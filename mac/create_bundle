@@ -1,0 +1,15 @@
+#!/bin/bash
+
+rm -rf build
+mkdir -p build
+cp -r Thonny.app.template build
+mv build/Thonny.app.template build/Thonny.app
+cp -r ../src/* build/Thonny.app/Contents/MacOS
+rm -rf build/Thonny.app/Contents/MacOs/__pycache__
+rm -rf build/Thonny.app/Contents/MacOs/*.pyo
+rm -rf build/Thonny.app/Contents/MacOs/*.pyc
+
+rm -f Thonny.dmg
+hdiutil create -srcfolder build/Thonny.app Thonny.dmg
+hdiutil internet-enable -yes Thonny.dmg
+

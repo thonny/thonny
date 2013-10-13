@@ -1,0 +1,15 @@
+[Desktop Entry]
+Encoding=UTF-8
+Type=Application
+Name=Thonny (uus)
+GenericName=Python IDE
+Exec=python3 /home/aivar/workspaces/python_stuff/kananaba/src/main.py %F
+Comment=A Python IDE
+Terminal=false
+Categories=Development;Debugger;IDE;
+MimeType=text/x-python;text/x-pytemp;text/x-pyex;application/x-pytemplate; 
+Actions=Edit;
+
+[Desktop Action Edit]
+Exec=python3 /home/aivar/workspaces/python_stuff/kananaba/src/main.py %F
+Name=Edit with Thonny

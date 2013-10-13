@@ -1,0 +1,639 @@
+# -*- coding: utf-8 -*-
+from __future__ import print_function, division 
+
+import sys
+from os.path import join as join_path, dirname, relpath
+import os.path
+from distutils.version import StrictVersion
+import stack
+from config import prefs
+
+try:
+    import tkinter as tk
+    from tkinter import ttk
+    from tkinter.messagebox import showinfo
+except ImportError:
+    import Tkinter as tk
+    import ttk 
+    from tkMessageBox import showinfo
+
+import ui_utils
+from about import AboutDialog
+from static import AstFrame
+from code import EditorNotebook
+from shell import ShellFrame
+from memory import GlobalsFrame, HeapFrame, ObjectInfoFrame
+import vm_proxy
+from browser import BrowseNotebook
+from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
+from ui_utils import Command
+
+THONNY_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+
+class Thonny(tk.Tk):
+    def __init__(self):
+        tk.Tk.__init__(self)
+        self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
+        self.createcommand("::tk::mac::OpenApplication", self._mac_open_application)
+        self.createcommand("::tk::mac::ReopenApplication", self._mac_reopen_application)
+        #self.iconbitmap(default=os.path.join(THONNY_DIR, "res", "thonny_small.ico"))
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+        #showinfo("sys.argv", str(sys.argv))
+        
+        self._vm = vm_proxy.VMProxy(prefs["cwd"])
+        self._update_title()
+        
+        # UI items, positions, sizes
+        geometry = "{0}x{1}+{2}+{3}".format(prefs["layout.width"], prefs["layout.height"],
+                                               prefs["layout.left"], prefs["layout.top"])
+        if prefs["layout.zoomed"]:
+            ui_utils.set_zoomed(self, True)
+        self.geometry(geometry)
+        
+        ui_utils.setup_style()
+        self._init_widgets()
+        
+        self._init_commands()
+
+        
+        
+        # events ---------------------------------------------
+        
+        # There are 3 kinds of events:
+        #    - commands from user (menu and toolbar events are bound in respective methods)
+        #    - notifications about asynchronous debugger responses 
+        #    - notifications about new output from the running program
+        
+        ui_utils.start_keeping_track_of_held_keys(self)
+        
+        # KeyRelease may also trigger a debugger command
+        self.bind_all("<KeyRelease>", self._check_issue_goto_before_or_after, "+") 
+        
+        # start saving settings periodically
+        self._store_prefs(True)
+        
+        # start listening to backend process
+        self._poll_vm_messages()
+    
+    def _init_widgets(self):
+        
+        self.main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border 
+        self.main_frame.grid(sticky=tk.NSEW)
+        self.toolbar = ttk.Frame(self.main_frame, padding=0) # TODO: height=30 ?
+        
+        self.main_pw   = ui_utils.create_PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
+        self.right_pw  = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
+        self.center_pw = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
+        
+        self.toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10)
+        self._init_populate_toolbar()
+        self.main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
+        
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        self.main_frame.columnconfigure(0, weight=1)
+        self.main_frame.rowconfigure(1, weight=1)
+        
+        self.browse_book = BrowseNotebook(self.main_pw)
+        self.main_pw.add(self.center_pw, minsize=150, width=prefs["layout.center_width"])
+        self.cmd_update_browser_visibility(False)
+        self.cmd_update_memory_visibility(False)
+        
+        self.editor_book = EditorNotebook(self.center_pw)
+        self.center_pw.add(self.editor_book, minsize=150)
+        
+        self.control_book = ui_utils.PanelBook(self.center_pw)
+        self.center_pw.add(self.control_book, minsize=150)
+        self.shell = ShellFrame(self.control_book, self._vm, self.editor_book)
+        self.stack = stack.StackPanel(self.control_book, self._vm, self.editor_book)
+        self.ast_frame = AstFrame(self.control_book)
+        
+        self.control_book.add(self.shell, text="Käsurida") # TODO: , underline=0
+        #self.control_book.add(self.stack, text="Stack") # TODO: , underline=1
+        #self.control_book.add(self.ast_frame, text="AST")
+         
+        self.globals_book = ui_utils.PanelBook(self.right_pw)
+        self.globals_frame = GlobalsFrame(self.globals_book)
+        self.globals_book.add(self.globals_frame, text="Muutujad") # TODO:
+        self.right_pw.add(self.globals_book, minsize=50)
+        
+        self.heap_book = ui_utils.PanelBook(self.right_pw)
+        self.heap_frame = HeapFrame(self.heap_book)
+        self.heap_book.add(self.heap_frame, text="Heap")
+        #self.right_pw.add(self.heap_book, minsize=50)
+        
+        self.info_book = ui_utils.PanelBook(self.right_pw)
+        self.info_frame = ObjectInfoFrame(self.info_book)
+        self.info_book.add(self.info_frame, text="Object info")
+        # TODO: self.right_pw.add(self.info_book, minsize=50)
+
+    
+    def _init_commands(self):
+        
+        # TODO: see idlelib.macosxSupports
+        self.createcommand("tkAboutDialog", self.cmd_about)
+        # https://www.tcl.tk/man/tcl8.6/TkCmd/tk_mac.htm
+        self.createcommand("::tk::mac::ShowPreferences", lambda: print("Prefs"))
+
+        
+        # declare menu structure
+        self._menus = [
+            ('file', 'File', [
+                Command('new_file',     'New',         'Ctrl+N',       self.editor_book),
+                Command('open_file',    'Open...',     'Ctrl+O',       self.editor_book),
+                Command('close_file',   'Close',       'Ctrl+W',       self.editor_book),
+                "---",
+                Command('save_file',    'Save',        'Ctrl+S',       self.editor_book.get_current_editor),
+                Command('save_file_as', 'Save as...',  'Shift+Ctrl+S', self.editor_book.get_current_editor),
+                "---",
+                Command('print',    'Print (via browser)',        'Ctrl+P',       self.editor_book.get_current_editor),
+                "---",
+                Command('TODO:', '1 prax11/kollane.py', None, None),
+                Command('TODO:', '2 kodutööd/vol1_algne.py', None, None),
+                Command('TODO:', '3 stat.py', None, None),
+                Command('TODO:', '4 praxss11/kollane.py', None, None),
+                Command('TODO:', '5 koduqwertööd/vol1_algne.py', None, None),
+                Command('TODO:', '6 stasst.py', None, None),
+                "---",
+                Command('exit', 'Exit', None, self),
+            ]),
+            ('edit', 'Edit', [
+                Command('undo',         'Undo',         'Ctrl+Z', self._find_current_edit_widget), 
+                Command('redo',         'Redo',         'Ctrl+Y', self._find_current_edit_widget),
+                "---", 
+                Command('cut',          'Cut',          'Ctrl+X', self._find_current_edit_widget), 
+                Command('copy',         'Copy',         'Ctrl+C', self._find_current_edit_widget), 
+                Command('paste',        'Paste',        'Ctrl+V', self._find_current_edit_widget),
+                "---", 
+                Command('select_all',   'Select all',   'Ctrl+A', self._find_current_edit_widget),
+                "---",
+                Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget),
+                Command('find_next',    'Find next',    'F3',     self._find_current_edit_widget),
+                 
+            ]),
+            ('view', 'View', [
+                Command('update_browser_visibility', 'Show browser',  None, self,
+                        kind="checkbutton", variable_name="layout.browser_visible"),
+                Command('update_memory_visibility', 'Show variables',  None, self,
+                        kind="checkbutton", variable_name="layout.memory_visible"),
+                "---",
+                Command('increase_font_size', 'Increase font size', 'Ctrl++', self),
+                Command('decrease_font_size', 'Decrease font size', 'Ctrl+-', self),
+                "---",
+                Command('update_memory_model', 'Show values in heap',  None, self,
+                        kind="checkbutton", variable_name="values_in_heap"),
+                Command('update_debugging_mode', 'Enable advanced debugging',  None, self,
+                        kind="checkbutton", variable_name="advanced_debugging"),
+                "---",
+                Command('show_ast', "Show AST", "F12", self),
+                Command('preferences', 'Preferences', None, self) 
+            ]),
+            ('code', 'Code', [
+                Command('TODO:', 'Indent selection',         "Tab", self.editor_book.get_current_editor), 
+                Command('TODO:', 'Dedent selection',         "Shift+Tab", self.editor_book.get_current_editor),
+                "---", 
+                Command('TODO:', 'Comment out selection',    "Ctrl+3", self.editor_book.get_current_editor), 
+                Command('TODO:', 'Uncomment selection',      "Shift+Ctrl+3", self.editor_book.get_current_editor), 
+            ]),
+            ('run', 'Run', [
+                Command('run_current_script',       'Run current script',        'F5',  self), 
+                Command('debug_current_script',     'Debug current script',  'Ctrl+F5', self),
+#                 Command('run_current_file',         'Run current file',        None,  self), 
+#                 Command('debug_current_file',       'Debug current file',  None, self), 
+#                 "---", 
+#                 Command('run_current_cell',         'Run current cell',        None,  self), 
+#                 Command('debug_current_cell',       'Debug current cell',  None, self), 
+#                 "---", 
+#                 Command('run_current_selection',    'Run current selection',        None,  self), 
+#                 Command('debug_current_selection',  'Debug current selection',  None, self), 
+#                 "---", 
+#                 Command('run_main_script',          'Run main script',        'Shift+F5',  self), 
+#                 Command('debug_main_script',        'Debug main script',  'Ctrl+Shift+F5', self), 
+#                 Command('run_main_file',            'Run main file',        None,  self), 
+#                 Command('debug_main_file',          'Debug main file',  None, self), 
+#                 "---", 
+                Command('reset',                 'Stop/Reset',       None, self),
+                "---", 
+                Command('exec',                 'Execute current focus', "F7", self),
+                Command('zoom',                 'Zoom in',               "F8", self),
+                Command('step',                 'Step',                  "F9", self),
+                "---", 
+                Command('set_auto_cd', 'Auto-cd to script dir',  None, self,
+                        kind="checkbutton", variable_name="run.auto_cd"),
+            ]),
+            ('help', 'Help', [
+                Command('help',    'Thonny help',        None, self), 
+            ]),
+        ]
+        
+        
+        ## make plaftform specific tweaks
+        if ui_utils.running_on_mac_os():
+            # insert app menu with "about" and "preferences"
+            self._menus.insert(0, ('apple', 'Thonny', [
+                Command('about', 'About Thonny', None, self),
+                # TODO: tkdocs says preferences are added automatically.
+                # How can I connect with it?
+            ]))
+            
+            # use Command instead of Ctrl in accelerators
+            for _, _, items in self._menus:
+                for item in items:
+                    if isinstance(item, Command) and isinstance(item.accelerator, str):
+                        item.accelerator = item.accelerator.replace("Ctrl", "Command") 
+        else:
+            # insert "about" to Help (last) menu ...
+            self._menus[-1][2].append(Command('about', 'About Thonny', None, self))
+            
+
+        # create actual widgets and bind the shortcuts
+        self.option_add('*tearOff', tk.FALSE)
+        menubar = tk.Menu(self)
+        self['menu'] = menubar
+        
+        for name, label, items in self._menus:
+            menu = tk.Menu(menubar, name=name)
+            menubar.add_cascade(menu=menu, label=label)
+            menu["postcommand"] = lambda name=name, menu=menu: self._update_menu(name, menu)
+            
+            for item in items:
+                if item == "---":
+                    menu.add_separator()
+                elif isinstance(item, Command):
+                    menu.add(item.kind,
+                        label=item.label,
+                        accelerator=item.accelerator,
+                        value=item.value,
+                        variable=item.variable,
+                        command=lambda cmd=item: cmd.execute())
+                    
+                    if (item.accelerator != None
+                        # tk binds main editing shortcuts itself
+                        # TODO: maybe I should bind them myself to guarantee
+                        # the match between menu command and shortcut?
+                        and item.accelerator not in ("Ctrl+C", "Command+C",
+                                                     "Ctrl+X", "Command+X",
+                                                     "Ctrl+V", "Command+V")):
+                        # create event sequence out of accelerator 
+                        # tk wants Control, not Ctrl
+                        sequence = item.accelerator.replace("Ctrl", "Control")
+                        sequence = sequence.replace("+-", "+minus")
+                        sequence = sequence.replace("++", "+plus")
+                        
+                        # it's customary to show keys with capital letters
+                        # but tk would treat this as pressing with shift
+                        parts = sequence.split("+")
+                        if len(parts[-1]) == 1:
+                            parts[-1] = parts[-1].lower()
+                        
+                        # tk wants "-" between the parts 
+                        sequence = "-".join(parts)
+                        
+                        # bind the event
+                        self.bind_all("<"+sequence+">", lambda e, cmd=item: cmd.execute(e), "+")
+
+        
+        #variables_var = tk.BooleanVar()
+        #variables_var.set(True)
+        #var_menu = view_menu.add_checkbutton(label="Variables", value=1, variable=variables_var, command=showViews)
+        #def showViews():
+        #    if variables_var.get():
+        #        memory_pw.remove(globals_frame)
+        #    else:
+        #        memory_pw.pane
+
+    def _init_populate_toolbar(self): 
+        def on_kala_button():
+            self.editor_book.demo_editor.set_read_only(not self.editor_book.demo_editor.read_only)
+        
+        top_spacer = ttk.Frame(self.toolbar, height=5)
+        top_spacer.grid(row=0, column=0, columnspan=100)
+        
+        self.images = {}
+        self.toolbar_buttons = {}
+        col = 1
+        res_dir = join_path(dirname(__file__), "res")
+        for name in ('new', 'open', 'save', '-', 'run', 'debug', 'zoom_in', 'kill'):
+            
+            if name == '-':
+                hor_spacer = ttk.Frame(self.toolbar, width=15)
+                hor_spacer.grid(row=0, column=col)
+            else:
+                img = tk.PhotoImage(file=join_path(res_dir, name + ".gif"))
+            
+                btn = ttk.Button(self.toolbar, command=on_kala_button, image=img, text="butt",  style="Toolbutton")
+                btn.grid(row=1, column=col, padx=0, pady=0)
+            
+                self.images[name] = img
+                self.toolbar_buttons[name] = btn
+                
+            col += 1 
+        
+        
+        
+    def _poll_vm_messages(self):
+        # I chose polling instead of event_generate
+        # because event_generate across threads is not reliable
+        while not self._vm.message_queue.empty():
+            msg = self._vm.message_queue.get()
+            
+            if hasattr(msg, "success") and not msg.success:
+                print("_poll_vm_messages, not success")
+                self.bell()
+            
+            self.shell.handle_vm_message(msg)
+            self.stack.handle_vm_message(msg)
+            self.editor_book.handle_vm_message(msg)
+            self.globals_frame.handle_vm_message(msg)
+            #self.heap_frame.handle_vm_message(msg)
+            
+            prefs["cwd"] = self._vm.cwd
+            self._update_title()
+            
+            # semi-automatically issue "next" command
+            if not ui_utils.non_modifier_key_is_held():
+                self._check_issue_goto_before_or_after()
+                
+        self.after(50, self._poll_vm_messages)
+    
+    
+    def cmd_about(self):
+        AboutDialog(self, self._get_version())
+    
+    def cmd_run_current_script_enabled(self):
+        return (self._vm.get_state() == "toplevel"
+                and self.editor_book.get_current_editor() != None)
+    
+    def cmd_run_current_script(self):
+        self._execute_current("Run")
+    
+    def cmd_debug_current_script_enabled(self):
+        return self.cmd_run_current_script_enabled()
+    
+    def cmd_debug_current_script(self):
+        self._execute_current("Debug")
+        
+    def cmd_run_current_file_enabled(self):
+        return self.cmd_run_current_script_enabled()
+    
+    def cmd_run_current_file(self):
+        self._execute_current("run")
+    
+    def cmd_debug_current_file_enabled(self):
+        return self.cmd_run_current_script_enabled()
+    
+    def cmd_debug_current_file(self):
+        self._execute_current("debug")
+    
+    def cmd_increase_font_size(self):
+        self._change_font_size(1)
+    
+    def cmd_decrease_font_size(self):
+        self._change_font_size(-1)
+    
+    def _change_font_size(self, delta):
+        self.shell.change_font_size(delta)
+        self.editor_book.change_font_size(delta)
+        self.globals_frame.change_font_size(delta)
+        self.builtins_frame.change_font_size(delta)
+        self.heap_frame.change_font_size(delta)
+    
+    def _execute_current(self, cmd_name, text_range=None):
+        """
+        This method's job is to create a command for running/debugging
+        current file/script and submit it to shell
+        """
+        
+        editor = self.editor_book.get_current_editor()
+        if not editor:
+            return
+
+        filename = editor.get_filename(True)
+        if not filename:
+            return
+        
+        # changing dir may be required
+        script_dir = dirname(filename)
+        
+        if (prefs["run.auto_cd"] and cmd_name[0].isupper()
+            and self._vm.cwd != script_dir):
+            # create compound command
+            # start with %cd
+            cmd_line = "%cd " + script_dir + "\n"
+            next_cwd = script_dir
+        else:
+            # create simple command
+            cmd_line = ""
+            next_cwd = self._vm.cwd
+        
+        # append main command (Run, run, Debug or debug)
+        rel_filename = relpath(filename, next_cwd)
+        cmd_line += "%" + cmd_name + " " + rel_filename + "\n"
+        if text_range != None:
+            "TODO: append range indicators" 
+        
+        # submit to shell (shell will execute it)
+        self.shell.submit_magic_command(cmd_line)
+    
+    
+    def cmd_reset(self):
+        self._vm.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
+    
+    def cmd_update_browser_visibility(self, adjust_window_width=True):
+        if prefs["layout.browser_visible"] and not self.browse_book.winfo_ismapped():
+            if adjust_window_width:
+                self._check_update_window_width(+prefs["layout.browser_width"]+ui_utils.SASHTHICKNESS)
+            self.main_pw.add(self.browse_book, minsize=150, 
+                             width=prefs["layout.browser_width"],
+                             before=self.center_pw)
+        elif not prefs["layout.browser_visible"] and self.browse_book.winfo_ismapped():
+            if adjust_window_width:
+                self._check_update_window_width(-prefs["layout.browser_width"]-ui_utils.SASHTHICKNESS)
+            self.main_pw.remove(self.browse_book)
+
+    def cmd_update_memory_visibility(self, adjust_window_width=True):
+        if prefs["layout.memory_visible"] and not self.right_pw.winfo_ismapped():
+            if adjust_window_width:
+                self._check_update_window_width(+prefs["layout.memory_width"]+ui_utils.SASHTHICKNESS)
+            
+            self.main_pw.add(self.right_pw, minsize=150, 
+                             width=prefs["layout.memory_width"],
+                             after=self.center_pw)
+        elif not prefs["layout.memory_visible"] and self.right_pw.winfo_ismapped():
+            if adjust_window_width:
+                self._check_update_window_width(-prefs["layout.memory_width"]-ui_utils.SASHTHICKNESS)
+            self.main_pw.remove(self.right_pw)
+            
+    
+    def _check_update_window_width(self, delta):
+        if not ui_utils.get_zoomed(self):
+            self.update_idletasks()
+            # TODO: shift to left if right edge goes away from screen
+            # TODO: check with screen width
+            new_geometry = "{0}x{1}+{2}+{3}".format(self.winfo_width() + delta,
+                                                   self.winfo_height(),
+                                                   self.winfo_x(), self.winfo_y())
+            
+            self.geometry(new_geometry)
+            
+        
+    
+    def cmd_update_memory_model(self):
+        if prefs["values_in_heap"] and not self.heap_book.winfo_ismapped():
+            self.right_pw.insert()
+        elif not prefs["values_in_heap"] and self.heap_book.winfo_ismapped():
+            pass
+
+    def cmd_update_debugging_mode(self):
+        print(prefs["advanced_debugging"])
+
+    def cmd_step_enabled(self):
+        self._check_issue_goto_before_or_after()
+        return self.cmd_exec_enabled()
+    
+    def cmd_step(self):
+        self._check_issue_debugger_command(DebuggerCommand(command="step"))
+    
+    def cmd_zoom_enabled(self):
+        self._check_issue_goto_before_or_after()
+        return self.cmd_exec_enabled()
+    
+    def cmd_zoom(self):
+        self._check_issue_debugger_command(DebuggerCommand(command="zoom"))
+    
+    def cmd_exec_enabled(self):
+        self._check_issue_goto_before_or_after()
+        msg = self._vm.get_state_message()
+        return (isinstance(msg, DebuggerResponse) 
+                and msg.state in ("before_expression", "before_expression_again",
+                                  "before_statement", "before_statement_again")) 
+    
+    def cmd_exec(self):
+        self._check_issue_debugger_command(DebuggerCommand(command="exec"))
+    
+    def _check_issue_debugger_command(self, cmd):
+        last_response = self._vm.get_state_message()
+        if isinstance(self._vm.get_state_message(), DebuggerResponse):
+            # tell VM the state we are seeing
+            cmd.setdefault (
+                frame_id=last_response.frame_id,
+                state=last_response.state,
+                focus=last_response.focus
+            )
+            self._vm.send_command(cmd)
+            # TODO: notify memory panes and editors? Make them inactive?
+            
+    def cmd_set_auto_cd(self):
+        print(self._auto_cd.get())
+        
+    def stop_debugging(self):
+        self.editor_book.stop_debugging()
+        self.shell.stop_debugging()
+        self.globals_frame.stop_debugging()
+        self.builtins_frame.stop_debugging()
+        self.heap_frame.stop_debugging()
+        self._vm.reset()
+    
+    def start_debugging(self, filename=None):
+        self.editor_book.start_debugging(self._vm, filename)
+        self.shell.start_debugging(self._vm, filename)
+        self._vm.start()
+    
+    
+    def _update_menu(self, name, menu_widget):
+        for menu_name, _, items in self._menus:
+            if menu_name == name:
+                for item in items:
+                    if isinstance(item, Command):
+                        if item.is_enabled():
+                            menu_widget.entryconfigure(item.label, state=tk.NORMAL)
+                        else:
+                            menu_widget.entryconfigure(item.label, state=tk.DISABLED)
+                    
+                    
+        
+    
+    def _check_issue_goto_before_or_after(self, *args):
+        # used for semi-automatic progression from after_* state to before_* state 
+        state_msg = self._vm.get_state_message()
+        if (isinstance(state_msg, DebuggerResponse)
+            and state_msg.state in ("after_statement", "after_expression")):
+            if hasattr(state_msg, "return_value"):
+                # a user function returned, need to show the result in callsite
+                self._check_issue_debugger_command(DebuggerCommand(command="goto_after"))
+            else:
+                self._check_issue_debugger_command(DebuggerCommand(command="goto_before"))
+    
+    def _find_current_edit_widget(self):
+        "TODO:"
+            
+
+    def cmd_show_ast(self):
+        self.ast_frame.show_ast(self.editor_book.get_current_editor()._code_view)
+    
+    def _get_version(self):
+        try:
+            with open(join_path(dirname(__file__), "VERSION")) as fp:
+                return StrictVersion(fp.read().strip())
+        except:
+            return StrictVersion("0.0")
+      
+    def _update_title(self):
+        self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._vm.cwd, *sys.version_info))
+    
+    def _mac_open_document(self, *args):
+        showinfo("open doc", str(args))
+    
+    def _mac_open_application(self, *args):
+        showinfo("open app", str(args))
+    
+    def _mac_reopen_application(self, *args):
+        showinfo("reopen app", str(args))
+    
+    def _on_close(self):
+        # TODO: warn about unsaved files (or just save?)
+        self._store_prefs(False)
+        ui_utils.delete_images()
+        self.destroy()
+        
+    def _store_prefs(self, periodically=False):
+        self.update_idletasks()
+        
+        # update layout prefs
+        if self.browse_book.winfo_ismapped():
+            prefs["layout.browser_width"] = self.browse_book.winfo_width()
+        
+        if self.right_pw.winfo_ismapped():
+            prefs["layout.memory_width"] = self.right_pw.winfo_width()
+            # TODO: heigths
+        
+        prefs["layout.zoomed"] = ui_utils.get_zoomed(self)
+        if not ui_utils.get_zoomed(self):
+            prefs["layout.top"] = self.winfo_y()
+            prefs["layout.left"] = self.winfo_x()
+            prefs["layout.width"] = self.winfo_width()
+            prefs["layout.height"] = self.winfo_height()
+            
+        prefs["layout.center_width"] = self.center_pw.winfo_width()
+        
+        if self.right_pw.winfo_ismapped():
+            prefs["layout.memory_width"] = self.right_pw.winfo_width()
+        
+        if self.browse_book.winfo_ismapped():
+            prefs["layout.browser_width"] = self.browse_book.winfo_width()
+            
+        prefs.save()
+        
+        if periodically:
+            # it's really annoying when I reopen program after crash and
+            # discover that in addition to reopening my work, I need to reconfigure settings
+            # so let's save the layout and other conf periodically 
+            self.after(1000 * 60, lambda: self._store_prefs(True))
+    
+    
+
+        
+
+if __name__ == "__main__":        
+    Thonny().mainloop()
