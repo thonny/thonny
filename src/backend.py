@@ -31,6 +31,7 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 EXCEPTION_TRACEBACK_LIMIT = 100    
 
+DEBUG = True
 
 class VM:
     def __init__(self):
@@ -81,7 +82,7 @@ class VM:
                         response.globals = {cmd.globals_required : self.export_globals(cmd.globals_required)}
                         
                     if hasattr(cmd, "heap_required") and cmd.heap_required:
-                        response.heap = self._vm.export_heap()
+                        response.heap = self.export_heap()
                         
                     response.cwd = os.getcwd()
                     
@@ -99,7 +100,7 @@ class VM:
         Empty command, used for getting globals for new module
         or when user presses ENTER on shell prompt
         """
-        pass # globals will be added by mainloop
+        return ToplevelResponse() # globals will be added by mainloop
         
     def _cmd_cd(self, cmd):
         try:
@@ -183,7 +184,7 @@ class VM:
         # this allows client to see the order of interleaving writes to stdout/stderr
         sys.stdin = VM.FakeInputStream(self, sys.stdin)
         sys.stdout = VM.FakeOutputStream(self, sys.stdout, "stdout")
-        sys.stderr = VM.FakeOutputStream(self, sys.stdout, "stderr") #TODO: 
+        sys.stderr = VM.FakeOutputStream(self, sys.stdout, "stderr") 
              
         # fake it properly: replace also "backup" streams
         sys.__stdin__ = sys.stdin
@@ -216,8 +217,10 @@ class VM:
                            types.FunctionType, types.LambdaType, types.MethodType,
                            type(int)): 
             result.friendly_repr = value.__name__
+            result.is_function = True
         else:
             result.friendly_repr = result.short_repr
+            result.is_function = False
         
         return result
     
@@ -227,7 +230,11 @@ class VM:
         return self.export_variables(sys.modules[module_name].__dict__)
     
     def export_heap(self):
-        return self.export_variables(self._heap)
+        result = {}
+        for key in self._heap:
+            result[key] = self.export_value(self._heap[key])
+            
+        return result
     
     def export_variables(self, variables):
         result = {}

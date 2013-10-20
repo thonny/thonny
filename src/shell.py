@@ -4,6 +4,8 @@ from __future__ import print_function, division
 import os.path
 import traceback
 import ui_utils
+from config import prefs
+import memory
 
 try:
     import tkinter as tk
@@ -132,9 +134,11 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
                 
             if hasattr(msg, "value_info"):
-                value = msg.value_info.short_repr
-                if value != "None":
-                    self._insert_text_directly(value + "\n", ("toplevel", "value"))
+                value_repr = msg.value_info.short_repr
+                if value_repr != "None":
+                    if prefs["values_in_heap"]:
+                        value_repr = memory.format_object_id(msg.value_info.id)
+                    self._insert_text_directly(value_repr + "\n", ("toplevel", "value"))
             
             self._insert_prompt()
             self._try_submit_input()
@@ -319,7 +323,12 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 cmd.id = self._command_count
                 self._command_count += 1
                 
-                cmd.globals_required = "__main__" # TODO: look what's selected 
+                cmd.globals_required = "__main__" # TODO: look what's selected
+          
+                if prefs["values_in_heap"]:
+                    cmd.heap_required = True
+
+                 
                 self._vm.send_command(cmd)
                 
             except:

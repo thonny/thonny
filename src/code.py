@@ -20,6 +20,7 @@ from config import prefs
 from misc_utils import eqfn
 import ui_utils
 import misc_utils
+import memory
 
 try:
     import tkinter as tk
@@ -253,6 +254,7 @@ class EditorNotebook(ttk.Notebook):
         self._open_file(os.path.join(sfuffdir, "euler1.py"))
         self._open_file(os.path.join(sfuffdir, "pere_sissetulek.py"))
         self._open_file(os.path.join(sfuffdir, "kuupaev.py"))
+        self._open_file(os.path.join(sfuffdir, "aliasing.py"))
         #self._open_file(os.path.join(sfuffdir, "demofile.py"))
         self.show_file(os.path.join(sfuffdir, "euler1.py"))
         #self._open_file(progdir + "/../atidb.py")
@@ -262,7 +264,9 @@ class EditorNotebook(ttk.Notebook):
         
         
     def cmd_new_file(self):
-        self.add(Editor(self), text=self._generate_editor_title(None))
+        new_editor = Editor(self)
+        self.add(new_editor, text=self._generate_editor_title(None))
+        self.select(new_editor)
     
     def cmd_open_file(self):
         filename = askopenfilename()
@@ -412,8 +416,9 @@ class ExpressionView(tk.Text):
                 #print("del", start_mark, end_mark)
                 self.delete(start_mark, end_mark)
                 
-                id_str = "$" + str(msg.value.id)
-                if prefs["values_in_heap"]:
+                id_str = memory.format_object_id(msg.value.id)
+                if (prefs["values_in_heap"]
+                    and not (msg.value.is_function and prefs["friendly_values"])):
                     value_str = id_str
                 elif prefs["friendly_values"]:
                     value_str = msg.value.friendly_repr

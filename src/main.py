@@ -120,8 +120,9 @@ class Thonny(tk.Tk):
         
         self.heap_book = ui_utils.PanelBook(self.right_pw)
         self.heap_frame = HeapFrame(self.heap_book)
-        self.heap_book.add(self.heap_frame, text="Heap")
-        #self.right_pw.add(self.heap_book, minsize=50)
+        self.heap_book.add(self.heap_frame, text="Objektid") 
+        if prefs["values_in_heap"]:
+            self.right_pw.add(self.heap_book, minsize=50)
         
         self.info_book = ui_utils.PanelBook(self.right_pw)
         self.info_frame = ObjectInfoFrame(self.info_book)
@@ -346,7 +347,7 @@ class Thonny(tk.Tk):
             self.stack.handle_vm_message(msg)
             self.editor_book.handle_vm_message(msg)
             self.globals_frame.handle_vm_message(msg)
-            #self.heap_frame.handle_vm_message(msg)
+            self.heap_frame.handle_vm_message(msg)
             
             prefs["cwd"] = self._vm.cwd
             self._update_title()
@@ -477,13 +478,22 @@ class Thonny(tk.Tk):
             
             self.geometry(new_geometry)
             
-        
+    
+    def cmd_update_memory_model_enabled(self):
+        return self._vm.get_state() == "toplevel"
     
     def cmd_update_memory_model(self):
         if prefs["values_in_heap"] and not self.heap_book.winfo_ismapped():
-            self.right_pw.insert()
+            # TODO: put it before object info block
+            self.right_pw.add(self.heap_book, minsize=50)
         elif not prefs["values_in_heap"] and self.heap_book.winfo_ismapped():
-            pass
+            self.right_pw.remove(self.heap_book)
+        
+        self.globals_frame.update_memory_model()
+        # TODO: globals and locals
+        
+        assert self._vm.get_state() == "toplevel"
+        self._vm.send_command(ToplevelCommand(command="pass", heap_required=True))
 
     def cmd_update_debugging_mode(self):
         print(prefs["advanced_debugging"])
@@ -519,8 +529,10 @@ class Thonny(tk.Tk):
             cmd.setdefault (
                 frame_id=last_response.frame_id,
                 state=last_response.state,
-                focus=last_response.focus
+                focus=last_response.focus,
+                heap_required=prefs["values_in_heap"]
             )
+                
             self._vm.send_command(cmd)
             # TODO: notify memory panes and editors? Make them inactive?
             

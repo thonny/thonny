@@ -36,7 +36,7 @@ class VMProxy:
         with self._state_lock:
             if self._current_pause_msg == None:
                 return "busy"
-            else:
+            else: # "toplevel", "debug" or "input"
                 return self._current_pause_msg.vm_state
     
     def get_state_message(self):
