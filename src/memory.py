@@ -35,9 +35,9 @@ class VariablesFrame(MemoryFrame):
         self.tree.column('id', width=150, anchor=tk.W, stretch=False)
         self.tree.column('value', width=150, anchor=tk.W, stretch=True)
         
-        self.tree.heading('name', text='Nimi', anchor=tk.W) # TODO:
+        self.tree.heading('name', text='Name', anchor=tk.W) 
         self.tree.heading('id', text='Id', anchor=tk.W)
-        self.tree.heading('value', text='Väärtus', anchor=tk.W) # TODO:
+        self.tree.heading('value', text='Value', anchor=tk.W)
         
         self.update_memory_model()
         #self.tree.tag_configure("item", font=ui_utils.TREE_FONT)
@@ -90,7 +90,7 @@ class HeapFrame(MemoryFrame):
         self.tree.column('value', width=150, anchor=tk.W, stretch=True)
         
         self.tree.heading('id', text='Id', anchor=tk.W)
-        self.tree.heading('value', text='Kirjeldus', anchor=tk.W) # TODO:
+        self.tree.heading('value', text='Description', anchor=tk.W) 
 
     def _update_data(self, data):
         self._clear_tree()

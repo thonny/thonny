@@ -109,13 +109,13 @@ class Thonny(tk.Tk):
         self.stack = stack.StackPanel(self.control_book, self._vm, self.editor_book)
         self.ast_frame = AstFrame(self.control_book)
         
-        self.control_book.add(self.shell, text="Käsurida") # TODO: , underline=0
+        self.control_book.add(self.shell, text="Shell") # TODO: , underline=0
         #self.control_book.add(self.stack, text="Stack") # TODO: , underline=1
         #self.control_book.add(self.ast_frame, text="AST")
          
         self.globals_book = ui_utils.PanelBook(self.right_pw)
         self.globals_frame = GlobalsFrame(self.globals_book)
-        self.globals_book.add(self.globals_frame, text="Muutujad") # TODO:
+        self.globals_book.add(self.globals_frame, text="Variables")
         self.right_pw.add(self.globals_book, minsize=50)
         
         self.heap_book = ui_utils.PanelBook(self.right_pw)
