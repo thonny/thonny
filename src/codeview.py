@@ -169,13 +169,15 @@ class CodeView(ttk.Frame, TextWrapper):
                 self.margin.insert("end", "\n") 
         self.margin.config(state='disabled')
 
-    
+
     """
     def _show_read_only_warning(self):
         showwarning("Warning",
                 "Editing during run/debug is not allowed")
     """
     
+    
+            
     def update_focus_boxes(self, boxes):
         """
         1) Removes boxes which are not among given boxes, creates missing boxes
@@ -215,8 +217,6 @@ def fact(n):
         
         return
     
-        ufont = tk_font.Font(family='Consolas', size=11, underline=True, weight="bold")
-        
         self.text.tag_add("active1", "1.0", "end")
         self.text.tag_configure("active1", borderwidth=1, relief=tk.RAISED)
         
@@ -255,4 +255,6 @@ def fact(n):
         supfont = tk_font.Font(family='Consolas', size=8, weight="normal", slant="italic")
         self.text.tag_add('superscript', '6.33', '6.39')
         self.text.tag_configure('superscript', offset=7, font=supfont, underline=False, foreground="red")
+
+
 
