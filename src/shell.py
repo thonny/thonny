@@ -27,6 +27,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self._editor_book = editor_book
         self._before_io = True
         self._command_count = 0
+        self._command_history = [] # actually not really history, because each command occurs only once
+        self._command_history_current_index = None 
         self.text_mode = "toplevel"
         
         """
@@ -60,6 +62,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
                             insertwidth=2,
                             height=10)
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        self.text.bind("<Up>", self._arrow_up)
+        self.text.bind("<Down>", self._arrow_down)
         self.scrollbar['command'] = self.text.yview
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
@@ -171,9 +175,10 @@ class ShellFrame (ttk.Frame, TextWrapper):
         
         self._insert_text_directly(">>> ", prompt_tags)
     
+    
     def submit_magic_command(self, cmd_line):
         assert self._vm.get_state() == "toplevel"
-        # TODO: clean pending input
+        self.text.delete("input_start", "end")
         self.text.insert("input_start", cmd_line, ("automagic",))
         self.text.see("end")
 
@@ -320,14 +325,21 @@ class ShellFrame (ttk.Frame, TextWrapper):
                         abs_filename = os.path.join(self._vm.cwd, cmd.filename)
                     self._editor_book.enter_execution_mode(abs_filename)
                     
-                cmd.id = self._command_count
-                self._command_count += 1
+                # register in history and count
+                if hasattr(cmd, "cmd_line"):
+                    cmd.id = self._command_count
+                    self._command_count += 1
+                    if cmd.cmd_line in self._command_history:
+                        self._command_history.remove(cmd.cmd_line)
+                    self._command_history.append(cmd.cmd_line)
+                    self._command_history_current_index = None # meaning command selection is not in process
                 
                 cmd.globals_required = "__main__" # TODO: look what's selected
           
                 if prefs["values_in_heap"]:
                     cmd.heap_required = True
 
+                
                  
                 self._vm.send_command(cmd)
                 
@@ -339,42 +351,43 @@ class ShellFrame (ttk.Frame, TextWrapper):
             self._vm.send_program_input(text_to_be_submitted)
     
     
-    """
-    def _print_marks(self, prefix=""):
-        print(prefix, "input_start is at", self.text.index("input_start"), self.text.mark_gravity("input_start"))
-        print(prefix, "output_insert is at", self.text.index("output_insert"), self.text.mark_gravity("output_insert"))
-    """
-    
-    """
-    def test_insert(self):
-        import random
-        for _ in range(10):
-            text = repr([random.random() for _ in range(1000)]) + "\n"
-            self.text.insert("end", text)
-        self.text.see("end")
-    
-    def test_insert3(self):
-        self.text.insert("end", 10000 * (60* "*" + "\n"))
-        self.text.see("end")
-    
-    def test_insert2(self):
-        block_mode = False
-        for i in range(10000):
-            self.text.insert("end", str(i))
-            
-            if block_mode:
-                self.text.insert("end", 60 * "*" + "\n")
-            else:
-                for _ in range(60):
-                    self.text.insert("end", "*")
-                self.text.insert("end", "\n")
-#            self.text.see("end")
-        self.text.see("end")
-    """
-    
-    def change_font_size(self, delta):
+    def change_font_size(self, delta): # TODO: should be elsewhere?
         for f in (ui_utils.IO_FONT, ui_utils.EDITOR_FONT, ui_utils.BOLD_EDITOR_FONT):
             f.configure(size=f.cget("size") + delta)
+    
+    def _arrow_up(self, event):
+        if len(self._command_history) == 0 or self._command_history_current_index == 0:
+            # can't take previous command
+            return "break"
+        
+        if self._command_history_current_index == None:
+            self._command_history_current_index = len(self._command_history)-1
+        else:
+            self._command_history_current_index -= 1
+        
+        self._propose_command(self._command_history[self._command_history_current_index].strip("\n"))
+        return "break"
+    
+    def _arrow_down(self, event):
+        if (len(self._command_history) == 0 
+            or self._command_history_current_index == len(self._command_history)-1):
+            # can't take next command
+            return "break"
+        
+        
+        if self._command_history_current_index == None:
+            self._command_history_current_index = len(self._command_history)-1
+        else:
+            self._command_history_current_index += 1
+
+        self._propose_command(self._command_history[self._command_history_current_index].strip("\n"))
+        return "break"
+    
+    def _propose_command(self, cmd_line):
+        #print(command, self._command_history_current_index, self._command_history)
+        self.text.delete("input_start", "end")
+        self._user_text_insert("input_start", cmd_line)
+        
     
     def demo(self):
         self._original_user_text_insert("end", """Python 3.2.3
@@ -408,4 +421,37 @@ Nende arvude summa on 10
         
         
 
+    
+    """
+    def _print_marks(self, prefix=""):
+        print(prefix, "input_start is at", self.text.index("input_start"), self.text.mark_gravity("input_start"))
+        print(prefix, "output_insert is at", self.text.index("output_insert"), self.text.mark_gravity("output_insert"))
+    """
+    
+    """
+    def test_insert(self):
+        import random
+        for _ in range(10):
+            text = repr([random.random() for _ in range(1000)]) + "\n"
+            self.text.insert("end", text)
+        self.text.see("end")
+    
+    def test_insert3(self):
+        self.text.insert("end", 10000 * (60* "*" + "\n"))
+        self.text.see("end")
+    
+    def test_insert2(self):
+        block_mode = False
+        for i in range(10000):
+            self.text.insert("end", str(i))
+            
+            if block_mode:
+                self.text.insert("end", 60 * "*" + "\n")
+            else:
+                for _ in range(60):
+                    self.text.insert("end", "*")
+                self.text.insert("end", "\n")
+#            self.text.see("end")
+        self.text.see("end")
+    """
     
