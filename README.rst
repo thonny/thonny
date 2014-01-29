@@ -4,6 +4,7 @@ Thonny
 Thonny is a Python IDE with features making it especially suitable for learning programming.
 
 Features:
+
 * Statement stepping without breakpoints
 * Live variables during debugging
 * Separate windows for executing function calls (helps explaining local variables and call stack; gives good model for understanding recursion)  
