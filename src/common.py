@@ -123,6 +123,7 @@ class InputSubmission(Record):
 
 
 class PauseMessage(Record):
+    "PauseMessage-s indicate that backend has paused and waiting(?) for new command"
     pass
 
 class ToplevelResponse(PauseMessage):

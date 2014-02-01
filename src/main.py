@@ -7,6 +7,7 @@ import os.path
 from distutils.version import StrictVersion
 import stack
 from config import prefs
+import logging
 
 try:
     import tkinter as tk
@@ -29,6 +30,9 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
 from ui_utils import Command
 
 THONNY_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+logging.basicConfig(format='%(levelname)s | %(funcName)s |%(message)s',
+                    level=logging.DEBUG,
+                    stream=sys.stdout)
 
 class Thonny(tk.Tk):
     def __init__(self):

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division 
 from ui_utils import TreeFrame, TextFrame
-import ui_utils
 from config import prefs
 try:
     import tkinter as tk
@@ -101,9 +100,7 @@ class HeapFrame(MemoryFrame):
             
 
     def handle_vm_message(self, msg):
-        print("siin", msg)
         if hasattr(msg, "heap"):
-            print("seal")
             self._update_data(msg.heap)
     
         

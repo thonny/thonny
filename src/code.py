@@ -256,7 +256,7 @@ class EditorNotebook(ttk.Notebook):
         self._open_file(os.path.join(sfuffdir, "kuupaev.py"))
         self._open_file(os.path.join(sfuffdir, "aliasing.py"))
         #self._open_file(os.path.join(sfuffdir, "demofile.py"))
-        self.show_file(os.path.join(sfuffdir, "euler1.py"))
+        self.show_file(os.path.join(sfuffdir, "for.py"))
         #self._open_file(progdir + "/../atidb.py")
         
         global editor_book

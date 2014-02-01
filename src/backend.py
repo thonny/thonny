@@ -31,7 +31,7 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 EXCEPTION_TRACEBACK_LIMIT = 100    
 
-DEBUG = True
+DEBUG = 1
 
 class VM:
     def __init__(self):
@@ -68,6 +68,9 @@ class VM:
         while True: 
             cmd = self._fetch_command()
             assert isinstance(cmd, ToplevelCommand)
+            
+            if DEBUG > 0:
+                self._debug(cmd)
             
             try:
                 handler = getattr(self, "_cmd_" + cmd.command)
@@ -244,9 +247,8 @@ class VM:
             
         return result
            
-    def _log(self, *args):
-        return # TODO:
-        print(*args, file=self._original_stderr)
+    def _debug(self, *args):
+        print("VM:", *args, file=self._original_stderr)
     
     
     def _enter_io_function(self):
@@ -425,11 +427,10 @@ class FancyTracer(Executor):
         if not self._may_step_in(frame.f_code):
             return
 
-        """
-        self._log(len(inspect.stack()) * ">" , id(frame), event, 
+        if DEBUG > 0:
+            self._debug(len(inspect.stack()) * ">" , id(frame), event, 
                     frame.f_code.co_filename, frame.f_lineno, 
                     frame.f_code.co_name, frame.f_locals)
-        """
         
         args = {}
         focus = None
@@ -527,7 +528,7 @@ class FancyTracer(Executor):
         
         Returns True if it wants to continue searching in this frame
         """
-        self._log("CT", event, self._current_command.command, self._current_command)
+        self._debug("CT", event, self._current_command.command, self._current_command)
         if event == "exception":
             self._current_command.exception = args["exception"]
             # we don't stop at exceptions, just make a note that an exception
@@ -570,7 +571,7 @@ class FancyTracer(Executor):
                     
                     # read next command (blocking) 
                     self._current_command = self._vm._fetch_command() 
-                    self._log("Got command", self._current_command, "; current state:", event)
+                    self._debug("Got command", self._current_command, "; current state:", event)
                     assert isinstance(self._current_command, DebuggerCommand)
                     self._current_command.exception = None # start with no blame
                     
@@ -603,7 +604,7 @@ class FancyTracer(Executor):
                      or "or_arg" in node_tags and value
                      or "and_arg" in node_tags and not value)):
                 
-                #self._log("IAE", node_tags, value)
+                #self._debug("IAE", node_tags, value)
                 # next step will be finalizing evaluation of parent of current expr
                 # so let's say we're before that parent expression
                 parent_range = TextRange(*original_args.get("parent_range"))
@@ -659,7 +660,7 @@ class FancyTracer(Executor):
                 resp = DebuggerResponse(state="after_statement", focus=cmd.focus)
             
             if event == "return":
-                self._log("GOT RETURN")
+                self._debug("GOT RETURN")
                 resp.return_value=self._vm.export_value(args["return_value"])
             return resp
         else:
@@ -686,20 +687,20 @@ class FancyTracer(Executor):
             return None
         
     def _cmd_zoom(self, frame, event, args, focus, cmd):
-        self._log("_cmd_zoom", id(frame), cmd.frame_id, event, cmd.state, focus, cmd.focus)
+        self._debug("_cmd_zoom", id(frame), cmd.frame_id, event, cmd.state, focus, cmd.focus)
         if (id(frame) == cmd.frame_id
                 and focus.is_in(cmd.focus) 
                 # NB! ast.Expr statement and its child expression can have same code range
                 and (focus != cmd.focus or event != cmd.state)):
             
             # successful zoom in the same frame
-            self._log("successful zoom in the same frame", focus != cmd.focus)
+            self._debug("successful zoom in the same frame", focus != cmd.focus)
             return DebuggerResponse(success=True)
         
         elif id(frame) != cmd.frame_id:
             if event == "before_statement":
                 # successful zoom to new frame
-                self._log("successful zoom to new frame")
+                self._debug("successful zoom to new frame")
                 response = DebuggerResponse(success=True)
                 if hasattr(self._current_command, "function"):
                     response.function = self._vm.export_value(self._current_command.function)
@@ -707,17 +708,17 @@ class FancyTracer(Executor):
             else:
                 # TODO: it can be line event in non-instrumented module
                 # nothing to find there
-                self._log("zoom almost there (call of new frame)", event)
+                self._debug("zoom almost there (call of new frame)", event)
                 # almost there
                 return None
         
         elif focus == cmd.focus and event in ("before_expression", "before_statement"):
             if "node_tags" in args and "has_children" in args["node_tags"]:
-                self._log("zoom almost there (same frame)", event)
+                self._debug("zoom almost there (same frame)", event)
                 return None
             else:
-                #self._log("_cmd_zoom:node_tags", args.get("node_tags"))
-                self._log("failed zoom (no children)")
+                #self._debug("_cmd_zoom:node_tags", args.get("node_tags"))
+                self._debug("failed zoom (no children)")
                 return DebuggerResponse(success=False)
             
         # TODO: zoom in to import ???
@@ -728,26 +729,26 @@ class FancyTracer(Executor):
                 try:
                     inspect.getsource(fun)
                     self._current_command.function = fun 
-                    self._log("zoom almost there (still in old frame)", event, fun)
+                    self._debug("zoom almost there (still in old frame)", event, fun)
                     return None
                 except:
                     # can't zoom here
-                    self._log("failed zoom (no source)")
+                    self._debug("failed zoom (no source)")
                     return DebuggerResponse(success=False)
             else:
-                self._log("failed zoom (not fun)")
+                self._debug("failed zoom (not fun)")
                 return DebuggerResponse(success=False)
             
         else:
             # can't zoom here
-            self._log("failed zoom (other reasons)")
+            self._debug("failed zoom (other reasons)")
             return DebuggerResponse(success=False)
     
         
     
     def _cmd_step(self, frame, event, args, focus, cmd):
         # first try zoom, if can't zoom then do exec
-        self._log("_cmd_step")
+        self._debug("_cmd_step")
         result = self._cmd_zoom(frame, event, args, focus, cmd)
         
         if (isinstance(result, DebuggerResponse) 
@@ -759,12 +760,12 @@ class FancyTracer(Executor):
             # either positive zoom or hopeful zoom
             return result
         """
-        #self._log("step:", id(frame), cmd.frame_id, focus, cmd.focus, event, cmd.state)
+        #self._debug("step:", id(frame), cmd.frame_id, focus, cmd.focus, event, cmd.state)
         if (event in ("before_statement", "before_expression", "after_expression",
                       "before_statement_again", "before_expression_again")
             and (id(frame) != cmd.frame_id or focus != cmd.focus
                  or event != cmd.state)):
-            #self._log("responding")
+            #self._debug("responding")
             if event == "after_expression":
                 return DebuggerResponse(value=self._vm.export_value(args["value"]))
             else:
@@ -976,8 +977,8 @@ class FancyTracer(Executor):
             keywords=[]
         )
     
-    def _log(self, *args):
-        print(*args, file=self._vm._original_stderr)
+    def _debug(self, *args):
+        print("TRACER:", *args, file=self._vm._original_stderr)
 
     
     class CustomStackFrame:

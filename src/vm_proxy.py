@@ -4,6 +4,7 @@ from __future__ import print_function, division
 import subprocess
 import sys
 import os.path
+from logging import debug
 
 try:
     from _thread import start_new_thread
@@ -53,7 +54,7 @@ class VMProxy:
                  
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush() # required for Python 3.1
-            #print("PROXY: sent a command", cmd)
+            debug("sent a command: %s", cmd)
     
     def send_program_input(self, data):
         with self._state_lock:
@@ -69,14 +70,13 @@ class VMProxy:
     def _start_new_process(self, cmd):
         self._output_queue = Queue() # discard current output queue
     
-        # create new debugger process
+        # create new backend process
         # -u means unbuffered IO (neccessary for Python 3.1)
         my_env = os.environ
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         
         launcher = os.path.join(main.THONNY_DIR, "backlaunch.py")
         cmd_line = [sys.executable, '-u', launcher]
-        print(cmd_line, self.cwd)
         
         if hasattr(cmd, "filename"):
             cmd_line.append(cmd.filename)
@@ -84,6 +84,7 @@ class VMProxy:
                 cmd_line.extend(cmd.args)
             
         
+        debug("before starting backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
@@ -93,18 +94,18 @@ class VMProxy:
             cwd=self.cwd,
             env=my_env
         )
-        #print("£££ started a subprocess", cmd) 
+        #debug("after starting backend:") 
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
         start_new_thread(self._listen_stderr, ())
     
     def _listen_stdout(self):
-        #print("... started listening to stdout")
+        #debug("... started listening to stdout")
         # will be called from separate thread
         while True:
             data = self._proc.stdout.readline().decode(COMMUNICATION_ENCODING)
-            #print("... read some stdout data", repr(data))
+            #debug("... read some stdout data", repr(data))
             if data == '':
                 break
             else:
@@ -123,5 +124,6 @@ class VMProxy:
             if data == '':
                 break
             else:
-                print("ATIDB:", data.strip(), end="\n")
+                print("BACKEND:", data.strip(), end="\n")
+        
             
