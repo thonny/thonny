@@ -15,12 +15,14 @@ It can present program execution information in two ways:
 import os.path
 from os.path import dirname, basename, abspath
 import ast
+import sys
 from common import DebuggerResponse
 from config import prefs
 from misc_utils import eqfn
 import ui_utils
 import misc_utils
 import memory
+import logging
 
 try:
     import tkinter as tk
@@ -46,6 +48,11 @@ EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
 editor_book = None
 
+logger = logging.getLogger("thonny.code")
+logger.propagate = False
+logger.setLevel(logging.WARNING)
+logger.addHandler(logging.StreamHandler(sys.stdout))
+debug = logger.debug
 
 class StatementStepper:
     """
@@ -313,7 +320,7 @@ class EditorNotebook(ttk.Notebook):
     def handle_vm_message(self, msg):
         
         if self.is_in_execution_mode() and isinstance(msg, DebuggerResponse):
-            print("ENB", msg.state, msg.focus)
+            debug("EditorNotebook.handle_vm_message: %s", (msg.state, msg.focus))
             if prefs["advanced_debugging"]:
                 # only one editor shows debug view
                 for editor in self.winfo_children():
@@ -393,11 +400,11 @@ class ExpressionView(tk.Text):
         self.tag_config("focus", background="Yellow")
         
     def handle_vm_message(self, msg):
-        print("EV.handle_vm_message", msg.state, msg.focus)
+        debug("ExpressionView.handle_vm_message %s", (msg.state, msg.focus))
         
         if msg.state in ("before_expression", "before_expression_again"):
             # (re)load stuff
-            if self._main_range == None or msg.focus.not_in(self._main_range):
+            if self._main_range == None or msg.focus.not_smaller_eq_in(self._main_range):
                 self._load_expression(msg.filename, msg.focus)
                 self._update_position(msg.focus)
                 self._update_size()
@@ -406,13 +413,13 @@ class ExpressionView(tk.Text):
             
         
         elif msg.state == "after_expression":
-            print("ExpressionFrame: after_expression", msg)
+            debug("EV: after_expression %s", msg)
             
             start_mark = self._get_mark_name(msg.focus.lineno, msg.focus.col_offset)
             end_mark = self._get_mark_name(msg.focus.end_lineno, msg.focus.end_col_offset)
             
             if hasattr(msg, "value"):
-                print("replacing expression with value")
+                debug("EV: replacing expression with value")
                 #print("del", start_mark, end_mark)
                 self.delete(start_mark, end_mark)
                 
@@ -430,10 +437,12 @@ class ExpressionView(tk.Text):
                 self._update_size()
                 
             else:
-                print("got exc", msg)
+                debug("EV: got exc: %s", msg)
                 "TODO: make it red"
                 
-        elif (msg.state == "before_statement_again" and self._main_range.is_in(msg.focus)):
+        elif (msg.state == "before_statement_again"
+              and self._main_range != None # TODO: shouldn't need this 
+              and self._main_range.is_smaller_eq_in(msg.focus)):
             # we're at final stage of executing parent statement 
             # (eg. assignment after the LHS has been evaluated)
             # don't close yet
@@ -469,10 +478,11 @@ class ExpressionView(tk.Text):
         whole_source, _ = misc_utils.read_python_file(filename)
         root = ast_utils.parse_source(whole_source, filename)
         self._main_range = text_range
+        assert self._main_range != None
         main_node = ast_utils.find_expression(root, text_range)
         
         source = ast_utils.extract_text_range(whole_source, text_range)
-        print("EV.load_exp", text_range, main_node, source)
+        debug("EV.load_exp: %s", (text_range, main_node, source))
         
         self.delete("1.0", "end")
         self.insert("1.0", source)
@@ -512,7 +522,7 @@ class ExpressionView(tk.Text):
                 + "_" + str(node_or_text_range.end_col_offset))
     
     def _highlight_range(self, text_range):
-        print("EV._highlight_range", text_range)
+        debug("EV._highlight_range: %s", text_range)
         self.tag_remove("focus", "1.0", "end")
         self.tag_add("focus",
                      self._get_mark_name(text_range.lineno, text_range.col_offset),

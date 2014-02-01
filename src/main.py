@@ -17,7 +17,6 @@ except ImportError:
     import Tkinter as tk
     import ttk 
     from tkMessageBox import showinfo
-
 import ui_utils
 from about import AboutDialog
 from static import AstFrame
@@ -30,9 +29,10 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
 from ui_utils import Command
 
 THONNY_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-logging.basicConfig(format='%(levelname)s | %(funcName)s |%(message)s',
-                    level=logging.DEBUG,
-                    stream=sys.stdout)
+
+logger = logging.getLogger("thonny.main")
+logger.setLevel(logging.DEBUG)
+
 
 class Thonny(tk.Tk):
     def __init__(self):
@@ -71,7 +71,7 @@ class Thonny(tk.Tk):
         ui_utils.start_keeping_track_of_held_keys(self)
         
         # KeyRelease may also trigger a debugger command
-        self.bind_all("<KeyRelease>", self._check_issue_goto_before_or_after, "+") 
+        # self.bind_all("<KeyRelease>", self._check_issue_goto_before_or_after, "+") # TODO: 
         
         # start saving settings periodically
         self._store_prefs(True)
@@ -356,9 +356,10 @@ class Thonny(tk.Tk):
             prefs["cwd"] = self._vm.cwd
             self._update_title()
             
-            # semi-automatically issue "next" command
-            if not ui_utils.non_modifier_key_is_held():
-                self._check_issue_goto_before_or_after()
+            # automatically advance from after_statement
+            if (isinstance(msg, DebuggerResponse) 
+                and msg.state in ("after_statement", "after_expression")):
+                self._issue_debugger_command(DebuggerCommand(command="next"))
                 
         self.after(50, self._poll_vm_messages)
     
@@ -503,21 +504,21 @@ class Thonny(tk.Tk):
         print(prefs["advanced_debugging"])
 
     def cmd_step_enabled(self):
-        self._check_issue_goto_before_or_after()
+        #self._check_issue_goto_before_or_after()
         return self.cmd_exec_enabled()
     
     def cmd_step(self):
         self._check_issue_debugger_command(DebuggerCommand(command="step"))
     
     def cmd_zoom_enabled(self):
-        self._check_issue_goto_before_or_after()
+        #self._check_issue_goto_before_or_after()
         return self.cmd_exec_enabled()
     
     def cmd_zoom(self):
         self._check_issue_debugger_command(DebuggerCommand(command="zoom"))
     
     def cmd_exec_enabled(self):
-        self._check_issue_goto_before_or_after()
+        #self._check_issue_goto_before_or_after()
         msg = self._vm.get_state_message()
         return (isinstance(msg, DebuggerResponse) 
                 and msg.state in ("before_expression", "before_expression_again",
@@ -527,18 +528,22 @@ class Thonny(tk.Tk):
         self._check_issue_debugger_command(DebuggerCommand(command="exec"))
     
     def _check_issue_debugger_command(self, cmd):
-        last_response = self._vm.get_state_message()
         if isinstance(self._vm.get_state_message(), DebuggerResponse):
-            # tell VM the state we are seeing
-            cmd.setdefault (
-                frame_id=last_response.frame_id,
-                state=last_response.state,
-                focus=last_response.focus,
-                heap_required=prefs["values_in_heap"]
-            )
-                
-            self._vm.send_command(cmd)
+            self._issue_debugger_command(cmd)
             # TODO: notify memory panes and editors? Make them inactive?
+    
+    def _issue_debugger_command(self, cmd):
+        last_response = self._vm.get_state_message()
+        # tell VM the state we are seeing
+        cmd.setdefault (
+            frame_id=last_response.frame_id,
+            state=last_response.state,
+            focus=last_response.focus,
+            heap_required=prefs["values_in_heap"]
+        )
+            
+        self._vm.send_command(cmd)
+        # TODO: notify memory panes and editors? Make them inactive?
             
     def cmd_set_auto_cd(self):
         print(self._auto_cd.get())
@@ -569,17 +574,6 @@ class Thonny(tk.Tk):
                     
                     
         
-    
-    def _check_issue_goto_before_or_after(self, *args):
-        # used for semi-automatic progression from after_* state to before_* state 
-        state_msg = self._vm.get_state_message()
-        if (isinstance(state_msg, DebuggerResponse)
-            and state_msg.state in ("after_statement", "after_expression")):
-            if hasattr(state_msg, "return_value"):
-                # a user function returned, need to show the result in callsite
-                self._check_issue_debugger_command(DebuggerCommand(command="goto_after"))
-            else:
-                self._check_issue_debugger_command(DebuggerCommand(command="goto_before"))
     
     def _find_current_edit_widget(self):
         "TODO:"
@@ -652,4 +646,5 @@ class Thonny(tk.Tk):
         
 
 if __name__ == "__main__":        
+    logger.addHandler(logging.StreamHandler(sys.stdout))
     Thonny().mainloop()

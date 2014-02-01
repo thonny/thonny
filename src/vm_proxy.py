@@ -4,7 +4,7 @@ from __future__ import print_function, division
 import subprocess
 import sys
 import os.path
-from logging import debug
+import logging
 
 try:
     from _thread import start_new_thread
@@ -19,6 +19,10 @@ from common import parse_message, serialize_message, ToplevelCommand, PauseMessa
 import main
 
 COMMUNICATION_ENCODING = "UTF-8"
+
+logger = logging.getLogger("thonny.vmproxy")
+logger.addHandler(logging.StreamHandler(sys.stdout))
+
 
 
 class VMProxy:
@@ -54,7 +58,7 @@ class VMProxy:
                  
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush() # required for Python 3.1
-            debug("sent a command: %s", cmd)
+            logger.debug("sent a command: %s", cmd)
     
     def send_program_input(self, data):
         with self._state_lock:
@@ -84,7 +88,7 @@ class VMProxy:
                 cmd_line.extend(cmd.args)
             
         
-        debug("before starting backend: %s %s", cmd_line, self.cwd)
+        logger.info("VMProxy: starting the backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
@@ -94,7 +98,7 @@ class VMProxy:
             cwd=self.cwd,
             env=my_env
         )
-        #debug("after starting backend:") 
+        logger.debug("Done starting backend") 
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())

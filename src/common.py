@@ -59,7 +59,15 @@ class TextRange(Record):
         self.end_lineno = end_lineno
         self.end_col_offset = end_col_offset
     
-    def contains(self, other):
+    def contains_smaller(self, other):
+        return ((other.lineno > self.lineno
+                 or other.lineno == self.lineno 
+                    and other.col_offset > self.col_offset)
+                and (other.end_lineno < self.end_lineno
+                 or other.end_lineno == self.end_lineno 
+                    and other.end_col_offset < self.end_col_offset))
+    
+    def contains_smaller_eq(self, other):
         return ((other.lineno > self.lineno
                  or other.lineno == self.lineno 
                     and other.col_offset >= self.col_offset)
@@ -67,11 +75,17 @@ class TextRange(Record):
                  or other.end_lineno == self.end_lineno 
                     and other.end_col_offset <= self.end_col_offset))
     
-    def not_in(self, other):
-        return not other.contains(self)
+    def not_smaller_in(self, other):
+        return not other.contains_smaller(self)
 
-    def is_in(self, other):
-        return other.contains(self)
+    def is_smaller_in(self, other):
+        return other.contains_smaller(self)
+    
+    def not_smaller_eq_in(self, other):
+        return not other.contains_smaller_eq(self)
+
+    def is_smaller_eq_in(self, other):
+        return other.contains_smaller_eq(self)
     
     def __str__(self):
         return "TR(" + str(self.lineno) + "." + str(self.col_offset) + ", " \

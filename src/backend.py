@@ -8,6 +8,7 @@ import ast
 import _ast
 import traceback
 import types
+import logging
 
 try:
     import builtins # Python 3
@@ -31,7 +32,10 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 EXCEPTION_TRACEBACK_LIMIT = 100    
 
-DEBUG = 1
+logger = logging.getLogger("thonny.backend")
+logger.setLevel(logging.DEBUG)
+debug = logger.debug
+info = logger.info
 
 class VM:
     def __init__(self):
@@ -40,6 +44,7 @@ class VM:
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
+
         
         # script mode
         if len(sys.argv) > 1:
@@ -47,14 +52,14 @@ class VM:
                                 "__file__", "__cached__", "__loader__")
             sys.argv[:] = sys.argv[1:] # shift argv[1] to position of script name
             sys.path[0] = os.path.dirname(sys.argv[0]) # replace backend's dir with program dir
-            inspect.getdoc
+            # TODO: inspect.getdoc
         
         # shell mode
         else:
             initial_global_names = ("__builtins__", "__name__", "__package__", "__doc__")
             sys.argv[:] = [""] # empty "script name"
             sys.path[0] = ""   # current dir
-        
+    
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
             if key not in initial_global_names:
@@ -69,8 +74,7 @@ class VM:
             cmd = self._fetch_command()
             assert isinstance(cmd, ToplevelCommand)
             
-            if DEBUG > 0:
-                self._debug(cmd)
+            debug("MAINLOOP: %s", cmd)
             
             try:
                 handler = getattr(self, "_cmd_" + cmd.command)
@@ -147,18 +151,18 @@ class VM:
             mode = "exec"
         
         return self._execute_source(cmd.cmd_line, filename, mode,
-                   hasattr(cmd, "debug") and cmd.debug)
+                   hasattr(cmd, "debug_mode") and cmd.debug_mode)
     
-    def _execute_file(self, cmd, debug):
+    def _execute_file(self, cmd, debug_mode):
         source, _ = misc_utils.read_python_file(cmd.filename)
         
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
         code_filename = os.path.abspath(cmd.filename)
-        return self._execute_source(source, code_filename, "exec", debug)
+        return self._execute_source(source, code_filename, "exec", debug_mode)
     
-    def _execute_source(self, source, filename, execution_mode, debug):
-        if debug:
+    def _execute_source(self, source, filename, execution_mode, debug_mode):
+        if debug_mode:
             self._current_executor = FancyTracer(self)
         else:
             self._current_executor = Executor(self)
@@ -369,8 +373,12 @@ class FancyTracer(Executor):
         self._install_marker_functions()
         self._custom_stack = []
     
+    def _set_current_command(self, cmd):
+        self._current_command = cmd
+        #info("TRACER command: %s", cmd)
+    
     def execute_source(self, source, filename, mode):
-        self._current_command = DebuggerCommand(command="goto_before", state=None, focus=None, frame_id=None, exception=None)
+        self._set_current_command(DebuggerCommand(command="next", state=None, focus=None, frame_id=None, exception=None))
         
         response = Executor.execute_source(self, source, filename, mode)
         #assert len(self._custom_stack) == 0
@@ -427,10 +435,8 @@ class FancyTracer(Executor):
         if not self._may_step_in(frame.f_code):
             return
 
-        if DEBUG > 0:
-            self._debug(len(inspect.stack()) * ">" , id(frame), event, 
-                    frame.f_code.co_filename, frame.f_lineno, 
-                    frame.f_code.co_name, frame.f_locals)
+        #fdebug(frame, "TRACE %s %s", event, 
+        #        (frame.f_code.co_filename, frame.f_lineno, frame.f_code.co_name, frame.f_locals))
         
         args = {}
         focus = None
@@ -528,7 +534,11 @@ class FancyTracer(Executor):
         
         Returns True if it wants to continue searching in this frame
         """
-        self._debug("CT", event, self._current_command.command, self._current_command)
+        
+        if event.startswith("before") or event.startswith("after"):
+            assert focus != None 
+        
+        fdebug(frame, "CUSTR %s %s", event, focus)
         if event == "exception":
             self._current_command.exception = args["exception"]
             # we don't stop at exceptions, just make a note that an exception
@@ -539,12 +549,13 @@ class FancyTracer(Executor):
             # We have loop because it's possible respond to several denied zoom-ins, 
             # or in-debug eval/exec requests, in one conceptual program state
             while True:
+                # Select the correct method according to the command
                 handler = getattr(self, "_cmd_" + self._current_command.command)
                 response = handler(frame, event, args, focus, self._current_command)
                      
+                # If method decides we're in the right place to respond to the command ...
                 if isinstance(response, DebuggerResponse):
-                    # we are now in the right state
-                    
+                    # ... attach some more info to the response ...
                     response.setdefault (
                         frame_id=id(frame),
                         filename=frame.f_code.co_filename,
@@ -567,17 +578,21 @@ class FancyTracer(Executor):
                         and self._current_command.heap_required):
                         response.heap = self._vm.export_heap()
                     
+                    #assert response.focus != None
+                    # ... and send it to the client
                     self._vm._send_response(response)
                     
-                    # read next command (blocking) 
-                    self._current_command = self._vm._fetch_command() 
-                    self._debug("Got command", self._current_command, "; current state:", event)
+                    # Read next command (this is a blocking task) 
+                    self._set_current_command(self._vm._fetch_command()) 
+                    fdebug(frame, "COMMAND %s, current event: %s", self._current_command, event)
                     assert isinstance(self._current_command, DebuggerCommand)
                     self._current_command.exception = None # start with no blame
-                    
+                    # ... and continue with the loop
                     
                     
                 else:
+                    # ... we can't respond to this command at this state
+                    
                     # little post-processing
                     if event == "before_statement" and "first_except_stmt" in args["node_tags"]:
                         # We just arrived to an exception handler.
@@ -641,32 +656,68 @@ class FancyTracer(Executor):
         assert cmd.state in ("before_expression", "before_expression_again",
                              "before_statement", "before_statement_again")
         
+        fdebug(frame, "_cmd_exec %s %s %s", event, focus, cmd)
         if id(frame) != cmd.frame_id:
-            return "skip" # the answer lies in the frame where command was issued
+            fdebug(frame, "wrong frame")
+            # We're in a wrong frame,
+            # the answer must be in the frame where command was issued
+            return "skip" 
         
-        # normal completion of expression
-        elif (focus == cmd.focus
-               and event == "after_expression" 
-               and cmd.state in ("before_expression", "before_expression_again")):
+        elif focus.is_smaller_in(cmd.focus):
+            fdebug(frame, "smaller focus %s vs. %s", focus, cmd.focus)
+            # we're still in given code range
+            return None 
         
-            return DebuggerResponse(value=self._vm.export_value(args["value"]))
-                      
-        # exceptional completion of expression or completion of statement
-        elif focus == None or focus.not_in(cmd.focus):
-            # hide the fact that current focus and/or state may have been moved away from given node
-            if cmd.state == "before_expression":
-                resp = DebuggerResponse(state="after_expression", focus=cmd.focus)
-            else:
-                resp = DebuggerResponse(state="after_statement", focus=cmd.focus)
+        elif focus == cmd.focus:
+            fdebug(frame, "same focus")
+            if "before" in event:
+                # we're just starting
+                return None
             
-            if event == "return":
-                self._debug("GOT RETURN")
-                resp.return_value=self._vm.export_value(args["return_value"])
-            return resp
+            elif (cmd.state in ("before_expression", "before_expression_again")
+                  and event == "after_expression"):
+                fdebug(frame, "sending value")
+                # normal expression completion
+                return DebuggerResponse(value=self._vm.export_value(args["value"]))
+            
+            elif (cmd.state in ("before_statement", "before_statement_again")
+                  and event == "after_statement"):
+                # normal statement completion
+                return DebuggerResponse()
+            
+            elif (cmd.state in ("before_statement", "before_statement_again")
+                  and event == "after_expression"):
+                # Same code range can contain expression statement and expression.
+                # Here we need to run just a bit more
+                return None
+            
+            else:
+                # shouldn't be here
+                raise AssertionError("Unexpected state in responding to " + str(cmd))
+                
         else:
-            # keep looking
-            return None
+            # current focus must be outside of starting focus
+            assert focus == None or focus.not_smaller_in(cmd.focus)
+            
+            # Anyway, the execution of the focus has completed (somehow)
+            # Also, hide the fact that current focus and/or state may have been moved away from given range
+            if cmd.state == "before_expression":
+                return DebuggerResponse(state="after_expression", focus=cmd.focus)
+            else:
+                return DebuggerResponse(state="after_statement", focus=cmd.focus)
+            
 
+    def _cmd_next(self, frame, event, args, focus, cmd):
+        # TODO: should the next place be outside of cmd.focus?
+        #fdebug(frame, "_cmd_next %s", (event, args, focus, cmd))
+        
+        if (focus == cmd.focus and id(frame) == cmd.frame_id and event == cmd.state
+            or not event.startswith("before") and not event.startswith("after")):
+            return None
+        else:
+            return DebuggerResponse()
+
+    """
     def _cmd_goto_before(self, frame, event, args, focus, cmd):
         if event in ("before_expression", "before_expression_again",
                      "before_statement", "before_statement_again"):
@@ -685,11 +736,12 @@ class FancyTracer(Executor):
             "TODO: compute proper statement focus. NB! only full lines"
         else:
             return None
+    """
         
     def _cmd_zoom(self, frame, event, args, focus, cmd):
-        self._debug("_cmd_zoom", id(frame), cmd.frame_id, event, cmd.state, focus, cmd.focus)
+        fdebug(frame, "_cmd_zoom: %s", (cmd.frame_id, event, cmd.state, focus, cmd.focus))
         if (id(frame) == cmd.frame_id
-                and focus.is_in(cmd.focus) 
+                and focus.is_smaller_in(cmd.focus) 
                 # NB! ast.Expr statement and its child expression can have same code range
                 and (focus != cmd.focus or event != cmd.state)):
             
@@ -748,7 +800,7 @@ class FancyTracer(Executor):
     
     def _cmd_step(self, frame, event, args, focus, cmd):
         # first try zoom, if can't zoom then do exec
-        self._debug("_cmd_step")
+        fdebug(frame, "_cmd_step")
         result = self._cmd_zoom(frame, event, args, focus, cmd)
         
         if (isinstance(result, DebuggerResponse) 
@@ -760,7 +812,7 @@ class FancyTracer(Executor):
             # either positive zoom or hopeful zoom
             return result
         """
-        #self._debug("step:", id(frame), cmd.frame_id, focus, cmd.focus, event, cmd.state)
+        #fdebug(frame, "_cmd_step: %s", (focus, cmd.focus, event, cmd.state))
         if (event in ("before_statement", "before_expression", "after_expression",
                       "before_statement_again", "before_expression_again")
             and (id(frame) != cmd.frame_id or focus != cmd.focus
@@ -980,7 +1032,6 @@ class FancyTracer(Executor):
     def _debug(self, *args):
         print("TRACER:", *args, file=self._vm._original_stderr)
 
-    
     class CustomStackFrame:
         def __init__(self, frame, last_event, focus=None):
             self.system_frame = frame
@@ -992,5 +1043,17 @@ class ThonnyClientError(Exception):
     pass
 
     
+def finfo(frame, msg, *args):
+    if logger.isEnabledFor(logging.INFO):
+        logger.info(_get_frame_prefix(frame) + msg, *args)
+        
+
+def fdebug(frame, msg, *args):
+    if logger.isEnabledFor(logging.DEBUG):
+        logger.debug(_get_frame_prefix(frame) + msg, *args)
+    
+    
+def _get_frame_prefix(frame):
+    return str(id(frame)) + " " + ">" * len(inspect.getouterframes(frame, 0)) + " "
     
     
