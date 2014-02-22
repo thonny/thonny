@@ -363,6 +363,14 @@ class Executor:
 
 
 class FancyTracer(Executor):
+    """
+    ...
+    
+    * For normal operation _cmd_exec and _cmd_next should be interleaved
+    * NB! after_expression / after_statement does not mean successful completion 
+    
+    ...
+    """
     
     def __init__(self, vm):
         self._vm = vm
@@ -653,6 +661,13 @@ class FancyTracer(Executor):
          
     
     def _cmd_exec(self, frame, event, args, focus, cmd):
+        """
+        Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
+        has completed execution (either successfully or not).
+        
+        Can be called only in one of the before_* states.
+        Next state will be always one of after_* states.
+        """
         assert cmd.state in ("before_expression", "before_expression_again",
                              "before_statement", "before_statement_again")
         
@@ -699,8 +714,10 @@ class FancyTracer(Executor):
             # current focus must be outside of starting focus
             assert focus == None or focus.not_smaller_in(cmd.focus)
             
-            # Anyway, the execution of the focus has completed (somehow)
-            # Also, hide the fact that current focus and/or state may have been moved away from given range
+            # Anyway, the execution of the focus has completed (maybe unsuccessfully).
+            # In response hide the fact that current focus and/or state may have been moved away 
+            # from given range.
+            # TODO: what about exception?
             if cmd.state == "before_expression":
                 return DebuggerResponse(state="after_expression", focus=cmd.focus)
             else:
@@ -708,7 +725,20 @@ class FancyTracer(Executor):
             
 
     def _cmd_next(self, frame, event, args, focus, cmd):
-        # TODO: should the next place be outside of cmd.focus?
+        """
+        Identifies the next interesting moment/place after cmd.focus/cmd.frame_id/cmd.state
+        That place can be inside cmd.focus.
+        
+        Normally it's called after a successful exec in order focus next statement/subexpression.
+        In that case the new state will be a before_* state.
+        
+        If called after completing a return statement, it should go to after_expression 
+        state of calling expression.
+        
+        If it's called with cmd state different from actual runtime state
+        (eg. cmd.state == after_statement, when actually the statement 
+        failed and we're in except handler), then we may be already in the "next" place.
+        """
         #fdebug(frame, "_cmd_next %s", (event, args, focus, cmd))
         
         if (focus == cmd.focus and id(frame) == cmd.frame_id and event == cmd.state
@@ -738,6 +768,8 @@ class FancyTracer(Executor):
             return None
     """
         
+    
+    """
     def _cmd_zoom(self, frame, event, args, focus, cmd):
         fdebug(frame, "_cmd_zoom: %s", (cmd.frame_id, event, cmd.state, focus, cmd.focus))
         if (id(frame) == cmd.frame_id
@@ -795,7 +827,7 @@ class FancyTracer(Executor):
             # can't zoom here
             self._debug("failed zoom (other reasons)")
             return DebuggerResponse(success=False)
-    
+    """
         
     
     def _cmd_step(self, frame, event, args, focus, cmd):
