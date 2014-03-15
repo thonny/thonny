@@ -29,6 +29,7 @@ NORMCASE_THONNY_DIR = os.path.normcase(THONNY_DIR)
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
 AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
+AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
 
 EXCEPTION_TRACEBACK_LIMIT = 100    
 
@@ -366,7 +367,7 @@ class FancyTracer(Executor):
     """
     ...
     
-    * For normal operation _cmd_exec and _cmd_next should be interleaved
+    * For normal operation _cmd_exec and _cmd_next should be interleaved TODO: not really
     * NB! after_expression / after_statement does not mean successful completion 
     
     ...
@@ -386,7 +387,7 @@ class FancyTracer(Executor):
         #info("TRACER command: %s", cmd)
     
     def execute_source(self, source, filename, mode):
-        self._set_current_command(DebuggerCommand(command="next", state=None, focus=None, frame_id=None, exception=None))
+        self._set_current_command(DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None))
         
         response = Executor.execute_source(self, source, filename, mode)
         #assert len(self._custom_stack) == 0
@@ -398,7 +399,8 @@ class FancyTracer(Executor):
         self.marker_function_names = {
             AFTER_EXPRESSION_MARKER,
             BEFORE_EXPRESSION_MARKER,
-            BEFORE_STATEMENT_MARKER 
+            BEFORE_STATEMENT_MARKER,
+            AFTER_STATEMENT_MARKER 
         }
         
         for name in self.marker_function_names:
@@ -462,6 +464,8 @@ class FancyTracer(Executor):
             assert event == "call"
             if code_name == BEFORE_STATEMENT_MARKER:
                 event = "before_statement"
+            elif code_name == AFTER_STATEMENT_MARKER:
+                event = "after_statement"
             elif code_name == BEFORE_EXPRESSION_MARKER:
                 event = "before_expression"
             else:
@@ -511,7 +515,7 @@ class FancyTracer(Executor):
                 # call tracer again with new event and focus
                 result = self._custom_trace(frame, event, args, focus)
             
-            if result and event not in ("before_statement", "before_statement_again", 
+            if result and event not in ("before_statement", "before_statement_again", "after_statement", 
                                         "before_expression", "before_expression_again", "after_expression"):
                 return self._trace
             else:
@@ -662,6 +666,8 @@ class FancyTracer(Executor):
     
     def _cmd_exec(self, frame, event, args, focus, cmd):
         """
+        TODO: needs reworking, make it more similar to step, maybe refactor common code 
+        
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
         
@@ -717,6 +723,7 @@ class FancyTracer(Executor):
             # Anyway, the execution of the focus has completed (maybe unsuccessfully).
             # In response hide the fact that current focus and/or state may have been moved away 
             # from given range.
+            # TODO: do I need to hide this? Maybe I just forget about this statement/expression?
             # TODO: what about exception?
             if cmd.state == "before_expression":
                 return DebuggerResponse(state="after_expression", focus=cmd.focus)
@@ -724,13 +731,15 @@ class FancyTracer(Executor):
                 return DebuggerResponse(state="after_statement", focus=cmd.focus)
             
 
+    """
     def _cmd_next(self, frame, event, args, focus, cmd):
-        """
-        Identifies the next interesting moment/place after cmd.focus/cmd.frame_id/cmd.state
+        Finds the next interesting moment/place after cmd.focus/cmd.frame_id/cmd.state
         That place can be inside cmd.focus.
         
-        Normally it's called after a successful exec in order focus next statement/subexpression.
-        In that case the new state will be a before_* state.
+        Normally it's called 
+            1) after a successful exec in order focus next statement/subexpression.
+               In that case the new state will be a before_* state.
+            2) while being before a compound stmt/expr in order to zoom in. 
         
         If called after completing a return statement, it should go to after_expression 
         state of calling expression.
@@ -738,7 +747,6 @@ class FancyTracer(Executor):
         If it's called with cmd state different from actual runtime state
         (eg. cmd.state == after_statement, when actually the statement 
         failed and we're in except handler), then we may be already in the "next" place.
-        """
         #fdebug(frame, "_cmd_next %s", (event, args, focus, cmd))
         
         if (focus == cmd.focus and id(frame) == cmd.frame_id and event == cmd.state
@@ -746,6 +754,7 @@ class FancyTracer(Executor):
             return None
         else:
             return DebuggerResponse()
+    """
 
     """
     def _cmd_goto_before(self, frame, event, args, focus, cmd):
@@ -831,33 +840,28 @@ class FancyTracer(Executor):
         
     
     def _cmd_step(self, frame, event, args, focus, cmd):
-        # first try zoom, if can't zoom then do exec
-        fdebug(frame, "_cmd_step")
-        result = self._cmd_zoom(frame, event, args, focus, cmd)
-        
-        if (isinstance(result, DebuggerResponse) 
-            and hasattr(result, "success") and not result.success):
-            
-            cmd.command = "exec"
-            return self._cmd_exec(frame, event, args, focus, cmd)
-        else:
-            # either positive zoom or hopeful zoom
-            return result
         """
-        #fdebug(frame, "_cmd_step: %s", (focus, cmd.focus, event, cmd.state))
-        if (event in ("before_statement", "before_expression", "after_expression",
-                      "before_statement_again", "before_expression_again")
-            and (id(frame) != cmd.frame_id or focus != cmd.focus
-                 or event != cmd.state)):
-            #self._debug("responding")
-            if event == "after_expression":
-                return DebuggerResponse(value=self._vm.export_value(args["value"]))
-            else:
-                return DebuggerResponse()
-        else:
-            # keep running
+        Command step stops at all interesting places
+        """
+        if (focus == cmd.focus and id(frame) == cmd.frame_id and event == cmd.state
+            or not event.startswith("before") and not event.startswith("after")):
+            # We're still in the same situation where the command was issued,
+            # so keep running!
             return None
-        """
+        
+        elif event == 'after_expression':
+            return DebuggerResponse(value=self._vm.export_value(args["value"]))
+        
+        elif event in ('before_statement', 'before_expression',
+                       'before_statement_again', 'before_expression_again',
+                       'after_statement', 'after_expression'):
+            
+            return DebuggerResponse()
+        
+        else:
+            # We're not interested in other events when stepping
+            return None
+            
             
     
     def _cmd_line(self, frame, event, args, focus, cmd):
@@ -892,6 +896,15 @@ class FancyTracer(Executor):
         inserted before each statement. 
         Entry into this function indicates that statement as given
         by the code range is about to be evaluated next.
+        """
+        return None
+    
+    def _thonny_hidden_after_stmt(self, text_range, node_tags):
+        """
+        The code to be debugged will be instrumented with this function
+        inserted after each statement. 
+        Entry into this function indicates that statement as given
+        by the code range was just executed successfully.
         """
         return None
     
@@ -972,19 +985,27 @@ class FancyTracer(Executor):
                 for node in field:
                     if isinstance(node, _ast.stmt):
                         # add before marker
-                        call = self._create_before_marker(node, BEFORE_STATEMENT_MARKER)
-                        stmt = ast.Expr(value=call)
-                        ast.copy_location(stmt, node)
-                        ast.fix_missing_locations(stmt)
-                        new_list.append(stmt)
+                        new_list.append(self._create_statement_marker(node, BEFORE_STATEMENT_MARKER))
                     
                     # original statement
                     self._insert_statement_markers(node)
                     new_list.append(node)
                     
+                    if isinstance(node, _ast.stmt):
+                        # add after marker
+                        new_list.append(self._create_statement_marker(node, AFTER_STATEMENT_MARKER))
+                    
+                    
                 setattr(root, name, new_list)
         
     
+    def _create_statement_marker(self, node, function_name):
+        call = self._create_simple_marker_call(node, function_name)
+        stmt = ast.Expr(value=call)
+        ast.copy_location(stmt, node)
+        ast.fix_missing_locations(stmt)
+        return stmt
+        
     
     def _insert_expression_markers(self, node):
         """
@@ -1006,7 +1027,7 @@ class FancyTracer(Executor):
                     and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))):
                     
                     # before marker 
-                    before_marker = tracer._create_before_marker(node, BEFORE_EXPRESSION_MARKER)
+                    before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
                     ast.copy_location(before_marker, node)
                     
                     # after marker
@@ -1046,7 +1067,7 @@ class FancyTracer(Executor):
         else:
             return ast_utils.value_to_literal("")
     
-    def _create_before_marker(self, node, fun_name):
+    def _create_simple_marker_call(self, node, fun_name):
         assert hasattr(node, "end_lineno")
         assert hasattr(node, "end_col_offset")
         

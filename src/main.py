@@ -220,8 +220,8 @@ class Thonny(tk.Tk):
 #                 "---", 
                 Command('reset',                 'Stop/Reset',       None, self),
                 "---", 
-                Command('exec',                 'Execute current focus', "F7", self),
-                Command('zoom',                 'Zoom in',               "F8", self),
+#                Command('exec',                 'Execute current focus', "F7", self),
+#                Command('zoom',                 'Zoom in',               "F8", self),
                 Command('step',                 'Step',                  "F9", self),
                 "---", 
                 Command('set_auto_cd', 'Auto-cd to script dir',  None, self,
@@ -357,9 +357,12 @@ class Thonny(tk.Tk):
             self._update_title()
             
             # automatically advance from after_statement
+            # TODO:
+            """
             if (isinstance(msg, DebuggerResponse) 
                 and msg.state in ("after_statement", "after_expression")):
-                self._issue_debugger_command(DebuggerCommand(command="next"))
+                self._issue_debugger_command(DebuggerCommand(command="step"))
+            """
                 
         self.after(50, self._poll_vm_messages)
     
@@ -505,7 +508,9 @@ class Thonny(tk.Tk):
 
     def cmd_step_enabled(self):
         #self._check_issue_goto_before_or_after()
-        return self.cmd_exec_enabled()
+        msg = self._vm.get_state_message()
+        # always enabled during debugging
+        return (isinstance(msg, DebuggerResponse)) 
     
     def cmd_step(self):
         self._check_issue_debugger_command(DebuggerCommand(command="step"))
