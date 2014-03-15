@@ -26,11 +26,13 @@ def kuu_nimi(kuu):
 
 
 def kuupaev_sonena(paev, kuu, aasta):
-    return str(paev) + '. ' + kuu_nimi(kuu) + ' ' + str(aasta)
+    return str(paev) + '. ' + kuu_nimi(kuu) \
+        + ' ' + str(aasta)
 
 
 paev = int(input('Sisesta paev numbriga: '))
 kuu = int(input('Sisesta kuu numbriga: '))
 aasta = int(input('Sisesta aasta numbriga: '))
 
-print(kuupaev_sonena(paev, kuu, aasta))
+ks = kuupaev_sonena
+print(ks(paev, kuu, aasta))
