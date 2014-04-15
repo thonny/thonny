@@ -196,6 +196,11 @@ def parse_shell_command(cmd_line):
         return ToplevelCommand(command="python", cmd_line=cmd_line)
 
 
+def print_structure(o):
+    print(o.__class__.__name__)
+    for attr in dir(o):
+        print(attr, "=", getattr(o, attr))
+
 if __name__ == "__main__":
     tr1 = TextRange(1,2,3,4)
     tr2 = TextRange(1,2,3,4)

@@ -15,6 +15,7 @@ except ImportError:
 from ui_utils import TextWrapper
 from common import TextRange
 from coloring import SyntaxColorer
+from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
@@ -95,7 +96,7 @@ class CodeView(ttk.Frame, TextWrapper):
         
         self.colorer = SyntaxColorer(self.text)
         
-        #self.text.bind("<<Selection>>", self.text_selection_change)
+        self.text.bind("<<Undo>>", self.on_text_undo)
     
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -143,7 +144,7 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.configure(background="White", insertwidth=2, insertbackground="Black")
 
     def _user_text_insert(self, index, chars, tags=None):
-        cursor_pos = self.text.index(tk.INSERT)
+        #cursor_pos = self.text.index(tk.INSERT)
         
         if self.read_only:
             self.bell()
@@ -153,10 +154,12 @@ class CodeView(ttk.Frame, TextWrapper):
             self._original_user_text_insert(index, chars, tags)
             self.colorer.on_insert(index, chars, tags)
             self._update_line_numbers()
-            #print("insert", index, chars, "cursor pos", cursor_pos);
+            log_user_event(TextInsertEvent(id(self.master), 
+                                                        self.text.index(index),
+                                                        chars))
 
     def _user_text_delete(self, index1, index2=None):
-        cursor_pos = self.text.index(tk.INSERT)
+        # cursor_pos = self.text.index(tk.INSERT)
         
         if self.read_only:
             self.bell()
@@ -166,7 +169,9 @@ class CodeView(ttk.Frame, TextWrapper):
             self._original_user_text_delete(index1, index2)
             self.colorer.on_delete(index1, index2)
             self._update_line_numbers()
-            #print("delete", index1, index2, "cursor pos", cursor_pos)
+            log_user_event(TextDeleteEvent(id(self.master),
+                                                        self.text.index(index1),
+                                                        self.text.index(index2)))
     
     def _update_line_numbers(self):
         text_line_count = int(self.text.index("end-1c").split(".")[0])
@@ -209,6 +214,10 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def text_selection_change(self, *args):
         print("SEL", args)
+    
+    def on_text_undo(self, e):
+        from common import print_structure
+        print_structure(e)
         
     def fact_demo(self):
         self.text.insert("1.0", """

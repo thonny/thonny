@@ -23,8 +23,8 @@ from common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
     ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo
 
-THONNY_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-NORMCASE_THONNY_DIR = os.path.normcase(THONNY_DIR)
+THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+NORMCASE_THONNY_SRC_DIR = os.path.normcase(THONNY_SRC_DIR)
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -431,7 +431,7 @@ class FancyTracer(Executor):
             or "importlib._bootstrap" in code.co_filename
             or os.path.normcase(code.co_filename) not in self._instrumented_files 
                 and code.co_name not in self.marker_function_names
-            or os.path.normcase(code.co_filename).startswith(NORMCASE_THONNY_DIR)
+            or os.path.normcase(code.co_filename).startswith(NORMCASE_THONNY_SRC_DIR)
                 and code.co_name not in self.marker_function_names
             or self._vm.is_doing_io() 
         )

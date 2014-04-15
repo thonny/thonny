@@ -79,7 +79,7 @@ class VMProxy:
         my_env = os.environ
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         
-        launcher = os.path.join(main.THONNY_DIR, "backlaunch.py")
+        launcher = os.path.join(main.THONNY_SRC_DIR, "backlaunch.py")
         cmd_line = [sys.executable, '-u', launcher]
         
         if hasattr(cmd, "filename"):

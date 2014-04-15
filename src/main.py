@@ -8,6 +8,7 @@ from distutils.version import StrictVersion
 import stack
 from config import prefs
 import logging
+import time
 
 try:
     import tkinter as tk
@@ -27,8 +28,9 @@ import vm_proxy
 from browser import BrowseNotebook
 from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
 from ui_utils import Command
+import user_logging
 
-THONNY_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 logger = logging.getLogger("thonny.main")
 logger.setLevel(logging.DEBUG)
@@ -37,10 +39,12 @@ logger.setLevel(logging.DEBUG)
 class Thonny(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        user_logging.USER_LOGGER = user_logging.UserEventLogger(self.new_user_log_file())
+        
         self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
         self.createcommand("::tk::mac::OpenApplication", self._mac_open_application)
         self.createcommand("::tk::mac::ReopenApplication", self._mac_reopen_application)
-        #self.iconbitmap(default=os.path.join(THONNY_DIR, "res", "thonny_small.ico"))
+        #self.iconbitmap(default=os.path.join(THONNY_SRC_DIR, "res", "thonny_small.ico"))
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         #showinfo("sys.argv", str(sys.argv))
         
@@ -609,7 +613,9 @@ class Thonny(tk.Tk):
         # TODO: warn about unsaved files (or just save?)
         self._store_prefs(False)
         ui_utils.delete_images()
+        user_logging.USER_LOGGER.save()
         self.destroy()
+        
         
     def _store_prefs(self, periodically=False):
         self.update_idletasks()
@@ -646,6 +652,18 @@ class Thonny(tk.Tk):
             self.after(1000 * 60, lambda: self._store_prefs(True))
     
     
+    def new_user_log_file(self):
+        folder = os.path.join(THONNY_SRC_DIR, "..", "user_logs")
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            
+        i = 0
+        while True: 
+            fname = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.txt".format(i)));
+            if os.path.exists(fname):
+                i += 1;  
+            else:
+                return fname
 
         
 
