@@ -42,7 +42,8 @@ except ImportError:
 import ast_utils
 from memory import LocalsFrame
 from misc_utils import read_python_file
-from codeview import CodeView    
+from codeview import CodeView
+from user_logging import log_user_event    
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 

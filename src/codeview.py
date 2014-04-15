@@ -15,7 +15,9 @@ except ImportError:
 from ui_utils import TextWrapper
 from common import TextRange
 from coloring import SyntaxColorer
-from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
+from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
+    UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
+    EditorLoseFocusEvent
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
@@ -97,6 +99,12 @@ class CodeView(ttk.Frame, TextWrapper):
         self.colorer = SyntaxColorer(self.text)
         
         self.text.bind("<<Undo>>", self.on_text_undo)
+        self.text.bind("<<Redo>>", self.on_text_redo)
+        self.text.bind("<<Cut>>", self.on_text_cut)
+        self.text.bind("<<Copy>>", self.on_text_copy)
+        self.text.bind("<<Paste>>", self.on_text_paste)
+        self.text.bind("<FocusIn>", self.on_text_get_focus)
+        self.text.bind("<FocusOut>", self.on_text_lose_focus)
     
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -216,8 +224,25 @@ class CodeView(ttk.Frame, TextWrapper):
         print("SEL", args)
     
     def on_text_undo(self, e):
-        from common import print_structure
-        print_structure(e)
+        log_user_event(UndoEvent(id(self.master)));
+        
+    def on_text_redo(self, e):
+        log_user_event(RedoEvent(id(self.master)));
+        
+    def on_text_cut(self, e):
+        log_user_event(CutEvent(id(self.master)));
+        
+    def on_text_copy(self, e):
+        log_user_event(CopyEvent(id(self.master)));
+        
+    def on_text_paste(self, e):
+        log_user_event(PasteEvent(id(self.master)));
+    
+    def on_text_get_focus(self, e):
+        log_user_event(EditorGetFocusEvent(id(self.master)));
+        
+    def on_text_lose_focus(self, e):
+        log_user_event(EditorLoseFocusEvent(id(self.master)));
         
     def fact_demo(self):
         self.text.insert("1.0", """

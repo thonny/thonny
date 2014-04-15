@@ -3,6 +3,7 @@ __pycache__
 dist
 build
 */*.pyc
+user_logs/
 syntax: regexp
 ^MANIFEST$
 

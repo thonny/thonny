@@ -11,7 +11,7 @@ class UserEventLogger:
         # TODO: mõned sündmused tuleks koondada, ja panna koondsündmus macro_events'i
         
         self.macro_events.append((e, datetime.now()))
-        #print("EVENT:", str(e))
+        print("EVENT:", str(e))
     
     def save(self):
         """
