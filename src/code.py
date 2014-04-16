@@ -43,7 +43,8 @@ import ast_utils
 from memory import LocalsFrame
 from misc_utils import read_python_file
 from codeview import CodeView
-from user_logging import log_user_event    
+from user_logging import log_user_event, SaveEvent, SaveAsEvent,\
+    LoadEvent, NewFileEvent
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
@@ -150,7 +151,7 @@ class Editor(ttk.Frame):
             self._load_file(filename)
             self._code_view.text.edit_modified(False)
             
-        self._code_view.text.bind("<<Modified>>", lambda _: self.event_generate(EDITOR_STATE_CHANGE))
+        self._code_view.text.bind("<<Modified>>", lambda _: self.event_generate(EDITOR_STATE_CHANGE), "+")
             
 
     def get_filename(self, try_hard=False):
@@ -162,6 +163,7 @@ class Editor(ttk.Frame):
     def _load_file(self, filename):
         source, self.file_encoding = read_python_file(filename) # TODO: support also text files
         self._filename = filename
+        log_user_event(LoadEvent(self._code_view, filename))
         self._code_view.set_content(source)
         
     def is_modified(self):
@@ -173,11 +175,14 @@ class Editor(ttk.Frame):
     
     def cmd_save_file(self):
         if self._filename != None:
-            filename = self._filename 
+            filename = self._filename
+            log_user_event(SaveEvent(self._code_view))
         else:
             filename = asksaveasfilename()
             if filename == "":
                 return None
+            log_user_event(SaveAsEvent(self._code_view, filename))
+                
         
         encoding = self.file_encoding or "UTF-8" 
         
@@ -273,6 +278,7 @@ class EditorNotebook(ttk.Notebook):
         
     def cmd_new_file(self):
         new_editor = Editor(self)
+        log_user_event(NewFileEvent(new_editor._code_view))
         self.add(new_editor, text=self._generate_editor_title(None))
         self.select(new_editor)
     

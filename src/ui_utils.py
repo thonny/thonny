@@ -15,6 +15,11 @@ except ImportError:
 
 import config
 
+from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
+    UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
+    EditorLoseFocusEvent, CommandEvent, KeyPressEvent
+
+
 SASHTHICKNESS = 10
 CLAM_BACKGROUND = "#dcdad5"
 EDITOR_FONT = None 
@@ -296,15 +301,67 @@ class TextWrapper:
         self._text_redirector = WidgetRedirector(self.text)
         self._original_user_text_insert = self._text_redirector.register("insert", self._user_text_insert)
         self._original_user_text_delete = self._text_redirector.register("delete", self._user_text_delete)
+        
+        self.text.bind("<<Undo>>", self.on_text_undo, "+")
+        self.text.bind("<<Redo>>", self.on_text_redo, "+")
+        self.text.bind("<<Cut>>", self.on_text_cut, "+")
+        self.text.bind("<<Copy>>", self.on_text_copy, "+")
+        self.text.bind("<<Paste>>", self.on_text_paste, "+")
+        # self.text.bind("<<Selection>>", self.on_text_selection_change, "+")
+        self.text.bind("<FocusIn>", self.on_text_get_focus, "+")
+        self.text.bind("<FocusOut>", self.on_text_lose_focus, "+")
+        self.text.bind("<Key>", self.on_text_key_press, "+")
  
     def _user_text_insert(self, *args, **kw):
         # subclass may intercept this forwarding
         self._original_user_text_insert(*args, **kw)
+        if len(args) >= 3:
+            tags = args[2]
+        else:
+            tags = None 
+        log_user_event(TextInsertEvent(self, 
+                                       self.text.index(args[0]),
+                                       args[1],
+                                       tags))
         
     def _user_text_delete(self, *args, **kw):
         # subclass may intercept this forwarding
         self._original_user_text_delete(*args, **kw)
+        log_user_event(TextDeleteEvent(self,
+                                       self.text.index(args[0]),
+                                       self.text.index(args[1])))
 
+    def on_text_undo(self, e):
+        log_user_event(UndoEvent(self));
+        
+    def on_text_redo(self, e):
+        log_user_event(RedoEvent(self));
+        
+    def on_text_cut(self, e):
+        log_user_event(CutEvent(self));
+        
+    def on_text_copy(self, e):
+        log_user_event(CopyEvent(self));
+        
+    def on_text_paste(self, e):
+        log_user_event(PasteEvent(self));
+    
+    def on_text_get_focus(self, e):
+        log_user_event(EditorGetFocusEvent(self));
+        
+    def on_text_lose_focus(self, e):
+        log_user_event(EditorLoseFocusEvent(self));
+    
+    def on_text_key_press(self, e):
+        log_user_event(KeyPressEvent(self, e, self.text.index(tk.INSERT)))
+    
+#     def on_text_selection_change(self, e):
+#         pass
+#         # Selection creates too many events and is not very useful
+#         #log_user_event(SelectionChangeEvent(self,
+#         #                                    self.text.index(tk.SEL_FIRST),
+#         #                                    self.text.index(tk.SEL_LAST)))
+        
 
 def running_on_windows():
     return tk._default_root.call('tk', 'windowingsystem') == "win32"
@@ -492,9 +549,15 @@ class Command:
             target = self._find_target()
             method_name = "cmd_" + self.cmd_id
             method = getattr(target, method_name)
+            if event != None:
+                log_user_event(CommandEvent(self.cmd_id, "shortcut"))
+            else:
+                log_user_event(CommandEvent(self.cmd_id, "menu"))
+                # TODO: what about toolbar?
+                
             return method()
         else:
-            # tk._default_root is our own beloved main window             
+            # tk._default_root is our beloved main window             
             tk._default_root.bell()
             print("Cmd execute: cmd_" + self.cmd_id + " not enabled")
     
@@ -527,3 +590,9 @@ def set_zoomed(toplevel, value):
             toplevel.wm_state("zoomed")
         else:
             toplevel.wm_state("normal")
+
+def notebook_contains(nb, child):
+    return str(child) in nb.tabs()
+
+
+

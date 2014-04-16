@@ -11,7 +11,7 @@ class UserEventLogger:
         # TODO: mõned sündmused tuleks koondada, ja panna koondsündmus macro_events'i
         
         self.macro_events.append((e, datetime.now()))
-        print("EVENT:", str(e))
+        #print("EVENT:", str(e))
     
     def save(self):
         """
@@ -39,65 +39,102 @@ class UserEvent:
     
 
 class TextInsertEvent(UserEvent):
-    def __init__(self, editor_id, position, text):
-        self.editor_id = editor_id
+    def __init__(self, editor, position, text, tags):
+        self.editor_id = id(editor)
         self.position = position
         self.text = text
+        self.tags = tags
         
 class TextDeleteEvent(UserEvent):
-    def __init__(self, editor_id, from_position, to_position):
-        self.editor_id = editor_id
+    def __init__(self, editor, from_position, to_position):
+        self.editor_id = id(editor)
         self.from_position = from_position
         self.to_position = to_position
 
 class UndoEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id        
+    def __init__(self, editor):
+        self.editor_id = id(editor)        
         
 class RedoEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class CutEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class PasteEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class CopyEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class RunEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class SaveEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class SaveAsEvent(UserEvent):
-    def __init__(self, editor_id, filename):
-        self.editor_id = editor_id
+    def __init__(self, editor, filename):
+        self.editor_id = id(editor)
         self.filename = filename
         
+class LoadEvent(UserEvent):
+    def __init__(self, editor, filename):
+        self.editor_id = id(editor)
+        self.filename = filename
+        
+class NewFileEvent(UserEvent):
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+        
 class EditorGetFocusEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
 class EditorLoseFocusEvent(UserEvent):
-    def __init__(self, editor_id):
-        self.editor_id = editor_id
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+
+class KeyPressEvent(UserEvent):
+    def __init__(self, editor, event, cursor_pos):
+        self.editor_id = id(editor)
+        self.cursor_pos = cursor_pos
+        self.char = event.char
+        self.keysym = event.keysym
+
+# class SelectionChangeEvent(UserEvent):
+#     def __init__(self, editor, first_pos, last_pos):
+#         self.editor_id = id(editor)
+#         self.first_pos = first_pos
+#         self.last_pos = last_pos
+    
         
 class ProgramGetFocusEvent(UserEvent):
     pass
         
 class ProgramLoseFocusEvent(UserEvent):
     pass
+
+class CommandEvent(UserEvent):
+    def __init__(self, cmd_id, source):
+        self.cmd_id = cmd_id
+        self.source = source
+
+class ShellCreateEvent(UserEvent):
+    def __init__(self, editor):
+        self.editor_id = id(editor)
         
-class ShellExecuteCommandEvent(UserEvent):
+class ShellCommandEvent(UserEvent):
+    def __init__(self, command_text):
+        self.command_text = command_text 
+
+class ShellInputEvent(UserEvent):
     def __init__(self, command_text):
         self.command_text = command_text 
         

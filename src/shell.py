@@ -18,6 +18,8 @@ except ImportError:
 
 from ui_utils import TextWrapper
 from common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
+from user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
+    ShellInputEvent
 
 class ShellFrame (ttk.Frame, TextWrapper):
     def __init__(self, master, vm, editor_book):
@@ -62,6 +64,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
                             insertwidth=2,
                             height=10,
                             undo=True)
+        log_user_event(ShellCreateEvent(self))
+        
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         self.text.bind("<Up>", self._arrow_up)
         self.text.bind("<Down>", self._arrow_down)
@@ -199,7 +203,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             else:
                 tags = tags + ("toplevel", "command")
             
-            self._original_user_text_insert(index, txt, tags, **kw)
+            TextWrapper._user_text_insert(self, index, txt, tags, **kw)
             
             # tag first char of io separately
             if self._vm.get_state() == "input" and self._before_io:
@@ -215,7 +219,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         if (self._editing_allowed() 
             and self._in_current_input_range(index1)
             and (index2 == None or self._in_current_input_range(index2))):
-            self._original_user_text_delete(index1, index2, **kw)
+            TextWrapper._user_text_delete(self, index1, index2, **kw)
         else:
             self.bell()
             print("Shell: can't delete", self._vm.get_state())
@@ -229,7 +233,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         #print("inserting directly", txt, tags)
         self.text.mark_gravity("input_start", tk.RIGHT)
         self.text.mark_gravity("output_insert", tk.RIGHT)
-        self._original_user_text_insert("output_insert", txt, tuple(tags))
+        TextWrapper._user_text_insert(self, "output_insert", txt, tuple(tags))
         #self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
         
@@ -316,6 +320,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
     
     def _submit_input(self, text_to_be_submitted):
         if self._vm.get_state() == "toplevel":
+            log_user_event(ShellCommandEvent(text_to_be_submitted))
             try:
                 # if it's a file/script-related command, then editor_book wants to 
                 # know about it first
@@ -350,6 +355,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 self._insert_text_directly("Internal error: " + traceback.format_exc() + "\n", ("toplevel", "error"))
                 self._insert_prompt()
         else:
+            log_user_event(ShellInputEvent(text_to_be_submitted))
             self._vm.send_program_input(text_to_be_submitted)
     
     
@@ -391,7 +397,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self._user_text_insert("input_start", cmd_line)
         
     def demo(self):
-        self._original_user_text_insert("end", """Python 3.2.3
+        TextWrapper._user_text_insert(self, "end", """Python 3.2.3
 >>> %run "c:/my documents/kool/prog/katsetus.py"
 Sisesta esimene arv: 4
 Sisesta teine arv: 6

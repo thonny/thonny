@@ -27,7 +27,7 @@ from memory import GlobalsFrame, HeapFrame, ObjectInfoFrame
 import vm_proxy
 from browser import BrowseNotebook
 from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
-from ui_utils import Command
+from ui_utils import Command, notebook_contains
 import user_logging
 
 THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -119,7 +119,7 @@ class Thonny(tk.Tk):
         
         self.control_book.add(self.shell, text="Shell") # TODO: , underline=0
         #self.control_book.add(self.stack, text="Stack") # TODO: , underline=1
-        self.control_book.add(self.ast_frame, text="AST")
+        
          
         self.globals_book = ui_utils.PanelBook(self.right_pw)
         self.globals_frame = GlobalsFrame(self.globals_book)
@@ -588,6 +588,8 @@ class Thonny(tk.Tk):
             
 
     def cmd_show_ast(self):
+        if not notebook_contains(self.control_book, self.ast_frame): 
+            self.control_book.add(self.ast_frame, text="AST")
         self.ast_frame.show_ast(self.editor_book.get_current_editor()._code_view)
     
     def _get_version(self):

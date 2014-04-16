@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
-from argparse import ArgumentError
 try: 
     from configparser import ConfigParser
     import tkinter as tk

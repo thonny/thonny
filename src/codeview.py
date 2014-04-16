@@ -15,9 +15,7 @@ except ImportError:
 from ui_utils import TextWrapper
 from common import TextRange
 from coloring import SyntaxColorer
-from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
-    UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
-    EditorLoseFocusEvent
+from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
@@ -80,8 +78,6 @@ class CodeView(ttk.Frame, TextWrapper):
                 undo=True)
         
         TextWrapper.__init__(self)
-        #self._original_user_text_delete = self.text.delete
-        #self._original_user_text_insert = self.text.insert
         
         self.read_only = False
         
@@ -98,20 +94,13 @@ class CodeView(ttk.Frame, TextWrapper):
         
         self.colorer = SyntaxColorer(self.text)
         
-        self.text.bind("<<Undo>>", self.on_text_undo)
-        self.text.bind("<<Redo>>", self.on_text_redo)
-        self.text.bind("<<Cut>>", self.on_text_cut)
-        self.text.bind("<<Copy>>", self.on_text_copy)
-        self.text.bind("<<Paste>>", self.on_text_paste)
-        self.text.bind("<FocusIn>", self.on_text_get_focus)
-        self.text.bind("<FocusOut>", self.on_text_lose_focus)
     
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
     
     def set_content(self, content):
-        self._original_user_text_delete("1.0", tk.END)
-        self._original_user_text_insert("1.0", content)
+        TextWrapper._user_text_delete(self, "1.0", tk.END)
+        TextWrapper._user_text_insert(self, "1.0", content)
         self._update_line_numbers()
         self.text.edit_reset();
         
@@ -156,15 +145,12 @@ class CodeView(ttk.Frame, TextWrapper):
         
         if self.read_only:
             self.bell()
-            print("CodeView._user_text_insert, read only")
+            #print("CodeView._user_text_insert, read only") # TODO: log this?
             #self._show_read_only_warning()
         else:
-            self._original_user_text_insert(index, chars, tags)
+            TextWrapper._user_text_insert(self, index, chars, tags)
             self.colorer.on_insert(index, chars, tags)
             self._update_line_numbers()
-            log_user_event(TextInsertEvent(id(self.master), 
-                                                        self.text.index(index),
-                                                        chars))
 
     def _user_text_delete(self, index1, index2=None):
         # cursor_pos = self.text.index(tk.INSERT)
@@ -174,12 +160,9 @@ class CodeView(ttk.Frame, TextWrapper):
             print("CodeView._user_text_insert, read only")
             #self._show_read_only_warning()
         else:
-            self._original_user_text_delete(index1, index2)
+            TextWrapper._user_text_delete(self, index1, index2)
             self.colorer.on_delete(index1, index2)
             self._update_line_numbers()
-            log_user_event(TextDeleteEvent(id(self.master),
-                                                        self.text.index(index1),
-                                                        self.text.index(index2)))
     
     def _update_line_numbers(self):
         text_line_count = int(self.text.index("end-1c").split(".")[0])
@@ -220,30 +203,6 @@ class CodeView(ttk.Frame, TextWrapper):
     def change_font_size(self, delta):
         self.font.configure(size=self.font.cget("size") + delta)
     
-    def text_selection_change(self, *args):
-        print("SEL", args)
-    
-    def on_text_undo(self, e):
-        log_user_event(UndoEvent(id(self.master)));
-        
-    def on_text_redo(self, e):
-        log_user_event(RedoEvent(id(self.master)));
-        
-    def on_text_cut(self, e):
-        log_user_event(CutEvent(id(self.master)));
-        
-    def on_text_copy(self, e):
-        log_user_event(CopyEvent(id(self.master)));
-        
-    def on_text_paste(self, e):
-        log_user_event(PasteEvent(id(self.master)));
-    
-    def on_text_get_focus(self, e):
-        log_user_event(EditorGetFocusEvent(id(self.master)));
-        
-    def on_text_lose_focus(self, e):
-        log_user_event(EditorLoseFocusEvent(id(self.master)));
-        
     def fact_demo(self):
         self.text.insert("1.0", """
 def fact(n):
