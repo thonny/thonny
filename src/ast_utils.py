@@ -309,7 +309,6 @@ def mark_text_ranges(node, source):
             return list(tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline))
 
     all_tokens = _tokenize(source)
-    print("TOKENS", all_tokens)
     _fix_triple_quote_positions(node, all_tokens)
     _fix_binop_positions(node)
     source_lines = source.splitlines(True) 
