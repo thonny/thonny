@@ -155,16 +155,16 @@ class Thonny(tk.Tk):
                 "---",
                 Command('save_file',    'Save',        'Ctrl+S',       self.editor_book.get_current_editor),
                 Command('save_file_as', 'Save as...',  'Shift+Ctrl+S', self.editor_book.get_current_editor),
-                "---",
-                Command('print',    'Print (via browser)',        'Ctrl+P',       self.editor_book.get_current_editor),
-                "---",
-                Command('TODO:', '1 prax11/kollane.py', None, None),
-                Command('TODO:', '2 kodutööd/vol1_algne.py', None, None),
-                Command('TODO:', '3 stat.py', None, None),
-                Command('TODO:', '4 praxss11/kollane.py', None, None),
-                Command('TODO:', '5 koduqwertööd/vol1_algne.py', None, None),
-                Command('TODO:', '6 stasst.py', None, None),
-                "---",
+#                 "---",
+#                 Command('print',    'Print (via browser)',        'Ctrl+P',       self.editor_book.get_current_editor),
+#                 "---",
+#                 Command('TODO:', '1 prax11/kollane.py', None, None),
+#                 Command('TODO:', '2 kodutööd/vol1_algne.py', None, None),
+#                 Command('TODO:', '3 stat.py', None, None),
+#                 Command('TODO:', '4 praxss11/kollane.py', None, None),
+#                 Command('TODO:', '5 koduqwertööd/vol1_algne.py', None, None),
+#                 Command('TODO:', '6 stasst.py', None, None),
+#                 "---",
                 Command('exit', 'Exit', None, self),
             ]),
             ('edit', 'Edit', [
@@ -176,9 +176,9 @@ class Thonny(tk.Tk):
                 Command('paste',        'Paste',        'Ctrl+V', self._find_current_edit_widget, system_bound=True),
                 "---", 
                 Command('select_all',   'Select all',   'Ctrl+A', self._find_current_edit_widget, system_bound=True),
-                "---",
-                Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget),
-                Command('find_next',    'Find next',    'F3',     self._find_current_edit_widget),
+#                 "---",
+#                 Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget),
+#                 Command('find_next',    'Find next',    'F3',     self._find_current_edit_widget),
                  
             ]),
             ('view', 'View', [
@@ -198,13 +198,13 @@ class Thonny(tk.Tk):
                 Command('show_ast', "Show AST", "F12", self),
                 Command('preferences', 'Preferences', None, self) 
             ]),
-            ('code', 'Code', [
-                Command('TODO:', 'Indent selection',         "Tab", self.editor_book.get_current_editor), 
-                Command('TODO:', 'Dedent selection',         "Shift+Tab", self.editor_book.get_current_editor),
-                "---", 
-                Command('TODO:', 'Comment out selection',    "Ctrl+3", self.editor_book.get_current_editor), 
-                Command('TODO:', 'Uncomment selection',      "Shift+Ctrl+3", self.editor_book.get_current_editor), 
-            ]),
+#             ('code', 'Code', [
+#                 Command('TODO:', 'Indent selection',         "Tab", self.editor_book.get_current_editor), 
+#                 Command('TODO:', 'Dedent selection',         "Shift+Tab", self.editor_book.get_current_editor),
+#                 "---", 
+#                 Command('TODO:', 'Comment out selection',    "Ctrl+3", self.editor_book.get_current_editor), 
+#                 Command('TODO:', 'Uncomment selection',      "Shift+Ctrl+3", self.editor_book.get_current_editor), 
+#             ]),
             ('run', 'Run', [
                 Command('run_current_script',       'Run current script',        'F5',  self), 
                 Command('debug_current_script',     'Debug current script',  'Ctrl+F5', self),
@@ -317,7 +317,11 @@ class Thonny(tk.Tk):
         self.toolbar_buttons = {}
         col = 1
         res_dir = join_path(dirname(__file__), "res")
-        for name in ('new', 'open', 'save', '-', 'run', 'debug', 'zoom_in', 'kill'):
+        for name in ('file.new_file', 'file.open_file', 'file.save_file', 
+                     '-', 'run.run_current_script',
+                          'run.debug_current_script',
+                          'run.step',
+                          'run.reset'):
             
             if name == '-':
                 hor_spacer = ttk.Frame(self.toolbar, width=15)
@@ -325,7 +329,12 @@ class Thonny(tk.Tk):
             else:
                 img = tk.PhotoImage(file=join_path(res_dir, name + ".gif"))
             
-                btn = ttk.Button(self.toolbar, command=on_kala_button, image=img, text="butt",  style="Toolbutton")
+                btn = ttk.Button(self.toolbar, 
+                                 command=on_kala_button, 
+                                 image=img, 
+                                 text="?",
+                                 style="Toolbutton",
+                                 state=tk.DISABLED)
                 btn.grid(row=1, column=col, padx=0, pady=0)
             
                 self.images[name] = img

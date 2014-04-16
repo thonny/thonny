@@ -43,7 +43,7 @@ class AboutDialog(tk.Toplevel):
                                   font=heading_font)
         heading_label.grid()
         
-        url = "http://whatever.the.url.will.be"
+        url = "https://bitbucket.org/aivarannamaa/thonny"
         url_font = font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
         url_label = ttk.Label(self, text=url,

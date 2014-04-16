@@ -1,7 +1,2 @@
-def fact(n):
-    if n == 0:
-        return 1
-    else:
-        return n * fact(n-1)
-
-print(fact(3))
+if fun1sdfsdfsff(a):
+    a.append(1)

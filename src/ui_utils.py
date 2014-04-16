@@ -516,7 +516,8 @@ def _tk_version_warning():
 class Command:
     def __init__(self, cmd_id, label, accelerator, target_or_finder,
                  kind="command", variable=None, value=None, onvalue=None,
-                 variable_name=None, offvalue=None, system_bound=False):
+                 variable_name=None, offvalue=None, system_bound=False,
+                 source=None):
         self.cmd_id = cmd_id
         self.label = label
         self.accelerator = accelerator
@@ -527,6 +528,7 @@ class Command:
         self.offvalue = offvalue
         self._target_or_finder = target_or_finder
         self.system_bound = system_bound
+        self.source = source
         if variable == None and variable_name != None:
             self.variable = config.prefs_vars[variable_name]
     
@@ -549,11 +551,14 @@ class Command:
             target = self._find_target()
             method_name = "cmd_" + self.cmd_id
             method = getattr(target, method_name)
-            if event != None:
-                log_user_event(CommandEvent(self.cmd_id, "shortcut"))
+            if self.source != None:
+                source = self.source
+            elif event != None:
+                source = "shortcut"
             else:
-                log_user_event(CommandEvent(self.cmd_id, "menu"))
-                # TODO: what about toolbar?
+                source = "menu"
+                
+            log_user_event(CommandEvent(self.cmd_id, source))
                 
             return method()
         else:
