@@ -286,7 +286,11 @@ class EditorNotebook(ttk.Notebook):
         filename = askopenfilename()
         if filename != "":
             self.show_file(filename)
-            
+    
+    def cmd_close_file(self):
+        # TODO: ask in case file is modified
+        self.forget(self.select());
+    
     def get_current_editor(self):
         for child in self.winfo_children():
             if child.winfo_pathname(child.winfo_id()) == self.select():
