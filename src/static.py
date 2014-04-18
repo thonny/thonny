@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division 
 from common import TextRange
+from tkinter.messagebox import showerror
 try:
     import tkinter as tk
     from tkinter import ttk
@@ -57,15 +58,22 @@ class AstFrame(ui_utils.TreeFrame):
         source = code_view.get_content()
         
 
-        #import time
-        #start = time.clock()
-        root = ast_utils.parse_source(source)
-        #ast_utils.insert_expression_markers(root)
-        #ast_utils.insert_statement_markers(root)
-        #elapsed = (time.clock() - start)
-        #print("ELAPSED: ", elapsed)
-        
         self.clear_tree()
+        
+        try:
+            #import time
+            #start = time.clock()
+            root = ast_utils.parse_source(source)
+            #ast_utils.insert_expression_markers(root)
+            #ast_utils.insert_statement_markers(root)
+            #elapsed = (time.clock() - start)
+            #print("ELAPSED: ", elapsed)
+        except Exception as e:
+            #showerror("Viga!", e)
+            #print("VIGA", e)
+            self.tree.insert("", "end", text=str(e), open=True)
+            return
+        
         
         def _format(key, node, parent_id):
             
