@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division 
+from common import TextRange
 try:
     import tkinter as tk
     from tkinter import ttk
@@ -14,21 +15,22 @@ import ui_utils
 class AstFrame(ui_utils.TreeFrame):
     def __init__(self, master):
         ui_utils.TreeFrame.__init__(self, master,
-            columns=('lineno', 'col_offset', 'end_lineno', 'end_col_offset', 'start_position'))
+            columns=('range', 'lineno', 'col_offset', 'end_lineno', 'end_col_offset'),
+            displaycolumns=(0,)
+        )
         
         self.current_code_view = None
         self.tree.bind("<<TreeviewSelect>>", self.locate_code)
 
-        self.tree.column('#0', width=430, anchor=tk.W)
+        self.tree.column('#0', width=550, anchor=tk.W)
+        self.tree.column('range', width=100, anchor=tk.W)
         self.tree.column('lineno', width=30, anchor=tk.W)
         self.tree.column('col_offset', width=30, anchor=tk.W)
         self.tree.column('end_lineno', width=30, anchor=tk.W)
         self.tree.column('end_col_offset', width=30, anchor=tk.W)
-        self.tree.column('start_position', width=30, anchor=tk.W)
         
         self.tree.heading('#0', text="Node", anchor=tk.W)
-        self.tree.heading('lineno', text='lineno', anchor=tk.W)
-        self.tree.heading('col_offset', text='col_offset', anchor=tk.W)
+        self.tree.heading('range', text='Code range', anchor=tk.W)
         
         self.tree['show'] = ('headings', 'tree')
     
@@ -40,10 +42,10 @@ class AstFrame(ui_utils.TreeFrame):
         
         if iid != '':
             values = self.tree.item(iid)['values']
-            if isinstance(values, list) and len(values) >= 4:
-                start_line, start_col, end_line, end_col = values[:4] 
-                self.current_code_view.select_range(start_line, start_col, 
-                                                    end_line, end_col)
+            if isinstance(values, list) and len(values) >= 5:
+                start_line, start_col, end_line, end_col = values[1:5] 
+                self.current_code_view.select_range(TextRange(start_line, start_col, 
+                                                    end_line, end_col))
         
     
     def clear_tree(self):
@@ -71,7 +73,7 @@ class AstFrame(ui_utils.TreeFrame):
                 value_label = node.__class__.__name__ 
             elif isinstance(node, list):
                 children = list(enumerate(node))
-                value_label = "LIST"
+                value_label = "list"
             else:
                 children = []
                 value_label = repr(node)
@@ -79,20 +81,21 @@ class AstFrame(ui_utils.TreeFrame):
             item_text = str(key) + "=" + value_label
             node_id = self.tree.insert(parent_id, "end", text=item_text, open=True)
             
-            if hasattr(node, "start_position"):
-                self.tree.set(node_id, "start_position", node.start_position)
-            
             if hasattr(node, "lineno") and hasattr(node, "col_offset"):
                 self.tree.set(node_id, "lineno", node.lineno)
                 self.tree.set(node_id, "col_offset", node.col_offset)
                 
+                range_str = str(node.lineno) + '.' + str(node.col_offset)
                 if hasattr(node, "end_lineno") and hasattr(node, "end_col_offset"):
                     self.tree.set(node_id, "end_lineno", node.end_lineno)
                     self.tree.set(node_id, "end_col_offset", node.end_col_offset)
+                    range_str += "  -  " + str(node.end_lineno) + '.' + str(node.end_col_offset)
                 else:
                     # fallback
                     self.tree.set(node_id, "end_lineno", node.lineno)
                     self.tree.set(node_id, "end_col_offset", node.col_offset + 1)
+                    
+                self.tree.set(node_id, "range", range_str)
                 
             
             for child_key, child in children:

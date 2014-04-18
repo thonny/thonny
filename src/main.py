@@ -600,6 +600,7 @@ class Thonny(tk.Tk):
         if not notebook_contains(self.control_book, self.ast_frame): 
             self.control_book.add(self.ast_frame, text="AST")
         self.ast_frame.show_ast(self.editor_book.get_current_editor()._code_view)
+        self.control_book.select(self.ast_frame)
     
     def _get_version(self):
         try:

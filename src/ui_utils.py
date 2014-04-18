@@ -260,12 +260,12 @@ class PanelBook(ttk.Notebook):
             anchor=tk.NW)
 
 class TreeFrame(ttk.Frame):
-    def __init__(self, master, columns):
+    def __init__(self, master, columns, displaycolumns='#all'):
         ttk.Frame.__init__(self, master)
         self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
         
-        self.tree = ttk.Treeview(self, columns=columns, 
+        self.tree = ttk.Treeview(self, columns=columns, displaycolumns=displaycolumns, 
                                  yscrollcommand=self.scrollbar.set)
         self.tree['show'] = 'headings'
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
