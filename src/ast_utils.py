@@ -388,7 +388,6 @@ def fix_ast_problems(tree, source_lines, tokens):
         if (isinstance(node, ast.Call) 
             and node.lineno == node.func.lineno 
             and node.col_offset > node.func.col_offset):
-            print("FIXED", node)
             # Python 3.4 call problem
             # get position from an already fixed child
             # (If the func and args paren start on different lines
