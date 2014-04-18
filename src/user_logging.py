@@ -6,12 +6,28 @@ class UserEventLogger:
     def __init__(self, filename=None):
         self.filename = filename
         self.macro_events = []
+        self.last_position = "0.0"
     
     def log_micro_event(self, e):
-        # TODO: mõned sündmused tuleks koondada, ja panna koondsündmus macro_events'i
-        
-        self.macro_events.append((e, datetime.now()))
-        #print("EVENT:", str(e))
+        # Koondab üksikud tähesisestused samal real olevatega, va. kui sisestuskursori asukoht on mujal
+        if(isinstance(e, TextInsertEvent)):
+            if(len(self.macro_events) != 0):
+                if(isinstance(self.macro_events[-1][0], TextInsertEvent)
+                        and int(self.last_position.split(".")[0]) == int(e.position.split(".")[0])
+                        and int(self.last_position.split(".")[1]) + 1 == int(e.position.split(".")[1])):
+                    
+                    self.macro_events[-1][0].text = self.macro_events[-1][0].text + e.text
+                    self.macro_events[-1] = (self.macro_events[-1][0], datetime.now())
+                    self.last_position = e.position
+                else:
+                    self.macro_events.append((e, datetime.now()))
+                    self.last_position = e.position
+            else:
+                self.macro_events.append((e, datetime.now()))
+                self.last_position = e.position
+        else:
+            # print("Appending: " + str(e))
+            self.macro_events.append((e, datetime.now()))
     
     def save(self):
         """

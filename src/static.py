@@ -67,9 +67,6 @@ class AstFrame(ui_utils.TreeFrame):
         
         self.clear_tree()
         
-        def is_simple_field(val):
-            return not isinstance(val, ast.AST) and not isinstance(val, list)
-        
         def _format(key, node, parent_id):
             
             
@@ -112,16 +109,6 @@ class AstFrame(ui_utils.TreeFrame):
                 
                 
         _format("root", root, "")
-#         def is_simple_node(node):
-#             if not isinstance(node, ast.AST) and not isinstance(node, list):
-#                 return True
-#             if node == []:
-#                 return True
-#             if isinstance(node, ast.AST) and node._fields == []:
-#                 return True
-#             
-#             return False
-            
         
         
         

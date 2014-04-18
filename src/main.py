@@ -646,8 +646,10 @@ class Thonny(tk.Tk):
             prefs["layout.left"] = self.winfo_x()
             prefs["layout.width"] = self.winfo_width()
             prefs["layout.height"] = self.winfo_height()
-            
-        prefs["layout.center_width"] = self.center_pw.winfo_width()
+        
+        center_width = self.center_pw.winfo_width();
+        if center_width > 1:
+            prefs["layout.center_width"] = center_width
         
         if self.right_pw.winfo_ismapped():
             prefs["layout.memory_width"] = self.right_pw.winfo_width()
