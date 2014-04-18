@@ -55,17 +55,19 @@ class UserEvent:
     
 
 class TextInsertEvent(UserEvent):
-    def __init__(self, editor, position, text, tags):
+    def __init__(self, editor, position, text, tags, source=None):
         self.editor_id = id(editor)
         self.position = position
         self.text = text
         self.tags = tags
+        self.source = source
         
 class TextDeleteEvent(UserEvent):
-    def __init__(self, editor, from_position, to_position):
+    def __init__(self, editor, from_position, to_position, source=None):
         self.editor_id = id(editor)
         self.from_position = from_position
         self.to_position = to_position
+        self.source = source
 
 class UndoEvent(UserEvent):
     def __init__(self, editor):
