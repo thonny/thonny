@@ -12,6 +12,7 @@ except ImportError:
 import ast
 import ast_utils
 import ui_utils
+import traceback
 
 class AstFrame(ui_utils.TreeFrame):
     def __init__(self, master):
@@ -72,6 +73,7 @@ class AstFrame(ui_utils.TreeFrame):
             #showerror("Viga!", e)
             #print("VIGA", e)
             self.tree.insert("", "end", text=str(e), open=True)
+            traceback.print_exc()
             return
         
         
