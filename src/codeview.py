@@ -115,6 +115,10 @@ class CodeView(ttk.Frame, TextWrapper):
         self.select_range(TextRange(start_line - self.first_line_no + 1, 0, 
                           end_line - self.first_line_no + 1), "end")
     
+    def select_all(self):
+        self.text.tag_remove("sel", "1.0", tk.END)
+        self.text.tag_add('sel', '1.0', tk.END)
+        
     def show_focus_box(self, text_range):
         "TODO:"
         #print("*** focus", start_line, start_col, end_line, end_col)

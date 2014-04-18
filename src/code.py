@@ -173,6 +173,9 @@ class Editor(ttk.Frame):
     def cmd_save_file_enabled(self):
         return self.is_modified()
     
+    def cmd_select_all(self):
+        self._code_view.select_all();
+    
     def cmd_save_file(self):
         if self._filename != None:
             filename = self._filename

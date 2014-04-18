@@ -175,7 +175,7 @@ class Thonny(tk.Tk):
                 Command('copy',         'Copy',         'Ctrl+C', self._find_current_edit_widget, system_bound=True), 
                 Command('paste',        'Paste',        'Ctrl+V', self._find_current_edit_widget, system_bound=True),
                 "---", 
-                Command('select_all',   'Select all',   'Ctrl+A', self._find_current_edit_widget, system_bound=True),
+                Command('select_all',   'Select all',   'Ctrl+A', self._find_current_edit_widget),
 #                 "---",
 #                 Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget),
 #                 Command('find_next',    'Find next',    'F3',     self._find_current_edit_widget),
