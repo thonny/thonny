@@ -149,9 +149,7 @@ def mark_text_ranges(node, source):
             return ast.iter_child_nodes(node)    
     
     def _fix_triple_quote_positions(root, all_tokens):
-        """
-        http://bugs.python.org/issue18370
-        """
+        # http://bugs.python.org/issue18370
         filtered = filter(lambda tok: tok[TYPE] == token.STRING, all_tokens)
         string_tokens = list(filtered)
         
@@ -172,16 +170,24 @@ def mark_text_ranges(node, source):
                 node.lineno, node.col_offset = node.value.lineno, node.value.col_offset
      
     def _fix_binop_positions(node):
-        """
-        http://bugs.python.org/issue18374
-        """
+        # http://bugs.python.org/issue18374
         for child in ast.iter_child_nodes(node):
             _fix_binop_positions(child)
         
         if isinstance(node, ast.BinOp):
             node.lineno = node.left.lineno
             node.col_offset = node.left.col_offset
-
+    
+    def _fix_py34_call_positions(node):
+        # http://bugs.python.org/issue21295
+        for child in ast.iter_child_nodes(node):
+            _fix_py34_call_positions(child)
+        
+        if isinstance(node, ast.Call):
+            if node.lineno == node.func.lineno and node.col_offset > node.func.col_offset:
+                node.col_offset = node.func.col_offset
+            #node.lineno = node.func.lineno # won't help when func and args are on different lines
+            #                               # because then func has also wrong lineno
     
     def _extract_tokens(tokens, lineno, col_offset, end_lineno, end_col_offset):
         return list(filter((lambda tok: tok[START][0] >= lineno
@@ -311,6 +317,8 @@ def mark_text_ranges(node, source):
     all_tokens = _tokenize(source)
     _fix_triple_quote_positions(node, all_tokens)
     _fix_binop_positions(node)
+    if sys.version_info[0] == 3 and sys.version_info[1] == 4:
+        _fix_py34_call_positions(node)
     source_lines = source.splitlines(True) 
     prelim_end_lineno = len(source_lines)
     prelim_end_col_offset = len(source_lines[len(source_lines)-1])
