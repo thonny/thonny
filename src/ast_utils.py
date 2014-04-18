@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division 
+from collections import namedtuple
 
 import ast
 import _ast
@@ -8,6 +9,7 @@ import token
 import tokenize
 import io
 
+Thoken = namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
 
 # token element indices (Py2 tokens aren't named tuples)
 TYPE = 0
@@ -50,7 +52,6 @@ def parse_source(source, filename='<unknown>', mode="exec"):
 
 def get_last_child(node):
     if isinstance(node, ast.Call):
-        # TODO: confirm the evaluation order
         if node.kwargs != None:
             return node.kwargs
         elif node.starargs != None:
@@ -124,7 +125,6 @@ def mark_text_ranges(node, source):
     which has attributes lineno and col_offset.
     """
     
-
     def _get_ordered_child_nodes(node):
         if isinstance(node, ast.Dict):
             children = []
@@ -147,47 +147,6 @@ def mark_text_ranges(node, source):
             return children
         else:
             return ast.iter_child_nodes(node)    
-    
-    def _fix_triple_quote_positions(root, all_tokens):
-        # http://bugs.python.org/issue18370
-        filtered = filter(lambda tok: tok[TYPE] == token.STRING, all_tokens)
-        string_tokens = list(filtered)
-        
-        def _fix_str_nodes(node):
-            if isinstance(node, ast.Str):
-                tok = string_tokens.pop(0)
-                node.lineno, node.col_offset = tok[START]
-                
-            for child in _get_ordered_child_nodes(node):
-                _fix_str_nodes(child)
-        
-        _fix_str_nodes(root)
-        
-        # fix their erroneous Expr parents   
-        for node in ast.walk(root):
-            if ((isinstance(node, ast.Expr) or isinstance(node, ast.Attribute))
-                and isinstance(node.value, ast.Str)):
-                node.lineno, node.col_offset = node.value.lineno, node.value.col_offset
-     
-    def _fix_binop_positions(node):
-        # http://bugs.python.org/issue18374
-        for child in ast.iter_child_nodes(node):
-            _fix_binop_positions(child)
-        
-        if isinstance(node, ast.BinOp):
-            node.lineno = node.left.lineno
-            node.col_offset = node.left.col_offset
-    
-    def _fix_py34_call_positions(node):
-        # http://bugs.python.org/issue21295
-        for child in ast.iter_child_nodes(node):
-            _fix_py34_call_positions(child)
-        
-        if isinstance(node, ast.Call):
-            if node.lineno == node.func.lineno and node.col_offset > node.func.col_offset:
-                node.col_offset = node.func.col_offset
-            #node.lineno = node.func.lineno # won't help when func and args are on different lines
-            #                               # because then func has also wrong lineno
     
     def _extract_tokens(tokens, lineno, col_offset, end_lineno, end_col_offset):
         return list(filter((lambda tok: tok[START][0] >= lineno
@@ -315,51 +274,59 @@ def mark_text_ranges(node, source):
             return list(tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline))
 
     all_tokens = _tokenize(source)
-    _fix_triple_quote_positions(node, all_tokens)
-    _fix_binop_positions(node)
-    if sys.version_info[0] == 3 and sys.version_info[1] == 4:
-        _fix_py34_call_positions(node)
     source_lines = source.splitlines(True) 
+    fix_ast_problems(node, source_lines, all_tokens)
     prelim_end_lineno = len(source_lines)
     prelim_end_col_offset = len(source_lines[len(source_lines)-1])
     _mark_text_ranges_rec(node, all_tokens, prelim_end_lineno, prelim_end_col_offset)
     
 
+def tokenize_with_char_offsets(source):
+    # built-in tokenizer gives token offsets in bytes. I need them in chars.
     
-"""
-def _bubble_up_starting_positions(node):
-    # this is required for ordering the nodes (see _mark_text_ranges_rec)
-    if "lineno" in node._attributes:
-        node.start_position = (node.lineno, node.col_offset)
+    if sys.version_info[0] == 2:
+        token_source = tokenize.generate_tokens(io.StringIO(source).readline)
     else:
-        node.start_position = None
-    for child in ast.iter_child_nodes(node):
-        child_pos = _bubble_up_starting_positions(child)
-        if node.start_position == None or (child_pos != None and child_pos < node.start_position):
-            node.start_position = child_pos
+        token_source = tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline)
     
-    return node.start_position
-
-def _find_minusone_offsets(root):
-    for node in ast.walk(root):
-        if hasattr(node, "col_offset") and node.col_offset < 0:
-            msg = "node has col_offset < 0, " + str((node.__class__, node.lineno, node.col_offset))
-            print("$$$$$$", msg)
-            #raise AssertionError(msg)
-
-def _find_twisted_locations(root):
-    for node in ast.walk(root):
-        try:
-            if (hasattr(node, "lineno") 
-                and (node.lineno > node.end_lineno
-                     or node.lineno == node.end_lineno and node.col_offset > node.end_col_offset)):
-                import sys
-                #msg = "twisted " + str((node.__class__, node.lineno, node.col_offset))
-                print("$$$$$$ twisted", node.__class__, node.lineno, node.col_offset, node.end_lineno, node.end_col_offset, file=sys.stderr)
-                #raise AssertionError(msg)
-        except:
-            print("!!!!!!!! missing end location", node.__class__, node.lineno, node.col_offset, file=sys.stderr)
-"""
+    encoding = "UTF-8"
+    char_lines = list(map(lambda line: line + "\n", source.split("\n")))
+    print(char_lines)
+    byte_lines = None
+    thokens = []
+    
+    
+    for token in token_source:
+        print(token)
+        
+        if token[TYPE] == tokenize.ENCODING:
+            # first token
+            encoding = token[STRING]
+            byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
+            
+            
+        if token[START][0] == 0 or (token[START][1] == 0 and token[END][1] == 0):
+            # just copy information
+            thoken = Thoken(token[TYPE], token[STRING],
+                            token[START][0], token[START][1],
+                            token[END][0], token[END][1])
+        else:
+            # translate byte offsets to char offsets
+            assert token[START][0] > 0 # lineno should be > 0
+            
+            byte_start_line = byte_lines[token[START][0]-1]
+            char_start_col = len(byte_start_line[:token[START][1]].decode(encoding)) 
+            
+            byte_end_line = byte_lines[token[END][0]-1]
+            char_end_col = len(byte_end_line[:token[END][1]].decode(encoding)) 
+            
+            thoken = Thoken(token[TYPE], token[STRING],
+                            token[START][0], char_start_col,
+                            token[END][0], char_end_col)
+        
+        thokens.append(thoken)
+        print(thoken)
+            
 
 
 def value_to_literal(value):
@@ -377,9 +344,93 @@ def value_to_literal(value):
 
 
 
+def fix_ast_problems(tree, source_lines, tokens):
+    # Problem 1:
+    # Python parser gives col_offset as offset to its internal UTF-8 byte array
+    # I need offsets to chars
+    utf8_byte_lines = list(map(lambda line: line.encode("UTF-8"), source_lines))
     
+    # Problem 2: 
+    # triple-quoted strings have just plain wrong positions: http://bugs.python.org/issue18370
+    # Fortunately lexer gives them correct positions
+    string_tokens = list(filter(lambda tok: tok[TYPE] == token.STRING, tokens))
+    
+    # Problem 3:
+    # Binary operations have wrong positions: http://bugs.python.org/issue18374
+    
+    # Problem 4:
+    # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
+
+    def fix_node(node):
+        for child in get_ordered_child_nodes(node):
+        #for child in ast.iter_child_nodes(node):
+            fix_node(child)
+                    
+        if isinstance(node, ast.Str):
+            # fix triple-quote problem
+            # get position from tokens
+            token = string_tokens.pop(0)
+            node.lineno, node.col_offset = token[START]
+            
+        elif ((isinstance(node, ast.Expr) or isinstance(node, ast.Attribute))
+            and isinstance(node.value, ast.Str)):
+            # they share the wrong offset of their triple-quoted child
+            # get position from already fixed child
+            node.lineno = node.value.lineno
+            node.col_offset = node.value.col_offset
+                        
+        elif isinstance(node, ast.BinOp):
+            # fix binop problem
+            # get position from an already fixed child
+            node.lineno = node.left.lineno
+            node.col_offset = node.left.col_offset
+            
+        if (isinstance(node, ast.Call) 
+            and node.lineno == node.func.lineno 
+            and node.col_offset > node.func.col_offset):
+            print("FIXED", node)
+            # Python 3.4 call problem
+            # get position from an already fixed child
+            # (If the func and args paren start on different lines
+            # then the lineno is wrong for both and I don't know how to fix this)
+            node.lineno = node.func.lineno
+            node.col_offset = node.func.col_offset
+        
+        else:
+            # Let's hope this node has correct lineno, and byte-based col_offset
+            # Now compute char-based col_offset
+            if hasattr(node, "lineno"):
+                byte_line = utf8_byte_lines[node.lineno-1]
+                char_col_offset = len(byte_line[:node.col_offset].decode("UTF-8"))
+                node.col_offset = char_col_offset
+     
+    def get_ordered_child_nodes(node):
+        if isinstance(node, ast.Dict):
+            children = []
+            for i in range(len(node.keys)):
+                children.append(node.keys[i])
+                children.append(node.values[i])
+            return children
+        elif isinstance(node, ast.Call):
+            children = [node.func] + node.args
+            
+            for kw in node.keywords:
+                children.append(kw.value)
+            
+            if node.starargs != None:
+                children.append(node.starargs)
+            if node.kwargs != None:
+                children.append(node.kwargs)
+            
+            children.sort(key=lambda x: (x.lineno, x.col_offset))
+            return children
+        else:
+            return ast.iter_child_nodes(node)    
+    
+    fix_node(tree)
 
 if __name__ == "__main__":
+    """
     if len(sys.argv) > 1:
         with open(sys.argv[1]) as f:
             source = f.read()
@@ -394,6 +445,7 @@ if __name__ == "__main__":
                     print(node.lineno, node.col_offset)
                 else:
                     print()
-
+    """
+    tokenize_with_char_offsets("ä")
             
         
