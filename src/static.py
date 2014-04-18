@@ -67,15 +67,25 @@ class AstFrame(ui_utils.TreeFrame):
         
         self.clear_tree()
         
+        def is_simple_field(val):
+            return not isinstance(val, ast.AST) and not isinstance(val, list)
+        
         def _format(key, node, parent_id):
+            
+            
             if isinstance(node, ast.AST):
-                children = [(key, child) for key, child in ast.iter_fields(node)]
-                value_label = node.__class__.__name__ 
+                fields = [(key, val) for key, val in ast.iter_fields(node)]
+                
+                value_label = node.__class__.__name__
+                    
             elif isinstance(node, list):
-                children = list(enumerate(node))
-                value_label = "list"
+                fields = list(enumerate(node))
+                if len(node) == 0:
+                    value_label = "[]"
+                else:
+                    value_label = "[...]"
             else:
-                children = []
+                fields = []
                 value_label = repr(node)
             
             item_text = str(key) + "=" + value_label
@@ -97,9 +107,9 @@ class AstFrame(ui_utils.TreeFrame):
                     
                 self.tree.set(node_id, "range", range_str)
                 
-            
-            for child_key, child in children:
-                _format(child_key, child, node_id)
+            for field_key, field_value in fields:
+                _format(field_key, field_value, node_id)
+                
                 
         _format("root", root, "")
 #         def is_simple_node(node):
