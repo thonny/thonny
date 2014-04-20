@@ -1,0 +1,33 @@
+syntax: glob
+__pycache__
+dist
+build
+*/*.pyc
+user_logs/
+syntax: regexp
+^MANIFEST$
+
+syntax: regexp
+^mac/Thonny\.dmg$
+syntax: regexp
+^windows/ShortcutLauncher/Debug$
+syntax: regexp
+^windows/ShortcutLauncher/Release/ShortcutLauncher\.pdb$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/Debug$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/Release$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/RCa01424$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/RCa06892$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/RCb06892$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/RCc06892$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher\.sdf$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher\.v11\.suo$
+syntax: regexp
+^windows/ShortcutLauncher/ShortcutLauncher/ShortcutLauncher\.aps$

@@ -1,0 +1,4 @@
+#!/usr/local/bin/pythonw3
+
+import main
+main.Thonny().mainloop()    
