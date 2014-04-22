@@ -1,4 +1,5 @@
 from datetime import datetime
+from datetime import timedelta
 
 USER_LOGGER = None # Main will create the logger
 
@@ -7,15 +8,28 @@ class UserEventLogger:
         self.filename = filename
         self.macro_events = []
         self.last_position = "0.0"
+        self.last_source = None
+        self.default_timeout = timedelta(seconds = 2)
     
     def log_micro_event(self, e):
+        # Jätab meelde eelmise event'i klassi nime.
+        if(isinstance(e, LoadEvent) or isinstance(e,PasteEvent) or isinstance(e, CutEvent)
+           or isinstance(e, UndoEvent) or isinstance(e, RedoEvent)):
+            self.last_source = e
+        if(isinstance(e, KeyPressEvent)):
+            self.last_source = e
         # Koondab üksikud tähesisestused samal real olevatega, va. kui sisestuskursori asukoht on mujal
-        if(isinstance(e, TextInsertEvent)):
+        # või kui mikrosündmuste vahel on rohkem, kui üleval märgitud default_timeout'is
+        elif(isinstance(e, TextInsertEvent)):
+            e.source = self.last_source.__class__.__name__
+            if(isinstance(self.last_source, KeyPressEvent)):
+                if(self.last_source.char == '\r'):
+                    e.position = str(self.last_source.cursor_pos.split(".")[0])+ "." + str(int(self.last_source.cursor_pos.split(".")[1]) + 1)
             if(len(self.macro_events) != 0):
                 if(isinstance(self.macro_events[-1][0], TextInsertEvent)
                         and int(self.last_position.split(".")[0]) == int(e.position.split(".")[0])
-                        and int(self.last_position.split(".")[1]) + 1 == int(e.position.split(".")[1])):
-                    
+                        and int(self.last_position.split(".")[1]) + 1 == int(e.position.split(".")[1])
+                        and datetime.now() - self.macro_events[-1][1] < self.default_timeout):
                     self.macro_events[-1][0].text = self.macro_events[-1][0].text + e.text
                     self.macro_events[-1] = (self.macro_events[-1][0], datetime.now())
                     self.last_position = e.position
@@ -25,8 +39,29 @@ class UserEventLogger:
             else:
                 self.macro_events.append((e, datetime.now()))
                 self.last_position = e.position
+        # Koondab üksikud kustutamised samal real tehtutega, va. kui sisestuskursori asukoht on mujal
+        # või kui mikrosündmuste vahel on rohkem, kui üleval märgitud default_timeout'is
+        elif(isinstance(e, TextDeleteEvent)):
+            e.source = self.last_source.__class__.__name__
+            if(isinstance(self.last_source, KeyPressEvent)):
+                e.to_position = str(self.last_source.cursor_pos.split(".")[0]) + "." +  str(int(self.last_source.cursor_pos.split(".")[1]) - 1) 
+                e.from_position = self.last_source.cursor_pos
+            if(len(self.macro_events) != 0):
+                if(isinstance(self.macro_events[-1][0], TextDeleteEvent)
+                            and int(self.last_position.split(".")[0]) == int(e.to_position.split(".")[0])
+                            and int(self.last_position.split(".")[1]) - 1 == int(e.to_position.split(".")[1])
+                            and datetime.now() - self.macro_events[-1][1] < self.default_timeout):
+                    self.macro_events[-1][0].to_position = e.to_position
+                    self.macro_events[-1] = (self.macro_events[-1][0], datetime.now())
+                    self.last_position = e.to_position
+                else:
+                    self.macro_events.append((e, datetime.now()))
+                    self.last_position = e.to_position
+            else:
+                self.macro_events.append((e, datetime.now()))
+                self.last_position = e.to_position
+                
         else:
-            # print("Appending: " + str(e))
             self.macro_events.append((e, datetime.now()))
     
     def save(self):
