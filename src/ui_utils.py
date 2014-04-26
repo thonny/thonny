@@ -313,23 +313,25 @@ class TextWrapper:
         self.text.bind("<Key>", self.on_text_key_press, "+")
  
     def _user_text_insert(self, *args, **kw):
+        index = self.text.index(args[0])
         # subclass may intercept this forwarding
+#        print("INS", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         self._original_user_text_insert(*args, **kw)
+#        print("INS'", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         if len(args) >= 3:
             tags = args[2]
         else:
             tags = None 
-        log_user_event(TextInsertEvent(self, 
-                                       self.text.index(args[0]),
-                                       args[1],
-                                       tags))
+        log_user_event(TextInsertEvent(self, index, args[1], tags))
         
     def _user_text_delete(self, *args, **kw):
+        index1 = self.text.index(args[0])
+        index2 = self.text.index(args[1])
+#        print("DEL", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
         # subclass may intercept this forwarding
         self._original_user_text_delete(*args, **kw)
-        log_user_event(TextDeleteEvent(self,
-                                       self.text.index(args[0]),
-                                       self.text.index(args[1])))
+#        print("DEL'", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
+        log_user_event(TextDeleteEvent(self, index1, index2))
 
     def on_text_undo(self, e):
         log_user_event(UndoEvent(self));
