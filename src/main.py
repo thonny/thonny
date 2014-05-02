@@ -329,7 +329,6 @@ class Thonny(tk.Tk):
                 hor_spacer = ttk.Frame(self.toolbar, width=15)
                 hor_spacer.grid(row=0, column=col)
             else:
-                print(join_path(res_dir, name + ".gif"))
                 img = tk.PhotoImage(file=join_path(res_dir, name + ".gif"))
             
                 btn = ttk.Button(self.toolbar, 
