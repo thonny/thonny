@@ -1,1 +1,0 @@
-c:\python33\python src\main.py
