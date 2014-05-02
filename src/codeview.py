@@ -190,8 +190,44 @@ class CodeView(ttk.Frame, TextWrapper):
                 "Editing during run/debug is not allowed")
     """
     
-    
+    def on_text_key_press(self, e):
+        TextWrapper.on_text_key_press(self, e)
+        #print("KEY", repr(e.char))
+        
+        # replace tabs with spaces
+        # TODO: keep tabs when inside string or when there are some
+        # non-whitespace chars on current line left to the cursor
+        if e.char in ("\t", "\n", "\r"):
+            current_line = self.text.get("insert linestart", "insert lineend")
+            #print("KEY", repr(e.char))
+            if e.char == "\t":
+                self.text.insert("insert", "    ");
+                # TODO: delete selected text if there is any
+                return "break"
             
+            elif e.char in ("\n", "\r"):
+                
+                current_indent = ""
+                for c in current_line:
+                    if c in " \t":
+                        current_indent += c
+                    else:
+                        break
+                if current_line.strip().endswith(':'):
+                    self.text.insert("insert", "\n" + current_indent + "    ")
+                    return "break"
+                else:
+                    self.text.insert("insert", "\n" + current_indent)
+                    return "break"
+                # TODO: unindent in case of break, return, continue, raise, pass
+                  
+        elif e.keysym == "BackSpace":
+            left_text = self.text.get("insert linestart", "insert")
+            if left_text.endswith("    ") and len(left_text) % 4 == 0:
+                self.text.delete("insert-4c", "insert")
+                return "break"
+                    
+        
     def update_focus_boxes(self, boxes):
         """
         1) Removes boxes which are not among given boxes, creates missing boxes

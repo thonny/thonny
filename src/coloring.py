@@ -1,3 +1,5 @@
+# copied from idlelib
+
 import time
 import re
 import keyword

@@ -183,7 +183,7 @@ def setup_fonts():
     if running_on_mac_os():
         base_font_size = 15
     else:
-        base_font_size = 11;
+        base_font_size = 10;
     # fonts
     global EDITOR_FONT, BOLD_EDITOR_FONT, IO_FONT, TREE_FONT
     EDITOR_FONT = tk_font.Font(family="Courier New", size=base_font_size)
