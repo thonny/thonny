@@ -180,11 +180,15 @@ def setup_style():
 
 
 def setup_fonts():
+    if running_on_mac_os():
+        base_font_size = 15
+    else:
+        base_font_size = 11;
     # fonts
     global EDITOR_FONT, BOLD_EDITOR_FONT, IO_FONT, TREE_FONT
-    EDITOR_FONT = tk_font.Font(family="Consolas", size=11)
-    BOLD_EDITOR_FONT = tk_font.Font(family="Consolas", size=11, weight="bold")
-    IO_FONT = tk_font.Font(family='Courier New', size=9, slant="roman")
+    EDITOR_FONT = tk_font.Font(family="Courier New", size=base_font_size)
+    BOLD_EDITOR_FONT = tk_font.Font(family="Courier New", size=base_font_size, weight="bold")
+    IO_FONT = tk_font.Font(family='Courier New', size=base_font_size-2, slant="roman")
     default_font = tk_font.nametofont("TkDefaultFont")
     TREE_FONT = tk_font.Font(family=default_font.cget("family"), size=12)
 

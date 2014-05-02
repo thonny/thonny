@@ -318,6 +318,7 @@ class Thonny(tk.Tk):
         self.toolbar_buttons = {}
         col = 1
         res_dir = join_path(dirname(__file__), "res")
+        
         for name in ('file.new_file', 'file.open_file', 'file.save_file', 
                      '-', 'run.run_current_script',
                           'run.debug_current_script',
@@ -328,6 +329,7 @@ class Thonny(tk.Tk):
                 hor_spacer = ttk.Frame(self.toolbar, width=15)
                 hor_spacer.grid(row=0, column=col)
             else:
+                print(join_path(res_dir, name + ".gif"))
                 img = tk.PhotoImage(file=join_path(res_dir, name + ".gif"))
             
                 btn = ttk.Button(self.toolbar, 
@@ -614,13 +616,16 @@ class Thonny(tk.Tk):
         self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._vm.cwd, *sys.version_info))
     
     def _mac_open_document(self, *args):
-        showinfo("open doc", str(args))
+        #showinfo("open doc", str(args))
+        pass
     
     def _mac_open_application(self, *args):
-        showinfo("open app", str(args))
+        #showinfo("open app", str(args))
+        pass
     
     def _mac_reopen_application(self, *args):
-        showinfo("reopen app", str(args))
+        #showinfo("reopen app", str(args))
+        pass
     
     def _on_close(self):
         # TODO: warn about unsaved files (or just save?)
@@ -685,3 +690,4 @@ class Thonny(tk.Tk):
 if __name__ == "__main__":        
     logger.addHandler(logging.StreamHandler(sys.stdout))
     Thonny().mainloop()
+

@@ -23,7 +23,7 @@ defaults = {
     },
     "view" : {
         "code_font_size"    : None,
-        "code_font_family"  : "Courier New",
+        "code_font_family"  : None,
     },
     "run" : {
         "auto_cd"      : True,
