@@ -365,6 +365,9 @@ class ShellFrame (ttk.Frame, TextWrapper):
             f.configure(size=f.cget("size") + delta)
     
     def _arrow_up(self, event):
+        if not self._in_current_input_range("insert"):
+            return
+        
         if len(self._command_history) == 0 or self._command_history_current_index == 0:
             # can't take previous command
             return "break"
@@ -378,6 +381,9 @@ class ShellFrame (ttk.Frame, TextWrapper):
         return "break"
     
     def _arrow_down(self, event):
+        if not self._in_current_input_range("insert"):
+            return
+        
         if (len(self._command_history) == 0 
             or self._command_history_current_index == len(self._command_history)-1):
             # can't take next command
