@@ -324,13 +324,6 @@ class TextWrapper:
 #        print("INS", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         
         self._original_user_text_insert(*args, **kw)
-        """
-        if self._last_event_kind != "insert":
-            self.text.edit_separator()
-        if '\n' in args[1]:
-            self.text.edit_separator()
-        """        
-        self._last_event_kind = "insert"
 #        print("INS'", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         if len(args) >= 3:
             tags = args[2]
@@ -343,55 +336,59 @@ class TextWrapper:
         index2 = self.text.index(args[1])
 #        print("DEL", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
         # subclass may intercept this forwarding
-        """
-        if self._last_event_kind != "delete":
-            self.text.edit_separator()
-        """
         self._original_user_text_delete(*args, **kw)
-        self._last_event_kind = "delete"
 #        print("DEL'", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
         log_user_event(TextDeleteEvent(self, index1, index2))
 
     def on_text_undo(self, e):
+        self._last_event_kind = "undo"
         log_user_event(UndoEvent(self));
         
     def on_text_redo(self, e):
+        self._last_event_kind = "redo"
         log_user_event(RedoEvent(self));
         
     def on_text_cut(self, e):
+        self._last_event_kind = "cut"
         self.text.edit_separator()        
         log_user_event(CutEvent(self));
         
     def on_text_copy(self, e):
+        self._last_event_kind = "copy"
         self.text.edit_separator()        
         log_user_event(CopyEvent(self));
         
     def on_text_paste(self, e):
+        self._last_event_kind = "paste"
         self.text.edit_separator()        
         log_user_event(PasteEvent(self));
     
     def on_text_get_focus(self, e):
+        self._last_event_kind = "get_focus"
         self.text.edit_separator()        
         log_user_event(EditorGetFocusEvent(self));
         
     def on_text_lose_focus(self, e):
+        self._last_event_kind = "lose_focus"
         self.text.edit_separator()        
         log_user_event(EditorLoseFocusEvent(self));
     
     def on_text_key_press(self, e):
-        if e.keysym in ("BackSpace", "Delete") and self._last_event_kind != "delete":
-            self.text.edit_separator()
+        if e.keysym in ("BackSpace", "Delete"):
+            if self._last_event_kind != "delete":
+                self.text.edit_separator()
+            self._last_event_kind = "delete"
+        
+        elif e.char:
+            if self._last_event_kind != "insert":
+                self.text.edit_separator()
+            self._last_event_kind = "insert"
+
+
         if e.char in ("\r", "\n", " "):
             self.text.edit_separator()
         log_user_event(KeyPressEvent(self, e, self.text.index(tk.INSERT)))
     
-#     def on_text_selection_change(self, e):
-#         pass
-#         # Selection creates too many events and is not very useful
-#         #log_user_event(SelectionChangeEvent(self,
-#         #                                    self.text.index(tk.SEL_FIRST),
-#         #                                    self.text.index(tk.SEL_LAST)))
-        
 
 def running_on_windows():
     return tk._default_root.call('tk', 'windowingsystem') == "win32"

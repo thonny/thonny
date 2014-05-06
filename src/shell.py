@@ -63,7 +63,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
                             padx=4,
                             insertwidth=2,
                             height=10,
-                            undo=True)
+                            undo=True,
+                            autoseparators=False)
         log_user_event(ShellCreateEvent(self))
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
