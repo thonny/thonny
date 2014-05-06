@@ -75,7 +75,8 @@ class CodeView(ttk.Frame, TextWrapper):
                 #highlightthickness=0, # TODO: try different in Mac and Linux
                 #highlightcolor="gray",
                 padx=4,
-                undo=True)
+                undo=True,
+                autoseparators=False)
         
         TextWrapper.__init__(self)
         
