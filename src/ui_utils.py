@@ -63,7 +63,7 @@ def create_menubutton(master):
     
     # trying menubutton
     kw_args = {
-        "text" : '__main__',
+        "text" : '@1208323432',
         "image" : _images["arrow_down"],
         "compound" : tk.RIGHT,
         "relief" : tk.FLAT,
@@ -264,10 +264,11 @@ class PanelBook(ttk.Notebook):
             anchor=tk.NW)
 
 class TreeFrame(ttk.Frame):
-    def __init__(self, master, columns, displaycolumns='#all'):
+    def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
         ttk.Frame.__init__(self, master)
         self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+        if show_scrollbar:
+            self.scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
         
         self.tree = ttk.Treeview(self, columns=columns, displaycolumns=displaycolumns, 
                                  yscrollcommand=self.scrollbar.set)

@@ -136,7 +136,7 @@ class Thonny(tk.Tk):
         self.info_book = ui_utils.PanelBook(self.right_pw)
         self.info_frame = ObjectInfoFrame(self.info_book)
         self.info_book.add(self.info_frame, text="Object info")
-        # TODO: self.right_pw.add(self.info_book, minsize=50)
+        self.right_pw.add(self.info_book, minsize=50)
 
     
     def _init_commands(self):
