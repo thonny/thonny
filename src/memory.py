@@ -104,53 +104,107 @@ class HeapFrame(MemoryFrame):
             self._update_data(msg.heap)
     
 
-class ObjectInfoFrame(tk.Frame):
+class ObjectInspectorFrame(tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master, bg="white")
         
         # set up scrolling with canvas
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        canvas = tk.Canvas(self, bg="white", bd=0, highlightthickness=0,
+        self.canvas = tk.Canvas(self, bg="white", bd=0, highlightthickness=0,
                            yscrollcommand=vscrollbar.set)
-        vscrollbar.config(command=canvas.yview)
-        canvas.xview_moveto(0)
-        canvas.yview_moveto(0)
-        canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        vscrollbar.config(command=self.canvas.yview)
+        self.canvas.xview_moveto(0)
+        self.canvas.yview_moveto(0)
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
         vscrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        
+        #self.canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=tk.TRUE)
+        #vscrollbar.pack(fill=tk.Y, side=tk.RIGHT, expand=tk.FALSE)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        # now the actual content
-        self.inner_frame = tk.Frame(canvas, bg="white")
-        self.inner_frame.grid(sticky=tk.NSEW, padx=10, pady=15)
+        self.interior = tk.Frame(self.canvas, bg="white")
+        self.interior.columnconfigure(0, weight=1)
+        self.interior.rowconfigure(0, weight=1)
+        self.interior_id = self.canvas.create_window(0,0, 
+                                                    window=self.interior, 
+                                                    anchor=tk.NW)
+        def _configure_interior(event):
+            # update the scrollbars to match the size of the inner frame
+            size = (self.canvas.winfo_width() , self.interior.winfo_reqheight())
+            self.canvas.config(scrollregion="0 0 %s %s" % size)
+            if (self.interior.winfo_reqwidth() != self.canvas.winfo_width()
+                and self.canvas.winfo_width() > 10):
+                # update the interior's width to fit canvas
+                #print("CAWI", self.canvas.winfo_width())
+                self.canvas.itemconfigure(self.interior_id,
+                                          width=self.canvas.winfo_width())
+                
+        self.bind('<Configure>', _configure_interior)
+
+        def _configure_canvas(event):
+            if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
+                # update the inner frame's width to fill the canvas
+                self.canvas.itemconfigure(self.interior_id, width=self.canvas.winfo_width())
         
+        self.info_views = {}
+        self.generic_view = ObjectInfoView(self.interior)
+        self.current_view = self.generic_view
+        
+        self.show_object(1234)
+        self.show_object("1234")
+    
+    def get_info_view(self, obj):
+        type_code = str(type(obj))
+        
+        if not type_code in self.info_views:
+            if type_code == "<class 'str'>":
+                view = StringInfoView(self.interior)
+            else:
+                view = self.generic_view
+            self.info_views[type_code] = view
+        
+        return self.info_views[type_code]
+    
+    def show_object(self, obj):
+        view = self.get_info_view(obj)
+        if view != self.current_view:
+            self.current_view.grid_forget()
+            view.grid(row=0, column=0, sticky=tk.NSEW, padx=10, pady=15)
+            self.current_view = view
+         
+            
+        
+
+class ObjectInfoView(tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master, bg="white")
+        self.columnconfigure(1, weight=1)
         self.id_entry = self._add_info(0, "id", "823234235")
         self.repr_entry = self._add_info(1, "repr", "[234, 345, 324, 33333]")
         self.type_entry = self._add_info(2, "type", "<class 'list'>")
         self.type_entry.config(cursor="hand2", fg="dark blue")
         self.type_entry.bind("<Button-1>", self.goto_type)
-    
-    def _add_block(self, row, caption, widget):
-        label = ttk.Label(self.inner_frame, bg="white", text=caption)
-        label.grid(row=row, column=0, columnspan=2, sticky=tk.NEW)
         
-        widget.grid(row=row, column=0, columnspan=2, sticky=tk.NEW)
+        # reserve intermediate rows for subclasses
         
+        # row 10 for attributes
+        self.attributes_tree = ttk.Button(self, text="ATT tree")
+        self._add_block(10, "Attributes", self.attributes_tree)
+         
     
     def goto_type(self, event):
         # TODO:
         print("Goto type", event)
     
     def _add_info(self, row, caption, value):
-        label = ttk.Label(self.inner_frame, text=caption + ":  ",
+        label = ttk.Label(self, text=caption + ":  ",
                          background="white",
                          justify=tk.LEFT)
         label.grid(row=row, column=0, sticky=tk.NW)
         
         if isinstance(value, str):
             text = value
-            value = tk.Entry(self.inner_frame,
+            value = tk.Entry(self,
                              background="white",
                              bd=0,
                              readonlybackground="white",
@@ -162,7 +216,20 @@ class ObjectInfoFrame(tk.Frame):
             value.grid(row=row, column=1, sticky=tk.NW)
         
         return value
-                            
+
+    def _add_block(self, row, caption, widget):
+        label = tk.Label(self, bg="white", text=caption)
+        label.grid(row=row, column=0, columnspan=2, sticky="nsew", pady=(10,0))
+        
+        widget.grid(row=row+1, column=0, columnspan=2, sticky="nsew")
+        
+    
+class StringInfoView(ObjectInfoView):
+    def __init__(self, master):
+        ObjectInfoView.__init__(self, master)        
+        self.attributes_tree = ttk.Button(self, text="Text ")
+        self._add_block(4, "Content", self.attributes_tree)
+                                    
         
 class ObjectInfoFrameOld(ttk.Frame):
     def __init__(self, master):

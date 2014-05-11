@@ -24,7 +24,7 @@ from about import AboutDialog
 from static import AstFrame
 from code import EditorNotebook
 from shell import ShellFrame
-from memory import GlobalsFrame, HeapFrame, ObjectInfoFrame
+from memory import GlobalsFrame, HeapFrame, ObjectInspectorFrame
 import vm_proxy
 from browser import BrowseNotebook
 from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
@@ -134,7 +134,7 @@ class Thonny(tk.Tk):
             self.right_pw.add(self.heap_book, minsize=50)
         
         self.info_book = ui_utils.PanelBook(self.right_pw)
-        self.info_frame = ObjectInfoFrame(self.info_book)
+        self.info_frame = ObjectInspectorFrame(self.info_book)
         self.info_book.add(self.info_frame, text="Object info")
         self.right_pw.add(self.info_book, minsize=50)
 
