@@ -643,3 +643,56 @@ class AutoScrollbar(ttk.Scrollbar):
         raise tk.TclError("cannot use pack with this widget")
     def place(self, **kw):
         raise tk.TclError("cannot use place with this widget")
+
+def update_entry_text(entry, text):
+    original_state = entry.cget("state")
+    entry.config(state="normal")
+    entry.delete(0, "end")
+    entry.insert(0, text)
+    entry.config(state=original_state)
+
+
+class ScrollableFrame(tk.Frame):
+    # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
+    
+    def __init__(self, master):
+        tk.Frame.__init__(self, master, bg="white")
+        
+        # set up scrolling with canvas
+        vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.canvas = tk.Canvas(self, bg="white", bd=0, highlightthickness=0,
+                           yscrollcommand=vscrollbar.set)
+        vscrollbar.config(command=self.canvas.yview)
+        self.canvas.xview_moveto(0)
+        self.canvas.yview_moveto(0)
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        vscrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        self.interior = tk.Frame(self.canvas, bg="white")
+        self.interior.columnconfigure(0, weight=1)
+        self.interior.rowconfigure(0, weight=1)
+        self.interior_id = self.canvas.create_window(0,0, 
+                                                    window=self.interior, 
+                                                    anchor=tk.NW)
+        self.bind('<Configure>', self._configure_interior, "+")
+        self.bind('<Expose>', self._expose, "+")
+        
+    def _expose(self, event):
+        self.update_idletasks()
+        self._configure_interior(event)
+    
+    def _configure_interior(self, event):
+        # update the scrollbars to match the size of the inner frame
+        size = (self.canvas.winfo_width() , self.interior.winfo_reqheight())
+        self.canvas.config(scrollregion="0 0 %s %s" % size)
+        if (self.interior.winfo_reqwidth() != self.canvas.winfo_width()
+            and self.canvas.winfo_width() > 10):
+            # update the interior's width to fit canvas
+            #print("CAWI", self.canvas.winfo_width())
+            self.canvas.itemconfigure(self.interior_id,
+                                      width=self.canvas.winfo_width())
+                
+    
+    

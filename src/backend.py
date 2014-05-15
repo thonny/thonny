@@ -21,7 +21,7 @@ import misc_utils
 from misc_utils import eqfn
 from common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
     ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
-    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand
+    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InlineResponse
 
 THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 NORMCASE_THONNY_SRC_DIR = os.path.normcase(THONNY_SRC_DIR)
@@ -159,7 +159,10 @@ class VM:
                    hasattr(cmd, "debug_mode") and cmd.debug_mode)
     
     def _cmd_get_object_info(self, cmd):
-        pass
+        value = self._heap[cmd.object_id]
+        return InlineResponse(object_info={'id' : cmd.object_id,
+                                           'repr' : repr(value),
+                                           'type' : str(type(value))})
     
     def _cmd_get_globals(self, cmd):
         pass

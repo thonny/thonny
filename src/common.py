@@ -126,10 +126,13 @@ class CommunicationObject:
     def __repr__(self):
         return self.serialize()
 """
-class ToplevelCommand(Record):
+class ActionCommand(Record):
     pass
 
-class DebuggerCommand(Record):
+class ToplevelCommand(ActionCommand):
+    pass
+
+class DebuggerCommand(ActionCommand):
     pass
 
 class InlineCommand(Record):
@@ -144,27 +147,27 @@ class InputSubmission(Record):
 
 
 class PauseMessage(Record):
-    "PauseMessage-s indicate that backend has paused and waiting(?) for new command"
+    "PauseMessage-s indicate that backend has paused and is waiting for new command"
     pass
 
-class ToplevelResponse(PauseMessage):
+class ActionResponse(PauseMessage):
+    pass
+
+class ToplevelResponse(ActionResponse):
     def __init__(self, **kw):
         kw["vm_state"] = "toplevel"
         Record.__init__(self, **kw)
 
-class DebuggerResponse(PauseMessage):
+class DebuggerResponse(ActionResponse):
     def __init__(self, **kw):
         kw["vm_state"] = "debug"
         Record.__init__(self, **kw)
 
 
-class InlineResponse(PauseMessage):
+class InlineResponse(Record):
     """
     Meant for getting variable/heap info from backend
     """
-    def __init__(self, **kw):
-        kw["vm_state"] = "debug_or_toplevel"
-        Record.__init__(self, **kw)
 
 
 class InputRequest(PauseMessage):

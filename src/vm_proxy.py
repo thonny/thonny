@@ -15,27 +15,32 @@ except ImportError:
 
 import threading
 
-from common import parse_message, serialize_message, ToplevelCommand, PauseMessage
-import main
+from common import parse_message, serialize_message, ToplevelCommand, PauseMessage,\
+    ActionCommand
 
 COMMUNICATION_ENCODING = "UTF-8"
 
 logger = logging.getLogger("thonny.vmproxy")
 logger.addHandler(logging.StreamHandler(sys.stdout))
 
-
+_CURRENT_VM = None
 
 class VMProxy:
-    def __init__(self, default_cwd):
+    def __init__(self, default_cwd, backend_dir):
+        global _CURRENT_VM
+        
         if os.path.exists(default_cwd):
             self.cwd = default_cwd
         else:
             self.cwd = os.path.expanduser("~")
             
+        self.backend_dir = backend_dir
         self._proc = None
         self._state_lock = threading.RLock()
         self.message_queue = Queue()
         self.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
+        
+        _CURRENT_VM = self
         
     def get_state(self):
         with self._state_lock:
@@ -50,7 +55,8 @@ class VMProxy:
     
     def send_command(self, cmd):
         with self._state_lock:
-            self._current_pause_msg = None
+            if isinstance(cmd, ActionCommand):
+                self._current_pause_msg = None
             
             if (isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset")):
                 self._kill_current_process()
@@ -79,7 +85,7 @@ class VMProxy:
         my_env = os.environ
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         
-        launcher = os.path.join(main.THONNY_SRC_DIR, "backlaunch.py")
+        launcher = os.path.join(self.backend_dir, "backlaunch.py")
         cmd_line = [sys.executable, '-u', launcher]
         
         if hasattr(cmd, "filename"):
@@ -131,3 +137,5 @@ class VMProxy:
                 print("BACKEND:", data.strip(), end="\n")
         
             
+def send_command(cmd):
+    _CURRENT_VM.send_command(cmd)

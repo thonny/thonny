@@ -29,7 +29,8 @@ from shell import ShellFrame
 from memory import GlobalsFrame, HeapFrame, ObjectInspectorFrame
 import vm_proxy
 from browser import BrowseNotebook
-from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
+from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
+    ToplevelResponse
 from ui_utils import Command, notebook_contains
 import user_logging
 
@@ -51,7 +52,7 @@ class Thonny(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         #showinfo("sys.argv", str(sys.argv))
         
-        self._vm = vm_proxy.VMProxy(prefs["cwd"])
+        self._vm = vm_proxy.VMProxy(prefs["cwd"], THONNY_SRC_DIR)
         self._update_title()
         
         # UI items, positions, sizes
@@ -139,10 +140,9 @@ class Thonny(tk.Tk):
             self.right_pw.add(self.heap_book, minsize=50)
         
         self.info_book = ui_utils.PanelBook(self.right_pw)
-        self.info_frame = ObjectInspectorFrame(self.info_book)
-        self.info_book.add(self.info_frame, text="Object info")
+        self.inspector_frame = ObjectInspectorFrame(self.info_book)
+        self.info_book.add(self.inspector_frame, text="Object info")
         self.right_pw.add(self.info_book, minsize=50)
-        #self.info_frame._configure_interior(None)
 
     
     def _init_commands(self):
@@ -367,6 +367,7 @@ class Thonny(tk.Tk):
             self.editor_book.handle_vm_message(msg)
             self.globals_frame.handle_vm_message(msg)
             self.heap_frame.handle_vm_message(msg)
+            self.inspector_frame.handle_vm_message(msg)
             
             prefs["cwd"] = self._vm.cwd
             self._update_title()
