@@ -21,7 +21,7 @@ import misc_utils
 from misc_utils import eqfn
 from common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
     ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
-    ValueInfo, ToplevelCommand, FrameInfo
+    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand
 
 THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 NORMCASE_THONNY_SRC_DIR = os.path.normcase(THONNY_SRC_DIR)
@@ -70,38 +70,42 @@ class VM:
         __main__.__doc__ = None
         
     def mainloop(self):
-        
         while True: 
             cmd = self._fetch_command()
-            assert isinstance(cmd, ToplevelCommand)
+            self.handle_command(cmd)
             
-            debug("MAINLOOP: %s", cmd)
             
+    def handle_command(self, cmd):
+        assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
+        
+        debug("MAINLOOP: %s", cmd)
+        
+        try:
+            handler = getattr(self, "_cmd_" + cmd.command)
+        except AttributeError:
+            self._send_response(ToplevelResponse(error="Unknown command: %" + cmd.command))
+        else:
             try:
-                handler = getattr(self, "_cmd_" + cmd.command)
-            except AttributeError:
-                self._send_response(ToplevelResponse(error="Unknown command: %" + cmd.command))
-            else:
-                try:
-                    response = handler(cmd)
+                response = handler(cmd)
+                
+                # add state information
+                if hasattr(cmd, "globals_required") and cmd.globals_required:
+                    response.globals = {cmd.globals_required : self.export_globals(cmd.globals_required)}
                     
-                    # add state information
-                    if hasattr(cmd, "globals_required") and cmd.globals_required:
-                        response.globals = {cmd.globals_required : self.export_globals(cmd.globals_required)}
-                        
-                    if hasattr(cmd, "heap_required") and cmd.heap_required:
-                        response.heap = self.export_heap()
-                        
-                    response.cwd = os.getcwd()
+                if hasattr(cmd, "heap_required") and cmd.heap_required:
+                    response.heap = self.export_heap()
                     
-                    self._send_response(response)
-                    
-                except:
-                    #raise
-                    # TODO: 
-                    self._send_response(ToplevelResponse (
-                        error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
-                    ))
+                response.cwd = os.getcwd()
+                
+                self._send_response(response)
+                
+            except:
+                #raise
+                # TODO: 
+                self._send_response(ToplevelResponse (
+                    error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
+                ))
+        
     
     def _cmd_pass(self, cmd):
         """
@@ -153,6 +157,18 @@ class VM:
         
         return self._execute_source(cmd.cmd_line, filename, mode,
                    hasattr(cmd, "debug_mode") and cmd.debug_mode)
+    
+    def _cmd_get_object_info(self, cmd):
+        pass
+    
+    def _cmd_get_globals(self, cmd):
+        pass
+    
+    def _cmd_get_locals(self, cmd):
+        pass
+    
+    def _cmd_get_heap(self, cmd):
+        pass
     
     def _execute_file(self, cmd, debug_mode):
         source, _ = misc_utils.read_python_file(cmd.filename)
@@ -594,10 +610,17 @@ class FancyTracer(Executor):
                     # ... and send it to the client
                     self._vm._send_response(response)
                     
-                    # Read next command (this is a blocking task) 
-                    self._set_current_command(self._vm._fetch_command()) 
+                    # Read next command (this is a blocking task)
+                    cmd = self._vm._fetch_command()
+                    
+                    # memory requests should be handled by VM
+                    while isinstance(cmd, InlineCommand): # or ToplevelCommand???
+                        self._vm.handle_command(cmd)
+                        cmd = self._vm._fetch_command()
+                    
+                    assert isinstance(cmd, DebuggerCommand)
+                    self._set_current_command(cmd) 
                     fdebug(frame, "COMMAND %s, current event: %s", self._current_command, event)
-                    assert isinstance(self._current_command, DebuggerCommand)
                     self._current_command.exception = None # start with no blame
                     # ... and continue with the loop
                     
@@ -873,10 +896,12 @@ class FancyTracer(Executor):
         else:
             return None
 
+    """
     def _cmd_get_globals(self, frame, event, args, focus, cmd):
         return DebuggerResponse(globals={
             cmd.module_name : self._vm.export_globals(cmd.module_name)
         })
+    """
             
     
     def _export_stack(self):

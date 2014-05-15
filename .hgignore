@@ -31,3 +31,6 @@ syntax: regexp
 ^windows/ShortcutLauncher/ShortcutLauncher\.v11\.suo$
 syntax: regexp
 ^windows/ShortcutLauncher/ShortcutLauncher/ShortcutLauncher\.aps$
+
+syntax: regexp
+^RemoteSystemsTempFiles$

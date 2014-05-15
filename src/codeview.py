@@ -12,7 +12,7 @@ except ImportError:
     import tkFont as tk_font
     from tkMessageBox import showwarning
 
-from ui_utils import TextWrapper
+from ui_utils import TextWrapper, AutoScrollbar
 from common import TextRange
 from coloring import SyntaxColorer
 from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
@@ -22,7 +22,9 @@ from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
 # scrolling code copied from tkinter.scrolledtext
 # (don't want to use scrolledtext directly, because I want to include margin in the same box) 
 class CodeView(ttk.Frame, TextWrapper):
-    def __init__(self, master, first_line_no=1, font_size=11):
+    def __init__(self, master, first_line_no=1, font_size=11,
+                 auto_vert_scroll=False,
+                 height=None):
         ttk.Frame.__init__(self, master)
         
         # attributes
@@ -31,12 +33,15 @@ class CodeView(ttk.Frame, TextWrapper):
         self.file_encoding = "UTF-8"
         
         # child widgets
-        self.vbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        if auto_vert_scroll:
+            self.vbar = AutoScrollbar(self, orient=tk.VERTICAL)
+        else:
+            self.vbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.vbar.grid(row=0, column=2, sticky=tk.NSEW)
-        self.hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+        self.hbar = AutoScrollbar(self, orient=tk.HORIZONTAL)
         
         # TODO: show when necessary
-        #self.hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
+        self.hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
         
         self.margin = tk.Text(self,
                 width = 4,
@@ -60,6 +65,7 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text = tk.Text(self,
                 #background="#ffffff",
                 #background="#FEE5BF",
+                height=height,
                 spacing1=0,
                 spacing3=0,
                 highlightthickness=0,
@@ -93,7 +99,8 @@ class CodeView(ttk.Frame, TextWrapper):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.colorer = SyntaxColorer(self.text)
+        self.colorer = None
+        self.set_coloring(True)
         self.prepare_level_boxes()
         
     
@@ -106,13 +113,23 @@ class CodeView(ttk.Frame, TextWrapper):
         self._update_line_numbers()
         self.text.edit_reset();
         
-        self.colorer.notify_range("1.0", "end")
+        if self.colorer:
+            self.colorer.notify_range("1.0", "end")
         self.update_level_boxes()
     
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
         return self.text.bbox(str(lineno - self.first_line_no + 1) + "." + str(col_offset))
             
+    
+    def set_coloring(self, value):
+        if value:
+            if self.colorer == None:
+                self.colorer = SyntaxColorer(self.text)
+        else:
+            if self.colorer != None:
+                self.colorer.removecolors()
+                self.colorer = None
     
     def select_lines(self, start_line, end_line=None):
         self.select_range(TextRange(start_line - self.first_line_no + 1, 0, 
@@ -156,7 +173,8 @@ class CodeView(ttk.Frame, TextWrapper):
             #self._show_read_only_warning()
         else:
             TextWrapper._user_text_insert(self, index, chars, tags)
-            self.colorer.on_insert(index, chars, tags)
+            if self.colorer:
+                self.colorer.on_insert(index, chars, tags)
             self._update_line_numbers()
             self.update_level_boxes()
 
@@ -169,7 +187,8 @@ class CodeView(ttk.Frame, TextWrapper):
             #self._show_read_only_warning()
         else:
             TextWrapper._user_text_delete(self, index1, index2)
-            self.colorer.on_delete(index1, index2)
+            if self.colorer:
+                self.colorer.on_delete(index1, index2)
             self._update_line_numbers()
             self.update_level_boxes()
     

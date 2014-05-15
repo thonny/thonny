@@ -10,6 +10,8 @@ import stack
 from config import prefs
 import logging
 import time
+from user_logging import log_user_event,\
+    ProgramGetFocusEvent, ProgramLoseFocusEvent
 
 try:
     import tkinter as tk
@@ -83,6 +85,9 @@ class Thonny(tk.Tk):
         
         # start listening to backend process
         self._poll_vm_messages()
+        self.bind("<FocusIn>", self.on_get_focus, "+")
+        self.bind("<FocusOut>", self.on_lose_focus, "+")
+
     
     def _init_widgets(self):
         
@@ -137,6 +142,7 @@ class Thonny(tk.Tk):
         self.info_frame = ObjectInspectorFrame(self.info_book)
         self.info_book.add(self.info_frame, text="Object info")
         self.right_pw.add(self.info_book, minsize=50)
+        #self.info_frame._configure_interior(None)
 
     
     def _init_commands(self):
@@ -684,7 +690,11 @@ class Thonny(tk.Tk):
             else:
                 return fname
 
-        
+    def on_get_focus(self, e):
+        log_user_event(ProgramGetFocusEvent());
+
+    def on_lose_focus(self, e):
+        log_user_event(ProgramLoseFocusEvent());
 
 if __name__ == "__main__":        
     logger.addHandler(logging.StreamHandler(sys.stdout))

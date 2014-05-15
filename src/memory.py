@@ -2,6 +2,7 @@
 from __future__ import print_function, division 
 from ui_utils import TreeFrame, TextFrame
 from config import prefs
+from codeview import CodeView
 try:
     import tkinter as tk
     from tkinter import ttk
@@ -109,6 +110,7 @@ class ObjectInspectorFrame(tk.Frame):
         tk.Frame.__init__(self, master, bg="white")
         
         # set up scrolling with canvas
+        # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.canvas = tk.Canvas(self, bg="white", bd=0, highlightthickness=0,
                            yscrollcommand=vscrollbar.set)
@@ -128,23 +130,12 @@ class ObjectInspectorFrame(tk.Frame):
         self.interior_id = self.canvas.create_window(0,0, 
                                                     window=self.interior, 
                                                     anchor=tk.NW)
-        def _configure_interior(event):
-            # update the scrollbars to match the size of the inner frame
-            size = (self.canvas.winfo_width() , self.interior.winfo_reqheight())
-            self.canvas.config(scrollregion="0 0 %s %s" % size)
-            if (self.interior.winfo_reqwidth() != self.canvas.winfo_width()
-                and self.canvas.winfo_width() > 10):
-                # update the interior's width to fit canvas
-                #print("CAWI", self.canvas.winfo_width())
-                self.canvas.itemconfigure(self.interior_id,
-                                          width=self.canvas.winfo_width())
-                
-        self.bind('<Configure>', _configure_interior)
-
-        def _configure_canvas(event):
-            if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
-                # update the inner frame's width to fill the canvas
-                self.canvas.itemconfigure(self.interior_id, width=self.canvas.winfo_width())
+        self.bind('<Configure>', self._configure_interior, "+")
+        self.bind('<Expose>', self._expose, "+")
+#         def _configure_canvas(event):
+#             if self.interior.winfo_reqwidth() != self.canvas.winfo_width():
+#                 # update the inner frame's width to fill the canvas
+#                 self.canvas.itemconfigure(self.interior_id, width=self.canvas.winfo_width())
         
         self.info_views = {}
         self.generic_view = ObjectInfoView(self.interior)
@@ -152,7 +143,23 @@ class ObjectInspectorFrame(tk.Frame):
         
         self.show_object(1234)
         self.show_object("1234")
+        #self._configure_interior(None)
     
+    def _expose(self, event):
+        self.update_idletasks()
+        self._configure_interior(event)
+    
+    def _configure_interior(self, event):
+        # update the scrollbars to match the size of the inner frame
+        size = (self.canvas.winfo_width() , self.interior.winfo_reqheight())
+        self.canvas.config(scrollregion="0 0 %s %s" % size)
+        if (self.interior.winfo_reqwidth() != self.canvas.winfo_width()
+            and self.canvas.winfo_width() > 10):
+            # update the interior's width to fit canvas
+            #print("CAWI", self.canvas.winfo_width())
+            self.canvas.itemconfigure(self.interior_id,
+                                      width=self.canvas.winfo_width())
+                
     def get_info_view(self, obj):
         type_code = str(type(obj))
         
@@ -226,9 +233,13 @@ class ObjectInfoView(tk.Frame):
     
 class StringInfoView(ObjectInfoView):
     def __init__(self, master):
-        ObjectInfoView.__init__(self, master)        
-        self.attributes_tree = ttk.Button(self, text="Text ")
-        self._add_block(4, "Content", self.attributes_tree)
+        ObjectInfoView.__init__(self, master)
+        self.text = CodeView(self, auto_vert_scroll=True,
+                             height=1)
+        self.text.config(border=1)  
+        self.text.set_coloring(False)       
+        #self.attributes_tree = ttk.Button(self, text="Text ")
+        self._add_block(4, "Content", self.text)
                                     
         
 class ObjectInfoFrameOld(ttk.Frame):

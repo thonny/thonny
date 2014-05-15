@@ -132,6 +132,13 @@ class ToplevelCommand(Record):
 class DebuggerCommand(Record):
     pass
 
+class InlineCommand(Record):
+    """
+    Can be used both during debugging and between debugging.
+    Meant for sending variable and heap info requests
+    """
+    pass
+
 class InputSubmission(Record):
     pass
 
@@ -148,6 +155,15 @@ class ToplevelResponse(PauseMessage):
 class DebuggerResponse(PauseMessage):
     def __init__(self, **kw):
         kw["vm_state"] = "debug"
+        Record.__init__(self, **kw)
+
+
+class InlineResponse(PauseMessage):
+    """
+    Meant for getting variable/heap info from backend
+    """
+    def __init__(self, **kw):
+        kw["vm_state"] = "debug_or_toplevel"
         Record.__init__(self, **kw)
 
 
