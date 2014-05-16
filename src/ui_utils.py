@@ -22,6 +22,7 @@ from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
 
 SASHTHICKNESS = 10
 CLAM_BACKGROUND = "#dcdad5"
+CALM_WHITE = '#fafafa'
 EDITOR_FONT = None 
 BOLD_EDITOR_FONT = None
 IO_FONT = None
@@ -31,6 +32,8 @@ TREE_FONT = None
 imgdir = os.path.join(os.path.dirname(__file__), 'res')
 
 _images = {} # save them here to avoid them being gc-d 
+_event_data = {}
+_next_event_data_serial = 1
 
 _held_keys = set()
 _modifier_keys = {"Control_L", "Alt_L", "Shift_L",   
@@ -176,12 +179,17 @@ def setup_style():
     
     
     #print(style.map("Treeview"))
+    #print(style.layout("Treeview"))
     setup_fonts()
     style.configure("Treeview.treearea", font=TREE_FONT)
     style.map("Treeview",
-              background=[('selected', 'focus', 'SystemHighlight'), ('selected', '!focus', 'light grey')],
+              background=[('selected', 'focus', 'SystemHighlight'),
+                          ('selected', '!focus', 'light grey'),
+                          ],
               foreground=[('selected', 'SystemHighlightText')],
               )
+    
+    
 
 
 def setup_fonts():
@@ -665,11 +673,11 @@ class ScrollableFrame(tk.Frame):
     # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
     
     def __init__(self, master):
-        tk.Frame.__init__(self, master, bg="white")
+        tk.Frame.__init__(self, master, bg=CALM_WHITE)
         
         # set up scrolling with canvas
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.canvas = tk.Canvas(self, bg="white", bd=0, highlightthickness=0,
+        self.canvas = tk.Canvas(self, bg=CALM_WHITE, bd=0, highlightthickness=0,
                            yscrollcommand=vscrollbar.set)
         vscrollbar.config(command=self.canvas.yview)
         self.canvas.xview_moveto(0)
@@ -679,7 +687,7 @@ class ScrollableFrame(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.interior = tk.Frame(self.canvas, bg="white")
+        self.interior = tk.Frame(self.canvas, bg=CALM_WHITE)
         self.interior.columnconfigure(0, weight=1)
         self.interior.rowconfigure(0, weight=1)
         self.interior_id = self.canvas.create_window(0,0, 
@@ -703,5 +711,21 @@ class ScrollableFrame(tk.Frame):
             self.canvas.itemconfigure(self.interior_id,
                                       width=self.canvas.winfo_width())
                 
+def generate_event(widget, descriptor, data=None):
+    global _next_event_data_serial
     
-    
+    if data != None:
+        data_serial = _next_event_data_serial
+        _next_event_data_serial += 1 
+        _event_data[data_serial] = data
+        widget.event_generate(descriptor, serial=data_serial)
+    else:
+        widget.event_generate(descriptor)
+        
+        
+
+def get_event_data(event):
+    if event.serial in _event_data:
+        return _event_data[event.serial]
+    else:
+        return None

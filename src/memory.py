@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division 
-from ui_utils import TreeFrame, TextFrame, update_entry_text, ScrollableFrame
+from ui_utils import TreeFrame, TextFrame, update_entry_text, ScrollableFrame,\
+    generate_event, get_event_data, CALM_WHITE
 from config import prefs
 from codeview import CodeView
 from common import ToplevelResponse, ActionResponse, InlineCommand
@@ -78,7 +79,8 @@ class VariablesFrame(MemoryFrame):
         iid = self.tree.focus()
         if iid != '':
             object_id = parse_object_id(self.tree.item(iid)['values'][1])
-            self.event_generate("<<ObjectSelect>>", serial=object_id)
+            # self.event_generate("<<ObjectSelect>>", serial=object_id)
+            generate_event(self, "<<ObjectSelect>>", object_id)
             
         
 class GlobalsFrame(VariablesFrame):
@@ -125,7 +127,8 @@ class HeapFrame(MemoryFrame):
         iid = self.tree.focus()
         if iid != '':
             object_id = parse_object_id(self.tree.item(iid)['values'][0])
-            self.event_generate("<<ObjectSelect>>", serial=object_id)
+            #self.event_generate("<<ObjectSelect>>", serial=object_id)
+            generate_event(self, "<<ObjectSelect>>", object_id)
             
     def handle_vm_message(self, msg):
         if self.winfo_ismapped():
@@ -147,20 +150,21 @@ class ObjectInspectorFrame(ScrollableFrame):
         self.object_info = None
         self.bind_all("<<ObjectSelect>>", self.show_object)
         
-        self.grid_frame = tk.Frame(self.interior, bg="white") 
+        self.grid_frame = tk.Frame(self.interior, bg=CALM_WHITE) 
         self.grid_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=(10,0), pady=15)
         self.grid_frame.columnconfigure(1, weight=1)
         
         def _add_main_attribute(row, caption):
-            label = ttk.Label(self.grid_frame, text=caption + ":  ",
-                             background="white",
+            label = tk.Label(self.grid_frame, text=caption + ":  ",
+                             background=CALM_WHITE,
                              justify=tk.LEFT)
             label.grid(row=row, column=0, sticky=tk.NW)
             
             value = tk.Entry(self.grid_frame,
-                             background="white",
+                             background=CALM_WHITE,
                              bd=0,
-                             readonlybackground="white",
+                             readonlybackground=CALM_WHITE,
+                             highlightthickness = 0,
                              state="readonly"
                              )
             value.grid(row=row, column=1, sticky=tk.NSEW, pady=2)
@@ -179,10 +183,12 @@ class ObjectInspectorFrame(ScrollableFrame):
         self.attributes_frame.configure(border=1)
         self.attributes_frame.scrollbar.grid_remove()
         
+        self.grid_frame.grid_remove()
+        
     
     def show_object(self, event):
         print("SO", vars(event))
-        object_id = event.serial
+        object_id = get_event_data(event)
         
         if self.winfo_ismapped() and self.object_id != object_id:
             self.object_id = object_id
@@ -194,11 +200,16 @@ class ObjectInspectorFrame(ScrollableFrame):
         print("MAS", msg)
         if self.winfo_ismapped():
             if hasattr(msg, "object_info") and msg.object_info["id"] == self.object_id:
-                self.update_info(msg.object_info)
+                if hasattr(msg, "not_found") and msg.not_found:
+                    self.object_id = None
+                    self.update_info(None)
+                else:
+                    self.update_info(msg.object_info)
             elif (isinstance(msg, ActionResponse)
                   and not hasattr(msg, "error") 
                   and self.object_id != None):
                 self.request_object_info()
+                
                 
     def request_object_info(self): 
         vm_proxy.send_command(InlineCommand(command="get_object_info",
@@ -210,22 +221,24 @@ class ObjectInspectorFrame(ScrollableFrame):
         if object_info == None:
             update_entry_text(self.repr_entry, "")
             update_entry_text(self.type_entry, "")
+            self.grid_frame.grid_remove()
         else:
-            print(object_info)
             update_entry_text(self.repr_entry, object_info["repr"])
             update_entry_text(self.type_entry, object_info["type"])
             self.attributes_frame.tree.configure(height=len(object_info["attributes"]))
             self.attributes_frame.update_variables(object_info["attributes"])
             self._expose(None)
+            if not self.grid_frame.winfo_ismapped():
+                self.grid_frame.grid()
          
     def goto_type(self, event):
         if self.object_info != None:
-            self.event_generate("<<ObjectSelect>>", serial=self.object_info["type_id"])
+            generate_event(self, "<<ObjectSelect>>", self.object_info["type_id"])
     
     
     
     def _add_block_label(self, row, caption):
-        label = tk.Label(self.grid_frame, bg="white", text=caption)
+        label = tk.Label(self.grid_frame, bg=CALM_WHITE, text=caption)
         label.grid(row=row, column=0, columnspan=2, sticky="nsew", pady=(10,0))
             
     def update_memory_model(self):

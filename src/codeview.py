@@ -12,7 +12,7 @@ except ImportError:
     import tkFont as tk_font
     from tkMessageBox import showwarning
 
-from ui_utils import TextWrapper, AutoScrollbar
+from ui_utils import TextWrapper, AutoScrollbar, CALM_WHITE
 from common import TextRange
 from coloring import SyntaxColorer
 from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent

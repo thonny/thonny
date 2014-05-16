@@ -88,6 +88,8 @@ class Thonny(tk.Tk):
         self._poll_vm_messages()
         self.bind("<FocusIn>", self.on_get_focus, "+")
         self.bind("<FocusOut>", self.on_lose_focus, "+")
+        # self.bind('<Expose>', self._expose, "+")
+        # self.focus_force()
 
     
     def _init_widgets(self):
@@ -698,6 +700,7 @@ class Thonny(tk.Tk):
 
     def on_lose_focus(self, e):
         log_user_event(ProgramLoseFocusEvent());
+        
 
 if __name__ == "__main__":        
     logger.addHandler(logging.StreamHandler(sys.stdout))
