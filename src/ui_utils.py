@@ -22,7 +22,7 @@ from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
 
 SASHTHICKNESS = 10
 CLAM_BACKGROUND = "#dcdad5"
-CALM_WHITE = '#fafafa'
+CALM_WHITE = '#fdfdfd'
 EDITOR_FONT = None 
 BOLD_EDITOR_FONT = None
 IO_FONT = None
