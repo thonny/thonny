@@ -160,9 +160,23 @@ class VM:
     
     def _cmd_get_object_info(self, cmd):
         value = self._heap[cmd.object_id]
+        attributes = {}
+        for name in dir(value):
+            if not name.startswith("__") or cmd.all_attributes:
+                #attributes[name] = inspect.getattr_static(value, name)
+                try: 
+                    attributes[name] = getattr(value, name)
+                except:
+                    pass 
+        
+        self._heap[id(type(value))] = type(value)
+        
         return InlineResponse(object_info={'id' : cmd.object_id,
                                            'repr' : repr(value),
-                                           'type' : str(type(value))})
+                                           'type' : str(type(value)),
+                                           'type_id' : id(type(value)),
+                                           'attributes': self.export_variables(attributes)})
+        
     
     def _cmd_get_globals(self, cmd):
         pass

@@ -175,8 +175,13 @@ def setup_style():
     """
     
     
+    #print(style.map("Treeview"))
     setup_fonts()
     style.configure("Treeview.treearea", font=TREE_FONT)
+    style.map("Treeview",
+              background=[('selected', 'focus', 'SystemHighlight'), ('selected', '!focus', 'light grey')],
+              foreground=[('selected', 'SystemHighlightText')],
+              )
 
 
 def setup_fonts():
@@ -277,10 +282,14 @@ class TreeFrame(ttk.Frame):
         self.scrollbar['command'] = self.tree.yview
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
         
     def _clear_tree(self):
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
+    
+    def on_select(self, event):
+        pass
     
 class TextFrame(ttk.Frame):
     def __init__(self, master, text_font):

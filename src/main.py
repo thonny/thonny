@@ -133,9 +133,10 @@ class Thonny(tk.Tk):
         self.globals_book.add(self.globals_frame, text="Variables")
         self.right_pw.add(self.globals_book, minsize=50)
         
+        
         self.heap_book = ui_utils.PanelBook(self.right_pw)
         self.heap_frame = HeapFrame(self.heap_book)
-        self.heap_book.add(self.heap_frame, text="Objektid") 
+        self.heap_book.add(self.heap_frame, text="Heap") 
         if prefs["values_in_heap"]:
             self.right_pw.add(self.heap_book, minsize=50)
         
@@ -509,11 +510,12 @@ class Thonny(tk.Tk):
     def cmd_update_memory_model(self):
         if prefs["values_in_heap"] and not self.heap_book.winfo_ismapped():
             # TODO: put it before object info block
-            self.right_pw.add(self.heap_book, minsize=50)
+            self.right_pw.add(self.heap_book, before=self.info_book, minsize=50)
         elif not prefs["values_in_heap"] and self.heap_book.winfo_ismapped():
             self.right_pw.remove(self.heap_book)
         
         self.globals_frame.update_memory_model()
+        self.inspector_frame.update_memory_model()
         # TODO: globals and locals
         
         assert self._vm.get_state() == "toplevel"

@@ -16,11 +16,18 @@ except ImportError:
 
 
 def format_object_id(object_id):
-    return "@" + str(object_id)
+    #return "@" + str(object_id)
+    return hex(object_id).upper().replace("X", "x")
+
+def parse_object_id(object_id_repr):
+    return int(object_id_repr, base=16)
 
 class MemoryFrame(TreeFrame):
     def __init__(self, master, columns):
         TreeFrame.__init__(self, master, columns)
+        font = tk_font.nametofont("TkDefaultFont").copy()
+        font.configure(underline=True)
+        self.tree.tag_configure("hovered", font=font)
     
     def stop_debugging(self):
         self._clear_tree()
@@ -34,8 +41,8 @@ class VariablesFrame(MemoryFrame):
         MemoryFrame.__init__(self, master, ('name', 'id', 'value'))
     
         self.tree.column('name', width=90, anchor=tk.W, stretch=False)
-        self.tree.column('id', width=150, anchor=tk.W, stretch=False)
-        self.tree.column('value', width=150, anchor=tk.W, stretch=True)
+        self.tree.column('id', width=450, anchor=tk.W, stretch=True)
+        self.tree.column('value', width=450, anchor=tk.W, stretch=True)
         
         self.tree.heading('name', text='Name', anchor=tk.W) 
         self.tree.heading('id', text='Id', anchor=tk.W)
@@ -44,16 +51,16 @@ class VariablesFrame(MemoryFrame):
         self.update_memory_model()
         #self.tree.tag_configure("item", font=ui_utils.TREE_FONT)
         
-        self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
-
-    def show_object(self, event):
-        print("show object", event)
 
     def update_memory_model(self):
         if prefs["values_in_heap"]:
             self.tree.configure(displaycolumns=("name", "id"))
+            #self.tree.columnconfigure(1, weight=1, width=400)
+            #self.tree.columnconfigure(2, weight=0)
         else:
             self.tree.configure(displaycolumns=("name", "value"))
+            #self.tree.columnconfigure(1, weight=0)
+            #self.tree.columnconfigure(2, weight=1, width=400)
 
     def update_variables(self, variables):
         self._clear_tree()
@@ -70,7 +77,7 @@ class VariablesFrame(MemoryFrame):
     def on_select(self, event):
         iid = self.tree.focus()
         if iid != '':
-            object_id = int(self.tree.item(iid)['values'][1].strip("@"))
+            object_id = parse_object_id(self.tree.item(iid)['values'][1])
             self.event_generate("<<ObjectSelect>>", serial=object_id)
             
         
@@ -91,8 +98,9 @@ class LocalsFrame(VariablesFrame):
     def handle_vm_message(self, event):
         pass
 
-    def show_frame(self, frame):
-        "TODO:"
+class AttributesFrame(VariablesFrame):   
+    def on_select(self, event):
+        pass
     
 
 class HeapFrame(MemoryFrame):
@@ -113,13 +121,21 @@ class HeapFrame(MemoryFrame):
             self.tree.set(node_id, "value", data[value_id].short_repr)
             
 
+    def on_select(self, event):
+        iid = self.tree.focus()
+        if iid != '':
+            object_id = parse_object_id(self.tree.item(iid)['values'][0])
+            self.event_generate("<<ObjectSelect>>", serial=object_id)
+            
     def handle_vm_message(self, msg):
         if self.winfo_ismapped():
             if hasattr(msg, "heap"):
                 self._update_data(msg.heap)
             elif isinstance(msg, ActionResponse):
+                """
                 # ask for updated heap
                 vm_proxy.send_command(InlineCommand(command="get_heap"))
+                """
                 
     
 
@@ -127,8 +143,9 @@ class ObjectInspectorFrame(ScrollableFrame):
     def __init__(self, master):
         
         ScrollableFrame.__init__(self, master)
-        
         self.object_id = None
+        self.object_info = None
+        self.bind_all("<<ObjectSelect>>", self.show_object)
         
         self.grid_frame = tk.Frame(self.interior, bg="white") 
         self.grid_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=(10,0), pady=15)
@@ -156,45 +173,61 @@ class ObjectInspectorFrame(ScrollableFrame):
         self.type_entry.config(cursor="hand2", fg="dark blue")
         self.type_entry.bind("<Button-1>", self.goto_type)
         
-        self.bind_all("<<ObjectSelect>>", self.show_object)
+        self._add_block_label(4, "Attributes")
+        self.attributes_frame = AttributesFrame(self.grid_frame)
+        self.attributes_frame.grid(row=5, column=0, columnspan=2, sticky=tk.NSEW, padx=(0,10))
+        self.attributes_frame.configure(border=1)
+        self.attributes_frame.scrollbar.grid_remove()
         
     
     def show_object(self, event):
+        print("SO", vars(event))
         object_id = event.serial
         
         if self.winfo_ismapped() and self.object_id != object_id:
             self.object_id = object_id
-            update_entry_text(self.id_entry, str(object_id))
+            update_entry_text(self.id_entry, format_object_id(object_id))
             self.update_info(None)
-            
-            # ask for object info
-            vm_proxy.send_command(InlineCommand(command="get_object_info", object_id=object_id))
+            self.request_object_info()
     
     def handle_vm_message(self, msg):
+        print("MAS", msg)
         if self.winfo_ismapped():
             if hasattr(msg, "object_info") and msg.object_info["id"] == self.object_id:
                 self.update_info(msg.object_info)
-            elif isinstance(msg, ActionResponse) and self.object_id != None:
-                # ask for updated heap
-                vm_proxy.send_command(InlineCommand(command="get_object_info", object_id=self.object_id))
+            elif (isinstance(msg, ActionResponse)
+                  and not hasattr(msg, "error") 
+                  and self.object_id != None):
+                self.request_object_info()
                 
+    def request_object_info(self): 
+        vm_proxy.send_command(InlineCommand(command="get_object_info",
+                                            object_id=self.object_id,
+                                            all_attributes=False)) # TODO: consult configuration
                     
     def update_info(self, object_info):
+        self.object_info = object_info
         if object_info == None:
             update_entry_text(self.repr_entry, "")
             update_entry_text(self.type_entry, "")
         else:
+            print(object_info)
             update_entry_text(self.repr_entry, object_info["repr"])
             update_entry_text(self.type_entry, object_info["type"])
+            self.attributes_frame.tree.configure(height=len(object_info["attributes"]))
+            self.attributes_frame.update_variables(object_info["attributes"])
+            self._expose(None)
          
     def goto_type(self, event):
-        # TODO:
-        print("Goto type", event)
+        if self.object_info != None:
+            self.event_generate("<<ObjectSelect>>", serial=self.object_info["type_id"])
     
     
     
     def _add_block_label(self, row, caption):
-        label = tk.Label(self, bg="white", text=caption)
+        label = tk.Label(self.grid_frame, bg="white", text=caption)
         label.grid(row=row, column=0, columnspan=2, sticky="nsew", pady=(10,0))
             
+    def update_memory_model(self):
+        self.attributes_frame.update_memory_model()
         
