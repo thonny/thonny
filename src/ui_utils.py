@@ -94,6 +94,7 @@ def create_menubutton(master):
 
 def setup_style():
     style = ttk.Style()
+    print(style.theme_names())
     if 'xpnative' in style.theme_names():
         # gives better scrollbars in empty editors
         # and Python 2.7 and 3.1 don't have "vista" theme anyway
@@ -182,7 +183,16 @@ def setup_style():
     #print(style.layout("Treeview"))
     setup_fonts()
     style.configure("Treeview.treearea", font=TREE_FONT)
-    style.map("Treeview",
+    if running_on_linux():
+        style.map("Treeview",
+              background=[('selected', 'focus', 'light blue'),
+                          ('selected', '!focus', 'light grey'),
+                          ],
+              foreground=[('selected', 'black'),
+                          ],
+              )
+    else:
+        style.map("Treeview",
               background=[('selected', 'focus', 'SystemHighlight'),
                           ('selected', '!focus', 'light grey'),
                           ],
