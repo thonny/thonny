@@ -672,7 +672,9 @@ class FancyTracer(Executor):
             if (node_tags != None 
                 and ("last_child" in node_tags
                      or "or_arg" in node_tags and value
-                     or "and_arg" in node_tags and not value)):
+                     or "and_arg" in node_tags and not value)
+                and ("child_of_expression_statement" not in node_tags)
+                ):
                 
                 #self._debug("IAE", node_tags, value)
                 # next step will be finalizing evaluation of parent of current expr
@@ -682,6 +684,7 @@ class FancyTracer(Executor):
                 if "child_of_expression" in node_tags: 
                     return "before_expression_again", parent_range, {}
                 else:
+                    #debug("NOOOOOT" + str(node_tags))
                     return "before_statement_again", parent_range, {}
             else:
                 return None
@@ -975,6 +978,7 @@ class FancyTracer(Executor):
         def add_tag(node, tag):
             if not hasattr(node, "tags"):
                 node.tags = set()
+                node.tags.add("class=" + node.__class__.__name__)
             node.tags.add(tag)
         
         for node in ast.walk(root):
@@ -992,6 +996,9 @@ class FancyTracer(Executor):
                     else:
                         add_tag(last_child, "child_of_statement")
                     
+                    if isinstance(node, ast.Expr):
+                        add_tag(last_child, "child_of_expression_statement")
+                        
                     if isinstance(node, ast.Call):
                         add_tag(last_child, "last_call_arg")
                     

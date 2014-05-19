@@ -45,7 +45,8 @@ class CodeView(ttk.Frame, TextWrapper):
         
         self.margin = tk.Text(self,
                 width = 4,
-                padx = 4,
+                padx = 5,
+                pady = 5,
                 highlightthickness = 0,
                 takefocus = 0,
                 bd = 0,
@@ -80,7 +81,8 @@ class CodeView(ttk.Frame, TextWrapper):
                 inactiveselectbackground='gray',
                 #highlightthickness=0, # TODO: try different in Mac and Linux
                 #highlightcolor="gray",
-                padx=4,
+                padx=5,
+                pady=5,
                 undo=True,
                 autoseparators=False)
         
@@ -164,20 +166,27 @@ class CodeView(ttk.Frame, TextWrapper):
             
             first_line = text_range.lineno - self.first_line_no + 1
             last_line = text_range.end_lineno - self.first_line_no + 1
-            
-            if "expression" in state:
-                self.text.tag_add(tag, 
-                                  "%d.%d" % (first_line, text_range.col_offset),
-                                  "%d.%d" % (last_line, text_range.end_col_offset))
-            elif "statement" in state:
-                # create a rectangular box
+            first_line_content = self.text.get("%d.0" % first_line, "%d.end" % first_line)
+            if first_line_content.strip().startswith("elif "):
+                first_col = first_line_content.find("elif ")
+            else:
                 first_col = text_range.col_offset
-                for lineno in range(first_line, last_line+1):
-                    self.text.tag_add(tag,
-                                      "%d.%d" % (lineno, first_col),
-                                      "%d.0" % (lineno+1))
-                
-            self.text.see("%d.0" % first_line)
+            
+            
+            for lineno in range(first_line, last_line+1):
+                self.text.tag_add(tag,
+                                  "%d.%d" % (lineno, first_col),
+                                  "%d.0" % (lineno+1))
+            
+            self.text.update_idletasks()
+            self.text.see("%d.0" % (first_line))
+            #print("SEEING: " + "%d.0" % (first_line))
+            if last_line - first_line < 3:
+                # if it's safe to assume that whole code fits into screen
+                # then scroll it down a bit so that expression view doesn't hide behind
+                # lower edge of the editor
+                self.text.update_idletasks()
+                self.text.see("%d.0" % (first_line+3))
     
     def clear_tags(self, tags):
         for tag in tags:
@@ -197,10 +206,12 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def enter_execution_mode(self):
         self.read_only = True
+        self.text.configure(insertwidth=0)
         #self.text.configure(background="LightYellow", insertwidth=0, insertbackground="Gray")
 
     def exit_execution_mode(self):
         self.read_only = False
+        self.text.configure(insertwidth=2)
         self.text.configure(background="White", insertwidth=2, insertbackground="Black")
 
     def _user_text_insert(self, index, chars, tags=None):
