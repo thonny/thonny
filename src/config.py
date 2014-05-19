@@ -36,6 +36,7 @@ defaults = {
         "height"    : 650,
         "browser_visible" : False, 
         "memory_visible"  : False,
+        "inspector_visible"  : False,
         "browser_width"   : 200,
         "center_width"    : 650,
         "memory_width"    : 200,

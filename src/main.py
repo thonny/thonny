@@ -145,7 +145,8 @@ class Thonny(tk.Tk):
         self.info_book = ui_utils.PanelBook(self.right_pw)
         self.inspector_frame = ObjectInspectorFrame(self.info_book)
         self.info_book.add(self.inspector_frame, text="Object info")
-        self.right_pw.add(self.info_book, minsize=50)
+        #self.right_pw.add(self.info_book, minsize=50)
+        self.cmd_update_inspector_visibility()
 
     
     def _init_commands(self):
@@ -196,14 +197,16 @@ class Thonny(tk.Tk):
                         kind="checkbutton", variable_name="layout.browser_visible"),
                 Command('update_memory_visibility', 'Show variables',  None, self,
                         kind="checkbutton", variable_name="layout.memory_visible"),
+                Command('update_inspector_visibility', 'Show object inspector',  None, self,
+                        kind="checkbutton", variable_name="layout.inspector_visible"),
                 "---",
                 Command('increase_font_size', 'Increase font size', 'Ctrl++', self),
                 Command('decrease_font_size', 'Decrease font size', 'Ctrl+-', self),
                 "---",
                 Command('update_memory_model', 'Show values in heap',  None, self,
                         kind="checkbutton", variable_name="values_in_heap"),
-                Command('update_debugging_mode', 'Enable advanced debugging',  None, self,
-                        kind="checkbutton", variable_name="advanced_debugging"),
+                #Command('update_debugging_mode', 'Enable advanced debugging',  None, self,
+                #        kind="checkbutton", variable_name="advanced_debugging"),
                 "---",
                 Command('show_ast', "Show AST", "F12", self),
                 Command('preferences', 'Preferences', None, self) 
@@ -305,7 +308,14 @@ class Thonny(tk.Tk):
                         
                         # bind the event
                         self.bind_all("<"+sequence+">", lambda e, cmd=item: cmd.execute(e), "+")
+                        
+                        # TODO: temporary extra key for step
+                        if item.cmd_id == "step":
+                            self.bind_all("<Control-t>", lambda e, cmd=item: cmd.execute(e), "+")
 
+
+        
+        
         
         #variables_var = tk.BooleanVar()
         #variables_var.set(True)
@@ -481,6 +491,7 @@ class Thonny(tk.Tk):
             self.main_pw.remove(self.browse_book)
 
     def cmd_update_memory_visibility(self, adjust_window_width=True):
+        # TODO: treat variables frame and memory pane differently
         if prefs["layout.memory_visible"] and not self.right_pw.winfo_ismapped():
             if adjust_window_width:
                 self._check_update_window_width(+prefs["layout.memory_width"]+ui_utils.SASHTHICKNESS)
@@ -492,6 +503,13 @@ class Thonny(tk.Tk):
             if adjust_window_width:
                 self._check_update_window_width(-prefs["layout.memory_width"]-ui_utils.SASHTHICKNESS)
             self.main_pw.remove(self.right_pw)
+            
+
+    def cmd_update_inspector_visibility(self):
+        if prefs["layout.inspector_visible"]:
+            self.right_pw.add(self.info_book, minsize=50)
+        else:
+            self.right_pw.remove(self.info_book)
             
     
     def _check_update_window_width(self, delta):

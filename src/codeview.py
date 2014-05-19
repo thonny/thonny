@@ -108,6 +108,7 @@ class CodeView(ttk.Frame, TextWrapper):
         #self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
         self.text.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
         self.text.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
+        self.current_statement_range = None
         
     
     def get_content(self):
@@ -151,8 +152,11 @@ class CodeView(ttk.Frame, TextWrapper):
             
         elif "statement" not in state: 
             self.text.tag_configure('before', background="#F8FC9A", relief=tk.FLAT)
+            if text_range.not_smaller_eq_in(self.current_statement_range):
+                self.clear_tags(["before", "after", "exception"])
             
         else:
+            self.current_statement_range = text_range
             self.clear_tags(["before", "after", "exception"])
             
             self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)

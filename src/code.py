@@ -408,8 +408,8 @@ class ExpressionView(tk.Text):
                          height=1,
                          width=1,
                          relief=tk.RAISED,
-                         background="white",
-                         borderwidth=1,
+                         background="#DCEDF2",
+                         borderwidth=2,
                          highlightthickness=0,
                          padx=7,
                          pady=7,
@@ -441,7 +441,7 @@ class ExpressionView(tk.Text):
         elif msg.state == "after_expression":
             debug("EV: after_expression %s", msg)
             
-            self.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
+            self.tag_configure('after', background="#BBEDB2", borderwidth=1, relief=tk.FLAT)
             start_mark = self._get_mark_name(msg.focus.lineno, msg.focus.col_offset)
             end_mark = self._get_mark_name(msg.focus.end_lineno, msg.focus.end_col_offset)
             
@@ -474,7 +474,7 @@ class ExpressionView(tk.Text):
             # we're at final stage of executing parent statement 
             # (eg. assignment after the LHS has been evaluated)
             # don't close yet
-            self.tag_configure('after', background="white", borderwidth=1, relief=tk.FLAT)   
+            self.tag_configure('after', background="#DCEDF2", borderwidth=1, relief=tk.FLAT)   
         else:
             # hide and clear on non-expression events
             self.clear_debug_view()

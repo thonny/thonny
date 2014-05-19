@@ -41,7 +41,7 @@ class VariablesFrame(MemoryFrame):
     def __init__(self, master):
         MemoryFrame.__init__(self, master, ('name', 'id', 'value'))
     
-        self.tree.column('name', width=90, anchor=tk.W, stretch=False)
+        self.tree.column('name', width=120, anchor=tk.W, stretch=False)
         self.tree.column('id', width=450, anchor=tk.W, stretch=True)
         self.tree.column('value', width=450, anchor=tk.W, stretch=True)
         
