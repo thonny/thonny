@@ -404,8 +404,17 @@ class EditorNotebook(ttk.Notebook):
 
 class ExpressionView(tk.Text):
     def __init__(self, codeview):
-        tk.Text.__init__(self, codeview.text, height=1, width=1,
-                         relief=tk.RIDGE, wrap=tk.NONE, font=ui_utils.EDITOR_FONT)
+        tk.Text.__init__(self, codeview.text,
+                         height=1,
+                         width=1,
+                         relief=tk.RAISED,
+                         background="white",
+                         borderwidth=1,
+                         highlightthickness=0,
+                         padx=7,
+                         pady=7,
+                         wrap=tk.NONE,
+                         font=ui_utils.EDITOR_FONT)
         self._codeview = codeview
         self._main_range = None
         self._last_focus = None
