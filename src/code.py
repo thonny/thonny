@@ -79,7 +79,7 @@ class StatementStepper:
         
         # show this frame
         if msg.frame_id == self._frame_id:
-            self._code_view.show_focus_box(msg.focus)
+            self._code_view.show_focus_box(msg.focus, msg.state)
             self._expression_view.handle_vm_message(msg)
         else:
             if self._next_frame_handler == None:
@@ -411,7 +411,10 @@ class ExpressionView(tk.Text):
         self._last_focus = None
         
         self.tag_config("value", foreground="Blue")
-        self.tag_config("focus", background="Yellow")
+        self.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
+        self.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
+        self.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
+        
         
     def handle_vm_message(self, msg):
         debug("ExpressionView.handle_vm_message %s", (msg.state, msg.focus))
@@ -423,7 +426,7 @@ class ExpressionView(tk.Text):
                 self._update_position(msg.focus)
                 self._update_size()
                 
-            self._highlight_range(msg.focus)
+            self._highlight_range(msg.focus, msg.state)
             
         
         elif msg.state == "after_expression":
@@ -447,7 +450,8 @@ class ExpressionView(tk.Text):
                     value_str = msg.value.short_repr
                 
                 #print("ins", start_mark, value_str)
-                self.insert(start_mark, value_str, ('value', id_str))
+                self.insert(start_mark, value_str, ('value', 'after', id_str))
+                #self.insert(start_mark, value_str) # TODO:
                 self._update_size()
                 
             else:
@@ -535,10 +539,20 @@ class ExpressionView(tk.Text):
                 + "_" + str(node_or_text_range.end_lineno)
                 + "_" + str(node_or_text_range.end_col_offset))
     
-    def _highlight_range(self, text_range):
+    def _highlight_range(self, text_range, state):
         debug("EV._highlight_range: %s", text_range)
-        self.tag_remove("focus", "1.0", "end")
-        self.tag_add("focus",
+        self.tag_remove("after", "1.0", "end")
+        self.tag_remove("before", "1.0", "end")
+        self.tag_remove("exception", "1.0", "end")
+        
+        if state.startswith("after"):
+            tag = "after"
+        elif state.startswith("before"):
+            tag = "before"
+        else:
+            tag = "exception"
+            
+        self.tag_add(tag,
                      self._get_mark_name(text_range.lineno, text_range.col_offset),
                      self._get_mark_name(text_range.end_lineno, text_range.end_col_offset))
         

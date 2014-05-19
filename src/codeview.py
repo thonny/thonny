@@ -103,6 +103,10 @@ class CodeView(ttk.Frame, TextWrapper):
         self.set_coloring(True)
         self.prepare_level_boxes()
         
+        #self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
+        self.text.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
+        self.text.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
+        
     
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -139,10 +143,45 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.tag_remove("sel", "1.0", tk.END)
         self.text.tag_add('sel', '1.0', tk.END)
         
-    def show_focus_box(self, text_range):
-        "TODO:"
-        #print("*** focus", start_line, start_col, end_line, end_col)
-        self.select_range(text_range)
+    def show_focus_box(self, text_range, state=None):
+        if text_range == None:
+            self.clear_tags(["before", "after", "exception"])
+            
+        elif "statement" not in state: 
+            self.text.tag_configure('before', background="#F8FC9A", relief=tk.FLAT)
+            
+        else:
+            self.clear_tags(["before", "after", "exception"])
+            
+            self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
+             
+            if state.startswith("after"):
+                tag = "after"
+            elif state.startswith("before"):
+                tag = "before"
+            else:
+                tag = "exception"
+            
+            first_line = text_range.lineno - self.first_line_no + 1
+            last_line = text_range.end_lineno - self.first_line_no + 1
+            
+            if "expression" in state:
+                self.text.tag_add(tag, 
+                                  "%d.%d" % (first_line, text_range.col_offset),
+                                  "%d.%d" % (last_line, text_range.end_col_offset))
+            elif "statement" in state:
+                # create a rectangular box
+                first_col = text_range.col_offset
+                for lineno in range(first_line, last_line+1):
+                    self.text.tag_add(tag,
+                                      "%d.%d" % (lineno, first_col),
+                                      "%d.0" % (lineno+1))
+                
+            self.text.see("%d.0" % first_line)
+    
+    def clear_tags(self, tags):
+        for tag in tags:
+            self.text.tag_remove(tag, "1.0", tk.END)
     
     def select_range(self, text_range):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -158,7 +197,7 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def enter_execution_mode(self):
         self.read_only = True
-        self.text.configure(background="LightYellow", insertwidth=0, insertbackground="Gray")
+        #self.text.configure(background="LightYellow", insertwidth=0, insertbackground="Gray")
 
     def exit_execution_mode(self):
         self.read_only = False
