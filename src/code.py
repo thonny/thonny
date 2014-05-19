@@ -409,7 +409,7 @@ class ExpressionView(tk.Text):
                          width=1,
                          relief=tk.RAISED,
                          background="#DCEDF2",
-                         borderwidth=2,
+                         borderwidth=1,
                          highlightthickness=0,
                          padx=7,
                          pady=7,
