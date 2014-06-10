@@ -8,7 +8,6 @@ encoding//src/code.py=utf-8
 encoding//src/codeview.py=utf-8
 encoding//src/common.py=utf-8
 encoding//src/config.py=utf-8
-encoding//src/locale/pygettext.py=iso-8859-1
 encoding//src/main.py=utf-8
 encoding//src/memory.py=utf-8
 encoding//src/shell.py=utf-8
