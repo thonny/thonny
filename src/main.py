@@ -12,15 +12,11 @@ import logging
 import time
 from user_logging import log_user_event,\
     ProgramGetFocusEvent, ProgramLoseFocusEvent
+import gettext
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    from tkinter.messagebox import showinfo
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    from tkMessageBox import showinfo
+import tkinter as tk
+from tkinter import ttk
+from tkinter.messagebox import showinfo
 import ui_utils
 from about import AboutDialog
 from static import AstFrame
@@ -34,10 +30,18 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
 from ui_utils import Command, notebook_contains
 import user_logging
 
+
+
+
 THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 
 logger = logging.getLogger("thonny.main")
 logger.setLevel(logging.DEBUG)
+
+
+gettext.translation('thonny',
+                    os.path.join(THONNY_SRC_DIR, "locale"), 
+                    languages=[prefs["general.language"], "en"]).install()
 
 
 class Thonny(tk.Tk):
@@ -126,19 +130,19 @@ class Thonny(tk.Tk):
         self.stack = stack.StackPanel(self.control_book, self._vm, self.editor_book)
         self.ast_frame = AstFrame(self.control_book)
         
-        self.control_book.add(self.shell, text="Shell") # TODO: , underline=0
+        self.control_book.add(self.shell, text=_("Shell")) # TODO: , underline=0
         #self.control_book.add(self.stack, text="Stack") # TODO: , underline=1
         
          
         self.globals_book = ui_utils.PanelBook(self.right_pw)
         self.globals_frame = GlobalsFrame(self.globals_book)
-        self.globals_book.add(self.globals_frame, text="Variables")
+        self.globals_book.add(self.globals_frame, text=_("Variables"))
         self.right_pw.add(self.globals_book, minsize=50)
         
         
         self.heap_book = ui_utils.PanelBook(self.right_pw)
         self.heap_frame = HeapFrame(self.heap_book)
-        self.heap_book.add(self.heap_frame, text="Heap") 
+        self.heap_book.add(self.heap_frame, text=_("Heap")) 
         if prefs["values_in_heap"]:
             self.right_pw.add(self.heap_book, minsize=50)
         
@@ -160,9 +164,9 @@ class Thonny(tk.Tk):
         # declare menu structure
         self._menus = [
             ('file', 'File', [
-                Command('new_file',     'New',         'Ctrl+N',       self.editor_book),
-                Command('open_file',    'Open...',     'Ctrl+O',       self.editor_book),
-                Command('close_file',   'Close',       'Ctrl+W',       self.editor_book),
+                Command('new_file',     _('New'),         'Ctrl+N',       self.editor_book),
+                Command('open_file',    _('Open...'),     'Ctrl+O',       self.editor_book),
+                Command('close_file',   _('Close'),       'Ctrl+W',       self.editor_book),
                 "---",
                 Command('save_file',    'Save',        'Ctrl+S',       self.editor_book.get_current_editor),
                 Command('save_file_as', 'Save as...',  'Shift+Ctrl+S', self.editor_book.get_current_editor),
@@ -260,7 +264,7 @@ class Thonny(tk.Tk):
             ]))
             
             # use Command instead of Ctrl in accelerators
-            for _, _, items in self._menus:
+            for __, __, items in self._menus:
                 for item in items:
                     if isinstance(item, Command) and isinstance(item.accelerator, str):
                         item.accelerator = item.accelerator.replace("Ctrl", "Command") 

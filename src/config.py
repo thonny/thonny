@@ -19,7 +19,8 @@ defaults = {
         "advanced_debugging" : False,
         "values_in_heap" : False,
         "friendly_values" : True,
-        "cwd" : os.path.expanduser("~")
+        "cwd" : os.path.expanduser("~"),
+        "language" : "en"
     },
     "view" : {
         "code_font_size"    : None,
