@@ -87,6 +87,7 @@ class StatementStepper:
                     self._next_frame_handler = editor_book.get_editor(msg.filename, True)
                     self._next_frame_handler.enter_execution_mode()
                 else:
+                    # Function call
                     if self._expression_view.winfo_ismapped():
                         call_label = self._expression_view.get_focused_text()
                     else:
@@ -569,12 +570,12 @@ class ExpressionView(tk.Text):
     def _update_position(self, text_range):
         bbox = self._codeview.get_char_bbox(text_range.lineno, text_range.col_offset)
         if isinstance(bbox, tuple):
-            x = bbox[0] + 3
-            y = bbox[1] + 8
+            x = bbox[0] + 6
+            y = bbox[1] - 6
         else:
             x = 30
             y = 30
-        self.place(x=x, y=y)
+        self.place(x=x, y=y, anchor=tk.NW)
     
     def _update_size(self):
         content = self.get("1.0", tk.END)

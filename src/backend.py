@@ -26,10 +26,12 @@ from common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
 THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 NORMCASE_THONNY_SRC_DIR = os.path.normcase(THONNY_SRC_DIR)
 
+BEFORE_SUITE_MARKER = "_thonny_hidden_before_suite"
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
-AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
+AFTER_SUITE_MARKER = "_thonny_hidden_after_suite"
 AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
+AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 EXCEPTION_TRACEBACK_LIMIT = 100    
 
@@ -433,10 +435,12 @@ class FancyTracer(Executor):
         # Make dummy marker functions universally available by putting them
         # into builtin scope        
         self.marker_function_names = {
-            AFTER_EXPRESSION_MARKER,
-            BEFORE_EXPRESSION_MARKER,
+            BEFORE_SUITE_MARKER,
+            AFTER_SUITE_MARKER, 
             BEFORE_STATEMENT_MARKER,
-            AFTER_STATEMENT_MARKER 
+            AFTER_STATEMENT_MARKER, 
+            BEFORE_EXPRESSION_MARKER,
+            AFTER_EXPRESSION_MARKER,
         }
         
         for name in self.marker_function_names:
@@ -502,6 +506,10 @@ class FancyTracer(Executor):
                 event = "before_statement"
             elif code_name == AFTER_STATEMENT_MARKER:
                 event = "after_statement"
+            elif code_name == BEFORE_SUITE_MARKER:
+                event = "before_suite"
+            elif code_name == AFTER_SUITE_MARKER:
+                event = "after_suite"
             elif code_name == BEFORE_EXPRESSION_MARKER:
                 event = "before_expression"
             else:
@@ -551,7 +559,8 @@ class FancyTracer(Executor):
                 # call tracer again with new event and focus
                 result = self._custom_trace(frame, event, args, focus)
             
-            if result and event not in ("before_statement", "before_statement_again", "after_statement", 
+            if result and event not in ("before_statement", "before_statement_again", "after_statement",
+                                        "before_suite", "after_suite", 
                                         "before_expression", "before_expression_again", "after_expression"):
                 return self._trace
             else:
@@ -938,6 +947,20 @@ class FancyTracer(Executor):
             ) for cframe in self._custom_stack]
 
     
+    def _thonny_hidden_before_suite(self, text_range, stmt_ranges):
+        """
+        The code to be debugged will be instrumented with this function
+        inserted before each statement suite. 
+        """
+        return None
+    
+    def _thonny_hidden_after_suite(self, text_range, stmt_ranges):
+        """
+        The code to be debugged will be instrumented with this function
+        inserted before each statement suite. 
+        """
+        return None
+    
     def _thonny_hidden_before_stmt(self, text_range, node_tags):
         """
         The code to be debugged will be instrumented with this function
@@ -1029,27 +1052,56 @@ class FancyTracer(Executor):
         
     def _insert_statement_markers(self, root):
         # find lists of statements and insert before/after markers for each statement
-        for name, field in ast.iter_fields(root):
-            if isinstance(field, ast.AST):
-                self._insert_statement_markers(field)
-            elif isinstance(field, list):
+        for name, value in ast.iter_fields(root):
+            if isinstance(value, ast.AST):
+                self._insert_statement_markers(value)
+            elif isinstance(value, list):
                 new_list = []
-                for node in field:
-                    if isinstance(node, _ast.stmt):
-                        # add before marker
-                        new_list.append(self._create_statement_marker(node, BEFORE_STATEMENT_MARKER))
-                    
-                    # original statement
-                    self._insert_statement_markers(node)
-                    new_list.append(node)
-                    
-                    if isinstance(node, _ast.stmt):
-                        # add after marker
-                        new_list.append(self._create_statement_marker(node, AFTER_STATEMENT_MARKER))
-                    
+                if len(value) > 0:
+                    # create before suite
+                    if isinstance(value[0], _ast.stmt):
+                        new_list.append(self._create_suite_marker(value, BEFORE_SUITE_MARKER))
+                
+                    # create suite body
+                    for node in value:
+                        if isinstance(node, _ast.stmt):
+                            # add before marker
+                            new_list.append(self._create_statement_marker(node, 
+                                                                          BEFORE_STATEMENT_MARKER))
+                        
+                        # original statement
+                        self._insert_statement_markers(node)
+                        new_list.append(node)
+                        
+                        if isinstance(node, _ast.stmt):
+                            # add after marker
+                            new_list.append(self._create_statement_marker(node,
+                                                                          AFTER_STATEMENT_MARKER))
+                    # create after suite
+                    if isinstance(value[0], _ast.stmt):
+                        new_list.append(self._create_suite_marker(value, AFTER_SUITE_MARKER))
                     
                 setattr(root, name, new_list)
+    
+    def _create_suite_marker(self, stmt_nodes, function_name):
+        stmt_ranges = ast.Tuple(elts=list(map(self._create_location_literal, stmt_nodes)), 
+             ctx=ast.Load())
         
+        # create a compound range
+        nums = []
+        for value in (stmt_nodes[0].lineno, stmt_nodes[0].col_offset, 
+                      stmt_nodes[-1].end_lineno, stmt_nodes[-1].end_col_offset):
+            nums.append(ast.Num(n=value))
+        text_range = ast.Tuple(elts=nums, ctx=ast.Load())
+        
+        stmt = ast.Expr(value=ast.Call (
+            func=ast.Name(id=function_name, ctx=ast.Load()),
+            args=[text_range, stmt_ranges],
+            keywords=[]
+        ))
+        ast.fix_missing_locations(stmt)
+        return stmt
+
     
     def _create_statement_marker(self, node, function_name):
         call = self._create_simple_marker_call(node, function_name)
@@ -1106,6 +1158,9 @@ class FancyTracer(Executor):
     def _create_location_literal(self, node):
         if node == None:
             return ast_utils.value_to_literal(None)
+        
+        assert hasattr(node, "end_lineno")
+        assert hasattr(node, "end_col_offset")
         
         nums = []
         for value in node.lineno, node.col_offset, node.end_lineno, node.end_col_offset:

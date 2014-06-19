@@ -126,7 +126,13 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
-        return self.text.bbox(str(lineno - self.first_line_no + 1) + "." + str(col_offset))
+        bbox = self.text.bbox(str(lineno - self.first_line_no + 1) 
+                              + "."
+                              + str(col_offset))
+        if isinstance(bbox, tuple):
+            return (bbox[0] - self.text.cget("padx"), bbox[1] - self.text.cget("pady"))
+        else:
+            return (0,0)
             
     
     def set_coloring(self, value):
