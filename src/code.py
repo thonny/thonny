@@ -296,7 +296,7 @@ class EditorNotebook(ttk.Notebook):
     
     def get_current_editor(self):
         for child in self.winfo_children():
-            if child.winfo_pathname(child.winfo_id()) == self.select():
+            if str(child) == str(self.select()):
                 return child
             
         return None

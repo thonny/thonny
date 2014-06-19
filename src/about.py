@@ -58,9 +58,11 @@ class AboutDialog(tk.Toplevel):
             python_version += "-" + sys.version_info[3]
         platform_label = ttk.Label(self, justify=tk.CENTER, 
                                    text=platform.system() + " " 
-                                   + platform.release() + "\n"
-                                   + "Python " + python_version + "\n"
-                                   + "Tk " + self.tk.call('info', 'patchlevel'))
+                                        + platform.release()  
+                                        + " " + self.get_os_word_size_guess() + "\n"
+                                        + "Python " + python_version 
+                                        + " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
+                                        + "Tk " + self.tk.call('info', 'patchlevel'))
         platform_label.grid(pady=20)
         
         ok_button = ttk.Button(self, text="OK", command=self._ok)
@@ -73,4 +75,12 @@ class AboutDialog(tk.Toplevel):
         
     def _ok(self, event=None):
         self.destroy()
+    
+    def get_os_word_size_guess(self):
+        if "32" in platform.machine() and "64" not in platform.machine():
+            return "(32 bit)"
+        elif "64" in platform.machine() and "32" not in platform.machine():
+            return "(64 bit)"
+        else:
+            return ""
 
