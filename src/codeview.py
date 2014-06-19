@@ -105,9 +105,12 @@ class CodeView(ttk.Frame, TextWrapper):
         self.set_coloring(True)
         self.prepare_level_boxes()
         
-        #self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
-        self.text.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
-        self.text.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
+        self.text.tag_configure('before', background="#F8FC9A")
+        self.text.tag_configure('after', background="#D7EDD3")
+        self.text.tag_configure('exception', background="#FFBFD6")
+        self.text.tag_configure('statement', borderwidth=1, relief=tk.SOLID)
+        self.text.tag_configure('statement_odd', borderwidth=1, relief=tk.RIDGE, background="#FFFFFF")
+        self.text.tag_configure('statement_even', borderwidth=1, relief=tk.RIDGE, background="#FFFFFE")
         self.current_statement_range = None
         
     
@@ -152,28 +155,41 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.tag_remove("sel", "1.0", tk.END)
         self.text.tag_add('sel', '1.0', tk.END)
         
-    def show_focus_box(self, text_range, state=None):
+    def update_focus(self, text_range, msg=None):
         if text_range == None:
-            self.clear_tags(["before", "after", "exception"])
+            self.clear_tags(["before", "after", "exception", "statement", "statement_odd", "statement_even"])
             
-        elif "statement" not in state: 
-            self.text.tag_configure('before', background="#F8FC9A", relief=tk.FLAT)
-            if text_range.not_smaller_eq_in(self.current_statement_range):
-                self.clear_tags(["before", "after", "exception"])
             
-        else:
+        elif "statement" in msg.state:
             self.current_statement_range = text_range
             self.clear_tags(["before", "after", "exception"])
             
             self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
              
-            if state.startswith("after"):
+            if msg.state.startswith("after"):
                 tag = "after"
-            elif state.startswith("before"):
+            elif msg.state.startswith("before"):
                 tag = "before"
             else:
                 tag = "exception"
             
+            self.tag_statement(text_range, tag, True)
+            
+        elif "suite" in msg.state:
+            #print(msg.stmt_ranges)
+            odd = True
+            for stmt_range in msg.stmt_ranges:
+                if odd:
+                    self.tag_statement(stmt_range, "statement_odd")
+                else:
+                    self.tag_statement(stmt_range, "statement_even")
+                odd = not odd
+        else: 
+            self.text.tag_configure('before', background="#F8FC9A", relief=tk.FLAT)
+            if text_range.not_smaller_eq_in(self.current_statement_range):
+                self.clear_tags(["before", "after", "exception"])
+    
+    def tag_statement(self, text_range, tag, see=False):
             first_line = text_range.lineno - self.first_line_no + 1
             last_line = text_range.end_lineno - self.first_line_no + 1
             first_line_content = self.text.get("%d.0" % first_line, "%d.end" % first_line)
@@ -187,7 +203,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 self.text.tag_add(tag,
                                   "%d.%d" % (lineno, first_col),
                                   "%d.0" % (lineno+1))
-            
+                
             self.text.update_idletasks()
             self.text.see("%d.0" % (first_line))
             #print("SEEING: " + "%d.0" % (first_line))
@@ -197,6 +213,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 # lower edge of the editor
                 self.text.update_idletasks()
                 self.text.see("%d.0" % (first_line+3))
+        
     
     def clear_tags(self, tags):
         for tag in tags:

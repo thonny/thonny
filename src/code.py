@@ -79,7 +79,7 @@ class StatementStepper:
         
         # show this frame
         if msg.frame_id == self._frame_id:
-            self._code_view.show_focus_box(msg.focus, msg.state)
+            self._code_view.update_focus(msg.focus, msg)
             self._expression_view.handle_vm_message(msg)
         else:
             if self._next_frame_handler == None:
@@ -98,7 +98,7 @@ class StatementStepper:
             
         
     def clear_debug_view(self):
-        self._code_view.show_focus_box(None)
+        self._code_view.update_focus(None)
         self._clear_next_frame_handler()
         self._expression_view.clear_debug_view()
     

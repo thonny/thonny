@@ -910,8 +910,10 @@ class FancyTracer(Executor):
         elif event in ('before_statement', 'before_expression',
                        'before_statement_again', 'before_expression_again',
                        'after_statement', 'after_expression'):
-            
             return DebuggerResponse()
+        
+        elif event in ('before_suite', 'after_suite'):
+            return DebuggerResponse(stmt_ranges=list(map(lambda arg: TextRange(*arg), args['stmt_ranges'])))
         
         else:
             # We're not interested in other events when stepping
