@@ -274,6 +274,7 @@ class EditorNotebook(ttk.Notebook):
         #self._open_file(os.path.join(sfuffdir, "aliasing.py"))
         self._open_file(os.path.join(sfuffdir, "kahest_suurim.py"))
         self.show_file(os.path.join(sfuffdir, "kahest_suurim.py"))
+        self.show_file(os.path.join(sfuffdir, "multilevel.py"))
         #self._open_file(progdir + "/../atidb.py")
         
         global editor_book

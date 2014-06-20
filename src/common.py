@@ -87,6 +87,12 @@ class TextRange(Record):
     def is_smaller_eq_in(self, other):
         return other.contains_smaller_eq(self)
     
+    def get_start_index(self):
+        return str(self.lineno) + "." + str(self.col_offset)
+    
+    def get_end_index(self):
+        return str(self.end_lineno) + "." + str(self.end_col_offset)
+    
     def __str__(self):
         return "TR(" + str(self.lineno) + "." + str(self.col_offset) + ", " \
                      + str(self.end_lineno) + "." + str(self.end_col_offset) + ")"
