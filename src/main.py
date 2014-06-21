@@ -1,6 +1,5 @@
 #! /usr/bin/python3
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
 
 import sys
 from os.path import join as join_path, dirname, relpath
@@ -16,7 +15,6 @@ import gettext
 
 import tkinter as tk
 from tkinter import ttk
-from tkinter.messagebox import showinfo
 import ui_utils
 from about import AboutDialog
 from static import AstFrame
@@ -25,8 +23,7 @@ from shell import ShellFrame
 from memory import GlobalsFrame, HeapFrame, ObjectInspectorFrame
 import vm_proxy
 from browser import BrowseNotebook
-from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
-    ToplevelResponse
+from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
 from ui_utils import Command, notebook_contains
 import user_logging
 

@@ -1,19 +1,12 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
-from ui_utils import TreeFrame, TextFrame, update_entry_text, ScrollableFrame,\
+ 
+from ui_utils import TreeFrame, update_entry_text, ScrollableFrame,\
     generate_event, get_event_data, CALM_WHITE
 from config import prefs
-from codeview import CodeView
-from common import ToplevelResponse, ActionResponse, InlineCommand
+from common import ActionResponse, InlineCommand
 import vm_proxy
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    import tkinter.font as tk_font
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    import tkFont as tk_font
+import tkinter as tk
+import tkinter.font as tk_font
 
 
 def format_object_id(object_id):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
 
 import os.path
 import traceback
@@ -7,14 +6,9 @@ import ui_utils
 from config import prefs
 import memory
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    import tkinter.font as font
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    import tkFont as font
+import tkinter as tk
+from tkinter import ttk
+import tkinter.font as font
 
 from ui_utils import TextWrapper
 from common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command

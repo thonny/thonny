@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
 
 import sys
 import webbrowser
 import platform
 import ui_utils
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    import tkinter.font as font
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    import tkFont as font
+import tkinter as tk
+from tkinter import ttk
+import tkinter.font as font
 
 class AboutDialog(tk.Toplevel):
     def __init__(self, parent, version):

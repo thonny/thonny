@@ -1,15 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
-from common import DebuggerResponse
-
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    from tkinter.messagebox import showinfo
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    from tkMessageBox import showinfo
 
 import ui_utils
 

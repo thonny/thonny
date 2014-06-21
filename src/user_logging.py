@@ -44,8 +44,8 @@ class UserEventLogger:
         elif(isinstance(e, TextDeleteEvent)):
             e.source = self.last_source.__class__.__name__
             if(isinstance(self.last_source, KeyPressEvent) and e.to_position == ''):
-                 e.to_position = e.from_position.split(".")[0] + "." + str(int(e.from_position.split(".")[1])+1)
-                 e.from_position = e.from_position.split(".")[0] + "." + str(int(e.from_position.split(".")[1]))
+                e.to_position = e.from_position.split(".")[0] + "." + str(int(e.from_position.split(".")[1])+1)
+                e.from_position = e.from_position.split(".")[0] + "." + str(int(e.from_position.split(".")[1]))
             if(len(self.macro_events) != 0):
                 if(isinstance(self.macro_events[-1][0], TextDeleteEvent)
                             and int(self.last_position.split(".")[0]) == int(e.to_position.split(".")[0])

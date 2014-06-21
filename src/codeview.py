@@ -1,21 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
+ 
 import ui_utils
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    import tkinter.font as tk_font
-    from tkinter.messagebox import showwarning
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    import tkFont as tk_font
-    from tkMessageBox import showwarning
+import tkinter as tk
+from tkinter import ttk
+import tkinter.font as tk_font
 
-from ui_utils import TextWrapper, AutoScrollbar, CALM_WHITE
+from ui_utils import TextWrapper, AutoScrollbar
 from common import TextRange
 from coloring import SyntaxColorer
-from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
 from config import prefs
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 

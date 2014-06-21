@@ -1,13 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
+ 
 from common import TextRange
-from tkinter.messagebox import showerror
-try:
-    import tkinter as tk
-    from tkinter import ttk
-except ImportError:
-    import Tkinter as tk
-    import ttk 
+import tkinter as tk
 
 import ast
 import ast_utils

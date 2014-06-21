@@ -8,27 +8,28 @@ import ui_utils
     
 DEBUG = False
 
-def any(name, alternates):
+
+def matches_any(name, alternates):
     "Return a named group pattern matching list of alternates."
     return "(?P<%s>" % name + "|".join(alternates) + ")"
 
 def make_pat():
-    kw = r"\b" + any("KEYWORD", keyword.kwlist) + r"\b"
+    kw = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
     builtinlist = [str(name) for name in dir(builtins)
                                         if not name.startswith('_') and \
                                         name not in keyword.kwlist]
     # self.file = open("file") :
     # 1st 'file' colorized normal, 2nd as builtin, 3rd as string
-    builtin = r"([^.'\"\\#]\b|^)" + any("BUILTIN", builtinlist) + r"\b"
-    comment = any("COMMENT", [r"#[^\n]*"])
+    builtin = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", builtinlist) + r"\b"
+    comment = matches_any("COMMENT", [r"#[^\n]*"])
     stringprefix = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"
     sqstring = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*'?"
     dqstring = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*"?'
     sq3string = stringprefix + r"'''[^'\\]*((\\.|'(?!''))[^'\\]*)*(''')?"
     dq3string = stringprefix + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
-    string = any("STRING", [sq3string, dq3string, sqstring, dqstring])
+    string = matches_any("STRING", [sq3string, dq3string, sqstring, dqstring])
     return kw + "|" + builtin + "|" + comment + "|" + string +\
-           "|" + any("SYNC", [r"\n"])
+           "|" + matches_any("SYNC", [r"\n"])
 
 prog = re.compile(make_pat(), re.S)
 idprog = re.compile(r"\s+(\w+)", re.S)
@@ -56,7 +57,7 @@ class SyntaxColorer:
             self.bind("<<toggle-auto-coloring>>", self.toggle_colorize_event)
             self.notify_range("1.0", "end")
         else:
-            # No delegate - stop any colorizing
+            # No delegate - stop matches_any colorizing
             self.stop_colorizing = True
             self.allow_colorizing = False
     """
@@ -179,9 +180,9 @@ class SyntaxColorer:
             top.destroy()
 
     def recolorize_main(self):
-        next = "1.0"
+        next_index = "1.0"
         while True:
-            item = self.text.tag_nextrange("TODO", next)
+            item = self.text.tag_nextrange("TODO", next_index)
             if not item:
                 break
             head, tail = item
@@ -193,21 +194,21 @@ class SyntaxColorer:
                 head = "1.0"
 
             chars = ""
-            next = head
+            next_index = head
             lines_to_get = 1
             ok = False
             while not ok:
-                mark = next
-                next = self.text.index(mark + "+%d lines linestart" %
+                mark = next_index
+                next_index = self.text.index(mark + "+%d lines linestart" %
                                          lines_to_get)
                 lines_to_get = min(lines_to_get * 2, 100)
-                ok = "SYNC" in self.text.tag_names(next + "-1c")
-                line = self.text.get(mark, next)
-                ##print head, "get", mark, next, "->", repr(line)
+                ok = "SYNC" in self.text.tag_names(next_index + "-1c")
+                line = self.text.get(mark, next_index)
+                ##print head, "get", mark, next_index, "->", repr(line)
                 if not line:
                     return
                 for tag in self.tagdefs:
-                    self.text.tag_remove(tag, mark, next)
+                    self.text.tag_remove(tag, mark, next_index)
                 chars = chars + line
                 m = self.prog.search(chars)
                 while m:
@@ -241,19 +242,19 @@ class SyntaxColorer:
                                                  head + "+%dc" % a,
                                                  head + "+%dc" % b)
                     m = self.prog.search(chars, m.end())
-                if "SYNC" in self.text.tag_names(next + "-1c"):
-                    head = next
+                if "SYNC" in self.text.tag_names(next_index + "-1c"):
+                    head = next_index
                     chars = ""
                 else:
                     ok = False
                 if not ok:
                     # We're in an inconsistent state, and the call to
                     # update may tell us to stop.  It may also change
-                    # the correct value for "next" (since this is a
+                    # the correct value for "next_index" (since this is a
                     # line.col string, not a true mark).  So leave a
-                    # crumb telling the next invocation to resume here
+                    # crumb telling the next_index invocation to resume here
                     # in case update tells us to leave.
-                    self.text.tag_add("TODO", next)
+                    self.text.tag_add("TODO", next_index)
                 self.text.update()
                 if self.stop_colorizing:
                     if DEBUG: print("colorizing stopped")

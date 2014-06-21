@@ -1,12 +1,7 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division
-try: 
-    from configparser import ConfigParser
-    import tkinter as tk
-except ImportError:
-    import Tkinter as tk
-    from ConfigParser import ConfigParser
-    
+
+from configparser import ConfigParser
+import tkinter as tk
 import os.path
 import codecs
 import ast

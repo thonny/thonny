@@ -1,17 +1,10 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division
 
 import os.path
  
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    import tkinter.font as tk_font
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    import tkFont as tk_font
-
+import tkinter as tk
+from tkinter import ttk
+import tkinter.font as tk_font
 
 import config
 

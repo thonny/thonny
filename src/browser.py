@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-except ImportError:
-    import Tkinter as tk
-    import ttk 
+import tkinter as tk
+from tkinter import ttk
     
 class BrowseNotebook(ttk.Notebook):
     def __init__(self, master):

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
 """
 EditorNotebook may contain several Editor-s, each Editor contains one CodeView.
 

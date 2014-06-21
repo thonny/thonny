@@ -6,11 +6,7 @@ import re
 import io
 import os.path
 from codecs import lookup, BOM_UTF8
-
-try:
-    import builtins
-except ImportError:
-    import __builtin__ as builtins
+import builtins
 
 
 class PathSet:
@@ -62,7 +58,6 @@ def detect_encoding(readline):
     except AttributeError:
         filename = None
     bom_found = False
-    encoding = None
     default = 'utf-8'
     def read_or_stop():
         try:
@@ -87,7 +82,7 @@ def detect_encoding(readline):
             return None
         encoding = _get_normal_name(matches[0])
         try:
-            codec = lookup(encoding)
+            _codec = lookup(encoding)
         except LookupError:
             # This behaviour mimics the Python interpreter
             if filename is None:

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
 
 import sys 
 import os.path
@@ -10,10 +9,7 @@ import traceback
 import types
 import logging
 
-try:
-    import builtins # Python 3
-except ImportError:
-    import __builtin__ as builtins # Python 2
+import builtins
 
 import __main__  # @UnresolvedImport
 import ast_utils

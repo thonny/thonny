@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function, division 
 
 import subprocess
 import sys
 import os.path
 import logging
 
-try:
-    from _thread import start_new_thread
-    from queue import Queue
-except ImportError:
-    from thread import start_new_thread
-    from Queue import Queue
+from _thread import start_new_thread
+from queue import Queue
 
 import threading
 
