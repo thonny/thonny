@@ -375,6 +375,7 @@ class Thonny(tk.Tk):
         while not self._vm.message_queue.empty():
             msg = self._vm.message_queue.get()
             
+                
             if hasattr(msg, "success") and not msg.success:
                 print("_poll_vm_messages, not success")
                 self.bell()
@@ -389,13 +390,15 @@ class Thonny(tk.Tk):
             prefs["cwd"] = self._vm.cwd
             self._update_title()
             
-            # automatically advance from after_statement
-            # TODO:
-            """
+            # automatically advance from some events
             if (isinstance(msg, DebuggerResponse) 
-                and msg.state in ("after_statement", "after_expression")):
-                self._issue_debugger_command(DebuggerCommand(command="step"))
-            """
+                and msg.state in ("after_statement",
+                                  "after_suite",
+                                  "before_suite")
+                and not prefs["debugging.detailed_steps"]):
+                
+                self._check_issue_debugger_command(DebuggerCommand(command="step"))
+                
                 
         self.after(50, self._poll_vm_messages)
     

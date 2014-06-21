@@ -22,6 +22,9 @@ defaults = {
         "cwd" : os.path.expanduser("~"),
         "language" : "en"
     },
+    "debugging" : {
+        "detailed_steps" : False,
+    },
     "view" : {
         "code_font_size"    : None,
         "code_font_family"  : None,

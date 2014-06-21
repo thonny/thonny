@@ -16,6 +16,7 @@ from ui_utils import TextWrapper, AutoScrollbar, CALM_WHITE
 from common import TextRange
 from coloring import SyntaxColorer
 from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent
+from config import prefs
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
@@ -110,13 +111,14 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.tag_configure('statement', borderwidth=1, relief=tk.SOLID)
         self.text.tag_configure('statement_odd', borderwidth=1, relief=tk.SOLID, background="#FFFFFF")
         self.text.tag_configure('statement_even', borderwidth=1, relief=tk.SOLID, background="#FFFFFE")
+        """
         self.text.tag_configure('before', background="#F8FC9A")
         self.text.tag_configure('after', background="#D7EDD3")
         self.text.tag_configure('exception', background="#FFBFD6")
-        """
-        self.current_statement_range = None
-        self.suites = []
-        self.statement_tags = set()
+        
+        #self.current_statement_range = None
+        self.active_statement_ranges = []
+        #self.statement_tags = set()
     
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -159,49 +161,41 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.tag_remove("sel", "1.0", tk.END)
         self.text.tag_add('sel', '1.0', tk.END)
     
-    def update_focus(self, text_range, msg=None):
+    def handle_focus_message(self, text_range, msg=None):
+        
         if text_range == None:
-            self.clear_tags(self.statement_tags)
+            self.clear_tags(['before', 'after', 'exception'])
             
-            
-        elif "statement" in msg.state:
-            self.current_statement_range = text_range
-            #self.clear_tags_for_text_range(self.statement_tags, text_range)
-            
-            #self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
+        elif "statement" in msg.state or "suite" in msg.state:
+            self.clear_tags(['before', 'after', 'exception'])
+            self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
              
             if msg.state.startswith("before"):
-                tag_kind = "before"
+                tag = "before"
             elif msg.state.startswith("after"):
-                tag_kind = "after"
+                tag = "after"
             else:
-                tag_kind = "exception"
+                tag = "exception"
             
-            self.tag_range(text_range,
-                           self.get_statement_tag(len(self.suites)-1, tag_kind),
-                           True)
+            if (msg.state in ("before_statement", "before_statement_again")
+                or (prefs["debugging.detailed_steps"]
+                    and msg.state in ("after_statement",
+                                      "after_suite",
+                                      "before_suite"))):
+                self.tag_range(text_range, tag, True)
             
-        elif "suite" in msg.state:
-            #self.clear_tags_for_text_range(self.statement_tags, text_range)
+            if msg.state == "before_statement":
+                self.active_statement_ranges.append(text_range)
+            elif msg.state == "after_statement":
+                # TODO: what about exception??
+                self.active_statement_ranges.pop()
+        
+        else:
+            # if expression is in focus, statement will be shown without border
+            self.text.tag_configure('before', background="#F8FC9A", borderwidth=0, relief=tk.SOLID)
             
-            if "before" in msg.state:
-                self.suites.append(text_range)
-                self.tag_range(text_range, self.get_statement_tag(len(self.suites)-1, "fresh", True))
-                
-                #odd = True
-                #for stmt_range in msg.stmt_ranges:
-                #    self.tag_range(stmt_range, self.get_statement_tag(len(self.suites)-1, odd))
-                #    odd = not odd
-            else:
-                self.suites.pop()
-                
             
-        else: 
-            #self.text.tag_configure('before', background="#F8FC9A", relief=tk.FLAT)
-            """
-            if text_range.not_smaller_eq_in(self.current_statement_range):
-                self.clear_tags(["before", "after", "exception"])
-            """
+            
     
     def tag_range(self, text_range, tag, see=False):
             first_line, first_col, last_line = self.get_text_range_block(text_range)
@@ -275,12 +269,13 @@ class CodeView(ttk.Frame, TextWrapper):
             
     
     def enter_execution_mode(self):
-        self.suites = []
+        self.active_statement_ranges = []
         self.read_only = True
         self.text.configure(insertwidth=0)
         #self.text.configure(background="LightYellow", insertwidth=0, insertbackground="Gray")
 
     def exit_execution_mode(self):
+        self.active_statement_ranges = []
         self.read_only = False
         self.text.configure(insertwidth=2)
         self.text.configure(background="White", insertwidth=2, insertbackground="Black")
