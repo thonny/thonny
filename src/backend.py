@@ -5,6 +5,7 @@ import os.path
 import inspect
 import ast
 import _ast
+import _io
 import traceback
 import types
 import logging
@@ -170,15 +171,35 @@ class VM:
             
             self._heap[id(type(value))] = type(value)
             
-            return InlineResponse(object_info={'id' : cmd.object_id,
-                                               'repr' : repr(value),
-                                               'type' : str(type(value)),
-                                               'type_id' : id(type(value)),
-                                               'attributes': self.export_variables(attributes)})
+            info = {'id' : cmd.object_id,
+                    'repr' : repr(value),
+                    'type' : str(type(value)),
+                    'type_id' : id(type(value)),
+                    'attributes': self.export_variables(attributes)}
+            
+            if isinstance(value, _io.TextIOWrapper):
+                self._add_file_handler_info(value, info)
+            
+            return InlineResponse(object_info=info)
         else:
             return InlineResponse(object_info={'id' : cmd.object_id}, not_found=True)
-        
     
+    def _add_file_handler_info(self, value, info):
+        try:
+            assert isinstance(value.name, str)
+            assert value.mode in ("r", "rt", "tr", "br", "rb")
+            assert value.errors in ("strict", None)
+            assert value.newlines == None or value.tell() > 0
+            # TODO: cache the content
+            # TODO: don't read too big files
+            with open(value.name, encoding=value.encoding) as f:
+                info["file_encoding"] = f.encoding
+                info["file_content"] = f.read()
+                info["file_tell"] = value.tell()
+        except:
+            pass
+        
+        
     def _cmd_get_globals(self, cmd):
         pass
     

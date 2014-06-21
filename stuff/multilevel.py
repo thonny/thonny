@@ -17,3 +17,4 @@ if True:
         pass
     pass
 pass
+f = open("ascii.txt", encoding="UTF-8")

@@ -43,8 +43,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.margin.grid(row=0, column=0)
         """
         
-        self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
         editor_font = font.nametofont(name='TkFixedFont')
         self.text = tk.Text(self,
                             font=editor_font,
@@ -53,7 +53,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
                             highlightthickness=0,
                             #highlightcolor="LightBlue",
                             borderwidth=0,
-                            yscrollcommand=self.scrollbar.set,
+                            yscrollcommand=self.vert_scrollbar.set,
                             padx=4,
                             insertwidth=2,
                             height=10,
@@ -64,7 +64,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         self.text.bind("<Up>", self._arrow_up)
         self.text.bind("<Down>", self._arrow_down)
-        self.scrollbar['command'] = self.text.yview
+        self.vert_scrollbar['command'] = self.text.yview
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         

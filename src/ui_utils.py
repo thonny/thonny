@@ -282,15 +282,15 @@ class PanelBook(ttk.Notebook):
 class TreeFrame(ttk.Frame):
     def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
         ttk.Frame.__init__(self, master)
-        self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         if show_scrollbar:
-            self.scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+            self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
         
         self.tree = ttk.Treeview(self, columns=columns, displaycolumns=displaycolumns, 
-                                 yscrollcommand=self.scrollbar.set)
+                                 yscrollcommand=self.vert_scrollbar.set)
         self.tree['show'] = 'headings'
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
-        self.scrollbar['command'] = self.tree.yview
+        self.vert_scrollbar['command'] = self.tree.yview
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
@@ -302,21 +302,6 @@ class TreeFrame(ttk.Frame):
     def on_select(self, event):
         pass
     
-class TextFrame(ttk.Frame):
-    def __init__(self, master, text_font):
-        ttk.Frame.__init__(self, master)
-        self.scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        self.text = tk.Text(self, font=text_font,
-                            borderwidth=0,
-                            yscrollcommand=self.scrollbar.set,
-                            padx=4,
-                            insertwidth=2)
-        self.text.grid(row=0, column=0, sticky=tk.NSEW)
-        self.scrollbar['command'] = self.text.yview
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
     
 
 class TextWrapper:
@@ -409,7 +394,44 @@ class TextWrapper:
         if e.char in ("\r", "\n", " "):
             self.text.edit_separator()
         log_user_event(KeyPressEvent(self, e, self.text.index(tk.INSERT)))
+
+
+class TextFrame(ttk.Frame, TextWrapper):
+    def __init__(self, master, readonly=False):
+        ttk.Frame.__init__(self, master)
+        
+        self.readonly = readonly
+        self.vert_scrollbar = AutoScrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+        self.hor_scrollbar = AutoScrollbar(self, orient=tk.HORIZONTAL)
+        self.hor_scrollbar.grid(row=1, column=0, sticky=tk.NSEW)
+        self.text = tk.Text(self,
+                            borderwidth=0,
+                            yscrollcommand=self.vert_scrollbar.set,
+                            xscrollcommand=self.hor_scrollbar.set,
+                            padx=4,
+                            insertwidth=2,
+                            wrap='none')
+        self.text.grid(row=0, column=0, sticky=tk.NSEW)
+        self.vert_scrollbar['command'] = self.text.yview
+        self.hor_scrollbar['command'] = self.text.xview
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        TextWrapper.__init__(self)
+        
+        
+    def _user_text_insert(self, *args, **kw):
+        if not self.readonly:
+            TextWrapper._user_text_insert(self, *args, **kw)
     
+    def _user_text_delete(self, *args, **kw):
+        if not self.readonly:
+            TextWrapper._user_text_delete(self, *args, **kw)
+    
+    def set_content(self, content):
+        TextWrapper._user_text_delete(self, "1.0", tk.END)
+        TextWrapper._user_text_insert(self, "1.0", content)
 
 def running_on_windows():
     return tk._default_root.call('tk', 'windowingsystem') == "win32"
@@ -651,7 +673,7 @@ def notebook_contains(nb, child):
 
 class AutoScrollbar(ttk.Scrollbar):
     # http://effbot.org/zone/tkinter-autoscrollbar.htm
-    # a scrollbar that hides itself if it's not needed.  only
+    # a vert_scrollbar that hides itself if it's not needed.  only
     # works if you use the grid geometry manager.
     def set(self, lo, hi):
         if float(lo) <= 0.0 and float(hi) >= 1.0:
