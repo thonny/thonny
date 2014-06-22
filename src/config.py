@@ -15,6 +15,7 @@ defaults = {
         "values_in_heap" : False,
         "friendly_values" : True,
         "cwd" : os.path.expanduser("~"),
+        "show_double_underscore_names" : False,
         "language" : "en"
     },
     "debugging" : {

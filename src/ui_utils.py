@@ -294,6 +294,7 @@ class TreeFrame(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
+        self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
         
     def _clear_tree(self):
         for child_id in self.tree.get_children():
@@ -302,7 +303,8 @@ class TreeFrame(ttk.Frame):
     def on_select(self, event):
         pass
     
-    
+    def on_double_click(self, event):
+        pass
 
 class TextWrapper:
     # Used for getting read-only effect
@@ -676,10 +678,13 @@ class AutoScrollbar(ttk.Scrollbar):
     # a vert_scrollbar that hides itself if it's not needed.  only
     # works if you use the grid geometry manager.
     def set(self, lo, hi):
+        # TODO: this can make GUI hang or max out CPU when scrollbar wobbles back and forth
+        """
         if float(lo) <= 0.0 and float(hi) >= 1.0:
             self.grid_remove()
         else:
             self.grid()
+        """
         ttk.Scrollbar.set(self, lo, hi)
     def pack(self, **kw):
         raise tk.TclError("cannot use pack with this widget")

@@ -6,6 +6,7 @@ from config import prefs
 from common import ActionResponse, InlineCommand
 import vm_proxy
 import tkinter as tk
+import tkinter.ttk as ttk
 import tkinter.font as tk_font
 import ast
 import os.path
@@ -64,7 +65,8 @@ class VariablesFrame(MemoryFrame):
         if variables:
             for name in sorted(variables.keys()):
                 
-                if not name.startswith("__"): # TODO: consult prefs
+                if (not name.startswith("__")
+                    or prefs["show_double_underscore_names"]):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
                     self.tree.set(node_id, "id", format_object_id(variables[name].id))
@@ -98,6 +100,9 @@ class LocalsFrame(VariablesFrame):
 class AttributesFrame(VariablesFrame):   
     def on_select(self, event):
         pass
+    
+    def on_double_click(self, event):
+        VariablesFrame.on_select(self, event)
     
 
 class HeapFrame(MemoryFrame):
@@ -137,7 +142,7 @@ class HeapFrame(MemoryFrame):
                 
     
 
-class ObjectInspectorFrame(ScrollableFrame):
+class ObjectInspector(ScrollableFrame):
     def __init__(self, master):
         
         ScrollableFrame.__init__(self, master)
@@ -162,8 +167,11 @@ class ObjectInspectorFrame(ScrollableFrame):
                              highlightthickness = 0,
                              state="readonly"
                              )
-            value.grid(row=row, column=1, sticky=tk.NSEW, pady=2)
-            
+            if row > 0:
+                value.grid(row=row, column=1, columnspan=3, 
+                       sticky=tk.NSEW, pady=2)
+            else:
+                value.grid(row=row, column=1, sticky=tk.NSEW, pady=2)
             return value
         
         self.id_entry   = _add_main_attribute(0, "id")
@@ -174,24 +182,66 @@ class ObjectInspectorFrame(ScrollableFrame):
         
         self._add_block_label(5, "Attributes")
         self.attributes_frame = AttributesFrame(self.grid_frame)
-        self.attributes_frame.grid(row=6, column=0, columnspan=2, sticky=tk.NSEW, padx=(0,10))
+        self.attributes_frame.grid(row=6, column=0, columnspan=4, sticky=tk.NSEW, padx=(0,10))
         self.attributes_frame.configure(border=1)
         self.attributes_frame.vert_scrollbar.grid_remove()
         
         self.grid_frame.grid_remove()
         
+        # navigation 
+        self.create_navigation_link(2, " << ", self.navigate_back)
+        self.create_navigation_link(3, " >> ", self.navigate_forward, (0,10))
+        self.back_links = []
+        self.forward_links = []
+        
         # type-specific inspectors
         self.current_type_specific_inspector = None
         self.current_type_specific_label = None
         self.type_specific_inspectors = [ 
-            FileHandleInspector(self.grid_frame)
+            FileHandleInspector(self.grid_frame),
+            FunctionInspector(self.grid_frame),
+            StringInspector(self.grid_frame),
         ]
-        
     
+    def create_navigation_link(self, col, text, action, padx=0):
+        link = tk.Label(self.grid_frame,
+                        text=text,
+                        background=CALM_WHITE,
+                        foreground="blue",
+                        cursor="hand2")
+        link.grid(row=0, column=col, sticky=tk.NE, padx=padx)
+        link.bind("<Button-1>", action)
+    
+    def navigate_back(self, event):
+        print("back")
+        if len(self.back_links) == 0:
+            return
+        
+        self.forward_links.append(self.object_id)
+        self._show_object_by_id(self.back_links.pop(), True)
+    
+    def navigate_forward(self, event):
+        if len(self.forward_links) == 0:
+            return
+        print("forward")
+    
+        self.back_links.append(self.object_id)
+        self._show_object_by_id(self.forward_links.pop(), True)
+        
+        
     def show_object(self, event):
         object_id = get_event_data(event)
+        self._show_object_by_id(object_id)
+        
+    def _show_object_by_id(self, object_id, via_navigation=False):
         
         if self.winfo_ismapped() and self.object_id != object_id:
+            if not via_navigation and self.object_id != None:
+                if self.object_id in self.back_links:
+                    self.back_links.remove(self.object_id)
+                self.back_links.append(self.object_id)
+                self.forward_links.clear()
+                
             self.object_id = object_id
             update_entry_text(self.id_entry, format_object_id(object_id))
             self.update_info(None)
@@ -214,7 +264,7 @@ class ObjectInspectorFrame(ScrollableFrame):
     def request_object_info(self): 
         vm_proxy.send_command(InlineCommand(command="get_object_info",
                                             object_id=self.object_id,
-                                            all_attributes=False)) # TODO: consult configuration
+                                            all_attributes=prefs["show_double_underscore_names"])) 
                     
     def update_info(self, object_info):
         self.object_info = object_info
@@ -251,19 +301,19 @@ class ObjectInspectorFrame(ScrollableFrame):
                 self.current_type_specific_label = None
                 
             if type_specific_inspector != None:
-                self.current_type_specific_label = self._add_block_label (
-                    3, type_specific_inspector.get_caption())
+                self.current_type_specific_label = self._add_block_label (3, "")
                 
                 type_specific_inspector.grid(row=4, 
                                              column=0, 
-                                             columnspan=2, 
+                                             columnspan=4, 
                                              sticky=tk.NSEW,
                                              padx=(0,10))
                 
             self.current_type_specific_inspector = type_specific_inspector
         
         if self.current_type_specific_inspector != None:
-            self.current_type_specific_inspector.update_info(object_info)
+            self.current_type_specific_inspector.update_info(object_info,
+                                                             self.current_type_specific_label)
     
     def goto_type(self, event):
         if self.object_info != None:
@@ -273,7 +323,7 @@ class ObjectInspectorFrame(ScrollableFrame):
     
     def _add_block_label(self, row, caption):
         label = tk.Label(self.grid_frame, bg=CALM_WHITE, text=caption)
-        label.grid(row=row, column=0, columnspan=2, sticky="nsew", pady=(10,0))
+        label.grid(row=row, column=0, columnspan=4, sticky="nsew", pady=(20,0))
         return label
             
     def update_memory_model(self):
@@ -292,26 +342,77 @@ class FileHandleInspector(TextFrame):
         return ("file_content" in object_info
                 or "file_error" in object_info)
     
-    def get_caption(self):
-        return "Content and position"
-    
-    def update_info(self, object_info):
+    def update_info(self, object_info, label):
         
         assert "file_content" in object_info
         content = object_info["file_content"]
-        line_count = len(content.splitlines())
-        self.text.configure(height=min(line_count, 10))
+        line_count_sep = len(content.split("\n"))
+        line_count_term = len(content.splitlines())
+        char_count = len(content)
+        self.text.configure(height=min(line_count_sep, 10))
         self.set_content(content)
         
-        if "file_tell" in object_info and object_info["file_tell"] > 0:
-            # f.tell() gives num of bytes read (minus some magic with linebreaks)
-            
-            file_bytes = content.encode(encoding=object_info["file_encoding"])
-            bytes_read = file_bytes[0:object_info["file_tell"]]
-            chars_read = len(bytes_read.decode(encoding=object_info["file_encoding"]))
-            
-            pos_index = "1.0+" + str(chars_read) + "c"
-            self.text.tag_add("read", "1.0", pos_index)
-            self.text.see(pos_index)
-            
+        assert "file_tell" in object_info
+        # f.tell() gives num of bytes read (minus some magic with linebreaks)
         
+        file_bytes = content.encode(encoding=object_info["file_encoding"])
+        bytes_read = file_bytes[0:object_info["file_tell"]]
+        read_content = bytes_read.decode(encoding=object_info["file_encoding"])
+        read_char_count = len(read_content)
+        read_line_count_term = (len(content.splitlines())
+                                - len(content[read_char_count:].splitlines()))
+        
+        pos_index = "1.0+" + str(read_char_count) + "c"
+        self.text.tag_add("read", "1.0", pos_index)
+        self.text.see(pos_index)
+        
+        label.configure(text="Content (read %d/%d %s, %d/%d %s)" 
+                        % (read_char_count,
+                           char_count,
+                           "symbol" if char_count == 1 else "symbols",  
+                           read_line_count_term,
+                           line_count_term,
+                           "line" if line_count_term == 1 else "lines"))
+            
+            
+            
+class FunctionInspector(TextFrame):
+    
+    def __init__(self, master):
+        TextFrame.__init__(self, master, readonly=True)
+        self.config(borderwidth=1)
+        self.text.configure(background="white")
+
+    def applies_to(self, object_info):
+        return "source" in object_info
+    
+    def update_info(self, object_info, label):
+        line_count = len(object_info["source"].split("\n"))
+        self.text.configure(height=min(line_count, 15))
+        self.set_content(object_info["source"])
+        label.configure(text="Code")
+                
+            
+class StringInspector(TextFrame):
+    
+    def __init__(self, master):
+        TextFrame.__init__(self, master, readonly=True)
+        self.config(borderwidth=1)
+        self.text.configure(background="white")
+
+    def applies_to(self, object_info):
+        return object_info["type"] == repr(str)
+    
+    def update_info(self, object_info, label):
+        content = ast.literal_eval(object_info["repr"])
+        line_count_sep = len(content.split("\n"))
+        line_count_term = len(content.splitlines())
+        self.text.configure(height=min(line_count_sep, 10))
+        self.set_content(content)
+        label.configure(text="Content (%d %s, %d %s)" 
+                        % (len(content),
+                           "symbol" if len(content) == 1 else "symbols",
+                           line_count_term, 
+                           "line" if line_count_term == 1 else "lines"))
+        
+    

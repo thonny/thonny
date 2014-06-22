@@ -9,6 +9,7 @@ import _io
 import traceback
 import types
 import logging
+import pydoc
 
 import builtins
 
@@ -41,6 +42,7 @@ class VM:
     def __init__(self):
         #print(sys.argv, file=sys.stderr)
         self._heap = {} # TODO: weakref.WeakValueDictionary() ??
+        pydoc.pager = pydoc.plainpager
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
@@ -179,6 +181,9 @@ class VM:
             
             if isinstance(value, _io.TextIOWrapper):
                 self._add_file_handler_info(value, info)
+            elif ("function" in str(type(value)).lower()
+                  or "method" in str(type(value)).lower()):
+                self._add_function_info(value, info)
             
             return InlineResponse(object_info=info)
         else:
@@ -199,6 +204,12 @@ class VM:
         except:
             pass
         
+    def _add_function_info(self, value, info):
+        try:
+            info["source"] = inspect.getsource(value)
+            # findsource gives code for modules???
+        except:
+            pass
         
     def _cmd_get_globals(self, cmd):
         pass

@@ -114,6 +114,7 @@ class VMProxy:
             if data == '':
                 break
             else:
+                print("MSG", data)
                 msg = parse_message(data)
                 if hasattr(msg, "cwd"):
                     self.cwd = msg.cwd
