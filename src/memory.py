@@ -33,6 +33,7 @@ class MemoryFrame(TreeFrame):
     def show_selected_object_info(self):
         iid = self.tree.focus()
         if iid != '':
+            # NB! Assuming id is second column!
             object_id = parse_object_id(self.tree.item(iid)['values'][1])
             generate_event(self, "<<ObjectSelect>>", object_id)
     
@@ -117,8 +118,8 @@ class HeapFrame(MemoryFrame):
         self.tree.column('id', width=100, anchor=tk.W, stretch=False)
         self.tree.column('value', width=150, anchor=tk.W, stretch=True)
         
-        self.tree.heading('id', text='Value ID', anchor=tk.W)
-        self.tree.heading('value', text='Description', anchor=tk.W) 
+        self.tree.heading('id', text='ID', anchor=tk.W)
+        self.tree.heading('value', text='Value', anchor=tk.W) 
 
     def _update_data(self, data):
         self._clear_tree()
@@ -512,7 +513,7 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
 
 class DictInspector(MemoryFrame, TypeSpecificInspector):
     def __init__(self, master):
-        MemoryFrame.__init__(self, master, ('id', 'key_id', 'key', 'value'))
+        MemoryFrame.__init__(self, master, ('key_id', 'id', 'key', 'value'))
         self.configure(border=1)
         #self.vert_scrollbar.grid_remove()
         self.tree.column('key_id', width=100, anchor=tk.W, stretch=False)
