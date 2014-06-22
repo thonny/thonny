@@ -1,3 +1,6 @@
+def kala():
+    pass
+
 pass
 if True:
     pass
@@ -17,23 +20,21 @@ if True:
         pass
     pass
 pass
-f = open("ascii.txt", encoding="UTF-8")
 
-s1 = "tere"
-s2 = """
-Veidi pikem
-tekst asdfa sd fas as as da s as dasadf asd asd asd asdasd a df'
-siia sdfgsdf sdfg sdgf sd
-asdf
-asdf
-asdf
-asdf
-asdf
-asdf
-asdf
-asdf
-asdf
-asdf
-asdf
-"""
-s3 = ""
+s = ""
+list0 = []
+list1 = [1]
+list3 = [1,2,3]
+list_list = [1,[], [1,2,3]]
+
+set0 = set()
+set1 = {'a'}
+set3 = {1,2,3}
+
+tuple0 = ()
+tuple1 = (4,)
+tuple_tuple = ((1,2), (3,4))
+
+d1 = {}
+d2 = {1:'üks', 2:'kaks'}
+d2p = {'üks':1, 'kaks':{1,2,3}}

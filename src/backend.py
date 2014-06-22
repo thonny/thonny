@@ -42,7 +42,7 @@ class VM:
     def __init__(self):
         #print(sys.argv, file=sys.stderr)
         self._heap = {} # TODO: weakref.WeakValueDictionary() ??
-        pydoc.pager = pydoc.plainpager
+        pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
@@ -184,6 +184,12 @@ class VM:
             elif ("function" in str(type(value)).lower()
                   or "method" in str(type(value)).lower()):
                 self._add_function_info(value, info)
+            elif (isinstance(value, list) 
+                  or isinstance(value, tuple)
+                  or isinstance(value, set)):
+                self._add_elements_info(value, info)
+            elif (isinstance(value, dict)):
+                self._add_entries_info(value, info)
             
             return InlineResponse(object_info=info)
         else:
@@ -210,6 +216,17 @@ class VM:
             # findsource gives code for modules???
         except:
             pass
+        
+    def _add_elements_info(self, value, info):
+        info["elements"] = []
+        for element in value:
+            info["elements"].append(self.export_value(element))
+        
+    def _add_entries_info(self, value, info):
+        info["entries"] = []
+        for key in value:
+            info["entries"].append((self.export_value(key),
+                                     self.export_value(value[key])))
         
     def _cmd_get_globals(self, cmd):
         pass

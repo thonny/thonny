@@ -6,15 +6,13 @@ from config import prefs
 from common import ActionResponse, InlineCommand
 import vm_proxy
 import tkinter as tk
-import tkinter.ttk as ttk
 import tkinter.font as tk_font
 import ast
-import os.path
 
 
 def format_object_id(object_id):
-    #return "@" + str(object_id)
-    return hex(object_id).upper().replace("X", "x")
+    # this format aligns with how Python shows memory addresses
+    return "0x" + hex(object_id)[2:].rjust(8,'0').upper()
 
 def parse_object_id(object_id_repr):
     return int(object_id_repr, base=16)
@@ -31,6 +29,13 @@ class MemoryFrame(TreeFrame):
         
     def change_font_size(self, delta):
         pass
+
+    def show_selected_object_info(self):
+        iid = self.tree.focus()
+        if iid != '':
+            object_id = parse_object_id(self.tree.item(iid)['values'][1])
+            generate_event(self, "<<ObjectSelect>>", object_id)
+    
     
         
 class VariablesFrame(MemoryFrame):
@@ -42,7 +47,7 @@ class VariablesFrame(MemoryFrame):
         self.tree.column('value', width=450, anchor=tk.W, stretch=True)
         
         self.tree.heading('name', text='Name', anchor=tk.W) 
-        self.tree.heading('id', text='Id', anchor=tk.W)
+        self.tree.heading('id', text='Value ID', anchor=tk.W)
         self.tree.heading('value', text='Value', anchor=tk.W)
         
         self.update_memory_model()
@@ -73,12 +78,7 @@ class VariablesFrame(MemoryFrame):
                     self.tree.set(node_id, "value", variables[name].short_repr)
     
     def on_select(self, event):
-        iid = self.tree.focus()
-        if iid != '':
-            object_id = parse_object_id(self.tree.item(iid)['values'][1])
-            # self.event_generate("<<ObjectSelect>>", serial=object_id)
-            generate_event(self, "<<ObjectSelect>>", object_id)
-            
+        self.show_selected_object_info()
         
 class GlobalsFrame(VariablesFrame):
     def __init__(self, master):
@@ -97,12 +97,17 @@ class LocalsFrame(VariablesFrame):
     def handle_vm_message(self, event):
         pass
 
-class AttributesFrame(VariablesFrame):   
+class AttributesFrame(VariablesFrame):
+    def __init__(self, master):
+        VariablesFrame.__init__(self, master)
+        self.configure(border=1)
+        self.vert_scrollbar.grid_remove()
+       
     def on_select(self, event):
         pass
     
     def on_double_click(self, event):
-        VariablesFrame.on_select(self, event)
+        self.show_selected_object_info()
     
 
 class HeapFrame(MemoryFrame):
@@ -112,7 +117,7 @@ class HeapFrame(MemoryFrame):
         self.tree.column('id', width=100, anchor=tk.W, stretch=False)
         self.tree.column('value', width=150, anchor=tk.W, stretch=True)
         
-        self.tree.heading('id', text='Id', anchor=tk.W)
+        self.tree.heading('id', text='Value ID', anchor=tk.W)
         self.tree.heading('value', text='Description', anchor=tk.W) 
 
     def _update_data(self, data):
@@ -140,7 +145,8 @@ class HeapFrame(MemoryFrame):
                 vm_proxy.send_command(InlineCommand(command="get_heap"))
                 """
                 
-    
+
+        
 
 class ObjectInspector(ScrollableFrame):
     def __init__(self, master):
@@ -183,14 +189,12 @@ class ObjectInspector(ScrollableFrame):
         self._add_block_label(5, "Attributes")
         self.attributes_frame = AttributesFrame(self.grid_frame)
         self.attributes_frame.grid(row=6, column=0, columnspan=4, sticky=tk.NSEW, padx=(0,10))
-        self.attributes_frame.configure(border=1)
-        self.attributes_frame.vert_scrollbar.grid_remove()
         
         self.grid_frame.grid_remove()
         
         # navigation 
-        self.create_navigation_link(2, " << ", self.navigate_back)
-        self.create_navigation_link(3, " >> ", self.navigate_forward, (0,10))
+        self.back_label = self.create_navigation_link(2, " << ", self.navigate_back)
+        self.forward_label = self.create_navigation_link(3, " >> ", self.navigate_forward, (0,10))
         self.back_links = []
         self.forward_links = []
         
@@ -201,6 +205,8 @@ class ObjectInspector(ScrollableFrame):
             FileHandleInspector(self.grid_frame),
             FunctionInspector(self.grid_frame),
             StringInspector(self.grid_frame),
+            ElementsInspector(self.grid_frame),
+            DictInspector(self.grid_frame),
         ]
     
     def create_navigation_link(self, col, text, action, padx=0):
@@ -211,9 +217,9 @@ class ObjectInspector(ScrollableFrame):
                         cursor="hand2")
         link.grid(row=0, column=col, sticky=tk.NE, padx=padx)
         link.bind("<Button-1>", action)
+        return link
     
     def navigate_back(self, event):
-        print("back")
         if len(self.back_links) == 0:
             return
         
@@ -223,12 +229,10 @@ class ObjectInspector(ScrollableFrame):
     def navigate_forward(self, event):
         if len(self.forward_links) == 0:
             return
-        print("forward")
     
         self.back_links.append(self.object_id)
         self._show_object_by_id(self.forward_links.pop(), True)
-        
-        
+
     def show_object(self, event):
         object_id = get_event_data(event)
         self._show_object_by_id(object_id)
@@ -244,7 +248,7 @@ class ObjectInspector(ScrollableFrame):
                 
             self.object_id = object_id
             update_entry_text(self.id_entry, format_object_id(object_id))
-            self.update_info(None)
+            self.set_object_info(None)
             self.request_object_info()
     
     def handle_vm_message(self, msg):
@@ -252,9 +256,9 @@ class ObjectInspector(ScrollableFrame):
             if hasattr(msg, "object_info") and msg.object_info["id"] == self.object_id:
                 if hasattr(msg, "not_found") and msg.not_found:
                     self.object_id = None
-                    self.update_info(None)
+                    self.set_object_info(None)
                 else:
-                    self.update_info(msg.object_info)
+                    self.set_object_info(msg.object_info)
             elif (isinstance(msg, ActionResponse)
                   and not hasattr(msg, "error") 
                   and self.object_id != None):
@@ -266,7 +270,7 @@ class ObjectInspector(ScrollableFrame):
                                             object_id=self.object_id,
                                             all_attributes=prefs["show_double_underscore_names"])) 
                     
-    def update_info(self, object_info):
+    def set_object_info(self, object_info):
         self.object_info = object_info
         if object_info == None:
             update_entry_text(self.repr_entry, "")
@@ -285,6 +289,15 @@ class ObjectInspector(ScrollableFrame):
             if not self.grid_frame.winfo_ismapped():
                 self.grid_frame.grid()
     
+        if self.back_links == []:
+            self.back_label.config(foreground="lightgray", cursor="arrow")
+        else:
+            self.back_label.config(foreground="blue", cursor="hand2")
+    
+        if self.forward_links == []:
+            self.forward_label.config(foreground="lightgray", cursor="arrow")
+        else:
+            self.forward_label.config(foreground="blue", cursor="hand2")
     
     def update_type_specific_info(self, object_info):
         type_specific_inspector = None
@@ -312,7 +325,7 @@ class ObjectInspector(ScrollableFrame):
             self.current_type_specific_inspector = type_specific_inspector
         
         if self.current_type_specific_inspector != None:
-            self.current_type_specific_inspector.update_info(object_info,
+            self.current_type_specific_inspector.set_object_info(object_info,
                                                              self.current_type_specific_label)
     
     def goto_type(self, event):
@@ -328,8 +341,20 @@ class ObjectInspector(ScrollableFrame):
             
     def update_memory_model(self):
         self.attributes_frame.update_memory_model()
+        if self.current_type_specific_inspector != None:
+            self.current_type_specific_inspector.update_memory_model()
 
-class FileHandleInspector(TextFrame):
+class TypeSpecificInspector:
+    def update_memory_model(self):
+        pass
+    
+    def set_object_info(self, object_info, label):
+        pass
+    
+    def applies_to(self, object_info):
+        return False
+    
+class FileHandleInspector(TextFrame, TypeSpecificInspector):
     
     def __init__(self, master):
         TextFrame.__init__(self, master, readonly=True)
@@ -342,7 +367,7 @@ class FileHandleInspector(TextFrame):
         return ("file_content" in object_info
                 or "file_error" in object_info)
     
-    def update_info(self, object_info, label):
+    def set_object_info(self, object_info, label):
         
         assert "file_content" in object_info
         content = object_info["file_content"]
@@ -366,7 +391,7 @@ class FileHandleInspector(TextFrame):
         self.text.tag_add("read", "1.0", pos_index)
         self.text.see(pos_index)
         
-        label.configure(text="Content (read %d/%d %s, %d/%d %s)" 
+        label.configure(text="Read %d/%d %s, %d/%d %s" 
                         % (read_char_count,
                            char_count,
                            "symbol" if char_count == 1 else "symbols",  
@@ -376,7 +401,7 @@ class FileHandleInspector(TextFrame):
             
             
             
-class FunctionInspector(TextFrame):
+class FunctionInspector(TextFrame, TypeSpecificInspector):
     
     def __init__(self, master):
         TextFrame.__init__(self, master, readonly=True)
@@ -386,14 +411,14 @@ class FunctionInspector(TextFrame):
     def applies_to(self, object_info):
         return "source" in object_info
     
-    def update_info(self, object_info, label):
+    def set_object_info(self, object_info, label):
         line_count = len(object_info["source"].split("\n"))
         self.text.configure(height=min(line_count, 15))
         self.set_content(object_info["source"])
         label.configure(text="Code")
                 
             
-class StringInspector(TextFrame):
+class StringInspector(TextFrame, TypeSpecificInspector):
     
     def __init__(self, master):
         TextFrame.__init__(self, master, readonly=True)
@@ -403,16 +428,138 @@ class StringInspector(TextFrame):
     def applies_to(self, object_info):
         return object_info["type"] == repr(str)
     
-    def update_info(self, object_info, label):
+    def set_object_info(self, object_info, label):
         content = ast.literal_eval(object_info["repr"])
         line_count_sep = len(content.split("\n"))
         line_count_term = len(content.splitlines())
         self.text.configure(height=min(line_count_sep, 10))
         self.set_content(content)
-        label.configure(text="Content (%d %s, %d %s)" 
+        label.configure(text="%d %s, %d %s" 
                         % (len(content),
                            "symbol" if len(content) == 1 else "symbols",
                            line_count_term, 
                            "line" if line_count_term == 1 else "lines"))
         
+
+class ElementsInspector(MemoryFrame, TypeSpecificInspector):
+    def __init__(self, master):
+        MemoryFrame.__init__(self, master, ('index', 'id', 'value'))
+        self.configure(border=1)
+        #self.vert_scrollbar.grid_remove()
+        self.tree.column('index', width=40, anchor=tk.W, stretch=False)
+        self.tree.column('id', width=750, anchor=tk.W, stretch=True)
+        self.tree.column('value', width=750, anchor=tk.W, stretch=True)
+        
+        self.tree.heading('index', text='Index', anchor=tk.W) 
+        self.tree.heading('id', text='Value ID', anchor=tk.W)
+        self.tree.heading('value', text='Value', anchor=tk.W)
+    
+        self.elements_have_indices = None
+        self.update_memory_model()
+        
+        
+    def update_memory_model(self):
+        self._update_columns()
+        
+    def _update_columns(self):
+        if prefs["values_in_heap"]:
+            if self.elements_have_indices:
+                self.tree.configure(displaycolumns=("index", "id"))
+            else:
+                self.tree.configure(displaycolumns=("id",))
+        else:
+            if self.elements_have_indices:
+                self.tree.configure(displaycolumns=("index", "value"))
+            else:
+                self.tree.configure(displaycolumns=("value"))
+
+    def applies_to(self, object_info):
+        return "elements" in object_info
+    
+    def on_select(self, event):
+        pass
+    
+    def on_double_click(self, event):
+        self.show_selected_object_info()
+    
+    def set_object_info(self, object_info, label):
+        assert "elements" in object_info
+        
+        self.elements_have_indices = object_info["type"] in (repr(tuple), repr(list))
+        self._update_columns()
+        
+        self._clear_tree()
+        index = 0
+        for element in object_info["elements"]:
+            node_id = self.tree.insert("", "end")
+            if self.elements_have_indices:
+                self.tree.set(node_id, "index", index)
+            else:
+                self.tree.set(node_id, "index", "")
+                
+            self.tree.set(node_id, "id", format_object_id(element.id))
+            self.tree.set(node_id, "value", element.short_repr)
+            index += 1
+
+        count = len(object_info["elements"])
+        self.tree.config(height=min(count,10))
+        
+        
+        label.configure (
+            text=("%d element" if count == 1 else "%d elements") % count
+        ) 
+        
+
+class DictInspector(MemoryFrame, TypeSpecificInspector):
+    def __init__(self, master):
+        MemoryFrame.__init__(self, master, ('id', 'key_id', 'key', 'value'))
+        self.configure(border=1)
+        #self.vert_scrollbar.grid_remove()
+        self.tree.column('key_id', width=100, anchor=tk.W, stretch=False)
+        self.tree.column('key', width=100, anchor=tk.W, stretch=False)
+        self.tree.column('id', width=750, anchor=tk.W, stretch=True)
+        self.tree.column('value', width=750, anchor=tk.W, stretch=True)
+        
+        self.tree.heading('key_id', text='Key ID', anchor=tk.W) 
+        self.tree.heading('key', text='Key', anchor=tk.W) 
+        self.tree.heading('id', text='Value ID', anchor=tk.W)
+        self.tree.heading('value', text='Value', anchor=tk.W)
+    
+        self.update_memory_model()
+        
+    def update_memory_model(self):
+        if prefs["values_in_heap"]:
+            self.tree.configure(displaycolumns=("key_id", "id"))
+        else:
+            self.tree.configure(displaycolumns=("key", "value"))
+
+    def applies_to(self, object_info):
+        return "entries" in object_info
+
+    def on_select(self, event):
+        pass
+    
+    def on_double_click(self, event):
+        # NB! this selects value
+        self.show_selected_object_info()
+
+    def set_object_info(self, object_info, label):
+        assert "entries" in object_info
+        
+        self._clear_tree()
+        for key, value in object_info["entries"]:
+            node_id = self.tree.insert("", "end")
+            self.tree.set(node_id, "key_id", format_object_id(key.id))
+            self.tree.set(node_id, "key", key.short_repr)
+            self.tree.set(node_id, "id", format_object_id(value.id))
+            self.tree.set(node_id, "value", value.short_repr)
+
+        count = len(object_info["entries"])
+        self.tree.config(height=min(count,10))
+        
+        label.configure (
+            text=("%d entry" if count == 1 else "%d entries") % count
+        ) 
+        
+        self.update_memory_model()
     

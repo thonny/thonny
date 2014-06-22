@@ -285,6 +285,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 self.colorer.on_insert(index, chars, tags)
             self._update_line_numbers()
             self.update_level_boxes()
+            self.text.see(index)
 
     def _user_text_delete(self, index1, index2=None):
         # cursor_pos = self.text.index(tk.INSERT)
