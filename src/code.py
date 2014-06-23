@@ -200,6 +200,7 @@ class Editor(ttk.Frame):
         self._code_view.text.edit_modified(False)
         self.event_generate(EDITOR_STATE_CHANGE)
         
+        self.master.remember_open_files()
         return self._filename
     
     def change_font_size(self, delta):
@@ -266,6 +267,10 @@ class EditorNotebook(ttk.Notebook):
         
         self._main_editor = None # references the editor of main file during execution
         
+        global editor_book
+        editor_book = self
+        
+        """
         # TODO: temporary
         sfuffdir = os.path.normpath(os.path.join(dirname(abspath(__file__)), "..", "stuff"))
         self._open_file(os.path.join(sfuffdir, "euler1.py"))
@@ -277,9 +282,16 @@ class EditorNotebook(ttk.Notebook):
         self.show_file(os.path.join(sfuffdir, "multilevel.py"))
         self.show_file(os.path.join(sfuffdir, "ast_test.py"))
         #self._open_file(progdir + "/../atidb.py")
+        """
         
-        global editor_book
-        editor_book = self
+        # open files from last session
+        for filename in prefs["open_files"].split(";"):
+            if os.path.exists(filename):
+                self._open_file(filename)
+        
+        # don't leave editor part empty 
+        if len(self.winfo_children()) == 0:
+            self.cmd_new_file()
         
         
     def cmd_new_file(self):
@@ -292,10 +304,12 @@ class EditorNotebook(ttk.Notebook):
         filename = askopenfilename()
         if filename != "":
             self.show_file(filename)
+            self.remember_open_files()
     
     def cmd_close_file(self):
         # TODO: ask in case file is modified
         self.forget(self.select());
+        self.remember_open_files()
     
     def get_current_editor(self):
         for child in self.winfo_children():
@@ -404,6 +418,15 @@ class EditorNotebook(ttk.Notebook):
         else:
             return None
     
+    def remember_open_files(self):
+        filenames = []
+        for child in self.winfo_children():
+            filename = child.get_filename()
+            if filename != None:
+                filenames.append(filename)
+        
+        prefs["open_files"] = ";".join(filenames)
+            
 
 class ExpressionView(tk.Text):
     def __init__(self, codeview):

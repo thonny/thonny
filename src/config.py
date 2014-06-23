@@ -15,7 +15,8 @@ defaults = {
         "values_in_heap" : False,
         "cwd" : os.path.expanduser("~"),
         "show_double_underscore_names" : False,
-        "language" : "en"
+        "language" : "en",
+        "open_files" : "",
     },
     "debugging" : {
         "detailed_steps" : False,
@@ -77,11 +78,13 @@ class ThonnyConfigParser(ConfigParser):
             self.set(section, option, repr(value))
             
     def save(self):
+        
         if not os.path.exists(os.path.dirname(self.filename)):
-            os.makedirs(os.path.dirname(self.filename), 0o600)
+            os.makedirs(os.path.dirname(self.filename), 0o700)
             
         with codecs.open(self.filename, 'w', "UTF-8") as fp: 
             self.write(fp)
+        
 
 def _parse_descriptor(descriptor):
     if "." in descriptor:
