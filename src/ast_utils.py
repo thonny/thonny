@@ -375,7 +375,7 @@ def fix_ast_problems(tree, source_lines, tokens):
     
     # Problem 4:
     # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
-    # similar problem is with Attributes
+    # similar problem is with Attributes and Subscripts
 
     def fix_node(node):
         for child in get_ordered_child_nodes(node):
@@ -392,36 +392,33 @@ def fix_ast_problems(tree, source_lines, tokens):
             and isinstance(node.value, ast.Str)):
             # they share the wrong offset of their triple-quoted child
             # get position from already fixed child
+            # TODO: try whether this works when child is in parentheses
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
                         
-        elif isinstance(node, ast.BinOp):
+        elif (isinstance(node, ast.BinOp)
+            and compare_node_positions(node, node.left) > 0):
             # fix binop problem
             # get position from an already fixed child
             node.lineno = node.left.lineno
             node.col_offset = node.left.col_offset
             
         elif (isinstance(node, ast.Call) 
-            and node.lineno == node.func.lineno 
-            and node.col_offset > node.func.col_offset):
+            and compare_node_positions(node, node.func) > 0):
             # Python 3.4 call problem
             # get position from an already fixed child
-            # (If the func and args paren start on different lines
-            # then the lineno is wrong for both and I don't know how to fix this)
             node.lineno = node.func.lineno
             node.col_offset = node.func.col_offset
             
         elif (isinstance(node, ast.Attribute) 
-            and node.lineno == node.value.lineno 
-            and node.col_offset > node.value.col_offset):
+            and compare_node_positions(node, node.value) > 0):
             # Python 3.4 attribute problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
             
         elif (isinstance(node, ast.Subscript) 
-            and node.lineno == node.value.lineno 
-            and node.col_offset > node.value.col_offset):
-            # Python 3.4 attribute problem ...
+            and compare_node_positions(node, node.value) > 0):
+            # Python 3.4 Subscript problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
         
@@ -457,6 +454,18 @@ def fix_ast_problems(tree, source_lines, tokens):
             return ast.iter_child_nodes(node)    
     
     fix_node(tree)
+
+def compare_node_positions(n1, n2):
+    if n1.lineno > n2.lineno:
+        return 1
+    elif n1.lineno < n2.lineno:
+        return -1
+    elif n1.col_offset > n2.col_offset:
+        return 1
+    elif n2.col_offset < n2.col_offset:
+        return -1
+    else:
+        return 0
 
 if __name__ == "__main__":
     """
