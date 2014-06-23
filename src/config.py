@@ -78,10 +78,6 @@ class ThonnyConfigParser(ConfigParser):
             self.set(section, option, repr(value))
             
     def save(self):
-        
-        if not os.path.exists(os.path.dirname(self.filename)):
-            os.makedirs(os.path.dirname(self.filename), 0o700)
-            
         with codecs.open(self.filename, 'w', "UTF-8") as fp: 
             self.write(fp)
         

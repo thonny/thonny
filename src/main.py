@@ -31,6 +31,7 @@ import user_logging
 
 
 THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
+THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
 logger = logging.getLogger("thonny.main")
 logger.setLevel(logging.DEBUG)
@@ -731,7 +732,9 @@ class Thonny(tk.Tk):
         log_user_event(ProgramLoseFocusEvent());
         
 
-if __name__ == "__main__":        
+if __name__ == "__main__":
+    if not os.path.exists(THONNY_USER_DIR):
+        os.makedirs(THONNY_USER_DIR, 0o700)
     logger.addHandler(logging.StreamHandler(sys.stdout))
     Thonny().mainloop()
 
