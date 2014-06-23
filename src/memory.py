@@ -245,7 +245,7 @@ class ObjectInspector(ScrollableFrame):
                 if self.object_id in self.back_links:
                     self.back_links.remove(self.object_id)
                 self.back_links.append(self.object_id)
-                self.forward_links.clear()
+                del self.forward_links[:]
                 
             self.object_id = object_id
             update_entry_text(self.id_entry, format_object_id(object_id))

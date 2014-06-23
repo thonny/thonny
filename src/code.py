@@ -22,6 +22,7 @@ import ui_utils
 import misc_utils
 import memory
 import logging
+from ui_utils import running_on_mac_os, generate_event
 
 try:
     import tkinter as tk
@@ -461,8 +462,15 @@ class ExpressionView(tk.Text):
                     value_str = msg.value.short_repr
                 
                 #print("ins", start_mark, value_str)
-                self.insert(start_mark, value_str, ('value', 'after', id_str))
-                #self.insert(start_mark, value_str) # TODO:
+                object_tag = "object_" + str(msg.value.id)
+                self.insert(start_mark, value_str, ('value', 'after', object_tag))
+                if running_on_mac_os():
+                    sequence = "<Command-Button-1>"
+                else:
+                    sequence = "<Control-Button-1>"
+                self.tag_bind(object_tag, sequence,
+                              lambda _: generate_event(self, "<<ObjectSelect>>", msg.value.id))
+                    
                 self._update_size()
                 
             else:
