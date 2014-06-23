@@ -95,6 +95,22 @@ def get_last_child(node):
         else:
             return node.test
     
+    elif isinstance(node, ast.Subscript):
+        if hasattr(node.slice, "value"):
+            return node.slice.value
+        else:
+            assert (hasattr(node.slice, "lower") 
+                    and hasattr(node.slice, "upper")
+                    and hasattr(node.slice, "step"))
+            
+            if node.slice.step != None:
+                return node.slice.step
+            elif node.slice.upper != None:
+                return node.slice.upper
+            else:
+                return node.slice.lower
+            
+    
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True # There is last child, but I don't know which it will be
     
@@ -398,10 +414,14 @@ def fix_ast_problems(tree, source_lines, tokens):
         elif (isinstance(node, ast.Attribute) 
             and node.lineno == node.value.lineno 
             and node.col_offset > node.value.col_offset):
-            # Python 3.4 attribute problem
-            # get position from an already fixed child
-            # (If the func and args paren start on different lines
-            # then the lineno is wrong for both and I don't know how to fix this)
+            # Python 3.4 attribute problem ...
+            node.lineno = node.value.lineno
+            node.col_offset = node.value.col_offset
+            
+        elif (isinstance(node, ast.Subscript) 
+            and node.lineno == node.value.lineno 
+            and node.col_offset > node.value.col_offset):
+            # Python 3.4 attribute problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
         

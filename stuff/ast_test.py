@@ -1,2 +1,1 @@
-x = "kala"
-x.upper().lower()
+[42][0]

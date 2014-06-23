@@ -715,14 +715,14 @@ class FancyTracer(Executor):
             node_tags = original_args.get("node_tags")
             value = original_args.get("value")
             
+            #self._debug("IAE", node_tags, value)
             if (node_tags != None 
                 and ("last_child" in node_tags
                      or "or_arg" in node_tags and value
                      or "and_arg" in node_tags and not value)
-                and ("child_of_expression_statement" not in node_tags)
+                and ("child_of_expression_statement" not in node_tags) # don't want to go to expression statement again
                 ):
                 
-                #self._debug("IAE", node_tags, value)
                 # next step will be finalizing evaluation of parent of current expr
                 # so let's say we're before that parent expression
                 parent_range = TextRange(*original_args.get("parent_range"))
