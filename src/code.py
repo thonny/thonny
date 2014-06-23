@@ -275,6 +275,7 @@ class EditorNotebook(ttk.Notebook):
         self._open_file(os.path.join(sfuffdir, "kahest_suurim.py"))
         self.show_file(os.path.join(sfuffdir, "kahest_suurim.py"))
         self.show_file(os.path.join(sfuffdir, "multilevel.py"))
+        self.show_file(os.path.join(sfuffdir, "ast_test.py"))
         #self._open_file(progdir + "/../atidb.py")
         
         global editor_book
@@ -453,11 +454,8 @@ class ExpressionView(tk.Text):
                 self.delete(start_mark, end_mark)
                 
                 id_str = memory.format_object_id(msg.value.id)
-                if (prefs["values_in_heap"]
-                    and not (msg.value.is_function and prefs["friendly_values"])):
+                if prefs["values_in_heap"]:
                     value_str = id_str
-                elif prefs["friendly_values"]:
-                    value_str = msg.value.friendly_repr
                 else:
                     value_str = msg.value.short_repr
                 

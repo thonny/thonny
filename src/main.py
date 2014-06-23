@@ -372,6 +372,14 @@ class Thonny(tk.Tk):
         while not self._vm.message_queue.empty():
             msg = self._vm.message_queue.get()
             
+            # skip some events
+            if (isinstance(msg, DebuggerResponse) 
+                and hasattr(msg, "tags") 
+                and "call_function" in msg.tags
+                and not prefs["debugging.expand_call_functions"]):
+                
+                self._check_issue_debugger_command(DebuggerCommand(command="step"))
+                continue
                 
             if hasattr(msg, "success") and not msg.success:
                 print("_poll_vm_messages, not success")
@@ -389,12 +397,11 @@ class Thonny(tk.Tk):
             
             # automatically advance from some events
             if (isinstance(msg, DebuggerResponse) 
-                and msg.state in ("after_statement",
-                                  "after_suite",
-                                  "before_suite")
+                and msg.state in ("after_statement", "after_suite", "before_suite")
                 and not prefs["debugging.detailed_steps"]):
                 
                 self._check_issue_debugger_command(DebuggerCommand(command="step"))
+            
                 
                 
         self.after(50, self._poll_vm_messages)

@@ -13,13 +13,13 @@ defaults = {
     "general" : {
         "advanced_debugging" : False,
         "values_in_heap" : False,
-        "friendly_values" : True,
         "cwd" : os.path.expanduser("~"),
         "show_double_underscore_names" : False,
         "language" : "en"
     },
     "debugging" : {
         "detailed_steps" : False,
+        "expand_call_functions" : False,
     },
     "view" : {
         "code_font_size"    : None,

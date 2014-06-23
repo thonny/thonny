@@ -1,2 +1,2 @@
-teksti sisesta mine asdfasdasdf asdfsadf
-asfdasdfasdfasfd
+x = "kala"
+x.upper().lower()

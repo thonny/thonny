@@ -181,8 +181,8 @@ class VM:
             
             if isinstance(value, _io.TextIOWrapper):
                 self._add_file_handler_info(value, info)
-            elif ("function" in str(type(value)).lower()
-                  or "method" in str(type(value)).lower()):
+            elif (type(value) in (types.BuiltinFunctionType, types.BuiltinMethodType,
+                                 types.FunctionType, types.LambdaType, types.MethodType)):
                 self._add_function_info(value, info)
             elif (isinstance(value, list) 
                   or isinstance(value, tuple)
@@ -303,15 +303,6 @@ class VM:
         result = ValueInfo(id=id(value),
                          short_repr=repr(value), # TODO:
                          type_name=type_name)
-        
-        if type(value) in (types.BuiltinFunctionType, types.BuiltinMethodType,
-                           types.FunctionType, types.LambdaType, types.MethodType,
-                           type(int)): 
-            result.friendly_repr = value.__name__
-            result.is_function = True
-        else:
-            result.friendly_repr = result.short_repr
-            result.is_function = False
         
         return result
     
@@ -464,6 +455,7 @@ class FancyTracer(Executor):
         self._thread_exception = None
         self._install_marker_functions()
         self._custom_stack = []
+        self._expand_call_functions = False # TODO: take it from configuration
     
     def _set_current_command(self, cmd):
         self._current_command = cmd
@@ -799,12 +791,13 @@ class FancyTracer(Executor):
                   and event == "after_expression"):
                 fdebug(frame, "sending value")
                 # normal expression completion
-                return DebuggerResponse(value=self._vm.export_value(args["value"]))
+                return DebuggerResponse(value=self._vm.export_value(args["value"]),
+                                        tags=args.get("node_tags", ""))
             
             elif (cmd.state in ("before_statement", "before_statement_again")
                   and event == "after_statement"):
                 # normal statement completion
-                return DebuggerResponse()
+                return DebuggerResponse(tags=args.get("node_tags", ""))
             
             elif (cmd.state in ("before_statement", "before_statement_again")
                   and event == "after_expression"):
@@ -826,9 +819,13 @@ class FancyTracer(Executor):
             # TODO: do I need to hide this? Maybe I just forget about this statement/expression?
             # TODO: what about exception?
             if cmd.state == "before_expression":
-                return DebuggerResponse(state="after_expression", focus=cmd.focus)
+                return DebuggerResponse(state="after_expression", 
+                                        focus=cmd.focus,
+                                        tags="") 
             else:
-                return DebuggerResponse(state="after_statement", focus=cmd.focus)
+                return DebuggerResponse(state="after_statement",
+                                        focus=cmd.focus,
+                                        tags="")
             
 
     """
@@ -950,12 +947,13 @@ class FancyTracer(Executor):
             return None
         
         elif event == 'after_expression':
-            return DebuggerResponse(value=self._vm.export_value(args["value"]))
+            return DebuggerResponse(value=self._vm.export_value(args["value"]),
+                                    tags=args.get("node_tags", ""))
         
         elif event in ('before_statement', 'before_expression',
                        'before_statement_again', 'before_expression_again',
                        'after_statement', 'after_expression'):
-            return DebuggerResponse()
+            return DebuggerResponse(tags=args.get("node_tags", ""))
         
         elif event in ('before_suite', 'after_suite'):
             return DebuggerResponse(stmt_ranges=list(map(lambda arg: TextRange(*arg), args['stmt_ranges'])))
@@ -1095,6 +1093,10 @@ class FancyTracer(Executor):
                     add_tag(handler, "first_except_stmt")
             
                 
+            # make sure every node has this field
+            if not hasattr(node, "tags"):
+                node.tags = set()
+            
     
         
     def _insert_statement_markers(self, root):
@@ -1176,26 +1178,35 @@ class FancyTracer(Executor):
             def generic_visit(self, node):
                 if (isinstance(node, _ast.expr)
                     and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))):
-                    
-                    # before marker 
-                    before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
-                    ast.copy_location(before_marker, node)
-                    
-                    # after marker
-                    after_marker = ast.Call (
-                        func=ast.Name(id=AFTER_EXPRESSION_MARKER, ctx=ast.Load()),
-                        args=[
-                            before_marker,
-                            tracer._create_tags_literal(node),
-                            ast.NodeTransformer.generic_visit(self, node),
-                            tracer._create_location_literal(node.parent_node if hasattr(node, "parent_node") else None)
-                        ],
-                        keywords=[]
-                    )
-                    ast.copy_location(after_marker, node)
-                    ast.fix_missing_locations(after_marker)
-                    
-                    return after_marker
+
+#                     if "call_function" in node.tags and not tracer._expand_call_functions:
+#                         # TODO: test with no-argument calls
+#                         
+#                         for child in ast.iter_child_nodes(node):
+#                             ast.NodeTransformer.generic_visit(self, child)
+#                             
+#                         return node
+#                     else:
+                        
+                        # before marker 
+                        before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
+                        ast.copy_location(before_marker, node)
+                        
+                        # after marker
+                        after_marker = ast.Call (
+                            func=ast.Name(id=AFTER_EXPRESSION_MARKER, ctx=ast.Load()),
+                            args=[
+                                before_marker,
+                                tracer._create_tags_literal(node),
+                                ast.NodeTransformer.generic_visit(self, node),
+                                tracer._create_location_literal(node.parent_node if hasattr(node, "parent_node") else None)
+                            ],
+                            keywords=[]
+                        )
+                        ast.copy_location(after_marker, node)
+                        ast.fix_missing_locations(after_marker)
+                        
+                        return after_marker
                 else:
                     return ast.NodeTransformer.generic_visit(self, node)
         
@@ -1218,7 +1229,9 @@ class FancyTracer(Executor):
         if hasattr(node, "tags"):
             # maybe set would perform as well, but I think string is faster
             return ast_utils.value_to_literal(",".join(node.tags))
+            #self._debug("YESTAGS")
         else:
+            #self._debug("NOTAGS " + str(node))
             return ast_utils.value_to_literal("")
     
     def _create_simple_marker_call(self, node, fun_name):

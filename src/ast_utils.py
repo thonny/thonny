@@ -359,6 +359,7 @@ def fix_ast_problems(tree, source_lines, tokens):
     
     # Problem 4:
     # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
+    # similar problem is with Attributes
 
     def fix_node(node):
         for child in get_ordered_child_nodes(node):
@@ -384,7 +385,7 @@ def fix_ast_problems(tree, source_lines, tokens):
             node.lineno = node.left.lineno
             node.col_offset = node.left.col_offset
             
-        if (isinstance(node, ast.Call) 
+        elif (isinstance(node, ast.Call) 
             and node.lineno == node.func.lineno 
             and node.col_offset > node.func.col_offset):
             # Python 3.4 call problem
@@ -393,6 +394,16 @@ def fix_ast_problems(tree, source_lines, tokens):
             # then the lineno is wrong for both and I don't know how to fix this)
             node.lineno = node.func.lineno
             node.col_offset = node.func.col_offset
+            
+        elif (isinstance(node, ast.Attribute) 
+            and node.lineno == node.value.lineno 
+            and node.col_offset > node.value.col_offset):
+            # Python 3.4 attribute problem
+            # get position from an already fixed child
+            # (If the func and args paren start on different lines
+            # then the lineno is wrong for both and I don't know how to fix this)
+            node.lineno = node.value.lineno
+            node.col_offset = node.value.col_offset
         
         else:
             # Let's hope this node has correct lineno, and byte-based col_offset

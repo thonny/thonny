@@ -1,25 +1,14 @@
-def kala():
-    pass
+def pala(x):
+    return x+1
+    
+def kala(x):
+    return pala
 
-pass
-if True:
-    pass
-    print("yay" * 100)
-    if False:
-        pass
-        pass
-        pass
-    else:
-        if False:
-            pass
-        else:
-            pass
-            if True:
-                pass
-            pass
-        pass
-    pass
-pass
+x = "abc"
+
+print(x.upper().lower())
+
+
 
 s = ""
 list0 = []
