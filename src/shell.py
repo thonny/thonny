@@ -10,7 +10,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
-from ui_utils import TextWrapper
+from ui_utils import TextWrapper, generate_event, running_on_mac_os
 from common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
 from user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
     ShellInputEvent
@@ -64,6 +64,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         self.text.bind("<Up>", self._arrow_up)
         self.text.bind("<Down>", self._arrow_down)
+        self.text.bind("<KeyPress>", self._text_key_press, "+")
+        self.text.bind("<KeyRelease>", self._text_key_release, "+")
         self.vert_scrollbar['command'] = self.text.yview
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
@@ -80,7 +82,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.tag_configure("automagic", foreground="DarkGray")
         #self.text.tag_configure("value", foreground="DarkGreen")
         #self.text.tag_configure("value", foreground="#B25300")
-        self.text.tag_configure("value", foreground="DarkBlue")
+        self.text.tag_configure("value", foreground="DarkBlue") # TODO: see also _text_key_press and _text_key_release
         self.text.tag_configure("error", foreground="Red")
         
         self.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent, font=ui_utils.IO_FONT)
@@ -89,15 +91,22 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.tag_configure("stderr", foreground="Red")
         
         self.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
+        self.text.tag_configure("inactive", foreground="#aaaaaa")
         
-        
-        # create 2 marks: one shows the place where user entered but not-yet-submitted
-        # input starts, other shows where next incoming program output should be inserted
+        # create 3 marks: input_start shows the place where user entered but not-yet-submitted
+        # input starts, output_end shows the end of last output,
+        # output_insert shows where next incoming program output should be inserted
         self.text.mark_set("input_start", "end-1c")
         self.text.mark_gravity("input_start", tk.LEFT)
         
+        self.text.mark_set("output_end", "end-1c")
+        self.text.mark_gravity("output_end", tk.LEFT)
+        
         self.text.mark_set("output_insert", "end-1c")
         self.text.mark_gravity("output_insert", tk.RIGHT)
+        
+        
+        self.active_object_tags = set()
     
         
         
@@ -124,7 +133,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 self._insert_text_directly(msg.data[1:], ("io", msg.stream_name))
             else:
                 self._insert_text_directly(msg.data, ("io", msg.stream_name))
-                
+            
+            self.text.mark_set("output_end", self.text.index("end-1c"))
             self.text.see("end")
             
         elif isinstance(msg, ToplevelResponse):
@@ -142,8 +152,20 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 if value_repr != "None":
                     if prefs["values_in_heap"]:
                         value_repr = memory.format_object_id(msg.value_info.id)
-                    self._insert_text_directly(value_repr + "\n", ("toplevel", "value"))
+                    object_tag = "object_" + str(msg.value_info.id)
+                    self._insert_text_directly(value_repr + "\n", ("toplevel",
+                                                                   "value",
+                                                                   object_tag))
+                    if running_on_mac_os():
+                        sequence = "<Command-Button-1>"
+                    else:
+                        sequence = "<Control-Button-1>"
+                    self.text.tag_bind(object_tag, sequence,
+                                       lambda _: generate_event(self, "<<ObjectSelect>>", msg.value_info.id))
+                    
+                    self.active_object_tags.add(object_tag)
             
+            self.text.mark_set("output_end", self.text.index("end-1c"))
             self._insert_prompt()
             self._try_submit_input()
             self.text.see("end")
@@ -340,9 +362,10 @@ class ShellFrame (ttk.Frame, TextWrapper):
           
                 if prefs["values_in_heap"]:
                     cmd.heap_required = True
-
                 
-                 
+                if cmd.command[0].isupper(): # this means reset
+                    self._invalidate_current_data()
+                    
                 self._vm.send_command(cmd)
                 
             except:
@@ -396,7 +419,29 @@ class ShellFrame (ttk.Frame, TextWrapper):
         #print(command, self._command_history_current_index, self._command_history)
         self.text.delete("input_start", "end")
         self._user_text_insert("input_start", cmd_line)
+    
+    def _text_key_press(self, event):
+        # TODO: this underline may confuse, when user is just copying on pasting
+        # try to add this underline only when mouse is over the value
+        """
+        if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
+            self.text.tag_configure("value", foreground="DarkBlue", underline=1)
+        """
+    
+    def _text_key_release(self, event):
+        if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
+            self.text.tag_configure("value", foreground="DarkBlue", underline=0)
+    
+    def _invalidate_current_data(self):
+        end_index = self.text.index("output_end")
+        print("inva", end_index)
         
+        self.text.tag_add("inactive", "1.0", end_index)
+        self.text.tag_remove("value", "1.0", end_index)
+        
+        while len(self.active_object_tags) > 0:
+            self.text.tag_remove(self.active_object_tags.pop(), "1.0", "end")
+    
     def demo(self):
         TextWrapper._user_text_insert(self, "end", """Python 3.2.3
 >>> %run "c:/my documents/kool/prog/katsetus.py"

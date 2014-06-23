@@ -4,7 +4,7 @@ def kala():
 pass
 if True:
     pass
-    print("yay")
+    print("yay" * 100)
     if False:
         pass
         pass
