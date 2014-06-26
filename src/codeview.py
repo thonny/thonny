@@ -169,6 +169,8 @@ class CodeView(ttk.Frame, TextWrapper):
             else:
                 tag = "exception"
             
+            # TODO: duplicated in main
+            # better just skip those events
             if (msg.state in ("before_statement", "before_statement_again")
                 or (prefs["debugging.detailed_steps"]
                     and msg.state in ("after_statement",
@@ -253,7 +255,6 @@ class CodeView(ttk.Frame, TextWrapper):
                 color_level = hex(255 - level * 5 - (1 if odd else 0))[2:]
                 color = "#" + color_level + color_level + color_level
                 
-            print("COLOOOOOOOOO", kind, color, level)
             self.statement_tags.add(tag_name)
             self.text.tag_configure(tag_name, background=color, borderwidth=1, relief=tk.SOLID)
             #self.text.tag_raise(tag_name)

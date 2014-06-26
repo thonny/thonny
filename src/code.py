@@ -12,7 +12,7 @@ It can present program execution information in two ways:
 """
 
 import os.path
-from os.path import dirname, basename, abspath
+from os.path import basename
 import ast
 import sys
 from common import DebuggerResponse
