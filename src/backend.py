@@ -79,7 +79,8 @@ class VM:
     def handle_command(self, cmd):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
         
-        debug("MAINLOOP: %s", cmd)
+        #if cmd.command != "tkupdate":
+        #    debug("MAINLOOP: %s", cmd)
         
         try:
             handler = getattr(self, "_cmd_" + cmd.command)
@@ -89,16 +90,19 @@ class VM:
             try:
                 response = handler(cmd)
                 
-                # add state information
-                if hasattr(cmd, "globals_required") and cmd.globals_required:
-                    response.globals = {cmd.globals_required : self.export_globals(cmd.globals_required)}
-                    
-                if hasattr(cmd, "heap_required") and cmd.heap_required:
-                    response.heap = self.export_heap()
-                    
-                response.cwd = os.getcwd()
+                if response != None:
                 
-                self._send_response(response)
+                    # TODO: ask explicitly for them with InlineRequest ??
+                    # add state information
+                    if hasattr(cmd, "globals_required") and cmd.globals_required:
+                        response.globals = {cmd.globals_required : self.export_globals(cmd.globals_required)}
+                        
+                    if hasattr(cmd, "heap_required") and cmd.heap_required:
+                        response.heap = self.export_heap()
+                        
+                    response.cwd = os.getcwd()
+                    
+                    self._send_response(response)
                 
             except:
                 #raise
@@ -158,6 +162,26 @@ class VM:
         
         return self._execute_source(cmd.cmd_line, filename, mode,
                    hasattr(cmd, "debug_mode") and cmd.debug_mode)
+    
+    def _cmd_tkupdate(self, cmd):
+        tkinter = sys.modules.get("tkinter")
+        if (tkinter == None or tkinter._default_root == None):
+            return
+        else:
+            # keep on top
+            # TODO: make this in different event and according to prefs
+            tkinter._default_root.wm_attributes("-topmost", 1)
+            
+            # advance the event loop
+            # http://bugs.python.org/issue989712
+            # http://bugs.python.org/file6090/run.py.diff
+            try:
+                while (tkinter._default_root != None 
+                       and tkinter._default_root.dooneevent(tkinter._tkinter.DONT_WAIT)):
+                    pass 
+            except:
+                pass
+    
     
     def _cmd_get_object_info(self, cmd):
         if cmd.object_id in self._heap:

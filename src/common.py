@@ -144,7 +144,7 @@ class DebuggerCommand(ActionCommand):
 class InlineCommand(Record):
     """
     Can be used both during debugging and between debugging.
-    Meant for sending variable and heap info requests
+    Initially meant for sending variable and heap info requests
     """
     pass
 

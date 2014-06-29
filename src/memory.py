@@ -12,7 +12,7 @@ import ast
 
 def format_object_id(object_id):
     # this format aligns with how Python shows memory addresses
-    return "0x" + hex(object_id)[2:].rjust(8,'0').upper()
+    return "0x" + hex(object_id)[2:].upper() #.rjust(8,'0')
 
 def parse_object_id(object_id_repr):
     return int(object_id_repr, base=16)

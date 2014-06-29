@@ -23,7 +23,8 @@ from shell import ShellFrame
 from memory import GlobalsFrame, HeapFrame, ObjectInspector
 import vm_proxy
 from browser import BrowseNotebook
-from common import DebuggerCommand, ToplevelCommand, DebuggerResponse
+from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
+    InlineCommand
 from ui_utils import Command, notebook_contains
 import user_logging
 
@@ -88,6 +89,7 @@ class Thonny(tk.Tk):
         
         # start listening to backend process
         self._poll_vm_messages()
+        self._advance_background_tk_mainloop()
         self.bind("<FocusIn>", self.on_get_focus, "+")
         self.bind("<FocusOut>", self.on_lose_focus, "+")
         # self.bind('<Expose>', self._expose, "+")
@@ -365,7 +367,9 @@ class Thonny(tk.Tk):
                 
             col += 1 
         
-        
+    def _advance_background_tk_mainloop(self):
+        self._vm.send_command(InlineCommand(command="tkupdate"))
+        self.after(50, self._advance_background_tk_mainloop)
         
     def _poll_vm_messages(self):
         # I chose polling instead of event_generate
