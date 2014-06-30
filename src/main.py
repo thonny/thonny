@@ -368,7 +368,8 @@ class Thonny(tk.Tk):
             col += 1 
         
     def _advance_background_tk_mainloop(self):
-        self._vm.send_command(InlineCommand(command="tkupdate"))
+        if self._vm.get_state() == "toplevel":
+            self._vm.send_command(InlineCommand(command="tkupdate"))
         self.after(50, self._advance_background_tk_mainloop)
         
     def _poll_vm_messages(self):

@@ -168,10 +168,6 @@ class VM:
         if (tkinter == None or tkinter._default_root == None):
             return
         else:
-            # keep on top
-            # TODO: make this in different event and according to prefs
-            tkinter._default_root.wm_attributes("-topmost", 1)
-            
             # advance the event loop
             # http://bugs.python.org/issue989712
             # http://bugs.python.org/file6090/run.py.diff
