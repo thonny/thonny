@@ -718,7 +718,7 @@ class Thonny(tk.Tk):
     
     
     def new_user_log_file(self):
-        folder = os.path.join(THONNY_SRC_DIR, "..", "user_logs")
+        folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
         if not os.path.exists(folder):
             os.makedirs(folder)
             
