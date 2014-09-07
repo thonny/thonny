@@ -34,7 +34,7 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 EXCEPTION_TRACEBACK_LIMIT = 100    
 
 logger = logging.getLogger("thonny.backend")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.ERROR)
 debug = logger.debug
 info = logger.info
 

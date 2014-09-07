@@ -636,7 +636,7 @@ class Command:
         else:
             # tk._default_root is our beloved main window             
             tk._default_root.bell()
-            print("Cmd execute: cmd_" + self.cmd_id + " not enabled")
+            #print("Cmd execute: cmd_" + self.cmd_id + " not enabled")
     
     def is_enabled(self):
         target = self._find_target()

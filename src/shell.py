@@ -433,8 +433,11 @@ class ShellFrame (ttk.Frame, TextWrapper):
             self.text.tag_configure("value", foreground="DarkBlue", underline=0)
     
     def _invalidate_current_data(self):
+        """
+        Grayes out input & output displayed so far
+        """
         end_index = self.text.index("output_end")
-        print("inva", end_index)
+        #print("inva", end_index)
         
         self.text.tag_add("inactive", "1.0", end_index)
         self.text.tag_remove("value", "1.0", end_index)
