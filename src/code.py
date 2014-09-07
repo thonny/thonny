@@ -135,7 +135,6 @@ class Editor(ttk.Frame):
     """
     def __init__(self, master, filename=None):
         ttk.Frame.__init__(self, master)
-        
         assert isinstance(master, EditorNotebook)
         
         self._code_view = CodeView(self)
@@ -308,8 +307,11 @@ class EditorNotebook(ttk.Notebook):
     
     def cmd_close_file(self):
         # TODO: ask in case file is modified
-        self.forget(self.select());
-        self.remember_open_files()
+        current_editor = self.get_current_editor()
+        if current_editor: 
+            self.forget(current_editor)
+            current_editor.destroy()
+            self.remember_open_files()
     
     def get_current_editor(self):
         for child in self.winfo_children():
@@ -424,7 +426,6 @@ class EditorNotebook(ttk.Notebook):
             filename = child.get_filename()
             if filename != None:
                 filenames.append(filename)
-        
         prefs["open_files"] = ";".join(filenames)
             
 
