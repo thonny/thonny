@@ -196,28 +196,48 @@ def parse_message(msg_string):
 
 
 def parse_shell_command(cmd_line):
-    parts = shlex.split(cmd_line.strip(), posix=False)
-    
-    if len(parts) == 0:
-        return ToplevelCommand(command="pass")
-    
-    elif parts[0][0] == '%':
+    if cmd_line.startswith("%"):
+        parts = shlex.split(cmd_line.strip(), posix=False)
+        
         command = parts[0][1:]
         
         if command == "Reset":
             assert len(parts) == 1
             return ToplevelCommand(command="Reset")
         elif command == "cd":
-            return ToplevelCommand(command="cd", path=cmd_line.split(maxsplit=1)[1].strip())
+            if len(parts) == 2:
+                return ToplevelCommand(command="cd", path=unquote_path(parts[1]))
+            elif len(parts) > 2:
+                # extra flexibility for those who forget the quotes
+                return ToplevelCommand(command="cd", 
+                                       path=unquote_path(cmd_line.split(maxsplit=1)[1]))
         elif command.lower() in ("run", "debug"):
             if len(parts) > 2:
                 raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
-            return ToplevelCommand(command=command, filename=parts[1], args=parts[2:])
+            return ToplevelCommand(command=command,
+                                   filename=unquote_path(parts[1]),
+                                   args=parts[2:])
         else:
             raise AssertionError("Unknown magic command: " + command)
-          
+        
+    elif len(cmd_line.strip()) == 0:
+        return ToplevelCommand(command="pass")
     else:
         return ToplevelCommand(command="python", cmd_line=cmd_line)
+
+
+def quote_path_for_shell(path):
+    # http://stackoverflow.com/a/25208652/261181
+    try:
+        from shlex import quote
+    except ImportError:
+        from pipes import quote
+    
+    return quote(path)
+
+def unquote_path(path):
+    # TODO: may be incomplete
+    return path.strip("'").strip('"').replace("\\\\", "\\")
 
 
 def print_structure(o):

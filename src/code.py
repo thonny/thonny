@@ -283,13 +283,11 @@ class EditorNotebook(ttk.Notebook):
         """
         
         # open files from last session
+        """ TODO: they should go only to recent files
         for filename in prefs["open_files"].split(";"):
             if os.path.exists(filename):
                 self._open_file(filename)
-        
-        # don't leave editor part empty 
-        if len(self.winfo_children()) == 0:
-            self.cmd_new_file()
+        """
         
         
     def cmd_new_file(self):

@@ -24,10 +24,9 @@ from memory import GlobalsFrame, HeapFrame, ObjectInspector
 import vm_proxy
 from browser import BrowseNotebook
 from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
-    InlineCommand
+    InlineCommand, quote_path_for_shell
 from ui_utils import Command, notebook_contains
 import user_logging
-import shlex
 
 
 
@@ -99,9 +98,15 @@ class Thonny(tk.Tk):
     
     def _handle_cmd_line_files(self):
         
-        for filename in sys.argv[1:]:
+        filenames = sys.argv[1:]
+        for filename in filenames:
             if os.path.exists(filename):
                 self.editor_book.show_file(filename)
+        
+        if len(filenames) == 0:
+            self.editor_book.cmd_new_file()
+        
+        
     
     def _init_widgets(self):
         
@@ -482,7 +487,7 @@ class Thonny(tk.Tk):
             and self._vm.cwd != script_dir):
             # create compound command
             # start with %cd
-            cmd_line = "%cd " + shlex.quote(script_dir) + "\n"
+            cmd_line = "%cd " + quote_path_for_shell(script_dir) + "\n"
             next_cwd = script_dir
         else:
             # create simple command
@@ -491,7 +496,7 @@ class Thonny(tk.Tk):
         
         # append main command (Run, run, Debug or debug)
         rel_filename = relpath(filename, next_cwd)
-        cmd_line += "%" + cmd_name + " " + shlex.quote(rel_filename) + "\n"
+        cmd_line += "%" + cmd_name + " " + quote_path_for_shell(rel_filename) + "\n"
         if text_range != None:
             "TODO: append range indicators" 
         
