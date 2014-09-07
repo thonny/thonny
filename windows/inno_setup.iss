@@ -8,7 +8,7 @@ AppName=Thonny
 AppVersion={#AppVer}
 AppVerName=Thonny {#AppVer}
 ;AppComments string is displayed on the "Support" dialog of the Add/Remove Programs Control Panel applet
-AppComments=Thonny {#AppVer}
+AppComments=Thonny is beginners' Python IDE
 AppPublisher=Aivar Annamaa
 AppPublisherURL=https://bitbucket.org/aivarannamaa/thonny
 AppSupportURL=https://bitbucket.org/aivarannamaa/thonny
@@ -39,15 +39,15 @@ Source: "ShortcutLauncher\Release\ShortcutLauncher.exe"; DestDir: "{app}"; DestN
 Source: "..\src\*.py"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\src\locale\*"; DestDir: "{app}\locale"; Flags: ignoreversion recursesubdirs
 Source: "..\src\res\*.gif"; DestDir: "{app}\res"; Flags: ignoreversion
-Source: "..\src\res\*.ico"; DestDir: "{app}\res"; Flags: ignoreversion
+;Source: "..\src\res\*.ico"; DestDir: "{app}\res"; Flags: ignoreversion
 Source: "..\src\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 ; TODO: AppUserModelID ? http://msdn.microsoft.com/en-us/library/windows/desktop/dd378459%28v=vs.85%29.aspx
 ; TODO: pinning?
-Name: "{group}\Thonny";         Filename: "{app}\Thonny.exe"; IconFilename: "{app}\res\thonny.ico"
-Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\res\thonny.ico"
-Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 ""{app}\main.py"""; IconFilename: "{app}\res\thonny.ico"
+Name: "{group}\Thonny";         Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
+Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
+Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"
 
 [Registry]
 
