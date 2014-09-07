@@ -87,7 +87,7 @@ def create_menubutton(master):
 
 def setup_style():
     style = ttk.Style()
-    print(style.theme_names())
+
     if 'xpnative' in style.theme_names():
         # gives better scrollbars in empty editors
         # and Python 2.7 and 3.1 don't have "vista" theme anyway
