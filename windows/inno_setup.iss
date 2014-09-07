@@ -47,7 +47,9 @@ Source: "..\src\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 ; TODO: pinning?
 Name: "{group}\Thonny";         Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
-Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"
+Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"
+; "-B" because when user executes Thonny, it doesn't have permission to write pyc files anyway. 
+; If installer did write these, it would possibly cause problems when python version is changed
 
 [Registry]
 

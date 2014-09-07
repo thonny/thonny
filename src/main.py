@@ -27,6 +27,7 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
     InlineCommand
 from ui_utils import Command, notebook_contains
 import user_logging
+import shlex
 
 
 
@@ -94,7 +95,13 @@ class Thonny(tk.Tk):
         self.bind("<FocusOut>", self.on_lose_focus, "+")
         # self.bind('<Expose>', self._expose, "+")
         # self.focus_force()
-
+        self._handle_cmd_line_files()
+    
+    def _handle_cmd_line_files(self):
+        
+        for filename in sys.argv[1:]:
+            if os.path.exists(filename):
+                self.editor_book.show_file(filename)
     
     def _init_widgets(self):
         
@@ -475,7 +482,7 @@ class Thonny(tk.Tk):
             and self._vm.cwd != script_dir):
             # create compound command
             # start with %cd
-            cmd_line = "%cd " + script_dir + "\n"
+            cmd_line = "%cd " + shlex.quote(script_dir) + "\n"
             next_cwd = script_dir
         else:
             # create simple command
@@ -484,7 +491,7 @@ class Thonny(tk.Tk):
         
         # append main command (Run, run, Debug or debug)
         rel_filename = relpath(filename, next_cwd)
-        cmd_line += "%" + cmd_name + " " + rel_filename + "\n"
+        cmd_line += "%" + cmd_name + " " + shlex.quote(rel_filename) + "\n"
         if text_range != None:
             "TODO: append range indicators" 
         

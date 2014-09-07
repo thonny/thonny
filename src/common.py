@@ -208,8 +208,7 @@ def parse_shell_command(cmd_line):
             assert len(parts) == 1
             return ToplevelCommand(command="Reset")
         elif command == "cd":
-            assert len(parts) == 2
-            return ToplevelCommand(command="cd", path=parts[1])
+            return ToplevelCommand(command="cd", path=cmd_line.split(maxsplit=1)[1].strip())
         elif command.lower() in ("run", "debug"):
             if len(parts) > 2:
                 raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))

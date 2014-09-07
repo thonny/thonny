@@ -187,10 +187,9 @@ class Editor(ttk.Frame):
             log_user_event(SaveAsEvent(self._code_view, filename))
                 
         
-        encoding = self.file_encoding or "UTF-8" 
-        
-        f = open(filename, mode="wb", )
         content = self._code_view.get_content()
+        encoding = self.file_encoding or "UTF-8" 
+        f = open(filename, mode="wb", )
         f.write(content.encode(encoding))
         f.close()
     
