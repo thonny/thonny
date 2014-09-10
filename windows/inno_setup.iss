@@ -47,13 +47,22 @@ Source: "..\src\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 ; TODO: pinning?
 Name: "{group}\Thonny";         Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
-Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"
+
+; TODO: use concrete pythonw.exe in order to let shortcut affect the pinning
+; When newer Python is installed, which is better a) Thonny keeps using the version fixed during its installation, or b) Thonny uses latest Python (via pyw.exe)
+Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
+;Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""d:\workspaces\python_stuff\thonny\src\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
 ; "-B" because when user executes Thonny, it doesn't have permission to write pyc files anyway. 
 ; If installer did write these, it would possibly cause problems when python version is changed
 
 [Registry]
 
 ; Register the application
+; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
+Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "Thonny"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "Thonny"; Flags: uninsdeletekey
+
+
 ; http://superuser.com/questions/51264/how-do-i-add-new-applications-to-the-set-default-programs-list-in-windows-vist
 Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Thonny"; ValueData: "Software\Thonny\Capabilities";  Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny";  Flags: uninsdeletekey
@@ -66,8 +75,6 @@ Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: 
 
 ; Register application and supported types
 Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\Thonny.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\Thonny.exe"; Flags: uninsdeletekey
-; TODO: next doesn't seem to work, see http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
-Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\FriendlyAppName"; ValueType: string; ValueName: "Thonny"; ValueData: ""; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\SupportedTypes"; ValueType: string; ValueName: ".py"; ValueData: ""; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\SupportedTypes"; ValueType: string; ValueName: ".pyw"; ValueData: ""; Flags: uninsdeletekey
 Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1"""; Flags: uninsdeletekey
