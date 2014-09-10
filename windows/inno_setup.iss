@@ -43,17 +43,14 @@ Source: "..\src\res\*.gif"; DestDir: "{app}\res"; Flags: ignoreversion
 Source: "..\src\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-; TODO: AppUserModelID ? http://msdn.microsoft.com/en-us/library/windows/desktop/dd378459%28v=vs.85%29.aspx
-; TODO: pinning?
 Name: "{group}\Thonny";         Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 
-; TODO: use concrete pythonw.exe in order to let shortcut affect the pinning
-; When newer Python is installed, which is better a) Thonny keeps using the version fixed during its installation, or b) Thonny uses latest Python (via pyw.exe)
-Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
-;Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""d:\workspaces\python_stuff\thonny\src\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
+; Using concrete pythonw.exe instead of pyw.exe in order to let shortcut affect the pinning
 ; "-B" because when user executes Thonny, it doesn't have permission to write pyc files anyway. 
 ; If installer did write these, it would possibly cause problems when python version is changed
+Name: "{app}\Thonny_shortcut";  Filename: "{code:GetPythonCommand}"; Parameters: "-B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
+;Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""d:\workspaces\python_stuff\thonny\src\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
 
 [Registry]
 
@@ -99,6 +96,48 @@ ClickFinish=
 
 
 [Code]
+
+function GetPythonFolder(version: string): string;
+var          
+  reg1 : string;
+  reg2 : string;
+begin
+  reg1 := 'SOFTWARE\Python\PythonCore\' + version + '\InstallPath';
+  reg2 := 'SOFTWARE\Python\PythonCore\Wow6432Node\' + version + '\InstallPath';
+
+  if not (RegQueryStringValue(HKLM, reg1, '', Result) 
+       or RegQueryStringValue(HKCU, reg1, '', Result)
+       or RegQueryStringValue(HKLM, reg2, '', Result)) then
+  begin
+    Result := '';
+  end
+end;
+
+function GetPythonCommand(Value: string): string;
+var          
+  Py32 : string;
+  Py33 : string;
+  Py34 : string;
+begin
+  Py34 := GetPythonFolder('3.4');
+  Py33 := GetPythonFolder('3.3');
+  Py32 := GetPythonFolder('3.2');
+
+  if Py34 <> '' then
+  begin
+    Result := Py34 + '\pythonw.exe';
+  end
+  else if Py33 <> '' then
+  begin
+    Result := Py33 + '\pythonw.exe';
+  end
+  else
+  begin
+    MsgBox('Could not find suitable Python version (3.3 or 3.4). Update the shortcut in Thonny folder after installation ends.',mbError,MB_OK);
+    Result := 'C:\Python34\pythonw.exe'
+  end
+end;
+
 procedure CurPageChanged(CurPageID: Integer);
 begin
   if CurPageID = wpLicense then
