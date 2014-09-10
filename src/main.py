@@ -465,7 +465,8 @@ class Thonny(tk.Tk):
         self.shell.change_font_size(delta)
         self.editor_book.change_font_size(delta)
         self.globals_frame.change_font_size(delta)
-        self.builtins_frame.change_font_size(delta)
+        # TODO:
+        #self.builtins_frame.change_font_size(delta)
         self.heap_frame.change_font_size(delta)
     
     def _execute_current(self, cmd_name, text_range=None):
