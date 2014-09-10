@@ -27,6 +27,7 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
     InlineCommand, quote_path_for_shell
 from ui_utils import Command, notebook_contains
 import user_logging
+from textwrap import dedent
 
 
 
@@ -46,6 +47,7 @@ gettext.translation('thonny',
 class Thonny(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        tk.Tk.report_callback_exception = self.on_tk_exception
         user_logging.USER_LOGGER = user_logging.UserEventLogger(self.new_user_log_file())
         
         self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
@@ -747,6 +749,21 @@ class Thonny(tk.Tk):
 
     def on_lose_focus(self, e):
         log_user_event(ProgramLoseFocusEvent());
+        
+    
+    def on_tk_exception(self, exc, val, tb):
+        # copied from tkinter.Tk.report_callback_exception
+        import traceback
+        # Aivar: following statement kills the process when run with pythonw.exe
+        # http://bugs.python.org/issue22384
+        #sys.stderr.write("Exception in Tkinter callback\n")
+        sys.last_type = exc
+        sys.last_value = val
+        sys.last_traceback = tb
+        traceback.print_exception(exc, val, tb)
+        
+        tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
+                                traceback.format_exc())
         
 
 if __name__ == "__main__":
