@@ -1,9 +1,9 @@
-#define AppVer "0.1"
+﻿#define AppVer "0.1"
 #define AppUserModelID "Thonny.Thonny"
 #define PyProgID "Thonny.py"
 
-; You can give PyVer and AppVer from command line, eg:
-; "C:\Program Files (x86)\Inno Setup 5\iscc" /dPyVer=2.8 /dAppVer=1.13 inno_setup.iss 
+; You can give AppVer from command line, eg:
+; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
 
 [Setup]
 AppId=Thonny
@@ -46,15 +46,16 @@ Source: "..\src\res\*.gif"; DestDir: "{app}\res"; Flags: ignoreversion
 Source: "..\src\VERSION"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\Thonny";         Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
-Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
+Name: "{userstartmenu}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
+Name: "{userdesktop}\Thonny";   Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 
 ; Using concrete pythonw.exe instead of pyw.exe in order to let shortcut affect the pinning
 ; "-B" because when user executes Thonny, it doesn't have permission to write pyc files anyway. 
 ; If installer did write these, it would possibly cause problems when python version is changed
-Name: "{app}\Thonny_shortcut";  Filename: "{code:GetPythonCommand}"; Parameters: "-B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
+Name: "{app}\Thonny";  Filename: "{code:GetPythonCommand}"; Parameters: "-B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
 
 [Registry]
+;Python.File
 
 ; Register the application
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
@@ -67,14 +68,16 @@ Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                 
 Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
 
-; Create ProgID (Thonny.py) for relating Thonny and Python file type
+; Add link to Thonny under existing Python.File ProgID
+Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
+
+; Create separate ProgID (Thonny.py) for relating Thonny and Python file type
+; These settings will be used when user chooses Thonny as default program for opening *.py files
 Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#PyProgID}\shell\Edit with Thonny"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#PyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
-
-; Relate ProgID with *.py and *.pyw extensions
+; Relate this ProgID with *.py and *.pyw extensions
 Root: HKCU; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#PyProgID}";   Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#PyProgID}";   Flags: uninsdeletekey
 
@@ -114,9 +117,12 @@ begin
   reg1 := 'SOFTWARE\Python\PythonCore\' + version + '\InstallPath';
   reg2 := 'SOFTWARE\Python\PythonCore\Wow6432Node\' + version + '\InstallPath';
 
-  if not (RegQueryStringValue(HKLM, reg1, '', Result) 
-       or RegQueryStringValue(HKCU, reg1, '', Result)
-       or RegQueryStringValue(HKLM, reg2, '', Result)) then
+  if not (RegQueryStringValue(HKLM64, reg1, '', Result) 
+       or RegQueryStringValue(HKCU64, reg1, '', Result)
+       or RegQueryStringValue(HKLM32, reg1, '', Result)
+       or RegQueryStringValue(HKCU32, reg1, '', Result)
+       or RegQueryStringValue(HKLM, reg2, '', Result)
+       ) then
   begin
     Result := '';
   end
@@ -124,13 +130,11 @@ end;
 
 function GetPythonCommand(Value: string): string;
 var          
-  Py32 : string;
-  Py33 : string;
   Py34 : string;
+  Py33 : string;
 begin
   Py34 := GetPythonFolder('3.4');
   Py33 := GetPythonFolder('3.3');
-  Py32 := GetPythonFolder('3.2');
 
   if Py34 <> '' then
   begin
@@ -143,7 +147,7 @@ begin
   else
   begin
     MsgBox('Could not find suitable Python version (3.3 or 3.4). Update the shortcut in Thonny folder after installation ends.',mbError,MB_OK);
-    Result := 'C:\Python34\pythonw.exe'
+    Result := 'C:\PythonXX\pythonw.exe'
   end
 end;
 

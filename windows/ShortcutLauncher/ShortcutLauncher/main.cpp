@@ -14,7 +14,7 @@ int __stdcall wWinMain(HINSTANCE hInstance,
 	lpFileName[wcsnlen_s(lpFileName, 1000)-4] = NULL; // could use PathRemoveExtensionW(lpFileName), but don't want that dependency
 
 	// construct shortcut path
-	wcscat_s(lpFileName, TEXT("_shortcut.lnk"));
+	wcscat_s(lpFileName, TEXT(".lnk"));
 
 	// TODO: check that shortcut exists
 

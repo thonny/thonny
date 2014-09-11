@@ -4,6 +4,7 @@ dist
 build
 */*.pyc
 user_logs/
+windows/ShortcutLauncher/ShortcutLauncher.v12.suo
 syntax: regexp
 ^MANIFEST$
 
