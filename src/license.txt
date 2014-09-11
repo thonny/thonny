@@ -2,3 +2,9 @@ Thonny will be open-source, free to use, but I haven't chosen the license yet.
 
 At the moment, you may try it out, but you should contact the original author,
 Aivar Annamaa (aivar.annamaa@ut.ee) if you want to redistribute or modify it.
+
+!!!
+!!! THONNY IS CURRENTLY OF BETA QUALITY, IT MAY CRASH, IT MAY LOSE YOUR WORK. 
+!!! Most likely it won't ruin anything else besides your mood and the files
+!!! you open with it, but WHO KNOWS!
+!!! 
