@@ -1,6 +1,6 @@
 ﻿#define AppVer "0.1"
 #define AppUserModelID "Thonny.Thonny"
-#define PyProgID "Thonny.py"
+#define ThonnyPyProgID "Thonny.py"
 
 ; You can give AppVer from command line, eg:
 ; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
@@ -11,7 +11,7 @@ AppName=Thonny
 AppVersion={#AppVer}
 AppVerName=Thonny {#AppVer}
 ;AppComments string is displayed on the "Support" dialog of the Add/Remove Programs Control Panel applet
-AppComments=Thonny is beginners' Python IDE
+AppComments=Thonny is Python IDE for beginners
 AppPublisher=Aivar Annamaa
 AppPublisherURL=https://bitbucket.org/aivarannamaa/thonny
 AppSupportURL=https://bitbucket.org/aivarannamaa/thonny
@@ -21,9 +21,7 @@ DirExistsWarning=auto
 UsePreviousAppDir=yes
 DefaultGroupName=Thonny
 DisableProgramGroupPage=yes
-;DisableDirPage=yes
 DisableReadyPage=yes
-;DisableWelcomePage=yes
 LicenseFile=..\src\license.txt
 OutputDir=dist
 OutputBaseFilename=Thonny-{#AppVer}
@@ -50,9 +48,7 @@ Name: "{userstartmenu}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{ap
 Name: "{userdesktop}\Thonny";   Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 
 ; Using concrete pythonw.exe instead of pyw.exe in order to let shortcut affect the pinning
-; "-B" because when user executes Thonny, it doesn't have permission to write pyc files anyway. 
-; If installer did write these, it would possibly cause problems when python version is changed
-Name: "{app}\Thonny";  Filename: "{code:GetPythonCommand}"; Parameters: "-B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
+Name: "{app}\Thonny";  Filename: "{code:GetPythonCommand}"; Parameters: """{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
 
 [Registry]
 ;Python.File
@@ -71,26 +67,25 @@ Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                 
 ; Add link to Thonny under existing Python.File ProgID
 Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
-; Create separate ProgID (Thonny.py) for relating Thonny and Python file type
+; Create separate ProgID (Thonny.py) which represents Thonny's ability to handle Python files
 ; These settings will be used when user chooses Thonny as default program for opening *.py files
-Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#PyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
 ; Relate this ProgID with *.py and *.pyw extensions
-Root: HKCU; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#PyProgID}";   Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#PyProgID}";   Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
 
-
-; Registering under Default Programs
+; Register Thonny under Default Programs
 ; http://superuser.com/questions/51264/how-do-i-add-new-applications-to-the-set-default-programs-list-in-windows-vist
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/cc144154%28v=vs.85%29.aspx
-;Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Thonny"; ValueData: "Software\Thonny\Capabilities";  Flags: uninsdeletekey
-;Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny";  Flags: uninsdeletekey
-;Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "Thonny";  Flags: uninsdeletekey
-;Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".py"; ValueData: "Thonny.py";  Flags: uninsdeletekey
-
-
+; Unfortunately HKLM can't be written without elevating permissions. I chose user-install over Default Programs
+; Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Thonny"; ValueData: "Software\Thonny\Capabilities"; Flags: uninsdeletevalue
+; Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "Thonny";  Flags: uninsdeletekey
+; Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny is Python IDE for beginners";  Flags: uninsdeletekey
+; Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".py";  ValueData: "Thonny.py";  Flags: uninsdeletekey
+; Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".pyw"; ValueData: "Thonny.py";  Flags: uninsdeletekey
 
 
 [UninstallDelete]
@@ -99,10 +94,10 @@ Type: filesandordirs; Name: "{app}\__pycache__"
 
 [Messages]
 ClickNext=
-WelcomeLabel1=Thonny
-WelcomeLabel2=Click "Next" to install [name/ver] %n%n-.-- . .- .... --..--   .- ... -.-. .. ..   .- .-. -   .-- --- ..- .-.. -..   .... .- ...- .   -... . . -.   -... . - - . .-. --..--   -... ..- -   .-- .. - ....   ...- .- .-. .. .- -... .-.. . -....- .-- .. -.. - ....   ..-. --- -. -   .. - .----. ...   -. ---   --. --- --- -.. .-.-.-  %n%n..-. .. .-. ... -   ..   .-- .- ...   -- . ... ... .. -. --.   .-- .. - ....   -.. .. ... - ..- - .. .-.. ...   .. -. ... - .- .-.. .-.. . .-. --..--   -... ..- -   .-.. --- --- -.- ...   .-.. .. -.- .   .-- .. -. .. -. ... -   .. -. ... - .- .-.. .-.. . .-.   -.. --- . ... -. .----. -   .-. ..- -.   - .... .   .--. --- ... -   .. -. ... - .- .-.. .-.. .- - .. --- -.   ... -.-. .-. .. .--. -   .-- .... . -.   ..- -. .. -. ... - .- .-.. .-.. .. -. --.   - .... .   .- .--. .--. .-.-.-   ... ---   ..   .-- . -. -   ..-. --- .-.   .. -. -. ---   ... . - ..- .--.   .- -. -..   .. .----. --   .-. . .- .-.. .-.. -.--   .... .- .--. .--. -.--   .-- .. - ....   .. - .-.-.-   - .... .- -. -.-   -.-- --- ..- --..--   .--- --- .-. -.. .- -.   .-. ..- ... ... . .-.. .-.. 
+WelcomeLabel1=Install Thonny {#AppVer} ?
+WelcomeLabel2=Click "Next" if that's what you want! %n%n-.-- . .- .... --..--   .- ... -.-. .. ..   .- .-. -   .-- --- ..- .-.. -..   .... .- ...- .   -... . . -.   -... . - - . .-. --..--   -... ..- -   .-- .. - ....   ...- .- .-. .. .- -... .-.. . -....- .-- .. -.. - ....   ..-. --- -. -   .. - .----. ...   -. ---   --. --- --- -.. .-.-.-  %n%n..-. .. .-. ... -   ..   .-- .- ...   -- . ... ... .. -. --.   .-- .. - ....   -.. .. ... - ..- - .. .-.. ...   .. -. ... - .- .-.. .-.. . .-. --..--   -... ..- -   .-.. --- --- -.- ...   .-.. .. -.- .   .-- .. -. .. -. ... -   .. -. ... - .- .-.. .-.. . .-.   -.. --- . ... -. .----. -   .-. ..- -.   - .... .   .--. --- ... -   .. -. ... - .- .-.. .-.. .- - .. --- -.   ... -.-. .-. .. .--. -   .-- .... . -.   ..- -. .. -. ... - .- .-.. .-.. .. -. --.   - .... .   .- .--. .--. .-.-.-   ... ---   ..   .-- . -. -   ..-. --- .-.   .. -. -. ---   ... . - ..- .--.   .- -. -..   .. .----. --   .-. . .- .-.. .-.. -.--   .... .- .--. .--. -.--   .-- .. - ....   .. - .-.-.-   - .... .- -. -.-   -.-- --- ..- --..--   .--- --- .-. -.. .- -.   .-. ..- ... ... . .-.. .-.. 
 FinishedHeadingLabel=Great success!
-FinishedLabel=[name] is now installed!%n%n%n/ \ / \ / \ / / / / \ / / / \ \ / / / / \ / / \ \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / / / / / / / / / \ / \ / \ \ \ / / / \ \ \ / \ \ \ \ / \ / \ \ / / \ \ \ / / / \ \ \ / \ / \ / / \ / \ / \ \  
+FinishedLabel=[name] is now installed. Run it via shortcut or right-click a *.py file and select "Edit with Thonny".%n%n%n/ \ / \ / \ / / / / \ / / / \ \ / / / / \ / / \ \ / / / / / \ \ \ \ \ \ / \ / / / / \ \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / / / / / / / / / \ / \ / \ \ \ / / / \ \ \ / \ \ \ \ / \ / \ \ / / \ \ \ / / / \ \ \ / \ / \ / / \ / \ / \ \ / \ \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / \ / 
 
 ClickFinish=
 
@@ -146,8 +141,8 @@ begin
   end
   else
   begin
-    MsgBox('Could not find suitable Python version (3.3 or 3.4). Update the shortcut in Thonny folder after installation ends.',mbError,MB_OK);
-    Result := 'C:\PythonXX\pythonw.exe'
+    Result := 'C:\Python34\pythonw.exe' // my best guess
+    MsgBox('Could not find information about suitable Python version (3.3 or 3.4). Update the shortcut in Thonny folder after installation ends.',mbError,MB_OK);
   end
 end;
 
