@@ -53,7 +53,8 @@ class Thonny(tk.Tk):
         self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
         self.createcommand("::tk::mac::OpenApplication", self._mac_open_application)
         self.createcommand("::tk::mac::ReopenApplication", self._mac_reopen_application)
-        #self.iconbitmap(default=os.path.join(THONNY_SRC_DIR, "res", "thonny_small.ico"))
+        self.set_icon()
+        
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         #showinfo("sys.argv", str(sys.argv))
         
@@ -765,7 +766,13 @@ class Thonny(tk.Tk):
         
         tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
                                 traceback.format_exc())
-        
+    
+    def set_icon(self):
+        try:
+            self.iconbitmap(default=os.path.join(THONNY_SRC_DIR, "res", "thonny.ico"))
+        except:
+            pass
+
 
 if __name__ == "__main__":
     if not os.path.exists(THONNY_USER_DIR):
