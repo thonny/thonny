@@ -1,4 +1,7 @@
 #define AppVer "0.1"
+#define AppUserModelID "Thonny.Thonny"
+#define PyProgID "Thonny.py"
+
 ; You can give PyVer and AppVer from command line, eg:
 ; "C:\Program Files (x86)\Inno Setup 5\iscc" /dPyVer=2.8 /dAppVer=1.13 inno_setup.iss 
 
@@ -13,7 +16,7 @@ AppPublisher=Aivar Annamaa
 AppPublisherURL=https://bitbucket.org/aivarannamaa/thonny
 AppSupportURL=https://bitbucket.org/aivarannamaa/thonny
 AppUpdatesURL=https://bitbucket.org/aivarannamaa/thonny
-DefaultDirName={pf}\Thonny
+DefaultDirName={userpf}\Thonny
 DirExistsWarning=auto
 UsePreviousAppDir=yes
 DefaultGroupName=Thonny
@@ -27,7 +30,7 @@ OutputBaseFilename=Thonny-{#AppVer}
 Compression=lzma
 SolidCompression=yes
 WizardImageFile=inno_setup.bmp
-;PrivilegesRequired=lowest
+PrivilegesRequired=lowest
 ChangesAssociations=yes
 
 
@@ -49,37 +52,43 @@ Name: "{commondesktop}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{ap
 ; Using concrete pythonw.exe instead of pyw.exe in order to let shortcut affect the pinning
 ; "-B" because when user executes Thonny, it doesn't have permission to write pyc files anyway. 
 ; If installer did write these, it would possibly cause problems when python version is changed
-Name: "{app}\Thonny_shortcut";  Filename: "{code:GetPythonCommand}"; Parameters: "-B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
-;Name: "{app}\Thonny_shortcut";  Filename: "C:\Windows\pyw.exe"; Parameters: "-3 -B ""d:\workspaces\python_stuff\thonny\src\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "AivarAnnamaa.Thonny"
+Name: "{app}\Thonny_shortcut";  Filename: "{code:GetPythonCommand}"; Parameters: "-B ""{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
 
 [Registry]
 
 ; Register the application
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
-Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "Thonny"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe"; ValueType: string; ValueName: "FriendlyAppName"; ValueData: "Thonny"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\Thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\Thonny.exe"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\Thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\Thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\Thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+
+; Create ProgID (Thonny.py) for relating Thonny and Python file type
+Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#PyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#PyProgID}\shell\Edit with Thonny"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#PyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
+
+; Relate ProgID with *.py and *.pyw extensions
+Root: HKCU; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#PyProgID}";   Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#PyProgID}";   Flags: uninsdeletekey
 
 
+; Registering under Default Programs
 ; http://superuser.com/questions/51264/how-do-i-add-new-applications-to-the-set-default-programs-list-in-windows-vist
-Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Thonny"; ValueData: "Software\Thonny\Capabilities";  Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny";  Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "Thonny";  Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".py"; ValueData: "Thonny.py";  Flags: uninsdeletekey
+; http://msdn.microsoft.com/en-us/library/windows/desktop/cc144154%28v=vs.85%29.aspx
+;Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Thonny"; ValueData: "Software\Thonny\Capabilities";  Flags: uninsdeletekey
+;Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny";  Flags: uninsdeletekey
+;Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "Thonny";  Flags: uninsdeletekey
+;Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".py"; ValueData: "Thonny.py";  Flags: uninsdeletekey
 
-; TODO: assuming entry for Python.File is made already
-;Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny for Python {#PyVer}"; Flags: uninsdeletekey
-;Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny for Python {#PyVer}\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1"""; Flags: uninsdeletekey
 
-; Register application and supported types
-Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\Thonny.exe"; ValueType: string; ValueName: ""; ValueData: "{app}\Thonny.exe"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\SupportedTypes"; ValueType: string; ValueName: ".py"; ValueData: ""; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\SupportedTypes"; ValueType: string; ValueName: ".pyw"; ValueData: ""; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Classes\Applications\Thonny.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1"""; Flags: uninsdeletekey
 
-; *.py
-Root: HKLM; Subkey: "Software\Classes\.py\OpenWithProgIds"; ValueType: string; ValueName: "Thonny.py";   Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Classes\.py\OpenWithList\Thonny.exe"; Flags: uninsdeletekey
-Root: HKLM; Subkey: "Software\Classes\Thonny.py\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 [UninstallDelete]
 Type: files; Name: "{app}\*.pyc"
