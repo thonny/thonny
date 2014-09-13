@@ -37,6 +37,7 @@ class AboutDialog(tk.Toplevel):
                                   font=heading_font)
         heading_label.grid()
         
+        
         url = "https://bitbucket.org/aivarannamaa/thonny"
         url_font = font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
@@ -58,6 +59,19 @@ class AboutDialog(tk.Toplevel):
                                         + " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
                                         + "Tk " + self.tk.call('info', 'patchlevel'))
         platform_label.grid(pady=20)
+        
+        license_font = font.nametofont("TkDefaultFont").copy()
+        license_font.configure(size=7)
+        license_label = ttk.Label(self,
+                                  text="Coppyright (©) 2014 Aivar Annamaa\n"
+                                  + "This program comes with\n"
+                                  + "ABSOLUTELY NO WARRANTY!\n"
+                                  + "It is free software, and you are welcome to\n"
+                                  + "redistribute it under certain conditions, see\n"
+                                  + "http://www.gnu.org/licenses/gpl-3.0.txt\n"
+                                  + "for details\n",
+                                  justify=tk.CENTER, font=license_font)
+        license_label.grid()
         
         ok_button = ttk.Button(self, text="OK", command=self._ok)
         ok_button.grid()
