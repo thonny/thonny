@@ -1,9 +1,10 @@
-﻿#define AppVer "0.1"
+﻿; Give AppVer from command line, eg:
+; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
+; #define AppVer "0.0.0"
+
 #define AppUserModelID "Thonny.Thonny"
 #define ThonnyPyProgID "Thonny.py"
 
-; You can give AppVer from command line, eg:
-; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
 
 [Setup]
 AppId=Thonny
@@ -30,6 +31,14 @@ SolidCompression=yes
 WizardImageFile=inno_setup.bmp
 PrivilegesRequired=lowest
 ChangesAssociations=yes
+
+; Signing
+; Certum Unizeto provides free certs for open source
+; http://www.certum.eu/certum/cert,offer_en_open_source_cs.xml
+; http://pete.akeo.ie/2011/11/free-code-signing-certificate-for-open.html
+; http://blog.ksoftware.net/2011/07/exporting-your-code-signing-certificate-to-a-pfx-file-from-firefox/
+; http://blog.ksoftware.net/2011/07/how-to-automate-code-signing-with-innosetup-and-ksign/
+SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttps://bitbucket.org/aivarannamaa/thonny$q $f
 
 
 [Languages]
@@ -157,4 +166,16 @@ end;
 procedure InitializeWizard;
 begin
   WizardForm.LicenseAcceptedRadio.Checked := True;
+end;
+
+function Version(Param: String): String;
+var
+  VersionValue: AnsiString;
+  VersionFile: String;
+begin
+  // Default to some predefined value.
+  Result := '0.0.0';
+  VersionFile := '{app}\VERSION';
+  if LoadStringFromFile(VersionFile, VersionValue) then
+    Result := Trim(VersionValue);
 end;
