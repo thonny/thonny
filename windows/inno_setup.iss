@@ -82,6 +82,11 @@ Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; Val
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\Thonny.exe"" ""%1""";  Flags: uninsdeletekey
+
+; Restore "Edit with IDLE" when selecting Thonny as default opener
+Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\Edit with IDLE\command";     ValueType: string; ValueName: ""; ValueData: "C:\Windows\pyw.exe -3 -m idlelib ""%1""";  Flags: uninsdeletekey
+
+
 ; Relate this ProgID with *.py and *.pyw extensions
 Root: HKCU; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
 Root: HKCU; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
