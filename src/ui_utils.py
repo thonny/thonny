@@ -93,7 +93,7 @@ def setup_style():
         # and Python 2.7 and 3.1 don't have "vista" theme anyway
         theme = 'xpnative'
     elif 'aqua' in style.theme_names():
-        theme = 'aqua'
+        theme = 'clam'
     elif 'clam' in style.theme_names():
         theme = 'clam'
     else:
