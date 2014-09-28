@@ -362,9 +362,10 @@ class CodeView(ttk.Frame, TextWrapper):
                 return "break"
         
         elif e.keysym == "Home":
-            if current_line_left_part.strip() != "":
+            if ((current_line_left_part.startswith(" ") or current_line_left_part.startswith("\t"))
+                and current_line_left_part.strip() != ""):
                 # first go to start of visible symbols
-                self.text.mark_set("insert", "insert-{}c".format(len(current_line.lstrip())))
+                self.text.mark_set("insert", "insert-{}c".format(len(current_line_left_part.lstrip())))
                 return "break"
                     
         
