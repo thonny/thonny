@@ -775,6 +775,7 @@ class Thonny(tk.Tk):
         sys.last_traceback = tb
         traceback.print_exception(exc, val, tb)
         
+        # TODO: Command+C for Mac
         tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
                                 traceback.format_exc())
     
@@ -793,6 +794,7 @@ if __name__ == "__main__":
         Thonny().mainloop()
     except:
         traceback.print_exc()
+        # TODO: Command+C for Mac
         tk.messagebox.showerror("Internal error. Program will close. Use Ctrl+C to copy",
                                 traceback.format_exc())
         
