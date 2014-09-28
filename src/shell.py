@@ -10,7 +10,8 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
-from ui_utils import TextWrapper, generate_event, running_on_mac_os
+from misc_utils import running_on_mac_os
+from ui_utils import TextWrapper, generate_event
 from common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
 from user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
     ShellInputEvent

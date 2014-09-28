@@ -22,7 +22,7 @@ import ui_utils
 import misc_utils
 import memory
 import logging
-from ui_utils import running_on_mac_os, generate_event
+from ui_utils import generate_event
 
 try:
     import tkinter as tk
@@ -483,7 +483,7 @@ class ExpressionView(tk.Text):
                 #print("ins", start_mark, value_str)
                 object_tag = "object_" + str(msg.value.id)
                 self.insert(start_mark, value_str, ('value', 'after', object_tag))
-                if running_on_mac_os():
+                if misc_utils.running_on_mac_os():
                     sequence = "<Command-Button-1>"
                 else:
                     sequence = "<Control-Button-1>"
@@ -618,7 +618,7 @@ class FunctionDialog(tk.Toplevel):
         self._frame_id = msg.frame_id
         self.title(title)
         self.transient(master)
-        if ui_utils.running_on_windows():
+        if misc_utils.running_on_windows():
             self.wm_attributes('-toolwindow', 1)
         
         

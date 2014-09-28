@@ -7,6 +7,7 @@ import io
 import os.path
 from codecs import lookup, BOM_UTF8
 import builtins
+import tkinter as tk
 
 
 class PathSet:
@@ -160,4 +161,12 @@ def open_py_file(filename):
     text.mode = 'r'
     return text, encoding
 
+def running_on_windows():
+    return tk._default_root.call('tk', 'windowingsystem') == "win32"
     
+def running_on_mac_os():
+    return tk._default_root.call('tk', 'windowingsystem') == "aqua"
+    
+def running_on_linux():
+    return tk._default_root.call('tk', 'windowingsystem') == "x11"
+

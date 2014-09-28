@@ -3,7 +3,7 @@
 import sys
 import webbrowser
 import platform
-import ui_utils
+import misc_utils
 
 import tkinter as tk
 from tkinter import ttk
@@ -19,7 +19,7 @@ class AboutDialog(tk.Toplevel):
                                   parent.winfo_rooty() + parent.winfo_height() // 2 - 150))
 
         self.title("About Thonny")
-        if ui_utils.running_on_mac_os():
+        if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(parent)

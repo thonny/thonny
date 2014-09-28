@@ -5,6 +5,7 @@ import os.path
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as tk_font
+from misc_utils import running_on_linux, running_on_mac_os, running_on_windows
 
 import config
 
@@ -434,15 +435,6 @@ class TextFrame(ttk.Frame, TextWrapper):
     def set_content(self, content):
         TextWrapper._user_text_delete(self, "1.0", tk.END)
         TextWrapper._user_text_insert(self, "1.0", content)
-
-def running_on_windows():
-    return tk._default_root.call('tk', 'windowingsystem') == "win32"
-    
-def running_on_mac_os():
-    return tk._default_root.call('tk', 'windowingsystem') == "aqua"
-    
-def running_on_linux():
-    return tk._default_root.call('tk', 'windowingsystem') == "x11"
 
 
 def delete_images():

@@ -12,6 +12,7 @@ You should have received a copy of the GNU General Public License along with thi
 """
 
 import sys
+import traceback
 from os.path import join as join_path, dirname, relpath
 import os.path
 from distutils.version import StrictVersion
@@ -37,6 +38,7 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
     InlineCommand, quote_path_for_shell
 from ui_utils import Command, notebook_contains
 import user_logging
+import misc_utils
 from textwrap import dedent
 
 
@@ -280,7 +282,7 @@ class Thonny(tk.Tk):
         
         
         ## make plaftform specific tweaks
-        if ui_utils.running_on_mac_os():
+        if misc_utils.running_on_mac_os():
             # insert app menu with "about" and "preferences"
             self._menus.insert(0, ('apple', 'Thonny', [
                 Command('about', 'About Thonny', None, self),
@@ -765,7 +767,6 @@ class Thonny(tk.Tk):
     
     def on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception
-        import traceback
         # Aivar: following statement kills the process when run with pythonw.exe
         # http://bugs.python.org/issue22384
         #sys.stderr.write("Exception in Tkinter callback\n")
@@ -785,8 +786,14 @@ class Thonny(tk.Tk):
 
 
 if __name__ == "__main__":
-    if not os.path.exists(THONNY_USER_DIR):
-        os.makedirs(THONNY_USER_DIR, 0o700)
-    logger.addHandler(logging.StreamHandler(sys.stdout))
-    Thonny().mainloop()
+    try:
+        if not os.path.exists(THONNY_USER_DIR):
+            os.makedirs(THONNY_USER_DIR, 0o700)
+        logger.addHandler(logging.StreamHandler(sys.stdout))
+        Thonny().mainloop()
+    except:
+        traceback.print_exc()
+        tk.messagebox.showerror("Internal error. Program will close. Use Ctrl+C to copy",
+                                traceback.format_exc())
+        
 
