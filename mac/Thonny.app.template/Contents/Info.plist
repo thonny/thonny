@@ -9,10 +9,10 @@
 	<string>Thonny</string>
 	
 	<key>CFBundleIdentifier</key>
-	<string>ee.aivarannamaa.thonny</string>
+	<string>ee.ut.cs.thonny</string>
 	
 	<key>CFBundleVersion</key>
-	<string>0.1</string>
+	<string>0.1.2</string>
 	
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
@@ -28,45 +28,20 @@
 		<dict>
 			<key>CFBundleTypeExtensions</key>
 			<array>
-				<string>pytemp</string>
-				<string>pyex</string>
+				<string>py</string>
+				<string>pyw</string>
 			</array>
-			
-			<key>CFBundleTypeMIMETypes</key>
-			<array>
-				<string>text/x-pytemp</string>
-				<string>text/x-pyex</string>
-			</array>
-			
 			<key>CFBundleTypeIconFile</key>
 			<string>PythonSource.icns</string>
-			
 			<key>CFBundleTypeName</key>
 			<string>Python Script</string>
-			
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-		</dict>
-	</array>
-	
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			
-			<key>CFBundleURLName</key>
-			<string>pyexercise</string>
-			
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>pyexercise</string>
-			</array>
 		</dict>
 	</array>
 	
 	<key>CFBundleGetInfoString</key>
-	<string>Thonny 0.1</string>
+	<string>Thonny 0.1.2</string>
 	
 	<key>CFBundleIconFile</key>
 	<string>Thonny.icns</string>
@@ -75,9 +50,13 @@
 	<string>6.0</string>
 	
 	<key>CFBundleShortVersionString</key>
-	<string>Thonny 0.1</string>
+	<string>0.1.2</string>
 	
 	<key>NSHighResolutionCapable</key>
 	<true/>
+	
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	
 </dict>
 </plist>

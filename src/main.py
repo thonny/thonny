@@ -785,8 +785,7 @@ class Thonny(tk.Tk):
         except:
             pass
 
-
-if __name__ == "__main__":
+def launch():
     try:
         if not os.path.exists(THONNY_USER_DIR):
             os.makedirs(THONNY_USER_DIR, 0o700)
@@ -797,5 +796,8 @@ if __name__ == "__main__":
         # TODO: Command+C for Mac
         tk.messagebox.showerror("Internal error. Program will close. Use Ctrl+C to copy",
                                 traceback.format_exc())
-        
+    
+
+if __name__ == "__main__":
+    launch()
 
