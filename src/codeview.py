@@ -323,12 +323,13 @@ class CodeView(ttk.Frame, TextWrapper):
     def on_text_key_press(self, e):
         TextWrapper.on_text_key_press(self, e)
         #print("KEY", repr(e.char))
+        current_line = self.text.get("insert linestart", "insert lineend")
+        current_line_left_part = self.text.get("insert linestart", "insert")
         
         # replace tabs with spaces
         # TODO: keep tabs when inside string or when there are some
         # non-whitespace chars on current line left to the cursor
         if e.char in ("\t", "\n", "\r"):
-            current_line = self.text.get("insert linestart", "insert lineend")
             #print("KEY", repr(e.char))
             if e.char == "\t":
                 self.text.insert("insert", "    ");
@@ -343,7 +344,10 @@ class CodeView(ttk.Frame, TextWrapper):
                         current_indent += c
                     else:
                         break
-                if current_line.strip().endswith(':'):
+                
+                # TODO: strip also comments
+                if (current_line.strip().endswith(':')
+                    and current_line_left_part.strip() != ""): 
                     self.text.insert("insert", "\n" + current_indent + "    ")
                     return "break"
                 else:
@@ -355,6 +359,12 @@ class CodeView(ttk.Frame, TextWrapper):
             left_text = self.text.get("insert linestart", "insert")
             if left_text.endswith("    ") and len(left_text) % 4 == 0:
                 self.text.delete("insert-4c", "insert")
+                return "break"
+        
+        elif e.keysym == "Home":
+            if current_line_left_part.strip() != "":
+                # first go to start of visible symbols
+                self.text.mark_set("insert", "insert-{}c".format(len(current_line.lstrip())))
                 return "break"
                     
         
