@@ -12,7 +12,7 @@
 	<string>ee.ut.cs.thonny</string>
 	
 	<key>CFBundleVersion</key>
-	<string>0.1.2</string>
+	<string>VERSION</string>
 	
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
@@ -41,7 +41,7 @@
 	</array>
 	
 	<key>CFBundleGetInfoString</key>
-	<string>Thonny 0.1.2</string>
+	<string>Thonny VERSION</string>
 	
 	<key>CFBundleIconFile</key>
 	<string>Thonny.icns</string>
@@ -50,7 +50,7 @@
 	<string>6.0</string>
 	
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.2</string>
+	<string>VERSION</string>
 	
 	<key>NSHighResolutionCapable</key>
 	<true/>

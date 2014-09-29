@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# prepare working folder
 rm -rf build
 mkdir -p build
 cp -r Thonny.app.template build
@@ -10,7 +11,14 @@ rm -rf build/Thonny.app/Contents/MacOs/__pycache__
 rm -rf build/Thonny.app/Contents/MacOs/*.pyo
 rm -rf build/Thonny.app/Contents/MacOs/*.pyc 
 
-rm -f Thonny.dmg
-hdiutil create -srcfolder build/Thonny.app Thonny.dmg
-hdiutil internet-enable -yes Thonny.dmg
+# get and set version
+VERSION=$(<../src/VERSION)
+sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
+
+
+# create dmg
+FILENAME=Thonny-$VERSION.dmg
+rm -f $FILENAME
+hdiutil create -srcfolder build/Thonny.app $FILENAME
+hdiutil internet-enable -yes $FILENAME
 

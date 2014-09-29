@@ -35,3 +35,6 @@ syntax: regexp
 
 syntax: regexp
 ^RemoteSystemsTempFiles$
+
+syntax: regexp
+\.dmg$
