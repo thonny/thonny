@@ -2,7 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from ui_utils import TreeFrame
-from misc_utils import running_on_windows
+from misc_utils import running_on_windows, get_res_path
 import os
     
 class BrowseNotebook(ttk.Notebook):
@@ -33,6 +33,17 @@ class FileBrowser(TreeFrame):
         TreeFrame.__init__(self, master, ["#0"], displaycolumns=(0,))
         #print(self.get_toplevel_items())
         self.tree['show'] = ('tree')
+        
+        self.hor_scrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+        self.tree.config(xscrollcommand=self.hor_scrollbar.set)
+        self.hor_scrollbar['command'] = self.tree.xview
+        self.hor_scrollbar.grid(row=1, column=0, sticky="nsew")
+        
+        self.folder_icon = tk.PhotoImage(file=get_res_path("folder.gif"))
+        self.python_file_icon = tk.PhotoImage(file=get_res_path("python_file.gif"))
+        self.text_file_icon = tk.PhotoImage(file=get_res_path("text_file.gif"))
+        self.generic_file_icon = tk.PhotoImage(file=get_res_path("generic_file.gif"))
+        
         #self.populate_tree()
     
     
@@ -41,7 +52,19 @@ class FileBrowser(TreeFrame):
             self.show_item(path, path, "", 2)
     
     def show_item(self, name, path, parent_id, levels_left):
-        node_id = self.tree.insert(parent_id, "end", text=name, open=False)
+        if os.path.isdir(path):
+            img = self.folder_icon
+        elif path.lower().endswith(".py"):
+            img = self.python_file_icon
+        elif path.lower().endswith(".txt") or path.lower().endswith(".csv"):
+            img = self.text_file_icon
+        else:
+            img = self.generic_file_icon
+            
+        node_id = self.tree.insert(parent_id, "end",
+                                   text=" " + name,
+                                   open=False,
+                                   image=img)
         
         try:
             if os.path.isdir(path) and levels_left > 0:
@@ -78,7 +101,7 @@ class FileBrowser(TreeFrame):
         required_drive_types = ['DRIVE_REMOVABLE',
                                 'DRIVE_FIXED',
                                 'DRIVE_REMOTE',
-                                'DRIVE_CDROM',
+                                #'DRIVE_CDROM',
                                 'DRIVE_RAMDISK']
     
         drives = []

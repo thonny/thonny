@@ -40,6 +40,7 @@ from ui_utils import Command, notebook_contains
 import user_logging
 import misc_utils
 from textwrap import dedent
+from misc_utils import get_res_path
 
 
 
@@ -367,7 +368,6 @@ class Thonny(tk.Tk):
         self.images = {}
         self.toolbar_buttons = {}
         col = 1
-        res_dir = join_path(dirname(__file__), "res")
         
         for name in ('file.new_file', 'file.open_file', 'file.save_file', 
                      '-', 'run.run_current_script',
@@ -379,7 +379,7 @@ class Thonny(tk.Tk):
                 hor_spacer = ttk.Frame(self.toolbar, width=15)
                 hor_spacer.grid(row=0, column=col)
             else:
-                img = tk.PhotoImage(file=join_path(res_dir, name + ".gif"))
+                img = tk.PhotoImage(file=get_res_path(name + ".gif"))
             
                 btn = ttk.Button(self.toolbar, 
                                  command=on_kala_button, 

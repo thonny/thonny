@@ -8,6 +8,7 @@ import os.path
 from codecs import lookup, BOM_UTF8
 import builtins
 import tkinter as tk
+from os.path import dirname
 
 
 class PathSet:
@@ -169,4 +170,7 @@ def running_on_mac_os():
     
 def running_on_linux():
     return tk._default_root.call('tk', 'windowingsystem') == "x11"
+
+def get_res_path(filename):
+    return os.path.join(dirname(__file__), "res", filename)
 
