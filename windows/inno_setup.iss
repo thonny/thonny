@@ -123,6 +123,17 @@ ClickFinish=
 
 [Code]
 
+function TryRegQueryStringValue(const RootKey: Integer; const SubKeyName, ValueName: String; var ResultStr: String): Boolean;
+begin
+  try
+    RegQueryStringValue(RootKey, SubKeyName, ValueName, ResultStr);
+  except
+    Result := False;
+  end;
+end;
+
+
+
 function GetPythonFolder(version: string): string;
 var          
   reg1 : string;
@@ -131,12 +142,11 @@ begin
   reg1 := 'SOFTWARE\Python\PythonCore\' + version + '\InstallPath';
   reg2 := 'SOFTWARE\Python\PythonCore\Wow6432Node\' + version + '\InstallPath';
 
-  if not (RegQueryStringValue(HKLM64, reg1, '', Result) 
-       or RegQueryStringValue(HKCU64, reg1, '', Result)
-       or RegQueryStringValue(HKLM32, reg1, '', Result)
-       or RegQueryStringValue(HKCU32, reg1, '', Result)
-       or RegQueryStringValue(HKLM, reg2, '', Result)
-       ) then
+  if not (TryRegQueryStringValue(HKLM64, reg1, '', Result) 
+       or TryRegQueryStringValue(HKCU64, reg1, '', Result)
+       or TryRegQueryStringValue(HKLM32, reg1, '', Result)
+       or TryRegQueryStringValue(HKCU32, reg1, '', Result)
+       or TryRegQueryStringValue(HKLM, reg2, '', Result)) then
   begin
     Result := '';
   end
