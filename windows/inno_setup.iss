@@ -126,7 +126,7 @@ ClickFinish=
 function TryRegQueryStringValue(const RootKey: Integer; const SubKeyName, ValueName: String; var ResultStr: String): Boolean;
 begin
   try
-    RegQueryStringValue(RootKey, SubKeyName, ValueName, ResultStr);
+    Result := RegQueryStringValue(RootKey, SubKeyName, ValueName, ResultStr);
   except
     Result := False;
   end;
