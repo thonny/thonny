@@ -1,3 +1,7 @@
+from os import listdir
+import os.path
+from time import strptime
+import ast
 from datetime import datetime
 from datetime import timedelta
 
@@ -204,4 +208,43 @@ class ShellInputEvent(UserEvent):
 class ShellOutputEvent(UserEvent):
     def __init__(self, text):
         self.text = text
+
+# TODO: return object with correct class
+def parse_log_line(line):
+    split_pos = line.rfind(" at ")
+    assert split_pos > 0
+    left = line[0:split_pos]
+    right = line[split_pos + 4:].strip()
+    
+    tree = ast.parse(left, mode='eval')
+    assert isinstance(tree, ast.Expression)
+    assert isinstance(tree.body, ast.Call)
+    
+    attributes = {
+        'event_kind' : tree.body.func.id,
+        'event_time' : strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
+    }
+    
+    for kw in tree.body.keywords:
+        attributes[kw.arg] = ast.literal_eval(kw.value)
+        
+    return attributes
+
+def parse_log_file(filename):
+    f = open(filename, encoding="UTF-8")
+    events = []
+    for line in f:
+        events.append(parse_log_line(line))
+    
+    f.close()
+    return events
+
+def parse_all_log_files(path):
+    all_events = []
+    for name in sorted(listdir(path)):
+        if name.endswith(".txt"):
+            events = parse_log_file(os.path.join(path, name))
+            all_events.extend(events)
+            
+    return all_events
 
