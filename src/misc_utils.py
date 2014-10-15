@@ -174,3 +174,43 @@ def running_on_linux():
 def get_res_path(filename):
     return os.path.join(dirname(__file__), "res", filename)
 
+def is_hidden_or_system_file(path):
+    if os.path.basename(path).startswith("."):
+        return True
+    elif running_on_windows():
+        from ctypes import windll
+        FILE_ATTRIBUTE_HIDDEN = 0x2
+        FILE_ATTRIBUTE_SYSTEM = 0x4
+        return bool(windll.kernel32.GetFileAttributesW(path)  # @UndefinedVariable
+                & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM))
+    else:
+        return False 
+    
+def get_win_drives():
+    # http://stackoverflow.com/a/2288225/261181
+    # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
+    import string
+    from ctypes import windll
+    
+    all_drive_types = ['DRIVE_UNKNOWN', 
+                       'DRIVE_NO_ROOT_DIR',
+                       'DRIVE_REMOVABLE',
+                       'DRIVE_FIXED',
+                       'DRIVE_REMOTE',
+                       'DRIVE_CDROM',
+                       'DRIVE_RAMDISK']
+    
+    required_drive_types = ['DRIVE_REMOVABLE',
+                            'DRIVE_FIXED',
+                            'DRIVE_REMOTE',
+                            'DRIVE_RAMDISK']
+
+    drives = []
+    bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
+    for letter in string.ascii_uppercase:
+        drive_type = all_drive_types[windll.kernel32.GetDriveTypeW("%s:\\" % letter)]  # @UndefinedVariable
+        if bitmask & 1 and drive_type in required_drive_types:
+            drives.append(letter + ":\\")
+        bitmask >>= 1
+
+    return drives
