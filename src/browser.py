@@ -178,11 +178,16 @@ class FileBrowser(TreeFrame):
         if path == "" and running_on_windows():
             result = get_win_drives()
         else:
+            if path == "":
+                first_level = True
+                path = "/"
+            else:
+                first_level = False
             result = [x for x in os.listdir(path) 
                         if include_hidden_files 
                             or not is_hidden_or_system_file(os.path.join(path, x))]
             
-            if path == "" and not running_on_windows():
+            if first_level:
                 result = ["/" + x for x in result]
             
         return sorted(result, key=str.upper)
