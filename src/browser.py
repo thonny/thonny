@@ -6,7 +6,6 @@ from misc_utils import running_on_windows, get_res_path, is_hidden_or_system_fil
     get_win_drives, running_on_mac_os
 import os
 from ttk_simpledialog import askstring
-from docutils.parsers.rst.directives import path
 from tkinter.messagebox import showerror
 import code
 
