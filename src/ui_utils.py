@@ -732,6 +732,10 @@ class ScrollableFrame(tk.Frame):
             #print("CAWI", self.canvas.winfo_width())
             self.canvas.itemconfigure(self.interior_id,
                                       width=self.canvas.winfo_width())
+
+    
+
+
                 
 def generate_event(widget, descriptor, data=None):
     global _next_event_data_serial

@@ -3,8 +3,12 @@ import tkinter as tk
 from tkinter import ttk
 from ui_utils import TreeFrame
 from misc_utils import running_on_windows, get_res_path, is_hidden_or_system_file,\
-    get_win_drives
+    get_win_drives, running_on_mac_os
 import os
+from ttk_simpledialog import askstring
+from docutils.parsers.rst.directives import path
+from tkinter.messagebox import showerror
+import code
 
 _dummy_node_text = "..."
     
@@ -12,10 +16,8 @@ class BrowseNotebook(ttk.Notebook):
     def __init__(self, master):
         ttk.Notebook.__init__(self, master)
         self.files_frame = FileBrowser(self)
-        self.modules_frame = ModulesFrame(self)
         
         self.add(self.files_frame, text="Files")
-        self.add(self.modules_frame, text="Modules")
         
         
         
@@ -46,16 +48,106 @@ class FileBrowser(TreeFrame):
         self.tree.set("", "path", "")
         self.refresh_tree()
         
-        #self.open_path(r"C:\workspaces\python_stuff\thonny\src")
+        #self.open_path_in_browser(r"D:\workspaces\python_stuff\thonny\src")
         self.tree.bind("<<TreeviewOpen>>", self.on_open_node)
+        
+        self.menu = tk.Menu(tk._default_root, tearoff=False)
+        self.menu.add_command(label="Create new file", command=self.create_new_file)
+        self.menu.add_command(label="Copy", command=self.do_stuff)
+        
+        if running_on_mac_os():
+            self.tree.bind('<2>', self.on_secondary_click)
+            self.tree.bind('<Control-1>', self.on_secondary_click)
+        else:
+            self.tree.bind("<3>", self.on_secondary_click)
     
+    
+    def do_stuff(self, *args):
+        print(args)
+    
+    def on_double_click(self, event):
+        path = self.get_selected_path()
+        if path:
+            code.editor_book.show_file(path)
+    
+    def on_secondary_click(self, event):
+        node_id = self.tree.identify_row(event.y)
+        
+        if node_id:
+            self.tree.selection_set(node_id)
+            self.tree.focus(node_id)
+            self.menu.post(event.x_root, event.y_root)
     
     def on_open_node(self, event):
-        node_id = self.tree.focus()
+        node_id = self.get_selected_node()
         if node_id:
             self.refresh_tree(node_id, True)
     
-    def open_path(self, path, see=True):
+
+    def create_new_file(self):
+        selected_path = self.get_selected_path()
+        
+        if not selected_path:
+            return
+        
+        if os.path.isdir(selected_path):
+            parent_path = selected_path
+        else:
+            parent_path = os.path.dirname(selected_path)
+        
+        
+        initial_name = self.get_proposed_new_file_name(parent_path, ".py")
+        name = askstring("File name",
+                        "Provide filename",
+                        initialvalue=initial_name,
+                        selection_range=(0, len(initial_name)-3))
+        
+        if not name:
+            return
+                        
+        path = os.path.join(parent_path, name)
+        
+        if os.path.exists(path):
+            showerror("Error", "The file '"+path+"' already exists")
+        else:
+            open(path, 'w').close()
+        
+        self.open_path_in_browser(path, True)
+        code.editor_book.show_file(path)
+    
+    def get_proposed_new_file_name(self, folder, extension):
+        base = "new_file"
+        
+        if os.path.exists(os.path.join(folder, base + extension)):
+            i = 2
+            
+            while True:
+                name = base + "_" + str(i) + extension
+                path = os.path.join(folder, name)
+                if os.path.exists(path):
+                    i += 1
+                else:
+                    return name
+        else:
+            return base + extension 
+    
+    def get_selected_node(self):
+        nodes = self.tree.selection()
+        assert len(nodes) <= 1
+        if len(nodes) == 1:
+            return nodes[0]
+        else:
+            return None
+    
+    def get_selected_path(self):
+        node_id = self.get_selected_node()
+        
+        if node_id:
+            return self.tree.set(node_id, "path")
+        else:
+            return None
+    
+    def open_path_in_browser(self, path, see=True):
         
         # unfortunately os.path.split splits from the wrong end (for this case)
         def split(path):
@@ -88,6 +180,8 @@ class FileBrowser(TreeFrame):
         
         if see:
             self.tree.see(current_node_id)    
+            self.tree.selection_set(current_node_id)
+            self.tree.focus(current_node_id)
                 
     
     def populate_tree(self):
@@ -151,13 +245,14 @@ class FileBrowser(TreeFrame):
         path = self.tree.set(node_id, "path")
         
         
-        if os.path.isdir(path):
+        if os.path.isdir(path) or path.endswith(":") or path.endswith(":\\"):
+            self.tree.set(node_id, "kind", "dir")
             if path.endswith(":") or path.endswith(":\\"):
                 img = self.hard_drive_icon
             else:
                 img = self.folder_icon
-            
         else:
+            self.tree.set(node_id, "kind", "file")
             if path.lower().endswith(".py"):
                 img = self.python_file_icon
             elif path.lower().endswith(".txt") or path.lower().endswith(".csv"):
@@ -192,6 +287,3 @@ class FileBrowser(TreeFrame):
             
         return sorted(result, key=str.upper)
     
-
-class ModulesFrame(ttk.Frame):
-    pass
