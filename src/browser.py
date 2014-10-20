@@ -56,6 +56,7 @@ class FileBrowser(TreeFrame):
         
         if running_on_mac_os():
             self.tree.bind('<2>', self.on_secondary_click)
+            self.tree.bind('<3>', self.on_secondary_click)
             self.tree.bind('<Control-1>', self.on_secondary_click)
         else:
             self.tree.bind("<3>", self.on_secondary_click)
