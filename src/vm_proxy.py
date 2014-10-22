@@ -11,7 +11,8 @@ from queue import Queue
 import threading
 
 from common import parse_message, serialize_message, ToplevelCommand, PauseMessage,\
-    ActionCommand
+    ActionCommand, OutputEvent
+import collections
 
 COMMUNICATION_ENCODING = "UTF-8"
 
@@ -32,7 +33,7 @@ class VMProxy:
         self.backend_dir = backend_dir
         self._proc = None
         self._state_lock = threading.RLock()
-        self.message_queue = Queue()
+        self._message_queue = collections.deque()
         self.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
         
         _CURRENT_VM = self
@@ -47,6 +48,34 @@ class VMProxy:
     def get_state_message(self):
         with self._state_lock:
             return self._current_pause_msg
+    
+    def has_next_message(self):
+        return len(self._message_queue) > 0
+    
+    def fetch_next_message(self):
+        # combine available output messages to one single message, 
+        # in order to put less pressure on UI code
+        assert self.has_next_message()
+        
+        msg = self._message_queue.popleft()
+        if isinstance(msg, OutputEvent):
+            stream_name = msg.stream_name
+            data = msg.data
+            
+            while True:
+                if not self.has_next_message():
+                    return OutputEvent(stream_name=stream_name, data=data)
+                else:
+                    msg = self._message_queue.popleft()
+                    if isinstance(msg, OutputEvent) and msg.stream_name == stream_name:
+                        data += msg.data
+                    else:
+                        # not same type of message, put it back
+                        self._message_queue.appendleft(msg)
+                        return OutputEvent(stream_name=stream_name, data=data)
+            
+        else: 
+            return msg
     
     def send_command(self, cmd):
         with self._state_lock:
@@ -119,7 +148,7 @@ class VMProxy:
                 if hasattr(msg, "cwd"):
                     self.cwd = msg.cwd
                 with self._state_lock:
-                    self.message_queue.put(msg)
+                    self._message_queue.append(msg)
                     if isinstance(msg, PauseMessage):
                         self._current_pause_msg = msg
 
