@@ -17,6 +17,7 @@ defaults = {
         "show_double_underscore_names" : False,
         "language" : "en",
         "open_files" : "",
+        "last_browser_folder": ""
     },
     "debugging" : {
         "detailed_steps" : False,

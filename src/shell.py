@@ -63,8 +63,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
         log_user_event(ShellCreateEvent(self))
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
-        self.text.bind("<Up>", self._arrow_up)
-        self.text.bind("<Down>", self._arrow_down)
+        self.text.bind("<Up>", self._arrow_up, "+")
+        self.text.bind("<Down>", self._arrow_down, "+")
         self.text.bind("<KeyPress>", self._text_key_press, "+")
         self.text.bind("<KeyRelease>", self._text_key_release, "+")
         self.vert_scrollbar['command'] = self.text.yview
@@ -381,6 +381,12 @@ class ShellFrame (ttk.Frame, TextWrapper):
     def change_font_size(self, delta): # TODO: should be elsewhere?
         for f in (ui_utils.IO_FONT, ui_utils.EDITOR_FONT, ui_utils.BOLD_EDITOR_FONT):
             f.configure(size=f.cget("size") + delta)
+    
+    def focus_set(self):
+        self.text.focus()
+    
+    def is_focused(self):
+        return self.focus_displayof() == self.text
     
     def _arrow_up(self, event):
         if not self._in_current_input_range("insert"):

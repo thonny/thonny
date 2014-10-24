@@ -39,7 +39,6 @@ from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
 from ui_utils import Command, notebook_contains
 import user_logging
 import misc_utils
-from textwrap import dedent
 from misc_utils import get_res_path
 
 
@@ -110,19 +109,9 @@ class Thonny(tk.Tk):
         self.bind("<FocusOut>", self.on_lose_focus, "+")
         # self.bind('<Expose>', self._expose, "+")
         # self.focus_force()
-        self._handle_cmd_line_files()
+        self.editor_book.load_startup_files()
+        self.editor_book.focus_current_editor()
     
-    def _handle_cmd_line_files(self):
-        
-        filenames = sys.argv[1:]
-        for filename in filenames:
-            if os.path.exists(filename):
-                self.editor_book.show_file(filename)
-        
-        if len(filenames) == 0:
-            self.editor_book.cmd_new_file()
-        
-        
     
     def _init_widgets(self):
         
@@ -240,6 +229,8 @@ class Thonny(tk.Tk):
                 #Command('update_debugging_mode', 'Enable advanced debugging',  None, self,
                 #        kind="checkbutton", variable_name="advanced_debugging"),
                 "---",
+                Command('focus_editor', "Focus editor", "Ctrl+,", self),
+                Command('focus_shell', "Focus shell", "Ctrl+.", self),
                 Command('show_ast', "Show AST", "F12", self),
                 Command('preferences', 'Preferences', None, self) 
             ]),
@@ -326,6 +317,7 @@ class Thonny(tk.Tk):
                         # create event sequence out of accelerator 
                         # tk wants Control, not Ctrl
                         sequence = item.accelerator.replace("Ctrl", "Control")
+                        
                         sequence = sequence.replace("+-", "+minus")
                         sequence = sequence.replace("++", "+plus")
                         
@@ -616,6 +608,12 @@ class Thonny(tk.Tk):
     
     def cmd_exec(self):
         self._check_issue_debugger_command(DebuggerCommand(command="exec"))
+    
+    def cmd_focus_editor(self):
+        self.editor_book.focus_current_editor()
+    
+    def cmd_focus_shell(self):
+        self.shell.focus_set()
     
     def _check_issue_debugger_command(self, cmd):
         if isinstance(self._vm.get_state_message(), DebuggerResponse):

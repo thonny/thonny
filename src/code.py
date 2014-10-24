@@ -251,8 +251,13 @@ class Editor(ttk.Frame):
             return None
         else:
             return self._stepper.frame_id
-    
 
+    def focus_set(self):
+        self._code_view.focus_set()
+    
+    def is_focused(self):
+        return self.focus_displayof() == self._code_view.text
+    
 class EditorNotebook(ttk.Notebook):
     """
     Manages opened files / modules
@@ -290,6 +295,16 @@ class EditorNotebook(ttk.Notebook):
         """
         
         
+    def load_startup_files(self):
+        
+        filenames = sys.argv[1:]
+        for filename in filenames:
+            if os.path.exists(filename):
+                self.show_file(filename)
+        
+        if len(filenames) == 0:
+            self.cmd_new_file()
+
     def cmd_new_file(self):
         new_editor = Editor(self)
         log_user_event(NewFileEvent(new_editor._code_view))
@@ -424,6 +439,17 @@ class EditorNotebook(ttk.Notebook):
             if filename != None:
                 filenames.append(filename)
         prefs["open_files"] = ";".join(filenames)
+
+    
+    def focus_current_editor(self):
+        editor = self.get_current_editor()
+        if editor: 
+            editor.focus_set()
+
+    def current_editor_is_focused(self):
+        editor = self.get_current_editor()
+        return editor.is_focused()
+
             
 
 class ExpressionView(tk.Text):

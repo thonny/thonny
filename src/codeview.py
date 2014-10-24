@@ -135,6 +135,8 @@ class CodeView(ttk.Frame, TextWrapper):
         else:
             return (0,0)
             
+    def focus_set(self):
+        self.text.focus_set()
     
     def set_coloring(self, value):
         if value:

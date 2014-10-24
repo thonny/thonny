@@ -8,6 +8,7 @@ import os
 from ttk_simpledialog import askstring
 from tkinter.messagebox import showerror
 import code
+from config import prefs
 
 _dummy_node_text = "..."
     
@@ -21,7 +22,6 @@ class BrowseNotebook(ttk.Notebook):
         
         
 class FileBrowser(TreeFrame):
-    
     def __init__(self, master):
         TreeFrame.__init__(self, master, 
                            ["#0", "kind", "path"], 
@@ -47,21 +47,25 @@ class FileBrowser(TreeFrame):
         self.tree.set("", "path", "")
         self.refresh_tree()
         
-        #self.open_path_in_browser(r"D:\workspaces\python_stuff\thonny\src")
+        
         self.tree.bind("<<TreeviewOpen>>", self.on_open_node)
         
         self.menu = tk.Menu(tk._default_root, tearoff=False)
         self.menu.add_command(label="Create new file", command=self.create_new_file)
-        self.menu.add_command(label="Copy", command=self.do_stuff)
         
         self.tree.bind('<3>', self.on_secondary_click)
         if running_on_mac_os():
             self.tree.bind('<2>', self.on_secondary_click)
             self.tree.bind('<Control-1>', self.on_secondary_click)
     
+        self.restore_last_folder()
     
-    def do_stuff(self, *args):
-        print(args)
+    def restore_last_folder(self):
+        path = prefs["last_browser_folder"]
+        if path:
+            self.open_path_in_browser(path, True)
+    
+    
     
     def on_double_click(self, event):
         path = self.get_selected_path()
