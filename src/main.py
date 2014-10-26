@@ -33,7 +33,7 @@ from code import EditorNotebook
 from shell import ShellFrame
 from memory import GlobalsFrame, HeapFrame, ObjectInspector
 import vm_proxy
-from browser import BrowseNotebook
+from browser import FileBrowser
 from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
     InlineCommand, quote_path_for_shell
 from ui_utils import Command, notebook_contains
@@ -133,9 +133,12 @@ class Thonny(tk.Tk):
         self.main_frame.columnconfigure(0, weight=1)
         self.main_frame.rowconfigure(1, weight=1)
         
-        self.browse_book = BrowseNotebook(self.main_pw)
+        self.browse_book = ui_utils.PanelBook(self.main_pw)
         self.main_pw.add(self.center_pw, minsize=150, width=prefs["layout.center_width"])
+        self.file_browser = FileBrowser(self)
+        self.browse_book.add(self.file_browser, text="Files")
         self.cmd_update_browser_visibility(False)
+        
         self.cmd_update_memory_visibility(False)
         
         self.editor_book = EditorNotebook(self.center_pw)

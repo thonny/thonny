@@ -8,18 +8,11 @@ import os
 from ttk_simpledialog import askstring
 from tkinter.messagebox import showerror
 import code
+import sys
 from config import prefs
 
 _dummy_node_text = "..."
     
-class BrowseNotebook(ttk.Notebook):
-    def __init__(self, master):
-        ttk.Notebook.__init__(self, master)
-        self.files_frame = FileBrowser(self)
-        
-        self.add(self.files_frame, text="Files")
-        
-        
         
 class FileBrowser(TreeFrame):
     def __init__(self, master):
@@ -58,19 +51,28 @@ class FileBrowser(TreeFrame):
             self.tree.bind('<2>', self.on_secondary_click)
             self.tree.bind('<Control-1>', self.on_secondary_click)
     
-        self.restore_last_folder()
+        self.open_initial_folder()
     
-    def restore_last_folder(self):
-        path = prefs["last_browser_folder"]
-        if path:
-            self.open_path_in_browser(path, True)
+    def open_initial_folder(self):
+        if len(sys.argv) > 1:
+            self.open_path_in_browser(sys.argv[1], True)
+            self.save_current_folder()
+        else:
+            path = prefs["last_browser_folder"]
+            if path:
+                self.open_path_in_browser(path, True)
     
-    
+    def save_current_folder(self):
+        path = self.get_selected_path()
+        if os.path.isfile(path):
+            path = os.path.dirname(path)
+        prefs["last_browser_folder"] = path
     
     def on_double_click(self, event):
         path = self.get_selected_path()
         if path:
             code.editor_book.show_file(path)
+            self.save_current_folder()
     
     def on_secondary_click(self, event):
         node_id = self.tree.identify_row(event.y)
@@ -181,9 +183,13 @@ class FileBrowser(TreeFrame):
                     break
         
         if see:
-            self.tree.see(current_node_id)    
             self.tree.selection_set(current_node_id)
             self.tree.focus(current_node_id)
+            
+            if self.tree.set(current_node_id, "kind") == "file":
+                self.tree.see(self.tree.parent(current_node_id))
+            else:
+                self.tree.see(current_node_id)    
                 
     
     def populate_tree(self):
