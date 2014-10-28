@@ -267,7 +267,7 @@ class CodeView(ttk.Frame, TextWrapper):
         self.active_statement_ranges = []
         self.read_only = True
         self.text.configure(insertwidth=0)
-        #self.text.configure(background="LightYellow", insertwidth=0, insertbackground="Gray")
+        self.text.configure(background="LightYellow")
 
     def exit_execution_mode(self):
         self.active_statement_ranges = []
