@@ -200,7 +200,7 @@ class CodeView(ttk.Frame, TextWrapper):
     
     
     def indent_or_dedent_event(self, event):
-        if event.state == 9: # shift is pressed
+        if event.state in [1,9]: # shift is pressed (1 in Mac, 9 in Win)
             return self.dedent_region_event(event)
         else:
             return self.smart_indent_event(event)    
