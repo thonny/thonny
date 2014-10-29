@@ -165,6 +165,7 @@ class Editor(ttk.Frame):
         self._filename = filename
         log_user_event(LoadEvent(self._code_view, filename))
         self._code_view.set_content(source)
+        self._code_view.focus_set()
         
     def is_modified(self):
         return self._code_view.text.edit_modified()

@@ -8,6 +8,7 @@ import tkinter.font as tk_font
 from misc_utils import running_on_linux, running_on_mac_os, running_on_windows
 
 import config
+import time
 
 from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
     UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
@@ -310,6 +311,8 @@ class TreeFrame(ttk.Frame):
 class TextWrapper:
     # Used for getting read-only effect
     # http://tkinter.unpythonic.net/wiki/ReadOnlyText
+
+    
     def __init__(self):
         self._text_redirector = WidgetRedirector(self.text)
         self._original_user_text_insert = self._text_redirector.register("insert", self._user_text_insert)
@@ -320,12 +323,21 @@ class TextWrapper:
         self.text.bind("<<Cut>>", self.on_text_cut, "+")
         self.text.bind("<<Copy>>", self.on_text_copy, "+")
         self.text.bind("<<Paste>>", self.on_text_paste, "+")
-        # self.text.bind("<<Selection>>", self.on_text_selection_change, "+")
+        #self.text.bind("<<Selection>>", self.on_text_selection_change, "+")
         self.text.bind("<FocusIn>", self.on_text_get_focus, "+")
         self.text.bind("<FocusOut>", self.on_text_lose_focus, "+")
         self.text.bind("<Key>", self.on_text_key_press, "+")
+        self.text.bind("<1>", self.on_text_mouse_click, "+")
+        self.text.bind("<2>", self.on_text_mouse_click, "+")
+        self.text.bind("<3>", self.on_text_mouse_click, "+")
         
         self._last_event_kind = None
+        self._last_key_time = 0
+
+        # These are needed because code copied from idlelib relies on such methods
+        self.started_undo_blocks = 0
+        self.text.undo_block_start = self.undo_block_start
+        self.text.undo_block_stop = self.undo_block_stop
  
     def _user_text_insert(self, *args, **kw):
         index = self.text.index(args[0])
@@ -359,45 +371,65 @@ class TextWrapper:
         
     def on_text_cut(self, e):
         self._last_event_kind = "cut"
-        self.text.edit_separator()        
+        self.add_undo_separator()        
         log_user_event(CutEvent(self));
         
     def on_text_copy(self, e):
         self._last_event_kind = "copy"
-        self.text.edit_separator()        
+        self.add_undo_separator()        
         log_user_event(CopyEvent(self));
         
     def on_text_paste(self, e):
         self._last_event_kind = "paste"
-        self.text.edit_separator()        
+        self.add_undo_separator()        
         log_user_event(PasteEvent(self));
     
     def on_text_get_focus(self, e):
         self._last_event_kind = "get_focus"
-        self.text.edit_separator()        
+        self.add_undo_separator()        
         log_user_event(EditorGetFocusEvent(self));
         
     def on_text_lose_focus(self, e):
         self._last_event_kind = "lose_focus"
-        self.text.edit_separator()        
+        self.add_undo_separator()        
         log_user_event(EditorLoseFocusEvent(self));
     
     def on_text_key_press(self, e):
-        if e.keysym in ("BackSpace", "Delete"):
-            if self._last_event_kind != "delete":
-                self.text.edit_separator()
-            self._last_event_kind = "delete"
+            
+        event_kind = self.get_event_kind(e)
         
-        elif e.char:
-            if self._last_event_kind != "insert":
-                self.text.edit_separator()
-            self._last_event_kind = "insert"
+        if (event_kind != self._last_event_kind
+            or e.char in ("\r", "\n", " ")
+            or time.time() - self.last_key_time > 2):
+            self.add_undo_separator()
+            self._last_event_kind = event_kind
 
-
-        if e.char in ("\r", "\n", " "):
-            self.text.edit_separator()
+        self.last_key_time = time.time()
         log_user_event(KeyPressEvent(self, e, self.text.index(tk.INSERT)))
 
+    def on_text_mouse_click(self, event):
+        self.add_undo_separator()
+    
+    def add_undo_separator(self):
+        if self.started_undo_blocks == 0:
+            self.text.edit_separator()
+    
+    def get_event_kind(self, event):
+        if event.keysym in ("BackSpace", "Delete"):
+            return "delete"
+        elif event.char:
+            return "insert"
+        else:
+            # eg. e.keysym in ("Left", "Up", "Right", "Down", "Home", "End", "Prior", "Next"):
+            return "other_key"
+
+    def undo_block_start(self):
+        self.started_undo_blocks += 1
+    
+    def undo_block_stop(self):
+        self.started_undo_blocks -= 1
+        if self.started_undo_blocks == 0:
+            self.add_undo_separator()
 
 class TextFrame(ttk.Frame, TextWrapper):
     def __init__(self, master, readonly=False):

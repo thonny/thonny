@@ -10,6 +10,26 @@ from common import TextRange
 from coloring import SyntaxColorer
 from config import prefs
 
+
+def classifyws(s, tabwidth):
+    # copied from idlelib.EditorWindow (Python 3.4.2)
+    raw = effective = 0
+    for ch in s:
+        if ch == ' ':
+            raw = raw + 1
+            effective = effective + 1
+        elif ch == '\t':
+            raw = raw + 1
+            effective = (effective // tabwidth + 1) * tabwidth
+        else:
+            break
+    return raw, effective
+
+def index2line(index):
+    # copied from idlelib.EditorWindow (Python 3.4.2)
+    return int(float(index))
+
+
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
 # scrolling code copied from tkinter.scrolledtext
@@ -24,6 +44,10 @@ class CodeView(ttk.Frame, TextWrapper):
         self.first_line_no = first_line_no
         self.filename = None
         self.file_encoding = "UTF-8"
+        
+        self.tabwidth = 8 # See comments in idlelib.EditorWindow 
+        self.indentwidth = 4 
+        self.usetabs = False
         
         # child widgets
         if auto_vert_scroll:
@@ -111,7 +135,186 @@ class CodeView(ttk.Frame, TextWrapper):
         #self.current_statement_range = None
         self.active_statement_ranges = []
         #self.statement_tags = set()
+        
+        # TODO: Check Mac bindings
+        self.text.bind("<Control-BackSpace>", self.del_word_left)
+        self.text.bind("<Control-Delete>", self.del_word_right)
+        self.text.bind("<Left>", self.move_at_edge_if_selection(0))
+        self.text.bind("<Right>", self.move_at_edge_if_selection(1))
+        self.text.bind("<Tab>", self.indent_or_dedent_event)
+        
     
+    def del_word_left(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        self.text.event_generate('<Meta-Delete>')
+        return "break"
+
+    def del_word_right(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        self.text.event_generate('<Meta-d>')
+        return "break"
+
+    """
+    def remove_selection(self, event=None):
+        # copied from idlelib.EditorWindow
+        self.text.tag_remove("sel", "1.0", "end")
+        self.text.see("insert")
+    """
+
+    def move_at_edge_if_selection(self, edge_index):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        """Cursor move begins at start or end of selection
+
+        When a left/right cursor key is pressed create and return to Tkinter a
+        function which causes a cursor move from the associated edge of the
+        selection.
+
+        """
+        self_text_index = self.text.index
+        self_text_mark_set = self.text.mark_set
+        edges_table = ("sel.first+1c", "sel.last-1c")
+        def move_at_edge(event):
+            if (event.state & 5) == 0: # no shift(==1) or control(==4) pressed
+                try:
+                    self_text_index("sel.first")
+                    self_text_mark_set("insert", edges_table[edge_index])
+                except tk.TclError:
+                    pass
+        return move_at_edge
+    
+    
+    def indent_or_dedent_event(self, event):
+        if event.state == 9: # shift is pressed
+            return self.dedent_region_event(event)
+        else:
+            return self.smart_indent_event(event)    
+    
+    def indent_region_event(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        head, tail, chars, lines = self.get_region()
+        for pos in range(len(lines)):
+            line = lines[pos]
+            if line:
+                raw, effective = classifyws(line, self.tabwidth)
+                effective = effective + self.indentwidth
+                lines[pos] = self._make_blanks(effective) + line[raw:]
+        self.set_region(head, tail, chars, lines)
+        return "break"
+
+    def dedent_region_event(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        head, tail, chars, lines = self.get_region()
+        for pos in range(len(lines)):
+            line = lines[pos]
+            if line:
+                raw, effective = classifyws(line, self.tabwidth)
+                effective = max(effective - self.indentwidth, 0)
+                lines[pos] = self._make_blanks(effective) + line[raw:]
+        self.set_region(head, tail, chars, lines)
+        return "break"
+    
+    
+    def _make_blanks(self, n):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        # Make string that displays as n leading blanks.
+        if self.usetabs:
+            ntabs, nspaces = divmod(n, self.tabwidth)
+            return '\t' * ntabs + ' ' * nspaces
+        else:
+            return ' ' * n
+        
+    def reindent_to(self, column):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        # Delete from beginning of line to insert point, then reinsert
+        # column logical (meaning use tabs if appropriate) spaces.
+        text = self.text
+        text.undo_block_start()
+        if text.compare("insert linestart", "!=", "insert"):
+            text.delete("insert linestart", "insert")
+        if column:
+            text.insert("insert", self._make_blanks(column))
+        text.undo_block_stop()
+
+    def smart_indent_event(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        # if intraline selection:
+        #     delete it
+        # elif multiline selection:
+        #     do indent-region
+        # else:
+        #     indent one level
+        text = self.text
+        first, last = self.get_selection_indices()
+        text.undo_block_start()
+        try:
+            if first and last:
+                if index2line(first) != index2line(last):
+                    return self.indent_region_event(event)
+                text.delete(first, last)
+                text.mark_set("insert", first)
+            prefix = text.get("insert linestart", "insert")
+            raw, effective = classifyws(prefix, self.tabwidth)
+            if raw == len(prefix):
+                # only whitespace to the left
+                self.reindent_to(effective + self.indentwidth)
+            else:
+                # tab to the next 'stop' within or to right of line's text:
+                if self.usetabs:
+                    pad = '\t'
+                else:
+                    effective = len(prefix.expandtabs(self.tabwidth))
+                    n = self.indentwidth
+                    pad = ' ' * (n - effective % n)
+                text.insert("insert", pad)
+            text.see("insert")
+            return "break"
+        finally:
+            text.undo_block_stop()
+
+    def get_region(self):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        text = self.text
+        first, last = self.get_selection_indices()
+        if first and last:
+            head = text.index(first + " linestart")
+            tail = text.index(last + "-1c lineend +1c")
+        else:
+            head = text.index("insert linestart")
+            tail = text.index("insert lineend +1c")
+        chars = text.get(head, tail)
+        lines = chars.split("\n")
+        return head, tail, chars, lines
+
+    def set_region(self, head, tail, chars, lines):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        text = self.text
+        newchars = "\n".join(lines)
+        if newchars == chars:
+            text.bell()
+            return
+        text.tag_remove("sel", "1.0", "end")
+        text.mark_set("insert", head)
+        text.undo_block_start()
+        text.delete(head, tail)
+        text.insert(head, newchars)
+        text.undo_block_stop()
+        text.tag_add("sel", head, "insert")
+    
+    def get_selection_indices(self):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        # If a selection is defined in the text widget, return (start,
+        # end) as Tkinter text indices, otherwise return (None, None)
+        try:
+            first = self.text.index("sel.first")
+            last = self.text.index("sel.last")
+            return first, last
+        except tk.TclError:
+            return None, None
+        
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
     
