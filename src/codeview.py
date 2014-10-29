@@ -635,6 +635,9 @@ class CodeView(ttk.Frame, TextWrapper):
     def select_all(self):
         self.text.tag_remove("sel", "1.0", tk.END)
         self.text.tag_add('sel', '1.0', tk.END)
+        self.text.mark_set("insert", "1.0")
+        self.text.see("insert")
+    
     
     def handle_focus_message(self, text_range, msg=None):
         
@@ -843,6 +846,26 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def change_font_size(self, delta):
         self.font.configure(size=self.font.cget("size") + delta)
+    
+    def cmd_cut(self, event=None):
+        self.text.event_generate("<<Cut>>")
+        return "break"
+
+    def cmd_copy(self, event=None):
+        if not self.text.tag_ranges("sel"):
+            # There is no selection, so do nothing and maybe interrupt.
+            return
+        self.text.event_generate("<<Copy>>")
+        return "break"
+
+    def cmd_paste(self, event=None):
+        self.text.event_generate("<<Paste>>")
+        self.text.see("insert")
+        return "break"
+
+    def cmd_select_all(self, event=None):
+        self.select_all();
+        return "break"
     
     
     def prepare_level_boxes(self):

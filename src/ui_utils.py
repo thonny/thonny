@@ -679,7 +679,7 @@ class Command:
                 return availability_method()
             else:
                 # Let's be optimistic
-                return hasattr(target, "cmd_" + self.cmd_id)
+                return self.system_bound or hasattr(target, "cmd_" + self.cmd_id)
         
 def get_zoomed(toplevel):
     if "-zoomed" in toplevel.wm_attributes(): # Linux
