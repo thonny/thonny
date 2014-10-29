@@ -7,6 +7,24 @@ from datetime import timedelta
 
 USER_LOGGER = None # Main will create the logger
 
+"""
+TODO: on Mac when playing around with backspace and undo by long pressing keys
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/tkinter/__init__.py", line 1487, in __call__
+    return self.func(*args)
+  File "/Users/aivar/workspaces/python_stuff/thonny/src/codeview.py", line 445, in smart_backspace_event
+    text.delete("insert-1c")
+  File "/Users/aivar/workspaces/python_stuff/thonny/src/codeview.py", line 787, in _user_text_delete
+    TextWrapper._user_text_delete(self, index1, index2)
+  File "/Users/aivar/workspaces/python_stuff/thonny/src/ui_utils.py", line 364, in _user_text_delete
+    log_user_event(TextDeleteEvent(self, index1, index2))
+  File "/Users/aivar/workspaces/python_stuff/thonny/src/user_logging.py", line 94, in log_user_event
+    USER_LOGGER.log_micro_event(e)
+  File "/Users/aivar/workspaces/python_stuff/thonny/src/user_logging.py", line 55, in log_micro_event
+    and int(self.last_position.split(".")[0]) == int(e.to_position.split(".")[0])
+ValueError: invalid literal for int() with base 10: ''
+"""
+
 class UserEventLogger:
     def __init__(self, filename=None):
         self.filename = filename
