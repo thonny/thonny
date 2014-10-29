@@ -158,6 +158,7 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.bind("<Return>", self.newline_and_indent_event)
         self.text.bind("<BackSpace>", self.smart_backspace_event)
         
+        fixwordbreaks(tk._default_root)
         
     
     def del_word_left(self, event):
@@ -967,4 +968,15 @@ def fact(n):
         self.text.tag_configure('superscript', offset=7, font=supfont, underline=False, foreground="red")
 
 
+
+def fixwordbreaks(root):
+    # Copied from idlelib.EditorWindow (Python 3.4.2)
+    # Modified to include non-ascii chars
+    
+    # Make sure that Tk's double-click and next/previous word
+    # operations use our definition of a word (i.e. an identifier)
+    tk = root.tk
+    tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
+    tk.call('set', 'tcl_wordchars',     '[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+    tk.call('set', 'tcl_nonwordchars', '[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
 
