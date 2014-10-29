@@ -2,9 +2,11 @@
 
 from configparser import ConfigParser
 import tkinter as tk
+import tkinter.messagebox
 import os.path
 import codecs
 import ast
+import traceback
 
 
 PREFS_FILE = os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini"))
@@ -118,15 +120,15 @@ class ThonnyTkVars():
             var.trace_variable("w", _update_prefs)
         
         return self._vars[key]
- 
-prefs = ThonnyConfigParser()
-prefs_vars = ThonnyTkVars()
+
+try:
+    prefs = ThonnyConfigParser()
+    prefs_vars = ThonnyTkVars()
+except:
+    tkinter.messagebox.showerror("Error reading configuration. Use Ctrl+C to copy",
+                                traceback.format_exc())
+    raise
 
 
 
 
-if __name__ == "__main__":
-    print(repr(prefs["UI.font_size"]),
-          repr(prefs["UI.heap_visible"]),
-          repr(prefs["UI.some_crap"]))
-    prefs["kola.pola"] = True

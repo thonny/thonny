@@ -327,6 +327,7 @@ class TextWrapper:
         self.text.bind("<FocusIn>", self.on_text_get_focus, "+")
         self.text.bind("<FocusOut>", self.on_text_lose_focus, "+")
         self.text.bind("<Key>", self.on_text_key_press, "+")
+        self.text.bind("<KeyRelease>", self.on_text_key_release, "+")
         self.text.bind("<1>", self.on_text_mouse_click, "+")
         self.text.bind("<2>", self.on_text_mouse_click, "+")
         self.text.bind("<3>", self.on_text_mouse_click, "+")
@@ -338,6 +339,7 @@ class TextWrapper:
         self.started_undo_blocks = 0
         self.text.undo_block_start = self.undo_block_start
         self.text.undo_block_stop = self.undo_block_stop
+        # TODO: see idlelib.EditorWindow.reset_undo
  
     def _user_text_insert(self, *args, **kw):
         index = self.text.index(args[0])
@@ -394,6 +396,9 @@ class TextWrapper:
         self.add_undo_separator()        
         log_user_event(EditorLoseFocusEvent(self));
     
+    def on_text_key_release(self, e):
+        pass
+            
     def on_text_key_press(self, e):
             
         event_kind = self.get_event_kind(e)

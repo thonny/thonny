@@ -1,14 +1,20 @@
 # -*- coding: utf-8 -*-
- 
+
+# TODO: refactor IDLE editor text into separate component and use it in IDLE 
+# and here?
+
 import ui_utils
 import tkinter as tk
+import os.path
 from tkinter import ttk
+from idlelib import PyParse
 import tkinter.font as tk_font
 
 from ui_utils import TextWrapper, AutoScrollbar
 from common import TextRange
 from coloring import SyntaxColorer
 from config import prefs
+from idlelib import ParenMatch
 
 
 def classifyws(s, tabwidth):
@@ -121,7 +127,10 @@ class CodeView(ttk.Frame, TextWrapper):
         
         self.colorer = None
         self.set_coloring(True)
-        self.prepare_level_boxes()
+        self.set_up_paren_matching()
+        
+                        
+        #self.prepare_level_boxes()
         
         """
         self.text.tag_configure('statement', borderwidth=1, relief=tk.SOLID)
@@ -136,12 +145,19 @@ class CodeView(ttk.Frame, TextWrapper):
         self.active_statement_ranges = []
         #self.statement_tags = set()
         
+        self.num_context_lines = 50, 500, 5000000 # See idlelib.EditorWindow
+        self.context_use_ps1 = False
+        
         # TODO: Check Mac bindings
         self.text.bind("<Control-BackSpace>", self.del_word_left)
         self.text.bind("<Control-Delete>", self.del_word_right)
+        self.text.bind("<Home>", self.home_callback)
         self.text.bind("<Left>", self.move_at_edge_if_selection(0))
         self.text.bind("<Right>", self.move_at_edge_if_selection(1))
         self.text.bind("<Tab>", self.indent_or_dedent_event)
+        self.text.bind("<Return>", self.newline_and_indent_event)
+        self.text.bind("<BackSpace>", self.smart_backspace_event)
+        
         
     
     def del_word_left(self, event):
@@ -214,6 +230,171 @@ class CodeView(ttk.Frame, TextWrapper):
         self.set_region(head, tail, chars, lines)
         return "break"
     
+    def home_callback(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        if (event.state & 4) != 0 and event.keysym == "Home":
+            # state&4==Control. If <Control-Home>, use the Tk binding.
+            return
+        if self.text.index("iomark") and \
+           self.text.compare("iomark", "<=", "insert lineend") and \
+           self.text.compare("insert linestart", "<=", "iomark"):
+            # In Shell on input line, go to just after prompt
+            insertpt = int(self.text.index("iomark").split(".")[1])
+        else:
+            line = self.text.get("insert linestart", "insert lineend")
+            for insertpt in range(len(line)):
+                if line[insertpt] not in (' ','\t'):
+                    break
+            else:
+                insertpt=len(line)
+        lineat = int(self.text.index("insert").split('.')[1])
+        if insertpt == lineat:
+            insertpt = 0
+        dest = "insert linestart+"+str(insertpt)+"c"
+        if (event.state&1) == 0:
+            # shift was not pressed
+            self.text.tag_remove("sel", "1.0", "end")
+        else:
+            if not self.text.index("sel.first"):
+                # there was no previous selection
+                self.text.mark_set("my_anchor", "insert")
+            else:
+                if self.text.compare(self.text.index("sel.first"), "<",
+                                     self.text.index("insert")):
+                    self.text.mark_set("my_anchor", "sel.first") # extend back
+                else:
+                    self.text.mark_set("my_anchor", "sel.last") # extend forward
+            first = self.text.index(dest)
+            last = self.text.index("my_anchor")
+            if self.text.compare(first,">",last):
+                first,last = last,first
+            self.text.tag_remove("sel", "1.0", "end")
+            self.text.tag_add("sel", first, last)
+        self.text.mark_set("insert", dest)
+        self.text.see("insert")
+        return "break"
+
+    
+    def newline_and_indent_event(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        # slightly modified
+        
+        text = self.text
+        first, last = self.get_selection_indices()
+        text.undo_block_start()
+        try:
+            if first and last:
+                text.delete(first, last)
+                text.mark_set("insert", first)
+            line = text.get("insert linestart", "insert")
+            i, n = 0, len(line)
+            while i < n and line[i] in " \t":
+                i = i+1
+            if i == n:
+                # the cursor is in or at leading indentation in a continuation
+                # line; just inject an empty line at the start
+                text.insert("insert linestart", '\n')
+                return "break"
+            indent = line[:i]
+            # strip whitespace before insert point unless it's in the prompt
+            i = 0
+            
+            #last_line_of_prompt = sys.ps1.split('\n')[-1]
+            while line and line[-1] in " \t" : #and line != last_line_of_prompt:
+                line = line[:-1]
+                i = i+1
+            if i:
+                text.delete("insert - %d chars" % i, "insert")
+            # strip whitespace after insert point
+            while text.get("insert") in " \t":
+                text.delete("insert")
+            # start new line
+            text.insert("insert", '\n')
+
+            # adjust indentation for continuations and block
+            # open/close first need to find the last stmt
+            lno = index2line(text.index('insert'))
+            y = PyParse.Parser(self.indentwidth, self.tabwidth)
+            
+            #if not self.context_use_ps1:
+            for context in self.num_context_lines:
+                startat = max(lno - context, 1)
+                startatindex = repr(startat) + ".0"
+                rawtext = text.get(startatindex, "insert")
+                y.set_str(rawtext)
+                bod = y.find_good_parse_start(
+                          self.context_use_ps1,
+                          self._build_char_in_string_func(startatindex))
+                if bod is not None or startat == 1:
+                    break
+            y.set_lo(bod or 0)
+            #else:
+            #    r = text.tag_prevrange("console", "insert")
+            #    if r:
+            #        startatindex = r[1]
+            #    else:
+            #        startatindex = "1.0"
+            #    rawtext = text.get(startatindex, "insert")
+            #    y.set_str(rawtext)
+            #    y.set_lo(0)
+
+            c = y.get_continuation_type()
+            if c != PyParse.C_NONE:
+                # The current stmt hasn't ended yet.
+                if c == PyParse.C_STRING_FIRST_LINE:
+                    # after the first line of a string; do not indent at all
+                    pass
+                elif c == PyParse.C_STRING_NEXT_LINES:
+                    # inside a string which started before this line;
+                    # just mimic the current indent
+                    text.insert("insert", indent)
+                elif c == PyParse.C_BRACKET:
+                    # line up with the first (if any) element of the
+                    # last open bracket structure; else indent one
+                    # level beyond the indent of the line with the
+                    # last open bracket
+                    self.reindent_to(y.compute_bracket_indent())
+                elif c == PyParse.C_BACKSLASH:
+                    # if more than one line in this stmt already, just
+                    # mimic the current indent; else if initial line
+                    # has a start on an assignment stmt, indent to
+                    # beyond leftmost =; else to beyond first chunk of
+                    # non-whitespace on initial line
+                    if y.get_num_lines_in_stmt() > 1:
+                        text.insert("insert", indent)
+                    else:
+                        self.reindent_to(y.compute_backslash_indent())
+                else:
+                    assert 0, "bogus continuation type %r" % (c,)
+                return "break"
+
+            # This line starts a brand new stmt; indent relative to
+            # indentation of initial line of closest preceding
+            # interesting stmt.
+            indent = y.get_base_indent_string()
+            text.insert("insert", indent)
+            if y.is_block_opener():
+                self.smart_indent_event(event)
+            elif indent and y.is_block_closer():
+                self.smart_backspace_event(event)
+            return "break"
+        finally:
+            text.see("insert")
+            text.undo_block_stop()
+
+    def _build_char_in_string_func(self, startindex):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        # Our editwin provides a is_char_in_string function that works
+        # with a Tk text index, but PyParse only knows about offsets into
+        # a string. This builds a function for PyParse that accepts an
+        # offset.
+
+        def inner(offset, _startindex=startindex,
+                  _icis=self.is_char_in_string):
+            return _icis(_startindex + "+%dc" % offset)
+        return inner
     
     def _make_blanks(self, n):
         # copied from idlelib.EditorWindow (Python 3.4.2)
@@ -238,6 +419,58 @@ class CodeView(ttk.Frame, TextWrapper):
             text.insert("insert", self._make_blanks(column))
         text.undo_block_stop()
 
+
+    def smart_backspace_event(self, event):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        # Slightly modified
+        
+        text = self.text
+        first, last = self.get_selection_indices()
+        if first and last:
+            text.delete(first, last)
+            text.mark_set("insert", first)
+            return "break"
+        # Delete whitespace left, until hitting a real char or closest
+        # preceding virtual tab stop.
+        chars = text.get("insert linestart", "insert")
+        if chars == '':
+            if text.compare("insert", ">", "1.0"):
+                # easy: delete preceding newline
+                text.delete("insert-1c")
+            else:
+                text.bell()     # at start of buffer
+            return "break"
+        if  chars[-1] not in " \t":
+            # easy: delete preceding real char
+            text.delete("insert-1c")
+            return "break"
+        # Ick.  It may require *inserting* spaces if we back up over a
+        # tab character!  This is written to be clear, not fast.
+        tabwidth = self.tabwidth
+        have = len(chars.expandtabs(tabwidth))
+        assert have > 0
+        want = ((have - 1) // self.indentwidth) * self.indentwidth
+        # Debug prompt is multilined....
+        #if self.context_use_ps1:
+        #    last_line_of_prompt = sys.ps1.split('\n')[-1]
+        #else:
+        last_line_of_prompt = ''
+        ncharsdeleted = 0
+        while 1:
+            if chars == last_line_of_prompt:
+                break
+            chars = chars[:-1]
+            ncharsdeleted = ncharsdeleted + 1
+            have = len(chars.expandtabs(tabwidth))
+            if have <= want or chars[-1] not in " \t":
+                break
+        text.undo_block_start()
+        text.delete("insert-%dc" % ncharsdeleted, "insert")
+        if have < want:
+            text.insert("insert", ' ' * (want - have))
+        text.undo_block_stop()
+        return "break"
+    
     def smart_indent_event(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         
@@ -306,6 +539,7 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def get_selection_indices(self):
         # copied from idlelib.EditorWindow (Python 3.4.2)
+        
         # If a selection is defined in the text widget, return (start,
         # end) as Tkinter text indices, otherwise return (None, None)
         try:
@@ -314,6 +548,38 @@ class CodeView(ttk.Frame, TextWrapper):
             return first, last
         except tk.TclError:
             return None, None
+        
+    def ispythonsource(self, filename):
+        # TODO: doesn't belong here
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        
+        if not filename or os.path.isdir(filename):
+            return True
+        _, ext = os.path.splitext(os.path.basename(filename))
+        if os.path.normcase(ext) in (".py", ".pyw"):
+            return True
+        line = self.text.get('1.0', '1.0 lineend')
+        return line.startswith('#!') and 'python' in line
+    
+
+    def is_char_in_string(self, text_index):
+        # copied from idlelib.EditorWindow (Python 3.4.2)
+        # Slightly modified
+        
+        # Is character at text_index in a Python string?  Return 0 for
+        # "guaranteed no", true for anything else.  This info is expensive
+        # to compute ab initio, but is probably already known by the
+        # platform's colorizer.
+        
+        if self.colorer:
+            # Return true iff colorizer hasn't (re)gotten this far
+            # yet, or the character is tagged as being in a string
+            return self.text.tag_prevrange("TODO", text_index) or \
+                   "STRING" in self.text.tag_names(text_index)
+        else:
+            # The colorizer is missing: assume the worst
+            return 1
+        
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -349,6 +615,16 @@ class CodeView(ttk.Frame, TextWrapper):
             if self.colorer != None:
                 self.colorer.removecolors()
                 self.colorer = None
+    
+    def set_up_paren_matching(self):
+        self.text_frame = self # ParenMatch assumes the existence of this attribute
+        self.paren_matcher = ParenMatch.ParenMatch(self)
+        self.paren_matcher.set_style("expression")
+        ParenMatch.ParenMatch.HILITE_CONFIG = {'foreground': 'black', 'background': 'lightgray'}
+        
+        # paren_closed_event is called in _user_text_insert
+        # because KeyRelease doesn't give necessary info with Estonian keyboard
+
     
     def select_lines(self, start_line, end_line=None):
         self.select_range(TextRange(start_line - self.first_line_no + 1, 0, 
@@ -489,6 +765,13 @@ class CodeView(ttk.Frame, TextWrapper):
             TextWrapper._user_text_insert(self, index, chars, tags)
             if self.colorer:
                 self.colorer.on_insert(index, chars, tags)
+            
+            if self.paren_matcher and chars in (")", "]", "}"):
+                try:
+                    self.paren_matcher.paren_closed_event(None)
+                except:
+                    pass
+            
             self._update_line_numbers()
             self.update_level_boxes()
             self.text.see(index)
@@ -525,55 +808,6 @@ class CodeView(ttk.Frame, TextWrapper):
                 "Editing during run/debug is not allowed")
     """
     
-    def on_text_key_press(self, e):
-        TextWrapper.on_text_key_press(self, e)
-        #print("KEY", repr(e.char))
-        current_line = self.text.get("insert linestart", "insert lineend")
-        current_line_left_part = self.text.get("insert linestart", "insert")
-        
-        # replace tabs with spaces
-        # TODO: keep tabs when inside string or when there are some
-        # non-whitespace chars on current line left to the cursor
-        if e.char in ("\t", "\n", "\r"):
-            #print("KEY", repr(e.char))
-            if e.char == "\t":
-                self.text.insert("insert", "    ");
-                # TODO: delete selected text if there is any
-                return "break"
-            
-            elif e.char in ("\n", "\r"):
-                
-                current_indent = ""
-                for c in current_line:
-                    if c in " \t":
-                        current_indent += c
-                    else:
-                        break
-                
-                # TODO: strip also comments
-                if (current_line.strip().endswith(':')
-                    and current_line_left_part.strip() != ""): 
-                    self.text.insert("insert", "\n" + current_indent + "    ")
-                    return "break"
-                else:
-                    self.text.insert("insert", "\n" + current_indent)
-                    return "break"
-                # TODO: unindent in case of break, return, continue, raise, pass
-                  
-        elif e.keysym == "BackSpace":
-            left_text = self.text.get("insert linestart", "insert")
-            if left_text.endswith("    ") and len(left_text) % 4 == 0:
-                self.text.delete("insert-4c", "insert")
-                return "break"
-        
-        elif e.keysym == "Home":
-            if ((current_line_left_part.startswith(" ") or current_line_left_part.startswith("\t"))
-                and current_line_left_part.strip() != ""):
-                # first go to start of visible symbols
-                self.text.mark_set("insert", "insert-{}c".format(len(current_line_left_part.lstrip())))
-                return "break"
-                    
-        
     def update_focus_boxes(self, boxes):
         """
         1) Removes boxes which are not among given boxes, creates missing boxes
