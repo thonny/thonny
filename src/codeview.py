@@ -624,6 +624,7 @@ class CodeView(ttk.Frame, TextWrapper):
         
         # paren_closed_event is called in _user_text_insert
         # because KeyRelease doesn't give necessary info with Estonian keyboard
+        # restore_event call is also there
 
     
     def select_lines(self, start_line, end_line=None):
@@ -754,6 +755,18 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.configure(insertwidth=2)
         self.text.configure(background="White", insertwidth=2, insertbackground="Black")
 
+    def on_text_mouse_click(self, event):
+        TextWrapper.on_text_mouse_click(self, event)
+        self.remove_paren_highlight()
+        
+    
+    def remove_paren_highlight(self): 
+        if self.paren_matcher:
+            try: 
+                self.paren_matcher.restore_event(None)
+            except:
+                pass
+        
     def _user_text_insert(self, index, chars, tags=None):
         #cursor_pos = self.text.index(tk.INSERT)
         
@@ -766,9 +779,12 @@ class CodeView(ttk.Frame, TextWrapper):
             if self.colorer:
                 self.colorer.on_insert(index, chars, tags)
             
-            if self.paren_matcher and chars in (")", "]", "}"):
+            if self.paren_matcher: 
                 try:
-                    self.paren_matcher.paren_closed_event(None)
+                    if chars in (")", "]", "}"):
+                        self.paren_matcher.paren_closed_event(None)
+                    else:
+                        self.remove_paren_highlight()
                 except:
                     pass
             
