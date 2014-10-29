@@ -696,6 +696,7 @@ class Thonny(tk.Tk):
         self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._vm.cwd, *sys.version_info))
     
     def _mac_open_document(self, *args):
+        # TODO:
         #showinfo("open doc", str(args))
         pass
     
@@ -708,10 +709,17 @@ class Thonny(tk.Tk):
         pass
     
     def _on_close(self):
-        # TODO: warn about unsaved files (or just save?)
-        self._store_prefs(False)
-        ui_utils.delete_images()
-        user_logging.USER_LOGGER.save()
+        if not self.editor_book.check_allow_closing():
+            return
+        
+        try:
+            self._store_prefs(False)
+            ui_utils.delete_images()
+            user_logging.USER_LOGGER.save()
+        except:
+            tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
+                                traceback.format_exc())
+        
         self.destroy()
         
         

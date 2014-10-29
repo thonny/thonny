@@ -23,21 +23,14 @@ import misc_utils
 import memory
 import logging
 from ui_utils import generate_event
+import tkinter.messagebox as tkMessageBox
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    from tkinter.filedialog import asksaveasfilename
-    from tkinter.filedialog import askopenfilename
-    #from tkinter.messagebox import showwarning
-    from tkinter.messagebox import showinfo
-except ImportError:
-    import Tkinter as tk
-    import ttk 
-    from tkFileDialog import asksaveasfilename
-    from tkFileDialog import askopenfilename
-    #from tkMessageBox import showwarning
-    from tkMessageBox import showinfo
+import tkinter as tk
+from tkinter import ttk
+from tkinter.filedialog import asksaveasfilename
+from tkinter.filedialog import askopenfilename
+#from tkinter.messagebox import showwarning
+from tkinter.messagebox import showinfo
     
 import ast_utils
 from memory import LocalsFrame
@@ -55,6 +48,9 @@ logger.propagate = False
 logger.setLevel(logging.WARNING)
 logger.addHandler(logging.StreamHandler(sys.stdout))
 debug = logger.debug
+
+_dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
+
 
 class StatementStepper:
     """
@@ -172,7 +168,7 @@ class Editor(ttk.Frame):
     
     
     def cmd_save_file_enabled(self):
-        return self.is_modified()
+        return self.is_modified() or not self.get_filename()
     
     def cmd_select_all(self):
         self._code_view.select_all();
@@ -182,7 +178,12 @@ class Editor(ttk.Frame):
             filename = self._filename
             log_user_event(SaveEvent(self._code_view))
         else:
-            filename = asksaveasfilename()
+            # http://tkinter.unpythonic.net/wiki/tkFileDialog
+            filename = asksaveasfilename (
+                filetypes = _dialog_filetypes, 
+                defaultextension = ".py",
+                initialdir = prefs["cwd"]
+            )
             if filename == "":
                 return None
             log_user_event(SaveAsEvent(self._code_view, filename))
@@ -273,21 +274,6 @@ class EditorNotebook(ttk.Notebook):
         
         global editor_book
         editor_book = self
-        
-        """
-        # TODO: temporary
-        sfuffdir = os.path.normpath(os.path.join(dirname(abspath(__file__)), "..", "stuff"))
-        self._open_file(os.path.join(sfuffdir, "euler1.py"))
-        self._open_file(os.path.join(sfuffdir, "pere_sissetulek.py"))
-        self._open_file(os.path.join(sfuffdir, "kuupaev.py"))
-        #self._open_file(os.path.join(sfuffdir, "aliasing.py"))
-        self._open_file(os.path.join(sfuffdir, "kahest_suurim.py"))
-        self.show_file(os.path.join(sfuffdir, "kahest_suurim.py"))
-        self.show_file(os.path.join(sfuffdir, "multilevel.py"))
-        self.show_file(os.path.join(sfuffdir, "ast_test.py"))
-        #self._open_file(progdir + "/../atidb.py")
-        """
-        
         # open files from last session
         """ TODO: they should go only to recent files
         for filename in prefs["open_files"].split(";"):
@@ -311,9 +297,13 @@ class EditorNotebook(ttk.Notebook):
         log_user_event(NewFileEvent(new_editor._code_view))
         self.add(new_editor, text=self._generate_editor_title(None))
         self.select(new_editor)
+        new_editor.focus_set()
     
     def cmd_open_file(self):
-        filename = askopenfilename()
+        filename = askopenfilename (
+            filetypes = _dialog_filetypes, 
+            initialdir = prefs["cwd"]
+        )
         if filename != "":
             self.show_file(filename)
             self.remember_open_files()
@@ -332,13 +322,6 @@ class EditorNotebook(ttk.Notebook):
                 return child
             
         return None
-    
-    """
-    def save_all_named_editors(self):
-        for editor in self.winfo_children():
-            if editor.get_filename():
-                editor.cmd_save_file()
-    """
     
     def enter_execution_mode(self, main_filename):
         assert not self.is_in_execution_mode() 
@@ -451,7 +434,32 @@ class EditorNotebook(ttk.Notebook):
         editor = self.get_current_editor()
         return editor.is_focused()
 
-            
+    
+    def check_allow_closing(self):
+        modified_editors = [e for e in self.winfo_children() if e.is_modified()]
+        
+        if len(modified_editors) == 0:
+            return True
+        
+        confirm = tkMessageBox.askyesnocancel(
+                  title="Save On Close",
+                  message="Do you want to save files before closing?",
+                  default=tkMessageBox.YES,
+                  master=self)
+        
+        if confirm:
+            for editor in modified_editors:
+                if editor.get_filename(True):
+                    editor.cmd_save_file()
+                else:
+                    return False
+            return True
+        
+        elif confirm is None:
+            return False
+        else:
+            return True
+    
 
 class ExpressionView(tk.Text):
     def __init__(self, codeview):
