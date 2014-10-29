@@ -8,6 +8,7 @@ import os.path
 from codecs import lookup, BOM_UTF8
 import builtins
 import tkinter as tk
+import subprocess
 from os.path import dirname
 
 
@@ -214,3 +215,13 @@ def get_win_drives():
         bitmask >>= 1
 
     return drives
+
+def open_path_in_system_file_manager(path):
+    if running_on_mac_os():
+        # http://stackoverflow.com/a/3520693/261181
+        subprocess.Popen(["open", "-R", path])
+    elif running_on_linux():
+        subprocess.Popen(["xdg-open", path])
+    else:
+        assert running_on_windows()
+        subprocess.Popen(["explorer", path])

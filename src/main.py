@@ -271,7 +271,8 @@ class Thonny(tk.Tk):
                         kind="checkbutton", variable_name="run.auto_cd"),
             ]),
             ('help', 'Help', [
-                Command('help',    'Thonny help',        None, self), 
+                Command('help',             'Thonny help',        None, self), 
+                Command('open_user_dir',   'Open Thonny user folder',        None, self), 
             ]),
         ]
         
@@ -617,6 +618,9 @@ class Thonny(tk.Tk):
     
     def cmd_focus_shell(self):
         self.shell.focus_set()
+    
+    def cmd_open_user_dir(self):
+        misc_utils.open_path_in_system_file_manager(THONNY_USER_DIR)
     
     def _check_issue_debugger_command(self, cmd):
         if isinstance(self._vm.get_state_message(), DebuggerResponse):
