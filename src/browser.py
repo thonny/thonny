@@ -64,6 +64,10 @@ class FileBrowser(TreeFrame):
     
     def save_current_folder(self):
         path = self.get_selected_path()
+        
+        if not path:
+            return
+        
         if os.path.isfile(path):
             path = os.path.dirname(path)
         prefs["last_browser_folder"] = path
