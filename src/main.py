@@ -335,7 +335,14 @@ class Thonny(tk.Tk):
                         sequence = "-".join(parts)
                         
                         # bind the event
-                        self.bind_all("<"+sequence+">", lambda e, cmd=item: cmd.execute(e), "+")
+                        try:
+                            self.bind_all("<"+sequence+">", lambda e, cmd=item: cmd.execute(e), "+")
+                        except:
+                            # TODO: Command+C for Mac
+                            # TODO: refactor
+                            tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
+                                traceback.format_exc())
+                            
                         
                         # TODO: temporary extra key for step
                         if item.cmd_id == "step":
