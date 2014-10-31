@@ -635,8 +635,10 @@ class CodeView(ttk.Frame, TextWrapper):
     def select_all(self):
         self.text.tag_remove("sel", "1.0", tk.END)
         self.text.tag_add('sel', '1.0', tk.END)
-        self.text.mark_set("insert", "1.0")
-        self.text.see("insert")
+        
+        # this can be confusing with big files:
+        #self.text.mark_set("insert", "1.0")
+        #self.text.see("insert") 
     
     
     def handle_focus_message(self, text_range, msg=None):

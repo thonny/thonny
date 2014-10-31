@@ -8,7 +8,7 @@ from datetime import timedelta
 USER_LOGGER = None # Main will create the logger
 
 """
-TODO: on Mac when playing around with backspace and undo by long pressing keys
+TODO: on Mac when playing around with backspace and undo by long pressing keys (long backspace)
 Traceback (most recent call last):
   File "/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/tkinter/__init__.py", line 1487, in __call__
     return self.func(*args)
@@ -34,6 +34,19 @@ class UserEventLogger:
         self.default_timeout = timedelta(seconds = 2)
     
     def log_micro_event(self, e):
+        # TODO: save and clear the log when it becomes too big
+        self.macro_events.append((e, datetime.now()))
+        """
+        TODO:
+        try:
+            #print("OK", e, vars(e))
+            self._log_micro_event(e)
+        except:
+            print(self.last_position, e, vars(e))
+            raise
+        """
+    
+    def _log_micro_event(self, e):
         # Jätab meelde eelmise event'i klassi nime.
         if(isinstance(e, LoadEvent) or isinstance(e,PasteEvent) or isinstance(e, CutEvent)
            or isinstance(e, UndoEvent) or isinstance(e, RedoEvent)):
@@ -96,6 +109,7 @@ class UserEventLogger:
                 self.last_position = e.from_position            
         else:
             self.macro_events.append((e, datetime.now()))
+            
     def save(self):
         """
         Stores whole log into file. 

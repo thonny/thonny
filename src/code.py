@@ -302,6 +302,7 @@ class EditorNotebook(ttk.Notebook):
             initialdir = prefs["cwd"]
         )
         if filename != "":
+            #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
             self.remember_open_files()
     
@@ -313,6 +314,13 @@ class EditorNotebook(ttk.Notebook):
             current_editor.destroy()
             self.remember_open_files()
     
+    def close_single_untitled_unmodified_editor(self):
+        editors = self.winfo_children()
+        if (len(editors) == 1 
+            and not editors[0].is_modified()
+            and not editors[0].get_filename()):
+            self.cmd_close_file()
+        
     def get_current_editor(self):
         for child in self.winfo_children():
             if str(child) == str(self.select()):
@@ -362,10 +370,12 @@ class EditorNotebook(ttk.Notebook):
             pass # don't care about other events
     
     def show_file(self, filename, text_range=None):
+        #self.close_single_untitled_unmodified_editor()
         editor = self.get_editor(filename, True)
-        self.select(editor)
-        
         assert editor != None
+        
+        self.select(editor)
+        editor.focus_set()
         
         if text_range != None:
             editor.select_range(text_range)
