@@ -621,7 +621,7 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text_frame = self # ParenMatch assumes the existence of this attribute
         self.paren_matcher = ParenMatch.ParenMatch(self)
         self.paren_matcher.set_style("expression")
-        ParenMatch.ParenMatch.HILITE_CONFIG = {'foreground': 'black', 'background': 'lightgray'}
+        ParenMatch.ParenMatch.HILITE_CONFIG = {'background': 'lightgray'}
         
         # paren_closed_event is called in _user_text_insert
         # because KeyRelease doesn't give necessary info with Estonian keyboard
