@@ -19,7 +19,7 @@ if "" in sys.path:
 
 # Where are we?
 assert(__file__)
-src_dir = os.path.normpath(os.path.join(__file__, os.pardir))
+src_dir = os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir))
 sys.path.insert(0, os.path.normpath(os.path.join(src_dir, os.pardir)))
 
 from thonny.backend import VM
