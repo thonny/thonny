@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# prepare working folder
+rm -rf build
+mkdir -p build
+
+# copy template and source files
+VERSION=$(<../thonny/VERSION)
+MAIN_DIR = build/thonny-$VERSION 
+mkdir $MAIN_DIR
+
+cp -r ../thonny $MAIN_DIR
+cp Thonny.desktop $MAIN_DIR
+cp install.py $MAIN_DIR/install
+chmod 755 $MAIN_DIR/install
+
+# clean up unnecessary stuff
+rm -rf $MAIN_DIR/thonny/__pycache__
+rm -rf $MAIN_DIR/thonny/*.pyo
+rm -rf $MAIN_DIR/thonny/*.pyc 
+
+# put it together
+tar -cvzf thonny-$VERSION.tar.gz $MAIN_DIR
+
