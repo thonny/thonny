@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-from collections import namedtuple
 
 import ast
 import _ast
+import io
 import sys
 import token
 import tokenize
-import io
+import collections
 
-Thoken = namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
+# TODO: can rely on Py3 
+Thoken = collections.namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
 
 # token element indices (Py2 tokens aren't named tuples)
 TYPE = 0

@@ -3,11 +3,12 @@
 import sys
 import webbrowser
 import platform
-import misc_utils
 
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
+
+from thonny import misc_utils
 
 class AboutDialog(tk.Toplevel):
     def __init__(self, parent, version):

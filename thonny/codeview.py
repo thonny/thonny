@@ -3,18 +3,17 @@
 # TODO: refactor IDLE editor text into separate component and use it in IDLE 
 # and here?
 
-import ui_utils
-import tkinter as tk
 import os.path
+import tkinter as tk
 from tkinter import ttk
-from idlelib import PyParse
 import tkinter.font as tk_font
+from idlelib import PyParse, ParenMatch
 
-from ui_utils import TextWrapper, AutoScrollbar
-from common import TextRange
-from coloring import SyntaxColorer
-from config import prefs
-from idlelib import ParenMatch
+from thonny import ui_utils
+from thonny.ui_utils import TextWrapper, AutoScrollbar
+from thonny.common import TextRange
+from thonny.coloring import SyntaxColorer
+from thonny.config import prefs
 
 
 def classifyws(s, tabwidth):

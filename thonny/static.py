@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
  
-from common import TextRange
+import ast
+import traceback
 import tkinter as tk
 
-import ast
-import ast_utils
-import ui_utils
-import traceback
+from thonny import ast_utils
+from thonny import ui_utils
+from thonny.common import TextRange
 
 class AstFrame(ui_utils.TreeFrame):
     def __init__(self, master):

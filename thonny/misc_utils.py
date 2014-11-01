@@ -1,15 +1,15 @@
 """
 Mostly Encoding related stuff copied from Py 3.3.1 library, because Py 2.7 doesn't have it.
+TODO: Don't need Py 2.7 anymore
 """
 
 import re
 import io
 import os.path
-from codecs import lookup, BOM_UTF8
 import builtins
 import tkinter as tk
 import subprocess
-from os.path import dirname
+from codecs import lookup, BOM_UTF8
 
 
 class PathSet:
@@ -173,7 +173,7 @@ def running_on_linux():
     return tk._default_root.call('tk', 'windowingsystem') == "x11"
 
 def get_res_path(filename):
-    return os.path.join(dirname(__file__), "res", filename)
+    return os.path.join(os.path.dirname(__file__), "res", filename)
 
 def is_hidden_or_system_file(path):
     if os.path.basename(path).startswith("."):

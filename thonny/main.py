@@ -4,63 +4,68 @@
 """
 Thonny, Python IDE for beginners Copyright (C) 2014 Aivar Annamaa
 
-This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This program is free software: you can redistribute it and/or modify it under the 
+terms of the GNU General Public License as published by the Free Software Foundation, 
+either version 3 of the License, or (at your option) any later version.
 
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
+See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with this program. If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with this program. 
+If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
 import traceback
-from os.path import join as join_path, dirname, relpath
 import os.path
 from distutils.version import StrictVersion
-import stack
-from config import prefs
 import logging
 import time
-from user_logging import log_user_event,\
-    ProgramGetFocusEvent, ProgramLoseFocusEvent
 import gettext
-
 import tkinter as tk
 from tkinter import ttk
-import ui_utils
-from about import AboutDialog
-from static import AstFrame
-from code import EditorNotebook
-from shell import ShellFrame
-from memory import GlobalsFrame, HeapFrame, ObjectInspector
-import vm_proxy
-from browser import FileBrowser
-from common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
+
+from thonny import ui_utils
+from thonny import stack
+from thonny import vm_proxy
+from thonny.config import prefs
+from thonny.about import AboutDialog
+from thonny.static import AstFrame
+from thonny.code import EditorNotebook
+from thonny.shell import ShellFrame
+from thonny.memory import GlobalsFrame, HeapFrame, ObjectInspector
+from thonny.browser import FileBrowser
+from thonny.common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
     InlineCommand, quote_path_for_shell
-from ui_utils import Command, notebook_contains
-import user_logging
-import misc_utils
-from misc_utils import get_res_path
+from thonny.ui_utils import Command, notebook_contains
+from thonny import user_logging
+from thonny import misc_utils
 
 
 
-
-THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
 THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
-logger = logging.getLogger("thonny.main")
-logger.setLevel(logging.DEBUG)
 
 
-gettext.translation('thonny',
-                    os.path.join(THONNY_SRC_DIR, "locale"), 
-                    languages=[prefs["general.language"], "en"]).install()
 
 
 class Thonny(tk.Tk):
-    def __init__(self):
+    def __init__(self, src_dir):
+        self.src_dir = src_dir
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self.on_tk_exception
-        user_logging.USER_LOGGER = user_logging.UserEventLogger(self.new_user_log_file())
+        
+        self.logger = logging.getLogger("thonny.main")
+        self.logger.setLevel(logging.DEBUG)
+        self.logger.addHandler(logging.StreamHandler(sys.stdout))
+        
+        self.user_logger = user_logging.UserEventLogger(self.new_user_log_file())
+        user_logging.USER_LOGGER = self.user_logger # TODO: ugly
+        
+        gettext.translation('thonny',
+                    os.path.join(src_dir, "locale"), 
+                    languages=[prefs["general.language"], "en"]).install()
         
         self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
         self.createcommand("::tk::mac::OpenApplication", self._mac_open_application)
@@ -70,7 +75,7 @@ class Thonny(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         #showinfo("sys.argv", str(sys.argv))
         
-        self._vm = vm_proxy.VMProxy(prefs["cwd"], THONNY_SRC_DIR)
+        self._vm = vm_proxy.VMProxy(prefs["cwd"], src_dir)
         self._update_title()
         
         # UI items, positions, sizes
@@ -134,14 +139,14 @@ class Thonny(tk.Tk):
         self.main_frame.rowconfigure(1, weight=1)
         
         self.browse_book = ui_utils.PanelBook(self.main_pw)
+        self.editor_book = EditorNotebook(self.center_pw)
         self.main_pw.add(self.center_pw, minsize=150, width=prefs["layout.center_width"])
-        self.file_browser = FileBrowser(self)
+        self.file_browser = FileBrowser(self, self.editor_book)
         self.browse_book.add(self.file_browser, text="Files")
         self.cmd_update_browser_visibility(False)
         
         self.cmd_update_memory_visibility(False)
         
-        self.editor_book = EditorNotebook(self.center_pw)
         self.center_pw.add(self.editor_book, minsize=150)
         
         self.control_book = ui_utils.PanelBook(self.center_pw)
@@ -382,7 +387,7 @@ class Thonny(tk.Tk):
                 hor_spacer = ttk.Frame(self.toolbar, width=15)
                 hor_spacer.grid(row=0, column=col)
             else:
-                img = tk.PhotoImage(file=get_res_path(name + ".gif"))
+                img = tk.PhotoImage(file=misc_utils.get_res_path(name + ".gif"))
             
                 btn = ttk.Button(self.toolbar, 
                                  command=on_kala_button, 
@@ -502,7 +507,7 @@ class Thonny(tk.Tk):
             return
         
         # changing dir may be required
-        script_dir = dirname(filename)
+        script_dir = os.path.dirname(filename)
         
         if (prefs["run.auto_cd"] and cmd_name[0].isupper()
             and self._vm.cwd != script_dir):
@@ -516,7 +521,7 @@ class Thonny(tk.Tk):
             next_cwd = self._vm.cwd
         
         # append main command (Run, run, Debug or debug)
-        rel_filename = relpath(filename, next_cwd)
+        rel_filename = os.path.relpath(filename, next_cwd)
         cmd_line += "%" + cmd_name + " " + quote_path_for_shell(rel_filename) + "\n"
         if text_range != None:
             "TODO: append range indicators" 
@@ -694,7 +699,7 @@ class Thonny(tk.Tk):
     
     def _get_version(self):
         try:
-            with open(join_path(dirname(__file__), "VERSION")) as fp:
+            with open(os.path.join(os.path.dirname(__file__), "VERSION")) as fp:
                 return StrictVersion(fp.read().strip())
         except:
             return StrictVersion("0.0")
@@ -722,7 +727,7 @@ class Thonny(tk.Tk):
         try:
             self._store_prefs(False)
             ui_utils.delete_images()
-            user_logging.USER_LOGGER.save()
+            self.user_logger.save()
         except:
             tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
                                 traceback.format_exc())
@@ -781,10 +786,10 @@ class Thonny(tk.Tk):
                 return fname
 
     def on_get_focus(self, e):
-        log_user_event(ProgramGetFocusEvent());
+        user_logging.log_user_event(user_logging.ProgramGetFocusEvent());
 
     def on_lose_focus(self, e):
-        log_user_event(ProgramLoseFocusEvent());
+        user_logging.log_user_event(user_logging.ProgramLoseFocusEvent());
         
     
     def on_tk_exception(self, exc, val, tb):
@@ -803,7 +808,7 @@ class Thonny(tk.Tk):
     
     def set_icon(self):
         try:
-            self.iconbitmap(default=os.path.join(THONNY_SRC_DIR, "res", "thonny.ico"))
+            self.iconbitmap(default=os.path.join(self.src_dir, "res", "thonny.ico"))
         except:
             pass
 
@@ -811,7 +816,6 @@ def launch():
     try:
         if not os.path.exists(THONNY_USER_DIR):
             os.makedirs(THONNY_USER_DIR, 0o700)
-        logger.addHandler(logging.StreamHandler(sys.stdout))
         Thonny().mainloop()
     except:
         traceback.print_exc()
@@ -820,6 +824,4 @@ def launch():
                                 traceback.format_exc())
     
 
-if __name__ == "__main__":
-    launch()
 

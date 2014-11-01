@@ -15,8 +15,7 @@
 		<key>LSRiskCategoryExtensions</key>
 		<array>
 			<string>py</string>
-			<string>pytemp</string>
-			<string>pyex</string>
+			<string>pyw</string>
 		</array>
 	</dict>
 </dict>

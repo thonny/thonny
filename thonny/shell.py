@@ -2,18 +2,17 @@
 
 import os.path
 import traceback
-import ui_utils
-from config import prefs
-import memory
-
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
-from misc_utils import running_on_mac_os
-from ui_utils import TextWrapper, generate_event
-from common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
-from user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
+from thonny import ui_utils
+from thonny.config import prefs
+from thonny import memory
+from thonny.misc_utils import running_on_mac_os
+from thonny.ui_utils import TextWrapper, generate_event
+from thonny.common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
+from thonny.user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
     ShellInputEvent
 
 class ShellFrame (ttk.Frame, TextWrapper):

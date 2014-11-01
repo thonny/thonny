@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-import os.path
- 
-import tkinter as tk
-from tkinter import ttk
-import tkinter.font as tk_font
-from misc_utils import running_on_linux, running_on_mac_os, running_on_windows
-
-import config
 import time
+import os.path
+import tkinter as tk
+import tkinter.font as tk_font
+from tkinter import ttk
 
-from user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
+from thonny import config
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny.user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
     UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
     EditorLoseFocusEvent, CommandEvent, KeyPressEvent
 

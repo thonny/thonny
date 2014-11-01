@@ -4,7 +4,8 @@ import time
 import re
 import keyword
 import builtins
-import ui_utils
+
+from thonny import ui_utils
     
 DEBUG = False
 

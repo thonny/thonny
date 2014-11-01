@@ -23,7 +23,7 @@ UsePreviousAppDir=yes
 DefaultGroupName=Thonny
 DisableProgramGroupPage=yes
 DisableReadyPage=yes
-LicenseFile=..\src\license.txt
+LicenseFile=..\thonny\license.txt
 OutputDir=dist
 OutputBaseFilename=Thonny-{#AppVer}
 Compression=lzma
@@ -46,18 +46,25 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Files]
 Source: "ShortcutLauncher\Release\ShortcutLauncher.exe"; DestDir: "{app}"; DestName: "Thonny.exe"; Flags: ignoreversion
-Source: "..\src\*.py"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\locale\*"; DestDir: "{app}\locale"; Flags: ignoreversion recursesubdirs
-Source: "..\src\res\*.gif"; DestDir: "{app}\res"; Flags: ignoreversion
-;Source: "..\src\res\*.ico"; DestDir: "{app}\res"; Flags: ignoreversion
-Source: "..\src\VERSION"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\thonny\*.py"; DestDir: "{app}\thonny"; Flags: ignoreversion
+Source: "..\thonny\locale\*"; DestDir: "{app}\thonny\locale"; Flags: ignoreversion recursesubdirs
+Source: "..\thonny\res\*.gif"; DestDir: "{app}\thonny\res"; Flags: ignoreversion
+Source: "..\thonny\VERSION"; DestDir: "{app}\thonny"; Flags: ignoreversion
+
+; TODO: Temporary, remove files from older (up to 30.10.2014) directory layout
+[InstallDelete]
+Type: files; Name: "{app}\*.py"
+Type: files; Name: "{app}\VERSION"
+Type: filesandordirs; Name: "{app}\res"
+Type: filesandordirs; Name: "{app}\locale"
+Type: filesandordirs; Name: "{app}\__pycache__"
 
 [Icons]
 Name: "{userstartmenu}\Thonny"; Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 Name: "{userdesktop}\Thonny";   Filename: "{app}\Thonny.exe"; IconFilename: "{app}\Thonny.exe"
 
 ; Using concrete pythonw.exe instead of pyw.exe in order to let shortcut affect the pinning
-Name: "{app}\Thonny";  Filename: "{code:GetPythonCommand}"; Parameters: """{app}\main.py"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
+Name: "{app}\Thonny";  Filename: "{code:GetPythonCommand}"; Parameters: """{app}\thonny"""; IconFilename: "{app}\Thonny.exe"; AppUserModelID: "{#AppUserModelID}"
 
 [Registry]
 ;Python.File
@@ -108,6 +115,10 @@ Root: HKCU; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueNa
 
 
 [UninstallDelete]
+Type: files; Name: "{app}\thonny\*.pyc"
+Type: filesandordirs; Name: "{app}\thonny\__pycache__"
+
+; TODO: Temporarily (these don't appear after 30.10.2014 versions)
 Type: files; Name: "{app}\*.pyc"
 Type: filesandordirs; Name: "{app}\__pycache__"
 

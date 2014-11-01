@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import ui_utils
+from thonny import ui_utils
 
 
 class StackPanel(ui_utils.TreeFrame):

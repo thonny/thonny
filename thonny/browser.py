@@ -1,25 +1,26 @@
 # -*- coding: utf-8 -*-
+
+import os
+import sys
 import tkinter as tk
 from tkinter import ttk
-from ui_utils import TreeFrame
-from misc_utils import running_on_windows, get_res_path, is_hidden_or_system_file,\
-    get_win_drives, running_on_mac_os
-import os
-from ttk_simpledialog import askstring
 from tkinter.messagebox import showerror
-import code
-import sys
-from config import prefs
+
+from thonny.ui_utils import TreeFrame
+from thonny import misc_utils
+from thonny.ttk_simpledialog import askstring
+from thonny.config import prefs
 
 _dummy_node_text = "..."
     
         
 class FileBrowser(TreeFrame):
-    def __init__(self, master):
+    def __init__(self, master, editor_book):
         TreeFrame.__init__(self, master, 
                            ["#0", "kind", "path"], 
                            displaycolumns=(0,))
         #print(self.get_toplevel_items())
+        self.editor_book = editor_book
         self.tree['show'] = ('tree',)
         
         self.hor_scrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
@@ -27,11 +28,11 @@ class FileBrowser(TreeFrame):
         self.hor_scrollbar['command'] = self.tree.xview
         self.hor_scrollbar.grid(row=1, column=0, sticky="nsew")
         
-        self.folder_icon = tk.PhotoImage(file=get_res_path("folder.gif"))
-        self.python_file_icon = tk.PhotoImage(file=get_res_path("python_file.gif"))
-        self.text_file_icon = tk.PhotoImage(file=get_res_path("text_file.gif"))
-        self.generic_file_icon = tk.PhotoImage(file=get_res_path("generic_file.gif"))
-        self.hard_drive_icon = tk.PhotoImage(file=get_res_path("hard_drive2.gif"))
+        self.folder_icon = tk.PhotoImage(file=misc_utils.get_res_path("folder.gif"))
+        self.python_file_icon = tk.PhotoImage(file=misc_utils.get_res_path("python_file.gif"))
+        self.text_file_icon = tk.PhotoImage(file=misc_utils.get_res_path("text_file.gif"))
+        self.generic_file_icon = tk.PhotoImage(file=misc_utils.get_res_path("generic_file.gif"))
+        self.hard_drive_icon = tk.PhotoImage(file=misc_utils.get_res_path("hard_drive2.gif"))
         
         self.tree.column('#0', width=500, anchor=tk.W)
         
@@ -47,7 +48,7 @@ class FileBrowser(TreeFrame):
         self.menu.add_command(label="Create new file", command=self.create_new_file)
         
         self.tree.bind('<3>', self.on_secondary_click)
-        if running_on_mac_os():
+        if misc_utils.running_on_mac_os():
             self.tree.bind('<2>', self.on_secondary_click)
             self.tree.bind('<Control-1>', self.on_secondary_click)
     
@@ -75,7 +76,7 @@ class FileBrowser(TreeFrame):
     def on_double_click(self, event):
         path = self.get_selected_path()
         if path:
-            code.editor_book.show_file(path)
+            self.editor_book.show_file(path)
             self.save_current_folder()
     
     def on_secondary_click(self, event):
@@ -121,7 +122,7 @@ class FileBrowser(TreeFrame):
             open(path, 'w').close()
         
         self.open_path_in_browser(path, True)
-        code.editor_book.show_file(path)
+        self.editor_book.show_file(path)
     
     def get_proposed_new_file_name(self, folder, extension):
         base = "new_file"
@@ -282,8 +283,8 @@ class FileBrowser(TreeFrame):
     
     def listdir(self, path="", include_hidden_files=False):
         
-        if path == "" and running_on_windows():
-            result = get_win_drives()
+        if path == "" and misc_utils.running_on_windows():
+            result = misc_utils.get_win_drives()
         else:
             if path == "":
                 first_level = True
@@ -292,7 +293,7 @@ class FileBrowser(TreeFrame):
                 first_level = False
             result = [x for x in os.listdir(path) 
                         if include_hidden_files 
-                            or not is_hidden_or_system_file(os.path.join(path, x))]
+                            or not misc_utils.is_hidden_or_system_file(os.path.join(path, x))]
             
             if first_level:
                 result = ["/" + x for x in result]

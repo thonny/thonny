@@ -1,8 +1,7 @@
 # copied from tkinter.simpledialog and changed to use ttk widgets
 
 import tkinter as tk
-import tkinter.ttk as ttk
-
+from tkinter import ttk
 from tkinter.simpledialog import Dialog
 from tkinter import messagebox
 

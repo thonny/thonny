@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from configparser import ConfigParser
 import tkinter as tk
 import tkinter.messagebox
 import os.path
 import codecs
 import ast
 import traceback
+from configparser import ConfigParser
 
 
 PREFS_FILE = os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini"))

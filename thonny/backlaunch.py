@@ -9,10 +9,20 @@ I could also do python -c "from backend import VM: VM().mainloop()", but looks l
 gives relative __file__-s on imported modules.) 
 """
 
+import sys
 import logging
 import os.path
-import sys
-from backend import VM
+
+
+if "" in sys.path:
+    sys.path.remove("") # don't want current directory in path
+
+# Where are we?
+assert(__file__)
+src_dir = os.path.normpath(os.path.join(__file__, os.pardir))
+sys.path.insert(0, os.path.normpath(os.path.join(src_dir, os.pardir)))
+
+from thonny.backend import VM
 
 # set up logging
 logger = logging.getLogger("thonny.backend")
@@ -26,4 +36,4 @@ stream_handler = logging.StreamHandler(stream=sys.stderr)
 logger.addHandler(stream_handler)
 
 # create and run VM
-VM().mainloop()
+VM(src_dir).mainloop()

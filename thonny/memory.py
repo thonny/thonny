@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
  
-from ui_utils import TreeFrame, update_entry_text, ScrollableFrame,\
-    generate_event, get_event_data, CALM_WHITE, TextFrame
-from config import prefs
-from common import ActionResponse, InlineCommand
-import vm_proxy
 import tkinter as tk
 import tkinter.font as tk_font
 import ast
+
+from thonny.ui_utils import TreeFrame, update_entry_text, ScrollableFrame,\
+    generate_event, get_event_data, CALM_WHITE, TextFrame
+from thonny.config import prefs
+from thonny.common import ActionResponse, InlineCommand
+from thonny import vm_proxy
 
 
 def format_object_id(object_id):

@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import subprocess
 import sys
 import os.path
 import logging
-
+import subprocess
+import collections
+import threading
 from _thread import start_new_thread
 from queue import Queue
 
-import threading
 
-from common import parse_message, serialize_message, ToplevelCommand, PauseMessage,\
+from thonny.common import parse_message, serialize_message, ToplevelCommand, PauseMessage,\
     ActionCommand, OutputEvent
-import collections
 
 COMMUNICATION_ENCODING = "UTF-8"
 

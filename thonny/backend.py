@@ -10,19 +10,16 @@ import traceback
 import types
 import logging
 import pydoc
-
 import builtins
 
 import __main__  # @UnresolvedImport
-import ast_utils
-import misc_utils
-from misc_utils import eqfn
-from common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
+
+from thonny import ast_utils
+from thonny import misc_utils
+from thonny.misc_utils import eqfn
+from thonny.common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
     ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InlineResponse
-
-THONNY_SRC_DIR = os.path.dirname(os.path.realpath(sys.argv[0]))
-NORMCASE_THONNY_SRC_DIR = os.path.normcase(THONNY_SRC_DIR)
 
 BEFORE_SUITE_MARKER = "_thonny_hidden_before_suite"
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -39,8 +36,9 @@ debug = logger.debug
 info = logger.info
 
 class VM:
-    def __init__(self):
+    def __init__(self, src_dir):
         #print(sys.argv, file=sys.stderr)
+        self.src_dir = src_dir
         self._heap = {} # TODO: weakref.WeakValueDictionary() ??
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
@@ -267,7 +265,7 @@ class VM:
     
     def _execute_source(self, source, filename, execution_mode, debug_mode):
         if debug_mode:
-            self._current_executor = FancyTracer(self)
+            self._current_executor = FancyTracer(self, self.src_dir)
         else:
             self._current_executor = Executor(self)
         
@@ -467,8 +465,9 @@ class FancyTracer(Executor):
     ...
     """
     
-    def __init__(self, vm):
+    def __init__(self, vm, src_dir):
         self._vm = vm
+        self._normcase_thonny_src_dir = os.path.normcase(src_dir) 
         self._instrumented_files = misc_utils.PathSet()
         self._interesting_files = misc_utils.PathSet() # only events happening in these files are reported
         self._current_command = None
@@ -528,7 +527,7 @@ class FancyTracer(Executor):
             or "importlib._bootstrap" in code.co_filename
             or os.path.normcase(code.co_filename) not in self._instrumented_files 
                 and code.co_name not in self.marker_function_names
-            or os.path.normcase(code.co_filename).startswith(NORMCASE_THONNY_SRC_DIR)
+            or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir)
                 and code.co_name not in self.marker_function_names
             or self._vm.is_doing_io() 
         )

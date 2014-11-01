@@ -1,9 +1,7 @@
-from os import listdir
+import ast
 import os.path
 from time import strptime
-import ast
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 USER_LOGGER = None # Main will create the logger
 
@@ -273,7 +271,7 @@ def parse_log_file(filename):
 
 def parse_all_log_files(path):
     all_events = []
-    for name in sorted(listdir(path)):
+    for name in sorted(os.listdir(path)):
         if name.endswith(".txt"):
             events = parse_log_file(os.path.join(path, name))
             all_events.extend(events)

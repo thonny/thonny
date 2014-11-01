@@ -11,33 +11,26 @@ It can present program execution information in two ways:
 
 """
 
-import os.path
-from os.path import basename
 import ast
 import sys
-from common import DebuggerResponse
-from config import prefs
-from misc_utils import eqfn
-import ui_utils
-import misc_utils
-import memory
+import os.path
 import logging
-from ui_utils import generate_event
-import tkinter.messagebox as tkMessageBox
-
 import tkinter as tk
 from tkinter import ttk
+import tkinter.messagebox as tkMessageBox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
-#from tkinter.messagebox import showwarning
 from tkinter.messagebox import showinfo
-    
-import ast_utils
-from memory import LocalsFrame
-from misc_utils import read_python_file
-from codeview import CodeView
-from user_logging import log_user_event, SaveEvent, SaveAsEvent,\
-    LoadEvent, NewFileEvent
+
+from thonny.common import DebuggerResponse
+from thonny.config import prefs
+from thonny.misc_utils import eqfn
+from thonny import ui_utils
+from thonny import misc_utils
+from thonny import ast_utils
+from thonny import memory
+from thonny.codeview import CodeView
+from thonny.user_logging import log_user_event, SaveEvent, SaveAsEvent, LoadEvent, NewFileEvent
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
@@ -157,7 +150,7 @@ class Editor(ttk.Frame):
         return self._filename
             
     def _load_file(self, filename):
-        source, self.file_encoding = read_python_file(filename) # TODO: support also text files
+        source, self.file_encoding = misc_utils.read_python_file(filename) # TODO: support also text files
         self._filename = filename
         log_user_event(LoadEvent(self._code_view, filename))
         self._code_view.set_content(source)
@@ -395,7 +388,7 @@ class EditorNotebook(ttk.Notebook):
         if filename == None:
             result = "<untitled>"
         else:
-            result = basename(filename)
+            result = os.path.basename(filename)
         
         if is_modified:
             result += " *"
@@ -530,7 +523,7 @@ class ExpressionView(tk.Text):
                 else:
                     sequence = "<Control-Button-1>"
                 self.tag_bind(object_tag, sequence,
-                              lambda _: generate_event(self, "<<ObjectSelect>>", msg.value.id))
+                              lambda _: ui_utils.generate_event(self, "<<ObjectSelect>>", msg.value.id))
                     
                 self._update_size()
                 
@@ -699,7 +692,7 @@ class FunctionDialog(tk.Toplevel):
         
         
         self._locals_book = ui_utils.PanelBook(self.main_pw)
-        self._locals_frame = LocalsFrame(self._locals_book)
+        self._locals_frame = memory.LocalsFrame(self._locals_book)
         self._locals_book.add(self._locals_frame, text="Local variables")
         
         
