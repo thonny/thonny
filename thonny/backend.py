@@ -52,6 +52,7 @@ class VM:
                                 "__file__", "__cached__", "__loader__")
             sys.argv[:] = sys.argv[1:] # shift argv[1] to position of script name
             sys.path[0] = os.path.dirname(sys.argv[0]) # replace backend's dir with program dir
+            __main__.__dict__["__file__"] = sys.argv[0]
             # TODO: inspect.getdoc
         
         # shell mode
