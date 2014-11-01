@@ -18,6 +18,7 @@ rm -rf build/Thonny.app/Contents/MacOs/thonny/*.pyc
 # get and set version
 VERSION=$(<../thonny/VERSION)
 sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
+rm -f build/Thonny.app/Contents/Info.plist.bak
 
 
 # create dmg

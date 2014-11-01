@@ -21,7 +21,7 @@
 	<string>????</string>
 	
 	<key>CFBundleExecutable</key>
-	<string>thonny</string>
+	<string>thonny_launch</string>
 
 	<key>CFBundleDocumentTypes</key>
 	<array>
