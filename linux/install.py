@@ -5,7 +5,6 @@
 # Python path won't be modified.
 
 import sys
-import os
 import os.path
 import shutil
 
