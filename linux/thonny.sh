@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python3 $prefix/lib/thonny/thonny  
+python3 $prefix/lib/thonny/thonny "$@"

@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Type=Application
 Name=Thonny
 GenericName=Python IDE
@@ -8,7 +7,7 @@ Comment=Python IDE for beginners
 Icon=$prefix/lib/thonny/thonny/res/thonny.png
 Terminal=false
 Categories=Development;Debugger;IDE;
-MimeType=text/x-python; application/x-python; 
+MimeType=text/x-python;
 Actions=Edit;
 
 [Desktop Action Edit]

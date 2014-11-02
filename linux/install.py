@@ -5,12 +5,17 @@
 # Python path won't be modified.
 
 import sys
+import os
 import os.path
 import shutil
 
 def replace_prefix_and_save_launcher(source_filename, target_filename):
     with open(source_filename) as f:
         content = f.read()
+
+    target_dir = os.path.dirname(target_filename) 
+    if not os.path.exists(target_dir):
+        os.makedirs(target_dir)
     with open(target_filename, mode="w") as f:
         f.write(content.replace("$prefix", prefix))
     
@@ -47,27 +52,33 @@ else:
     target_menu_dir = "/usr/share/applications" 
 
 
+if os.path.exists(target_main_dir):
+    answer = input(target_main_dir + " already exists, may I clear it before installing this version [Y/n]: ").strip()
+    if not answer or answer.lower() == "y":
+        shutil.rmtree(target_main_dir)
 
 print("Copying files to " + target_main_dir + " ... ", end="")
 shutil.copytree(source_main_dir + "/thonny", target_main_dir + "/thonny")
 print("Done!")
 
 
-print("Creating command line script (" + target_script_path + ") ... ", end="")
-replace_prefix_and_save_launcher(source_main_dir + "thonny.sh", target_script_path)
+print("Creating executable " + target_script_path + " ... ", end="")
+replace_prefix_and_save_launcher(source_main_dir + "/thonny.sh", target_script_path)
 print("Done!")
 
 
 print("Creating start menu item ... ", end="")
-replace_prefix_and_save_launcher(source_main_dir + "Thonny.desktop",
-                                 target_menu_dir + "Thonny.desktop")
+replace_prefix_and_save_launcher(source_main_dir + "/Thonny.desktop",
+                                 target_menu_dir + "/Thonny.desktop")
 print("Done!")
 
 
 print("Creating desktop icon ... ", end="")
-replace_prefix_and_save_launcher(source_main_dir + "Thonny.desktop",
+replace_prefix_and_save_launcher(source_main_dir + "/Thonny.desktop",
                                  os.path.expanduser("~/Desktop/Thonny.desktop"))
 print("Done!")
 
 print()
 print("Installation was successful, you can start Thonny from start menu or desktop")
+print()
+
