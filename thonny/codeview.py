@@ -9,7 +9,7 @@ from tkinter import ttk
 import tkinter.font as tk_font
 from idlelib import PyParse, ParenMatch
 
-from thonny import ui_utils
+from thonny import ui_utils, misc_utils
 from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer

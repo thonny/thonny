@@ -6,11 +6,13 @@ import tkinter as tk
 import tkinter.font as tk_font
 from tkinter import ttk
 
-from thonny import config
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny import config, misc_utils
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows,\
+    try_remove_linenumbers
 from thonny.user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
     UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
     EditorLoseFocusEvent, CommandEvent, KeyPressEvent
+import traceback
 
 
 SASHTHICKNESS = 10
@@ -344,6 +346,13 @@ class TextWrapper:
         # subclass may intercept this forwarding
 #        print("INS", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         
+        # try removing line numbers
+        if isinstance(args[1], str):
+            print(args)
+            args = tuple((args[0],) + (try_remove_linenumbers(args[1], self.text),) + args[2:])
+            print(args)
+            print("-------------")
+        
         self._original_user_text_insert(*args, **kw)
 #        print("INS'", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         if len(args) >= 3:
@@ -351,6 +360,7 @@ class TextWrapper:
         else:
             tags = None 
         log_user_event(TextInsertEvent(self, index, args[1], tags))
+    
         
     def _user_text_delete(self, *args, **kw):
         index1 = self.text.index(args[0])

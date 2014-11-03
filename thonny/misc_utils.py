@@ -8,8 +8,12 @@ import io
 import os.path
 import builtins
 import tkinter as tk
+import tkinter.messagebox as tkMessageBox
+
 import subprocess
 from codecs import lookup, BOM_UTF8
+import textwrap
+import traceback
 
 
 class PathSet:
@@ -225,3 +229,43 @@ def open_path_in_system_file_manager(path):
     else:
         assert running_on_windows()
         subprocess.Popen(["explorer", path])
+
+
+def has_line_numbers(text):
+    lines = text.splitlines()
+    return (len(lines) > 2 
+            and all([len(split_after_line_number(line)) == 2 for line in lines]))
+
+def split_after_line_number(s): 
+    parts = re.split("(^\s*\d+\.?)", s)
+    if len(parts) == 1:
+        return parts
+    else:
+        assert len(parts) == 3 and parts[0] == ''
+        return parts[1:]
+
+def remove_line_numbers(s):
+    cleaned_lines = []
+    for line in s.splitlines():
+        parts = split_after_line_number(line)
+        if len(parts) != 2:
+            return s
+        else:
+            cleaned_lines.append(parts[1])
+    
+    return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
+    
+    
+def try_remove_linenumbers(text, master):
+    try:        
+        if has_line_numbers(text) and tkMessageBox.askyesno (
+                  title="Remove linenumbers",
+                  message="Do you want to remove linenumbers from pasted text?",
+                  default=tkMessageBox.YES,
+                  master=master):
+            return remove_line_numbers(text)
+        else:
+            return text
+    except:
+        traceback.print_exc()
+        return text
