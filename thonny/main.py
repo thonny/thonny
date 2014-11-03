@@ -275,11 +275,21 @@ class Thonny(tk.Tk):
                 Command('set_auto_cd', 'Auto-cd to script dir',  None, self,
                         kind="checkbutton", variable_name="run.auto_cd"),
             ]),
-            ('help', 'Help', [
-                Command('help',             'Thonny help',        None, self), 
+            ('misc', 'Misc', [
                 Command('open_user_dir',   'Open Thonny user folder',        None, self), 
             ]),
+            ('help', 'Help', [
+                Command('help',             'Thonny help',        None, self), 
+            ]),
         ]
+        
+        # TODO:
+        """
+        if misc_utils.running_on_mac_os():
+            self.menus[-2][2].append (
+                Command('mac_add_download_assessment',   'Allow opening py files from browser ...',        None, self)
+            )
+        """
         
         
         ## make plaftform specific tweaks
@@ -598,6 +608,38 @@ class Thonny(tk.Tk):
 
     def cmd_update_debugging_mode(self):
         print(prefs["advanced_debugging"])
+
+    def cmd_mac_add_download_assessment(self):
+        # TODO:
+        """
+        Normally Mac doesn't allow opening py files from web directly
+        See:
+        http://keith.chaos-realm.net/plugin/tag/downloadassessment
+        https://developer.apple.com/library/mac/#documentation/Miscellaneous/Reference/UTIRef/Articles/System-DeclaredUniformTypeIdentifiers.html
+        
+        create file ~/Library/Preferences/com.apple.DownloadAssessment.plist
+        with following content:
+        
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+            <key>LSRiskCategorySafe</key> 
+            <dict>
+                <key>LSRiskCategoryContentTypes</key>
+                <array>
+                    <string>public.xml</string>
+                </array>
+            
+                <key>LSRiskCategoryExtensions</key>
+                <array>
+                    <string>py</string>
+                    <string>pyw</string>
+                </array>
+            </dict>
+        </dict>
+        </plist>
+        """
 
     def cmd_step_enabled(self):
         #self._check_issue_goto_before_or_after()
