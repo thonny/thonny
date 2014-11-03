@@ -348,10 +348,7 @@ class TextWrapper:
         
         # try removing line numbers
         if isinstance(args[1], str):
-            print(args)
             args = tuple((args[0],) + (try_remove_linenumbers(args[1], self.text),) + args[2:])
-            print(args)
-            print("-------------")
         
         self._original_user_text_insert(*args, **kw)
 #        print("INS'", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
