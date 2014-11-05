@@ -178,10 +178,14 @@ def setup_style():
     #print(style.layout("Treeview"))
     setup_fonts()
     style.configure("Treeview.treearea", font=TREE_FONT)
+    # NB! Some Python or Tk versions (Eg. Py 3.2.3 + Tk 8.5.11 on Raspbian)
+    # can't handle multi word color names in style.map  
+    light_blue = "#ADD8E6" 
+    light_grey = "#D3D3D3"
     if running_on_linux():
         style.map("Treeview",
-              background=[('selected', 'focus', 'light blue'),
-                          ('selected', '!focus', 'light grey'),
+              background=[('selected', 'focus', light_blue),
+                          ('selected', '!focus', light_grey),
                           ],
               foreground=[('selected', 'black'),
                           ],
@@ -189,7 +193,7 @@ def setup_style():
     else:
         style.map("Treeview",
               background=[('selected', 'focus', 'SystemHighlight'),
-                          ('selected', '!focus', 'light grey'),
+                          ('selected', '!focus', light_grey),
                           ],
               foreground=[('selected', 'SystemHighlightText')],
               )
