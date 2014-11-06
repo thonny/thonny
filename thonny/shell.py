@@ -220,6 +220,11 @@ class ShellFrame (ttk.Frame, TextWrapper):
             else:
                 tags = tags + ("toplevel", "command")
             
+            # when going back and fixing in the middle of command and pressing ENTER there
+            if txt == "\n":
+                self.text.mark_set("insert", "insert lineend")
+                index = "insert"
+                
             TextWrapper._user_text_insert(self, index, txt, tags, **kw)
             
             # tag first char of io separately
