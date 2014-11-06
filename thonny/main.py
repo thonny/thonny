@@ -237,9 +237,9 @@ class Thonny(tk.Tk):
                 #Command('update_debugging_mode', 'Enable advanced debugging',  None, self,
                 #        kind="checkbutton", variable_name="advanced_debugging"),
                 "---",
-                Command('focus_editor', "Focus editor", "Ctrl+,", self),
-                Command('focus_shell', "Focus shell", "Ctrl+.", self),
-                Command('show_ast', "Show AST", "F12", self),
+                Command('focus_editor', "Focus editor", "F11", self),
+                Command('focus_shell', "Focus shell", "F12", self),
+                Command('show_ast', "Show AST", None, self),
                 Command('preferences', 'Preferences', None, self) 
             ]),
 #             ('code', 'Code', [
