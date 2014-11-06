@@ -16,6 +16,8 @@ from thonny.user_logging import log_user_event, ShellCreateEvent, ShellCommandEv
     ShellInputEvent
 
 class ShellFrame (ttk.Frame, TextWrapper):
+
+    
     def __init__(self, master, vm, editor_book):
         ttk.Frame.__init__(self, master)
         
@@ -66,6 +68,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.bind("<Down>", self._arrow_down, "+")
         self.text.bind("<KeyPress>", self._text_key_press, "+")
         self.text.bind("<KeyRelease>", self._text_key_release, "+")
+        self.text.bind("<Home>", self.home_callback)
         self.vert_scrollbar['command'] = self.text.yview
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
@@ -442,6 +445,12 @@ class ShellFrame (ttk.Frame, TextWrapper):
     def _text_key_release(self, event):
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
             self.text.tag_configure("value", foreground="DarkBlue", underline=0)
+    
+    def home_callback(self, event):
+        if self._in_current_input_range("insert"):
+            # on input line, go to just after prompt
+            self.text.mark_set("insert", "input_start")
+            return "break"
     
     def _invalidate_current_data(self):
         """
