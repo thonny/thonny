@@ -649,8 +649,12 @@ class Command:
             return self._target_or_finder
     
     def execute(self, event=None):
+        if self.system_bound:
+            return
+        
         if hasattr(event, "keysym"):
             # ignore long-press-repeated keypresses
+            # TODO: check this
             if event.keysym in _held_keys:
                 return
             
