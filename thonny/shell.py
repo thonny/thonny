@@ -94,7 +94,9 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.tag_configure("stdout", foreground="Black")
         self.text.tag_configure("stderr", foreground="Red")
         self.text.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
-        self.text.tag_bind("hyperlink", "<ButtonRelease-1>", self.handle_hyperlink)
+        self.text.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
+        self.text.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
+        self.text.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
         
         self.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
         self.text.tag_configure("inactive", foreground="#aaaaaa")
@@ -263,7 +265,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.mark_gravity("output_insert", tk.RIGHT)
         tags = tuple(tags)
         
-        if "stderr" in tags:
+        if "stderr" in tags or "error" in tags:
             # show lines pointing to source lines as hyperlinks
             for line in txt.splitlines(True):
                 parts = re.split(r'(File .* line \d+.*)$', line, maxsplit=1)
@@ -472,7 +474,13 @@ class ShellFrame (ttk.Frame, TextWrapper):
             self.text.mark_set("insert", "input_start")
             return "break"
     
-    def handle_hyperlink(self, event):
+    def _hyperlink_enter(self, event):
+        self.text.config(cursor="hand2")
+        
+    def _hyperlink_leave(self, event):
+        self.text.config(cursor="")
+        
+    def _handle_hyperlink(self, event):
         try:
             line = self.text.get("insert linestart", "insert lineend")
             matches = re.findall(r'File "([^"]+)", line (\d+)', line)

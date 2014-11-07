@@ -735,7 +735,8 @@ class CodeView(ttk.Frame, TextWrapper):
                 start, end  = text_range
                 
             self.text.tag_add("sel", start, end)
-                                     
+            if isinstance(text_range, int):
+                self.text.mark_set("insert", end) 
             self.text.see(start + " -1 lines")
             
     def get_statement_tag(self, level, kind, odd=False):
