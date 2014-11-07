@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import re
 import os.path
 import traceback
 import tkinter as tk
@@ -92,6 +93,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.tag_configure("stdin", foreground="Blue")
         self.text.tag_configure("stdout", foreground="Black")
         self.text.tag_configure("stderr", foreground="Red")
+        self.text.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
+        self.text.tag_bind("hyperlink", "<ButtonRelease-1>", self.handle_hyperlink)
         
         self.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
         self.text.tag_configure("inactive", foreground="#aaaaaa")
@@ -258,10 +261,27 @@ class ShellFrame (ttk.Frame, TextWrapper):
         #print("inserting directly", txt, tags)
         self.text.mark_gravity("input_start", tk.RIGHT)
         self.text.mark_gravity("output_insert", tk.RIGHT)
-        TextWrapper._user_text_insert(self, "output_insert", txt, tuple(tags))
+        tags = tuple(tags)
+        
+        if "stderr" in tags:
+            # show lines pointing to source lines as hyperlinks
+            for line in txt.splitlines(True):
+                parts = re.split(r'(File .* line \d+.*)$', line, maxsplit=1)
+                if len(parts) == 3 and "<pyshell" not in line:
+                    self._insert_text_drctly(parts[0], tags)
+                    self._insert_text_drctly(parts[1], tags + ("hyperlink",))
+                    self._insert_text_drctly(parts[2], tags)
+                else:
+                    self._insert_text_drctly(line, tags)
+        else:
+            self._insert_text_drctly(txt, tags)
+            
         #self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
-        
+    
+    def _insert_text_drctly(self, txt, tags):
+        if txt != "":
+            TextWrapper._user_text_insert(self, "output_insert", txt, tags)
     
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
@@ -451,6 +471,20 @@ class ShellFrame (ttk.Frame, TextWrapper):
             # on input line, go to just after prompt
             self.text.mark_set("insert", "input_start")
             return "break"
+    
+    def handle_hyperlink(self, event):
+        try:
+            line = self.text.get("insert linestart", "insert lineend")
+            matches = re.findall(r'File "([^"]+)", line (\d+)', line)
+            if len(matches) == 1 and len(matches[0]) == 2:
+                filename, lineno = matches[0]
+                lineno = int(lineno)
+                if os.path.exists(filename) and os.path.isfile(filename):
+                    # TODO: better use events instead direct referencing
+                    self._editor_book.show_file(filename, lineno)
+        except:
+            traceback.print_exc()
+    
     
     def _invalidate_current_data(self):
         """

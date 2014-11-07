@@ -34,8 +34,6 @@ from thonny.user_logging import log_user_event, SaveEvent, SaveAsEvent, LoadEven
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
-editor_book = None
-
 logger = logging.getLogger("thonny.code")
 logger.propagate = False
 logger.setLevel(logging.WARNING)

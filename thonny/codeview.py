@@ -721,13 +721,22 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.tag_remove("sel", "1.0", tk.END)
         
         if text_range:
-            start = str(text_range.lineno - self.first_line_no + 1) \
-                + "." + str(text_range.col_offset)
-            end = str(text_range.end_lineno - self.first_line_no + 1) \
-                + "." + str(text_range.end_col_offset)
+            if isinstance(text_range, int):
+                # it's line number
+                start = str(text_range - self.first_line_no + 1) + ".0"
+                end = str(text_range - self.first_line_no + 1) + ".end"
+            elif isinstance(text_range, TextRange):
+                start = str(text_range.lineno - self.first_line_no + 1) \
+                    + "." + str(text_range.col_offset)
+                end = str(text_range.end_lineno - self.first_line_no + 1) \
+                    + "." + str(text_range.end_col_offset)
+            else:
+                assert isinstance(text_range, tuple)
+                start, end  = text_range
+                
             self.text.tag_add("sel", start, end)
                                      
-            self.text.see(start)
+            self.text.see(start + " -1 lines")
             
     def get_statement_tag(self, level, kind, odd=False):
         tag_name = "st_" + kind + str(level) + ("odd" if odd else "even")
