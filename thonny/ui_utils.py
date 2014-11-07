@@ -347,6 +347,11 @@ class TextWrapper:
  
     def _user_text_insert(self, *args, **kw):
         index = self.text.index(args[0])
+        text = args[1]
+        
+        if text >= "\uf704" and text <= "\uf70d": # Function keys F1..F10 in Mac cause these
+            return
+        
         # subclass may intercept this forwarding
 #        print("INS", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         
@@ -409,6 +414,8 @@ class TextWrapper:
         pass
             
     def on_text_key_press(self, e):
+        #if e.keysym in ('F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'):
+        #    return "break" # otherwise it inserts a character in
             
         event_kind = self.get_event_kind(e)
         
