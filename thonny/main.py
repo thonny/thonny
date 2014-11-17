@@ -420,8 +420,10 @@ class Thonny(tk.Tk):
     def _poll_vm_messages(self):
         # I chose polling instead of event_generate
         # because event_generate across threads is not reliable
-        while self._vm.has_next_message():
+        while True:
             msg = self._vm.fetch_next_message()
+            if not msg:
+                break
             
             # skip some events
             if (isinstance(msg, DebuggerResponse) 

@@ -32,7 +32,6 @@ class VMProxy:
         self.backend_dir = backend_dir
         self._proc = None
         self._state_lock = threading.RLock()
-        self._message_queue = collections.deque()
         self.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
         
         _CURRENT_VM = self
@@ -48,13 +47,11 @@ class VMProxy:
         with self._state_lock:
             return self._current_pause_msg
     
-    def has_next_message(self):
-        return len(self._message_queue) > 0
-    
     def fetch_next_message(self):
         # combine available output messages to one single message, 
         # in order to put less pressure on UI code
-        assert self.has_next_message()
+        if not self._message_queue or len(self._message_queue) == 0:
+            return None
         
         msg = self._message_queue.popleft()
         if isinstance(msg, OutputEvent):
@@ -62,7 +59,7 @@ class VMProxy:
             data = msg.data
             
             while True:
-                if not self.has_next_message():
+                if len(self._message_queue) == 0:
                     return OutputEvent(stream_name=stream_name, data=data)
                 else:
                     msg = self._message_queue.popleft()
@@ -99,13 +96,14 @@ class VMProxy:
         if self._proc != None and self._proc.poll() == None: 
             self._proc.kill()
             self._proc = None
+            self._message_queue = None
         
     def _start_new_process(self, cmd):
-        self._output_queue = Queue() # discard current output queue
+        self._message_queue = collections.deque()
     
         # create new backend process
         # -u means unbuffered IO (neccessary for Python 3.1)
-        my_env = os.environ
+        my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         
         launcher = os.path.join(self.backend_dir, "backlaunch.py")
