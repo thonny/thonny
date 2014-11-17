@@ -9,7 +9,9 @@ from thonny.ui_utils import TreeFrame, update_entry_text, ScrollableFrame,\
 from thonny.config import prefs
 from thonny.common import ActionResponse, InlineCommand
 from thonny import vm_proxy
+from thonny.misc_utils import shorten_repr
 
+MAX_REPR_LENGTH_IN_GRID = 100
 
 def format_object_id(object_id):
     # this format aligns with how Python shows memory addresses
@@ -77,7 +79,8 @@ class VariablesFrame(MemoryFrame):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
                     self.tree.set(node_id, "id", format_object_id(variables[name].id))
-                    self.tree.set(node_id, "value", variables[name].short_repr)
+                    self.tree.set(node_id, "value", shorten_repr(variables[name].repr, MAX_REPR_LENGTH_IN_GRID))
+    
     
     def on_select(self, event):
         self.show_selected_object_info()
@@ -127,7 +130,7 @@ class HeapFrame(MemoryFrame):
         for value_id in sorted(data.keys()):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "id", format_object_id(value_id))
-            self.tree.set(node_id, "value", data[value_id].short_repr)
+            self.tree.set(node_id, "value", shorten_repr(data[value_id].repr, MAX_REPR_LENGTH_IN_GRID))
             
 
     def on_select(self, event):
@@ -431,6 +434,7 @@ class StringInspector(TextFrame, TypeSpecificInspector):
         return object_info["type"] == repr(str)
     
     def set_object_info(self, object_info, label):
+        # TODO: don't show too big string
         content = ast.literal_eval(object_info["repr"])
         line_count_sep = len(content.split("\n"))
         line_count_term = len(content.splitlines())
@@ -492,6 +496,7 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
         
         self._clear_tree()
         index = 0
+        # TODO: don't show too big number of elements
         for element in object_info["elements"]:
             node_id = self.tree.insert("", "end")
             if self.elements_have_indices:
@@ -500,7 +505,7 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
                 self.tree.set(node_id, "index", "")
                 
             self.tree.set(node_id, "id", format_object_id(element.id))
-            self.tree.set(node_id, "value", element.short_repr)
+            self.tree.set(node_id, "value", shorten_repr(element.repr, MAX_REPR_LENGTH_IN_GRID))
             index += 1
 
         count = len(object_info["elements"])
@@ -549,12 +554,13 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         assert "entries" in object_info
         
         self._clear_tree()
+        # TODO: don't show too big number of elements
         for key, value in object_info["entries"]:
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "key_id", format_object_id(key.id))
-            self.tree.set(node_id, "key", key.short_repr)
+            self.tree.set(node_id, "key", shorten_repr(key.repr, MAX_REPR_LENGTH_IN_GRID))
             self.tree.set(node_id, "id", format_object_id(value.id))
-            self.tree.set(node_id, "value", value.short_repr)
+            self.tree.set(node_id, "value", shorten_repr(value.repr, MAX_REPR_LENGTH_IN_GRID))
 
         count = len(object_info["entries"])
         self.tree.config(height=min(count,10))

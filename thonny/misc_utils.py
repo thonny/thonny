@@ -269,3 +269,10 @@ def try_remove_linenumbers(text, master):
     except:
         traceback.print_exc()
         return text
+
+def shorten_repr(original_repr, max_len=1000):
+    if len(original_repr) > max_len:
+        return original_repr[:max_len] + " ... [{} chars truncated]".format(len(original_repr) - max_len)
+    else:
+        return original_repr
+        

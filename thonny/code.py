@@ -24,7 +24,7 @@ from tkinter.messagebox import showinfo
 
 from thonny.common import DebuggerResponse
 from thonny.config import prefs
-from thonny.misc_utils import eqfn
+from thonny.misc_utils import eqfn, shorten_repr
 from thonny import ui_utils
 from thonny import misc_utils
 from thonny import ast_utils
@@ -511,7 +511,7 @@ class ExpressionView(tk.Text):
                 if prefs["values_in_heap"]:
                     value_str = id_str
                 else:
-                    value_str = msg.value.short_repr
+                    value_str = shorten_repr(msg.value.repr, 100)
                 
                 #print("ins", start_mark, value_str)
                 object_tag = "object_" + str(msg.value.id)
@@ -700,7 +700,7 @@ class FunctionDialog(tk.Toplevel):
     def _load_function(self, msg):
         self._code_view.set_content(msg.source)
         if hasattr(msg, "function"):
-            function_label = msg.function.short_repr
+            function_label = msg.function.repr
         else:
             function_label = msg.code_name
              

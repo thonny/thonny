@@ -320,7 +320,7 @@ class VM:
             type_name = type(value).__name__ 
             
         result = ValueInfo(id=id(value),
-                         short_repr=repr(value), # TODO:
+                         repr=repr(value), 
                          type_name=type_name)
         
         return result

@@ -10,7 +10,7 @@ import tkinter.font as font
 from thonny import ui_utils
 from thonny.config import prefs
 from thonny import memory
-from thonny.misc_utils import running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import TextWrapper, generate_event
 from thonny.common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
 from thonny.user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
@@ -156,7 +156,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
                 
             if hasattr(msg, "value_info"):
-                value_repr = msg.value_info.short_repr
+                value_repr = shorten_repr(msg.value_info.repr, 10000)
                 if value_repr != "None":
                     if prefs["values_in_heap"]:
                         value_repr = memory.format_object_id(msg.value_info.id)
