@@ -25,6 +25,6 @@ rm -f build/Thonny.app/Contents/Info.plist.bak
 mkdir -p dist
 FILENAME=dist/thonny-$VERSION.dmg
 rm -f $FILENAME
-hdiutil create -srcfolder build/Thonny.app $FILENAME
+hdiutil create -srcfolder build $FILENAME
 hdiutil internet-enable -yes $FILENAME
 
