@@ -597,7 +597,7 @@ class Thonny(tk.Tk):
     def cmd_update_memory_model(self):
         if prefs["values_in_heap"] and not self.heap_book.winfo_ismapped():
             # TODO: put it before object info block
-            self.right_pw.add(self.heap_book, before=self.info_book, minsize=50)
+            self.right_pw.add(self.heap_book, after=self.globals_book, minsize=50)
         elif not prefs["values_in_heap"] and self.heap_book.winfo_ismapped():
             self.right_pw.remove(self.heap_book)
         
@@ -606,6 +606,7 @@ class Thonny(tk.Tk):
         # TODO: globals and locals
         
         assert self._vm.get_state() == "toplevel"
+        # TODO: following command creates an unnecessary new propmpt
         self._vm.send_command(ToplevelCommand(command="pass", heap_required=True))
 
     def cmd_update_debugging_mode(self):
