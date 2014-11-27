@@ -1125,8 +1125,8 @@ class FancyTracer(Executor):
             if isinstance(value, ast.AST):
                 self._insert_statement_markers(value)
             elif isinstance(value, list):
-                new_list = []
                 if len(value) > 0:
+                    new_list = []
                     # create before suite
                     if isinstance(value[0], _ast.stmt):
                         new_list.append(self._create_suite_marker(value, BEFORE_SUITE_MARKER))
@@ -1139,7 +1139,8 @@ class FancyTracer(Executor):
                                                                           BEFORE_STATEMENT_MARKER))
                         
                         # original statement
-                        self._insert_statement_markers(node)
+                        if isinstance(node, _ast.stmt):
+                            self._insert_statement_markers(node)
                         new_list.append(node)
                         
                         if isinstance(node, _ast.stmt):
@@ -1150,7 +1151,7 @@ class FancyTracer(Executor):
                     if isinstance(value[0], _ast.stmt):
                         new_list.append(self._create_suite_marker(value, AFTER_SUITE_MARKER))
                     
-                setattr(root, name, new_list)
+                    setattr(root, name, new_list)
     
     def _create_suite_marker(self, stmt_nodes, function_name):
         stmt_ranges = ast.Tuple(elts=list(map(self._create_location_literal, stmt_nodes)), 
