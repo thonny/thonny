@@ -150,7 +150,7 @@ class Thonny(tk.Tk):
         self.center_pw.add(self.editor_book, minsize=150)
         
         self.control_book = ui_utils.PanelBook(self.center_pw)
-        self.center_pw.add(self.control_book, minsize=150)
+        self.center_pw.add(self.control_book, minsize=50)
         self.shell = ShellFrame(self.control_book, self._vm, self.editor_book)
         self.stack = stack.StackPanel(self.control_book, self._vm, self.editor_book)
         self.ast_frame = AstFrame(self.control_book)
