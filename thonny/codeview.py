@@ -42,7 +42,8 @@ def index2line(index):
 class CodeView(ttk.Frame, TextWrapper):
     def __init__(self, master, first_line_no=1, font_size=11,
                  auto_vert_scroll=False,
-                 height=None):
+                 height=None,
+                 propose_remove_line_numbers=False):
         ttk.Frame.__init__(self, master)
         
         # attributes
@@ -109,7 +110,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 undo=True,
                 autoseparators=False)
         
-        TextWrapper.__init__(self)
+        TextWrapper.__init__(self, propose_remove_line_numbers)
         
         self.read_only = False
         

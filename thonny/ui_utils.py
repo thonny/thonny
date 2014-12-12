@@ -317,7 +317,7 @@ class TextWrapper:
     # http://tkinter.unpythonic.net/wiki/ReadOnlyText
 
     
-    def __init__(self):
+    def __init__(self, propose_remove_line_numbers=False):
         self._text_redirector = WidgetRedirector(self.text)
         self._original_user_text_insert = self._text_redirector.register("insert", self._user_text_insert)
         self._original_user_text_delete = self._text_redirector.register("delete", self._user_text_delete)
@@ -338,6 +338,7 @@ class TextWrapper:
         
         self._last_event_kind = None
         self._last_key_time = 0
+        self._propose_remove_line_numbers = propose_remove_line_numbers
 
         # These are needed because code copied from idlelib relies on such methods
         self.started_undo_blocks = 0
@@ -356,7 +357,9 @@ class TextWrapper:
 #        print("INS", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
         
         # try removing line numbers
-        if isinstance(args[1], str):
+        # TODO: shouldn't it take place only on paste?
+        # TODO: does it occur when opening a file with line numbers in it?
+        if self._propose_remove_line_numbers and isinstance(args[1], str):
             args = tuple((args[0],) + (try_remove_linenumbers(args[1], self.text),) + args[2:])
         
         self._original_user_text_insert(*args, **kw)

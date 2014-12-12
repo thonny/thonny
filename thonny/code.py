@@ -124,7 +124,7 @@ class Editor(ttk.Frame):
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
         
-        self._code_view = CodeView(self)
+        self._code_view = CodeView(self, propose_remove_line_numbers=True)
         self._code_view.grid(sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
