@@ -132,6 +132,8 @@ class UserEvent:
         items = ("{}={!r}".format(k, str(self.__dict__[k])) for k in keys)
         return "{}({})".format(self.__class__.__name__.replace("Event", ""), ", ".join(items))
     
+    def compact_description(self):
+        return self.__class__.__name__.replace("Event", "")
 
 class TextInsertEvent(UserEvent):
     def __init__(self, editor, position, text, tags, source=None):
@@ -250,15 +252,27 @@ def parse_log_line(line):
     assert isinstance(tree, ast.Expression)
     assert isinstance(tree.body, ast.Call)
     
-    attributes = {
-        'event_kind' : tree.body.func.id,
-        'event_time' : strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
-    }
+    event_kind = tree.body.func.id
+    event_class = globals()[event_kind + "Event"]
+    
+    #attributes = {
+    #    'event_kind' : event_kind,
+    #    'event_time' : strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
+    #}
+    
+    constructor_arguments = {}
     
     for kw in tree.body.keywords:
-        attributes[kw.arg] = ast.literal_eval(kw.value)
-        
-    return attributes
+    #    attributes[kw.arg] = ast.literal_eval(kw.value)
+        name = kw.arg
+        if name == "editor_id":
+            name = "editor"
+        constructor_arguments[name] = ast.literal_eval(kw.value)
+    
+    obj = event_class(**constructor_arguments)
+    obj.event_time = strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
+    
+    return obj
 
 def parse_log_file(filename):
     f = open(filename, encoding="UTF-8")

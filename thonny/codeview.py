@@ -62,8 +62,6 @@ class CodeView(ttk.Frame, TextWrapper):
             self.vbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.vbar.grid(row=0, column=2, sticky=tk.NSEW)
         self.hbar = AutoScrollbar(self, orient=tk.HORIZONTAL)
-        
-        # TODO: show when necessary
         self.hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
         
         self.margin = tk.Text(self,
