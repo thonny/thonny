@@ -1,32 +1,36 @@
+import sys
+import traceback
 import tkinter as tk
 import tkinter.ttk as ttk
 from thonny import ui_utils
-from thonny.ui_utils import TextWrapper
 from thonny.user_logging import parse_log_line, TextInsertEvent,\
-    TextDeleteEvent, UserEvent, ShellCreateEvent, ProgramLoseFocusEvent,\
+    TextDeleteEvent, ShellCreateEvent, ProgramLoseFocusEvent,\
     ProgramGetFocusEvent, EditorGetFocusEvent, EditorLoseFocusEvent,\
     KeyPressEvent
-from thonny.codeview import CodeView
+from thonny.browser import FileBrowser
 
 
 class ReplayWindow(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
+        tk.Tk.report_callback_exception = self.on_tk_exception
         
         self.main_pw   = ui_utils.create_PanedWindow(self, orient=tk.HORIZONTAL)
-        self.left_pw  = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
+        self.center_pw  = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
         self.right_frame = ttk.Frame(self.main_pw)
-        self.editor_book = EditorNotebook(self.left_pw)
+        self.editor_book = EditorNotebook(self.center_pw)
         shell_book = ui_utils.PanelBook(self.main_pw)
         self.shell = ShellFrame(shell_book)
         self.log_frame = LogFrame(self.right_frame, self.editor_book, self.shell)
+        self.browser = ReplayerFileBrowser(self.main_pw, self.log_frame)
         self.control_frame = ControlFrame(self.right_frame)
         
         self.main_pw.grid(padx=10, pady=10, sticky=tk.NSEW)
-        self.main_pw.add(self.left_pw, minsize=700)
-        self.main_pw.add(self.right_frame)
-        self.left_pw.add(self.editor_book, minsize=500)
-        self.left_pw.add(shell_book)
+        self.main_pw.add(self.browser, minsize=200)
+        self.main_pw.add(self.center_pw, minsize=700)
+        self.main_pw.add(self.right_frame, minsize=200)
+        self.center_pw.add(self.editor_book, minsize=500)
+        self.center_pw.add(shell_book)
         shell_book.add(self.shell, text="Shell")
         self.log_frame.grid(sticky=tk.NSEW)
         self.control_frame.grid(sticky=tk.NSEW)
@@ -39,9 +43,41 @@ class ReplayWindow(tk.Tk):
         
         self.state("zoomed")
         
-        self.log_frame.load_log("C:/users/aivar/.thonny/user_logs/2014-12-16_16-54-56_0.txt")
+        if len(sys.argv) > 1:
+            self.log_frame.load_log(sys.argv[1])
+        else:
+            try: 
+                self.log_frame.load_log("C:/users/aivar/.thonny/user_logs/2014-12-16_16-54-56_0.txt")
+            except:
+                pass
             
 
+    def on_tk_exception(self, exc, val, tb):
+        # copied from tkinter.Tk.report_callback_exception
+        # Aivar: following statement kills the process when run with pythonw.exe
+        # http://bugs.python.org/issue22384
+        #sys.stderr.write("Exception in Tkinter callback\n")
+        sys.last_type = exc
+        sys.last_value = val
+        sys.last_traceback = tb
+        traceback.print_exception(exc, val, tb)
+        
+        # TODO: Command+C for Mac
+        tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
+                                traceback.format_exc())
+    
+
+class ReplayerFileBrowser(FileBrowser):
+    
+    def __init__(self, master, log_frame):
+        FileBrowser.__init__(self, master, show_hidden_files=True)
+        self.log_frame = log_frame
+
+    def on_double_click(self, event):
+        path = self.get_selected_path()
+        if path:
+            self.log_frame.load_log(path)
+            
 class ControlFrame(ttk.Frame):
     pass
 
@@ -60,6 +96,8 @@ class LogFrame(ui_utils.TreeFrame):
         self.all_events = []
         self.last_event_index = -1
         self.loading = True
+        self.editor_book.clear()
+        self.shell.clear()
         
         with open(filename, encoding="UTF-8") as f:
             last_event = None
@@ -194,6 +232,13 @@ class EditorNotebook(ttk.Notebook):
         ttk.Notebook.__init__(self, master, padding=0)
         self.editors_by_id = {}
     
+    def clear(self):
+        
+        for child in self.winfo_children():
+            child.destroy()
+        
+        self.editors_by_id = {}
+    
     def get_editor_by_id(self, editor_id):
         if editor_id not in self.editors_by_id:
             editor = Editor(self)
@@ -215,9 +260,19 @@ class EditorNotebook(ttk.Notebook):
             editor.undo_event(event)
 
 class ShellFrame(Editor):
-    pass
+    
+    def clear(self):
+        self.code_view.text.delete("1.0", "end")
 
 
+def run():
+    try:
+        ReplayWindow().mainloop()
+    except:
+        traceback.print_exc()
+        # TODO: Command+C for Mac
+        tk.messagebox.showerror("Internal error. Program will close. Use Ctrl+C to copy",
+                                traceback.format_exc())
 
 if __name__ == "__main__":
-    ReplayWindow().mainloop()    
+    run()

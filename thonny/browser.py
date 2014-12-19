@@ -15,12 +15,14 @@ _dummy_node_text = "..."
     
         
 class FileBrowser(TreeFrame):
-    def __init__(self, master, editor_book):
+    def __init__(self, master, editor_book=None,
+                 show_hidden_files=False): # TODO: refactor universal file browser
         TreeFrame.__init__(self, master, 
                            ["#0", "kind", "path"], 
                            displaycolumns=(0,))
         #print(self.get_toplevel_items())
         self.editor_book = editor_book
+        self.show_hidden_files = show_hidden_files
         self.tree['show'] = ('tree',)
         
         self.hor_scrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
@@ -211,7 +213,7 @@ class FileBrowser(TreeFrame):
         else:
             # either root or directory
             if node_id == "" or self.tree.item(node_id, "open") or opening == True:
-                fs_children_names = self.listdir(path)
+                fs_children_names = self.listdir(path, self.show_hidden_files)
                 tree_children_ids = self.tree.get_children(node_id) 
                 
                 # recollect children

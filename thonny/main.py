@@ -41,6 +41,7 @@ from thonny.common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
 from thonny.ui_utils import Command, notebook_contains
 from thonny import user_logging
 from thonny import misc_utils
+import subprocess
 
 
 
@@ -240,6 +241,7 @@ class Thonny(tk.Tk):
                 Command('focus_editor', "Focus editor", "F11", self),
                 Command('focus_shell', "Focus shell", "F12", self),
                 Command('show_ast', "Show AST", None, self),
+                Command('show_replayer', "Show Replayer", None, self),
                 Command('preferences', 'Preferences', None, self) 
             ]),
 #             ('code', 'Code', [
@@ -741,6 +743,11 @@ class Thonny(tk.Tk):
             self.control_book.add(self.ast_frame, text="AST")
         self.ast_frame.show_ast(self.editor_book.get_current_editor()._code_view)
         self.control_book.select(self.ast_frame)
+    
+    def cmd_show_replayer(self):
+        launcher = os.path.join(self.src_dir, "replay")
+        cmd_line = [sys.executable, '-u', launcher]
+        subprocess.Popen(cmd_line)
     
     def _get_version(self):
         try:
