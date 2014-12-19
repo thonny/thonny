@@ -49,6 +49,7 @@ Source: "ShortcutLauncher\Release\ShortcutLauncher.exe"; DestDir: "{app}"; DestN
 Source: "..\thonny\*.py"; DestDir: "{app}\thonny"; Flags: ignoreversion
 Source: "..\thonny\locale\*"; DestDir: "{app}\thonny\locale"; Flags: ignoreversion recursesubdirs
 Source: "..\thonny\res\*.gif"; DestDir: "{app}\thonny\res"; Flags: ignoreversion
+Source: "..\thonny\replay\*.py"; DestDir: "{app}\thonny\replay"; Flags: ignoreversion
 Source: "..\thonny\VERSION"; DestDir: "{app}\thonny"; Flags: ignoreversion
 
 ; TODO: Temporary, remove files from older (up to 30.10.2014) directory layout

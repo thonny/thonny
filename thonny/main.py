@@ -747,6 +747,7 @@ class Thonny(tk.Tk):
     def cmd_show_replayer(self):
         launcher = os.path.join(self.src_dir, "replay")
         cmd_line = [sys.executable, '-u', launcher]
+        print(cmd_line)
         subprocess.Popen(cmd_line)
     
     def _get_version(self):
