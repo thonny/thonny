@@ -429,7 +429,7 @@ class TextWrapper:
             self._last_event_kind = event_kind
 
         self.last_key_time = time.time()
-        log_user_event(KeyPressEvent(self, e, self.text.index(tk.INSERT)))
+        log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
     def on_text_mouse_click(self, event):
         self.add_undo_separator()

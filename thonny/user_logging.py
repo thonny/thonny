@@ -201,11 +201,11 @@ class EditorLoseFocusEvent(UserEvent):
         self.editor_id = id(editor)
 
 class KeyPressEvent(UserEvent):
-    def __init__(self, editor, event, cursor_pos):
+    def __init__(self, editor, char, keysym, cursor_pos):
         self.editor_id = id(editor)
         self.cursor_pos = cursor_pos
-        self.char = event.char
-        self.keysym = event.keysym
+        self.char = char
+        self.keysym = keysym
 
 # class SelectionChangeEvent(UserEvent):
 #     def __init__(self, editor, first_pos, last_pos):
@@ -267,10 +267,14 @@ def parse_log_line(line):
         name = kw.arg
         if name == "editor_id":
             name = "editor"
+            editor_id = ast.literal_eval(kw.value) # TODO: clean this hack
         constructor_arguments[name] = ast.literal_eval(kw.value)
     
     obj = event_class(**constructor_arguments)
     obj.event_time = strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
+    
+    if hasattr(obj, "editor_id"): # TODO: hack
+        obj.editor_id = editor_id
     
     return obj
 
