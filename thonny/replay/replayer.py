@@ -207,25 +207,38 @@ class Editor(ttk.Frame):
         self.code_view.grid(sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        self.text_states_before = {} # self.text_states[event_id] contains editor content before event with id event_id
     
     def replay_event(self, event):
-        if isinstance(event, TextInsertEvent):
-            assert event.position != '', "Bad event position: " + str(event)
-            self.code_view.text.see(event.position)
-            self.code_view.text.insert(event.position, event.text, event.tags)
-        elif isinstance(event, TextDeleteEvent):
-            if event.to_position:
-                self.code_view.text.see(event.to_position)
-            if event.from_position:
-                self.code_view.text.see(event.from_position)
+        if isinstance(event, TextInsertEvent) or isinstance(event, TextDeleteEvent):
+            self.text_states_before[id(event)] = self.code_view.text.get("1.0", "end")
+            self.see_event(event)
             
-            if event.to_position:
-                self.code_view.text.delete(event.from_position, event.to_position)
-            else:
-                self.code_view.text.debug(event.from_position)
+            if isinstance(event, TextInsertEvent):
+                self.code_view.text.insert(event.position, event.text, event.tags)
+                
+            elif isinstance(event, TextDeleteEvent):
+                if event.to_position:
+                    self.code_view.text.delete(event.from_position, event.to_position)
+                else:
+                    self.code_view.text.delete(event.from_position)
+        
     
     def undo_event(self, event):
-        raise Exception
+        if id(event) in self.text_states_before:
+            self.code_view.text.delete("1.0", "end")
+            self.code_view.text.insert("1.0", self.text_states_before[id(event)])
+            self.see_event(event)
+    
+    def see_event(self, event):
+        if hasattr(event, "to_position") and event.to_position:
+            self.code_view.text.see(event.to_position)
+            
+        if hasattr(event, "from_position") and event.from_position:
+            self.code_view.text.see(event.from_position)
+            
+        if hasattr(event, "position") and event.position:
+            self.code_view.text.see(event.position)
 
 class EditorNotebook(ttk.Notebook):
     def __init__(self, master):
