@@ -255,15 +255,9 @@ def parse_log_line(line):
     event_kind = tree.body.func.id
     event_class = globals()[event_kind + "Event"]
     
-    #attributes = {
-    #    'event_kind' : event_kind,
-    #    'event_time' : strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
-    #}
-    
     constructor_arguments = {}
     
     for kw in tree.body.keywords:
-    #    attributes[kw.arg] = ast.literal_eval(kw.value)
         name = kw.arg
         if name == "editor_id":
             name = "editor"
@@ -271,7 +265,7 @@ def parse_log_line(line):
         constructor_arguments[name] = ast.literal_eval(kw.value)
     
     obj = event_class(**constructor_arguments)
-    obj.event_time = strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
+    obj.event_time = datetime.strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
     
     if hasattr(obj, "editor_id"): # TODO: hack
         obj.editor_id = editor_id

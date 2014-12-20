@@ -79,7 +79,18 @@ class ReplayerFileBrowser(FileBrowser):
             self.log_frame.load_log(path)
             
 class ControlFrame(ttk.Frame):
-    pass
+    def __init__(self, master, **kw):
+        ttk.Frame.__init__(self, master=master, **kw)
+        
+        self.toggle_button = ttk.Button(self, text="Play")
+        self.speed_scale = ttk.Scale(self, from_=1, to=100, orient=tk.HORIZONTAL)
+        
+        self.toggle_button.grid(row=0, column=0, sticky=tk.NSEW, pady=(10,0), padx=(0,5))
+        self.speed_scale.grid(row=0, column=1, sticky=tk.NSEW, pady=(10,0), padx=(5,0))
+        
+        self.columnconfigure(1, weight=1)
+        
+        
 
 class LogFrame(ui_utils.TreeFrame):
     def __init__(self, master, editor_book, shell):
@@ -115,7 +126,12 @@ class LogFrame(ui_utils.TreeFrame):
                 
                 node_id = self.tree.insert("", "end")
                 self.tree.set(node_id, "desc", event.compact_description())
-                self.tree.set(node_id, "pause", str(-1)) # TODO:
+                if last_event:
+                    delta = event.event_time - last_event.event_time
+                    pause = delta.seconds
+                else:
+                    pause = 0   
+                self.tree.set(node_id, "pause", str(pause if pause else ""))
                 self.tree.set(node_id, "time", str(event.event_time))
                 self.all_events.append(event)
                 
