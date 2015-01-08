@@ -695,7 +695,7 @@ class FunctionDialog(tk.Toplevel):
         
         
         self.main_pw.add(self._code_book, minsize=150)
-        self.main_pw.add(self._locals_book, minsize=150)
+        self.main_pw.add(self._locals_book, minsize=50)
     
     def _load_function(self, msg):
         self._code_view.set_content(msg.source)
