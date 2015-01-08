@@ -1,0 +1,2 @@
+thonny -- contains everything needed to run thonny. 
+	NB! This folder is a Python package, ie its parent needs to be in Python path.  

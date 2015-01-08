@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleName</key>
+	<string>Thonny</string>
+	
+	<key>CFBundleDisplayName</key>
+	<string>Thonny</string>
+	
+	<key>CFBundleIdentifier</key>
+	<string>ee.ut.cs.thonny</string>
+	
+	<key>CFBundleVersion</key>
+	<string>VERSION</string>
+	
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	
+	<key>CFBundleExecutable</key>
+	<string>thonny_launch</string>
+
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>py</string>
+				<string>pyw</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>PythonSource.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Python Script</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+		</dict>
+	</array>
+	
+	<key>CFBundleGetInfoString</key>
+	<string>Thonny VERSION</string>
+	
+	<key>CFBundleIconFile</key>
+	<string>Thonny.icns</string>
+	
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	
+	<key>CFBundleShortVersionString</key>
+	<string>VERSION</string>
+	
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	
+</dict>
+</plist>

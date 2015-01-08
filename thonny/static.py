@@ -1,0 +1,120 @@
+# -*- coding: utf-8 -*-
+ 
+import ast
+import traceback
+import tkinter as tk
+
+from thonny import ast_utils
+from thonny import ui_utils
+from thonny.common import TextRange
+
+class AstFrame(ui_utils.TreeFrame):
+    def __init__(self, master):
+        ui_utils.TreeFrame.__init__(self, master,
+            columns=('range', 'lineno', 'col_offset', 'end_lineno', 'end_col_offset'),
+            displaycolumns=(0,)
+        )
+        
+        self.current_code_view = None
+        self.tree.bind("<<TreeviewSelect>>", self.locate_code)
+
+        self.tree.column('#0', width=550, anchor=tk.W)
+        self.tree.column('range', width=100, anchor=tk.W)
+        self.tree.column('lineno', width=30, anchor=tk.W)
+        self.tree.column('col_offset', width=30, anchor=tk.W)
+        self.tree.column('end_lineno', width=30, anchor=tk.W)
+        self.tree.column('end_col_offset', width=30, anchor=tk.W)
+        
+        self.tree.heading('#0', text="Node", anchor=tk.W)
+        self.tree.heading('range', text='Code range', anchor=tk.W)
+        
+        self.tree['show'] = ('headings', 'tree')
+    
+    def locate_code(self, event):
+        if self.current_code_view == None:
+            return
+        
+        iid = self.tree.focus()
+        
+        if iid != '':
+            values = self.tree.item(iid)['values']
+            if isinstance(values, list) and len(values) >= 5:
+                start_line, start_col, end_line, end_col = values[1:5] 
+                self.current_code_view.select_range(TextRange(start_line, start_col, 
+                                                    end_line, end_col))
+        
+    
+    def clear_tree(self):
+        for child_id in self.tree.get_children():
+            self.tree.delete(child_id)
+    
+    def show_ast(self, code_view):
+        self.current_code_view = code_view
+        source = code_view.get_content()
+        
+
+        self.clear_tree()
+        
+        try:
+            #import time
+            #start = time.clock()
+            root = ast_utils.parse_source(source)
+            #ast_utils.insert_expression_markers(root)
+            #ast_utils.insert_statement_markers(root)
+            #elapsed = (time.clock() - start)
+            #print("ELAPSED: ", elapsed)
+        except Exception as e:
+            #showerror("Viga!", e)
+            #print("VIGA", e)
+            self.tree.insert("", "end", text=str(e), open=True)
+            traceback.print_exc()
+            return
+        
+        
+        def _format(key, node, parent_id):
+            
+            
+            if isinstance(node, ast.AST):
+                fields = [(key, val) for key, val in ast.iter_fields(node)]
+                
+                value_label = node.__class__.__name__
+                    
+            elif isinstance(node, list):
+                fields = list(enumerate(node))
+                if len(node) == 0:
+                    value_label = "[]"
+                else:
+                    value_label = "[...]"
+            else:
+                fields = []
+                value_label = repr(node)
+            
+            item_text = str(key) + "=" + value_label
+            node_id = self.tree.insert(parent_id, "end", text=item_text, open=True)
+            
+            if hasattr(node, "lineno") and hasattr(node, "col_offset"):
+                self.tree.set(node_id, "lineno", node.lineno)
+                self.tree.set(node_id, "col_offset", node.col_offset)
+                
+                range_str = str(node.lineno) + '.' + str(node.col_offset)
+                if hasattr(node, "end_lineno") and hasattr(node, "end_col_offset"):
+                    self.tree.set(node_id, "end_lineno", node.end_lineno)
+                    self.tree.set(node_id, "end_col_offset", node.end_col_offset)
+                    range_str += "  -  " + str(node.end_lineno) + '.' + str(node.end_col_offset)
+                else:
+                    # fallback
+                    self.tree.set(node_id, "end_lineno", node.lineno)
+                    self.tree.set(node_id, "end_col_offset", node.col_offset + 1)
+                    
+                self.tree.set(node_id, "range", range_str)
+                
+            for field_key, field_value in fields:
+                _format(field_key, field_value, node_id)
+                
+                
+        _format("root", root, "")
+        
+        
+        
+    
+        
