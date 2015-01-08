@@ -238,6 +238,7 @@ class ShellInputEvent(UserEvent):
         self.command_text = command_text 
         
 class ShellOutputEvent(UserEvent):
+    # TODO: distinguish between err and out
     def __init__(self, text):
         self.text = text
 
