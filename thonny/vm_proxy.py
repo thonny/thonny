@@ -44,6 +44,7 @@ class VMProxy:
                 return self._current_pause_msg.vm_state
     
     def get_state_message(self):
+        # TODO: create separate class for expressing backend state
         with self._state_lock:
             return self._current_pause_msg
     

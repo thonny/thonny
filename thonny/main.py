@@ -53,6 +53,9 @@ THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
 class Thonny(tk.Tk):
     def __init__(self, src_dir):
+        self.last_manual_debugger_command_sent = None # TODO: hack
+        self.step_over = False
+        
         self.src_dir = src_dir
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self.on_tk_exception
@@ -270,7 +273,7 @@ class Thonny(tk.Tk):
 #                 "---", 
                 Command('reset',                 'Stop/Reset',       None, self),
                 "---", 
-#                Command('exec',                 'Execute current focus', "F7", self),
+                Command('exec',                 'Step over', "F7", self),
 #                Command('zoom',                 'Zoom in',               "F8", self),
                 Command('step',                 'Step',                  "F9", self),
                 "---", 
@@ -433,7 +436,7 @@ class Thonny(tk.Tk):
                 and "call_function" in msg.tags
                 and not prefs["debugging.expand_call_functions"]):
                 
-                self._check_issue_debugger_command(DebuggerCommand(command="step"))
+                self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
                 continue
                 
             if hasattr(msg, "success") and not msg.success:
@@ -453,16 +456,40 @@ class Thonny(tk.Tk):
             # automatically advance from some events
             if (isinstance(msg, DebuggerResponse) 
                 and msg.state in ("after_statement", "after_suite", "before_suite")
-                and not prefs["debugging.detailed_steps"]):
+                and not prefs["debugging.detailed_steps"]
+                or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
                 
-                self._check_issue_debugger_command(DebuggerCommand(command="step"))
+                self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
             
-            
-                
             self.update_idletasks()
             
         self.after(50, self._poll_vm_messages)
     
+    def continue_with_step_over(self, cmd, msg):
+        if not self.step_over:
+            print("Not step_over")
+            return False
+        
+        if not isinstance(msg, DebuggerResponse):
+            return False
+        
+        if cmd == None:
+            return False
+        
+        if msg.state not in ("before_statement", "before_expression", "after_expression"):
+            # TODO: hack, may want after_statement
+            return True
+        
+        if msg.frame_id != cmd.frame_id:
+            return True
+        
+        if msg.focus.is_smaller_in(cmd.focus):
+            print("smaller")
+            return True
+        else:
+            print("outside")
+            return False
+        
     
     def cmd_about(self):
         AboutDialog(self, self._get_version())
@@ -542,6 +569,7 @@ class Thonny(tk.Tk):
         
         # submit to shell (shell will execute it)
         self.shell.submit_magic_command(cmd_line)
+        self.step_over = False
     
     
     def cmd_reset(self):
@@ -558,6 +586,8 @@ class Thonny(tk.Tk):
             if adjust_window_width:
                 self._check_update_window_width(-prefs["layout.browser_width"]-ui_utils.SASHTHICKNESS)
             self.main_pw.remove(self.browse_book)
+
+            self.step_over = False
 
     def cmd_update_memory_visibility(self, adjust_window_width=True):
         # TODO: treat variables frame and memory pane differently
@@ -652,7 +682,9 @@ class Thonny(tk.Tk):
         # always enabled during debugging
         return (isinstance(msg, DebuggerResponse)) 
     
-    def cmd_step(self):
+    def cmd_step(self, automatic=False):
+        if not automatic:
+            self.step_over = False
         self._check_issue_debugger_command(DebuggerCommand(command="step"))
     
     def cmd_zoom_enabled(self):
@@ -663,14 +695,16 @@ class Thonny(tk.Tk):
         self._check_issue_debugger_command(DebuggerCommand(command="zoom"))
     
     def cmd_exec_enabled(self):
+        return self.cmd_step_enabled()
         #self._check_issue_goto_before_or_after()
-        msg = self._vm.get_state_message()
-        return (isinstance(msg, DebuggerResponse) 
-                and msg.state in ("before_expression", "before_expression_again",
-                                  "before_statement", "before_statement_again")) 
+        #msg = self._vm.get_state_message()
+        #return (isinstance(msg, DebuggerResponse) 
+        #        and msg.state in ("before_expression", "before_expression_again",
+        #                          "before_statement", "before_statement_again")) 
     
     def cmd_exec(self):
-        self._check_issue_debugger_command(DebuggerCommand(command="exec"))
+        self.step_over = True
+        self.cmd_step(True)
     
     def cmd_focus_editor(self):
         self.editor_book.focus_current_editor()
@@ -681,12 +715,13 @@ class Thonny(tk.Tk):
     def cmd_open_user_dir(self):
         misc_utils.open_path_in_system_file_manager(THONNY_USER_DIR)
     
-    def _check_issue_debugger_command(self, cmd):
+    def _check_issue_debugger_command(self, cmd, automatic=False):
         if isinstance(self._vm.get_state_message(), DebuggerResponse):
-            self._issue_debugger_command(cmd)
+            self._issue_debugger_command(cmd, automatic)
             # TODO: notify memory panes and editors? Make them inactive?
     
-    def _issue_debugger_command(self, cmd):
+    def _issue_debugger_command(self, cmd, automatic=False):
+        print("_issue", cmd, automatic)
         last_response = self._vm.get_state_message()
         # tell VM the state we are seeing
         cmd.setdefault (
@@ -695,7 +730,9 @@ class Thonny(tk.Tk):
             focus=last_response.focus,
             heap_required=prefs["values_in_heap"]
         )
-            
+        
+        if not automatic:
+            self.last_manual_debugger_command_sent = cmd    # TODO: hack
         self._vm.send_command(cmd)
         # TODO: notify memory panes and editors? Make them inactive?
             
