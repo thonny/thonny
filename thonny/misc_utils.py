@@ -150,7 +150,7 @@ def read_python_file(filename):
         fp, encoding = open_py_file(filename)
         return fp.read(), encoding
     finally:
-        if fp != None:
+        if fp is not None:
             fp.close()
     
 def open_py_file(filename):

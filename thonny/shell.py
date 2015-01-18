@@ -248,7 +248,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
     def _user_text_delete(self, index1, index2=None, **kw):
         if (self._editing_allowed() 
             and self._in_current_input_range(index1)
-            and (index2 == None or self._in_current_input_range(index2))):
+            and (index2 is None or self._in_current_input_range(index2))):
             TextWrapper._user_text_delete(self, index1, index2, **kw)
         else:
             self.bell()
@@ -290,7 +290,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
         input_text = self.text.get("input_start", "end-1c")
         submittable_text = self._extract_submittable_input(input_text)
         
-        if submittable_text != None:
+        if submittable_text is not None:
             # user may have pasted more text than necessary for this request
             # leftover text will be kept in widget, waiting for next request.
             start_index = self.text.index("input_start")
@@ -353,7 +353,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 while True:
                     if i >= len(input_text):
                         return None
-                    elif limit != None and i+1 == limit:
+                    elif limit is not None and i+1 == limit:
                         return input_text[:i+1]
                     elif input_text[i] == "\n":
                         return input_text[:i+1]
@@ -425,7 +425,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             # can't take previous command
             return "break"
         
-        if self._command_history_current_index == None:
+        if self._command_history_current_index is None:
             self._command_history_current_index = len(self._command_history)-1
         else:
             self._command_history_current_index -= 1
@@ -443,7 +443,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             return "break"
         
         
-        if self._command_history_current_index == None:
+        if self._command_history_current_index is None:
             self._command_history_current_index = len(self._command_history)-1
         else:
             self._command_history_current_index += 1

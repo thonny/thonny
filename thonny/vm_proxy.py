@@ -38,7 +38,7 @@ class VMProxy:
         
     def get_state(self):
         with self._state_lock:
-            if self._current_pause_msg == None:
+            if self._current_pause_msg is None:
                 return "busy"
             else: # "toplevel", "debug" or "input"
                 return self._current_pause_msg.vm_state
@@ -94,7 +94,7 @@ class VMProxy:
             self._proc.stdin.flush()
     
     def _kill_current_process(self):
-        if self._proc != None and self._proc.poll() == None: 
+        if self._proc is not None and self._proc.poll() is None: 
             self._proc.kill()
             self._proc = None
             self._message_queue = None

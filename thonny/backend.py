@@ -89,7 +89,7 @@ class VM:
             try:
                 response = handler(cmd)
                 
-                if response != None:
+                if response is not None:
                 
                     # TODO: ask explicitly for them with InlineRequest ??
                     # add state information
@@ -164,14 +164,14 @@ class VM:
     
     def _cmd_tkupdate(self, cmd):
         tkinter = sys.modules.get("tkinter")
-        if (tkinter == None or tkinter._default_root == None):
+        if (tkinter is None or tkinter._default_root is None):
             return
         else:
             # advance the event loop
             # http://bugs.python.org/issue989712
             # http://bugs.python.org/file6090/run.py.diff
             try:
-                while (tkinter._default_root != None 
+                while (tkinter._default_root is not None 
                        and tkinter._default_root.dooneevent(tkinter._tkinter.DONT_WAIT)):
                     pass 
             except:
@@ -219,7 +219,7 @@ class VM:
             assert isinstance(value.name, str)
             assert value.mode in ("r", "rt", "tr", "br", "rb")
             assert value.errors in ("strict", None)
-            assert value.newlines == None or value.tell() > 0
+            assert value.newlines is None or value.tell() > 0
             # TODO: cache the content
             # TODO: don't read too big files
             with open(value.name, encoding=value.encoding) as f:
@@ -281,7 +281,7 @@ class VM:
             fp, _ = misc_utils.open_py_file(filename)
             return fp.read()
         finally:
-            if fp != None:
+            if fp is not None:
                 fp.close()
     
         
@@ -433,7 +433,7 @@ class Executor:
                 sys.settrace(self._trace)    
             if mode == "eval":
                 value = eval(bytecode, __main__.__dict__)
-                if value != None:
+                if value is not None:
                     builtins._ = value 
                 return ToplevelResponse(value_info=self._vm.export_value(value))
             else:
@@ -523,8 +523,8 @@ class FancyTracer(Executor):
 #            print("*", file)
             
         return not (
-            code == None 
-            or code.co_filename == None
+            code is None 
+            or code.co_filename is None
             or "importlib._bootstrap" in code.co_filename
             or os.path.normcase(code.co_filename) not in self._instrumented_files 
                 and code.co_name not in self.marker_function_names
@@ -608,7 +608,7 @@ class FancyTracer(Executor):
             # "before_*_again" events (eg. when last argument of a call was 
             # evaluated, then we are just before executing the final stage of the call)
             before_again = self._interpret_as_before_again_event(event, focus, args)
-            if before_again != None:
+            if before_again is not None:
                 event, focus, args = before_again
                 # store the new state in stack
                 self._custom_stack[-1].last_event = event
@@ -650,7 +650,7 @@ class FancyTracer(Executor):
         """
         
         if event.startswith("before") or event.startswith("after"):
-            assert focus != None 
+            assert focus is not None 
         
         fdebug(frame, "CUSTR %s %s", event, focus)
         if event == "exception":
@@ -692,7 +692,7 @@ class FancyTracer(Executor):
                         and self._current_command.heap_required):
                         response.heap = self._vm.export_heap()
                     
-                    #assert response.focus != None
+                    #assert response.focus is not None
                     # ... and send it to the client
                     self._vm._send_response(response)
                     
@@ -736,7 +736,7 @@ class FancyTracer(Executor):
             value = original_args.get("value")
             
             #self._debug("IAE", node_tags, value)
-            if (node_tags != None 
+            if (node_tags is not None 
                 and ("last_child" in node_tags
                      or "or_arg" in node_tags and value
                      or "and_arg" in node_tags and not value)
@@ -831,7 +831,7 @@ class FancyTracer(Executor):
                 
         else:
             # current focus must be outside of starting focus
-            assert focus == None or focus.not_smaller_in(cmd.focus)
+            assert focus is None or focus.not_smaller_in(cmd.focus)
             
             # Anyway, the execution of the focus has completed (maybe unsuccessfully).
             # In response hide the fact that current focus and/or state may have been moved away 
@@ -935,7 +935,7 @@ class FancyTracer(Executor):
         elif focus == cmd.focus and event in ("before_expression_again"):
             # we can focus here if it's a call and there is source available
             fun = self._custom_stack[-1].call_functions.get(focus)
-            if fun != None and hasattr(fun, "__code__") and self._may_step_in(fun.__code__):
+            if fun is not None and hasattr(fun, "__code__") and self._may_step_in(fun.__code__):
                 try:
                     inspect.getsource(fun)
                     self._current_command.function = fun 
@@ -1073,7 +1073,7 @@ class FancyTracer(Executor):
             
             # tag last children 
             last_child = ast_utils.get_last_child(node)
-            if last_child != None and last_child:
+            if last_child is not None and last_child:
                 add_tag(node, "has_children")
                 
                 if isinstance(last_child, ast.AST):
@@ -1235,7 +1235,7 @@ class FancyTracer(Executor):
             
     
     def _create_location_literal(self, node):
-        if node == None:
+        if node is None:
             return ast_utils.value_to_literal(None)
         
         assert hasattr(node, "end_lineno")

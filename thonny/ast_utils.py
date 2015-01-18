@@ -39,7 +39,7 @@ def find_expression(node, text_range):
     else:
         for child in ast.iter_child_nodes(node):
             result = find_expression(child, text_range)
-            if result != None:
+            if result is not None:
                 return result
         return None
         
@@ -52,9 +52,9 @@ def parse_source(source, filename='<unknown>', mode="exec"):
 
 def get_last_child(node):
     if isinstance(node, ast.Call):
-        if node.kwargs != None:
+        if node.kwargs is not None:
             return node.kwargs
-        elif node.starargs != None:
+        elif node.starargs is not None:
             return node.starargs
         elif len(node.keywords) > 0:
             return node.keywords[-1]
@@ -84,14 +84,14 @@ def get_last_child(node):
         return node.values[-1]
     
     elif (isinstance(node, (ast.Return, ast.Delete, ast.Assign, ast.AugAssign, ast.Yield))
-          and node.value != None):
+          and node.value is not None):
         return node.value
     
     elif isinstance(node, ast.Expr):
         return node.value
     
     elif isinstance(node, ast.Assert):
-        if node.msg != None:
+        if node.msg is not None:
             return node.msg
         else:
             return node.test
@@ -104,9 +104,9 @@ def get_last_child(node):
                     and hasattr(node.slice, "upper")
                     and hasattr(node.slice, "step"))
             
-            if node.slice.step != None:
+            if node.slice.step is not None:
                 return node.slice.step
-            elif node.slice.upper != None:
+            elif node.slice.upper is not None:
                 return node.slice.upper
             else:
                 return node.slice.lower
@@ -121,11 +121,11 @@ def get_last_child(node):
     # TODO: pick more cases from here:
     """
     (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
-            or isinstance(node, ast.Raise) and (node.exc != None or node.cause != None)
+            or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
             # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0 
             or sys.version_info[0] == 2 and isinstance(node, (ast.Exec, ast.Repr))  # @UndefinedVariable
             or sys.version_info[0] == 2 and isinstance(node, ast.Print)           # @UndefinedVariable
-                and (node.dest != None or len(node.values) > 0))
+                and (node.dest is not None or len(node.values) > 0))
                 
             #"TODO: Import ja ImportFrom"
             # TODO: what about ClassDef ???
@@ -154,9 +154,9 @@ def mark_text_ranges(node, source):
             for kw in node.keywords:
                 children.append(kw.value)
             
-            if node.starargs != None:
+            if node.starargs is not None:
                 children.append(node.starargs)
-            if node.kwargs != None:
+            if node.kwargs is not None:
                 children.append(node.kwargs)
             
             children.sort(key=lambda x: (x.lineno, x.col_offset))
@@ -346,7 +346,7 @@ def tokenize_with_char_offsets(source):
 
 
 def value_to_literal(value):
-    if value == None:
+    if value is None:
         return ast.Name(id="None", ctx=ast.Load())
     elif isinstance(value, bool):
         if value:
@@ -444,9 +444,9 @@ def fix_ast_problems(tree, source_lines, tokens):
             for kw in node.keywords:
                 children.append(kw.value)
             
-            if node.starargs != None:
+            if node.starargs is not None:
                 children.append(node.starargs)
-            if node.kwargs != None:
+            if node.kwargs is not None:
                 children.append(node.kwargs)
             
             children.sort(key=lambda x: (x.lineno, x.col_offset))

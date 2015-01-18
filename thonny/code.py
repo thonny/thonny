@@ -61,7 +61,7 @@ class StatementStepper:
     def handle_vm_message(self, msg):
         #print("SS", msg.state, msg.focus)
         # make sure current next_frame_handler is still relevant
-        if self._next_frame_handler != None:
+        if self._next_frame_handler is not None:
             self._check_clear_next_frame_handler(msg.stack)
         
         # show this frame
@@ -69,7 +69,7 @@ class StatementStepper:
             self._code_view.handle_focus_message(msg.focus, msg)
             self._expression_view.handle_vm_message(msg)
         else:
-            if self._next_frame_handler == None:
+            if self._next_frame_handler is None:
                 if msg.code_name == "<module>":
                     self._next_frame_handler = editor_book.get_editor(msg.filename, True)
                     self._next_frame_handler.enter_execution_mode()
@@ -105,7 +105,7 @@ class StatementStepper:
         elif isinstance(self._next_frame_handler, FunctionDialog):
             self._next_frame_handler.destroy()
         else:
-            assert self._next_frame_handler == None
+            assert self._next_frame_handler is None
             
         self._next_frame_handler = None
     
@@ -134,7 +134,7 @@ class Editor(ttk.Frame):
         self._filename = None
         self.file_encoding = None
         
-        if filename != None:
+        if filename is not None:
             self._load_file(filename)
             self._code_view.text.edit_modified(False)
             
@@ -142,7 +142,7 @@ class Editor(ttk.Frame):
             
 
     def get_filename(self, try_hard=False):
-        if self._filename == None and try_hard:
+        if self._filename is None and try_hard:
             self.cmd_save_file()
             
         return self._filename
@@ -162,7 +162,7 @@ class Editor(ttk.Frame):
         return self.is_modified() or not self.get_filename()
     
     def cmd_save_file(self):
-        if self._filename != None:
+        if self._filename is not None:
             filename = self._filename
             log_user_event(SaveEvent(self._code_view))
         else:
@@ -212,7 +212,7 @@ class Editor(ttk.Frame):
             raise RuntimeError ("Editor content doesn't match module source. Did you change it after starting the program?")
         """
         
-        if self._stepper == None:
+        if self._stepper is None:
             if prefs["advanced_debugging"]:
                 self._stepper = AdvancedStatementStepper(msg.frame_id, self, self._code_view)
             else:
@@ -228,7 +228,7 @@ class Editor(ttk.Frame):
     
     
     def clear_debug_view(self):
-        if self._stepper != None:
+        if self._stepper is not None:
             self._stepper.clear_debug_view()
     
     def exit_execution_mode(self):
@@ -237,7 +237,7 @@ class Editor(ttk.Frame):
         self._stepper = None
     
     def get_frame_id(self):
-        if self._stepper == None:
+        if self._stepper is None:
             return None
         else:
             return self._stepper.frame_id
@@ -340,7 +340,7 @@ class EditorNotebook(ttk.Notebook):
         self._main_editor = None
     
     def is_in_execution_mode(self):
-        return self._main_editor != None
+        return self._main_editor is not None
             
     def handle_vm_message(self, msg):
         
@@ -363,12 +363,12 @@ class EditorNotebook(ttk.Notebook):
     def show_file(self, filename, text_range=None):
         #self.close_single_untitled_unmodified_editor()
         editor = self.get_editor(filename, True)
-        assert editor != None
+        assert editor is not None
         
         self.select(editor)
         editor.focus_set()
         
-        if text_range != None:
+        if text_range is not None:
             editor.select_range(text_range)
             
         return editor
@@ -383,7 +383,7 @@ class EditorNotebook(ttk.Notebook):
     
      
     def _generate_editor_title(self, filename, is_modified=False):
-        if filename == None:
+        if filename is None:
             result = "<untitled>"
         else:
             result = os.path.basename(filename)
@@ -418,7 +418,7 @@ class EditorNotebook(ttk.Notebook):
         filenames = []
         for child in self.winfo_children():
             filename = child.get_filename()
-            if filename != None:
+            if filename is not None:
                 filenames.append(filename)
         prefs["open_files"] = ";".join(filenames)
 
@@ -487,7 +487,7 @@ class ExpressionView(tk.Text):
         
         if msg.state in ("before_expression", "before_expression_again"):
             # (re)load stuff
-            if self._main_range == None or msg.focus.not_smaller_eq_in(self._main_range):
+            if self._main_range is None or msg.focus.not_smaller_eq_in(self._main_range):
                 self._load_expression(msg.filename, msg.focus)
                 self._update_position(msg.focus)
                 self._update_size()
@@ -530,7 +530,7 @@ class ExpressionView(tk.Text):
                 "TODO: make it red"
                 
         elif (msg.state == "before_statement_again"
-              and self._main_range != None # TODO: shouldn't need this 
+              and self._main_range is not None # TODO: shouldn't need this 
               and self._main_range.is_smaller_eq_in(msg.focus)):
             # we're at final stage of executing parent statement 
             # (eg. assignment after the LHS has been evaluated)
@@ -567,7 +567,7 @@ class ExpressionView(tk.Text):
         whole_source, _ = misc_utils.read_python_file(filename)
         root = ast_utils.parse_source(whole_source, filename)
         self._main_range = text_range
-        assert self._main_range != None
+        assert self._main_range is not None
         main_node = ast_utils.find_expression(root, text_range)
         
         source = ast_utils.extract_text_range(whole_source, text_range)

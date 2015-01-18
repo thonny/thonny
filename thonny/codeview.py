@@ -608,10 +608,10 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def set_coloring(self, value):
         if value:
-            if self.colorer == None:
+            if self.colorer is None:
                 self.colorer = SyntaxColorer(self.text)
         else:
-            if self.colorer != None:
+            if self.colorer is not None:
                 self.colorer.removecolors()
                 self.colorer = None
     
@@ -641,7 +641,7 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def handle_focus_message(self, text_range, msg=None):
         
-        if text_range == None:
+        if text_range is None:
             self.clear_tags(['before', 'after', 'exception'])
             
         elif "statement" in msg.state or "suite" in msg.state:
@@ -890,7 +890,7 @@ class CodeView(ttk.Frame, TextWrapper):
     
     def update_level_boxes(self, first_line=1, last_line=None):
         return
-        if last_line == None:
+        if last_line is None:
             last_line = int(self.text.index(tk.END).split('.')[0])
             
         for i in range(6):
@@ -922,7 +922,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 
                 box = self.text.bbox(str(lineno) + "." + str(level*4))
                 print(box, str(lineno) + "." + str(level*4))
-                if box != None:
+                if box is not None:
                     x, y, _, _ = box
                     hor_canvas = tk.Canvas(self.text, width=100, height=1, bd=0,
                                        takefocus=False, highlightthickness=0)

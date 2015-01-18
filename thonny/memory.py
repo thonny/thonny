@@ -245,7 +245,7 @@ class ObjectInspector(ScrollableFrame):
     def _show_object_by_id(self, object_id, via_navigation=False):
         
         if self.winfo_ismapped() and self.object_id != object_id:
-            if not via_navigation and self.object_id != None:
+            if not via_navigation and self.object_id is not None:
                 if self.object_id in self.back_links:
                     self.back_links.remove(self.object_id)
                 self.back_links.append(self.object_id)
@@ -266,7 +266,7 @@ class ObjectInspector(ScrollableFrame):
                     self.set_object_info(msg.object_info)
             elif (isinstance(msg, ActionResponse)
                   and not hasattr(msg, "error") 
-                  and self.object_id != None):
+                  and self.object_id is not None):
                 self.request_object_info()
                 
                 
@@ -277,7 +277,7 @@ class ObjectInspector(ScrollableFrame):
                     
     def set_object_info(self, object_info):
         self.object_info = object_info
-        if object_info == None:
+        if object_info is None:
             update_entry_text(self.repr_entry, "")
             update_entry_text(self.type_entry, "")
             self.grid_frame.grid_remove()
@@ -312,13 +312,13 @@ class ObjectInspector(ScrollableFrame):
                 break
         
         if type_specific_inspector != self.current_type_specific_inspector:
-            if self.current_type_specific_inspector != None:
+            if self.current_type_specific_inspector is not None:
                 self.current_type_specific_inspector.grid_remove() # TODO: or forget?
                 self.current_type_specific_label.destroy()
                 self.current_type_specific_inspector = None
                 self.current_type_specific_label = None
                 
-            if type_specific_inspector != None:
+            if type_specific_inspector is not None:
                 self.current_type_specific_label = self._add_block_label (3, "")
                 
                 type_specific_inspector.grid(row=4, 
@@ -329,12 +329,12 @@ class ObjectInspector(ScrollableFrame):
                 
             self.current_type_specific_inspector = type_specific_inspector
         
-        if self.current_type_specific_inspector != None:
+        if self.current_type_specific_inspector is not None:
             self.current_type_specific_inspector.set_object_info(object_info,
                                                              self.current_type_specific_label)
     
     def goto_type(self, event):
-        if self.object_info != None:
+        if self.object_info is not None:
             generate_event(self, "<<ObjectSelect>>", self.object_info["type_id"])
     
     
@@ -346,7 +346,7 @@ class ObjectInspector(ScrollableFrame):
             
     def update_memory_model(self):
         self.attributes_frame.update_memory_model()
-        if self.current_type_specific_inspector != None:
+        if self.current_type_specific_inspector is not None:
             self.current_type_specific_inspector.update_memory_model()
 
 class TypeSpecificInspector:

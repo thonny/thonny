@@ -337,7 +337,7 @@ class Thonny(tk.Tk):
                         variable=item.variable,
                         command=lambda cmd=item: cmd.execute())
                     
-                    if (item.accelerator != None and not item.system_bound):
+                    if (item.accelerator is not None and not item.system_bound):
                         # create event sequence out of accelerator 
                         # tk wants Control, not Ctrl
                         sequence = item.accelerator.replace("Ctrl", "Control")
@@ -473,7 +473,7 @@ class Thonny(tk.Tk):
         if not isinstance(msg, DebuggerResponse):
             return False
         
-        if cmd == None:
+        if cmd is None:
             return False
         
         if msg.state not in ("before_statement", "before_expression", "after_expression"):
@@ -496,7 +496,7 @@ class Thonny(tk.Tk):
     
     def cmd_run_current_script_enabled(self):
         return (self._vm.get_state() == "toplevel"
-                and self.editor_book.get_current_editor() != None)
+                and self.editor_book.get_current_editor() is not None)
     
     def cmd_run_current_script(self):
         self._execute_current("Run")
@@ -564,7 +564,7 @@ class Thonny(tk.Tk):
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(filename, next_cwd)
         cmd_line += "%" + cmd_name + " " + quote_path_for_shell(rel_filename) + "\n"
-        if text_range != None:
+        if text_range is not None:
             "TODO: append range indicators" 
         
         # submit to shell (shell will execute it)

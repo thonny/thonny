@@ -255,7 +255,7 @@ class _KeyboardZoomable:
             self.held_keys.remove(norm_keysym)
         
         # don't clear if zoom-in has already occured
-        if norm_keysym == "Control" and self.current_zoom == None:
+        if norm_keysym == "Control" and self.current_zoom is None:
             self.clear_preview()
     
     def zoom_in(self):
@@ -649,7 +649,7 @@ class Command:
         self._target_or_finder = target_or_finder
         self.system_bound = system_bound
         self.source = source
-        if variable == None and variable_name != None:
+        if variable is None and variable_name is not None:
             self.variable = config.prefs_vars[variable_name]
     
     def _find_target(self):
@@ -675,9 +675,9 @@ class Command:
             target = self._find_target()
             method_name = "cmd_" + self.cmd_id
             method = getattr(target, method_name)
-            if self.source != None:
+            if self.source is not None:
                 source = self.source
-            elif event != None:
+            elif event is not None:
                 source = "shortcut"
             else:
                 source = "menu"
@@ -693,7 +693,7 @@ class Command:
     def is_enabled(self):
         target = self._find_target()
         
-        if target == None:
+        if target is None:
             return False
         else:
             method_name = "cmd_" + self.cmd_id + "_enabled"
@@ -800,7 +800,7 @@ class ScrollableFrame(tk.Frame):
 def generate_event(widget, descriptor, data=None):
     global _next_event_data_serial
     
-    if data != None:
+    if data is not None:
         data_serial = _next_event_data_serial
         _next_event_data_serial += 1 
         _event_data[data_serial] = data

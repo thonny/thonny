@@ -31,7 +31,7 @@ class AstFrame(ui_utils.TreeFrame):
         self.tree['show'] = ('headings', 'tree')
     
     def locate_code(self, event):
-        if self.current_code_view == None:
+        if self.current_code_view is None:
             return
         
         iid = self.tree.focus()
