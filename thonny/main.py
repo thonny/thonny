@@ -108,9 +108,6 @@ class Thonny(tk.Tk):
         # KeyRelease may also trigger a debugger command
         # self.bind_all("<KeyRelease>", self._check_issue_goto_before_or_after, "+") # TODO: 
         
-        # start saving settings periodically
-        self._store_prefs(True)
-        
         # start listening to backend process
         self._poll_vm_messages()
         self._advance_background_tk_mainloop()
@@ -814,9 +811,9 @@ class Thonny(tk.Tk):
             return
         
         try:
-            self._store_prefs(False)
-            ui_utils.delete_images()
+            self._save_preferences()
             self.user_logger.save()
+            ui_utils.delete_images()
         except:
             tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
                                 traceback.format_exc())
@@ -824,7 +821,7 @@ class Thonny(tk.Tk):
         self.destroy()
         
         
-    def _store_prefs(self, periodically=False):
+    def _save_preferences(self):
         self.update_idletasks()
         
         # update layout prefs
@@ -853,12 +850,6 @@ class Thonny(tk.Tk):
             prefs["layout.browser_width"] = self.browse_book.winfo_width()
             
         prefs.save()
-        
-        if periodically:
-            # it's really annoying when I reopen program after crash and
-            # discover that in addition to reopening my work, I need to reconfigure settings
-            # so let's save the layout and other conf periodically 
-            self.after(1000 * 60, lambda: self._store_prefs(True))
     
     
     def new_user_log_file(self):
