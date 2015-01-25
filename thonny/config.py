@@ -45,7 +45,10 @@ defaults = {
         "center_width"    : 650,
         "memory_width"    : 200,
         "shell_height"    : 200,
-    }    
+    },
+    "experimental" : {
+        "find_feature_enabled"      : False,
+    },    
 }
 
 

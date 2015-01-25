@@ -284,6 +284,10 @@ class Thonny(tk.Tk):
                 Command('help',             'Thonny help',        None, self), 
             ]),
         ]
+
+        if prefs["experimental.find_feature_enabled"]:
+            self._menus[1][2].append("---");
+            self._menus[1][2].append(Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget));
         
         # TODO:
         """

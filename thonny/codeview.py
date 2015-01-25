@@ -14,6 +14,7 @@ from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
 from thonny.config import prefs
+from thonny.find import FindDialog
 
 
 def classifyws(s, tabwidth):
@@ -876,6 +877,10 @@ class CodeView(ttk.Frame, TextWrapper):
     def cmd_select_all(self, event=None):
         self.select_all();
         return "break"
+
+    def cmd_find(self, event=None):
+        FindDialog(self)
+        return "break"    
     
     
     def prepare_level_boxes(self):
