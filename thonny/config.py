@@ -48,6 +48,7 @@ defaults = {
     },
     "experimental" : {
         "find_feature_enabled"      : False,
+        "autocomplete_feature_enabled"      : False,
     },    
 }
 

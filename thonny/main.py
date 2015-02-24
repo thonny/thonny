@@ -217,8 +217,7 @@ class Thonny(tk.Tk):
                 Command('paste',        'Paste',        'Ctrl+V', self._find_current_edit_widget, system_bound=True),
                 "---", 
                 Command('select_all',   'Select all',   'Ctrl+A', self._find_current_edit_widget),
-#                 "---",
-#                 Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget),
+#                 "---",        
 #                 Command('find_next',    'Find next',    'F3',     self._find_current_edit_widget),
                  
             ]),
@@ -288,6 +287,10 @@ class Thonny(tk.Tk):
         if prefs["experimental.find_feature_enabled"]:
             self._menus[1][2].append("---");
             self._menus[1][2].append(Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget));
+
+        if prefs["experimental.autocomplete_feature_enabled"]:
+            self._menus[1][2].append("---");
+            self._menus[1][2].append(Command('autocomplete',         'Autocomplete',         'Ctrl+space', self._find_current_edit_widget));            
         
         # TODO:
         """
