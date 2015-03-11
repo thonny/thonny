@@ -42,6 +42,7 @@ from thonny.ui_utils import Command, notebook_contains
 from thonny import user_logging
 from thonny import misc_utils
 import subprocess
+import thonny.outline
 
 
 
@@ -164,6 +165,11 @@ class Thonny(tk.Tk):
         self.globals_frame = GlobalsFrame(self.globals_book)
         self.globals_book.add(self.globals_frame, text=_("Variables"))
         self.right_pw.add(self.globals_book, minsize=50)
+
+                 
+        self.outline_book = ui_utils.PanelBook(self.right_pw)
+        self.outline_frame = thonny.outline.OutlineFrame(self.outline_book, self.editor_book)
+        self.outline_book.add(self.outline_frame, text=_("Outline"))
         
         
         self.heap_book = ui_utils.PanelBook(self.right_pw)
@@ -284,6 +290,7 @@ class Thonny(tk.Tk):
             ]),
         ]
 
+        #TODO - implement a better way to conditionally add the below items
         if prefs["experimental.find_feature_enabled"]:
             self._menus[1][2].append("---");
             self._menus[1][2].append(Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget));
@@ -291,7 +298,12 @@ class Thonny(tk.Tk):
         if prefs["experimental.autocomplete_feature_enabled"]:
             self._menus[1][2].append("---");
             self._menus[1][2].append(Command('autocomplete',         'Autocomplete',         'Ctrl+space', self._find_current_edit_widget));            
-        
+
+        if prefs["experimental.outline_feature_enabled"]:
+            self._menus[2][2].append("---");
+            self._menus[2][2].append(Command('update_outline_visibility',         'Outline',         'Alt+O', self));            
+
+                
         # TODO:
         """
         if misc_utils.running_on_mac_os():
@@ -613,7 +625,21 @@ class Thonny(tk.Tk):
             self.right_pw.add(self.info_book, minsize=50)
         else:
             self.right_pw.remove(self.info_book)
+
+
+    def cmd_update_outline_visibility(self): 
+        filename = self._find_current_edit_widget().master._filename
+        if filename == None:
+            return
             
+        if not self.outline_frame.outline_shown:
+            self.outline_frame.outline_shown = True
+            self.outline_frame.load_content_from_path(filename)
+
+            self.right_pw.add(self.outline_book, minsize=50)
+        else:
+            self.outline_frame.outline_shown = False
+            self.right_pw.remove(self.outline_book)
     
     def _check_update_window_width(self, delta):
         if not ui_utils.get_zoomed(self):

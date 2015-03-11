@@ -41,6 +41,7 @@ defaults = {
         "browser_visible" : False, 
         "memory_visible"  : False,
         "inspector_visible"  : False,
+        "outline_visible"  : False,
         "browser_width"   : 200,
         "center_width"    : 650,
         "memory_width"    : 200,
@@ -49,6 +50,7 @@ defaults = {
     "experimental" : {
         "find_feature_enabled"      : False,
         "autocomplete_feature_enabled"      : False,
+        "outline_feature_enabled"      : False,
     },    
 }
 

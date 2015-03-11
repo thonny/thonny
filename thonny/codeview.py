@@ -14,8 +14,7 @@ from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
 from thonny.config import prefs
-from thonny.find import FindDialog
-import thonny.autocomplete
+
 
 
 def classifyws(s, tabwidth):
@@ -880,10 +879,12 @@ class CodeView(ttk.Frame, TextWrapper):
         return "break"
 
     def cmd_find(self, event=None):
+        from thonny.find import FindDialog
         FindDialog(self)
         return "break"
 
     def cmd_autocomplete(self, event=None):
+        import thonny.autocomplete
         index = self.text.index('insert')
         delim = index.index('.')
         row = int(index[0:delim])
