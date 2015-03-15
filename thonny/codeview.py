@@ -127,7 +127,9 @@ class CodeView(ttk.Frame, TextWrapper):
         self.colorer = None
         self.set_coloring(True)
         self.set_up_paren_matching()
-        
+
+        self.modify_listeners = set() #subscribers that listen to text change events
+        self._resetting_modified_flag = False #used internally, indicates when modified flag reset is currently in progress
                         
         #self.prepare_level_boxes()
         
@@ -156,9 +158,29 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.bind("<Tab>", self.indent_or_dedent_event)
         self.text.bind("<Return>", self.newline_and_indent_event)
         self.text.bind("<BackSpace>", self.smart_backspace_event)
+        self.text.bind("<<Modified>>", self.on_text_modified)
         
         fixwordbreaks(tk._default_root)
+
+    #called when text change event is fired, notifies all listeners
+    def on_text_modified(self, event=None):
+        if self._resetting_modified_flag:
+            return
+
+        self._clear_modified_flag()
         
+        for listener in self.modify_listeners:
+            listener.notify_text_changed()
+
+    #used internally to clear the text modified flag
+    def _clear_modified_flag(self):
+        self._resetting_modified_flag = True
+
+        try:
+            self.tk.call(self.text._w, 'edit', 'modified', 0)
+
+        finally:
+            self._resetting_modified_flag = False        
     
     def del_word_left(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)

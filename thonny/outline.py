@@ -13,41 +13,24 @@
 ########
 
 
-
-
-
-
-
-
-
-
-
-
-
-import pyclbr
-import os
-from operator import itemgetter
-import sys
+import re
 import tkinter as tk
 from tkinter import ttk
 
-#TODO - go over imports, see which are needed
+#TODO - see if there's a way to remember the previously focused tree item
+#when the tree is rebuilt
+#an: remember the focus item's name and line number, in the case of
+#any change see if there's an item with the same name on the same line,
+#or an item on any adjacent lines with nearly the same name (?)
 
 #TODO - see if there's a way to select or somehow mark the line
 #that contains the item that's double-clicked on
-
-#TODO - find out if there's a way to display 2nd level nested classes/methods
-
-#TODO - automatic outline updating
-#TODO - if file isn't saved or can't be parsed display an error message instead
-
-#TODO - normalize method names, put _ in front of private ones
 
 class OutlineFrame(ttk.Frame):
     def __init__(self, master, editor_notebook):
         ttk.Frame.__init__(self, master)
         self.editor_notebook = editor_notebook #reference to the notebook containing editors
-        self.current_path = None #path of the currently opened file
+        self.active_codeview = None
 
         #init and place scrollbar
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
@@ -55,14 +38,8 @@ class OutlineFrame(ttk.Frame):
 
         #init and place tree
         self.tree = ttk.Treeview(self, yscrollcommand=self.vert_scrollbar.set)
-        #self.tree.grid(row=0, column=0, sticky=tk.NSEW)
+        self.tree.grid(row=0, column=0, sticky=tk.NSEW)
         self.vert_scrollbar['command'] = self.tree.yview
-
-
-        #init error label
-        #TODO - make wraplength dynamic, also listen to the resize event and reset the wraplength
-        self.error_label = ttk.Label(self, anchor=tk.CENTER, wraplength=200, text="Outline cannot be displayed until the current file is saved.")
-        self.error_label.grid(row=0, column=0, sticky=tk.NSEW)
 
         #set single-cell frame
         self.columnconfigure(0, weight=1)
@@ -79,13 +56,38 @@ class OutlineFrame(ttk.Frame):
         #marks whether the outline is currently shown
         self.outline_shown = False #TODO - think about removing this entirely
 
-    #sets the current path and parses the module structure from it
-    def load_content_from_path(self, path):
-        return False
-        self.current_path = path
-        modulename = os.path.splitext(os.path.basename(path))[0]
-        self.module_data = pyclbr.readmodule_ex(modulename, [path])
-        self.module_data = sorted([i[1] for i in self.module_data.items() if i[1].module == modulename], key=lambda x:x.lineno)
+    #handles the parsing and display of the module's contents in the frame
+    def parse_and_display_module(self, codeview):
+        self.active_codeview = codeview
+        self.active_codeview.modify_listeners.add(self)
+        self.editor_notebook.tab_change_listeners.add(self) #it's a set so subsequent adds do nothing, but we need to make sure we're listening
+        self._update_frame_contents()
+
+    #updates the tree content of the frame by clearing the tree and parsing the module data nodes data
+    def _update_frame_contents(self):
+        self._clear_tree()
+        module_contents = self.active_codeview.get_content()
+        nodes = []  #all nodes in format (parent, node_indent, node_children, name, type, linernumber)
+        root_node = (None, 0, []) #name, type and linenumber not needed for root
+        nodes.append(root_node)
+        active_node = root_node
+
+        lineno = 0
+        for line in module_contents.split('\n'):
+            lineno += 1
+            m = re.match('[ ]*[\w]{1}', line)
+            if m:
+                indent = len(m.group(0))
+                while indent <= active_node[1]:
+                    active_node = active_node[0]
+
+                t = re.match('[ ]*(?P<type>(def|class){1})[ ]+(?P<name>[\w]+)', line)
+                if t:
+                    current = (active_node, indent, [], t.group('name'), t.group('type'), lineno)
+                    active_node[2].append(current)
+                    active_node = current
+
+        self.module_data = nodes
         self._display_content() #and now let's display the data
 
     #displays the parsed content
@@ -93,26 +95,22 @@ class OutlineFrame(ttk.Frame):
         if not self.module_data or self.module_data == None:
             return
 
-        #go over each top-level item
-        for item in self.module_data:
-            if isinstance(item, pyclbr.Class):
-                itemtype = 'class'
-            else:
-                itemtype = 'def'
+        #go over each item in the root node, which will recursively do the same for child nodes
+        for item in self.module_data[0][2]:
+            self._add_item_to_tree('', item)
 
-            #create the text to be played for this item
-            item_text = item.name + ' (' + itemtype + ' @ ' + str(item.lineno) + ')'
-            #insert the item, set lineno as a 'hidden' value
-            current = self.tree.insert('', 'end', text=item_text, values = item.lineno)
-            #in the case of a class item, also go over the 2nd level methods,
-            #do similar stuff as for top-level items
-            if isinstance(item, pyclbr.Class):
-                    for method in sorted(item.methods.items(), key=lambda x:x[1]):
-                        item_text = method[0] + ' (def @ ' + str(method[1]) + ')'
-                        self.tree.insert(current, 'end', text=item_text, values = method[1])
+    #adds a single item to the tree, recursively calls itself to add any child nodes
+    def _add_item_to_tree(self, parent, item):
+        #create the text to be played for this item
+        item_text = item[3] + ' (' + item[4] + ' @ ' + str(item[5]) + ')'
         
+        #insert the item, set lineno as a 'hidden' value
+        current = self.tree.insert(parent, 'end', text=item_text, values = item[5])
 
-    #TODO - reconsider this        
+        for child in item[2]:
+            self._add_item_to_tree(current, child)
+        
+    #clears the tree by deleting all items      
     def _clear_tree(self):
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
@@ -121,10 +119,26 @@ class OutlineFrame(ttk.Frame):
     def on_select(self, event):
         pass
 
-    #TODO - change this if you decide to update outline on switching tabs
+    #called when a double-click is performed on any items
     def on_double_click(self, event):
-        editor = self.editor_notebook.get_editor(self.current_path)
-        self.editor_notebook.select(editor)
-        lineno = self.tree.item(self.tree.focus())['values'][0]
-        index = editor._code_view.text.index(str(lineno) + '.0')
-        editor._code_view.text.see(index)
+        try:
+            lineno = self.tree.item(self.tree.focus())['values'][0]
+            index = self.active_codeview.text.index(str(lineno) + '.0')
+            self.active_codeview.text.see(index) #make sure that the double-clicked item is visible
+        except Exception:
+            return 
+
+    #called by codeview publisher to notify of changes
+    def notify_text_changed(self):
+        self._update_frame_contents()
+
+    #called by editornotebook publisher to notify of changed tab
+    def notify_tab_changed(self):
+        self.active_codeview.modify_listeners.remove(self)
+        self.parse_and_display_module(self.editor_notebook.get_current_editor()._code_view)
+
+    #called by the main window to notify that the outline frame is about to get hidden
+    #all publishers will be unsubscribed from to prevent leaks
+    def prepare_for_removal(self):
+        self.active_codeview.modify_listeners.remove(self)
+        self.editor_notebook.tab_change_listeners.remove(self)

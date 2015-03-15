@@ -259,6 +259,7 @@ class EditorNotebook(ttk.Notebook):
         self.bind_all(EDITOR_STATE_CHANGE, self._on_editor_state_changed)
         
         self._main_editor = None # references the editor of main file during execution
+        self.tab_change_listeners = set() #subscribers that listen to active tab changes
         
         global editor_book
         editor_book = self
@@ -269,7 +270,7 @@ class EditorNotebook(ttk.Notebook):
                 self._open_file(filename)
         """
         
-        
+
     def load_startup_files(self):
         
         filenames = sys.argv[1:]
@@ -393,9 +394,10 @@ class EditorNotebook(ttk.Notebook):
         
         return result
     
-    
+    #called when active tab change event is fired
     def _on_tab_changed(self, event):
-        "TODO:"
+        for listener in self.tab_change_listeners:
+            listener.notify_tab_changed()        
         
     def _open_file(self, filename):
         editor = Editor(self, filename)

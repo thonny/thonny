@@ -628,16 +628,12 @@ class Thonny(tk.Tk):
 
 
     def cmd_update_outline_visibility(self): 
-        filename = self._find_current_edit_widget().master._filename
-        if filename == None:
-            return
-            
         if not self.outline_frame.outline_shown:
             self.outline_frame.outline_shown = True
-            self.outline_frame.load_content_from_path(filename)
-
+            self.outline_frame.parse_and_display_module(self._find_current_edit_widget())
             self.right_pw.add(self.outline_book, minsize=50)
         else:
+            self.outline_frame.prepare_for_removal()
             self.outline_frame.outline_shown = False
             self.right_pw.remove(self.outline_book)
     
