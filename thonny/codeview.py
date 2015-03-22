@@ -35,7 +35,6 @@ def index2line(index):
     # copied from idlelib.EditorWindow (Python 3.4.2)
     return int(float(index))
 
-
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
 # scrolling code copied from tkinter.scrolledtext
@@ -148,6 +147,7 @@ class CodeView(ttk.Frame, TextWrapper):
         
         self.num_context_lines = 50, 500, 5000000 # See idlelib.EditorWindow
         self.context_use_ps1 = False
+        self.modified_since_last_save = False
         
         # TODO: Check Mac bindings
         self.text.bind("<Control-BackSpace>", self.del_word_left)
@@ -161,16 +161,21 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.bind("<<Modified>>", self.on_text_modified)
         
         fixwordbreaks(tk._default_root)
-
+		
     #called when text change event is fired, notifies all listeners
     def on_text_modified(self, event=None):
         if self._resetting_modified_flag:
             return
 
+        self.text.edit_modified(True)
+        self.modified_since_last_save = True
+
         self._clear_modified_flag()
         
         for listener in self.modify_listeners:
             listener.notify_text_changed()
+
+            
 
     #used internally to clear the text modified flag
     def _clear_modified_flag(self):

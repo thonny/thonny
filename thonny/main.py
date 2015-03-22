@@ -23,8 +23,10 @@ from distutils.version import StrictVersion
 import logging
 import time
 import gettext
+import re
 import tkinter as tk
 from tkinter import ttk
+import tkinter.messagebox as tkMessageBox
 
 from thonny import ui_utils
 from thonny import stack
@@ -41,8 +43,10 @@ from thonny.common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
 from thonny.ui_utils import Command, notebook_contains
 from thonny import user_logging
 from thonny import misc_utils
+import thonny.refactor
 import subprocess
 import thonny.outline
+
 
 
 
@@ -301,7 +305,11 @@ class Thonny(tk.Tk):
 
         if prefs["experimental.outline_feature_enabled"]:
             self._menus[2][2].append("---");
-            self._menus[2][2].append(Command('update_outline_visibility',         'Outline',         'Alt+O', self));            
+            self._menus[2][2].append(Command('update_outline_visibility',         'Outline',         'Alt+O', self));
+
+        if prefs["experimental.refactor_rename_feature_enabled"]:
+            self._menus[1][2].append("---");
+            self._menus[1][2].append(Command('refactor_rename',         'Rename identifier',         None, self)); 
 
                 
         # TODO:
@@ -626,6 +634,8 @@ class Thonny(tk.Tk):
         else:
             self.right_pw.remove(self.info_book)
 
+    def cmd_update_outline_visibility_enabled(self):
+        return self.editor_book.get_current_editor() is not None
 
     def cmd_update_outline_visibility(self): 
         if not self.outline_frame.outline_shown:
@@ -636,7 +646,137 @@ class Thonny(tk.Tk):
             self.outline_frame.prepare_for_removal()
             self.outline_frame.outline_shown = False
             self.right_pw.remove(self.outline_book)
-    
+
+    def cmd_refactor_rename_enabled(self):
+	    return self.editor_book.get_current_editor() is not None
+
+    def cmd_refactor_rename(self):
+
+        if not self.editor_book.get_current_editor(): #sanity check
+            errorMessage = tkMessageBox.showerror(
+                           title="Rename failed",
+                           message="Rename operation failed (no active editor tabs?).", #TODO - more informative text needed
+                           master=self)
+            return		
+
+        #create a list of active but unsaved/modified editors)
+        unsaved_editors = [x for x in self.editor_book.winfo_children() if x.cmd_save_file_enabled()]
+		
+        if len(unsaved_editors) != 0:
+            #confirm with the user that all open editors need to be saved first
+            confirm = tkMessageBox.askyesno(
+                      title="Save Files Before Rename",
+                      message="All modified files need to be saved before refactoring. Do you want to continue?",
+                      default=tkMessageBox.YES,
+                      master=self)
+
+            if not confirm:
+                return #if user doesn't want it, return
+
+            for editor in unsaved_editors:                     
+                if not editor.get_filename():
+                    self.editor_book.select(editor) #in the case of editors with no filename, show it, so user know which one they're saving
+                editor.cmd_save_file()
+                if editor.cmd_save_file_enabled(): #just a sanity check - if after saving a file still needs saving, something is wrong
+                    errorMessage = tkMessageBox.showerror(
+                                   title="Rename failed",
+                                   message="Rename operation failed (saving file failed).", #TODO - more informative text needed
+                                   master=self)
+                    return
+
+        filename = self.editor_book.get_current_editor().get_filename()
+
+        if filename == None: #another sanity check - the current editor should have an associated filename by this point 
+            errorMessage = tkMessageBox.showerror(
+                           title="Rename failed",
+                           message="Rename operation failed (no filename associated with current module).", #TODO - more informative text needed
+                           master=self)
+            return			
+
+        identifier = re.compile(r"^[^\d\W]\w*\Z", re.UNICODE) #regex to compare valid python identifiers against
+		
+        while True: #ask for new variable name until a valid one is entered
+            renameWindow = thonny.refactor.RenameWindow(self)
+            newname = renameWindow.refactor_new_variable_name
+            if newname == None:  
+                return #user canceled, return
+			
+            if re.match(identifier, newname):
+                break #valid identifier entered, continue
+
+            errorMessage = tkMessageBox.showerror(
+                           title="Incorrect identifier",
+                           message="Incorrect Python identifier, please re-enter.",
+                           master=self)				
+
+        try: 
+            #calculate the offset for rope
+            offset = thonny.refactor.calculate_offset(self.editor_book.get_current_editor()._code_view.text)
+            #get the project handle and list of changes
+            project, changes = thonny.refactor.get_list_of_rename_changes(filename, newname, offset)
+            #if len(changes.changes == 0): raise Exception
+
+        except Exception:
+            try: #rope needs the cursor to be AFTER the first character of the variable being refactored
+                 #so the reason for failure might be that the user had the cursor before the variable name
+                offset = offset + 1
+                project, changes = thonny.refactor.get_list_of_rename_changes(filename, newname, offset)
+                #if len(changes.changes == 0): raise Exception
+
+            except Exception: #user is trying the operation on a non-identifier, let's return
+                errorMessage = tkMessageBox.showerror(
+                               title="Rename failed",
+                               message="Rename operation failed (not a valid Python identifier selected?).", #TODO - more informative text needed
+                               master=self)               
+                return
+		
+        #show the preview window to user
+        messageText = 'Confirm the changes. The following files will be modified:\n'
+        for change in changes.changes:
+            messageText += '\n ' + change.resource._path
+
+        messageText += '\n\n NB! This action cannot be undone.'
+
+        confirm = tkMessageBox.askyesno(
+                  title="Confirm changes",
+                  message=messageText,
+                  default=tkMessageBox.YES,
+                  master=self)
+        
+        #confirm with user to finalize the changes
+        if not confirm:
+            thonny.refactor.cancel_changes(project)
+            return
+
+        try:
+            thonny.refactor.perform_changes(project, changes)			
+        except Exception:
+                errorMessage = tkMessageBox.showerror(
+                               title="Rename failed",
+                               message="Rename operation failed (Rope error).", #TODO - more informative text needed
+                               master=self)     
+                thonny.refactor.cancel_changes(project)							   
+                return            
+	   
+        #everything went fine, let's load all the active tabs again and set their content
+        for editor in self.editor_book.winfo_children():
+            try: 
+                filename = editor.get_filename()
+                source, self.file_encoding = misc_utils.read_python_file(filename)
+                editor._code_view.set_content(source)
+                editor._code_view.modified_since_last_save = False
+                self.editor_book.tab(editor, text=self.editor_book._generate_editor_title(filename))
+            except Exception:
+                try: #it is possible that a file (module) itself was renamed - Rope allows it. so let's see if a file exists with the new name. 
+                    filename = filename.replace(os.path.split(filename)[1], newname + '.py')
+                    source, self.file_encoding = misc_utils.read_python_file(filename)
+                    editor._code_view.set_content(source)
+                    editor._code_view.modified_since_last_save = False
+                    self.editor_book.tab(editor, text=self.editor_book._generate_editor_title(filename))
+                except Exception: #something went wrong with reloading the file, let's close this tab to avoid consistency problems
+                    self.editor_book.forget(editor)
+                    editor.destroy()					
+
     def _check_update_window_width(self, delta):
         if not ui_utils.get_zoomed(self):
             self.update_idletasks()

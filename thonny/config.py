@@ -51,6 +51,7 @@ defaults = {
         "find_feature_enabled"      : False,
         "autocomplete_feature_enabled"      : False,
         "outline_feature_enabled"      : False,
+        "refactor_rename_feature_enabled"   : False,
     },    
 }
 

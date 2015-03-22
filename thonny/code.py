@@ -138,8 +138,7 @@ class Editor(ttk.Frame):
             self._load_file(filename)
             self._code_view.text.edit_modified(False)
             
-        self._code_view.text.bind("<<Modified>>", lambda _: self.event_generate(EDITOR_STATE_CHANGE), "+")
-            
+        self._code_view.text.bind("<<Modified>>", lambda _: self.event_generate(EDITOR_STATE_CHANGE), "+")            
 
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
@@ -150,16 +149,17 @@ class Editor(ttk.Frame):
     def _load_file(self, filename):
         source, self.file_encoding = misc_utils.read_python_file(filename) # TODO: support also text files
         self._filename = filename
+        self._code_view.modified_since_last_save = False
         log_user_event(LoadEvent(self._code_view, filename))
         self._code_view.set_content(source)
         self._code_view.focus_set()
         
     def is_modified(self):
-        return self._code_view.text.edit_modified()
+        return self._code_view.modified_since_last_save
     
     
     def cmd_save_file_enabled(self):
-        return self.is_modified() or not self.get_filename()
+         return self.is_modified() or not self.get_filename()
     
     def cmd_save_file(self):
         if self._filename is not None:
@@ -182,6 +182,8 @@ class Editor(ttk.Frame):
         f = open(filename, mode="wb", )
         f.write(content.encode(encoding))
         f.close()
+		
+        self._code_view.modified_since_last_save = False
     
         self._filename = filename
         

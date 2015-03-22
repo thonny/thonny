@@ -51,7 +51,7 @@ class OutlineFrame(ttk.Frame):
 
         #configure the only tree column
         self.tree.column('#0', anchor=tk.W, stretch=True)
-        self.tree.heading('#0', text='Item (type / line)', anchor=tk.W)
+        self.tree.heading('#0', text='Item (type @ line)', anchor=tk.W)
 
         #marks whether the outline is currently shown
         self.outline_shown = False #TODO - think about removing this entirely
@@ -135,7 +135,8 @@ class OutlineFrame(ttk.Frame):
     #called by editornotebook publisher to notify of changed tab
     def notify_tab_changed(self):
         self.active_codeview.modify_listeners.remove(self)
-        self.parse_and_display_module(self.editor_notebook.get_current_editor()._code_view)
+        if self.editor_notebook.get_current_editor():
+            self.parse_and_display_module(self.editor_notebook.get_current_editor()._code_view)
 
     #called by the main window to notify that the outline frame is about to get hidden
     #all publishers will be unsubscribed from to prevent leaks
