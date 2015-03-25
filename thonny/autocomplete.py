@@ -17,7 +17,7 @@ import jedi
 #if 2+ suggestions are found, creates a vertical list of suggestions where the user can choose
 def autocomplete(codeview, row, column):
     try: #everything in a try block - if something goes wrong, we don't want the program to crash
-        script = jedi.Script(codeview.get_content(), row, column, '')
+        script = jedi.Script(codeview.get_content(), row, column, codeview.master._filename)
         completions = script.completions() #get the list of suggestions
 
         if len(completions) == 0:
