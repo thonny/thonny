@@ -639,8 +639,8 @@ class Thonny(tk.Tk):
 
     def cmd_update_outline_visibility(self): 
         if not self.outline_frame.outline_shown:
-            self.outline_frame.outline_shown = True
-            self.outline_frame.parse_and_display_module(self._find_current_edit_widget())
+            self.outline_frame.outline_shown = True 
+            self.outline_frame.parse_and_display_module(self.editor_book.get_current_editor()._code_view)
             self.right_pw.add(self.outline_book, minsize=50)
         else:
             self.outline_frame.prepare_for_removal()
@@ -651,8 +651,7 @@ class Thonny(tk.Tk):
 	    return self.editor_book.get_current_editor() is not None
 
     def cmd_refactor_rename(self):
-
-        if not self.editor_book.get_current_editor(): #sanity check
+        if not self.editor_book.get_current_editor():
             errorMessage = tkMessageBox.showerror(
                            title="Rename failed",
                            message="Rename operation failed (no active editor tabs?).", #TODO - more informative text needed
@@ -730,6 +729,14 @@ class Thonny(tk.Tk):
                                master=self)               
                 return
 		
+        #sanity check
+        if len(changes.changes) == 0:
+            errorMessage = tkMessageBox.showerror(
+                               title="Rename failed",
+                               message="Rename operation failed - no identifiers affected by change.", #TODO - more informative text needed
+                               master=self)               
+            return
+			
         #show the preview window to user
         messageText = 'Confirm the changes. The following files will be modified:\n'
         for change in changes.changes:

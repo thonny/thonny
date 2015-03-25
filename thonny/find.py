@@ -81,31 +81,31 @@ class FindDialog(tk.Toplevel):
 
         #Case checkbox
         self.case_var = tk.IntVar()
-        self.case_checkbutton = tk.Checkbutton(self,text="Case sensitive",variable=self.case_var);  #TODO - text to resources
+        self.case_checkbutton = ttk.Checkbutton(self,text="Case sensitive",variable=self.case_var);  #TODO - text to resources
         self.case_checkbutton.grid(column=0, row=3)
 
         #Direction radiobuttons
         self.direction_var = tk.IntVar()
-        self.up_radiobutton = tk.Radiobutton(self, text="Up", variable=self.direction_var, value=1)
+        self.up_radiobutton = ttk.Radiobutton(self, text="Up", variable=self.direction_var, value=1)
         self.up_radiobutton.grid(column=1, row=3)
-        self.down_radiobutton = tk.Radiobutton(self, text="Down", variable=self.direction_var, value=2)
+        self.down_radiobutton = ttk.Radiobutton(self, text="Down", variable=self.direction_var, value=2)
         self.down_radiobutton.grid(column=2, row=3)
-        self.down_radiobutton.select()
+        self.down_radiobutton.invoke()
 
         #Find button - goes to the next occurrence
-        self.find_button = tk.Button(self, text="Find", command=self._perform_find) #TODO - text to resources
+        self.find_button = ttk.Button(self, text="Find", command=self._perform_find) #TODO - text to resources
         self.find_button.grid(column=3, row=0, sticky=tk.W + tk.E);
 
         #Replace button - replaces the current occurrence, if it exists
-        self.replace_button = tk.Button(self, text="Replace", command=self._perform_replace) #TODO - text to resources
+        self.replace_button = ttk.Button(self, text="Replace", command=self._perform_replace) #TODO - text to resources
         self.replace_button.grid(column=3, row=1, sticky=tk.W + tk.E);
 
         #Replace + find button - replaces the current occurence and goes to next
-        self.replace_and_find_button = tk.Button(self, text="Replace+Find", command=self._perform_replace_and_find) #TODO - text to resources
+        self.replace_and_find_button = ttk.Button(self, text="Replace+Find", command=self._perform_replace_and_find) #TODO - text to resources
         self.replace_and_find_button.grid(column=3, row=2, sticky=tk.W + tk.E);
  
         #Replace all button - replaces all occurrences
-        self.replace_all_button = tk.Button(self, text="Replace all", command=self._perform_replace_all) #TODO - text to resources
+        self.replace_all_button = ttk.Button(self, text="Replace all", command=self._perform_replace_all) #TODO - text to resources
         self.replace_all_button.grid(column=3, row=3, sticky=tk.W + tk.E);        
 
         #create bindings

@@ -55,13 +55,13 @@ class RenameWindow(tk.Toplevel):
         self.parent = parent
         self.result = None
     
-        tk.Label(self, text="New name:").grid(row=0, columnspan=2)
-        self.new_name_entry = tk.Entry(self)
+        ttk.Label(self, text="New name:").grid(row=0, columnspan=2)
+        self.new_name_entry = ttk.Entry(self)
         self.new_name_entry.grid(row=1, columnspan=2)
         self.new_name_entry.focus_force();
 
-        self.ok_button = tk.Button(self, text="OK", command=self.ok, default=tk.ACTIVE)
-        self.cancel_button = tk.Button(self, text="Cancel", command=self.cancel)
+        self.ok_button = ttk.Button(self, text="OK", command=self.ok, default=tk.ACTIVE)
+        self.cancel_button = ttk.Button(self, text="Cancel", command=self.cancel)
         self.ok_button.grid(row=2, column=0, sticky=tk.W + tk.E, padx=5)
         self.cancel_button.grid(row=2, column=1, sticky=tk.W + tk.E, padx=5)
 
@@ -73,6 +73,7 @@ class RenameWindow(tk.Toplevel):
         self.protocol("WM_DELETE_WINDOW", self.cancel)
         self.geometry("+%d+%d" % (parent.winfo_rootx()+50,
                                   parent.winfo_rooty()+50))
+        self.resizable(width=False, height=False)
 
         self.wait_window(self)
     
