@@ -52,6 +52,7 @@ defaults = {
         "autocomplete_feature_enabled"      : False,
         "outline_feature_enabled"      : False,
         "refactor_rename_feature_enabled"   : False,
+        "comment_toggle_enabled"   : False,		
     },    
 }
 

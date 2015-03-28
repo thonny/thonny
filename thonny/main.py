@@ -311,6 +311,10 @@ class Thonny(tk.Tk):
             self._menus[1][2].append("---");
             self._menus[1][2].append(Command('refactor_rename',         'Rename identifier',         None, self)); 
 
+        if prefs["experimental.comment_toggle_enabled"]:
+            self._menus[1][2].append("---");
+            self._menus[1][2].append(Command('comment_in',         'Comment in',         'Ctrl+3', self._find_current_edit_widget)); 
+            self._menus[1][2].append(Command('comment_out',         'Comment out',         'Ctrl+4', self._find_current_edit_widget));
                 
         # TODO:
         """

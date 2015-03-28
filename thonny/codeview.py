@@ -918,6 +918,49 @@ class CodeView(ttk.Frame, TextWrapper):
         column = int(index[delim+1:])
         thonny.autocomplete.autocomplete(self, row, column)
         return 'break'
+
+    #handles the 'comment in' command by adding ## in front of all selected lines if any lines are selected, 
+    #or just the current line otherwise
+    def cmd_comment_in(self, event=None):
+        insert_index = self.text.index('insert')
+        sel_first_index, sel_last_index = self.get_selection_indices()
+        selection_used = False
+        if sel_first_index != None and sel_first_index.strip() != '':
+            selection_used = True
+        
+        if selection_used:
+            lines = list(range(index2line(sel_first_index), index2line(sel_last_index) + 1))
+        else: #adds hashes to insert line only
+            lines = [index2line(insert_index)]
+
+        end_index = index2line(self.text.index('end'))
+        if end_index in lines:
+            lines.remove(end_index)
+        
+        for line in lines:
+            self.text.insert(str(line) + '.0', '##')
+
+    #handles the 'comment out' command by removing '##' or '#' from the selected lines or the current line, if present      
+    def cmd_comment_out(self, event=None):
+        insert_index = self.text.index('insert')
+        sel_first_index, sel_last_index = self.get_selection_indices()
+        selection_used = False
+        if sel_first_index != None and sel_first_index.strip() != '':
+            selection_used = True
+        
+        if selection_used:
+            lines = range(index2line(sel_first_index), index2line(sel_last_index) + 1)
+         
+        else:
+            lines = [index2line(insert_index)]
+        
+        for line_no in lines:
+            line_str = str(line_no) + '.'
+            line_text = self.text.get(line_str + "0", str(line_no+1) + ".0")
+            if len(line_text) == 0: continue #empty line            
+            if line_text[0] != '#':
+                continue
+            self.text.delete(line_str + '0', line_str + '2' if len(line_text) > 1 and line_text[1] == '#' else line_str + '1')
     
     def prepare_level_boxes(self):
         return
