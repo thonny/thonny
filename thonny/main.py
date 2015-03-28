@@ -660,7 +660,7 @@ class Thonny(tk.Tk):
                            title="Rename failed",
                            message="Rename operation failed (no active editor tabs?).", #TODO - more informative text needed
                            master=self)
-            return		
+            return
 
         #create a list of active but unsaved/modified editors)
         unsaved_editors = [x for x in self.editor_book.winfo_children() if x.cmd_save_file_enabled()]
@@ -726,13 +726,16 @@ class Thonny(tk.Tk):
                 project, changes = thonny.refactor.get_list_of_rename_changes(filename, newname, offset)
                 #if len(changes.changes == 0): raise Exception
 
-            except Exception: #user is trying the operation on a non-identifier, let's return
+            except Exception: #couple of different reasons why this could happen, let's list them all in the error message
+                message = 'Rename operation failed. A few possible reasons: \n'
+                message += '1) Not a valid Python identifier selected \n'
+                message += '2) The current file or any other files in the same directory or in any of its subdirectores contain incorrect syntax. Make sure the current project is in its own separate folder.'
                 errorMessage = tkMessageBox.showerror(
                                title="Rename failed",
-                               message="Rename operation failed (not a valid Python identifier selected?).", #TODO - more informative text needed
+                               message=message, #TODO - maybe also print stack trace for more info?
                                master=self)               
                 return
-		
+
         #sanity check
         if len(changes.changes) == 0:
             errorMessage = tkMessageBox.showerror(
@@ -740,7 +743,7 @@ class Thonny(tk.Tk):
                                message="Rename operation failed - no identifiers affected by change.", #TODO - more informative text needed
                                master=self)               
             return
-			
+
         #show the preview window to user
         messageText = 'Confirm the changes. The following files will be modified:\n'
         for change in changes.changes:
