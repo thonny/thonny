@@ -5,6 +5,8 @@ from idlelib.WidgetRedirector import WidgetRedirector
 import tkinter as tk
 import jedi
 
+import thonny.user_logging
+
 #TODO list:
 #1) make autocomplete window colors (both bg and fg) configurable
 #2) adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown
@@ -17,6 +19,7 @@ import jedi
 #if 2+ suggestions are found, creates a vertical list of suggestions where the user can choose
 def autocomplete(codeview, row, column):
     try: #everything in a try block - if something goes wrong, we don't want the program to crash
+        thonny.user_logging.log_user_event(AutocompleteQueryEvent(codeview.master, row, column))        
         script = jedi.Script(codeview.get_content(), row, column, codeview.master._filename)
         completions = script.completions() #get the list of suggestions
 
@@ -24,17 +27,20 @@ def autocomplete(codeview, row, column):
             return
 
         elif len(completions) == 1:
-            _complete(codeview, completions[0].complete) #insert the only completion
+            _complete(codeview, completions[0]) #insert the only completion
 
         else:
             window = AutocompleteWindow(codeview, completions) #creat the window
     except:
         return
 
+def _get_partial_string(completion): #calculates the partial string such as it was for user when autocomplete was called, used for user_logging info
+    return completion.name[:-len(completion.complete)]
+
 #inserts the chosen completion into the current position in the codeview
 def _complete(codeview, completion):
-    codeview._user_text_insert(codeview.text.index('insert'), completion)
-
+    thonny.user_logging.log_user_event(AutocompleteFinishEvent(_get_partial_string(completion), completion.name))
+    codeview._user_text_insert(codeview.text.index('insert'), completion.complete)
 
 #top-level container of the vertical list of suggestions
 class AutocompleteWindow(Toplevel): 
@@ -161,11 +167,28 @@ class AutocompleteWindowText(Text):
     #finalize choosing the suggestions - insert it into codeview and close window
     def _choose_completion(self, event=None):
         completion = self.content[self.marked_line-1]
-        _complete(self.codeview, completion.complete)
-        self._ok()
+        _complete(self.codeview, completion)
+        self._ok(cancel=False)
         
     #unregister global bindings, destroy both inner and top-level widgets
-    def _ok(self,event=None):
+    def _ok(self, event=None, cancel=True):
+        if cancel:
+            thonny.user_logging.log_user_event(AutocompleteCancelEvent(self.codeview.master))
         self.parent.unbind_all("<Button-1>")
         self.parent.destroy()
         self.destroy()
+
+class AutocompleteQueryEvent(thonny.user_logging.UserEvent): #user issues the autocomplete command
+    def __init__(self, editor, row, column):
+        self.editor_id = id(editor)
+        self.row = row
+        self.column = column
+
+class AutocompleteFinishEvent(thonny.user_logging.UserEvent): #current text is successfully autocompleted, either automatically (if there's one option) or user chooses one from list
+    def __init__(self, partial_string, chosen_completion):
+        self.partial_string = partial_string
+        self.chosen_completion = chosen_completion
+
+class AutocompleteCancelEvent(thonny.user_logging.UserEvent): #autocomplete action is canceled by user - list is presented to the user but user closes list without making a selection
+    def __init__(self, editor):
+        self.editor_id = id(editor)

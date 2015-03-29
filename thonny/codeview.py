@@ -14,7 +14,7 @@ from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
 from thonny.config import prefs
-
+import thonny.user_logging
 
 
 def classifyws(s, tabwidth):
@@ -940,6 +940,10 @@ class CodeView(ttk.Frame, TextWrapper):
         for line in lines:
             self.text.insert(str(line) + '.0', '##')
 
+        thonny.user_logging.log_user_event(thonny.user_logging.CommentInEvent(self.master, 
+                                                                               'selection' if selection_used else 'current_line', 
+                                                                               str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0])));
+
     #handles the 'comment out' command by removing '##' or '#' from the selected lines or the current line, if present      
     def cmd_comment_out(self, event=None):
         insert_index = self.text.index('insert')
@@ -961,7 +965,11 @@ class CodeView(ttk.Frame, TextWrapper):
             if line_text[0] != '#':
                 continue
             self.text.delete(line_str + '0', line_str + '2' if len(line_text) > 1 and line_text[1] == '#' else line_str + '1')
-    
+        
+        thonny.user_logging.log_user_event(thonny.user_logging.CommentOutEvent(self.master, 
+                                                                               'selection' if selection_used else 'current_line', 
+                                                                               str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0])))
+
     def prepare_level_boxes(self):
         return
         for i in range(6):

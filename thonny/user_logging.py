@@ -207,6 +207,19 @@ class KeyPressEvent(UserEvent):
         self.char = char
         self.keysym = keysym
 
+class CommentInEvent(UserEvent):
+    def __init__(self, editor, scope, affected_lines):
+        self.editor_id = id(editor)
+        self.scope = scope
+        self.affected_lines = affected_lines
+
+class CommentOutEvent(UserEvent):
+    def __init__(self, editor, scope, affected_lines):
+        self.editor_id = id(editor)
+        self.scope = scope
+        self.affected_lines = affected_lines
+
+
 # class SelectionChangeEvent(UserEvent):
 #     def __init__(self, editor, first_pos, last_pos):
 #         self.editor_id = id(editor)
