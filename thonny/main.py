@@ -646,6 +646,7 @@ class Thonny(tk.Tk):
             self.outline_frame.outline_shown = True 
             self.outline_frame.parse_and_display_module(self.editor_book.get_current_editor()._code_view)
             self.right_pw.add(self.outline_book, minsize=50)
+            user_logging.log_user_event(thonny.outline.OutlineOpenEvent(self.editor_book.get_current_editor()))
         else:
             self.outline_frame.prepare_for_removal()
             self.outline_frame.outline_shown = False
@@ -655,7 +656,9 @@ class Thonny(tk.Tk):
 	    return self.editor_book.get_current_editor() is not None
 
     def cmd_refactor_rename(self):
+        user_logging.log_user_event(thonny.refactor.RefactorRenameStartEvent(self.editor_book.get_current_editor()))
         if not self.editor_book.get_current_editor():
+            user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
             errorMessage = tkMessageBox.showerror(
                            title="Rename failed",
                            message="Rename operation failed (no active editor tabs?).", #TODO - more informative text needed
@@ -664,7 +667,7 @@ class Thonny(tk.Tk):
 
         #create a list of active but unsaved/modified editors)
         unsaved_editors = [x for x in self.editor_book.winfo_children() if x.cmd_save_file_enabled()]
-		
+
         if len(unsaved_editors) != 0:
             #confirm with the user that all open editors need to be saved first
             confirm = tkMessageBox.askyesno(
@@ -674,6 +677,7 @@ class Thonny(tk.Tk):
                       master=self)
 
             if not confirm:
+                user_logging.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
                 return #if user doesn't want it, return
 
             for editor in unsaved_editors:                     
@@ -681,6 +685,7 @@ class Thonny(tk.Tk):
                     self.editor_book.select(editor) #in the case of editors with no filename, show it, so user know which one they're saving
                 editor.cmd_save_file()
                 if editor.cmd_save_file_enabled(): #just a sanity check - if after saving a file still needs saving, something is wrong
+                    user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
                     errorMessage = tkMessageBox.showerror(
                                    title="Rename failed",
                                    message="Rename operation failed (saving file failed).", #TODO - more informative text needed
@@ -690,27 +695,29 @@ class Thonny(tk.Tk):
         filename = self.editor_book.get_current_editor().get_filename()
 
         if filename == None: #another sanity check - the current editor should have an associated filename by this point 
+            user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
             errorMessage = tkMessageBox.showerror(
                            title="Rename failed",
                            message="Rename operation failed (no filename associated with current module).", #TODO - more informative text needed
                            master=self)
-            return			
+            return
 
         identifier = re.compile(r"^[^\d\W]\w*\Z", re.UNICODE) #regex to compare valid python identifiers against
-		
+
         while True: #ask for new variable name until a valid one is entered
             renameWindow = thonny.refactor.RenameWindow(self)
             newname = renameWindow.refactor_new_variable_name
-            if newname == None:  
+            if newname == None:
+                user_logging.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
                 return #user canceled, return
-			
+
             if re.match(identifier, newname):
                 break #valid identifier entered, continue
 
             errorMessage = tkMessageBox.showerror(
                            title="Incorrect identifier",
                            message="Incorrect Python identifier, please re-enter.",
-                           master=self)				
+                           master=self)
 
         try: 
             #calculate the offset for rope
@@ -727,6 +734,7 @@ class Thonny(tk.Tk):
                 #if len(changes.changes == 0): raise Exception
 
             except Exception: #couple of different reasons why this could happen, let's list them all in the error message
+                user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
                 message = 'Rename operation failed. A few possible reasons: \n'
                 message += '1) Not a valid Python identifier selected \n'
                 message += '2) The current file or any other files in the same directory or in any of its subdirectores contain incorrect syntax. Make sure the current project is in its own separate folder.'
@@ -736,17 +744,22 @@ class Thonny(tk.Tk):
                                master=self)               
                 return
 
+        description = changes.description #needed for logging
+
         #sanity check
         if len(changes.changes) == 0:
+            user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
             errorMessage = tkMessageBox.showerror(
                                title="Rename failed",
                                message="Rename operation failed - no identifiers affected by change.", #TODO - more informative text needed
                                master=self)               
             return
 
+        affected_files = [] #needed for logging
         #show the preview window to user
         messageText = 'Confirm the changes. The following files will be modified:\n'
         for change in changes.changes:
+            affected_files.append(change.resource._path)
             messageText += '\n ' + change.resource._path
 
         messageText += '\n\n NB! This action cannot be undone.'
@@ -759,17 +772,19 @@ class Thonny(tk.Tk):
         
         #confirm with user to finalize the changes
         if not confirm:
+            user_logging.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
             thonny.refactor.cancel_changes(project)
             return
 
         try:
-            thonny.refactor.perform_changes(project, changes)			
+            thonny.refactor.perform_changes(project, changes)
         except Exception:
+                user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
                 errorMessage = tkMessageBox.showerror(
                                title="Rename failed",
                                message="Rename operation failed (Rope error).", #TODO - more informative text needed
                                master=self)     
-                thonny.refactor.cancel_changes(project)							   
+                thonny.refactor.cancel_changes(project)
                 return            
 	   
         #everything went fine, let's load all the active tabs again and set their content
@@ -789,7 +804,9 @@ class Thonny(tk.Tk):
                     self.editor_book.tab(editor, text=self.editor_book._generate_editor_title(filename))
                 except Exception: #something went wrong with reloading the file, let's close this tab to avoid consistency problems
                     self.editor_book.forget(editor)
-                    editor.destroy()					
+                    editor.destroy()
+
+        user_logging.log_user_event(thonny.refactor.RefactorRenameCompleteEvent(description, offset, affected_files))
 
     def _check_update_window_width(self, delta):
         if not ui_utils.get_zoomed(self):

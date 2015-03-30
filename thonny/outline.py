@@ -1,25 +1,12 @@
-
-
-
-
-
-
-
-
-########
-########
-# PLEASE NOTE - THIS FEATURE IS STILL UNDER DESIGN / CONSTRUCTION
-########
-########
-
-
 import re
 import tkinter as tk
 from tkinter import ttk
 
+import thonny.user_logging
+
 #TODO - see if there's a way to remember the previously focused tree item
-#when the tree is rebuilt
-#an: remember the focus item's name and line number, in the case of
+#when the tree is rebuilt to avoid reparsing everything on every step
+#idea: remember the focus item's name and line number, in the case of
 #any change see if there's an item with the same name on the same line,
 #or an item on any adjacent lines with nearly the same name (?)
 
@@ -46,7 +33,6 @@ class OutlineFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         #init tree events
-        self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
         self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
 
         #configure the only tree column
@@ -115,16 +101,13 @@ class OutlineFrame(ttk.Frame):
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
 
-    #TODO - reconsider this    
-    def on_select(self, event):
-        pass
-
     #called when a double-click is performed on any items
     def on_double_click(self, event):
         try:
             lineno = self.tree.item(self.tree.focus())['values'][0]
             index = self.active_codeview.text.index(str(lineno) + '.0')
             self.active_codeview.text.see(index) #make sure that the double-clicked item is visible
+            thonny.user_logging.log_user_event(OutlineLineclickEvent(self.editor_notebook.get_current_editor(), self.tree.item(self.tree.focus(), option='text')))
         except Exception:
             return 
 
@@ -143,3 +126,17 @@ class OutlineFrame(ttk.Frame):
     def prepare_for_removal(self):
         self.active_codeview.modify_listeners.remove(self)
         self.editor_notebook.tab_change_listeners.remove(self)
+        thonny.user_logging.log_user_event(OutlineCloseEvent(self.editor_notebook.get_current_editor()))
+
+class OutlineOpenEvent(thonny.user_logging.UserEvent): #user opens the outline view
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+
+class OutlineCloseEvent(thonny.user_logging.UserEvent): #user closes the outline view
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+
+class OutlineLineclickEvent(thonny.user_logging.UserEvent): #user doubleclicks on a line in outline view, taking them to the declaration
+    def __init__(self, editor, text):
+        self.editor_id = id(editor)
+        self.text = text

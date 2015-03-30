@@ -4,6 +4,7 @@ import rope.base.libutils
 import tkinter as tk
 from tkinter import ttk
 import os.path
+import thonny.user_logging
 
 #arguments: 1) full path to the file, 2) new name to be applied to the identifier, 3) Rope offset (position) of the renamed identifier in the current file
 #returns a list of Rope change objects applying to this rename refactor
@@ -88,3 +89,21 @@ class RenameWindow(tk.Toplevel):
         self.update_idletasks()
         self.refactor_new_variable_name = self.new_name_entry.get()
         self.cancel()
+
+class RefactorRenameStartEvent(thonny.user_logging.UserEvent): #user initiated the refactoring process
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+
+class RefactorRenameCancelEvent(thonny.user_logging.UserEvent): #user manually cancelled the refactoring process
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+
+class RefactorRenameFailedEvent(thonny.user_logging.UserEvent): #refactoring process failed due to an error
+    def __init__(self, editor):
+        self.editor_id = id(editor)
+
+class RefactorRenameCompleteEvent(thonny.user_logging.UserEvent): #refactoring process was successfully completed
+    def __init__(self, description, offset, affected_files):
+        self.description = description
+        self.offset = offset
+        self.affected_files = affected_files
