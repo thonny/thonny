@@ -34,7 +34,7 @@ from thonny import vm_proxy
 from thonny.config import prefs
 from thonny.about import AboutDialog
 from thonny.static import AstFrame
-from thonny.code import EditorNotebook
+from thonny.code import EditorNotebook, Editor
 from thonny.shell import ShellFrame
 from thonny.memory import GlobalsFrame, HeapFrame, ObjectInspector
 from thonny.browser import FileBrowser
@@ -666,7 +666,7 @@ class Thonny(tk.Tk):
             return
 
         #create a list of active but unsaved/modified editors)
-        unsaved_editors = [x for x in self.editor_book.winfo_children() if x.cmd_save_file_enabled()]
+        unsaved_editors = [x for x in self.editor_book.winfo_children() if type(x) == Editor and x.cmd_save_file_enabled()]
 
         if len(unsaved_editors) != 0:
             #confirm with the user that all open editors need to be saved first
@@ -807,6 +807,10 @@ class Thonny(tk.Tk):
                     editor.destroy()
 
         user_logging.log_user_event(thonny.refactor.RefactorRenameCompleteEvent(description, offset, affected_files))
+        current_browser_node_path = self.file_browser.get_selected_path()
+        self.file_browser.refresh_tree()
+        if current_browser_node_path != None:
+            self.file_browser.open_path_in_browser(current_browser_node_path)
 
     def _check_update_window_width(self, delta):
         if not ui_utils.get_zoomed(self):
