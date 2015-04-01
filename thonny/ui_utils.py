@@ -52,6 +52,32 @@ def create_PanedWindow(master, orient):
 
     return pw
 
+#the right-side paned window containing Variables, Outline, Inspect views, etc
+#hides itself when it has no children, automatically shows itself when it adds children
+class RightPanedWindow(tk.PanedWindow):
+    def __init__(self, master, main_pw, after, pref_width):
+        tk.PanedWindow.__init__(self, master, orient=tk.VERTICAL, showhandle="False", sashwidth=SASHTHICKNESS)
+        self.main_pw = main_pw
+        self.pref_width = pref_width
+        self.after = after
+        style = ttk.Style()
+        if style.theme_use() == "clam":
+            self.configure(background=CLAM_BACKGROUND)
+        elif style.theme_use() == "aqua":
+            self.configure(background="systemSheetBackground")
+        elif running_on_windows():
+            self.configure(background="SystemButtonFace")
+
+    def add(self, *args, **kwargs): #proxies the PanedWindow method, also handles the logic of adding the pane to the main_pw when it has any children
+        super(RightPanedWindow, self).add(*args, **kwargs)
+        if len(self.panes()) == 1:
+            self.main_pw.add(self, minsize=250, width=self.pref_width, after=self.after)
+
+    def remove(self, *args, **kwargs): #proxies the PanedWindow method, also handles the logic of removing the pane from the main_pw when it has no children
+        super(RightPanedWindow, self).remove(*args, **kwargs)
+        if len(self.panes()) == 0:
+            self.main_pw.remove(self)
+
 def create_menubutton(master):
     font = tk_font.nametofont("TkTextFont").copy()
     #font.configure(size=7)

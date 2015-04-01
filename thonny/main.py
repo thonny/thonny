@@ -131,9 +131,9 @@ class Thonny(tk.Tk):
         self.toolbar = ttk.Frame(self.main_frame, padding=0) # TODO: height=30 ?
         
         self.main_pw   = ui_utils.create_PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
-        self.right_pw  = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
         self.center_pw = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
-        
+        self.right_pw  = ui_utils.RightPanedWindow(self.main_frame, self.main_pw, self.center_pw, prefs["layout.memory_width"])        
+
         self.toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10)
         self._init_populate_toolbar()
         self.main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
@@ -151,8 +151,6 @@ class Thonny(tk.Tk):
         self.browse_book.add(self.file_browser, text="Files")
         self.cmd_update_browser_visibility(False)
         
-        self.cmd_update_memory_visibility(False)
-        
         self.center_pw.add(self.editor_book, minsize=150)
         
         self.control_book = ui_utils.PanelBook(self.center_pw)
@@ -168,25 +166,23 @@ class Thonny(tk.Tk):
         self.globals_book = ui_utils.PanelBook(self.right_pw)
         self.globals_frame = GlobalsFrame(self.globals_book)
         self.globals_book.add(self.globals_frame, text=_("Variables"))
-        self.right_pw.add(self.globals_book, minsize=50)
 
-                 
         self.outline_book = ui_utils.PanelBook(self.right_pw)
         self.outline_frame = thonny.outline.OutlineFrame(self.outline_book, self.editor_book)
         self.outline_book.add(self.outline_frame, text=_("Outline"))
-        
-        
+                
         self.heap_book = ui_utils.PanelBook(self.right_pw)
         self.heap_frame = HeapFrame(self.heap_book)
         self.heap_book.add(self.heap_frame, text=_("Heap")) 
-        if prefs["values_in_heap"]:
-            self.right_pw.add(self.heap_book, minsize=50)
         
         self.info_book = ui_utils.PanelBook(self.right_pw)
         self.inspector_frame = ObjectInspector(self.info_book)
         self.info_book.add(self.inspector_frame, text="Object info")
         #self.right_pw.add(self.info_book, minsize=50)
+        
         self.cmd_update_inspector_visibility()
+        self.cmd_update_memory_visibility()
+        self.cmd_update_outline_visibility()
 
     
     def _init_commands(self):
@@ -305,7 +301,7 @@ class Thonny(tk.Tk):
 
         if prefs["experimental.outline_feature_enabled"]:
             self._menus[2][2].append("---");
-            self._menus[2][2].append(Command('update_outline_visibility',         'Outline',         'Alt+O', self));
+            self._menus[2][2].append(Command('update_outline_visibility',         'Show outline',         None, self,  kind="checkbutton", variable_name="layout.outline_visible"));
 
         if prefs["experimental.refactor_rename_feature_enabled"]:
             self._menus[1][2].append("---");
@@ -619,18 +615,11 @@ class Thonny(tk.Tk):
 
     def cmd_update_memory_visibility(self, adjust_window_width=True):
         # TODO: treat variables frame and memory pane differently
-        if prefs["layout.memory_visible"] and not self.right_pw.winfo_ismapped():
-            if adjust_window_width:
-                self._check_update_window_width(+prefs["layout.memory_width"]+ui_utils.SASHTHICKNESS)
-            
-            self.main_pw.add(self.right_pw, minsize=150, 
-                             width=prefs["layout.memory_width"],
-                             after=self.center_pw)
-        elif not prefs["layout.memory_visible"] and self.right_pw.winfo_ismapped():
-            if adjust_window_width:
-                self._check_update_window_width(-prefs["layout.memory_width"]-ui_utils.SASHTHICKNESS)
-            self.main_pw.remove(self.right_pw)
-            
+
+        if prefs["layout.memory_visible"]:
+            self.right_pw.add(self.globals_book, minsize=50)
+        else:
+            self.right_pw.remove(self.globals_book)
 
     def cmd_update_inspector_visibility(self):
         if prefs["layout.inspector_visible"]:
@@ -642,18 +631,16 @@ class Thonny(tk.Tk):
         return self.editor_book.get_current_editor() is not None
 
     def cmd_update_outline_visibility(self): 
-        if not self.outline_frame.outline_shown:
-            self.outline_frame.outline_shown = True 
+        if not prefs["layout.outline_visible"]: 
+            self.outline_frame.prepare_for_removal()
+            self.right_pw.remove(self.outline_book)
+        else:
             self.outline_frame.parse_and_display_module(self.editor_book.get_current_editor()._code_view)
             self.right_pw.add(self.outline_book, minsize=50)
             user_logging.log_user_event(thonny.outline.OutlineOpenEvent(self.editor_book.get_current_editor()))
-        else:
-            self.outline_frame.prepare_for_removal()
-            self.outline_frame.outline_shown = False
-            self.right_pw.remove(self.outline_book)
 
     def cmd_refactor_rename_enabled(self):
-	    return self.editor_book.get_current_editor() is not None
+        return self.editor_book.get_current_editor() is not None
 
     def cmd_refactor_rename(self):
         user_logging.log_user_event(thonny.refactor.RefactorRenameStartEvent(self.editor_book.get_current_editor()))

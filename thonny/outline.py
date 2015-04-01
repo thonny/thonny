@@ -39,9 +39,6 @@ class OutlineFrame(ttk.Frame):
         self.tree.column('#0', anchor=tk.W, stretch=True)
         self.tree.heading('#0', text='Item (type @ line)', anchor=tk.W)
 
-        #marks whether the outline is currently shown
-        self.outline_shown = False #TODO - think about removing this entirely
-
     #handles the parsing and display of the module's contents in the frame
     def parse_and_display_module(self, codeview):
         self.active_codeview = codeview
@@ -124,9 +121,12 @@ class OutlineFrame(ttk.Frame):
     #called by the main window to notify that the outline frame is about to get hidden
     #all publishers will be unsubscribed from to prevent leaks
     def prepare_for_removal(self):
-        self.active_codeview.modify_listeners.remove(self)
-        self.editor_notebook.tab_change_listeners.remove(self)
-        thonny.user_logging.log_user_event(OutlineCloseEvent(self.editor_notebook.get_current_editor()))
+        try:
+            self.active_codeview.modify_listeners.remove(self)
+            self.editor_notebook.tab_change_listeners.remove(self)
+            thonny.user_logging.log_user_event(OutlineCloseEvent(self.editor_notebook.get_current_editor()))
+        except Exception:
+            pass #this method might be called during startup, where the listeners have not actually yet been registered, so 'removing' them would throw an exception
 
 class OutlineOpenEvent(thonny.user_logging.UserEvent): #user opens the outline view
     def __init__(self, editor):
