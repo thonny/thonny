@@ -97,6 +97,7 @@ class FindDialog(tk.Toplevel):
         #Find button - goes to the next occurrence
         self.find_button = ttk.Button(self, text="Find", command=self._perform_find) #TODO - text to resources
         self.find_button.grid(column=3, row=0, sticky=tk.W + tk.E);
+        self.find_button.config(state='disabled') 
 
         #Replace button - replaces the current occurrence, if it exists
         self.replace_button = ttk.Button(self, text="Replace", command=self._perform_replace) #TODO - text to resources
@@ -118,12 +119,14 @@ class FindDialog(tk.Toplevel):
         self.bind('<Escape>', self._ok)
         self.find_entry.bind('<Return>', self._perform_find)
         self.find_entry.bind('<Return>', self._perform_find)
-        self.find_entry_var.trace('w', self._on_find_text_enter)
+        self.find_entry_var.trace('w', self._update_button_statuses)
+
+        self._update_button_statuses()
 
         self.wait_window()
 
     #callback for text modifications on the find entry object, used to dynamically enable and disable buttons
-    def _on_find_text_enter(self, *args):
+    def _update_button_statuses(self, *args):
         find_text = self.find_entry_var.get().strip()
         if len(find_text) == 0:
             self.find_button.config(state='disabled')
@@ -166,8 +169,6 @@ class FindDialog(tk.Toplevel):
         self.codeview._user_text_insert(del_start, toreplace)
         #mark the inserted word boundaries 
         self.last_processed_indexes = (del_start, self.codeview.text.index("%s+%dc" % (del_start, len(toreplace))))
-        #re-set all passive tags
-        self._find_and_tag_all(FindDialog.last_searched_word, force = True)
 
     #performs the replace operation followed by a new find
     def _perform_replace_and_find(self, event=None):
@@ -242,7 +243,9 @@ class FindDialog(tk.Toplevel):
             thonny.user_logging.log_user_event(FindEvent(tofind, 'backwards' if search_backwards else 'forwards', 'case sensitive' if self._is_search_case_sensitive() else 'not case sensitive'))
         wordstart = self.codeview.text.search(tofind, search_start_index, backwards = search_backwards, forwards = not search_backwards, nocase = not self._is_search_case_sensitive()); #performs the search and sets the start index of the found string
         if len(wordstart) == 0:
-            self.infotext_label_var.set("Not found!"); #TODO - better text, also move it to the texts resources list
+            self.infotext_label_var.set("The inserted string can't be found!"); #TODO - better text, also move it to the texts resources list
+            self.replace_and_find_button.config(state='disabled')
+            self.replace_button.config(state='disabled')            
             return
         
         self.last_processed_indexes = (wordstart, self.codeview.text.index("%s+1c" % wordstart)); #sets the data about last search      

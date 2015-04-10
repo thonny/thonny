@@ -669,7 +669,7 @@ class Thonny(tk.Tk):
 
             for editor in unsaved_editors:                     
                 if not editor.get_filename():
-                    self.editor_book.select(editor) #in the case of editors with no filename, show it, so user know which one they're saving
+                    self.editor_book.select(editor) #in the case of editors with no filename, show it, so user knows which one they're saving
                 editor.cmd_save_file()
                 if editor.cmd_save_file_enabled(): #just a sanity check - if after saving a file still needs saving, something is wrong
                     user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
@@ -773,7 +773,7 @@ class Thonny(tk.Tk):
                                master=self)     
                 thonny.refactor.cancel_changes(project)
                 return            
-	   
+  
         #everything went fine, let's load all the active tabs again and set their content
         for editor in self.editor_book.winfo_children():
             try: 
