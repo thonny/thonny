@@ -635,7 +635,8 @@ class Thonny(tk.Tk):
             self.outline_frame.prepare_for_removal()
             self.right_pw.remove(self.outline_book)
         else:
-            self.outline_frame.parse_and_display_module(self.editor_book.get_current_editor()._code_view)
+            if self.editor_book.get_current_editor() != None:
+                self.outline_frame.parse_and_display_module(self.editor_book.get_current_editor()._code_view)
             self.right_pw.add(self.outline_book, minsize=50)
             user_logging.log_user_event(thonny.outline.OutlineOpenEvent(self.editor_book.get_current_editor()))
 
