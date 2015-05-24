@@ -293,7 +293,7 @@ class Thonny(tk.Tk):
         #TODO - implement a better way to conditionally add the below items
         if prefs["experimental.find_feature_enabled"]:
             self._menus[1][2].append("---");
-            self._menus[1][2].append(Command('find',         'Find',         'Ctrl+F', self._find_current_edit_widget));
+            self._menus[1][2].append(Command('find',         'Find & Replace',         'Ctrl+F', self._find_current_edit_widget));
 
         if prefs["experimental.autocomplete_feature_enabled"]:
             self._menus[1][2].append("---");
@@ -309,8 +309,8 @@ class Thonny(tk.Tk):
 
         if prefs["experimental.comment_toggle_enabled"]:
             self._menus[1][2].append("---");
-            self._menus[1][2].append(Command('comment_in',         'Comment in',         'Ctrl+3', self._find_current_edit_widget)); 
-            self._menus[1][2].append(Command('comment_out',         'Comment out',         'Ctrl+4', self._find_current_edit_widget));
+            self._menus[1][2].append(Command('comment_in',         'Comment in',         'Ctrl+Key-3', self._find_current_edit_widget)); 
+            self._menus[1][2].append(Command('comment_out',         'Comment out',         'Ctrl+Key-4', self._find_current_edit_widget));
                 
         # TODO:
         """
@@ -354,9 +354,12 @@ class Thonny(tk.Tk):
                 if item == "---":
                     menu.add_separator()
                 elif isinstance(item, Command):
+                    accelerator_name = item.accelerator
+                    if accelerator_name is not None: 
+                        accelerator_name = accelerator_name.replace("Key-", "")
                     menu.add(item.kind,
                         label=item.label,
-                        accelerator=item.accelerator,
+                        accelerator=accelerator_name,
                         value=item.value,
                         variable=item.variable,
                         command=lambda cmd=item: cmd.execute())

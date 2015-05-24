@@ -298,7 +298,7 @@ class FindDialog(tk.Toplevel):
 
     #initializes the tagging styles 
     def _init_found_tag_styles(self):
-        self.codeview.text.tag_configure("found", foreground="green", underline=True) #TODO - style
+        self.codeview.text.tag_configure("found", foreground="blue", underline=True) #TODO - style
         self.codeview.text.tag_configure("currentfound", foreground="white", background="red")  #TODO - style
 
 

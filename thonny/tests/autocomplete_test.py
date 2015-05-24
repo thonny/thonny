@@ -13,37 +13,26 @@ class TestClass:
         pass
     def brokenMethod(self):
 
-#step 2
-import 
+import                              #<<<<<<<<LINE 1>>>>>>>>
 
-#step 9
-import p
+import p                            #<<<<<<<<LINE 2>>>>>>>>
 
-#step 11
-sys.
+sys.                                #<<<<<<<<LINE 3>>>>>>>>
 
-#step 13
-getfilesys
+getfilesys                          #<<<<<<<<LINE 4>>>>>>>>
 
-#step 14
-os.path.
+os.path.                            #<<<<<<<<LINE 5>>>>>>>>
 
-#step 15
-path.
+path.                               #<<<<<<<<LINE 6>>>>>>>>
 
-#step 17
-re.
+re.                                 #<<<<<<<<LINE 7>>>>>>>>
 
-#step 18
-compi
+compi                               #<<<<<<<<LINE 8>>>>>>>>
 
-#step 19
-testob
+testob                              #<<<<<<<<LINE 9>>>>>>>>
 
 testobject = TestClass()
 
-#step 20
-testo
+testo                               #<<<<<<<<LINE 10>>>>>>>>
 
-#step 21
-testobject.
+testobject.                         #<<<<<<<<LINE 11>>>>>>>>

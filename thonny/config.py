@@ -48,11 +48,11 @@ defaults = {
         "shell_height"    : 200,
     },
     "experimental" : {
-        "find_feature_enabled"      : False,
-        "autocomplete_feature_enabled"      : False,
-        "outline_feature_enabled"      : False,
-        "refactor_rename_feature_enabled"   : False,
-        "comment_toggle_enabled"   : False,		
+        "find_feature_enabled"      : True,
+        "autocomplete_feature_enabled"      : True,
+        "outline_feature_enabled"      : True,
+        "refactor_rename_feature_enabled"   : True,
+        "comment_toggle_enabled"   : True,
     },    
 }
 
