@@ -43,8 +43,10 @@ class OutlineFrame(ttk.Frame):
     def parse_and_display_module(self, codeview):
         self.active_codeview = codeview
         self.active_codeview.modify_listeners.add(self)
-        self.editor_notebook.tab_change_listeners.add(self) #it's a set so subsequent adds do nothing, but we need to make sure we're listening
         self._update_frame_contents()
+
+    def register_notebook_listener(self):
+        self.editor_notebook.tab_change_listeners.add(self) #it's a set so subsequent adds do nothing, but we need to make sure we're listening	
 
     #updates the tree content of the frame by clearing the tree and parsing the module data nodes data
     def _update_frame_contents(self):
@@ -114,9 +116,12 @@ class OutlineFrame(ttk.Frame):
 
     #called by editornotebook publisher to notify of changed tab
     def notify_tab_changed(self):
-        self.active_codeview.modify_listeners.remove(self)
+        if self.active_codeview != None and self.active_codeview.modify_listeners != None and self in self.active_codeview.modify_listeners:
+            self.active_codeview.modify_listeners.remove(self)
         if self.editor_notebook.get_current_editor():
             self.parse_and_display_module(self.editor_notebook.get_current_editor()._code_view)
+        else: 
+            self._clear_tree()
 
     #called by the main window to notify that the outline frame is about to get hidden
     #all publishers will be unsubscribed from to prevent leaks

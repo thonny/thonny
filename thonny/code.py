@@ -289,6 +289,7 @@ class EditorNotebook(ttk.Notebook):
         self.add(new_editor, text=self._generate_editor_title(None))
         self.select(new_editor)
         new_editor.focus_set()
+        self._on_tab_changed(None)
     
     def cmd_open_file(self):
         filename = askopenfilename (
@@ -299,6 +300,7 @@ class EditorNotebook(ttk.Notebook):
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
             self.remember_open_files()
+            self._on_tab_changed(None)
     
     def cmd_close_file(self):
         # TODO: ask in case file is modified
@@ -307,6 +309,7 @@ class EditorNotebook(ttk.Notebook):
             self.forget(current_editor)
             current_editor.destroy()
             self.remember_open_files()
+            self._on_tab_changed(None)
     
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
