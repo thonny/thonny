@@ -432,11 +432,11 @@ class Thonny(tk.Tk):
                 img = tk.PhotoImage(file=misc_utils.get_res_path(name + ".gif"))
             
                 btn = ttk.Button(self.toolbar, 
-                                 command=on_kala_button, 
+                                 #command=on_kala_button, 
                                  image=img, 
                                  text="?",
                                  style="Toolbutton",
-                                 state=tk.DISABLED)
+                                 state=tk.NORMAL)
                 btn.grid(row=1, column=col, padx=0, pady=0)
             
                 self.images[name] = img
