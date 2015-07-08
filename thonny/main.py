@@ -123,6 +123,34 @@ class Thonny(tk.Tk):
         self.editor_book.load_startup_files()
         self.editor_book.focus_current_editor()
     
+    def _find_extension_module_names(self):
+        result = []
+        for path_item in sys.path:
+            if os.path.isdir(path_item):
+                extension_dir = os.path.join(path_item, "thonny", "extensions")
+                if (os.path.isdir(extension_dir)):
+                    for extension_dir_item in os.listdir(extension_dir):
+                        if (os.path.isfile(extension_dir_item)
+                                and extension_dir_item.endswith(".py")
+                            or os.path.isdir(extension_dir_item)
+                                and os.path.isfile(os.path.join(extension_dir_item, "__init__.py"))):
+                                result.append("thonny.extensions." + os.path.basename(extension_dir_item))
+        
+        return result
+                                
+                            
+                            
+    
+    def add_view(self, view_constructor, name, title, preferred_location=None):
+        """
+        Is used for adding a "standard" view, ie. a view whose visibility can be
+        controlled by the View menu
+        """
+        # TODO: find parent
+        master = ...
+        view = view_constructor(master)
+        self.views[name] = view # TODO: is it necessary?
+        
     
     def _init_widgets(self):
         
