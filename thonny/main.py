@@ -25,6 +25,7 @@ import time
 import gettext
 import re
 import tkinter as tk
+import importlib
 from tkinter import ttk
 import tkinter.messagebox as tkMessageBox
 
@@ -122,19 +123,30 @@ class Thonny(tk.Tk):
         # self.focus_force()
         self.editor_book.load_startup_files()
         self.editor_book.focus_current_editor()
+        
+        self._load_plugins()
     
-    def _find_extension_module_names(self):
-        result = []
+    def _load_plugins(self):
+        for plugin_name in sorted(self._find_plugins()):
+            m = importlib.import_module(plugin_name)
+            m.load_plugin(self)
+    
+    def _find_plugins(self):
+        result = set()
         for path_item in sys.path:
             if os.path.isdir(path_item):
-                extension_dir = os.path.join(path_item, "thonny", "extensions")
+                extension_dir = os.path.join(path_item, "thonny", "plugins")
                 if (os.path.isdir(extension_dir)):
                     for extension_dir_item in os.listdir(extension_dir):
-                        if (os.path.isfile(extension_dir_item)
+                        extension_dir_item_path = os.path.join(extension_dir, extension_dir_item)
+                        # TODO: support zipped packages
+                        if (os.path.isfile(extension_dir_item_path)
                                 and extension_dir_item.endswith(".py")
-                            or os.path.isdir(extension_dir_item)
+                                and not extension_dir_item.endswith("__.py")
+                            or os.path.isdir(extension_dir_item_path)
                                 and os.path.isfile(os.path.join(extension_dir_item, "__init__.py"))):
-                                result.append("thonny.extensions." + os.path.basename(extension_dir_item))
+                                result.add("thonny.plugins." 
+                                           + os.path.splitext(extension_dir_item)[0])
         
         return result
                                 
