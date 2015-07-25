@@ -34,7 +34,6 @@ from thonny import stack
 from thonny import vm_proxy
 from thonny.config import prefs
 from thonny.about import AboutDialog
-from thonny.static import AstFrame
 from thonny.code import EditorNotebook, Editor
 from thonny.shell import ShellFrame
 from thonny.memory import GlobalsFrame, HeapFrame, ObjectInspector
@@ -57,12 +56,12 @@ THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
 
 
-class Thonny(tk.Tk):
-    def __init__(self, src_dir):
+class Workbench(tk.Tk):
+    def __init__(self, main_dir):
         self.last_manual_debugger_command_sent = None # TODO: hack
         self.step_over = False
         
-        self.src_dir = src_dir
+        self._main_dir = main_dir # the directory containing eg. "thonny" package 
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self.on_tk_exception
         
@@ -72,10 +71,8 @@ class Thonny(tk.Tk):
         
         self.user_logger = user_logging.UserEventLogger(self.new_user_log_file())
         user_logging.USER_LOGGER = self.user_logger # TODO: ugly
+        self._load_translations()
         
-        gettext.translation('thonny',
-                    os.path.join(src_dir, "locale"), 
-                    languages=[prefs["general.language"], "en"]).install()
         
         self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
         self.createcommand("::tk::mac::OpenApplication", self._mac_open_application)
@@ -85,7 +82,7 @@ class Thonny(tk.Tk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         #showinfo("sys.argv", str(sys.argv))
         
-        self._vm = vm_proxy.VMProxy(prefs["cwd"], src_dir)
+        self._vm = vm_proxy.VMProxy(prefs["cwd"], self._main_dir)
         self._update_title()
         
         # UI items, positions, sizes
@@ -123,46 +120,103 @@ class Thonny(tk.Tk):
         # self.focus_force()
         self.editor_book.load_startup_files()
         self.editor_book.focus_current_editor()
-        
+        self._views = {}
         self._load_plugins()
     
     def _load_plugins(self):
-        for plugin_name in sorted(self._find_plugins()):
+        plugin_names = self._find_plugins(
+                            os.path.join(self._main_dir, "thonny", "plugins"),
+                            "thonny.plugins.")
+        
+        for plugin_name in sorted(plugin_names):
             m = importlib.import_module(plugin_name)
             m.load_plugin(self)
     
-    def _find_plugins(self):
+    def _find_plugins(self, extension_dir, module_name_prefix):
         result = set()
-        for path_item in sys.path:
-            if os.path.isdir(path_item):
-                extension_dir = os.path.join(path_item, "thonny", "plugins")
-                if (os.path.isdir(extension_dir)):
-                    for extension_dir_item in os.listdir(extension_dir):
-                        extension_dir_item_path = os.path.join(extension_dir, extension_dir_item)
-                        # TODO: support zipped packages
-                        if (os.path.isfile(extension_dir_item_path)
-                                and extension_dir_item.endswith(".py")
-                                and not extension_dir_item.endswith("__.py")
-                            or os.path.isdir(extension_dir_item_path)
-                                and os.path.isfile(os.path.join(extension_dir_item, "__init__.py"))):
-                                result.add("thonny.plugins." 
-                                           + os.path.splitext(extension_dir_item)[0])
+        
+        for item in os.listdir(extension_dir):
+            item_path = os.path.join(extension_dir, item)
+            # TODO: support zipped packages
+            if (os.path.isfile(item_path)
+                    and item.endswith(".py")
+                    and not item.endswith("__.py")
+                or os.path.isdir(item_path)
+                    and os.path.isfile(os.path.join(item, "__init__.py"))):
+                    result.add(module_name_prefix 
+                               + os.path.splitext(item)[0])
         
         return result
                                 
-                            
+    def _load_translations(self):
+        gettext.translation('thonny',
+                    os.path.join(self._main_dir, "thonny", "locale"), 
+                    languages=[prefs["general.language"], "en"]).install()
+                                
                             
     
-    def add_view(self, view_constructor, name, title, preferred_location=None):
+    def add_view(self, view_constructor, label, preferred_location=None):
         """
         Is used for adding a "standard" view, ie. a view whose visibility can be
         controlled by the View menu
         """
-        # TODO: find parent
-        master = ...
+        # TODO: find parent according to preferred_location
+        master = self.control_book
         view = view_constructor(master)
-        self.views[name] = view # TODO: is it necessary?
+        master.add(view, text=label)
         
+        # TODO: organize showing and hiding 
+        
+    def add_command(self, menu_label, command_label, handler,
+                    availability_predicate=lambda event: True,
+                    default_accelerator=None,
+                    option_variable_id=None):
+        
+        def dispatch(event=None):
+            if availability_predicate(event):
+                # TODO: what about executing via shortcut and option variable?
+                handler(event)
+            else:
+                self.bell()
+                
+        # select actual accelerator according to user settings
+        accelerator = ...
+        
+        if accelerator:
+            # Tweak the appearance of the accelerator
+            accelerator = accelerator.replace("Key-", "")
+            if misc_utils.running_on_mac_os():
+                accelerator = accelerator.replace("Ctrl", "Command")
+            
+            # Convert visible accelerator string to Tk-s sequence 
+            sequence = accelerator.replace("Ctrl", "Control")
+            sequence = sequence.replace("+-", "+minus")
+            sequence = sequence.replace("++", "+plus")
+            
+            # it's customary to show keys with capital letters
+            # but tk would treat this as pressing with shift
+            parts = sequence.split("+")
+            if len(parts[-1]) == 1:
+                parts[-1] = parts[-1].lower()
+            
+            # tk wants "-" between the parts 
+            sequence = "-".join(parts)
+    
+            self.bind_all('<' + sequence + '>', dispatch, True)
+                 
+        # create or find menu
+        menu = self.get_menu(menu_label)
+        menu.add(kind,
+            label=command_label,
+            accelerator=accelerator,
+            value=item.value,
+            variable=item.variable,
+            command=dispatch)
+    
+    
+    
+    def _update_toolbar(self):
+        "TODO:"
     
     def _init_widgets(self):
         
@@ -187,8 +241,9 @@ class Thonny(tk.Tk):
         self.browse_book = ui_utils.PanelBook(self.main_pw)
         self.editor_book = EditorNotebook(self.center_pw)
         self.main_pw.add(self.center_pw, minsize=150, width=prefs["layout.center_width"])
-        self.file_browser = FileBrowser(self, self.editor_book)
-        self.browse_book.add(self.file_browser, text="Files")
+        # TODO: load lazily
+        #self.file_browser = FileBrowser(self, self.editor_book)
+        #self.browse_book.add(self.file_browser, text="Files")
         self.cmd_update_browser_visibility(False)
         
         self.center_pw.add(self.editor_book, minsize=150)
@@ -197,7 +252,6 @@ class Thonny(tk.Tk):
         self.center_pw.add(self.control_book, minsize=50)
         self.shell = ShellFrame(self.control_book, self._vm, self.editor_book)
         self.stack = stack.StackPanel(self.control_book, self._vm, self.editor_book)
-        self.ast_frame = AstFrame(self.control_book)
         
         self.control_book.add(self.shell, text=_("Shell")) # TODO: , underline=0
         #self.control_book.add(self.stack, text="Stack") # TODO: , underline=1
@@ -285,7 +339,6 @@ class Thonny(tk.Tk):
                 "---",
                 Command('focus_editor', "Focus editor", "F11", self),
                 Command('focus_shell', "Focus shell", "F12", self),
-                Command('show_ast', "Show AST", None, self),
                 Command('show_replayer', "Show Replayer", None, self),
                 Command('preferences', 'Preferences', None, self) 
             ]),
@@ -1008,14 +1061,8 @@ class Thonny(tk.Tk):
             
             
 
-    def cmd_show_ast(self):
-        if not notebook_contains(self.control_book, self.ast_frame): 
-            self.control_book.add(self.ast_frame, text="AST")
-        self.ast_frame.show_ast(self.editor_book.get_current_editor()._code_view)
-        self.control_book.select(self.ast_frame)
-    
     def cmd_show_replayer(self):
-        launcher = os.path.join(self.src_dir, "replay")
+        launcher = os.path.join(self._main_dir, "replay")
         cmd_line = [sys.executable, '-u', launcher]
         subprocess.Popen(cmd_line)
     
@@ -1124,20 +1171,6 @@ class Thonny(tk.Tk):
     
     def set_icon(self):
         try:
-            self.iconbitmap(default=os.path.join(self.src_dir, "res", "thonny.ico"))
+            self.iconbitmap(default=os.path.join(self._main_dir, "res", "thonny.ico"))
         except:
             pass
-
-def launch():
-    try:
-        if not os.path.exists(THONNY_USER_DIR):
-            os.makedirs(THONNY_USER_DIR, 0o700)
-        Thonny().mainloop()
-    except:
-        traceback.print_exc()
-        # TODO: Command+C for Mac
-        tk.messagebox.showerror("Internal error. Program will close. Use Ctrl+C to copy",
-                                traceback.format_exc())
-    
-
-

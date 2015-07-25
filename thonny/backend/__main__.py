@@ -2,8 +2,8 @@
 """
 This file is run by VMProxy
 
-(I could run also backend.py directly, but I want to have clean global scope 
-in __main__ module (because that's where user scripts run), but backend's global scope 
+(Why separate file for launching? I want to have clean global scope 
+in toplevel __main__ module (because that's where user scripts run), but backend's global scope 
 is far from clean. 
 I could also do python -c "from backend import VM: VM().mainloop()", but looks like this 
 gives relative __file__-s on imported modules.) 
@@ -13,10 +13,16 @@ import sys
 import logging
 import os.path
 
-# Where are we?
-assert(__file__)
-src_dir = os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir))
-sys.path.insert(0, os.path.normpath(os.path.join(src_dir, os.pardir)))
+# Tweak the path
+
+# It is assumed that backend is run with
+#     python3 /absolute/path/to/thonny/thonny/backend
+# We don't assume that path contains
+#             /absolute/path/to/thonny
+# therefore we add it to path, because that's the base for thonny package
+main_dir = os.path.normpath(os.path.join(__file__, os.pardir, os.pardir))
+if main_dir not in sys.path:
+    sys.path.insert(0, main_dir)
 
 from thonny.backend import VM
 
@@ -32,4 +38,4 @@ stream_handler = logging.StreamHandler(stream=sys.stderr)
 logger.addHandler(stream_handler)
 
 # create and run VM
-VM(src_dir).mainloop()
+VM(main_dir).mainloop()

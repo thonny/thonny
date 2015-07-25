@@ -36,9 +36,9 @@ debug = logger.debug
 info = logger.info
 
 class VM:
-    def __init__(self, src_dir):
+    def __init__(self, main_dir):
         #print(sys.argv, file=sys.stderr)
-        self.src_dir = src_dir
+        self._main_dir = main_dir
         self._heap = {} # TODO: weakref.WeakValueDictionary() ??
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
@@ -266,7 +266,7 @@ class VM:
     
     def _execute_source(self, source, filename, execution_mode, debug_mode):
         if debug_mode:
-            self._current_executor = FancyTracer(self, self.src_dir)
+            self._current_executor = FancyTracer(self, self._main_dir)
         else:
             self._current_executor = Executor(self)
         
@@ -466,9 +466,9 @@ class FancyTracer(Executor):
     ...
     """
     
-    def __init__(self, vm, src_dir):
+    def __init__(self, vm, main_dir):
         self._vm = vm
-        self._normcase_thonny_src_dir = os.path.normcase(src_dir) 
+        self._normcase_thonny_src_dir = os.path.normcase(main_dir) 
         self._instrumented_files = misc_utils.PathSet()
         self._interesting_files = misc_utils.PathSet() # only events happening in these files are reported
         self._current_command = None

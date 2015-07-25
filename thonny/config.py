@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
-import tkinter.messagebox
+import json
 import os.path
-import codecs
-import ast
-import traceback
-from configparser import ConfigParser
 
-
-PREFS_FILE = os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini"))
 
 defaults = {
     "general" : {
@@ -57,86 +51,54 @@ defaults = {
 }
 
 
-class ThonnyConfigParser(ConfigParser):
-    def __init__(self):
-        ConfigParser.__init__(self)
-        self.filename = PREFS_FILE
-        if os.path.exists(self.filename):
-            with codecs.open(self.filename, 'r', "UTF-8") as fp: 
-                self.readfp(fp)
-
-        #print(prefs_filename, self.sections())
-    
-    def __getitem__(self, descriptor):
-        section, option = _parse_descriptor(descriptor)
-        try:
-            val = self.get(section, option)
-            try:
-                return ast.literal_eval(val)
-            except:
-                return val
-        except:
-            return defaults[section][option]
-
-    def __setitem__(self, descriptor, value):
-        section, option = _parse_descriptor(descriptor)
-        if not self.has_section(section):
-            self.add_section(section)
+class ConfigurationManager:
+    def __init__(self, filename):
+        self._filename = filename 
+        self._preferences = {}
+        self._variables = {} # for storing respective Tk control variables
+        self._defaults = {}
         
-        if isinstance(value, str):
-            self.set(section, option, value)
+        if os.path.exists(self._filename):
+            with open(self._filename, encoding="UTF-8") as fp: 
+                self._preferences = json.load(fp)
+                
+
+    def __getitem__(self, name):
+        if name in self._variables:
+            return self._variables[name].get()
+        elif name in self._variables:
+            return self._preferences[name]
         else:
-            self.set(section, option, repr(value))
-            
-    def save(self):
-        with codecs.open(self.filename, 'w', "UTF-8") as fp: 
-            self.write(fp)
-        
+            return self._defaults[name]
 
-def _parse_descriptor(descriptor):
-    if "." in descriptor:
-        return descriptor.split(".", 1)
-    else:
-        return "general", descriptor 
-
-
-class ThonnyTkVars():
-    def __init__(self):
-        self._vars = {}
+    def __setitem__(self, name, value):
+        self._preferences[name] = value
+        if name in self._variables:
+            self._variables[name].set(value)
     
-    def __getitem__(self, descriptor):
-        section, option = _parse_descriptor(descriptor)
-        key = section + "." + option
-        
-        if not key in self._vars:
-            default = defaults[section][option]
-            if isinstance(default, bool):
-                var = tk.BooleanVar(value=prefs[descriptor])
-            elif isinstance(default, int):
-                var = tk.IntVar(value=prefs[descriptor])
-            elif isinstance(default, str):
-                var = tk.StringVar(value=prefs[descriptor])
+    def get_variable(self, name):
+        if name in self._variables:
+            return self._variables[name]
+        else:
+            value = self[name]
+            if isinstance(value, bool):
+                var = tk.BooleanVar(value=value)
+            elif isinstance(value, int):
+                var = tk.IntVar(value=value)
+            elif isinstance(value, str):
+                var = tk.StringVar(value=value)
             else:
-                raise KeyError("Can't create Tk Var for " + descriptor)
+                raise KeyError("Can't create Tk Variable for " + name)
+            self._variables[name] = var
+            return var
+    
+    def _save(self):
+        # save all tk variables
+        for name in self._variables:
+            self._preferences[name] = self._variables[name].get()
             
-            self._vars[key] = var
-            
-            # make it update prefs
-            def _update_prefs(*args):
-                prefs[descriptor] = var.get()
-                 
-            var.trace_variable("w", _update_prefs)
         
-        return self._vars[key]
-
-try:
-    prefs = ThonnyConfigParser()
-    prefs_vars = ThonnyTkVars()
-except:
-    tkinter.messagebox.showerror("Error reading configuration. Use Ctrl+C to copy",
-                                traceback.format_exc())
-    raise
-
-
-
+        with open(self._filename, 'w', encoding="UTF-8") as fp: 
+            json.dump(self._preferences, fp)
+        
 

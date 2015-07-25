@@ -7,7 +7,6 @@ import subprocess
 import collections
 import threading
 from _thread import start_new_thread
-from queue import Queue
 
 
 from thonny.common import parse_message, serialize_message, ToplevelCommand, PauseMessage,\
@@ -21,7 +20,7 @@ logger.addHandler(logging.StreamHandler(sys.stdout))
 _CURRENT_VM = None
 
 class VMProxy:
-    def __init__(self, default_cwd, backend_dir):
+    def __init__(self, default_cwd, main_dir):
         global _CURRENT_VM
         
         if os.path.exists(default_cwd):
@@ -29,7 +28,7 @@ class VMProxy:
         else:
             self.cwd = os.path.expanduser("~")
             
-        self.backend_dir = backend_dir
+        self.thonny_dir = main_dir
         self._proc = None
         self._state_lock = threading.RLock()
         self.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
@@ -107,7 +106,7 @@ class VMProxy:
         my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         
-        launcher = os.path.join(self.backend_dir, "backlaunch.py")
+        launcher = os.path.join(self.thonny_dir, "thonny", "backend")
         cmd_line = [sys.executable, '-u', launcher]
         
         if hasattr(cmd, "filename"):
