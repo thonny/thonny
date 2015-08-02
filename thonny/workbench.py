@@ -20,109 +20,230 @@ import sys
 import traceback
 import os.path
 from distutils.version import StrictVersion
-import logging
+from logging import info, debug
 import time
 import gettext
 import re
 import tkinter as tk
-import importlib
 from tkinter import ttk
+import tkinter.font as tk_font
+import importlib
 import tkinter.messagebox as tkMessageBox
 
 from thonny import ui_utils
 from thonny import stack
 from thonny import vm_proxy
-from thonny.config import prefs
+from thonny.config import ConfigurationManager
 from thonny.about import AboutDialog
 from thonny.code import EditorNotebook, Editor
 from thonny.shell import ShellFrame
 from thonny.memory import GlobalsFrame, HeapFrame, ObjectInspector
-from thonny.browser import FileBrowser
 from thonny.common import DebuggerCommand, ToplevelCommand, DebuggerResponse,\
     InlineCommand, quote_path_for_shell
-from thonny.ui_utils import Command, notebook_contains
+from thonny.ui_utils import Command, CLAM_BACKGROUND, SASHTHICKNESS,\
+    insert_to_notebook
 from thonny import user_logging
 from thonny import misc_utils
 import thonny.refactor
 import subprocess
 import thonny.outline
-
-
-
-
-THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
-
-
-
+from thonny.misc_utils import running_on_mac_os, running_on_linux,\
+    running_on_windows
 
 
 class Workbench(tk.Tk):
     def __init__(self, main_dir):
-        self.last_manual_debugger_command_sent = None # TODO: hack
-        self.step_over = False
         
-        self._main_dir = main_dir # the directory containing eg. "thonny" package 
+        self._main_dir = main_dir # the directory containing eg. "thonny" package
+        
+        self._init_configuration()
+        self._init_translation()
+        self._init_user_logging()
+        self._init_backend()
+        
         tk.Tk.__init__(self)
-        tk.Tk.report_callback_exception = self.on_tk_exception
+        tk.Tk.report_callback_exception = self._on_tk_exception
+        self._init_window()
+        self._init_style()
         
-        self.logger = logging.getLogger("thonny.main")
-        self.logger.setLevel(logging.DEBUG)
-        self.logger.addHandler(logging.StreamHandler(sys.stdout))
-        
-        self.user_logger = user_logging.UserEventLogger(self.new_user_log_file())
-        user_logging.USER_LOGGER = self.user_logger # TODO: ugly
-        self._load_translations()
-        
-        
-        self.createcommand("::tk::mac::OpenDocument", self._mac_open_document)
-        self.createcommand("::tk::mac::OpenApplication", self._mac_open_application)
-        self.createcommand("::tk::mac::ReopenApplication", self._mac_reopen_application)
-        self.set_icon()
-        
-        self.protocol("WM_DELETE_WINDOW", self._on_close)
-        #showinfo("sys.argv", str(sys.argv))
-        
-        self._vm = vm_proxy.VMProxy(prefs["cwd"], self._main_dir)
-        self._update_title()
-        
-        # UI items, positions, sizes
-        geometry = "{0}x{1}+{2}+{3}".format(prefs["layout.width"], prefs["layout.height"],
-                                               prefs["layout.left"], prefs["layout.top"])
-        if prefs["layout.zoomed"]:
-            ui_utils.set_zoomed(self, True)
-        self.geometry(geometry)
-        
-        ui_utils.setup_style()
+        self._views = {}
         self._init_widgets()
-        
         self._init_commands()
-
-        
-        
-        # events ---------------------------------------------
+        self._load_plugins()
         
         # There are 3 kinds of events:
         #    - commands from user (menu and toolbar events are bound in respective methods)
         #    - notifications about asynchronous debugger responses 
         #    - notifications about new output from the running program
         
-        ui_utils.start_keeping_track_of_held_keys(self)
+        self.last_manual_debugger_command_sent = None # TODO: hack
+        self.step_over = False
         
-        # KeyRelease may also trigger a debugger command
-        # self.bind_all("<KeyRelease>", self._check_issue_goto_before_or_after, "+") # TODO: 
-        
-        # start listening to backend process
-        self._poll_vm_messages()
-        self._advance_background_tk_mainloop()
-        self.bind("<FocusIn>", self.on_get_focus, "+")
-        self.bind("<FocusOut>", self.on_lose_focus, "+")
-        # self.bind('<Expose>', self._expose, "+")
-        # self.focus_force()
         self.editor_book.load_startup_files()
         self.editor_book.focus_current_editor()
-        self._views = {}
-        self._load_plugins()
     
+    def _init_window(self):
+        self._update_title()
+        self.geometry("{0}x{1}+{2}+{3}".format(self.get_option("layout.width"),
+                                            self.get_option("layout.height"),
+                                            self.get_option("layout.left"),
+                                            self.get_option("layout.top")))
+        
+        if self.get_option("layout.zoomed"):
+            ui_utils.set_zoomed(self, True)
+        
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+        
+        # Try set icon
+        try:
+            self.iconbitmap(default=os.path.join(self._main_dir, "res", "thonny.ico"))
+        except:
+            pass
+        
+        
+        self.bind("<FocusIn>", self._on_get_focus, "+")
+        self.bind("<FocusOut>", self._on_lose_focus, "+")
+        
+        if ui_utils.running_on_mac_os:
+            self._set_up_mac_specific_stuff()
+    
+    def _init_menu(self):
+        self._menubar = tk.Menu(self)
+        self["menu"] = self._menubar
+        self._menus = {}
+        
+        # create standard menus in correct order
+        self._get_menu("File")
+        self._get_menu("Edit")
+        self._get_menu("View")
+        self._get_menu("Run")
+        self._get_menu("Help")
+        
+        
+    def _init_style(self):
+        style = ttk.Style()
+    
+        if 'xpnative' in style.theme_names():
+            # gives better scrollbars in empty editors
+            theme = 'xpnative'
+        elif 'aqua' in style.theme_names():
+            theme = 'clam'
+        elif 'clam' in style.theme_names():
+            theme = 'clam'
+        else:
+            theme = style.theme_use()
+            
+        style.theme_use(theme)
+        
+        style.configure("Sash", sashthickness=SASHTHICKNESS)
+        
+        # get rid of Treeview borders
+        style.layout("Treeview", [
+            ('Treeview.treearea', {'sticky': 'nswe'})
+        ])
+        
+        # necessary for Python 2.7 TODO: doesn't help for aqua
+        style.configure("Treeview", background="white")
+        
+        
+        """
+        _images[1] = tk.PhotoImage("img_close",
+            file=os.path.join(imgdir, '1x1_white.gif'))
+        _images[2] = tk.PhotoImage("img_closeactive",
+            file=os.path.join(imgdir, 'close_active.gif'))
+        _images[3] = tk.PhotoImage("img_closepressed",
+            file=os.path.join(imgdir, 'close_pressed.gif'))
+            
+        style.element_create("close", "image", "img_close",
+            ("active", "pressed", "!disabled", "img_closepressed"),
+            ("active", "!disabled", "img_closeactive"), border=8, sticky='')
+        """
+        
+        global _IMG_GRAY_LINE # Saving the reference, otherwise Tk will garbage collect the images 
+        _IMG_GRAY_LINE = tk.PhotoImage("gray_line", file=os.path.join(self._get_image_dir(), 'gray_line.gif'))
+        style.element_create("gray_line", "image", "gray_line",
+                                   ("!selected", "gray_line"), 
+                                   height=1, width=10, border=1)
+        
+        
+        if theme == "xpnative":
+            # add a line below active tab to separate it from content
+            style.layout("Tab", [
+                ('Notebook.tab', {'sticky': 'nswe', 'children': [
+                    ('Notebook.padding', {'sticky': 'nswe', 'children': [
+                        ('Notebook.focus', {'sticky': 'nswe', 'children': [
+                            ('Notebook.label', {'sticky': '', 'side': 'left'}),
+                            #("close", {"side": "left", "sticky": ''})
+                        ], 'side': 'top'})
+                    ], 'side': 'top'}),
+                    ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
+                ]}),
+            ])
+            
+            style.configure("Tab", padding=(4,1,0,0))
+            
+        elif theme == "aqua":
+            style.map("TNotebook.Tab", foreground=[('selected', 'white'), ('!selected', 'black')])
+            
+            
+            
+        
+        """
+        ################
+        #print(style.layout("TMenubutton"))
+        style.layout("TMenubutton", [
+            ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
+            ('Menubutton.button', {'children': [
+                #('Menubutton.padding', {'children': [
+                    ('Menubutton.label', {'sticky': ''})
+                #], 'expand': '1', 'sticky': 'we'})
+            ], 'expand': '1', 'sticky': 'nswe'})
+        ])
+        
+        style.configure("TMenubutton", padding=14)
+        """
+        
+        
+        #print(style.map("Treeview"))
+        #print(style.layout("Treeview"))
+        #style.configure("Treeview.treearea", font=TREE_FONT)
+        # NB! Some Python or Tk versions (Eg. Py 3.2.3 + Tk 8.5.11 on Raspbian)
+        # can't handle multi word color names in style.map  
+        light_blue = "#ADD8E6" 
+        light_grey = "#D3D3D3"
+        if running_on_linux():
+            style.map("Treeview",
+                  background=[('selected', 'focus', light_blue),
+                              ('selected', '!focus', light_grey),
+                              ],
+                  foreground=[('selected', 'black'),
+                              ],
+                  )
+        else:
+            style.map("Treeview",
+                  background=[('selected', 'focus', 'SystemHighlight'),
+                              ('selected', '!focus', light_grey),
+                              ],
+                  foreground=[('selected', 'SystemHighlightText')],
+                  )
+        
+    def _init_user_logging(self):
+        # generate log filename
+        folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
+        if not os.path.exists(folder):
+            os.makedirs(folder)
+            
+        i = 0
+        while True: 
+            filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.txt".format(i)));
+            if os.path.exists(filename):
+                i += 1;  
+            else:
+                return filename
+        
+        # create logger
+        self._user_logger = user_logging.UserEventLogger(filename)
+        
     def _load_plugins(self):
         plugin_names = self._find_plugins(
                             os.path.join(self._main_dir, "thonny", "plugins"),
@@ -148,137 +269,60 @@ class Workbench(tk.Tk):
         
         return result
                                 
-    def _load_translations(self):
+    def _init_fonts(self):
+        if self.get_option("view.editor_font_family"):
+            editor_font = tk_font.Font(family=self.get_option("view.editor_font_family"))
+        else:
+            editor_font = tk_font.nametofont("TkFixedFont")
+            
+        if self.get_option("view.editor_font_size"):
+            editor_font.configure(size=self.get_option("view.editor_font_size"))
+        
+        self._fonts = {
+            'EditorFont' : editor_font,
+            'BoldEditorFont' : tk_font.Font(family=editor_font.actual()["family"],
+                                    size=editor_font.actual()["size"],
+                                    weight="bold"),
+            'IOFont' : tk_font.Font(family=editor_font.actual()["family"],
+                                    size=editor_font.actual()["size"]-2)
+        }
+
+    def _init_translation(self):
         gettext.translation('thonny',
                     os.path.join(self._main_dir, "thonny", "locale"), 
-                    languages=[prefs["general.language"], "en"]).install()
+                    languages=[self.get_option("general.language"), "en"]).install()
                                 
-                            
     
-    def add_view(self, view_constructor, label, preferred_location=None):
-        """
-        Is used for adding a "standard" view, ie. a view whose visibility can be
-        controlled by the View menu
-        """
-        # TODO: find parent according to preferred_location
-        master = self.control_book
-        view = view_constructor(master)
-        master.add(view, text=label)
-        
-        # TODO: organize showing and hiding 
-        
-    def add_command(self, menu_label, command_label, handler,
-                    availability_predicate=lambda event: True,
-                    default_accelerator=None,
-                    option_variable_id=None):
-        
-        def dispatch(event=None):
-            if availability_predicate(event):
-                # TODO: what about executing via shortcut and option variable?
-                handler(event)
-            else:
-                self.bell()
-                
-        # select actual accelerator according to user settings
-        accelerator = ...
-        
-        if accelerator:
-            # Tweak the appearance of the accelerator
-            accelerator = accelerator.replace("Key-", "")
-            if misc_utils.running_on_mac_os():
-                accelerator = accelerator.replace("Ctrl", "Command")
+    def _init_configuration(self):
+        self._configuration = ConfigurationManager(os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini")))
+        self._configuration.set_defaults({
+            "general.language" : "en",
+            "layout.zoomed" : False,
+            "layout.top" : 15,
+            "layout.left" : 150,
+            "layout.width" : 700,
+            "layout.height" : 650,
+            "layout.w_width" : 200,
+            "layout.e_width" : 200,
+            "layout.s_height" : 200,
             
-            # Convert visible accelerator string to Tk-s sequence 
-            sequence = accelerator.replace("Ctrl", "Control")
-            sequence = sequence.replace("+-", "+minus")
-            sequence = sequence.replace("++", "+plus")
+            "file.recent_files" : [],
+            "file.last_browser_folder" : None,
             
-            # it's customary to show keys with capital letters
-            # but tk would treat this as pressing with shift
-            parts = sequence.split("+")
-            if len(parts[-1]) == 1:
-                parts[-1] = parts[-1].lower()
+            "run.working_directory" : os.path.expanduser("~"),
+            "run.auto_cd" : True, 
             
-            # tk wants "-" between the parts 
-            sequence = "-".join(parts)
-    
-            self.bind_all('<' + sequence + '>', dispatch, True)
-                 
-        # create or find menu
-        menu = self.get_menu(menu_label)
-        menu.add(kind,
-            label=command_label,
-            accelerator=accelerator,
-            value=item.value,
-            variable=item.variable,
-            command=dispatch)
-    
-    
-    
-    def _update_toolbar(self):
-        "TODO:"
-    
-    def _init_widgets(self):
-        
-        self.main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border 
-        self.main_frame.grid(sticky=tk.NSEW)
-        self.toolbar = ttk.Frame(self.main_frame, padding=0) # TODO: height=30 ?
-        
-        self.main_pw   = ui_utils.create_PanedWindow(self.main_frame, orient=tk.HORIZONTAL)
-        self.center_pw = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
-        self.right_pw  = ui_utils.RightPanedWindow(self.main_frame, self.main_pw, self.center_pw, prefs["layout.memory_width"])        
+            "edit.enable_autocomplete" : True,
+            
+            "view.editor_font_family" : None,
+            "view.editor_font_size" : None, # 15 if running_on_mac_os() else 10,
 
-        self.toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10)
-        self._init_populate_toolbar()
-        self.main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
-        
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        self.main_frame.columnconfigure(0, weight=1)
-        self.main_frame.rowconfigure(1, weight=1)
-        
-        self.browse_book = ui_utils.PanelBook(self.main_pw)
-        self.editor_book = EditorNotebook(self.center_pw)
-        self.main_pw.add(self.center_pw, minsize=150, width=prefs["layout.center_width"])
-        # TODO: load lazily
-        #self.file_browser = FileBrowser(self, self.editor_book)
-        #self.browse_book.add(self.file_browser, text="Files")
-        self.cmd_update_browser_visibility(False)
-        
-        self.center_pw.add(self.editor_book, minsize=150)
-        
-        self.control_book = ui_utils.PanelBook(self.center_pw)
-        self.center_pw.add(self.control_book, minsize=50)
-        self.shell = ShellFrame(self.control_book, self._vm, self.editor_book)
-        self.stack = stack.StackPanel(self.control_book, self._vm, self.editor_book)
-        
-        self.control_book.add(self.shell, text=_("Shell")) # TODO: , underline=0
-        #self.control_book.add(self.stack, text="Stack") # TODO: , underline=1
-        
+            # TODO: view defaults should appear automatically
+            "view.filebrowser" : False,
+            "view.variables" : False,
+            "view.heap" : False,
+        })
          
-        self.globals_book = ui_utils.PanelBook(self.right_pw)
-        self.globals_frame = GlobalsFrame(self.globals_book)
-        self.globals_book.add(self.globals_frame, text=_("Variables"))
-
-        self.outline_book = ui_utils.PanelBook(self.right_pw)
-        self.outline_frame = thonny.outline.OutlineFrame(self.outline_book, self.editor_book)
-        self.outline_book.add(self.outline_frame, text=_("Outline"))
-                
-        self.heap_book = ui_utils.PanelBook(self.right_pw)
-        self.heap_frame = HeapFrame(self.heap_book)
-        self.heap_book.add(self.heap_frame, text=_("Heap")) 
-        
-        self.info_book = ui_utils.PanelBook(self.right_pw)
-        self.inspector_frame = ObjectInspector(self.info_book)
-        self.info_book.add(self.inspector_frame, text="Object info")
-        #self.right_pw.add(self.info_book, minsize=50)
-        
-        self.cmd_update_inspector_visibility()
-        self.cmd_update_memory_visibility()
-        self.cmd_update_outline_visibility()
-
-    
     def _init_commands(self):
         
         # TODO: see idlelib.macosxSupports
@@ -333,9 +377,7 @@ class Workbench(tk.Tk):
                 Command('decrease_font_size', 'Decrease font size', 'Ctrl+-', self),
                 "---",
                 Command('update_memory_model', 'Show values in heap',  None, self,
-                        kind="checkbutton", variable_name="values_in_heap"),
-                #Command('update_debugging_mode', 'Enable advanced debugging',  None, self,
-                #        kind="checkbutton", variable_name="advanced_debugging"),
+                        kind="checkbutton", variable_name="view.values_in_heap"),
                 "---",
                 Command('focus_editor', "Focus editor", "F11", self),
                 Command('focus_shell', "Focus shell", "F12", self),
@@ -383,27 +425,21 @@ class Workbench(tk.Tk):
             ]),
         ]
 
-        #TODO - implement a better way to conditionally add the below items
-        if prefs["experimental.find_feature_enabled"]:
-            self._menus[1][2].append("---");
-            self._menus[1][2].append(Command('find',         'Find & Replace',         'Ctrl+F', self._find_current_edit_widget));
+        self._menus[1][2].append("---");
+        self._menus[1][2].append(Command('find',         'Find & Replace',         'Ctrl+F', self._find_current_edit_widget));
 
-        if prefs["experimental.autocomplete_feature_enabled"]:
-            self._menus[1][2].append("---");
-            self._menus[1][2].append(Command('autocomplete',         'Autocomplete',         'Ctrl+space', self._find_current_edit_widget));            
+        self._menus[1][2].append("---");
+        self._menus[1][2].append(Command('autocomplete',         'Autocomplete',         'Ctrl+space', self._find_current_edit_widget));            
 
-        if prefs["experimental.outline_feature_enabled"]:
-            self._menus[2][2].append("---");
-            self._menus[2][2].append(Command('update_outline_visibility',         'Show outline',         None, self,  kind="checkbutton", variable_name="layout.outline_visible"));
+        self._menus[2][2].append("---");
+        self._menus[2][2].append(Command('update_outline_visibility',         'Show outline',         None, self,  kind="checkbutton", variable_name="layout.outline_visible"));
 
-        if prefs["experimental.refactor_rename_feature_enabled"]:
-            self._menus[1][2].append("---");
-            self._menus[1][2].append(Command('refactor_rename',         'Rename identifier',         None, self)); 
+        self._menus[1][2].append("---");
+        self._menus[1][2].append(Command('refactor_rename',         'Rename identifier',         None, self)); 
 
-        if prefs["experimental.comment_toggle_enabled"]:
-            self._menus[1][2].append("---");
-            self._menus[1][2].append(Command('comment_in',         'Comment in',         'Ctrl+Key-3', self._find_current_edit_widget)); 
-            self._menus[1][2].append(Command('comment_out',         'Comment out',         'Ctrl+Key-4', self._find_current_edit_widget));
+        self._menus[1][2].append("---");
+        self._menus[1][2].append(Command('comment_in',         'Comment in',         'Ctrl+Key-3', self._find_current_edit_widget)); 
+        self._menus[1][2].append(Command('comment_out',         'Comment out',         'Ctrl+Key-4', self._find_current_edit_widget));
                 
         # TODO:
         """
@@ -501,6 +537,50 @@ class Workbench(tk.Tk):
         #    else:
         #        memory_pw.pane
 
+    
+    def _init_widgets(self):
+        
+        main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border 
+        main_frame.grid(sticky=tk.NSEW)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        self.toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
+        self.toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10)
+        self._init_populate_toolbar()
+        
+        main_pw   = ui_utils.OrderedPanedWindow(main_frame, orient=tk.HORIZONTAL)
+        main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
+        self.main_frame.columnconfigure(0, weight=1)
+        self.main_frame.rowconfigure(1, weight=1)
+        
+        west_pw   = ui_utils.OrderedPanedWindow(main_pw, orient=tk.VERTICAL)
+        center_pw = ui_utils.OrderedPanedWindow(main_pw, orient=tk.VERTICAL)
+        east_pw   = ui_utils.OrderedPanedWindow(main_pw, orient=tk.VERTICAL)
+        
+        self.view_notebooks = {
+            'nw' : ui_utils.OrderedNotebook(west_pw),
+            'w'  : ui_utils.OrderedNotebook(west_pw),
+            'sw' : ui_utils.OrderedNotebook(west_pw),
+            
+            's'  : ui_utils.OrderedNotebook(center_pw),
+            
+            'ne' : ui_utils.OrderedNotebook(east_pw),
+            'e'  : ui_utils.OrderedNotebook(east_pw),
+            'se' : ui_utils.OrderedNotebook(east_pw),
+        }
+
+        self.editor_book = EditorNotebook(self.center_pw)
+        center_pw.add(self.editor_book, position_key=1)
+        
+
+
+    def _init_backend(self):
+        self._vm = vm_proxy.VMProxy(self.get_option("run.working_directory"), self._main_dir)
+        self._poll_vm_messages()
+        self._advance_background_tk_mainloop()
+
+
     def _init_populate_toolbar(self): 
         def on_kala_button():
             self.editor_book.demo_editor.set_read_only(not self.editor_book.demo_editor.read_only)
@@ -537,6 +617,252 @@ class Workbench(tk.Tk):
                 
             col += 1 
         
+    def _set_up_mac_specific_stuff(self):
+        def mac_open_document(self, *args):
+            # TODO:
+            #showinfo("open doc", str(args))
+            pass
+        
+        def mac_open_application(self, *args):
+            #showinfo("open app", str(args))
+            pass
+        
+        def mac_reopen_application(self, *args):
+            #showinfo("reopen app", str(args))
+            pass
+        
+        self.createcommand("::tk::mac::OpenDocument", mac_open_document)
+        self.createcommand("::tk::mac::OpenApplication", mac_open_application)
+        self.createcommand("::tk::mac::ReopenApplication", mac_reopen_application)
+        
+    def _get_image_dir(self):
+        return os.path.join(self._main_dir, "thonny", "res")
+    
+    def _get_menu(self, label):
+        if label not in self._menus:
+            self._menus[label] = tk.Menu(self._menubar)
+            self._menubar.add_cascade(label=label, menu=self._menus[label])
+            
+        return self._menus[label]
+                      
+    def get_option(self, name):
+        return self._configuration.get_option(name)
+    
+    def set_option(self, name, value, save_now=True):
+        self._configuration.set_option(name, value, save_now)
+        
+    def add_defaults(self, defaults):
+        self._configuration.set_defaults(defaults)
+    
+    def get_variable(self, name):
+        return self._configuration.get_variable(name)
+    
+    def get_font(self, name):
+        """
+        Supported names are EditorFont and BoldEditorFont
+        """
+        return self._fonts[name]
+    
+    def _get_view(self, view_id):
+        if "instance" not in self._views[view_id]:
+            # create the view
+            class_ = self._view_records[view_id]["class"]
+            location = self._view_records[view_id]["location"]
+            master = self._view_notebooks[location]
+            view = class_(master)
+            self._views[view_id]["instance"] = view
+            
+        return self._views[view_id]["instance"]
+    
+    
+    def _show_view(self, view_id, set_focus):
+        # get or create
+        view = self._get_view(view_id)
+        notebook = view.master
+        
+        if not view.winfo_ismapped():
+            # insert to correct position
+            position_key = self._views[view_id]["position_key"] 
+            for sibling in map(notebook.nametowidget, notebook.tabs()):
+                sibling_id = sibling.__class__.__name__
+                sibling_position_key = self._views[sibling_id]["position_key"]
+                if sibling_position_key > position_key:
+                    where = sibling
+                    break
+            else:
+                where = "end"
+            
+            notebook.insert(where, view, text=self._views[view_id]["label"])
+        
+        # switch to the tab
+        notebook.select(view)
+        
+        # add focus
+        if set_focus:
+            view.focus_set()
+    
+    def _hide_view(self, view_id):
+        if "instance" in self._views[view_id]:
+            view = self._views[view_id]["instance"]
+            view.master.remove(view)
+        
+        # TODO: update master visibility
+        
+    
+    def register_view(self, class_, label, default_location):
+        """Adds item to "View" menu for showing/hiding given view. 
+        
+        Args:
+            view_class: Class or constructor for view. Should be callable with single
+                argument (the master of the view)
+            label: Label of the view tab
+            location: Location descriptor. Can be "nw", "sw", "s", "se", "ne"
+        
+        Returns: None        
+        """
+        view_id = class_.__name__
+        
+        self.add_defaults({
+            "view." + view_id + ".visible"  : False,
+            "view." + view_id + ".location" : default_location,
+            "view." + view_id + ".position_key" : label
+        })
+        
+        self._view_records[view_id] = {
+            "class" : class_,
+            "label" : label,
+            "location" : self.get_option("view." + view_id + ".location"),
+            "position_key" : self.get_option("view." + view_id + ".position_key")
+        }
+            
+        def toggle_view():
+            # find or create view
+            master = self._view_notebooks[self.get_option("view." + view_id + ".location")] 
+            for child in master.winfo_children():
+                if isinstance(child, view_class):
+                    view = child
+                    break
+            else:
+                view = view_class(master)
+                view.position_key = self.get_option("view." + view_id + ".position_key")
+            
+            # show or hide
+            visibility_flag = self.get_variable("view." + view_id + ".visible") 
+            if visibility_flag.get():
+                master.remove(view)
+                if len(master.panes()) == 0:
+                    
+            else:
+                # find correct position
+                for name in master.tabs():
+                    where = master.nametowidget(name)
+                    if where.position_key > view.position_key:
+                        break
+                else:
+                    where = "end"
+                
+                # insert
+                master.insert(where, view, text=label)
+            
+            # toggle the flag
+            visibility_flag.set(not visibility_flag.get())
+        
+        
+        # Menu items are positioned alphabetically 
+        # in first section (ie. before first separator) of View menu.
+        # Find correct position for this label
+        view_menu = self._get_menu("View")
+        for i in range(0, view_menu.index("end")+1):
+            if ("label" not in view_menu.entryconfigure(i) # separator
+                or view_menu.entrycget(i, "label") > label):
+                index = i
+                break
+        else:
+            index = None
+            
+            
+        self.add_command(
+            menu_label="View",
+            command_label=label,
+            handler=toggle_view,
+            flag_name="view." + view_id + ".visible",
+            index=index)
+        
+        
+    def add_command(self, menu_label, command_label, handler,
+                    tester=None,
+                    default_accelerator=None,
+                    flag_name=None,
+                    _index="end"):
+        """Adds an item to specified menu.
+        
+        Args:
+            menu_label: Label of the menu the command should appear in.
+            command_label: Label for this command
+            handler: Function to be called when the command is invoked. 
+                Should be callable with one argument (the event or None).
+            tester: Function to be called for determining if command is available or not.
+                Should be callable with one argument (the event or None).
+                Should return True or False.
+                If None then command is assumed to be always available.
+            default_accelerator: Windows style keyboard shortcut string. 
+                Will be translated on Mac
+            flag_name: Used for toggle commands. Indicates the name of the boolean option.
+        
+        Returns:
+            None
+        """     
+        
+        def dispatch(event=None):
+            if tester and tester(event):
+                # TODO: what about executing via shortcut and option variable?
+                handler(event)
+            else:
+                self.bell()
+                
+        # select actual accelerator according to user settings
+        """TODO:
+        accelerator = ...
+        
+        if accelerator:
+            # Tweak the appearance of the accelerator
+            accelerator = accelerator.replace("Key-", "")
+            if misc_utils.running_on_mac_os():
+                accelerator = accelerator.replace("Ctrl", "Command")
+            
+            # Convert visible accelerator string to Tk-s sequence 
+            sequence = accelerator.replace("Ctrl", "Control")
+            sequence = sequence.replace("+-", "+minus")
+            sequence = sequence.replace("++", "+plus")
+            
+            # it's customary to show keys with capital letters
+            # but tk would treat this as pressing with shift
+            parts = sequence.split("+")
+            if len(parts[-1]) == 1:
+                parts[-1] = parts[-1].lower()
+            
+            # tk wants "-" between the parts 
+            sequence = "-".join(parts)
+    
+            self.bind_all('<' + sequence + '>', dispatch, True)
+        """
+        
+        self._get_menu(menu_label).insert(
+            _index,
+            "checkbutton" if flag_name else "command",
+            label=command_label,
+            #accelerator=accelerator,
+            variable=self.get_variable(flag_name),
+            command=dispatch)
+    
+    def log_user_event(self, event):
+        self._user_logger.log_micro_event(event)
+
+    
+    def _update_toolbar(self):
+        "TODO:"
+    
+    
     def _advance_background_tk_mainloop(self):
         if self._vm.get_state() == "toplevel":
             self._vm.send_command(InlineCommand(command="tkupdate"))
@@ -554,7 +880,7 @@ class Workbench(tk.Tk):
             if (isinstance(msg, DebuggerResponse) 
                 and hasattr(msg, "tags") 
                 and "call_function" in msg.tags
-                and not prefs["debugging.expand_call_functions"]):
+                and not self.get_option("debugging.expand_call_functions")):
                 
                 self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
                 continue
@@ -570,13 +896,13 @@ class Workbench(tk.Tk):
             self.heap_frame.handle_vm_message(msg)
             self.inspector_frame.handle_vm_message(msg)
             
-            prefs["cwd"] = self._vm.cwd
+            self.set_option("run.working_directory", self._vm.cwd)
             self._update_title()
             
             # automatically advance from some events
             if (isinstance(msg, DebuggerResponse) 
                 and msg.state in ("after_statement", "after_suite", "before_suite")
-                and not prefs["debugging.detailed_steps"]
+                and not self.get_option("debugging.detailed_steps")
                 or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
                 
                 self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
@@ -670,7 +996,7 @@ class Workbench(tk.Tk):
         # changing dir may be required
         script_dir = os.path.dirname(filename)
         
-        if (prefs["run.auto_cd"] and cmd_name[0].isupper()
+        if (self.get_option("run.auto_cd") and cmd_name[0].isupper()
             and self._vm.cwd != script_dir):
             # create compound command
             # start with %cd
@@ -696,29 +1022,29 @@ class Workbench(tk.Tk):
         self._vm.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
     
     def cmd_update_browser_visibility(self, adjust_window_width=True):
-        if prefs["layout.browser_visible"] and not self.browse_book.winfo_ismapped():
+        if self.get_option("layout.browser_visible") and not self.w_book.winfo_ismapped():
             if adjust_window_width:
-                self._check_update_window_width(+prefs["layout.browser_width"]+ui_utils.SASHTHICKNESS)
-            self.main_pw.add(self.browse_book, minsize=150, 
-                             width=prefs["layout.browser_width"],
+                self._check_update_window_width(+self.get_option("layout.w_width")+SASHTHICKNESS)
+            self.main_pw.add(self.w_book, minsize=150, 
+                             width=self.get_option("layout.w_width"),
                              before=self.center_pw)
-        elif not prefs["layout.browser_visible"] and self.browse_book.winfo_ismapped():
+        elif not self.get_option("layout.browser_visible") and self.w_book.winfo_ismapped():
             if adjust_window_width:
-                self._check_update_window_width(-prefs["layout.browser_width"]-ui_utils.SASHTHICKNESS)
-            self.main_pw.remove(self.browse_book)
+                self._check_update_window_width(-self.get_option("layout.w_width")-SASHTHICKNESS)
+            self.main_pw.remove(self.w_book)
 
             self.step_over = False
 
     def cmd_update_memory_visibility(self, adjust_window_width=True):
         # TODO: treat variables frame and memory pane differently
 
-        if prefs["layout.memory_visible"]:
+        if self.get_option("layout.memory_visible"):
             self.right_pw.add(self.globals_book, minsize=50)
         else:
             self.right_pw.remove(self.globals_book)
 
     def cmd_update_inspector_visibility(self):
-        if prefs["layout.inspector_visible"]:
+        if self.get_option("layout.inspector_visible"):
             self.right_pw.add(self.info_book, minsize=50)
         else:
             self.right_pw.remove(self.info_book)
@@ -727,7 +1053,7 @@ class Workbench(tk.Tk):
         return self.editor_book.get_current_editor() is not None
 
     def cmd_update_outline_visibility(self): 
-        if not prefs["layout.outline_visible"]: 
+        if not self.get_option("layout.outline_visible"): 
             self.outline_frame.prepare_for_removal()
             self.right_pw.remove(self.outline_book)
         else:
@@ -735,15 +1061,15 @@ class Workbench(tk.Tk):
             if self.editor_book.get_current_editor() != None:
                 self.outline_frame.parse_and_display_module(self.editor_book.get_current_editor()._code_view)
             self.right_pw.add(self.outline_book, minsize=50)
-            user_logging.log_user_event(thonny.outline.OutlineOpenEvent(self.editor_book.get_current_editor()))
+            self.log_user_event(thonny.outline.OutlineOpenEvent(self.editor_book.get_current_editor()))
 
     def cmd_refactor_rename_enabled(self):
         return self.editor_book.get_current_editor() is not None
 
     def cmd_refactor_rename(self):
-        user_logging.log_user_event(thonny.refactor.RefactorRenameStartEvent(self.editor_book.get_current_editor()))
+        self.log_user_event(thonny.refactor.RefactorRenameStartEvent(self.editor_book.get_current_editor()))
         if not self.editor_book.get_current_editor():
-            user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
+            self.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
             errorMessage = tkMessageBox.showerror(
                            title="Rename failed",
                            message="Rename operation failed (no active editor tabs?).", #TODO - more informative text needed
@@ -762,7 +1088,7 @@ class Workbench(tk.Tk):
                       master=self)
 
             if not confirm:
-                user_logging.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
+                self.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
                 return #if user doesn't want it, return
 
             for editor in unsaved_editors:                     
@@ -770,7 +1096,7 @@ class Workbench(tk.Tk):
                     self.editor_book.select(editor) #in the case of editors with no filename, show it, so user knows which one they're saving
                 editor.cmd_save_file()
                 if editor.cmd_save_file_enabled(): #just a sanity check - if after saving a file still needs saving, something is wrong
-                    user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
+                    self.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
                     errorMessage = tkMessageBox.showerror(
                                    title="Rename failed",
                                    message="Rename operation failed (saving file failed).", #TODO - more informative text needed
@@ -780,7 +1106,7 @@ class Workbench(tk.Tk):
         filename = self.editor_book.get_current_editor().get_filename()
 
         if filename == None: #another sanity check - the current editor should have an associated filename by this point 
-            user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
+            self.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
             errorMessage = tkMessageBox.showerror(
                            title="Rename failed",
                            message="Rename operation failed (no filename associated with current module).", #TODO - more informative text needed
@@ -793,7 +1119,7 @@ class Workbench(tk.Tk):
             renameWindow = thonny.refactor.RenameWindow(self)
             newname = renameWindow.refactor_new_variable_name
             if newname == None:
-                user_logging.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
+                self.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
                 return #user canceled, return
 
             if re.match(identifier, newname):
@@ -819,7 +1145,7 @@ class Workbench(tk.Tk):
                 #if len(changes.changes == 0): raise Exception
 
             except Exception: #couple of different reasons why this could happen, let's list them all in the error message
-                user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
+                self.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
                 message = 'Rename operation failed. A few possible reasons: \n'
                 message += '1) Not a valid Python identifier selected \n'
                 message += '2) The current file or any other files in the same directory or in any of its subdirectores contain incorrect syntax. Make sure the current project is in its own separate folder.'
@@ -833,7 +1159,7 @@ class Workbench(tk.Tk):
 
         #sanity check
         if len(changes.changes) == 0:
-            user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
+            self.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
             errorMessage = tkMessageBox.showerror(
                                title="Rename failed",
                                message="Rename operation failed - no identifiers affected by change.", #TODO - more informative text needed
@@ -857,14 +1183,14 @@ class Workbench(tk.Tk):
         
         #confirm with user to finalize the changes
         if not confirm:
-            user_logging.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
+            self.log_user_event(thonny.refactor.RefactorRenameCancelEvent(self.editor_book.get_current_editor()))
             thonny.refactor.cancel_changes(project)
             return
 
         try:
             thonny.refactor.perform_changes(project, changes)
         except Exception:
-                user_logging.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
+                self.log_user_event(thonny.refactor.RefactorRenameFailedEvent(self.editor_book.get_current_editor()))
                 errorMessage = tkMessageBox.showerror(
                                title="Rename failed",
                                message="Rename operation failed (Rope error).", #TODO - more informative text needed
@@ -891,7 +1217,7 @@ class Workbench(tk.Tk):
                     self.editor_book.forget(editor)
                     editor.destroy()
 
-        user_logging.log_user_event(thonny.refactor.RefactorRenameCompleteEvent(description, offset, affected_files))
+        self.log_user_event(thonny.refactor.RefactorRenameCompleteEvent(description, offset, affected_files))
         current_browser_node_path = self.file_browser.get_selected_path()
         self.file_browser.refresh_tree()
         if current_browser_node_path != None:
@@ -913,10 +1239,10 @@ class Workbench(tk.Tk):
         return self._vm.get_state() == "toplevel"
     
     def cmd_update_memory_model(self):
-        if prefs["values_in_heap"] and not self.heap_book.winfo_ismapped():
+        if self.get_option("view.heap") and not self.heap_book.winfo_ismapped():
             # TODO: put it before object info block
             self.right_pw.add(self.heap_book, after=self.globals_book, minsize=50)
-        elif not prefs["values_in_heap"] and self.heap_book.winfo_ismapped():
+        elif not self.get_option("view.heap") and self.heap_book.winfo_ismapped():
             self.right_pw.remove(self.heap_book)
         
         self.globals_frame.update_memory_model()
@@ -926,9 +1252,6 @@ class Workbench(tk.Tk):
         assert self._vm.get_state() == "toplevel"
         # TODO: following command creates an unnecessary new propmpt
         self._vm.send_command(ToplevelCommand(command="pass", heap_required=True))
-
-    def cmd_update_debugging_mode(self):
-        print(prefs["advanced_debugging"])
 
     def cmd_mac_add_download_assessment(self):
         # TODO:
@@ -999,7 +1322,7 @@ class Workbench(tk.Tk):
         self.shell.focus_set()
     
     def cmd_open_user_dir(self):
-        misc_utils.open_path_in_system_file_manager(THONNY_USER_DIR)
+        misc_utils.open_path_in_system_file_manager(os.path.expanduser(os.path.join("~", ".thonny")))
     
     def _check_issue_debugger_command(self, cmd, automatic=False):
         if isinstance(self._vm.get_state_message(), DebuggerResponse):
@@ -1014,7 +1337,7 @@ class Workbench(tk.Tk):
             frame_id=last_response.frame_id,
             state=last_response.state,
             focus=last_response.focus,
-            heap_required=prefs["values_in_heap"]
+            heap_required=self.get_option("view.values_in_heap")
         )
         
         if not automatic:
@@ -1076,18 +1399,7 @@ class Workbench(tk.Tk):
     def _update_title(self):
         self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._vm.cwd, *sys.version_info))
     
-    def _mac_open_document(self, *args):
-        # TODO:
-        #showinfo("open doc", str(args))
-        pass
-    
-    def _mac_open_application(self, *args):
-        #showinfo("open app", str(args))
-        pass
-    
-    def _mac_reopen_application(self, *args):
-        #showinfo("reopen app", str(args))
-        pass
+
     
     def _on_close(self):
         if not self.editor_book.check_allow_closing():
@@ -1103,59 +1415,14 @@ class Workbench(tk.Tk):
         
         self.destroy()
         
-        
-    def _save_preferences(self):
-        self.update_idletasks()
-        
-        # update layout prefs
-        if self.browse_book.winfo_ismapped():
-            prefs["layout.browser_width"] = self.browse_book.winfo_width()
-        
-        if self.right_pw.winfo_ismapped():
-            prefs["layout.memory_width"] = self.right_pw.winfo_width()
-            # TODO: heigths
-        
-        prefs["layout.zoomed"] = ui_utils.get_zoomed(self)
-        if not ui_utils.get_zoomed(self):
-            prefs["layout.top"] = self.winfo_y()
-            prefs["layout.left"] = self.winfo_x()
-            prefs["layout.width"] = self.winfo_width()
-            prefs["layout.height"] = self.winfo_height()
-        
-        center_width = self.center_pw.winfo_width();
-        if center_width > 1:
-            prefs["layout.center_width"] = center_width
-        
-        if self.right_pw.winfo_ismapped():
-            prefs["layout.memory_width"] = self.right_pw.winfo_width()
-        
-        if self.browse_book.winfo_ismapped():
-            prefs["layout.browser_width"] = self.browse_book.winfo_width()
-            
-        prefs.save()
-    
-    
-    def new_user_log_file(self):
-        folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-            
-        i = 0
-        while True: 
-            fname = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.txt".format(i)));
-            if os.path.exists(fname):
-                i += 1;  
-            else:
-                return fname
+    def _on_get_focus(self, e):
+        self.log_user_event(user_logging.ProgramGetFocusEvent());
 
-    def on_get_focus(self, e):
-        user_logging.log_user_event(user_logging.ProgramGetFocusEvent());
-
-    def on_lose_focus(self, e):
-        user_logging.log_user_event(user_logging.ProgramLoseFocusEvent());
+    def _on_lose_focus(self, e):
+        self.log_user_event(user_logging.ProgramLoseFocusEvent());
         
     
-    def on_tk_exception(self, exc, val, tb):
+    def _on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception
         # Aivar: following statement kills the process when run with pythonw.exe
         # http://bugs.python.org/issue22384
@@ -1169,8 +1436,35 @@ class Workbench(tk.Tk):
         tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
                                 traceback.format_exc())
     
-    def set_icon(self):
-        try:
-            self.iconbitmap(default=os.path.join(self._main_dir, "res", "thonny.ico"))
-        except:
-            pass
+        
+    def _save_preferences(self):
+        self.update_idletasks()
+        
+        # update layout prefs
+        if self.w_book.winfo_ismapped():
+            self.set_option("layout.w_width", self.w_book.winfo_width(), False)
+        
+        if self.right_pw.winfo_ismapped():
+            self.set_option("layout.memory_width", self.right_pw.winfo_width(), False)
+            # TODO: heigths
+        
+        self.set_option("layout.zoomed", ui_utils.get_zoomed(self), False)
+        if not ui_utils.get_zoomed(self):
+            self.set_option("layout.top", self.winfo_y(), False)
+            self.set_option("layout.left", self.winfo_x(), False)
+            self.set_option("layout.width", self.winfo_width(), False)
+            self.set_option("layout.height", self.winfo_height(), False)
+        
+        center_width = self.center_pw.winfo_width()
+        if center_width > 1:
+            self.set_option("layout.center_width", center_width, False)
+        
+        if self.right_pw.winfo_ismapped():
+            self.set_option("layout.memory_width", self.right_pw.winfo_width(), False)
+        
+        if self.w_book.winfo_ismapped():
+            self.set_option("layout.browser_width", self.w_book.winfo_width(), False)
+            
+        self._configuration.save()
+    
+

@@ -9,7 +9,7 @@ from thonny import ui_utils
 from thonny.common import TextRange
 
 class AstView(ui_utils.TreeFrame):
-    def __init__(self, master):
+    def __init__(self, workbench, master):
         ui_utils.TreeFrame.__init__(self, master,
             columns=('range', 'lineno', 'col_offset', 'end_lineno', 'end_col_offset'),
             displaycolumns=(0,)

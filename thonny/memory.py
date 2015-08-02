@@ -59,7 +59,7 @@ class VariablesFrame(MemoryFrame):
         
 
     def update_memory_model(self):
-        if prefs["values_in_heap"]:
+        if prefs["view.values_in_heap"]:
             self.tree.configure(displaycolumns=("name", "id"))
             #self.tree.columnconfigure(1, weight=1, width=400)
             #self.tree.columnconfigure(2, weight=0)
@@ -74,8 +74,7 @@ class VariablesFrame(MemoryFrame):
         if variables:
             for name in sorted(variables.keys()):
                 
-                if (not name.startswith("__")
-                    or prefs["show_double_underscore_names"]):
+                if not name.startswith("__"):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
                     self.tree.set(node_id, "id", format_object_id(variables[name].id))
@@ -273,7 +272,7 @@ class ObjectInspector(ScrollableFrame):
     def request_object_info(self): 
         vm_proxy.send_command(InlineCommand(command="get_object_info",
                                             object_id=self.object_id,
-                                            all_attributes=prefs["show_double_underscore_names"])) 
+                                            all_attributes=False)) 
                     
     def set_object_info(self, object_info):
         self.object_info = object_info
@@ -468,7 +467,7 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
         self._update_columns()
         
     def _update_columns(self):
-        if prefs["values_in_heap"]:
+        if prefs["view.values_in_heap"]:
             if self.elements_have_indices:
                 self.tree.configure(displaycolumns=("index", "id"))
             else:
@@ -535,7 +534,7 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         self.update_memory_model()
         
     def update_memory_model(self):
-        if prefs["values_in_heap"]:
+        if prefs["view.values_in_heap"]:
             self.tree.configure(displaycolumns=("key_id", "id"))
         else:
             self.tree.configure(displaycolumns=("key", "value"))

@@ -3,7 +3,6 @@ import os.path
 from time import strptime
 from datetime import datetime, timedelta
 
-USER_LOGGER = None # Main will create the logger
 
 """
 TODO: on Mac when playing around with backspace and undo by long pressing keys (long backspace)
@@ -120,11 +119,7 @@ class UserEventLogger:
         
         f.close()
 
-def log_user_event(e):
-    USER_LOGGER.log_micro_event(e)
 
-def events_list_to_json():
-    pass
 
 class UserEvent:
     def __str__(self):

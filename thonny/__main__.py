@@ -2,6 +2,10 @@ import sys
 import os.path
 import traceback
 import tkinter
+import logging
+
+
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
 
 # Tweak the path
 # First remove the current folder from path
@@ -24,7 +28,6 @@ if installation_dir not in sys.path:
 # Run
 try:
     from thonny import workbench
-    
     workbench.Workbench(installation_dir).mainloop()
 except:
     traceback.print_exc()

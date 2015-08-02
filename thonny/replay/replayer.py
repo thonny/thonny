@@ -19,7 +19,7 @@ class ReplayWindow(tk.Tk):
         self.center_pw  = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
         self.right_frame = ttk.Frame(self.main_pw)
         self.editor_book = EditorNotebook(self.center_pw)
-        shell_book = ui_utils.PanelBook(self.main_pw)
+        shell_book = ui_utils.AutomaticViewNotebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
         self.log_frame = LogFrame(self.right_frame, self.editor_book, self.shell)
         self.browser = ReplayerFileBrowser(self.main_pw, self.log_frame)

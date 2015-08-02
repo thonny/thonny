@@ -26,7 +26,6 @@ TREE_FONT = None
 
 imgdir = os.path.join(os.path.dirname(__file__), 'res')
 
-_images = {} # save them here to avoid them being gc-d 
 _event_data = {}
 _next_event_data_serial = 1
 
@@ -37,29 +36,17 @@ _modifier_keys = {"Control_L", "Alt_L", "Shift_L",
                   #"270336", "131076", "1048592"
                   } 
 
-def create_PanedWindow(master, orient):
-    pw = tk.PanedWindow(master,
-                          orient=orient,
-                          showhandle="False",
-                          sashwidth=SASHTHICKNESS)
-    style = ttk.Style()
-    if style.theme_use() == "clam":
-        pw.configure(background=CLAM_BACKGROUND)
-    elif style.theme_use() == "aqua":
-        pw.configure(background="systemSheetBackground")
-    elif running_on_windows():
-        pw.configure(background="SystemButtonFace")
 
-    return pw
-
-#the right-side paned window containing Variables, Outline, Inspect views, etc
-#hides itself when it has no children, automatically shows itself when it adds children
-class RightPanedWindow(tk.PanedWindow):
-    def __init__(self, master, main_pw, after, pref_width):
-        tk.PanedWindow.__init__(self, master, orient=tk.VERTICAL, showhandle="False", sashwidth=SASHTHICKNESS)
-        self.main_pw = main_pw
-        self.pref_width = pref_width
-        self.after = after
+class PanedWindowForViewNotebooks(tk.PanedWindow):
+    """
+    Enables positioning panes according to their position_key-s.
+    Automatically adds/removes itself to/from its master PanedWindow.
+    Fixes some style glitches.
+    """ 
+    def __init__(self, master, location):
+        tk.PanedWindow.__init__(self, master)
+        
+        self._location = location
         style = ttk.Style()
         if style.theme_use() == "clam":
             self.configure(background=CLAM_BACKGROUND)
@@ -67,249 +54,73 @@ class RightPanedWindow(tk.PanedWindow):
             self.configure(background="systemSheetBackground")
         elif running_on_windows():
             self.configure(background="SystemButtonFace")
-
-    def add(self, *args, **kwargs): #proxies the PanedWindow method, also handles the logic of adding the pane to the main_pw when it has any children
-        super(RightPanedWindow, self).add(*args, **kwargs)
-        if len(self.panes()) == 1:
-            self.main_pw.add(self, minsize=250, width=self.pref_width, after=self.after)
-
-    def remove(self, *args, **kwargs): #proxies the PanedWindow method, also handles the logic of removing the pane from the main_pw when it has no children
-        super(RightPanedWindow, self).remove(*args, **kwargs)
-        if len(self.panes()) == 0:
-            self.main_pw.remove(self)
-
-def create_menubutton(master):
-    font = tk_font.nametofont("TkTextFont").copy()
-    #font.configure(size=7)
     
-    if "arrow_down" not in _images:
-        _images["arrow_down"] = tk.PhotoImage("img_arrow_down", file=os.path.join(imgdir, 'arrow_down2.gif'))
-    
-    # trying menubutton
-    kw_args = {
-        "text" : '@1208323432',
-        "image" : _images["arrow_down"],
-        "compound" : tk.RIGHT,
-        "relief" : tk.FLAT,
-        #"foreground": "#777777",
-        "font" : font
-    }
-    
-    style = ttk.Style()
-    if style.theme_use() == "clam":
-        kw_args["background"] = CLAM_BACKGROUND
+    def add_notebook(self, child):
+        kwargs = {}
+        for sibling in self.panes():
+            if (not hasattr(sibling, "position_key") 
+                or sibling.position_key > child.position_key):
+                kwargs["before"] = sibling
+                break
         
-    mb = tk.Menubutton(master, **kw_args)
-    #mb = ttk.Menubutton(master, text="__main__")
-        
-    mb.menu = tk.Menu(mb, tearoff=0)
-    mb['menu'] = mb.menu
-
-    # TODO: demo
-    mayoVar  = tk.IntVar()
-    ketchVar = tk.IntVar()
-    mb.menu.add_checkbutton(label='mayo', variable=mayoVar)
-    mb.menu.add_checkbutton(label='ketchup', variable=ketchVar)
+        self.add(child, **kwargs)
     
-    return mb
-
-def setup_style():
-    style = ttk.Style()
-
-    if 'xpnative' in style.theme_names():
-        # gives better scrollbars in empty editors
-        # and Python 2.7 and 3.1 don't have "vista" theme anyway
-        theme = 'xpnative'
-    elif 'aqua' in style.theme_names():
-        theme = 'clam'
-    elif 'clam' in style.theme_names():
-        theme = 'clam'
-    else:
-        theme = style.theme_use()
-        
-    style.theme_use(theme)
-    #style.theme_use("clam")
-    
-    
-    style.configure("Sash", sashthickness=SASHTHICKNESS)
-    
-    # get rid of Treeview borders
-    style.layout("Treeview", [
-        ('Treeview.treearea', {'sticky': 'nswe'})
-    ])
-    
-    # necessary for Python 2.7 TODO: doesn't help for aqua
-    style.configure("Treeview", background="white")
-    
-    
-    """
-    _images[1] = tk.PhotoImage("img_close",
-        file=os.path.join(imgdir, '1x1_white.gif'))
-    _images[2] = tk.PhotoImage("img_closeactive",
-        file=os.path.join(imgdir, 'close_active.gif'))
-    _images[3] = tk.PhotoImage("img_closepressed",
-        file=os.path.join(imgdir, 'close_pressed.gif'))
-        
-    style.element_create("close", "image", "img_close",
-        ("active", "pressed", "!disabled", "img_closepressed"),
-        ("active", "!disabled", "img_closeactive"), border=8, sticky='')
-    """
-    _images[4] = tk.PhotoImage("gray_line1", file=os.path.join(imgdir, 'gray_line.gif'))
-    _images[5] = tk.PhotoImage("gray_line2", file=os.path.join(imgdir, 'gray_line.gif'))
-    
-    style.element_create("gray_line", "image", "gray_line1",
-                               ("!selected", "gray_line2"), 
-                               height=1, width=10, border=1)
-    
-    
-    if theme == "xpnative":
-        # add a line below active tab to separate it from content
-        style.layout("Tab", [
-            ('Notebook.tab', {'sticky': 'nswe', 'children': [
-                ('Notebook.padding', {'sticky': 'nswe', 'children': [
-                    ('Notebook.focus', {'sticky': 'nswe', 'children': [
-                        ('Notebook.label', {'sticky': '', 'side': 'left'}),
-                        #("close", {"side": "left", "sticky": ''})
-                    ], 'side': 'top'})
-                ], 'side': 'top'}),
-                ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
-            ]}),
-        ])
-        
-        style.configure("Tab", padding=(4,1,0,0))
-        
-    elif theme == "aqua":
-        style.map("TNotebook.Tab", foreground=[('selected', 'white'), ('!selected', 'black')])
-        
-        
-        
-    
-    """
-    ################
-    #print(style.layout("TMenubutton"))
-    style.layout("TMenubutton", [
-        ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
-        ('Menubutton.button', {'children': [
-            #('Menubutton.padding', {'children': [
-                ('Menubutton.label', {'sticky': ''})
-            #], 'expand': '1', 'sticky': 'we'})
-        ], 'expand': '1', 'sticky': 'nswe'})
-    ])
-    
-    style.configure("TMenubutton", padding=14)
-    """
-    
-    
-    #print(style.map("Treeview"))
-    #print(style.layout("Treeview"))
-    setup_fonts()
-    style.configure("Treeview.treearea", font=TREE_FONT)
-    # NB! Some Python or Tk versions (Eg. Py 3.2.3 + Tk 8.5.11 on Raspbian)
-    # can't handle multi word color names in style.map  
-    light_blue = "#ADD8E6" 
-    light_grey = "#D3D3D3"
-    if running_on_linux():
-        style.map("Treeview",
-              background=[('selected', 'focus', light_blue),
-                          ('selected', '!focus', light_grey),
-                          ],
-              foreground=[('selected', 'black'),
-                          ],
-              )
-    else:
-        style.map("Treeview",
-              background=[('selected', 'focus', 'SystemHighlight'),
-                          ('selected', '!focus', light_grey),
-                          ],
-              foreground=[('selected', 'SystemHighlightText')],
-              )
-    
-    
-
-
-def setup_fonts():
-    if running_on_mac_os():
-        base_font_size = 15
-    else:
-        base_font_size = 10;
-    # fonts
-    global EDITOR_FONT, BOLD_EDITOR_FONT, IO_FONT, TREE_FONT
-    EDITOR_FONT = tk_font.Font(family="Courier New", size=base_font_size)
-    BOLD_EDITOR_FONT = tk_font.Font(family="Courier New", size=base_font_size, weight="bold")
-    IO_FONT = tk_font.Font(family='Courier New', size=base_font_size-2, slant="roman")
-    default_font = tk_font.nametofont("TkDefaultFont")
-    TREE_FONT = tk_font.Font(family=default_font.cget("family"), size=12)
-
-
-class _KeyboardZoomable:
-    def __init__(self):
-        self.held_keys = set()
-    
-    def normalize_keysym(self, keycode, keysym):
-        if keysym.startswith("Control"):
-            return "Control"
-        elif keysym == '??' and keycode in (1048584, 1048592, '1048584', '1048592'):
-            print("Fake control")
-            return "Control"
-        else:
-            return keysym
-        
-    def cmd_key_press(self, event):
-        print("press", event.keycode, event.keysym, event.keysym_num, event.num)
-        
-        norm_keysym = self.normalize_keysym(event.keycode, event.keysym)
-        
-        if norm_keysym in self.held_keys: # ignore repeated events
-            return
-        
-        self.held_keys.add(norm_keysym)
-        
-        if norm_keysym == "Return":
-            if 'Control' in self.held_keys:
-                self.zoom_in() 
+    def _update_visibility(self):
+        if len(self.panes()) == 0 and self.winfo_ismapped():
+            self.master.remove(self)
+            
+        if len(self.tabs()) > 0 and not self.winfo_ismapped():
+            self.master.add_view_notebook(self)
+            if self._location == "w":
+                pass
             else:
-                self.execute_focus()
-        elif norm_keysym == 'Control':
-            self.preview_zoom()
+                pass
 
+
+class ViewNotebook(ttk.Notebook):
+    """
+    Allows adding views according to their position keys.
+    Remember its own position key. Automatically updates its visibility.
+    """
+    def __init__(self, master, location):
+        ttk.Notebook.__init__(self, master)
+        self.location = location
     
-    def cmd_key_release(self, event):
-        print("release", event.keycode, event.keysym, event.keysym_num, event.num)
-        norm_keysym = self.normalize_keysym(event.keycode, event.keysym)
-
-        if norm_keysym in self.held_keys:
-            self.held_keys.remove(norm_keysym)
+    def add_view(self, view, text, position_key):
+        view.position_key = position_key
         
-        # don't clear if zoom-in has already occured
-        if norm_keysym == "Control" and self.current_zoom is None:
-            self.clear_preview()
+        for sibling in map(self.nametowidget, self.tabs()):
+            if sibling.position_key > view.position_key:
+                where = sibling
+                break
+        else:
+            where = "end"
+        
+        self.insert(where, view, text=text)
     
-    def zoom_in(self):
-        pass
+    def add(self, child, **kw):
+        ttk.Notebook.add(self, child, **kw)
+        self._update_visibility()
     
-    def execute_focus(self):
-        pass
-         
-    def preview_zoom(self):
-        pass
+    def insert(self, pos, child, **kw):
+        ttk.Notebook.insert(self, pos, child, **kw)
+        self._update_visibility()
     
-    def clear_preview(self):
-        pass
+    def hide(self, tab_id):
+        ttk.Notebook.hide(self, tab_id)
+        self._update_visibility()
     
-class PanelBook(ttk.Notebook):
-    def __init__(self, master):
-        ttk.Notebook.__init__(self, master, padding=0)
-        """
-        self.menubutton = create_menubutton(self)
-        self._position_menubutton()
-        self.bind("<Configure>", self._position_menubutton)
-        """
+    def forget(self, tab_id):
+        ttk.Notebook.forget(self, tab_id)
+        self._update_visibility()
     
-    def _position_menubutton(self, *args):
-        #self.update_idletasks()
-        self.menubutton.place(y=0,
-            x=self.winfo_width() - self.menubutton.winfo_width(),
-            anchor=tk.NW)
+    def _update_visibility(self):
+        if len(self.tabs()) == 0 and self.winfo_ismapped():
+            self.master.remove(self)
+            
+        if len(self.tabs()) > 0 and not self.winfo_ismapped():
+            self.master.add_view_notebook(self)
+        
 
 class TreeFrame(ttk.Frame):
     def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
@@ -821,6 +632,21 @@ class ScrollableFrame(tk.Frame):
 
     
 
+def create_PanedWindow(master, orient):
+    pw = tk.PanedWindow(master,
+                          orient=orient,
+                          showhandle="False",
+                          sashwidth=SASHTHICKNESS)
+    style = ttk.Style()
+    if style.theme_use() == "clam":
+        pw.configure(background=CLAM_BACKGROUND)
+    elif style.theme_use() == "aqua":
+        pw.configure(background="systemSheetBackground")
+    elif running_on_windows():
+        pw.configure(background="SystemButtonFace")
+
+    return pw
+
 
                 
 def generate_event(widget, descriptor, data=None):
@@ -841,3 +667,71 @@ def get_event_data(event):
         return _event_data[event.serial]
     else:
         return None
+
+def create_menubutton(master):
+    font = tk_font.nametofont("TkTextFont").copy()
+    #font.configure(size=7)
+    
+    if "arrow_down" not in _images:
+        _images["arrow_down"] = tk.PhotoImage("img_arrow_down", file=os.path.join(imgdir, 'arrow_down2.gif'))
+    
+    # trying menubutton
+    kw_args = {
+        "text" : '@1208323432',
+        "image" : _images["arrow_down"],
+        "compound" : tk.RIGHT,
+        "relief" : tk.FLAT,
+        #"foreground": "#777777",
+        "font" : font
+    }
+    
+    style = ttk.Style()
+    if style.theme_use() == "clam":
+        kw_args["background"] = CLAM_BACKGROUND
+        
+    mb = tk.Menubutton(master, **kw_args)
+    #mb = ttk.Menubutton(master, text="__main__")
+        
+    mb.menu = tk.Menu(mb, tearoff=0)
+    mb['menu'] = mb.menu
+
+    # TODO: demo
+    mayoVar  = tk.IntVar()
+    ketchVar = tk.IntVar()
+    mb.menu.add_checkbutton(label='mayo', variable=mayoVar)
+    mb.menu.add_checkbutton(label='ketchup', variable=ketchVar)
+    
+    return mb
+
+
+def add_pane(paned_window, child, position_key, **kwargs):
+    """
+    Adds pane to paned_window so that panes are sorted according to position_keys
+    """
+    for sibling in paned_window.panes():
+        if (not hasattr(sibling, "position_key") 
+            or sibling.position_key > child.position_key):
+            kwargs["before"] = sibling
+            break
+    
+    paned_window.add(child, kwargs)
+    
+def update_paned_window_visibility(paned_window):
+    assert (isinstance(paned_window.master, tk.PanedWindow)
+         or isinstance(paned_window.master, ttk.PanedWindow))
+    
+    if paned_window.winfo_ismapped() and len(paned_window.panes()) == 0:
+        paned_window.master.remove(paned_window)
+        
+    if not paned_window.winfo_ismapped() and len(paned_window.panes()) > 0:
+        add_pane(paned_window.master, paned_window, )
+        paned_window.master.add(paned_window)
+    
+    
+    update_paned_window_visibility(paned_window.master)
+        
+        
+            
+    
+    
+    

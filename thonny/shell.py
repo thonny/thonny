@@ -158,7 +158,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             if hasattr(msg, "value_info"):
                 value_repr = shorten_repr(msg.value_info.repr, 10000)
                 if value_repr != "None":
-                    if prefs["values_in_heap"]:
+                    if prefs["view.values_in_heap"]:
                         value_repr = memory.format_object_id(msg.value_info.id)
                     object_tag = "object_" + str(msg.value_info.id)
                     self._insert_text_directly(value_repr + "\n", ("toplevel",
@@ -390,7 +390,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 
                 cmd.globals_required = "__main__" # TODO: look what's selected
           
-                if prefs["values_in_heap"]:
+                if prefs["view.values_in_heap"]:
                     cmd.heap_required = True
                 
                 if cmd.command[0].isupper(): # this means reset

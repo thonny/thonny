@@ -9,18 +9,18 @@ from tkinter.messagebox import showerror
 from thonny.ui_utils import TreeFrame
 from thonny import misc_utils
 from thonny.ttk_simpledialog import askstring
-from thonny.config import prefs
 
 _dummy_node_text = "..."
     
         
 class FileBrowser(TreeFrame):
-    def __init__(self, master, editor_book=None,
+    def __init__(self, workbench, master, editor_book=None,
                  show_hidden_files=False): # TODO: refactor universal file browser
         TreeFrame.__init__(self, master, 
                            ["#0", "kind", "path"], 
                            displaycolumns=(0,))
         #print(self.get_toplevel_items())
+        self._workbench = workbench
         self.editor_book = editor_book
         self.show_hidden_files = show_hidden_files
         self.tree['show'] = ('tree',)
@@ -61,7 +61,7 @@ class FileBrowser(TreeFrame):
             self.open_path_in_browser(sys.argv[1], True)
             self.save_current_folder()
         else:
-            path = prefs["last_browser_folder"]
+            path = self._workbench.configuration["file.last_browser_folder"]
             if path:
                 self.open_path_in_browser(path, True)
     
@@ -73,7 +73,7 @@ class FileBrowser(TreeFrame):
         
         if os.path.isfile(path):
             path = os.path.dirname(path)
-        prefs["last_browser_folder"] = path
+        prefs["file.last_browser_folder"] = path
     
     def on_double_click(self, event):
         path = self.get_selected_path()

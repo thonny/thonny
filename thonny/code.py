@@ -170,7 +170,7 @@ class Editor(ttk.Frame):
             filename = asksaveasfilename (
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
-                initialdir = prefs["cwd"]
+                initialdir = prefs["working_directory"]
             )
             if filename == "":
                 return None
@@ -215,10 +215,7 @@ class Editor(ttk.Frame):
         """
         
         if self._stepper is None:
-            if prefs["advanced_debugging"]:
-                self._stepper = AdvancedStatementStepper(msg.frame_id, self, self._code_view)
-            else:
-                self._stepper = StatementStepper(msg.frame_id, self, self._code_view)
+            self._stepper = StatementStepper(msg.frame_id, self, self._code_view)
         
         self._stepper.handle_vm_message(msg)
     
@@ -294,7 +291,7 @@ class EditorNotebook(ttk.Notebook):
     def cmd_open_file(self):
         filename = askopenfilename (
             filetypes = _dialog_filetypes, 
-            initialdir = prefs["cwd"]
+            initialdir = prefs["run.working_directory"]
         )
         if filename != "":
             #self.close_single_untitled_unmodified_editor()
@@ -352,16 +349,8 @@ class EditorNotebook(ttk.Notebook):
         
         if self.is_in_execution_mode() and isinstance(msg, DebuggerResponse):
             debug("EditorNotebook.handle_vm_message: %s", (msg.state, msg.focus))
-            if prefs["advanced_debugging"]:
-                # only one editor shows debug view
-                for editor in self.winfo_children():
-                    if eqfn(editor.get_filename(), msg.filename):
-                        editor.handle_vm_message(msg)
-                    else:
-                        editor.clear_debug_view()
-            else:
-                # editor of main file will take care of forwarding the msg
-                self._main_editor.handle_vm_message(msg)
+            # editor of main file will take care of forwarding the msg
+            self._main_editor.handle_vm_message(msg)
                 
         else:
             pass # don't care about other events
@@ -421,14 +410,6 @@ class EditorNotebook(ttk.Notebook):
         else:
             return None
     
-    def remember_open_files(self):
-        filenames = []
-        for child in self.winfo_children():
-            filename = child.get_filename()
-            if filename is not None:
-                filenames.append(filename)
-        prefs["open_files"] = ";".join(filenames)
-
     
     def focus_current_editor(self):
         editor = self.get_current_editor()
@@ -515,7 +496,7 @@ class ExpressionView(tk.Text):
                 self.delete(start_mark, end_mark)
                 
                 id_str = memory.format_object_id(msg.value.id)
-                if prefs["values_in_heap"]:
+                if prefs["view.values_in_heap"]:
                     value_str = id_str
                 else:
                     value_str = shorten_repr(msg.value.repr, 100)
@@ -687,7 +668,7 @@ class FunctionDialog(tk.Toplevel):
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         
-        self._code_book = ui_utils.PanelBook(self.main_pw)
+        self._code_book = ui_utils.AutomaticViewNotebook(self.main_pw)
         self._code_view = CodeView(self._code_book, first_line_no=msg.firstlineno)
         self._code_book.add(self._code_view)
         self._code_view.enter_execution_mode()
@@ -696,7 +677,7 @@ class FunctionDialog(tk.Toplevel):
         #self._code_book.columnconfigure(0, weight=1)
         
         
-        self._locals_book = ui_utils.PanelBook(self.main_pw)
+        self._locals_book = ui_utils.AutomaticViewNotebook(self.main_pw)
         self._locals_frame = memory.LocalsFrame(self._locals_book)
         self._locals_book.add(self._locals_frame, text="Local variables")
         
