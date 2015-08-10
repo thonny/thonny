@@ -1,3 +1,7 @@
+!!! Note for paper reviewer !!!
+===============================
+Current installers provide Thonny version where "Step into" and "Step over" are merged into single command "Step". Code and installer for latest features appear by 16th of August.
+
 Thonny
 ======
 
