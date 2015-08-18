@@ -1,3 +1,6 @@
+!!! News !!!
+18th of August: The repo is converted to git
+
 !!! Note for paper reviewer !!!
 ===============================
 Current installers provide Thonny version where "Step into" and "Step over" are merged into single command "Step". These installers (0.2.7) are recommended for reviewing main features of Thonny.
