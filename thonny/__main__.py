@@ -1,8 +1,9 @@
 import sys
 import os.path
 import traceback
-import tkinter
+import tkinter.messagebox
 import logging
+from logging import exception
 
 
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
@@ -28,8 +29,8 @@ if installation_dir not in sys.path:
 # Run
 try:
     from thonny import workbench
-    workbench.Workbench(installation_dir).mainloop()
+    workbench.Workbench(installation_dir)
 except:
-    traceback.print_exc()
+    exception("Internal error")
     tkinter.messagebox.showerror("Internal error. Use Ctrl+C to copy error message",
                             traceback.format_exc())

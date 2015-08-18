@@ -166,11 +166,11 @@ class AbstractModule(PyObject):
 class PyDefinedObject(object):
     """Python defined names that rope can access their sources"""
 
-    def __init__(self, pycore, ast_node, parent):
+    def __init__(self, pycore, ast_node, master):
         self.pycore = pycore
         self.ast_node = ast_node
         self.scope = None
-        self.parent = parent
+        self.parent = master
         self.structural_attributes = None
         self.concluded_attributes = self.get_module()._get_concluded_data()
         self.attributes = self.get_module()._get_concluded_data()

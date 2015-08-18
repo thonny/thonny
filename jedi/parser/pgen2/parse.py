@@ -115,14 +115,16 @@ class PgenParser(object):
         return self.rootnode
 
     def addtoken(self, type, value, prefix, start_pos):
-        """Add a token; return True iff this is the end of the program."""
+        """Add a token; return True if this is the end of the program."""
         # Map from token to label
-        try:
-            ilabel = self.classify(type, value, start_pos)
-        except ParseError:
-            # Currently we ignore tokens like `?`.
-            print('invalid token', tokenize.tok_name[type], value)
-            return
+        if type == tokenize.NAME:
+            # Check for reserved words (keywords)
+            try:
+                ilabel = self.grammar.keywords[value]
+            except KeyError:
+                ilabel = self.grammar.tokens[type]
+        else:
+            ilabel = self.grammar.tokens[type]
 
         # Loop until the token is shifted; may raise exceptions
         while True:
@@ -168,18 +170,6 @@ class PgenParser(object):
                                         value, start_pos, prefix, self.addtoken)
                     break
 
-    def classify(self, type, value, start_pos):
-        """Turn a token into a label.  (Internal)"""
-        if type == tokenize.NAME:
-            # Check for reserved words
-            ilabel = self.grammar.keywords.get(value)
-            if ilabel is not None:
-                return ilabel
-        ilabel = self.grammar.tokens.get(type)
-        if ilabel is None:
-            raise ParseError("bad token", type, value, start_pos)
-        return ilabel
-
     def shift(self, type, value, newstate, prefix, start_pos):
         """Shift a token.  (Internal)"""
         dfa, state, node = self.stack[-1]
@@ -200,11 +190,10 @@ class PgenParser(object):
         # If there's exactly one child, return that child instead of creating a
         # new node.  We still create expr_stmt and file_input though, because a
         # lot of Jedi depends on its logic.
-        if len(children) != 1 or type in (self.grammar.symbol2number['expr_stmt'],
-                                          self.grammar.symbol2number['file_input']):
-            newnode = self.convert_node(self.grammar, type, children)
-        else:
+        if len(children) == 1:
             newnode = children[0]
+        else:
+            newnode = self.convert_node(self.grammar, type, children)
 
         try:
             # Equal to:

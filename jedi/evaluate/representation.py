@@ -30,10 +30,12 @@ __
 """
 import os
 import pkgutil
+import imp
+import re
 from itertools import chain
 
 from jedi._compatibility import use_metaclass, unicode, Python3Method
-from jedi.parser import tree as pr
+from jedi.parser import tree
 from jedi import debug
 from jedi import common
 from jedi.cache import underscore_memoization, cache_star_import
@@ -48,22 +50,7 @@ from jedi.evaluate import flow_analysis
 from jedi.evaluate import imports
 
 
-def wrap(evaluator, element):
-    if isinstance(element, pr.Class):
-        return Class(evaluator, element)
-    elif isinstance(element, pr.Function):
-        if isinstance(element, pr.Lambda):
-            return LambdaWrapper(evaluator, element)
-        else:
-            return Function(evaluator, element)
-    elif isinstance(element, (pr.Module)) \
-            and not isinstance(element, ModuleWrapper):
-        return ModuleWrapper(evaluator, element)
-    else:
-        return element
-
-
-class Executed(pr.Base):
+class Executed(tree.Base):
     """
     An instance is also an executable - because __init__ is called
     :param var_args: The param input array, consist of a parser node or a list.
@@ -77,7 +64,7 @@ class Executed(pr.Base):
         return True
 
     def get_parent_until(self, *args, **kwargs):
-        return pr.Base.get_parent_until(self, *args, **kwargs)
+        return tree.Base.get_parent_until(self, *args, **kwargs)
 
     @common.safe_property
     def parent(self):
@@ -140,7 +127,7 @@ class Instance(use_metaclass(CachedMetaClass, Executed)):
         normally self.
         """
         try:
-            return str(func.params[0].get_name())
+            return str(func.params[0].name)
         except IndexError:
             return None
 
@@ -149,7 +136,7 @@ class Instance(use_metaclass(CachedMetaClass, Executed)):
         # This loop adds the names of the self object, copies them and removes
         # the self.
         for sub in self.base.subscopes:
-            if isinstance(sub, pr.Class):
+            if isinstance(sub, tree.Class):
                 continue
             # Get the self name, if there's one.
             self_name = self._get_func_self_name(sub)
@@ -168,8 +155,9 @@ class Instance(use_metaclass(CachedMetaClass, Executed)):
                 for name in name_list:
                     if name.value == self_name and name.prev_sibling() is None:
                         trailer = name.next_sibling()
-                        if pr.is_node(trailer, 'trailer') \
-                                and len(trailer.children) == 2:
+                        if tree.is_node(trailer, 'trailer') \
+                                and len(trailer.children) == 2 \
+                                and trailer.children[0] == '.':
                             name = trailer.children[1]  # After dot.
                             if name.is_definition():
                                 arr = names.setdefault(name.value, [])
@@ -258,9 +246,9 @@ class LazyInstanceDict(object):
         return [self[key] for key in self._dct]
 
 
-class InstanceName(pr.Name):
+class InstanceName(tree.Name):
     def __init__(self, origin_name, parent):
-        super(InstanceName, self).__init__(pr.zero_position_modifier,
+        super(InstanceName, self).__init__(tree.zero_position_modifier,
                                            origin_name.value,
                                            origin_name.start_pos)
         self._origin_name = origin_name
@@ -274,19 +262,24 @@ def get_instance_el(evaluator, instance, var, is_class_var=False):
     """
     Returns an InstanceElement if it makes sense, otherwise leaves the object
     untouched.
+
+    Basically having an InstanceElement is context information. That is needed
+    in quite a lot of cases, which includes Nodes like ``power``, that need to
+    know where a self name comes from for example.
     """
-    if isinstance(var, pr.Name):
+    if isinstance(var, tree.Name):
         parent = get_instance_el(evaluator, instance, var.parent, is_class_var)
         return InstanceName(var, parent)
-    elif isinstance(var, (Instance, compiled.CompiledObject, pr.Leaf,
-                          pr.Module, FunctionExecution)):
+    elif var.type != 'funcdef' \
+            and isinstance(var, (Instance, compiled.CompiledObject, tree.Leaf,
+                           tree.Module, FunctionExecution)):
         return var
 
-    var = wrap(evaluator, var)
+    var = evaluator.wrap(var)
     return InstanceElement(evaluator, instance, var, is_class_var)
 
 
-class InstanceElement(use_metaclass(CachedMetaClass, pr.Base)):
+class InstanceElement(use_metaclass(CachedMetaClass, tree.Base)):
     """
     InstanceElement is a wrapper for any object, that is used as an instance
     variable (e.g. self.variable or class methods).
@@ -302,7 +295,7 @@ class InstanceElement(use_metaclass(CachedMetaClass, pr.Base)):
     def parent(self):
         par = self.var.parent
         if isinstance(par, Class) and par == self.instance.base \
-                or isinstance(par, pr.Class) \
+                or isinstance(par, tree.Class) \
                 and par == self.instance.base.base:
             par = self.instance
         else:
@@ -311,10 +304,10 @@ class InstanceElement(use_metaclass(CachedMetaClass, pr.Base)):
         return par
 
     def get_parent_until(self, *args, **kwargs):
-        return pr.BaseNode.get_parent_until(self, *args, **kwargs)
+        return tree.BaseNode.get_parent_until(self, *args, **kwargs)
 
     def get_definition(self):
-        return self.get_parent_until((pr.ExprStmt, pr.IsScope, pr.Import))
+        return self.get_parent_until((tree.ExprStmt, tree.IsScope, tree.Import))
 
     def get_decorated_func(self):
         """ Needed because the InstanceElement should not be stripped """
@@ -363,18 +356,30 @@ class InstanceElement(use_metaclass(CachedMetaClass, pr.Base)):
         return self.var.is_scope()
 
     def py__call__(self, evaluator, params):
-        return Function.py__call__(self, evaluator, params)
+        if isinstance(self.var, compiled.CompiledObject):
+            # This check is a bit strange, but CompiledObject itself is a bit
+            # more complicated than we would it actually like to be.
+            return self.var.py__call__(evaluator, params)
+        else:
+            return Function.py__call__(self, evaluator, params)
 
     def __repr__(self):
         return "<%s of %s>" % (type(self).__name__, self.var)
 
 
-class Wrapper(pr.Base):
+class Wrapper(tree.Base):
     def is_scope(self):
         return True
 
     def is_class(self):
         return False
+
+    def py__bool__(self):
+        """
+        Since Wrapper is a super class for classes, functions and modules,
+        the return value will always be true.
+        """
+        return True
 
     @property
     @underscore_memoization
@@ -385,7 +390,7 @@ class Wrapper(pr.Base):
 
 class Class(use_metaclass(CachedMetaClass, Wrapper)):
     """
-    This class is not only important to extend `pr.Class`, it is also a
+    This class is not only important to extend `tree.Class`, it is also a
     important for descriptors (if the descriptor methods are evaluated or not).
     """
     def __init__(self, evaluator, base):
@@ -404,9 +409,25 @@ class Class(use_metaclass(CachedMetaClass, Wrapper)):
         for cls in self.py__bases__(self._evaluator):
             # TODO detect for TypeError: duplicate base class str,
             # e.g.  `class X(str, str): pass`
-            add(cls)
-            for cls_new in cls.py__mro__(evaluator):
-                add(cls_new)
+            try:
+                mro_method = cls.py__mro__
+            except AttributeError:
+                # TODO add a TypeError like:
+                """
+                >>> class Y(lambda: test): pass
+                Traceback (most recent call last):
+                  File "<stdin>", line 1, in <module>
+                TypeError: function() argument 1 must be code, not str
+                >>> class Y(1): pass
+                Traceback (most recent call last):
+                  File "<stdin>", line 1, in <module>
+                TypeError: int() takes at most 2 arguments (3 given)
+                """
+                pass
+            else:
+                add(cls)
+                for cls_new in mro_method(evaluator):
+                    add(cls_new)
         return tuple(mro)
 
     @memoize_default(default=())
@@ -442,10 +463,10 @@ class Class(use_metaclass(CachedMetaClass, Wrapper)):
         return True
 
     def get_subscope_by_name(self, name):
-        for s in [self] + self.py__bases__(self._evaluator):
+        for s in self.py__mro__(self._evaluator):
             for sub in reversed(s.subscopes):
                 if sub.name.value == name:
-                    return sub
+                        return sub
         raise KeyError("Couldn't find subscope.")
 
     def __getattr__(self, name):
@@ -487,12 +508,12 @@ class Function(use_metaclass(CachedMetaClass, Wrapper)):
         if not self.is_decorated:
             for dec in reversed(decorators):
                 debug.dbg('decorator: %s %s', dec, f)
-                dec.children
                 dec_results = self._evaluator.eval_element(dec.children[1])
                 trailer = dec.children[2:-1]
                 if trailer:
                     # Create a trailer and evaluate it.
-                    trailer = pr.Node('trailer', trailer)
+                    trailer = tree.Node('trailer', trailer)
+                    trailer.parent = dec
                     dec_results = self._evaluator.eval_trailer(dec_results, trailer)
 
                 if not len(dec_results):
@@ -538,9 +559,6 @@ class Function(use_metaclass(CachedMetaClass, Wrapper)):
         else:
             return FunctionExecution(evaluator, self, params).get_return_types()
 
-    def py__bool__(self):
-        return True
-
     def __getattr__(self, name):
         return getattr(self.base_func, name)
 
@@ -569,13 +587,10 @@ class FunctionExecution(Executed):
 
     def __init__(self, evaluator, base, *args, **kwargs):
         super(FunctionExecution, self).__init__(evaluator, base, *args, **kwargs)
-        # for deep_ast_copy
-        func = base.base_func
-        self._copy_dict = {func: self, func.parent: func.parent}
-        helpers.deep_ast_copy(self.base.base_func, self._copy_dict, check_first=True)
-        # We definitely want the params to be generated. Params are special,
-        # because they have been altered and are not normal "children".
-        self.params
+        self._copy_dict = {}
+        new_func = helpers.deep_ast_copy(base.base_func, self, self._copy_dict)
+        self.children = new_func.children
+        self.names_dict = new_func.names_dict
 
     @memoize_default(default=())
     @recursion.execution_recursion_decorator
@@ -613,15 +628,13 @@ class FunctionExecution(Executed):
         return types
 
     def names_dicts(self, search_global):
-        self.children
-        yield dict((k, [self._copy_dict[v] for v in values])
-                   for k, values in self.base.names_dict.items())
+        yield self.names_dict
 
     @memoize_default(default=NO_DEFAULT)
     def _get_params(self):
         """
         This returns the params for an TODO and is injected as a
-        'hack' into the pr.Function class.
+        'hack' into the tree.Function class.
         This needs to be here, because Instance can have __init__ functions,
         which act the same way as normal functions.
         """
@@ -631,7 +644,7 @@ class FunctionExecution(Executed):
         return [n for n in self._get_params() if str(n) == name][0]
 
     def name_for_position(self, position):
-        return pr.Function.name_for_position(self, position)
+        return tree.Function.name_for_position(self, position)
 
     def _copy_list(self, lst):
         """
@@ -653,6 +666,7 @@ class FunctionExecution(Executed):
         return getattr(self.base, name)
 
     def _scope_copy(self, scope):
+        raise NotImplementedError
         """ Copies a scope (e.g. `if foo:`) in an execution """
         if scope != self.base.base_func:
             # Just make sure the parents been copied.
@@ -662,22 +676,22 @@ class FunctionExecution(Executed):
     @common.safe_property
     @memoize_default([])
     def returns(self):
-        return self._copy_list(self.base.returns)
+        return tree.Scope._search_in_scope(self, tree.ReturnStmt)
 
     @common.safe_property
     @memoize_default([])
     def yields(self):
-        return self._copy_list(self.base.yields)
+        return tree.Scope._search_in_scope(self, tree.YieldExpr)
 
     @common.safe_property
     @memoize_default([])
     def statements(self):
-        return self._copy_list(self.base.statements)
+        return tree.Scope._search_in_scope(self, tree.ExprStmt)
 
     @common.safe_property
     @memoize_default([])
     def subscopes(self):
-        return self._copy_list(self.base.subscopes)
+        return tree.Scope._search_in_scope(self, tree.Scope)
 
     def __repr__(self):
         return "<%s of %s>" % (type(self).__name__, self.base)
@@ -693,7 +707,7 @@ class GlobalName(helpers.FakeName):
                                          name.start_pos, is_definition=True)
 
 
-class ModuleWrapper(use_metaclass(CachedMetaClass, pr.Module, Wrapper)):
+class ModuleWrapper(use_metaclass(CachedMetaClass, tree.Module, Wrapper)):
     def __init__(self, evaluator, module):
         self._evaluator = evaluator
         self.base = self._module = module
@@ -708,7 +722,10 @@ class ModuleWrapper(use_metaclass(CachedMetaClass, pr.Module, Wrapper)):
         yield dict((str(n), [GlobalName(n)]) for n in self.base.global_names)
         yield self._sub_modules_dict()
 
-    @cache_star_import
+    # I'm not sure if the star import cache is really that effective anymore
+    # with all the other really fast import caches. Recheck. Also we would need
+    # to push the star imports into Evaluator.modules, if we reenable this.
+    #@cache_star_import
     @memoize_default([])
     def star_imports(self):
         modules = []
@@ -717,7 +734,7 @@ class ModuleWrapper(use_metaclass(CachedMetaClass, pr.Module, Wrapper)):
                 name = i.star_import_name()
                 new = imports.ImportWrapper(self._evaluator, name).follow()
                 for module in new:
-                    if isinstance(module, pr.Module):
+                    if isinstance(module, tree.Module):
                         modules += module.star_imports()
                 modules += new
         return modules
@@ -736,6 +753,76 @@ class ModuleWrapper(use_metaclass(CachedMetaClass, pr.Module, Wrapper)):
     @memoize_default()
     def name(self):
         return helpers.FakeName(unicode(self.base.name), self, (1, 0))
+
+    def _get_init_directory(self):
+        for suffix, _, _ in imp.get_suffixes():
+            ending = '__init__' + suffix
+            if self.py__file__().endswith(ending):
+                # Remove the ending, including the separator.
+                return self.py__file__()[:-len(ending) - 1]
+        return None
+
+    def py__name__(self):
+        for name, module in self._evaluator.modules.items():
+            if module == self:
+                return name
+
+        return '__main__'
+
+    def py__file__(self):
+        """
+        In contrast to Python's __file__ can be None.
+        """
+        if self._module.path is None:
+            return None
+
+        return os.path.abspath(self._module.path)
+
+    def py__package__(self):
+        if self._get_init_directory() is None:
+            return re.sub(r'\.?[^\.]+$', '', self.py__name__())
+        else:
+            return self.py__name__()
+
+    @property
+    def py__path__(self):
+        """
+        Not seen here, since it's a property. The callback actually uses a
+        variable, so use it like::
+
+            foo.py__path__(sys_path)
+
+        In case of a package, this returns Python's __path__ attribute, which
+        is a list of paths (strings).
+        Raises an AttributeError if the module is not a package.
+        """
+        def return_value(search_path):
+            init_path = self.py__file__()
+            if os.path.basename(init_path) == '__init__.py':
+
+                with open(init_path, 'rb') as f:
+                    content = common.source_to_unicode(f.read())
+                    # these are strings that need to be used for namespace packages,
+                    # the first one is ``pkgutil``, the second ``pkg_resources``.
+                    options = ('declare_namespace(__name__)', 'extend_path(__path__')
+                    if options[0] in content or options[1] in content:
+                        # It is a namespace, now try to find the rest of the
+                        # modules on sys_path or whatever the search_path is.
+                        paths = set()
+                        for s in search_path:
+                            other = os.path.join(s, unicode(self.name))
+                            if os.path.isdir(other):
+                                paths.add(other)
+                        return list(paths)
+            # Default to this.
+            return [path]
+
+        path = self._get_init_directory()
+
+        if path is None:
+            raise AttributeError('Only packages have __path__ attributes.')
+        else:
+            return return_value
 
     @memoize_default()
     def _sub_modules_dict(self):
@@ -768,6 +855,3 @@ class ModuleWrapper(use_metaclass(CachedMetaClass, pr.Module, Wrapper)):
 
     def __repr__(self):
         return "<%s: %s>" % (type(self).__name__, self._module)
-
-    def py__bool__(self):
-        return True

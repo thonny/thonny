@@ -1,12 +1,14 @@
+import glob
 import os
 import sys
 
 from jedi._compatibility import exec_function, unicode
-from jedi.parser import tree as pr
+from jedi.parser import tree
 from jedi.parser import Parser
 from jedi.evaluate.cache import memoize_default
 from jedi import debug
 from jedi import common
+from jedi import cache
 
 
 def get_sys_path():
@@ -16,16 +18,26 @@ def get_sys_path():
         if not venv:
             return
         venv = os.path.abspath(venv)
-        if os.name == 'nt':
-            p = os.path.join(venv, 'lib', 'site-packages')
-        else:
-            p = os.path.join(venv, 'lib', 'python%d.%d' % sys.version_info[:2],
-                             'site-packages')
+        p = _get_venv_sitepackages(venv)
         if p not in sys_path:
             sys_path.insert(0, p)
 
+        # Add all egg-links from the virtualenv.
+        for egg_link in glob.glob(os.path.join(p, '*.egg-link')):
+            with open(egg_link) as fd:
+                sys_path.insert(0, fd.readline().rstrip())
+
     check_virtual_env(sys.path)
     return [p for p in sys.path if p != ""]
+
+
+def _get_venv_sitepackages(venv):
+    if os.name == 'nt':
+        p = os.path.join(venv, 'lib', 'site-packages')
+    else:
+        p = os.path.join(venv, 'lib', 'python%d.%d' % sys.version_info[:2],
+                         'site-packages')
+    return p
 
 
 def _execute_code(module_path, code):
@@ -59,7 +71,7 @@ def _paths_from_assignment(evaluator, expr_stmt):
     for assignee, operator in zip(expr_stmt.children[::2], expr_stmt.children[1::2]):
         try:
             assert operator in ['=', '+=']
-            assert pr.is_node(assignee, 'power') and len(assignee.children) > 1
+            assert tree.is_node(assignee, 'power') and len(assignee.children) > 1
             c = assignee.children
             assert c[0].type == 'name' and c[0].value == 'sys'
             trailer = c[1]
@@ -89,8 +101,8 @@ def _paths_from_list_modifications(module_path, trailer1, trailer2):
     """ extract the path from either "sys.path.append" or "sys.path.insert" """
     # Guarantee that both are trailers, the first one a name and the second one
     # a function execution with at least one param.
-    if not (pr.is_node(trailer1, 'trailer') and trailer1.children[0] == '.'
-            and pr.is_node(trailer2, 'trailer') and trailer2.children[0] == '('
+    if not (tree.is_node(trailer1, 'trailer') and trailer1.children[0] == '.'
+            and tree.is_node(trailer2, 'trailer') and trailer2.children[0] == '('
             and len(trailer2.children) == 3):
         return []
 
@@ -108,12 +120,12 @@ def _check_module(evaluator, module):
     def get_sys_path_powers(names):
         for name in names:
             power = name.parent.parent
-            if pr.is_node(power, 'power'):
+            if tree.is_node(power, 'power'):
                 c = power.children
-                if isinstance(c[0], pr.Name) and c[0].value == 'sys' \
-                        and pr.is_node(c[1], 'trailer'):
+                if isinstance(c[0], tree.Name) and c[0].value == 'sys' \
+                        and tree.is_node(c[1], 'trailer'):
                     n = c[1].children[1]
-                    if isinstance(n, pr.Name) and n.value == 'path':
+                    if isinstance(n, tree.Name) and n.value == 'path':
                         yield name, power
 
     sys_path = list(get_sys_path())  # copy
@@ -131,7 +143,7 @@ def _check_module(evaluator, module):
     return sys_path
 
 
-@memoize_default(evaluator_is_first_arg=True)
+@memoize_default(evaluator_is_first_arg=True, default=[])
 def sys_path_with_modifications(evaluator, module):
     if module.path is None:
         # Support for modules without a path is bad, therefore return the
@@ -142,29 +154,41 @@ def sys_path_with_modifications(evaluator, module):
     with common.ignored(OSError):
         os.chdir(os.path.dirname(module.path))
 
+    buildout_script_paths = set()
+
     result = _check_module(evaluator, module)
     result += _detect_django_path(module.path)
-    # buildout scripts often contain the same sys.path modifications
-    # the set here is used to avoid duplicate sys.path entries
-    buildout_paths = set()
-    for module_path in _get_buildout_scripts(module.path):
-        try:
-            with open(module_path, 'rb') as f:
-                source = f.read()
-        except IOError:
-            pass
-        else:
-            p = Parser(evaluator.grammar, common.source_to_unicode(source), module_path)
-            for path in _check_module(p.module):
-                if path not in buildout_paths:
-                    buildout_paths.add(path)
-                    result.append(path)
+    for buildout_script in _get_buildout_scripts(module.path):
+        for path in _get_paths_from_buildout_script(evaluator, buildout_script):
+            buildout_script_paths.add(path)
     # cleanup, back to old directory
     os.chdir(curdir)
-    return list(result)
+    return list(result) + list(buildout_script_paths)
 
 
-def _traverse_parents(path):
+def _get_paths_from_buildout_script(evaluator, buildout_script):
+    def load(buildout_script):
+        try:
+            with open(buildout_script, 'rb') as f:
+                source = common.source_to_unicode(f.read())
+        except IOError:
+            debug.dbg('Error trying to read buildout_script: %s', buildout_script)
+            return
+
+        p = Parser(evaluator.grammar, source, buildout_script)
+        cache.save_parser(buildout_script, p)
+        return p.module
+
+    cached = cache.load_parser(buildout_script)
+    module = cached and cached.module or load(buildout_script)
+    if not module:
+        return
+
+    for path in _check_module(evaluator, module):
+        yield path
+
+
+def traverse_parents(path):
     while True:
         new = os.path.dirname(path)
         if new == path:
@@ -174,7 +198,7 @@ def _traverse_parents(path):
 
 
 def _get_parent_dir_with_file(path, filename):
-    for parent in _traverse_parents(path):
+    for parent in traverse_parents(path):
         if os.path.isfile(os.path.join(parent, filename)):
             return parent
     return None
@@ -184,7 +208,7 @@ def _detect_django_path(module_path):
     """ Detects the path of the very well known Django library (if used) """
     result = []
 
-    for parent in _traverse_parents(module_path):
+    for parent in traverse_parents(module_path):
         with common.ignored(IOError):
             with open(parent + os.path.sep + 'manage.py'):
                 debug.dbg('Found django path: %s', module_path)

@@ -9,5 +9,5 @@ sys.path.insert(0, os.path.normpath(os.path.join(src_dir, os.pardir)))
 if sys.argv[0] in sys.path:
     sys.path.remove(sys.argv[0]) # .../thonny/thonny
 
-import thonny.replay.replayer as rep
+import thonny.plugins.replay.replayer as rep
 rep.run()

@@ -8,22 +8,23 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
-from thonny import misc_utils
+from thonny import misc_utils, workbench
+from thonny.misc_utils import running_on_mac_os
 
 class AboutDialog(tk.Toplevel):
-    def __init__(self, parent, version):
-        tk.Toplevel.__init__(self, parent, borderwidth=15)
+    def __init__(self, master, version):
+        tk.Toplevel.__init__(self, master, borderwidth=15)
         
         #self.geometry("200x200")
         # TODO: position in the center of master
-        self.geometry("+%d+%d" % (parent.winfo_rootx() + parent.winfo_width() // 2 - 50,
-                                  parent.winfo_rooty() + parent.winfo_height() // 2 - 150))
+        self.geometry("+%d+%d" % (master.winfo_rootx() + master.winfo_width() // 2 - 50,
+                                  master.winfo_rooty() + master.winfo_height() // 2 - 150))
 
         self.title("About Thonny")
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.transient(parent)
+        self.transient(master)
         self.grab_set()
         self.protocol("WM_DELETE_WINDOW", self._ok)
         
@@ -93,3 +94,11 @@ class AboutDialog(tk.Toplevel):
         else:
             return ""
 
+
+def load_plugin(workbench):
+    workbench.add_command("about", 
+        "Thonny" if running_on_mac_os() else "help",
+        "About Thonny",
+        lambda: AboutDialog(workbench, workbench.get_version()))
+
+    

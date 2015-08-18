@@ -11,7 +11,7 @@ from jedi._compatibility import builtins as _builtins, unicode
 from jedi import debug
 from jedi.cache import underscore_memoization, memoize_method
 from jedi.evaluate.sys_path import get_sys_path
-from jedi.parser.tree import Param, Base
+from jedi.parser.tree import Param, Base, Operator, zero_position_modifier
 from jedi.evaluate.helpers import FakeName
 from . import fake
 
@@ -40,6 +40,7 @@ class CompiledObject(Base):
     # comply with the parser
     start_pos = 0, 0
     path = None  # modules have this attribute - set it to None.
+    used_names = {}  # To be consistent with modules.
 
     def __init__(self, obj, parent=None):
         self.obj = obj
@@ -73,6 +74,9 @@ class CompiledObject(Base):
     def py__bool__(self):
         return bool(self.obj)
 
+    def py__file__(self):
+        return self.obj.__file__
+
     def is_class(self):
         return inspect.isclass(self.obj)
 
@@ -84,19 +88,14 @@ class CompiledObject(Base):
     def params(self):
         params_str, ret = self._parse_function_doc()
         tokens = params_str.split(',')
+        if inspect.ismethoddescriptor(self._cls().obj):
+            tokens.insert(0, 'self')
         params = []
-        module = self.get_parent_until()
-        # it seems like start_pos/end_pos is always (0, 0) for a compiled
-        # object
-        start_pos, end_pos = (0, 0), (0, 0)
         for p in tokens:
             parts = [FakeName(part) for part in p.strip().split('=')]
-            name = parts[0]
-            if len(parts) > 2:
-                default = parts[2]
-            else:
-                default = None
-            params.append(Param(name, module, default))
+            if len(parts) > 1:
+                parts.insert(1, Operator(zero_position_modifier, '=', (0, 0)))
+            params.append(Param(parts, self))
         return params
 
     def __repr__(self):
@@ -319,6 +318,10 @@ def dotted_from_fs_path(fs_path, sys_path=None):
     if sys_path is None:
         sys_path = get_sys_path()
 
+    if os.path.basename(fs_path).startswith('__init__.'):
+        # We are calculating the path. __init__ files are not interesting.
+        fs_path = os.path.dirname(fs_path)
+
     # prefer
     #   - UNIX
     #     /path/to/pythonX.Y/lib-dynload
@@ -338,30 +341,7 @@ def dotted_from_fs_path(fs_path, sys_path=None):
     return _path_re.sub('', fs_path[len(path):].lstrip(os.path.sep)).replace(os.path.sep, '.')
 
 
-def load_module(path, name):
-    """
-    if not name:
-        name = os.path.basename(path)
-        name = name.rpartition('.')[0]  # cut file type (normally .so)
-
-    # sometimes there are endings like `_sqlite3.cpython-32mu`
-    name = re.sub(r'\..*', '', name)
-
-    dot_path = []
-    if path:
-        p = path
-        # if path is not in sys.path, we need to make a well defined import
-        # like `from numpy.core import umath.`
-        while p and p not in sys.path:
-            p, sep, mod = p.rpartition(os.path.sep)
-            dot_path.insert(0, mod.partition('.')[0])
-        if p:
-            name = ".".join(dot_path)
-            path = p
-        else:
-            path = os.path.dirname(path)
-
-    """
+def load_module(path=None, name=None):
     if path is not None:
         dotted_path = dotted_from_fs_path(path)
     else:
@@ -381,10 +361,18 @@ def load_module(path, name):
             # the QObject class.
             # See https://github.com/davidhalter/jedi/pull/483
             return None
+        raise
+    except ImportError:
+        # If a module is "corrupt" or not really a Python module or whatever.
+        debug.warning('Module %s not importable.', path)
+        return None
+    finally:
+        sys.path = temp
+
     # Just access the cache after import, because of #59 as well as the very
     # complicated import structure of Python.
     module = sys.modules[dotted_path]
-    sys.path = temp
+
     return CompiledObject(module)
 
 

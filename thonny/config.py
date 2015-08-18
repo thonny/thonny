@@ -33,8 +33,14 @@ class ConfigurationManager:
             except:
                 return val
         except:
+            if name not in self._defaults:
+                raise KeyError("Option named '{}' doesn't exist".format(name)) 
+            
             return self._defaults[name]
-
+    
+    def has_option(self, name):
+        return name in self._defaults
+    
     def set_option(self, name, value, save_now=True):
         section, option = self._parse_name(name)
         name = section + "." + option
@@ -58,7 +64,7 @@ class ConfigurationManager:
         name = section + "." + option
         self._defaults[name] = value
 
-    def set_defaults(self, defaults):
+    def add_defaults(self, defaults):
         for name in defaults:
             self.set_default(name, defaults[name])
     
@@ -69,7 +75,7 @@ class ConfigurationManager:
         if name in self._variables:
             return self._variables[name]
         else:
-            value = self[name]
+            value = self.get_option(name)
             if isinstance(value, bool):
                 var = tk.BooleanVar(value=value)
             elif isinstance(value, int):
@@ -84,7 +90,7 @@ class ConfigurationManager:
     def save(self):
         # save all tk variables
         for name in self._variables:
-            self[name] = self._variables[name].get()
+            self.set_option(name, self._variables[name].get(), save_now=False)
             
         # store
         with open(self._filename, 'w', encoding="UTF-8") as fp: 

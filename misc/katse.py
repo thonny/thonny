@@ -1,22 +1,17 @@
 import tkinter as tk
+from tkinter import ttk
 
 root = tk.Tk()
 
-menubar = tk.Menu(root)
-root["menu"] = menubar
-root.option_add('*tearOff', tk.FALSE)
+t1 = tk.Text(root, undo=True)
+t1 = ttk.Entry(root)
+t1.grid()
 
-file_menu = tk.Menu(menubar)
+def do_stuff(e=None):
+    print(t1.selection_get())
+    #print(">" + t1.selection_present() + "<")
 
-menubar.add_cascade(label="File", menu=file_menu)
-
-file_menu.add_command(label="kala")
-file_menu.add_separator()
-
-
-print(menubar.entryconfigure(1, "menu"), file_menu)
-print(file_menu.entrycget(0, "label"))
-print(file_menu.index("kala"))
-file_menu.insert(, "command", label="uus")
+b1 = ttk.Button(root, command=do_stuff)
+b1.grid()
 
 root.mainloop()

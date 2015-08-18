@@ -5,8 +5,6 @@ import re
 import keyword
 import builtins
 
-from thonny import ui_utils
-    
 DEBUG = False
 
 
@@ -32,36 +30,17 @@ def make_pat():
     return kw + "|" + builtin + "|" + comment + "|" + string +\
            "|" + matches_any("SYNC", [r"\n"])
 
-prog = re.compile(make_pat(), re.S)
-idprog = re.compile(r"\s+(\w+)", re.S)
-asprog = re.compile(r".*?\b(as)\b")
-
 class SyntaxColorer:
 
-    def __init__(self, text):
+    def __init__(self, text, main_font, bold_font):
         self.text = text
-        self.prog = prog
-        self.idprog = idprog
-        self.asprog = asprog
-        self.LoadTagDefs()
+        self.prog = re.compile(make_pat(), re.S)
+        self.idprog = re.compile(r"\s+(\w+)", re.S)
+        self.asprog = re.compile(r".*?\b(as)\b")
+        self.LoadTagDefs(main_font, bold_font)
         
         self.config_colors() # AA
         self.notify_range("1.0", "end") # AA
-
-    """
-    def setdelegate(self, delegate):
-        if self.delegate is not None:
-            self.unbind("<<toggle-auto-coloring>>")
-        Delegator.setdelegate(self, delegate)
-        if delegate is not None:
-            self.config_colors()
-            self.bind("<<toggle-auto-coloring>>", self.toggle_colorize_event)
-            self.notify_range("1.0", "end")
-        else:
-            # No delegate - stop matches_any colorizing
-            self.stop_colorizing = True
-            self.allow_colorizing = False
-    """
 
     def config_colors(self):
         for tag, cnf in self.tagdefs.items():
@@ -69,13 +48,13 @@ class SyntaxColorer:
                 self.text.tag_configure(tag, **cnf)
         self.text.tag_raise('sel')
 
-    def LoadTagDefs(self):
+    def LoadTagDefs(self, main_font, bold_font):
         self.tagdefs = {
             "SYNC": {'background':None,'foreground':None},
             "TODO": {'background':None,'foreground':None},
             
             "COMMENT": {'background':None,'foreground':"DarkGray"},
-            "KEYWORD": {'background':None,'foreground':"#7f0055", "font":ui_utils.BOLD_EDITOR_FONT},
+            "KEYWORD": {'background':None,'foreground':"#7f0055", "font":bold_font},
             #"KEYWORD": {'background':None,'foreground':"#ff7700", "font":ui_utils.BOLD_EDITOR_FONT},
             "BUILTIN": {'background':None,'foreground':None},
             #"STRING":  {'background':None,'foreground':"#00AA00"},

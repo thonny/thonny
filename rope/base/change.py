@@ -256,8 +256,8 @@ class CreateFolder(CreateResource):
     See docs for `CreateResource`.
     """
 
-    def __init__(self, parent, name):
-        resource = parent.project.get_folder(self._get_child_path(parent, name))
+    def __init__(self, master, name):
+        resource = master.project.get_folder(self._get_child_path(master, name))
         super(CreateFolder, self).__init__(resource)
 
 
@@ -267,8 +267,8 @@ class CreateFile(CreateResource):
     See docs for `CreateResource`.
     """
 
-    def __init__(self, parent, name):
-        resource = parent.project.get_file(self._get_child_path(parent, name))
+    def __init__(self, master, name):
+        resource = master.project.get_file(self._get_child_path(master, name))
         super(CreateFile, self).__init__(resource)
 
 

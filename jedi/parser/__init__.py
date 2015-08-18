@@ -22,7 +22,7 @@ from jedi.parser import tree as pt
 from jedi.parser import tokenize
 from jedi.parser import token
 from jedi.parser.token import (DEDENT, INDENT, ENDMARKER, NEWLINE, NUMBER,
-                               STRING, OP)
+                               STRING, OP, ERRORTOKEN)
 from jedi.parser.pgen2.pgen import generate_grammar
 from jedi.parser.pgen2.parse import PgenParser
 
@@ -74,6 +74,12 @@ class ErrorStatement(object):
         return first_type
 
 
+class ParserSyntaxError(object):
+    def __init__(self, message, position):
+        self.message = message
+        self.position = position
+
+
 class Parser(object):
     """
     This class is used to parse a Python file, it then divides them into a
@@ -115,6 +121,8 @@ class Parser(object):
             'lambdef_nocond': pt.Lambda,
         }
 
+        self.syntax_errors = []
+
         self._global_names = []
         self._omit_dedent_list = []
         self._indent_counter = 0
@@ -145,6 +153,12 @@ class Parser(object):
                        self.error_recovery)
         tokenizer = tokenizer or tokenize.source_tokens(source)
         self.module = p.parse(self._tokenize(tokenizer))
+        if self.module.type != 'file_input':
+            # If there's only one statement, we get back a non-module. That's
+            # not what we want, we want a module, so we add it here:
+            self.module = self.convert_node(grammar,
+                                            grammar.symbol2number['file_input'],
+                                            [self.module])
 
         if added_newline:
             self.remove_last_newline()
@@ -321,10 +335,16 @@ class Parser(object):
                 self._indent_counter -= 1
             elif typ == INDENT:
                 self._indent_counter += 1
+            elif typ == ERRORTOKEN:
+                self._add_syntax_error('Strange token', start_pos)
+                continue
 
             if typ == OP:
                 typ = token.opmap[value]
             yield typ, value, prefix, start_pos
+
+    def _add_syntax_error(self, message, position):
+        self.syntax_errors.append(ParserSyntaxError(message, position))
 
     def __repr__(self):
         return "<%s: %s>" % (type(self).__name__, self.module)
@@ -350,7 +370,12 @@ class Parser(object):
             while True:
                 if newline.value == '':
                     # Must be a DEDENT, just continue.
-                    newline = newline.get_previous()
+                    try:
+                        newline = newline.get_previous()
+                    except IndexError:
+                        # If there's a statement that fails to be parsed, there
+                        # will be no previous leaf. So just ignore it.
+                        break
                 elif newline.value != '\n':
                     # This may happen if error correction strikes and removes
                     # a whole statement including '\n'.

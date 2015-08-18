@@ -26,10 +26,10 @@ from jedi import common
 from jedi import debug
 from jedi import settings
 from jedi._compatibility import use_metaclass, is_py3, unicode
-from jedi.parser import tree as pr
+from jedi.parser import tree
 from jedi.evaluate import compiled
 from jedi.evaluate import helpers
-from jedi.evaluate.cache import CachedMetaClass, memoize_default, NO_DEFAULT
+from jedi.evaluate.cache import CachedMetaClass, memoize_default
 from jedi.evaluate import analysis
 
 
@@ -38,7 +38,7 @@ def unite(iterable):
     return list(chain.from_iterable(iterable))
 
 
-class IterableWrapper(pr.Base):
+class IterableWrapper(tree.Base):
     def is_class(self):
         return False
 
@@ -68,6 +68,9 @@ class GeneratorMixin(object):
         used with generators.
         """
         return [self.iter_content()[index]]
+
+    def py__bool__(self):
+        return True
 
 
 class Generator(use_metaclass(CachedMetaClass, IterableWrapper, GeneratorMixin)):
@@ -137,13 +140,13 @@ class Comprehension(IterableWrapper):
         last = comprehension.children[-1]
         last_comp = comprehension.children[1]
         while True:
-            if isinstance(last, pr.CompFor):
+            if isinstance(last, tree.CompFor):
                 last_comp = last
-            elif not pr.is_node(last, 'comp_if'):
+            elif not tree.is_node(last, 'comp_if'):
                 break
             last = last.children[-1]
 
-        return helpers.deep_ast_copy(comprehension.children[0], {comprehension: last_comp})
+        return helpers.deep_ast_copy(comprehension.children[0], parent=last_comp)
 
     def get_exact_index_types(self, index):
         return [self._evaluator.eval_element(self.eval_node())[index]]
@@ -152,7 +155,22 @@ class Comprehension(IterableWrapper):
         return "<e%s of %s>" % (type(self).__name__, self._atom)
 
 
-class ListComprehension(Comprehension):
+class ArrayMixin(object):
+    @memoize_default()
+    def names_dicts(self, search_global=False):  # Always False.
+        # `array.type` is a string with the type, e.g. 'list'.
+        scope = self._evaluator.find_types(compiled.builtin, self.type)[0]
+        # builtins only have one class -> [0]
+        scope = self._evaluator.execute(scope, (AlreadyEvaluated((self,)),))[0]
+        return scope.names_dicts(search_global)
+
+    def py__bool__(self):
+        return None  # We don't know the length, because of appends.
+
+
+class ListComprehension(Comprehension, ArrayMixin):
+    type = 'list'
+
     def get_index_types(self, evaluator, index):
         return self.iter_content()
 
@@ -169,7 +187,7 @@ class GeneratorComprehension(Comprehension, GeneratorMixin):
         return self._evaluator.eval_element(self.eval_node())
 
 
-class Array(IterableWrapper):
+class Array(IterableWrapper, ArrayMixin):
     mapping = {'(': 'tuple',
                '[': 'list',
                '{': 'dict'}
@@ -191,10 +209,7 @@ class Array(IterableWrapper):
     def name(self):
         return helpers.FakeName(self.type, parent=self)
 
-    def py__bool__(self):
-        return None  # We don't know the length, because of appends.
-
-    @memoize_default(NO_DEFAULT)
+    @memoize_default()
     def get_index_types(self, evaluator, index=()):
         """
         Get the types of a specific index or all, if not given.
@@ -216,7 +231,7 @@ class Array(IterableWrapper):
 
         return types if lookup_done else self.values()
 
-    @memoize_default(NO_DEFAULT)
+    @memoize_default()
     def values(self):
         result = unite(self._evaluator.eval_element(v) for v in self._values())
         result += check_array_additions(self._evaluator, self)
@@ -241,13 +256,6 @@ class Array(IterableWrapper):
 
     def iter_content(self):
         return self.values()
-
-    @memoize_default()
-    def names_dicts(self, search_global=False):  # Always False.
-        # `array.type` is a string with the type, e.g. 'list'.
-        scope = self._evaluator.find_types(compiled.builtin, self.type)[0]
-        scope = self._evaluator.execute(scope)[0]  # builtins only have one class
-        return scope.names_dicts(search_global)
 
     @common.safe_property
     def parent(self):
@@ -275,9 +283,9 @@ class Array(IterableWrapper):
         if array_node in (']', '}', ')'):
             return []  # Direct closing bracket, doesn't contain items.
 
-        if pr.is_node(array_node, 'testlist_comp'):
+        if tree.is_node(array_node, 'testlist_comp'):
             return array_node.children[::2]
-        elif pr.is_node(array_node, 'dictorsetmaker'):
+        elif tree.is_node(array_node, 'dictorsetmaker'):
             kv = []
             iterator = iter(array_node.children)
             for key in iterator:
@@ -358,11 +366,11 @@ class MergedArray(_FakeArray):
         super(MergedArray, self).__init__(evaluator, arrays, arrays[-1].type)
         self._arrays = arrays
 
-    def get_index_types(self, evaluator, mixed_index):
-        return list(chain(*(a.values() for a in self._arrays)))
-
     def get_exact_index_types(self, mixed_index):
         raise IndexError
+
+    def values(self):
+        return list(chain(*(a.values() for a in self._arrays)))
 
     def __iter__(self):
         for array in self._arrays:
@@ -542,6 +550,11 @@ class ArrayInstance(IterableWrapper):
     Used for the usage of set() and list().
     This is definitely a hack, but a good one :-)
     It makes it possible to use set/list conversions.
+
+    In contrast to Array, ListComprehension and all other iterable types, this
+    is something that is only used inside `evaluate/compiled/fake/builtins.py`
+    and therefore doesn't need `names_dicts`, `py__bool__` and so on, because
+    we don't use these operations in `builtins.py`.
     """
     def __init__(self, evaluator, instance):
         self._evaluator = evaluator
@@ -600,14 +613,14 @@ class Slice(object):
 
 
 def create_indexes_or_slices(evaluator, index):
-    if pr.is_node(index, 'subscript'):  # subscript is a slice operation.
+    if tree.is_node(index, 'subscript'):  # subscript is a slice operation.
         start, stop, step = None, None, None
         result = []
         for el in index.children:
             if el == ':':
                 if not result:
                     result.append(None)
-            elif pr.is_node(el, 'sliceop'):
+            elif tree.is_node(el, 'sliceop'):
                 if len(el.children) == 2:
                     result.append(el.children[1])
             else:

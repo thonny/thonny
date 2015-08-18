@@ -10,7 +10,7 @@ import re
 from jedi._compatibility import unicode, use_metaclass
 from jedi import settings
 from jedi import common
-from jedi.parser import tree as pr
+from jedi.parser import tree
 from jedi.evaluate.cache import memoize_default, CachedMetaClass
 from jedi.evaluate import representation as er
 from jedi.evaluate import iterable
@@ -61,7 +61,7 @@ class BaseDefinition(object):
         """
         An instance of :class:`jedi.parser.reprsentation.Name` subclass.
         """
-        self._definition = er.wrap(evaluator, self._name.get_definition())
+        self._definition = evaluator.wrap(self._name.get_definition())
         self.is_keyword = isinstance(self._definition, keywords.Keyword)
 
         # generate a path to the definition
@@ -152,7 +152,7 @@ class BaseDefinition(object):
             return stripped.api_type()
         elif isinstance(stripped, iterable.Array):
             return 'instance'
-        elif isinstance(stripped, pr.Import):
+        elif isinstance(stripped, tree.Import):
             return 'import'
 
         string = type(stripped).__name__.lower().replace('wrapper', '')
@@ -162,15 +162,25 @@ class BaseDefinition(object):
             return string
 
     def _path(self):
-        """The module path."""
+        """The path to a module/class/function definition."""
         path = []
         par = self._definition
         while par is not None:
-            if isinstance(par, pr.Import):
+            if isinstance(par, tree.Import):
                 path += imports.ImportWrapper(self._evaluator, self._name).import_path
                 break
-            with common.ignored(AttributeError):
-                path.insert(0, par.name)
+            try:
+                name = par.name
+            except AttributeError:
+                pass
+            else:
+                if isinstance(par, er.ModuleWrapper):
+                    # TODO just make the path dotted from the beginning, we
+                    # shouldn't really split here.
+                    path[0:0] = par.py__name__().split('.')
+                    break
+                else:
+                    path.insert(0, unicode(name))
             par = par.parent
         return path
 
@@ -307,9 +317,9 @@ class BaseDefinition(object):
         """
         Follow both statements and imports, as far as possible.
         """
-        if self._definition.isinstance(pr.ExprStmt):
+        if self._definition.isinstance(tree.ExprStmt):
             return self._evaluator.eval_statement(self._definition)
-        elif self._definition.isinstance(pr.Import):
+        elif self._definition.isinstance(tree.Import):
             return imports.ImportWrapper(self._evaluator, self._name).follow()
         else:
             return [self._definition]
@@ -326,7 +336,7 @@ class BaseDefinition(object):
             raise AttributeError()
         followed = followed[0]  # only check the first one.
 
-        if followed.isinstance(er.Function):
+        if followed.type == 'funcdef':
             if isinstance(followed, er.InstanceElement):
                 params = followed.params[1:]
             else:
@@ -339,11 +349,11 @@ class BaseDefinition(object):
                 params = sub.params[1:]  # ignore self
             except KeyError:
                 return []
-        return [_Param(self._evaluator, p.get_name()) for p in params]
+        return [_Param(self._evaluator, p.name) for p in params]
 
     def parent(self):
         scope = self._definition.get_parent_scope()
-        scope = er.wrap(self._evaluator, scope)
+        scope = self._evaluator.wrap(scope)
         return Definition(self._evaluator, scope.name)
 
     def __repr__(self):
@@ -373,9 +383,9 @@ class Completion(BaseDefinition):
             append = '('
 
         if settings.add_dot_after_module:
-            if isinstance(self._definition, pr.Module):
+            if isinstance(self._definition, tree.Module):
                 append += '.'
-        if isinstance(self._definition, pr.Param):
+        if isinstance(self._definition, tree.Param):
             append += '='
 
         name = str(self._name)
@@ -433,7 +443,7 @@ class Completion(BaseDefinition):
             parses all libraries starting with ``a``.
         """
         definition = self._definition
-        if isinstance(definition, pr.Import):
+        if isinstance(definition, tree.Import):
             i = imports.ImportWrapper(self._evaluator, self._name)
             if len(i.import_path) > 1 or not fast:
                 followed = self._follow_statements_imports()
@@ -452,7 +462,7 @@ class Completion(BaseDefinition):
         The type of the completion objects. Follows imports. For a further
         description, look at :attr:`jedi.api.classes.BaseDefinition.type`.
         """
-        if isinstance(self._definition, pr.Import):
+        if isinstance(self._definition, tree.Import):
             i = imports.ImportWrapper(self._evaluator, self._name)
             if len(i.import_path) <= 1:
                 return 'module'
@@ -470,7 +480,7 @@ class Completion(BaseDefinition):
         # imports completion is very complicated and needs to be treated
         # separately in Completion.
         definition = self._definition
-        if definition.isinstance(pr.Import):
+        if definition.isinstance(tree.Import):
             i = imports.ImportWrapper(self._evaluator, self._name)
             return i.follow()
         return super(Completion, self)._follow_statements_imports()
@@ -536,17 +546,23 @@ class Definition(use_metaclass(CachedMetaClass, BaseDefinition)):
             d = typ + ' ' + d.name.get_code()
         elif isinstance(d, iterable.Array):
             d = 'class ' + d.type
-        elif isinstance(d, (pr.Class, er.Class, er.Instance)):
+        elif isinstance(d, (tree.Class, er.Class, er.Instance)):
             d = 'class ' + unicode(d.name)
-        elif isinstance(d, (er.Function, pr.Function)):
+        elif isinstance(d, (er.Function, tree.Function)):
             d = 'def ' + unicode(d.name)
-        elif isinstance(d, pr.Module):
+        elif isinstance(d, tree.Module):
             # only show module name
             d = 'module %s' % self.module_name
-        elif isinstance(d, pr.Param):
-            d = d.get_code()
+        elif isinstance(d, tree.Param):
+            d = d.get_code().strip()
+            if d.endswith(','):
+                d = d[:-1]  # Remove the comma.
         else:  # ExprStmt
-            first_leaf = d.first_leaf()
+            try:
+                first_leaf = d.first_leaf()
+            except AttributeError:
+                # `d` is already a Leaf (Name).
+                first_leaf = d
             # Remove the prefix, because that's not what we want for get_code
             # here.
             old, first_leaf.prefix = first_leaf.prefix, ''
@@ -613,11 +629,11 @@ class CallSignature(Definition):
     It knows what functions you are currently in. e.g. `isinstance(` would
     return the `isinstance` function. without `(` it would return nothing.
     """
-    def __init__(self, evaluator, executable_name, call, index, key_name):
+    def __init__(self, evaluator, executable_name, call_stmt, index, key_name):
         super(CallSignature, self).__init__(evaluator, executable_name)
         self._index = index
         self._key_name = key_name
-        self._call = call
+        self._call_stmt = call_stmt
 
     @property
     def index(self):
@@ -649,10 +665,7 @@ class CallSignature(Definition):
         The indent of the bracket that is responsible for the last function
         call.
         """
-        c = self._call
-        while c.next is not None:
-            c = c.next
-        return c.name.end_pos
+        return self._call_stmt.end_pos
 
     @property
     def call_name(self):

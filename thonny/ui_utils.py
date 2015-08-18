@@ -1,52 +1,28 @@
 # -*- coding: utf-8 -*-
 
 import time
-import os.path
 import tkinter as tk
-import tkinter.font as tk_font
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
-from thonny import config, misc_utils
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows,\
-    try_remove_linenumbers
-from thonny.user_logging import log_user_event, TextDeleteEvent, TextInsertEvent,\
-    UndoEvent, RedoEvent, CutEvent, PasteEvent, CopyEvent, EditorGetFocusEvent,\
-    EditorLoseFocusEvent, CommandEvent, KeyPressEvent
-import traceback
+from thonny.misc_utils import try_remove_linenumbers
+from tkinter.dialog import Dialog
 
 
-SASHTHICKNESS = 10
 CLAM_BACKGROUND = "#dcdad5"
 CALM_WHITE = '#fdfdfd'
-EDITOR_FONT = None 
-BOLD_EDITOR_FONT = None
-IO_FONT = None
-TREE_FONT = None
 
 
-imgdir = os.path.join(os.path.dirname(__file__), 'res')
-
-_event_data = {}
-_next_event_data_serial = 1
-
-_held_keys = set()
-_modifier_keys = {"Control_L", "Alt_L", "Shift_L",   
-                  "Control_R", "Alt_R", "Shift_R",
-                  #"131074", "1048584", "262145", # TODO: check on real Mac
-                  #"270336", "131076", "1048592"
-                  } 
-
-
-class PanedWindowForViewNotebooks(tk.PanedWindow):
+class AutomaticPanedWindow(ttk.PanedWindow):
     """
-    Enables positioning panes according to their position_key-s.
-    Automatically adds/removes itself to/from its master PanedWindow.
+    Enables inserting panes according to their position_key-s.
+    Automatically adds/removes itself to/from its master AutomaticPanedWindow.
     Fixes some style glitches.
     """ 
-    def __init__(self, master, location):
-        tk.PanedWindow.__init__(self, master)
+    def __init__(self, master, position_key=None, **kwargs):
+        # kwargs["sashwidth"]=10
+        ttk.PanedWindow.__init__(self, master, **kwargs)
         
-        self._location = location
+        """ TODO: test in Linux and Mac 
         style = ttk.Style()
         if style.theme_use() == "clam":
             self.configure(background=CLAM_BACKGROUND)
@@ -54,55 +30,83 @@ class PanedWindowForViewNotebooks(tk.PanedWindow):
             self.configure(background="systemSheetBackground")
         elif running_on_windows():
             self.configure(background="SystemButtonFace")
+        """
+        self.position_key = position_key
+        self.visible_panes = set()
     
-    def add_notebook(self, child):
-        kwargs = {}
-        for sibling in self.panes():
-            if (not hasattr(sibling, "position_key") 
-                or sibling.position_key > child.position_key):
-                kwargs["before"] = sibling
-                break
-        
-        self.add(child, **kwargs)
+    def insert(self, pos, child, **kw):
+        if pos == "auto":
+            # According to documentation I should use self.panes()
+            # but this doesn't return expected widgets
+            for sibling in self.visible_panes:
+                if (not hasattr(sibling, "position_key") 
+                    or sibling.position_key == None
+                    or sibling.position_key > child.position_key):
+                    pos = sibling
+                    break
+            else:
+                pos = "end"
+            
+        ttk.PanedWindow.insert(self, pos, child, **kw)
+        self.visible_panes.add(child)
+        self._update_visibility()
+
+    def add(self, child, **kw):
+        ttk.PanedWindow.add(self, child, **kw)
+        self.visible_panes.add(child)
+        self._update_visibility()
+    
+    def remove(self, child):
+        ttk.PanedWindow.remove(self, child)
+        self.visible_panes.remove(child)
+        self._update_visibility()
+    
+    def forget(self, child):
+        ttk.PanedWindow.forget(self, child)
+        self.visible_panes.remove(child)
+        self._update_visibility()
+    
+    def is_visible(self):
+        if not isinstance(self.master, AutomaticPanedWindow):
+            return self.winfo_ismapped()
+        else:
+            return self in self.master.visible_panes
     
     def _update_visibility(self):
-        if len(self.panes()) == 0 and self.winfo_ismapped():
-            self.master.remove(self)
+        if not isinstance(self.master, AutomaticPanedWindow):
+            return
+        
+        if len(self.visible_panes) == 0 and self.is_visible():
+            self.master.forget(self)
             
-        if len(self.tabs()) > 0 and not self.winfo_ismapped():
-            self.master.add_view_notebook(self)
-            if self._location == "w":
-                pass
-            else:
-                pass
+        if len(self.panes()) > 0 and not self.is_visible():
+            self.master.insert("auto", self)
 
 
-class ViewNotebook(ttk.Notebook):
+class AutomaticNotebook(ttk.Notebook):
     """
-    Allows adding views according to their position keys.
+    Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
     """
-    def __init__(self, master, location):
+    def __init__(self, master, position_key):
         ttk.Notebook.__init__(self, master)
-        self.location = location
-    
-    def add_view(self, view, text, position_key):
-        view.position_key = position_key
-        
-        for sibling in map(self.nametowidget, self.tabs()):
-            if sibling.position_key > view.position_key:
-                where = sibling
-                break
-        else:
-            where = "end"
-        
-        self.insert(where, view, text=text)
+        self.position_key = position_key
     
     def add(self, child, **kw):
         ttk.Notebook.add(self, child, **kw)
         self._update_visibility()
     
     def insert(self, pos, child, **kw):
+        if pos == "auto":
+            for sibling in map(self.nametowidget, self.tabs()):
+                if (not hasattr(sibling, "position_key") 
+                    or sibling.position_key == None
+                    or sibling.position_key > child.position_key):
+                    pos = sibling
+                    break
+            else:
+                pos = "end"
+            
         ttk.Notebook.insert(self, pos, child, **kw)
         self._update_visibility()
     
@@ -114,12 +118,17 @@ class ViewNotebook(ttk.Notebook):
         ttk.Notebook.forget(self, tab_id)
         self._update_visibility()
     
+    def is_visible(self):
+        return self in self.master.visible_panes
+        
     def _update_visibility(self):
-        if len(self.tabs()) == 0 and self.winfo_ismapped():
+        if not isinstance(self.master, AutomaticPanedWindow):
+            return
+        if len(self.tabs()) == 0 and self.is_visible():
             self.master.remove(self)
             
-        if len(self.tabs()) > 0 and not self.winfo_ismapped():
-            self.master.add_view_notebook(self)
+        if len(self.tabs()) > 0 and not self.is_visible():
+            self.master.insert("auto", self)
         
 
 class TreeFrame(ttk.Frame):
@@ -158,7 +167,7 @@ class TextWrapper:
         self._text_redirector = WidgetRedirector(self.text)
         self._original_user_text_insert = self._text_redirector.register("insert", self._user_text_insert)
         self._original_user_text_delete = self._text_redirector.register("delete", self._user_text_delete)
-        
+        """
         self.text.bind("<<Undo>>", self.on_text_undo, "+")
         self.text.bind("<<Redo>>", self.on_text_redo, "+")
         self.text.bind("<<Cut>>", self.on_text_cut, "+")
@@ -172,7 +181,7 @@ class TextWrapper:
         self.text.bind("<1>", self.on_text_mouse_click, "+")
         self.text.bind("<2>", self.on_text_mouse_click, "+")
         self.text.bind("<3>", self.on_text_mouse_click, "+")
-        
+        """
         self._last_event_kind = None
         self._last_key_time = 0
         self._propose_remove_line_numbers = propose_remove_line_numbers
@@ -205,7 +214,7 @@ class TextWrapper:
             tags = args[2]
         else:
             tags = None 
-        log_user_event(TextInsertEvent(self, index, args[1], tags))
+        #log_user_event(TextInsertEvent(self, index, args[1], tags)) TODO:
     
         
     def _user_text_delete(self, *args, **kw):
@@ -215,40 +224,33 @@ class TextWrapper:
         # subclass may intercept this forwarding
         self._original_user_text_delete(*args, **kw)
 #        print("DEL'", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
-        log_user_event(TextDeleteEvent(self, index1, index2))
+        #log_user_event(TextDeleteEvent(self, index1, index2)) TODO:
 
     def on_text_undo(self, e):
         self._last_event_kind = "undo"
-        log_user_event(UndoEvent(self));
         
     def on_text_redo(self, e):
         self._last_event_kind = "redo"
-        log_user_event(RedoEvent(self));
         
     def on_text_cut(self, e):
         self._last_event_kind = "cut"
         self.add_undo_separator()        
-        log_user_event(CutEvent(self));
         
     def on_text_copy(self, e):
         self._last_event_kind = "copy"
         self.add_undo_separator()        
-        log_user_event(CopyEvent(self));
         
     def on_text_paste(self, e):
         self._last_event_kind = "paste"
         self.add_undo_separator()        
-        log_user_event(PasteEvent(self));
     
     def on_text_get_focus(self, e):
         self._last_event_kind = "get_focus"
         self.add_undo_separator()        
-        log_user_event(EditorGetFocusEvent(self));
         
     def on_text_lose_focus(self, e):
         self._last_event_kind = "lose_focus"
         self.add_undo_separator()        
-        log_user_event(EditorLoseFocusEvent(self));
     
     def on_text_key_release(self, e):
         pass
@@ -266,7 +268,6 @@ class TextWrapper:
             self._last_event_kind = event_kind
 
         self.last_key_time = time.time()
-        log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
     def on_text_mouse_click(self, event):
         self.add_undo_separator()
@@ -329,11 +330,6 @@ class TextFrame(ttk.Frame, TextWrapper):
         TextWrapper._user_text_delete(self, "1.0", tk.END)
         TextWrapper._user_text_insert(self, "1.0", content)
 
-
-def delete_images():
-    # otherwise Tk will print a weird error
-    global _images
-    del _images
 
 
 class WidgetRedirector:
@@ -422,124 +418,31 @@ class WidgetRedirector:
             return self.tk_call(self.orig_and_operation + args)
 
 
-def start_keeping_track_of_held_keys(tk_root):
-        
-    tk_root.bind_all("<KeyPress>", _register_key_press, "+")
-    tk_root.bind_all("<KeyRelease>", _register_key_release, "+")
-
-def _register_key_press(event):
-    keysym = _get_keysym(event)
-    _held_keys.add(keysym)
-
-def _register_key_release(event):
-    keysym = _get_keysym(event)
-    if keysym in _held_keys:
-        _held_keys.remove(keysym)
-
-def _get_keysym(event):
-    if event.keysym == "??": # shift, alt, Ctrl in OSx86 (Hackintosh)
-        return str(event.keycode)
-    else:
-        return event.keysym
-
-def non_modifier_key_is_held():
-    for keysym in _held_keys:
-        if (keysym not in _modifier_keys 
-            and not (keysym.isnumeric() and len(keysym) > 0)):
-            return True
+def sequence_to_accelerator(sequence):
+    """Translates Tk event sequence to customary shortcut string
+    for showing in the menu"""
     
-    return False
-
-
-def _tk_version_warning():
-    root = tk._default_root
-    try:
-        import idlelib.macosxSupport
-        return idlelib.macosxSupport.tkVersionWarning(root)
-    except ImportError:
-        # copied from macosxSupport
-        if (root._is_on_mac_os() and
-                ('AppKit' in root.tk.call('winfo', 'server', '.')) ):
-            patchlevel = root.tk.call('info', 'patchlevel')
-            if patchlevel not in ('8.5.7', '8.5.9'):
-                return False
-            return (r"WARNING: The version of Tcl/Tk ({0}) in use may"
-                    r" be unstable.\n"
-                    r"Visit http://www.python.org/download/mac/tcltk/"
-                    r" for current information.".format(patchlevel))
-        else:
-            return False
-
-class Command:
-    def __init__(self, cmd_id, label, accelerator, target_or_finder,
-                 kind="command", variable=None, value=None, onvalue=None,
-                 variable_name=None, offvalue=None, system_bound=False,
-                 source=None):
-        self.cmd_id = cmd_id
-        self.label = label
-        self.accelerator = accelerator
-        self.kind = kind
-        self.variable=variable
-        self.value = value
-        self.onvalue = onvalue
-        self.offvalue = offvalue
-        self._target_or_finder = target_or_finder
-        self.system_bound = system_bound
-        self.source = source
-        if variable is None and variable_name is not None:
-            self.variable = config.prefs_vars[variable_name]
+    if not sequence:
+        return ""
     
-    def _find_target(self):
-        if hasattr(self._target_or_finder, '__call__'):
-            return self._target_or_finder()
-        else:
-            return self._target_or_finder
+    accelerator = (sequence
+        .strip("<>")
+        .replace("Key-", "")
+        .replace("KeyPress", "")
+        .replace("Control", "Ctrl")
+        .replace("-Minus", "--").replace("-minus", "--")
+        .replace("-Plus", "-+").replace("-plus", "-+")
+    )
+        
+    # it's customary to show keys with capital letters
+    # but tk would treat this as pressing with shift
+    parts = accelerator.split("-")
+    if len(parts[-1]) == 1 and "Shift" not in accelerator:
+        parts[-1] = parts[-1].upper()
     
-    def execute(self, event=None):
-        if self.system_bound:
-            return
-        
-        if hasattr(event, "keysym"):
-            # ignore long-press-repeated keypresses
-            # TODO: check this
-            if event.keysym in _held_keys:
-                return
-            
-            _register_key_press(event)
-        
-        
-        if self.is_enabled():
-            target = self._find_target()
-            method_name = "cmd_" + self.cmd_id
-            method = getattr(target, method_name)
-            if self.source is not None:
-                source = self.source
-            elif event is not None:
-                source = "shortcut"
-            else:
-                source = "menu"
-                
-            log_user_event(CommandEvent(self.cmd_id, source))
-                
-            return method()
-        else:
-            # tk._default_root is our beloved main window             
-            tk._default_root.bell()
-            #print("Cmd execute: cmd_" + self.cmd_id + " not enabled")
+    return "+".join(parts)
     
-    def is_enabled(self):
-        target = self._find_target()
-        
-        if target is None:
-            return False
-        else:
-            method_name = "cmd_" + self.cmd_id + "_enabled"
-            if hasattr(target, method_name):
-                availability_method = getattr(target, method_name)
-                return availability_method()
-            else:
-                # Let's be optimistic
-                return self.system_bound or hasattr(target, "cmd_" + self.cmd_id)
+
         
 def get_zoomed(toplevel):
     if "-zoomed" in toplevel.wm_attributes(): # Linux
@@ -556,10 +459,6 @@ def set_zoomed(toplevel, value):
             toplevel.wm_state("zoomed")
         else:
             toplevel.wm_state("normal")
-
-def notebook_contains(nb, child):
-    return str(child) in nb.tabs()
-
 
 
 class AutoScrollbar(ttk.Scrollbar):
@@ -630,108 +529,132 @@ class ScrollableFrame(tk.Frame):
             self.canvas.itemconfigure(self.interior_id,
                                       width=self.canvas.winfo_width())
 
+class TtkDialog(Dialog):
+    def buttonbox(self):
+        '''add standard button box.
+
+        override if you do not want the standard buttons
+        '''
+
+        box = ttk.Frame(self)
+
+        w = ttk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
+        w.pack(side=tk.LEFT, padx=5, pady=5)
+        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
+        w.pack(side=tk.LEFT, padx=5, pady=5)
+
+        self.bind("<Return>", self.ok)
+        self.bind("<Escape>", self.cancel)
+
+        box.pack()
+
     
 
-def create_PanedWindow(master, orient):
-    pw = tk.PanedWindow(master,
-                          orient=orient,
-                          showhandle="False",
-                          sashwidth=SASHTHICKNESS)
-    style = ttk.Style()
-    if style.theme_use() == "clam":
-        pw.configure(background=CLAM_BACKGROUND)
-    elif style.theme_use() == "aqua":
-        pw.configure(background="systemSheetBackground")
-    elif running_on_windows():
-        pw.configure(background="SystemButtonFace")
+class _QueryDialog(TtkDialog):
 
-    return pw
+    def __init__(self, title, prompt,
+                 initialvalue=None,
+                 minvalue = None, maxvalue = None,
+                 master = None,
+                 selection_range=None):
 
+        if not master:
+            master = tk._default_root
 
-                
-def generate_event(widget, descriptor, data=None):
-    global _next_event_data_serial
-    
-    if data is not None:
-        data_serial = _next_event_data_serial
-        _next_event_data_serial += 1 
-        _event_data[data_serial] = data
-        widget.event_generate(descriptor, serial=data_serial)
-    else:
-        widget.event_generate(descriptor)
-        
-        
+        self.prompt   = prompt
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
 
-def get_event_data(event):
-    if event.serial in _event_data:
-        return _event_data[event.serial]
-    else:
-        return None
+        self.initialvalue = initialvalue
+        self.selection_range = selection_range
 
-def create_menubutton(master):
-    font = tk_font.nametofont("TkTextFont").copy()
-    #font.configure(size=7)
-    
-    if "arrow_down" not in _images:
-        _images["arrow_down"] = tk.PhotoImage("img_arrow_down", file=os.path.join(imgdir, 'arrow_down2.gif'))
-    
-    # trying menubutton
-    kw_args = {
-        "text" : '@1208323432',
-        "image" : _images["arrow_down"],
-        "compound" : tk.RIGHT,
-        "relief" : tk.FLAT,
-        #"foreground": "#777777",
-        "font" : font
-    }
-    
-    style = ttk.Style()
-    if style.theme_use() == "clam":
-        kw_args["background"] = CLAM_BACKGROUND
-        
-    mb = tk.Menubutton(master, **kw_args)
-    #mb = ttk.Menubutton(master, text="__main__")
-        
-    mb.menu = tk.Menu(mb, tearoff=0)
-    mb['menu'] = mb.menu
+        Dialog.__init__(self, master, title)
 
-    # TODO: demo
-    mayoVar  = tk.IntVar()
-    ketchVar = tk.IntVar()
-    mb.menu.add_checkbutton(label='mayo', variable=mayoVar)
-    mb.menu.add_checkbutton(label='ketchup', variable=ketchVar)
-    
-    return mb
+    def destroy(self):
+        self.entry = None
+        Dialog.destroy(self)
 
+    def body(self, master):
 
-def add_pane(paned_window, child, position_key, **kwargs):
-    """
-    Adds pane to paned_window so that panes are sorted according to position_keys
-    """
-    for sibling in paned_window.panes():
-        if (not hasattr(sibling, "position_key") 
-            or sibling.position_key > child.position_key):
-            kwargs["before"] = sibling
-            break
-    
-    paned_window.add(child, kwargs)
-    
-def update_paned_window_visibility(paned_window):
-    assert (isinstance(paned_window.master, tk.PanedWindow)
-         or isinstance(paned_window.master, ttk.PanedWindow))
-    
-    if paned_window.winfo_ismapped() and len(paned_window.panes()) == 0:
-        paned_window.master.remove(paned_window)
-        
-    if not paned_window.winfo_ismapped() and len(paned_window.panes()) > 0:
-        add_pane(paned_window.master, paned_window, )
-        paned_window.master.add(paned_window)
-    
-    
-    update_paned_window_visibility(paned_window.master)
-        
-        
+        w = ttk.Label(master, text=self.prompt, justify=tk.LEFT)
+        w.grid(row=0, padx=5, sticky=tk.W)
+
+        self.entry = ttk.Entry(master, name="entry")
+        self.entry.grid(row=1, padx=5, sticky="we")
+
+        if self.initialvalue is not None:
+            self.entry.insert(0, self.initialvalue)
             
-    
-    
-    
+            if self.selection_range:
+                self.entry.icursor(self.selection_range[0])
+                self.entry.select_range(self.selection_range[0], self.selection_range[1])
+            else:
+                self.entry.select_range(0, tk.END)
+
+        return self.entry
+
+    def validate(self):
+        try:
+            result = self.getresult()
+        except ValueError:
+            messagebox.showwarning(
+                "Illegal value",
+                self.errormessage + "\nPlease try again",
+                parent = self
+            )
+            return 0
+
+        if self.minvalue is not None and result < self.minvalue:
+            messagebox.showwarning(
+                "Too small",
+                "The allowed minimum value is %s. "
+                "Please try again." % self.minvalue,
+                parent = self
+            )
+            return 0
+
+        if self.maxvalue is not None and result > self.maxvalue:
+            messagebox.showwarning(
+                "Too large",
+                "The allowed maximum value is %s. "
+                "Please try again." % self.maxvalue,
+                parent = self
+            )
+            return 0
+
+        self.result = result
+
+        return 1
+
+class _QueryString(_QueryDialog):
+    def __init__(self, *args, **kw):
+        if "show" in kw:
+            self.__show = kw["show"]
+            del kw["show"]
+        else:
+            self.__show = None
+        _QueryDialog.__init__(self, *args, **kw)
+
+    def body(self, master):
+        entry = _QueryDialog.body(self, master)
+        if self.__show is not None:
+            entry.configure(show=self.__show)
+        return entry
+
+    def getresult(self):
+        return self.entry.get()
+
+def askstring(title, prompt, **kw):
+    '''get a string from the user
+
+    Arguments:
+
+        title -- the dialog title
+        prompt -- the label text
+        **kw -- see SimpleDialog class
+
+    Return value is a string
+    '''
+    d = _QueryString(title, prompt, **kw)
+    return d.result
+

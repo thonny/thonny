@@ -1,113 +1,74 @@
 import copy
 from itertools import chain
 
-from jedi.parser import tree as pr
+from jedi.parser import tree
 
 
-def deep_ast_copy(obj, new_elements_default=None, check_first=False):
+def deep_ast_copy(obj, parent=None, new_elements=None):
     """
     Much, much faster than copy.deepcopy, but just for Parser elements (Doesn't
     copy parents).
     """
-    def sort_stmt(key_value):
-        return key_value[0] not in ('_expression_list', '_assignment_details')
 
-    new_elements = new_elements_default or {}
-    unfinished_parents = []
+    if new_elements is None:
+        new_elements = {}
 
-    def recursion(obj, check_first=False):
+    def copy_node(obj):
         # If it's already in the cache, just return it.
         try:
-            new_obj = new_elements[obj]
-            if not check_first:
-                return new_obj
+            return new_elements[obj]
         except KeyError:
             # Actually copy and set attributes.
             new_obj = copy.copy(obj)
             new_elements[obj] = new_obj
 
-        if isinstance(obj, pr.ExprStmt):
-            # Need to set _set_vars, otherwise the cache is not working
-            # correctly, don't know exactly why.
-            obj.get_defined_names()
+        # Copy children
+        new_children = []
+        for child in obj.children:
+            typ = child.type
+            if typ in ('whitespace', 'operator', 'keyword', 'number', 'string'):
+                # At the moment we're not actually copying those primitive
+                # elements, because there's really no need to. The parents are
+                # obviously wrong, but that's not an issue.
+                new_child = child
+            elif typ == 'name':
+                new_elements[child] = new_child = copy.copy(child)
+                new_child.parent = new_obj
+            else:  # Is a BaseNode.
+                new_child = copy_node(child)
+                new_child.parent = new_obj
+            new_children.append(new_child)
+        new_obj.children = new_children
 
-        # Gather items
+        # Copy the names_dict (if there is one).
         try:
-            items = list(obj.__dict__.items())
+            names_dict = obj.names_dict
         except AttributeError:
-            # __dict__ not available, because of __slots__
-            items = []
-
-        before = ()
-        for cls in obj.__class__.__mro__:
-            try:
-                if before == cls.__slots__:
-                    continue
-                before = cls.__slots__
-                items += [(n, getattr(obj, n)) for n in before]
-            except AttributeError:
-                pass
-
-        if isinstance(obj, pr.ExprStmt):
-            # We need to process something with priority for statements,
-            # because there are several references that don't walk the whole
-            # tree in there.
-            items = sorted(items, key=sort_stmt)
+            pass
         else:
-            # names_dict should be the last item.
-            items = sorted(items, key=lambda x: (x[0] == 'names_dict', x[0] == 'params'))
-
-        #if hasattr(new_obj, 'parent'): print(new_obj, new_obj.parent)
-
-        for key, value in items:
-            # replace parent (first try _parent and then parent)
-            if key in ['parent', '_parent'] and value is not None:
-                if key == 'parent' and '_parent' in items:
-                    # parent can be a property
-                    continue
-                try:
-                    if not check_first:
-                        setattr(new_obj, key, new_elements[value])
-                except KeyError:
-                    unfinished_parents.append(new_obj)
-            elif key in ['parent_function', 'use_as_parent', '_sub_module']:
-                continue
-            elif key == 'names_dict':
-                d = dict((k, sequence_recursion(v)) for k, v in value.items())
-                setattr(new_obj, key, d)
-            elif isinstance(value, (list, tuple)):
-                setattr(new_obj, key, sequence_recursion(value))
-            elif isinstance(value, (pr.BaseNode, pr.Name)):
-                setattr(new_obj, key, recursion(value))
-
+            try:
+                new_obj.names_dict = new_names_dict = {}
+            except AttributeError:  # Impossible to set CompFor.names_dict
+                pass
+            else:
+                for string, names in names_dict.items():
+                    new_names_dict[string] = [new_elements[n] for n in names]
         return new_obj
 
-    def sequence_recursion(array_obj):
-        if isinstance(array_obj, tuple):
-            copied_array = list(array_obj)
-        else:
-            copied_array = array_obj[:]   # lists, tuples, strings, unicode
-        for i, el in enumerate(copied_array):
-            if isinstance(el, (tuple, list)):
-                copied_array[i] = sequence_recursion(el)
-            else:
-                copied_array[i] = recursion(el)
-
-        if isinstance(array_obj, tuple):
-            return tuple(copied_array)
-        return copied_array
-
-    result = recursion(obj, check_first=check_first)
-
-    # TODO this sucks... we need to change it.
-    # DOESNT WORK
-    for unfinished in unfinished_parents:
-        try:
-            unfinished.parent = new_elements[unfinished.parent]
-        except KeyError:  # TODO this keyerror is useless.
-            pass
-
-    return result
+    if obj.type == 'name':
+        # Special case of a Name object.
+        new_elements[obj] = new_obj = copy.copy(obj)
+        if parent is not None:
+            new_obj.parent = parent
+    elif isinstance(obj, tree.BaseNode):
+        new_obj = copy_node(obj)
+        if parent is not None:
+            for child in new_obj.children:
+                if isinstance(child, (tree.Name, tree.BaseNode)):
+                    child.parent = parent
+    else:  # String literals and so on.
+        new_obj = obj  # Good enough, don't need to copy anything.
+    return new_obj
 
 
 def call_of_name(name, cut_own_trailer=False):
@@ -122,11 +83,11 @@ def call_of_name(name, cut_own_trailer=False):
     This generates a copy of the original ast node.
     """
     par = name
-    if pr.is_node(par.parent, 'trailer'):
+    if tree.is_node(par.parent, 'trailer'):
         par = par.parent
 
     power = par.parent
-    if pr.is_node(power, 'power') and power.children[0] != name \
+    if tree.is_node(power, 'power') and power.children[0] != name \
             and not (power.children[-2] == '**' and
                      name.start_pos > power.children[-1].start_pos):
         par = power
@@ -156,7 +117,7 @@ def get_module_names(module, all_scopes):
     return chain.from_iterable(dct.values())
 
 
-class FakeImport(pr.ImportName):
+class FakeImport(tree.ImportName):
     def __init__(self, name, parent, level=0):
         super(FakeImport, self).__init__([])
         self.parent = parent
@@ -184,13 +145,13 @@ class FakeImport(pr.ImportName):
         return True
 
 
-class FakeName(pr.Name):
+class FakeName(tree.Name):
     def __init__(self, name_str, parent=None, start_pos=(0, 0), is_definition=None):
         """
         In case is_definition is defined (not None), that bool value will be
         returned.
         """
-        super(FakeName, self).__init__(pr.zero_position_modifier, name_str, start_pos)
+        super(FakeName, self).__init__(tree.zero_position_modifier, name_str, start_pos)
         self.parent = parent
         self._is_definition = is_definition
 

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Mostly Encoding related stuff copied from Py 3.3.1 library, because Py 2.7 doesn't have it.
 TODO: Don't need Py 2.7 anymore
@@ -220,15 +222,6 @@ def get_win_drives():
 
     return drives
 
-def open_path_in_system_file_manager(path):
-    if running_on_mac_os():
-        # http://stackoverflow.com/a/3520693/261181
-        subprocess.Popen(["open", "-R", path])
-    elif running_on_linux():
-        subprocess.Popen(["xdg-open", path])
-    else:
-        assert running_on_windows()
-        subprocess.Popen(["explorer", path])
 
 
 def has_line_numbers(text):

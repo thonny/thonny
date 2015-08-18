@@ -347,9 +347,9 @@ class _GlobalUnboundNameFinder(_UnboundNameFinder):
 
 class _LocalUnboundNameFinder(_UnboundNameFinder):
 
-    def __init__(self, pyobject, parent):
+    def __init__(self, pyobject, master):
         super(_LocalUnboundNameFinder, self).__init__(pyobject)
-        self.parent = parent
+        self.parent = master
 
     def _get_root(self):
         return self.parent._get_root()

@@ -156,7 +156,7 @@ class set():
             yield i
 
     def pop(self):
-        return self.__iterable.pop()
+        return list(self.__iterable)[-1]
 
     def copy(self):
         return self
@@ -205,6 +205,21 @@ class dict():
     def setdefault(self, k, d):
         # TODO maybe also return the content
         return d
+
+
+class enumerate():
+    def __init__(self, sequence, start=0):
+        self.__sequence = sequence
+
+    def __iter__(self):
+        for i in self.__sequence:
+            yield 1, i
+
+    def __next__(self):
+        return next(self.__iter__())
+
+    def next(self):
+        return next(self.__iter__())
 
 
 class reversed():

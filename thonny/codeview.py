@@ -13,8 +13,6 @@ from thonny import ui_utils, misc_utils
 from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
-from thonny.config import prefs
-import thonny.user_logging
 
 
 def classifyws(s, tabwidth):
@@ -40,11 +38,13 @@ def index2line(index):
 # scrolling code copied from tkinter.scrolledtext
 # (don't want to use scrolledtext directly, because I want to include margin in the same box) 
 class CodeView(ttk.Frame, TextWrapper):
-    def __init__(self, master, first_line_no=1, font_size=11,
+    # TODO: make it independent from Thonny ???
+    def __init__(self, master, workbench, first_line_no=1, font_size=11,
                  auto_vert_scroll=False,
                  height=None,
                  propose_remove_line_numbers=False):
         ttk.Frame.__init__(self, master)
+        self._workbench = workbench
         
         # attributes
         self.first_line_no = first_line_no
@@ -71,7 +71,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 highlightthickness = 0,
                 takefocus = 0,
                 bd = 0,
-                font = ui_utils.EDITOR_FONT,
+                font = workbench.get_font("EditorFont"),
                 #cursor = "dotbox",
                 background = '#e0e0e0',
                 foreground = '#999999',
@@ -96,7 +96,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 yscrollcommand=_vertical_scrollbar_update,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
-                font=ui_utils.EDITOR_FONT,
+                font=self._workbench.get_font("EditorFont"),
                 wrap=tk.NONE,
                 insertwidth=2,
                 #selectborderwidth=2,
@@ -126,8 +126,8 @@ class CodeView(ttk.Frame, TextWrapper):
         self.colorer = None
         self.set_coloring(True)
         self.set_up_paren_matching()
-
-        self.modify_listeners = set() #subscribers that listen to text change events
+        
+        # TODO: use general event system
         self._resetting_modified_flag = False #used internally, indicates when modified flag reset is currently in progress
                         
         #self.prepare_level_boxes()
@@ -161,8 +161,7 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.bind("<<Modified>>", self.on_text_modified)
         
         fixwordbreaks(tk._default_root)
-		
-    #called when text change event is fired, notifies all listeners
+        
     def on_text_modified(self, event=None):
         if self._resetting_modified_flag:
             return
@@ -171,9 +170,6 @@ class CodeView(ttk.Frame, TextWrapper):
         self.modified_since_last_save = True
 
         self._clear_modified_flag()
-        
-        for listener in self.modify_listeners:
-            listener.notify_text_changed()
 
             
 
@@ -637,7 +633,9 @@ class CodeView(ttk.Frame, TextWrapper):
     def set_coloring(self, value):
         if value:
             if self.colorer is None:
-                self.colorer = SyntaxColorer(self.text)
+                self.colorer = SyntaxColorer(self.text, 
+                                             self._workbench.get_font("EditorFont"),
+                                             self._workbench.get_font("BoldEditorFont"))
         else:
             if self.colorer is not None:
                 self.colorer.removecolors()
@@ -686,7 +684,7 @@ class CodeView(ttk.Frame, TextWrapper):
             # TODO: duplicated in main
             # better just skip those events
             if (msg.state in ("before_statement", "before_statement_again")
-                or (prefs["debugging.detailed_steps"]
+                or (self._workbench.get_option("debugging.detailed_steps")
                     and msg.state in ("after_statement",
                                       "after_suite",
                                       "before_suite"))):
@@ -882,50 +880,13 @@ class CodeView(ttk.Frame, TextWrapper):
         
         #self.text.insert("1.0", "x = 23 * (3 + 2 ^ 2) - sin(3) - 1")
     
-    def change_font_size(self, delta):
-        self.font.configure(size=self.font.cget("size") + delta)
-    
-    def cmd_cut(self, event=None):
-        self.text.event_generate("<<Cut>>")
-        return "break"
-
-    def cmd_copy(self, event=None):
-        if not self.text.tag_ranges("sel"):
-            # There is no selection, so do nothing and maybe interrupt.
-            return
-        self.text.event_generate("<<Copy>>")
-        return "break"
-
-    def cmd_paste(self, event=None):
-        self.text.event_generate("<<Paste>>")
-        self.text.see("insert")
-        return "break"
-
-    def cmd_select_all(self, event=None):
-        self.select_all();
-        return "break"
-
-    def cmd_find(self, event=None):
-        from thonny.find import FindDialog
-        FindDialog(self)
-        return "break"
-
-    def cmd_autocomplete(self, event=None):
-        import thonny.autocomplete
-        index = self.text.index('insert')
-        delim = index.index('.')
-        row = int(index[0:delim])
-        column = int(index[delim+1:])
-        thonny.autocomplete.autocomplete(self, row, column)
-        return 'break'
-
     #handles the 'comment in' command by adding ## in front of all selected lines if any lines are selected, 
     #or just the current line otherwise
-    def cmd_comment_in(self, event=None):
+    def _cmd_comment_in(self):
         insert_index = self.text.index('insert')
         sel_first_index, sel_last_index = self.get_selection_indices()
         selection_used = False
-        if sel_first_index != None and sel_first_index.strip() != '':
+        if sel_first_index is not None and sel_first_index.strip() != '':
             selection_used = True
         
         if selection_used:
@@ -939,17 +900,17 @@ class CodeView(ttk.Frame, TextWrapper):
         
         for line in lines:
             self.text.insert(str(line) + '.0', '##')
-
-        thonny.user_logging.log_user_event(thonny.user_logging.CommentInEvent(self.master, 
-                                                                               'selection' if selection_used else 'current_line', 
-                                                                               str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0])));
+        
+        self._workbench.event_generate("CommentIn", editor=self.master,
+                                       kind='selection' if selection_used else 'current_line',
+                                       subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 
     #handles the 'comment out' command by removing '##' or '#' from the selected lines or the current line, if present      
-    def cmd_comment_out(self, event=None):
+    def _cmd_comment_out(self):
         insert_index = self.text.index('insert')
         sel_first_index, sel_last_index = self.get_selection_indices()
         selection_used = False
-        if sel_first_index != None and sel_first_index.strip() != '':
+        if sel_first_index is not None and sel_first_index.strip() != '':
             selection_used = True
         
         if selection_used:
@@ -966,9 +927,9 @@ class CodeView(ttk.Frame, TextWrapper):
                 continue
             self.text.delete(line_str + '0', line_str + '2' if len(line_text) > 1 and line_text[1] == '#' else line_str + '1')
         
-        thonny.user_logging.log_user_event(thonny.user_logging.CommentOutEvent(self.master, 
-                                                                               'selection' if selection_used else 'current_line', 
-                                                                               str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0])))
+        self._workbench.event_generate("CommentOut", editor=self.master,
+                                       kind='selection' if selection_used else 'current_line',
+                                       subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 
     def prepare_level_boxes(self):
         return

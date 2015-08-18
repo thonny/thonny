@@ -1,4 +1,4 @@
-from jedi.parser import tree as pr
+from jedi.parser import tree
 
 
 class Status(object):
@@ -33,8 +33,7 @@ UNSURE = Status(None, 'unsure')
 
 
 def break_check(evaluator, base_scope, stmt, origin_scope=None):
-    from jedi.evaluate.representation import wrap
-    element_scope = wrap(evaluator, stmt.get_parent_scope(include_flows=True))
+    element_scope = evaluator.wrap(stmt.get_parent_scope(include_flows=True))
     # Direct parents get resolved, we filter scopes that are separate branches.
     # This makes sense for autocompletion and static analysis. For actual
     # Python it doesn't matter, because we're talking about potentially
@@ -50,12 +49,11 @@ def break_check(evaluator, base_scope, stmt, origin_scope=None):
 
 
 def _break_check(evaluator, stmt, base_scope, element_scope):
-    from jedi.evaluate.representation import wrap
-    element_scope = wrap(evaluator, element_scope)
-    base_scope = wrap(evaluator, base_scope)
+    element_scope = evaluator.wrap(element_scope)
+    base_scope = evaluator.wrap(base_scope)
 
     reachable = REACHABLE
-    if isinstance(element_scope, pr.IfStmt):
+    if isinstance(element_scope, tree.IfStmt):
         if element_scope.node_after_else(stmt):
             for check_node in element_scope.check_nodes():
                 reachable = _check_if(evaluator, check_node)
@@ -65,7 +63,7 @@ def _break_check(evaluator, stmt, base_scope, element_scope):
         else:
             node = element_scope.node_in_which_check_node(stmt)
             reachable = _check_if(evaluator, node)
-    elif isinstance(element_scope, (pr.TryStmt, pr.WhileStmt)):
+    elif isinstance(element_scope, (tree.TryStmt, tree.WhileStmt)):
         return UNSURE
 
     # Only reachable branches need to be examined further.

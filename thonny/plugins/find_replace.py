@@ -1,15 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import webbrowser
-import platform
-
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
 from thonny import misc_utils
-import thonny.user_logging
 
 #TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
 #TODO - logging
@@ -19,10 +14,10 @@ import thonny.user_logging
 # Handles the find dialog display and the logic of searching.
 #Communicates with the codeview that is passed to the constructor as a parameter.
 class FindDialog(tk.Toplevel): 
-    def __init__(self, parent): #constructor
-        tk.Toplevel.__init__(self, parent, borderwidth=15, takefocus=1) #superclass constructor
-        thonny.user_logging.log_user_event(FindWindowOpenEvent(parent.master))
-        self.codeview = parent; 
+    def __init__(self, master, workbench):
+        tk.Toplevel.__init__(self, master, borderwidth=15, takefocus=1)
+        self._workbench = workbench
+        self.codeview = master; 
         self._init_found_tag_styles();  #sets up the styles used to highlight found strings
         #references to the current set of passive found tags e.g. all words that match the searched term but are not the active string
         self.passive_found_tags = set()
@@ -44,14 +39,14 @@ class FindDialog(tk.Toplevel):
         self.last_search_case = None    #case sensitivity value used during the last search
         
         #set up window display
-        self.geometry("+%d+%d" % (parent.winfo_rootx() + parent.winfo_width() // 2,
-                                  parent.winfo_rooty() + parent.winfo_height() // 2 - 150))
+        self.geometry("+%d+%d" % (master.winfo_rootx() + master.winfo_width() // 2,
+                                  master.winfo_rooty() + master.winfo_height() // 2 - 150))
 
         self.title("Find & Replace")
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.transient(parent) 
+        self.transient(master) 
         self.grab_set()        
         self.protocol("WM_DELETE_WINDOW", self._ok)
       
@@ -63,7 +58,7 @@ class FindDialog(tk.Toplevel):
         self.find_entry_var = tk.StringVar()
         self.find_entry = ttk.Entry(self, textvariable=self.find_entry_var);
         self.find_entry.grid(column=1, row=0, columnspan=2, padx=5);
-        if FindDialog.last_searched_word != None:
+        if FindDialog.last_searched_word is not None:
             self.find_entry.insert(0, FindDialog.last_searched_word)
         self.find_entry.focus_force();
 
@@ -135,7 +130,7 @@ class FindDialog(tk.Toplevel):
         else:
             self.find_button.config(state='normal')
             self.replace_all_button.config(state='normal')
-            if self.active_found_tag != None: 
+            if self.active_found_tag is not None: 
                 self.replace_and_find_button.config(state='normal')
 
     #returns whether the next search is case sensitive based on the current value of the case sensitivity checkbox
@@ -144,11 +139,11 @@ class FindDialog(tk.Toplevel):
 
     #returns whether the current search is a repeat of the last searched based on all significant values
     def _repeats_last_search(self, tofind):
-        return tofind == FindDialog.last_searched_word and self.last_processed_indexes != None and self.last_search_case == self._is_search_case_sensitive();
+        return tofind == FindDialog.last_searched_word and self.last_processed_indexes is not None and self.last_search_case == self._is_search_case_sensitive();
 
 
     #performs the replace operation - replaces the currently active found word with what is entered in the replace field
-    def _perform_replace(self, event=None, log=True):
+    def _perform_replace(self):
 
         #nothing is currently in found status
         if self.active_found_tag == None:
@@ -162,7 +157,6 @@ class FindDialog(tk.Toplevel):
         self._remove_all_tags()
         toreplace = self.replace_entry.get().strip(); #get the text to replace
 
-        thonny.user_logging.log_user_event(ReplaceEvent(self.codeview.text.get(del_start, del_end), toreplace))
         #delete the found word
         self.codeview.text.delete(del_start, del_end)
         #insert the new word
@@ -170,15 +164,20 @@ class FindDialog(tk.Toplevel):
         #mark the inserted word boundaries 
         self.last_processed_indexes = (del_start, self.codeview.text.index("%s+%dc" % (del_start, len(toreplace))))
 
+        self._workbench.event_generate("Replace",
+            widget=self.codeview.text,
+            old_text=self.codeview.text.get(del_start, del_end),
+            new_text=toreplace)
+
     #performs the replace operation followed by a new find
-    def _perform_replace_and_find(self, event=None):
+    def _perform_replace_and_find(self):
         if self.active_found_tag == None:
             return
         self._perform_replace()
         self._perform_find()
 
     #replaces all occurences of the search string with the replace string
-    def _perform_replace_all(self, event=None):
+    def _perform_replace_all(self):
 
         tofind = self.find_entry.get().strip();
         if len(tofind) == 0:
@@ -191,8 +190,6 @@ class FindDialog(tk.Toplevel):
 
         currentpos = 1.0;
         end = self.codeview.text.index("end");
-
-        thonny.user_logging.log_user_event(ReplaceAllEvent(tofind, toreplace))
 
         while True:
             currentpos = self.codeview.text.search(tofind, currentpos, end, nocase = not self._is_search_case_sensitive()); 
@@ -208,8 +205,13 @@ class FindDialog(tk.Toplevel):
                 
             currentpos = self.codeview.text.index("%s+%dc" % (currentpos, len(toreplace)))
 
-    #performs the find action
-    def _perform_find(self, event=None, log=True):
+        self._workbench.event_generate("ReplaceAll",
+            widget=self.codeview.text,
+            old_text=tofind,
+            new_text=toreplace)
+        
+        
+    def _perform_find(self):
         self.infotext_label_var.set("");    #reset the info label text
         tofind = self.find_entry.get().strip(); #get the text to find 
         if len(tofind) == 0:    #in the case of empty string, cancel
@@ -223,13 +225,13 @@ class FindDialog(tk.Toplevel):
             else:
                 search_start_index = self.last_processed_indexes[1];
             
-            if self.active_found_tag != None:
+            if self.active_found_tag is not None:
                 self.codeview.text.tag_remove("currentfound", self.active_found_tag[0], self.active_found_tag[1]);  #remove the active tag from the previously found string
                 self.passive_found_tags.add((self.active_found_tag[0], self.active_found_tag[1]))                   #..and set it to passive instead
                 self.codeview.text.tag_add("found", self.active_found_tag[0], self.active_found_tag[1]);
         
         else: #start a new search, start from the current insert line position
-            if self.active_found_tag != None:
+            if self.active_found_tag is not None:
                 self.codeview.text.tag_remove("currentfound", self.active_found_tag[0], self.active_found_tag[1]); #remove the previous active tag if it was present
             for tag in self.passive_found_tags:
                 self.codeview.text.tag_remove("found", tag[0], tag[1]);                                            #and remove all the previous passive tags that were present
@@ -239,8 +241,7 @@ class FindDialog(tk.Toplevel):
             self.last_search_case = self._is_search_case_sensitive();       
 
         
-        if log: 
-            thonny.user_logging.log_user_event(FindEvent(tofind, 'backwards' if search_backwards else 'forwards', 'case sensitive' if self._is_search_case_sensitive() else 'not case sensitive'))
+
         wordstart = self.codeview.text.search(tofind, search_start_index, backwards = search_backwards, forwards = not search_backwards, nocase = not self._is_search_case_sensitive()); #performs the search and sets the start index of the found string
         if len(wordstart) == 0:
             self.infotext_label_var.set("The inserted string can't be found!"); #TODO - better text, also move it to the texts resources list
@@ -256,9 +257,15 @@ class FindDialog(tk.Toplevel):
         self.replace_and_find_button.config(state='normal')
         self.replace_button.config(state='normal')
 
-    #called when the window is closed. responsible for handling all cleanup. 
+        self._workbench.event_generate("Find",
+            widget=self.codeview.text,
+            text=tofind,
+            backwards=search_backwards,
+            case_sensitive=self._is_search_case_sensitive())
+        
+     
     def _ok(self, event=None):
-        thonny.user_logging.log_user_event(FindWindowCloseEvent(self.codeview.master))
+        """Called when the window is closed. responsible for handling all cleanup."""
         self._remove_all_tags()
         self.destroy()
 
@@ -267,7 +274,7 @@ class FindDialog(tk.Toplevel):
         for tag in self.passive_found_tags:
             self.codeview.text.tag_remove("found", tag[0], tag[1]); #removes the passive tags
 
-        if self.active_found_tag != None:
+        if self.active_found_tag is not None:
             self.codeview.text.tag_remove("currentfound", self.active_found_tag[0], self.active_found_tag[1]); #removes the currently active tag   
 
         self.active_found_tag = None
@@ -302,26 +309,13 @@ class FindDialog(tk.Toplevel):
         self.codeview.text.tag_configure("currentfound", foreground="white", background="red")  #TODO - style
 
 
-class FindWindowOpenEvent(thonny.user_logging.UserEvent):
-    def __init__(self, editor):
-        self.editor_id = id(editor)
-
-class FindWindowCloseEvent(thonny.user_logging.UserEvent):
-    def __init__(self, editor):
-        self.editor_id = id(editor)
-
-class FindEvent(thonny.user_logging.UserEvent):
-    def __init__(self, text, direction, case_sensitivity):
-        self.text = text
-        self.direction = direction
-        self.case_sensitivity = case_sensitivity
-
-class ReplaceEvent(thonny.user_logging.UserEvent):
-    def __init__(self, previous_text, new_text):
-        self.previous_text = previous_text
-        self.new_text = new_text
-
-class ReplaceAllEvent(thonny.user_logging.UserEvent):
-    def __init__(self, previous_text, new_text):
-        self.previous_text = previous_text
-        self.new_text = new_text
+def load_plugin(workbench):
+    def cmd_open_find_dialog():
+        editor = workbench.get_editor_notebook().get_current_editor()
+        if editor:
+            FindDialog(editor._code_view, workbench)
+         
+    workbench.add_command("OpenFindDialog", "edit", 'Find & Replace',
+        cmd_open_find_dialog,
+        default_sequence="<Control-f>")
+    

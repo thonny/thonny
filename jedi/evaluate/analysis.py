@@ -2,7 +2,7 @@
 Module for statical analysis.
 """
 from jedi import debug
-from jedi.parser import tree as pr
+from jedi.parser import tree
 from jedi.evaluate.compiled import CompiledObject
 
 
@@ -103,8 +103,8 @@ def _check_for_setattr(instance):
                for stmt in stmts)
 
 
-def add_attribute_error(evaluator, scope, name_part):
-    message = ('AttributeError: %s has no attribute %s.' % (scope, name_part))
+def add_attribute_error(evaluator, scope, name):
+    message = ('AttributeError: %s has no attribute %s.' % (scope, name))
     from jedi.evaluate.representation import Instance
     # Check for __getattr__/__getattribute__ existance and issue a warning
     # instead of an error, if that happens.
@@ -121,8 +121,8 @@ def add_attribute_error(evaluator, scope, name_part):
     else:
         typ = Error
 
-    payload = scope, name_part
-    add(evaluator, 'attribute-error', name_part, message, typ, payload)
+    payload = scope, name
+    add(evaluator, 'attribute-error', name, message, typ, payload)
 
 
 def _check_for_exception_catch(evaluator, jedi_obj, exception, payload=None):
@@ -196,13 +196,13 @@ def _check_for_exception_catch(evaluator, jedi_obj, exception, payload=None):
             return False
 
     obj = jedi_obj
-    while obj is not None and not obj.isinstance(pr.Function, pr.Class):
-        if obj.isinstance(pr.Flow):
+    while obj is not None and not obj.isinstance(tree.Function, tree.Class):
+        if obj.isinstance(tree.Flow):
             # try/except catch check
-            if obj.isinstance(pr.TryStmt) and check_try_for_except(obj, exception):
+            if obj.isinstance(tree.TryStmt) and check_try_for_except(obj, exception):
                 return True
             # hasattr check
-            if exception == AttributeError and obj.isinstance(pr.IfStmt, pr.WhileStmt):
+            if exception == AttributeError and obj.isinstance(tree.IfStmt, tree.WhileStmt):
                 if check_hasattr(obj.children[1], obj.children[3]):
                     return True
         obj = obj.parent
@@ -240,16 +240,36 @@ def get_module_statements(module):
                                     nodes.append(argument)
             return nodes
 
-    def add_stmts(stmts):
+    def add_nodes(nodes):
         new = set()
-        for stmt in stmts:
-            if stmt.type == 'expr_stmt':
-                new.add(stmt)
+        for node in nodes:
+            if isinstance(node, tree.Flow):
+                children = node.children
+                if node.type == 'for_stmt':
+                    children = children[2:]  # Don't want to include the names.
+                # Pick the suite/simple_stmt.
+                new |= add_nodes(children)
+            elif node.type in ('simple_stmt', 'suite'):
+                new |= add_nodes(node.children)
+            elif node.type in ('return_stmt', 'yield_expr'):
+                try:
+                    new.add(node.children[1])
+                except IndexError:
+                    pass
+            elif node.type not in ('whitespace', 'operator', 'keyword',
+                                   'parameters', 'decorated', 'except_clause') \
+                    and not isinstance(node, (tree.ClassOrFunc, tree.Import)):
+                new.add(node)
 
-            for node in stmt.children:
-                new.update(check_children(node))
-                if node.type != 'keyword' and stmt.type != 'expr_stmt':
-                    new.add(node)
+                try:
+                    children = node.children
+                except AttributeError:
+                    pass
+                else:
+                    for next_node in children:
+                        new.update(check_children(node))
+                        if next_node.type != 'keyword' and node.type != 'expr_stmt':
+                            new.add(node)
         return new
 
     nodes = set()
@@ -260,8 +280,11 @@ def get_module_statements(module):
             import_names |= set(imp.get_defined_names())
             if imp.is_nested():
                 import_names |= set(path[-1] for path in imp.paths())
-        nodes |= add_stmts(scope.statements)
-        nodes |= add_stmts(r for r in scope.returns if r is not None)
+
+        children = scope.children
+        if isinstance(scope, tree.ClassOrFunc):
+            children = children[2:]  # We don't want to include the class name.
+        nodes |= add_nodes(children)
 
         for flow in scope.flows:
             if flow.type == 'for_stmt':

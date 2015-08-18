@@ -254,6 +254,13 @@ class VM:
         pass
     
     def _cmd_get_heap(self, cmd):
+        #TODO:
+        """ Before was like that:
+                            if (hasattr(self._current_command, "heap_required")
+                        and self._current_command.heap_required):
+                        response.heap = self._vm.export_heap()
+        """
+
         pass
     
     def _execute_file(self, cmd, debug_mode):
@@ -687,10 +694,6 @@ class FancyTracer(Executor):
                         },
                         cwd=os.getcwd()
                     )
-                    
-                    if (hasattr(self._current_command, "heap_required")
-                        and self._current_command.heap_required):
-                        response.heap = self._vm.export_heap()
                     
                     #assert response.focus is not None
                     # ... and send it to the client

@@ -14,7 +14,6 @@ It can present program execution information in two ways:
 import ast
 import sys
 import os.path
-import logging
 import tkinter as tk
 from tkinter import ttk
 import tkinter.messagebox as tkMessageBox
@@ -23,22 +22,17 @@ from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import showinfo
 
 from thonny.common import DebuggerResponse
-from thonny.config import prefs
 from thonny.misc_utils import eqfn, shorten_repr
 from thonny import ui_utils
 from thonny import misc_utils
 from thonny import ast_utils
 from thonny import memory
 from thonny.codeview import CodeView
-from thonny.user_logging import log_user_event, SaveEvent, SaveAsEvent, LoadEvent, NewFileEvent
+from logging import debug
+from thonny.memory import VariablesFrame
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
-logger = logging.getLogger("thonny.code")
-logger.propagate = False
-logger.setLevel(logging.WARNING)
-logger.addHandler(logging.StreamHandler(sys.stdout))
-debug = logger.debug
 
 _dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
 
@@ -48,11 +42,11 @@ class StatementStepper:
     Is responsible for stepping through statements and updating corresponding UI
     both in Editor-s and FunctionDialog-s
     """
-    def __init__(self, frame_id, master, code_view):
+    def __init__(self, frame_id, master, workbench, code_view):
         self._master = master
         self._code_view = code_view
         self._frame_id = frame_id
-        self._expression_view = ExpressionView(code_view)
+        self._expression_view = ExpressionView(code_view, workbench)
         self._next_frame_handler = None
     
     def get_frame_id(self):
@@ -71,7 +65,7 @@ class StatementStepper:
         else:
             if self._next_frame_handler is None:
                 if msg.code_name == "<module>":
-                    self._next_frame_handler = editor_book.get_editor(msg.filename, True)
+                    self._next_frame_handler = self.master.get_editor(msg.filename, True)
                     self._next_frame_handler.enter_execution_mode()
                 else:
                     # Function call
@@ -120,11 +114,12 @@ class Editor(ttk.Frame):
     """
     Text editor and visual part of module stepper
     """
-    def __init__(self, master, filename=None):
+    def __init__(self, master, workbench, filename=None):
+        self._workbench = workbench
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
         
-        self._code_view = CodeView(self, propose_remove_line_numbers=True)
+        self._code_view = CodeView(self, workbench, propose_remove_line_numbers=True)
         self._code_view.grid(sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -142,7 +137,7 @@ class Editor(ttk.Frame):
 
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
-            self.cmd_save_file()
+            self._cmd_save_file()
             
         return self._filename
             
@@ -150,7 +145,7 @@ class Editor(ttk.Frame):
         source, self.file_encoding = misc_utils.read_python_file(filename) # TODO: support also text files
         self._filename = filename
         self._code_view.modified_since_last_save = False
-        log_user_event(LoadEvent(self._code_view, filename))
+        self._workbench.event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
         self._code_view.focus_set()
         
@@ -158,23 +153,24 @@ class Editor(ttk.Frame):
         return self._code_view.modified_since_last_save
     
     
-    def cmd_save_file_enabled(self):
-         return self.is_modified() or not self.get_filename()
+    def save_file_enabled(self):
+        return self.is_modified() or not self.get_filename()
     
-    def cmd_save_file(self):
+    def save_file(self):
         if self._filename is not None:
             filename = self._filename
-            log_user_event(SaveEvent(self._code_view))
+            self._workbench.event_generate("Save", editor=self)
         else:
             # http://tkinter.unpythonic.net/wiki/tkFileDialog
             filename = asksaveasfilename (
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
-                initialdir = prefs["working_directory"]
+                initialdir = self._workbench.get_option("run.working_directory")
             )
             if filename == "":
                 return None
-            log_user_event(SaveAsEvent(self._code_view, filename))
+            
+            self._workbench.event_generate("SaveAs", editor=self, filename=filename)
                 
         
         content = self._code_view.get_content()
@@ -182,7 +178,7 @@ class Editor(ttk.Frame):
         f = open(filename, mode="wb", )
         f.write(content.encode(encoding))
         f.close()
-		
+
         self._code_view.modified_since_last_save = False
     
         self._filename = filename
@@ -190,14 +186,13 @@ class Editor(ttk.Frame):
         self._code_view.text.edit_modified(False)
         self.event_generate(EDITOR_STATE_CHANGE)
         
-        self.master.remember_open_files()
         return self._filename
     
     def change_font_size(self, delta):
         self._code_view.change_font_size(delta)
     
     def show(self):
-        editor_book.select(self)
+        self.master.select(self)
     
     def handle_vm_message(self, msg):
         assert isinstance(msg, DebuggerResponse)
@@ -215,7 +210,7 @@ class Editor(ttk.Frame):
         """
         
         if self._stepper is None:
-            self._stepper = StatementStepper(msg.frame_id, self, self._code_view)
+            self._stepper = StatementStepper(msg.frame_id, self, self._workbench, self._code_view)
         
         self._stepper.handle_vm_message(msg)
     
@@ -251,25 +246,70 @@ class EditorNotebook(ttk.Notebook):
     """
     Manages opened files / modules
     """
-    def __init__(self, master):
+    def __init__(self, master, workbench):
         ttk.Notebook.__init__(self, master, padding=0)
+        self._workbench = workbench
+        self._init_commands()
         self.enable_traversal()
-        self.bind("<<NotebookTabChanged>>", self._on_tab_changed)
         self.bind_all(EDITOR_STATE_CHANGE, self._on_editor_state_changed)
         
+        # TODO: don't depend on running
         self._main_editor = None # references the editor of main file during execution
-        self.tab_change_listeners = set() #subscribers that listen to active tab changes
         
-        global editor_book
-        editor_book = self
         # open files from last session
         """ TODO: they should go only to recent files
         for filename in prefs["open_files"].split(";"):
             if os.path.exists(filename):
                 self._open_file(filename)
         """
+        self._cmd_new_file()
+    
+    def _list_recent_files(self):
+        self._workbench.add_defaults({"file.recent_files" : []})
+         
+        # TODO:
         
+    
+    def _init_commands(self):    
+        # TODO: do these commands have to be in EditorNotebook ??
+        # Create a module level function install_editor_notebook ??
+        # Maybe add them separately, when notebook has been installed ??     
+        self._workbench.add_command("new_file", "file", "New", 
+            self._cmd_new_file,
+            default_sequence="<Control-n>")
+        
+        self._workbench.add_command("open_file", "file", "Open...", 
+            self._cmd_open_file,
+            default_sequence="<Control-o>")
+        
+        self._workbench.add_command("close_file", "file", "Close", 
+            self._cmd_close_file,
+            default_sequence="<Control-w>",
+            tester=lambda e: self.get_current_editor() is not None)
+        
+        self._workbench.add_separator("file")
+        
+        self._workbench.add_command("save_file", "file", "Save", 
+            self._cmd_save_file,
+            default_sequence="<Control-s>",
+            tester=self._cmd_save_file_enabled)
+        
+        self._workbench.add_command("save_file_as", "file", "Save as...",
+            self._cmd_save_file_as,
+            default_sequence=None,
+            tester=lambda e: self.get_current_editor() is not None)
+        
+        self._workbench.add_command("comment_in", "edit", "Comment in",
+            self._cmd_comment_in,
+            default_sequence="<Control-Key-3>",
+            tester=None) # TODO:
+        
+        self._workbench.add_command("comment_out", "edit", "Comment out",
+            self._cmd_comment_out,
+            default_sequence="<Control-Key-4>",
+            tester=None) # TODO:
 
+        
     def load_startup_files(self):
         
         filenames = sys.argv[1:]
@@ -278,42 +318,61 @@ class EditorNotebook(ttk.Notebook):
                 self.show_file(filename)
         
         if len(filenames) == 0:
-            self.cmd_new_file()
+            self._cmd_new_file()
 
-    def cmd_new_file(self):
-        new_editor = Editor(self)
-        log_user_event(NewFileEvent(new_editor._code_view))
+    def _cmd_new_file(self):
+        new_editor = Editor(self, self._workbench)
+        self._workbench.event_generate("NewFile", editor=new_editor)
         self.add(new_editor, text=self._generate_editor_title(None))
         self.select(new_editor)
         new_editor.focus_set()
-        self._on_tab_changed(None)
     
-    def cmd_open_file(self):
+    def _cmd_open_file(self):
         filename = askopenfilename (
             filetypes = _dialog_filetypes, 
-            initialdir = prefs["run.working_directory"]
+            initialdir = self._workbench.get_option("run.working_directory")
         )
         if filename != "":
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
-            self.remember_open_files()
-            self._on_tab_changed(None)
     
-    def cmd_close_file(self):
+    def _cmd_close_file(self):
         # TODO: ask in case file is modified
         current_editor = self.get_current_editor()
         if current_editor: 
             self.forget(current_editor)
             current_editor.destroy()
-            self.remember_open_files()
             self._on_tab_changed(None)
+    
+    def _cmd_save_file(self):
+        if self.get_current_editor():
+            self.get_current_editor().save_file()
+    
+    def _cmd_save_file_enabled(self):
+        return (self.get_current_editor() 
+            and self.get_current_editor().save_file_enabled())
+    
+    def _cmd_save_file_as(self):
+        if self.get_current_editor():
+            self.get_current_editor().save_file()
+    
+    def _cmd_save_file_as_enabled(self):
+        return self.get_current_editor() is not None
+    
+    def _cmd_comment_in(self):
+        if self.get_current_editor() is not None: 
+            self.get_current_editor()._code_view._comment_in()
+    
+    def _cmd_comment_out(self):
+        if self.get_current_editor() is not None: 
+            self.get_current_editor()._code_view._comment_out()
     
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
         if (len(editors) == 1 
             and not editors[0].is_modified()
             and not editors[0].get_filename()):
-            self.cmd_close_file()
+            self._cmd_close_file()
         
     def get_current_editor(self):
         for child in self.winfo_children():
@@ -328,7 +387,7 @@ class EditorNotebook(ttk.Notebook):
         # save all editors which have a filename
         for editor in self.winfo_children():
             if editor.get_filename():
-                editor.cmd_save_file()
+                editor._cmd_save_file()
         
         # highlight and remember the main editor
         self._main_editor = self.get_editor(main_filename, True)
@@ -388,13 +447,8 @@ class EditorNotebook(ttk.Notebook):
         
         return result
     
-    #called when active tab change event is fired
-    def _on_tab_changed(self, event):
-        for listener in self.tab_change_listeners:
-            listener.notify_tab_changed()        
-        
     def _open_file(self, filename):
-        editor = Editor(self, filename)
+        editor = Editor(self, self._workbench, filename)
         self.add(editor, text=self._generate_editor_title(filename))
               
         return editor
@@ -411,10 +465,12 @@ class EditorNotebook(ttk.Notebook):
             return None
     
     
-    def focus_current_editor(self):
+    def focus_set(self):
         editor = self.get_current_editor()
         if editor: 
             editor.focus_set()
+        else:
+            super().focus_set()
 
     def current_editor_is_focused(self):
         editor = self.get_current_editor()
@@ -436,7 +492,7 @@ class EditorNotebook(ttk.Notebook):
         if confirm:
             for editor in modified_editors:
                 if editor.get_filename(True):
-                    editor.cmd_save_file()
+                    editor._cmd_save_file()
                 else:
                     return False
             return True
@@ -448,7 +504,7 @@ class EditorNotebook(ttk.Notebook):
     
 
 class ExpressionView(tk.Text):
-    def __init__(self, codeview):
+    def __init__(self, codeview, workbench):
         tk.Text.__init__(self, codeview.text,
                          height=1,
                          width=1,
@@ -459,8 +515,9 @@ class ExpressionView(tk.Text):
                          padx=7,
                          pady=7,
                          wrap=tk.NONE,
-                         font=ui_utils.EDITOR_FONT)
+                         font=workbench.get_font("EditorFont"))
         self._codeview = codeview
+        self._workbench = workbench
         self._main_range = None
         self._last_focus = None
         
@@ -496,7 +553,7 @@ class ExpressionView(tk.Text):
                 self.delete(start_mark, end_mark)
                 
                 id_str = memory.format_object_id(msg.value.id)
-                if prefs["view.values_in_heap"]:
+                if self._workbench.get_option("view.values_in_heap"):
                     value_str = id_str
                 else:
                     value_str = shorten_repr(msg.value.repr, 100)
@@ -509,7 +566,7 @@ class ExpressionView(tk.Text):
                 else:
                     sequence = "<Control-Button-1>"
                 self.tag_bind(object_tag, sequence,
-                              lambda _: ui_utils.generate_event(self, "<<ObjectSelect>>", msg.value.id))
+                              lambda _: self._workbench.event_generate("ObjectSelect", object_id=msg.value.id))
                     
                 self._update_size()
                 
@@ -652,7 +709,7 @@ class FunctionDialog(tk.Toplevel):
         
         self._init_layout_widgets(master, msg)
         self._load_function(msg)
-        self._stepper = StatementStepper(msg.frame_id, self, self._code_view)
+        self._stepper = StatementStepper(msg.frame_id, self, self._workbench, self._code_view)
         self._code_view.text.focus()
     
     def get_frame_id(self):
@@ -663,12 +720,12 @@ class FunctionDialog(tk.Toplevel):
         self.main_frame.grid(sticky=tk.NSEW)        
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.main_pw = ui_utils.create_PanedWindow(self.main_frame, orient=tk.VERTICAL)
+        self.main_pw = ui_utils.AutomaticPanedWindow(self.main_frame, orient=tk.VERTICAL)
         self.main_pw.grid(sticky=tk.NSEW, padx=10, pady=10)
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
         
-        self._code_book = ui_utils.AutomaticViewNotebook(self.main_pw)
+        self._code_book = ttk.Notebook(self.main_pw)
         self._code_view = CodeView(self._code_book, first_line_no=msg.firstlineno)
         self._code_book.add(self._code_view)
         self._code_view.enter_execution_mode()
@@ -677,8 +734,8 @@ class FunctionDialog(tk.Toplevel):
         #self._code_book.columnconfigure(0, weight=1)
         
         
-        self._locals_book = ui_utils.AutomaticViewNotebook(self.main_pw)
-        self._locals_frame = memory.LocalsFrame(self._locals_book)
+        self._locals_book = ttk.Notebook(self.main_pw)
+        self._locals_frame = LocalsFrame(self._locals_book)
         self._locals_book.add(self._locals_frame, text="Local variables")
         
         
@@ -709,3 +766,6 @@ class FunctionDialog(tk.Toplevel):
         showinfo("Can't close yet", "Step until the end of this function to close it")
 
     
+class LocalsFrame(VariablesFrame):   
+    def handle_vm_message(self, event):
+        pass

@@ -68,7 +68,7 @@ double = r'[^"\\]*(?:\\.[^"\\]*)*"'
 single3 = r"[^'\\]*(?:(?:\\.|'(?!''))[^'\\]*)*'''"
 # Tail end of """ string.
 double3 = r'[^"\\]*(?:(?:\\.|"(?!""))[^"\\]*)*"""'
-triple = group("[bB]?[rR]?'''", '[bB]?[rR]?"""')
+triple = group("[uUbB]?[rR]?'''", '[uUbB]?[rR]?"""')
 # Single-line ' or " string.
 
 # Because of leftmost-then-longest match semantics, be sure to put the
@@ -105,13 +105,17 @@ endprogs = {"'": _compile(single), '"': _compile(double),
             "r'''": single3prog, 'r"""': double3prog,
             "b'''": single3prog, 'b"""': double3prog,
             "u'''": single3prog, 'u"""': double3prog,
-            "br'''": single3prog, 'br"""': double3prog,
             "R'''": single3prog, 'R"""': double3prog,
             "B'''": single3prog, 'B"""': double3prog,
             "U'''": single3prog, 'U"""': double3prog,
+            "br'''": single3prog, 'br"""': double3prog,
             "bR'''": single3prog, 'bR"""': double3prog,
             "Br'''": single3prog, 'Br"""': double3prog,
             "BR'''": single3prog, 'BR"""': double3prog,
+            "ur'''": single3prog, 'ur"""': double3prog,
+            "uR'''": single3prog, 'uR"""': double3prog,
+            "Ur'''": single3prog, 'Ur"""': double3prog,
+            "UR'''": single3prog, 'UR"""': double3prog,
             'r': None, 'R': None, 'b': None, 'B': None}
 
 triple_quoted = {}
@@ -120,23 +124,27 @@ for t in ("'''", '"""',
           "b'''", 'b"""', "B'''", 'B"""',
           "u'''", 'u"""', "U'''", 'U"""',
           "br'''", 'br"""', "Br'''", 'Br"""',
-          "bR'''", 'bR"""', "BR'''", 'BR"""'):
+          "bR'''", 'bR"""', "BR'''", 'BR"""',
+          "ur'''", 'ur"""', "Ur'''", 'Ur"""',
+          "uR'''", 'uR"""', "UR'''", 'UR"""'):
     triple_quoted[t] = t
 single_quoted = {}
 for t in ("'", '"',
           "r'", 'r"', "R'", 'R"',
           "b'", 'b"', "B'", 'B"',
-          "u'", 'u""', "U'", 'U"',
+          "u'", 'u"', "U'", 'U"',
           "br'", 'br"', "Br'", 'Br"',
-          "bR'", 'bR"', "BR'", 'BR"'):
+          "bR'", 'bR"', "BR'", 'BR"',
+          "ur'", 'ur"', "Ur'", 'Ur"',
+          "uR'", 'uR"', "UR'", 'UR"'):
     single_quoted[t] = t
 
 del _compile
 
 tabsize = 8
 
-ALWAYS_BREAK_TOKEN = (';', 'import', 'from', 'class', 'def', 'try', 'except',
-                      'finally', 'while', 'return')
+ALWAYS_BREAK_TOKENS = (';', 'import', 'from', 'class', 'def', 'try', 'except',
+                       'finally', 'while', 'return')
 
 
 def source_tokens(source):
@@ -254,7 +262,7 @@ def generate_tokens(readline):
                 else:                                       # ordinary string
                     yield STRING, token, spos, prefix
             elif is_identifier(initial):                      # ordinary name
-                if token in ALWAYS_BREAK_TOKEN:
+                if token in ALWAYS_BREAK_TOKENS:
                     paren_level = 0
                     while True:
                         indent = indents.pop()
@@ -264,8 +272,9 @@ def generate_tokens(readline):
                             indents.append(indent)
                             break
                 yield NAME, token, spos, prefix
-            elif initial == '\\' and line[start:] == '\\\n':  # continued stmt
-                continue
+            elif initial == '\\' and line[start:] in ('\\\n', '\\\r\n'):  # continued stmt
+                additional_prefix += prefix + line[start:]
+                break
             else:
                 if token in '([{':
                     paren_level += 1
@@ -273,6 +282,9 @@ def generate_tokens(readline):
                     paren_level -= 1
                 yield OP, token, spos, prefix
 
+    end_pos = (lnum, max - 1)
+    # As the last position we just take the maximally possible position. We
+    # remove -1 for the last new line.
     for indent in indents[1:]:
-        yield DEDENT, '', spos, ''
-    yield ENDMARKER, '', spos, prefix
+        yield DEDENT, '', end_pos, ''
+    yield ENDMARKER, '', end_pos, prefix

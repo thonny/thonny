@@ -49,8 +49,8 @@ def ast_suite_tree(node):
 
 class Suite(object):
 
-    def __init__(self, child_nodes, lineno, parent=None, ignored=False):
-        self.parent = parent
+    def __init__(self, child_nodes, lineno, master=None, ignored=False):
+        self.parent = master
         self.lineno = lineno
         self.child_nodes = child_nodes
         self._children = None

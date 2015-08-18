@@ -10,9 +10,9 @@ from rope.base.pyobjects import *
 
 class PyFunction(pyobjects.PyFunction):
 
-    def __init__(self, pycore, ast_node, parent):
+    def __init__(self, pycore, ast_node, master):
         AbstractFunction.__init__(self)
-        PyDefinedObject.__init__(self, pycore, ast_node, parent)
+        PyDefinedObject.__init__(self, pycore, ast_node, master)
         self.arguments = self.ast_node.args
         self.parameter_pyobjects = pynames._Inferred(
             self._infer_parameters, self.get_module()._get_concluded_data())
@@ -107,11 +107,11 @@ class PyFunction(pyobjects.PyFunction):
 
 class PyClass(pyobjects.PyClass):
 
-    def __init__(self, pycore, ast_node, parent):
+    def __init__(self, pycore, ast_node, master):
         self.visitor_class = _ClassVisitor
         AbstractClass.__init__(self)
-        PyDefinedObject.__init__(self, pycore, ast_node, parent)
-        self.parent = parent
+        PyDefinedObject.__init__(self, pycore, ast_node, master)
+        self.parent = master
         self._superclasses = self.get_module()._get_concluded_data()
 
     def get_superclasses(self):

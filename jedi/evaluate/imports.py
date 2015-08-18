@@ -11,6 +11,7 @@ correct implementation is delegated to _compatibility.
 This module also supports import autocompletion, which means to complete
 statements like ``from datetim`` (curser at the end would return ``datetime``).
 """
+import imp
 import os
 import pkgutil
 import sys
@@ -21,8 +22,8 @@ from jedi import common
 from jedi import debug
 from jedi import cache
 from jedi.parser import fast
-from jedi.parser import tree as pr
-from jedi.evaluate.sys_path import get_sys_path, sys_path_with_modifications
+from jedi.parser import tree
+from jedi.evaluate import sys_path
 from jedi.evaluate import helpers
 from jedi import settings
 from jedi.common import source_to_unicode
@@ -31,15 +32,9 @@ from jedi.evaluate import analysis
 from jedi.evaluate.cache import memoize_default, NO_DEFAULT
 
 
-class ModuleNotFound(Exception):
-    def __init__(self, name):
-        super(ModuleNotFound, self).__init__()
-        self.name = name
-
-
 def completion_names(evaluator, imp, pos):
     name = imp.name_for_position(pos)
-    module = imp.get_parent_until()
+    module = evaluator.wrap(imp.get_parent_until())
     if name is None:
         level = 0
         for node in imp.children:
@@ -54,8 +49,8 @@ def completion_names(evaluator, imp, pos):
         import_path = imp.path_for_name(name)[:-1]
         level = imp.level
 
-    importer = get_importer(evaluator, tuple(import_path), module, level)
-    if isinstance(imp, pr.ImportFrom):
+    importer = Importer(evaluator, tuple(import_path), module, level)
+    if isinstance(imp, tree.ImportFrom):
         c = imp.children
         only_modules = c[c.index('import')].start_pos >= pos
     else:
@@ -63,12 +58,12 @@ def completion_names(evaluator, imp, pos):
     return importer.completion_names(evaluator, only_modules)
 
 
-class ImportWrapper(pr.Base):
+class ImportWrapper(tree.Base):
     def __init__(self, evaluator, name):
         self._evaluator = evaluator
         self._name = name
 
-        self._import = name.get_parent_until(pr.Import)
+        self._import = name.get_parent_until(tree.Import)
         self.import_path = self._import.path_for_name(name)
 
     @memoize_default()
@@ -78,48 +73,55 @@ class ImportWrapper(pr.Base):
             return []
 
         try:
-            module = self._import.get_parent_until()
+            module = self._evaluator.wrap(self._import.get_parent_until())
             import_path = self._import.path_for_name(self._name)
-            importer = get_importer(self._evaluator, tuple(import_path),
-                                    module, self._import.level)
+            from_import_name = None
             try:
-                module, rest = importer.follow_file_system()
-            except ModuleNotFound as e:
-                analysis.add(self._evaluator, 'import-error', e.name)
-                return []
+                from_names = self._import.get_from_names()
+            except AttributeError:
+                # Is an import_name
+                pass
+            else:
+                if len(from_names) + 1 == len(import_path):
+                    # We have to fetch the from_names part first and then check
+                    # if from_names exists in the modules.
+                    from_import_name = import_path[-1]
+                    import_path = from_names
 
-            if module is None:
-                return []
+            importer = Importer(self._evaluator, tuple(import_path),
+                                module, self._import.level)
+
+            types = importer.follow()
 
             #if self._import.is_nested() and not self.nested_resolve:
             #    scopes = [NestedImportModule(module, self._import)]
-            scopes = [module]
 
-            # goto only accepts `Name`
-            if is_goto and not rest:
-                scopes = [s.name for s in scopes]
+            if from_import_name is not None:
+                types = list(chain.from_iterable(
+                    self._evaluator.find_types(t, unicode(from_import_name),
+                                               is_goto=is_goto)
+                    for t in types))
 
-            # follow the rest of the import (not FS -> classes, functions)
-            if rest:
+                if not types:
+                    path = import_path + [from_import_name]
+                    importer = Importer(self._evaluator, tuple(path),
+                                        module, self._import.level)
+                    types = importer.follow()
+                    # goto only accepts `Name`
+                    if is_goto:
+                        types = [s.name for s in types]
+            else:
+                # goto only accepts `Name`
                 if is_goto:
-                    scopes = list(chain.from_iterable(
-                        self._evaluator.find_types(s, rest[0], is_goto=True)
-                        for s in scopes))
-                else:
-                    if self._import.type == 'import_from' \
-                            or importer.str_import_path == ('os', 'path'):
-                        scopes = importer.follow_rest(scopes[0], rest)
-                    else:
-                        scopes = []
-            debug.dbg('after import: %s', scopes)
-            if not scopes:
-                analysis.add(self._evaluator, 'import-error', importer.import_path[-1])
+                    types = [s.name for s in types]
+
+            debug.dbg('after import: %s', types)
         finally:
             self._evaluator.recursion_detector.pop_stmt()
-        return scopes
+        return types
 
 
-class NestedImportModule(pr.Module):
+class NestedImportModule(tree.Module):
     """
     TODO while there's no use case for nested import module right now, we might
         be able to use them for static analysis checks later on.
@@ -138,7 +140,7 @@ class NestedImportModule(pr.Module):
         zero = (0, 0)
         names = [unicode(name) for name in i.namespace_names[1:]]
         name = helpers.FakeName(names, self._nested_import)
-        new = pr.Import(i._sub_module, zero, zero, name)
+        new = tree.Import(i._sub_module, zero, zero, name)
         new.parent = self._module
         debug.dbg('Generated a nested import: %s', new)
         return helpers.FakeName(str(i.namespace_names[1]), new)
@@ -151,28 +153,28 @@ class NestedImportModule(pr.Module):
                                    self._nested_import)
 
 
-def get_importer(evaluator, import_path, module, level=0):
-    """
-    Checks the evaluator caches first, which resembles the ``sys.modules``
-    cache and speeds up libraries like ``numpy``.
-    """
-    import_path = tuple(import_path)  # We use it as hash in the import cache.
-    if level != 0:
-        # Only absolute imports should be cached. Otherwise we have a mess.
-        # TODO Maybe calculate the absolute import and save it here?
-        return _Importer(evaluator, import_path, module, level)
-    try:
-        return evaluator.import_cache[import_path]
-    except KeyError:
-        importer = _Importer(evaluator, import_path, module, level)
-        evaluator.import_cache[import_path] = importer
-        return importer
+def _add_error(evaluator, name, message=None):
+    if hasattr(name, 'parent'):
+        # Should be a name, not a string!
+        analysis.add(evaluator, 'import-error', name, message)
 
 
-class _Importer(object):
+def get_init_path(directory_path):
+    """
+    The __init__ file can be searched in a directory. If found return it, else
+    None.
+    """
+    for suffix, _, _ in imp.get_suffixes():
+        path = os.path.join(directory_path, '__init__' + suffix)
+        if os.path.exists(path):
+            return path
+    return None
+
+
+class Importer(object):
     def __init__(self, evaluator, import_path, module, level=0):
         """
-        An implementation similar to ``__import__``. Use `follow_file_system`
+        An implementation similar to ``__import__``. Use `follow`
         to actually follow the imports.
 
         *level* specifies whether to use absolute or relative imports. 0 (the
@@ -181,212 +183,171 @@ class _Importer(object):
         directory of the module calling ``__import__()`` (see PEP 328 for the
         details).
 
-        :param import_path: List of namespaces (strings).
+        :param import_path: List of namespaces (strings or Names).
         """
         debug.speed('import %s' % (import_path,))
         self._evaluator = evaluator
-        self.import_path = import_path
         self.level = level
         self.module = module
-        path = module.path
-        # TODO abspath
-        self.file_path = os.path.dirname(path) if path is not None else None
+        try:
+            self.file_path = module.py__file__()
+        except AttributeError:
+            # Can be None for certain compiled modules like 'builtins'.
+            self.file_path = None
+
+        if level:
+            base = module.py__package__().split('.')
+            if base == ['']:
+                base = []
+            if level > len(base):
+                path = module.py__file__()
+                import_path = list(import_path)
+                for i in range(level):
+                    path = os.path.dirname(path)
+                dir_name = os.path.basename(path)
+                # This is not the proper way to do relative imports. However, since
+                # Jedi cannot be sure about the entry point, we just calculate an
+                # absolute path here.
+                if dir_name:
+                    import_path.insert(0, dir_name)
+                else:
+                    _add_error(self._evaluator, import_path[-1])
+                    import_path = []
+                    # TODO add import error.
+                    debug.warning('Attempted relative import beyond top-level package.')
+            else:
+                # Here we basically rewrite the level to 0.
+                import_path = tuple(base) + import_path
+        self.import_path = import_path
 
     @property
     def str_import_path(self):
         """Returns the import path as pure strings instead of `Name`."""
         return tuple(str(name) for name in self.import_path)
 
-    def get_relative_path(self):
-        path = self.file_path
-        for i in range(self.level - 1):
-            path = os.path.dirname(path)
-        return path
-
     @memoize_default()
     def sys_path_with_modifications(self):
-        # If you edit e.g. gunicorn, there will be imports like this:
-        # `from gunicorn import something`. But gunicorn is not in the
-        # sys.path. Therefore look if gunicorn is a parent directory, #56.
         in_path = []
-        if self.import_path and self.file_path is not None:
-            parts = self.file_path.split(os.path.sep)
-            for i, p in enumerate(parts):
-                if p == unicode(self.import_path[0]):
-                    new = os.path.sep.join(parts[:i])
-                    in_path.append(new)
+        sys_path_mod = list(sys_path.sys_path_with_modifications(self._evaluator, self.module))
+        if self.file_path is not None:
+            # If you edit e.g. gunicorn, there will be imports like this:
+            # `from gunicorn import something`. But gunicorn is not in the
+            # sys.path. Therefore look if gunicorn is a parent directory, #56.
+            if self.import_path:  # TODO is this check really needed?
+                for path in sys_path.traverse_parents(self.file_path):
+                    if os.path.basename(path) == self.str_import_path[0]:
+                        in_path.append(os.path.dirname(path))
 
-        return in_path + sys_path_with_modifications(self._evaluator, self.module)
+            # Since we know nothing about the call location of the sys.path,
+            # it's a possibility that the current directory is the origin of
+            # the Python execution.
+            sys_path_mod.insert(0, os.path.dirname(self.file_path))
 
-    def follow(self, evaluator):
-        try:
-            scope, rest = self.follow_file_system()
-        except ModuleNotFound:
+        return in_path + sys_path_mod
+
+    @memoize_default(NO_DEFAULT)
+    def follow(self):
+        if not self.import_path:
             return []
-        if rest:
-            # follow the rest of the import (not FS -> classes, functions)
-            return self.follow_rest(scope, rest)
-        return [scope]
+        return self._do_import(self.import_path, self.sys_path_with_modifications())
 
-    def follow_rest(self, module, rest):
-        # Either os.path or path length is smaller.
-        if len(rest) < 2 or len(self.str_import_path) < 4 \
-                and ('os', 'path') == self.str_import_path[:2] and self.level == 0:
+    def _do_import(self, import_path, sys_path):
+        """
+        This method is very similar to importlib's `_gcd_import`.
+        """
+        import_parts = [str(i) for i in import_path]
+
+        # Handle "magic" Flask extension imports:
+        # ``flask.ext.foo`` is really ``flask_foo`` or ``flaskext.foo``.
+        if len(import_path) > 2 and import_parts[:2] == ['flask', 'ext']:
+            # New style.
+            ipath = ('flask_' + str(import_parts[2]),) + import_path[3:]
+            modules = self._do_import(ipath, sys_path)
+            if modules:
+                return modules
+            else:
+                # Old style
+                return self._do_import(('flaskext',) + import_path[2:], sys_path)
+
+        module_name = '.'.join(import_parts)
+        try:
+            return [self._evaluator.modules[module_name]]
+        except KeyError:
+            pass
+
+        if len(import_path) > 1:
+            # This is a recursive way of importing that works great with
+            # the module cache.
+            bases = self._do_import(import_path[:-1], sys_path)
+            if not bases:
+                return []
+            # We can take the first element, because only the os special
+            # case yields multiple modules, which is not important for
+            # further imports.
+            base = bases[0]
+
             # This is a huge exception, we follow a nested import
             # ``os.path``, because it's a very important one in Python
             # that is being achieved by messing with ``sys.modules`` in
             # ``os``.
-            scopes = [module]
-            for r in rest:
-                scopes = list(chain.from_iterable(
-                              self._evaluator.find_types(s, r)
-                              for s in scopes))
-            return scopes
-        else:
-            return []
+            if [str(i) for i in import_path] == ['os', 'path']:
+                return self._evaluator.find_types(base, 'path')
 
-    @memoize_default(NO_DEFAULT)
-    def follow_file_system(self):
-        # Handle "magic" Flask extension imports:
-        # ``flask.ext.foo`` is really ``flask_foo`` or ``flaskext.foo``.
-        if len(self.import_path) > 2 and self.str_import_path[:2] == ('flask', 'ext'):
-            orig_path = tuple(self.import_path)
             try:
-                self.import_path = ('flask_' + str(orig_path[2]),) + orig_path[3:]
-                return self._real_follow_file_system()
-            except ModuleNotFound:
-                self.import_path = ('flaskext',) + orig_path[2:]
-                return self._real_follow_file_system()
-
-        return self._real_follow_file_system()
-
-    def _real_follow_file_system(self):
-        if self.file_path:
-            sys_path_mod = list(self.sys_path_with_modifications())
-            if not self.module.has_explicit_absolute_import:
-                # If the module explicitly asks for absolute imports,
-                # there's probably a bogus local one.
-                sys_path_mod.insert(0, self.file_path)
-
-            # First the sys path is searched normally and if that doesn't
-            # succeed, try to search the parent directories, because sometimes
-            # Jedi doesn't recognize sys.path modifications (like py.test
-            # stuff).
-            old_path, temp_path = self.file_path, os.path.dirname(self.file_path)
-            while old_path != temp_path:
-                sys_path_mod.append(temp_path)
-                old_path, temp_path = temp_path, os.path.dirname(temp_path)
+                # It's possible that by giving it always the sys path (and not
+                # the __path__ attribute of the parent, we get wrong results
+                # and nested namespace packages don't work.  But I'm not sure.
+                paths = base.py__path__(sys_path)
+            except AttributeError:
+                # The module is not a package.
+                _add_error(self._evaluator, import_path[-1])
+                return []
+            else:
+                debug.dbg('search_module %s in paths %s', module_name, paths)
+                for path in paths:
+                    # At the moment we are only using one path. So this is
+                    # not important to be correct.
+                    try:
+                        module_file, module_path, is_pkg = \
+                            find_module(import_parts[-1], [path])
+                        break
+                    except ImportError:
+                        module_path = None
+                if module_path is None:
+                    _add_error(self._evaluator, import_path[-1])
+                    return []
         else:
-            sys_path_mod = list(get_sys_path())
-
-        from jedi.evaluate.representation import ModuleWrapper
-        module, rest = self._follow_sys_path(sys_path_mod)
-        if isinstance(module, pr.Module):
-            return ModuleWrapper(self._evaluator, module), rest
-        return module, rest
-
-    def namespace_packages(self, found_path, import_path):
-        """
-        Returns a list of paths of possible ``pkgutil``/``pkg_resources``
-        namespaces. If the package is no "namespace package", an empty list is
-        returned.
-        """
-        def follow_path(directories, paths):
             try:
-                directory = next(directories)
-            except StopIteration:
-                return paths
-            else:
-                deeper_paths = []
-                for p in paths:
-                    new = os.path.join(p, directory)
-                    if os.path.isdir(new) and new != found_path:
-                        deeper_paths.append(new)
-                return follow_path(directories, deeper_paths)
-
-        with open(os.path.join(found_path, '__init__.py'), 'rb') as f:
-            content = common.source_to_unicode(f.read())
-            # these are strings that need to be used for namespace packages,
-            # the first one is ``pkgutil``, the second ``pkg_resources``.
-            options = ('declare_namespace(__name__)', 'extend_path(__path__')
-            if options[0] in content or options[1] in content:
-                # It is a namespace, now try to find the rest of the modules.
-                return follow_path((str(i) for i in import_path), sys.path)
-        return []
-
-    def _follow_sys_path(self, sys_path):
-        """
-        Find a module with a path (of the module, like usb.backend.libusb10).
-        """
-        def follow_str(ns_path, string):
-            debug.dbg('follow_module %s in %s', string, ns_path)
-            path = None
-            if ns_path:
-                path = ns_path
-            elif self.level > 0:  # is a relative import
-                path = self.get_relative_path()
-
-            if path is not None:
-                importing = find_module(string, [path])
-            else:
-                debug.dbg('search_module %s in %s', string, self.file_path)
+                debug.dbg('search_module %s in %s', import_parts[-1], self.file_path)
                 # Override the sys.path. It works only good that way.
                 # Injecting the path directly into `find_module` did not work.
                 sys.path, temp = sys_path, sys.path
                 try:
-                    importing = find_module(string)
+                    module_file, module_path, is_pkg = \
+                        find_module(import_parts[-1])
                 finally:
                     sys.path = temp
-
-            return importing
-
-        current_namespace = (None, None, None)
-        # now execute those paths
-        rest = []
-        for i, s in enumerate(self.import_path):
-            try:
-                current_namespace = follow_str(current_namespace[1], unicode(s))
             except ImportError:
-                _continue = False
-                if self.level >= 1 and len(self.import_path) == 1:
-                    # follow `from . import some_variable`
-                    rel_path = self.get_relative_path()
-                    with common.ignored(ImportError):
-                        current_namespace = follow_str(rel_path, '__init__')
-                elif current_namespace[2]:  # is a package
-                    path = self.str_import_path[:i]
-                    for n in self.namespace_packages(current_namespace[1], path):
-                        try:
-                            current_namespace = follow_str(n, unicode(s))
-                            if current_namespace[1]:
-                                _continue = True
-                                break
-                        except ImportError:
-                            pass
+                # The module is not a package.
+                _add_error(self._evaluator, import_path[-1])
+                return []
 
-                if not _continue:
-                    if current_namespace[1]:
-                        rest = self.str_import_path[i:]
-                        break
-                    else:
-                        raise ModuleNotFound(s)
+        source = None
+        if is_pkg:
+            # In this case, we don't have a file yet. Search for the
+            # __init__ file.
+            module_path = get_init_path(module_path)
+        elif module_file:
+            source = module_file.read()
+            module_file.close()
 
-        path = current_namespace[1]
-        is_package_directory = current_namespace[2]
-
-        f = None
-        if is_package_directory or current_namespace[0]:
-            # is a directory module
-            if is_package_directory:
-                path = os.path.join(path, '__init__.py')
-                with open(path, 'rb') as f:
-                    source = f.read()
-            else:
-                source = current_namespace[0].read()
-                current_namespace[0].close()
-            return _load_module(self._evaluator, path, source, sys_path=sys_path), rest
+        if module_file is None and not module_path.endswith('.py'):
+            module = compiled.load_module(module_path)
         else:
-            return _load_module(self._evaluator, name=path, sys_path=sys_path), rest
+            module = _load_module(self._evaluator, module_path, source, sys_path)
+
+        self._evaluator.modules[module_name] = module
+        return [module]
 
     def _generate_name(self, name):
         return helpers.FakeName(name, parent=self.module)
@@ -413,7 +374,7 @@ class _Importer(object):
         :param only_modules: Indicates wheter it's possible to import a
             definition that is not defined in a module.
         """
-        from jedi.evaluate import finder, representation as er
+        from jedi.evaluate import finder
         names = []
         if self.import_path:
             # flask
@@ -430,16 +391,15 @@ class _Importer(object):
                     if os.path.isdir(flaskext):
                         names += self._get_module_names([flaskext])
 
-            for scope in self.follow(evaluator):
+            for scope in self.follow():
                 # Non-modules are not completable.
                 if not scope.type == 'file_input':  # not a module
                     continue
 
                 # namespace packages
-                if isinstance(scope, pr.Module) and scope.path.endswith('__init__.py'):
-                    pkg_path = os.path.dirname(scope.path)
-                    paths = self.namespace_packages(pkg_path, self.import_path)
-                    names += self._get_module_names([pkg_path] + paths)
+                if isinstance(scope, tree.Module) and scope.path.endswith('__init__.py'):
+                    paths = scope.py__path__(self.sys_path_with_modifications())
+                    names += self._get_module_names(paths)
 
                 if only_modules:
                     # In the case of an import like `from x.` we don't need to
@@ -468,18 +428,10 @@ class _Importer(object):
                     path = os.path.dirname(path)
                 names += self._get_module_names([path])
 
-                if self.level:
-                    rel_path = os.path.join(self.get_relative_path(),
-                                            '__init__.py')
-                    if os.path.exists(rel_path):
-                        module = _load_module(self._evaluator, rel_path)
-                        module = er.wrap(self._evaluator, module)
-                        for names_dict in module.names_dicts(search_global=False):
-                            names += chain.from_iterable(names_dict.values())
         return names
 
 
-def _load_module(evaluator, path=None, source=None, name=None, sys_path=None):
+def _load_module(evaluator, path=None, source=None, sys_path=None):
     def load(source):
         dotted_path = path and compiled.dotted_from_fs_path(path, sys_path)
         if path is not None and path.endswith('.py') \
@@ -488,14 +440,25 @@ def _load_module(evaluator, path=None, source=None, name=None, sys_path=None):
                 with open(path, 'rb') as f:
                     source = f.read()
         else:
-            return compiled.load_module(path, name)
-        p = path or name
+            return compiled.load_module(path)
+        p = path
         p = fast.FastParser(evaluator.grammar, common.source_to_unicode(source), p)
-        cache.save_parser(path, name, p)
+        cache.save_parser(path, p)
         return p.module
 
-    cached = cache.load_parser(path, name)
-    return load(source) if cached is None else cached.module
+    cached = cache.load_parser(path)
+    module = load(source) if cached is None else cached.module
+    module = evaluator.wrap(module)
+    return module
+
+
+def add_module(evaluator, module_name, module):
+    if '.' not in module_name:
+        # We cannot add paths with dots, because that would collide with
+        # the sepatator dots for nested packages. Therefore we return
+        # `__main__` in ModuleWrapper.py__name__(), which is similar to
+        # Python behavior.
+        evaluator.modules[module_name] = module
 
 
 def get_modules_containing_name(evaluator, mods, name):
@@ -515,7 +478,10 @@ def get_modules_containing_name(evaluator, mods, name):
         with open(path, 'rb') as f:
             source = source_to_unicode(f.read())
             if name in source:
-                return _load_module(evaluator, path, source)
+                module_name = os.path.basename(path)[:-3]  # Remove `.py`.
+                module = _load_module(evaluator, path, source)
+                add_module(evaluator, module_name, module)
+                return module
 
     # skip non python modules
     mods = set(m for m in mods if not isinstance(m, compiled.CompiledObject))

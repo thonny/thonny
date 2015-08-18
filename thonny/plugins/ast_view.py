@@ -9,7 +9,7 @@ from thonny import ui_utils
 from thonny.common import TextRange
 
 class AstView(ui_utils.TreeFrame):
-    def __init__(self, workbench, master):
+    def __init__(self, master, workbench):
         ui_utils.TreeFrame.__init__(self, master,
             columns=('range', 'lineno', 'col_offset', 'end_lineno', 'end_col_offset'),
             displaycolumns=(0,)
@@ -116,8 +116,7 @@ class AstView(ui_utils.TreeFrame):
         
 
 def load_plugin(workbench): 
-    print("Hello from AST View!")
-    workbench.add_view(AstView, "AST")       
+    workbench.add_view(AstView, "AST", "s")
         
     
         

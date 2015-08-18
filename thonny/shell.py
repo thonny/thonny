@@ -1,29 +1,26 @@
 # -*- coding: utf-8 -*-
 
-import re
 import os.path
-import traceback
-import tkinter as tk
+import re
 from tkinter import ttk
-import tkinter.font as font
+import traceback
 
-from thonny import ui_utils
-from thonny.config import prefs
 from thonny import memory
-from thonny.misc_utils import running_on_mac_os, shorten_repr
-from thonny.ui_utils import TextWrapper, generate_event
 from thonny.common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
-from thonny.user_logging import log_user_event, ShellCreateEvent, ShellCommandEvent,\
-    ShellInputEvent
+from thonny.misc_utils import running_on_mac_os, shorten_repr
+from thonny.ui_utils import TextWrapper
+import tkinter as tk
+import tkinter.font as font
+from logging import info
 
-class ShellFrame (ttk.Frame, TextWrapper):
+
+class ShellView (ttk.Frame, TextWrapper):
 
     
-    def __init__(self, master, vm, editor_book):
+    def __init__(self, master, workbench):
         ttk.Frame.__init__(self, master)
         
-        self._vm = vm
-        self._editor_book = editor_book
+        self._workbench = workbench
         self._before_io = True
         self._command_count = 0
         self._command_history = [] # actually not really history, because each command occurs only once
@@ -62,7 +59,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
                             height=10,
                             undo=True,
                             autoseparators=False)
-        log_user_event(ShellCreateEvent(self))
+        
+        #log_user_event(ShellCreateEvent(self)) TODO:
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         self.text.bind("<Up>", self._arrow_up, "+")
@@ -76,12 +74,12 @@ class ShellFrame (ttk.Frame, TextWrapper):
         
         TextWrapper.__init__(self)
         
-        self.text["font"] = ui_utils.EDITOR_FONT
+        self.text["font"] = workbench.get_font("EditorFont")
         vert_spacing = 10
         io_indent = 16
         
-        self.text.tag_configure("toplevel", font=ui_utils.EDITOR_FONT)
-        self.text.tag_configure("prompt", foreground="purple", font=ui_utils.BOLD_EDITOR_FONT)
+        self.text.tag_configure("toplevel", font=workbench.get_font("EditorFont"))
+        self.text.tag_configure("prompt", foreground="purple", font=workbench.get_font("BoldEditorFont"))
         self.text.tag_configure("command", foreground="black")
         self.text.tag_configure("automagic", foreground="DarkGray")
         #self.text.tag_configure("value", foreground="DarkGreen")
@@ -89,7 +87,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
         self.text.tag_configure("value", foreground="DarkBlue") # TODO: see also _text_key_press and _text_key_release
         self.text.tag_configure("error", foreground="Red")
         
-        self.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent, font=ui_utils.IO_FONT)
+        self.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
+                                font=workbench.get_font("IOFont"))
         self.text.tag_configure("stdin", foreground="Blue")
         self.text.tag_configure("stdout", foreground="Black")
         self.text.tag_configure("stderr", foreground="Red")
@@ -116,14 +115,17 @@ class ShellFrame (ttk.Frame, TextWrapper):
         
         self.active_object_tags = set()
     
+        self._workbench.bind("BackendMessage", 
+            lambda e: self._handle_vm_message(e.message))
         
+
         
         
 
-    def handle_vm_message(self, msg):
+    def _handle_vm_message(self, msg):
         if isinstance(msg, InputRequest):
             self.text_mode = "io"
-            self.text["font"] = ui_utils.IO_FONT # otherwise the cursor is of toplevel size
+            self.text["font"] = self._workbench.get_font("IOFont") # otherwise the cursor is of toplevel size
             self.text.focus_set()
             self.text.mark_set("insert", "end")
             self.text.tag_remove("sel", "1.0", tk.END)
@@ -132,7 +134,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             
         elif isinstance(msg, OutputEvent):
             self.text_mode = "io"
-            self.text["font"] = ui_utils.IO_FONT
+            self.text["font"] = self._workbench.get_font("IOFont")
             
             # mark first line of io
             if self._before_io:
@@ -146,11 +148,9 @@ class ShellFrame (ttk.Frame, TextWrapper):
             self.text.see("end")
             
         elif isinstance(msg, ToplevelResponse):
-            if self._editor_book.is_in_execution_mode():
-                self._editor_book.exit_execution_mode() # TODO: only when it's about program exit?
             
             self.text_mode = "toplevel"
-            self.text["font"] = ui_utils.EDITOR_FONT
+            self.text["font"] = self._workbench.get_font("EditorFont")
             self._before_io = True
             if hasattr(msg, "error"):
                 self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
@@ -158,7 +158,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             if hasattr(msg, "value_info"):
                 value_repr = shorten_repr(msg.value_info.repr, 10000)
                 if value_repr != "None":
-                    if prefs["view.values_in_heap"]:
+                    if self._workbench.in_heap_mode():
                         value_repr = memory.format_object_id(msg.value_info.id)
                     object_tag = "object_" + str(msg.value_info.id)
                     self._insert_text_directly(value_repr + "\n", ("toplevel",
@@ -169,7 +169,8 @@ class ShellFrame (ttk.Frame, TextWrapper):
                     else:
                         sequence = "<Control-Button-1>"
                     self.text.tag_bind(object_tag, sequence,
-                                       lambda _: generate_event(self, "<<ObjectSelect>>", msg.value_info.id))
+                                       lambda _: self._workbench.event_generate(
+                                            "ObjectSelect", object_id=msg.value_info.id))
                     
                     self.active_object_tags.add(object_tag)
             
@@ -182,7 +183,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             """
             if hasattr(msg, "event") and msg.event == "reset":
                 # make current dir visible (again)
-                self.submit_magic_command("%cd " + self._vm.cwd + "\n")
+                self.submit_magic_command("%cd " + self._workbench.get_runner().get_cwd() + "\n")
             """
             
         else:
@@ -208,11 +209,13 @@ class ShellFrame (ttk.Frame, TextWrapper):
     
     
     def submit_magic_command(self, cmd_line):
-        assert self._vm.get_state() == "toplevel"
+        assert self._get_state() == "toplevel"
         self.text.delete("input_start", "end")
         self.text.insert("input_start", cmd_line, ("automagic",))
         self.text.see("end")
-
+    
+    def _get_state(self):
+        return self._workbench.get_runner().get_state()
         
     def _user_text_insert(self, index, txt, tags=(), **kw):
         #print("insert", index, text, kw)
@@ -223,7 +226,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             self.text.mark_gravity("input_start", tk.LEFT)
             self.text.mark_gravity("output_insert", tk.LEFT)
             
-            if self._vm.get_state() == "input":
+            if self._get_state() == "input":
                 tags = tags + ("io", "stdin")
             else:
                 tags = tags + ("toplevel", "command")
@@ -236,14 +239,14 @@ class ShellFrame (ttk.Frame, TextWrapper):
             TextWrapper._user_text_insert(self, index, txt, tags, **kw)
             
             # tag first char of io separately
-            if self._vm.get_state() == "input" and self._before_io:
+            if self._get_state() == "input" and self._before_io:
                 self.text.tag_add("vertically_spaced", index)
                 self._before_io = False
             
             self._try_submit_input()
         else:
             self.bell()
-            print("Shell: can't insert", self._vm.get_state())
+            print("Shell: can't insert", self._get_state())
             
     def _user_text_delete(self, index1, index2=None, **kw):
         if (self._editing_allowed() 
@@ -252,7 +255,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             TextWrapper._user_text_delete(self, index1, index2, **kw)
         else:
             self.bell()
-            print("Shell: can't delete", self._vm.get_state())
+            print("Shell: can't delete", self._get_state())
     
     def _in_current_input_range(self, index):
         return self.text.compare(index, ">=", "input_start")
@@ -296,7 +299,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
             start_index = self.text.index("input_start")
             end_index = self.text.index("input_start+{0}c".format(len(submittable_text)))
             # apply correct tags (if it's leftover then it doesn't have them yet)
-            if self._vm.get_state() == "input":
+            if self._get_state() == "input":
                 self.text.tag_add("io", start_index, end_index)
                 self.text.tag_add("stdin", start_index, end_index)
             else:
@@ -326,17 +329,17 @@ class ShellFrame (ttk.Frame, TextWrapper):
             #self.text.tag_add("pending_input", end_index, "end-1c")
     
     def _editing_allowed(self):
-        return self._vm.get_state() in ('toplevel', 'input')
+        return self._get_state() in ('toplevel', 'input')
     
     def _extract_submittable_input(self, input_text):
         
-        if self._vm.get_state() == "toplevel":
+        if self._get_state() == "toplevel":
             # TODO: support also multiline commands
             if "\n" in input_text:
                 return input_text[:input_text.index("\n")+1]
             else:
                 return None
-        elif self._vm.get_state() == "input":
+        elif self._get_state() == "input":
             input_request = self._vm.get_state_message()
             method = input_request.method
             limit = input_request.limit
@@ -366,20 +369,22 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 
     
     def _submit_input(self, text_to_be_submitted):
-        if self._vm.get_state() == "toplevel":
-            log_user_event(ShellCommandEvent(text_to_be_submitted))
+        if self._get_state() == "toplevel":
             try:
-                # if it's a file/script-related command, then editor_book wants to 
+                # if it's a file/script-related command, then editor_notebook wants to 
                 # know about it first
                 cmd = parse_shell_command(text_to_be_submitted)
+                """ TODO: ???
                 if cmd.command.lower() in ("run", "debug"):
                     if os.path.isabs(cmd.filename):
                         abs_filename = cmd.filename
                     else:
-                        abs_filename = os.path.join(self._vm.cwd, cmd.filename)
+                        abs_filename = os.path.join(self._worbench.get_runner().get_cwd(), cmd.filename)
                     self._editor_book.enter_execution_mode(abs_filename)
+                """
                     
                 # register in history and count
+                print("cmd:", cmd)
                 if hasattr(cmd, "cmd_line"):
                     cmd.id = self._command_count
                     self._command_count += 1
@@ -390,26 +395,21 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 
                 cmd.globals_required = "__main__" # TODO: look what's selected
           
-                if prefs["view.values_in_heap"]:
-                    cmd.heap_required = True
-                
                 if cmd.command[0].isupper(): # this means reset
                     self._invalidate_current_data()
                     
-                self._vm.send_command(cmd)
+                self._workbench.get_runner().send_command(cmd)
                 
             except:
                 #raise # TODO:
                 self._insert_text_directly("Internal error: " + traceback.format_exc() + "\n", ("toplevel", "error"))
                 self._insert_prompt()
+                
+            self._workbench.event_generate("ShellCommand", command_text=text_to_be_submitted)
         else:
-            log_user_event(ShellInputEvent(text_to_be_submitted))
-            self._vm.send_program_input(text_to_be_submitted)
+            self._workbench.get_runner().send_program_input(text_to_be_submitted)
+            self._workbench.event_generate("ShellInput", input_text=text_to_be_submitted)
     
-    
-    def change_font_size(self, delta): # TODO: should be elsewhere?
-        for f in (ui_utils.IO_FONT, ui_utils.EDITOR_FONT, ui_utils.BOLD_EDITOR_FONT):
-            f.configure(size=f.cget("size") + delta)
     
     def focus_set(self):
         self.text.focus()
@@ -489,7 +489,7 @@ class ShellFrame (ttk.Frame, TextWrapper):
                 lineno = int(lineno)
                 if os.path.exists(filename) and os.path.isfile(filename):
                     # TODO: better use events instead direct referencing
-                    self._editor_book.show_file(filename, lineno)
+                    self._workbench.get_editor_notebook().show_file(filename, lineno)
         except:
             traceback.print_exc()
     
@@ -572,4 +572,5 @@ Nende arvude summa on 10
 #            self.text.see("end")
         self.text.see("end")
     """
+    
     

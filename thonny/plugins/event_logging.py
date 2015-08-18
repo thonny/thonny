@@ -1,7 +1,9 @@
 import ast
 import os.path
+import tkinter as tk
 from time import strptime
 from datetime import datetime, timedelta
+import time
 
 
 """
@@ -22,13 +24,43 @@ Traceback (most recent call last):
 ValueError: invalid literal for int() with base 10: ''
 """
 
-class UserEventLogger:
-    def __init__(self, filename=None):
+class EventLogger:
+    def __init__(self, workbench, filename=None):
         self.filename = filename
         self.macro_events = []
         self.last_position = "0.0"
         self.last_source = None
         self.default_timeout = timedelta(seconds = 2)
+        
+        self._bind("<<Undo>>")
+        self._bind("<<Undo>>")
+        self._bind("<<Redo>>")
+        self._bind("<<Cut>>")
+        self._bind("<<Copy>>")
+        self._bind("<<Paste>>")
+        #self._bind("<<Selection>>")
+        self._bind("<FocusIn>")
+        self._bind("<FocusOut>")
+        self._bind("<Key>")
+        self._bind("<KeyRelease>")
+        self._bind("<1>")
+        self._bind("<2>")
+        self._bind("<3>")
+
+        workbench.bind("<FocusIn>", self._on_get_focus, "+")
+        workbench.bind("<FocusOut>", self._on_lose_focus, "+")
+        
+        ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
+
+        
+        # TODO: if event data includes an Editor, then look up also text id
+    
+    def _bind(self, sequence):
+        
+        def handle(event):
+            self.log_micro_event(event)
+        
+        tk._default_root.bind_all(sequence, handle, True)
     
     def log_micro_event(self, e):
         # TODO: save and clear the log when it becomes too big
@@ -230,7 +262,7 @@ class ProgramLoseFocusEvent(UserEvent):
 
 class CommandEvent(UserEvent):
     def __init__(self, cmd_id, source):
-        self.cmd_id = cmd_id
+        self._cmd_id = cmd_id
         self.source = source
 
 class ShellCreateEvent(UserEvent):
@@ -299,3 +331,20 @@ def parse_all_log_files(path):
             
     return all_events
 
+def load_plugin(workbench):
+    # generate log filename
+    folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+        
+    i = 0
+    while True: 
+        filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.txt".format(i)));
+        if os.path.exists(filename):
+            i += 1;  
+        else:
+            return filename
+    
+    # create logger
+    EventLogger(workbench, filename)
+    

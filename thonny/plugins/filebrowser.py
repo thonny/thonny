@@ -6,22 +6,20 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter.messagebox import showerror
 
-from thonny.ui_utils import TreeFrame
+from thonny.ui_utils import TreeFrame, askstring
 from thonny import misc_utils
-from thonny.ttk_simpledialog import askstring
 
 _dummy_node_text = "..."
     
         
 class FileBrowser(TreeFrame):
-    def __init__(self, workbench, master, editor_book=None,
-                 show_hidden_files=False): # TODO: refactor universal file browser
+    def __init__(self, master, workbench, show_hidden_files=False): # TODO: refactor universal file browser
         TreeFrame.__init__(self, master, 
                            ["#0", "kind", "path"], 
                            displaycolumns=(0,))
         #print(self.get_toplevel_items())
         self._workbench = workbench
-        self.editor_book = editor_book
+        self.editor_notebook = workbench.get_editor_notebook()
         self.show_hidden_files = show_hidden_files
         self.tree['show'] = ('tree',)
         
@@ -61,7 +59,7 @@ class FileBrowser(TreeFrame):
             self.open_path_in_browser(sys.argv[1], True)
             self.save_current_folder()
         else:
-            path = self._workbench.configuration["file.last_browser_folder"]
+            path = self._workbench.get_option("file.last_browser_folder")
             if path:
                 self.open_path_in_browser(path, True)
     
@@ -73,12 +71,12 @@ class FileBrowser(TreeFrame):
         
         if os.path.isfile(path):
             path = os.path.dirname(path)
-        prefs["file.last_browser_folder"] = path
+        self._workbench.set_option("file.last_browser_folder", path)
     
     def on_double_click(self, event):
         path = self.get_selected_path()
         if path:
-            self.editor_book.show_file(path)
+            self.editor_notebook.show_file(path)
             self.save_current_folder()
     
     def on_secondary_click(self, event):
@@ -124,7 +122,7 @@ class FileBrowser(TreeFrame):
             open(path, 'w').close()
         
         self.open_path_in_browser(path, True)
-        self.editor_book.show_file(path)
+        self.editor_notebook.show_file(path)
     
     def get_proposed_new_file_name(self, folder, extension):
         base = "new_file"
@@ -302,3 +300,6 @@ class FileBrowser(TreeFrame):
             
         return sorted(result, key=str.upper)
     
+def load_plugin(workbench): 
+    workbench.add_defaults({"file.last_browser_folder" : None})
+    workbench.add_view(FileBrowser, "Files", "nw")

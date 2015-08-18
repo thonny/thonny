@@ -133,8 +133,10 @@ def _evaluate_for_statement_string(evaluator, string, module):
     p = Parser(load_grammar(), code % indent_block(string))
     try:
         pseudo_cls = p.module.subscopes[0]
-        stmt = pseudo_cls.statements[-1]
-    except IndexError:
+        # First pick suite, then simple_stmt (-2 for DEDENT) and then the node,
+        # which is also not the last item, because there's a newline.
+        stmt = pseudo_cls.children[-1].children[-2].children[-2]
+    except (AttributeError, IndexError):
         return []
 
     # Use the module of the param.
@@ -151,7 +153,7 @@ def _execute_types_in_stmt(evaluator, stmt):
     doesn't include tuple, list and dict literals, because the stuff they
     contain is executed. (Used as type information).
     """
-    definitions = evaluator.eval_statement(stmt)
+    definitions = evaluator.eval_element(stmt)
     return chain.from_iterable(_execute_array_values(evaluator, d) for d in definitions)
 
 
@@ -176,7 +178,7 @@ def follow_param(evaluator, param):
 
     return [p
             for param_str in _search_param_in_docstr(func.raw_doc,
-                                                     str(param.get_name()))
+                                                     str(param.name))
             for p in _evaluate_for_statement_string(evaluator, param_str,
                                                     param.get_parent_until())]
 

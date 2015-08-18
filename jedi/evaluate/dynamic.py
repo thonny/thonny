@@ -19,7 +19,7 @@ It works as follows:
 from itertools import chain
 
 from jedi._compatibility import unicode
-from jedi.parser import tree as pr
+from jedi.parser import tree
 from jedi import settings
 from jedi import debug
 from jedi.evaluate.cache import memoize_default
@@ -53,15 +53,9 @@ def search_params(evaluator, param):
     """
     if not settings.dynamic_params:
         return []
-    debug.dbg('Dynamic param search for %s', param)
 
-    func = param.get_parent_until(pr.Function)
-    """
-        for params in get_posibilities(evaluator, module, func_name):
-            for p in params:
-                if str(p) == str(param.get_name()):
-                    result += p.parent.eval(evaluator)
-                    """
+    func = param.get_parent_until(tree.Function)
+    debug.dbg('Dynamic param search for %s in %s.', param, str(func.name))
     # Compare the param names.
     names = [n for n in search_function_call(evaluator, func)
              if n.value == param.name.value]
@@ -90,15 +84,12 @@ def search_function_call(evaluator, func):
                 return []
 
             for name in names:
-                stmt = name.get_definition()
-                if not isinstance(stmt, (pr.ExprStmt, pr.CompFor, pr.ReturnStmt)):
-                    continue
                 parent = name.parent
-                if pr.is_node(parent, 'trailer'):
+                if tree.is_node(parent, 'trailer'):
                     parent = parent.parent
 
                 trailer = None
-                if pr.is_node(parent, 'power'):
+                if tree.is_node(parent, 'power'):
                     for t in parent.children[1:]:
                         if t == '**':
                             break
@@ -121,7 +112,7 @@ def search_function_call(evaluator, func):
                         else:
                             undec.append(escope)
 
-                    if er.wrap(evaluator, compare) in undec:
+                    if evaluator.wrap(compare) in undec:
                         # Only if we have the correct function we execute
                         # it, otherwise just ignore it.
                         evaluator.eval_trailer(types, trailer)
@@ -133,7 +124,7 @@ def search_function_call(evaluator, func):
     compare = func
     if func_name == '__init__':
         cls = func.get_parent_scope()
-        if isinstance(cls, pr.Class):
+        if isinstance(cls, tree.Class):
             func_name = unicode(cls.name)
             compare = cls
 

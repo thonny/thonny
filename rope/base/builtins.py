@@ -50,9 +50,9 @@ class BuiltinModule(pyobjects.AbstractModule):
 
 class _BuiltinElement(object):
 
-    def __init__(self, builtin, parent=None):
+    def __init__(self, builtin, master=None):
         self.builtin = builtin
-        self._parent = parent
+        self._parent = master
 
     def get_doc(self):
         if self.builtin:
@@ -71,8 +71,8 @@ class _BuiltinElement(object):
 
 class BuiltinClass(_BuiltinElement, pyobjects.AbstractClass):
 
-    def __init__(self, builtin, attributes, parent=None):
-        _BuiltinElement.__init__(self, builtin, parent)
+    def __init__(self, builtin, attributes, master=None):
+        _BuiltinElement.__init__(self, builtin, master)
         pyobjects.AbstractClass.__init__(self)
         self.initial = attributes
 
@@ -86,8 +86,8 @@ class BuiltinClass(_BuiltinElement, pyobjects.AbstractClass):
 class BuiltinFunction(_BuiltinElement, pyobjects.AbstractFunction):
 
     def __init__(self, returned=None, function=None, builtin=None,
-                 argnames=[], parent=None):
-        _BuiltinElement.__init__(self, builtin, parent)
+                 argnames=[], master=None):
+        _BuiltinElement.__init__(self, builtin, master)
         pyobjects.AbstractFunction.__init__(self)
         self.argnames = argnames
         self.returned = returned

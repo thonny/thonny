@@ -3,11 +3,7 @@ import traceback
 import tkinter as tk
 import tkinter.ttk as ttk
 from thonny import ui_utils
-from thonny.user_logging import parse_log_line, TextInsertEvent,\
-    TextDeleteEvent, ShellCreateEvent, ProgramLoseFocusEvent,\
-    ProgramGetFocusEvent, EditorGetFocusEvent, EditorLoseFocusEvent,\
-    KeyPressEvent
-from thonny.browser import FileBrowser
+from thonny.plugins.filebrowser import FileBrowser
 
 
 class ReplayWindow(tk.Tk):
@@ -15,13 +11,13 @@ class ReplayWindow(tk.Tk):
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self.on_tk_exception
         
-        self.main_pw   = ui_utils.create_PanedWindow(self, orient=tk.HORIZONTAL)
-        self.center_pw  = ui_utils.create_PanedWindow(self.main_pw, orient=tk.VERTICAL)
+        self.main_pw   = ui_utils.AutomaticPanedWindow(self, orient=tk.HORIZONTAL)
+        self.center_pw  = ui_utils.AutomaticPanedWindow(self.main_pw, orient=tk.VERTICAL)
         self.right_frame = ttk.Frame(self.main_pw)
-        self.editor_book = EditorNotebook(self.center_pw)
-        shell_book = ui_utils.AutomaticViewNotebook(self.main_pw)
+        self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
+        shell_book = ui_utils.AutomaticNotebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
-        self.log_frame = LogFrame(self.right_frame, self.editor_book, self.shell)
+        self.log_frame = LogFrame(self.right_frame, self.editor_notebook, self.shell)
         self.browser = ReplayerFileBrowser(self.main_pw, self.log_frame)
         self.control_frame = ControlFrame(self.right_frame)
         
@@ -29,7 +25,7 @@ class ReplayWindow(tk.Tk):
         self.main_pw.add(self.browser, minsize=200)
         self.main_pw.add(self.center_pw, minsize=700)
         self.main_pw.add(self.right_frame, minsize=200)
-        self.center_pw.add(self.editor_book, minsize=500)
+        self.center_pw.add(self.editor_notebook, minsize=500)
         self.center_pw.add(shell_book)
         shell_book.add(self.shell, text="Shell")
         self.log_frame.grid(sticky=tk.NSEW)
@@ -95,7 +91,7 @@ class ControlFrame(ttk.Frame):
 class LogFrame(ui_utils.TreeFrame):
     def __init__(self, master, editor_book, shell):
         ui_utils.TreeFrame.__init__(self, master, ("desc", "pause", "time"))
-        self.editor_book = editor_book
+        self.editor_notebook = editor_book
         self.shell = shell
         self.all_events = []
         self.last_event_index = -1
@@ -107,7 +103,7 @@ class LogFrame(ui_utils.TreeFrame):
         self.all_events = []
         self.last_event_index = -1
         self.loading = True
-        self.editor_book.clear()
+        self.editor_notebook.clear()
         self.shell.clear()
         
         with open(filename, encoding="UTF-8") as f:
@@ -150,7 +146,7 @@ class LogFrame(ui_utils.TreeFrame):
             if event.editor_id == self.shell_editor_id:
                 self.shell.replay_event(event)
             else:
-                self.editor_book.replay_event(event)
+                self.editor_notebook.replay_event(event)
     
     def undo_event(self, event):
         "this should be called with events in correct order"
@@ -159,7 +155,7 @@ class LogFrame(ui_utils.TreeFrame):
             if event.editor_id == self.shell_editor_id:
                 self.shell.undo_event(event)
             else:
-                self.editor_book.undo_event(event)
+                self.editor_notebook.undo_event(event)
     
     def on_select(self, event):
         # parameter "event" is here tkinter event
@@ -197,7 +193,7 @@ class ReplayerCodeView(ttk.Frame):
                 yscrollcommand=self.vbar.set,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
-                font=ui_utils.EDITOR_FONT,
+                font=self._workbench.get_font("EditorFont"),
                 wrap=tk.NONE,
                 insertwidth=2,
                 #selectborderwidth=2,
@@ -216,7 +212,7 @@ class ReplayerCodeView(ttk.Frame):
         self.rowconfigure(0, weight=1)
         
 
-class Editor(ttk.Frame):
+class ReplayerEditor(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
         self.code_view = ReplayerCodeView(self)
@@ -256,7 +252,7 @@ class Editor(ttk.Frame):
         if hasattr(event, "position") and event.position:
             self.code_view.text.see(event.position)
 
-class EditorNotebook(ttk.Notebook):
+class ReplayerEditorNotebook(ttk.Notebook):
     def __init__(self, master):
         ttk.Notebook.__init__(self, master, padding=0)
         self.editors_by_id = {}
@@ -270,7 +266,7 @@ class EditorNotebook(ttk.Notebook):
     
     def get_editor_by_id(self, editor_id):
         if editor_id not in self.editors_by_id:
-            editor = Editor(self)
+            editor = ReplayerEditor(self)
             self.add(editor, text="<untitled>")
             self.editors_by_id[editor_id] = editor
             
@@ -288,7 +284,7 @@ class EditorNotebook(ttk.Notebook):
             editor = self.get_editor_by_id(event.editor_id)
             editor.undo_event(event)
 
-class ShellFrame(Editor):
+class ShellFrame(ReplayerEditor):
     
     def clear(self):
         self.code_view.text.delete("1.0", "end")

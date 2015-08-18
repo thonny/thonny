@@ -34,7 +34,7 @@ from inspect import cleandoc
 from itertools import chain
 import textwrap
 
-from jedi._compatibility import (next, Python3Method, encoding, is_py3,
+from jedi._compatibility import (Python3Method, encoding, is_py3, utf8_repr,
                                  literal_eval, use_metaclass, unicode)
 from jedi import cache
 
@@ -64,31 +64,34 @@ class DocstringMixin(object):
     def raw_doc(self):
         """ Returns a cleaned version of the docstring token. """
         if isinstance(self, Module):
-            stmt = self.children[0]
-        else:
-            stmt = self.children[self.children.index(':') + 1]
-            if is_node(stmt, 'suite'):  # Normally a suite
-                stmt = stmt.children[2]  # -> NEWLINE INDENT stmt
-        if is_node(stmt, 'simple_stmt'):
-            stmt = stmt.children[0]
+            node = self.children[0]
+        elif isinstance(self, ClassOrFunc):
+            node = self.children[self.children.index(':') + 1]
+            if is_node(node, 'suite'):  # Normally a suite
+                node = node.children[2]  # -> NEWLINE INDENT stmt
+        else:  # ExprStmt
+            simple_stmt = self.parent
+            c = simple_stmt.parent.children
+            index = c.index(simple_stmt)
+            if not index:
+                return ''
+            node = c[index - 1]
 
-        try:
-            first = stmt.children[0]
-        except AttributeError:
-            pass  # Probably a pass Keyword (Leaf).
-        else:
-            if first.type == 'string':
-                # TODO We have to check next leaves until there are no new
-                # leaves anymore that might be part of the docstring. A
-                # docstring can also look like this: ``'foo' 'bar'
-                # Returns a literal cleaned version of the ``Token``.
-                cleaned = cleandoc(literal_eval(first.value))
-                # Since we want the docstr output to be always unicode, just
-                # force it.
-                if is_py3 or isinstance(cleaned, unicode):
-                    return cleaned
-                else:
-                    return unicode(cleaned, 'UTF-8', 'replace')
+        if is_node(node, 'simple_stmt'):
+            node = node.children[0]
+
+        if node.type == 'string':
+            # TODO We have to check next leaves until there are no new
+            # leaves anymore that might be part of the docstring. A
+            # docstring can also look like this: ``'foo' 'bar'
+            # Returns a literal cleaned version of the ``Token``.
+            cleaned = cleandoc(literal_eval(node.value))
+            # Since we want the docstr output to be always unicode, just
+            # force it.
+            if is_py3 or isinstance(cleaned, unicode):
+                return cleaned
+            else:
+                return unicode(cleaned, 'UTF-8', 'replace')
         return ''
 
 
@@ -165,6 +168,10 @@ class Leaf(Base):
         return (self._start_pos[0] + self.position_modifier.line,
                 self._start_pos[1] + len(self.value))
 
+    def move(self, line_offset, column_offset):
+        self._start_pos = (self._start_pos[0] + line_offset,
+                           self._start_pos[1] + column_offset)
+
     def get_previous(self):
         """
         Returns the previous leaf in the parser tree.
@@ -216,8 +223,9 @@ class Leaf(Base):
                     return None
                 return self.parent.children[i - 1]
 
+    @utf8_repr
     def __repr__(self):
-        return "<%s: %s>" % (type(self).__name__, repr(self.value))
+        return "<%s: %s>" % (type(self).__name__, self.value)
 
 
 class LeafWithNewLines(Leaf):
@@ -239,6 +247,10 @@ class LeafWithNewLines(Leaf):
             end_pos_col = len(lines[-1])
         return end_pos_line, end_pos_col
 
+
+    @utf8_repr
+    def __repr__(self):
+        return "<%s: %r>" % (type(self).__name__, self.value)
 
 class Whitespace(LeafWithNewLines):
     """Contains NEWLINE and ENDMARKER tokens."""
@@ -265,28 +277,27 @@ class Name(Leaf):
                                    self.start_pos[0], self.start_pos[1])
 
     def get_definition(self):
-        scope = self.parent
+        scope = self
         while scope.parent is not None:
-            if scope.isinstance(Node):
+            parent = scope.parent
+            if scope.isinstance(Node, Name) and parent.type != 'simple_stmt':
                 if scope.type == 'testlist_comp':
                     try:
                         if isinstance(scope.children[1], CompFor):
                             return scope.children[1]
                     except IndexError:
                         pass
+                scope = parent
             else:
                 break
-            scope = scope.parent
         return scope
 
     def is_definition(self):
         stmt = self.get_definition()
-        if stmt.type in ('funcdef', 'classdef', 'file_input'):
+        if stmt.type in ('funcdef', 'classdef', 'file_input', 'param'):
             return self == stmt.name
         elif stmt.type == 'for_stmt':
             return self.start_pos < stmt.children[2].start_pos
-        elif stmt.type == 'param':
-            return self == stmt.get_name()
         elif stmt.type == 'try_stmt':
             return self.prev_sibling() == 'as'
         else:
@@ -329,16 +340,6 @@ class Literal(LeafWithNewLines):
 
     def eval(self):
         return literal_eval(self.value)
-
-    def __repr__(self):
-        # TODO remove?
-        """
-        if is_py3:
-            s = self.literal
-        else:
-            s = self.literal.encode('ascii', 'replace')
-        """
-        return "<%s: %s>" % (type(self).__name__, self.value)
 
 
 class Number(Literal):
@@ -421,11 +422,7 @@ class BaseNode(Base):
         Move the Node's start_pos.
         """
         for c in self.children:
-            if isinstance(c, Leaf):
-                c.start_pos = (c.start_pos[0] + line_offset,
-                               c.start_pos[1] + column_offset)
-            else:
-                c.move(line_offset, column_offset)
+            c.move(line_offset, column_offset)
 
     @property
     def start_pos(self):
@@ -454,7 +451,8 @@ class BaseNode(Base):
     def get_statement_for_position(self, pos):
         for c in self.children:
             if c.start_pos <= pos <= c.end_pos:
-                if c.type in ('expr_stmt', 'import_from', 'import_name'):
+                if c.type not in ('decorated', 'simple_stmt', 'suite') \
+                        and not isinstance(c, (Flow, ClassOrFunc)):
                     return c
                 else:
                     try:
@@ -469,6 +467,7 @@ class BaseNode(Base):
         except AttributeError:
             return self.children[0]
 
+    @utf8_repr
     def __repr__(self):
         code = self.get_code().replace('\n', ' ')
         if not is_py3:
@@ -540,6 +539,7 @@ class Scope(BaseNode, DocstringMixin):
     def imports(self):
         return self._search_in_scope(Import)
 
+    @Python3Method
     def _search_in_scope(self, typ):
         def scan(children):
             elements = []
@@ -704,49 +704,67 @@ class Class(ClassOrFunc):
         return docstr
 
 
-def _create_params(function, lst):
-    if not lst:
-        return []
-    if is_node(lst[0], 'typedargslist', 'varargslist'):
-        params = []
-        iterator = iter(lst[0].children)
-        for n in iterator:
-            stars = 0
-            if n in ('*', '**'):
-                stars = len(n.value)
-                n = next(iterator)
+def _create_params(parent, argslist_list):
+    """
+    `argslist_list` is a list that can contain an argslist as a first item, but
+    most not. It's basically the items between the parameter brackets (which is
+    at most one item).
+    This function modifies the parser structure. It generates `Param` objects
+    from the normal ast. Those param objects do not exist in a normal ast, but
+    make the evaluation of the ast tree so much easier.
+    You could also say that this function replaces the argslist node with a
+    list of Param objects.
+    """
+    def check_python2_nested_param(node):
+        """
+        Python 2 allows params to look like ``def x(a, (b, c))``, which is
+        basically a way of unpacking tuples in params. Python 3 has ditched
+        this behavior. Jedi currently just ignores those constructs.
+        """
+        return node.type == 'tfpdef' and node.children[0] == '('
 
-            op = next(iterator, None)
-            if op == '=':
-                default = next(iterator)
-                next(iterator, None)
-            else:
-                default = None
-            params.append(Param(n, function, default, stars))
+    try:
+        first = argslist_list[0]
+    except IndexError:
+        return []
+
+    if first.type in ('name', 'tfpdef'):
+        if check_python2_nested_param(first):
+            return []
+        else:
+            return [Param([first], parent)]
+    else:  # argslist is a `typedargslist` or a `varargslist`.
+        children = first.children
+        params = []
+        start = 0
+        # Start with offset 1, because the end is higher.
+        for end, child in enumerate(children + [None], 1):
+            if child is None or child == ',':
+                new_children = children[start:end]
+                if new_children:  # Could as well be comma and then end.
+                    if check_python2_nested_param(new_children[0]):
+                        continue
+                    params.append(Param(new_children, parent))
+                    start = end
         return params
-    else:
-        return [Param(lst[0], function)]
 
 
 class Function(ClassOrFunc):
     """
     Used to store the parsed contents of a python function.
-
-    :param name: The Function name.
-    :type name: str
-    :param params: The parameters (Statement) of a Function.
-    :type params: list
-    :param start_pos: The start position (line, column) the Function.
-    :type start_pos: tuple(int, int)
     """
-    __slots__ = ('listeners', 'params')
+    __slots__ = ('listeners',)
     type = 'funcdef'
 
     def __init__(self, children):
         super(Function, self).__init__(children)
         self.listeners = set()  # not used here, but in evaluation.
-        lst = self.children[2].children[1:-1]  # After `def foo`
-        self.params = _create_params(self, lst)
+        parameters = self.children[2]  # After `def foo`
+        parameters.children[1:-1] = _create_params(parameters, parameters.children[1:-1])
+
+    @property
+    def params(self):
+        return self.children[2].children[1:-1]
 
     @property
     def name(self):
@@ -796,10 +814,15 @@ class Lambda(Function):
     __slots__ = ()
 
     def __init__(self, children):
+        # We don't want to call the Function constructor, call its parent.
         super(Function, self).__init__(children)
         self.listeners = set()  # not used here, but in evaluation.
         lst = self.children[1:-2]  # After `def foo`
-        self.params = _create_params(self, lst)
+        self.children[1:-2] = _create_params(self, lst)
+
+    @property
+    def params(self):
+        return self.children[1:-2]
 
     def is_generator(self):
         return False
@@ -929,6 +952,17 @@ class ImportFrom(Import):
         return dict((alias, name) for name, alias in self._as_name_tuples()
                     if alias is not None)
 
+    def get_from_names(self):
+        for n in self.children[1:]:
+            if n not in ('.', '...'):
+                break
+        if is_node(n, 'dotted_name'):  # from x.y import
+            return n.children[::2]
+        elif n == 'import':  # from . import
+            return []
+        else:  # from x import
+            return [n]
+
     @property
     def level(self):
         """The level parameter of ``__import__``."""
@@ -968,15 +1002,7 @@ class ImportFrom(Import):
         The import paths defined in an import statement. Typically an array
         like this: ``[<Name: datetime>, <Name: date>]``.
         """
-        for n in self.children[1:]:
-            if n not in ('.', '...'):
-                break
-        if is_node(n, 'dotted_name'):  # from x.y import
-            dotted = n.children[::2]
-        elif n == 'import':  # from . import
-            dotted = []
-        else:  # from x import
-            dotted = [n]
+        dotted = self.get_from_names()
 
         if self.children[-1] == '*':
             return [dotted]
@@ -1119,64 +1145,63 @@ class ExprStmt(BaseNode, DocstringMixin):
             return None
 
 
-class Param(Base):
+class Param(BaseNode):
     """
-    The class which shows definitions of params of classes and functions.
-    But this is not to define function calls.
-
-    A helper class for functions. Read only.
+    It's a helper class that makes business logic with params much easier. The
+    Python grammar defines no ``param`` node. It defines it in a different way
+    that is not really suited to working with parameters.
     """
-    __slots__ = ('tfpdef', 'default', 'stars', 'parent')
-    # Even though it's not not an official node, just give it one, because that
-    # makes checking more consistent.
     type = 'param'
 
-    def __init__(self, tfpdef, parent, default=None, stars=0):
-        self.tfpdef = tfpdef  # tfpdef: see grammar.txt
-        self.default = default
-        self.stars = stars
+    def __init__(self, children, parent):
+        super(Param, self).__init__(children)
         self.parent = parent
-        # Here we reset the parent of our name. IMHO this is ok.
-        self.get_name().parent = self
+        for child in children:
+            child.parent = self
+
+    @property
+    def stars(self):
+        first = self.children[0]
+        if first in ('*', '**'):
+            return len(first.value)
+        return 0
+
+    @property
+    def default(self):
+        try:
+            return self.children[int(self.children[0] in ('*', '**')) + 2]
+        except IndexError:
+            return None
 
     def annotation(self):
         # Generate from tfpdef.
         raise NotImplementedError
 
-    @property
-    def children(self):
-        return []
-
-    @property
-    def start_pos(self):
-        return self.tfpdef.start_pos
-
-    def get_name(self):
-        # TODO remove!
-        return self.name
+    def _tfpdef(self):
+        """
+        tfpdef: see grammar.txt.
+        """
+        offset = int(self.children[0] in ('*', '**'))
+        return self.children[offset]
 
     @property
     def name(self):
-        if is_node(self.tfpdef, 'tfpdef'):
-            return self.tfpdef.children[0]
+        if is_node(self._tfpdef(), 'tfpdef'):
+            return self._tfpdef().children[0]
         else:
-            return self.tfpdef
+            return self._tfpdef()
 
     @property
     def position_nr(self):
-        return self.parent.params.index(self)
+        return self.parent.children.index(self) - 1
 
     @property
     def parent_function(self):
         return self.get_parent_until(IsScope)
 
-    def get_code(self):
-        df = '' if self.default is None else '=' + self.default.get_code()
-        return self.tfpdef.get_code() + df
-
     def __repr__(self):
         default = '' if self.default is None else '=%s' % self.default
-        return '<%s: %s>' % (type(self).__name__, str(self.tfpdef) + default)
+        return '<%s: %s>' % (type(self).__name__, str(self._tfpdef()) + default)
 
 
 class CompFor(BaseNode):
