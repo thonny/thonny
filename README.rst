@@ -13,4 +13,4 @@ Features:
 
 Screenshot:
 
-.. image:: https://bitbucket.org/plas/thonny/raw/9936e8b2c64b58efe290f3deaf11ca67436c1764/screenshot.png
+.. image:: https://bytebucket.org/plas/thonny/raw/822bfda455d57309e84d16b9842c83645ab8eaa6/screenshot.png
