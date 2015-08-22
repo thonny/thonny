@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 
-# TODO: refactor IDLE editor text into separate component and use it in IDLE 
-# and here?
-
 import os.path
 import tkinter as tk
 from tkinter import ttk
@@ -15,23 +12,6 @@ from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
 
 
-def classifyws(s, tabwidth):
-    # copied from idlelib.EditorWindow (Python 3.4.2)
-    raw = effective = 0
-    for ch in s:
-        if ch == ' ':
-            raw = raw + 1
-            effective = effective + 1
-        elif ch == '\t':
-            raw = raw + 1
-            effective = (effective // tabwidth + 1) * tabwidth
-        else:
-            break
-    return raw, effective
-
-def index2line(index):
-    # copied from idlelib.EditorWindow (Python 3.4.2)
-    return int(float(index))
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
@@ -140,10 +120,6 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.tag_configure('before', background="#F8FC9A")
         self.text.tag_configure('after', background="#D7EDD3")
         self.text.tag_configure('exception', background="#FFBFD6")
-        
-        #self.current_statement_range = None
-        self.active_statement_ranges = []
-        #self.statement_tags = set()
         
         self.num_context_lines = 50, 500, 5000000 # See idlelib.EditorWindow
         self.context_use_ps1 = False
@@ -665,41 +641,6 @@ class CodeView(ttk.Frame, TextWrapper):
         #self.text.see("insert") 
     
     
-    def handle_focus_message(self, text_range, msg=None):
-        
-        if text_range is None:
-            self.clear_tags(['before', 'after', 'exception'])
-            
-        elif "statement" in msg.state or "suite" in msg.state:
-            self.clear_tags(['before', 'after', 'exception'])
-            self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
-             
-            if msg.state.startswith("before"):
-                tag = "before"
-            elif msg.state.startswith("after"):
-                tag = "after"
-            else:
-                tag = "exception"
-            
-            # TODO: duplicated in main
-            # better just skip those events
-            if (msg.state in ("before_statement", "before_statement_again")
-                or (self._workbench.get_option("debugging.detailed_steps")
-                    and msg.state in ("after_statement",
-                                      "after_suite",
-                                      "before_suite"))):
-                self.tag_range(text_range, tag, True)
-            
-            if msg.state == "before_statement":
-                self.active_statement_ranges.append(text_range)
-            elif msg.state == "after_statement":
-                # TODO: what about exception??
-                self.active_statement_ranges.pop()
-        
-        else:
-            # if expression is in focus, statement will be shown without border
-            self.text.tag_configure('before', background="#F8FC9A", borderwidth=0, relief=tk.SOLID)
-            
             
             
     
@@ -783,18 +724,6 @@ class CodeView(ttk.Frame, TextWrapper):
         return tag_name
             
     
-    def enter_execution_mode(self):
-        self.active_statement_ranges = []
-        self.read_only = True
-        self.text.configure(insertwidth=0)
-        self.text.configure(background="LightYellow")
-
-    def exit_execution_mode(self):
-        self.active_statement_ranges = []
-        self.read_only = False
-        self.text.configure(insertwidth=2)
-        self.text.configure(background="White", insertwidth=2, insertbackground="Black")
-
     def on_text_mouse_click(self, event):
         TextWrapper.on_text_mouse_click(self, event)
         self.remove_paren_highlight()
@@ -864,21 +793,6 @@ class CodeView(ttk.Frame, TextWrapper):
                 "Editing during run/debug is not allowed")
     """
     
-    def update_focus_boxes(self, boxes):
-        """
-        1) Removes boxes which are not among given boxes, creates missing boxes
-        2) Highlights last box, removes highlighting from other boxes 
-        """
-        # TODO:
-        pass
-
-    def repl_demo(self):
-        self.text.margin.config(state='normal')
-        self.text.margin.delete("1.0", "end")
-        self.text.margin.insert("1.0", ">>>")
-        self.text.margin.config(state='disabled')
-        
-        #self.text.insert("1.0", "x = 23 * (3 + 2 ^ 2) - sin(3) - 1")
     
     #handles the 'comment in' command by adding ## in front of all selected lines if any lines are selected, 
     #or just the current line otherwise
@@ -1066,3 +980,20 @@ def fixwordbreaks(root):
     tk.call('set', 'tcl_wordchars',     '[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
     tk.call('set', 'tcl_nonwordchars', '[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
 
+def classifyws(s, tabwidth):
+    # copied from idlelib.EditorWindow (Python 3.4.2)
+    raw = effective = 0
+    for ch in s:
+        if ch == ' ':
+            raw = raw + 1
+            effective = effective + 1
+        elif ch == '\t':
+            raw = raw + 1
+            effective = (effective // tabwidth + 1) * tabwidth
+        else:
+            break
+    return raw, effective
+
+def index2line(index):
+    # copied from idlelib.EditorWindow (Python 3.4.2)
+    return int(float(index))

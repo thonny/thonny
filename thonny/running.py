@@ -44,16 +44,19 @@ class Runner:
             default_sequence="<F5>",
             tester=self._cmd_run_current_script_enabled)
         
+        """
         self._workbench.add_command('debug_current_script', "run", 'Debug current script',
             handler=self._cmd_debug_current_script,
             default_sequence="<Control-F5>",
             tester=self._cmd_debug_current_script_enabled)
+        """
         
         self._workbench.add_command('reset', "run", 'Stop/Reset',
             handler=self._cmd_reset,
             default_sequence=None # TODO:
             )
         
+        """
         self._workbench.add_separator("run")
         
         self._workbench.add_command('step_over', "run", 'Step over',
@@ -67,6 +70,7 @@ class Runner:
             tester=self._cmd_step_into_enabled)
         
         """
+        """
                 "---", 
                 Command('set_auto_cd', 'Auto-cd to script dir',  None, self,
                         kind="checkbutton", variable_name="run.auto_cd"),
@@ -74,6 +78,18 @@ class Runner:
         
     def get_cwd(self):
         return self._proxy.cwd
+    
+    def request_locals(self, frame_id):
+        "TODO: "
+    
+    def request_globals(self, module_id):
+        "TODO: "
+    
+    def request_object_info(self, object_id):
+        "TODO: "
+    
+    def request_reset(self, object_id):
+        "TODO: "
     
     def get_state(self):
         return self._proxy.get_state()
@@ -217,6 +233,7 @@ class Runner:
     def _poll_vm_messages(self):
         # I chose polling instead of event_generate
         # because event_generate across threads is not reliable
+        # http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         while True:
             msg = self._proxy.fetch_next_message()
             if not msg:
