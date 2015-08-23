@@ -10,9 +10,11 @@ import threading
 
 from thonny.common import parse_message, serialize_message, ToplevelCommand, PauseMessage, \
     ActionCommand, OutputEvent, quote_path_for_shell, DebuggerResponse, \
-    DebuggerCommand, InlineCommand
+    DebuggerCommand, InlineCommand, parse_shell_command, unquote_path,\
+    CommandSyntaxError
 from thonny.shell import ShellView
 from thonny.globals import get_workbench
+import shlex
 
 
 COMMUNICATION_ENCODING = "UTF-8"
@@ -32,6 +34,11 @@ class Runner:
             visible_by_default=True,
             default_position_key='A')
         
+        self._shell = get_workbench().get_view("ShellView")
+        self._shell.add_command("Run", self._handle_magic_command_from_shell)
+        self._shell.add_command("Reset", self._handle_magic_command_from_shell)
+        self._shell.add_command("cd", self._handle_magic_command_from_shell)
+        
         self._init_commands()
         
         self._poll_vm_messages()
@@ -45,52 +52,18 @@ class Runner:
             default_sequence="<F5>",
             tester=self._cmd_run_current_script_enabled)
         
-        """
-        get_workbench().add_command('debug_current_script', "run", 'Debug current script',
-            handler=self._cmd_debug_current_script,
-            default_sequence="<Control-F5>",
-            tester=self._cmd_debug_current_script_enabled)
-        """
-        
         get_workbench().add_command('reset', "run", 'Stop/Reset',
             handler=self._cmd_reset,
             default_sequence=None # TODO:
             )
         
-        """
-        get_workbench().add_separator("run")
-        
-        get_workbench().add_command('step_over', "run", 'Step over',
-            handler=self._cmd_step_over,
-            default_sequence="<F7>",
-            tester=self._cmd_step_over_enabled)
-        
-        get_workbench().add_command('step_into', "run", 'Step into',
-            handler=self._cmd_step_into,
-            default_sequence="<F8>",
-            tester=self._cmd_step_into_enabled)
-        
-        """
-        """
-                "---", 
-                Command('set_auto_cd', 'Auto-cd to script dir',  None, self,
-                        kind="checkbutton", variable_name="run.auto_cd"),
-        """
+        get_workbench().add_command('set_auto_cd', "run", 'Auto-cd to script dir',
+            handler=lambda: get_workbench().set_option("run.auto_cd",
+                        not get_workbench().get_option("run.auto_cd")),
+            flag_name="run.auto_cd"),
         
     def get_cwd(self):
         return self._proxy.cwd
-    
-    def request_locals(self, frame_id):
-        "TODO: "
-    
-    def request_globals(self, module_id):
-        "TODO: "
-    
-    def request_object_info(self, object_id):
-        "TODO: "
-    
-    def request_reset(self, object_id):
-        "TODO: "
     
     def get_state(self):
         return self._proxy.get_state()
@@ -105,25 +78,7 @@ class Runner:
     def _cmd_run_current_script(self):
         self.execute_current("Run")
     
-    def _cmd_debug_current_script_enabled(self):
-        return self._cmd_run_current_script_enabled()
-    
-    def _cmd_debug_current_script(self):
-        self.execute_current("Debug")
-        
-    def _cmd_run_current_file_enabled(self):
-        return self._cmd_run_current_script_enabled()
-    
-    def _cmd_run_current_file(self):
-        self.execute_current("run")
-    
-    def _cmd_debug_current_file_enabled(self):
-        return self._cmd_run_current_script_enabled()
-    
-    def _cmd_debug_current_file(self):
-        self.execute_current("debug")
-    
-    def execute_current(self, cmd_name, text_range=None):
+    def execute_current(self, mode):
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
@@ -140,7 +95,7 @@ class Runner:
         # changing dir may be required
         script_dir = os.path.dirname(filename)
         
-        if (get_workbench().get_option("run.auto_cd") and cmd_name[0].isupper()
+        if (get_workbench().get_option("run.auto_cd") and mode[0].isupper()
             and self._proxy.cwd != script_dir):
             # create compound command
             # start with %cd
@@ -153,79 +108,56 @@ class Runner:
         
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(filename, next_cwd)
-        cmd_line += "%" + cmd_name + " " + quote_path_for_shell(rel_filename) + "\n"
-        if text_range is not None:
-            "TODO: append range indicators" 
+        cmd_line += "%" + mode + " " + quote_path_for_shell(rel_filename) + "\n"
         
         # submit to shell (shell will execute it)
-        get_workbench().get_view("ShellView").submit_magic_command(cmd_line)
+        get_workbench().get_view("ShellView").submit_command(cmd_line)
         
-        self.step_over = False
-    
+
+    def _handle_magic_command_from_shell(self, cmd_line):
+        command, arg_str = parse_shell_command(cmd_line)
+        assert command in ["Run", "Reset", "cd"] 
+
+        args = shlex.split(arg_str.strip(), posix=False)
+        
+        if command == "Reset":
+            # TODO: check that args is empty
+            if len(args) == 0:
+                self.send_command(ToplevelCommand(command="Reset"))
+            else:
+                raise CommandSyntaxError("Command 'Reset' doesn't take arguments")
+                
+        elif command == "cd":
+            if len(args) == 1:
+                self.send_command(ToplevelCommand(command="cd", path=unquote_path(args[0])))
+            elif len(args) > 1:
+                # extra flexibility for those who forgot the quotes
+                self.send_command(ToplevelCommand(command="cd", 
+                                       path=unquote_path(arg_str)))
+            else:
+                raise CommandSyntaxError("Directory missing in '{0}'".format(cmd_line))
+                
+                
+        elif command == "Run":
+            if len(args) >= 1:
+                get_workbench().get_editor_notebook().save_all_named_editors()
+                
+                self.send_command(ToplevelCommand(command=command,
+                                   filename=unquote_path(args[0]),
+                                   args=args[1:],
+                                   id=self._shell.get_last_command_id()))
+            else:
+                raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
+
     
     def _cmd_reset(self):
-        self._proxy.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
+        self._shell.submit_command("%Reset\n")
     
-    def _cmd_step_into_enabled(self):
-        #self._check_issue_goto_before_or_after()
-        msg = self._proxy.get_state_message()
-        # always enabled during debugging
-        return (isinstance(msg, DebuggerResponse)) 
-    
-    def _cmd_step_into(self, automatic=False):
-        if not automatic:
-            self.step_over = False
-        self._check_issue_debugger_command(DebuggerCommand(command="step"))
-    
-    def _cmd_step_over_enabled(self):
-        return self._cmd_step_enabled()
-        #self._check_issue_goto_before_or_after()
-        #msg = self._proxy.get_state_message()
-        #return (isinstance(msg, DebuggerResponse) 
-        #        and msg.state in ("before_expression", "before_expression_again",
-        #                          "before_statement", "before_statement_again")) 
-    
-    def _cmd_step_over(self):
-        self.step_over = True
-        self._cmd_step(True)
 
-    def _check_issue_debugger_command(self, cmd, automatic=False):
-        if isinstance(self._proxy.get_state_message(), DebuggerResponse):
-            self._issue_debugger_command(cmd, automatic)
-            # TODO: notify memory panes and editors? Make them inactive?
-    
-    def _issue_debugger_command(self, cmd, automatic=False):
-        debug("_issue", cmd, automatic)
-        
-        last_response = self._proxy.get_state_message()
-        # tell VM the state we are seeing
-        cmd.setdefault (
-            frame_id=last_response.frame_id,
-            state=last_response.state,
-            focus=last_response.focus
-        )
-        
-        if not automatic:
-            self.last_manual_debugger_command_sent = cmd    # TODO: hack
-        self._proxy.send_command(cmd)
-        # TODO: notify memory panes and editors? Make them inactive?
             
     def _cmd_set_auto_cd(self):
         print(self._auto_cd.get())
         
-    def stop_debugging(self):
-        self.editor_notebook.stop_debugging()
-        self._shell.stop_debugging()
-        self.globals_frame.stop_debugging()
-        self.builtins_frame.stop_debugging()
-        self.heap_frame.stop_debugging()
-        self._proxy.reset()
-    
-    def start_debugging(self, filename=None):
-        self.editor_notebook.start_debugging(self._proxy, filename)
-        self._shell.start_debugging(self._proxy, filename)
-        self._proxy.start()
-    
     def _advance_background_tk_mainloop(self):
         if self._proxy.get_state() == "toplevel":
             self._proxy.send_command(InlineCommand(command="tkupdate"))
@@ -257,8 +189,6 @@ class Runner:
             get_workbench().event_generate("BackendMessage", message=msg)
             get_workbench().set_option("run.working_directory", self._proxy.cwd, save_now=False)
             
-            self._update_title()
-            
             # automatically advance from some events
             # TODO:
             """
@@ -273,36 +203,6 @@ class Runner:
             
         get_workbench().after(50, self._poll_vm_messages)
     
-    def _update_title(self):
-        get_workbench().title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self.get_cwd(), *sys.version_info))
-        
-    def continue_with_step_over(self, cmd, msg):
-        if not self.step_over:
-            print("Not step_over")
-            return False
-        
-        if not isinstance(msg, DebuggerResponse):
-            return False
-        
-        if cmd is None:
-            return False
-        
-        if msg.state not in ("before_statement", "before_expression", "after_expression"):
-            # TODO: hack, may want after_statement
-            return True
-        
-        if msg.frame_id != cmd.frame_id:
-            return True
-        
-        if msg.focus.is_smaller_in(cmd.focus):
-            print("smaller")
-            return True
-        else:
-            print("outside")
-            return False
-        
-    
-    
 
 class _BackendProxy:
     def __init__(self, default_cwd, main_dir):
@@ -316,7 +216,7 @@ class _BackendProxy:
         self.thonny_dir = main_dir
         self._proc = None
         self._state_lock = threading.RLock()
-        self.send_command(ToplevelCommand(command="Reset", globals_required="__main__"))
+        self.send_command(ToplevelCommand(command="Reset"))
         
         _CURRENT_VM = self
         

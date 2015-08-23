@@ -18,7 +18,7 @@ If not, see <http://www.gnu.org/licenses/>.
 from distutils.version import StrictVersion
 import gettext
 import importlib
-from logging import exception, info
+from logging import exception, info, warning
 import os.path
 import sys
 from tkinter import ttk
@@ -65,6 +65,7 @@ class Workbench(tk.Tk):
     def __init__(self, main_dir):
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self._on_tk_exception
+        self._event_handlers = {}
         
         thonny.globals.register_workbench(self)
         
@@ -76,9 +77,9 @@ class Workbench(tk.Tk):
         self._init_window()
         self._init_menu()
         
-        self.title("Thonny") # will be updated by Runner
+        self.title("Thonny")
+        self.bind("BackendMessage", self._update_title, True)
         
-        self._event_handlers = {}
         self._init_containers()
         self._runner = Runner()
         self._init_commands()
@@ -550,6 +551,10 @@ class Workbench(tk.Tk):
     def bind(self, sequence, func, add=None):
         """Uses custom event handling when sequence doesn't start with <.
         Otherwise forwards the call to Tk's bind"""
+        
+        if not add:
+            warning("Workbench.bind({}, ..., add={}) -- did you really want to replace existing bindings?".format(sequence, add))
+        
         if sequence.startswith("<"):
             tk.Tk.bind(self, sequence, func, add)
         else:
@@ -625,7 +630,6 @@ class Workbench(tk.Tk):
 
     
     def _on_close(self):
-        """ TODO:
         if not self._editor_notebook.check_allow_closing():
             return
         
@@ -634,9 +638,10 @@ class Workbench(tk.Tk):
             #self.user_logger.save()
             #ui_utils.delete_images()
         except:
+            exception("Error on close")
             tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
                                 traceback.format_exc())
-        """
+
         self.destroy()
         
     def _on_tk_exception(self, exc, val, tb):
@@ -660,6 +665,7 @@ class Workbench(tk.Tk):
         self.set_option("layout.zoomed", ui_utils.get_zoomed(self), False)
         
         def save_width(widget, name):
+            #TODO:
             assert (isinstance(widget, AutomaticPanedWindow)
                 or isinstance(widget, AutomaticNotebook))
             
@@ -669,11 +675,10 @@ class Workbench(tk.Tk):
                 
         if self._west_pw.winfo_ismapped():
             self.set_option("layout.west_width", self._west_pw.winfo_width(), False)
+        if self._center_pw.winfo_ismapped():
+            self.set_option("layout.center_width", self._center_pw.winfo_width(), False)
         if self._west_pw.winfo_ismapped():
             self.set_option("layout.east_width", self._west_pw.winfo_width(), False)
-        
-        if self._east_pw.winfo_ismapped():
-            self.set_option("layout.memory_width", self.eas_pw.winfo_width(), False)
             # TODO: heigths
         
         if not ui_utils.get_zoomed(self):
@@ -682,17 +687,10 @@ class Workbench(tk.Tk):
             self.set_option("layout.width", self.winfo_width(), False)
             self.set_option("layout.height", self.winfo_height(), False)
         
-        center_width = self.center_pw.winfo_width()
-        if center_width > 1:
-            self.set_option("layout.center_width", center_width, False)
-        
-        if self.right_pw.winfo_ismapped():
-            self.set_option("layout.memory_width", self.right_pw.winfo_width(), False)
-        
-        if self.w_book.winfo_ismapped():
-            self.set_option("layout.browser_width", self.w_book.winfo_width(), False)
-            
         self._configuration_manager.save()
+        
+    def _update_title(self, event):
+        self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._runner.get_cwd(), *sys.version_info))
     
 class WorkbenchEvent(Record):
     def __init__(self, sequence, **kw):

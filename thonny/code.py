@@ -73,7 +73,7 @@ class Editor(ttk.Frame):
     
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
-            self._cmd_save_file()
+            self.save_file()
             
         return self._filename
             
@@ -169,7 +169,7 @@ class EditorNotebook(ttk.Notebook):
             if os.path.exists(filename):
                 self._open_file(filename)
         """
-        self._cmd_new_file()
+        self._load_startup_files()
     
     def _list_recent_files(self):
         get_workbench().add_defaults({"file.recent_files" : []})
@@ -180,7 +180,15 @@ class EditorNotebook(ttk.Notebook):
     def _init_commands(self):    
         # TODO: do these commands have to be in EditorNotebook ??
         # Create a module level function install_editor_notebook ??
-        # Maybe add them separately, when notebook has been installed ??     
+        # Maybe add them separately, when notebook has been installed ??
+        
+        get_workbench().add_defaults({"file.reopen_files" : False})
+        
+        get_workbench().add_command("file.reopen_files", "file", "Automatically open files from last session",
+            lambda: get_workbench().set_option("file.reopen_files", 
+                    not get_workbench().get_option("file.reopen_files")),
+            flag_name = "file.reopen_files") # TODO: reduce boilerplate
+             
         get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,
             default_sequence="<Control-n>")
@@ -216,22 +224,36 @@ class EditorNotebook(ttk.Notebook):
             default_sequence="<Control-Key-4>",
             tester=None) # TODO:
 
-        
-    def load_startup_files(self):
+        get_workbench()
+    
+    
+    def _load_startup_files(self):
         
         filenames = sys.argv[1:]
+        
+        if len(filenames) == 0 and get_workbench().get_option("file.reopen_files"):
+            filenames = get_workbench().get_option("file.open_files")
+            
         for filename in filenames:
             if os.path.exists(filename):
                 self.show_file(filename)
         
         if len(filenames) == 0:
             self._cmd_new_file()
+        
+        self._remember_open_files()
     
-    def save_all(self):
+    def save_all_named_editors(self):
         for editor in self.winfo_children():
             if editor.get_filename():
-                editor._cmd_save_file()
+                editor.save_file()
+    
+    def _remember_open_files(self):
+        open_files = [editor.get_filename() 
+                      for editor in self.winfo_children() 
+                      if editor.get_filename()]
         
+        get_workbench().set_option("file.open_files", open_files)
     
     def _cmd_new_file(self):
         new_editor = Editor(self)
@@ -248,6 +270,7 @@ class EditorNotebook(ttk.Notebook):
         if filename != "":
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
+            self._remember_open_files()
     
     def _cmd_close_file(self):
         # TODO: ask in case file is modified
@@ -256,10 +279,13 @@ class EditorNotebook(ttk.Notebook):
             self.forget(current_editor)
             current_editor.destroy()
             self._on_tab_changed(None)
+            self._remember_open_files()
     
     def _cmd_save_file(self):
         if self.get_current_editor():
             self.get_current_editor().save_file()
+        
+        self._remember_open_files()
     
     def _cmd_save_file_enabled(self):
         return (self.get_current_editor() 
@@ -268,6 +294,8 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_save_file_as(self):
         if self.get_current_editor():
             self.get_current_editor().save_file()
+            
+        self._remember_open_files()
     
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None

@@ -2,7 +2,8 @@
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerResponse, DebuggerCommand, ToplevelResponse
+from thonny.common import DebuggerResponse, DebuggerCommand, ToplevelResponse,\
+    parse_shell_command, ToplevelCommand, unquote_path, CommandSyntaxError
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
@@ -11,6 +12,7 @@ import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
 from thonny.globals import get_workbench
+import shlex
  
 class Debugger:
     
@@ -29,16 +31,65 @@ class Debugger:
         
         self._main_frame_visualizer = None
         
-        get_workbench().bind("DebuggerProgress", self._update_frames)
+        self._runner = get_workbench().get_runner()
+        
+        get_workbench().bind("DebuggerProgress", self._update_frames, True)
+        get_workbench().get_view("ShellView").add_command("Debug", self._handle_command_from_shell)
     
     def _cmd_debug_current_script(self):
         get_workbench().get_runner().execute_current("Debug")
 
+
+    def _check_issue_debugger_command(self, cmd, automatic=False):
+        #if isinstance(self._proxy.get_state_message(), DebuggerResponse):
+            self._issue_debugger_command(cmd, automatic)
+            # TODO: notify memory panes and editors? Make them inactive?
+    
+    def _issue_debugger_command(self, cmd, automatic=False):
+        debug("_issue", cmd, automatic)
+        
+        last_response = self._proxy.get_state_message()
+        # tell VM the state we are seeing
+        cmd.setdefault (
+            frame_id=last_response.frame_id,
+            state=last_response.state,
+            focus=last_response.focus
+        )
+        
+        self._runner.send_command(cmd)
+
+
+    def _cmd_step_into_enabled(self):
+        #self._check_issue_goto_before_or_after()
+        msg = self._proxy.get_state_message()
+        # always enabled during debugging
+        return (isinstance(msg, DebuggerResponse)) 
+    
     def _cmd_step_into(self):
-        get_workbench().get_runner().send_command(DebuggerCommand("step_into"))
+        self._check_issue_debugger_command(DebuggerCommand("step_into"))
+    
+    def _cmd_step_over_enabled(self):
+        return self._cmd_step_into_enabled()
     
     def _cmd_step_over(self):
-        get_workbench().get_runner().send_command(DebuggerCommand("step_over"))
+        self._check_issue_debugger_command(DebuggerCommand("step_over"))
+
+    def _handle_command_from_shell(self, cmd_line):
+        raise CommandSyntaxError("blaa")
+        
+        command, arg_str = parse_shell_command(cmd_line)
+        assert command == "Debug" 
+        args = shlex.split(arg_str.strip(), posix=False)
+        
+        if len(args) >= 1:
+            get_workbench().get_editor_notebook().save_all_named_editors()
+            
+            self.send_command(ToplevelCommand(command=command,
+                               filename=unquote_path(args[0]),
+                               args=args[1:],
+                               id=self._shell.get_last_command_id()))
+        else:
+            raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
 
     def _is_debugging(self):
         return self._main_frame_visualizer != None
@@ -498,7 +549,7 @@ class ModuleLoadDialog(FrameDialog):
     
     
     
-def _load_plugin():
+def load_plugin():
     Debugger()
     
         

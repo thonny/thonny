@@ -188,42 +188,20 @@ class OutputEvent(Record):
 class CommandSyntaxError(Exception):
     pass
 
+def parse_shell_command(cmd_line):
+    assert cmd_line.startswith("%")
+    
+    parts = cmd_line.split(maxsplit=1)
+    return parts[0][1:], parts[1] if len(parts) == 2 else ""
+
+
+
 def serialize_message(msg):
     return repr(msg)
 
 def parse_message(msg_string):
     return eval(msg_string)
 
-
-def parse_shell_command(cmd_line):
-    if cmd_line.startswith("%"):
-        parts = shlex.split(cmd_line.strip(), posix=False)
-        
-        command = parts[0][1:]
-        
-        if command == "Reset":
-            assert len(parts) == 1
-            return ToplevelCommand(command="Reset")
-        elif command == "cd":
-            if len(parts) == 2:
-                return ToplevelCommand(command="cd", path=unquote_path(parts[1]))
-            elif len(parts) > 2:
-                # extra flexibility for those who forget the quotes
-                return ToplevelCommand(command="cd", 
-                                       path=unquote_path(cmd_line.split(maxsplit=1)[1]))
-        elif command.lower() in ("run", "debug"):
-            if len(parts) > 2:
-                raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
-            return ToplevelCommand(command=command,
-                                   filename=unquote_path(parts[1]),
-                                   args=parts[2:])
-        else:
-            raise AssertionError("Unknown magic command: " + command)
-        
-    elif len(cmd_line.strip()) == 0:
-        return ToplevelCommand(command="pass")
-    else:
-        return ToplevelCommand(command="python", cmd_line=cmd_line)
 
 
 def quote_path_for_shell(path):

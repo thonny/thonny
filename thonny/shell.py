@@ -6,7 +6,8 @@ from tkinter import ttk
 import traceback
 
 from thonny import memory
-from thonny.common import InputRequest, ToplevelResponse, OutputEvent, parse_shell_command
+from thonny.common import InputRequest, ToplevelResponse, OutputEvent, ToplevelCommand,\
+    parse_shell_command
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import TextWrapper
 import tkinter as tk
@@ -115,9 +116,11 @@ class ShellView (ttk.Frame, TextWrapper):
         
         
         self.active_object_tags = set()
+        
+        self._command_handlers = {}
     
         get_workbench().bind("BackendMessage", 
-            lambda e: self._handle_vm_message(e.message))
+            lambda e: self._handle_vm_message(e.message), True)
         
 
         
@@ -180,13 +183,6 @@ class ShellView (ttk.Frame, TextWrapper):
             self._try_submit_input()
             self.text.see("end")
             
-            # TODO: show cwd if it has changed
-            """
-            if hasattr(msg, "event") and msg.event == "reset":
-                # make current dir visible (again)
-                self.submit_magic_command("%cd " + get_workbench().get_runner().get_cwd() + "\n")
-            """
-            
         else:
             pass
     
@@ -209,7 +205,11 @@ class ShellView (ttk.Frame, TextWrapper):
         self.text.edit_reset();
     
     
-    def submit_magic_command(self, cmd_line):
+    
+    def add_command(self, command, handler):
+        self._command_handlers[command] = handler
+        
+    def submit_command(self, cmd_line):
         assert self._get_state() == "toplevel"
         self.text.delete("input_start", "end")
         self.text.insert("input_start", cmd_line, ("automagic",))
@@ -367,39 +367,31 @@ class ShellView (ttk.Frame, TextWrapper):
                 raise AssertionError("only readline is supported at the moment")
             
     
-                
+    def get_last_command_id(self):
+        return self._command_count
     
     def _submit_input(self, text_to_be_submitted):
         if self._get_state() == "toplevel":
+            # register in history and count
+            self._command_count += 1
+            if text_to_be_submitted in self._command_history:
+                self._command_history.remove(text_to_be_submitted)
+            self._command_history.append(text_to_be_submitted)
+            self._command_history_current_index = None # meaning command selection is not in process
+            
             try:
-                # if it's a file/script-related command, then editor_notebook wants to 
-                # know about it first
-                cmd = parse_shell_command(text_to_be_submitted)
-                """ TODO: ???
-                if cmd.command.lower() in ("run", "debug"):
-                    if os.path.isabs(cmd.filename):
-                        abs_filename = cmd.filename
+                if text_to_be_submitted.startswith("%"):
+                    command, _ = parse_shell_command(text_to_be_submitted)
+                    if command in self._command_handlers:
+                        self._command_handlers[command](text_to_be_submitted)
                     else:
-                        abs_filename = os.path.join(self._worbench.get_runner().get_cwd(), cmd.filename)
-                    self._editor_book.enter_execution_mode(abs_filename)
-                """
-                    
-                # register in history and count
-                print("cmd:", cmd)
-                if hasattr(cmd, "cmd_line"):
-                    cmd.id = self._command_count
-                    self._command_count += 1
-                    if cmd.cmd_line in self._command_history:
-                        self._command_history.remove(cmd.cmd_line)
-                    self._command_history.append(cmd.cmd_line)
-                    self._command_history_current_index = None # meaning command selection is not in process
-                
-                cmd.globals_required = "__main__" # TODO: look what's selected
-          
-                if cmd.command[0].isupper(): # this means reset
-                    self._invalidate_current_data()
-                    
-                get_workbench().get_runner().send_command(cmd)
+                        self._insert_text_directly("Unknown magic command: " + command)
+                        self._insert_prompt()
+                else:
+                    get_workbench().get_runner().send_command(
+                        ToplevelCommand(command="python",
+                                        cmd_line=text_to_be_submitted,
+                                        id=self.get_last_command_id()))
                 
             except:
                 #raise # TODO:
