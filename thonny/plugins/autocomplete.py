@@ -3,6 +3,7 @@
 from tkinter import Text, Toplevel
 from idlelib.WidgetRedirector import WidgetRedirector
 import jedi
+from thonny.globals import get_workbench
 
 
 
@@ -16,9 +17,9 @@ import jedi
 #if 0 suggestions are found, does nothing
 #if 1 suggestion is found, inserts it into the text
 #if 2+ suggestions are found, creates a vertical list of suggestions where the user can choose
-def autocomplete(codeview, workbench, row, column):
+def autocomplete(codeview, row, column):
     try: #everything in a try block - if something goes wrong, we don't want the program to crash
-        workbench.event_generate("AutocompleteQuery",
+        get_workbench().event_generate("AutocompleteQuery",
             editor=codeview.master,
             row=row,
             column=column)
@@ -30,10 +31,10 @@ def autocomplete(codeview, workbench, row, column):
             return
 
         elif len(completions) == 1:
-            _complete(codeview, workbench, completions[0]) #insert the only completion
+            _complete(codeview, completions[0]) #insert the only completion
 
         else:
-            AutocompleteWindow(codeview, workbench, completions) #create the window
+            AutocompleteWindow(codeview, completions) #create the window
     except:
         return
 
@@ -41,8 +42,8 @@ def _get_partial_string(completion): #calculates the partial string such as it w
     return completion.name[:-len(completion.complete)]
 
 #inserts the chosen completion into the current position in the codeview
-def _complete(codeview, workbench, completion):
-    workbench.event_generate("AutocompleteFinished",
+def _complete(codeview, completion):
+    get_workbench().event_generate("AutocompleteFinished",
         partial_string=_get_partial_string(completion),
         chosen_completion=completion.name)
     codeview._user_text_insert(codeview.text.index('insert'), completion.complete)
@@ -50,11 +51,11 @@ def _complete(codeview, workbench, completion):
 #top-level container of the vertical list of suggestions
 # TODO: do we need the toplevel?
 class AutocompleteWindow(Toplevel): 
-    def __init__(self, master, workbench, completions):
+    def __init__(self, master, completions):
         Toplevel.__init__(self, background='red') #TODO - background configurable
 
         #create and place the text windget
-        self.text = AutocompleteWindowText(self, master, workbench, completions)
+        self.text = AutocompleteWindowText(self, master, completions)
         self.text.grid(row=0, column=0)
 
         #calculate and apply the position of the window
@@ -73,8 +74,8 @@ class AutocompleteWindow(Toplevel):
 
 #inner container showing the list of suggestions
 class AutocompleteWindowText(Text):
-    def __init__(self, master, codeview, workbench, content, *args, **kwargs):
-        self._workbench = workbench
+    def __init__(self, master, codeview, content, *args, **kwargs):
+        
         #init the text widget - note the height calculation, #TODO - make the height configurable?
         Text.__init__(self, master, height=min(len(content), 10), width=30, takefocus=1, insertontime=0, background='#ececea', borderwidth=1, wrap='none', *args, **kwargs)
 
@@ -174,30 +175,30 @@ class AutocompleteWindowText(Text):
     #finalize choosing the suggestions - insert it into codeview and close window
     def _choose_completion(self):
         completion = self.content[self.marked_line-1]
-        _complete(self.codeview, self._workbench, completion)
+        _complete(self.codeview, completion)
         self._ok(cancel=False)
         
     #unregister global bindings, destroy both inner and top-level widgets
     def _ok(self, event=None, cancel=True):
         if cancel:
-            self._workbench.event_generate("AutocompleteCanceled", editor=self.codeview.master)
+            get_workbench().event_generate("AutocompleteCanceled", editor=self.codeview.master)
         self.parent.unbind_all("<Button-1>")
         self.parent.destroy()
         self.destroy()
 
-def load_plugin(workbench):
+def load_plugin():
     def cmd_autocomplete():
         # TODO: enable autocomplete also in shell
-        editor = workbench.get_editor_notebook().get_current_editor()
+        editor = get_workbench().get_editor_notebook().get_current_editor()
         if editor:
             text = editor._code_view.text
             index = text.index('insert')
             delim = index.index('.')
             row = int(index[0:delim])
             column = int(index[delim+1:])
-            autocomplete(editor._code_view, workbench, row, column)
+            autocomplete(editor._code_view, row, column)
     
-    workbench.add_command("autocomplete", "edit", "Auto-complete",
+    get_workbench().add_command("autocomplete", "edit", "Auto-complete",
         cmd_autocomplete,
         default_sequence="<Control-space>"
         # TODO: tester

@@ -5,6 +5,7 @@ from tkinter import ttk
 import tkinter.font as font
 
 from thonny import misc_utils
+from thonny.globals import get_workbench
 
 #TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
 #TODO - logging
@@ -14,9 +15,9 @@ from thonny import misc_utils
 # Handles the find dialog display and the logic of searching.
 #Communicates with the codeview that is passed to the constructor as a parameter.
 class FindDialog(tk.Toplevel): 
-    def __init__(self, master, workbench):
+    def __init__(self, master):
         tk.Toplevel.__init__(self, master, borderwidth=15, takefocus=1)
-        self._workbench = workbench
+        
         self.codeview = master; 
         self._init_found_tag_styles();  #sets up the styles used to highlight found strings
         #references to the current set of passive found tags e.g. all words that match the searched term but are not the active string
@@ -164,7 +165,7 @@ class FindDialog(tk.Toplevel):
         #mark the inserted word boundaries 
         self.last_processed_indexes = (del_start, self.codeview.text.index("%s+%dc" % (del_start, len(toreplace))))
 
-        self._workbench.event_generate("Replace",
+        get_workbench().event_generate("Replace",
             widget=self.codeview.text,
             old_text=self.codeview.text.get(del_start, del_end),
             new_text=toreplace)
@@ -205,7 +206,7 @@ class FindDialog(tk.Toplevel):
                 
             currentpos = self.codeview.text.index("%s+%dc" % (currentpos, len(toreplace)))
 
-        self._workbench.event_generate("ReplaceAll",
+        get_workbench().event_generate("ReplaceAll",
             widget=self.codeview.text,
             old_text=tofind,
             new_text=toreplace)
@@ -257,7 +258,7 @@ class FindDialog(tk.Toplevel):
         self.replace_and_find_button.config(state='normal')
         self.replace_button.config(state='normal')
 
-        self._workbench.event_generate("Find",
+        get_workbench().event_generate("Find",
             widget=self.codeview.text,
             text=tofind,
             backwards=search_backwards,
@@ -309,13 +310,13 @@ class FindDialog(tk.Toplevel):
         self.codeview.text.tag_configure("currentfound", foreground="white", background="red")  #TODO - style
 
 
-def load_plugin(workbench):
+def load_plugin():
     def cmd_open_find_dialog():
-        editor = workbench.get_editor_notebook().get_current_editor()
+        editor = get_workbench().get_editor_notebook().get_current_editor()
         if editor:
-            FindDialog(editor._code_view, workbench)
+            FindDialog(editor._code_view)
          
-    workbench.add_command("OpenFindDialog", "edit", 'Find & Replace',
+    get_workbench().add_command("OpenFindDialog", "edit", 'Find & Replace',
         cmd_open_find_dialog,
         default_sequence="<Control-f>")
     

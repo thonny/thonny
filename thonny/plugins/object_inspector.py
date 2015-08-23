@@ -10,12 +10,13 @@ from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text,\
     TextFrame
 from thonny.common import ActionResponse, InlineCommand
 import ast
+from thonny.globals import get_workbench
 
 
 
 class AttributesFrame(VariablesFrame):
-    def __init__(self, master, workbench):
-        VariablesFrame.__init__(self, master, workbench)
+    def __init__(self, master):
+        VariablesFrame.__init__(self, master)
         self.configure(border=1)
         self.vert_scrollbar.grid_remove()
        
@@ -31,13 +32,13 @@ class AttributesFrame(VariablesFrame):
     
 
 class ObjectInspector(ScrollableFrame):
-    def __init__(self, master, workbench):
+    def __init__(self, master):
         
         ScrollableFrame.__init__(self, master)
-        self._workbench = workbench
+        
         self.object_id = None
         self.object_info = None
-        self._workbench.bind("ObjectSelect", self.show_object)
+        get_workbench().bind("ObjectSelect", self.show_object)
         
         self.grid_frame = tk.Frame(self.interior, bg=CALM_WHITE) 
         self.grid_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=(10,0), pady=15)
@@ -70,7 +71,7 @@ class ObjectInspector(ScrollableFrame):
         self.type_entry.bind("<Button-1>", self.goto_type)
         
         self._add_block_label(5, "Attributes")
-        self.attributes_frame = AttributesFrame(self.grid_frame, self._workbench)
+        self.attributes_frame = AttributesFrame(self.grid_frame)
         self.attributes_frame.grid(row=6, column=0, columnspan=4, sticky=tk.NSEW, padx=(0,10))
         
         self.grid_frame.grid_remove()
@@ -85,11 +86,11 @@ class ObjectInspector(ScrollableFrame):
         self.current_type_specific_inspector = None
         self.current_type_specific_label = None
         self.type_specific_inspectors = [ 
-            FileHandleInspector(self.grid_frame, self._workbench),
-            FunctionInspector(self.grid_frame, self._workbench),
-            StringInspector(self.grid_frame, self._workbench),
-            ElementsInspector(self.grid_frame, self._workbench),
-            DictInspector(self.grid_frame, self._workbench),
+            FileHandleInspector(self.grid_frame),
+            FunctionInspector(self.grid_frame),
+            StringInspector(self.grid_frame),
+            ElementsInspector(self.grid_frame),
+            DictInspector(self.grid_frame),
         ]
 
     
@@ -149,7 +150,7 @@ class ObjectInspector(ScrollableFrame):
                 
                 
     def request_object_info(self): 
-        self._workbench.get_runner().send_command(InlineCommand(command="get_object_info",
+        get_workbench().get_runner().send_command(InlineCommand(command="get_object_info",
                                             object_id=self.object_id,
                                             all_attributes=False)) 
                     
@@ -213,7 +214,7 @@ class ObjectInspector(ScrollableFrame):
     
     def goto_type(self, event):
         if self.object_info is not None:
-            self._workbench("ObjectSelect", object_id=self.object_info["type_id"])
+            get_workbench()("ObjectSelect", object_id=self.object_info["type_id"])
     
     
     
@@ -224,8 +225,9 @@ class ObjectInspector(ScrollableFrame):
             
 
 class TypeSpecificInspector:
-    def __init__(self, master, workbench):
-        self._workbench = workbench
+    def __init__(self, master):
+        pass
+    
     def set_object_info(self, object_info, label):
         pass
     
@@ -234,8 +236,8 @@ class TypeSpecificInspector:
     
 class FileHandleInspector(TextFrame, TypeSpecificInspector):
     
-    def __init__(self, master, workbench):
-        TypeSpecificInspector.__init__(self, master, workbench)
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
         TextFrame.__init__(self, master, readonly=True)
         self.cache = {} # stores file contents for handle id-s
         self.config(borderwidth=1)
@@ -282,8 +284,8 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
             
 class FunctionInspector(TextFrame, TypeSpecificInspector):
     
-    def __init__(self, master, workbench):
-        TypeSpecificInspector.__init__(self, master, workbench)
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
         TextFrame.__init__(self, master, readonly=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
@@ -300,8 +302,8 @@ class FunctionInspector(TextFrame, TypeSpecificInspector):
             
 class StringInspector(TextFrame, TypeSpecificInspector):
     
-    def __init__(self, master, workbench):
-        TypeSpecificInspector.__init__(self, master, workbench)
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
         TextFrame.__init__(self, master, readonly=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
@@ -324,11 +326,11 @@ class StringInspector(TextFrame, TypeSpecificInspector):
         
 
 class ElementsInspector(MemoryFrame, TypeSpecificInspector):
-    def __init__(self, master, workbench):
-        TypeSpecificInspector.__init__(self, master, workbench)
-        MemoryFrame.__init__(self, master, workbench, ('index', 'id', 'value'))
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
+        MemoryFrame.__init__(self, master, ('index', 'id', 'value'))
         self.configure(border=1)
-        self._workbench = workbench
+        
         #self.vert_scrollbar.grid_remove()
         self.tree.column('index', width=40, anchor=tk.W, stretch=False)
         self.tree.column('id', width=750, anchor=tk.W, stretch=True)
@@ -341,15 +343,15 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
         self.elements_have_indices = None
         self.update_memory_model()
 
-        self._workbench.bind("ShowView", self.update_memory_model, True)
-        self._workbench.bind("HideView", self.update_memory_model, True)
+        get_workbench().bind("ShowView", self.update_memory_model, True)
+        get_workbench().bind("HideView", self.update_memory_model, True)
         
         
     def update_memory_model(self, event=None):
         self._update_columns()
         
     def _update_columns(self):
-        if self._workbench.in_heap_mode():
+        if get_workbench().in_heap_mode():
             if self.elements_have_indices:
                 self.tree.configure(displaycolumns=("index", "id"))
             else:
@@ -399,9 +401,9 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
         
 
 class DictInspector(MemoryFrame, TypeSpecificInspector):
-    def __init__(self, master, workbench):
-        TypeSpecificInspector.__init__(self, master, workbench)
-        MemoryFrame.__init__(self, master, workbench, ('key_id', 'id', 'key', 'value'))
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
+        MemoryFrame.__init__(self, master, ('key_id', 'id', 'key', 'value'))
         self.configure(border=1)
         #self.vert_scrollbar.grid_remove()
         self.tree.column('key_id', width=100, anchor=tk.W, stretch=False)
@@ -417,7 +419,7 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         self.update_memory_model()
         
     def update_memory_model(self, event=None):
-        if self._workbench.in_heap_mode():
+        if get_workbench().in_heap_mode():
             self.tree.configure(displaycolumns=("key_id", "id"))
         else:
             self.tree.configure(displaycolumns=("key", "value"))
@@ -453,5 +455,5 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         
         self.update_memory_model()
 
-def load_plugin(workbench):
-    workbench.add_view(ObjectInspector, "Object inspector", "se")
+def load_plugin():
+    get_workbench().add_view(ObjectInspector, "Object inspector", "se")

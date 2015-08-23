@@ -6,10 +6,11 @@ from thonny.memory import MemoryFrame, format_object_id, MAX_REPR_LENGTH_IN_GRID
     parse_object_id
 from thonny.misc_utils import shorten_repr
 from thonny.common import ActionResponse
+from thonny.globals import get_workbench
 
 class HeapView(MemoryFrame):
-    def __init__(self, master, workbench):
-        MemoryFrame.__init__(self, master, workbench, ("id", "value"))
+    def __init__(self, master):
+        MemoryFrame.__init__(self, master, ("id", "value"))
         
         self.tree.column('id', width=100, anchor=tk.W, stretch=False)
         self.tree.column('value', width=150, anchor=tk.W, stretch=True)
@@ -29,7 +30,7 @@ class HeapView(MemoryFrame):
         iid = self.tree.focus()
         if iid != '':
             object_id = parse_object_id(self.tree.item(iid)['values'][0])
-            self._workbench.event_generate("ObjectSelect", object_id=object_id)
+            get_workbench().event_generate("ObjectSelect", object_id=object_id)
             
     def handle_vm_message(self, msg):
         if self.winfo_ismapped():
@@ -41,5 +42,5 @@ class HeapView(MemoryFrame):
                 vm_proxy.send_command(InlineCommand(command="get_heap"))
                 """
                 
-def load_plugin(workbench):
-    workbench.add_view(HeapView, "Heap", "e")
+def load_plugin():
+    get_workbench().add_view(HeapView, "Heap", "e")

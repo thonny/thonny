@@ -8,8 +8,9 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
-from thonny import misc_utils, workbench
+from thonny import misc_utils
 from thonny.misc_utils import running_on_mac_os
+from thonny.globals import get_workbench
 
 class AboutDialog(tk.Toplevel):
     def __init__(self, master, version):
@@ -95,10 +96,10 @@ class AboutDialog(tk.Toplevel):
             return ""
 
 
-def load_plugin(workbench):
-    workbench.add_command("about", 
+def load_plugin():
+    get_workbench().add_command("about", 
         "Thonny" if running_on_mac_os() else "help",
         "About Thonny",
-        lambda: AboutDialog(workbench, workbench.get_version()))
+        lambda: AboutDialog(get_workbench().get_version()))
 
     

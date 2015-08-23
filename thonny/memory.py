@@ -5,6 +5,7 @@ import tkinter.font as tk_font
 
 from thonny.ui_utils import TreeFrame
 from thonny.misc_utils import shorten_repr
+from thonny.globals import get_workbench
 
 MAX_REPR_LENGTH_IN_GRID = 100
 
@@ -16,9 +17,9 @@ def parse_object_id(object_id_repr):
     return int(object_id_repr, base=16)
 
 class MemoryFrame(TreeFrame):
-    def __init__(self, master, workbench, columns):
+    def __init__(self, master, columns):
         TreeFrame.__init__(self, master, columns)
-        self._workbench = workbench
+        
         font = tk_font.nametofont("TkDefaultFont").copy()
         font.configure(underline=True)
         self.tree.tag_configure("hovered", font=font)
@@ -31,13 +32,13 @@ class MemoryFrame(TreeFrame):
         if iid != '':
             # NB! Assuming id is second column!
             object_id = parse_object_id(self.tree.item(iid)['values'][1])
-            self._workbench.event_generate(self, "ObjectSelect", object_id=object_id)
+            get_workbench().event_generate(self, "ObjectSelect", object_id=object_id)
     
     
         
 class VariablesFrame(MemoryFrame):
-    def __init__(self, master, workbench):
-        MemoryFrame.__init__(self, master, workbench, ('name', 'id', 'value'))
+    def __init__(self, master):
+        MemoryFrame.__init__(self, master, ('name', 'id', 'value'))
     
         self.tree.column('name', width=120, anchor=tk.W, stretch=False)
         self.tree.column('id', width=450, anchor=tk.W, stretch=True)
@@ -47,15 +48,15 @@ class VariablesFrame(MemoryFrame):
         self.tree.heading('id', text='Value ID', anchor=tk.W)
         self.tree.heading('value', text='Value', anchor=tk.W)
         
-        workbench.bind("ShowView", self._update_memory_model, True)
-        workbench.bind("HideView", self._update_memory_model, True)
+        get_workbench().bind("ShowView", self._update_memory_model, True)
+        get_workbench().bind("HideView", self._update_memory_model, True)
         self._update_memory_model()
         #self.tree.tag_configure("item", font=ui_utils.TREE_FONT)
         
         
 
     def _update_memory_model(self, event=None):
-        if self._workbench.in_heap_mode():
+        if get_workbench().in_heap_mode():
             self.tree.configure(displaycolumns=("name", "id"))
             #self.tree.columnconfigure(1, weight=1, width=400)
             #self.tree.columnconfigure(2, weight=0)

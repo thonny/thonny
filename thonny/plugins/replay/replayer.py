@@ -193,7 +193,7 @@ class ReplayerCodeView(ttk.Frame):
                 yscrollcommand=self.vbar.set,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
-                font=self._workbench.get_font("EditorFont"),
+                font=get_workbench().get_font("EditorFont"),
                 wrap=tk.NONE,
                 insertwidth=2,
                 #selectborderwidth=2,

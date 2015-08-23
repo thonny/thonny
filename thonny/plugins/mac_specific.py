@@ -61,6 +61,6 @@ def _set_up_mac_specific_stuff(self):
                       ...)
     """
     
-def load_plugin(workbench):
+def load_plugin():
     if running_on_mac_os():
         _set_up_mac_specific_stuff()

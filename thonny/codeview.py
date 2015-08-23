@@ -10,6 +10,7 @@ from thonny import ui_utils, misc_utils
 from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
+from thonny.globals import get_workbench
 
 
 
@@ -19,12 +20,12 @@ from thonny.coloring import SyntaxColorer
 # (don't want to use scrolledtext directly, because I want to include margin in the same box) 
 class CodeView(ttk.Frame, TextWrapper):
     # TODO: make it independent from Thonny ???
-    def __init__(self, master, workbench, first_line_no=1, font_size=11,
+    def __init__(self, master, first_line_no=1, font_size=11,
                  auto_vert_scroll=False,
                  height=None,
                  propose_remove_line_numbers=False):
         ttk.Frame.__init__(self, master)
-        self._workbench = workbench
+        
         
         # attributes
         self.first_line_no = first_line_no
@@ -51,7 +52,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 highlightthickness = 0,
                 takefocus = 0,
                 bd = 0,
-                font = workbench.get_font("EditorFont"),
+                font = get_workbench().get_font("EditorFont"),
                 #cursor = "dotbox",
                 background = '#e0e0e0',
                 foreground = '#999999',
@@ -76,7 +77,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 yscrollcommand=_vertical_scrollbar_update,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
-                font=self._workbench.get_font("EditorFont"),
+                font=get_workbench().get_font("EditorFont"),
                 wrap=tk.NONE,
                 insertwidth=2,
                 #selectborderwidth=2,
@@ -610,8 +611,8 @@ class CodeView(ttk.Frame, TextWrapper):
         if value:
             if self.colorer is None:
                 self.colorer = SyntaxColorer(self.text, 
-                                             self._workbench.get_font("EditorFont"),
-                                             self._workbench.get_font("BoldEditorFont"))
+                                             get_workbench().get_font("EditorFont"),
+                                             get_workbench().get_font("BoldEditorFont"))
         else:
             if self.colorer is not None:
                 self.colorer.removecolors()
@@ -815,7 +816,7 @@ class CodeView(ttk.Frame, TextWrapper):
         for line in lines:
             self.text.insert(str(line) + '.0', '##')
         
-        self._workbench.event_generate("CommentIn", editor=self.master,
+        get_workbench().event_generate("CommentIn", editor=self.master,
                                        kind='selection' if selection_used else 'current_line',
                                        subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 
@@ -841,7 +842,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 continue
             self.text.delete(line_str + '0', line_str + '2' if len(line_text) > 1 and line_text[1] == '#' else line_str + '1')
         
-        self._workbench.event_generate("CommentOut", editor=self.master,
+        get_workbench().event_generate("CommentOut", editor=self.master,
                                        kind='selection' if selection_used else 'current_line',
                                        subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 

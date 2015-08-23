@@ -4,6 +4,7 @@ import tkinter as tk
 from time import strptime
 from datetime import datetime, timedelta
 import time
+from thonny.globals import get_workbench
 
 
 """
@@ -25,7 +26,7 @@ ValueError: invalid literal for int() with base 10: ''
 """
 
 class EventLogger:
-    def __init__(self, workbench, filename=None):
+    def __init__(self, filename=None):
         self.filename = filename
         self.macro_events = []
         self.last_position = "0.0"
@@ -47,8 +48,8 @@ class EventLogger:
         self._bind("<2>")
         self._bind("<3>")
 
-        workbench.bind("<FocusIn>", self._on_get_focus, "+")
-        workbench.bind("<FocusOut>", self._on_lose_focus, "+")
+        get_workbench().bind("<FocusIn>", self._on_get_focus, "+")
+        get_workbench().bind("<FocusOut>", self._on_lose_focus, "+")
         
         ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
@@ -331,7 +332,7 @@ def parse_all_log_files(path):
             
     return all_events
 
-def load_plugin(workbench):
+def load_plugin():
     # generate log filename
     folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
     if not os.path.exists(folder):

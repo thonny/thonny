@@ -12,22 +12,23 @@ from thonny.common import parse_message, serialize_message, ToplevelCommand, Pau
     ActionCommand, OutputEvent, quote_path_for_shell, DebuggerResponse, \
     DebuggerCommand, InlineCommand
 from thonny.shell import ShellView
+from thonny.globals import get_workbench
 
 
 COMMUNICATION_ENCODING = "UTF-8"
 
 class Runner:
-    def __init__(self, workbench):
-        self._workbench = workbench
-        self._workbench.add_defaults({
+    def __init__(self):
+        
+        get_workbench().add_defaults({
             "run.working_directory" : os.path.expanduser("~"),
             "run.auto_cd" : True, 
         })
         
-        self._proxy = _BackendProxy(self._workbench.get_option("run.working_directory"),
-            self._workbench.get_installation_dir())
+        self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"),
+            get_workbench().get_installation_dir())
         
-        self._workbench.add_view(ShellView, "Shell", "s",
+        get_workbench().add_view(ShellView, "Shell", "s",
             visible_by_default=True,
             default_position_key='A')
         
@@ -39,32 +40,32 @@ class Runner:
     def _init_commands(self):
         
         
-        self._workbench.add_command('run_current_script', "run", 'Run current script',
+        get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
             tester=self._cmd_run_current_script_enabled)
         
         """
-        self._workbench.add_command('debug_current_script', "run", 'Debug current script',
+        get_workbench().add_command('debug_current_script', "run", 'Debug current script',
             handler=self._cmd_debug_current_script,
             default_sequence="<Control-F5>",
             tester=self._cmd_debug_current_script_enabled)
         """
         
-        self._workbench.add_command('reset', "run", 'Stop/Reset',
+        get_workbench().add_command('reset', "run", 'Stop/Reset',
             handler=self._cmd_reset,
             default_sequence=None # TODO:
             )
         
         """
-        self._workbench.add_separator("run")
+        get_workbench().add_separator("run")
         
-        self._workbench.add_command('step_over', "run", 'Step over',
+        get_workbench().add_command('step_over', "run", 'Step over',
             handler=self._cmd_step_over,
             default_sequence="<F7>",
             tester=self._cmd_step_over_enabled)
         
-        self._workbench.add_command('step_into', "run", 'Step into',
+        get_workbench().add_command('step_into', "run", 'Step into',
             handler=self._cmd_step_into,
             default_sequence="<F8>",
             tester=self._cmd_step_into_enabled)
@@ -99,7 +100,7 @@ class Runner:
     
     def _cmd_run_current_script_enabled(self):
         return (self._proxy.get_state() == "toplevel"
-                and self._workbench.get_editor_notebook().get_current_editor() is not None)
+                and get_workbench().get_editor_notebook().get_current_editor() is not None)
     
     def _cmd_run_current_script(self):
         self._execute_current("Run")
@@ -128,7 +129,7 @@ class Runner:
         current file/script and submit it to shell
         """
         
-        editor = self._workbench.get_current_editor()
+        editor = get_workbench().get_current_editor()
         if not editor:
             return
 
@@ -139,7 +140,7 @@ class Runner:
         # changing dir may be required
         script_dir = os.path.dirname(filename)
         
-        if (self._workbench.get_option("run.auto_cd") and cmd_name[0].isupper()
+        if (get_workbench().get_option("run.auto_cd") and cmd_name[0].isupper()
             and self._proxy.cwd != script_dir):
             # create compound command
             # start with %cd
@@ -157,7 +158,7 @@ class Runner:
             "TODO: append range indicators" 
         
         # submit to shell (shell will execute it)
-        self._workbench.get_view("ShellView").submit_magic_command(cmd_line)
+        get_workbench().get_view("ShellView").submit_magic_command(cmd_line)
         
         self.step_over = False
     
@@ -253,8 +254,8 @@ class Runner:
                 self.bell()
             
             # publish event
-            self._workbench.event_generate("BackendMessage", message=msg)
-            self._workbench.set_option("run.working_directory", self._proxy.cwd, save_now=False)
+            get_workbench().event_generate("BackendMessage", message=msg)
+            get_workbench().set_option("run.working_directory", self._proxy.cwd, save_now=False)
             
             self._update_title()
             
@@ -268,12 +269,12 @@ class Runner:
                 
                 self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
             """
-            self._workbench.update_idletasks()
+            get_workbench().update_idletasks()
             
-        self._workbench.after(50, self._poll_vm_messages)
+        get_workbench().after(50, self._poll_vm_messages)
     
     def _update_title(self):
-        self._workbench.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self.get_cwd(), *sys.version_info))
+        get_workbench().title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self.get_cwd(), *sys.version_info))
         
     def continue_with_step_over(self, cmd, msg):
         if not self.step_over:

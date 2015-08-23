@@ -3,8 +3,9 @@ import os.path
 import tkinter as tk
 from tkinter import ttk
 from thonny.misc_utils import running_on_linux
+from thonny.globals import get_workbench
 
-def load_plugin(workbench):
+def load_plugin():
     style = ttk.Style()
 
     if 'xpnative' in style.theme_names():
@@ -44,7 +45,7 @@ def load_plugin(workbench):
     """
     
     global _IMG_GRAY_LINE # Saving the reference, otherwise Tk will garbage collect the images 
-    _IMG_GRAY_LINE = tk.PhotoImage("gray_line", file=os.path.join(workbench.get_resource_dir(), 'gray_line.gif'))
+    _IMG_GRAY_LINE = tk.PhotoImage("gray_line", file=os.path.join(get_workbench().get_resource_dir(), 'gray_line.gif'))
     style.element_create("gray_line", "image", "gray_line",
                                ("!selected", "gray_line"), 
                                height=1, width=10, border=1)

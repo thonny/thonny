@@ -1,4 +1,3 @@
-#! /usr/bin/python3
 # -*- coding: utf-8 -*-
 
 """
@@ -36,7 +35,7 @@ import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
 from thonny.running import Runner
-
+import thonny.globals
 
 class Workbench(tk.Tk):
     """
@@ -56,9 +55,9 @@ class Workbench(tk.Tk):
     After workbench and plugins get loaded, 3 kinds of events start happening:
         
         * User events (keypresses, mouse clicks, menu selections, ...)
-        * Virtual events (mostly via workbench.event_generate). These include:
+        * Virtual events (mostly via get_workbench().event_generate). These include:
           events reported via and dispatched by Tk event system;
-          WorkbenchEvent-s, reported via and dispatched by enhanced Workbench.event_generate.
+          WorkbenchEvent-s, reported via and dispatched by enhanced get_workbench().event_generate.
         * Events from the background process (program output notifications, input requests,
           notifications about debugger's progress)
           
@@ -67,6 +66,7 @@ class Workbench(tk.Tk):
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self._on_tk_exception
         
+        thonny.globals.register_workbench(self)
         
         self._main_dir = main_dir 
         self._configuration_manager = ConfigurationManager(os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini")))
@@ -80,7 +80,7 @@ class Workbench(tk.Tk):
         
         self._event_handlers = {}
         self._init_containers()
-        self._runner = Runner(self)
+        self._runner = Runner()
         self._init_commands()
         self._editor_notebook.focus_set()
         
@@ -141,7 +141,7 @@ class Workbench(tk.Tk):
             try:
                 m = importlib.import_module(plugin_name)
                 if hasattr(m, "load_plugin"):
-                    m.load_plugin(self)
+                    m.load_plugin()
             except:
                 exception("Failed loading plugin '" + plugin_name + "'")
     
@@ -252,7 +252,7 @@ class Workbench(tk.Tk):
             'se' : AutomaticNotebook(self._east_pw, 3),
         }
 
-        self._editor_notebook = EditorNotebook(self._center_pw, self)
+        self._editor_notebook = EditorNotebook(self._center_pw)
         self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
 
@@ -474,7 +474,7 @@ class Workbench(tk.Tk):
             class_ = self._view_records[view_id]["class"]
             location = self._view_records[view_id]["location"]
             master = self._view_notebooks[location]
-            view = class_(master, self)
+            view = class_(master)
             view.position_key = self._view_records[view_id]["position_key"]
             self._view_records[view_id]["instance"] = view
             
@@ -698,3 +698,5 @@ class WorkbenchEvent(Record):
     def __init__(self, sequence, **kw):
         Record.__init__(self, **kw)
         self.sequence = sequence
+
+

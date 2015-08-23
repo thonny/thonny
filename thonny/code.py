@@ -29,6 +29,7 @@ from thonny import memory
 from thonny.codeview import CodeView
 from logging import debug
 from thonny.memory import VariablesFrame
+from thonny.globals import get_workbench
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
@@ -41,12 +42,12 @@ class Editor(ttk.Frame):
     """
     Text editor and visual part of module stepper
     """
-    def __init__(self, master, workbench, filename=None):
-        self._workbench = workbench
+    def __init__(self, master, filename=None):
+        
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
         
-        self._code_view = CodeView(self, workbench, propose_remove_line_numbers=True)
+        self._code_view = CodeView(self, propose_remove_line_numbers=True)
         self._code_view.grid(sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -76,7 +77,7 @@ class Editor(ttk.Frame):
         source, self.file_encoding = misc_utils.read_python_file(filename) # TODO: support also text files
         self._filename = filename
         self._code_view.modified_since_last_save = False
-        self._workbench.event_generate("Open", editor=self, filename=filename)
+        get_workbench().event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
         self._code_view.focus_set()
         
@@ -90,18 +91,18 @@ class Editor(ttk.Frame):
     def save_file(self):
         if self._filename is not None:
             filename = self._filename
-            self._workbench.event_generate("Save", editor=self)
+            get_workbench().event_generate("Save", editor=self)
         else:
             # http://tkinter.unpythonic.net/wiki/tkFileDialog
             filename = asksaveasfilename (
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
-                initialdir = self._workbench.get_option("run.working_directory")
+                initialdir = get_workbench().get_option("run.working_directory")
             )
             if filename == "":
                 return None
             
-            self._workbench.event_generate("SaveAs", editor=self, filename=filename)
+            get_workbench().event_generate("SaveAs", editor=self, filename=filename)
                 
         
         content = self._code_view.get_content()
@@ -141,7 +142,7 @@ class Editor(ttk.Frame):
             raise RuntimeError ("Editor content doesn't match module source. Did you change it after starting the program?")
         
         if self._stepper is None:
-            self._stepper = StatementStepper(msg.frame_id, self, self._workbench, self._code_view)
+            self._stepper = StatementStepper(msg.frame_id, self, self._code_view)
         
         self._stepper.handle_vm_message(msg)
     """
@@ -178,9 +179,9 @@ class EditorNotebook(ttk.Notebook):
     """
     Manages opened files / modules
     """
-    def __init__(self, master, workbench):
+    def __init__(self, master):
         ttk.Notebook.__init__(self, master, padding=0)
-        self._workbench = workbench
+        
         self._init_commands()
         self.enable_traversal()
         self.bind_all(EDITOR_STATE_CHANGE, self._on_editor_state_changed)
@@ -194,7 +195,7 @@ class EditorNotebook(ttk.Notebook):
         self._cmd_new_file()
     
     def _list_recent_files(self):
-        self._workbench.add_defaults({"file.recent_files" : []})
+        get_workbench().add_defaults({"file.recent_files" : []})
          
         # TODO:
         
@@ -203,37 +204,37 @@ class EditorNotebook(ttk.Notebook):
         # TODO: do these commands have to be in EditorNotebook ??
         # Create a module level function install_editor_notebook ??
         # Maybe add them separately, when notebook has been installed ??     
-        self._workbench.add_command("new_file", "file", "New", 
+        get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,
             default_sequence="<Control-n>")
         
-        self._workbench.add_command("open_file", "file", "Open...", 
+        get_workbench().add_command("open_file", "file", "Open...", 
             self._cmd_open_file,
             default_sequence="<Control-o>")
         
-        self._workbench.add_command("close_file", "file", "Close", 
+        get_workbench().add_command("close_file", "file", "Close", 
             self._cmd_close_file,
             default_sequence="<Control-w>",
             tester=lambda e: self.get_current_editor() is not None)
         
-        self._workbench.add_separator("file")
+        get_workbench().add_separator("file")
         
-        self._workbench.add_command("save_file", "file", "Save", 
+        get_workbench().add_command("save_file", "file", "Save", 
             self._cmd_save_file,
             default_sequence="<Control-s>",
             tester=self._cmd_save_file_enabled)
         
-        self._workbench.add_command("save_file_as", "file", "Save as...",
+        get_workbench().add_command("save_file_as", "file", "Save as...",
             self._cmd_save_file_as,
             default_sequence=None,
             tester=lambda e: self.get_current_editor() is not None)
         
-        self._workbench.add_command("comment_in", "edit", "Comment in",
+        get_workbench().add_command("comment_in", "edit", "Comment in",
             self._cmd_comment_in,
             default_sequence="<Control-Key-3>",
             tester=None) # TODO:
         
-        self._workbench.add_command("comment_out", "edit", "Comment out",
+        get_workbench().add_command("comment_out", "edit", "Comment out",
             self._cmd_comment_out,
             default_sequence="<Control-Key-4>",
             tester=None) # TODO:
@@ -250,8 +251,8 @@ class EditorNotebook(ttk.Notebook):
             self._cmd_new_file()
 
     def _cmd_new_file(self):
-        new_editor = Editor(self, self._workbench)
-        self._workbench.event_generate("NewFile", editor=new_editor)
+        new_editor = Editor(self)
+        get_workbench().event_generate("NewFile", editor=new_editor)
         self.add(new_editor, text=self._generate_editor_title(None))
         self.select(new_editor)
         new_editor.focus_set()
@@ -259,7 +260,7 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_open_file(self):
         filename = askopenfilename (
             filetypes = _dialog_filetypes, 
-            initialdir = self._workbench.get_option("run.working_directory")
+            initialdir = get_workbench().get_option("run.working_directory")
         )
         if filename != "":
             #self.close_single_untitled_unmodified_editor()
@@ -344,7 +345,7 @@ class EditorNotebook(ttk.Notebook):
         return result
     
     def _open_file(self, filename):
-        editor = Editor(self, self._workbench, filename)
+        editor = Editor(self, filename)
         self.add(editor, text=self._generate_editor_title(filename))
               
         return editor

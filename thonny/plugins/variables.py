@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from thonny.memory import VariablesFrame
+from thonny.globals import get_workbench
 
 class GlobalsView(VariablesFrame):
-    def __init__(self, master, workbench):
-        VariablesFrame.__init__(self, master, workbench)
+    def __init__(self, master):
+        VariablesFrame.__init__(self, master)
 
     def handle_vm_message(self, event):
         if hasattr(event, "globals"):
@@ -15,5 +16,5 @@ class GlobalsView(VariablesFrame):
         "TODO:"
     
 
-def load_plugin(workbench):
-    workbench.add_view(GlobalsView, "Variables", "ne")
+def load_plugin():
+    get_workbench().add_view(GlobalsView, "Variables", "ne")

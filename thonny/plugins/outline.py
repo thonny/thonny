@@ -1,6 +1,7 @@
 import re
 import tkinter as tk
 from tkinter import ttk
+from thonny.globals import get_workbench
 
 #TODO - see if there's a way to remember the previously focused tree item
 #when the tree is rebuilt to avoid reparsing everything on every step
@@ -12,10 +13,10 @@ from tkinter import ttk
 #that contains the item that's double-clicked on
 
 class OutlineView(ttk.Frame):
-    def __init__(self, master, workbench):
+    def __init__(self, master):
         ttk.Frame.__init__(self, master)
-        self._workbench = workbench
-        self._workbench.get_editor_notebook().bind("<<NotebookTabChanged>>",self._update_frame_contents ,True)
+        
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>",self._update_frame_contents ,True)
 
         #init and place scrollbar
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
@@ -39,8 +40,8 @@ class OutlineView(ttk.Frame):
 
     def _update_frame_contents(self, event=None):
         self._clear_tree()
-        if self._workbench.get_editor_notebook().get_current_editor():
-            self.parse_and_display_module(self._workbench.get_editor_notebook().get_current_editor()._code_view)
+        if get_workbench().get_editor_notebook().get_current_editor():
+            self.parse_and_display_module(get_workbench().get_editor_notebook().get_current_editor()._code_view)
         
         module_contents = self.active_codeview.get_content()
         nodes = []  #all nodes in format (parent, node_indent, node_children, name, type, linernumber)
@@ -96,7 +97,7 @@ class OutlineView(ttk.Frame):
         lineno = self.tree.item(self.tree.focus())['values'][0]
         index = self.active_codeview.text.index(str(lineno) + '.0')
         self.active_codeview.text.see(index) #make sure that the double-clicked item is visible
-        self._workbench.event_generate("OutlineDoubleClick",
+        get_workbench().event_generate("OutlineDoubleClick",
             item_text=self.tree.item(self.tree.focus(), option='text'))
 
     #called by editornotebook publisher to notify of changed tab
@@ -106,5 +107,5 @@ class OutlineView(ttk.Frame):
         else: 
             self._clear_tree()
 
-def load_plugin(workbench): 
-    workbench.add_view(OutlineView, "Outline", "ne")
+def load_plugin(): 
+    get_workbench().add_view(OutlineView, "Outline", "ne")

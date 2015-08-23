@@ -7,9 +7,10 @@ import tkinter as tk
 from thonny import ast_utils
 from thonny import ui_utils
 from thonny.common import TextRange
+from thonny.globals import get_workbench
 
 class AstView(ui_utils.TreeFrame):
-    def __init__(self, master, workbench):
+    def __init__(self, master):
         ui_utils.TreeFrame.__init__(self, master,
             columns=('range', 'lineno', 'col_offset', 'end_lineno', 'end_col_offset'),
             displaycolumns=(0,)
@@ -115,8 +116,8 @@ class AstView(ui_utils.TreeFrame):
         _format("root", root, "")
         
 
-def load_plugin(workbench): 
-    workbench.add_view(AstView, "AST", "s")
+def load_plugin(): 
+    get_workbench().add_view(AstView, "AST", "s")
         
     
         
