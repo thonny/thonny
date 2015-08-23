@@ -67,6 +67,10 @@ class Editor(ttk.Frame):
     def get_text_widget(self):
         return self._code_view.text
     
+    def get_code_view(self):
+        # TODO: try to get rid of this
+        return self._code_view
+    
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
             self._cmd_save_file()
@@ -126,27 +130,6 @@ class Editor(ttk.Frame):
     def show(self):
         self.master.select(self)
     
-    
-    """    
-    def handle_vm_message(self, msg):
-        assert isinstance(msg, DebuggerResponse)
-        
-        if self.is_modified():
-            raise RuntimeError ("Can't show debug info in modified editor")
-        
-        # actually this check is not sound, as this_frame.source is not guaranteed 
-        # to be saved at code compilation time 
-        if frame.source != self._code_view.get_content():
-            print("Editor content>" + self._code_view.get_content() + "<")
-            print("frame.source>" + frame.source + "<")
-            raise RuntimeError ("Editor content doesn't match module source. Did you change it after starting the program?")
-        
-        if self._stepper is None:
-            self._stepper = StatementStepper(msg.frame_id, self, self._code_view)
-        
-        self._stepper.handle_vm_message(msg)
-    """
-    
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
     
@@ -163,12 +146,6 @@ class Editor(ttk.Frame):
         self._code_view.exit_execution_mode()
         self._stepper = None
     
-    def get_frame_id(self):
-        if self._stepper is None:
-            return None
-        else:
-            return self._stepper.frame_id
-
     def focus_set(self):
         self._code_view.focus_set()
     
@@ -249,7 +226,13 @@ class EditorNotebook(ttk.Notebook):
         
         if len(filenames) == 0:
             self._cmd_new_file()
-
+    
+    def save_all(self):
+        for editor in self.winfo_children():
+            if editor.get_filename():
+                editor._cmd_save_file()
+        
+    
     def _cmd_new_file(self):
         new_editor = Editor(self)
         get_workbench().event_generate("NewFile", editor=new_editor)

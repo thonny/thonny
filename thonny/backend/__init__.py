@@ -651,7 +651,7 @@ class FancyTracer(Executor):
         """
         Tries to respond to current client's command in this state. 
         If it can't, then it returns, program resumes
-        and _standard_trace will call it again in another state.  
+        and _trace will call it again in another state.  
         
         Returns True if it wants to continue searching in this frame
         """
@@ -667,8 +667,8 @@ class FancyTracer(Executor):
             return True
         
         else:
-            # We have loop because it's possible respond to several denied zoom-ins, 
-            # or in-debug eval/exec requests, in one conceptual program state
+            # We have loop because it's possible respond to inline requests,
+            # in one conceptual program state
             while True:
                 # Select the correct method according to the command
                 handler = getattr(self, "_cmd_" + self._current_command.command)
@@ -1006,13 +1006,13 @@ class FancyTracer(Executor):
     
     def _export_stack(self):
         return [FrameInfo (
-                id=id(cframe.system_frame),
-                filename=cframe.system_frame.f_code.co_filename,
-                module_name=cframe.system_frame.f_globals["__name__"],
-                code_name=cframe.system_frame.f_code.co_name,
-                locals=self._vm.export_variables(cframe.system_frame.f_locals),
-                focus=cframe.focus
-            ) for cframe in self._custom_stack]
+                id=id(custom_frame.system_frame),
+                filename=custom_frame.system_frame.f_code.co_filename,
+                module_name=custom_frame.system_frame.f_globals["__name__"],
+                code_name=custom_frame.system_frame.f_code.co_name,
+                locals=self._vm.export_variables(custom_frame.system_frame.f_locals),
+                focus=custom_frame.focus
+            ) for custom_frame in self._custom_stack]
 
     
     def _thonny_hidden_before_suite(self, text_range, stmt_ranges):

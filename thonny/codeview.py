@@ -110,17 +110,7 @@ class CodeView(ttk.Frame, TextWrapper):
         
         # TODO: use general event system
         self._resetting_modified_flag = False #used internally, indicates when modified flag reset is currently in progress
-                        
-        #self.prepare_level_boxes()
         
-        """
-        self.text.tag_configure('statement', borderwidth=1, relief=tk.SOLID)
-        self.text.tag_configure('statement_odd', borderwidth=1, relief=tk.SOLID, background="#FFFFFF")
-        self.text.tag_configure('statement_even', borderwidth=1, relief=tk.SOLID, background="#FFFFFE")
-        """
-        self.text.tag_configure('before', background="#F8FC9A")
-        self.text.tag_configure('after', background="#D7EDD3")
-        self.text.tag_configure('exception', background="#FFBFD6")
         
         self.num_context_lines = 50, 500, 5000000 # See idlelib.EditorWindow
         self.context_use_ps1 = False
@@ -645,44 +635,7 @@ class CodeView(ttk.Frame, TextWrapper):
             
             
     
-    def tag_range(self, text_range, tag, see=False):
-            first_line, first_col, last_line = self.get_text_range_block(text_range)
-            
-            for lineno in range(first_line, last_line+1):
-                self.text.tag_add(tag,
-                                  "%d.%d" % (lineno, first_col),
-                                  "%d.0" % (lineno+1))
-                
-            self.text.update_idletasks()
-            self.text.see("%d.0" % (first_line))
-            #print("SEEING: " + "%d.0" % (first_line))
-            if last_line - first_line < 3:
-                # if it's safe to assume that whole code fits into screen
-                # then scroll it down a bit so that expression view doesn't hide behind
-                # lower edge of the editor
-                self.text.update_idletasks()
-                self.text.see("%d.0" % (first_line+3))
     
-    def get_text_range_block(self, text_range):
-        first_line = text_range.lineno - self.first_line_no + 1
-        last_line = text_range.end_lineno - self.first_line_no + 1
-        first_line_content = self.text.get("%d.0" % first_line, "%d.end" % first_line)
-        if first_line_content.strip().startswith("elif "):
-            first_col = first_line_content.find("elif ")
-        else:
-            first_col = text_range.col_offset
-        
-        return (first_line, first_col, last_line)
-    
-    def clear_tags(self, tags, from_index="1.0", to_index=tk.END):
-        for tag in tags:
-            self.text.tag_remove(tag, from_index, to_index)
-    
-    def clear_tags_for_text_range(self, tags, text_range):
-        first_line, first_col, last_line = self.get_text_range_block(text_range)
-        start_index = "%d.%d" % (first_line, first_col)
-        end_index = "%d.0" % (last_line+1)
-        self.clear_tags(tags, start_index, end_index)
     
     def select_range(self, text_range):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -706,25 +659,6 @@ class CodeView(ttk.Frame, TextWrapper):
                 self.text.mark_set("insert", end) 
             self.text.see(start + " -1 lines")
             
-    def get_statement_tag(self, level, kind, odd=False):
-        tag_name = "st_" + kind + str(level) + ("odd" if odd else "even")
-        if tag_name not in self.statement_tags:
-            if kind == "before":
-                color = "#" + hex(0xF8FC9A - level)[2:]
-            elif kind == "after":
-                color = "#" + hex(0xD7EDD3 - level)[2:]
-            elif kind == "exception":
-                color = "#" + hex(0xFFBFD6 - level)[2:]
-            else:
-                color_level = hex(255 - level * 5 - (1 if odd else 0))[2:]
-                color = "#" + color_level + color_level + color_level
-                
-            self.statement_tags.add(tag_name)
-            self.text.tag_configure(tag_name, background=color, borderwidth=1, relief=tk.SOLID)
-            #self.text.tag_raise(tag_name)
-        return tag_name
-            
-    
     def on_text_mouse_click(self, event):
         TextWrapper.on_text_mouse_click(self, event)
         self.remove_paren_highlight()

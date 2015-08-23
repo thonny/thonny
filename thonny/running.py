@@ -103,27 +103,27 @@ class Runner:
                 and get_workbench().get_editor_notebook().get_current_editor() is not None)
     
     def _cmd_run_current_script(self):
-        self._execute_current("Run")
+        self.execute_current("Run")
     
     def _cmd_debug_current_script_enabled(self):
         return self._cmd_run_current_script_enabled()
     
     def _cmd_debug_current_script(self):
-        self._execute_current("Debug")
+        self.execute_current("Debug")
         
     def _cmd_run_current_file_enabled(self):
         return self._cmd_run_current_script_enabled()
     
     def _cmd_run_current_file(self):
-        self._execute_current("run")
+        self.execute_current("run")
     
     def _cmd_debug_current_file_enabled(self):
         return self._cmd_run_current_script_enabled()
     
     def _cmd_debug_current_file(self):
-        self._execute_current("debug")
+        self.execute_current("debug")
     
-    def _execute_current(self, cmd_name, text_range=None):
+    def execute_current(self, cmd_name, text_range=None):
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell

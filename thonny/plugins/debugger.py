@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerResponse, DebuggerCommand
+from thonny.common import DebuggerResponse, DebuggerCommand, ToplevelResponse
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
@@ -10,59 +10,62 @@ from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
-from thonny.code import Editor
+from thonny.globals import get_workbench
  
 class Debugger:
     
     
-    def __init__(self, workbench):
-        self._workbench = workbench
-        
-        workbench.add_command("debug", "run", "Debug current script",
+    def __init__(self):
+        get_workbench().add_command("debug", "run", "Debug current script",
             self._cmd_debug_current_script,
             default_sequence="<Control-F5>")
-        workbench.add_command("step_over", "run", "Step over",
+        get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
             default_sequence="<F8>")
-        workbench.add_command("step_into", "run", "Step into",
+        get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
             default_sequence="<Control-F8>")
         
         
-        self._bottom_frame_visualizer = None
+        self._main_frame_visualizer = None
         
-        workbench.bind("DebuggerProgress", self._update_focus)
+        get_workbench().bind("DebuggerProgress", self._update_frames)
     
     def _cmd_debug_current_script(self):
-        editor = self._workbench.get_current_editor()
-        if not editor:
-            return 
-        
-        self._filename = editor.get_filename()
-        self._text = editor.get_text_widget() 
+        get_workbench().get_runner().execute_current("Debug")
 
     def _cmd_step_into(self):
-        pass
+        get_workbench().get_runner().send_command(DebuggerCommand("step_into"))
     
     def _cmd_step_over(self):
-        pass
+        get_workbench().get_runner().send_command(DebuggerCommand("step_over"))
 
+    def _is_debugging(self):
+        return self._main_frame_visualizer != None
 
-    def _update_focus(self, event):
-        pass
-    
-    
-    def enter_execution_mode(self, main_filename):
-        assert not self.is_in_execution_mode() 
+    def _update_frames(self, event):
+        msg = event.msg # TODO: should event be the msg?
         
-        # save all editors which have a filename
-        for editor in self.winfo_children():
-            if editor.get_filename():
-                editor._cmd_save_file()
-        
-        # highlight and remember the main editor
-        self._main_editor = self.get_editor(main_filename, True)
-        self._main_editor.enter_execution_mode()
+        if isinstance(msg, ToplevelResponse) and self._main_frame_visualizer is not None:
+            self._main_frame_visualizer.close()
+            self._main_frame_visualizer = None
+            
+        elif isinstance(msg, DebuggerResponse):
+            assert self._is_debugging()
+            
+            main_frame_id = msg.stack[0].id
+            
+            # clear obsolete main frame visualizer
+            if (self._main_frame_visualizer 
+                and self._main_frame_visualizer.get_frame_id() != main_frame_id):
+                self._main_frame_visualizer.close()
+                self._main_frame_visualizer = None
+                
+            if not self._main_frame_visualizer:
+                self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
+                
+            self._main_frame_visualizer.update_this_and_next_frames(msg) 
+    
     
     def exit_execution_mode(self):
         assert self.is_in_execution_mode()
@@ -72,131 +75,163 @@ class Debugger:
             
         self._main_editor = None
     
-    def is_in_execution_mode(self):
-        return self._main_editor is not None
-            
 
 
 class FrameVisualizer:
     """
     Is responsible for stepping through statements and updating corresponding UI
-    in Editor-s, FunctionCallDialog-s, ModuleDialog-s and shell
+    in Editor-s, FunctionCallDialog-s, ModuleDialog-s
     """
-    def __init__(self, master, workbench, frame_id, line_offset=0, col_offset=0):
-        self._text = master.text
-        self._frame_id = frame_id
-        self._expression_view = ExpressionView(master, workbench)
+    def __init__(self, text_wrapper, frame_info):
+        self._text_wrapper = text_wrapper
+        self._text = text_wrapper.text
+        self._frame_id = frame_info.id
+        self._expression_view = ExpressionBox(text_wrapper)
         self._next_frame_visualizer = None
         
+        self._text.tag_configure('focus', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
+        #self._text.tag_configure('before', background="#F8FC9A") TODO: ???
+        #self._text.tag_configure('after', background="#D7EDD3")
+        #self._text.tag_configure('exception', background="#FFBFD6")
+        self._text.configure(insertwidth=0, background="LightYellow")
+        self._text.wrapper.read_only = True
     
-    def update(self, msg):
-        #print("SS", msg.state, msg.focus)
-        # make sure current next_frame_handler is still relevant
-        if self._next_frame_visualizer is not None:
-            self._check_clear_next_frame_visualizer(msg.stack)
+    def close(self):
+        if self._next_frame_visualizer:
+            self._next_frame_visualizer.close()
+            self._next_frame_visualizer = None
+            
+            
+        self._text.wrapper.read_only = False
         
-        # show this frame
-        if msg.frame_id == self._frame_id:
-            self._code_view.handle_focus_message(msg.focus, msg)
-            self._expression_view.handle_vm_message(msg)
+        # TODO: better remember previous insertwidth and insertbackground
+        self._text.configure(background="White", insertwidth=2, insertbackground="Black")
+    
+    def get_frame_id(self):
+        return self._frame_id
+    
+    def update_this_and_next_frames(self, msg):
+        """Must not be used on obsolete frame"""
+        
+        #info("State: %s, focus: %s", msg.state, msg.focus)
+        
+        frame_info, next_frame_info = self._find_this_and_next_frame(msg.stack)
+        self._update_this_frame(msg, frame_info)
+        
+        # clear obsolete next frame visualizer
+        if (self._next_frame_visualizer 
+            and (not next_frame_info or 
+                 self._next_frame_visualizer.get_frame_id() != next_frame_info)):
+            self._next_frame_visualizer.close()
+            self._next_frame_visualizer = None
+            
+        if next_frame_info and not self._next_frame_visualizer:
+            self._next_frame_visualizer = self._create_next_frame_visualizer(next_frame_info)
+            
+        if self._next_frame_visualizer:
+            self._next_frame_visualizer.update_this_and_next_frames(msg)
+        
+            
+    def _update_this_frame(self, msg, frame_info):
+        
+        self.text.tag_remove("focus", "0.0", "end")
+            
+        """             
+        if msg.state.startswith("before"):
+            tag = "before"
+        elif msg.state.startswith("after"):
+            tag = "after"
         else:
-            if self._next_frame_visualizer is None:
-                if msg.code_name == "<module>":
-                    self._next_frame_visualizer = self.master.get_editor(msg.filename, True)
-                    self._next_frame_visualizer.enter_execution_mode()
+            tag = "exception"
+        """
+        
+        
+        # TODO: if focus is in expression, then find and highlight closest
+        # statement
+        self._tag_range(msg.focus, "focus", True)
+        
+        # TODO: use different color if focus is not topmost
+        
+        # TODO: update expression box
+
+    def _find_this_and_next_frame(self, stack):
+        for i in range(len(stack)):
+            if stack[i].id == self._frame_id:
+                if i == len(stack)-1: # last frame
+                    return stack[i], None
                 else:
-                    # Function call
-                    if self._expression_view.winfo_ismapped():
-                        call_label = self._expression_view.get_focused_text()
-                    else:
-                        call_label = "Function call at " + hex(self._frame_id) 
-                    self._next_frame_visualizer = FunctionCallDialog(self._master, msg, call_label)
+                    return stack[i], stack[i+1]
                     
-            self._next_frame_visualizer.handle_vm_message(msg)
-            
-        
-    def clear_debug_view(self):
-        self._code_view.handle_focus_message(None)
-        self._clear_next_frame_visualizer()
-        self._expression_view.clear_debug_view()
-    
-    def _check_clear_next_frame_visualizer(self, current_stack):
-        
-        for frame in current_stack:
-            if frame.id == self._next_frame_visualizer.get_frame_id():
-                # it's still relevant
-                return
-        
-        # didn't find that frame id
-        self._clear_next_frame_visualizer()
-    
-    def _clear_next_frame_visualizer(self):
-        if isinstance(self._next_frame_visualizer, Editor):
-            self._next_frame_visualizer.exit_execution_mode()
-        elif isinstance(self._next_frame_visualizer, FunctionCallDialog):
-            self._next_frame_visualizer.destroy()
         else:
-            assert self._next_frame_visualizer is None
-            
-        self._next_frame_visualizer = None
-    
-    def __del__(self):
-        self.clear_debug_view()
-        self._expression_view.destroy()
-
-
-    # TODO:
-    def _text_handle_focus_message(self, text_range, msg=None):
+            raise AssertionError("Frame doesn't exist anymore")
         
-        if text_range is None:
-            self.clear_tags(['before', 'after', 'exception'])
+    
+    def _tag_range(self, text_range, tag, see=False):
+        first_line, first_col, last_line = self._get_text_range_block(text_range)
+        
+        for lineno in range(first_line, last_line+1):
+            self._text.tag_add(tag,
+                              "%d.%d" % (lineno, first_col),
+                              "%d.0" % (lineno+1))
             
-        elif "statement" in msg.state or "suite" in msg.state:
-            self.clear_tags(['before', 'after', 'exception'])
-            self.text.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
-             
-            if msg.state.startswith("before"):
-                tag = "before"
-            elif msg.state.startswith("after"):
-                tag = "after"
+        self._text.update_idletasks()
+        self._text.see("%d.0" % (first_line))
+        #print("SEEING: " + "%d.0" % (first_line))
+        if last_line - first_line < 3:
+            # if it's safe to assume that whole code fits into screen
+            # then scroll it down a bit so that expression view doesn't hide behind
+            # lower edge of the editor
+            self._text.update_idletasks()
+            self._text.see("%d.0" % (first_line+3))
+            
+    def _get_text_range_block(self, text_range):
+        first_line = text_range.lineno - self.first_line_no + 1
+        last_line = text_range.end_lineno - self.first_line_no + 1
+        first_line_content = self._text.get("%d.0" % first_line, "%d.end" % first_line)
+        if first_line_content.strip().startswith("elif "):
+            first_col = first_line_content.find("elif ")
+        else:
+            first_col = text_range.col_offset
+        
+        return (first_line, first_col, last_line)
+    
+            
+    
+    def _create_next_frame_visualizer(self, next_frame_info):
+        if next_frame_info.code_name == "<module>":
+            return ModuleLoadDialog(self._text_wrapper, next_frame_info)
+        else:
+            dialog = FunctionCallDialog(self._text_wrapper, next_frame_info)
+            
+            if self._expression_view.winfo_ismapped():
+                dialog.title(self._expression_view.get_focused_text())
             else:
-                tag = "exception"
-            
-            # TODO: duplicated in main
-            # better just skip those events
-            if (msg.state in ("before_statement", "before_statement_again")
-                or (self._workbench.get_option("debugging.detailed_steps")
-                    and msg.state in ("after_statement",
-                                      "after_suite",
-                                      "before_suite"))):
-                self.tag_range(text_range, tag, True)
-            
+                dialog.title("Function call at " + hex(self._frame_id))
+                 
+            return dialog
+     
+
+
+class MainFrameVisualizer(FrameVisualizer):
+    """
+    Takes care of stepping in the main module
+    """
+    def __init__(self, frame_info):
+        editor = get_workbench().get_editor_notebook().show_file(frame_info.filename)
+        FrameVisualizer.__init__(self, editor.get_code_view(), frame_info)
         
-        else:
-            # if expression is in focus, statement will be shown without border
-            self.text.tag_configure('before', background="#F8FC9A", borderwidth=0, relief=tk.SOLID)
-            
 
+class CallFrameVisualizer(FrameVisualizer):
+    def __init__(self, text_wrapper, frame_id):
+        self._dialog = FunctionCallDialog(text_wrapper)
+        FrameVisualizer.__init__(self, self._dialog.get_code_view(), frame_id)
+        
+    def close(self):
+        super().close()
+        self._dialog.destroy()
 
-    def _text_enter_execution_mode(self):
-        self.read_only = True
-        self.text.configure(insertwidth=0)
-        self.text.configure(background="LightYellow")
-
-    def _textexit_execution_mode(self):
-        self.read_only = False
-        self.text.configure(insertwidth=2)
-        self.text.configure(background="White", insertwidth=2, insertbackground="Black")
-
-
-class ScriptFrameVisualizer:
-    pass
-
-class ShellFrameVisualizer:
-    pass
-
-class ExpressionView(tk.Text):
-    def __init__(self, codeview, workbench):
+class ExpressionBox(tk.Text):
+    def __init__(self, codeview):
         tk.Text.__init__(self, codeview.text,
                          height=1,
                          width=1,
@@ -207,9 +242,9 @@ class ExpressionView(tk.Text):
                          padx=7,
                          pady=7,
                          wrap=tk.NONE,
-                         font=workbench.get_font("EditorFont"))
+                         font=get_workbench().get_font("EditorFont"))
         self._codeview = codeview
-        self._workbench = workbench
+        
         self._main_range = None
         self._last_focus = None
         
@@ -220,7 +255,7 @@ class ExpressionView(tk.Text):
         
         
     def handle_vm_message(self, msg):
-        debug("ExpressionView.handle_vm_message %s", (msg.state, msg.focus))
+        debug("ExpressionBox.handle_vm_message %s", (msg.state, msg.focus))
         
         if msg.state in ("before_expression", "before_expression_again"):
             # (re)load stuff
@@ -245,7 +280,7 @@ class ExpressionView(tk.Text):
                 self.delete(start_mark, end_mark)
                 
                 id_str = memory.format_object_id(msg.value.id)
-                if self._workbench.get_option("view.values_in_heap"):
+                if get_workbench().get_option("view.values_in_heap"):
                     value_str = id_str
                 else:
                     value_str = shorten_repr(msg.value.repr, 100)
@@ -258,7 +293,7 @@ class ExpressionView(tk.Text):
                 else:
                     sequence = "<Control-Button-1>"
                 self.tag_bind(object_tag, sequence,
-                              lambda _: self._workbench.event_generate("ObjectSelect", object_id=msg.value.id))
+                              lambda _: get_workbench().event_generate("ObjectSelect", object_id=msg.value.id))
                     
                 self._update_size()
                 
@@ -381,35 +416,28 @@ class ExpressionView(tk.Text):
         self["width"] = max(map(len, lines))
     
 
-class ModuleLoadDialog(tk.Toplevel):
-    pass         
-    
-class FunctionCallDialog(tk.Toplevel, FrameVisualizer):
-    def __init__(self, master, msg, title):
-        tk.Toplevel.__init__(self, master)
-        self._frame_id = msg.frame_id
-        self.title(title)
-        self.transient(master)
+class FrameDialog(tk.Toplevel, FrameVisualizer):
+    def __init__(self, text_wrapper, frame_info):
+        tk.Toplevel.__init__(self, text_wrapper)
+        FrameVisualizer.__init__(self, text_wrapper, frame_info)
+        
+        self.transient(text_wrapper)
         if misc_utils.running_on_windows():
             self.wm_attributes('-toolwindow', 1)
         
         
         # TODO: take size from prefs
-        self.geometry("{}x{}+{}+{}".format(master.winfo_width(),
-                                           master.winfo_height(),
-                                           master.winfo_toplevel().winfo_rootx(),
-                                           master.winfo_toplevel().winfo_rooty()))
+        self.geometry("{}x{}+{}+{}".format(text_wrapper.winfo_width(),
+                                           text_wrapper.winfo_height(),
+                                           text_wrapper.winfo_toplevel().winfo_rootx(),
+                                           text_wrapper.winfo_toplevel().winfo_rooty()))
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
-        self._init_layout_widgets(master, msg)
-        self._load_function(msg)
-        FrameVisualizer.__init__(self, msg.frame_id, master, self._workbench, self._code_view)
-        self._code_view.text.focus()
+        self._init_layout_widgets(text_wrapper, frame_info)
+        self._load_function(frame_info)
+        self._text_wrapper.text.focus()
     
-    def get_frame_id(self):
-        return self._frame_id
-    
-    def _init_layout_widgets(self, master, msg):
+    def _init_layout_widgets(self, master, frame_info):
         self.main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border
         self.main_frame.grid(sticky=tk.NSEW)        
         self.rowconfigure(0, weight=1)
@@ -420,51 +448,57 @@ class FunctionCallDialog(tk.Toplevel, FrameVisualizer):
         self.main_frame.columnconfigure(0, weight=1)
         
         self._code_book = ttk.Notebook(self.main_pw)
-        self._code_view = CodeView(self._code_book, first_line_no=msg.firstlineno)
-        self._code_book.add(self._code_view)
-        self._code_view.enter_execution_mode()
-        
-        #self._code_book.rowconfigure(1, weight=1)
-        #self._code_book.columnconfigure(0, weight=1)
-        
-        
-        self._locals_book = ttk.Notebook(self.main_pw)
-        self._locals_frame = LocalsFrame(self._locals_book)
-        self._locals_book.add(self._locals_frame, text="Local variables")
-        
-        
+        self._text_wrapper = CodeView(self._code_book, first_line_no=frame_info.firstlineno)
+        self._code_book.add(self._text_wrapper, text="Source")
+        self._text_wrapper.enter_execution_mode()
         self.main_pw.add(self._code_book, minsize=130)
-        self.main_pw.add(self._locals_book, minsize=75)
-    
-    def _load_function(self, msg):
-        self._code_view.set_content(msg.source)
-        if hasattr(msg, "function"):
-            function_label = msg.function.repr
-        else:
-            function_label = msg.code_name
-             
-        self._code_book.tab(self._code_view, text=function_label)
-        #self._locals_frame.handle_vm_message(msg)
-    
-    def handle_vm_message(self, msg):
-        self._stepper.handle_vm_message(msg)
         
-        if hasattr(msg, "stack"):
-            frame = list(filter(lambda f: f.id == self._frame_id, msg.stack))[0]
-            self._locals_frame.update_variables(frame.locals)
-        else:
-            self._locals_frame.update_variables(None)
-                
+    
+    def _load_code(self, frame_info):
+        self._text_wrapper.set_content(frame_info.source)
+    
+    def _update_this_frame(self, msg, frame_info):
+        FrameVisualizer._update_this_frame(self, msg, frame_info)
+        self._locals_frame.update_variables(None)
     
     def _on_close(self):
-        showinfo("Can't close yet", "Step until the end of this function to close it")
+        showinfo("Can't close yet", "Step until the end of this code to close it")
+    
+    
+    def close(self):
+        FrameVisualizer.close(self)
+        self.destroy()
 
+class FunctionCallDialog(FrameDialog):
+    def __init__(self, text_wrapper, frame_info):
+        FrameDialog.__init__(self, text_wrapper)
     
-class LocalsFrame(VariablesFrame):   
-    def handle_vm_message(self, event):
-        pass
+    def _init_layout_widgets(self, master, frame_info):
+        FrameDialog._init_layout_widgets(self, master, frame_info)
+        self._locals_book = ttk.Notebook(self.main_pw)
+        self._locals_frame = VariablesFrame(self._locals_book)
+        self._locals_book.add(self._locals_frame, text="Local variables")
+        self.main_pw.add(self._locals_book, minsize=75)
+
+    def _load_code(self, frame_info):
+        FrameDialog._load_code(self, frame_info)
+        
+        if hasattr(frame_info, "function"):
+            function_label = frame_info.function.repr
+        else:
+            function_label = frame_info.code_name
+        
+        # change tab label
+        self._code_book.tab(self._text_wrapper, text=function_label)
+        
+        
+class ModuleLoadDialog(FrameDialog):
+    def __init__(self, text_wrapper, frame_info):
+        FrameDialog.__init__(self, text_wrapper)
     
-def load_plugin(workbench):
-    Debugger(workbench)
+    
+    
+def _load_plugin():
+    Debugger()
     
         
