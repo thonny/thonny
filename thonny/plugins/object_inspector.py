@@ -38,7 +38,7 @@ class ObjectInspector(ScrollableFrame):
         
         self.object_id = None
         self.object_info = None
-        get_workbench().bind("ObjectSelect", self.show_object)
+        get_workbench().bind("ObjectSelect", self.show_object, True)
         
         self.grid_frame = tk.Frame(self.interior, bg=CALM_WHITE) 
         self.grid_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=(10,0), pady=15)

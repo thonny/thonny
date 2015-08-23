@@ -7,9 +7,9 @@ class GlobalsView(VariablesFrame):
     def __init__(self, master):
         VariablesFrame.__init__(self, master)
         
-        get_workbench().bind("DebuggerResponse", self._update)
-        get_workbench().bind("ToplevelResponse", self._update)
-        get_workbench().bind("InputRequest", self._update)
+        get_workbench().bind("DebuggerResponse", self._update, True)
+        get_workbench().bind("ToplevelResponse", self._update, True)
+        get_workbench().bind("InputRequest", self._update, True)
 
     def _update(self, event):
         # TODO: request globals itself?

@@ -9,8 +9,8 @@ class EventsView(TextFrame):
     def __init__(self, master):
         TextFrame.__init__(self, master, readonly=False)
         #self.text.config(wrap=tk.WORD)
-        get_workbench().bind("ShowView", self._log_event)
-        get_workbench().bind("HideView", self._log_event)
+        get_workbench().bind("ShowView", self._log_event, True)
+        get_workbench().bind("HideView", self._log_event, True)
     
     
     def _log_event(self, event):
