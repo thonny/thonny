@@ -63,6 +63,9 @@ class ConfigurationManager:
         section, option = self._parse_name(name)
         name = section + "." + option
         self._defaults[name] = default_value
+        
+        if not self._ini.has_option(section, option):
+            self.set_option(name, default_value, False)
 
     def get_variable(self, name):
         section, option = self._parse_name(name)

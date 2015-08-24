@@ -331,7 +331,7 @@ class ExpressionBox(tk.Text):
                 self.delete(start_mark, end_mark)
                 
                 id_str = memory.format_object_id(msg.value.id)
-                if get_workbench().get_option("view.values_in_heap"):
+                if get_workbench().in_heap_mode():
                     value_str = id_str
                 else:
                     value_str = shorten_repr(msg.value.repr, 100)

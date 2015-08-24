@@ -430,7 +430,7 @@ class Workbench(tk.Tk):
         self._configuration_manager.set_option(name, value, save_now)
         
     def add_option(self, name, default_value):
-        """Registers new option.
+        """Registers a new option.
         
         If the name contains a period, then the part left to the (first) period
         will become the section of the option and rest will become name under that 
@@ -441,7 +441,7 @@ class Workbench(tk.Tk):
          
         Don't confuse this method with Tkinter's option_add!
         """
-        self._configuration_manager.add_default(name, default_value)
+        self._configuration_manager.add_option(name, default_value)
     
     def get_variable(self, name):
         return self._configuration_manager.get_variable(name)
