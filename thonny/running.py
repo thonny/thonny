@@ -22,10 +22,8 @@ COMMUNICATION_ENCODING = "UTF-8"
 class Runner:
     def __init__(self):
         
-        get_workbench().add_defaults({
-            "run.working_directory" : os.path.expanduser("~"),
-            "run.auto_cd" : True, 
-        })
+        get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
+        get_workbench().add_option("run.auto_cd", True)
         
         self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"),
             get_workbench().get_installation_dir())

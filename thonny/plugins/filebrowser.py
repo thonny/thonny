@@ -302,5 +302,5 @@ class FileBrowser(TreeFrame):
         return sorted(result, key=str.upper)
     
 def load_plugin(): 
-    get_workbench().add_defaults({"file.last_browser_folder" : None})
+    get_workbench().add_option("file.last_browser_folder", None)
     get_workbench().add_view(FileBrowser, "Files", "nw")

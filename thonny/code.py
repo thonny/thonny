@@ -172,7 +172,7 @@ class EditorNotebook(ttk.Notebook):
         self._load_startup_files()
     
     def _list_recent_files(self):
-        get_workbench().add_defaults({"file.recent_files" : []})
+        get_workbench().add_option("file.recent_files", [])
          
         # TODO:
         
@@ -182,13 +182,8 @@ class EditorNotebook(ttk.Notebook):
         # Create a module level function install_editor_notebook ??
         # Maybe add them separately, when notebook has been installed ??
         
-        get_workbench().add_defaults({"file.reopen_files" : False})
+        get_workbench().add_option("file.reopen_files", False)
         
-        get_workbench().add_command("file.reopen_files", "file", "Automatically open files from last session",
-            lambda: get_workbench().set_option("file.reopen_files", 
-                    not get_workbench().get_option("file.reopen_files")),
-            flag_name = "file.reopen_files") # TODO: reduce boilerplate
-             
         get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,
             default_sequence="<Control-n>")

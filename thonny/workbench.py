@@ -90,16 +90,14 @@ class Workbench(tk.Tk):
     
     def _init_window(self):
         
-        self.add_defaults({
-            "layout.zoomed" : False,
-            "layout.top" : 15,
-            "layout.left" : 150,
-            "layout.width" : 700,
-            "layout.height" : 650,
-            "layout.w_width" : 200,
-            "layout.e_width" : 200,
-            "layout.s_height" : 200,
-        })
+        self.add_option("layout.zoomed", False)
+        self.add_option("layout.top", 15)
+        self.add_option("layout.left", 150)
+        self.add_option("layout.width", 700)
+        self.add_option("layout.height", 650)
+        self.add_option("layout.w_width", 200)
+        self.add_option("layout.e_width", 200)
+        self.add_option("layout.s_height", 200)
         
         self.geometry("{0}x{1}+{2}+{3}".format(self.get_option("layout.width"),
                                             self.get_option("layout.height"),
@@ -163,10 +161,8 @@ class Workbench(tk.Tk):
         return result
                                 
     def _init_fonts(self):
-        self.add_defaults({
-            "view.editor_font_family" : None,
-            "view.editor_font_size" : None, # 15 if running_on_mac_os() else 10,
-        })
+        self.add_option("view.editor_font_family", None)
+        self.add_option("view.editor_font_size", None) # 15 if running_on_mac_os() else 10,
         
         if self.get_option("view.editor_font_family"):
             editor_font = tk_font.Font(family=self.get_option("view.editor_font_family"))
@@ -186,7 +182,7 @@ class Workbench(tk.Tk):
         }
 
     def _init_translation(self):
-        self.add_defaults({"general.language" : "en"})
+        self.add_option("general.language", "en")
         
         gettext.translation('thonny',
                     os.path.join(self._main_dir, "thonny", "locale"), 
@@ -335,7 +331,7 @@ class Workbench(tk.Tk):
             self.event_generate("Command", command_id=command_id, denied=denied)
         
         sequence_option_name = "shortcuts." + command_id
-        self.add_defaults({sequence_option_name : default_sequence})
+        self.add_option(sequence_option_name, default_sequence)
         sequence = self.get_option(sequence_option_name) 
         
         if sequence and not skip_sequence_binding:
@@ -384,11 +380,9 @@ class Workbench(tk.Tk):
         if default_position_key == None:
             default_position_key = label
         
-        self.add_defaults({
-            "view." + view_id + ".visible"  : visible_by_default,
-            "view." + view_id + ".location" : default_location,
-            "view." + view_id + ".position_key" : default_position_key
-        })
+        self.add_option("view." + view_id + ".visible" , visible_by_default)
+        self.add_option("view." + view_id + ".location", default_location)
+        self.add_option("view." + view_id + ".position_key", default_position_key)
         
         self._view_records[view_id] = {
             "class" : class_,
@@ -435,8 +429,19 @@ class Workbench(tk.Tk):
     def set_option(self, name, value, save_now=True):
         self._configuration_manager.set_option(name, value, save_now)
         
-    def add_defaults(self, defaults):
-        self._configuration_manager.add_defaults(defaults)
+    def add_option(self, name, default_value):
+        """Registers new option.
+        
+        If the name contains a period, then the part left to the (first) period
+        will become the section of the option and rest will become name under that 
+        section.
+        
+        If the name doesn't contain a period, then it will be added under section 
+        "general".
+         
+        Don't confuse this method with Tkinter's option_add!
+        """
+        self._configuration_manager.add_default(name, default_value)
     
     def get_variable(self, name):
         return self._configuration_manager.get_variable(name)

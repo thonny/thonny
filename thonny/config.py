@@ -59,15 +59,11 @@ class ConfigurationManager:
         if save_now:
             self.save() 
     
-    def set_default(self, name, value):
+    def add_option(self, name, default_value):
         section, option = self._parse_name(name)
         name = section + "." + option
-        self._defaults[name] = value
+        self._defaults[name] = default_value
 
-    def add_defaults(self, defaults):
-        for name in defaults:
-            self.set_default(name, defaults[name])
-    
     def get_variable(self, name):
         section, option = self._parse_name(name)
         name = section + "." + option
