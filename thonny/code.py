@@ -159,6 +159,7 @@ class EditorNotebook(ttk.Notebook):
     def __init__(self, master):
         ttk.Notebook.__init__(self, master, padding=0)
         
+        get_workbench().add_option("file.reopen_files", False)
         self._init_commands()
         self.enable_traversal()
         self.bind_all(EDITOR_STATE_CHANGE, self._on_editor_state_changed)
@@ -182,7 +183,6 @@ class EditorNotebook(ttk.Notebook):
         # Create a module level function install_editor_notebook ??
         # Maybe add them separately, when notebook has been installed ??
         
-        get_workbench().add_option("file.reopen_files", False)
         
         get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,

@@ -9,8 +9,8 @@ import sys
 import threading
 
 from thonny.common import parse_message, serialize_message, ToplevelCommand, PauseMessage, \
-    ActionCommand, OutputEvent, quote_path_for_shell, DebuggerResponse, \
-    DebuggerCommand, InlineCommand, parse_shell_command, unquote_path,\
+    ActionCommand, OutputEvent, quote_path_for_shell, \
+    InlineCommand, parse_shell_command, unquote_path,\
     CommandSyntaxError
 from thonny.shell import ShellView
 from thonny.globals import get_workbench
@@ -40,11 +40,9 @@ class Runner:
         self._init_commands()
         
         self._poll_vm_messages()
-        #self._advance_background_tk_mainloop()
+        self._advance_background_tk_mainloop()
     
     def _init_commands(self):
-        
-        
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
@@ -55,11 +53,6 @@ class Runner:
             default_sequence=None # TODO:
             )
         
-        get_workbench().add_command('set_auto_cd', "run", 'Auto-cd to script dir',
-            handler=lambda: get_workbench().set_option("run.auto_cd",
-                        not get_workbench().get_option("run.auto_cd")),
-            flag_name="run.auto_cd"),
-        
     def get_cwd(self):
         return self._proxy.cwd
     
@@ -68,13 +61,6 @@ class Runner:
     
     def send_command(self, cmd):
         self._proxy.send_command(cmd)
-    
-    def _cmd_run_current_script_enabled(self):
-        return (self._proxy.get_state() == "toplevel"
-                and get_workbench().get_editor_notebook().get_current_editor() is not None)
-    
-    def _cmd_run_current_script(self):
-        self.execute_current("Run")
     
     def execute_current(self, mode):
         """
@@ -111,6 +97,13 @@ class Runner:
         # submit to shell (shell will execute it)
         get_workbench().get_view("ShellView").submit_command(cmd_line)
         
+    def _cmd_run_current_script_enabled(self):
+        return (self._proxy.get_state() == "toplevel"
+                and get_workbench().get_editor_notebook().get_current_editor() is not None)
+    
+    def _cmd_run_current_script(self):
+        self.execute_current("Run")
+    
 
     def _handle_magic_command_from_shell(self, cmd_line):
         command, arg_str = parse_shell_command(cmd_line)
@@ -119,7 +112,6 @@ class Runner:
         args = shlex.split(arg_str.strip(), posix=False)
         
         if command == "Reset":
-            # TODO: check that args is empty
             if len(args) == 0:
                 self.send_command(ToplevelCommand(command="Reset"))
             else:
@@ -153,50 +145,31 @@ class Runner:
     
 
             
-    def _cmd_set_auto_cd(self):
-        print(self._auto_cd.get())
-        
     def _advance_background_tk_mainloop(self):
+        """Enables running Tkinter programs which doesn't call mainloop. 
+        
+        When mainloop is omitted, then program can be interacted with
+        from the shell after it runs to the end.
+        """
         if self._proxy.get_state() == "toplevel":
             self._proxy.send_command(InlineCommand(command="tkupdate"))
-        self.after(50, self._advance_background_tk_mainloop)
+        get_workbench().after(50, self._advance_background_tk_mainloop)
         
     def _poll_vm_messages(self):
-        # I chose polling instead of event_generate
-        # because event_generate across threads is not reliable
-        # http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
+        """I chose polling instead of event_generate
+        because event_generate across threads is not reliable
+        http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
+        """
         while True:
             msg = self._proxy.fetch_next_message()
             if not msg:
                 break
             
-            # skip some events
-            if (isinstance(msg, DebuggerResponse) 
-                and hasattr(msg, "tags") 
-                and "call_function" in msg.tags
-                and not self.get_option("debugging.expand_call_functions")):
-                
-                self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
-                continue
-                
             if hasattr(msg, "success") and not msg.success:
-                print("_poll_vm_messages, not success")
-                self.bell()
+                info("_poll_vm_messages, not success")
             
-            # publish event
             get_workbench().event_generate("BackendMessage", message=msg)
             get_workbench().set_option("run.working_directory", self._proxy.cwd, save_now=False)
-            
-            # automatically advance from some events
-            # TODO:
-            """
-            if (isinstance(msg, DebuggerResponse) 
-                and msg.state in ("after_statement", "after_suite", "before_suite")
-                and not self.get_option("debugging.detailed_steps")
-                or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
-                
-                self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
-            """
             get_workbench().update_idletasks()
             
         get_workbench().after(50, self._poll_vm_messages)
@@ -226,7 +199,6 @@ class _BackendProxy:
                 return self._current_pause_msg.vm_state
     
     def get_state_message(self):
-        # TODO: create separate class for expressing backend state
         with self._state_lock:
             return self._current_pause_msg
     
@@ -267,7 +239,7 @@ class _BackendProxy:
                  
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush() # required for Python 3.1
-            debug("sent a command: %s", cmd)
+            #debug("sent a command: %s", cmd)
     
     def send_program_input(self, data):
         with self._state_lock:

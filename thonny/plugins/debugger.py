@@ -95,7 +95,25 @@ class Debugger:
         return self._main_frame_visualizer != None
 
     def _update_frames(self, event):
+        
         msg = event.msg # TODO: should event be the msg?
+        
+        # skip some events
+        if (isinstance(msg, DebuggerResponse) 
+            and hasattr(msg, "tags") 
+            and "call_function" in msg.tags
+            and not self.get_option("debugging.expand_call_functions")):
+            
+            self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
+            return
+            """
+            if (isinstance(msg, DebuggerResponse) 
+                and msg.state in ("after_statement", "after_suite", "before_suite")
+                and not self.get_option("debugging.detailed_steps")
+                or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
+                
+                self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
+            """
         
         if isinstance(msg, ToplevelResponse) and self._main_frame_visualizer is not None:
             self._main_frame_visualizer.close()
