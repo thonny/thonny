@@ -108,7 +108,7 @@ class Debugger:
             return
             """
             if (isinstance(msg, DebuggerResponse) 
-                and msg.state in ("after_statement", "after_suite", "before_suite")
+                and msg.state in ("after_statement")
                 and not self.get_option("debugging.detailed_steps")
                 or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
                 
