@@ -1,0 +1,45 @@
+
+COMMANDS
+
+toplevel
+    pass ???
+    cd
+    run / Run
+    debug / Debug
+    python
+
+running (progress commands)
+    step_into
+    step_over
+    run_to_line
+    submit_input
+
+both 
+    reset
+    tkupdate
+    get_object_info
+    get_globals
+    get_locals
+    get_heap
+--------------------------------------------------------------
+EVENTS
+
+    ToplevelProgress
+    RunProgress
+        stack=...
+        location=...Before/After Expression/Statement, Exception
+        value=...
+    Heap
+    Globals
+    Locals
+
+---------------------
+* eval literals?
+* eval functions?
+* show after statement
+* show after expression
+
+
+
+
+
