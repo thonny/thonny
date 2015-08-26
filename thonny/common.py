@@ -164,10 +164,11 @@ class ToplevelResponse(ActionResponse):
         kw["vm_state"] = "toplevel"
         Record.__init__(self, **kw)
 
-class DebuggerResponse(ActionResponse):
+class DebuggerProgressResponse(ActionResponse):
     def __init__(self, **kw):
         kw["vm_state"] = "debug"
         Record.__init__(self, **kw)
+
 
 
 class InlineResponse(Record):

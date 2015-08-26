@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerResponse, DebuggerCommand, ToplevelResponse,\
+from thonny.common import DebuggerProgressResponse, DebuggerCommand, ToplevelResponse,\
     parse_shell_command, ToplevelCommand, unquote_path, CommandSyntaxError
 from thonny.memory import VariablesFrame
 from logging import debug
@@ -41,7 +41,7 @@ class Debugger:
 
 
     def _check_issue_debugger_command(self, cmd, automatic=False):
-        #if isinstance(self._proxy.get_state_message(), DebuggerResponse):
+        #if isinstance(self._proxy.get_state_message(), DebuggerProgressResponse):
             self._issue_debugger_command(cmd, automatic)
             # TODO: notify memory panes and editors? Make them inactive?
     
@@ -63,7 +63,7 @@ class Debugger:
         #self._check_issue_goto_before_or_after()
         msg = self._proxy.get_state_message()
         # always enabled during debugging
-        return (isinstance(msg, DebuggerResponse)) 
+        return (isinstance(msg, DebuggerProgressResponse)) 
     
     def _cmd_step_into(self):
         self._check_issue_debugger_command(DebuggerCommand("step_into"))
@@ -98,8 +98,10 @@ class Debugger:
         
         msg = event.msg # TODO: should event be the msg?
         
+        # TODO: if exception then show message
+        
         # skip some events
-        if (isinstance(msg, DebuggerResponse) 
+        if (isinstance(msg, DebuggerProgressResponse) 
             and hasattr(msg, "tags") 
             and "call_function" in msg.tags
             and not self.get_option("debugging.expand_call_functions")):
@@ -107,7 +109,7 @@ class Debugger:
             self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
             return
             """
-            if (isinstance(msg, DebuggerResponse) 
+            if (isinstance(msg, DebuggerProgressResponse) 
                 and msg.state in ("after_statement")
                 and not self.get_option("debugging.detailed_steps")
                 or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
@@ -119,7 +121,7 @@ class Debugger:
             self._main_frame_visualizer.close()
             self._main_frame_visualizer = None
             
-        elif isinstance(msg, DebuggerResponse):
+        elif isinstance(msg, DebuggerProgressResponse):
             assert self._is_debugging()
             
             main_frame_id = msg.stack[0].id

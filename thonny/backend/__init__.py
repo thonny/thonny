@@ -17,7 +17,7 @@ import __main__  # @UnresolvedImport
 from thonny import ast_utils
 from thonny import misc_utils
 from thonny.misc_utils import eqfn
-from thonny.common import InputRequest, OutputEvent, DebuggerResponse, TextRange,\
+from thonny.common import InputRequest, OutputEvent, DebuggerProgressResponse, TextRange,\
     ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InlineResponse
 
@@ -308,8 +308,9 @@ class VM:
         
     def _fetch_command(self):
         line = self._original_stdin.readline()
-        self._command_count
-        return parse_message(line)
+        cmd = parse_message(line)
+        cmd._exception = None # The command doesn't propagate an exception
+        return cmd
 
     def _send_response(self, msg):
         self._original_stdout.write(serialize_message(msg) + "\n")
@@ -463,14 +464,6 @@ class Executor:
 
 
 class FancyTracer(Executor):
-    """
-    ...
-    
-    * For normal operation _cmd_exec and _cmd_next should be interleaved TODO: not really
-    * NB! after_expression / after_statement does not mean successful completion 
-    
-    ...
-    """
     
     def __init__(self, vm, main_dir):
         self._vm = vm
@@ -478,10 +471,9 @@ class FancyTracer(Executor):
         self._instrumented_files = misc_utils.PathSet()
         self._interesting_files = misc_utils.PathSet() # only events happening in these files are reported
         self._current_command = None
-        self._thread_exception = None
+        self._unhandled_exception = None
         self._install_marker_functions()
         self._custom_stack = []
-        self._expand_call_functions = False # TODO: take it from configuration
     
     def execute_source(self, source, filename, mode):
         self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
@@ -536,203 +528,126 @@ class FancyTracer(Executor):
     
     def _trace(self, frame, event, arg):
         """
-        1) Filters and transforms system trace events
+        1) Detects marker calls and responds to client queries in these spots
         2) Maintains a customized view of stack
         """
         if not self._may_step_in(frame.f_code):
             return
 
-        #fdebug(frame, "TRACE %s %s", event, 
-        #        (frame.f_code.co_filename, frame.f_lineno, frame.f_code.co_name, frame.f_locals))
-        
-        args = {}
-        focus = None
-        # Reinterpret the event and update our customized stack representation. 
-        code_name = frame.f_code.co_name
-        
-        
-        # disguise marker calls as custom events in caller frame
-        if code_name in self.marker_function_names:
-            args.update(frame.f_locals)
-            focus = TextRange(*args["text_range"])
-            del args["text_range"]
-            frame = frame.f_back
+        if event == "call":
+            self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
             
-            assert event == "call"
-            if code_name == BEFORE_STATEMENT_MARKER:
-                event = "before_statement"
-            elif code_name == AFTER_STATEMENT_MARKER:
-                event = "after_statement"
-            elif code_name == BEFORE_EXPRESSION_MARKER:
-                event = "before_expression"
+            code_name = frame.f_code.co_name
+            
+            if code_name in self.marker_function_names:
+                # the main thing
+                if code_name == BEFORE_STATEMENT_MARKER:
+                    event = "before_statement"
+                elif code_name == AFTER_STATEMENT_MARKER:
+                    event = "after_statement"
+                elif code_name == BEFORE_EXPRESSION_MARKER:
+                    event = "before_expression"
+                elif code_name == AFTER_EXPRESSION_MARKER:
+                    event = "after_expression"
+                else:
+                    raise AssertionError("Unknown marker function")
+                
+                self._handle_progress_event(frame.f_back, event, frame.f_locals)
+                self._try_interpret_as_again_event(frame.f_back, event, frame.f_locals)
+                
+                
             else:
-                assert code_name == AFTER_EXPRESSION_MARKER
-                event = "after_expression"
-                
-                # remember each evaluated call function, zoom command will need them later
-                node_tags = args.get("node_tags")
-                if node_tags and "call_function" in node_tags:
-                    parent_range = TextRange(*args.get("parent_range"))
-                    self._custom_stack[-1].call_functions[parent_range] = args["value"] 
-            
-            
-        elif event == "call":
-            self._custom_stack.append(FancyTracer.CustomStackFrame(frame, "call"))
-                
-        elif event == "return":
-            args["return_value"] = arg
+                # Calls to proper functions.
+                # Client doesn't care about these events,
+                # it cares about "before_statement" events in the first statement of the body
+                self._custom_stack.append(FancyTracer.CustomStackFrame(frame, "call"))
         
-        elif event == "line":
-            if frame.f_code.co_filename in self._instrumented_files:
-                # don't need line events in instrumented files
-                # (but keep stepping in this file, to get "return" and "exception" events
-                return self._trace
+        elif event == "return":
+            self._custom_stack.pop()
+            if len(self._custom_stack) == 0:
+                # We popped last frame, this means our program has ended.
+                # There may be more events coming from upper (system) frames
+                # but we're not interested in those
+                sys.settrace(None)
                 
-        else:
-            assert event == "exception"
-            self._thread_exception = arg[1]
-            args["exception"] = arg[1]
+        elif event == "exception":
+            self._unhandled_exception = arg[1]
+
+        # TODO: support line event in non-instrumented files
+        elif event == "line":
+            self._unhandled_exception = None  
+                
+        return self._trace
+        
             
+    def _handle_progress_event(self, frame, event, args):
+        """
+        Tries to respond to current command in this state. 
+        If it can't, then it returns, program resumes
+        and _trace will call it again in another state.
+        Otherwise sends response and fetches next command.  
+        """
+        focus = TextRange(*args["text_range"])
         
         self._custom_stack[-1].last_event = event
-        self._custom_stack[-1].focus = focus
-        
-        try:
-            result = self._custom_trace(frame, event, args, focus)
-            
-            # some after_* events can be interpreted also as 
-            # "before_*_again" events (eg. when last argument of a call was 
-            # evaluated, then we are just before executing the final stage of the call)
-            before_again = self._interpret_as_before_again_event(event, focus, args)
-            if before_again is not None:
-                event, focus, args = before_again
-                # store the new state in stack
-                self._custom_stack[-1].last_event = event
-                self._custom_stack[-1].focus = focus
-                # call tracer again with new event and focus
-                result = self._custom_trace(frame, event, args, focus)
-            
-            if result == "continue" and event not in ("before_statement", "before_statement_again", "after_statement",
-                                        "before_expression", "before_expression_again", "after_expression"):
-                return self._trace
-            else:
-                return None
-            
-        finally:
-            if event == "return":
-                self._custom_stack.pop()
-                if len(self._custom_stack) == 0:
-                    # We popped last frame, this means our program has ended.
-                    # There may be more events coming from upper (system) frames
-                    # but we're not interested in those
-                    sys.settrace(None)
-                    return None
-            
-            if event == "before_statement" and "first_except_stmt" in args["node_tags"]:
-                # We just arrived to an exception handler.
-                # this clears current active exception
-                self._active_exception = None
-                    
-        
-    
-    def _custom_trace(self, frame, event, args, focus):
-        """
-        Tries to respond to current client's command in this state. 
-        If it can't, then it returns, program resumes
-        and _trace will call it again in another state.  
-        
-        Returns True if it wants to continue searching in this frame
-        """
-        
-        if event.startswith("before") or event.startswith("after"):
-            assert focus is not None 
-        fdebug(frame, "CUSTR %s %s", event, focus)
-        
-        if event == "exception":
-            self._current_command.exception = args["exception"]
-            # we don't stop at exceptions, just make a note that an exception
-            # occured during handling current command.
-            return True
+        self._custom_stack[-1].last_event_focus = focus
+        self._custom_stack[-1].last_event_args = args
         
         # Select the correct method according to the command
-        handler = getattr(self, "_cmd_" + self._current_command.command)
-        response = handler(frame, event, args, focus, self._current_command)
+        tester = getattr(self, "_cmd_" + self._current_command.command + "_completed")
              
         # If method decides we're in the right place to respond to the command ...
-        if isinstance(response, DebuggerResponse):
-            # ... attach some more info to the response ...
-            response.setdefault (
-                state=event,
-                command_exception=self._vm.export_value(self._current_command.exception, True),
-                thread_exception=self._vm.export_value(self._thread_exception, True),
+        if tester(frame, event, args, focus, self._current_command):
+            
+            self._vm._send_response(DebuggerProgressResponse(
+                command=self._current_command.command,
                 stack=self._export_stack(),
-                globals={
-                    frame.f_globals["__name__"] : self._vm.export_variables(frame.f_globals)
-                },
-                cwd=os.getcwd()
-            )
+                exception=self._vm.export_value(self._unhandled_exception, True),
+                value=self._vm.export_value(args["value"]) 
+                    if event == "after_expression"
+                    else None
+            ))
             
-            #assert response.focus is not None
-            # ... and send it to the client
-            self._vm._send_response(response)
-            
-            # Wait for next debugger progress command
+            # Fetch next debugger command
             self._current_command = self._vm._fetch_command()
-            self._respond_to_inline_commands() # get non-progress commands out our way 
+            # get non-progress commands out our way
+            self._respond_to_inline_commands()  
             assert isinstance(self._current_command, DebuggerCommand)
             
-            fdebug(frame, "COMMAND %s, current event: %s", self._current_command, event)
-            self._current_command.exception = None # start with no blame
-            # All debugger progress commands need at least one step 
-            # before they can be completed, so let the machine loose ...
-            return True
-            
-        else:
-            # ... we can't respond to current command at this state
-            
-            # little post-processing
-            if event == "before_statement" and "first_except_stmt" in args["node_tags"]:
-                # We just arrived to an exception handler.
-                # As command handler didn't want to stop here,
-                # we clear the blame from current command
-                self._current_command.exception = None
-            
-            # resume program
-            return response
+        # Return and let Python run to next progress event
         
+    
+    def _try_interpret_as_again_event(self, frame, original_event, original_args):
+        """
+        Some after_* events can be interpreted also as 
+        "before_*_again" events (eg. when last argument of a call was 
+        evaluated, then we are just before executing the final stage of the call)
+        """
+
+        if original_event == "after_expression":
+            node_tags = original_args.get("node_tags")
+            value = original_args.get("value")
+            
+            if (node_tags is not None 
+                and ("last_child" in node_tags
+                     or "or_arg" in node_tags and value
+                     or "and_arg" in node_tags and not value)):
+                
+                # next step will be finalizing evaluation of parent of current expr
+                # so let's say we're before that parent expression
+                again_args = {"text_range" : original_args.get("parent_range")}
+                again_event = ("before_expression_again" 
+                               if "child_of_expression" in node_tags
+                               else "before_statement_again")
+                
+                self._handle_progress_event(frame, again_event, again_args)
+                
     
     def _respond_to_inline_commands(self):
         while isinstance(self._current_command, InlineCommand): 
             self._vm.handle_command(self._current_command)
             self._current_command = self._vm._fetch_command()
-    
-    def _interpret_as_before_again_event(self, original_event, original_focus, original_args):
-        if original_event == "after_expression":
-            node_tags = original_args.get("node_tags")
-            value = original_args.get("value")
             
-            #self._debug("IAE", node_tags, value)
-            if (node_tags is not None 
-                and ("last_child" in node_tags
-                     or "or_arg" in node_tags and value
-                     or "and_arg" in node_tags and not value)
-                and ("child_of_expression_statement" not in node_tags) # don't want to go to expression statement again
-                ):
-                
-                # next step will be finalizing evaluation of parent of current expr
-                # so let's say we're before that parent expression
-                parent_range = TextRange(*original_args.get("parent_range"))
-                # update the state and focus
-                if "child_of_expression" in node_tags: 
-                    return "before_expression_again", parent_range, {}
-                else:
-                    #debug("NOOOOOT" + str(node_tags))
-                    return "before_statement_again", parent_range, {}
-            else:
-                return None
-            
-        else:
-            return None
     
     def _get_source(self, frame):
         try:
@@ -751,120 +666,83 @@ class FancyTracer(Executor):
             return None
 
     
-    def _cmd_exec(self, frame, event, args, focus, cmd):
+    def _cmd_exec_completed(self, frame, event, args, focus, cmd):
         """
-        TODO: needs reworking, make it more similar to step, maybe refactor common code 
-        
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
-        
-        Can be called only in one of the before_* states.
-        Next state will be always one of after_* states.
         """
+        
         assert cmd.state in ("before_expression", "before_expression_again",
                              "before_statement", "before_statement_again")
         
-        fdebug(frame, "_cmd_exec %s %s %s", event, focus, cmd)
-        if id(frame) != cmd.frame_id:
-            fdebug(frame, "wrong frame")
-            # We're in a wrong frame,
-            # the answer must be in the frame where command was issued
-            return "skip_frame" 
         
-        elif focus.is_smaller_in(cmd.focus):
-            fdebug(frame, "smaller focus %s vs. %s", focus, cmd.focus)
-            # we're still in given code range
-            return "continue" 
-        
-        elif focus == cmd.focus:
-            fdebug(frame, "same focus")
-            if "before" in event:
-                # we're just starting
-                return "continue"
+        if id(frame) == cmd.frame_id:
             
-            elif (cmd.state in ("before_expression", "before_expression_again")
-                  and event == "after_expression"):
-                fdebug(frame, "sending value")
-                # normal expression completion
-                return DebuggerResponse(value=self._vm.export_value(args["value"]),
-                                        tags=args.get("node_tags", ""))
+            if focus.is_smaller_in(cmd.focus):
+                # we're executing a child of command focus,
+                # keep running
+                return False 
             
-            elif (cmd.state in ("before_statement", "before_statement_again")
-                  and event == "after_statement"):
-                # normal statement completion
-                return DebuggerResponse(tags=args.get("node_tags", ""))
-            
-            elif (cmd.state in ("before_statement", "before_statement_again")
-                  and event == "after_expression"):
-                # Same code range can contain expression statement and expression.
-                # Here we need to run just a bit more
-                return "continue"
-            
-            else:
-                # shouldn't be here
-                raise AssertionError("Unexpected state in responding to " + str(cmd))
+            elif focus == cmd.focus:
                 
-        else:
-            # current focus must be outside of starting focus
-            assert focus is None or focus.not_smaller_in(cmd.focus)
-            
-            # Anyway, the execution of the focus has completed (maybe unsuccessfully).
-            # In response hide the fact that current focus and/or state may have been moved away 
-            # from given range.
-            # TODO: do I need to hide this? Maybe I just forget about this statement/expression?
-            # TODO: what about exception?
-            if cmd.state == "before_expression":
-                return DebuggerResponse(state="after_expression", 
-                                        focus=cmd.focus,
-                                        tags="") 
+                if event.startswith("before_"):
+                    # we're just starting
+                    return False
+                
+                elif (event == "after_expression"
+                      and cmd.state in ("before_expression", "before_expression_again")
+                      or 
+                      event == "after_statement"
+                      and cmd.state in ("before_statement", "before_statement_again")):
+                    # Normal completion
+                    # Maybe there was an exception, but this is forgotten now
+                    cmd._unhandled_exception = False
+                    return True
+                
+                
+                elif (cmd.state in ("before_statement", "before_statement_again")
+                      and event == "after_expression"):
+                    # Same code range can contain expression statement and expression.
+                    # Here we need to run just a bit more
+                    return False
+                
+                else:
+                    # shouldn't be here
+                    raise AssertionError("Unexpected state in responding to " + str(cmd))
+                    
             else:
-                return DebuggerResponse(state="after_statement",
-                                        focus=cmd.focus,
-                                        tags="")
+                # We're outside of starting focus, assumedly because of an exception
+                return True
+        
+        else:
+            # We're in another frame
+            if self._frame_is_alive(cmd.frame_id):
+                # We're in a successor frame, keep running
+                return False
+            else:
+                # Original frame has completed, assumedly because of an exception
+                # We're done
+                return True
             
 
     
-    def _cmd_step(self, frame, event, args, focus, cmd):
-        """
-        Command step stops at all interesting places
-        """
-        if (focus == cmd.focus and id(frame) == cmd.frame_id and event == cmd.state
-            or not event.startswith("before") and not event.startswith("after")):
-            # We're still in the same situation where the command was issued,
-            # so keep running!
-            return "continue"
-        
-        elif event == 'after_expression':
-            return DebuggerResponse(value=self._vm.export_value(args["value"]),
-                                    tags=args.get("node_tags", ""))
-        
-        elif event in ('before_statement', 'before_expression',
-                       'before_statement_again', 'before_expression_again',
-                       'after_statement', 'after_expression'):
-            return DebuggerResponse(tags=args.get("node_tags", ""))
-        
-        else:
-            # We're not interested in other events when stepping
-            return "continue"
-            
-            
+    def _cmd_step_completed(self, frame, event, args, focus, cmd):
+        return True
     
-    def _cmd_line(self, frame, event, args, focus, cmd):
-        if (event in ("before_statement", "before_expression") 
+    
+    def _cmd_line_completed(self, frame, event, args, focus, cmd):
+        return (event in ("before_statement", "before_expression") 
             and eqfn(frame.f_code.co_filename, cmd.target_filename)
             and focus.lineno == cmd.target_lineno
-            and (focus != cmd.focus or id(frame) != cmd.frame_id)):
-            return DebuggerResponse()
-        else:
-            return "continue"
+            and (focus != cmd.focus or id(frame) != cmd.frame_id))
 
-    """
-    def _cmd_get_globals(self, frame, event, args, focus, cmd):
-        return DebuggerResponse(globals={
-            cmd.module_name : self._vm.export_globals(cmd.module_name)
-        })
-    """
-            
+    
+    def _frame_is_alive(self, frame_id):
+        for frame in self._custom_stack:
+            if frame.id == frame_id:
+                return True
+        else:
+            return False 
     
     def _export_stack(self):
         return [FrameInfo (
@@ -873,9 +751,11 @@ class FancyTracer(Executor):
                 module_name=custom_frame.system_frame.f_globals["__name__"],
                 code_name=custom_frame.system_frame.f_code.co_name,
                 locals=self._vm.export_variables(custom_frame.system_frame.f_locals),
-                focus=custom_frame.focus,
                 source=self._get_source(custom_frame.system_frame),
                 firstlineno=custom_frame.system_frame.f_code.co_firstlineno,
+                last_event=custom_frame.last_event,
+                last_event_args=custom_frame.last_event_args,
+                last_event_focus=custom_frame.last_event_focus,
             ) for custom_frame in self._custom_stack]
 
     
@@ -937,9 +817,6 @@ class FancyTracer(Executor):
                     else:
                         add_tag(last_child, "child_of_statement")
                     
-                    if isinstance(node, ast.Expr):
-                        add_tag(last_child, "child_of_expression_statement")
-                        
                     if isinstance(node, ast.Call):
                         add_tag(last_child, "last_call_arg")
                     
@@ -958,12 +835,7 @@ class FancyTracer(Executor):
                     add_tag(child, "and_arg")
                     child.parent_node = node
             
-            # TODO: does assert evaluate msg when test == True ??
-            
-            if (hasattr(ast, "Try") and isinstance(node, ast.Try) # Python 3 
-                or hasattr(ast, "TryExcept") and isinstance(node, ast.TryExcept)): # Python 2
-                for handler in node.handlers:
-                    add_tag(handler, "first_except_stmt")
+            # TODO: assert (doesn't evaluate msg when test == True)
             
                 
             # make sure every node has this field
@@ -1025,15 +897,6 @@ class FancyTracer(Executor):
                 if (isinstance(node, _ast.expr)
                     and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))):
 
-#                     if "call_function" in node.tags and not tracer._expand_call_functions:
-#                         # TODO: test with no-argument calls
-#                         
-#                         for child in ast.iter_child_nodes(node):
-#                             ast.NodeTransformer.generic_visit(self, child)
-#                             
-#                         return node
-#                     else:
-                        
                         # before marker 
                         before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
                         ast.copy_location(before_marker, node)

@@ -4,7 +4,7 @@ EditorNotebook may contain several Editor-s, each Editor contains one CodeView.
 
 It can present program execution information in two ways:
  - coarse: use enter/exit_execution_mode to highlight/un-highlight the main script
- - precise: pass DebuggerResponse-s to handle_vm_message to show program state more precisely
+ - precise: pass DebuggerProgressResponse-s to handle_vm_message to show program state more precisely
 
  EditorNotebook passes both kind of requests on to relevant editors.
 
@@ -20,7 +20,7 @@ import tkinter.messagebox as tkMessageBox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
-from thonny.common import DebuggerResponse
+from thonny.common import DebuggerProgressResponse
 from thonny.misc_utils import eqfn, shorten_repr
 from thonny import ui_utils
 from thonny import misc_utils
