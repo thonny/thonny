@@ -20,6 +20,7 @@ from thonny.misc_utils import eqfn
 from thonny.common import InputRequest, OutputEvent, DebuggerProgressResponse, TextRange,\
     ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InlineResponse
+from weakref import WeakValueDictionary
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -37,7 +38,7 @@ class VM:
     def __init__(self, main_dir):
         #print(sys.argv, file=sys.stderr)
         self._main_dir = main_dir
-        self._heap = {} # TODO: weakref.WeakValueDictionary() ??
+        self._heap = WeakValueDictionary()
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
         self._current_executor = None
@@ -87,24 +88,9 @@ class VM:
         else:
             try:
                 response = handler(cmd)
-                
                 if response is not None:
-                
-                    # TODO: ask explicitly for them with InlineRequest ??
-                    # add state information
-                    if hasattr(cmd, "globals_required") and cmd.globals_required:
-                        response.globals = {cmd.globals_required : self.export_globals(cmd.globals_required)}
-                        
-                    if hasattr(cmd, "heap_required") and cmd.heap_required:
-                        response.heap = self.export_heap()
-                        
-                    response.cwd = os.getcwd()
-                    
                     self._send_response(response)
-                
             except:
-                #raise
-                # TODO: 
                 self._send_response(ToplevelResponse (
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
                 ))
@@ -176,6 +162,31 @@ class VM:
                 pass
     
     
+    def _cmd_get_globals(self, cmd):
+        if not cmd.module_name in sys.modules:
+            raise ThonnyClientError("Module '{0}' is not loaded".format(cmd.module_name))
+        
+        return InlineResponse(module_name=cmd.module_name,
+                              globals=self.export_variables(sys.modules[cmd.module_name].__dict__))
+    
+    def _cmd_get_locals(self, cmd):
+        for frame in inspect.stack():
+            if id(frame) == cmd.frame_id:
+                return InlineResponse(locals=self.export_variables(frame.f_locals))
+        else:
+            raise ThonnyClientError("Frame '{0}' not found".format(cmd.frame_id))
+            
+    
+    def _cmd_get_heap(self, cmd):
+        result = {}
+        for key in self._heap:
+            result[key] = self.export_value(self._heap[key])
+            
+        return InlineResponse(heap=result)
+    
+    def _cmd_get_cwd(self, cmd):
+        return InlineResponse(cwd=os.getcwd())
+    
     def _cmd_get_object_info(self, cmd):
         if cmd.object_id in self._heap:
             value = self._heap[cmd.object_id]
@@ -245,21 +256,6 @@ class VM:
             info["entries"].append((self.export_value(key),
                                      self.export_value(value[key])))
         
-    def _cmd_get_globals(self, cmd):
-        pass
-    
-    def _cmd_get_locals(self, cmd):
-        pass
-    
-    def _cmd_get_heap(self, cmd):
-        #TODO:
-        """ Before was like that:
-                            if (hasattr(self._current_command, "heap_required")
-                        and self._current_command.heap_required):
-                        response.heap = self._vm.export_heap()
-        """
-
-        pass
     
     def _execute_file(self, cmd, debug_mode):
         source, _ = misc_utils.read_python_file(cmd.filename)
@@ -330,18 +326,6 @@ class VM:
                          repr=repr(value), 
                          type_name=type_name)
         
-        return result
-    
-    def export_globals(self, module_name):
-        if not module_name in sys.modules:
-            raise ThonnyClientError("Module '{0}' is not loaded".format(module_name))
-        return self.export_variables(sys.modules[module_name].__dict__)
-    
-    def export_heap(self):
-        result = {}
-        for key in self._heap:
-            result[key] = self.export_value(self._heap[key])
-            
         return result
     
     def export_variables(self, variables):
@@ -835,7 +819,7 @@ class FancyTracer(Executor):
                     add_tag(child, "and_arg")
                     child.parent_node = node
             
-            # TODO: assert (doesn't evaluate msg when test == True)
+            # TODO: assert (it doesn't evaluate msg when test == True)
             
                 
             # make sure every node has this field
