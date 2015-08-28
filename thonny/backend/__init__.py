@@ -17,10 +17,9 @@ import __main__  # @UnresolvedImport
 from thonny import ast_utils
 from thonny import misc_utils
 from thonny.misc_utils import eqfn
-from thonny.common import InputRequest, OutputEvent, DebuggerProgressResponse, TextRange,\
-    ToplevelResponse, parse_message, serialize_message, DebuggerCommand,\
-    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InlineResponse
-from weakref import WeakValueDictionary
+from thonny.common import TextRange,\
+    parse_message, serialize_message, DebuggerCommand,\
+    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -38,12 +37,11 @@ class VM:
     def __init__(self, main_dir):
         #print(sys.argv, file=sys.stderr)
         self._main_dir = main_dir
-        self._heap = WeakValueDictionary()
+        self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
-        self._command_count = 0
 
         
         # script mode
@@ -80,52 +78,43 @@ class VM:
         
         #if cmd.command != "tkupdate":
         #    debug("MAINLOOP: %s", cmd)
-        
+        response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
         try:
             handler = getattr(self, "_cmd_" + cmd.command)
         except AttributeError:
-            self._send_response(ToplevelResponse(error="Unknown command: %" + cmd.command))
+            self.send_message(response_type, error="Unknown command: " + cmd.command)
         else:
             try:
-                response = handler(cmd)
-                if response is not None:
-                    self._send_response(response)
+                handler(cmd)
             except:
-                self._send_response(ToplevelResponse (
+                self.send_message(response_type,
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
-                ))
+                )
         
     
-    def _cmd_pass(self, cmd):
-        """
-        Empty command, used for getting globals for new module
-        or when user presses ENTER on shell prompt
-        """
-        return ToplevelResponse() # globals will be added by mainloop
-        
     def _cmd_cd(self, cmd):
         try:
             os.chdir(cmd.path)
-            return ToplevelResponse()
+            self.send_message("ToplevelResult")
         except Exception as e:
-            return ToplevelResponse(error=str(e))
+            self.send_message("ToplevelResult", error=str(e))
     
     
     def _cmd_Reset(self, cmd):
         # nothing to do, because Reset always happens in fresh process
-        return ToplevelResponse()
+        self.send_message("ToplevelResult")
     
     def _cmd_Run(self, cmd):
-        return self._execute_file(cmd, False)
+        self._execute_file(cmd, False)
     
     def _cmd_run(self, cmd):
-        return self._execute_file(cmd, False)
+        self._execute_file(cmd, False)
     
     def _cmd_Debug(self, cmd):
-        return self._execute_file(cmd, True)
+        self._execute_file(cmd, True)
     
     def _cmd_debug(self, cmd):
-        return self._execute_file(cmd, True)
+        self._execute_file(cmd, True)
     
     def _cmd_python(self, cmd):
         # let's see if it's single expression or something more complex
@@ -134,7 +123,9 @@ class VM:
         try:
             root = ast.parse(cmd.cmd_line, filename=filename, mode="exec")
         except SyntaxError as e:
-            return ToplevelResponse(error="".join(traceback.format_exception_only(SyntaxError, e)))
+            self.send_message("ToplevelResult",
+                error="".join(traceback.format_exception_only(SyntaxError, e)))
+            return
             
         assert isinstance(root, ast.Module)
             
@@ -143,8 +134,8 @@ class VM:
         else:
             mode = "exec"
         
-        return self._execute_source(cmd.cmd_line, filename, mode,
-                   hasattr(cmd, "debug_mode") and cmd.debug_mode)
+        self._execute_source(cmd.cmd_line, filename, mode,
+            hasattr(cmd, "debug_mode") and cmd.debug_mode)
     
     def _cmd_tkupdate(self, cmd):
         tkinter = sys.modules.get("tkinter")
@@ -166,13 +157,13 @@ class VM:
         if not cmd.module_name in sys.modules:
             raise ThonnyClientError("Module '{0}' is not loaded".format(cmd.module_name))
         
-        return InlineResponse(module_name=cmd.module_name,
+        self.send_message("Globals", module_name=cmd.module_name,
                               globals=self.export_variables(sys.modules[cmd.module_name].__dict__))
     
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
             if id(frame) == cmd.frame_id:
-                return InlineResponse(locals=self.export_variables(frame.f_locals))
+                self.send_message("Locals", locals=self.export_variables(frame.f_locals))
         else:
             raise ThonnyClientError("Frame '{0}' not found".format(cmd.frame_id))
             
@@ -182,10 +173,7 @@ class VM:
         for key in self._heap:
             result[key] = self.export_value(self._heap[key])
             
-        return InlineResponse(heap=result)
-    
-    def _cmd_get_cwd(self, cmd):
-        return InlineResponse(cwd=os.getcwd())
+        self.send_message("Heap", heap=result)
     
     def _cmd_get_object_info(self, cmd):
         if cmd.object_id in self._heap:
@@ -219,9 +207,14 @@ class VM:
             elif (isinstance(value, dict)):
                 self._add_entries_info(value, info)
             
-            return InlineResponse(object_info=info)
         else:
-            return InlineResponse(object_info={'id' : cmd.object_id}, not_found=True)
+            info = {'id' : cmd.object_id,
+                    "repr": "<object info not found>",
+                    "type" : "object",
+                    "type_id" : id(object),
+                    "attributes" : {}}
+        
+        self.send_message("ObjectInfo", id=cmd.object_id, info=info)
     
     def _add_file_handler_info(self, value, info):
         try:
@@ -305,11 +298,15 @@ class VM:
     def _fetch_command(self):
         line = self._original_stdin.readline()
         cmd = parse_message(line)
-        cmd._exception = None # The command doesn't propagate an exception
         return cmd
 
-    def _send_response(self, msg):
-        self._original_stdout.write(serialize_message(msg) + "\n")
+    def send_message(self, message_type, **kwargs):
+        
+        kwargs["message_type"] = message_type
+        if "cwd" not in kwargs:
+            kwargs["cwd"] = os.getcwd()
+        
+        self._original_stdout.write(repr(kwargs) + "\n")
         self._original_stdout.flush()
         
     def export_value(self, value, skip_None=False):
@@ -372,7 +369,7 @@ class VM:
             try:
                 self._vm._enter_io_function()
                 if data != "":
-                    self._vm._send_response(OutputEvent(stream_name=self._stream_name, data=data))
+                    self._vm.send_message("ProgramOutput", stream_name=self._stream_name, data=data)
             finally:
                 self._vm._exit_io_function()
         
@@ -387,7 +384,7 @@ class VM:
         def read(self, limit=-1):
             try:
                 self._vm._enter_io_function()
-                self._vm._send_response(InputRequest(method="read", limit=limit))
+                self._vm.send_message("InputRequest", method="read", limit=limit)
                 # TODO: maybe it's better to read as a command-package?
                 return self._target_stream.read(limit)
             finally:
@@ -396,7 +393,7 @@ class VM:
         def readline(self, limit=-1):
             try:
                 self._vm._enter_io_function()
-                self._vm._send_response(InputRequest(method="readline", limit=limit))
+                self._vm.send_message("InputRequest", method="readline", limit=limit)
                 return self._target_stream.readline(limit)
             finally:
                 self._vm._exit_io_function()
@@ -404,7 +401,7 @@ class VM:
         def readlines(self, limit=-1):
             try:
                 self._vm._enter_io_function()
-                self._vm._send_response(InputRequest(method="readlines", limit=limit))
+                self._vm.send_message("InputRequest", method="readlines", limit=limit)
                 return self._target_stream.readlines(limit)
             finally:
                 self._vm._exit_io_function()
@@ -426,20 +423,20 @@ class Executor:
                 value = eval(bytecode, __main__.__dict__)
                 if value is not None:
                     builtins._ = value 
-                return ToplevelResponse(value_info=self._vm.export_value(value))
+                self._vm.send_message("ToplevelResult", value_info=self._vm.export_value(value))
             else:
                 assert mode == "exec"
                 exec(bytecode, __main__.__dict__)
-                return ToplevelResponse()
+                self._vm.send_message("ToplevelResult")
         except SyntaxError as e:
-            return ToplevelResponse(error="".join(traceback.format_exception_only(SyntaxError, e)))
+            self._vm.send_message("ToplevelResult", error="".join(traceback.format_exception_only(SyntaxError, e)))
         except ThonnyClientError as e:
-            return ToplevelResponse(error=str(e))
+            self._vm.send_message("ToplevelResult", error=str(e))
         except:
             # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
             # for VM mainloop they are not exceptions
             traceback.print_exc(EXCEPTION_TRACEBACK_LIMIT)
-            return ToplevelResponse()
+            self._vm.send_message("ToplevelResult")
         finally:
             sys.settrace(None)
 
@@ -462,9 +459,8 @@ class FancyTracer(Executor):
     def execute_source(self, source, filename, mode):
         self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
         
-        response = Executor.execute_source(self, source, filename, mode)
+        Executor.execute_source(self, source, filename, mode)
         #assert len(self._custom_stack) == 0
-        return response
         
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
@@ -583,14 +579,14 @@ class FancyTracer(Executor):
         # If method decides we're in the right place to respond to the command ...
         if tester(frame, event, args, focus, self._current_command):
             
-            self._vm._send_response(DebuggerProgressResponse(
+            self._vm.send_message("DebuggerProgress",
                 command=self._current_command.command,
                 stack=self._export_stack(),
                 exception=self._vm.export_value(self._unhandled_exception, True),
                 value=self._vm.export_value(args["value"]) 
                     if event == "after_expression"
                     else None
-            ))
+            )
             
             # Fetch next debugger command
             self._current_command = self._vm._fetch_command()

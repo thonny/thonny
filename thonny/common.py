@@ -52,6 +52,7 @@ class Record:
     def __hash__(self):
         return hash(repr(self))
 
+
 class TextRange(Record):
     def __init__(self, lineno, col_offset, end_lineno, end_col_offset):
         self.lineno = lineno
@@ -111,27 +112,6 @@ class FrameInfo(Record):
         )
 
 
-"""
-# I didn't bother listing possible cases and fields of CommunicationObjects
-# but did't want to use dict either (object form is a bit nicer to write) 
-class CommunicationObject:
-    def __init__(self, **kw):
-        for key in kw:
-            if key.endswith("_range") and isinstance(kw[key], tuple):
-                value = TextRange(*kw[key])
-            else:
-                value = kw[key]
-                
-            setattr(self, key, value)
-    
-    def serialize(self):
-        d = self.__dict__.copy()
-        d["class"] = self.__class__.__name__
-        return repr(d)
-    
-    def __repr__(self):
-        return self.serialize()
-"""
 class ActionCommand(Record):
     pass
 
@@ -146,43 +126,6 @@ class InlineCommand(Record):
     Can be used both during debugging and between debugging.
     Initially meant for sending variable and heap info requests
     """
-    pass
-
-class InputSubmission(Record):
-    pass
-
-
-class PauseMessage(Record):
-    "PauseMessage-s indicate that backend has paused and is waiting for new command"
-    pass
-
-class ActionResponse(PauseMessage):
-    pass
-
-class ToplevelResponse(ActionResponse):
-    def __init__(self, **kw):
-        kw["vm_state"] = "toplevel"
-        Record.__init__(self, **kw)
-
-class DebuggerProgressResponse(ActionResponse):
-    def __init__(self, **kw):
-        kw["vm_state"] = "debug"
-        Record.__init__(self, **kw)
-
-
-
-class InlineResponse(Record):
-    """
-    Meant for getting variable/heap info from backend
-    """
-
-
-class InputRequest(PauseMessage):
-    def __init__(self, **kw):
-        kw["vm_state"] = "input"
-        Record.__init__(self, **kw)
-
-class OutputEvent(Record):
     pass
 
 

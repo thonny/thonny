@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
-from tkinter import ttk
 
 from thonny.memory import format_object_id, VariablesFrame, MemoryFrame,\
     MAX_REPR_LENGTH_IN_GRID
 from thonny.misc_utils import shorten_repr
 from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text,\
     TextFrame
-from thonny.common import ActionResponse, InlineCommand
+from thonny.common import InlineCommand
 import ast
 from thonny.globals import get_workbench
 
@@ -93,6 +92,11 @@ class ObjectInspector(ScrollableFrame):
             DictInspector(self.grid_frame),
         ]
 
+        get_workbench().bind("ObjectInfo", self._handle_object_info_event, True)
+        get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
+        get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
+
+
     
     def create_navigation_link(self, col, text, action, padx=0):
         link = tk.Label(self.grid_frame,
@@ -135,18 +139,18 @@ class ObjectInspector(ScrollableFrame):
             self.set_object_info(None)
             self.request_object_info()
     
-    def handle_vm_message(self, msg):
+    def _handle_object_info_event(self, msg):
         if self.winfo_ismapped():
-            if hasattr(msg, "object_info") and msg.object_info["id"] == self.object_id:
+            if msg.object_info["id"] == self.object_id:
                 if hasattr(msg, "not_found") and msg.not_found:
                     self.object_id = None
                     self.set_object_info(None)
                 else:
                     self.set_object_info(msg.object_info)
-            elif (isinstance(msg, ActionResponse)
-                  and not hasattr(msg, "error") 
-                  and self.object_id is not None):
-                self.request_object_info()
+    
+    def _handle_progress_event(self, event):
+        if self.object_id is not None:
+            self.request_object_info()
                 
                 
     def request_object_info(self): 

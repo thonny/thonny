@@ -1,27 +1,28 @@
 # -*- coding: utf-8 -*-
 
 from _thread import start_new_thread
+import ast
 import collections
 from logging import info, debug
 import os.path
+import shlex
 import subprocess
 import sys
 import threading
 
-from thonny.common import parse_message, serialize_message, ToplevelCommand, PauseMessage, \
-    ActionCommand, OutputEvent, quote_path_for_shell, \
-    InlineCommand, parse_shell_command, unquote_path,\
-    CommandSyntaxError
+from thonny.common import serialize_message, ToplevelCommand, \
+    quote_path_for_shell, \
+    InlineCommand, parse_shell_command, unquote_path, \
+    CommandSyntaxError, parse_message, DebuggerCommand
+from thonny.globals import get_workbench, register_runner
 from thonny.shell import ShellView
-from thonny.globals import get_workbench
-import shlex
 
 
 COMMUNICATION_ENCODING = "UTF-8"
 
 class Runner:
     def __init__(self):
-        
+        register_runner(self)
         get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
         get_workbench().add_option("run.auto_cd", True)
         
@@ -40,7 +41,7 @@ class Runner:
         self._init_commands()
         
         self._poll_vm_messages()
-        self._advance_background_tk_mainloop()
+        #self._advance_background_tk_mainloop()
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -62,6 +63,9 @@ class Runner:
     def send_command(self, cmd):
         self._proxy.send_command(cmd)
     
+    def send_program_input(self, data):
+        self._proxy.send_program_input(data)
+        
     def execute_current(self, mode):
         """
         This method's job is to create a command for running/debugging
@@ -98,7 +102,7 @@ class Runner:
         get_workbench().get_view("ShellView").submit_command(cmd_line)
         
     def _cmd_run_current_script_enabled(self):
-        return (self._proxy.get_state() == "toplevel"
+        return (self._proxy.get_state() == "waiting_toplevel_command"
                 and get_workbench().get_editor_notebook().get_current_editor() is not None)
     
     def _cmd_run_current_script(self):
@@ -134,8 +138,7 @@ class Runner:
                 
                 self.send_command(ToplevelCommand(command=command,
                                    filename=unquote_path(args[0]),
-                                   args=args[1:],
-                                   id=self._shell.get_last_command_id()))
+                                   args=args[1:]))
             else:
                 raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
 
@@ -151,7 +154,7 @@ class Runner:
         When mainloop is omitted, then program can be interacted with
         from the shell after it runs to the end.
         """
-        if self._proxy.get_state() == "toplevel":
+        if self._proxy.get_state() == "waiting_toplevel_command":
             self._proxy.send_command(InlineCommand(command="tkupdate"))
         get_workbench().after(50, self._advance_background_tk_mainloop)
         
@@ -165,10 +168,11 @@ class Runner:
             if not msg:
                 break
             
-            if hasattr(msg, "success") and not msg.success:
-                info("_poll_vm_messages, not success")
+            debug("Fetched msg: %s", msg)
             
-            get_workbench().event_generate("BackendMessage", message=msg)
+            get_workbench().event_generate(msg["message_type"], **msg)
+            
+            # TODO: maybe distinguish between workbench cwd and backend cwd ??
             get_workbench().set_option("run.working_directory", self._proxy.cwd, save_now=False)
             get_workbench().update_idletasks()
             
@@ -177,8 +181,6 @@ class Runner:
 
 class _BackendProxy:
     def __init__(self, default_cwd, main_dir):
-        global _CURRENT_VM
-        
         if os.path.exists(default_cwd):
             self.cwd = default_cwd
         else:
@@ -186,52 +188,50 @@ class _BackendProxy:
             
         self.thonny_dir = main_dir
         self._proc = None
+        self._state = None
+        self._message_queue = None
         self._state_lock = threading.RLock()
-        self.send_command(ToplevelCommand(command="Reset"))
-        
-        _CURRENT_VM = self
         
     def get_state(self):
         with self._state_lock:
-            if self._current_pause_msg is None:
-                return "busy"
-            else: # "toplevel", "debug" or "input"
-                return self._current_pause_msg.vm_state
+            return self._state
     
     def get_state_message(self):
         with self._state_lock:
             return self._current_pause_msg
     
     def fetch_next_message(self):
-        # combine available output messages to one single message, 
-        # in order to put less pressure on UI code
         if not self._message_queue or len(self._message_queue) == 0:
             return None
         
         msg = self._message_queue.popleft()
-        if isinstance(msg, OutputEvent):
-            stream_name = msg.stream_name
-            data = msg.data
+        
+        if msg["message_type"] == "Output":
+            # combine available output messages to one single message, 
+            # in order to put less pressure on UI code
             
             while True:
                 if len(self._message_queue) == 0:
-                    return OutputEvent(stream_name=stream_name, data=data)
+                    return msg
                 else:
-                    msg = self._message_queue.popleft()
-                    if isinstance(msg, OutputEvent) and msg.stream_name == stream_name:
-                        data += msg.data
+                    next_msg = self._message_queue.popleft()
+                    if (next_msg["message_type"] == "Output" 
+                        and next_msg["stream_name"] == msg["stream_name"]):
+                        msg["data"] += next_msg["data"]
                     else:
                         # not same type of message, put it back
-                        self._message_queue.appendleft(msg)
-                        return OutputEvent(stream_name=stream_name, data=data)
+                        self._message_queue.appendleft(next_msg)
+                        return msg
             
         else: 
             return msg
     
     def send_command(self, cmd):
         with self._state_lock:
-            if isinstance(cmd, ActionCommand):
-                self._current_pause_msg = None
+            assert self._state != "waiting_input"
+             
+            if isinstance(cmd, ToplevelCommand) or isinstance(cmd, DebuggerCommand):
+                self._state = "busy"
             
             if (isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset")):
                 self._kill_current_process()
@@ -239,11 +239,12 @@ class _BackendProxy:
                  
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush() # required for Python 3.1
-            #debug("sent a command: %s", cmd)
+            debug("sent a command in state %s: %s", self._state, cmd)
     
     def send_program_input(self, data):
         with self._state_lock:
-            assert self.get_state() == "input"
+            assert self._state == "waiting_input"
+            self._state = "busy"
             self._proc.stdin.write(data.encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush()
     
@@ -295,14 +296,20 @@ class _BackendProxy:
             if data == '':
                 break
             else:
-                #print("MSG", data)
+                debug("Got raw msg: %s", data)
                 msg = parse_message(data)
-                if hasattr(msg, "cwd"):
-                    self.cwd = msg.cwd
+                debug("Got <%s>: %s", msg["message_type"], msg)
+                if "cwd" in msg:
+                    self.cwd = msg["cwd"]
+                    
                 with self._state_lock:
                     self._message_queue.append(msg)
-                    if isinstance(msg, PauseMessage):
-                        self._current_pause_msg = msg
+                    if msg["message_type"] == "ToplevelResult":
+                        self._state = "waiting_toplevel_command"
+                    elif msg["message_type"] == "DebuggerProgress":
+                        self._state = "waiting_debug_command"
+                    elif msg["message_type"] == "InputRequest":
+                        self._state = "waiting_input"
 
     def _listen_stderr(self):
         # stderr is used only for debugger debugging

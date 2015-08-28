@@ -12,7 +12,7 @@ import traceback
 from thonny import misc_utils
 from thonny import ui_utils
 from thonny.code import EditorNotebook
-from thonny.common import Record
+from thonny.common import Record, ToplevelCommand
 from thonny.config import ConfigurationManager
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook
@@ -71,6 +71,8 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         
         self._load_plugins()
+        
+        self._runner.send_command(ToplevelCommand(command="Reset"))
         self.mainloop()
     
     def _init_window(self):
@@ -682,9 +684,9 @@ class Workbench(tk.Tk):
     def _update_title(self, event):
         self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._runner.get_cwd(), *sys.version_info))
     
+
 class WorkbenchEvent(Record):
-    def __init__(self, sequence, **kw):
-        Record.__init__(self, **kw)
+    def __init__(self, sequence, **kwargs):
+        Record.__init__(self, **kwargs)
         self.sequence = sequence
-
-
+        

@@ -1,17 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-EditorNotebook may contain several Editor-s, each Editor contains one CodeView.
-
-It can present program execution information in two ways:
- - coarse: use enter/exit_execution_mode to highlight/un-highlight the main script
- - precise: pass DebuggerProgressResponse-s to handle_vm_message to show program state more precisely
-
- EditorNotebook passes both kind of requests on to relevant editors.
-
-
-"""
-
-import ast
 import sys
 import os.path
 import tkinter as tk
@@ -20,16 +7,10 @@ import tkinter.messagebox as tkMessageBox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
-from thonny.common import DebuggerProgressResponse
-from thonny.misc_utils import eqfn, shorten_repr
-from thonny import ui_utils
-from thonny import misc_utils
-from thonny import ast_utils
-from thonny import memory
+from thonny.misc_utils import eqfn
 from thonny.codeview import CodeView
-from logging import debug
-from thonny.memory import VariablesFrame
 from thonny.globals import get_workbench
+from thonny import misc_utils
 
 EDITOR_STATE_CHANGE = "<<editor-state-change>>"
 
@@ -141,11 +122,6 @@ class Editor(ttk.Frame):
         if self._stepper is not None:
             self._stepper.clear_debug_view()
     
-    def exit_execution_mode(self):
-        self.clear_debug_view()
-        self._code_view.exit_execution_mode()
-        self._stepper = None
-    
     def focus_set(self):
         self._code_view.focus_set()
     
@@ -226,8 +202,10 @@ class EditorNotebook(ttk.Notebook):
         
         filenames = sys.argv[1:]
         
-        if len(filenames) == 0 and get_workbench().get_option("file.reopen_files"):
-            filenames = get_workbench().get_option("file.open_files")
+        if get_workbench().get_option("file.reopen_files"):
+            for filename in get_workbench().get_option("file.open_files"): 
+                if filename not in filenames:
+                    filenames.append(filename) 
             
         for filename in filenames:
             if os.path.exists(filename):

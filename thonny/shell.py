@@ -6,8 +6,7 @@ from tkinter import ttk
 import traceback
 
 from thonny import memory
-from thonny.common import InputRequest, ToplevelResponse, OutputEvent, ToplevelCommand,\
-    parse_shell_command
+from thonny.common import ToplevelCommand, parse_shell_command
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import TextWrapper
 import tkinter as tk
@@ -24,7 +23,6 @@ class ShellView (ttk.Frame, TextWrapper):
         
         
         self._before_io = True
-        self._command_count = 0
         self._command_history = [] # actually not really history, because each command occurs only once
         self._command_history_current_index = None 
         self.text_mode = "toplevel"
@@ -119,73 +117,70 @@ class ShellView (ttk.Frame, TextWrapper):
         
         self._command_handlers = {}
     
-        get_workbench().bind("BackendMessage", 
-            lambda e: self._handle_vm_message(e.message), True)
+        get_workbench().bind("InputRequest", self._handle_input_request, True)
+        get_workbench().bind("ProgramOutput", self._handle_program_output, True)
+        get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
         
 
         
         
 
-    def _handle_vm_message(self, msg):
-        if isinstance(msg, InputRequest):
-            self.text_mode = "io"
-            self.text["font"] = get_workbench().get_font("IOFont") # otherwise the cursor is of toplevel size
-            self.text.focus_set()
-            self.text.mark_set("insert", "end")
-            self.text.tag_remove("sel", "1.0", tk.END)
-            self._try_submit_input() # try to use leftovers from previous request
-            self.text.see("end")
-            
-        elif isinstance(msg, OutputEvent):
-            self.text_mode = "io"
-            self.text["font"] = get_workbench().get_font("IOFont")
-            
-            # mark first line of io
-            if self._before_io:
-                self._insert_text_directly(msg.data[0], ("io", msg.stream_name, "vertically_spaced"))
-                self._before_io = False
-                self._insert_text_directly(msg.data[1:], ("io", msg.stream_name))
-            else:
-                self._insert_text_directly(msg.data, ("io", msg.stream_name))
-            
-            self.text.mark_set("output_end", self.text.index("end-1c"))
-            self.text.see("end")
-            
-        elif isinstance(msg, ToplevelResponse):
-            
-            self.text_mode = "toplevel"
-            self.text["font"] = get_workbench().get_font("EditorFont")
-            self._before_io = True
-            if hasattr(msg, "error"):
-                self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
-                
-            if hasattr(msg, "value_info"):
-                value_repr = shorten_repr(msg.value_info.repr, 10000)
-                if value_repr != "None":
-                    if get_workbench().in_heap_mode():
-                        value_repr = memory.format_object_id(msg.value_info.id)
-                    object_tag = "object_" + str(msg.value_info.id)
-                    self._insert_text_directly(value_repr + "\n", ("toplevel",
-                                                                   "value",
-                                                                   object_tag))
-                    if running_on_mac_os():
-                        sequence = "<Command-Button-1>"
-                    else:
-                        sequence = "<Control-Button-1>"
-                    self.text.tag_bind(object_tag, sequence,
-                                       lambda _: get_workbench().event_generate(
-                                            "ObjectSelect", object_id=msg.value_info.id))
-                    
-                    self.active_object_tags.add(object_tag)
-            
-            self.text.mark_set("output_end", self.text.index("end-1c"))
-            self._insert_prompt()
-            self._try_submit_input()
-            self.text.see("end")
-            
+    def _handle_input_request(self, msg):
+        self.text_mode = "io"
+        self.text["font"] = get_workbench().get_font("IOFont") # otherwise the cursor is of toplevel size
+        self.text.focus_set()
+        self.text.mark_set("insert", "end")
+        self.text.tag_remove("sel", "1.0", tk.END)
+        self._current_input_request = msg
+        self._try_submit_input() # try to use leftovers from previous request
+        self.text.see("end")
+
+    def _handle_program_output(self, msg):
+        self.text_mode = "io"
+        self.text["font"] = get_workbench().get_font("IOFont")
+        
+        # mark first line of io
+        if self._before_io:
+            self._insert_text_directly(msg.data[0], ("io", msg.stream_name, "vertically_spaced"))
+            self._before_io = False
+            self._insert_text_directly(msg.data[1:], ("io", msg.stream_name))
         else:
-            pass
-    
+            self._insert_text_directly(msg.data, ("io", msg.stream_name))
+        
+        self.text.mark_set("output_end", self.text.index("end-1c"))
+        self.text.see("end")
+            
+    def _handle_toplevel_result(self, msg):
+        self.text_mode = "toplevel"
+        self.text["font"] = get_workbench().get_font("EditorFont")
+        self._before_io = True
+        if hasattr(msg, "error"):
+            self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
+            
+        if hasattr(msg, "value_info"):
+            value_repr = shorten_repr(msg.value_info.repr, 10000)
+            if value_repr != "None":
+                if get_workbench().in_heap_mode():
+                    value_repr = memory.format_object_id(msg.value_info.id)
+                object_tag = "object_" + str(msg.value_info.id)
+                self._insert_text_directly(value_repr + "\n", ("toplevel",
+                                                               "value",
+                                                               object_tag))
+                if running_on_mac_os():
+                    sequence = "<Command-Button-1>"
+                else:
+                    sequence = "<Control-Button-1>"
+                self.text.tag_bind(object_tag, sequence,
+                                   lambda _: get_workbench().event_generate(
+                                        "ObjectSelect", object_id=msg.value_info.id))
+                
+                self.active_object_tags.add(object_tag)
+        
+        self.text.mark_set("output_end", self.text.index("end-1c"))
+        self._insert_prompt()
+        self._try_submit_input()
+        self.text.see("end")
+            
     def _insert_prompt(self):
         # if previous output didn't put a newline, then do it now
         if not self.text.index("output_insert").endswith(".0"):
@@ -210,7 +205,7 @@ class ShellView (ttk.Frame, TextWrapper):
         self._command_handlers[command] = handler
         
     def submit_command(self, cmd_line):
-        assert self._get_state() == "toplevel"
+        assert self._get_state() == "waiting_toplevel_command"
         self.text.delete("input_start", "end")
         self.text.insert("input_start", cmd_line, ("automagic",))
         self.text.see("end")
@@ -227,7 +222,7 @@ class ShellView (ttk.Frame, TextWrapper):
             self.text.mark_gravity("input_start", tk.LEFT)
             self.text.mark_gravity("output_insert", tk.LEFT)
             
-            if self._get_state() == "input":
+            if self._get_state() == "waiting_input":
                 tags = tags + ("io", "stdin")
             else:
                 tags = tags + ("toplevel", "command")
@@ -240,7 +235,7 @@ class ShellView (ttk.Frame, TextWrapper):
             TextWrapper._user_text_insert(self, index, txt, tags, **kw)
             
             # tag first char of io separately
-            if self._get_state() == "input" and self._before_io:
+            if self._get_state() == "waiting_input" and self._before_io:
                 self.text.tag_add("vertically_spaced", index)
                 self._before_io = False
             
@@ -300,7 +295,7 @@ class ShellView (ttk.Frame, TextWrapper):
             start_index = self.text.index("input_start")
             end_index = self.text.index("input_start+{0}c".format(len(submittable_text)))
             # apply correct tags (if it's leftover then it doesn't have them yet)
-            if self._get_state() == "input":
+            if self._get_state() == "waiting_input":
                 self.text.tag_add("io", start_index, end_index)
                 self.text.tag_add("stdin", start_index, end_index)
             else:
@@ -330,18 +325,18 @@ class ShellView (ttk.Frame, TextWrapper):
             #self.text.tag_add("pending_input", end_index, "end-1c")
     
     def _editing_allowed(self):
-        return self._get_state() in ('toplevel', 'input')
+        return self._get_state() in ('waiting_toplevel_command', 'waiting_input')
     
     def _extract_submittable_input(self, input_text):
         
-        if self._get_state() == "toplevel":
+        if self._get_state() == "waiting_toplevel_command":
             # TODO: support also multiline commands
             if "\n" in input_text:
                 return input_text[:input_text.index("\n")+1]
             else:
                 return None
-        elif self._get_state() == "input":
-            input_request = self._vm.get_state_message()
+        elif self._get_state() == "waiting_input":
+            input_request = self._current_input_request
             method = input_request.method
             limit = input_request.limit
             # TODO: what about EOF?
@@ -367,13 +362,10 @@ class ShellView (ttk.Frame, TextWrapper):
                 raise AssertionError("only readline is supported at the moment")
             
     
-    def get_last_command_id(self):
-        return self._command_count
     
     def _submit_input(self, text_to_be_submitted):
-        if self._get_state() == "toplevel":
+        if self._get_state() == "waiting_toplevel_command":
             # register in history and count
-            self._command_count += 1
             if text_to_be_submitted in self._command_history:
                 self._command_history.remove(text_to_be_submitted)
             self._command_history.append(text_to_be_submitted)
@@ -390,8 +382,7 @@ class ShellView (ttk.Frame, TextWrapper):
                 else:
                     get_workbench().get_runner().send_command(
                         ToplevelCommand(command="python",
-                                        cmd_line=text_to_be_submitted,
-                                        id=self.get_last_command_id()))
+                                        cmd_line=text_to_be_submitted))
                 
             except:
                 #raise # TODO:

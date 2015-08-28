@@ -25,10 +25,12 @@ both
 EVENTS
 
     ToplevelProgress
-    RunProgress
+    Errors
+    DebuggerProgress
         stack=...
         location=...Before/After Expression/Statement, Exception
         value=...
+    IO
     Heap
     Globals
     Locals

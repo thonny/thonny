@@ -5,8 +5,8 @@ import tkinter as tk
 from thonny.memory import MemoryFrame, format_object_id, MAX_REPR_LENGTH_IN_GRID,\
     parse_object_id
 from thonny.misc_utils import shorten_repr
-from thonny.common import ActionResponse
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
+from thonny.common import InlineCommand
 
 class HeapView(MemoryFrame):
     def __init__(self, master):
@@ -17,6 +17,10 @@ class HeapView(MemoryFrame):
         
         self.tree.heading('id', text='ID', anchor=tk.W)
         self.tree.heading('value', text='Value', anchor=tk.W) 
+        
+        get_workbench().bind("Heap", self._handle_heap_event, True)
+        get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
+        get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
 
     def _update_data(self, data):
         self._clear_tree()
@@ -32,15 +36,15 @@ class HeapView(MemoryFrame):
             object_id = parse_object_id(self.tree.item(iid)['values'][0])
             get_workbench().event_generate("ObjectSelect", object_id=object_id)
             
-    def handle_vm_message(self, msg):
+    def _handle_progress_event(self, msg):
+        if self.winfo_ismapped():
+            # TODO: update itself also when it becomes visible
+            get_runner().send_command(InlineCommand(command="heap"))
+            
+    def _handle_heap_event(self, msg):
         if self.winfo_ismapped():
             if hasattr(msg, "heap"):
                 self._update_data(msg.heap)
-            elif isinstance(msg, ActionResponse):
-                """
-                # ask for updated heap
-                vm_proxy.send_command(InlineCommand(command="get_heap"))
-                """
                 
 def load_plugin():
     get_workbench().add_view(HeapView, "Heap", "e")

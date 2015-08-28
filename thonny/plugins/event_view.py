@@ -1,7 +1,6 @@
 """ Helper view for Thonny developers
 """
 
-import tkinter as tk
 from thonny.ui_utils import TextFrame
 from thonny.globals import get_workbench
 
@@ -11,6 +10,10 @@ class EventsView(TextFrame):
         #self.text.config(wrap=tk.WORD)
         get_workbench().bind("ShowView", self._log_event, True)
         get_workbench().bind("HideView", self._log_event, True)
+        get_workbench().bind("ToplevelResult", self._log_event, True)
+        get_workbench().bind("DebuggerProgress", self._log_event, True)
+        get_workbench().bind("ProgramOutput", self._log_event, True)
+        get_workbench().bind("InputRequest", self._log_event, True)
     
     
     def _log_event(self, event):

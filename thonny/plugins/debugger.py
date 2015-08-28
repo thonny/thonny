@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerProgressResponse, DebuggerCommand, ToplevelResponse,\
+from thonny.common import DebuggerCommand, \
     parse_shell_command, ToplevelCommand, unquote_path, CommandSyntaxError
 from thonny.memory import VariablesFrame
 from logging import debug
@@ -11,7 +11,7 @@ from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 import shlex
  
 class Debugger:
@@ -30,40 +30,38 @@ class Debugger:
         
         
         self._main_frame_visualizer = None
+        self._last_progress_message_handled = None
         
         self._runner = get_workbench().get_runner()
         
-        get_workbench().bind("DebuggerProgress", self._update_frames, True)
+        get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
+        get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
         get_workbench().get_view("ShellView").add_command("Debug", self._handle_command_from_shell)
     
     def _cmd_debug_current_script(self):
-        get_workbench().get_runner().execute_current("Debug")
+        get_runner().execute_current("Debug")
 
 
     def _check_issue_debugger_command(self, cmd, automatic=False):
-        #if isinstance(self._proxy.get_state_message(), DebuggerProgressResponse):
+        if self._runner.get_state() == "waiting_debug_command":
             self._issue_debugger_command(cmd, automatic)
             # TODO: notify memory panes and editors? Make them inactive?
     
     def _issue_debugger_command(self, cmd, automatic=False):
         debug("_issue", cmd, automatic)
         
-        last_response = self._proxy.get_state_message()
         # tell VM the state we are seeing
         cmd.setdefault (
-            frame_id=last_response.frame_id,
-            state=last_response.state,
-            focus=last_response.focus
+            frame_id=self._last_progress_message_handled.frame_id,
+            state=self._last_progress_message_handled.state,
+            focus=self._last_progress_message_handled.focus
         )
         
-        self._runner.send_command(cmd)
+        get_runner().send_command(cmd)
 
 
     def _cmd_step_into_enabled(self):
-        #self._check_issue_goto_before_or_after()
-        msg = self._proxy.get_state_message()
-        # always enabled during debugging
-        return (isinstance(msg, DebuggerProgressResponse)) 
+        return self._runner.get_state() == "waiting_debug_command"
     
     def _cmd_step_into(self):
         self._check_issue_debugger_command(DebuggerCommand("step_into"))
@@ -86,43 +84,33 @@ class Debugger:
             
             self.send_command(ToplevelCommand(command=command,
                                filename=unquote_path(args[0]),
-                               args=args[1:],
-                               id=self._shell.get_last_command_id()))
+                               args=args[1:]))
         else:
             raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
 
     def _is_debugging(self):
         return self._main_frame_visualizer != None
 
-    def _update_frames(self, event):
-        
-        msg = event.msg # TODO: should event be the msg?
+    def _handle_debugger_progress(self, msg):
         
         # TODO: if exception then show message
         
-        # skip some events
-        if (isinstance(msg, DebuggerProgressResponse) 
-            and hasattr(msg, "tags") 
+        if (hasattr(msg, "tags") 
             and "call_function" in msg.tags
             and not self.get_option("debugging.expand_call_functions")):
+            # skip some events
             
             self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
-            return
-            """
-            if (isinstance(msg, DebuggerProgressResponse) 
-                and msg.state in ("after_statement")
+        
+            if (msg.state in ("after_statement")
                 and not self.get_option("debugging.detailed_steps")
                 or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
                 
                 self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
-            """
         
-        if isinstance(msg, ToplevelResponse) and self._main_frame_visualizer is not None:
-            self._main_frame_visualizer.close()
-            self._main_frame_visualizer = None
-            
-        elif isinstance(msg, DebuggerProgressResponse):
+        else:
             assert self._is_debugging()
+            self._last_progress_message_handled = msg
             
             main_frame_id = msg.stack[0].id
             
@@ -138,14 +126,10 @@ class Debugger:
             self._main_frame_visualizer.update_this_and_next_frames(msg) 
     
     
-    def exit_execution_mode(self):
-        assert self.is_in_execution_mode()
-        
-        for editor in self.winfo_children():
-            editor.exit_execution_mode()
-            
-        self._main_editor = None
-    
+    def _handle_toplevel_result(self, msg):
+        if self._main_frame_visualizer is not None:
+            self._main_frame_visualizer.close()
+            self._main_frame_visualizer = None    
 
 
 class FrameVisualizer:
