@@ -121,6 +121,9 @@ class ToplevelCommand(ActionCommand):
 class DebuggerCommand(ActionCommand):
     pass
 
+class InputSubmission(Record):
+    pass
+
 class InlineCommand(Record):
     """
     Can be used both during debugging and between debugging.

@@ -19,7 +19,7 @@ from thonny import misc_utils
 from thonny.misc_utils import eqfn
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
-    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand
+    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -381,30 +381,31 @@ class VM:
                 self._vm._exit_io_function()
     
     class FakeInputStream(FakeStream):
-        def read(self, limit=-1):
+        
+        def _generic_read(self, method, limit=-1):
             try:
                 self._vm._enter_io_function()
-                self._vm.send_message("InputRequest", method="read", limit=limit)
-                # TODO: maybe it's better to read as a command-package?
-                return self._target_stream.read(limit)
+                self._vm.send_message("InputRequest", method=method, limit=limit)
+                
+                while True:
+                    cmd = self._vm._fetch_command()
+                    if isinstance(cmd, InputSubmission):
+                        return cmd.data
+                    elif isinstance(cmd, InlineCommand):
+                        self._vm.handle_command(cmd)
+                    else:
+                        raise ThonnyClientError("Wrong type of command when waiting for input")
             finally:
                 self._vm._exit_io_function()
+        
+        def read(self, limit=-1):
+            return self._generic_read("read", limit)
         
         def readline(self, limit=-1):
-            try:
-                self._vm._enter_io_function()
-                self._vm.send_message("InputRequest", method="readline", limit=limit)
-                return self._target_stream.readline(limit)
-            finally:
-                self._vm._exit_io_function()
+            return self._generic_read("readline", limit)
         
         def readlines(self, limit=-1):
-            try:
-                self._vm._enter_io_function()
-                self._vm.send_message("InputRequest", method="readlines", limit=limit)
-                return self._target_stream.readlines(limit)
-            finally:
-                self._vm._exit_io_function()
+            return self._generic_read("readlines", limit)
             
     
 

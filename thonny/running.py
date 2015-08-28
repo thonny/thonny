@@ -13,7 +13,7 @@ import threading
 from thonny.common import serialize_message, ToplevelCommand, \
     quote_path_for_shell, \
     InlineCommand, parse_shell_command, unquote_path, \
-    CommandSyntaxError, parse_message, DebuggerCommand
+    CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
 from thonny.globals import get_workbench, register_runner
 from thonny.shell import ShellView
 
@@ -228,6 +228,8 @@ class _BackendProxy:
     
     def send_command(self, cmd):
         with self._state_lock:
+            # TODO: make sure state restrictions for each command type are correct
+            # InlineCommands can be sent in any state?
             assert self._state != "waiting_input"
              
             if isinstance(cmd, ToplevelCommand) or isinstance(cmd, DebuggerCommand):
@@ -245,7 +247,8 @@ class _BackendProxy:
         with self._state_lock:
             assert self._state == "waiting_input"
             self._state = "busy"
-            self._proc.stdin.write(data.encode(COMMUNICATION_ENCODING))
+            cmd = InputSubmission(data=data)
+            self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush()
     
     def _kill_current_process(self):
