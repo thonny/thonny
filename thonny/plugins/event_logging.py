@@ -347,5 +347,5 @@ def load_plugin():
             return filename
     
     # create logger
-    EventLogger(workbench, filename)
+    EventLogger(get_workbench(), filename)
     
