@@ -246,14 +246,12 @@ def _cmd_refactor_rename(self):
             filename = editor.get_filename()
             source, self.file_encoding = misc_utils.read_python_file(filename)
             editor._code_view.set_content(source)
-            editor._code_view.modified_since_last_save = False
             self.editor_notebook.tab(editor, text=self.editor_notebook._generate_editor_title(filename))
         except Exception:
             try: #it is possible that a file (module) itself was renamed - Rope allows it. so let's see if a file exists with the new name. 
                 filename = filename.replace(os.path.split(filename)[1], newname + '.py')
                 source, self.file_encoding = misc_utils.read_python_file(filename)
                 editor._code_view.set_content(source)
-                editor._code_view.modified_since_last_save = False
                 self.editor_notebook.tab(editor, text=self.editor_notebook._generate_editor_title(filename))
             except Exception: #something went wrong with reloading the file, let's close this tab to avoid consistency problems
                 self.editor_notebook.forget(editor)

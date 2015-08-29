@@ -21,6 +21,7 @@ import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
 from thonny.running import Runner
 import thonny.globals
+import logging
 
 class Workbench(tk.Tk):
     """
@@ -56,7 +57,8 @@ class Workbench(tk.Tk):
         
         self._main_dir = main_dir 
         self._configuration_manager = ConfigurationManager(os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini")))
-
+        
+        self._init_diagnostic_logging()
         self._init_translation()
         self._init_fonts()
         self._init_window()
@@ -74,6 +76,11 @@ class Workbench(tk.Tk):
         
         self._runner.send_command(ToplevelCommand(command="Reset"))
         self.mainloop()
+    
+    def _init_diagnostic_logging(self):
+        self.add_option("debug_mode", False)
+        logging.basicConfig(format='%(levelname)s:%(message)s',
+            level=logging.DEBUG if self.get_option("debug_mode") else logging.INFO)
     
     def _init_window(self):
         

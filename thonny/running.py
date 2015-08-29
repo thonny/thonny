@@ -41,7 +41,7 @@ class Runner:
         self._init_commands()
         
         self._poll_vm_messages()
-        #self._advance_background_tk_mainloop()
+        self._advance_background_tk_mainloop()
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -168,8 +168,7 @@ class Runner:
             if not msg:
                 break
             
-            debug("Fetched msg: %s", msg)
-            
+            debug("Runner: Fetched msg: %s", msg)
             get_workbench().event_generate(msg["message_type"], **msg)
             
             # TODO: maybe distinguish between workbench cwd and backend cwd ??
@@ -195,6 +194,11 @@ class _BackendProxy:
     def get_state(self):
         with self._state_lock:
             return self._state
+    
+    def _set_state(self, state):
+        if self._state != state:
+            debug("BackendProxy state %s ==> %s", self._state, state)
+            self._state = state
     
     def get_state_message(self):
         with self._state_lock:
@@ -233,7 +237,7 @@ class _BackendProxy:
             assert self._state != "waiting_input"
              
             if isinstance(cmd, ToplevelCommand) or isinstance(cmd, DebuggerCommand):
-                self._state = "busy"
+                self._set_state("busy")
             
             if (isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset")):
                 self._kill_current_process()
@@ -241,12 +245,14 @@ class _BackendProxy:
                  
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush() # required for Python 3.1
-            debug("sent a command in state %s: %s", self._state, cmd)
+            
+            if cmd.command != "tkupdate":
+                debug("BackendProxy: sent a command in state %s: %s", self._state, cmd)
     
     def send_program_input(self, data):
         with self._state_lock:
             assert self._state == "waiting_input"
-            self._state = "busy"
+            self._set_state("busy")
             cmd = InputSubmission(data=data)
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
             self._proc.stdin.flush()
@@ -274,7 +280,7 @@ class _BackendProxy:
                 cmd_line.extend(cmd.args)
             
         
-        info("VMProxy: starting the backend: %s %s", cmd_line, self.cwd)
+        info("Starting the backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
@@ -284,7 +290,6 @@ class _BackendProxy:
             cwd=self.cwd,
             env=my_env
         )
-        debug("Done starting backend") 
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
@@ -299,20 +304,18 @@ class _BackendProxy:
             if data == '':
                 break
             else:
-                debug("Got raw msg: %s", data)
                 msg = parse_message(data)
-                debug("Got <%s>: %s", msg["message_type"], msg)
                 if "cwd" in msg:
                     self.cwd = msg["cwd"]
                     
                 with self._state_lock:
                     self._message_queue.append(msg)
                     if msg["message_type"] == "ToplevelResult":
-                        self._state = "waiting_toplevel_command"
+                        self._set_state("waiting_toplevel_command") 
                     elif msg["message_type"] == "DebuggerProgress":
-                        self._state = "waiting_debug_command"
+                        self._set_state("waiting_debug_command") 
                     elif msg["message_type"] == "InputRequest":
-                        self._state = "waiting_input"
+                        self._set_state("waiting_input") 
 
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
@@ -321,6 +324,6 @@ class _BackendProxy:
             if data == '':
                 break
             else:
-                print("BACKEND:", data.strip(), end="\n")
+                debug("Debug info from backend: %s", data.strip())
         
             

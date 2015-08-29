@@ -108,13 +108,9 @@ class CodeView(ttk.Frame, TextWrapper):
         self.set_coloring(True)
         self.set_up_paren_matching()
         
-        # TODO: use general event system
-        self._resetting_modified_flag = False #used internally, indicates when modified flag reset is currently in progress
-        
         
         self.num_context_lines = 50, 500, 5000000 # See idlelib.EditorWindow
         self.context_use_ps1 = False
-        self.modified_since_last_save = False
         
         # TODO: Check Mac bindings
         self.text.bind("<Control-BackSpace>", self.del_word_left)
@@ -125,31 +121,9 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.bind("<Tab>", self.indent_or_dedent_event)
         self.text.bind("<Return>", self.newline_and_indent_event)
         self.text.bind("<BackSpace>", self.smart_backspace_event)
-        self.text.bind("<<Modified>>", self.on_text_modified)
         
         fixwordbreaks(tk._default_root)
         
-    def on_text_modified(self, event=None):
-        if self._resetting_modified_flag:
-            return
-
-        self.text.edit_modified(True)
-        self.modified_since_last_save = True
-
-        self._clear_modified_flag()
-
-            
-
-    #used internally to clear the text modified flag
-    def _clear_modified_flag(self):
-        self._resetting_modified_flag = True
-
-        try:
-            self.tk.call(self.text._w, 'edit', 'modified', 0)
-
-        finally:
-            self._resetting_modified_flag = False        
-    
     def del_word_left(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         self.text.event_generate('<Meta-Delete>')

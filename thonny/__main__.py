@@ -2,11 +2,10 @@ import sys
 import os.path
 import traceback
 import tkinter.messagebox
-import logging
 from logging import exception
 
 
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.DEBUG)
+
 
 # Tweak the path
 # First remove the current folder from path

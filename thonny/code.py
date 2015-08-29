@@ -12,9 +12,6 @@ from thonny.codeview import CodeView
 from thonny.globals import get_workbench
 from thonny import misc_utils
 
-EDITOR_STATE_CHANGE = "<<editor-state-change>>"
-
-
 _dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
 
 
@@ -41,8 +38,8 @@ class Editor(ttk.Frame):
         if filename is not None:
             self._load_file(filename)
             self._code_view.text.edit_modified(False)
-            
-        self._code_view.text.bind("<<Modified>>", lambda _: self.event_generate(EDITOR_STATE_CHANGE), "+")            
+        
+        self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self))
 
 
     def get_text_widget(self):
@@ -61,13 +58,12 @@ class Editor(ttk.Frame):
     def _load_file(self, filename):
         source, self.file_encoding = misc_utils.read_python_file(filename) # TODO: support also text files
         self._filename = filename
-        self._code_view.modified_since_last_save = False
         get_workbench().event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
         self._code_view.focus_set()
         
     def is_modified(self):
-        return self._code_view.modified_since_last_save
+        return self._code_view.text.edit_modified()
     
     
     def save_file_enabled(self):
@@ -96,13 +92,9 @@ class Editor(ttk.Frame):
         f.write(content.encode(encoding))
         f.close()
 
-        self._code_view.modified_since_last_save = False
-    
         self._filename = filename
         
         self._code_view.text.edit_modified(False)
-        self.event_generate(EDITOR_STATE_CHANGE)
-        
         return self._filename
     
     def change_font_size(self, delta):
@@ -138,7 +130,6 @@ class EditorNotebook(ttk.Notebook):
         get_workbench().add_option("file.reopen_files", False)
         self._init_commands()
         self.enable_traversal()
-        self.bind_all(EDITOR_STATE_CHANGE, self._on_editor_state_changed)
         
         # open files from last session
         """ TODO: they should go only to recent files
@@ -311,10 +302,9 @@ class EditorNotebook(ttk.Notebook):
     def change_font_size(self, delta):
         pass
     
-    def _on_editor_state_changed(self, event):
-        assert isinstance(event.widget, Editor) 
-        editor = event.widget
-        self.tab(editor, text=self._generate_editor_title(editor.get_filename(), editor.is_modified()))
+    def update_editor_title(self, editor):
+        self.tab(editor,
+            text=self._generate_editor_title(editor.get_filename(), editor.is_modified()))
     
      
     def _generate_editor_title(self, filename, is_modified=False):
