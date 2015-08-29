@@ -427,7 +427,7 @@ class Executor:
                 self._vm.send_message("ToplevelResult", value_info=self._vm.export_value(value))
             else:
                 assert mode == "exec"
-                exec(bytecode, __main__.__dict__)
+                exec(bytecode, __main__.__dict__) # <Marker: remove this line from stacktrace>
                 self._vm.send_message("ToplevelResult")
         except SyntaxError as e:
             self._vm.send_message("ToplevelResult", error="".join(traceback.format_exception_only(SyntaxError, e)))
@@ -444,8 +444,17 @@ class Executor:
     
     def _print_user_exception(self, e_type, e_value, e_traceback):
         lines = traceback.format_exception(e_type, e_value, e_traceback)
+        if "thonny" in lines[1]:
+            "del lines[1]"
+            #del lines[1]
+
         for line in lines:
-            if "thonny\\backend" not in line and not line.strip().startswith("exec("):
+            # skip lines denoting thonny execution frame
+            if ("thonny/backend" in line 
+                or "thonny\\backend" in line
+                or "remove this line from stacktrace" in line):
+                continue
+            else:
                 sys.stderr.write(line)
 
     def _compile_source(self, source, filename, mode):
