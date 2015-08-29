@@ -436,10 +436,17 @@ class Executor:
         except:
             # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
             # for VM mainloop they are not exceptions
-            traceback.print_exc(EXCEPTION_TRACEBACK_LIMIT)
+            e_type, e_value, e_traceback = sys.exc_info()
+            self._print_user_exception(e_type, e_value, e_traceback)
             self._vm.send_message("ToplevelResult")
         finally:
             sys.settrace(None)
+    
+    def _print_user_exception(self, e_type, e_value, e_traceback):
+        lines = traceback.format_exception(e_type, e_value, e_traceback)
+        for line in lines:
+            if "thonny\\backend" not in line and not line.strip().startswith("exec("):
+                sys.stderr.write(line)
 
     def _compile_source(self, source, filename, mode):
         return compile(source, filename, mode)

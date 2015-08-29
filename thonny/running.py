@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from _thread import start_new_thread
-import ast
 import collections
 from logging import info, debug
 import os.path
@@ -58,6 +57,9 @@ class Runner:
         return self._proxy.cwd
     
     def get_state(self):
+        """State is one of "running", "waiting_input", "waiting_debug_command",
+            "waiting_toplevel_command"
+        """
         return self._proxy.get_state()
     
     def send_command(self, cmd):
@@ -191,19 +193,6 @@ class _BackendProxy:
         self._message_queue = None
         self._state_lock = threading.RLock()
         
-    def get_state(self):
-        with self._state_lock:
-            return self._state
-    
-    def _set_state(self, state):
-        if self._state != state:
-            debug("BackendProxy state %s ==> %s", self._state, state)
-            self._state = state
-    
-    def get_state_message(self):
-        with self._state_lock:
-            return self._current_pause_msg
-    
     def fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
             return None
@@ -232,30 +221,33 @@ class _BackendProxy:
     
     def send_command(self, cmd):
         with self._state_lock:
-            # TODO: make sure state restrictions for each command type are correct
-            # InlineCommands can be sent in any state?
-            assert self._state != "waiting_input"
-             
-            if isinstance(cmd, ToplevelCommand) or isinstance(cmd, DebuggerCommand):
-                self._set_state("busy")
+            if (isinstance(cmd, ToplevelCommand) 
+                or isinstance(cmd, DebuggerCommand)
+                or isinstance(cmd, InputSubmission)):
+                self._set_state("running")
             
-            if (isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset")):
+            if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
                 self._kill_current_process()
                 self._start_new_process(cmd)
                  
             self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
-            self._proc.stdin.flush() # required for Python 3.1
+            self._proc.stdin.flush() 
             
-            if cmd.command != "tkupdate":
+            if not (hasattr(cmd, "command") and cmd.command == "tkupdate"):
                 debug("BackendProxy: sent a command in state %s: %s", self._state, cmd)
     
     def send_program_input(self, data):
+        self.send_command(InputSubmission(data=data))
+        
+    def get_state(self):
         with self._state_lock:
-            assert self._state == "waiting_input"
-            self._set_state("busy")
-            cmd = InputSubmission(data=data)
-            self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
-            self._proc.stdin.flush()
+            return self._state
+    
+    def _set_state(self, state):
+        if self._state != state:
+            debug("BackendProxy state %s ==> %s", self._state, state)
+            self._state = state
+    
     
     def _kill_current_process(self):
         if self._proc is not None and self._proc.poll() is None: 
