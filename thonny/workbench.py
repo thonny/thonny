@@ -637,9 +637,7 @@ class Workbench(tk.Tk):
             #self.user_logger.save()
             #ui_utils.delete_images()
         except:
-            exception("Error on close")
-            tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
-                                traceback.format_exc())
+            self.report_internal_error()
 
         self.destroy()
         
@@ -651,8 +649,10 @@ class Workbench(tk.Tk):
         sys.last_type = exc
         sys.last_value = val
         sys.last_traceback = tb
+        self.report_internal_error()
+    
+    def report_internal_error(self):
         exception("Internal error")
-        
         tk_messagebox.showerror("Internal error. Use {} to copy"
                                 .format("Command+C" if running_on_mac_os() else "Ctrl+C"),
                                 traceback.format_exc())

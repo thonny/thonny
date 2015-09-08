@@ -386,7 +386,7 @@ class ShellView (ttk.Frame, TextWrapper):
                 
             except:
                 #raise # TODO:
-                self._insert_text_directly("Internal error: " + traceback.format_exc() + "\n", ("toplevel", "error"))
+                get_workbench().report_internal_error()
                 self._insert_prompt()
                 
             get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)

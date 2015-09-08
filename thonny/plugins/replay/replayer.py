@@ -4,6 +4,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from thonny import ui_utils
 from thonny.plugins.filebrowser import FileBrowser
+from thonny.globals import get_workbench
 
 
 class ReplayWindow(tk.Tk):
@@ -294,10 +295,7 @@ def run():
     try:
         ReplayWindow().mainloop()
     except:
-        traceback.print_exc()
-        # TODO: Command+C for Mac
-        tk.messagebox.showerror("Internal error. Program will close. Use Ctrl+C to copy",
-                                traceback.format_exc())
+        get_workbench().report_internal_error()
 
 if __name__ == "__main__":
     run()

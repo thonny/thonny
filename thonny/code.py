@@ -17,9 +17,6 @@ _dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text f
 
                 
 class Editor(ttk.Frame):
-    """
-    Text editor and visual part of module stepper
-    """
     def __init__(self, master, filename=None):
         
         ttk.Frame.__init__(self, master)
