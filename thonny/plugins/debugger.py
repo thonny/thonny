@@ -21,10 +21,10 @@ class Debugger:
             default_sequence="<Control-F5>")
         get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
-            default_sequence="<F8>")
+            default_sequence="<F6>")
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
-            default_sequence="<Control-F8>")
+            default_sequence="<F7>")
         
         
         self._main_frame_visualizer = None
