@@ -148,7 +148,7 @@ class Workbench(tk.Tk):
                     and item.endswith(".py")
                     and not item.endswith("__.py")
                 or os.path.isdir(item_path)
-                    and os.path.isfile(os.path.join(item, "__init__.py"))):
+                    and os.path.isfile(os.path.join(item_path, "__init__.py"))):
                     result.add(module_name_prefix 
                                + os.path.splitext(item)[0])
         
