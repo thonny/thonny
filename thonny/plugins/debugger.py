@@ -15,8 +15,6 @@ from thonny.globals import get_workbench, get_runner
 import shlex
  
 class Debugger:
-    
-    
     def __init__(self):
         get_workbench().add_command("debug", "run", "Debug current script",
             self._cmd_debug_current_script,
@@ -36,7 +34,8 @@ class Debugger:
         
         get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
-        get_workbench().get_view("ShellView").add_command("Debug", self._handle_command_from_shell)
+        
+        get_workbench().get_view("ShellView").add_command("Debug", self._handle_debug_from_shell)
     
     def _cmd_debug_current_script(self):
         get_runner().execute_current("Debug")
@@ -48,13 +47,13 @@ class Debugger:
             # TODO: notify memory panes and editors? Make them inactive?
     
     def _issue_debugger_command(self, cmd, automatic=False):
-        debug("_issue", cmd, automatic)
+        debug("_issue cmd: %s, auto: %s", cmd, automatic)
         
         # tell VM the state we are seeing
         cmd.setdefault (
-            frame_id=self._last_progress_message_handled.frame_id,
-            state=self._last_progress_message_handled.state,
-            focus=self._last_progress_message_handled.focus
+            frame_id=self._last_progress_message_handled.stack[-1].id,
+            state=self._last_progress_message_handled.stack[-1].last_event,
+            focus=self._last_progress_message_handled.stack[-1].last_event_focus
         )
         
         get_runner().send_command(cmd)
@@ -72,29 +71,23 @@ class Debugger:
     def _cmd_step_over(self):
         self._check_issue_debugger_command(DebuggerCommand("step_over"))
 
-    def _handle_command_from_shell(self, cmd_line):
-        raise CommandSyntaxError("blaa")
-        
-        command, arg_str = parse_shell_command(cmd_line)
-        assert command == "Debug" 
-        args = shlex.split(arg_str.strip(), posix=False)
+    def _handle_debug_from_shell(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
         
         if len(args) >= 1:
             get_workbench().get_editor_notebook().save_all_named_editors()
-            
-            self.send_command(ToplevelCommand(command=command,
+            get_runner().send_command(ToplevelCommand(command=command,
                                filename=unquote_path(args[0]),
                                args=args[1:]))
         else:
-            raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
+            raise CommandSyntaxError("Command '%s' takes at least one argument", command)
 
-    def _is_debugging(self):
-        return self._main_frame_visualizer != None
 
     def _handle_debugger_progress(self, msg):
         
         # TODO: if exception then show message
         
+        """
         if (hasattr(msg, "tags") 
             and "call_function" in msg.tags
             and not self.get_option("debugging.expand_call_functions")):
@@ -107,23 +100,23 @@ class Debugger:
                 or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
                 
                 self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
+        """
+                
         
-        else:
-            assert self._is_debugging()
-            self._last_progress_message_handled = msg
+        self._last_progress_message_handled = msg
+        
+        main_frame_id = msg.stack[0].id
+        
+        # clear obsolete main frame visualizer
+        if (self._main_frame_visualizer 
+            and self._main_frame_visualizer.get_frame_id() != main_frame_id):
+            self._main_frame_visualizer.close()
+            self._main_frame_visualizer = None
             
-            main_frame_id = msg.stack[0].id
+        if not self._main_frame_visualizer:
+            self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
             
-            # clear obsolete main frame visualizer
-            if (self._main_frame_visualizer 
-                and self._main_frame_visualizer.get_frame_id() != main_frame_id):
-                self._main_frame_visualizer.close()
-                self._main_frame_visualizer = None
-                
-            if not self._main_frame_visualizer:
-                self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
-                
-            self._main_frame_visualizer.update_this_and_next_frames(msg) 
+        self._main_frame_visualizer.update_this_and_next_frames(msg) 
     
     
     def _handle_toplevel_result(self, msg):
@@ -149,7 +142,7 @@ class FrameVisualizer:
         #self._text.tag_configure('after', background="#D7EDD3")
         #self._text.tag_configure('exception', background="#FFBFD6")
         self._text.configure(insertwidth=0, background="LightYellow")
-        self._text.wrapper.read_only = True
+        self._text_wrapper.read_only = True
     
     def close(self):
         if self._next_frame_visualizer:
@@ -188,8 +181,8 @@ class FrameVisualizer:
         
             
     def _update_this_frame(self, msg, frame_info):
-        
-        self.text.tag_remove("focus", "0.0", "end")
+        self._frame_info = frame_info
+        self._text.tag_remove("focus", "0.0", "end")
             
         """             
         if msg.state.startswith("before"):
@@ -203,7 +196,7 @@ class FrameVisualizer:
         
         # TODO: if focus is in expression, then find and highlight closest
         # statement
-        self._tag_range(msg.focus, "focus", True)
+        self._tag_range(frame_info.last_event_focus, "focus", True)
         
         # TODO: use different color if focus is not topmost
         
@@ -240,8 +233,8 @@ class FrameVisualizer:
             self._text.see("%d.0" % (first_line+3))
             
     def _get_text_range_block(self, text_range):
-        first_line = text_range.lineno - self.first_line_no + 1
-        last_line = text_range.end_lineno - self.first_line_no + 1
+        first_line = text_range.lineno - self._frame_info.firstlineno + 1
+        last_line = text_range.end_lineno - self._frame_info.firstlineno + 1
         first_line_content = self._text.get("%d.0" % first_line, "%d.end" % first_line)
         if first_line_content.strip().startswith("elif "):
             first_col = first_line_content.find("elif ")

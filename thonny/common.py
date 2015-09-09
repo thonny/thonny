@@ -112,14 +112,13 @@ class FrameInfo(Record):
         )
 
 
-class ActionCommand(Record):
+class ToplevelCommand(Record):
     pass
 
-class ToplevelCommand(ActionCommand):
-    pass
-
-class DebuggerCommand(ActionCommand):
-    pass
+class DebuggerCommand(Record):
+    def __init__(self, command, **kw):
+        Record.__init__(self, **kw)
+        self.command = command
 
 class InputSubmission(Record):
     pass
@@ -129,18 +128,31 @@ class InlineCommand(Record):
     Can be used both during debugging and between debugging.
     Initially meant for sending variable and heap info requests
     """
-    pass
+    def __init__(self, command, **kw):
+        Record.__init__(self, **kw)
+        self.command = command
 
 
 class CommandSyntaxError(Exception):
     pass
 
-def parse_shell_command(cmd_line):
+def parse_shell_command(cmd_line, split_arguments=True):
     assert cmd_line.startswith("%")
     
-    parts = cmd_line.split(maxsplit=1)
-    return parts[0][1:], parts[1] if len(parts) == 2 else ""
-
+    parts = cmd_line.strip().split(maxsplit=1)
+    command = parts[0][1:] # remove %
+    
+    if len(parts) == 1:
+        arg_str = ""
+    else:
+        arg_str = parts[1]
+        
+    if split_arguments:
+        args = shlex.split(arg_str.strip(), posix=False) 
+    else:
+        args = [arg_str]
+        
+    return (command, args)
 
 
 def serialize_message(msg):

@@ -39,7 +39,7 @@ class HeapView(MemoryFrame):
     def _handle_progress_event(self, msg):
         if self.winfo_ismapped():
             # TODO: update itself also when it becomes visible
-            get_runner().send_command(InlineCommand(command="heap"))
+            get_runner().send_command(InlineCommand("heap"))
             
     def _handle_heap_event(self, msg):
         if self.winfo_ismapped():

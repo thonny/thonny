@@ -154,7 +154,7 @@ class ObjectInspector(ScrollableFrame):
                 
                 
     def request_object_info(self): 
-        get_workbench().get_runner().send_command(InlineCommand(command="get_object_info",
+        get_workbench().get_runner().send_command(InlineCommand("get_object_info",
                                             object_id=self.object_id,
                                             all_attributes=False)) 
                     

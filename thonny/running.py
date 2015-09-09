@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
 
+"""Code for maintaining the background process and for running
+user programs
+
+Commands get executed via shell, this way the command line in the 
+shell becomes kind of title for the execution.
+
+""" 
+
+
 from _thread import start_new_thread
 import collections
 from logging import info, debug
 import os.path
-import shlex
 import subprocess
 import sys
 import threading
@@ -33,9 +41,9 @@ class Runner:
             default_position_key='A')
         
         self._shell = get_workbench().get_view("ShellView")
-        self._shell.add_command("Run", self._handle_magic_command_from_shell)
-        self._shell.add_command("Reset", self._handle_magic_command_from_shell)
-        self._shell.add_command("cd", self._handle_magic_command_from_shell)
+        self._shell.add_command("Run", self._handle_run_from_shell)
+        self._shell.add_command("Reset", self._handle_reset_from_shell)
+        self._shell.add_command("cd", self._handle_cd_from_shell)
         
         self._init_commands()
         
@@ -110,39 +118,34 @@ class Runner:
     def _cmd_run_current_script(self):
         self.execute_current("Run")
     
-
-    def _handle_magic_command_from_shell(self, cmd_line):
-        command, arg_str = parse_shell_command(cmd_line)
-        assert command in ["Run", "Reset", "cd"] 
-
-        args = shlex.split(arg_str.strip(), posix=False)
+    def _handle_reset_from_shell(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
+        assert command == "Reset"
         
-        if command == "Reset":
-            if len(args) == 0:
-                self.send_command(ToplevelCommand(command="Reset"))
-            else:
-                raise CommandSyntaxError("Command 'Reset' doesn't take arguments")
-                
-        elif command == "cd":
-            if len(args) == 1:
-                self.send_command(ToplevelCommand(command="cd", path=unquote_path(args[0])))
-            elif len(args) > 1:
-                # extra flexibility for those who forgot the quotes
-                self.send_command(ToplevelCommand(command="cd", 
-                                       path=unquote_path(arg_str)))
-            else:
-                raise CommandSyntaxError("Directory missing in '{0}'".format(cmd_line))
-                
-                
-        elif command == "Run":
-            if len(args) >= 1:
-                get_workbench().get_editor_notebook().save_all_named_editors()
-                
-                self.send_command(ToplevelCommand(command=command,
-                                   filename=unquote_path(args[0]),
-                                   args=args[1:]))
-            else:
-                raise CommandSyntaxError("Filename missing in '{0}'".format(cmd_line))
+        if len(args) == 0:
+            self.send_command(ToplevelCommand(command="Reset"))
+        else:
+            raise CommandSyntaxError("Command 'Reset' doesn't take arguments")
+
+    def _handle_cd_from_shell(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
+        assert command == "cd"
+        
+        if len(args) == 1:
+            self.send_command(ToplevelCommand(command="cd", path=unquote_path(args[0])))
+        else:
+            raise CommandSyntaxError("Command 'cd' takes one argument")
+
+    def _handle_run_from_shell(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
+        
+        if len(args) >= 1:
+            get_workbench().get_editor_notebook().save_all_named_editors()
+            self.send_command(ToplevelCommand(command=command,
+                               filename=unquote_path(args[0]),
+                               args=args[1:]))
+        else:
+            raise CommandSyntaxError("Command '%s' takes at least one argument", command)
 
     
     def _cmd_reset(self):
@@ -157,7 +160,7 @@ class Runner:
         from the shell after it runs to the end.
         """
         if self._proxy.get_state() == "waiting_toplevel_command":
-            self._proxy.send_command(InlineCommand(command="tkupdate"))
+            self._proxy.send_command(InlineCommand("tkupdate"))
         get_workbench().after(50, self._advance_background_tk_mainloop)
         
     def _poll_vm_messages(self):

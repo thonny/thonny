@@ -21,8 +21,7 @@ class GlobalsView(VariablesFrame):
         if self.winfo_ismapped():
             # TODO: update itself also when it becomes visible
             # TODO: module_name
-            get_runner().send_command(InlineCommand(command="get_globals",
-                                      module_name="__main__"))
+            get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
 
 def load_plugin():

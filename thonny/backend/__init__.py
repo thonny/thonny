@@ -549,15 +549,18 @@ class FancyTracer(Executor):
                 else:
                     raise AssertionError("Unknown marker function")
                 
-                self._handle_progress_event(frame.f_back, event, frame.f_locals)
-                self._try_interpret_as_again_event(frame.f_back, event, frame.f_locals)
+                marker_function_args = frame.f_locals.copy()
+                del marker_function_args["self"]
+                
+                self._handle_progress_event(frame.f_back, event, marker_function_args)
+                self._try_interpret_as_again_event(frame.f_back, event, marker_function_args)
                 
                 
             else:
                 # Calls to proper functions.
                 # Client doesn't care about these events,
                 # it cares about "before_statement" events in the first statement of the body
-                self._custom_stack.append(FancyTracer.CustomStackFrame(frame, "call"))
+                self._custom_stack.append(CustomStackFrame(frame, "call"))
         
         elif event == "return":
             self._custom_stack.pop()
@@ -958,12 +961,11 @@ class FancyTracer(Executor):
     def _debug(self, *args):
         print("TRACER:", *args, file=self._vm._original_stderr)
 
-    class CustomStackFrame:
-        def __init__(self, frame, last_event, focus=None):
-            self.system_frame = frame
-            self.last_event = last_event
-            self.focus = None
-            self.call_functions = {} # will be updated with evaluated call functions
+class CustomStackFrame:
+    def __init__(self, frame, last_event, focus=None):
+        self.system_frame = frame
+        self.last_event = last_event
+        self.focus = None
         
 class ThonnyClientError(Exception):
     pass
