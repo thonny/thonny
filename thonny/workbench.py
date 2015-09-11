@@ -22,6 +22,8 @@ import tkinter.messagebox as tk_messagebox
 from thonny.running import Runner
 import thonny.globals
 import logging
+from thonny.globals import register_runner, get_runner
+from pkgutil import get_data
 
 class Workbench(tk.Tk):
     """
@@ -68,13 +70,13 @@ class Workbench(tk.Tk):
         self.bind("BackendMessage", self._update_title, True)
         
         self._init_containers()
-        self._runner = Runner()
+        register_runner(Runner())
         self._init_commands()
         self._editor_notebook.focus_set()
         
         self._load_plugins()
         
-        self._runner.send_command(ToplevelCommand(command="Reset"))
+        get_runner().send_command(ToplevelCommand(command="Reset"))
         self.mainloop()
     
     def _init_diagnostic_logging(self):
@@ -485,9 +487,6 @@ class Workbench(tk.Tk):
     
     def get_editor_notebook(self):
         return self._editor_notebook
-    
-    def get_runner(self):
-        return self._runner
     
     def get_installation_dir(self):
         """Returns Thonny installation directory"""

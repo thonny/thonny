@@ -12,7 +12,7 @@ from thonny.ui_utils import TextWrapper
 import tkinter as tk
 import tkinter.font as font
 from logging import info
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 
 
 class ShellView (ttk.Frame, TextWrapper):
@@ -211,7 +211,7 @@ class ShellView (ttk.Frame, TextWrapper):
         self.text.see("end")
     
     def _get_state(self):
-        return get_workbench().get_runner().get_state()
+        return get_runner().get_state()
         
     def _user_text_insert(self, index, txt, tags=(), **kw):
         #print("insert", index, text, kw)
@@ -380,7 +380,7 @@ class ShellView (ttk.Frame, TextWrapper):
                         self._insert_text_directly("Unknown magic command: " + command)
                         self._insert_prompt()
                 else:
-                    get_workbench().get_runner().send_command(
+                    get_runner().send_command(
                         ToplevelCommand(command="python",
                                         cmd_line=text_to_be_submitted))
                 
@@ -391,7 +391,7 @@ class ShellView (ttk.Frame, TextWrapper):
                 
             get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)
         else:
-            get_workbench().get_runner().send_program_input(text_to_be_submitted)
+            get_runner().send_program_input(text_to_be_submitted)
             get_workbench().event_generate("ShellInput", input_text=text_to_be_submitted)
     
     

@@ -29,7 +29,6 @@ COMMUNICATION_ENCODING = "UTF-8"
 
 class Runner:
     def __init__(self):
-        register_runner(self)
         get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
         get_workbench().add_option("run.auto_cd", True)
         
@@ -40,17 +39,17 @@ class Runner:
             visible_by_default=True,
             default_position_key='A')
         
-        self._shell = get_workbench().get_view("ShellView")
-        self._shell.add_command("Run", self._handle_run_from_shell)
-        self._shell.add_command("Reset", self._handle_reset_from_shell)
-        self._shell.add_command("cd", self._handle_cd_from_shell)
-        
         self._init_commands()
         
         self._poll_vm_messages()
         self._advance_background_tk_mainloop()
     
     def _init_commands(self):
+        shell = get_workbench().get_view("ShellView")
+        shell.add_command("Run", self.handle_execute_from_shell)
+        shell.add_command("Reset", self._handle_reset_from_shell)
+        shell.add_command("cd", self._handle_cd_from_shell)
+        
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
@@ -111,32 +110,13 @@ class Runner:
         # submit to shell (shell will execute it)
         get_workbench().get_view("ShellView").submit_command(cmd_line)
         
-    def _cmd_run_current_script_enabled(self):
-        return (self._proxy.get_state() == "waiting_toplevel_command"
-                and get_workbench().get_editor_notebook().get_current_editor() is not None)
-    
-    def _cmd_run_current_script(self):
-        self.execute_current("Run")
-    
-    def _handle_reset_from_shell(self, cmd_line):
-        command, args = parse_shell_command(cmd_line)
-        assert command == "Reset"
+    def handle_execute_from_shell(self, cmd_line):
+        """
+        Handles all commands that take a filename and 0 or more extra arguments.
+        Passes the command to backend.
         
-        if len(args) == 0:
-            self.send_command(ToplevelCommand(command="Reset"))
-        else:
-            raise CommandSyntaxError("Command 'Reset' doesn't take arguments")
-
-    def _handle_cd_from_shell(self, cmd_line):
-        command, args = parse_shell_command(cmd_line)
-        assert command == "cd"
-        
-        if len(args) == 1:
-            self.send_command(ToplevelCommand(command="cd", path=unquote_path(args[0])))
-        else:
-            raise CommandSyntaxError("Command 'cd' takes one argument")
-
-    def _handle_run_from_shell(self, cmd_line):
+        (Debugger plugin may also use this method)
+        """
         command, args = parse_shell_command(cmd_line)
         
         if len(args) >= 1:
@@ -147,9 +127,35 @@ class Runner:
         else:
             raise CommandSyntaxError("Command '%s' takes at least one argument", command)
 
+    def _handle_reset_from_shell(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
+        assert command == "Reset"
+        
+        if len(args) == 0:
+            self.send_command(ToplevelCommand(command="Reset"))
+        else:
+            raise CommandSyntaxError("Command 'Reset' doesn't take arguments")
+        
+
+    def _handle_cd_from_shell(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
+        assert command == "cd"
+        
+        if len(args) == 1:
+            self.send_command(ToplevelCommand(command="cd", path=unquote_path(args[0])))
+        else:
+            raise CommandSyntaxError("Command 'cd' takes one argument")
+
+    def _cmd_run_current_script_enabled(self):
+        return (self._proxy.get_state() == "waiting_toplevel_command"
+                and get_workbench().get_editor_notebook().get_current_editor() is not None)
+    
+    def _cmd_run_current_script(self):
+        self.execute_current("Run")
+    
     
     def _cmd_reset(self):
-        self._shell.submit_command("%Reset\n")
+        get_workbench().get_view("ShellView").submit_command("%Reset\n")
     
 
             
@@ -266,7 +272,7 @@ class _BackendProxy:
         my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         
-        launcher = os.path.join(self.thonny_dir, "thonny", "backend")
+        launcher = os.path.join(self.thonny_dir, "launch_backend.py")
         cmd_line = [sys.executable, '-u', launcher]
         
         if hasattr(cmd, "filename"):

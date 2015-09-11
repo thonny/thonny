@@ -9,7 +9,7 @@ from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text,\
     TextFrame
 from thonny.common import InlineCommand
 import ast
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 
 
 
@@ -154,7 +154,7 @@ class ObjectInspector(ScrollableFrame):
                 
                 
     def request_object_info(self): 
-        get_workbench().get_runner().send_command(InlineCommand("get_object_info",
+        get_runner().send_command(InlineCommand("get_object_info",
                                             object_id=self.object_id,
                                             all_attributes=False)) 
                     

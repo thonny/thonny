@@ -12,18 +12,6 @@ gives relative __file__-s on imported modules.)
 import sys
 import logging
 import os.path
-
-# Tweak the path
-
-# It is assumed that backend is run with
-#     python3 /absolute/path/to/thonny/thonny/backend
-# We don't assume that path contains
-#             /absolute/path/to/thonny
-# therefore we add it to path, because that's the base for thonny package
-main_dir = os.path.normpath(os.path.join(__file__, os.pardir, os.pardir))
-if main_dir not in sys.path:
-    sys.path.insert(0, main_dir)
-
 from thonny.backend import VM
 
 # set up logging
@@ -38,4 +26,11 @@ stream_handler = logging.StreamHandler(stream=sys.stderr)
 logger.addHandler(stream_handler)
 
 # create and run VM
-VM(main_dir).mainloop()
+if getattr(sys, 'frozen', False):
+    # The application is frozen
+    this_file = sys.executable
+else:
+    # The application is not frozen
+    this_file = __file__
+
+VM(os.path.abspath(os.path.join(this_file, os.pardir))).mainloop()

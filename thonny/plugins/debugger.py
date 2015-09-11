@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 
+"""
+Adds debugging commands and features. 
+"""
+
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerCommand, \
-    parse_shell_command, ToplevelCommand, unquote_path, CommandSyntaxError
+from thonny.common import DebuggerCommand
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
@@ -12,10 +15,25 @@ import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
 from thonny.globals import get_workbench, get_runner
-import shlex
  
 class Debugger:
     def __init__(self):
+        
+        self._init_commands()
+        
+        
+        self._main_frame_visualizer = None
+        self._last_progress_message_handled = None
+        
+        self._runner = get_runner()
+        
+        get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
+        get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
+        
+        get_workbench().get_view("ShellView").add_command("Debug", 
+            get_runner().handle_execute_from_shell)
+    
+    def _init_commands(self):
         get_workbench().add_command("debug", "run", "Debug current script",
             self._cmd_debug_current_script,
             default_sequence="<Control-F5>")
@@ -25,17 +43,10 @@ class Debugger:
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
             default_sequence="<F7>")
-        
-        
-        self._main_frame_visualizer = None
-        self._last_progress_message_handled = None
-        
-        self._runner = get_workbench().get_runner()
-        
-        get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
-        get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
-        
-        get_workbench().get_view("ShellView").add_command("Debug", self._handle_debug_from_shell)
+        get_workbench().add_command("step_out", "run", "Step out",
+            self._cmd_step_out,
+            default_sequence="<F8>")
+
     
     def _cmd_debug_current_script(self):
         get_runner().execute_current("Debug")
@@ -71,16 +82,8 @@ class Debugger:
     def _cmd_step_over(self):
         self._check_issue_debugger_command(DebuggerCommand("step_over"))
 
-    def _handle_debug_from_shell(self, cmd_line):
-        command, args = parse_shell_command(cmd_line)
-        
-        if len(args) >= 1:
-            get_workbench().get_editor_notebook().save_all_named_editors()
-            get_runner().send_command(ToplevelCommand(command=command,
-                               filename=unquote_path(args[0]),
-                               args=args[1:]))
-        else:
-            raise CommandSyntaxError("Command '%s' takes at least one argument", command)
+    def _cmd_step_out(self):
+        self._check_issue_debugger_command(DebuggerCommand("step_out"))
 
 
     def _handle_debugger_progress(self, msg):
