@@ -21,7 +21,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     quote_path_for_shell, \
     InlineCommand, parse_shell_command, unquote_path, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
-from thonny.globals import get_workbench, register_runner
+from thonny.globals import get_workbench
 from thonny.shell import ShellView
 
 
@@ -268,13 +268,22 @@ class _BackendProxy:
         self._message_queue = collections.deque()
     
         # create new backend process
-        # -u means unbuffered IO (neccessary for Python 3.1)
         my_env = os.environ.copy()
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
+        my_env["PYTHONUNBUFFERED"] = "1"
         
-        launcher = os.path.join(self.thonny_dir, "launch_backend.py")
-        cmd_line = [sys.executable, '-u', launcher]
-        
+        # TODO: backend should be selectable by the user
+        if "thonny" in os.path.basename(sys.executable).lower():
+            # Thonny is run frozen, therefore also run frozen backend
+            cmd_line = [os.path.join(
+                            os.path.dirname(sys.executable),
+                            os.path.basename(sys.executable)
+                                .replace("frontend", "backend"))]
+        else:
+            cmd_line = [sys.executable, 
+                        '-u', # -u means unbuffered IO (neccessary for Python 3.1)
+                        os.path.join(self.thonny_dir, "thonny_backend.py")]
+        print("CMD lin", cmd_line)
         if hasattr(cmd, "filename"):
             cmd_line.append(cmd.filename)
             if hasattr(cmd, "args"):

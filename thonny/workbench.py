@@ -105,11 +105,7 @@ class Workbench(tk.Tk):
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
-        # Try set icon
-        try:
-            self.iconbitmap(default=os.path.join(self._main_dir, "res", "thonny.ico"))
-        except:
-            pass
+        self.iconbitmap(default=os.path.join(self._main_dir, "thonny", "res", "thonny.ico"))
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
