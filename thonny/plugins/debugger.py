@@ -87,7 +87,8 @@ class Debugger:
         self._follow_up_command = DebuggerCommand("run_to_before")
 
     def _cmd_step_out(self):
-        self._check_issue_debugger_command(DebuggerCommand("return"))
+        self._check_issue_debugger_command(DebuggerCommand("out"))
+        self._follow_up_command = DebuggerCommand("run_to_before")
 
 
     def _handle_debugger_progress(self, msg):

@@ -26,7 +26,8 @@ BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
 AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
 AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
-EXCEPTION_TRACEBACK_LIMIT = 100    
+EXCEPTION_TRACEBACK_LIMIT = 100
+DEBUG = True    
 
 logger = logging.getLogger("thonny.backend")
 logger.setLevel(logging.ERROR)
@@ -452,7 +453,7 @@ class Executor:
 
         for line in lines:
             # skip lines denoting thonny execution frame
-            if ("thonny/backend" in line 
+            if not DEBUG and ("thonny/backend" in line 
                 or "thonny\\backend" in line
                 or "remove this line from stacktrace" in line):
                 continue
@@ -679,8 +680,12 @@ class FancyTracer(Executor):
         has completed execution (either successfully or not).
         """
         
-        assert cmd.state in ("before_expression", "before_expression_again",
-                             "before_statement", "before_statement_again")
+        # it's meant to be executed in before* state, but if we're not there
+        # we'll step there
+        
+        if cmd.state not in ("before_expression", "before_expression_again",
+                             "before_statement", "before_statement_again"):
+            return self._cmd_step_completed(frame, event, args, focus, cmd)
         
         
         if id(frame) == cmd.frame_id:
@@ -742,9 +747,14 @@ class FancyTracer(Executor):
     def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
         return event.startswith("before")
     
-    def _cmd_return_completed(self, frame, event, args, focus, cmd):
+    def _cmd_out_completed(self, frame, event, args, focus, cmd):
         """Complete current frame"""
-        return not self._frame_is_alive(cmd.frame_id)
+        return (
+            # the frame has completed
+            not self._frame_is_alive(cmd.frame_id)
+            # we're in the same frame but on higher level 
+            or id(frame) == cmd.frame_id and focus.contains_smaller(cmd.focus)
+        )
     
     
     def _cmd_line_completed(self, frame, event, args, focus, cmd):
@@ -990,6 +1000,7 @@ class FancyTracer(Executor):
 
 class CustomStackFrame:
     def __init__(self, frame, last_event, focus=None):
+        self.id = id(frame)
         self.system_frame = frame
         self.last_event = last_event
         self.focus = None
