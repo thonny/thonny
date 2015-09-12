@@ -26,6 +26,7 @@ class EventsView(TextFrame):
             frame = event.stack[-1]
             self.text.insert("end", "    " + "event" + ": " + frame.last_event + "\n") 
             self.text.insert("end", "    " + "focus" + ": " + str(frame.last_event_focus) + "\n") 
+            self.text.insert("end", "    " + "args" + ": " + str(frame.last_event_args) + "\n") 
 
         self.text.see("end")
 

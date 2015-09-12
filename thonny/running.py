@@ -21,7 +21,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     quote_path_for_shell, \
     InlineCommand, parse_shell_command, unquote_path, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 
 
@@ -155,7 +155,10 @@ class Runner:
     
     
     def _cmd_reset(self):
-        get_workbench().get_view("ShellView").submit_command("%Reset\n")
+        if get_runner().get_state() == "waiting_toplevel_command":
+            get_workbench().get_view("ShellView").submit_command("%Reset\n")
+        else:
+            get_runner().send_command(ToplevelCommand(command="Reset"))
     
 
             

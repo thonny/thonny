@@ -6,7 +6,7 @@ Adds debugging commands and features.
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerCommand
+from thonny.common import DebuggerCommand, TextRange
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
@@ -15,14 +15,17 @@ import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
 from thonny.globals import get_workbench, get_runner
- 
+
+_SUSPENDED_FOCUS_BACKGROUND = "#DCEDF2"
+_ACTIVE_FOCUS_BACKGROUND = "#F8FC9A"
+
 class Debugger:
     def __init__(self):
         
         self._init_commands()
         
         self._main_frame_visualizer = None
-        self._last_progress_message_handled = None
+        self._last_progress_message = None
         self._follow_up_command = None
         
         get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
@@ -55,7 +58,8 @@ class Debugger:
         get_runner().execute_current("Debug")
 
 
-    def _check_issue_debugger_command(self, cmd):
+    def _check_issue_debugger_command(self, command):
+        cmd = DebuggerCommand(command=command)
         self._last_debugger_command = cmd
         
         if get_runner().get_state() == "waiting_debug_command":
@@ -63,9 +67,9 @@ class Debugger:
             
             # tell VM the state we are seeing
             cmd.setdefault (
-                frame_id=self._last_progress_message_handled.stack[-1].id,
-                state=self._last_progress_message_handled.stack[-1].last_event,
-                focus=self._last_progress_message_handled.stack[-1].last_event_focus
+                frame_id=self._last_progress_message.stack[-1].id,
+                state=self._last_progress_message.stack[-1].last_event,
+                focus=self._last_progress_message.stack[-1].last_event_focus
             )
             
             get_runner().send_command(cmd)
@@ -75,7 +79,7 @@ class Debugger:
         return get_runner().get_state() == "waiting_debug_command"
     
     def _cmd_step_into(self):
-        self._check_issue_debugger_command(DebuggerCommand("step"))
+        self._check_issue_debugger_command("step")
     
     def _cmd_step_over(self):
         # Step over should stop when new statement or expression is selected.
@@ -83,54 +87,64 @@ class Debugger:
         # Therefore I ask backend to stop first after the focus
         # and later I ask it to run to the beginning of new statement/expression.
         
-        self._check_issue_debugger_command(DebuggerCommand("exec"))
-        self._follow_up_command = DebuggerCommand("run_to_before")
-
+        self._check_issue_debugger_command("exec")
+        self._follow_up_command = "run_to_before"
+        
     def _cmd_step_out(self):
-        self._check_issue_debugger_command(DebuggerCommand("out"))
-        self._follow_up_command = DebuggerCommand("run_to_before")
+        self._check_issue_debugger_command("out")
+        self._follow_up_command = "run_to_before"
 
 
     def _handle_debugger_progress(self, msg):
         
         # TODO: if exception then show message
         
-        """
-        if (hasattr(msg, "tags") 
-            and "call_function" in msg.tags
-            and not self.get_option("debugging.expand_call_functions")):
-            # skip some events
-            
-            self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
-        
-            if (msg.state in ("after_statement")
-                and not self.get_option("debugging.detailed_steps")
-                or self.continue_with_step_over(self.last_manual_debugger_command_sent, msg)):
-                
-                self._check_issue_debugger_command(DebuggerCommand(command="step"), automatic=True)
-        """
                 
         
-        self._last_progress_message_handled = msg
+        self._last_progress_message = msg
         
-        main_frame_id = msg.stack[0].id
-        
-        # clear obsolete main frame visualizer
-        if (self._main_frame_visualizer 
-            and self._main_frame_visualizer.get_frame_id() != main_frame_id):
-            self._main_frame_visualizer.close()
-            self._main_frame_visualizer = None
+        if self._should_skip_event(msg):
+            self._check_issue_debugger_command("run_to_before")
+        else:
+            main_frame_id = msg.stack[0].id
             
-        if not self._main_frame_visualizer:
-            self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
-            
-        self._main_frame_visualizer.update_this_and_next_frames(msg)
+            # clear obsolete main frame visualizer
+            if (self._main_frame_visualizer 
+                and self._main_frame_visualizer.get_frame_id() != main_frame_id):
+                self._main_frame_visualizer.close()
+                self._main_frame_visualizer = None
+                
+            if not self._main_frame_visualizer:
+                self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
+                
+            self._main_frame_visualizer.update_this_and_next_frames(msg)
         
-        # make an automatic move in some cases
-        if self._follow_up_command is not None:
-            self._check_issue_debugger_command(self._follow_up_command)
-            self._follow_up_command = None 
+        # advance automatically in some cases
+        event = msg.stack[-1].last_event
+        focus = msg.stack[-1].last_event_focus
+        args = msg.stack[-1].last_event_args
+        print(event, focus, args)
+        if (event == "after_expression" 
+            and "last_child" in args["node_tags"]
+            and "child_of_statement" in args["node_tags"]):
+            # This means we're done with the expression, so let's speed up a bit.
+            self._check_issue_debugger_command("step")
+            # Next event will be before_statement_again
+            
     
+    def _should_skip_event(self, msg):
+        frame_info = msg.stack[-1]
+        event = frame_info.last_event
+        tags = frame_info.last_event_args["node_tags"]
+        
+        if event == "after_statement":
+            return True
+        
+        # TODO: consult also configuration
+        if "call_function" in tags:
+            return True
+        else:
+            return False
     
     def _handle_toplevel_result(self, msg):
         if self._main_frame_visualizer is not None:
@@ -150,7 +164,7 @@ class FrameVisualizer:
         self._expression_box = ExpressionBox(text_wrapper)
         self._next_frame_visualizer = None
         
-        self._text.tag_configure('focus', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
+        self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
         #self._text.tag_configure('before', background="#F8FC9A") TODO: ???
         #self._text.tag_configure('after', background="#D7EDD3")
         #self._text.tag_configure('exception', background="#FFBFD6")
@@ -204,19 +218,10 @@ class FrameVisualizer:
         # statement
         if "statement" in frame_info.last_event:
             self._remove_focus_tags()
-                
-            # TODO: use different color if focus is not topmost
-            """             
-            if msg.state.startswith("before"):
-                tag = "before"
-            elif msg.state.startswith("after"):
-                tag = "after"
-            else:
-                tag = "exception"
-            """
-            
-            
             self._tag_range(frame_info.last_event_focus, "focus", True)
+            self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
+        else:
+            self._text.tag_configure('focus', background=_SUSPENDED_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
             
         self._expression_box.update_expression(msg, frame_info)
 

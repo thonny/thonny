@@ -643,7 +643,8 @@ class FancyTracer(Executor):
                 
                 # next step will be finalizing evaluation of parent of current expr
                 # so let's say we're before that parent expression
-                again_args = {"text_range" : original_args.get("parent_range")}
+                again_args = {"text_range" : original_args.get("parent_range"),
+                              "node_tags" : ""}
                 again_event = ("before_expression_again" 
                                if "child_of_expression" in node_tags
                                else "before_statement_again")
