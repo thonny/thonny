@@ -147,7 +147,7 @@ class FrameVisualizer:
         self._text_wrapper = text_wrapper
         self._text = text_wrapper.text
         self._frame_id = frame_info.id
-        self._expression_view = ExpressionBox(text_wrapper)
+        self._expression_box = ExpressionBox(text_wrapper)
         self._next_frame_visualizer = None
         
         self._text.tag_configure('focus', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
@@ -164,7 +164,7 @@ class FrameVisualizer:
             
         self._text_wrapper.read_only = False
         self._remove_focus_tags()
-        self._expression_view.clear_debug_view()
+        self._expression_box.clear_debug_view()
         
         # TODO: better remember previous insertwidth and insertbackground
         self._text.configure(background="White", insertwidth=2, insertbackground="Black")
@@ -218,8 +218,7 @@ class FrameVisualizer:
             
             self._tag_range(frame_info.last_event_focus, "focus", True)
             
-            
-        # TODO: update expression box
+        self._expression_box.update_expression(msg, frame_info)
 
     def _find_this_and_next_frame(self, stack):
         for i in range(len(stack)):
@@ -270,8 +269,8 @@ class FrameVisualizer:
         else:
             dialog = FunctionCallDialog(self._text_wrapper, next_frame_info)
             
-            if self._expression_view.winfo_ismapped():
-                dialog.title(self._expression_view.get_focused_text())
+            if self._expression_box.winfo_ismapped():
+                dialog.title(self._expression_box.get_focused_text())
             else:
                 dialog.title("Function call at " + hex(self._frame_id))
                  
@@ -299,7 +298,7 @@ class CallFrameVisualizer(FrameVisualizer):
 
 class ExpressionBox(tk.Text):
     def __init__(self, codeview):
-        tk.Text.__init__(self, codeview.text,
+        tk.Text.__init__(self, get_workbench(), #codeview.text,
                          height=1,
                          width=1,
                          relief=tk.RAISED,
@@ -321,66 +320,72 @@ class ExpressionBox(tk.Text):
         self.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
         
         
-    def handle_vm_message(self, msg):
-        debug("ExpressionBox.handle_vm_message %s", (msg.state, msg.focus))
+    def update_expression(self, msg, frame_info):
+        focus = frame_info.last_event_focus
+        event = frame_info.last_event
         
-        if msg.state in ("before_expression", "before_expression_again"):
+        if event in ("before_expression", "before_expression_again"):
             # (re)load stuff
-            if self._main_range is None or msg.focus.not_smaller_eq_in(self._main_range):
-                self._load_expression(msg.filename, msg.focus)
-                self._update_position(msg.focus)
+            if self._main_range is None or focus.not_smaller_eq_in(self._main_range):
+                self._load_expression(frame_info.filename, focus)
+                self._update_position(focus)
                 self._update_size()
                 
-            self._highlight_range(msg.focus, msg.state)
+            self._highlight_range(focus, event)
             
         
-        elif msg.state == "after_expression":
+        elif event == "after_expression":
             debug("EV: after_expression %s", msg)
             
             self.tag_configure('after', background="#BBEDB2", borderwidth=1, relief=tk.FLAT)
-            start_mark = self._get_mark_name(msg.focus.lineno, msg.focus.col_offset)
-            end_mark = self._get_mark_name(msg.focus.end_lineno, msg.focus.end_col_offset)
+            start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
+            end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
             
-            if hasattr(msg, "value"):
-                debug("EV: replacing expression with value")
-                #print("del", start_mark, end_mark)
-                self.delete(start_mark, end_mark)
-                
-                id_str = memory.format_object_id(msg.value.id)
-                if get_workbench().in_heap_mode():
-                    value_str = id_str
-                else:
-                    value_str = shorten_repr(msg.value.repr, 100)
-                
-                #print("ins", start_mark, value_str)
-                object_tag = "object_" + str(msg.value.id)
-                self.insert(start_mark, value_str, ('value', 'after', object_tag))
-                if misc_utils.running_on_mac_os():
-                    sequence = "<Command-Button-1>"
-                else:
-                    sequence = "<Control-Button-1>"
-                self.tag_bind(object_tag, sequence,
-                              lambda _: get_workbench().event_generate("ObjectSelect", object_id=msg.value.id))
-                    
-                self._update_size()
-                
+            assert hasattr(msg, "value")
+            debug("EV: replacing expression with value")
+            #print("del", start_mark, end_mark)
+            original_focus_text = self.get(start_mark, end_mark)
+            self.delete(start_mark, end_mark)
+            
+            id_str = memory.format_object_id(msg.value.id)
+            if get_workbench().in_heap_mode():
+                value_str = id_str
+            elif "StringLiteral" in frame_info.last_event_args["node_tags"]:
+                # No need to show Python replacing double quotes with single quotes
+                value_str = original_focus_text
             else:
-                debug("EV: got exc: %s", msg)
-                "TODO: make it red"
+                value_str = shorten_repr(msg.value.repr, 100)
+            
+            #print("ins", start_mark, value_str)
+            object_tag = "object_" + str(msg.value.id)
+            self.insert(start_mark, value_str, ('value', 'after', object_tag))
+            if misc_utils.running_on_mac_os():
+                sequence = "<Command-Button-1>"
+            else:
+                sequence = "<Control-Button-1>"
+            self.tag_bind(object_tag, sequence,
+                          lambda _: get_workbench().event_generate("ObjectSelect", object_id=msg.value.id))
                 
-        elif (msg.state == "before_statement_again"
+            self._update_size()
+                
+            
+                
+        elif (event == "before_statement_again"
               and self._main_range is not None # TODO: shouldn't need this 
-              and self._main_range.is_smaller_eq_in(msg.focus)):
+              and self._main_range.is_smaller_eq_in(focus)):
             # we're at final stage of executing parent statement 
             # (eg. assignment after the LHS has been evaluated)
             # don't close yet
-            self.tag_configure('after', background="#DCEDF2", borderwidth=1, relief=tk.FLAT)   
+            self.tag_configure('after', background="#DCEDF2", borderwidth=1, relief=tk.FLAT)
+        
+        elif event == "exception":
+            "TODO:"   
+        
         else:
             # hide and clear on non-expression events
             self.clear_debug_view()
 
-        if hasattr(msg, "focus"):
-            self._last_focus = msg.focus
+        self._last_focus = focus
         
         
     def get_focused_text(self):
@@ -474,7 +479,16 @@ class ExpressionBox(tk.Text):
         else:
             x = 30
             y = 30
+            
+        widget = self._codeview
+        while widget != get_workbench():
+            x += widget.winfo_x()
+            y += widget.winfo_y()
+            widget = widget.master
+            
         self.place(x=x, y=y, anchor=tk.NW)
+        self.update_idletasks()
+        print(self.winfo_geometry())
     
     def _update_size(self):
         content = self.get("1.0", tk.END)

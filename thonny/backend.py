@@ -776,7 +776,7 @@ class FancyTracer(Executor):
         
         for custom_frame in self._custom_stack:
             
-            last_event_args = custom_frame.last_event_args
+            last_event_args = custom_frame.last_event_args.copy()
             if "value" in last_event_args:
                 last_event_args["value"] = self._vm.export_value(last_event_args["value"]) 
             
@@ -874,6 +874,11 @@ class FancyTracer(Executor):
             
             # TODO: assert (it doesn't evaluate msg when test == True)
             
+            if isinstance(node, ast.Str):
+                add_tag(node, "StringLiteral")
+                
+            if isinstance(node, ast.Num):
+                add_tag(node, "NumberLiteral")
                 
             # make sure every node has this field
             if not hasattr(node, "tags"):
