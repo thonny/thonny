@@ -24,5 +24,5 @@ class GlobalsView(VariablesFrame):
             get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
 
-def load_plugin():
+def _load_plugin():
     get_workbench().add_view(GlobalsView, "Variables", "ne")

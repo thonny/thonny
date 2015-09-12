@@ -61,20 +61,17 @@ class TextRange(Record):
         self.end_col_offset = end_col_offset
     
     def contains_smaller(self, other):
-        return ((other.lineno > self.lineno
-                 or other.lineno == self.lineno 
-                    and other.col_offset > self.col_offset)
-                and (other.end_lineno < self.end_lineno
-                 or other.end_lineno == self.end_lineno 
-                    and other.end_col_offset < self.end_col_offset))
+        this_start = (self.lineno, self.col_offset)
+        this_end = (self.end_lineno, self.end_col_offset)
+        other_start = (other.lineno, other.col_offset)
+        other_end = (other.end_lineno, other.end_col_offset)
+        
+        return (this_start < other_start and this_end > other_end
+                or this_start == other_start and this_end > other_end
+                or this_start < other_start and this_end == other_end)
     
     def contains_smaller_eq(self, other):
-        return ((other.lineno > self.lineno
-                 or other.lineno == self.lineno 
-                    and other.col_offset >= self.col_offset)
-                and (other.end_lineno < self.end_lineno
-                 or other.end_lineno == self.end_lineno 
-                    and other.end_col_offset <= self.end_col_offset))
+        return self.contains_smaller(other) or self == other
     
     def not_smaller_in(self, other):
         return not other.contains_smaller(self)
@@ -183,6 +180,6 @@ def print_structure(o):
         print(attr, "=", getattr(o, attr))
 
 if __name__ == "__main__":
-    tr1 = TextRange(1,2,3,4)
-    tr2 = TextRange(1,2,3,4)
-    print(tr1 == tr2)
+    tr1 = TextRange(1,0,1,10)
+    tr2 = TextRange(1,0,1,10)
+    print(tr2.contains_smaller(tr1))

@@ -532,11 +532,11 @@ class FancyTracer(Executor):
         """
         if not self._may_step_in(frame.f_code):
             return
-
+        
+        code_name = frame.f_code.co_name
+        
         if event == "call":
             self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
-            
-            code_name = frame.f_code.co_name
             
             if code_name in self.marker_function_names:
                 # the main thing
@@ -565,12 +565,15 @@ class FancyTracer(Executor):
                 self._custom_stack.append(CustomStackFrame(frame, "call"))
         
         elif event == "return":
-            self._custom_stack.pop()
-            if len(self._custom_stack) == 0:
-                # We popped last frame, this means our program has ended.
-                # There may be more events coming from upper (system) frames
-                # but we're not interested in those
-                sys.settrace(None)
+            if code_name not in self.marker_function_names:
+                self._custom_stack.pop()
+                if len(self._custom_stack) == 0:
+                    # We popped last frame, this means our program has ended.
+                    # There may be more events coming from upper (system) frames
+                    # but we're not interested in those
+                    sys.settrace(None)
+            else:
+                pass
                 
         elif event == "exception":
             self._unhandled_exception = arg[1]
@@ -589,6 +592,7 @@ class FancyTracer(Executor):
         and _trace will call it again in another state.
         Otherwise sends response and fetches next command.  
         """
+        self._debug("Progress event:", event, self._current_command)
         focus = TextRange(*args["text_range"])
         
         self._custom_stack[-1].last_event = event
@@ -600,7 +604,7 @@ class FancyTracer(Executor):
              
         # If method decides we're in the right place to respond to the command ...
         if tester(frame, event, args, focus, self._current_command):
-            
+            #self._debug("Completed command: ", self._current_command)
             self._vm.send_message("DebuggerProgress",
                 command=self._current_command.command,
                 stack=self._export_stack(),
@@ -612,6 +616,7 @@ class FancyTracer(Executor):
             
             # Fetch next debugger command
             self._current_command = self._vm._fetch_command()
+            self._debug("got command:", self._current_command)
             # get non-progress commands out our way
             self._respond_to_inline_commands()  
             assert isinstance(self._current_command, DebuggerCommand)
@@ -699,6 +704,7 @@ class FancyTracer(Executor):
                     # Normal completion
                     # Maybe there was an exception, but this is forgotten now
                     cmd._unhandled_exception = False
+                    self._debug("Exec normal")
                     return True
                 
                 
@@ -714,6 +720,7 @@ class FancyTracer(Executor):
                     
             else:
                 # We're outside of starting focus, assumedly because of an exception
+                self._debug("Exec outside", cmd.focus, focus)
                 return True
         
         else:
@@ -724,12 +731,20 @@ class FancyTracer(Executor):
             else:
                 # Original frame has completed, assumedly because of an exception
                 # We're done
+                self._debug("Exec wrong frame")
                 return True
             
 
     
     def _cmd_step_completed(self, frame, event, args, focus, cmd):
         return True
+    
+    def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
+        return event.startswith("before")
+    
+    def _cmd_return_completed(self, frame, event, args, focus, cmd):
+        """Complete current frame"""
+        return not self._frame_is_alive(cmd.frame_id)
     
     
     def _cmd_line_completed(self, frame, event, args, focus, cmd):
@@ -747,7 +762,15 @@ class FancyTracer(Executor):
             return False 
     
     def _export_stack(self):
-        return [FrameInfo (
+        result = []
+        
+        for custom_frame in self._custom_stack:
+            
+            last_event_args = custom_frame.last_event_args
+            if "value" in last_event_args:
+                last_event_args["value"] = self._vm.export_value(last_event_args["value"]) 
+            
+            result.append(FrameInfo(
                 id=id(custom_frame.system_frame),
                 filename=custom_frame.system_frame.f_code.co_filename,
                 module_name=custom_frame.system_frame.f_globals["__name__"],
@@ -756,9 +779,11 @@ class FancyTracer(Executor):
                 source=self._get_source(custom_frame.system_frame),
                 firstlineno=custom_frame.system_frame.f_code.co_firstlineno,
                 last_event=custom_frame.last_event,
-                last_event_args=custom_frame.last_event_args,
+                last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
-            ) for custom_frame in self._custom_stack]
+            ))
+        
+        return result
 
     
     def _thonny_hidden_before_stmt(self, text_range, node_tags):

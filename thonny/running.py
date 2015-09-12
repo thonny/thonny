@@ -53,7 +53,7 @@ class Runner:
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
-            tester=self._cmd_run_current_script_enabled)
+            tester=self.cmd_execution_command_enabled)
         
         get_workbench().add_command('reset', "run", 'Stop/Reset',
             handler=self._cmd_reset,
@@ -146,7 +146,7 @@ class Runner:
         else:
             raise CommandSyntaxError("Command 'cd' takes one argument")
 
-    def _cmd_run_current_script_enabled(self):
+    def cmd_execution_command_enabled(self):
         return (self._proxy.get_state() == "waiting_toplevel_command"
                 and get_workbench().get_editor_notebook().get_current_editor() is not None)
     
@@ -229,6 +229,9 @@ class _BackendProxy:
             return msg
     
     def send_command(self, cmd):
+        if not (isinstance(cmd, InlineCommand) and cmd.command == "tkupdate"): 
+            info("Proxy: Sending command: %s", cmd)
+            
         with self._state_lock:
             if (isinstance(cmd, ToplevelCommand) 
                 or isinstance(cmd, DebuggerCommand)
@@ -281,9 +284,9 @@ class _BackendProxy:
                                 .replace("frontend", "backend"))]
         else:
             cmd_line = [sys.executable, 
-                        '-u', # -u means unbuffered IO (neccessary for Python 3.1)
+                        '-u', # -u means unbuffered IO (neccessary in Python 3.1)
                         os.path.join(self.thonny_dir, "thonny_backend.py")]
-        print("CMD lin", cmd_line)
+
         if hasattr(cmd, "filename"):
             cmd_line.append(cmd.filename)
             if hasattr(cmd, "args"):
@@ -334,6 +337,6 @@ class _BackendProxy:
             if data == '':
                 break
             else:
-                debug("Debug info from backend: %s", data.strip())
+                debug("### BACKEND ###: %s", data.strip())
         
             

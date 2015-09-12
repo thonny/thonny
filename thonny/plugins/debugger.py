@@ -21,30 +21,33 @@ class Debugger:
         
         self._init_commands()
         
-        
         self._main_frame_visualizer = None
         self._last_progress_message_handled = None
-        
-        self._runner = get_runner()
+        self._follow_up_command = None
         
         get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
         
         get_workbench().get_view("ShellView").add_command("Debug", 
             get_runner().handle_execute_from_shell)
+        
     
     def _init_commands(self):
         get_workbench().add_command("debug", "run", "Debug current script",
             self._cmd_debug_current_script,
+            tester=get_runner().cmd_execution_command_enabled,
             default_sequence="<Control-F5>")
         get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
+            tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F6>")
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
+            tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F7>")
         get_workbench().add_command("step_out", "run", "Step out",
             self._cmd_step_out,
+            tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F8>")
 
     
@@ -52,38 +55,39 @@ class Debugger:
         get_runner().execute_current("Debug")
 
 
-    def _check_issue_debugger_command(self, cmd, automatic=False):
-        if self._runner.get_state() == "waiting_debug_command":
-            self._issue_debugger_command(cmd, automatic)
-            # TODO: notify memory panes and editors? Make them inactive?
-    
-    def _issue_debugger_command(self, cmd, automatic=False):
-        debug("_issue cmd: %s, auto: %s", cmd, automatic)
+    def _check_issue_debugger_command(self, cmd):
+        self._last_debugger_command = cmd
         
-        # tell VM the state we are seeing
-        cmd.setdefault (
-            frame_id=self._last_progress_message_handled.stack[-1].id,
-            state=self._last_progress_message_handled.stack[-1].last_event,
-            focus=self._last_progress_message_handled.stack[-1].last_event_focus
-        )
-        
-        get_runner().send_command(cmd)
+        if get_runner().get_state() == "waiting_debug_command":
+            debug("_issue cmd: %s", cmd)
+            
+            # tell VM the state we are seeing
+            cmd.setdefault (
+                frame_id=self._last_progress_message_handled.stack[-1].id,
+                state=self._last_progress_message_handled.stack[-1].last_event,
+                focus=self._last_progress_message_handled.stack[-1].last_event_focus
+            )
+            
+            get_runner().send_command(cmd)
 
 
-    def _cmd_step_into_enabled(self):
-        return self._runner.get_state() == "waiting_debug_command"
+    def _cmd_stepping_commands_enabled(self):
+        return get_runner().get_state() == "waiting_debug_command"
     
     def _cmd_step_into(self):
-        self._check_issue_debugger_command(DebuggerCommand("step_into"))
-    
-    def _cmd_step_over_enabled(self):
-        return self._cmd_step_into_enabled()
+        self._check_issue_debugger_command(DebuggerCommand("step"))
     
     def _cmd_step_over(self):
-        self._check_issue_debugger_command(DebuggerCommand("step_over"))
+        # Step over should stop when new statement or expression is selected.
+        # At the same time, I need to get value from after_expression event.
+        # Therefore I ask backend to stop first after the focus
+        # and later I ask it to run to the beginning of new statement/expression.
+        
+        self._check_issue_debugger_command(DebuggerCommand("exec"))
+        self._follow_up_command = DebuggerCommand("run_to_before")
 
     def _cmd_step_out(self):
-        self._check_issue_debugger_command(DebuggerCommand("step_out"))
+        self._check_issue_debugger_command(DebuggerCommand("return"))
 
 
     def _handle_debugger_progress(self, msg):
@@ -119,7 +123,12 @@ class Debugger:
         if not self._main_frame_visualizer:
             self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
             
-        self._main_frame_visualizer.update_this_and_next_frames(msg) 
+        self._main_frame_visualizer.update_this_and_next_frames(msg)
+        
+        # make an automatic move in some cases
+        if self._follow_up_command is not None:
+            self._check_issue_debugger_command(self._follow_up_command)
+            self._follow_up_command = None 
     
     
     def _handle_toplevel_result(self, msg):
@@ -152,8 +161,9 @@ class FrameVisualizer:
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
             
-            
-        self._text.wrapper.read_only = False
+        self._text_wrapper.read_only = False
+        self._remove_focus_tags()
+        self._expression_view.clear_debug_view()
         
         # TODO: better remember previous insertwidth and insertbackground
         self._text.configure(background="White", insertwidth=2, insertbackground="Black")
@@ -182,27 +192,32 @@ class FrameVisualizer:
         if self._next_frame_visualizer:
             self._next_frame_visualizer.update_this_and_next_frames(msg)
         
-            
+    
+    def _remove_focus_tags(self):
+        self._text.tag_remove("focus", "0.0", "end")
+     
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
-        self._text.tag_remove("focus", "0.0", "end")
-            
-        """             
-        if msg.state.startswith("before"):
-            tag = "before"
-        elif msg.state.startswith("after"):
-            tag = "after"
-        else:
-            tag = "exception"
-        """
-        
         
         # TODO: if focus is in expression, then find and highlight closest
         # statement
-        self._tag_range(frame_info.last_event_focus, "focus", True)
-        
-        # TODO: use different color if focus is not topmost
-        
+        if "statement" in frame_info.last_event:
+            self._remove_focus_tags()
+                
+            # TODO: use different color if focus is not topmost
+            """             
+            if msg.state.startswith("before"):
+                tag = "before"
+            elif msg.state.startswith("after"):
+                tag = "after"
+            else:
+                tag = "exception"
+            """
+            
+            
+            self._tag_range(frame_info.last_event_focus, "focus", True)
+            
+            
         # TODO: update expression box
 
     def _find_this_and_next_frame(self, stack):

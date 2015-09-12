@@ -1,12 +1,6 @@
 NB!!! The repo is now Git (was Mercurial) !!!
 ==================================================
 
-!!! Note for paper reviewer !!!
-===============================
-Current installers provide Thonny version where "Step into" and "Step over" are merged into single command "Step". These installers (0.2.8) are recommended for reviewing main features of Thonny.
-
-
-
 
 Thonny
 ======
