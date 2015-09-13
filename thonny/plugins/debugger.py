@@ -197,7 +197,7 @@ class FrameVisualizer:
         # clear obsolete next frame visualizer
         if (self._next_frame_visualizer 
             and (not next_frame_info or 
-                 self._next_frame_visualizer.get_frame_id() != next_frame_info)):
+                 self._next_frame_visualizer.get_frame_id() != next_frame_info.id)):
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
             
@@ -221,7 +221,7 @@ class FrameVisualizer:
             self._tag_range(frame_info.last_event_focus, "focus", True)
             self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
         else:
-            self._text.tag_configure('focus', background=_SUSPENDED_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
+            self._text.tag_configure('focus', background="LightYellow", borderwidth=1, relief=tk.SOLID)
             
         self._expression_box.update_expression(msg, frame_info)
 
@@ -270,9 +270,9 @@ class FrameVisualizer:
     
     def _create_next_frame_visualizer(self, next_frame_info):
         if next_frame_info.code_name == "<module>":
-            return ModuleLoadDialog(self._text_wrapper, next_frame_info)
+            return ModuleLoadDialog(self._text, next_frame_info)
         else:
-            dialog = FunctionCallDialog(self._text_wrapper, next_frame_info)
+            dialog = FunctionCallDialog(self._text.master, next_frame_info)
             
             if self._expression_box.winfo_ismapped():
                 dialog.title(self._expression_box.get_focused_text())
@@ -303,7 +303,7 @@ class CallFrameVisualizer(FrameVisualizer):
 
 class ExpressionBox(tk.Text):
     def __init__(self, codeview):
-        tk.Text.__init__(self, get_workbench(), #codeview.text,
+        tk.Text.__init__(self, codeview.winfo_toplevel(), #codeview.text,
                          height=1,
                          width=1,
                          relief=tk.RAISED,
@@ -486,7 +486,7 @@ class ExpressionBox(tk.Text):
             y = 30
             
         widget = self._codeview
-        while widget != get_workbench():
+        while widget != self.winfo_toplevel():
             x += widget.winfo_x()
             y += widget.winfo_y()
             widget = widget.master
@@ -503,24 +503,31 @@ class ExpressionBox(tk.Text):
     
 
 class FrameDialog(tk.Toplevel, FrameVisualizer):
-    def __init__(self, text_wrapper, frame_info):
-        tk.Toplevel.__init__(self, text_wrapper)
-        FrameVisualizer.__init__(self, text_wrapper, frame_info)
+    def __init__(self, master, frame_info):
+        tk.Toplevel.__init__(self, master)
         
-        self.transient(text_wrapper)
+        self.transient(master)
         if misc_utils.running_on_windows():
             self.wm_attributes('-toolwindow', 1)
         
         
         # TODO: take size from prefs
-        self.geometry("{}x{}+{}+{}".format(text_wrapper.winfo_width(),
-                                           text_wrapper.winfo_height(),
-                                           text_wrapper.winfo_toplevel().winfo_rootx(),
-                                           text_wrapper.winfo_toplevel().winfo_rooty()))
+        editor_notebook = get_workbench().get_editor_notebook()
+        if master.winfo_toplevel() == get_workbench():
+            position_reference = editor_notebook
+        else:
+            position_reference = master.winfo_toplevel()
+            
+        self.geometry("{}x{}+{}+{}".format(editor_notebook.winfo_width(),
+                                           editor_notebook.winfo_height()-20,
+                                           position_reference.winfo_rootx(),
+                                           position_reference.winfo_rooty()))
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
-        self._init_layout_widgets(text_wrapper, frame_info)
-        self._load_function(frame_info)
+        self._init_layout_widgets(master, frame_info)
+        FrameVisualizer.__init__(self, self._text_wrapper, frame_info)
+        
+        self._load_code(frame_info)
         self._text_wrapper.text.focus()
     
     def _init_layout_widgets(self, master, frame_info):
@@ -536,8 +543,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self._code_book = ttk.Notebook(self.main_pw)
         self._text_wrapper = CodeView(self._code_book, first_line_no=frame_info.firstlineno)
         self._code_book.add(self._text_wrapper, text="Source")
-        self._text_wrapper.enter_execution_mode()
-        self.main_pw.add(self._code_book, minsize=130)
+        self.main_pw.add(self._code_book, weight=3)
         
     
     def _load_code(self, frame_info):
@@ -556,15 +562,15 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self.destroy()
 
 class FunctionCallDialog(FrameDialog):
-    def __init__(self, text_wrapper, frame_info):
-        FrameDialog.__init__(self, text_wrapper)
+    def __init__(self, master, frame_info):
+        FrameDialog.__init__(self, master, frame_info)
     
     def _init_layout_widgets(self, master, frame_info):
         FrameDialog._init_layout_widgets(self, master, frame_info)
         self._locals_book = ttk.Notebook(self.main_pw)
         self._locals_frame = VariablesFrame(self._locals_book)
         self._locals_book.add(self._locals_frame, text="Local variables")
-        self.main_pw.add(self._locals_book, minsize=75)
+        self.main_pw.add(self._locals_book, weight=1)
 
     def _load_code(self, frame_info):
         FrameDialog._load_code(self, frame_info)
