@@ -52,9 +52,10 @@ def parse_source(source, filename='<unknown>', mode="exec"):
 
 def get_last_child(node):
     if isinstance(node, ast.Call):
-        if node.kwargs is not None:
+        # TODO: take care of Python 3.5 updates (Starred etc.)
+        if hasattr(node, "kwargs") and node.kwargs is not None:
             return node.kwargs
-        elif node.starargs is not None:
+        elif hasattr(node, "starargs") and node.starargs is not None:
             return node.starargs
         elif len(node.keywords) > 0:
             return node.keywords[-1]
@@ -141,28 +142,6 @@ def mark_text_ranges(node, source):
     which has attributes lineno and col_offset.
     """
     
-    def _get_ordered_child_nodes(node):
-        if isinstance(node, ast.Dict):
-            children = []
-            for i in range(len(node.keys)):
-                children.append(node.keys[i])
-                children.append(node.values[i])
-            return children
-        elif isinstance(node, ast.Call):
-            children = [node.func] + node.args
-            
-            for kw in node.keywords:
-                children.append(kw.value)
-            
-            if node.starargs is not None:
-                children.append(node.starargs)
-            if node.kwargs is not None:
-                children.append(node.kwargs)
-            
-            children.sort(key=lambda x: (x.lineno, x.col_offset))
-            return children
-        else:
-            return ast.iter_child_nodes(node)    
     
     def _extract_tokens(tokens, lineno, col_offset, end_lineno, end_col_offset):
         return list(filter((lambda tok: tok[START][0] >= lineno
@@ -271,7 +250,9 @@ def mark_text_ranges(node, source):
         # Try to peel off more tokens to give better estimate for children
         # Empty parens would confuse the children of no argument Call
         if ((isinstance(node, ast.Call)) 
-            and not (node.args or node.keywords or node.starargs or node.kwargs)):
+            and not (node.args or node.keywords 
+                     or hasattr(node, "starargs") and node.starargs 
+                     or hasattr(node, "kwargs") and node.kwargs)):
             assert tokens[-1][STRING] == ')'
             del tokens[-1]
             _strip_trailing_junk_from_expressions(tokens)
@@ -379,7 +360,7 @@ def fix_ast_problems(tree, source_lines, tokens):
     # similar problem is with Attributes and Subscripts
 
     def fix_node(node):
-        for child in get_ordered_child_nodes(node):
+        for child in _get_ordered_child_nodes(node):
         #for child in ast.iter_child_nodes(node):
             fix_node(child)
                     
@@ -431,28 +412,6 @@ def fix_ast_problems(tree, source_lines, tokens):
                 char_col_offset = len(byte_line[:node.col_offset].decode("UTF-8"))
                 node.col_offset = char_col_offset
      
-    def get_ordered_child_nodes(node):
-        if isinstance(node, ast.Dict):
-            children = []
-            for i in range(len(node.keys)):
-                children.append(node.keys[i])
-                children.append(node.values[i])
-            return children
-        elif isinstance(node, ast.Call):
-            children = [node.func] + node.args
-            
-            for kw in node.keywords:
-                children.append(kw.value)
-            
-            if node.starargs is not None:
-                children.append(node.starargs)
-            if node.kwargs is not None:
-                children.append(node.kwargs)
-            
-            children.sort(key=lambda x: (x.lineno, x.col_offset))
-            return children
-        else:
-            return ast.iter_child_nodes(node)    
     
     fix_node(tree)
 
@@ -467,6 +426,31 @@ def compare_node_positions(n1, n2):
         return -1
     else:
         return 0
+
+def _get_ordered_child_nodes(node):
+    if isinstance(node, ast.Dict):
+        children = []
+        for i in range(len(node.keys)):
+            children.append(node.keys[i])
+            children.append(node.values[i])
+        return children
+    elif isinstance(node, ast.Call):
+        children = [node.func] + node.args
+        
+        for kw in node.keywords:
+            children.append(kw.value)
+        
+        # TODO: take care of Python 3.5 updates (eg. args=[Starred] and keywords)
+        if hasattr(node, "starargs") and node.starargs is not None:
+            children.append(node.starargs)
+        if hasattr(node, "kwargs") and node.kwargs is not None:
+            children.append(node.kwargs)
+        
+        children.sort(key=lambda x: (x.lineno, x.col_offset))
+        return children
+    else:
+        return ast.iter_child_nodes(node)    
+
 
 if __name__ == "__main__":
     """
