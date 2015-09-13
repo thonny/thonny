@@ -16,13 +16,15 @@ def load_plugin():
         create_edit_command_handler("<<Undo>>"),
         tester=None, # TODO:
         default_sequence="<Control-z>",
-        skip_sequence_binding=True)
+        skip_sequence_binding=True,
+        group=10)
     
     get_workbench().add_command("redo", "edit", "Redo",
         create_edit_command_handler("<<Redo>>"),
         tester=None, # TODO:
         default_sequence="<Control-y>",
-        skip_sequence_binding=True)
+        skip_sequence_binding=True,
+        group=10)
     
     get_workbench().add_separator("edit")
     
@@ -30,23 +32,27 @@ def load_plugin():
         create_edit_command_handler("<<Cut>>"),
         tester=None, # TODO:
         default_sequence="<Control-x>",
-        skip_sequence_binding=True)
+        skip_sequence_binding=True,
+        group=20)
     
     get_workbench().add_command("Copy", "edit", "Copy",
         create_edit_command_handler("<<Copy>>"),
         tester=None, # TODO:
         default_sequence="<Control-c>",
-        skip_sequence_binding=True)
+        skip_sequence_binding=True,
+        group=20)
     
     get_workbench().add_command("Paste", "edit", "Paste",
         create_edit_command_handler("<<Paste>>"),
         tester=None, # TODO:
         default_sequence="<Control-v>",
-        skip_sequence_binding=True)
+        skip_sequence_binding=True,
+        group=20)
     
     get_workbench().add_command("SelectAll", "edit", "Select all",
         create_edit_command_handler("<<SelectAll>>"),
         tester=None, # TODO:
         default_sequence="<Control-a>",
-        skip_sequence_binding=True)
+        skip_sequence_binding=True,
+        group=20)
     

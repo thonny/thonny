@@ -112,6 +112,8 @@ class Workbench(tk.Tk):
         self._menubar = tk.Menu(self)
         self["menu"] = self._menubar
         self._menus = {}
+        self._menu_item_groups = {} # key is pair (menu_name, command_label)
+        self._menu_item_testers = {} # key is pair (menu_name, command_label)
         
         # create standard menus in correct order
         if running_on_mac_os():
@@ -191,19 +193,23 @@ class Workbench(tk.Tk):
         
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
-            default_sequence="<Control-plus>")
+            default_sequence="<Control-plus>",
+            group=60)
                 
-        self.add_command("decrease_font_size", "view", "Increase font size",
+        self.add_command("decrease_font_size", "view", "Decrease font size",
             lambda: self._change_font_size(-1),
-            default_sequence="<Control-minus>")
+            default_sequence="<Control-minus>",
+            group=60)
         
         self.add_command("focus_editor", "view", "Focus editor",
             self._cmd_focus_editor,
-            default_sequence="<F11>")
+            default_sequence="<F11>",
+            group=70)
                 
         self.add_command("focus_shell", "view", "Focus shell",
             self._cmd_focus_shell,
-            default_sequence="<F12>")
+            default_sequence="<F12>",
+            group=70)
         
         #self.add_command("help", "help", "Thonny help",
         #    self._cmd_help)
@@ -288,7 +294,8 @@ class Workbench(tk.Tk):
                     default_sequence=None,
                     flag_name=None,
                     skip_sequence_binding=False,
-                    _index="end"):
+                    group=99,
+                    position_in_group="end"):
         """Adds an item to specified menu.
         
         Args:
@@ -306,6 +313,8 @@ class Workbench(tk.Tk):
                 If None then command is assumed to be always available.
             default_sequence: Default shortcut (Tk style)
             flag_name: Used for toggle commands. Indicates the name of the boolean option.
+            group: Used for grouping related commands together. Value should be int. 
+                Groups with smaller numbers appear before.
         
         Returns:
             None
@@ -343,13 +352,19 @@ class Workbench(tk.Tk):
                 
             dispatch(None)
             
-        self.get_menu(menu_name).insert(
-            _index,
+        menu = self.get_menu(menu_name)
+        menu.insert(
+            self._find_location_for_menu_item(menu_name, command_label, group, position_in_group),
             "checkbutton" if flag_name else "command",
             label=command_label,
             accelerator=sequence_to_accelerator(sequence),
             variable=self.get_variable(flag_name) if flag_name else None,
             command=dispatch_from_menu)
+        
+        # remember the details that can't be stored in Tkinter objects
+        self._menu_item_groups[(menu_name, command_label)] = group
+        self._menu_item_testers[(menu_name, command_label)] = tester
+        
     
     def add_separator(self, menu_label):
         # TODO: don't add separator as first item in the menu
@@ -392,24 +407,13 @@ class Workbench(tk.Tk):
             else:
                 self.show_view(view_id, True)
         
-        # Menu items are positioned alphabetically 
-        # in first section (ie. before first separator) of View menu.
-        # Find correct position for this label
-        view_menu = self.get_menu("View")
-        for i in range(0, 999):
-            if ("label" not in view_menu.entryconfigure(i) # separator
-                or view_menu.entrycget(i, "label") > label):
-                index = i
-                break
-        else:
-            index = "end"
-            
-            
-        self.add_command("toggle_" + view_id, menu_name="view",
+        self.add_command("toggle_" + view_id,
+            menu_name="view",
             command_label=label,
             handler=toggle_view_visibility,
             flag_name="view." + view_id + ".visible",
-            _index=index)
+            group=10,
+            position_in_group="aplhabetic")
         
         if visibility_flag.get():
             self.show_view(view_id, False)
@@ -570,6 +574,45 @@ class Workbench(tk.Tk):
         # untie the mode from HeapView
         return (self._configuration_manager.has_option("view.heap.visible")
             and self.get_option("view.heap.visible"))
+    
+    def _find_location_for_menu_item(self, menu_name, command_label, group,
+            position_in_group="end"):        
+        
+        menu = self.get_menu(menu_name)
+        
+        if menu.index("end") == None: # menu is empty
+            return "end"
+        
+        this_group_exists = False
+        for i in range(0, menu.index("end")+1):
+            data = menu.entryconfigure(i)
+            if "label" in data:
+                # it's a command, not separator
+                sibling_label = menu.entrycget(i, "label")
+                sibling_group = self._menu_item_groups[(menu_name, sibling_label)]
+
+                if sibling_group == group:
+                    this_group_exists = True
+                    if position_in_group == "aplhabetic" and sibling_label > command_label:
+                        return i
+                    
+                if sibling_group > group:
+                    assert not this_group_exists # otherwise we would have found the ending separator
+                    menu.insert_separator(i)
+                    return i
+            else:
+                # We found a separator
+                if this_group_exists: 
+                    # it must be the ending separator for this group
+                    return i
+                
+        else:
+            # no group was bigger, ie. this should go to the end
+            if not this_group_exists:
+                menu.add_separator()
+                
+            return "end"
+        
         
     def _update_toolbar(self):
         "TODO:"

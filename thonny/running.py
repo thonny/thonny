@@ -53,12 +53,13 @@ class Runner:
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
-            tester=self.cmd_execution_command_enabled)
+            tester=self.cmd_execution_command_enabled,
+            group=10)
         
         get_workbench().add_command('reset', "run", 'Stop/Reset',
             handler=self._cmd_reset,
-            default_sequence=None # TODO:
-            )
+            default_sequence=None, # TODO:
+            group=70)
         
     def get_cwd(self):
         return self._proxy.cwd

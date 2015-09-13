@@ -3,13 +3,26 @@ from tkinter import ttk
 
 root = tk.Tk()
 
-t1 = tk.Text(root, undo=True)
-t1 = ttk.Entry(root)
-t1.grid()
 
 def do_stuff(e=None):
-    print(t1.selection_get())
-    #print(">" + t1.selection_present() + "<")
+    pass
+
+
+root.option_add('*tearOff', tk.FALSE)
+menubar = tk.Menu(root)
+root["menu"] = menubar
+
+file_menu = tk.Menu(menubar)
+menubar.add_cascade(label="File", menu=file_menu)
+
+print(file_menu.index("end"))
+file_menu.add_separator()
+print(file_menu.index("end"))
+file_menu.add_separator()
+print(file_menu.index("end"))
+file_menu.add_command(label="Tessa", command=do_stuff)
+print(file_menu.index("end"))
+
 
 b1 = ttk.Button(root, command=do_stuff)
 b1.grid()

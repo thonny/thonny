@@ -19,8 +19,8 @@ class AstView(ui_utils.TreeFrame):
         self.current_code_view = None
         self.tree.bind("<<TreeviewSelect>>", self._locate_code)
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
-        get_workbench().bind("Save", self._update)
-        get_workbench().bind("SaveAs", self._update)
+        get_workbench().bind("Save", self._update, True)
+        get_workbench().bind("SaveAs", self._update, True)
 
         self.tree.column('#0', width=550, anchor=tk.W)
         self.tree.column('range', width=100, anchor=tk.W)
