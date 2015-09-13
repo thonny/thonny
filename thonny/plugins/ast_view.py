@@ -17,7 +17,10 @@ class AstView(ui_utils.TreeFrame):
         )
         
         self.current_code_view = None
-        self.tree.bind("<<TreeviewSelect>>", self.locate_code)
+        self.tree.bind("<<TreeviewSelect>>", self._locate_code)
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
+        get_workbench().bind("Save", self._update)
+        get_workbench().bind("SaveAs", self._update)
 
         self.tree.column('#0', width=550, anchor=tk.W)
         self.tree.column('range', width=100, anchor=tk.W)
@@ -30,31 +33,21 @@ class AstView(ui_utils.TreeFrame):
         self.tree.heading('range', text='Code range', anchor=tk.W)
         
         self.tree['show'] = ('headings', 'tree')
+        
+        self._update(None)
     
-    def locate_code(self, event):
-        if self.current_code_view is None:
+    def _update(self, event):
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        
+        if not editor:
+            self.current_code_view = None
             return
         
-        iid = self.tree.focus()
-        
-        if iid != '':
-            values = self.tree.item(iid)['values']
-            if isinstance(values, list) and len(values) >= 5:
-                start_line, start_col, end_line, end_col = values[1:5] 
-                self.current_code_view.select_range(TextRange(start_line, start_col, 
-                                                    end_line, end_col))
-        
-    
-    def clear_tree(self):
-        for child_id in self.tree.get_children():
-            self.tree.delete(child_id)
-    
-    def show_ast(self, code_view):
-        self.current_code_view = code_view
-        source = code_view.get_content()
+        self.current_code_view = editor.get_code_view()
+        source = self.current_code_view.get_content()
         
 
-        self.clear_tree()
+        self._clear_tree()
         
         try:
             #import time
@@ -115,6 +108,24 @@ class AstView(ui_utils.TreeFrame):
                 
         _format("root", root, "")
         
+    def _locate_code(self, event):
+        if self.current_code_view is None:
+            return
+        
+        iid = self.tree.focus()
+        
+        if iid != '':
+            values = self.tree.item(iid)['values']
+            if isinstance(values, list) and len(values) >= 5:
+                start_line, start_col, end_line, end_col = values[1:5] 
+                self.current_code_view.select_range(TextRange(start_line, start_col, 
+                                                    end_line, end_col))
+        
+    
+    def _clear_tree(self):
+        for child_id in self.tree.get_children():
+            self.tree.delete(child_id)
+    
 
 def load_plugin(): 
     get_workbench().add_view(AstView, "AST", "s")
