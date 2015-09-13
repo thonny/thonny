@@ -47,13 +47,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Files]
 Source: "build\exe.win32-3.4\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
-; TODO: Temporary, remove files from older (up to 30.10.2014) directory layout
 [InstallDelete]
-Type: files; Name: "{app}\*.py"
-Type: files; Name: "{app}\VERSION"
-Type: filesandordirs; Name: "{app}\res"
-Type: filesandordirs; Name: "{app}\locale"
-Type: filesandordirs; Name: "{app}\__pycache__"
+; TODO: leave plugins dir 
+Type: filesandordirs; Name: "{app}\*"
 
 [Icons]
 Name: "{userstartmenu}\Thonny"; Filename: "{app}\thonny_frontend.exe"; IconFilename: "{app}\thonny_frontend.exe"
@@ -109,12 +105,7 @@ Root: HKCU; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueNa
 
 
 [UninstallDelete]
-Type: files; Name: "{app}\thonny\*.pyc"
-Type: filesandordirs; Name: "{app}\thonny\__pycache__"
-
-; TODO: Temporarily (these don't appear after 30.10.2014 versions) TODO: don't they?????
-Type: files; Name: "{app}\*.pyc"
-Type: filesandordirs; Name: "{app}\__pycache__"
+Type: filesandordirs; Name: "{app}\*"
 
 [Messages]
 ClickNext=
