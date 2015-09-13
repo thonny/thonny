@@ -10,8 +10,6 @@ def load_plugin():
         
         return handler
     
-    get_workbench().add_separator("edit")
-    
     get_workbench().add_command("undo", "edit", "Undo",
         create_edit_command_handler("<<Undo>>"),
         tester=None, # TODO:
@@ -25,8 +23,6 @@ def load_plugin():
         default_sequence="<Control-y>",
         skip_sequence_binding=True,
         group=10)
-    
-    get_workbench().add_separator("edit")
     
     get_workbench().add_command("Cut", "edit", "Cut",
         create_edit_command_handler("<<Cut>>"),

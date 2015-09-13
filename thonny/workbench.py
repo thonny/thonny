@@ -189,8 +189,6 @@ class Workbench(tk.Tk):
             self.destroy, 
             default_sequence="<Alt-F4>")
         
-        self.add_separator("view")
-        
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
             default_sequence="<Control-plus>",
@@ -365,10 +363,6 @@ class Workbench(tk.Tk):
         self._menu_item_groups[(menu_name, command_label)] = group
         self._menu_item_testers[(menu_name, command_label)] = tester
         
-    
-    def add_separator(self, menu_label):
-        # TODO: don't add separator as first item in the menu
-        pass
     
     def add_view(self, class_, label, default_location,
                 visible_by_default=False,

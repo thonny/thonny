@@ -164,8 +164,6 @@ class EditorNotebook(ttk.Notebook):
             tester=lambda e: self.get_current_editor() is not None,
             group=10)
         
-        get_workbench().add_separator("file")
-        
         get_workbench().add_command("save_file", "file", "Save", 
             self._cmd_save_file,
             default_sequence="<Control-s>",
