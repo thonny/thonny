@@ -20,6 +20,7 @@ from thonny.misc_utils import eqfn
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
+from importlib.abc import MetaPathFinder, SourceLoader
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -1014,7 +1015,16 @@ class CustomStackFrame:
 class ThonnyClientError(Exception):
     pass
 
+
+class InstumentationFinder(MetaPathFinder):
+    def find_spec(self, fullname, path, target=None):
+        pass
+        
+class MySourceLoader(SourceLoader):
+    pass
+        
     
+
 def finfo(frame, msg, *args):
     if logger.isEnabledFor(logging.INFO):
         logger.info(_get_frame_prefix(frame) + msg, *args)
