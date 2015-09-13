@@ -12,6 +12,7 @@ class GlobalsView(VariablesFrame):
         get_workbench().bind("Globals", self._handle_globals_event, True)
         get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
         get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
+        get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
 
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well
@@ -24,5 +25,5 @@ class GlobalsView(VariablesFrame):
             get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
 
-def _load_plugin():
+def load_plugin():
     get_workbench().add_view(GlobalsView, "Variables", "ne")

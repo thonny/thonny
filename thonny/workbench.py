@@ -71,12 +71,12 @@ class Workbench(tk.Tk):
         
         self._init_containers()
         register_runner(Runner())
+        get_runner().send_command(ToplevelCommand(command="Reset"))
         self._init_commands()
         self._editor_notebook.focus_set()
         
         self._load_plugins()
         
-        get_runner().send_command(ToplevelCommand(command="Reset"))
         self.mainloop()
     
     def _init_diagnostic_logging(self):
