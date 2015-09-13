@@ -452,7 +452,7 @@ class Workbench(tk.Tk):
         """
         if name not in self._menus:
             menu = tk.Menu(self._menubar)
-            menu["postcommand"] = lambda: self._update_menu(name, menu)
+            menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
             
             self._menus[name] = menu
@@ -569,6 +569,56 @@ class Workbench(tk.Tk):
         return (self._configuration_manager.has_option("view.heap.visible")
             and self.get_option("view.heap.visible"))
     
+        
+    def _update_toolbar(self):
+        "TODO:"
+    
+    
+    def _change_font_size(self, delta):
+        for f in self._fonts:
+            f.configure(size=f.cget("size") + delta)
+        
+        # TODO: save conf?
+    
+    def _check_update_window_width(self, delta):
+        if not ui_utils.get_zoomed(self):
+            self.update_idletasks()
+            # TODO: shift to left if right edge goes away from screen
+            # TODO: check with screen width
+            new_geometry = "{0}x{1}+{2}+{3}".format(self.winfo_width() + delta,
+                                                   self.winfo_height(),
+                                                   self.winfo_x(), self.winfo_y())
+            
+            self.geometry(new_geometry)
+            
+
+    
+    def _cmd_focus_editor(self):
+        self._editor_notebook.focus_set()
+    
+    def _cmd_focus_shell(self):
+        self.show_view("ShellView", True)
+    
+    
+    
+    def _update_menu(self, menu, menu_name):
+        if menu.index("end") == None:
+            return
+        
+        for i in range(menu.index("end")+1):
+            item_data = menu.entryconfigure(i)
+            if "label" in item_data:
+                command_label = menu.entrycget(i, "label")
+                tester = self._menu_item_testers[(menu_name, command_label)]
+
+                if tester and not tester():
+                    menu.entryconfigure(i, state=tk.DISABLED)
+                else:
+                    menu.entryconfigure(i, state=tk.ACTIVE)   
+                    
+                    
+        
+    
     def _find_location_for_menu_item(self, menu_name, command_label, group,
             position_in_group="end"):        
         
@@ -607,54 +657,6 @@ class Workbench(tk.Tk):
                 
             return "end"
         
-        
-    def _update_toolbar(self):
-        "TODO:"
-    
-    
-    def _change_font_size(self, delta):
-        for f in self._fonts:
-            f.configure(size=f.cget("size") + delta)
-        
-        # TODO: save conf?
-    
-    def _check_update_window_width(self, delta):
-        if not ui_utils.get_zoomed(self):
-            self.update_idletasks()
-            # TODO: shift to left if right edge goes away from screen
-            # TODO: check with screen width
-            new_geometry = "{0}x{1}+{2}+{3}".format(self.winfo_width() + delta,
-                                                   self.winfo_height(),
-                                                   self.winfo_x(), self.winfo_y())
-            
-            self.geometry(new_geometry)
-            
-
-    
-    def _cmd_focus_editor(self):
-        self._editor_notebook.focus_set()
-    
-    def _cmd_focus_shell(self):
-        self.show_view("ShellView", True)
-    
-    
-    
-    def _update_menu(self, name, menu_widget):
-        return
-        # TODO:
-        """
-        for menu_name, _, items in self._menus:
-            if menu_name == name:
-                for item in items:
-                    if isinstance(item, Command):
-                        if item.is_enabled():
-                            menu_widget.entryconfigure(item.label, state=tk.NORMAL)
-                        else:
-                            menu_widget.entryconfigure(item.label, state=tk.DISABLED)
-        """            
-                    
-        
-    
             
             
             

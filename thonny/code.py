@@ -161,7 +161,7 @@ class EditorNotebook(ttk.Notebook):
         get_workbench().add_command("close_file", "file", "Close", 
             self._cmd_close_file,
             default_sequence="<Control-w>",
-            tester=lambda e: self.get_current_editor() is not None,
+            tester=lambda: self.get_current_editor() is not None,
             group=10)
         
         get_workbench().add_command("save_file", "file", "Save", 
@@ -173,7 +173,7 @@ class EditorNotebook(ttk.Notebook):
         get_workbench().add_command("save_file_as", "file", "Save as...",
             self._cmd_save_file_as,
             default_sequence=None,
-            tester=lambda e: self.get_current_editor() is not None,
+            tester=lambda: self.get_current_editor() is not None,
             group=10)
         
         get_workbench().add_command("comment_in", "edit", "Comment in",
