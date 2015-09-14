@@ -77,7 +77,7 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         
         self._load_plugins()
-        
+        self._update_toolbar()
         self.mainloop()
     
     def _init_diagnostic_logging(self):
@@ -564,18 +564,25 @@ class Workbench(tk.Tk):
         else:
             group_frame = slaves[0]
         
-        btn = ttk.Button(group_frame, 
+        button = ttk.Button(group_frame, 
                          command=handler, 
                          image=image, 
                          text=command_label,
                          style="Toolbutton",
                          state=tk.NORMAL)
-        btn.pack(side=tk.LEFT)
-        
-        return btn
+        button.pack(side=tk.LEFT)
+        button.tester = tester
         
     def _update_toolbar(self):
-        "TODO:"
+        for group_frame in self._toolbar.grid_slaves(0):
+            for button in group_frame.pack_slaves():
+                if button.tester and not button.tester():
+                    button["state"] = tk.DISABLED
+                else:
+                    button["state"] = tk.NORMAL
+        
+        self.after(1000, self._update_toolbar)
+            
     
     
     def _change_font_size(self, delta):
