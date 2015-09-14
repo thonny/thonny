@@ -93,7 +93,7 @@ class ConfigurationManager:
             
         # store
         if not os.path.exists(self._filename):
-            os.makedirs(os.path.dirname(self._filename), exist_ok=True)
+            os.makedirs(os.path.dirname(self._filename), mode=0o700, exist_ok=True)
         with open(self._filename, 'w', encoding="UTF-8") as fp: 
             self._ini.write(fp)
         
