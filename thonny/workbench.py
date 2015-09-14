@@ -105,8 +105,12 @@ class Workbench(tk.Tk):
             ui_utils.set_zoomed(self, True)
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        
-        self.iconbitmap(get_res_path("thonny.icos"))
+        icon_file = get_res_path("thonny.ico")
+        try:
+            self.iconbitmap(icon_file, default=icon_file)
+        except:
+            # For mac
+            self.iconbitmap(icon_file)
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
