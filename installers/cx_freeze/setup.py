@@ -10,7 +10,7 @@ print(os.getcwd())
 build_exe_options = {
     'path' : [MAIN_DIR] + sys.path,
     'include_files': [MAIN_DIR + "/thonny"],
-    'packages': ["jedi", "rope", "turtle"],
+    'packages': ["jedi", "rope", "turtle", "idlelib"],
     'include_msvcr' : True, 
     'base' : "Win32GUI" if sys.platform == "win32" else None,
 }

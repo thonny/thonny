@@ -1,6 +1,7 @@
 __pycache__
 dist
 build
+cx_build
 */*.pyc
 user_logs/
 windows/ShortcutLauncher/ShortcutLauncher.v12.suo
@@ -19,3 +20,4 @@ windows/ShortcutLauncher/ShortcutLauncher\.v11\.suo
 windows/ShortcutLauncher/ShortcutLauncher/ShortcutLauncher\.aps
 RemoteSystemsTempFiles
 \.dmg
+installers/mac/freezing.log
