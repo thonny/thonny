@@ -1,16 +1,19 @@
 #!/bin/bash
 
 # prepare working folder
+rm -rf cx_build
 rm -rf build
 mkdir -p build
 
+python3.4 ../cx_freeze/setup.py build -b cx_build > freezing.log
+
 # copy template and source files
-VERSION=$(<../thonny/VERSION)
+VERSION=$(<../../thonny/VERSION)
 VERSION_NAME=thonny-$VERSION 
 MAIN_DIR=build/$VERSION_NAME
 mkdir $MAIN_DIR
 
-cp -r ../thonny $MAIN_DIR
+cp -r cx_build/exe.linux-i686-3.4/* $MAIN_DIR
 cp Thonny.desktop $MAIN_DIR
 cp thonny.sh $MAIN_DIR
 cp install.py $MAIN_DIR/install
