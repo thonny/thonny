@@ -64,6 +64,7 @@ class Workbench(tk.Tk):
         self._init_translation()
         self._init_fonts()
         self._init_window()
+        self._images = set() # to avoid Python garbage collecting them
         self._init_menu()
         
         self.title("Thonny")
@@ -219,9 +220,8 @@ class Workbench(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
-        self.toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10)
-        self._init_toolbar()
+        self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
+        self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
         
         main_pw   = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
         main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
@@ -250,42 +250,6 @@ class Workbench(tk.Tk):
         self._center_pw.insert("auto", self._editor_notebook)
 
 
-    def _init_toolbar(self): 
-        def on_kala_button():
-            self._editor_notebook.demo_editor.set_read_only(not self._editor_notebook.demo_editor.read_only)
-        
-        top_spacer = ttk.Frame(self.toolbar, height=5)
-        top_spacer.grid(row=0, column=0, columnspan=100)
-        
-        self.images = {}
-        self.toolbar_buttons = {}
-        col = 1
-        
-        for name in ('file.new_file', 'file.open_file', 'file.save_file', 
-                     '-', 'run.run_current_script',
-                          'run.debug_current_script',
-                          'run.step',
-                          'run.reset'):
-            
-            if name == '-':
-                hor_spacer = ttk.Frame(self.toolbar, width=15)
-                hor_spacer.grid(row=0, column=col)
-            else:
-                img = tk.PhotoImage(file=misc_utils.get_res_path(name + ".gif"))
-            
-                btn = ttk.Button(self.toolbar, 
-                                 #command=on_kala_button, 
-                                 image=img, 
-                                 text="?",
-                                 style="Toolbutton",
-                                 state=tk.NORMAL)
-                btn.grid(row=1, column=col, padx=0, pady=0)
-            
-                self.images[name] = img
-                self.toolbar_buttons[name] = btn
-                
-            col += 1 
-        
         
     def add_command(self, command_id, menu_name, command_label, handler,
                     tester=None,
@@ -293,7 +257,9 @@ class Workbench(tk.Tk):
                     flag_name=None,
                     skip_sequence_binding=False,
                     group=99,
-                    position_in_group="end"):
+                    position_in_group="end",
+                    image_filename=None,
+                    include_in_toolbar=False):
         """Adds an item to specified menu.
         
         Args:
@@ -349,6 +315,12 @@ class Workbench(tk.Tk):
                 var.set(not var.get())
                 
             dispatch(None)
+        
+        if image_filename:
+            image = tk.PhotoImage(file=image_filename)
+            self._images.add(image) # Otherwise Python will garbage collect it
+        else:
+            image = None
             
         menu = self.get_menu(menu_name)
         menu.insert(
@@ -356,12 +328,19 @@ class Workbench(tk.Tk):
             "checkbutton" if flag_name else "command",
             label=command_label,
             accelerator=sequence_to_accelerator(sequence),
+            image=image,
+            compound=tk.LEFT,
             variable=self.get_variable(flag_name) if flag_name else None,
             command=dispatch_from_menu)
         
         # remember the details that can't be stored in Tkinter objects
         self._menu_item_groups[(menu_name, command_label)] = group
         self._menu_item_testers[(menu_name, command_label)] = tester
+        
+        if include_in_toolbar:
+            toolbar_group = self._get_menu_index(menu) * 100 + group
+            self._add_toolbar_button(image, command_label, handler, tester,
+                toolbar_group)
         
     
     def add_view(self, class_, label, default_location,
@@ -569,6 +548,31 @@ class Workbench(tk.Tk):
         return (self._configuration_manager.has_option("view.heap.visible")
             and self.get_option("view.heap.visible"))
     
+    def _get_menu_index(self, menu):
+        for i in range(len(self._menubar.winfo_children())):
+            if menu == self._menubar.winfo_children()[i]:
+                return i
+        else:
+            return None
+    
+    def _add_toolbar_button(self, image, command_label, handler, tester, toolbar_group):
+        
+        slaves = self._toolbar.grid_slaves(0, toolbar_group)
+        if len(slaves) == 0:
+            group_frame = ttk.Frame(self._toolbar)
+            group_frame.grid(row=0, column=toolbar_group, padx=(0, 20))
+        else:
+            group_frame = slaves[0]
+        
+        btn = ttk.Button(group_frame, 
+                         command=handler, 
+                         image=image, 
+                         text=command_label,
+                         style="Toolbutton",
+                         state=tk.NORMAL)
+        btn.pack(side=tk.LEFT)
+        
+        return btn
         
     def _update_toolbar(self):
         "TODO:"
@@ -656,10 +660,6 @@ class Workbench(tk.Tk):
                 menu.add_separator()
                 
             return "end"
-        
-            
-            
-            
 
     
     def _on_close(self):

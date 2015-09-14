@@ -23,6 +23,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
+from thonny.misc_utils import get_res_path
 
 
 COMMUNICATION_ENCODING = "UTF-8"
@@ -54,7 +55,9 @@ class Runner:
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
             tester=self.cmd_execution_command_enabled,
-            group=10)
+            group=10,
+            image_filename=get_res_path("run.run_current_script.gif"),
+            include_in_toolbar=True)
         
         get_workbench().add_command('reset', "run", 'Stop/Reset',
             handler=self._cmd_reset,

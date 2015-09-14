@@ -10,7 +10,7 @@ from thonny.common import DebuggerCommand, TextRange
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
-from thonny.misc_utils import shorten_repr
+from thonny.misc_utils import shorten_repr, get_res_path
 import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
@@ -40,7 +40,9 @@ class Debugger:
             self._cmd_debug_current_script,
             tester=get_runner().cmd_execution_command_enabled,
             default_sequence="<Control-F5>",
-            group=10)
+            group=10,
+            image_filename=get_res_path("run.debug_current_script.gif"),
+            include_in_toolbar=True)
         get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
             tester=self._cmd_stepping_commands_enabled,
