@@ -14,7 +14,7 @@ from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand
 from thonny.config import ConfigurationManager
-from thonny.misc_utils import running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, get_res_path
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook
 import tkinter as tk
 import tkinter.font as tk_font
@@ -106,7 +106,7 @@ class Workbench(tk.Tk):
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
-        self.iconbitmap(default=os.path.join(self._main_dir, "thonny", "res", "thonny.ico"))
+        self.iconbitmap(get_res_path("thonny.icos"))
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)

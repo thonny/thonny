@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from thonny.misc_utils import running_on_mac_os
+from thonny.globals import get_workbench
 
-def _set_up_mac_specific_stuff(self):
+def _set_up_mac_specific_stuff():
     # TODO: see idlelib.macosxSupports
     # https://www.tcl.tk/man/tcl8.6/TkCmd/tk_mac.htm
     
@@ -50,11 +51,11 @@ def _set_up_mac_specific_stuff(self):
         </plist>
         """
     
-    self.createcommand("::tk::mac::OpenDocument", mac_open_document)
-    self.createcommand("::tk::mac::OpenApplication", mac_open_application)
-    self.createcommand("::tk::mac::ReopenApplication", mac_reopen_application)
-    self.createcommand("tkAboutDialog", self._cmd_about)
-    self.createcommand("::tk::mac::ShowPreferences", lambda: print("Prefs"))
+    get_workbench().createcommand("::tk::mac::OpenDocument", mac_open_document)
+    get_workbench().createcommand("::tk::mac::OpenApplication", mac_open_application)
+    get_workbench().createcommand("::tk::mac::ReopenApplication", mac_reopen_application)
+    # TODO: get_workbench().createcommand("tkAboutDialog", self._cmd_about)
+    get_workbench().createcommand("::tk::mac::ShowPreferences", lambda: print("Prefs"))
     
     """ TODO:
     self._add_command("mac_add_download_assessment", "Misc", 'Allow opening py files from browser ...',
