@@ -586,7 +586,7 @@ class Workbench(tk.Tk):
     
     
     def _change_font_size(self, delta):
-        for f in self._fonts:
+        for f in self._fonts.values():
             f.configure(size=f.cget("size") + delta)
         
         # TODO: save conf?
