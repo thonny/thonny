@@ -109,8 +109,12 @@ class Workbench(tk.Tk):
         try:
             self.iconbitmap(icon_file, default=icon_file)
         except:
-            # For mac
-            self.iconbitmap(icon_file)
+            
+            try:
+                # seems to work in mac
+                self.iconbitmap(icon_file)
+            except:
+                pass # TODO: try to get working in Ubuntu  
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
