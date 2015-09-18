@@ -16,11 +16,12 @@ class AstView(ui_utils.TreeFrame):
             displaycolumns=(0,)
         )
         
-        self.current_code_view = None
+        self._current_code_view = None
         self.tree.bind("<<TreeviewSelect>>", self._locate_code)
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
+        get_workbench().bind_class("Text", "<Double-Button-1>", self._update, True)
 
         self.tree.column('#0', width=550, anchor=tk.W)
         self.tree.column('range', width=100, anchor=tk.W)
@@ -40,30 +41,23 @@ class AstView(ui_utils.TreeFrame):
         editor = get_workbench().get_editor_notebook().get_current_editor()
         
         if not editor:
-            self.current_code_view = None
+            self._current_code_view = None
             return
         
-        self.current_code_view = editor.get_code_view()
-        source = self.current_code_view.get_content()
-        
+        self._current_code_view = editor.get_code_view()
+        source = self._current_code_view.get_content()
+        selection = self._current_code_view.get_selected_range()
 
         self._clear_tree()
         
         try:
-            #import time
-            #start = time.clock()
             root = ast_utils.parse_source(source)
-            #ast_utils.insert_expression_markers(root)
-            #ast_utils.insert_statement_markers(root)
-            #elapsed = (time.clock() - start)
-            #print("ELAPSED: ", elapsed)
+            selected_ast_node = ast_utils.find_closest_containing_node(root, selection)
+            
         except Exception as e:
-            #showerror("Viga!", e)
-            #print("VIGA", e)
             self.tree.insert("", "end", text=str(e), open=True)
             traceback.print_exc()
             return
-        
         
         def _format(key, node, parent_id):
             
@@ -85,6 +79,9 @@ class AstView(ui_utils.TreeFrame):
             
             item_text = str(key) + "=" + value_label
             node_id = self.tree.insert(parent_id, "end", text=item_text, open=True)
+            if node == selected_ast_node:
+                self.tree.see(node_id)
+                self.tree.selection_add(node_id)
             
             if hasattr(node, "lineno") and hasattr(node, "col_offset"):
                 self.tree.set(node_id, "lineno", node.lineno)
@@ -107,9 +104,9 @@ class AstView(ui_utils.TreeFrame):
                 
                 
         _format("root", root, "")
-        
+    
     def _locate_code(self, event):
-        if self.current_code_view is None:
+        if self._current_code_view is None:
             return
         
         iid = self.tree.focus()
@@ -118,9 +115,8 @@ class AstView(ui_utils.TreeFrame):
             values = self.tree.item(iid)['values']
             if isinstance(values, list) and len(values) >= 5:
                 start_line, start_col, end_line, end_col = values[1:5] 
-                self.current_code_view.select_range(TextRange(start_line, start_col, 
+                self._current_code_view.select_range(TextRange(start_line, start_col, 
                                                     end_line, end_col))
-        
     
     def _clear_tree(self):
         for child_id in self.tree.get_children():

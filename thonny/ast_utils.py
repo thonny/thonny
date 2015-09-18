@@ -7,6 +7,7 @@ import sys
 import token
 import tokenize
 import collections
+from thonny.common import TextRange
 
 # TODO: can rely on Py3 
 Thoken = collections.namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
@@ -28,6 +29,22 @@ def extract_text_range(source, text_range):
     lines[0] = lines[0][text_range.col_offset:]
     return "".join(lines)
     
+
+def find_closest_containing_node(tree, text_range):
+    # first look among children
+    for child in ast.iter_child_nodes(tree):
+        result = find_closest_containing_node(child, text_range)
+        if result is not None:
+            return result
+    
+    # no suitable child was found
+    if (hasattr(tree, "lineno")
+        and TextRange(tree.lineno, tree.col_offset, tree.end_lineno, tree.end_col_offset)
+            .contains_smaller_eq(text_range)):
+        return tree
+    # nope
+    else:
+        return None
 
 def find_expression(node, text_range):
     if (hasattr(node, "lineno") 

@@ -754,6 +754,16 @@ class CodeView(ttk.Frame, TextWrapper):
                                        kind='selection' if selection_used else 'current_line',
                                        subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 
+    def get_selected_range(self):
+        if self.text.index(tk.SEL_FIRST):
+            lineno, col_offset = map(int, self.text.index(tk.SEL_FIRST).split("."))
+            end_lineno, end_col_offset = map(int, self.text.index(tk.SEL_LAST).split("."))
+        else:
+            lineno, col_offset = map(int, self.text.index(tk.INSERT).split("."))
+            end_lineno, end_col_offset = lineno, col_offset
+            
+        return TextRange(lineno, col_offset, end_lineno, end_col_offset)
+
     def prepare_level_boxes(self):
         return
         for i in range(6):
