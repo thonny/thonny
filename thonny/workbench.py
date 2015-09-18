@@ -15,7 +15,8 @@ from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand
 from thonny.config import ConfigurationManager
 from thonny.misc_utils import running_on_mac_os, get_res_path
-from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook
+from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
+    create_tooltip
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -329,13 +330,14 @@ class Workbench(tk.Tk):
             self._images.add(image) # Otherwise Python will garbage collect it
         else:
             image = None
-            
+        
+        accelerator = sequence_to_accelerator(sequence)
         menu = self.get_menu(menu_name)
         menu.insert(
             self._find_location_for_menu_item(menu_name, command_label, group, position_in_group),
             "checkbutton" if flag_name else "command",
             label=command_label,
-            accelerator=sequence_to_accelerator(sequence),
+            accelerator=accelerator,
             image=image,
             compound=tk.LEFT,
             variable=self.get_variable(flag_name) if flag_name else None,
@@ -347,7 +349,7 @@ class Workbench(tk.Tk):
         
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
-            self._add_toolbar_button(image, command_label, handler, tester,
+            self._add_toolbar_button(image, command_label, accelerator, handler, tester,
                 toolbar_group)
         
     
@@ -563,23 +565,25 @@ class Workbench(tk.Tk):
         else:
             return None
     
-    def _add_toolbar_button(self, image, command_label, handler, tester, toolbar_group):
+    def _add_toolbar_button(self, image, command_label, accelerator, handler, tester, toolbar_group):
         
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:
             group_frame = ttk.Frame(self._toolbar)
-            group_frame.grid(row=0, column=toolbar_group, padx=(0, 20))
+            group_frame.grid(row=0, column=toolbar_group, padx=(0, 10))
         else:
             group_frame = slaves[0]
         
         button = ttk.Button(group_frame, 
                          command=handler, 
                          image=image, 
-                         text=command_label,
-                         style="Toolbutton",
-                         state=tk.NORMAL)
+                         style="Toolbutton", # TODO: does this cause problems in some Macs?
+                         state=tk.NORMAL
+                         )
         button.pack(side=tk.LEFT)
-        button.tester = tester
+        button.tester = tester 
+        create_tooltip(button, command_label 
+                       + (" (" + accelerator + ")" if accelerator else ""))
         
     def _update_toolbar(self):
         for group_frame in self._toolbar.grid_slaves(0):
@@ -589,7 +593,7 @@ class Workbench(tk.Tk):
                 else:
                     button["state"] = tk.NORMAL
         
-        self.after(1000, self._update_toolbar)
+        self.after(300, self._update_toolbar)
             
     
     

@@ -43,21 +43,30 @@ class Debugger:
             group=10,
             image_filename=get_res_path("run.debug_current_script.gif"),
             include_in_toolbar=True)
+        
         get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F6>",
-            group=30)
+            group=30,
+            image_filename=get_res_path("run.step_over.gif"),
+            include_in_toolbar=True)
+        
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F7>",
-            group=30)
+            group=30,
+            image_filename=get_res_path("run.step_into.gif"),
+            include_in_toolbar=True)
+        
         get_workbench().add_command("step_out", "run", "Step out",
             self._cmd_step_out,
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F8>",
-            group=30)
+            group=30,
+            image_filename=get_res_path("run.step_out.gif"),
+            include_in_toolbar=True)
 
     
     def _cmd_debug_current_script(self):
