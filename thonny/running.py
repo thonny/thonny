@@ -231,7 +231,6 @@ class _BackendProxy:
         
         if msg is not None:
             if msg["message_type"] == "ToplevelResult":
-                debug("Before changing state, msg: %s", msg)
                 self._set_state("waiting_toplevel_command") 
             elif msg["message_type"] == "DebuggerProgress":
                 self._set_state("waiting_debug_command") 
@@ -269,7 +268,7 @@ class _BackendProxy:
     
     def send_command(self, cmd):
         if not (isinstance(cmd, InlineCommand) and cmd.command == "tkupdate"): 
-            info("Proxy: Sending command: %s", cmd)
+            debug("Proxy: Sending command: %s", cmd)
             
         with self._state_lock:
             if (isinstance(cmd, ToplevelCommand) 
@@ -296,7 +295,7 @@ class _BackendProxy:
     
     def _set_state(self, state):
         if self._state != state:
-            debug("BackendProxy state %s ==> %s", self._state, state)
+            debug("BackendProxy state changed: %s ==> %s", self._state, state)
             self._state = state
     
     

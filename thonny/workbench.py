@@ -696,9 +696,7 @@ class Workbench(tk.Tk):
         
     def _on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception with modifications
-        # Aivar: following statement kills the process when run with pythonw.exe
-        # http://bugs.python.org/issue22384
-        #sys.stderr.write("Exception in Tkinter callback\n")
+        # see http://bugs.python.org/issue22384
         sys.last_type = exc
         sys.last_value = val
         sys.last_traceback = tb
@@ -707,9 +705,7 @@ class Workbench(tk.Tk):
     def report_internal_error(self):
         exception("Internal error")
         if tk._default_root:
-            tk_messagebox.showerror("Internal error. Use {} to copy"
-                                .format("Command+C" if running_on_mac_os() else "Ctrl+C"),
-                                traceback.format_exc())
+            tk_messagebox.showerror("Internal error", traceback.format_exc())
     
         
     def _save_layout(self):

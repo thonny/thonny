@@ -18,5 +18,4 @@ try:
     workbench.Workbench(os.path.abspath(os.path.join(this_file, os.pardir)))
 except:
     exception("Internal error")
-    tkinter.messagebox.showerror("Internal error. Use Ctrl+C to copy error message",
-                            traceback.format_exc())
+    tkinter.messagebox.showerror("Internal error", traceback.format_exc())

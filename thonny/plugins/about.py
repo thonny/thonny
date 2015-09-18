@@ -33,10 +33,14 @@ class AboutDialog(tk.Toplevel):
         #bg_frame = ttk.Frame(self) # gives proper color in aqua
         #bg_frame.grid()
         
+        version_str = str(version)
+        if version_str.count(".") == 1:
+            version_str += ".0"
+        
         heading_font = font.nametofont("TkHeadingFont").copy()
         heading_font.configure(size=19, weight="bold")
         heading_label = ttk.Label(self, 
-                                  text="Thonny " + str(version),
+                                  text="Thonny " + version_str,
                                   font=heading_font)
         heading_label.grid()
         

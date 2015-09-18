@@ -73,8 +73,8 @@ class Debugger:
         get_runner().execute_current("Debug")
 
 
-    def _check_issue_debugger_command(self, command):
-        cmd = DebuggerCommand(command=command)
+    def _check_issue_debugger_command(self, command, **kwargs):
+        cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
         
         if get_runner().get_state() == "waiting_debug_command":
@@ -109,6 +109,23 @@ class Debugger:
         self._check_issue_debugger_command("out")
         self._follow_up_command = "run_to_before"
 
+    def _cmd_run_to_cursor(self):
+        cw = self._get_focused_codeview()
+        if cw:
+            self._check_issue_debugger_command("line", target_lineno=None)
+
+    def _cmd_run_to_cursor_enabled(self):
+        return (self._cmd_stepping_commands_enabled()
+                and self._get_focused_codeview() is not None)
+
+    def _get_focused_codeview(self):
+        widget = get_workbench().focus_get()
+        if (widget and isinstance(widget, tk.Text)
+            and isinstance(widget.master, CodeView)):
+            return widget.master
+        else:
+            return None
+        
 
     def _handle_debugger_progress(self, msg):
         
@@ -183,7 +200,7 @@ class FrameVisualizer:
         #self._text.tag_configure('before', background="#F8FC9A") TODO: ???
         #self._text.tag_configure('after', background="#D7EDD3")
         #self._text.tag_configure('exception', background="#FFBFD6")
-        self._text.configure(insertwidth=0, background="LightYellow")
+        self._text.configure(background="LightYellow")
         self._text_wrapper.read_only = True
     
     def close(self):
@@ -195,8 +212,7 @@ class FrameVisualizer:
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
         
-        # TODO: better remember previous insertwidth and insertbackground
-        self._text.configure(background="White", insertwidth=2, insertbackground="Black")
+        self._text.configure(background="White")
     
     def get_frame_id(self):
         return self._frame_id

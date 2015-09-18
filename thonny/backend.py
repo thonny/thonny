@@ -760,7 +760,7 @@ class FancyTracer(Executor):
     
     
     def _cmd_line_completed(self, frame, event, args, focus, cmd):
-        return (event in ("before_statement", "before_expression") 
+        return (event == "before_statement" 
             and eqfn(frame.f_code.co_filename, cmd.target_filename)
             and focus.lineno == cmd.target_lineno
             and (focus != cmd.focus or id(frame) != cmd.frame_id))
