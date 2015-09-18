@@ -432,7 +432,7 @@ class Executor:
             else:
                 assert mode == "exec"
                 exec(bytecode, __main__.__dict__) # <Marker: remove this line from stacktrace>
-                self._vm.send_message("ToplevelResult")
+                self._vm.send_message("ToplevelResult", context_info="after normal execution", source=source, filename=filename, mode=mode)
         except SyntaxError as e:
             self._vm.send_message("ToplevelResult", error="".join(traceback.format_exception_only(SyntaxError, e)))
         except ThonnyClientError as e:
@@ -442,7 +442,7 @@ class Executor:
             # for VM mainloop they are not exceptions
             e_type, e_value, e_traceback = sys.exc_info()
             self._print_user_exception(e_type, e_value, e_traceback)
-            self._vm.send_message("ToplevelResult")
+            self._vm.send_message("ToplevelResult", context_info="other unhandled exception")
         finally:
             sys.settrace(None)
     

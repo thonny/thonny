@@ -706,7 +706,8 @@ class Workbench(tk.Tk):
     
     def report_internal_error(self):
         exception("Internal error")
-        tk_messagebox.showerror("Internal error. Use {} to copy"
+        if tk._default_root:
+            tk_messagebox.showerror("Internal error. Use {} to copy"
                                 .format("Command+C" if running_on_mac_os() else "Ctrl+C"),
                                 traceback.format_exc())
     

@@ -202,12 +202,13 @@ class Runner:
             if not msg:
                 break
             
-            debug("Runner: Fetched msg: %s", msg)
+            debug("Runner: State: %s, Fetched msg: %s", self.get_state(), msg)
             get_workbench().event_generate(msg["message_type"], **msg)
+            
             
             # TODO: maybe distinguish between workbench cwd and backend cwd ??
             get_workbench().set_option("run.working_directory", self._proxy.cwd, save_now=False)
-            get_workbench().update_idletasks()
+            get_workbench().update()
             
         get_workbench().after(50, self._poll_vm_messages)
     
@@ -224,14 +225,29 @@ class _BackendProxy:
         self._state = None
         self._message_queue = None
         self._state_lock = threading.RLock()
-        
+    
     def fetch_next_message(self):
+        msg = self._fetch_next_message()
+        
+        if msg is not None:
+            if msg["message_type"] == "ToplevelResult":
+                debug("Before changing state, msg: %s", msg)
+                self._set_state("waiting_toplevel_command") 
+            elif msg["message_type"] == "DebuggerProgress":
+                self._set_state("waiting_debug_command") 
+            elif msg["message_type"] == "InputRequest":
+                self._set_state("waiting_input")
+        
+        return msg 
+
+    
+    def _fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
             return None
         
         msg = self._message_queue.popleft()
         
-        if msg["message_type"] == "Output":
+        if msg["message_type"] == "ProgramOutput":
             # combine available output messages to one single message, 
             # in order to put less pressure on UI code
             
@@ -240,7 +256,7 @@ class _BackendProxy:
                     return msg
                 else:
                     next_msg = self._message_queue.popleft()
-                    if (next_msg["message_type"] == "Output" 
+                    if (next_msg["message_type"] == "ProgramOutput" 
                         and next_msg["stream_name"] == msg["stream_name"]):
                         msg["data"] += next_msg["data"]
                     else:
@@ -346,12 +362,6 @@ class _BackendProxy:
                     
                 with self._state_lock:
                     self._message_queue.append(msg)
-                    if msg["message_type"] == "ToplevelResult":
-                        self._set_state("waiting_toplevel_command") 
-                    elif msg["message_type"] == "DebuggerProgress":
-                        self._set_state("waiting_debug_command") 
-                    elif msg["message_type"] == "InputRequest":
-                        self._set_state("waiting_input") 
 
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
