@@ -67,6 +67,14 @@ class Debugger:
             group=30,
             image_filename=get_res_path("run.step_out.gif"),
             include_in_toolbar=True)
+        
+        get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
+            self._cmd_run_to_cursor,
+            tester=self._cmd_run_to_cursor_enabled,
+            default_sequence="<Control-F8>",
+            group=30,
+            image_filename=get_res_path("run.run_to_cursor.gif"),
+            include_in_toolbar=False)
 
     
     def _cmd_debug_current_script(self):
@@ -110,19 +118,39 @@ class Debugger:
         self._follow_up_command = "run_to_before"
 
     def _cmd_run_to_cursor(self):
-        cw = self._get_focused_codeview()
-        if cw:
-            self._check_issue_debugger_command("line", target_lineno=None)
+        visualizer = self._get_topmost_selected_visualizer()
+        if visualizer:
+            assert isinstance(visualizer._text_wrapper, CodeView)
+            code_view = visualizer._text_wrapper
+            selection = code_view.get_selected_range()
+            
+            target_lineno = visualizer._firstlineno-1 + selection.lineno
+            self._check_issue_debugger_command("line",
+                                               target_filename=visualizer._filename, 
+                                               target_lineno=target_lineno,
+                                               )
 
     def _cmd_run_to_cursor_enabled(self):
         return (self._cmd_stepping_commands_enabled()
-                and self._get_focused_codeview() is not None)
+                and self._get_topmost_selected_visualizer() is not None
+                )
 
-    def _get_focused_codeview(self):
-        widget = get_workbench().focus_get()
-        if (widget and isinstance(widget, tk.Text)
-            and isinstance(widget.master, CodeView)):
-            return widget.master
+    def _get_topmost_selected_visualizer(self):
+        
+        visualizer = self._main_frame_visualizer
+        if visualizer is None:
+            return None
+        
+        while visualizer._next_frame_visualizer is not None:
+            visualizer = visualizer._next_frame_visualizer
+        
+        topmost_text_widget = visualizer._text
+        focused_widget = get_workbench().focus_get()
+        
+        if focused_widget is None:
+            return None
+        elif focused_widget == topmost_text_widget:
+            return visualizer
         else:
             return None
         
@@ -130,9 +158,6 @@ class Debugger:
     def _handle_debugger_progress(self, msg):
         
         # TODO: if exception then show message
-        
-                
-        
         self._last_progress_message = msg
         
         if self._should_skip_event(msg):
@@ -153,9 +178,8 @@ class Debugger:
         
         # advance automatically in some cases
         event = msg.stack[-1].last_event
-        focus = msg.stack[-1].last_event_focus
         args = msg.stack[-1].last_event_args
-        print(event, focus, args)
+
         if (event == "after_expression" 
             and "last_child" in args["node_tags"]
             and "child_of_statement" in args["node_tags"]):
@@ -193,6 +217,10 @@ class FrameVisualizer:
         self._text_wrapper = text_wrapper
         self._text = text_wrapper.text
         self._frame_id = frame_info.id
+        self._filename = frame_info.filename
+        self._firstlineno = frame_info.firstlineno
+        self._source = frame_info.source
+        self._ast = ast_utils.parse_source(frame_info.source, frame_info.filename)
         self._expression_box = ExpressionBox(text_wrapper)
         self._next_frame_visualizer = None
         

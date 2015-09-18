@@ -448,13 +448,10 @@ class Executor:
     
     def _print_user_exception(self, e_type, e_value, e_traceback):
         lines = traceback.format_exception(e_type, e_value, e_traceback)
-        if "thonny" in lines[1]:
-            "del lines[1]"
-            #del lines[1]
 
         for line in lines:
             # skip lines denoting thonny execution frame
-            if not DEBUG and ("thonny/backend" in line 
+            if ("thonny/backend" in line 
                 or "thonny\\backend" in line
                 or "remove this line from stacktrace" in line):
                 continue
@@ -662,14 +659,10 @@ class FancyTracer(Executor):
     def _get_source(self, frame):
         try:
             if frame.f_code.co_name == "<module>":
-                return None
-                """
-                # in case you need source for modules as well:
-                # getsource doesn't give correct source for modules
-                # findsource does
+                # getsource doesn't give correct source for modules 
+                # (at least in some Python version or in some cases)
                 lines, _ = inspect.findsource(frame.f_code)
                 return "".join(lines)
-                """
             else:
                 return inspect.getsource(frame.f_code)
         except:

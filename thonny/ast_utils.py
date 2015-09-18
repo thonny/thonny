@@ -61,6 +61,21 @@ def find_expression(node, text_range):
         return None
         
 
+def contains_node(parent_node, child_node):
+    for child in ast.iter_child_nodes(parent_node):
+        if child == child_node or contains_node(child, child_node):
+            return True
+        
+    return False
+    
+def has_parent_with_class(target_node, parent_class, tree):
+    for node in ast.walk(tree):
+        if isinstance(node, parent_class) and contains_node(node, target_node):
+            return True
+    
+    return False    
+
+
 def parse_source(source, filename='<unknown>', mode="exec"):
     root = ast.parse(source, filename, mode)
     mark_text_ranges(root, source)
