@@ -80,7 +80,7 @@ class AboutDialog(tk.Toplevel):
                                   justify=tk.CENTER, font=license_font)
         license_label.grid()
         
-        ok_button = ttk.Button(self, text="OK", command=self._ok)
+        ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
         ok_button.grid()
         ok_button.focus_set()
         
