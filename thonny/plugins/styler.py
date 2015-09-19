@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import os.path
 import tkinter as tk
 from tkinter import ttk
-from thonny.misc_utils import running_on_linux
-from thonny.globals import get_workbench
+from thonny.misc_utils import running_on_linux, get_res_path
 
-def load_plugin():
+_images = set() # for keeping references to tkinter images to avoid garbace colleting them
+
+def select_theme():
     style = ttk.Style()
 
     if 'xpnative' in style.theme_names():
@@ -20,44 +20,28 @@ def load_plugin():
         
     style.theme_use(theme)
     
-    style.configure("Sash", sashthickness=10)
+
+def tweak_notebooks():
+    style = ttk.Style()
+    theme = style.theme_use()
     
-    # get rid of Treeview borders
-    style.layout("Treeview", [
-        ('Treeview.treearea', {'sticky': 'nswe'})
-    ])
-    
-    # necessary for Python 2.7 TODO: doesn't help for aqua
-    style.configure("Treeview", background="white")
+    _images.add(tk.PhotoImage("gray_line", file=get_res_path('gray_line.gif')))
+    _images.add(tk.PhotoImage("img_close", file=get_res_path('tab_close.gif')))
+    _images.add(tk.PhotoImage("img_closeactive", file=get_res_path('tab_close_active.gif')))
+    _images.add(tk.PhotoImage("img_closepressed", file=get_res_path('tab_close_pressed.gif')))
     
     
-    """
-    _images[1] = tk.PhotoImage("img_close",
-        file=os.path.join(imgdir, '1x1_white.gif'))
-    _images[2] = tk.PhotoImage("img_closeactive",
-        file=os.path.join(imgdir, 'close_active.gif'))
-    _images[3] = tk.PhotoImage("img_closepressed",
-        file=os.path.join(imgdir, 'close_pressed.gif'))
-        
-    style.element_create("close", "image", "img_close",
-        ("active", "pressed", "!disabled", "img_closepressed"),
-        ("active", "!disabled", "img_closeactive"), border=8, sticky='')
-    """
-    
-    global _IMG_GRAY_LINE # Saving the reference, otherwise Tk will garbage collect the images 
-    _IMG_GRAY_LINE = tk.PhotoImage("gray_line", file=os.path.join(get_workbench().get_resource_dir(), 'gray_line.gif'))
     style.element_create("gray_line", "image", "gray_line",
                                ("!selected", "gray_line"), 
                                height=1, width=10, border=1)
     
-    
     if theme == "xpnative":
         # add a line below active tab to separate it from content
         style.layout("Tab", [
-            ('Notebook.tab', {'sticky': 'nswe', 'children': [
-                ('Notebook.padding', {'sticky': 'nswe', 'children': [
-                    ('Notebook.focus', {'sticky': 'nswe', 'children': [
-                        ('Notebook.label', {'sticky': '', 'side': 'left'}),
+            ("Notebook" + '.tab', {'sticky': 'nswe', 'children': [
+                ("Notebook" + '.padding', {'sticky': 'nswe', 'children': [
+                    ("Notebook" + '.focus', {'sticky': 'nswe', 'children': [
+                        ("Notebook" + '.label', {'sticky': '', 'side': 'left'}),
                         #("close", {"side": "left", "sticky": ''})
                     ], 'side': 'top'})
                 ], 'side': 'top'}),
@@ -66,29 +50,21 @@ def load_plugin():
         ])
         
         style.configure("Tab", padding=(4,1,0,0))
-        
+            
     elif theme == "aqua":
         style.map("TNotebook.Tab", foreground=[('selected', 'white'), ('!selected', 'black')])
-        
-        
-        
-    
-    """
-    ################
-    #print(style.layout("TMenubutton"))
-    style.layout("TMenubutton", [
-        ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
-        ('Menubutton.button', {'children': [
-            #('Menubutton.padding', {'children': [
-                ('Menubutton.label', {'sticky': ''})
-            #], 'expand': '1', 'sticky': 'we'})
-        ], 'expand': '1', 'sticky': 'nswe'})
+
+
+def tweak_treeviews():
+    style = ttk.Style()
+    # get rid of Treeview borders
+    style.layout("Treeview", [
+        ('Treeview.treearea', {'sticky': 'nswe'})
     ])
     
-    style.configure("TMenubutton", padding=14)
-    """
-    
-    
+    # necessary for Python 2.7 TODO: doesn't help for aqua
+    style.configure("Treeview", background="white")
+
     #print(style.map("Treeview"))
     #print(style.layout("Treeview"))
     #style.configure("Treeview.treearea", font=TREE_FONT)
@@ -111,3 +87,30 @@ def load_plugin():
                           ],
               foreground=[('selected', 'SystemHighlightText')],
               )
+
+def tweak_menubuttons():
+    style = ttk.Style()
+    #print(style.layout("TMenubutton"))
+    style.layout("TMenubutton", [
+        ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
+        ('Menubutton.button', {'children': [
+            #('Menubutton.padding', {'children': [
+                ('Menubutton.label', {'sticky': ''})
+            #], 'expand': '1', 'sticky': 'we'})
+        ], 'expand': '1', 'sticky': 'nswe'})
+    ])
+    
+    style.configure("TMenubutton", padding=14)
+
+def tweak_paned_windows():
+    style = ttk.Style()
+    style.configure("Sash", sashthickness=10)
+
+
+def load_plugin():
+    select_theme()
+    tweak_notebooks()
+    tweak_treeviews()
+    tweak_paned_windows()
+    
+    
