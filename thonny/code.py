@@ -122,7 +122,8 @@ class EditorNotebook(ttk.Notebook):
     Manages opened files / modules
     """
     def __init__(self, master):
-        ttk.Notebook.__init__(self, master, padding=0)
+        _check_create_ButtonNotebook_style()
+        ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
         
         get_workbench().add_option("file.reopen_files", False)
         self._init_commands()
@@ -243,9 +244,10 @@ class EditorNotebook(ttk.Notebook):
             self._remember_open_files()
     
     def _cmd_close_file(self):
-        # TODO: ask in case file is modified
         current_editor = self.get_current_editor()
-        if current_editor: 
+        if current_editor:
+            if not self.check_allow_closing(current_editor):
+                return
             self.forget(current_editor)
             current_editor.destroy()
             self._on_tab_changed(None)
@@ -354,15 +356,24 @@ class EditorNotebook(ttk.Notebook):
         return editor.is_focused()
 
     
-    def check_allow_closing(self):
-        modified_editors = [e for e in self.winfo_children() if e.is_modified()]
-        
+    def check_allow_closing(self, editor=None):
+        if not editor:
+            modified_editors = [e for e in self.winfo_children() if e.is_modified()]
+        else:
+            if not editor.is_modified():
+                return True
+            else:
+                modified_editors = [editor]
         if len(modified_editors) == 0:
             return True
         
+        message = "Do you want to save files before closing?"
+        if editor:
+            message = "Do you want to save file before closing?"
+            
         confirm = tkMessageBox.askyesnocancel(
                   title="Save On Close",
-                  message="Do you want to save files before closing?",
+                  message=message,
                   default=tkMessageBox.YES,
                   master=self)
         
@@ -378,4 +389,74 @@ class EditorNotebook(ttk.Notebook):
             return False
         else:
             return True
+        
+
+def _check_create_ButtonNotebook_style():
+    """Taken from http://svn.python.org/projects/python/trunk/Demo/tkinter/ttk/notebook_closebtn.py"""
+    style = ttk.Style()
+    if "closebutton" in style.element_names():
+        # It's done already
+        return
+
+    get_workbench().get_image('tab_close.gif', "img_close")
+    get_workbench().get_image('tab_close_active.gif', "img_close_active")
+    
+    style.element_create("closebutton", "image", "img_close",
+        ("active", "pressed", "!disabled", "img_close_active"),
+        ("active", "!disabled", "img_close_active"), border=8, sticky='')
+
+    style.layout("ButtonNotebook", [("Notebook.client", {"sticky": "nswe"})])
+
+    style.layout("ButtonNotebook.Tab", [
+        ("ButtonNotebook.tab", {"sticky": "nswe", "children":
+            [("ButtonNotebook.padding", {"side": "top", "sticky": "nswe",
+                                         "children":
+                [("ButtonNotebook.focus", {"side": "top", "sticky": "nswe",
+                                           "children":
+                    [("ButtonNotebook.label", {"side": "left", "sticky": ''}),
+                     ("ButtonNotebook.closebutton", {"side": "left", "sticky": ''})
+                     ]
+                })]
+            })]
+        })]
+    )
+
+    def btn_press(event):
+        try:
+            x, y, widget = event.x, event.y, event.widget
+            elem = widget.identify(x, y)
+            index = widget.index("@%d,%d" % (x, y))
+        
+            if "closebutton" in elem:
+                widget.state(['pressed'])
+                widget.pressed_index = index
+        except:
+            # may fail, if clicked outside of tab
+            pass
+    
+    def btn_release(event):
+        x, y, widget = event.x, event.y, event.widget
+    
+        if not widget.instate(['pressed']):
+            return
+    
+        try:
+            elem =  widget.identify(x, y)
+            index = widget.index("@%d,%d" % (x, y))
+        
+            if "closebutton" in elem and widget.pressed_index == index:
+                if isinstance(widget, EditorNotebook):
+                    widget._cmd_close_file()
+                else:
+                    widget.forget(index)
+                    widget.event_generate("<<NotebookClosedTab>>")
+        
+            widget.state(["!pressed"])
+            widget.pressed_index = None
+        except:
+            # may fail, when mouse is dragged
+            pass
+    
+    get_workbench().bind_class("TNotebook", "<ButtonPress-1>", btn_press, True)
+    get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", btn_release, True)
     

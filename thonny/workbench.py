@@ -9,7 +9,6 @@ import sys
 from tkinter import ttk
 import traceback
 
-from thonny import misc_utils
 from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand
@@ -24,7 +23,6 @@ from thonny.running import Runner
 import thonny.globals
 import logging
 from thonny.globals import register_runner, get_runner
-from pkgutil import get_data
 
 class Workbench(tk.Tk):
     """
@@ -55,7 +53,7 @@ class Workbench(tk.Tk):
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
-        
+        self._select_theme()
         thonny.globals.register_workbench(self)
         
         self._main_dir = main_dir 
@@ -163,6 +161,7 @@ class Workbench(tk.Tk):
                                + os.path.splitext(item)[0])
         
         return result
+    
                                 
     def _init_fonts(self):
         self.add_option("view.editor_font_family", None)
@@ -258,6 +257,15 @@ class Workbench(tk.Tk):
         self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
 
+    def _select_theme(self):
+        style = ttk.Style()
+        
+        if 'vista' in style.theme_names():
+            style.theme_use('vista')
+        elif 'xpnative' in style.theme_names():
+            style.theme_use('xpnative')
+        elif 'clam' in style.theme_names():
+            style.theme_use('clam')
 
         
     def add_command(self, command_id, menu_name, command_label, handler,
@@ -478,6 +486,11 @@ class Workbench(tk.Tk):
     def get_resource_dir(self):
         """Returns directory with icon and other image files"""
         return os.path.join(self._main_dir, "thonny", "res")
+    
+    def get_image(self, filename_in_res_folder, tk_name=None):
+        img = tk.PhotoImage(tk_name, file=os.path.join(self.get_resource_dir(), filename_in_res_folder))
+        self._images.add(img)
+        return img
                       
     def show_view(self, view_id, set_focus=True):
         """View must be already registered.
@@ -565,7 +578,8 @@ class Workbench(tk.Tk):
         else:
             return None
     
-    def _add_toolbar_button(self, image, command_label, accelerator, handler, tester, toolbar_group):
+    def _add_toolbar_button(self, image, command_label, accelerator, handler, 
+                            tester, toolbar_group):
         
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:

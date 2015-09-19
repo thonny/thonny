@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import time
+import os.path
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny.misc_utils import try_remove_linenumbers
+from thonny.misc_utils import try_remove_linenumbers, get_res_path
 from tkinter.dialog import Dialog
+from thonny.globals import get_workbench
 
 
 CLAM_BACKGROUND = "#dcdad5"
 CALM_WHITE = '#fdfdfd'
 
+_images = set() # for keeping references to tkinter images to avoid garbace colleting them
 
 class AutomaticPanedWindow(ttk.PanedWindow):
     """
@@ -705,4 +708,8 @@ def askstring(title, prompt, **kw):
     '''
     d = _QueryString(title, prompt, **kw)
     return d.result
+
+
+    
+
 

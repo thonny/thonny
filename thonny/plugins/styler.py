@@ -5,53 +5,37 @@ from thonny.misc_utils import running_on_linux, get_res_path
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
 
-def select_theme():
-    style = ttk.Style()
 
-    if 'xpnative' in style.theme_names():
-        # gives better scrollbars in empty editors
-        theme = 'xpnative'
-    elif 'aqua' in style.theme_names():
-        theme = 'clam'
-    elif 'clam' in style.theme_names():
-        theme = 'clam'
-    else:
-        theme = style.theme_use()
-        
-    style.theme_use(theme)
-    
 
 def tweak_notebooks():
     style = ttk.Style()
     theme = style.theme_use()
     
     _images.add(tk.PhotoImage("gray_line", file=get_res_path('gray_line.gif')))
-    _images.add(tk.PhotoImage("img_close", file=get_res_path('tab_close.gif')))
-    _images.add(tk.PhotoImage("img_closeactive", file=get_res_path('tab_close_active.gif')))
-    _images.add(tk.PhotoImage("img_closepressed", file=get_res_path('tab_close_pressed.gif')))
     
     
     style.element_create("gray_line", "image", "gray_line",
                                ("!selected", "gray_line"), 
                                height=1, width=10, border=1)
     
-    if theme == "xpnative":
-        # add a line below active tab to separate it from content
-        style.layout("Tab", [
-            ("Notebook" + '.tab', {'sticky': 'nswe', 'children': [
-                ("Notebook" + '.padding', {'sticky': 'nswe', 'children': [
-                    ("Notebook" + '.focus', {'sticky': 'nswe', 'children': [
-                        ("Notebook" + '.label', {'sticky': '', 'side': 'left'}),
-                        #("close", {"side": "left", "sticky": ''})
-                    ], 'side': 'top'})
-                ], 'side': 'top'}),
-                ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
+    style.layout('Tab', [
+        ('Notebook.tab', {'sticky': 'nswe', 'children': [
+            ('Notebook.padding', {'sticky': 'nswe', 'side': 'top', 'children': [
+                ('Notebook.focus', {'sticky': 'nswe', 'side': 'top', 'children': [
+                    ('Notebook.label', {'sticky': '', 'side': 'left'}),
+                ]})
             ]}),
-        ])
-        
-        style.configure("Tab", padding=(4,1,0,0))
+            ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
+        ]}),
+    ])
+    
+    style.configure("Tab", padding=(4,1,0,0))
+    if theme == "clam":
+        style.configure("ButtonNotebook.Tab", padding=(6,4,2,3))
+    else:
+        style.configure("ButtonNotebook.Tab", padding=(4,1,1,3))
             
-    elif theme == "aqua":
+    if theme == "aqua":
         style.map("TNotebook.Tab", foreground=[('selected', 'white'), ('!selected', 'black')])
 
 
@@ -108,7 +92,6 @@ def tweak_paned_windows():
 
 
 def load_plugin():
-    select_theme()
     tweak_notebooks()
     tweak_treeviews()
     tweak_paned_windows()
