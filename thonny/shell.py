@@ -24,7 +24,13 @@ class ShellView (ttk.Frame, TextWrapper):
         
         self._before_io = True
         self._command_history = [] # actually not really history, because each command occurs only once
-        self._command_history_current_index = None 
+        self._command_history_current_index = None
+        
+        self.relocatable_frame = ttk.Frame(get_workbench())
+        self.relocatable_frame.grid(row=0, column=0, sticky=tk.NSEW, in_=get_workbench())
+        self.relocatable_frame.columnconfigure(1, weight=1)
+        self.relocatable_frame.rowconfigure(0, weight=1)
+        
         self.text_mode = "toplevel"
         
         """
@@ -43,10 +49,10 @@ class ShellView (ttk.Frame, TextWrapper):
         self.margin.grid(row=0, column=0)
         """
         
-        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar = ttk.Scrollbar(self.relocatable_frame, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
         editor_font = font.nametofont(name='TkFixedFont')
-        self.text = tk.Text(self,
+        self.text = tk.Text(self.relocatable_frame,
                             font=editor_font,
                             #foreground="white",
                             #background="#666666",
@@ -69,7 +75,7 @@ class ShellView (ttk.Frame, TextWrapper):
         self.text.bind("<KeyRelease>", self._text_key_release, "+")
         self.text.bind("<Home>", self.home_callback)
         self.vert_scrollbar['command'] = self.text.yview
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
         TextWrapper.__init__(self)

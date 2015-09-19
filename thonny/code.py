@@ -127,6 +127,9 @@ class EditorNotebook(ttk.Notebook):
         ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
         
         get_workbench().add_option("file.reopen_files", False)
+        
+        self.bind("<Double-ButtonPress-1>", self._on_double_click)
+        
         self._init_commands()
         self.enable_traversal()
         
@@ -279,6 +282,9 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_comment_out(self):
         if self.get_current_editor() is not None: 
             self.get_current_editor()._code_view._comment_out()
+    
+    def _on_double_click(self, event):
+        print("DC")
     
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()

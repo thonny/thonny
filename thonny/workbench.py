@@ -212,6 +212,10 @@ class Workbench(tk.Tk):
             self._cmd_focus_editor,
             default_sequence="<F11>",
             group=70)
+        
+        self.add_command("toggle_full_window", "view", "Toggle full window",
+            self._cmd_toggle_full_window,
+            group=80)
                 
         self.add_command("focus_shell", "view", "Focus shell",
             self._cmd_focus_shell,
@@ -224,7 +228,7 @@ class Workbench(tk.Tk):
     def _init_containers(self):
         
         main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border 
-        main_frame.grid(sticky=tk.NSEW)
+        main_frame.grid(row=0, column=0, sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
@@ -636,7 +640,12 @@ class Workbench(tk.Tk):
     def _cmd_focus_shell(self):
         self.show_view("ShellView", True)
     
-    
+    def _cmd_toggle_full_window(self):
+        # TODO: start from focused widget and go upwards until
+        # you find something with relocatable_frame
+        # If it is gridded into workbench, then grid it into it's home
+        # otherwise grid it into workbench
+        print("TOGGLE")
     
     def _update_menu(self, menu, menu_name):
         if menu.index("end") == None:
