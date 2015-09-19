@@ -11,6 +11,7 @@ from thonny.misc_utils import eqfn, get_res_path
 from thonny.codeview import CodeView
 from thonny.globals import get_workbench
 from thonny import misc_utils
+from logging import exception
 
 _dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
 
@@ -250,7 +251,6 @@ class EditorNotebook(ttk.Notebook):
                 return
             self.forget(current_editor)
             current_editor.destroy()
-            self._on_tab_changed(None)
             self._remember_open_files()
     
     def _cmd_save_file(self):
@@ -455,7 +455,7 @@ def _check_create_ButtonNotebook_style():
             widget.pressed_index = None
         except:
             # may fail, when mouse is dragged
-            pass
+            exception("Closing tab")
     
     get_workbench().bind_class("TNotebook", "<ButtonPress-1>", btn_press, True)
     get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", btn_release, True)
