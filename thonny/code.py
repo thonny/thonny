@@ -28,8 +28,6 @@ class Editor(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self._stepper = None
-        
         self._filename = None
         self.file_encoding = None
         
@@ -103,14 +101,6 @@ class Editor(ttk.Frame):
     
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
-    
-    def enter_execution_mode(self):
-        self._code_view.enter_execution_mode()
-    
-    
-    def clear_debug_view(self):
-        if self._stepper is not None:
-            self._stepper.clear_debug_view()
     
     def focus_set(self):
         self._code_view.focus_set()
