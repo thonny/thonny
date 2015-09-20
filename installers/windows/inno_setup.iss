@@ -50,6 +50,7 @@ Source: "build\exe.win32-3.4\*"; DestDir: "{app}"; Flags: ignoreversion recurses
 [InstallDelete]
 ; TODO: leave plugins dir 
 Type: filesandordirs; Name: "{app}\*"
+; TODO: temporary
 
 [Icons]
 Name: "{userstartmenu}\Thonny"; Filename: "{app}\thonny_frontend.exe"; IconFilename: "{app}\thonny_frontend.exe"
