@@ -12,6 +12,7 @@ from thonny.codeview import CodeView
 from thonny.globals import get_workbench
 from thonny import misc_utils
 from logging import exception
+from thonny.ui_utils import get_current_notebook_tab_widget
 
 _dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
 
@@ -23,8 +24,12 @@ class Editor(ttk.Frame):
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
         
-        self._code_view = CodeView(self, propose_remove_line_numbers=True)
-        self._code_view.grid(sticky=tk.NSEW)
+        # parent of codeview will be workbench so that it can be maximized
+        self._code_view = CodeView(get_workbench(), propose_remove_line_numbers=True, editor=self)
+        self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
+        self._code_view.home_widget = self # don't forget home
+        self.maximizable_widget = self._code_view
+        
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
@@ -117,8 +122,6 @@ class EditorNotebook(ttk.Notebook):
         ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
         
         get_workbench().add_option("file.reopen_files", False)
-        
-        self.bind("<Double-ButtonPress-1>", self._on_double_click)
         
         self._init_commands()
         self.enable_traversal()
@@ -273,9 +276,6 @@ class EditorNotebook(ttk.Notebook):
         if self.get_current_editor() is not None: 
             self.get_current_editor()._code_view._comment_out()
     
-    def _on_double_click(self, event):
-        print("DC")
-    
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
         if (len(editors) == 1 
@@ -284,11 +284,7 @@ class EditorNotebook(ttk.Notebook):
             self._cmd_close_file()
         
     def get_current_editor(self):
-        for child in self.winfo_children():
-            if str(child) == str(self.select()):
-                return child
-            
-        return None
+        return get_current_notebook_tab_widget(self)
     
     def show_file(self, filename, text_range=None):
         #self.close_single_untitled_unmodified_editor()

@@ -15,7 +15,7 @@ from thonny.common import Record, ToplevelCommand
 from thonny.config import ConfigurationManager
 from thonny.misc_utils import running_on_mac_os, get_res_path
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip
+    create_tooltip, get_current_notebook_tab_widget
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -23,6 +23,7 @@ from thonny.running import Runner
 import thonny.globals
 import logging
 from thonny.globals import register_runner, get_runner
+from jedi.evaluate.compiled import none_obj
 
 class Workbench(tk.Tk):
     """
@@ -237,7 +238,8 @@ class Workbench(tk.Tk):
             default_sequence="<F11>",
             group=80)
         
-        self.bind("<Escape>", self._unmaximize_view, True)
+        self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
+        self.bind_all("<Escape>", self._unmaximize_view, True)
             
     def _init_containers(self):
         
@@ -499,6 +501,7 @@ class Workbench(tk.Tk):
             view.home_widget = ttk.Frame(master) 
             view.home_widget.columnconfigure(0, weight=1)
             view.home_widget.rowconfigure(0, weight=1)
+            view.home_widget.maximizable_widget = view
             
             # initially the view will be in it's home_widget
             view.grid(row=0, column=0, sticky=tk.NSEW, in_=view.home_widget)
@@ -667,12 +670,22 @@ class Workbench(tk.Tk):
             self.geometry(new_geometry)
             
     
-    def _maximize_view(self):
+    def _maximize_view(self, event=None):
         if self._maximized_view is not None:
             return
         
         # find the widget that can be relocated
         widget = self.focus_get()
+        if isinstance(widget, EditorNotebook) or isinstance(widget, AutomaticNotebook):
+            current_tab = get_current_notebook_tab_widget(widget)
+            if current_tab is None:
+                return
+            
+            if not hasattr(current_tab, "maximizable_widget"):
+                return
+            
+            widget = current_tab.maximizable_widget
+        
         while widget is not None:
             if hasattr(widget, "home_widget"):
                 # if widget is view, then widget.master is workbench

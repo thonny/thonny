@@ -710,6 +710,11 @@ def askstring(title, prompt, **kw):
     return d.result
 
 
-    
+def get_current_notebook_tab_widget(notebook):    
+    for child in notebook.winfo_children():
+        if str(child) == str(notebook.select()):
+            return child
+        
+    return None
 
 

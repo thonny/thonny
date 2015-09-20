@@ -23,9 +23,11 @@ class CodeView(ttk.Frame, TextWrapper):
     def __init__(self, master, first_line_no=1, font_size=11,
                  auto_vert_scroll=False,
                  height=None,
-                 propose_remove_line_numbers=False):
+                 propose_remove_line_numbers=False,
+                 editor=None):
         ttk.Frame.__init__(self, master)
         
+        self._editor = editor # TODO: can I get rid of this?
         
         # attributes
         self.first_line_no = first_line_no
@@ -724,7 +726,7 @@ class CodeView(ttk.Frame, TextWrapper):
         for line in lines:
             self.text.insert(str(line) + '.0', '##')
         
-        get_workbench().event_generate("CommentIn", editor=self.master,
+        get_workbench().event_generate("CommentIn", editor=self._editor,
                                        kind='selection' if selection_used else 'current_line',
                                        subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 
@@ -750,7 +752,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 continue
             self.text.delete(line_str + '0', line_str + '2' if len(line_text) > 1 and line_text[1] == '#' else line_str + '1')
         
-        get_workbench().event_generate("CommentOut", editor=self.master,
+        get_workbench().event_generate("CommentOut", editor=self._editor,
                                        kind='selection' if selection_used else 'current_line',
                                        subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
 
