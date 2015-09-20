@@ -194,6 +194,9 @@ class Workbench(tk.Tk):
     
     def _init_commands(self):
         
+        self.add_option("view.full_screen", False)
+        self.add_option("view.full_window", False)
+        
         self.add_command("exit", "file", "Exit",
             self.destroy, 
             default_sequence="<Alt-F4>")
@@ -210,17 +213,24 @@ class Workbench(tk.Tk):
         
         self.add_command("focus_editor", "view", "Focus editor",
             self._cmd_focus_editor,
-            default_sequence="<F11>",
             group=70)
         
-        self.add_command("toggle_full_window", "view", "Toggle full window",
-            self._cmd_toggle_full_window,
-            group=80)
                 
         self.add_command("focus_shell", "view", "Focus shell",
             self._cmd_focus_shell,
             default_sequence="<F12>",
             group=70)
+        
+        self.add_command("toggle_full_window", "view", "Full window",
+            self._cmd_toggle_full_window,
+            flag_name="view.full_window",
+            group=80)
+                
+        self.add_command("toggle_full_window", "view", "Full screen",
+            self._cmd_toggle_full_screen,
+            flag_name="view.full_screen",
+            default_sequence="<F11>",
+            group=80)
         
         #self.add_command("help", "help", "Thonny help",
         #    self._cmd_help)
@@ -639,6 +649,11 @@ class Workbench(tk.Tk):
     
     def _cmd_focus_shell(self):
         self.show_view("ShellView", True)
+    
+    def _cmd_toggle_full_screen(self):
+        var = self.get_variable("view.full_screen")
+        var.set(not var.get())
+        self.attributes("-fullscreen", var.get())
     
     def _cmd_toggle_full_window(self):
         # TODO: start from focused widget and go upwards until
