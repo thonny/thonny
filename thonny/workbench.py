@@ -95,6 +95,14 @@ class Workbench(tk.Tk):
         self.add_option("layout.e_width", 200)
         self.add_option("layout.s_height", 200)
         
+        # I don't actually need saved options for Full screen/maximize view,
+        # but it's easier to create menu items, if I use configuration manager's variables
+        self.add_option("view.full_screen", False) # 
+        self.set_option("view.full_screen", False) # Don't start up with fullscreen to avoid confusion
+        self.add_option("view.maximize_view", False)
+        self.set_option("view.maximize_view", False) # Don't start up with maximized view to avoid confusion
+        
+        
         self.geometry("{0}x{1}+{2}+{3}".format(self.get_option("layout.width"),
                                             self.get_option("layout.height"),
                                             self.get_option("layout.left"),
@@ -194,9 +202,6 @@ class Workbench(tk.Tk):
     
     def _init_commands(self):
         
-        self.add_option("view.full_screen", False)
-        self.add_option("view.full_window", False)
-        
         self.add_command("exit", "file", "Exit",
             self.destroy, 
             default_sequence="<Alt-F4>")
@@ -221,26 +226,30 @@ class Workbench(tk.Tk):
             default_sequence="<F12>",
             group=70)
         
-        self.add_command("toggle_full_window", "view", "Full window",
-            self._cmd_toggle_full_window,
-            flag_name="view.full_window",
+        self.add_command("toggle_maximize_view", "view", "Maximize view",
+            self._cmd_toggle_maximize_view,
+            flag_name="view.maximize_view",
             group=80)
                 
-        self.add_command("toggle_full_window", "view", "Full screen",
+        self.add_command("toggle_maximize_view", "view", "Full screen",
             self._cmd_toggle_full_screen,
             flag_name="view.full_screen",
             default_sequence="<F11>",
             group=80)
         
-        #self.add_command("help", "help", "Thonny help",
-        #    self._cmd_help)
+        self.bind("<Escape>", self._unmaximize_view, True)
             
     def _init_containers(self):
         
-        main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border 
+        # Main frame functions as
+        # - a backgroud behind padding of main_pw, without this OS X leaves white border
+        # - a container to be hidden, when a view is maximized and restored when view is back home
+        main_frame= ttk.Frame(self) # 
+        self._main_frame = main_frame
         main_frame.grid(row=0, column=0, sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
+        self._maximized_view = None
         
         self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
@@ -477,13 +486,23 @@ class Workbench(tk.Tk):
             if not create:
                 return None
             
-            # create the view
             class_ = self._view_records[view_id]["class"]
             location = self._view_records[view_id]["location"]
             master = self._view_notebooks[location]
-            view = class_(master)
+            
+            # create the view
+            view = class_(self) # View's master is workbench to allow making it maximized
             view.position_key = self._view_records[view_id]["position_key"]
             self._view_records[view_id]["instance"] = view
+
+            # create the view home_widget to be added into notebook
+            view.home_widget = ttk.Frame(master) 
+            view.home_widget.columnconfigure(0, weight=1)
+            view.home_widget.rowconfigure(0, weight=1)
+            
+            # initially the view will be in it's home_widget
+            view.grid(row=0, column=0, sticky=tk.NSEW, in_=view.home_widget)
+            
             
         return self._view_records[view_id]["instance"]
     
@@ -513,15 +532,16 @@ class Workbench(tk.Tk):
             view_id: View class name 
             without package name (eg. 'ShellView') """
         
+        # NB! Don't forget that view.home_widget is added to notebook, not view directly
         # get or create
         view = self.get_view(view_id)
-        notebook = view.master
+        notebook = view.home_widget.master
         
         if not view.winfo_ismapped():
-            notebook.insert("auto", view, text=self._view_records[view_id]["label"])
+            notebook.insert("auto", view.home_widget, text=self._view_records[view_id]["label"])
         
         # switch to the tab
-        notebook.select(view)
+        notebook.select(view.home_widget)
         
         # add focus
         if set_focus:
@@ -531,9 +551,12 @@ class Workbench(tk.Tk):
         self.event_generate("ShowView", view=view)
     
     def hide_view(self, view_id):
+        # NB! Don't forget that view.home_widget is added to notebook, not view directly
+        
         if "instance" in self._view_records[view_id]:
+            # TODO: handle the case, when view is maximized
             view = self._view_records[view_id]["instance"]
-            view.master.forget(view)
+            view.home_widget.master.forget(view.home_widget)
             
             self.set_option("view." + view_id + ".visible", False)
             self.event_generate("HideView", view=view)
@@ -629,6 +652,7 @@ class Workbench(tk.Tk):
         for f in self._fonts.values():
             f.configure(size=f.cget("size") + delta)
         
+        self.update_idletasks()
         # TODO: save conf?
     
     def _check_update_window_width(self, delta):
@@ -642,7 +666,35 @@ class Workbench(tk.Tk):
             
             self.geometry(new_geometry)
             
-
+    
+    def _maximize_view(self):
+        if self._maximized_view is not None:
+            return
+        
+        # find the widget that can be relocated
+        widget = self.focus_get()
+        while widget is not None:
+            if hasattr(widget, "home_widget"):
+                # if widget is view, then widget.master is workbench
+                widget.grid(row=0, column=0, sticky=tk.NSEW, in_=widget.master)
+                # hide main_frame
+                self._main_frame.grid_forget()
+                self._maximized_view = widget
+                self.get_variable("view.maximize_view").set(True)
+                break
+            else:
+                widget = widget.master
+    
+    def _unmaximize_view(self, event=None):
+        if self._maximized_view is None:
+            return
+        
+        # restore main_frame
+        self._main_frame.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
+        # put the maximized view back to its home_widget
+        self._maximized_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.home_widget)
+        self._maximized_view = None
+        self.get_variable("view.maximize_view").set(False)
     
     def _cmd_focus_editor(self):
         self._editor_notebook.focus_set()
@@ -655,12 +707,13 @@ class Workbench(tk.Tk):
         var.set(not var.get())
         self.attributes("-fullscreen", var.get())
     
-    def _cmd_toggle_full_window(self):
-        # TODO: start from focused widget and go upwards until
-        # you find something with relocatable_frame
-        # If it is gridded into workbench, then grid it into it's home
-        # otherwise grid it into workbench
-        print("TOGGLE")
+    def _cmd_toggle_maximize_view(self):
+        if self._maximized_view is not None:
+            self._unmaximize_view()
+        else:
+            self._maximize_view()
+            
+            
     
     def _update_menu(self, menu, menu_name):
         if menu.index("end") == None:
