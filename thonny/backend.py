@@ -310,7 +310,7 @@ class VM:
         if "cwd" not in kwargs:
             kwargs["cwd"] = os.getcwd()
         
-        self._original_stdout.write(repr(kwargs) + "\n")
+        self._original_stdout.write(serialize_message(kwargs) + "\n")
         self._original_stdout.flush()
         
     def export_value(self, value, skip_None=False):

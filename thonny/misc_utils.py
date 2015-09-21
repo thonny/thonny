@@ -12,7 +12,6 @@ import builtins
 import tkinter as tk
 import tkinter.messagebox as tkMessageBox
 
-import subprocess
 from codecs import lookup, BOM_UTF8
 import textwrap
 import traceback

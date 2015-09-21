@@ -6,7 +6,7 @@ Adds debugging commands and features.
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerCommand, TextRange
+from thonny.common import DebuggerCommand
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils

@@ -23,7 +23,6 @@ from thonny.running import Runner
 import thonny.globals
 import logging
 from thonny.globals import register_runner, get_runner
-from test._test_multiprocessing import DELTA
 
 class Workbench(tk.Tk):
     """

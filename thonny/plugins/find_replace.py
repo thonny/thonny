@@ -2,7 +2,6 @@
 
 import tkinter as tk
 from tkinter import ttk
-import tkinter.font as font
 
 from thonny import misc_utils
 from thonny.globals import get_workbench

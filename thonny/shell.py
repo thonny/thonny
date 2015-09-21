@@ -11,7 +11,6 @@ from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import TextWrapper
 import tkinter as tk
 import tkinter.font as font
-from logging import info
 from thonny.globals import get_workbench, get_runner
 
 

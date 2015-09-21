@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import time
-import os.path
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny.misc_utils import try_remove_linenumbers, get_res_path,\
-    running_on_mac_os
+from thonny.misc_utils import try_remove_linenumbers
 from tkinter.dialog import Dialog
-from thonny.globals import get_workbench
 from logging import exception
 
 
