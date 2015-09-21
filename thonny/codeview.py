@@ -93,6 +93,18 @@ class CodeView(ttk.Frame, TextWrapper):
         
         TextWrapper.__init__(self, propose_remove_line_numbers)
         
+        # TODO: hack
+        _original_index = self.text.index
+        def _error_tolerant_index(arg):
+            try:
+                print("non-orig index")
+                return _original_index(arg)
+            except:
+                return None
+        self.text.index = _original_index
+        # end hack    
+        
+        
         self.read_only = False
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
@@ -115,14 +127,14 @@ class CodeView(ttk.Frame, TextWrapper):
         self.context_use_ps1 = False
         
         # TODO: Check Mac bindings
-        self.text.bind("<Control-BackSpace>", self.del_word_left)
-        self.text.bind("<Control-Delete>", self.del_word_right)
-        self.text.bind("<Home>", self.home_callback)
-        self.text.bind("<Left>", self.move_at_edge_if_selection(0))
-        self.text.bind("<Right>", self.move_at_edge_if_selection(1))
-        self.text.bind("<Tab>", self.indent_or_dedent_event)
-        self.text.bind("<Return>", self.newline_and_indent_event)
-        self.text.bind("<BackSpace>", self.smart_backspace_event)
+        self.text.bind("<Control-BackSpace>", self.del_word_left, True)
+        self.text.bind("<Control-Delete>", self.del_word_right, True)
+        self.text.bind("<Home>", self.home_callback, True)
+        self.text.bind("<Left>", self.move_at_edge_if_selection(0), True)
+        self.text.bind("<Right>", self.move_at_edge_if_selection(1), True)
+        self.text.bind("<Tab>", self.indent_or_dedent_event, True)
+        self.text.bind("<Return>", self.newline_and_indent_event, True)
+        self.text.bind("<BackSpace>", self.smart_backspace_event, True)
         
         fixwordbreaks(tk._default_root)
         
@@ -344,6 +356,7 @@ class CodeView(ttk.Frame, TextWrapper):
         finally:
             text.see("insert")
             text.undo_block_stop()
+            text.event_generate("<<NewLine>>")
 
     def _build_char_in_string_func(self, startindex):
         # copied from idlelib.EditorWindow (Python 3.4.2)

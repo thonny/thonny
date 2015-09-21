@@ -11,6 +11,7 @@ class OutlineView(ttk.Frame):
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_frame_contents ,True)
         get_workbench().bind("Save", self._update_frame_contents, True)
         get_workbench().bind("SaveAs", self._update_frame_contents, True)
+        get_workbench().bind_class("Text", "<<NewLine>>", self._update_frame_contents, True)
         
         self._update_frame_contents()
 
@@ -40,6 +41,7 @@ class OutlineView(ttk.Frame):
         self._method_img = get_workbench().get_image("method.gif")
 
     def _update_frame_contents(self, event=None):
+        print("UPD")
         self._clear_tree()
         
         editor = get_workbench().get_editor_notebook().get_current_editor()
