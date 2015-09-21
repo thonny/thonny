@@ -180,15 +180,23 @@ class EditorNotebook(ttk.Notebook):
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
-        get_workbench().add_command("comment_in", "edit", "Comment in",
-            self._cmd_comment_in,
+        get_workbench().add_command("toggle_comment", "edit", "Toggle selection comment",
+            self._cmd_toggle_selection_comment,
             default_sequence="<Control-Key-3>",
-            tester=None) # TODO:
+            tester=None, # TODO: not read-only
+            group=50)
         
-        get_workbench().add_command("comment_out", "edit", "Comment out",
-            self._cmd_comment_out,
-            default_sequence="<Control-Key-4>",
-            tester=None) # TODO:
+        get_workbench().add_command("comment_selection", "edit", "Comment out selection",
+            self._cmd_comment_selection,
+            default_sequence="<Alt-Key-3>",
+            tester=None, # TODO: not read-only
+            group=50)
+        
+        get_workbench().add_command("uncomment_selection", "edit", "Uncomment selection",
+            self._cmd_uncomment_selection,
+            default_sequence="<Alt-Key-4>",
+            tester=None, # TODO: not read-only
+            group=50)
 
         get_workbench()
     
@@ -268,13 +276,17 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None
     
-    def _cmd_comment_in(self):
+    def _cmd_toggle_selection_comment(self):
         if self.get_current_editor() is not None: 
-            self.get_current_editor()._code_view._comment_in()
+            self.get_current_editor().get_code_view().toggle_selection_comment()
+            
+    def _cmd_comment_selection(self):
+        if self.get_current_editor() is not None: 
+            self.get_current_editor().get_code_view().comment_selection()
     
-    def _cmd_comment_out(self):
+    def _cmd_uncomment_selection(self):
         if self.get_current_editor() is not None: 
-            self.get_current_editor()._code_view._comment_out()
+            self.get_current_editor().get_code_view().uncomment_selection()
     
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()

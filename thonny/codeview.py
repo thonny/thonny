@@ -12,7 +12,7 @@ from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
 from thonny.globals import get_workbench
 
-
+BLOCK_COMMENT_PREFIX = "##"
 
 # line numbers taken from http://tkinter.unpythonic.net/wiki/A_Text_Widget_with_Line_Numbers 
 
@@ -202,18 +202,14 @@ class CodeView(ttk.Frame, TextWrapper):
         if (event.state & 4) != 0 and event.keysym == "Home":
             # state&4==Control. If <Control-Home>, use the Tk binding.
             return
-        if self.text.index("iomark") and \
-           self.text.compare("iomark", "<=", "insert lineend") and \
-           self.text.compare("insert linestart", "<=", "iomark"):
-            # In Shell on input line, go to just after prompt
-            insertpt = int(self.text.index("iomark").split(".")[1])
+        
+        line = self.text.get("insert linestart", "insert lineend")
+        for insertpt in range(len(line)):
+            if line[insertpt] not in (' ','\t'):
+                break
         else:
-            line = self.text.get("insert linestart", "insert lineend")
-            for insertpt in range(len(line)):
-                if line[insertpt] not in (' ','\t'):
-                    break
-            else:
-                insertpt=len(line)
+            insertpt=len(line)
+            
         lineat = int(self.text.index("insert").split('.')[1])
         if insertpt == lineat:
             insertpt = 0
@@ -595,10 +591,6 @@ class CodeView(ttk.Frame, TextWrapper):
         # restore_event call is also there
 
     
-    def select_lines(self, start_line, end_line=None):
-        self.select_range(TextRange(start_line - self.first_line_no + 1, 0, 
-                          end_line - self.first_line_no + 1), "end")
-    
     def select_all(self):
         self.text.tag_remove("sel", "1.0", tk.END)
         self.text.tag_add('sel', '1.0', tk.END)
@@ -611,7 +603,11 @@ class CodeView(ttk.Frame, TextWrapper):
             
             
     
-    
+    def select_lines(self, first_line, last_line):
+        self.text.tag_remove("sel", "1.0", tk.END)
+        self.text.tag_add("sel", 
+                          str(first_line) + ".0",
+                          str(last_line) + ".end")
     
     def select_range(self, text_range):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -704,62 +700,57 @@ class CodeView(ttk.Frame, TextWrapper):
                 "Editing during run/debug is not allowed")
     """
     
+    def selection_is_line_commented(self):
+        sel_range = self.get_selected_range(True)
+        
+        for lineno in range(sel_range.lineno, sel_range.end_lineno+1):
+            line = self.text.get(str(lineno) + '.0', str(lineno) + '.end')
+            if not line.startswith(BLOCK_COMMENT_PREFIX):
+                return False
+        
+        return True
+        
     
-    #handles the 'comment in' command by adding ## in front of all selected lines if any lines are selected, 
-    #or just the current line otherwise
-    def _cmd_comment_in(self):
-        insert_index = self.text.index('insert')
-        sel_first_index, sel_last_index = self.get_selection_indices()
-        selection_used = False
-        if sel_first_index is not None and sel_first_index.strip() != '':
-            selection_used = True
-        
-        if selection_used:
-            lines = list(range(index2line(sel_first_index), index2line(sel_last_index) + 1))
-        else: #adds hashes to insert line only
-            lines = [index2line(insert_index)]
-
-        end_index = index2line(self.text.index('end'))
-        if end_index in lines:
-            lines.remove(end_index)
-        
-        for line in lines:
-            self.text.insert(str(line) + '.0', '##')
-        
-        get_workbench().event_generate("CommentIn", editor=self._editor,
-                                       kind='selection' if selection_used else 'current_line',
-                                       subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
-
-    #handles the 'comment out' command by removing '##' or '#' from the selected lines or the current line, if present      
-    def _cmd_comment_out(self):
-        insert_index = self.text.index('insert')
-        sel_first_index, sel_last_index = self.get_selection_indices()
-        selection_used = False
-        if sel_first_index is not None and sel_first_index.strip() != '':
-            selection_used = True
-        
-        if selection_used:
-            lines = range(index2line(sel_first_index), index2line(sel_last_index) + 1)
-         
+    def toggle_selection_comment(self):
+        if self.selection_is_line_commented():
+            self.uncomment_selection()
         else:
-            lines = [index2line(insert_index)]
+            self.comment_selection()
         
-        for line_no in lines:
-            line_str = str(line_no) + '.'
-            line_text = self.text.get(line_str + "0", str(line_no+1) + ".0")
-            if len(line_text) == 0: continue #empty line            
-            if line_text[0] != '#':
-                continue
-            self.text.delete(line_str + '0', line_str + '2' if len(line_text) > 1 and line_text[1] == '#' else line_str + '1')
+    
+    def comment_selection(self):
+        """Adds ## in front of all selected lines if any lines are selected, 
+        or just the current line otherwise"""
         
-        get_workbench().event_generate("CommentOut", editor=self._editor,
-                                       kind='selection' if selection_used else 'current_line',
-                                       subject=str(lines[0]) + '-' + str(lines[-1]) if selection_used else str(lines[0]))
+        sel_range = self.get_selected_range(True)
 
-    def get_selected_range(self):
-        if self.text.index(tk.SEL_FIRST):
+        for lineno in range(sel_range.lineno, sel_range.end_lineno+1):
+            self.text.insert(str(lineno) + '.0', BLOCK_COMMENT_PREFIX)
+        
+        if sel_range.end_lineno > sel_range.lineno:
+            self.select_lines(sel_range.lineno, sel_range.end_lineno)
+        
+        self.text.edit_separator()
+            
+
+    def uncomment_selection(self):
+        sel_range = self.get_selected_range(True)
+        
+        for lineno in range(sel_range.lineno, sel_range.end_lineno+1):
+            line = self.text.get(str(lineno) + '.0', str(lineno) + '.end')
+            if line.startswith(BLOCK_COMMENT_PREFIX):
+                self.text.delete(str(lineno) + ".0",
+                                 str(lineno) + "." + str(len(BLOCK_COMMENT_PREFIX)))
+
+    def get_selected_range(self, exclude_last_line_start=False):
+        if tk.SEL in self.text.tag_names() and self.text.index(tk.SEL_FIRST):
             lineno, col_offset = map(int, self.text.index(tk.SEL_FIRST).split("."))
             end_lineno, end_col_offset = map(int, self.text.index(tk.SEL_LAST).split("."))
+            
+            if exclude_last_line_start and end_lineno > lineno and end_col_offset == 0:
+                # SelectAll includes nonexisting extra line
+                end_lineno -= 1
+                end_col_offset = int(self.text.index(str(end_lineno) + ".end").split(".")[1])
         else:
             lineno, col_offset = map(int, self.text.index(tk.INSERT).split("."))
             end_lineno, end_col_offset = lineno, col_offset
