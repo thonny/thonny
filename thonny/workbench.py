@@ -173,23 +173,29 @@ class Workbench(tk.Tk):
                                 
     def _init_fonts(self):
         self.add_option("view.editor_font_family", None)
-        self.add_option("view.editor_font_size", None) # 15 if running_on_mac_os() else 10,
+        self.add_option("view.editor_font_size", 15 if running_on_mac_os() else 10)
         
         if self.get_option("view.editor_font_family"):
             editor_font = tk_font.Font(family=self.get_option("view.editor_font_family"))
+            bold_editor_font = tk_font.Font(family=self.get_option("view.editor_font_family"),
+                                    weight="bold")
         else:
             editor_font = tk_font.nametofont("TkFixedFont")
+            bold_editor_font = tk_font.Font(family=editor_font.actual()["family"],
+                                    weight="bold")
+        
             
         if self.get_option("view.editor_font_size"):
             editor_font.configure(size=self.get_option("view.editor_font_size"))
+            bold_editor_font.configure(size=self.get_option("view.editor_font_size"))
+        
+        io_font = tk_font.nametofont("TkFixedFont")
+        io_font.configure(size=editor_font.actual()["size"]-2)
         
         self._fonts = {
             'EditorFont' : editor_font,
-            'BoldEditorFont' : tk_font.Font(family=editor_font.actual()["family"],
-                                    size=editor_font.actual()["size"],
-                                    weight="bold"),
-            'IOFont' : tk_font.Font(family=editor_font.actual()["family"],
-                                    size=editor_font.actual()["size"]-2)
+            'BoldEditorFont' : bold_editor_font,
+            'IOFont' : io_font
         }
 
     def _init_translation(self):
@@ -654,11 +660,18 @@ class Workbench(tk.Tk):
     
     
     def _change_font_size(self, delta):
+        changed_font_ids = set()
+        
         for f in self._fonts.values():
-            f.configure(size=f.cget("size") + delta)
+            if id(f) not in changed_font_ids:
+                f.configure(size=f.cget("size") + delta)
+                changed_font_ids.add(id(f))
+        
+        self.set_option("view.editor_font_size", 
+                        self.get_font("EditorFont").cget("size"))
         
         self.update_idletasks()
-        # TODO: save conf?
+        
     
     def _check_update_window_width(self, delta):
         if not ui_utils.get_zoomed(self):
