@@ -15,7 +15,7 @@ from thonny.common import Record, ToplevelCommand
 from thonny.config import ConfigurationManager
 from thonny.misc_utils import running_on_mac_os, get_res_path
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, get_current_notebook_tab_widget
+    create_tooltip, get_current_notebook_tab_widget, select_sequence
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -201,39 +201,41 @@ class Workbench(tk.Tk):
         
         self.add_command("exit", "file", "Exit",
             self.destroy, 
-            default_sequence="<Alt-F4>")
+            default_sequence=select_sequence("<Alt-F4>", "<Command-q>"))
         
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
-            default_sequence="<Control-plus>",
+            default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
             group=60)
                 
         self.add_command("decrease_font_size", "view", "Decrease font size",
             lambda: self._change_font_size(-1),
-            default_sequence="<Control-minus>",
+            default_sequence=select_sequence("<Control-minus>", "<Command-minus>"),
             group=60)
         
         self.add_command("focus_editor", "view", "Focus editor",
             self._cmd_focus_editor,
+            default_sequence="<Alt-e>",
             group=70)
         
                 
         self.add_command("focus_shell", "view", "Focus shell",
             self._cmd_focus_shell,
-            default_sequence="<F12>",
+            default_sequence="<Alt-s>",
             group=70)
         
         self.add_command("toggle_maximize_view", "view", "Maximize view",
             self._cmd_toggle_maximize_view,
             flag_name="view.maximize_view",
+            default_sequence=None,
             group=80)
         
         if not running_on_mac_os():
-            # approach working in Win/Linux doesn't work in mac as it should and only confuses
+            # TODO: approach working in Win/Linux doesn't work in mac as it should and only confuses
             self.add_command("toggle_maximize_view", "view", "Full screen",
                 self._cmd_toggle_full_screen,
                 flag_name="view.full_screen",
-                default_sequence="<F11>",
+                default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
                 group=80)
         
         self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
@@ -297,6 +299,7 @@ class Workbench(tk.Tk):
                     default_sequence=None,
                     flag_name=None,
                     skip_sequence_binding=False,
+                    accelerator=None,
                     group=99,
                     position_in_group="end",
                     image_filename=None,
@@ -363,7 +366,9 @@ class Workbench(tk.Tk):
         else:
             image = None
         
-        accelerator = sequence_to_accelerator(sequence)
+        if not accelerator and sequence:
+            accelerator = sequence_to_accelerator(sequence)
+            
         menu = self.get_menu(menu_name)
         menu.insert(
             self._find_location_for_menu_item(menu_name, command_label, group, position_in_group),

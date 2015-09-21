@@ -4,7 +4,8 @@ import time
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny.misc_utils import try_remove_linenumbers
+from thonny.misc_utils import try_remove_linenumbers, running_on_mac_os,\
+    running_on_windows, running_on_linux
 from tkinter.dialog import Dialog
 from logging import exception
 
@@ -439,6 +440,9 @@ def sequence_to_accelerator(sequence):
     if not sequence:
         return ""
     
+    if not sequence.startswith("<"):
+        return sequence
+    
     accelerator = (sequence
         .strip("<>")
         .replace("Key-", "")
@@ -447,11 +451,15 @@ def sequence_to_accelerator(sequence):
         .replace("-Minus", "--").replace("-minus", "--")
         .replace("-Plus", "-+").replace("-plus", "-+")
     )
-        
-    # it's customary to show keys with capital letters
-    # but tk would treat this as pressing with shift
+    
+    # Tweaking individual parts
     parts = accelerator.split("-")
-    if len(parts[-1]) == 1 and "Shift" not in accelerator:
+    # tkinter shows shift with capital letter, but in shortcuts it's customary to include it explicitly
+    if len(parts[-1]) == 1 and parts[-1].isupper() and not "Shift" in parts:
+        parts.insert(-1, "Shift")
+    
+    # even when shift is not required, it's customary to show shortcut with capital letter
+    if len(parts[-1]) == 1:
         parts[-1] = parts[-1].upper()
     
     return "+".join(parts)
@@ -729,3 +737,12 @@ def get_current_notebook_tab_widget(notebook):
     return None
 
 
+def select_sequence(win_version, mac_version, linux_version=None):
+    if running_on_windows():
+        return win_version
+    elif running_on_mac_os():
+        return mac_version
+    elif running_on_linux() and linux_version:
+        return linux_version
+    else:
+        return win_version

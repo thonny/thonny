@@ -12,7 +12,7 @@ from thonny.codeview import CodeView
 from thonny.globals import get_workbench
 from thonny import misc_utils
 from logging import exception
-from thonny.ui_utils import get_current_notebook_tab_widget
+from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 
 _dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
 
@@ -70,8 +70,8 @@ class Editor(ttk.Frame):
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()
     
-    def save_file(self):
-        if self._filename is not None:
+    def save_file(self, ask_filename=False):
+        if self._filename is not None and not ask_filename:
             filename = self._filename
             get_workbench().event_generate("Save", editor=self)
         else:
@@ -148,27 +148,27 @@ class EditorNotebook(ttk.Notebook):
         
         get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,
-            default_sequence="<Control-n>",
+            default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             group=10,
             image_filename=get_res_path("file.new_file.gif"),
             include_in_toolbar=True)
         
         get_workbench().add_command("open_file", "file", "Open...", 
             self._cmd_open_file,
-            default_sequence="<Control-o>",
+            default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             group=10,
             image_filename=get_res_path("file.open_file.gif"),
             include_in_toolbar=True)
         
         get_workbench().add_command("close_file", "file", "Close", 
             self._cmd_close_file,
-            default_sequence="<Control-w>",
+            default_sequence=select_sequence("<Control-w>", "<Command-w>"),
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
         get_workbench().add_command("save_file", "file", "Save", 
             self._cmd_save_file,
-            default_sequence="<Control-s>",
+            default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             tester=self._cmd_save_file_enabled,
             group=10,
             image_filename=get_res_path("file.save_file.gif"),
@@ -176,13 +176,13 @@ class EditorNotebook(ttk.Notebook):
         
         get_workbench().add_command("save_file_as", "file", "Save as...",
             self._cmd_save_file_as,
-            default_sequence=None,
+            default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-S>"),
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
         get_workbench().add_command("toggle_comment", "edit", "Toggle comment",
             self._cmd_toggle_selection_comment,
-            default_sequence="<Control-Key-3>",
+            default_sequence=select_sequence("<Control-Key-3>", "<Command-Key-3>"),
             tester=None, # TODO: not read-only
             group=50)
         
@@ -269,7 +269,8 @@ class EditorNotebook(ttk.Notebook):
     
     def _cmd_save_file_as(self):
         if self.get_current_editor():
-            self.get_current_editor().save_file()
+            self.get_current_editor().save_file(ask_filename=True)
+            self.update_editor_title(self.get_current_editor())
             
         self._remember_open_files()
     

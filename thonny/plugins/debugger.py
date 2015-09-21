@@ -15,6 +15,7 @@ import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
 from thonny.globals import get_workbench, get_runner
+from thonny.ui_utils import select_sequence
 
 _SUSPENDED_FOCUS_BACKGROUND = "#DCEDF2"
 _ACTIVE_FOCUS_BACKGROUND = "#F8FC9A"
@@ -71,7 +72,7 @@ class Debugger:
         get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
             self._cmd_run_to_cursor,
             tester=self._cmd_run_to_cursor_enabled,
-            default_sequence="<Control-F8>",
+            default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
             group=30,
             image_filename=get_res_path("run.run_to_cursor.gif"),
             include_in_toolbar=False)

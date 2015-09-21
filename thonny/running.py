@@ -61,12 +61,12 @@ class Runner:
         
         get_workbench().add_command('reset', "run", 'Reset',
             handler=self._cmd_reset,
-            default_sequence=None, # TODO:
+            default_sequence=None,
             group=20)
         
         get_workbench().add_command('reset', "run", 'Stop',
             handler=self._cmd_stop,
-            default_sequence=None, # TODO:
+            default_sequence="<Control-F2>",
             tester=self._cmd_stop_enabled,
             group=70,
             image_filename=get_res_path("run.stop.gif"),

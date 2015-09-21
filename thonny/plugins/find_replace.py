@@ -5,6 +5,7 @@ from tkinter import ttk
 
 from thonny import misc_utils
 from thonny.globals import get_workbench
+from thonny.ui_utils import select_sequence
 
 #TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
 #TODO - logging
@@ -334,5 +335,5 @@ def load_plugin():
          
     get_workbench().add_command("OpenFindDialog", "edit", 'Find & Replace',
         cmd_open_find_dialog,
-        default_sequence="<Control-f>")
+        default_sequence=select_sequence("<Control-f>", "<Command-f>"))
     
