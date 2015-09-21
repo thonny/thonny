@@ -15,9 +15,13 @@ from thonny.globals import get_workbench
 class OutlineView(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
+        self._init_widgets()
         
-        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>",self._update_frame_contents ,True)
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_frame_contents ,True)
+        get_workbench().bind("Save", self._update_frame_contents, True)
+        get_workbench().bind("SaveAs", self._update_frame_contents, True)
 
+    def _init_widgets(self):
         #init and place scrollbar
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
@@ -32,7 +36,7 @@ class OutlineView(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         #init tree events
-        self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
+        self.tree.bind("<Double-Button-1>", self._on_double_click, "+")
 
         #configure the only tree column
         self.tree.column('#0', anchor=tk.W, stretch=True)
@@ -40,17 +44,22 @@ class OutlineView(ttk.Frame):
 
     def _update_frame_contents(self, event=None):
         self._clear_tree()
-        if get_workbench().get_editor_notebook().get_current_editor():
-            self.parse_and_display_module(get_workbench().get_editor_notebook().get_current_editor()._code_view)
         
-        module_contents = self.active_codeview.get_content()
-        nodes = []  #all nodes in format (parent, node_indent, node_children, name, type, linernumber)
-        root_node = (None, 0, []) #name, type and linenumber not needed for root
-        nodes.append(root_node)
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if editor is None:
+            return
+        
+        root = self._parse_source(editor.get_code_view().get_content())
+        for child in root[2]:
+            self._add_item_to_tree('', child)
+    
+    def _parse_source(self, source):
+        #all nodes in format (parent, node_indent, node_children, name, type, linenumber)
+        root_node = (None, 0, [], None, None, None) #name, type and linenumber not needed for root
         active_node = root_node
 
         lineno = 0
-        for line in module_contents.split('\n'):
+        for line in source.split('\n'):
             lineno += 1
             m = re.match('[ ]*[\w]{1}', line)
             if m:
@@ -63,18 +72,9 @@ class OutlineView(ttk.Frame):
                     current = (active_node, indent, [], t.group('name'), t.group('type'), lineno)
                     active_node[2].append(current)
                     active_node = current
+        
+        return root_node
 
-        self.module_data = nodes
-        self._display_content() #and now let's display the data
-
-    #displays the parsed content
-    def _display_content(self):
-        if not self.module_data or self.module_data == None:
-            return
-
-        #go over each item in the root node, which will recursively do the same for child nodes
-        for item in self.module_data[0][2]:
-            self._add_item_to_tree('', item)
 
     #adds a single item to the tree, recursively calls itself to add any child nodes
     def _add_item_to_tree(self, parent, item):
@@ -93,19 +93,17 @@ class OutlineView(ttk.Frame):
             self.tree.delete(child_id)
 
     #called when a double-click is performed on any items
-    def on_double_click(self, event):
-        lineno = self.tree.item(self.tree.focus())['values'][0]
-        index = self.active_codeview.text.index(str(lineno) + '.0')
-        self.active_codeview.text.see(index) #make sure that the double-clicked item is visible
-        get_workbench().event_generate("OutlineDoubleClick",
-            item_text=self.tree.item(self.tree.focus(), option='text'))
-
-    #called by editornotebook publisher to notify of changed tab
-    def notify_tab_changed(self):
-        if self.active_codeview is not None and self.active_codeview.modify_listeners is not None and self in self.active_codeview.modify_listeners:
-            self.active_codeview.modify_listeners.remove(self)
-        else: 
-            self._clear_tree()
+    def _on_double_click(self, event):
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if editor:
+            code_view = editor.get_code_view() 
+            lineno = self.tree.item(self.tree.focus())['values'][0]
+            index = code_view.text.index(str(lineno) + '.0')
+            code_view.text.see(index) #make sure that the double-clicked item is visible
+            code_view.select_lines(lineno, lineno)
+            
+            get_workbench().event_generate("OutlineDoubleClick",
+                item_text=self.tree.item(self.tree.focus(), option='text'))
 
 def load_plugin(): 
     get_workbench().add_view(OutlineView, "Outline", "ne")
