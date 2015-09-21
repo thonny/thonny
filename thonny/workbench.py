@@ -230,12 +230,14 @@ class Workbench(tk.Tk):
             self._cmd_toggle_maximize_view,
             flag_name="view.maximize_view",
             group=80)
-                
-        self.add_command("toggle_maximize_view", "view", "Full screen",
-            self._cmd_toggle_full_screen,
-            flag_name="view.full_screen",
-            default_sequence="<F11>",
-            group=80)
+        
+        if not running_on_mac_os():
+            # approach working in Win/Linux doesn't work in mac as it should and only confuses
+            self.add_command("toggle_maximize_view", "view", "Full screen",
+                self._cmd_toggle_full_screen,
+                flag_name="view.full_screen",
+                default_sequence="<F11>",
+                group=80)
         
         self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
         self.bind_all("<Escape>", self._unmaximize_view, True)
