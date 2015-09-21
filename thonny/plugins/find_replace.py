@@ -14,6 +14,9 @@ from thonny.globals import get_workbench
 
 # Handles the find dialog display and the logic of searching.
 #Communicates with the codeview that is passed to the constructor as a parameter.
+
+_active_find_dialog = None
+
 class FindDialog(tk.Toplevel): 
     def __init__(self, master):
         tk.Toplevel.__init__(self, master, borderwidth=15, takefocus=1)
@@ -118,8 +121,15 @@ class FindDialog(tk.Toplevel):
         self.find_entry.bind("<KP_Enter>", self._perform_find, True)
 
         self._update_button_statuses()
+        
+        global _active_find_dialog
+        _active_find_dialog = self
 
         self.wait_window()
+    
+    def focus_set(self):
+        self.find_entry.focus_set()
+        self.find_entry.selection_range(0, tk.END)
 
     #callback for text modifications on the find entry object, used to dynamically enable and disable buttons
     def _update_button_statuses(self, *args):
@@ -270,6 +280,10 @@ class FindDialog(tk.Toplevel):
         self._remove_all_tags()
         self.destroy()
 
+        global _active_find_dialog
+        _active_find_dialog = None
+        
+
     #removes the active tag and all passive tags
     def _remove_all_tags(self):
         for tag in self.passive_found_tags:
@@ -312,9 +326,12 @@ class FindDialog(tk.Toplevel):
 
 def load_plugin():
     def cmd_open_find_dialog():
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if editor:
-            FindDialog(editor._code_view)
+        if _active_find_dialog is not None:
+            _active_find_dialog.focus_set()
+        else:
+            editor = get_workbench().get_editor_notebook().get_current_editor()
+            if editor:
+                FindDialog(editor._code_view)
          
     get_workbench().add_command("OpenFindDialog", "edit", 'Find & Replace',
         cmd_open_find_dialog,
