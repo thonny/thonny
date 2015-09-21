@@ -238,7 +238,7 @@ class Workbench(tk.Tk):
                 group=80)
         
         self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
-        self.bind_all("<Escape>", self._unmaximize_view, True)
+        self.bind("<Escape>", self._unmaximize_view, True)
             
     def _init_containers(self):
         
