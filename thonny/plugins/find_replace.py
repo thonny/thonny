@@ -79,7 +79,7 @@ class FindDialog(tk.Toplevel):
 
         #Case checkbox
         self.case_var = tk.IntVar()
-        self.case_checkbutton = ttk.Checkbutton(self,text="Case sensitive",variable=self.case_var);  #TODO - text to resources
+        self.case_checkbutton = ttk.Checkbutton(self,text="Case sensitive",variable=self.case_var)
         self.case_checkbutton.grid(column=0, row=3)
 
         #Direction radiobuttons
@@ -91,12 +91,12 @@ class FindDialog(tk.Toplevel):
         self.down_radiobutton.invoke()
 
         #Find button - goes to the next occurrence
-        self.find_button = ttk.Button(self, text="Find", command=self._perform_find) #TODO - text to resources
+        self.find_button = ttk.Button(self, text="Find", command=self._perform_find, default="active")
         self.find_button.grid(column=3, row=0, sticky=tk.W + tk.E);
         self.find_button.config(state='disabled') 
 
         #Replace button - replaces the current occurrence, if it exists
-        self.replace_button = ttk.Button(self, text="Replace", command=self._perform_replace) #TODO - text to resources
+        self.replace_button = ttk.Button(self, text="Replace", command=self._perform_replace)
         self.replace_button.grid(column=3, row=1, sticky=tk.W + tk.E);
         self.replace_button.config(state='disabled')
 
@@ -113,9 +113,9 @@ class FindDialog(tk.Toplevel):
 
         #create bindings
         self.bind('<Escape>', self._ok)
-        self.find_entry.bind('<Return>', self._perform_find)
-        self.find_entry.bind('<Return>', self._perform_find)
         self.find_entry_var.trace('w', self._update_button_statuses)
+        self.find_entry.bind("<Return>", self._perform_find, True)
+        self.find_entry.bind("<KP_Enter>", self._perform_find, True)
 
         self._update_button_statuses()
 
@@ -212,7 +212,7 @@ class FindDialog(tk.Toplevel):
             new_text=toreplace)
         
         
-    def _perform_find(self):
+    def _perform_find(self, event=None):
         self.infotext_label_var.set("");    #reset the info label text
         tofind = self.find_entry.get().strip(); #get the text to find 
         if len(tofind) == 0:    #in the case of empty string, cancel
