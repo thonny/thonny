@@ -186,7 +186,7 @@ class AutocompleteWindowText(Text):
         self.parent.destroy()
         self.destroy()
 
-def load_plugin():
+def _load_plugin():
     def cmd_autocomplete():
         # TODO: enable autocomplete also in shell
         editor = get_workbench().get_editor_notebook().get_current_editor()

@@ -180,19 +180,19 @@ class EditorNotebook(ttk.Notebook):
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
-        get_workbench().add_command("toggle_comment", "edit", "Toggle selection comment",
+        get_workbench().add_command("toggle_comment", "edit", "Toggle comment",
             self._cmd_toggle_selection_comment,
             default_sequence="<Control-Key-3>",
             tester=None, # TODO: not read-only
             group=50)
         
-        get_workbench().add_command("comment_selection", "edit", "Comment out selection",
+        get_workbench().add_command("comment_selection", "edit", "Comment out",
             self._cmd_comment_selection,
             default_sequence="<Alt-Key-3>",
             tester=None, # TODO: not read-only
             group=50)
         
-        get_workbench().add_command("uncomment_selection", "edit", "Uncomment selection",
+        get_workbench().add_command("uncomment_selection", "edit", "Uncomment",
             self._cmd_uncomment_selection,
             default_sequence="<Alt-Key-4>",
             tester=None, # TODO: not read-only

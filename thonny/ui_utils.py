@@ -410,7 +410,7 @@ class WidgetRedirector:
             else:
                 return self.tk.call((self.orig, operation) + args)
         except tk.TclError:
-            exception("Exception caught by WidgetRedirector")
+            exception("Exception caught by WidgetRedirector, operation=" + operation)
             #raise # put it back if you need to debug
             return ""
 
