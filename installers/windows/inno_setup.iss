@@ -14,9 +14,9 @@ AppVerName=Thonny {#AppVer}
 ;AppComments string is displayed on the "Support" dialog of the Add/Remove Programs Control Panel applet
 AppComments=Thonny is Python IDE for beginners
 AppPublisher=Aivar Annamaa
-AppPublisherURL=https://bitbucket.org/aivarannamaa/thonny
-AppSupportURL=https://bitbucket.org/aivarannamaa/thonny
-AppUpdatesURL=https://bitbucket.org/aivarannamaa/thonny
+AppPublisherURL=http://thonny.cs.ut.ee
+AppSupportURL=http://thonny.cs.ut.ee
+AppUpdatesURL=http://thonny.cs.ut.ee
 DefaultDirName={userpf}\Thonny
 DirExistsWarning=auto
 UsePreviousAppDir=yes
