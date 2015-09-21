@@ -5,7 +5,8 @@ import os.path
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny.misc_utils import try_remove_linenumbers, get_res_path
+from thonny.misc_utils import try_remove_linenumbers, get_res_path,\
+    running_on_mac_os
 from tkinter.dialog import Dialog
 from thonny.globals import get_workbench
 from logging import exception
@@ -16,15 +17,22 @@ CALM_WHITE = '#fdfdfd'
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
 
-class AutomaticPanedWindow(ttk.PanedWindow):
+class AutomaticPanedWindow(tk.PanedWindow):
     """
     Enables inserting panes according to their position_key-s.
     Automatically adds/removes itself to/from its master AutomaticPanedWindow.
     Fixes some style glitches.
     """ 
     def __init__(self, master, position_key=None, **kwargs):
-        # kwargs["sashwidth"]=10
-        ttk.PanedWindow.__init__(self, master, **kwargs)
+        if not "sashwidth" in kwargs:
+            kwargs["sashwidth"]=10
+        
+        theme = ttk.Style().theme_use()
+        
+        if not "background" in kwargs:
+            kwargs["background"] = "#DCDAD5" if theme == "clam" else "SystemButtonFace"
+        
+        tk.PanedWindow.__init__(self, master, **kwargs)
         
         """ TODO: test in Linux and Mac 
         style = ttk.Style()
@@ -51,22 +59,25 @@ class AutomaticPanedWindow(ttk.PanedWindow):
             else:
                 pos = "end"
             
-        ttk.PanedWindow.insert(self, pos, child, **kw)
-        self.visible_panes.add(child)
-        self._update_visibility()
+        if isinstance(pos, tk.Widget):
+            kw["before"] = pos
+        self.add(child, **kw)
 
     def add(self, child, **kw):
-        ttk.PanedWindow.add(self, child, **kw)
+        if not "minsize" in kw:
+            kw["minsize"]=60
+            
+        tk.PanedWindow.add(self, child, **kw)
         self.visible_panes.add(child)
         self._update_visibility()
     
     def remove(self, child):
-        ttk.PanedWindow.remove(self, child)
+        tk.PanedWindow.remove(self, child)
         self.visible_panes.remove(child)
         self._update_visibility()
     
     def forget(self, child):
-        ttk.PanedWindow.forget(self, child)
+        tk.PanedWindow.forget(self, child)
         self.visible_panes.remove(child)
         self._update_visibility()
     
