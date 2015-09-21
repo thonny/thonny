@@ -215,7 +215,6 @@ class ShellView (ttk.Frame, TextWrapper):
         return get_runner().get_state()
         
     def _user_text_insert(self, index, txt, tags=(), **kw):
-        #print("insert", index, text, kw)
         if (self._editing_allowed()
             and self._in_current_input_range(index)):
             #self._print_marks("before insert")
@@ -243,7 +242,6 @@ class ShellView (ttk.Frame, TextWrapper):
             self._try_submit_input()
         else:
             self.bell()
-            print("Shell: can't insert", self._get_state())
             
     def _user_text_delete(self, index1, index2=None, **kw):
         if (self._editing_allowed() 
@@ -252,7 +250,6 @@ class ShellView (ttk.Frame, TextWrapper):
             TextWrapper._user_text_delete(self, index1, index2, **kw)
         else:
             self.bell()
-            print("Shell: can't delete", self._get_state())
     
     def _in_current_input_range(self, index):
         return self.text.compare(index, ">=", "input_start")
@@ -260,7 +257,6 @@ class ShellView (ttk.Frame, TextWrapper):
     def _insert_text_directly(self, txt, tags=()):
         # I want the insertion to go before marks 
         #self._print_marks("before output")
-        #print("inserting directly", txt, tags)
         self.text.mark_gravity("input_start", tk.RIGHT)
         self.text.mark_gravity("output_insert", tk.RIGHT)
         tags = tuple(tags)
@@ -437,7 +433,6 @@ class ShellView (ttk.Frame, TextWrapper):
         return "break"
     
     def _propose_command(self, cmd_line):
-        #print(command, self._command_history_current_index, self._command_history)
         self.text.delete("input_start", "end")
         self._user_text_insert("input_start", cmd_line)
     
@@ -484,7 +479,6 @@ class ShellView (ttk.Frame, TextWrapper):
         Grayes out input & output displayed so far
         """
         end_index = self.text.index("output_end")
-        #print("inva", end_index)
         
         self.text.tag_add("inactive", "1.0", end_index)
         self.text.tag_remove("value", "1.0", end_index)
@@ -525,37 +519,6 @@ Nende arvude summa on 10
         
 
     
-    """
-    def _print_marks(self, prefix=""):
-        print(prefix, "input_start is at", self.text.index("input_start"), self.text.mark_gravity("input_start"))
-        print(prefix, "output_insert is at", self.text.index("output_insert"), self.text.mark_gravity("output_insert"))
-    """
-    
-    """
-    def test_insert(self):
-        import random
-        for _ in range(10):
-            text = repr([random.random() for _ in range(1000)]) + "\n"
-            self.text.insert("end", text)
-        self.text.see("end")
-    
-    def test_insert3(self):
-        self.text.insert("end", 10000 * (60* "*" + "\n"))
-        self.text.see("end")
-    
-    def test_insert2(self):
-        block_mode = False
-        for i in range(10000):
-            self.text.insert("end", str(i))
-            
-            if block_mode:
-                self.text.insert("end", 60 * "*" + "\n")
-            else:
-                for _ in range(60):
-                    self.text.insert("end", "*")
-                self.text.insert("end", "\n")
-#            self.text.see("end")
-        self.text.see("end")
-    """
+
     
     

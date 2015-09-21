@@ -306,7 +306,7 @@ class FrameVisualizer:
             
         self._text.update_idletasks()
         self._text.see("%d.0" % (first_line))
-        #print("SEEING: " + "%d.0" % (first_line))
+
         if last_line - first_line < 3:
             # if it's safe to assume that whole code fits into screen
             # then scroll it down a bit so that expression view doesn't hide behind
@@ -407,7 +407,7 @@ class ExpressionBox(tk.Text):
             
             assert hasattr(msg, "value")
             debug("EV: replacing expression with value")
-            #print("del", start_mark, end_mark)
+
             original_focus_text = self.get(start_mark, end_mark)
             self.delete(start_mark, end_mark)
             
@@ -420,7 +420,6 @@ class ExpressionBox(tk.Text):
             else:
                 value_str = shorten_repr(msg.value.repr, 100)
             
-            #print("ins", start_mark, value_str)
             object_tag = "object_" + str(msg.value.id)
             self.insert(start_mark, value_str, ('value', 'after', object_tag))
             if misc_utils.running_on_mac_os():
@@ -552,7 +551,6 @@ class ExpressionBox(tk.Text):
             
         self.place(x=x, y=y, anchor=tk.NW)
         self.update_idletasks()
-        print(self.winfo_geometry())
     
     def _update_size(self):
         content = self.get("1.0", tk.END)

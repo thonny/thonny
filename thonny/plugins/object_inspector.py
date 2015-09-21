@@ -141,7 +141,6 @@ class ObjectInspector(ScrollableFrame):
             self.request_object_info()
     
     def _handle_object_info_event(self, msg):
-        print(msg)
         if self.winfo_ismapped():
             if msg.info["id"] == self.object_id:
                 if hasattr(msg, "not_found") and msg.not_found:

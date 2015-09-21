@@ -254,17 +254,6 @@ def mark_text_ranges(node, source):
         # Function returns the list of tokens which cover all its children
         
         
-        """
-        print("\n############################################\n")
-        print(node.__class__)
-        if isinstance(node, ast.Name):
-            print(node.id)
-        print(node.lineno, node.col_offset, prelim_end_lineno, prelim_end_col_offset)
-        print(" ".join(list(map(lambda x:x[STRING], tokens))))
-        print("----------")
-        for tok in tokens:
-            print(tok)
-        """
         if isinstance(node, _ast.stmt):
             # remove empty trailing lines
             while (tokens[-1][TYPE] in (tokenize.NL, tokenize.COMMENT, token.NEWLINE, token.INDENT)
@@ -320,13 +309,11 @@ def tokenize_with_char_offsets(source):
     
     encoding = "UTF-8"
     char_lines = list(map(lambda line: line + "\n", source.split("\n")))
-    print(char_lines)
     byte_lines = None
     thokens = []
     
     
     for token in token_source:
-        print(token)
         
         if token[TYPE] == tokenize.ENCODING:
             # first token
@@ -354,7 +341,6 @@ def tokenize_with_char_offsets(source):
                             token[END][0], char_end_col)
         
         thokens.append(thoken)
-        print(thoken)
             
 
 
@@ -484,23 +470,3 @@ def _get_ordered_child_nodes(node):
         return ast.iter_child_nodes(node)    
 
 
-if __name__ == "__main__":
-    """
-    if len(sys.argv) > 1:
-        with open(sys.argv[1]) as f:
-            source = f.read()
-            print("TOKENS") 
-            for tok in tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline):
-                print(tok)
-            print("AST")
-            root = ast.parse(source, sys.argv[1])
-            for node in ast.walk(root):
-                print(node, end=" ")
-                if hasattr(node, "lineno"):
-                    print(node.lineno, node.col_offset)
-                else:
-                    print()
-    """
-    tokenize_with_char_offsets("ä")
-            
-        

@@ -37,7 +37,6 @@ info = logger.info
 
 class VM:
     def __init__(self, main_dir):
-        #print(sys.argv, file=sys.stderr)
         self._main_dir = main_dir
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
@@ -508,10 +507,6 @@ class FancyTracer(Executor):
         return compile(root, filename, mode)
     
     def _may_step_in(self, code):
-#        print ("MAYSET", code.co_filename if code else '---',
-#               os.path.normcase(code.co_filename) not in self._instrumented_files)
-#        for file in self._instrumented_files:
-#            print("*", file)
             
         return not (
             code is None 
