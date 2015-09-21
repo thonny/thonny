@@ -10,6 +10,7 @@ from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text,\
 from thonny.common import InlineCommand
 import ast
 from thonny.globals import get_workbench, get_runner
+from logging import exception
 
 
 
@@ -140,13 +141,14 @@ class ObjectInspector(ScrollableFrame):
             self.request_object_info()
     
     def _handle_object_info_event(self, msg):
+        print(msg)
         if self.winfo_ismapped():
-            if msg.object_info["id"] == self.object_id:
+            if msg.info["id"] == self.object_id:
                 if hasattr(msg, "not_found") and msg.not_found:
                     self.object_id = None
                     self.set_object_info(None)
                 else:
-                    self.set_object_info(msg.object_info)
+                    self.set_object_info(msg.info)
     
     def _handle_progress_event(self, event):
         if self.object_id is not None:
@@ -218,7 +220,7 @@ class ObjectInspector(ScrollableFrame):
     
     def goto_type(self, event):
         if self.object_info is not None:
-            get_workbench()("ObjectSelect", object_id=self.object_info["type_id"])
+            get_workbench().event_generate("ObjectSelect", object_id=self.object_info["type_id"])
     
     
     
@@ -253,6 +255,10 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
                 or "file_error" in object_info)
     
     def set_object_info(self, object_info, label):
+        
+        if "file_content" not in object_info:
+            exception("File error: " + object_info["file_error"])
+            return
         
         assert "file_content" in object_info
         content = object_info["file_content"]

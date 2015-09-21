@@ -32,7 +32,7 @@ class MemoryFrame(TreeFrame):
         if iid != '':
             # NB! Assuming id is second column!
             object_id = parse_object_id(self.tree.item(iid)['values'][1])
-            get_workbench().event_generate(self, "ObjectSelect", object_id=object_id)
+            get_workbench().event_generate("ObjectSelect", object_id=object_id)
     
     
         

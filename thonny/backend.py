@@ -230,7 +230,8 @@ class VM:
                 info["file_encoding"] = f.encoding
                 info["file_content"] = f.read()
                 info["file_tell"] = value.tell()
-        except:
+        except Exception as e:
+            info["file_error"] = "Could not get file content, error:" + str(e)
             pass
         
     def _add_function_info(self, value, info):
