@@ -284,10 +284,11 @@ class Workbench(tk.Tk):
     def _select_theme(self):
         style = ttk.Style()
         
-        if 'vista' in style.theme_names():
+        if 'xpnative' in style.theme_names():
+            # in Win7 'xpnative' gives better scrollbars than 'vista'
+            style.theme_use('xpnative') 
+        elif 'vista' in style.theme_names():
             style.theme_use('vista')
-        elif 'xpnative' in style.theme_names():
-            style.theme_use('xpnative')
         elif 'clam' in style.theme_names():
             style.theme_use('clam')
 
