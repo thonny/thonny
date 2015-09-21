@@ -3,15 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 from thonny.globals import get_workbench
 
-#TODO - see if there's a way to remember the previously focused tree item
-#when the tree is rebuilt to avoid reparsing everything on every step
-#idea: remember the focus item's name and line number, in the case of
-#any change see if there's an item with the same name on the same line,
-#or an item on any adjacent lines with nearly the same name (?)
-
-#TODO - see if there's a way to select or somehow mark the line
-#that contains the item that's double-clicked on
-
 class OutlineView(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
@@ -20,6 +11,8 @@ class OutlineView(ttk.Frame):
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_frame_contents ,True)
         get_workbench().bind("Save", self._update_frame_contents, True)
         get_workbench().bind("SaveAs", self._update_frame_contents, True)
+        
+        self._update_frame_contents()
 
     def _init_widgets(self):
         #init and place scrollbar
@@ -40,7 +33,11 @@ class OutlineView(ttk.Frame):
 
         #configure the only tree column
         self.tree.column('#0', anchor=tk.W, stretch=True)
-        self.tree.heading('#0', text='Item (type @ line)', anchor=tk.W)
+        # self.tree.heading('#0', text='Item (type @ line)', anchor=tk.W)
+        self.tree['show'] = ('tree',)
+        
+        self._class_img = get_workbench().get_image("class.gif")
+        self._method_img = get_workbench().get_image("method.gif")
 
     def _update_frame_contents(self, event=None):
         self._clear_tree()
@@ -79,10 +76,18 @@ class OutlineView(ttk.Frame):
     #adds a single item to the tree, recursively calls itself to add any child nodes
     def _add_item_to_tree(self, parent, item):
         #create the text to be played for this item
-        item_text = item[3] + ' (' + item[4] + ' @ ' + str(item[5]) + ')'
+        item_type = item[4]
+        item_text = " " + item[3]
+        
+        if item_type == "class":
+            image = self._class_img
+        elif item_type == "def":
+            image = self._method_img
+        else:
+            image = None
         
         #insert the item, set lineno as a 'hidden' value
-        current = self.tree.insert(parent, 'end', text=item_text, values = item[5])
+        current = self.tree.insert(parent, 'end', text=item_text, values = item[5], image=image)
 
         for child in item[2]:
             self._add_item_to_tree(current, child)
