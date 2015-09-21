@@ -57,7 +57,7 @@ class Workbench(tk.Tk):
         thonny.globals.register_workbench(self)
         
         self._main_dir = main_dir 
-        self._configuration_manager = ConfigurationManager(os.path.expanduser(os.path.join("~", ".thonny", "preferences.ini")))
+        self._configuration_manager = ConfigurationManager(os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini")))
         
         self._init_diagnostic_logging()
         self._init_translation()
