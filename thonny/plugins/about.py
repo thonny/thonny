@@ -84,8 +84,8 @@ class AboutDialog(tk.Toplevel):
         ok_button.grid()
         ok_button.focus_set()
         
-        self.bind('<Return>', self._ok) 
-        self.bind('<Escape>', self._ok) 
+        self.bind('<Return>', self._ok, True) 
+        self.bind('<Escape>', self._ok, True) 
         self.wait_window()
         
     def _ok(self, event=None):

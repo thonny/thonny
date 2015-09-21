@@ -65,8 +65,8 @@ class RenameWindow(tk.Toplevel):
         self.ok_button.grid(row=2, column=0, sticky=tk.W + tk.E, padx=5)
         self.cancel_button.grid(row=2, column=1, sticky=tk.W + tk.E, padx=5)
 
-        self.bind("<Return>", self.ok)
-        self.bind("<Escape>", self.cancel)
+        self.bind("<Return>", self.ok, True)
+        self.bind("<Escape>", self.cancel, True)
 
         self.grab_set()
 

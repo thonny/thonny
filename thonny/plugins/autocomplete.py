@@ -92,13 +92,13 @@ class AutocompleteWindowText(Text):
         self.insert = self.redirector.register("insert", lambda *args, **kw: "break")
         self.delete = self.redirector.register("delete", lambda *args, **kw: "break")
         #register event bindings
-        self.bind("<B1-Motion>", lambda e: "break")
-        self.bind("<Double-Button-1>", self._choose_completion)
-        self.bind("<Button-1>", self._handle_click)
-        self.bind("<Up>", self._up_marked_line)
-        self.bind("<Down>", self._down_marked_line)
-        self.bind("<Return>", self._choose_completion)
-        self.bind("<Escape>", self._ok)
+        self.bind("<B1-Motion>", lambda e: "break", True)
+        self.bind("<Double-Button-1>", self._choose_completion, True)
+        self.bind("<Button-1>", self._handle_clic, True)
+        self.bind("<Up>", self._up_marked_line, True)
+        self.bind("<Down>", self._down_marked_line, True)
+        self.bind("<Return>", self._choose_completion, True)
+        self.bind("<Escape>", self._ok, True)
         #set the first completion in the list as selected
         self._mark_line(1)
         #force focus in the window

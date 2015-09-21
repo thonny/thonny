@@ -557,8 +557,8 @@ class TtkDialog(Dialog):
         w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
         w.pack(side=tk.LEFT, padx=5, pady=5)
 
-        self.bind("<Return>", self.ok)
-        self.bind("<Escape>", self.cancel)
+        self.bind("<Return>", self.ok, True)
+        self.bind("<Escape>", self.cancel, True)
 
         box.pack()
 
