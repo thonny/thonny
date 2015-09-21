@@ -38,7 +38,7 @@ ChangesAssociations=yes
 ; http://pete.akeo.ie/2011/11/free-code-signing-certificate-for-open.html
 ; http://blog.ksoftware.net/2011/07/exporting-your-code-signing-certificate-to-a-pfx-file-from-firefox/
 ; http://blog.ksoftware.net/2011/07/how-to-automate-code-signing-with-innosetup-and-ksign/
-;SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttps://bitbucket.org/aivarannamaa/thonny$q $f
+;SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttp://thonny.cs.ut.ee$q $f
 
 
 [Languages]

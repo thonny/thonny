@@ -23,7 +23,6 @@ from thonny.running import Runner
 import thonny.globals
 import logging
 from thonny.globals import register_runner, get_runner
-from jedi.evaluate.compiled import none_obj
 
 class Workbench(tk.Tk):
     """
@@ -793,6 +792,7 @@ class Workbench(tk.Tk):
             self._save_layout()
             #self.user_logger.save()
             #ui_utils.delete_images()
+            self.event_generate("WorkbenchClose")
         except:
             self.report_internal_error()
 

@@ -8,6 +8,7 @@ from tkinter import ttk, messagebox
 from thonny.misc_utils import try_remove_linenumbers, get_res_path
 from tkinter.dialog import Dialog
 from thonny.globals import get_workbench
+from logging import exception
 
 
 CLAM_BACKGROUND = "#dcdad5"
@@ -392,14 +393,13 @@ class WidgetRedirector:
 
         '''
         m = self._operations.get(operation)
-        # I removed silecing TclError (Aivar)
         try:
             if m:
                 return m(*args)
             else:
                 return self.tk.call((self.orig, operation) + args)
         except tk.TclError:
-            #traceback.print_exc()
+            exception("Exception caught by WidgetRedirector")
             #raise # put it back if you need to debug
             return ""
 

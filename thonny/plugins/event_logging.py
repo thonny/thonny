@@ -1,157 +1,128 @@
 import ast
 import os.path
 import tkinter as tk
-from time import strptime
-from datetime import datetime, timedelta
 import time
 from thonny.globals import get_workbench
+from thonny.workbench import WorkbenchEvent
+from datetime import datetime
 
-
-"""
-TODO: on Mac when playing around with backspace and undo by long pressing keys (long backspace)
-Traceback (most recent call last):
-  File "/Library/Frameworks/Python.framework/Versions/3.4/lib/python3.4/tkinter/__init__.py", line 1487, in __call__
-    return self.func(*args)
-  File "/Users/aivar/workspaces/python_stuff/thonny/src/codeview.py", line 445, in smart_backspace_event
-    text.delete("insert-1c")
-  File "/Users/aivar/workspaces/python_stuff/thonny/src/codeview.py", line 787, in _user_text_delete
-    TextWrapper._user_text_delete(self, index1, index2)
-  File "/Users/aivar/workspaces/python_stuff/thonny/src/ui_utils.py", line 364, in _user_text_delete
-    log_user_event(TextDeleteEvent(self, index1, index2))
-  File "/Users/aivar/workspaces/python_stuff/thonny/src/user_logging.py", line 94, in log_user_event
-    USER_LOGGER.log_micro_event(e)
-  File "/Users/aivar/workspaces/python_stuff/thonny/src/user_logging.py", line 55, in log_micro_event
-    and int(self.last_position.split(".")[0]) == int(e.to_position.split(".")[0])
-ValueError: invalid literal for int() with base 10: ''
-"""
 
 class EventLogger:
     def __init__(self, filename=None):
-        self.filename = filename
-        self.macro_events = []
-        self.last_position = "0.0"
-        self.last_source = None
-        self.default_timeout = timedelta(seconds = 2)
+        self._filename = filename
+        self._encoding = "UTF-8"
+        self._file = open(self._filename, mode="a", encoding=self._encoding)
+        self._file.write("[\n")
         
-        self._bind("<<Undo>>")
-        self._bind("<<Undo>>")
-        self._bind("<<Redo>>")
-        self._bind("<<Cut>>")
-        self._bind("<<Copy>>")
-        self._bind("<<Paste>>")
-        #self._bind("<<Selection>>")
-        self._bind("<FocusIn>")
-        self._bind("<FocusOut>")
-        self._bind("<Key>")
-        self._bind("<KeyRelease>")
-        self._bind("<1>")
-        self._bind("<2>")
-        self._bind("<3>")
+        self._event_count = 0
+        self._last_event_timestamp = datetime.now()
+        
+        wb = get_workbench()
+        wb.bind("WorkbenchClose", self._on_worbench_close, True)
+        
+        for sequence in ["<<Undo>>",
+                         "<<Redo>>",
+                         "<<Cut>>",
+                         "<<Copy>>",
+                         "<<Paste>>",
+                         #"<<Selection>>",
+                         "<FocusIn>",
+                         "<FocusOut>",
+                         #"<Key>",
+                         #"<KeyRelease>",
+                         "<Button-1>",
+                         "<Button-2>",
+                         "<Button-3>"
+                         ]:
+            self._bind(sequence)
 
-        get_workbench().bind("<FocusIn>", self._on_get_focus, "+")
-        get_workbench().bind("<FocusOut>", self._on_lose_focus, "+")
+
+        #get_workbench().bind("<FocusIn>", self._on_get_focus, "+")
+        #get_workbench().bind("<FocusOut>", self._on_lose_focus, "+")
         
         ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
         
         # TODO: if event data includes an Editor, then look up also text id
     
-    def _bind(self, sequence):
+    def _bind(self, sequence, widget=None):
         
         def handle(event):
-            self.log_micro_event(event)
+            self._log_event(sequence, event)
         
-        tk._default_root.bind_all(sequence, handle, True)
-    
-    def log_micro_event(self, e):
-        # TODO: save and clear the log when it becomes too big
-        self.macro_events.append((e, datetime.now()))
-        """
-        TODO:
-        try:
-            #print("OK", e, vars(e))
-            self._log_micro_event(e)
-        except:
-            print(self.last_position, e, vars(e))
-            raise
-        """
-    
-    def _log_micro_event(self, e):
-        # Jätab meelde eelmise event'i klassi nime.
-        if(isinstance(e, LoadEvent) or isinstance(e,PasteEvent) or isinstance(e, CutEvent)
-           or isinstance(e, UndoEvent) or isinstance(e, RedoEvent)):
-            self.last_source = e
-        if(isinstance(e, KeyPressEvent)):
-            self.last_source = e
-        # Koondab üksikud tähesisestused samal real olevatega, va. kui sisestuskursori asukoht on mujal
-        # või kui mikrosündmuste vahel on rohkem, kui üleval märgitud default_timeout'is
-        elif(isinstance(e, TextInsertEvent)):
-            e.source = self.last_source.__class__.__name__
-            if(isinstance(self.last_source, KeyPressEvent)):
-                if(self.last_source.char == '\r'):
-                    e.position = str(self.last_source.cursor_pos.split(".")[0])+ "." + str(int(self.last_source.cursor_pos.split(".")[1]) + 1)
-            if(len(self.macro_events) != 0):
-                if(isinstance(self.macro_events[-1][0], TextInsertEvent)
-                        and int(self.last_position.split(".")[0]) == int(e.position.split(".")[0])
-                        and int(self.last_position.split(".")[1]) + 1 == int(e.position.split(".")[1])
-                        and datetime.now() - self.macro_events[-1][1] < self.default_timeout):
-                    self.macro_events[-1][0].text = self.macro_events[-1][0].text + e.text
-                    self.macro_events[-1] = (self.macro_events[-1][0], datetime.now())
-                    self.last_position = e.position
-                else:
-                    self.macro_events.append((e, datetime.now()))
-                    self.last_position = e.position
-            else:
-                self.macro_events.append((e, datetime.now()))
-                self.last_position = e.position
-        # Koondab üksikud kustutamised samal real tehtutega, va. kui sisestuskursori asukoht on mujal
-        # või kui mikrosündmuste vahel on rohkem, kui üleval märgitud default_timeout'is
-        elif(isinstance(e, TextDeleteEvent)):
-            e.source = self.last_source.__class__.__name__
-            if(isinstance(self.last_source, KeyPressEvent) and e.to_position == ''):
-                e.to_position = e.from_position.split(".")[0] + "." + str(int(e.from_position.split(".")[1])+1)
-                e.from_position = e.from_position.split(".")[0] + "." + str(int(e.from_position.split(".")[1]))
-            if(len(self.macro_events) != 0):
-                if(isinstance(self.macro_events[-1][0], TextDeleteEvent)
-                            and int(self.last_position.split(".")[0]) == int(e.to_position.split(".")[0])
-                            and int(self.last_position.split(".")[1]) - 1 == int(e.from_position.split(".")[1])
-                            and datetime.now() - self.macro_events[-1][1] < self.default_timeout):
-                    e.to_position = self.macro_events[-1][0].to_position
-                    self.macro_events[-1] = (e, datetime.now())
-                    self.last_position = e.from_position
-        #Koondab delete klahvi kustutamised, mis toimuvad samal real va. kui sisestuskursori asukoht on mujal
-        # või kui mikrosündmuste vahel on rohkem, kui üleval märgitud default_timeout'is
-                elif(isinstance(self.macro_events[-1][0], TextDeleteEvent)
-                     and isinstance(self.last_source, KeyPressEvent)
-                     and self.last_source.keysym == 'Delete'
-                     and int(self.last_position.split(".")[0]) == int(e.to_position.split(".")[0])
-                     and int(self.last_position.split(".")[1]) == int(e.from_position.split(".")[1])
-                     and datetime.now() - self.macro_events[-1][1] < self.default_timeout):
-                    pass
-                    e.to_position = self.macro_events[-1][0].to_position.split(".")[0] + "." + str(int(self.macro_events[-1][0].to_position.split(".")[1])+1)
-                    self.macro_events[-1] = (e, datetime.now())
-                    self.last_position = e.from_position
-                else:
-                    self.macro_events.append((e, datetime.now()))
-                    self.last_position = e.from_position
-            else:           
-                self.macro_events.append((e, datetime.now()))
-                self.last_position = e.from_position            
+        if widget:
+            widget.bind(sequence, handle, True)
         else:
-            self.macro_events.append((e, datetime.now()))
-            
-    def save(self):
-        """
-        Stores whole log into file. 
-        This method can be called repeatedly, in this case
-        the old version of the file will be just overridden.
-        """
-        f = open(self.filename, mode="w", encoding="UTF-8")
-        for (e, t) in self.macro_events:
-            f.write(str(e) +" at " + t.isoformat() + "\n")
+            tk._default_root.bind_all(sequence, handle, True)
+    
+    def _extract_interesting_data(self, event, sequence):
+        data = {}
         
-        f.close()
-
+        if isinstance(event, tk.Event):
+            data["widget_id"] = id(event.widget)
+            data["widget_class"] = event.widget.__class__.__name__
+            # TODO: add other interesting attributes for individual events
+            
+        else:
+            assert isinstance(event, WorkbenchEvent)
+            # save all attributes
+            for name in dir(event):
+                if not name.startswith("_"):
+                    value = getattr(event, name)
+                    
+                    if name == "editor":
+                        data["editor_id"] = id(value)
+                        
+                    elif isinstance(value, tk.BaseWidget):
+                        data[name + "_id"] = id(value)
+                        data[name + "_class"] = value.__class__.__name__
+                    
+                    elif (isinstance(value, str)
+                            or isinstance(value, int)
+                            or isinstance(value, float)):
+                        data[name] = value
+                    
+                    else:
+                        data[name] = repr(value)
+                                 
+                        
+        
+        
+        return data
+    
+    def _log_event(self, sequence, event):
+        
+        timestamp = datetime.now()
+        time_from_last_event = timestamp-self._last_event_timestamp
+        
+        data = self._extract_interesting_data(event, sequence)
+        data["sequence"] = sequence 
+        data["time"] = timestamp.isoformat()
+        
+        
+        if self._event_count > 0:
+            self._file.write(",\n")
+             
+        self._file.write(repr(data))
+        
+        self._last_event_timestamp = timestamp
+        self._event_count += 1
+        
+        if (self._event_count % 100 == 0
+            or time_from_last_event.total_seconds() > 3):
+            self._intermediate_save()
+    
+    
+    def _on_worbench_close(self, event=None):
+        self._final_save()
+    
+    def _intermediate_save(self):
+        self._file.close()
+        self._file = open(self._filename, mode="a", encoding=self._encoding)
+    
+    def _final_save(self):
+        self._file.write("\n]\n")
+        self._file.close()
 
 
 class UserEvent:
@@ -338,14 +309,11 @@ def load_plugin():
     if not os.path.exists(folder):
         os.makedirs(folder)
         
-    i = 0
-    while True: 
+    for i in range(100): 
         filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.txt".format(i)));
-        if os.path.exists(filename):
-            i += 1;  
-        else:
-            return filename
+        if not os.path.exists(filename):
+            break
     
     # create logger
-    EventLogger(get_workbench(), filename)
+    EventLogger(filename)
     
