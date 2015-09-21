@@ -93,18 +93,6 @@ class CodeView(ttk.Frame, TextWrapper):
         
         TextWrapper.__init__(self, propose_remove_line_numbers)
         
-        # TODO: hack
-        _original_index = self.text.index
-        def _error_tolerant_index(arg):
-            try:
-                print("non-orig index")
-                return _original_index(arg)
-            except:
-                return None
-        self.text.index = _original_index
-        # end hack    
-        
-        
         self.read_only = False
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)

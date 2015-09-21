@@ -410,7 +410,10 @@ class WidgetRedirector:
             else:
                 return self.tk.call((self.orig, operation) + args)
         except tk.TclError:
-            exception("Exception caught by WidgetRedirector, operation=" + operation)
+            if operation != "index": # TODO: fix also index issues 
+                                    # Seems that index method now doesn't accept "sel_first" if "sel" not in tag_names()
+                                    # Reproduce by pressing enter in editor
+                exception("Exception caught by WidgetRedirector, operation=" + operation)
             #raise # put it back if you need to debug
             return ""
 
