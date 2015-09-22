@@ -21,28 +21,33 @@ class AutomaticPanedWindow(tk.PanedWindow):
     Automatically adds/removes itself to/from its master AutomaticPanedWindow.
     Fixes some style glitches.
     """ 
-    def __init__(self, master, position_key=None, **kwargs):
+    def __init__(self, master, position_key=None,
+                first_pane_size=1/3, last_pane_size=1/3, **kwargs):
         if not "sashwidth" in kwargs:
             kwargs["sashwidth"]=10
         
         theme = ttk.Style().theme_use()
         
         if not "background" in kwargs:
-            kwargs["background"] = "#DCDAD5" if theme == "clam" else "SystemButtonFace"
+            if theme == "clam":
+                kwargs["background"] = "#DCDAD5"
+            elif theme == "aqua":
+                kwargs["background"] = "systemSheetBackground"
+            else: 
+                kwargs["background"] = "SystemButtonFace"
         
         tk.PanedWindow.__init__(self, master, **kwargs)
         
-        """ TODO: test in Linux and Mac 
-        style = ttk.Style()
-        if style.theme_use() == "clam":
-            self.configure(background=CLAM_BACKGROUND)
-        elif style.theme_use() == "aqua":
-            self.configure(background="systemSheetBackground")
-        elif running_on_windows():
-            self.configure(background="SystemButtonFace")
-        """
         self.position_key = position_key
         self.visible_panes = set()
+        self.first_pane_size = first_pane_size
+        self.last_pane_size = last_pane_size
+        self._restoring_pane_sizes = False
+        
+        self._last_window_size = (0,0)
+        self._full_size_not_final = True
+        self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
+        self.bind("<B1-Motion>", self._on_mouse_dragged, True)
     
     def insert(self, pos, child, **kw):
         if pos == "auto":
@@ -68,22 +73,112 @@ class AutomaticPanedWindow(tk.PanedWindow):
         tk.PanedWindow.add(self, child, **kw)
         self.visible_panes.add(child)
         self._update_visibility()
+        self._restore_pane_sizes()
     
     def remove(self, child):
         tk.PanedWindow.remove(self, child)
         self.visible_panes.remove(child)
         self._update_visibility()
+        self._restore_pane_sizes()
     
     def forget(self, child):
         tk.PanedWindow.forget(self, child)
         self.visible_panes.remove(child)
         self._update_visibility()
+        self._restore_pane_sizes()
     
     def is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
             return self.winfo_ismapped()
         else:
             return self in self.master.visible_panes
+    
+    def _on_window_resize(self, event):
+        window = self.winfo_toplevel()
+        window_size = (window.winfo_width(), window.winfo_height())
+        
+        if (not self._restoring_pane_sizes 
+            and (window_size != self._last_window_size or self._full_size_not_final)):
+            self._restore_pane_sizes()
+            self._last_window_size = window_size
+    
+    def _on_mouse_dragged(self, event):
+        if event.widget == self and not self._restoring_pane_sizes:
+            self._store_pane_sizes()
+            
+    
+    def _store_pane_sizes(self):
+        if len(self.panes()) > 1:
+            self.last_pane_size = self._get_pane_size("last")
+            if len(self.panes()) > 2:
+                self.first_pane_size = self._get_pane_size("first")
+    
+    def _restore_pane_sizes(self):
+        """last (and maybe first) pane sizes are stored, first (or middle)
+        pane changes its size when window is resized"""
+        try:
+            self._restoring_pane_sizes = True
+            if len(self.panes()) > 1:
+                self._set_pane_size("last", self.last_pane_size)
+                if len(self.panes()) > 2:
+                    self._set_pane_size("first", self.first_pane_size)
+        finally:
+            self._restoring_pane_sizes = False
+    
+    def _get_pane_size(self, which):
+        self.update_idletasks()
+        
+        if which == "first":
+            coord = self.sash_coord(0)
+        else:
+            coord = self.sash_coord(len(self.panes())-2)
+            
+        if self.cget("orient") == tk.HORIZONTAL:
+            full_size = self.winfo_width()
+            sash_distance = coord[0]
+        else:
+            full_size = self.winfo_height()
+            sash_distance = coord[1]
+        
+        if which == "first":
+            return sash_distance
+        else:
+            return full_size - sash_distance 
+        
+    
+    def _set_pane_size(self, which, size):
+        #print("setsize", which, size)
+        self.update_idletasks()
+        
+        if self.cget("orient") == tk.HORIZONTAL:
+            full_size = self.winfo_width()
+        else:
+            full_size = self.winfo_height()
+        
+        self._full_size_not_final = full_size == 1
+        
+        if self._full_size_not_final:
+            return
+        
+        if isinstance(size, float):
+            size = int(full_size * size)
+        
+        #print("full vs size", full_size, size)
+        
+        if which == "first":
+            sash_index = 0
+            sash_distance = size 
+        else:
+            sash_index = len(self.panes())-2
+            sash_distance = full_size - size 
+        
+        if self.cget("orient") == tk.HORIZONTAL:
+            self.sash_place(sash_index, sash_distance, 0)
+            #print("PLACE", sash_index, sash_distance, 0)
+        else:
+            self.sash_place(sash_index, 0, sash_distance)
+            #print("PLACE", sash_index, 0, sash_distance)
+      
     
     def _update_visibility(self):
         if not isinstance(self.master, AutomaticPanedWindow):
@@ -94,7 +189,8 @@ class AutomaticPanedWindow(tk.PanedWindow):
             
         if len(self.panes()) > 0 and not self.is_visible():
             self.master.insert("auto", self)
-
+        
+    
 
 class AutomaticNotebook(ttk.Notebook):
     """

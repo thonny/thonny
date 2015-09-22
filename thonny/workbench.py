@@ -256,14 +256,36 @@ class Workbench(tk.Tk):
         self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
         
-        main_pw   = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
-        main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
+        self.add_option("layout.main_pw_first_pane_size", 1/3)
+        self.add_option("layout.main_pw_last_pane_size", 1/3)
+        self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL,
+            first_pane_size=self.get_option("layout.main_pw_first_pane_size"),
+            last_pane_size=self.get_option("layout.main_pw_last_pane_size")
+        )
+        
+        self._main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
         
-        self._west_pw   = AutomaticPanedWindow(main_pw, 1, orient=tk.VERTICAL)
-        self._center_pw = AutomaticPanedWindow(main_pw, 2, orient=tk.VERTICAL)
-        self._east_pw   = AutomaticPanedWindow(main_pw, 3, orient=tk.VERTICAL)
+        self.add_option("layout.west_pw_first_pane_size", 1/3)
+        self.add_option("layout.west_pw_last_pane_size", 1/3)
+        self.add_option("layout.center_pw_first_pane_size", 1/3)
+        self.add_option("layout.center_pw_last_pane_size", 1/3)
+        self.add_option("layout.east_pw_first_pane_size", 1/3)
+        self.add_option("layout.east_pw_last_pane_size", 1/3)
+        
+        self._west_pw = AutomaticPanedWindow(self._main_pw, 1, orient=tk.VERTICAL,
+            first_pane_size=self.get_option("layout.west_pw_first_pane_size"),
+            last_pane_size=self.get_option("layout.west_pw_last_pane_size")
+        )
+        self._center_pw = AutomaticPanedWindow(self._main_pw, 2, orient=tk.VERTICAL,
+            first_pane_size=self.get_option("layout.center_pw_first_pane_size"),
+            last_pane_size=self.get_option("layout.center_pw_last_pane_size")
+        )
+        self._east_pw = AutomaticPanedWindow(self._main_pw, 3, orient=tk.VERTICAL,
+            first_pane_size=self.get_option("layout.east_pw_first_pane_size"),
+            last_pane_size=self.get_option("layout.east_pw_last_pane_size")
+        )
         
         self._view_records = {}
         self._view_notebooks = {
@@ -538,7 +560,7 @@ class Workbench(tk.Tk):
         Args:
             view_id: View class name 
             without package name (eg. 'ShellView') """
-        
+
         # NB! Don't forget that view.home_widget is added to notebook, not view directly
         # get or create
         view = self.get_view(view_id)
@@ -828,23 +850,15 @@ class Workbench(tk.Tk):
         
         self.set_option("layout.zoomed", ui_utils.get_zoomed(self), False)
         
-        def save_width(widget, name):
-            #TODO:
-            assert (isinstance(widget, AutomaticPanedWindow)
-                or isinstance(widget, AutomaticNotebook))
-            
-            if widget.last_width:
-                self.set_
+        # each AutomaticPanedWindow remember it's splits for both 2 and 3 panes
+        self.set_option("layout.main_pw_first_pane_size", self._main_pw.first_pane_size)
+        self.set_option("layout.main_pw_last_pane_size", self._main_pw.last_pane_size)
+        self.set_option("layout.east_pw_first_pane_size", self._east_pw.first_pane_size)
+        self.set_option("layout.east_pw_last_pane_size", self._east_pw.last_pane_size)
+        self.set_option("layout.center_pw_last_pane_size", self._center_pw.last_pane_size)
+        self.set_option("layout.west_pw_first_pane_size", self._west_pw.first_pane_size)
+        self.set_option("layout.west_pw_last_pane_size", self._west_pw.last_pane_size)
                 
-                
-        if self._west_pw.winfo_ismapped():
-            self.set_option("layout.west_width", self._west_pw.winfo_width(), False)
-        if self._center_pw.winfo_ismapped():
-            self.set_option("layout.center_width", self._center_pw.winfo_width(), False)
-        if self._west_pw.winfo_ismapped():
-            self.set_option("layout.east_width", self._west_pw.winfo_width(), False)
-            # TODO: heigths
-        
         if not ui_utils.get_zoomed(self):
             self.set_option("layout.top", self.winfo_y(), False)
             self.set_option("layout.left", self.winfo_x(), False)
