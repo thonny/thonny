@@ -257,7 +257,6 @@ class Workbench(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self._maximized_view = None
-        self.bind_all("<1>")
         
         self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
@@ -838,9 +837,10 @@ class Workbench(tk.Tk):
         self.destroy()
     
     def _on_configure(self, event):
+        # called when window is moved or resized
         if self._maximized_view:
-            return
-            self._maximized_view.update() # TODO: not good with maximized view
+            # grid again, otherwise it acts weird
+            self._maximized_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.master)
     
     def _on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception with modifications
