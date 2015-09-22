@@ -72,11 +72,14 @@ class Workbench(tk.Tk):
         self._init_containers()
         register_runner(Runner())
         get_runner().send_command(ToplevelCommand(command="Reset"))
+        
         self._init_commands()
+        self._load_plugins()
+        
+        self._update_toolbar()
+        self._editor_notebook.load_startup_files()
         self._editor_notebook.focus_set()
         
-        self._load_plugins()
-        self._update_toolbar()
         self.mainloop()
     
     def _init_diagnostic_logging(self):
@@ -123,7 +126,7 @@ class Workbench(tk.Tk):
             except:
                 pass # TODO: try to get working in Ubuntu  
         
-        self.bind("<Configure>", self._on_configure)
+        self.bind("<Configure>", self._on_configure, True)
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
@@ -254,6 +257,7 @@ class Workbench(tk.Tk):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         self._maximized_view = None
+        self.bind_all("<1>")
         
         self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
@@ -834,8 +838,9 @@ class Workbench(tk.Tk):
         self.destroy()
     
     def _on_configure(self, event):
-        pass
-        #self.update_idletasks() TODO: not good with maximized view
+        if self._maximized_view:
+            return
+            self._maximized_view.update() # TODO: not good with maximized view
     
     def _on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception with modifications

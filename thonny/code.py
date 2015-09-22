@@ -133,7 +133,6 @@ class EditorNotebook(ttk.Notebook):
             if os.path.exists(filename):
                 self._open_file(filename)
         """
-        self._load_startup_files()
     
     def _list_recent_files(self):
         get_workbench().add_option("file.recent_files", [])
@@ -202,7 +201,7 @@ class EditorNotebook(ttk.Notebook):
         get_workbench()
     
     
-    def _load_startup_files(self):
+    def load_startup_files(self):
         """If no filename was sent from command line
         then load previous files (if setting allows)"""  
         
