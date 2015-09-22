@@ -664,7 +664,8 @@ class Workbench(tk.Tk):
         self.get_font("EditorFont").configure(size=editor_font_size)
         self.get_font("BoldEditorFont").configure(size=editor_font_size)
         
-        self.update_idletasks()
+        if delta != 0:
+            self.update_idletasks()
         
     
     def _check_update_window_width(self, delta):
