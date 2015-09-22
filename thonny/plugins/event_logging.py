@@ -5,6 +5,7 @@ import time
 from thonny.globals import get_workbench
 from thonny.workbench import WorkbenchEvent
 from datetime import datetime
+from builtins import callable
 
 
 class EventLogger:
@@ -26,34 +27,49 @@ class EventLogger:
                          "<<Copy>>",
                          "<<Paste>>",
                          #"<<Selection>>",
-                         "<FocusIn>",
-                         "<FocusOut>",
                          #"<Key>",
                          #"<KeyRelease>",
                          "<Button-1>",
                          "<Button-2>",
                          "<Button-3>"
                          ]:
-            self._bind(sequence)
+            self._bind_all(sequence)
+        
+        for sequence in ["Command",
+                         "Open",
+                         "Save",
+                         "SaveAs",
+                         "NewFile",
+                         "ShellCommand",
+                         "ShellInput",
+                         "ShowView",
+                         "HideView",
+                         "TextInsert",
+                         "TextDelete",
+                         ]:
+            self._bind_workbench(sequence)
 
-
-        #get_workbench().bind("<FocusIn>", self._on_get_focus, "+")
-        #get_workbench().bind("<FocusOut>", self._on_lose_focus, "+")
+        self._bind_workbench("<FocusIn>", True)
+        self._bind_workbench("<FocusOut>", True)
         
         ### log_user_event(KeyPressEvent(self, e.char, e.keysym, self.text.index(tk.INSERT)))
 
         
         # TODO: if event data includes an Editor, then look up also text id
     
-    def _bind(self, sequence, widget=None):
+    def _bind_workbench(self, sequence, only_workbench_widget=False):
+        def handle(event):
+            if not only_workbench_widget or event.widget == get_workbench():
+                self._log_event(sequence, event)
+        
+        get_workbench().bind(sequence, handle, True)
+    
+    def _bind_all(self, sequence):
         
         def handle(event):
             self._log_event(sequence, event)
         
-        if widget:
-            widget.bind(sequence, handle, True)
-        else:
-            tk._default_root.bind_all(sequence, handle, True)
+        tk._default_root.bind_all(sequence, handle, True)
     
     def _extract_interesting_data(self, event, sequence):
         data = {}
@@ -70,13 +86,11 @@ class EventLogger:
                 if not name.startswith("_"):
                     value = getattr(event, name)
                     
-                    if name == "editor":
-                        data["editor_id"] = id(value)
-                        
-                    elif isinstance(value, tk.BaseWidget):
+                    if isinstance(value, tk.BaseWidget):
                         data[name + "_id"] = id(value)
                         data[name + "_class"] = value.__class__.__name__
-                    
+                    elif name in ("update", "setdefault"): # TODO: make it more reliable
+                        pass
                     elif (isinstance(value, str)
                             or isinstance(value, int)
                             or isinstance(value, float)):

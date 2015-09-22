@@ -123,6 +123,8 @@ class Workbench(tk.Tk):
             except:
                 pass # TODO: try to get working in Ubuntu  
         
+        self.bind("<Configure>", self._on_configure)
+        
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
         self._menubar = tk.Menu(self)
@@ -577,7 +579,7 @@ class Workbench(tk.Tk):
             view.focus_set()
         
         self.set_option("view." + view_id + ".visible", True)
-        self.event_generate("ShowView", view=view)
+        self.event_generate("ShowView", view=view, view_id=view_id)
     
     def hide_view(self, view_id):
         # NB! Don't forget that view.home_widget is added to notebook, not view directly
@@ -588,7 +590,7 @@ class Workbench(tk.Tk):
             view.home_widget.master.forget(view.home_widget)
             
             self.set_option("view." + view_id + ".visible", False)
-            self.event_generate("HideView", view=view)
+            self.event_generate("HideView", view=view, view_id=view_id)
         
 
     def event_generate(self, sequence, **kwargs):
@@ -830,7 +832,11 @@ class Workbench(tk.Tk):
             self.report_internal_error()
 
         self.destroy()
-        
+    
+    def _on_configure(self, event):
+        pass
+        #self.update_idletasks() TODO: not good with maximized view
+    
     def _on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception with modifications
         # see http://bugs.python.org/issue22384

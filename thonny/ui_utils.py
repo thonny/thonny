@@ -8,6 +8,7 @@ from thonny.misc_utils import try_remove_linenumbers, running_on_mac_os,\
     running_on_windows, running_on_linux
 from tkinter.dialog import Dialog
 from logging import exception
+from thonny.globals import get_workbench
 
 
 CLAM_BACKGROUND = "#dcdad5"
@@ -324,6 +325,8 @@ class TextWrapper:
         else:
             tags = None 
         #log_user_event(TextInsertEvent(self, index, args[1], tags)) TODO:
+        
+        get_workbench().event_generate("TextInsert", index=index, text=text, tags=tags, editor=self)
     
         
     def _user_text_delete(self, *args, **kw):
@@ -334,6 +337,7 @@ class TextWrapper:
         self._original_user_text_delete(*args, **kw)
 #        print("DEL'", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
         #log_user_event(TextDeleteEvent(self, index1, index2)) TODO:
+        get_workbench().event_generate("TextDelete", index1=index1, index2=index2, editor=self)
 
     def on_text_undo(self, e):
         self._last_event_kind = "undo"

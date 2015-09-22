@@ -405,7 +405,7 @@ class EditorNotebook(ttk.Notebook):
         if confirm:
             for editor in modified_editors:
                 if editor.get_filename(True):
-                    editor._cmd_save_file()
+                    editor.save_file()
                 else:
                     return False
             return True
