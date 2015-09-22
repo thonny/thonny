@@ -26,7 +26,7 @@ from thonny.shell import ShellView
 from thonny.misc_utils import get_res_path
 
 
-COMMUNICATION_ENCODING = "UTF-8"
+COMMUNICATION_ENCODING = "ASCII"
 
 class Runner:
     def __init__(self):
@@ -310,8 +310,10 @@ class _BackendProxy:
     
         # create new backend process
         my_env = os.environ.copy()
+        # NB! Seems that cx_freeze-d programs don't take PYTHONIOENCODING into account
+        # But we should be still safe when only ASCII data is sent/received
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
-        my_env["PYTHONUNBUFFERED"] = "1"
+        my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
         # TODO: backend should be selectable by the user
         if "thonny" in os.path.basename(sys.executable).lower():

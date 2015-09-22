@@ -153,10 +153,13 @@ def parse_shell_command(cmd_line, split_arguments=True):
 
 
 def serialize_message(msg):
-    return repr(msg)
+    # I want to transfer only ASCII chars because 
+    # encodings are not reliable 
+    # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 
+    return repr(msg).encode("UTF-7").decode("ASCII") 
 
 def parse_message(msg_string):
-    return eval(msg_string)
+    return eval(msg_string.encode("ASCII").decode("UTF-7"))
 
 
 
