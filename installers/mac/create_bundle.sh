@@ -10,7 +10,9 @@ python3 ../cx_freeze/setup.py build -b cx_build > freezing.log
 # copy template and source files
 cp -r Thonny.app.template build/Thonny.app
 #mv build/Thonny.app.template build/Thonny.app
-cp -r cx_build/exe.macosx-10.6-x86_64-3.4/* build/Thonny.app/Contents/MacOS
+
+mkdir -p build/Thonny.app/Contents/MacOS 
+cp -r cx_build/exe.macosx-10.6-intel-3.4/* build/Thonny.app/Contents/MacOS
 
 #chmod 755 build/Thonny.app/Contents/MacOS/thonny_launch
 

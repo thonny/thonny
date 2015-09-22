@@ -1,3 +1,0 @@
-#!/usr/local/bin/python3
-
-from thonny import __main__    
