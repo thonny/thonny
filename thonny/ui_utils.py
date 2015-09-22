@@ -74,19 +74,19 @@ class AutomaticPanedWindow(tk.PanedWindow):
         tk.PanedWindow.add(self, child, **kw)
         self.visible_panes.add(child)
         self._update_visibility()
-        self._restore_pane_sizes()
+        self._check_restore_pane_sizes()
     
     def remove(self, child):
         tk.PanedWindow.remove(self, child)
         self.visible_panes.remove(child)
         self._update_visibility()
-        self._restore_pane_sizes()
+        self._check_restore_pane_sizes()
     
     def forget(self, child):
         tk.PanedWindow.forget(self, child)
         self.visible_panes.remove(child)
         self._update_visibility()
-        self._restore_pane_sizes()
+        self._check_restore_pane_sizes()
     
     def is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
@@ -97,10 +97,12 @@ class AutomaticPanedWindow(tk.PanedWindow):
     def _on_window_resize(self, event):
         window = self.winfo_toplevel()
         window_size = (window.winfo_width(), window.winfo_height())
+        initializing = hasattr(window, "initializing") and window.initializing
         
-        if (not self._restoring_pane_sizes 
+        if (not initializing
+            and not self._restoring_pane_sizes 
             and (window_size != self._last_window_size or self._full_size_not_final)):
-            self._restore_pane_sizes()
+            self._check_restore_pane_sizes()
             self._last_window_size = window_size
     
     def _on_mouse_dragged(self, event):
@@ -114,9 +116,14 @@ class AutomaticPanedWindow(tk.PanedWindow):
             if len(self.panes()) > 2:
                 self.first_pane_size = self._get_pane_size("first")
     
-    def _restore_pane_sizes(self):
+    def _check_restore_pane_sizes(self):
         """last (and maybe first) pane sizes are stored, first (or middle)
         pane changes its size when window is resized"""
+        
+        window = self.winfo_toplevel()
+        if hasattr(window, "initializing") and window.initializing:
+            return
+        
         try:
             self._restoring_pane_sizes = True
             if len(self.panes()) > 1:

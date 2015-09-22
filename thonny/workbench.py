@@ -50,6 +50,8 @@ class Workbench(tk.Tk):
           
     """
     def __init__(self, main_dir):
+        self.initializing = True
+        
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
@@ -80,6 +82,7 @@ class Workbench(tk.Tk):
         self._editor_notebook.load_startup_files()
         self._editor_notebook.focus_set()
         
+        self.initializing = False
         self.mainloop()
     
     def _init_diagnostic_logging(self):
@@ -838,7 +841,8 @@ class Workbench(tk.Tk):
     
     def _on_configure(self, event):
         # called when window is moved or resized
-        if self._maximized_view:
+        if (hasattr(self, "_maximized_view") # configure may happen before the attribute is defined 
+            and self._maximized_view):
             # grid again, otherwise it acts weird
             self._maximized_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.master)
     
