@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from thonny.misc_utils import running_on_linux, get_res_path
+from thonny.globals import get_workbench
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
 
@@ -48,6 +49,9 @@ def tweak_treeviews():
     
     # necessary for Python 2.7 TODO: doesn't help for aqua
     style.configure("Treeview", background="white")
+    
+    #style.configure("Treeview", font='helvetica 14 bold')
+    style.configure("Treeview", font=get_workbench().get_font("TreeviewFont"))
 
     #print(style.map("Treeview"))
     #print(style.layout("Treeview"))

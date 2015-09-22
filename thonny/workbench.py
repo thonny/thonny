@@ -187,11 +187,15 @@ class Workbench(tk.Tk):
         self.add_option("view.editor_font_size", 
                         15 if running_on_mac_os() else 10)
 
+        default_font = tk_font.nametofont("TkDefaultFont")
+
         self._fonts = {
             'IOFont' : tk_font.Font(family=self.get_option("view.io_font_family")),
             'EditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family")),
             'BoldEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
-                                            weight="bold")
+                                            weight="bold"),
+            'TreeviewFont' : tk_font.Font(family=default_font.cget("family"),
+                                          size=default_font.cget("size"))
         }
         
         self._change_font_size(0)
@@ -693,6 +697,12 @@ class Workbench(tk.Tk):
         self.get_font("IOFont").configure(size=int(editor_font_size * 0.8))
         self.get_font("EditorFont").configure(size=editor_font_size)
         self.get_font("BoldEditorFont").configure(size=editor_font_size)
+        
+        treeview_font_size = int(editor_font_size * 0.9)
+        self.get_font("TreeviewFont").configure(size=treeview_font_size)
+        
+        style = ttk.Style()
+        style.configure("Treeview", rowheight=int(treeview_font_size * 2.6))
         
         if delta != 0:
             self.update_idletasks()
