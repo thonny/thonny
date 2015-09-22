@@ -716,7 +716,7 @@ class Workbench(tk.Tk):
             rowheight = int(treeview_font_size*1.2 + 4 )
         else:
             treeview_font_size = int(editor_font_size * 0.9)
-            rowheight = int(treeview_font_size * 2.6)
+            rowheight = int(treeview_font_size * 2.0 + 6)
             
         self.get_font("TreeviewFont").configure(size=treeview_font_size)
         style.configure("Treeview", rowheight=rowheight)
