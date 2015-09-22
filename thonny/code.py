@@ -121,7 +121,8 @@ class EditorNotebook(ttk.Notebook):
         _check_create_ButtonNotebook_style()
         ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
         
-        get_workbench().add_option("file.reopen_files", False)
+        get_workbench().add_option("file.reopen_all_files", False)
+        get_workbench().add_option("file.current_file", None)
         
         self._init_commands()
         self.enable_traversal()
@@ -202,20 +203,34 @@ class EditorNotebook(ttk.Notebook):
     
     
     def _load_startup_files(self):
+        """If no filename was sent from command line
+        then load previous files (if setting allows)"""  
         
-        filenames = sys.argv[1:]
+        cmd_line_filenames = sys.argv[1:]
         
-        if get_workbench().get_option("file.reopen_files"):
-            for filename in get_workbench().get_option("file.open_files"): 
-                if filename not in filenames:
-                    filenames.append(filename) 
+        
+        if len(cmd_line_filenames) > 0:
+            filenames = cmd_line_filenames
+        elif get_workbench().get_option("file.reopen_all_files"):
+            filenames = get_workbench().get_option("file.open_files")
+        elif get_workbench().get_option("file.current_file"):
+            filenames = [get_workbench().get_option("file.current_file")]
+        else:
+            filenames = []
             
-        for filename in filenames:
-            if os.path.exists(filename):
-                self.show_file(filename)
-        
-        if len(filenames) == 0:
+        if len(filenames) > 0:
+            for filename in filenames:
+                if os.path.exists(filename):
+                    self.show_file(filename)
+            
+            # choose correct active file
+            if len(cmd_line_filenames) > 0:
+                self.show_file(cmd_line_filenames[0])
+            elif get_workbench().get_option("file.current_file"):
+                self.show_file(get_workbench().get_option("file.current_file"))
+        else:
             self._cmd_new_file()
+            
         
         self._remember_open_files()
     
@@ -225,9 +240,14 @@ class EditorNotebook(ttk.Notebook):
                 editor.save_file()
     
     def _remember_open_files(self):
+        if (self.get_current_editor() is not None 
+            and self.get_current_editor().get_filename() is not None):
+            get_workbench().set_option("file.current_file", 
+                                       self.get_current_editor().get_filename())
+            
         open_files = [editor.get_filename() 
-                      for editor in self.winfo_children() 
-                      if editor.get_filename()]
+                          for editor in self.winfo_children() 
+                          if editor.get_filename()]
         
         get_workbench().set_option("file.open_files", open_files)
     
