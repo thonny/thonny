@@ -181,11 +181,19 @@ class Workbench(tk.Tk):
                                 
     def _init_fonts(self):
         self.add_option("view.io_font_family", 
-                        "Courier New")
-        self.add_option("view.editor_font_family", 
-                        "Consolas" if "Consolas" in tk_font.families() else "Courier New")
+                        "Courier" if running_on_mac_os() else "Courier New")
+        
+        default_editor_family = "Courier New"
+        families = tk_font.families()
+        if running_on_mac_os() and "Monaco" in families:
+            default_editor_family = "Monaco"
+        
+        if "Consolas" in families:
+            default_editor_family = "Consolas"
+        
+        self.add_option("view.editor_font_family", default_editor_family)
         self.add_option("view.editor_font_size", 
-                        15 if running_on_mac_os() else 10)
+                        13 if running_on_mac_os() else 10)
 
         default_font = tk_font.nametofont("TkDefaultFont")
 
@@ -692,17 +700,26 @@ class Workbench(tk.Tk):
     def _change_font_size(self, delta):
         editor_font_size = self.get_option("view.editor_font_size")
         editor_font_size += delta
-        self.set_option("view.editor_font_size", editor_font_size)
         
-        self.get_font("IOFont").configure(size=int(editor_font_size * 0.8))
+        if delta != 0:
+            self.set_option("view.editor_font_size", editor_font_size)
+        
+        self.get_font("IOFont").configure(size=min(editor_font_size - 2,
+                                                   int(editor_font_size * 0.8 + 3)))
         self.get_font("EditorFont").configure(size=editor_font_size)
         self.get_font("BoldEditorFont").configure(size=editor_font_size)
         
-        treeview_font_size = int(editor_font_size * 0.9)
-        self.get_font("TreeviewFont").configure(size=treeview_font_size)
         
         style = ttk.Style()
-        style.configure("Treeview", rowheight=int(treeview_font_size * 2.6))
+        if running_on_mac_os():
+            treeview_font_size = int(editor_font_size * 0.7 + 4)
+            rowheight = int(treeview_font_size*1.2 + 4 )
+        else:
+            treeview_font_size = int(editor_font_size * 0.9)
+            rowheight = int(treeview_font_size * 2.6)
+            
+        self.get_font("TreeviewFont").configure(size=treeview_font_size)
+        style.configure("Treeview", rowheight=rowheight)
         
         if delta != 0:
             self.update_idletasks()
