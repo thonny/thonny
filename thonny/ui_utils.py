@@ -553,10 +553,8 @@ def sequence_to_accelerator(sequence):
     accelerator = (sequence
         .strip("<>")
         .replace("Key-", "")
-        .replace("KeyPress", "")
+        .replace("KeyPress-", "")
         .replace("Control", "Ctrl")
-        .replace("-Minus", "--").replace("-minus", "--")
-        .replace("-Plus", "-+").replace("-plus", "-+")
     )
     
     # Tweaking individual parts
@@ -569,7 +567,14 @@ def sequence_to_accelerator(sequence):
     if len(parts[-1]) == 1:
         parts[-1] = parts[-1].upper()
     
-    return "+".join(parts)
+    accelerator = "+".join(parts)
+    
+    # Post processing
+    accelerator = (accelerator
+        .replace("Minus", "-").replace("minus", "-")
+        .replace("Plus", "+").replace("plus", "+"))
+    
+    return accelerator
     
 
         
