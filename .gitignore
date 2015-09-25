@@ -10,3 +10,4 @@ RemoteSystemsTempFiles
 \.dmg
 installers/mac/freezing.log
 installer_building.log
+installers/windows/freezing.log
