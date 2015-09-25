@@ -23,6 +23,7 @@ from thonny.running import Runner
 import thonny.globals
 import logging
 from thonny.globals import register_runner, get_runner
+from thonny.config_ui import ConfigurationDialog
 
 class Workbench(tk.Tk):
     """
@@ -89,6 +90,8 @@ class Workbench(tk.Tk):
         self._configuration_manager = ConfigurationManager (
             os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
         )
+        
+        self._configuration_pages = {}
 
     
     def _init_diagnostic_logging(self):
@@ -149,11 +152,12 @@ class Workbench(tk.Tk):
         if running_on_mac_os():
             self.get_menu("Thonny")
             
-        self.get_menu("file", _("File"))
-        self.get_menu("edit", _("Edit"))
-        self.get_menu("view", _("View"))
-        self.get_menu("run", _("Run"))
-        self.get_menu("help", _("Help"))
+        self.get_menu("file", "File")
+        self.get_menu("edit", "Edit")
+        self.get_menu("view", "View")
+        self.get_menu("run", "Run")
+        self.get_menu("tools", "Tools")
+        self.get_menu("help", "Help")
         
     def _load_plugins(self):
         plugin_names = self._find_plugins(
@@ -212,7 +216,7 @@ class Workbench(tk.Tk):
                                           size=default_font.cget("size"))
         }
         
-        self._change_font_size(0)
+        self.update_fonts()
         
 
     def _init_translation(self):
@@ -229,7 +233,10 @@ class Workbench(tk.Tk):
             self.destroy, 
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>"))
         
-        #
+        
+        self.add_command("show_options", "tools", "Options ...",
+            self._cmd_show_options)
+        
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
@@ -492,7 +499,9 @@ class Workbench(tk.Tk):
         
         if visibility_flag.get():
             self.show_view(view_id, False)
-        
+    
+    def add_configuration_page(self, title, page_class):
+        self._configuration_pages[title] = page_class
         
     def get_option(self, name):
         return self._configuration_manager.get_option(name)
@@ -670,6 +679,32 @@ class Workbench(tk.Tk):
         return (self._configuration_manager.has_option("view.heap.visible")
             and self.get_option("view.heap.visible"))
     
+    def update_fonts(self):
+        editor_font_size = self.get_option("view.editor_font_size")
+        editor_font_family = self.get_option("view.editor_font_family")
+        io_font_family = self.get_option("view.editor_font_family")
+        
+        self.get_font("IOFont").configure(family=io_font_family,
+                                          size=min(editor_font_size - 2,
+                                                   int(editor_font_size * 0.8 + 3)))
+        self.get_font("EditorFont").configure(family=editor_font_family,
+                                              size=editor_font_size)
+        self.get_font("BoldEditorFont").configure(family=editor_font_family,
+                                                  size=editor_font_size)
+        
+        
+        style = ttk.Style()
+        if running_on_mac_os():
+            treeview_font_size = int(editor_font_size * 0.7 + 4)
+            rowheight = int(treeview_font_size*1.2 + 4 )
+        else:
+            treeview_font_size = int(editor_font_size * 0.7 + 2)
+            rowheight = int(treeview_font_size * 2.0 + 6)
+            
+        self.get_font("TreeviewFont").configure(size=treeview_font_size)
+        style.configure("Treeview", rowheight=rowheight)
+        
+    
     def _get_menu_index(self, menu):
         for i in range(len(self._menubar.winfo_children())):
             if menu == self._menubar.winfo_children()[i]:
@@ -716,31 +751,13 @@ class Workbench(tk.Tk):
             self._change_font_size(-1)
     
     def _change_font_size(self, delta):
-        editor_font_size = self.get_option("view.editor_font_size")
-        editor_font_size += delta
         
         if delta != 0:
+            editor_font_size = self.get_option("view.editor_font_size")
+            editor_font_size += delta
             self.set_option("view.editor_font_size", editor_font_size)
+            self.update_fonts()
         
-        self.get_font("IOFont").configure(size=min(editor_font_size - 2,
-                                                   int(editor_font_size * 0.8 + 3)))
-        self.get_font("EditorFont").configure(size=editor_font_size)
-        self.get_font("BoldEditorFont").configure(size=editor_font_size)
-        
-        
-        style = ttk.Style()
-        if running_on_mac_os():
-            treeview_font_size = int(editor_font_size * 0.7 + 4)
-            rowheight = int(treeview_font_size*1.2 + 4 )
-        else:
-            treeview_font_size = int(editor_font_size * 0.7 + 2)
-            rowheight = int(treeview_font_size * 2.0 + 6)
-            
-        self.get_font("TreeviewFont").configure(size=treeview_font_size)
-        style.configure("Treeview", rowheight=rowheight)
-        
-        if delta != 0:
-            self.update_idletasks()
         
     
     def _check_update_window_width(self, delta):
@@ -793,6 +810,13 @@ class Workbench(tk.Tk):
         self._maximized_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.home_widget)
         self._maximized_view = None
         self.get_variable("view.maximize_view").set(False)
+    
+    def _cmd_show_options(self):
+        dlg = ConfigurationDialog(self, self._configuration_pages)
+        dlg.focus_set()
+        dlg.transient(self)
+        dlg.grab_set()
+        self.wait_window(dlg)
     
     def _cmd_focus_editor(self):
         self._editor_notebook.focus_set()
@@ -880,7 +904,7 @@ class Workbench(tk.Tk):
             #ui_utils.delete_images()
             self.event_generate("WorkbenchClose")
         except:
-            self.report_internal_error()
+            self.report_exception()
 
         self.destroy()
     
@@ -897,12 +921,12 @@ class Workbench(tk.Tk):
         sys.last_type = exc
         sys.last_value = val
         sys.last_traceback = tb
-        self.report_internal_error()
+        self.report_exception()
     
-    def report_internal_error(self):
-        exception("Internal error")
+    def report_exception(self, title="Internal error"):
+        exception(title)
         if tk._default_root:
-            tk_messagebox.showerror("Internal error", traceback.format_exc())
+            tk_messagebox.showerror(title, traceback.format_exc())
     
         
     def _save_layout(self):

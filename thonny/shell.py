@@ -382,7 +382,7 @@ class ShellView (ttk.Frame, TextWrapper):
                 
             except:
                 #raise # TODO:
-                get_workbench().report_internal_error()
+                get_workbench().report_exception()
                 self._insert_prompt()
                 
             get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)

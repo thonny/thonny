@@ -295,7 +295,7 @@ def run():
     try:
         ReplayWindow().mainloop()
     except:
-        get_workbench().report_internal_error()
+        get_workbench().report_exception()
 
 if __name__ == "__main__":
     run()
