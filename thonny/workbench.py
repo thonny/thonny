@@ -224,12 +224,12 @@ class Workbench(tk.Tk):
                                 
     
     def _init_commands(self):
-        self.add_option("general.expert_mode", False)
         
         self.add_command("exit", "file", "Exit",
             self.destroy, 
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>"))
         
+        #
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
@@ -239,6 +239,8 @@ class Workbench(tk.Tk):
             lambda: self._change_font_size(-1),
             default_sequence=select_sequence("<Control-minus>", "<Command-minus>"),
             group=60)
+        
+        self.bind("<Control-MouseWheel>", self._cmd_zoom_with_mouse, True)
         
         self.add_command("focus_editor", "view", "Focus editor",
             self._cmd_focus_editor,
@@ -251,6 +253,8 @@ class Workbench(tk.Tk):
             default_sequence="<Alt-s>",
             group=70)
         
+        
+        self.add_option("general.expert_mode", False)
         if self.get_option("general.expert_mode"):
             
             self.add_command("toggle_maximize_view", "view", "Maximize view",
@@ -261,7 +265,6 @@ class Workbench(tk.Tk):
             self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
             self.bind("<Escape>", self._unmaximize_view, True)
             
-        if self.get_option("general.expert_mode"):
             if not running_on_mac_os():
                 # TODO: approach working in Win/Linux doesn't work in mac as it should and only confuses
                 self.add_command("toggle_maximize_view", "view", "Full screen",
@@ -706,6 +709,11 @@ class Workbench(tk.Tk):
         self.after(300, self._update_toolbar)
             
     
+    def _cmd_zoom_with_mouse(self, event):
+        if event.delta > 0:
+            self._change_font_size(1)
+        else:
+            self._change_font_size(-1)
     
     def _change_font_size(self, delta):
         editor_font_size = self.get_option("view.editor_font_size")
