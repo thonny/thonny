@@ -59,7 +59,7 @@ class Workbench(tk.Tk):
         thonny.globals.register_workbench(self)
         
         self._main_dir = main_dir 
-        self._configuration_manager = ConfigurationManager(os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini")))
+        self._init_configuration()
         
         self._init_diagnostic_logging()
         self._init_translation()
@@ -84,6 +84,12 @@ class Workbench(tk.Tk):
         
         self.initializing = False
         self.mainloop()
+        
+    def _init_configuration(self):
+        self._configuration_manager = ConfigurationManager (
+            os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
+        )
+
     
     def _init_diagnostic_logging(self):
         self.add_option("debug_mode", False)
@@ -218,6 +224,7 @@ class Workbench(tk.Tk):
                                 
     
     def _init_commands(self):
+        self.add_option("general.expert_mode", False)
         
         self.add_command("exit", "file", "Exit",
             self.destroy, 
@@ -244,22 +251,25 @@ class Workbench(tk.Tk):
             default_sequence="<Alt-s>",
             group=70)
         
-        self.add_command("toggle_maximize_view", "view", "Maximize view",
-            self._cmd_toggle_maximize_view,
-            flag_name="view.maximize_view",
-            default_sequence=None,
-            group=80)
-        
-        if not running_on_mac_os():
-            # TODO: approach working in Win/Linux doesn't work in mac as it should and only confuses
-            self.add_command("toggle_maximize_view", "view", "Full screen",
-                self._cmd_toggle_full_screen,
-                flag_name="view.full_screen",
-                default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
+        if self.get_option("general.expert_mode"):
+            
+            self.add_command("toggle_maximize_view", "view", "Maximize view",
+                self._cmd_toggle_maximize_view,
+                flag_name="view.maximize_view",
+                default_sequence=None,
                 group=80)
+            self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
+            self.bind("<Escape>", self._unmaximize_view, True)
+            
+        if self.get_option("general.expert_mode"):
+            if not running_on_mac_os():
+                # TODO: approach working in Win/Linux doesn't work in mac as it should and only confuses
+                self.add_command("toggle_maximize_view", "view", "Full screen",
+                    self._cmd_toggle_full_screen,
+                    flag_name="view.full_screen",
+                    default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
+                    group=80)
         
-        self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
-        self.bind("<Escape>", self._unmaximize_view, True)
             
     def _init_containers(self):
         
