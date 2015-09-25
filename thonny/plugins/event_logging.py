@@ -4,11 +4,27 @@ import time
 from thonny.globals import get_workbench
 from thonny.workbench import WorkbenchEvent
 from datetime import datetime
+import zipfile 
+from tkinter.filedialog import asksaveasfilename
 
 
 class EventLogger:
     def __init__(self, filename=None):
         self._filename = filename
+        self._init_logging()
+        self._init_commands()
+    
+    def _init_commands(self):
+        get_workbench().add_command(
+            "export_usage_logs",
+            "help",
+            "Export usage logs ...",
+            self._cmd_export,
+            group=60
+        )
+
+    
+    def _init_logging(self):
         self._encoding = "UTF-8"
         self._file = open(self._filename, mode="a", encoding=self._encoding)
         self._file.write("[\n")
@@ -102,6 +118,26 @@ class EventLogger:
         
         return data
     
+    def _cmd_export(self):
+        
+        filename = asksaveasfilename (
+                filetypes =  [('all files', '.*'), ('Zip-files', '.zip')], 
+                defaultextension = ".zip",
+                initialdir = get_workbench().get_option("run.working_directory"),
+                initialfile = time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip")
+        )
+        
+        if not filename:
+            return
+        
+        log_dir = os.path.dirname(self._filename)
+        
+        with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
+            for item in os.listdir(log_dir):
+                if item.endswith(".txt"):
+                    zipf.write(os.path.join(log_dir, item), arcname=item)
+            
+    
     def _log_event(self, sequence, event):
         
         timestamp = datetime.now()
@@ -135,7 +171,6 @@ class EventLogger:
     def _final_save(self):
         self._file.write("\n]\n")
         self._file.close()
-
 
 def load_plugin():
     # generate log filename
