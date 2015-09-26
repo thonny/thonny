@@ -23,6 +23,8 @@ import thonny.globals
 import logging
 from thonny.globals import register_runner, get_runner
 from thonny.config_ui import ConfigurationDialog
+import pkgutil
+
 
 class Workbench(tk.Tk):
     """
@@ -158,33 +160,16 @@ class Workbench(tk.Tk):
         self.get_menu("help", "Help")
         
     def _load_plugins(self):
-        plugin_names = self._find_plugins(
-                            os.path.join(self._main_dir, "thonny", "plugins"),
-                            "thonny.plugins.")
+        import thonny.plugins
         
-        for plugin_name in sorted(plugin_names):
+        for _, module_name, _ in pkgutil.iter_modules(thonny.plugins.__path__,
+                                                       "thonny.plugins."):
             try:
-                m = importlib.import_module(plugin_name)
+                m = importlib.import_module(module_name)
                 if hasattr(m, "load_plugin"):
                     m.load_plugin()
             except:
-                exception("Failed loading plugin '" + plugin_name + "'")
-    
-    def _find_plugins(self, extension_dir, module_name_prefix):
-        result = set()
-        
-        for item in os.listdir(extension_dir):
-            item_path = os.path.join(extension_dir, item)
-            # TODO: support zipped packages
-            if (os.path.isfile(item_path)
-                    and item.endswith(".py")
-                    and not item.endswith("__.py")
-                or os.path.isdir(item_path)
-                    and os.path.isfile(os.path.join(item_path, "__init__.py"))):
-                    result.add(module_name_prefix 
-                               + os.path.splitext(item)[0])
-        
-        return result
+                exception("Failed loading plugin '" + module_name + "'")
     
                                 
     def _init_fonts(self):
@@ -655,7 +640,7 @@ class Workbench(tk.Tk):
 
     def get_version(self):
         try:
-            with open(os.path.join(os.path.dirname(__file__), "VERSION")) as fp:
+            with open(os.path.join(self._main_dir, "VERSION")) as fp:
                 return StrictVersion(fp.read().strip())
         except:
             return StrictVersion("0.0")

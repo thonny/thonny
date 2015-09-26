@@ -1,7 +1,7 @@
 set FREEZE_TARGET=cx_build\exe.win32-3.4
 
 @echo ............... CLEANING .................
-rmdir build /s /q
+rmdir cx_build /s /q
 
 
 REM following two variables are fix for a bug in cx_freeze in Python 3.5

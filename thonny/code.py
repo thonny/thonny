@@ -222,11 +222,14 @@ class EditorNotebook(ttk.Notebook):
                 if os.path.exists(filename):
                     self.show_file(filename)
             
+            cur_file = get_workbench().get_option("file.current_file")
             # choose correct active file
             if len(cmd_line_filenames) > 0:
                 self.show_file(cmd_line_filenames[0])
-            elif get_workbench().get_option("file.current_file"):
+            elif cur_file and os.path.exists(cur_file):
                 self.show_file(get_workbench().get_option("file.current_file"))
+            else:
+                self._cmd_new_file()
         else:
             self._cmd_new_file()
             

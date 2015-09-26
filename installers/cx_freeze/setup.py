@@ -11,7 +11,7 @@ build_exe_options = {
     'path' : [MAIN_DIR] + sys.path,
     'include_files': [MAIN_DIR + "/res",
                       MAIN_DIR + "/VERSION"],
-    'packages': ["jedi", "rope", "turtle", "idlelib"],
+    'packages': ["jedi", "rope", "turtle", "idlelib", "thonny"],
     'include_msvcr' : True, 
     'base' : "Win32GUI" if sys.platform == "win32" else None,
 }
