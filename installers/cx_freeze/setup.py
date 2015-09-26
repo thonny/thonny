@@ -9,7 +9,8 @@ print(os.getcwd())
 # Options shared by both Executables
 build_exe_options = {
     'path' : [MAIN_DIR] + sys.path,
-    'include_files': [MAIN_DIR + "/thonny"],
+    'include_files': [MAIN_DIR + "/res",
+                      MAIN_DIR + "/VERSION"],
     'packages': ["jedi", "rope", "turtle", "idlelib"],
     'include_msvcr' : True, 
     'base' : "Win32GUI" if sys.platform == "win32" else None,
@@ -17,14 +18,14 @@ build_exe_options = {
 
 frontend_exe = Executable (
     script= MAIN_DIR + "/thonny_frontend.py",
-    icon=MAIN_DIR + "/thonny/res/thonny.ico",
+    icon=MAIN_DIR + "/res/thonny.ico",
 )
 
 backend_exe = Executable (
     script=MAIN_DIR + "/thonny_backend.py",
 )
 
-with open(MAIN_DIR + "/thonny/VERSION") as vf:
+with open(MAIN_DIR + "/VERSION") as vf:
     version = vf.read().strip()
 
 setup (
