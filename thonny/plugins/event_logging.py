@@ -17,7 +17,7 @@ class EventLogger:
     def _init_commands(self):
         get_workbench().add_command(
             "export_usage_logs",
-            "help",
+            "tools",
             "Export usage logs ...",
             self._cmd_export,
             group=60
