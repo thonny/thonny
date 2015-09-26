@@ -5,6 +5,7 @@ from tkinter import ttk
 from thonny.config_ui import ConfigurationPage
 from thonny.globals import get_workbench
 from tkinter.messagebox import showerror
+from thonny.ui_utils import create_string_var
 
 
 class FontConfigurationPage(ConfigurationPage):
@@ -12,10 +13,10 @@ class FontConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
         
-        self._family_variable = self.get_string_var(
+        self._family_variable = create_string_var(
             get_workbench().get_option("view.editor_font_family"))
         
-        self._size_variable = self.get_string_var(
+        self._size_variable = create_string_var(
             get_workbench().get_option("view.editor_font_size"))
         
         ttk.Label(self, text="Editor font family").grid(row=0, column=0, sticky="w")
@@ -35,6 +36,10 @@ class FontConfigurationPage(ConfigurationPage):
         self.columnconfigure(0, weight=1)
     
     def apply(self):
+        if (not self._family_variable.modified
+            and not self._size_variable.modified):
+            return
+        
         min_font_size = 3
         max_font_size = 99
         
