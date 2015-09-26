@@ -6,17 +6,26 @@ from thonny.globals import get_workbench
 class ConfigurationDialog(tk.Toplevel):
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
-        self.geometry("400x400+400+100")
+        width = 400
+        height = 400
+        left = max(int(get_workbench().winfo_x() + get_workbench().winfo_width()/2 - width/2), 0)
+        top = max(int(get_workbench().winfo_y() + get_workbench().winfo_height()/2 - height/2), 0)
+        self.geometry("%dx%d+%d+%d" % (width, height, left, top))
         self.title("Thonny options")
         
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self._notebook = ttk.Notebook(self)
+        main_frame = ttk.Frame(self) # otherwise there is wrong color background with clam
+        main_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(0, weight=1)
+        
+        self._notebook = ttk.Notebook(main_frame)
         self._notebook.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10)
         
-        self._ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
-        self._cancel_button = ttk.Button(self, text="Cancel", command=self._cancel)
+        self._ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
+        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
         self._ok_button.grid(row=1, column=1, padx=(0,11), pady=(0,10))
         self._cancel_button.grid(row=1, column=2, padx=(0,11), pady=(0,10))
         

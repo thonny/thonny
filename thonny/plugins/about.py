@@ -14,12 +14,17 @@ from thonny.globals import get_workbench
 
 class AboutDialog(tk.Toplevel):
     def __init__(self, master, version):
-        tk.Toplevel.__init__(self, master, borderwidth=15)
+        tk.Toplevel.__init__(self, master)
         
         #self.geometry("200x200")
         # TODO: position in the center of master
         self.geometry("+%d+%d" % (master.winfo_rootx() + master.winfo_width() // 2 - 50,
                                   master.winfo_rooty() + master.winfo_height() // 2 - 150))
+
+        main_frame = ttk.Frame(self)
+        main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
 
         self.title("About Thonny")
         if misc_utils.running_on_mac_os():
@@ -39,7 +44,7 @@ class AboutDialog(tk.Toplevel):
         
         heading_font = font.nametofont("TkHeadingFont").copy()
         heading_font.configure(size=19, weight="bold")
-        heading_label = ttk.Label(self, 
+        heading_label = ttk.Label(main_frame, 
                                   text="Thonny " + version_str,
                                   font=heading_font)
         heading_label.grid()
@@ -48,7 +53,7 @@ class AboutDialog(tk.Toplevel):
         url = "http://thonny.cs.ut.ee"
         url_font = font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
-        url_label = ttk.Label(self, text=url,
+        url_label = ttk.Label(main_frame, text=url,
                               cursor="hand2",
                               foreground="blue",
                               font=url_font,)
@@ -58,7 +63,7 @@ class AboutDialog(tk.Toplevel):
         python_version = ".".join(map(str, sys.version_info[:3]))
         if sys.version_info[3] != "final":
             python_version += "-" + sys.version_info[3]
-        platform_label = ttk.Label(self, justify=tk.CENTER, 
+        platform_label = ttk.Label(main_frame, justify=tk.CENTER, 
                                    text=platform.system() + " " 
                                         + platform.release()  
                                         + " " + self.get_os_word_size_guess() + "\n"
@@ -69,7 +74,7 @@ class AboutDialog(tk.Toplevel):
         
         license_font = font.nametofont("TkDefaultFont").copy()
         license_font.configure(size=7)
-        license_label = ttk.Label(self,
+        license_label = ttk.Label(main_frame,
                                   text="Coppyright (©) 2014 Aivar Annamaa\n"
                                   + "This program comes with\n"
                                   + "ABSOLUTELY NO WARRANTY!\n"
@@ -80,8 +85,8 @@ class AboutDialog(tk.Toplevel):
                                   justify=tk.CENTER, font=license_font)
         license_label.grid()
         
-        ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
-        ok_button.grid()
+        ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
+        ok_button.grid(pady=(0,15))
         ok_button.focus_set()
         
         self.bind('<Return>', self._ok, True) 

@@ -4,7 +4,6 @@ from tkinter import ttk
 
 from thonny.config_ui import ConfigurationPage
 from thonny.globals import get_workbench
-from tkinter.messagebox import showerror
 from thonny.ui_utils import create_string_var
 import textwrap
 
