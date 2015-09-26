@@ -870,7 +870,6 @@ def _create_var(class_, value, modification_listener):
     var.modified = False
     
     def on_write(*args):
-        print("on_write", args)
         var.modified = True
         if modification_listener:
             modification_listener()
