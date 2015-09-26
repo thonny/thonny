@@ -8,7 +8,7 @@ mkdir -p build
 python3.4 ../cx_freeze/setup.py build -b cx_build > freezing.log
 
 # copy template and source files
-VERSION=$(<../../thonny/VERSION)
+VERSION=$(<../../VERSION)
 VERSION_NAME=thonny-$VERSION 
 MAIN_DIR=build/$VERSION_NAME
 mkdir $MAIN_DIR

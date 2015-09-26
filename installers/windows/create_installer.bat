@@ -15,7 +15,7 @@ call EnableDPIAwareness %FREEZE_TARGET%\thonny_frontend.exe
 call EnableDPIAwareness %FREEZE_TARGET%\thonny_backend.exe
 
 @echo ............... BUILDING INSTALLER ...............
-set /p VERSION=<..\..\thonny\VERSION
+set /p VERSION=<..\..\VERSION
 "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=%VERSION% /dSourceFolder=%FREEZE_TARGET% inno_setup.iss > installer_building.log
 pause
 

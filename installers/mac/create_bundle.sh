@@ -22,7 +22,7 @@ cp -r cx_build/exe.macosx-10.6-intel-3.4/* build/Thonny.app/Contents/MacOS
 #rm -rf build/Thonny.app/Contents/MacOs/thonny/*.pyc 
 
 # get and set version
-VERSION=$(<../../thonny/VERSION)
+VERSION=$(<../../VERSION)
 sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
 
