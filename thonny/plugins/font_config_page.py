@@ -19,7 +19,7 @@ class FontConfigurationPage(ConfigurationPage):
         self._size_variable = create_string_var(
             get_workbench().get_option("view.editor_font_size"))
         
-        ttk.Label(self, text="Editor font family").grid(row=0, column=0, sticky="w")
+        ttk.Label(self, text="Editor font").grid(row=0, column=0, sticky="w")
         
         self._family_combo = ttk.Combobox(self,
                                           exportselection=False,
