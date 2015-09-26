@@ -38,7 +38,7 @@ class ConfigurationDialog(tk.Toplevel):
         for title in sorted(self._pages):
             try:
                 page = self._pages[title]
-                if page.is_modified() and not page.apply():
+                if page.apply() == False:
                     return
             except:
                 get_workbench().report_exception("Error when applying options in " + title)
@@ -49,31 +49,16 @@ class ConfigurationDialog(tk.Toplevel):
         self.destroy()
 
 class ConfigurationPage(ttk.Frame):
+    """This is an example dummy implementation of a configuration page.
+    
+    It's not required that configuration pages inherit from this class
+    (can be any widget), but the class must have constructor with single parameter
+    for getting the master."""
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
-        self._modified = False 
-    
-    def get_string_var(self, initial_value):
-        var = tk.StringVar(value=initial_value)
-        var.trace("w", self._on_variable_change)
-        return var
-    
-    def get_int_var(self, initial_value):
-        var = tk.IntVar(value=initial_value)
-        var.trace("w", self._on_variable_change)
-        return var
-    
-    def get_boolean_var(self, initial_value):
-        var = tk.BooleanVar(value=initial_value)
-        var.trace("w", self._on_variable_change)
-        return var
-    
-    def is_modified(self):
-        return self._modified
-    
-    def _on_variable_change(self, *args):
-        self._modified = True
     
     def apply(self):
+        """Apply method should return False, when page contains invalid
+        input and configuration dialog should not be closed."""
         pass
         
