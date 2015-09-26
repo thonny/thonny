@@ -23,7 +23,6 @@ from thonny.common import serialize_message, ToplevelCommand, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
-from thonny.misc_utils import get_res_path
 
 
 COMMUNICATION_ENCODING = "ASCII"
@@ -32,6 +31,7 @@ class Runner:
     def __init__(self):
         get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
         get_workbench().add_option("run.auto_cd", True)
+        get_workbench().add_option("run.interpreter", "")
         
         self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"),
             get_workbench().get_installation_dir())
@@ -56,7 +56,7 @@ class Runner:
             default_sequence="<F5>",
             tester=self.cmd_execution_command_enabled,
             group=10,
-            image_filename=get_res_path("run.run_current_script.gif"),
+            image_filename="run.run_current_script.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command('reset', "run", 'Reset',
@@ -69,7 +69,7 @@ class Runner:
             default_sequence="<Control-F2>",
             tester=self._cmd_stop_enabled,
             group=70,
-            image_filename=get_res_path("run.stop.gif"),
+            image_filename="run.stop.gif",
             include_in_toolbar=True)
         
     def get_cwd(self):
@@ -220,7 +220,7 @@ class _BackendProxy:
         else:
             self.cwd = os.path.expanduser("~")
             
-        self.thonny_dir = main_dir
+        self._thonny_dir = main_dir
         self._proc = None
         self._state = None
         self._message_queue = None
@@ -315,17 +315,21 @@ class _BackendProxy:
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
-        # TODO: backend should be selectable by the user
-        if "thonny" in os.path.basename(sys.executable).lower():
+        interpreter = get_workbench().get_option("run.interpreter")
+        if not interpreter:
+            interpreter = sys.executable
+        
+        if "thonny" in os.path.basename(interpreter).lower():
             # Thonny is run frozen, therefore also run frozen backend
             cmd_line = [os.path.join(
-                            os.path.dirname(sys.executable),
-                            os.path.basename(sys.executable)
+                            os.path.dirname(interpreter),
+                            os.path.basename(interpreter)
                                 .replace("frontend", "backend"))]
         else:
-            cmd_line = [sys.executable, 
-                        '-u', # -u means unbuffered IO (neccessary in Python 3.1)
-                        os.path.join(self.thonny_dir, "thonny_backend.py")]
+            cmd_line = [interpreter, 
+                        '-u', # unbuffered IO (neccessary in Python 3.1)
+                        '-B', # don't write pyo/pyc files (to avoid problems, when frontend and backend use different Python version)
+                        os.path.join(self._thonny_dir, "thonny_backend.py")]
 
         if hasattr(cmd, "filename"):
             cmd_line.append(cmd.filename)
