@@ -848,6 +848,36 @@ def get_current_notebook_tab_widget(notebook):
         
     return None
 
+def create_string_var(value, modification_listener=None):
+    """Creates a tk.StringVar with "modified" attribute
+    showing whether the variable has been modified after creation"""
+    return _create_var(tk.StringVar, value, modification_listener)
+
+def create_int_var(value, modification_listener=None):
+    """See create_string_var"""
+    return _create_var(tk.IntVar, value, modification_listener)
+
+def create_double_var(value, modification_listener=None):
+    """See create_string_var"""
+    return _create_var(tk.DoubleVar, value, modification_listener)
+
+def create_boolean_var(value, modification_listener=None):
+    """See create_string_var"""
+    return _create_var(tk.BooleanVar, value, modification_listener)
+
+def _create_var(class_, value, modification_listener):
+    var = class_(value=value)
+    var.modified = False
+    
+    def on_write(*args):
+        print("on_write", args)
+        var.modified = True
+        if modification_listener:
+            modification_listener()
+    
+    var.trace("w", on_write)
+    return var
+
 
 def select_sequence(win_version, mac_version, linux_version=None):
     if running_on_windows():
