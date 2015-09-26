@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-import tkinter as tk
 from tkinter import ttk
-from thonny.misc_utils import running_on_linux, get_res_path
+from thonny.misc_utils import running_on_linux
 from thonny.globals import get_workbench
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
@@ -12,7 +11,7 @@ def tweak_notebooks():
     style = ttk.Style()
     theme = style.theme_use()
     
-    _images.add(tk.PhotoImage("gray_line", file=get_res_path('gray_line.gif')))
+    get_workbench().get_image('gray_line.gif', "gray_line")
     
     
     style.element_create("gray_line", "image", "gray_line",

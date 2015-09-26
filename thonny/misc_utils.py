@@ -177,9 +177,6 @@ def running_on_mac_os():
 def running_on_linux():
     return tk._default_root.call('tk', 'windowingsystem') == "x11"
 
-def get_res_path(filename):
-    return os.path.join(os.path.dirname(__file__), "res", filename)
-
 def is_hidden_or_system_file(path):
     if os.path.basename(path).startswith("."):
         return True

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from distutils.version import StrictVersion
-import gettext
 import importlib
 from logging import exception, info, warning
 import os.path
@@ -13,7 +12,7 @@ from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand
 from thonny.config import ConfigurationManager
-from thonny.misc_utils import running_on_mac_os, get_res_path
+from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence
 import tkinter as tk
@@ -63,7 +62,6 @@ class Workbench(tk.Tk):
         self._init_configuration()
         
         self._init_diagnostic_logging()
-        self._init_translation()
         self._init_fonts()
         self._init_window()
         self._images = set() # to avoid Python garbage collecting them
@@ -127,7 +125,7 @@ class Workbench(tk.Tk):
             ui_utils.set_zoomed(self, True)
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        icon_file = get_res_path("thonny.ico")
+        icon_file = os.path.join(self._get_res_dir(), "thonny.ico")
         try:
             self.iconbitmap(icon_file, default=icon_file)
         except:
@@ -219,14 +217,6 @@ class Workbench(tk.Tk):
         self.update_fonts()
         
 
-    def _init_translation(self):
-        self.add_option("general.language", "en")
-        
-        gettext.translation('thonny',
-                    os.path.join(self._main_dir, "thonny", "locale"), 
-                    languages=[self.get_option("general.language"), "en"]).install()
-                                
-    
     def _init_commands(self):
         
         self.add_command("exit", "file", "Exit",
@@ -423,8 +413,7 @@ class Workbench(tk.Tk):
             dispatch(None)
         
         if image_filename:
-            image = tk.PhotoImage(file=image_filename)
-            self._images.add(image) # Otherwise Python will garbage collect it
+            image = self.get_image(image_filename)
         else:
             image = None
         
@@ -587,12 +576,11 @@ class Workbench(tk.Tk):
         """Returns Thonny installation directory"""
         return self._main_dir
     
-    def get_resource_dir(self):
-        """Returns directory with icon and other image files"""
-        return os.path.join(self._main_dir, "thonny", "res")
+    def _get_res_dir(self):
+        return os.path.join(self._main_dir, "res")
     
     def get_image(self, filename_in_res_folder, tk_name=None):
-        img = tk.PhotoImage(tk_name, file=os.path.join(self.get_resource_dir(), filename_in_res_folder))
+        img = tk.PhotoImage(tk_name, file=os.path.join(self._get_res_dir(), filename_in_res_folder))
         self._images.add(img)
         return img
                       

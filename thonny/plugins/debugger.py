@@ -10,7 +10,7 @@ from thonny.common import DebuggerCommand
 from thonny.memory import VariablesFrame
 from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
-from thonny.misc_utils import shorten_repr, get_res_path
+from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo
@@ -42,7 +42,7 @@ class Debugger:
             tester=get_runner().cmd_execution_command_enabled,
             default_sequence="<Control-F5>",
             group=10,
-            image_filename=get_res_path("run.debug_current_script.gif"),
+            image_filename="run.debug_current_script.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("step_over", "run", "Step over",
@@ -50,7 +50,7 @@ class Debugger:
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F6>",
             group=30,
-            image_filename=get_res_path("run.step_over.gif"),
+            image_filename="run.step_over.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("step_into", "run", "Step into",
@@ -58,7 +58,7 @@ class Debugger:
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F7>",
             group=30,
-            image_filename=get_res_path("run.step_into.gif"),
+            image_filename="run.step_into.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("step_out", "run", "Step out",
@@ -66,7 +66,7 @@ class Debugger:
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F8>",
             group=30,
-            image_filename=get_res_path("run.step_out.gif"),
+            image_filename="run.step_out.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
@@ -74,7 +74,7 @@ class Debugger:
             tester=self._cmd_run_to_cursor_enabled,
             default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
             group=30,
-            image_filename=get_res_path("run.run_to_cursor.gif"),
+            image_filename="run.run_to_cursor.gif",
             include_in_toolbar=False)
 
     

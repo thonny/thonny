@@ -7,7 +7,7 @@ import tkinter.messagebox as tkMessageBox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
-from thonny.misc_utils import eqfn, get_res_path
+from thonny.misc_utils import eqfn
 from thonny.codeview import CodeView
 from thonny.globals import get_workbench
 from thonny import misc_utils
@@ -150,14 +150,14 @@ class EditorNotebook(ttk.Notebook):
             self._cmd_new_file,
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             group=10,
-            image_filename=get_res_path("file.new_file.gif"),
+            image_filename="file.new_file.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("open_file", "file", "Open...", 
             self._cmd_open_file,
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             group=10,
-            image_filename=get_res_path("file.open_file.gif"),
+            image_filename="file.open_file.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("close_file", "file", "Close", 
@@ -171,7 +171,7 @@ class EditorNotebook(ttk.Notebook):
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             tester=self._cmd_save_file_enabled,
             group=10,
-            image_filename=get_res_path("file.save_file.gif"),
+            image_filename="file.save_file.gif",
             include_in_toolbar=True)
         
         get_workbench().add_command("save_file_as", "file", "Save as...",
