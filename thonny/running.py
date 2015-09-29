@@ -309,7 +309,11 @@ class _BackendProxy:
         self._message_queue = collections.deque()
     
         # create new backend process
-        my_env = os.environ.copy()
+        my_env = {}
+        for name in os.environ:
+            if "python" not in name.lower(): # skip python vars, because we may use different Python version
+                my_env = os.environ[name]
+                
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
         interpreter = get_workbench().get_option("run.interpreter")
