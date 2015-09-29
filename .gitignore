@@ -11,3 +11,4 @@ RemoteSystemsTempFiles
 installers/mac/freezing.log
 installer_building.log
 installers/windows/freezing.log
+backend_private

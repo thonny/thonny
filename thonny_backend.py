@@ -29,9 +29,6 @@ if getattr(sys, 'frozen', False):
     this_dir = os.path.abspath(os.path.dirname(sys.executable))
 else:
     this_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-    
-# If there is special dir meant for backend imports, then use it
-sys.path.append(os.path.join(this_dir, "backend_private"))    
 
 from thonny.backend import VM
 VM(this_dir).mainloop()

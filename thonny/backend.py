@@ -44,17 +44,16 @@ class VM:
         self._current_executor = None
         self._io_level = 0
         
+        original_argv = sys.argv.copy()
+        original_path = sys.path.copy()
+        
         # clean up path
         # Don't want current dir to be in path,
         # because it may contain files meant for different version of interpreter
         # (used for running the frontend)
         sys.path = [d for d in sys.path 
                         if d != "" 
-                        and d != main_dir
-                        and d != os.path.join(main_dir, "backend_private")]
-        
-        original_argv = sys.argv.copy()
-        original_path = sys.path.copy()
+                        and d != main_dir]
         
         # script mode
         if len(sys.argv) > 1:
