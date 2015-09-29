@@ -12,7 +12,6 @@ gives relative __file__-s on imported modules.)
 import sys
 import logging
 import os.path
-from thonny.backend import VM
 
 # set up logging
 logger = logging.getLogger("thonny.backend")
@@ -27,10 +26,13 @@ logger.addHandler(stream_handler)
 
 # create and run VM
 if getattr(sys, 'frozen', False):
-    # The application is frozen
-    this_file = sys.executable
+    this_dir = os.path.abspath(os.path.dirname(sys.executable))
 else:
-    # The application is not frozen
-    this_file = __file__
+    this_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
+    
+# If there is special dir meant for backend imports, then use it
+sys.path.append(os.path.join(this_dir, "backend_private"))    
 
-VM(os.path.abspath(os.path.join(this_file, os.pardir))).mainloop()
+from thonny.backend import VM
+VM(this_dir).mainloop()
+

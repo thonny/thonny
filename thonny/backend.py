@@ -43,14 +43,25 @@ class VM:
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
-
+        
+        # clean up path
+        # Don't want current dir to be in path,
+        # because it may contain files meant for different version of interpreter
+        # (used for running the frontend)
+        sys.path = [d for d in sys.path 
+                        if d != "" 
+                        and d != main_dir
+                        and d != os.path.join(main_dir, "backend_private")]
+        
+        original_argv = sys.argv.copy()
+        original_path = sys.path.copy()
         
         # script mode
         if len(sys.argv) > 1:
             initial_global_names = ("__builtins__", "__name__", "__package__", "__doc__",
                                 "__file__", "__cached__", "__loader__")
             sys.argv[:] = sys.argv[1:] # shift argv[1] to position of script name
-            sys.path[0] = os.path.dirname(sys.argv[0]) # replace backend's dir with program dir
+            sys.path.insert(0, os.path.abspath(os.path.dirname(sys.argv[0]))) # add program's dir
             __main__.__dict__["__file__"] = sys.argv[0]
             # TODO: inspect.getdoc
         
@@ -58,7 +69,7 @@ class VM:
         else:
             initial_global_names = ("__builtins__", "__name__", "__package__", "__doc__")
             sys.argv[:] = [""] # empty "script name"
-            sys.path[0] = ""   # current dir
+            sys.path.insert(0, "")   # current dir
     
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
@@ -67,6 +78,14 @@ class VM:
         
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
+        
+        self.send_message("Ready",
+                          main_dir=main_dir,
+                          original_argv=original_argv,
+                          original_path=original_path,
+                          argv=sys.argv,
+                          path=sys.path,
+                          cwd=os.getcwd())
         
     def mainloop(self):
         while True: 

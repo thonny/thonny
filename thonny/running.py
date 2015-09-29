@@ -23,6 +23,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
+from time import sleep
 
 
 COMMUNICATION_ENCODING = "ASCII"
@@ -311,20 +312,22 @@ class _BackendProxy:
         # create new backend process
         my_env = os.environ.copy()
         # NB! Seems that cx_freeze-d programs don't take PYTHONIOENCODING into account
-        # But we should be still safe when only ASCII data is sent/received
+        # But we should be still safe as only ASCII data is sent/received
         my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
         interpreter = get_workbench().get_option("run.interpreter")
         if not interpreter:
-            interpreter = sys.executable
+            if "thonny" in os.path.basename(sys.executable): # frozen Thonny
+                interpreter = os.path.join (
+                    os.path.dirname(sys.executable),
+                    os.path.basename(sys.executable).replace("frontend", "backend")
+                )
+            else:
+                interpreter = sys.executable
         
-        if "thonny" in os.path.basename(interpreter).lower():
-            # Thonny is run frozen, therefore also run frozen backend
-            cmd_line = [os.path.join(
-                            os.path.dirname(interpreter),
-                            os.path.basename(interpreter)
-                                .replace("frontend", "backend"))]
+        if "thonny" in os.path.basename(interpreter):
+            cmd_line = [interpreter]
         else:
             cmd_line = [interpreter, 
                         '-u', # unbuffered IO (neccessary in Python 3.1)
@@ -347,6 +350,8 @@ class _BackendProxy:
             cwd=self.cwd,
             env=my_env
         )
+        ready_msg = parse_message(self._proc.stdout.readline().decode(COMMUNICATION_ENCODING))
+        info("Backend ready: %s", ready_msg)
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
@@ -376,5 +381,6 @@ class _BackendProxy:
                 break
             else:
                 debug("### BACKEND ###: %s", data.strip())
+        
         
             
