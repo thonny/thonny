@@ -11,7 +11,7 @@ shell becomes kind of title for the execution.
 
 from _thread import start_new_thread
 import collections
-from logging import info, debug
+from logging import info, debug, exception
 import os.path
 import subprocess
 import sys
@@ -24,9 +24,8 @@ from thonny.common import serialize_message, ToplevelCommand, \
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 from time import sleep
+import shutil
 
-
-COMMUNICATION_ENCODING = "ASCII"
 
 class Runner:
     def __init__(self):
@@ -281,7 +280,7 @@ class _BackendProxy:
                 self._kill_current_process()
                 self._start_new_process(cmd)
                  
-            self._proc.stdin.write((serialize_message(cmd) + "\n").encode(COMMUNICATION_ENCODING))
+            self._proc.stdin.write(serialize_message(cmd) + "\n")
             self._proc.stdin.flush() 
             
             if not (hasattr(cmd, "command") and cmd.command == "tkupdate"):
@@ -311,9 +310,6 @@ class _BackendProxy:
     
         # create new backend process
         my_env = os.environ.copy()
-        # NB! Seems that cx_freeze-d programs don't take PYTHONIOENCODING into account
-        # But we should be still safe as only ASCII data is sent/received
-        my_env["PYTHONIOENCODING"] = COMMUNICATION_ENCODING
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
         interpreter = get_workbench().get_option("run.interpreter")
@@ -329,10 +325,12 @@ class _BackendProxy:
         if "thonny" in os.path.basename(interpreter):
             cmd_line = [interpreter]
         else:
+            self._check_update_backend_private()
             cmd_line = [interpreter, 
                         '-u', # unbuffered IO (neccessary in Python 3.1)
-                        '-B', # don't write pyo/pyc files (to avoid problems, when frontend and backend use different Python version)
-                        os.path.join(self._thonny_dir, "thonny_backend.py")]
+                        '-B', # don't write pyo/pyc files (to avoid problems when using different Python versions)
+                        os.path.join(self._get_backend_private_path(),
+                                     "thonny_backend.py")]
 
         if hasattr(cmd, "filename"):
             cmd_line.append(cmd.filename)
@@ -348,20 +346,51 @@ class _BackendProxy:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=self.cwd,
-            env=my_env
+            env=my_env,
+            universal_newlines=True
         )
-        ready_msg = parse_message(self._proc.stdout.readline().decode(COMMUNICATION_ENCODING))
+        ready_line = self._proc.stdout.readline()
+        try:
+            ready_msg = parse_message(ready_line)
+        except:
+            exception("ready_line=%s", ready_line)
+            raise
         info("Backend ready: %s", ready_msg)
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
         start_new_thread(self._listen_stderr, ())
     
+    def _get_backend_private_path(self):
+        return os.path.join(self._thonny_dir, "backend_private")
+    
+    def _check_update_backend_private(self):
+        """In case of frozen thonny, the originals are not available,
+        and we assume the folder is already created and populated.
+        This method is necessary in dev machine, to check that 
+        the private copy is up do date"""
+        
+        bp_path = self._get_backend_private_path()
+        os.makedirs(bp_path, 0o777, True)
+        os.makedirs(os.path.join(bp_path, "thonny"), 0o777, True)
+        
+        for filename in ["thonny_backend.py",
+                         os.path.join("thonny", "backend.py"),
+                         os.path.join("thonny", "ast_utils.py"),
+                         os.path.join("thonny", "misc_utils.py"),
+                         os.path.join("thonny", "common.py")]:
+            original = os.path.join(self._thonny_dir, filename)
+            copy = os.path.join(bp_path, filename)
+            
+            if os.path.exists(original): 
+                shutil.copyfile(original, copy)
+                
+    
     def _listen_stdout(self):
         #debug("... started listening to stdout")
         # will be called from separate thread
         while True:
-            data = self._proc.stdout.readline().decode(COMMUNICATION_ENCODING)
+            data = self._proc.stdout.readline()
             #debug("... read some stdout data", repr(data))
             if data == '':
                 break
@@ -376,7 +405,7 @@ class _BackendProxy:
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
         while True:
-            data = self._proc.stderr.readline().decode(COMMUNICATION_ENCODING)
+            data = self._proc.stderr.readline()
             if data == '':
                 break
             else:
