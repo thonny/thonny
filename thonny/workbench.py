@@ -621,7 +621,7 @@ class Workbench(tk.Tk):
                         event = WorkbenchEvent(sequence, **kwargs)
                         handler(event)
                     except:
-                        exception("Problem when handling '" + sequence + "'")
+                        self.report_exception("Problem when handling '" + sequence + "'")
                 
     def bind(self, sequence, func, add=None):
         """Uses custom event handling when sequence doesn't start with <.
