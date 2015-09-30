@@ -601,7 +601,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self._code_book = ttk.Notebook(self.main_pw)
         self._text_wrapper = CodeView(self._code_book, first_line_no=frame_info.firstlineno)
         self._code_book.add(self._text_wrapper, text="Source")
-        self.main_pw.add(self._code_book, weight=3)
+        self.main_pw.add(self._code_book, minsize=100)
         
     
     def _load_code(self, frame_info):
@@ -628,7 +628,7 @@ class FunctionCallDialog(FrameDialog):
         self._locals_book = ttk.Notebook(self.main_pw)
         self._locals_frame = VariablesFrame(self._locals_book)
         self._locals_book.add(self._locals_frame, text="Local variables")
-        self.main_pw.add(self._locals_book, weight=1)
+        self.main_pw.add(self._locals_book, minsize=100)
 
     def _load_code(self, frame_info):
         FrameDialog._load_code(self, frame_info)
