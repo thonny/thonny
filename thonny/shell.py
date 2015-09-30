@@ -368,7 +368,8 @@ class ShellView (ttk.Frame, TextWrapper):
             version_str = "Embedded " + version_str
             
         if version_str != self._last_python_version:
-            self._insert_text_directly(version_str, ("version",))
+            if "Embedded" not in version_str: # to make the first impression even clearer 
+                self._insert_text_directly(version_str, ("version",))
             self._last_python_version = version_str
     
     def _submit_input(self, text_to_be_submitted):
