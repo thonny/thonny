@@ -81,6 +81,7 @@ class ShellView (ttk.Frame, TextWrapper):
         self.text.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
         self.text.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
         self.text.tag_configure("command", foreground="black")
+        self.text.tag_configure("version", foreground="DarkGray")
         self.text.tag_configure("automagic", foreground="DarkGray")
         #self.text.tag_configure("value", foreground="DarkGreen")
         #self.text.tag_configure("value", foreground="#B25300")
@@ -116,10 +117,13 @@ class ShellView (ttk.Frame, TextWrapper):
         self.active_object_tags = set()
         
         self._command_handlers = {}
+        
+        self._last_python_version = None
     
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
+        get_workbench().bind("BackendReady", self._backend_ready, True)
         
 
         
@@ -358,6 +362,10 @@ class ShellView (ttk.Frame, TextWrapper):
                 raise AssertionError("only readline is supported at the moment")
             
     
+    def _backend_ready(self, event):
+        if event.python_version != self._last_python_version:
+            self._insert_text_directly("Python " + event.python_version, ("version",))
+            self._last_python_version = event.python_version
     
     def _submit_input(self, text_to_be_submitted):
         if self._get_state() == "waiting_toplevel_command":

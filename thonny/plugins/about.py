@@ -9,7 +9,7 @@ from tkinter import ttk
 import tkinter.font as font
 
 from thonny import misc_utils
-from thonny.misc_utils import running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, get_python_version_string
 from thonny.globals import get_workbench
 
 class AboutDialog(tk.Toplevel):
@@ -60,15 +60,11 @@ class AboutDialog(tk.Toplevel):
         url_label.grid()
         url_label.bind("<Button-1>", lambda _:webbrowser.open(url))
         
-        python_version = ".".join(map(str, sys.version_info[:3]))
-        if sys.version_info[3] != "final":
-            python_version += "-" + sys.version_info[3]
         platform_label = ttk.Label(main_frame, justify=tk.CENTER, 
                                    text=platform.system() + " " 
                                         + platform.release()  
                                         + " " + self.get_os_word_size_guess() + "\n"
-                                        + "Python " + python_version 
-                                        + " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
+                                        + "Python " + get_python_version_string() 
                                         + "Tk " + self.tk.call('info', 'patchlevel'))
         platform_label.grid(pady=20)
         

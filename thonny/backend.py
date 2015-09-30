@@ -16,7 +16,7 @@ import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
 from thonny import misc_utils
-from thonny.misc_utils import eqfn
+from thonny.misc_utils import eqfn, get_python_version_string
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
@@ -84,6 +84,7 @@ class VM:
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
+                          python_version=get_python_version_string(),
                           cwd=os.getcwd())
         
     def mainloop(self):

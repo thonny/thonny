@@ -15,6 +15,7 @@ import tkinter.messagebox as tkMessageBox
 from codecs import lookup, BOM_UTF8
 import textwrap
 import traceback
+import sys
 
 
 class PathSet:
@@ -265,3 +266,14 @@ def shorten_repr(original_repr, max_len=1000):
     else:
         return original_repr
         
+def get_python_version_string(version_info=None):
+    if version_info == None:
+        version_info = sys.version_info
+         
+    result = ".".join(map(str, version_info[:3]))
+    if version_info[3] != "final":
+        result += "-" + version_info[3]
+    
+    result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
+    
+    return result    
