@@ -23,7 +23,6 @@ from thonny.common import serialize_message, ToplevelCommand, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
-from time import sleep
 import shutil
 
 
@@ -353,13 +352,10 @@ class _BackendProxy:
             env=my_env,
             universal_newlines=True
         )
-        ready_line = self._proc.stdout.readline()
-        try:
-            ready_msg = parse_message(ready_line)
-        except:
-            exception("ready_line=%s", ready_line)
-            raise
+        
+        ready_msg = parse_message(self._proc.stdout.readline())
         info("Backend ready: %s", ready_msg)
+        get_workbench().event_generate("BackendReady", **ready_msg)
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
