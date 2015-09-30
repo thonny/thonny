@@ -85,6 +85,7 @@ class VM:
                           argv=sys.argv,
                           path=sys.path,
                           python_version=get_python_version_string(),
+                          python_executable=sys.executable,
                           cwd=os.getcwd())
         
     def mainloop(self):

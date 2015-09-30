@@ -363,9 +363,13 @@ class ShellView (ttk.Frame, TextWrapper):
             
     
     def _backend_ready(self, event):
-        if event.python_version != self._last_python_version:
-            self._insert_text_directly("Python " + event.python_version, ("version",))
-            self._last_python_version = event.python_version
+        version_str = "Python " + event.python_version
+        if "thonny" in os.path.basename(event.python_executable):
+            version_str = "Embedded " + version_str
+            
+        if version_str != self._last_python_version:
+            self._insert_text_directly(version_str, ("version",))
+            self._last_python_version = version_str
     
     def _submit_input(self, text_to_be_submitted):
         if self._get_state() == "waiting_toplevel_command":

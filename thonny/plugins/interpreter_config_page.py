@@ -2,6 +2,7 @@ import tkinter as tk
 import os.path
 from tkinter import filedialog
 from tkinter import ttk
+from tkinter import messagebox
 
 from thonny.config_ui import ConfigurationPage
 from thonny.globals import get_workbench
@@ -62,6 +63,7 @@ class InterpreterConfigurationPage(ConfigurationPage):
             return
         
         get_workbench().set_option("run.interpreter", self._interpreter_variable.get())
+        messagebox.showinfo(None, "New interpreter will be selected at next Run/Debug/Reset")
         
     
 
