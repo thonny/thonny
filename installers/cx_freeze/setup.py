@@ -36,15 +36,15 @@ build_exe_options = {
 }
 
 frontend_exe = Executable (
-    script= MAIN_DIR + "/thonny_frontend.py",
-    icon=MAIN_DIR + "/res/thonny.ico",
+    script = os.path.join(MAIN_DIR, "thonny_frontend.py"),
+    icon = os.path.join(MAIN_DIR, "res", "thonny.ico"),
 )
 
 backend_exe = Executable (
-    script=MAIN_DIR + "/thonny_backend.py",
+    script = os.path.join(MAIN_DIR, "thonny_backend.py"),
 )
 
-with open(MAIN_DIR + "/VERSION") as vf:
+with open(os.path.join(MAIN_DIR, "VERSION")) as vf:
     version = vf.read().strip()
 
 setup (
