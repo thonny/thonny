@@ -310,7 +310,8 @@ class _BackendProxy:
         # create new backend process
         my_env = {}
         for name in os.environ:
-            if "python" not in name.lower(): # skip python vars, because we may use different Python version
+            if ("python" not in name.lower() # skip python vars, because we may use different Python version
+                and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
                 my_env[name] = os.environ[name]
                 
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
