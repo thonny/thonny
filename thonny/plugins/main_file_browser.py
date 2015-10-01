@@ -4,7 +4,9 @@ import os
 import tkinter as tk
 from tkinter.messagebox import showerror
 
-from thonny.ui_utils import askstring
+#from thonny.ui_utils import askstring TODO: doesn't work
+from tkinter.simpledialog import askstring
+
 from thonny import misc_utils
 from thonny.globals import get_workbench
 from thonny.base_file_browser import BaseFileBrowser
@@ -17,12 +19,10 @@ class MainFileBrowser(BaseFileBrowser):
         self.menu = tk.Menu(tk._default_root, tearoff=False)
         self.menu.add_command(label="Create new file", command=self.create_new_file)
         
-        """ TODO: modified askstring doesn't work
         self.tree.bind('<3>', self.on_secondary_click, True)
         if misc_utils.running_on_mac_os():
             self.tree.bind('<2>', self.on_secondary_click, True)
             self.tree.bind('<Control-1>', self.on_secondary_click, True)
-        """
     
                 
     def create_new_file(self):
