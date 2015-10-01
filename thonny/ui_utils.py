@@ -376,12 +376,14 @@ class TextWrapper:
         pass
             
     def on_text_key_press(self, e):
-        return self.log_keypress_for_undo(e)
+        if e.keysym in ('F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'):
+            self.log_keypress_for_undo(e)
+            return "break" # otherwise it inserts a character in Mac
+        else:
+            return self.log_keypress_for_undo(e)
         
     def log_keypress_for_undo(self, e):
         # NB! this may not execute if the event is cancelled in another handler
-        #if e.keysym in ('F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'):
-        #    return "break" # otherwise it inserts a character in
         event_kind = self.get_event_kind(e)
         
         if (event_kind != self._last_event_kind
@@ -398,8 +400,6 @@ class TextWrapper:
         self.add_undo_separator()
     
     def add_undo_separator(self):
-        self.text.edit_separator()
-        self.text.edit_separator()
         self.text.edit_separator()
     
     def get_event_kind(self, event):
