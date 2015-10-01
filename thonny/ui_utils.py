@@ -376,11 +376,7 @@ class TextWrapper:
         pass
             
     def on_text_key_press(self, e):
-        if e.keysym in ('F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'):
-            self.log_keypress_for_undo(e)
-            return "break" # otherwise it inserts a character in Mac
-        else:
-            return self.log_keypress_for_undo(e)
+        return self.log_keypress_for_undo(e)
         
     def log_keypress_for_undo(self, e):
         # NB! this may not execute if the event is cancelled in another handler
