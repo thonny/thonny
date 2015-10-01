@@ -60,7 +60,7 @@ class ShellView (ttk.Frame, TextWrapper):
                             undo=True,
                             autoseparators=False)
         
-        #log_user_event(ShellCreateEvent(self)) TODO:
+        get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         self.text.bind("<Up>", self._arrow_up, "+")
@@ -124,8 +124,6 @@ class ShellView (ttk.Frame, TextWrapper):
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
         get_workbench().bind("BackendReady", self._backend_ready, True)
-        
-
         
         
 

@@ -7,6 +7,8 @@ from datetime import datetime
 import zipfile 
 from tkinter.filedialog import asksaveasfilename
 import json
+from thonny.shell import ShellView
+from thonny.code import Editor
 
 
 class EventLogger:
@@ -50,6 +52,8 @@ class EventLogger:
                          "Save",
                          "SaveAs",
                          "NewFile",
+                         "EditorTextCreated",
+                         #"ShellTextCreated", # Too bad, this event happens before event_logging is loaded
                          "ShellCommand",
                          "ShellInput",
                          "ShowView",
@@ -81,36 +85,48 @@ class EventLogger:
         
         tk._default_root.bind_all(sequence, handle, True)
     
+    
     def _extract_interesting_data(self, event, sequence):
-        data = {}
+        attributes = vars(event)
         
-        if isinstance(event, tk.Event):
-            data["widget_id"] = id(event.widget)
-            data["widget_class"] = event.widget.__class__.__name__
-            # TODO: add other interesting attributes for individual events
+        # generate some new attributes
+        if "text_widget" not in attributes:
+            if "editor" in attributes:
+                attributes["text_widget"] = attributes["editor"].get_text_widget()
+        
+            if "widget" in attributes and isinstance(attributes["widget"], tk.Text):
+                attributes["text_widget"] = attributes["widget"]
             
-        else:
-            assert isinstance(event, WorkbenchEvent)
-            # save all attributes
-            for name in dir(event):
-                if not name.startswith("_"):
-                    value = getattr(event, name)
-                    
-                    if isinstance(value, tk.BaseWidget):
-                        data[name + "_id"] = id(value)
-                        data[name + "_class"] = value.__class__.__name__
-                    elif name in ("update", "setdefault"): # TODO: make it more reliable
-                        pass
-                    elif (isinstance(value, str)
-                            or isinstance(value, int)
-                            or isinstance(value, float)):
-                        data[name] = value
-                    
-                    else:
-                        data[name] = repr(value)
-                                 
-                        
         
+        if "text_widget" in attributes:
+            widget = attributes["text_widget"]
+            if isinstance(widget.master, ShellView):
+                attributes["text_widget_context"] = "shell"
+            
+        
+        # select attributes      
+        data = {}
+        for name in attributes:
+            # skip some attributes
+            if (name.startswith("_")
+                or isinstance(event, WorkbenchEvent) and name in ["update", 
+                                                                  "setdefault"]
+                or isinstance(event, tk.Event) and name not in ["widget", 
+                                                                "text_widget", 
+                                                                "text_widget_context"]):
+                continue
+            
+            value = attributes[name]
+            
+            if isinstance(value, tk.BaseWidget) or isinstance(value, tk.Tk):
+                data[name + "_id"] = id(value)
+                data[name + "_class"] = value.__class__.__name__
+                
+            elif type(value) in [str, int, float]:
+                data[name] = value
+            
+            else:
+                data[name] = repr(value)
         
         return data
     

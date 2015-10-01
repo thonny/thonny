@@ -26,6 +26,8 @@ class Editor(ttk.Frame):
         
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(get_workbench(), propose_remove_line_numbers=True, editor=self)
+        get_workbench().event_generate("EditorTextCreated", editor=self, text_widget=self.get_text_widget())
+        
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
         self._code_view.home_widget = self # don't forget home
         self.maximizable_widget = self._code_view
@@ -41,6 +43,7 @@ class Editor(ttk.Frame):
             self._code_view.text.edit_modified(False)
         
         self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self))
+        
 
 
     def get_text_widget(self):
