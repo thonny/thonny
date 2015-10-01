@@ -127,11 +127,13 @@ class CodeView(ttk.Frame, TextWrapper):
     def del_word_left(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         self.text.event_generate('<Meta-Delete>')
+        self.add_undo_separator()
         return "break"
 
     def del_word_right(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         self.text.event_generate('<Meta-d>')
+        self.add_undo_separator()
         return "break"
 
     """
@@ -164,6 +166,7 @@ class CodeView(ttk.Frame, TextWrapper):
     
     
     def indent_or_dedent_event(self, event):
+        self.log_keypress_for_undo(event)
         if event.state in [1,9]: # shift is pressed (1 in Mac, 9 in Win)
             return self.dedent_region_event(event)
         else:
@@ -237,6 +240,7 @@ class CodeView(ttk.Frame, TextWrapper):
 
     
     def newline_and_indent_event(self, event):
+        self.log_keypress_for_undo(event)
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified
         
@@ -384,6 +388,7 @@ class CodeView(ttk.Frame, TextWrapper):
     def smart_backspace_event(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # Slightly modified
+        self.log_keypress_for_undo(event)
         
         text = self.text
         first, last = self.get_selection_indices()
@@ -404,6 +409,7 @@ class CodeView(ttk.Frame, TextWrapper):
         if  chars[-1] not in " \t":
             # easy: delete preceding real char
             text.delete("insert-1c")
+            self.log_keypress_for_undo(event)
             return "break"
         # Ick.  It may require *inserting* spaces if we back up over a
         # tab character!  This is written to be clear, not fast.
@@ -433,6 +439,8 @@ class CodeView(ttk.Frame, TextWrapper):
         return "break"
     
     def smart_indent_event(self, event):
+        self.log_keypress_for_undo(event)
+        
         # copied from idlelib.EditorWindow (Python 3.4.2)
         
         # if intraline selection:

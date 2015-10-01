@@ -284,21 +284,21 @@ class TextWrapper:
         self._text_redirector = WidgetRedirector(self.text)
         self._original_user_text_insert = self._text_redirector.register("insert", self._user_text_insert)
         self._original_user_text_delete = self._text_redirector.register("delete", self._user_text_delete)
-        """
-        self.text.bind("<<Undo>>", self.on_text_undo, "+")
-        self.text.bind("<<Redo>>", self.on_text_redo, "+")
-        self.text.bind("<<Cut>>", self.on_text_cut, "+")
-        self.text.bind("<<Copy>>", self.on_text_copy, "+")
-        self.text.bind("<<Paste>>", self.on_text_paste, "+")
-        #self.text.bind("<<Selection>>", self.on_text_selection_change, "+")
-        self.text.bind("<FocusIn>", self.on_text_get_focus, "+")
-        self.text.bind("<FocusOut>", self.on_text_lose_focus, "+")
-        self.text.bind("<Key>", self.on_text_key_press, "+")
-        self.text.bind("<KeyRelease>", self.on_text_key_release, "+")
-        self.text.bind("<1>", self.on_text_mouse_click, "+")
-        self.text.bind("<2>", self.on_text_mouse_click, "+")
-        self.text.bind("<3>", self.on_text_mouse_click, "+")
-        """
+        
+        self.text.bind("<<Undo>>", self.on_text_undo, True)
+        self.text.bind("<<Redo>>", self.on_text_redo, True)
+        self.text.bind("<<Cut>>", self.on_text_cut, True)
+        self.text.bind("<<Copy>>", self.on_text_copy, True)
+        self.text.bind("<<Paste>>", self.on_text_paste, True)
+        #self.text.bind("<<Selection>>", self.on_text_selection_change, True)
+        self.text.bind("<FocusIn>", self.on_text_get_focus, True)
+        self.text.bind("<FocusOut>", self.on_text_lose_focus, True)
+        self.text.bind("<Key>", self.on_text_key_press, True)
+        self.text.bind("<KeyRelease>", self.on_text_key_release, True)
+        self.text.bind("<1>", self.on_text_mouse_click, True)
+        self.text.bind("<2>", self.on_text_mouse_click, True)
+        self.text.bind("<3>", self.on_text_mouse_click, True)
+
         self._last_event_kind = None
         self._last_key_time = 0
         self._propose_remove_line_numbers = propose_remove_line_numbers
@@ -376,25 +376,31 @@ class TextWrapper:
         pass
             
     def on_text_key_press(self, e):
+        return self.log_keypress_for_undo(e)
+        
+    def log_keypress_for_undo(self, e):
+        # NB! this may not execute if the event is cancelled in another handler
         #if e.keysym in ('F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'):
         #    return "break" # otherwise it inserts a character in
-            
         event_kind = self.get_event_kind(e)
         
         if (event_kind != self._last_event_kind
-            or e.char in ("\r", "\n", " ")
-            or time.time() - self.last_key_time > 2):
+            or e.char in ("\r", "\n", " ", "\t")
+            or e.keysym in ["Return", "KP_Enter"]
+            #or time.time() - self.last_key_time > 2
+            ):
             self.add_undo_separator()
-            self._last_event_kind = event_kind
-
+            
+        self._last_event_kind = event_kind
         self.last_key_time = time.time()
 
     def on_text_mouse_click(self, event):
         self.add_undo_separator()
     
     def add_undo_separator(self):
-        if self.started_undo_blocks == 0:
-            self.text.edit_separator()
+        self.text.edit_separator()
+        self.text.edit_separator()
+        self.text.edit_separator()
     
     def get_event_kind(self, event):
         if event.keysym in ("BackSpace", "Delete"):
@@ -411,7 +417,8 @@ class TextWrapper:
     def undo_block_stop(self):
         self.started_undo_blocks -= 1
         if self.started_undo_blocks == 0:
-            self.add_undo_separator()
+            #self.add_undo_separator() # TODO: get rid of idlelib heritage
+            pass
 
 class TextFrame(ttk.Frame, TextWrapper):
     def __init__(self, master, readonly=False):
