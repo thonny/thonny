@@ -609,7 +609,6 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
     
     def _update_this_frame(self, msg, frame_info):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
-        self._locals_frame.update_variables(None)
     
     def _on_close(self):
         showinfo("Can't close yet", "Step until the end of this code to close it")
