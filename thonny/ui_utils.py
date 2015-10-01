@@ -54,7 +54,10 @@ class AutomaticPanedWindow(tk.PanedWindow):
         if pos == "auto":
             # According to documentation I should use self.panes()
             # but this doesn't return expected widgets
-            for sibling in self.visible_panes:
+            for sibling in sorted(self.visible_panes, 
+                                  key=lambda p:p.position_key 
+                                        if hasattr(p, "position_key")
+                                        else 0):
                 if (not hasattr(sibling, "position_key") 
                     or sibling.position_key == None
                     or sibling.position_key > child.position_key):
