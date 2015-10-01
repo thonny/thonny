@@ -1,0 +1,4 @@
+* running programs with non-ascii letters in identifiers using freezed thonny
+	(used to give ImportError for unicodedata)
+
+* undo / redo 
