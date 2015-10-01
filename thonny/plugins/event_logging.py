@@ -6,6 +6,7 @@ from thonny.workbench import WorkbenchEvent
 from datetime import datetime
 import zipfile 
 from tkinter.filedialog import asksaveasfilename
+import json
 
 
 class EventLogger:
@@ -25,12 +26,7 @@ class EventLogger:
 
     
     def _init_logging(self):
-        self._encoding = "UTF-8"
-        self._file = open(self._filename, mode="a", encoding=self._encoding)
-        self._file.write("[\n")
-        
-        self._event_count = 0
-        self._last_event_timestamp = datetime.now()
+        self._events = []
         
         wb = get_workbench()
         wb.bind("WorkbenchClose", self._on_worbench_close, True)
@@ -139,38 +135,14 @@ class EventLogger:
             
     
     def _log_event(self, sequence, event):
-        
-        timestamp = datetime.now()
-        time_from_last_event = timestamp-self._last_event_timestamp
-        
         data = self._extract_interesting_data(event, sequence)
         data["sequence"] = sequence 
-        data["time"] = timestamp.isoformat()
-        
-        
-        if self._event_count > 0:
-            self._file.write(",\n")
-             
-        self._file.write(repr(data))
-        
-        self._last_event_timestamp = timestamp
-        self._event_count += 1
-        
-        if (self._event_count % 100 == 0
-            or time_from_last_event.total_seconds() > 3):
-            self._intermediate_save()
-    
+        data["time"] = datetime.now().isoformat()
+        self._events.append(data)
     
     def _on_worbench_close(self, event=None):
-        self._final_save()
-    
-    def _intermediate_save(self):
-        self._file.close()
-        self._file = open(self._filename, mode="a", encoding=self._encoding)
-    
-    def _final_save(self):
-        self._file.write("\n]\n")
-        self._file.close()
+        with open(self._filename, encoding="UTF-8", mode="w") as fp:
+            json.dump(self._events, fp, indent="    ")
 
 def load_plugin():
     # generate log filename
