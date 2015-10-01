@@ -31,4 +31,5 @@ class EventsView(TextFrame):
         self.text.see("end")
 
 def load_plugin():
-    get_workbench().add_view(EventsView, "Events", "se")
+    if get_workbench().get_option("debug_mode"):
+        get_workbench().add_view(EventsView, "Events", "se")

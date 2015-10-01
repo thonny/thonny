@@ -12,6 +12,7 @@ encoding//thonny/globals.py=utf-8
 encoding//thonny/memory.py=utf-8
 encoding//thonny/misc_utils.py=utf-8
 encoding//thonny/plugins/about.py=utf-8
+encoding//thonny/plugins/ast_view.py=utf-8
 encoding//thonny/plugins/debugger.py=utf-8
 encoding//thonny/plugins/main_file_browser.py=utf-8
 encoding//thonny/plugins/variables.py=utf-8

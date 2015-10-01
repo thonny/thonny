@@ -124,7 +124,9 @@ class AstView(ui_utils.TreeFrame):
     
 
 def load_plugin(): 
-    get_workbench().add_view(AstView, "AST", "s")
+    if (get_workbench().get_option("debug_mode")
+        or get_workbench().get_option("expert_mode")):
+        get_workbench().add_view(AstView, "AST", "s")
         
     
         
