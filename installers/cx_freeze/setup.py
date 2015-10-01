@@ -30,7 +30,9 @@ build_exe_options = {
     'include_files': [os.path.join(MAIN_DIR, "res"),
                       os.path.join(MAIN_DIR , "VERSION"),
                       os.path.join(MAIN_DIR, "backend_private")],
-    'packages': ["jedi", "rope", "turtle", "idlelib", "thonny"],
+    'packages': ["jedi", "rope", "turtle", "idlelib", "thonny",
+                 "unicodedata" # seems that this doesn't suffice here, I also needed to import it in backend
+                 ],
     'include_msvcr' : True, 
     'base' : "Win32GUI" if sys.platform == "win32" else None,
 }

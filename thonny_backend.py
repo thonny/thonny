@@ -12,6 +12,7 @@ gives relative __file__-s on imported modules.)
 import sys
 import logging
 import os.path
+import unicodedata # Otherwise cx_freeze-d version of the program fails to find it @UnusedImport
 
 # set up logging
 logger = logging.getLogger("thonny.backend")
