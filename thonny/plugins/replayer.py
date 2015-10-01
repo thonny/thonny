@@ -1,76 +1,54 @@
-import sys
-import traceback
 import tkinter as tk
 import tkinter.ttk as ttk
+from datetime import datetime
 from thonny import ui_utils
-from thonny.plugins.filebrowser import FileBrowser
 from thonny.globals import get_workbench
+import json
+from thonny.base_file_browser import BaseFileBrowser
+import ast
 
 
-class ReplayWindow(tk.Tk):
+class ReplayWindow(tk.Toplevel):
     def __init__(self):
-        tk.Tk.__init__(self)
-        tk.Tk.report_callback_exception = self.on_tk_exception
+        tk.Toplevel.__init__(self, get_workbench())
+        ui_utils.set_zoomed(self, True)
         
-        self.main_pw   = ui_utils.AutomaticPanedWindow(self, orient=tk.HORIZONTAL)
-        self.center_pw  = ui_utils.AutomaticPanedWindow(self.main_pw, orient=tk.VERTICAL)
+        self.main_pw   = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
+        self.center_pw  = ttk.PanedWindow(self.main_pw, orient=tk.VERTICAL)
         self.right_frame = ttk.Frame(self.main_pw)
         self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
-        shell_book = ui_utils.AutomaticNotebook(self.main_pw)
+        shell_book = ttk.Notebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
         self.log_frame = LogFrame(self.right_frame, self.editor_notebook, self.shell)
         self.browser = ReplayerFileBrowser(self.main_pw, self.log_frame)
         self.control_frame = ControlFrame(self.right_frame)
         
         self.main_pw.grid(padx=10, pady=10, sticky=tk.NSEW)
-        self.main_pw.add(self.browser, minsize=200)
-        self.main_pw.add(self.center_pw, minsize=700)
-        self.main_pw.add(self.right_frame, minsize=200)
-        self.center_pw.add(self.editor_notebook, minsize=500)
-        self.center_pw.add(shell_book)
+        self.main_pw.add(self.browser, weight=1)
+        self.main_pw.add(self.center_pw, weight=3)
+        self.main_pw.add(self.right_frame, weight=1)
+        self.center_pw.add(self.editor_notebook, weight=3)
+        self.center_pw.add(shell_book, weight=1)
         shell_book.add(self.shell, text="Shell")
         self.log_frame.grid(sticky=tk.NSEW)
         self.control_frame.grid(sticky=tk.NSEW)
         self.right_frame.columnconfigure(0, weight=1)
         self.right_frame.rowconfigure(0, weight=1)
         
-        
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.state("zoomed")
-        
-        if len(sys.argv) > 1:
-            self.log_frame.load_log(sys.argv[1])
-        else:
-            try: 
-                self.log_frame.load_log("C:/users/aivar/.thonny/user_logs/2014-12-16_16-54-56_0.txt")
-            except:
-                pass
             
 
-    def on_tk_exception(self, exc, val, tb):
-        # copied from tkinter.Tk.report_callback_exception
-        # Aivar: following statement kills the process when run with pythonw.exe
-        # http://bugs.python.org/issue22384
-        #sys.stderr.write("Exception in Tkinter callback\n")
-        sys.last_type = exc
-        sys.last_value = val
-        sys.last_traceback = tb
-        traceback.print_exception(exc, val, tb)
-        
-        # TODO: Command+C for Mac
-        tk.messagebox.showerror("Internal error. Use Ctrl+C to copy",
-                                traceback.format_exc())
-    
-
-class ReplayerFileBrowser(FileBrowser):
+class ReplayerFileBrowser(BaseFileBrowser):
     
     def __init__(self, master, log_frame):
-        FileBrowser.__init__(self, master, show_hidden_files=True)
+        BaseFileBrowser.__init__(self, master, True, "tools.replayer_last_browser_folder")
         self.log_frame = log_frame
+        self.configure(border=1, relief=tk.GROOVE)
 
     def on_double_click(self, event):
+        self.save_current_folder()
         path = self.get_selected_path()
         if path:
             self.log_frame.load_log(path)
@@ -92,12 +70,13 @@ class ControlFrame(ttk.Frame):
 class LogFrame(ui_utils.TreeFrame):
     def __init__(self, master, editor_book, shell):
         ui_utils.TreeFrame.__init__(self, master, ("desc", "pause", "time"))
+        self.configure(border=1, relief=tk.GROOVE)
+        
         self.editor_notebook = editor_book
         self.shell = shell
         self.all_events = []
         self.last_event_index = -1
         self.loading = False 
-        self.shell_editor_id = None
 
     def load_log(self, filename):
         self._clear_tree()
@@ -108,34 +87,22 @@ class LogFrame(ui_utils.TreeFrame):
         self.shell.clear()
         
         with open(filename, encoding="UTF-8") as f:
-            last_event = None
-            for line in f:
-                event = parse_log_line(line)
-                if (isinstance(event, ProgramLoseFocusEvent) 
-                    and isinstance(last_event, ProgramLoseFocusEvent)
-                    or isinstance(event, ProgramGetFocusEvent)
-                    or isinstance(event, EditorGetFocusEvent) # TODO:
-                    or isinstance(event, EditorLoseFocusEvent)
-                    or isinstance(event, KeyPressEvent)
-                    ):
-                    # They are doubled for some reason
-                    continue
-                
+            events = json.load(f)
+            last_event_time = None
+            for event in events:
                 node_id = self.tree.insert("", "end")
-                self.tree.set(node_id, "desc", event.compact_description())
-                if last_event:
-                    delta = event.event_time - last_event.event_time
+                self.tree.set(node_id, "desc", repr(event))
+                event_time = datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
+                if last_event_time:
+                    delta = event_time - last_event_time
                     pause = delta.seconds
                 else:
                     pause = 0   
                 self.tree.set(node_id, "pause", str(pause if pause else ""))
-                self.tree.set(node_id, "time", str(event.event_time))
+                self.tree.set(node_id, "time", str(event["time"]))
                 self.all_events.append(event)
-                
-                if isinstance(event, ShellCreateEvent):
-                    self.shell_editor_id = event.editor_id
-                
-                last_event = event
+
+                last_event_time = event_time
                 
         self.loading = False
         
@@ -143,8 +110,8 @@ class LogFrame(ui_utils.TreeFrame):
         "this should be called with events in correct order"
         #print("log replay", event)
         
-        if hasattr(event, "editor_id"):
-            if event.editor_id == self.shell_editor_id:
+        if "text_widget_id" in event:
+            if event.get("text_widget_context", None) == "shell":
                 self.shell.replay_event(event)
             else:
                 self.editor_notebook.replay_event(event)
@@ -152,8 +119,8 @@ class LogFrame(ui_utils.TreeFrame):
     def undo_event(self, event):
         "this should be called with events in correct order"
         #print("log undo", event)
-        if hasattr(event, "editor_id"):
-            if event.editor_id == self.shell_editor_id:
+        if "text_widget_id" in event:
+            if event.get("text_widget_context", None) == "shell":
                 self.shell.undo_event(event)
             else:
                 self.editor_notebook.undo_event(event)
@@ -162,7 +129,6 @@ class LogFrame(ui_utils.TreeFrame):
         # parameter "event" is here tkinter event
         if self.loading:
             return 
-        
         iid = self.tree.focus()
         if iid != '':
             self.select_event(self.tree.index(iid))
@@ -223,18 +189,19 @@ class ReplayerEditor(ttk.Frame):
         self.text_states_before = {} # self.text_states[event_id] contains editor content before event with id event_id
     
     def replay_event(self, event):
-        if isinstance(event, TextInsertEvent) or isinstance(event, TextDeleteEvent):
+        if event["sequence"] in ["TextInsert", "TextDelete"]:
             self.text_states_before[id(event)] = self.code_view.text.get("1.0", "end")
             self.see_event(event)
             
-            if isinstance(event, TextInsertEvent):
-                self.code_view.text.insert(event.position, event.text, event.tags)
+            if event["sequence"] == "TextInsert":
+                self.code_view.text.insert(event["index"], event["text"],
+                                           ast.literal_eval(event["tags"]))
                 
-            elif isinstance(event, TextDeleteEvent):
-                if event.to_position:
-                    self.code_view.text.delete(event.from_position, event.to_position)
+            elif event["sequence"] == "TextDelete":
+                if event["index2"]:
+                    self.code_view.text.delete(event["index1"], event["index2"])
                 else:
-                    self.code_view.text.delete(event.from_position)
+                    self.code_view.text.delete(event["index1"])
         
     
     def undo_event(self, event):
@@ -256,46 +223,47 @@ class ReplayerEditor(ttk.Frame):
 class ReplayerEditorNotebook(ttk.Notebook):
     def __init__(self, master):
         ttk.Notebook.__init__(self, master, padding=0)
-        self.editors_by_id = {}
+        self._editors_by_text_widget_id = {}
     
     def clear(self):
         
         for child in self.winfo_children():
             child.destroy()
         
-        self.editors_by_id = {}
+        self._editors_by_text_widget_id = {}
     
-    def get_editor_by_id(self, editor_id):
-        if editor_id not in self.editors_by_id:
+    def get_editor_by_text_widget_id(self, text_widget_id):
+        if text_widget_id not in self._editors_by_text_widget_id:
             editor = ReplayerEditor(self)
             self.add(editor, text="<untitled>")
-            self.editors_by_id[editor_id] = editor
+            self._editors_by_text_widget_id[text_widget_id] = editor
             
-        return self.editors_by_id[editor_id]
+        return self._editors_by_text_widget_id[text_widget_id]
     
     def replay_event(self, event):
-        if hasattr(event, "editor_id"):
-            editor = self.get_editor_by_id(event.editor_id)
+        if "text_widget_id" in event:
+            editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
             #print(event.editor_id, id(editor), event)
             self.select(editor)
             editor.replay_event(event)
     
     def undo_event(self, event):
-        if hasattr(event, "editor_id"):
-            editor = self.get_editor_by_id(event.editor_id)
+        if "text_widget_id" in event:
+            editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
             editor.undo_event(event)
 
 class ShellFrame(ReplayerEditor):
-    
     def clear(self):
         self.code_view.text.delete("1.0", "end")
 
 
-def run():
-    try:
-        ReplayWindow().mainloop()
-    except:
-        get_workbench().report_exception()
-
-if __name__ == "__main__":
-    run()
+def load_plugin():
+    def open_replayer():
+        win = ReplayWindow()
+        win.focus_set()
+        win.grab_set()
+        get_workbench().wait_window(win)
+    
+    get_workbench().add_option("tools.replayer_last_browser_folder", None)
+    get_workbench().add_command("open_replayer", "tools", "Open replayer", 
+                                open_replayer)
