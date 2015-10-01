@@ -387,7 +387,7 @@ class TextWrapper:
         if (event_kind != self._last_event_kind
             or e.char in ("\r", "\n", " ", "\t")
             or e.keysym in ["Return", "KP_Enter"]
-            #or time.time() - self.last_key_time > 2
+            or time.time() - self.last_key_time > 2
             ):
             self.add_undo_separator()
             
