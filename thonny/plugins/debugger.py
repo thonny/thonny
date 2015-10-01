@@ -639,7 +639,11 @@ class FunctionCallDialog(FrameDialog):
         
         # change tab label
         self._code_book.tab(self._text_wrapper, text=function_label)
-        
+    
+    def _update_this_frame(self, msg, frame_info):
+        FrameDialog._update_this_frame(self, msg, frame_info)
+        self._locals_frame.update_variables(frame_info.locals)
+
         
 class ModuleLoadDialog(FrameDialog):
     def __init__(self, text_wrapper, frame_info):
