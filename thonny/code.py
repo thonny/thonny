@@ -201,7 +201,7 @@ class EditorNotebook(ttk.Notebook):
             tester=None, # TODO: not read-only
             group=50)
 
-        get_workbench()
+        get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
     
     
     def load_startup_files(self):
@@ -320,6 +320,11 @@ class EditorNotebook(ttk.Notebook):
             and not editors[0].is_modified()
             and not editors[0].get_filename()):
             self._cmd_close_file()
+    
+    def _mac_open_document(self, *args):
+        for arg in args:
+            if isinstance(arg, str) and os.path.exists(arg):
+                self.show_file(arg)
         
     def get_current_editor(self):
         return get_current_notebook_tab_widget(self)
