@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-python3 $prefix/lib/thonny/thonny "$@"
+$python -B $target_dir/share/thonny_frontend.py "$@"

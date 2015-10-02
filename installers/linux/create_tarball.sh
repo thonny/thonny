@@ -1,28 +1,41 @@
 #!/bin/bash
 
-# prepare working folder
-rm -rf cx_build
-rm -rf build
-mkdir -p build
+SOURCE_DIR=../..
 
-python3.4 ../cx_freeze/setup.py build -b cx_build > freezing.log
-
-# copy template and source files
-VERSION=$(<../../VERSION)
+VERSION=$(<$SOURCE_DIR/VERSION)
 VERSION_NAME=thonny-$VERSION 
-MAIN_DIR=build/$VERSION_NAME
-mkdir $MAIN_DIR
 
-cp -r cx_build/exe.linux-i686-3.4/* $MAIN_DIR
-cp Thonny.desktop $MAIN_DIR
-cp thonny.sh $MAIN_DIR
-cp install.py $MAIN_DIR/install
-chmod 755 $MAIN_DIR/install
+# prepare working folder
+rm -rf build
+TARGET_DIR=build/$VERSION_NAME
+mkdir -p $TARGET_DIR
+
+# copy source and template files
+mkdir -p $TARGET_DIR/share
+cp -r $SOURCE_DIR/thonny_frontend.py $TARGET_DIR/share
+cp -r $SOURCE_DIR/thonny_backend.py $TARGET_DIR/share
+cp -r $SOURCE_DIR/VERSION $TARGET_DIR/share
+cp -r $SOURCE_DIR/thonny $TARGET_DIR/share
+cp -r $SOURCE_DIR/rope $TARGET_DIR/share
+cp -r $SOURCE_DIR/jedi $TARGET_DIR/share
+cp -r $SOURCE_DIR/res $TARGET_DIR/share
+
+cp thonny.sh $TARGET_DIR/bin/thonny
+cp thonny.sh $TARGET_DIR/bin/thonny
+ 
+
+cp -r $SOURCE_DIR/LICENSE $TARGET_DIR
+cp INSTALL $TARGET_DIR
+cp Thonny.desktop $TARGET_DIR/temp
+cp uninstall.sh $TARGET_DIR/temp
+
+cp install.py $TARGET_DIR/install
+chmod 755 $TARGET_DIR/install
 
 # clean up unnecessary stuff
-rm -rf $MAIN_DIR/thonny/__pycache__
-rm -rf $MAIN_DIR/thonny/*.pyo
-rm -rf $MAIN_DIR/thonny/*.pyc 
+find $TARGET_DIR -type f -name "*.pyo" -delete
+find $TARGET_DIR -type f -name "*.pyc" -delete
+find $TARGET_DIR -type d -name "__pycache__" -delete
 
 # put it together
 mkdir -p dist
