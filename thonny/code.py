@@ -208,7 +208,7 @@ class EditorNotebook(ttk.Notebook):
         """If no filename was sent from command line
         then load previous files (if setting allows)"""  
         
-        cmd_line_filenames = sys.argv[1:]
+        cmd_line_filenames = [name for name in sys.argv[1:] if os.path.exists(name)]
         
         
         if len(cmd_line_filenames) > 0:
@@ -230,7 +230,7 @@ class EditorNotebook(ttk.Notebook):
             if len(cmd_line_filenames) > 0:
                 self.show_file(cmd_line_filenames[0])
             elif cur_file and os.path.exists(cur_file):
-                self.show_file(get_workbench().get_option("file.current_file"))
+                self.show_file(cur_file)
             else:
                 self._cmd_new_file()
         else:
