@@ -84,7 +84,11 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         
         self.initializing = False
-        self.mainloop()
+        
+        try:
+            self.mainloop()
+        except SystemExit:
+            self.destroy()
         
     def _init_configuration(self):
         self._configuration_manager = ConfigurationManager (
