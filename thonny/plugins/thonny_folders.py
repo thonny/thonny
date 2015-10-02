@@ -27,8 +27,10 @@ def load_plugin():
     def cmd_open_plugins_dir():
         open_path_in_system_file_manager(os.path.join(get_workbench().get_installation_dir(), "thonny", "plugins"))
         
-    get_workbench().add_command("open_user_dir", "tools", "Open Thonny plugins folder",
-        cmd_open_plugins_dir, group=70)
-    get_workbench().add_command("open_user_dir", "tools", "Open Thonny user folder",
-        cmd_open_user_dir, group=70)
+    if (get_workbench().get_option("debug_mode")
+        or get_workbench().get_option("expert_mode")):
+        get_workbench().add_command("open_user_dir", "tools", "Open Thonny plugins folder",
+                                    cmd_open_plugins_dir, group=70)
+        get_workbench().add_command("open_user_dir", "tools", "Open Thonny user folder",
+                                    cmd_open_user_dir, group=70)
     
