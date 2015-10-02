@@ -32,6 +32,8 @@ VERSION=$(<../../VERSION)
 sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
 
+# add readme #####################################################################
+cp readme.txt build
 
 # create dmg #####################################################################
 mkdir -p dist
