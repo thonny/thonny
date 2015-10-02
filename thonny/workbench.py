@@ -153,9 +153,6 @@ class Workbench(tk.Tk):
         self._menu_item_testers = {} # key is pair (menu_name, command_label)
         
         # create standard menus in correct order
-        if running_on_mac_os():
-            self.get_menu("Thonny")
-            
         self.get_menu("file", "File")
         self.get_menu("edit", "Edit")
         self.get_menu("view", "View")
@@ -213,8 +210,8 @@ class Workbench(tk.Tk):
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>"))
         
         
-        self.add_command("show_options", "tools", "Options ...",
-            self._cmd_show_options)
+        self.add_command("show_options", "tools", "Options ...", self._cmd_show_options)
+        self.createcommand("::tk::mac::ShowPreferences", self._cmd_show_options)
         
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),

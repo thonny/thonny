@@ -102,9 +102,13 @@ class AboutDialog(tk.Toplevel):
 
 
 def load_plugin():
-    get_workbench().add_command("about", 
-        "Thonny" if running_on_mac_os() else "help",
-        "About Thonny",
-        lambda: AboutDialog(get_workbench(), get_workbench().get_version()))
+    def open_about(*args):
+        AboutDialog(get_workbench(), get_workbench().get_version())
+        
+    get_workbench().add_command("about", "help", "About Thonny", open_about)
+    
+    # For Mac
+    get_workbench().createcommand("tkAboutDialog", open_about)
+
 
     

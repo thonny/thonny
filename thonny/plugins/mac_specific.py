@@ -54,8 +54,6 @@ def _set_up_mac_specific_stuff():
     get_workbench().createcommand("::tk::mac::OpenDocument", mac_open_document)
     get_workbench().createcommand("::tk::mac::OpenApplication", mac_open_application)
     get_workbench().createcommand("::tk::mac::ReopenApplication", mac_reopen_application)
-    # TODO: get_workbench().createcommand("tkAboutDialog", self._cmd_about)
-    get_workbench().createcommand("::tk::mac::ShowPreferences", lambda: print("Prefs"))
     
     """ TODO:
     self._add_command("mac_add_download_assessment", "Misc", 'Allow opening py files from browser ...',
