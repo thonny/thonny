@@ -73,9 +73,9 @@ class Workbench(tk.Tk):
         self.bind("BackendMessage", self._update_title, True)
         
         self._init_containers()
-        register_runner(Runner())
-        get_runner().send_command(ToplevelCommand(command="Reset"))
         
+        self._init_runner()
+            
         self._init_commands()
         self._load_plugins()
         
@@ -202,6 +202,13 @@ class Workbench(tk.Tk):
         
         self.update_fonts()
         
+    def _init_runner(self):
+        try:
+            register_runner(Runner())
+            get_runner().send_command(ToplevelCommand(command="Reset"))
+        except:
+            self.report_exception("Error when initializing backend")
+
 
     def _init_commands(self):
         
