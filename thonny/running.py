@@ -24,6 +24,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shutil
+import filecmp
 
 
 class Runner:
@@ -383,8 +384,13 @@ class _BackendProxy:
             original = os.path.join(self._thonny_dir, filename)
             copy = os.path.join(bp_path, filename)
             
-            if os.path.exists(original): 
+            if (os.path.exists(original) 
+                and not os.path.exists(copy)
+                or not filecmp.cmp(original, copy)): 
                 shutil.copyfile(original, copy)
+            elif not os.path.exists(original) and not os.path.exists(copy):
+                raise AssertionError("Missing file in backend_private: " + original)
+            
                 
     
     def _listen_stdout(self):
