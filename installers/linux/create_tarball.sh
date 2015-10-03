@@ -10,27 +10,31 @@ rm -rf build
 TARGET_DIR=build/$VERSION_NAME
 mkdir -p $TARGET_DIR
 
-# copy source and template files
+
+
+# copy files
+cp $SOURCE_DIR/license_wrapped.txt $TARGET_DIR/license.txt
+cp readme.txt $TARGET_DIR/readme.txt
+cp install.py $TARGET_DIR/install
+chmod 755 $TARGET_DIR/install
+
 mkdir -p $TARGET_DIR/share
 cp -r $SOURCE_DIR/thonny_frontend.py $TARGET_DIR/share
 cp -r $SOURCE_DIR/thonny_backend.py $TARGET_DIR/share
+cp -r $SOURCE_DIR/backend_private $TARGET_DIR/share
 cp -r $SOURCE_DIR/VERSION $TARGET_DIR/share
 cp -r $SOURCE_DIR/thonny $TARGET_DIR/share
 cp -r $SOURCE_DIR/rope $TARGET_DIR/share
 cp -r $SOURCE_DIR/jedi $TARGET_DIR/share
 cp -r $SOURCE_DIR/res $TARGET_DIR/share
 
-cp thonny.sh $TARGET_DIR/bin/thonny
-cp thonny.sh $TARGET_DIR/bin/thonny
- 
+#mkdir -fp $TARGET_DIR/share/backend_private
 
-cp -r $SOURCE_DIR/LICENSE $TARGET_DIR
-cp INSTALL $TARGET_DIR
-cp Thonny.desktop $TARGET_DIR/temp
-cp uninstall.sh $TARGET_DIR/temp
+mkdir -p $TARGET_DIR/templates
+cp thonny.sh $TARGET_DIR/templates
+cp uninstall.sh $TARGET_DIR/templates
+cp Thonny.desktop $TARGET_DIR/templates
 
-cp install.py $TARGET_DIR/install
-chmod 755 $TARGET_DIR/install
 
 # clean up unnecessary stuff
 find $TARGET_DIR -type f -name "*.pyo" -delete
