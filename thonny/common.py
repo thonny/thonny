@@ -164,13 +164,13 @@ def parse_message(msg_string):
 
 
 def quote_path_for_shell(path):
-    # http://stackoverflow.com/a/25208652/261181
-    try:
-        from shlex import quote
-    except ImportError:
-        from pipes import quote
-    
-    return quote(path)
+    for c in path:
+        if (not c.isalpha() 
+            and not c.isnumeric()
+            and c not in "-_./\\"):
+            return '"' + path + '"'
+    else:
+        return path
 
 def unquote_path(path):
     # TODO: may be incomplete
