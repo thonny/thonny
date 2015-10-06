@@ -11,6 +11,7 @@ import types
 import logging
 import pydoc
 import builtins
+import site
 
 import __main__  # @UnresolvedImport
 
@@ -39,6 +40,7 @@ class VM:
     def __init__(self, main_dir):
         self._main_dir = main_dir
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
+        site.sethelper() # otherwise help function is not available
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
         self._current_executor = None
