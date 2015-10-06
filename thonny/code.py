@@ -285,6 +285,7 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_save_file(self):
         if self.get_current_editor():
             self.get_current_editor().save_file()
+            self.update_editor_title(self.get_current_editor())
         
         self._remember_open_files()
     
