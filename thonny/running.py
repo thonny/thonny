@@ -102,7 +102,7 @@ class Runner:
             return
         
         # changing dir may be required
-        script_dir = os.path.dirname(filename)
+        script_dir = os.path.realpath(os.path.dirname(filename))
         
         if (get_workbench().get_option("run.auto_cd") and mode[0].isupper()
             and self._proxy.cwd != script_dir):
