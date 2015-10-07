@@ -376,19 +376,25 @@ class _BackendProxy:
         os.makedirs(bp_path, 0o777, True)
         os.makedirs(os.path.join(bp_path, "thonny"), 0o777, True)
         
-        for filename in [os.path.join(bp_path, "thonny_backend.py"),
-                         os.path.join(bp_path, "thonny", "backend.py"),
-                         os.path.join(bp_path, "thonny", "ast_utils.py"),
-                         os.path.join(bp_path, "thonny", "misc_utils.py"),
-                         os.path.join(bp_path, "thonny", "common.py")]:
+        for filename in ["thonny_backend.py",
+                         os.path.join("thonny", "backend.py"),
+                         os.path.join("thonny", "ast_utils.py"),
+                         os.path.join("thonny", "misc_utils.py"),
+                         os.path.join("thonny", "common.py")]:
             original = os.path.join(self._thonny_dir, filename)
             copy = os.path.join(bp_path, filename)
             
-            if (os.path.exists(original) 
-                and not os.path.exists(copy)
-                or not filecmp.cmp(original, copy)): 
-                shutil.copyfile(original, copy)
-            elif not os.path.exists(original) and not os.path.exists(copy):
+            if os.path.exists(original):
+                # May be dev environment or may be source based distribution
+                if os.path.exists(copy) and filecmp.cmp(original, copy):
+                    pass
+                else:
+                    info("UPDATING " + copy)
+                    shutil.copyfile(original, copy)
+            
+            # now the copy must exist
+            # (either because it was just copied or because it was bundled)
+            if not os.path.exists(copy): 
                 raise AssertionError("Missing file in backend_private: " + original)
             
                 
