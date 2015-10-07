@@ -376,11 +376,11 @@ class _BackendProxy:
         os.makedirs(bp_path, 0o777, True)
         os.makedirs(os.path.join(bp_path, "thonny"), 0o777, True)
         
-        for filename in ["thonny_backend.py",
-                         os.path.join("thonny", "backend.py"),
-                         os.path.join("thonny", "ast_utils.py"),
-                         os.path.join("thonny", "misc_utils.py"),
-                         os.path.join("thonny", "common.py")]:
+        for filename in [os.path.join(bp_path, "thonny_backend.py"),
+                         os.path.join(bp_path, "thonny", "backend.py"),
+                         os.path.join(bp_path, "thonny", "ast_utils.py"),
+                         os.path.join(bp_path, "thonny", "misc_utils.py"),
+                         os.path.join(bp_path, "thonny", "common.py")]:
             original = os.path.join(self._thonny_dir, filename)
             copy = os.path.join(bp_path, filename)
             
