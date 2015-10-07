@@ -386,7 +386,7 @@ class _BackendProxy:
             
             if os.path.exists(original):
                 # May be dev environment or may be source based distribution
-                if os.path.exists(copy) and filecmp.cmp(original, copy):
+                if os.path.exists(copy) and filecmp.cmp(original, copy, False):
                     pass
                 else:
                     info("UPDATING " + copy)
