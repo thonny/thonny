@@ -2,7 +2,10 @@ import sys
 import os.path
 from cx_Freeze import setup, Executable
 import shutil
+from pkgutil import iter_modules
 
+def module_exists(module_name):
+    return module_name in (name for loader, name, ispkg in iter_modules())
 
 MAIN_DIR = os.path.abspath("../..")
 
@@ -23,6 +26,219 @@ for filename in ["thonny_backend.py",
         shutil.copyfile(original, copy)
         
 
+stdlib_packages = [
+                 "string",
+                 "difflib",
+                 "textwrap",
+                 "unicodedata",
+                 "stringprep",
+                 
+                 "struct",
+                 "codecs",
+                 
+                 "datetime",
+                 "calendar",
+                 "collections", # TODO: .abc ???
+                 "heapq",
+                 "bisect",
+                 "array",
+                 "weakref",
+                 "types",
+                 "copy",
+                 "pprint",
+                 "reprlib",
+                 "enum",
+                 
+                 "numbers",
+                 "math",
+                 "cmath",
+                 "decimal",
+                 "fractions",
+                 "random",
+                 "statistics",
+                 
+                 "itertools",
+                 "functools",
+                 "operator",
+                 
+                 "pathlib",
+                 #os", # TODO: os.path ??
+                 "fileinput",
+                 "stat",
+                 "filecmp",
+                 "tempfile",
+                 "glob",
+                 "fnmatch",
+                 "linecache",
+                 "shutil",
+                 
+                 "pickle",
+                 "copyreg",
+                 "shelve",
+                 "marshal",
+                 "dbm",
+                 "sqlite3",
+                 
+                 "zlib",
+                 "gzip",
+                 "bz2",
+                 "lzma",
+                 "zipfile",
+                 "tarfile",
+                 
+                 "csv",
+                 "configparser",
+                 "netrc",
+                 "xdrlib",
+                 "plistlib",
+                 
+                 "hashlib",
+                 "hmac",
+                 "os",
+                 "io",
+                 "time",
+                 "argparse",
+                 "getopt",
+                 "logging", # TODO: config, handlers
+                 "getpass",
+                 #"curses", # not available in windows
+                 "platform",
+                 "errno",
+                 "ctypes",
+                 
+                 "threading",
+                 "multiprocessing",
+                 "concurrent",
+                 "subprocess",
+                 "sched",
+                 "queue",
+                 "_thread",
+                 
+                 "socket",
+                 "ssl",
+                 "select",
+                 "selectors",
+                 "asyncio",
+                 "asyncore",
+                 "asynchat",
+                 "signal",
+                 "mmap",
+                 
+                 "email",
+                 "json",
+                 "mailcap",
+                 "mailbox",
+                 "mimetypes",
+                 "base64",
+                 "binhex",
+                 "binascii",
+                 "quopri",
+                 "uu",
+                 
+                 "html",
+                 "xml",
+                 
+                 "webbrowser",
+                 "cgi",
+                 "cgitb",
+                 "wsgiref",
+                 "urllib",
+                 "http",
+                 "ftplib",
+                 "poplib",
+                 "imaplib",
+                 "nntplib",
+                 "smtplib",
+                 "smtpd",
+                 "telnetlib",
+                 "uuid",
+                 "socketserver",
+                 "xmlrpc",
+                 "ipaddress",
+                 
+                 "audioop",
+                 "aifc",
+                 "sunau",
+                 "wave",
+                 "chunk",
+                 "colorsys",
+                 "imghdr",
+                 "sndhdr",
+                 
+                 "gettext",
+                 "locale",
+                 
+                 "turtle",
+                 "cmd",
+                 "shlex",
+                 
+                 "tkinter",
+                 "idlelib", # TODO: does it cause warnings when I'm not using it?
+                 
+                 "pydoc",
+                 "doctest",
+                 "unittest",
+                 #"test" # Meant only for Python devs
+                 
+                 "bdb",
+                 "faulthandler",
+                 "pdb",
+                 "timeit",
+                 "trace",
+                 "tracemalloc",
+                 
+                 "distutils",
+                 "ensurepip", # TODO: ???
+                 "venv",
+                 
+                 "sys",
+                 "sysconfig",
+                 "builtins",
+                 "warnings",
+                 "contextlib",
+                 "abc",
+                 "atexit",
+                 "traceback",
+                 "__future__",
+                 "gc",
+                 "inspect",
+                 "site",
+                 #"fpectl", # not built by default
+                 
+                 "code",
+                 "codeop",
+                 
+                 "zipimport",
+                 "pkgutil",
+                 "modulefinder",
+                 "runpy",
+                 "importlib",
+                 
+                 "parser",
+                 "ast",
+                 "symtable",
+                 "symbol",
+                 "token",
+                 "keyword",
+                 "tokenize",
+                 "tabnanny",
+                 "pyclbr",
+                 "py_compile",
+                 "compileall",
+                 "dis",
+                 "pickletools", # TODO: ???
+                 
+                 "formatter",
+                 ]
+
+platform_specific = ["winsound",
+                     "readline",
+                     "rlcompleter",
+                     "ossaudiodev"]
+
+for module_name in platform_specific:
+    if module_exists(module_name):        
+        stdlib_packages.append(module_name)
 
 # Options shared by both Executables ----------------------------
 build_exe_options = {
@@ -30,9 +246,8 @@ build_exe_options = {
     'include_files': [os.path.join(MAIN_DIR, "res"),
                       os.path.join(MAIN_DIR , "VERSION"),
                       os.path.join(MAIN_DIR, "backend_private")],
-    'packages': ["jedi", "rope", "turtle", "idlelib", "thonny",
-                 "unicodedata" # seems that this doesn't suffice here, I also needed to import it in backend
-                 ],
+    'packages': ["jedi", "rope", "thonny"] + stdlib_packages
+                 ,
     'include_msvcr' : True, 
     'base' : "Win32GUI" if sys.platform == "win32" else None,
 }
