@@ -21,12 +21,18 @@ chmod 755 $TARGET_DIR/install
 mkdir -p $TARGET_DIR/share
 cp -r $SOURCE_DIR/thonny_frontend.py $TARGET_DIR/share
 cp -r $SOURCE_DIR/thonny_backend.py $TARGET_DIR/share
-cp -r $SOURCE_DIR/backend_private $TARGET_DIR/share
 cp -r $SOURCE_DIR/VERSION $TARGET_DIR/share
 cp -r $SOURCE_DIR/thonny $TARGET_DIR/share
 cp -r $SOURCE_DIR/rope $TARGET_DIR/share
 cp -r $SOURCE_DIR/jedi $TARGET_DIR/share
 cp -r $SOURCE_DIR/res $TARGET_DIR/share
+
+mkdir -p $TARGET_DIR/share/backend_private
+cp -r $SOURCE_DIR/thonny_backend.py $TARGET_DIR/share/backend_private
+cp -r $SOURCE_DIR/thonny/backend.py $TARGET_DIR/share/backend_private
+cp -r $SOURCE_DIR/thonny/ast_utils.py $TARGET_DIR/share/backend_private
+cp -r $SOURCE_DIR/thonny/misc_utils.py $TARGET_DIR/share/backend_private
+cp -r $SOURCE_DIR/thonny/common.py $TARGET_DIR/share/backend_private
 
 #mkdir -fp $TARGET_DIR/share/backend_private
 
