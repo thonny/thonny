@@ -12,6 +12,7 @@ gives relative __file__-s on imported modules.)
 # following imports force cx-freeze to include required lib
 from random import randint  # @UnusedImport
 from hashlib import md5   # @UnusedImport
+from urllib.request import urlopen    # @UnusedImport
 
 # imports required by backend itself
 import sys
