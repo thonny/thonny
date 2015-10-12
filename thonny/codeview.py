@@ -9,6 +9,7 @@ from thonny.ui_utils import TextWrapper, AutoScrollbar
 from thonny.common import TextRange
 from thonny.coloring import SyntaxColorer
 from thonny.globals import get_workbench
+from thonny.misc_utils import running_on_mac_os
 
 BLOCK_COMMENT_PREFIX = "##"
 
@@ -123,6 +124,13 @@ class CodeView(ttk.Frame, TextWrapper):
         self.text.bind("<BackSpace>", self.smart_backspace_event, True)
         
         fixwordbreaks(tk._default_root)
+        
+        if running_on_mac_os():
+            self.text.bind("<Button-2>", self._open_context_menu)
+            self.text.bind("<Control-Button-1>", self._open_context_menu)
+        else:  
+            self.text.bind("<Button-3>", self._open_context_menu)
+
         
     def del_word_left(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
@@ -758,6 +766,9 @@ class CodeView(ttk.Frame, TextWrapper):
             end_lineno, end_col_offset = lineno, col_offset
             
         return TextRange(lineno, col_offset, end_lineno, end_col_offset)
+    
+    def _open_context_menu(self, event):
+        get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
     
 
