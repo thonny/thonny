@@ -14,7 +14,7 @@ class ConfigurationManager:
         
         if os.path.exists(self._filename):
             with open(self._filename, 'r', encoding="UTF-8") as fp: 
-                self._ini.readfp(fp)
+                self._ini.read_file(fp)
 
         #print(prefs_filename, self.sections())
     
