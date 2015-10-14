@@ -11,7 +11,7 @@ shell becomes kind of title for the execution.
 
 from _thread import start_new_thread
 import collections
-from logging import info, debug, exception
+from logging import info, debug
 import os.path
 import subprocess
 import sys
@@ -315,6 +315,7 @@ class _BackendProxy:
                 and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
                 my_env[name] = os.environ[name]
                 
+        my_env["PYTHONIOENCODING"] = "ASCII" # cx_freezed backend won't use this but this enables using external python as fallback in cases of multibyte encodings
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
         interpreter = get_workbench().get_option("run.interpreter")
