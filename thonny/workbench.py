@@ -5,7 +5,7 @@ import importlib
 from logging import exception, info, warning
 import os.path
 import sys
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import traceback
 
 from thonny import ui_utils
@@ -24,6 +24,7 @@ import logging
 from thonny.globals import register_runner, get_runner
 from thonny.config_ui import ConfigurationDialog
 import pkgutil
+import configparser
 
 
 class Workbench(tk.Tk):
@@ -91,10 +92,19 @@ class Workbench(tk.Tk):
             self.destroy()
         
     def _init_configuration(self):
-        self._configuration_manager = ConfigurationManager (
-            os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
-        )
-        
+        conf_filename = os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
+        try: 
+            self._configuration_manager = ConfigurationManager(conf_filename)
+        except configparser.Error:
+            if (os.path.exists(conf_filename) 
+                and messagebox.askyesno("Problem", 
+                    "Thonny's configuration file can't be read. It may be corrupt.\n\n"
+                    + "Do you want to discard the file and open Thonny with default settings?")):
+                os.remove(conf_filename)
+                self._configuration_manager = ConfigurationManager(conf_filename)
+            else:
+                raise
+                
         self._configuration_pages = {}
 
     
