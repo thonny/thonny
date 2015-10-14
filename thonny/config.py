@@ -41,7 +41,7 @@ class ConfigurationManager:
     def has_option(self, name):
         return name in self._defaults
     
-    def set_option(self, name, value, save_now=True):
+    def set_option(self, name, value, save_now=False):
         section, option = self._parse_name(name)
         name = section + "." + option
         if not self._ini.has_section(section):

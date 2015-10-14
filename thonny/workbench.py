@@ -881,7 +881,6 @@ class Workbench(tk.Tk):
         
         try:
             self._save_layout()
-            #self.user_logger.save()
             #ui_utils.delete_images()
             self.event_generate("WorkbenchClose")
         except:
