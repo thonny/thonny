@@ -273,9 +273,11 @@ build_exe_options = {
                       os.path.join(MAIN_DIR , "VERSION"),
                       os.path.join(MAIN_DIR, "backend_private")],
     'packages' : packages,
-    'include_msvcr' : True, 
-    'base' : "Win32GUI" if sys.platform == "win32" else None,
+    'include_msvcr' : True
 }
+
+if sys.platform == "win32":
+    build_exe_options['base'] = "Win32GUI"
 
 frontend_exe = Executable (
     script = os.path.join(MAIN_DIR, "thonny_frontend.py"),
