@@ -262,7 +262,8 @@ for module_name in platform_specific_or_hidden:
     if module_exists(module_name):        
         stdlib_packages.append(module_name)
 
-extra_packages = ["pygame"]
+extra_packages = [
+]
 
 packages = ["jedi", "rope", "thonny"] + stdlib_packages + extra_packages
 
