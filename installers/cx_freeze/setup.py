@@ -199,7 +199,6 @@ stdlib_packages = [
                  "abc",
                  "atexit",
                  "traceback",
-                 "__future__",
                  "gc",
                  "inspect",
                  "site",
@@ -233,7 +232,6 @@ stdlib_packages = [
                      "pyexpat",
                      "select",
                      "unicodedata",
-                     "winsound",
                      "_bz2",
                      "_ctypes",
                      "_ctypes_test",
@@ -241,9 +239,7 @@ stdlib_packages = [
                      "_elementtree",
                      "_hashlib",
                      "_lzma",
-                     "_msi",
                      "_multiprocessing",
-                     "_overlapped",
                      "_socket",
                      "_sqlite3",
                      "_ssl",
@@ -254,6 +250,8 @@ stdlib_packages = [
                  ]
 
 platform_specific_or_hidden = [
+                     "_msi",
+                     "_overlapped",
                      "winsound",
                      "readline",
                      "rlcompleter",
