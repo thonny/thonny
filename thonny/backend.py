@@ -50,12 +50,7 @@ class VM:
         original_path = sys.path.copy()
         
         # clean up path
-        # Don't want current dir to be in path,
-        # because it may contain files meant for different version of interpreter
-        # (used for running the frontend)
-        sys.path = [d for d in sys.path 
-                        if d != "" 
-                        and d != main_dir]
+        sys.path = [d for d in sys.path if d != ""]
         
         # script mode
         if len(sys.argv) > 1:
