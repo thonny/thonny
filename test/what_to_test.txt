@@ -3,3 +3,5 @@
 
 * undo / redo
 **	with indent, newline, toggle_comment etc. 
+
+* importing from modules dependent on pyd files (eg, _socket)
