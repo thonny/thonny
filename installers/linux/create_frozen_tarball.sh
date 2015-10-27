@@ -14,5 +14,5 @@ TARGET_DIR=build/$VERSION_NAME
 mkdir -p $TARGET_DIR
 
 # Freeze #########################################################################
-python3 ../cx_freeze/setup.py build -b cx_build > freezing.log
+python3.4 ../cx_freeze/setup.py build -b cx_build > freezing.log
 

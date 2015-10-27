@@ -229,6 +229,7 @@ stdlib_packages = [
                  
                  "formatter",
                  ####################################
+                     "encodings",
                      "pyexpat",
                      "select",
                      "unicodedata",
