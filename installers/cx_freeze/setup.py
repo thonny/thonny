@@ -229,16 +229,44 @@ stdlib_packages = [
                  "pickletools", # TODO: ???
                  
                  "formatter",
+                 ####################################
+                     "pyexpat",
+                     "select",
+                     "unicodedata",
+                     "winsound",
+                     "_bz2",
+                     "_ctypes",
+                     "_ctypes_test",
+                     "_decimal",
+                     "_elementtree",
+                     "_hashlib",
+                     "_lzma",
+                     "_msi",
+                     "_multiprocessing",
+                     "_overlapped",
+                     "_socket",
+                     "_sqlite3",
+                     "_ssl",
+                     "_testbuffer",
+                     "_testcapi",
+                     "_testimportmultiple",
+                     "_tkinter",
                  ]
 
-platform_specific = ["winsound",
+platform_specific_or_hidden = [
+                     "winsound",
                      "readline",
                      "rlcompleter",
-                     "ossaudiodev"]
+                     "ossaudiodev",
+                     ]
 
-for module_name in platform_specific:
+for module_name in platform_specific_or_hidden:
     if module_exists(module_name):        
         stdlib_packages.append(module_name)
+
+extra_packages = ["pygame", "pygame.base"]
+
+packages = ["jedi", "rope", "thonny"] + stdlib_packages + extra_packages
 
 # Options shared by both Executables ----------------------------
 build_exe_options = {
@@ -246,8 +274,7 @@ build_exe_options = {
     'include_files': [os.path.join(MAIN_DIR, "res"),
                       os.path.join(MAIN_DIR , "VERSION"),
                       os.path.join(MAIN_DIR, "backend_private")],
-    'packages': ["jedi", "rope", "thonny"] + stdlib_packages
-                 ,
+    'packages' : packages,
     'include_msvcr' : True, 
     'base' : "Win32GUI" if sys.platform == "win32" else None,
 }
@@ -258,7 +285,8 @@ frontend_exe = Executable (
 )
 
 backend_exe = Executable (
-    script = os.path.join(MAIN_DIR, "thonny_backend.py"),
+    script = os.path.join(MAIN_DIR, "thonny_backend_cx_freeze.py"),
+    targetName = "thonny_backend" + (".exe" if sys.platform == "win32" else "")
 )
 
 with open(os.path.join(MAIN_DIR, "VERSION")) as vf:

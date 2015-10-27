@@ -25,3 +25,4 @@ encoding//thonny/ui_utils.py=utf-8
 encoding//thonny/workbench.py=utf-8
 encoding/<project>=UTF-8
 encoding/thonny_backend.py=utf-8
+encoding/thonny_backend_cx_freeze.py=utf-8
