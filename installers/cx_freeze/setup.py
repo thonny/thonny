@@ -278,17 +278,20 @@ build_exe_options = {
     'include_msvcr' : True
 }
 
+exe_kw = {}
 if sys.platform == "win32":
-    build_exe_options['base'] = "Win32GUI"
+    exe_kw['base'] = "Win32GUI"
 
 frontend_exe = Executable (
     script = os.path.join(MAIN_DIR, "thonny_frontend.py"),
     icon = os.path.join(MAIN_DIR, "res", "thonny.ico"),
+    **exe_kw
 )
 
 backend_exe = Executable (
     script = os.path.join(MAIN_DIR, "thonny_backend_cx_freeze.py"),
-    targetName = "thonny_backend" + (".exe" if sys.platform == "win32" else "")
+    targetName = "thonny_backend" + (".exe" if sys.platform == "win32" else ""),
+    **exe_kw
 )
 
 with open(os.path.join(MAIN_DIR, "VERSION")) as vf:
