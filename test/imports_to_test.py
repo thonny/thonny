@@ -22,20 +22,23 @@ import _testbuffer
 import _testimportmultiple
 import _ctypes_test
 
-import pygame.base
-import pygame.vidcap
+#import pygame.base
+#import pygame.vidcap
 
 
 import pyexpat
 import select
 import unicodedata
 
+from imp import load_dynamic
+
 import os
 if os.name == "nt":
-    import win32api
-    import win32evtlog
-    import win32file
-    import win32pipe
-    import win32ui
-    import win32wnet
     import winsound
+
+# import win32api
+# import win32evtlog
+# import win32file
+# import win32pipe
+# import win32ui
+# import win32wnet
