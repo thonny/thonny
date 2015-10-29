@@ -5,3 +5,11 @@
 **	with indent, newline, toggle_comment etc. 
 
 * importing from modules dependent on pyd files (eg, _socket)
+
+* debugging complex language constructs
+
+* debug and run empty file
+
+* debug and run file with syntax errors
+
+* close Thonny when program is running
