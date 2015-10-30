@@ -19,7 +19,7 @@ backend_zip = os.path.join(main_dir, "thonny_backend.zip")
 if backend_zip in sys.path:
     sys.path.remove(backend_zip)
 
-from imp import load_dynamic            # @UnusedImport, otherwise this function is not available in frozen 3.5
+#from imp import load_dynamic            # @UnusedImport, otherwise this function is not available in frozen 3.5
 
 import thonny_backend                   # @UnusedImport
 
