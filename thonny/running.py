@@ -356,7 +356,12 @@ class _BackendProxy:
             universal_newlines=True
         )
         
-        ready_msg = parse_message(self._proc.stdout.readline())
+        ready_line = self._proc.stdout.readline()
+        if ready_line == "": # There was some problem
+            error_msg = self._proc.stderr.read()
+            raise Exception("Error starting backend process: " + error_msg)
+        
+        ready_msg = parse_message(ready_line)
         info("Backend ready: %s", ready_msg)
         get_workbench().event_generate("BackendReady", **ready_msg)
         
