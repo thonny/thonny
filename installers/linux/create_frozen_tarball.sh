@@ -14,7 +14,7 @@ TARGET_DIR=build/$VERSION_NAME
 mkdir -p $TARGET_DIR
 
 # Freeze #########################################################################
-/opt/pythonny/bin/python3 ../cx_freeze/setup.py build -b cx_build > freezing.log
+/opt/pythonny/bin/python3.5 ../cx_freeze/setup.py build -b cx_build > freezing.log
 
 # move some dirs to correct location ##################
 OUTPUT_DIR=cx_build/$(ls cx_build)
