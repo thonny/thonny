@@ -1,7 +1,3 @@
-NB!!! The repo is now Git (was Mercurial) !!!
-==================================================
-
-
 Thonny
 ======
 
