@@ -28,6 +28,12 @@ cp /opt/pythonny/lib/libtk8.6.so $OUTPUT_DIR
 cp -R /opt/pythonny/lib/tcl8.6 $OUTPUT_DIR/tcl
 cp -R /opt/pythonny/lib/tk8.6 $OUTPUT_DIR/tk
 
+# copy tkhtml
+mkdir $OUTPUT_DIR/tcl/Tkhtml
+cp /opt/pythonny/lib/Tkhtml3.0/libTkhtml3.0.so $OUTPUT_DIR/tcl/Tkhtml
+cp /opt/pythonny/lib/Tkhtml3.0/pkgIndex.tcl $OUTPUT_DIR/tcl/Tkhtml
+
+
 # move all to target_dir
 mv $OUTPUT_DIR/* $TARGET_DIR
 
