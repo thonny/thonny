@@ -3,14 +3,15 @@
 SOURCE_DIR=../..
 
 VERSION=$(<$SOURCE_DIR/VERSION)
-VERSION_NAME=thonny-$VERSION 
+ARCHITECTURE="$(uname -m)"
+VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 
 # Clean #########################################################################
 # prepare working folder
 rm -rf build
 rm -rf cx_build
 
-TARGET_DIR=build/$VERSION_NAME
+TARGET_DIR=build/thonny
 mkdir -p $TARGET_DIR
 
 # Freeze #########################################################################
@@ -39,4 +40,5 @@ mv $OUTPUT_DIR/* $TARGET_DIR
 
 # put it together
 mkdir -p dist
-tar -cvzf dist/thonny-$VERSION.tar.gz -C build $VERSION_NAME
+tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
+
