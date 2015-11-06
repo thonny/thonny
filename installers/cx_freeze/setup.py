@@ -264,7 +264,7 @@ for module_name in platform_specific_or_hidden:
         stdlib_packages.append(module_name)
 
 extra_packages = [
-'pygame'
+#'pygame'
 ]
 
 packages = ["jedi", "rope", "thonny", "tkhtml"] + stdlib_packages + extra_packages

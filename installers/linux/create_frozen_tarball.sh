@@ -1,7 +1,6 @@
 #!/bin/bash
 
 SOURCE_DIR=../..
-
 VERSION=$(<$SOURCE_DIR/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
