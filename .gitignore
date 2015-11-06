@@ -17,3 +17,4 @@ installers/windows/ThonnyRunner/Release/ThonnyRunner.ipdb
 *.opensdf
 installers/windows/ThonnyRunner/ThonnyRunner.sdf
 *.tlog
+*.ipdb
