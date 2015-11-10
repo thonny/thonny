@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """
+In dev setup this file lives in the root of the project.
+In installed Thonny, it's located in thonny/backend_private
+
 This file is run by VMProxy
 
 (Why separate file for launching? I want to have clean global scope 
@@ -25,12 +28,6 @@ logger.addHandler(file_handler)
 stream_handler = logging.StreamHandler(stream=sys.stderr)
 logger.addHandler(stream_handler)
 
-# create and run VM
-if getattr(sys, 'frozen', False):
-    this_dir = os.path.abspath(os.path.dirname(sys.executable))
-else:
-    this_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
-
 from thonny.backend import VM
-VM(this_dir).mainloop()
+VM().mainloop()
 

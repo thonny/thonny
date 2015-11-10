@@ -33,8 +33,7 @@ class Runner:
         get_workbench().add_option("run.auto_cd", True)
         get_workbench().add_option("run.interpreter", "")
         
-        self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"),
-            get_workbench().get_package_dir())
+        self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"))
         
         get_workbench().add_view(ShellView, "Shell", "s",
             visible_by_default=True,
@@ -214,13 +213,12 @@ class Runner:
     
 
 class _BackendProxy:
-    def __init__(self, default_cwd, main_dir):
+    def __init__(self, default_cwd):
         if os.path.exists(default_cwd):
             self.cwd = default_cwd
         else:
             self.cwd = os.path.expanduser("~")
             
-        self._thonny_dir = main_dir
         self._proc = None
         self._state = None
         self._message_queue = None
@@ -320,23 +318,34 @@ class _BackendProxy:
         
         interpreter = get_workbench().get_option("run.interpreter")
         if not interpreter:
-            if "thonny" in os.path.basename(sys.executable): # frozen Thonny
-                interpreter = os.path.join (
-                    os.path.dirname(sys.executable),
-                    os.path.basename(sys.executable).replace("frontend", "backend")
-                )
-            else:
-                interpreter = sys.executable
+            interpreter = sys.executable
+            if interpreter.endswith("thonny.exe"):
+                # assuming that thonny.exe is in the same dir as pythonw.exe
+                # (NB! thonny.exe in scripts folder delegates running to python.exe)
+                interpreter = interpreter.replace("thonny.exe", "pythonw.exe")
+                
         
-        if "thonny" in os.path.basename(interpreter):
-            cmd_line = [interpreter]
-        else:
-            self._check_update_backend_private()
-            cmd_line = [interpreter, 
-                        '-u', # unbuffered IO (neccessary in Python 3.1)
-                        '-B', # don't write pyo/pyc files (to avoid problems when using different Python versions)
-                        os.path.join(self._get_backend_private_path(),
-                                     "thonny_backend.py")]
+        backend_launcher = os.path.join(get_workbench().get_package_dir(), 
+                                        "backend_private",
+                                        "thonny_backend.py") 
+        
+        if not os.path.exists(backend_launcher):
+            # in dev machine use the main source
+            backend_launcher = os.path.realpath(
+                os.path.join(get_workbench().get_package_dir(), 
+                             "..",
+                             "thonny_backend.py")
+            ) 
+             
+        
+        cmd_line = [
+            interpreter, 
+            '-u', # unbuffered IO (neccessary in Python 3.1)
+            '-B', # don't write pyo/pyc files 
+                  # (to avoid problems when using different Python versions without write permissions)
+            backend_launcher
+        ]
+        
 
         if hasattr(cmd, "filename"):
             cmd_line.append(cmd.filename)
@@ -383,6 +392,7 @@ class _BackendProxy:
         os.makedirs(os.path.join(bp_path, "thonny"), 0o777, True)
         
         for filename in ["thonny_backend.py",
+                         os.path.join("thonny", "__init__.py"),
                          os.path.join("thonny", "backend.py"),
                          os.path.join("thonny", "ast_utils.py"),
                          os.path.join("thonny", "misc_utils.py"),

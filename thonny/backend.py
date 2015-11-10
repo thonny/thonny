@@ -17,7 +17,7 @@ import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
 from thonny import misc_utils
-from thonny.misc_utils import eqfn, get_python_version_string
+from thonny.misc_utils import get_python_version_string
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
@@ -37,8 +37,8 @@ debug = logger.debug
 info = logger.info
 
 class VM:
-    def __init__(self, main_dir):
-        self._main_dir = main_dir
+    def __init__(self):
+        self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         site.sethelper() # otherwise help function is not available
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
@@ -76,7 +76,7 @@ class VM:
         __main__.__doc__ = None
         
         self.send_message("Ready",
-                          main_dir=main_dir,
+                          main_dir=self._main_dir,
                           original_argv=original_argv,
                           original_path=original_path,
                           argv=sys.argv,
@@ -279,7 +279,7 @@ class VM:
     
     def _execute_source(self, source, filename, execution_mode, debug_mode):
         if debug_mode:
-            self._current_executor = FancyTracer(self, self._main_dir)
+            self._current_executor = FancyTracer(self)
         else:
             self._current_executor = Executor(self)
         
@@ -481,9 +481,9 @@ class Executor:
 
 class FancyTracer(Executor):
     
-    def __init__(self, vm, main_dir):
+    def __init__(self, vm):
         self._vm = vm
-        self._normcase_thonny_src_dir = os.path.normcase(main_dir) 
+        self._normcase_thonny_src_dir = os.path.normcase(os.path.dirname(sys.modules["thonny"].__file__)) 
         self._instrumented_files = misc_utils.PathSet()
         self._interesting_files = misc_utils.PathSet() # only events happening in these files are reported
         self._current_command = None
@@ -767,7 +767,7 @@ class FancyTracer(Executor):
     
     def _cmd_line_completed(self, frame, event, args, focus, cmd):
         return (event == "before_statement" 
-            and eqfn(frame.f_code.co_filename, cmd.target_filename)
+            and os.path.normcase(frame.f_code.co_filename) == os.path.normcase(cmd.target_filename)
             and focus.lineno == cmd.target_lineno
             and (focus != cmd.focus or id(frame) != cmd.frame_id))
 

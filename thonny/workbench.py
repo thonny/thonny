@@ -52,7 +52,7 @@ class Workbench(tk.Tk):
           notifications about debugger's progress)
           
     """
-    def __init__(self, main_dir):
+    def __init__(self):
         self.initializing = True
         
         tk.Tk.__init__(self)
@@ -61,7 +61,6 @@ class Workbench(tk.Tk):
         self._select_theme()
         thonny.globals.register_workbench(self)
         
-        self._main_dir = main_dir 
         self._init_configuration()
         
         self._init_diagnostic_logging()
@@ -142,7 +141,7 @@ class Workbench(tk.Tk):
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
-        icon_file = os.path.join(self._main_dir, "thonny", "res", "thonny.ico")
+        icon_file = os.path.join(self.get_package_dir(), "res", "thonny.ico")
         try:
             self.iconbitmap(icon_file, default=icon_file)
         except:
@@ -577,7 +576,7 @@ class Workbench(tk.Tk):
     
     def get_package_dir(self):
         """Returns thonny package directory"""
-        return self._main_dir
+        return os.path.dirname(sys.modules["thonny"].__file__)
     
     def get_image(self, filename_in_res_folder, tk_name=None):
         img = tk.PhotoImage(tk_name, 
