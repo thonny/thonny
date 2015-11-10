@@ -575,8 +575,8 @@ class Workbench(tk.Tk):
     def get_editor_notebook(self):
         return self._editor_notebook
     
-    def get_installation_dir(self):
-        """Returns Thonny installation directory"""
+    def get_package_dir(self):
+        """Returns thonny package directory"""
         return self._main_dir
     
     def _get_res_dir(self):
