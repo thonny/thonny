@@ -18,3 +18,4 @@ installers/windows/ThonnyRunner/Release/ThonnyRunner.ipdb
 installers/windows/ThonnyRunner/ThonnyRunner.sdf
 *.tlog
 *.ipdb
+installers/setuptools/thonny.egg-info
