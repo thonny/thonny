@@ -32,6 +32,8 @@ SolidCompression=yes
 WizardImageFile=inno_setup.bmp
 PrivilegesRequired=lowest
 ChangesAssociations=yes
+; Request extra space for precompiling libraries
+ExtraDiskSpaceRequired=25000000
 
 ; Signing
 ; Certum Unizeto provides free certs for open source
@@ -56,8 +58,8 @@ Type: filesandordirs; Name: "{app}\*"
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
 
 [Icons]
-Name: "{userstartmenu}\Thonny"; Filename: "{app}\thonny_frontend.exe"; IconFilename: "{app}\thonny_frontend.exe"
-Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny_frontend.exe"; IconFilename: "{app}\thonny_frontend.exe"
+Name: "{userstartmenu}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 
 
 [Registry]
@@ -65,24 +67,24 @@ Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny_frontend.exe"; IconFilenam
 
 ; Register the application
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny_frontend.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny_frontend.exe"; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny_frontend.exe"" ""%1"""; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny_frontend.exe"" ""%1"""; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny_frontend.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny.exe"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
 
 ; Add link to Thonny under existing Python.File ProgID
-Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny_frontend.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 ; Create separate ProgID (Thonny.py) which represents Thonny's ability to handle Python files
 ; These settings will be used when user chooses Thonny as default program for opening *.py files
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny_frontend.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 ; Restore "Edit with IDLE" when selecting Thonny as default opener
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\Edit with IDLE\command";     ValueType: string; ValueName: ""; ValueData: "C:\Windows\pyw.exe -3 -m idlelib ""%1""";  Flags: uninsdeletekey
@@ -106,6 +108,9 @@ Root: HKCU; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueNa
 ; Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny is Python IDE for beginners";  Flags: uninsdeletekey
 ; Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".py";  ValueData: "Thonny.py";  Flags: uninsdeletekey
 ; Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".pyw"; ValueData: "Thonny.py";  Flags: uninsdeletekey
+
+[Run]
+Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."
 
 
 [UninstallDelete]

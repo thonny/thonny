@@ -22,6 +22,7 @@ rmdir Doc /S /Q
 rmdir include /S /Q
 rmdir libs /S /Q
 rmdir Tools /S /Q
+rmdir Scripts /S /Q
 
 rmdir lib\test /S /Q
 rmdir lib\plat-* /S /Q
@@ -44,3 +45,5 @@ cd ..
 @echo ............... COPYING THONNY LAUNCHER ..........................
 copy ThonnyRunner\Release\thonny.exe %BUILDDIR%
 
+@echo ............... ENABLE DPI AWARNESS ..............................
+@REM call EnableDPIAwareness build\pythonw.exe
