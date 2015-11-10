@@ -17,7 +17,7 @@ del /S *.pyc
 del /S *.lib
 del /S *.a
 del /S *.chm
-pause
+
 rmdir Doc /S /Q
 rmdir include /S /Q
 rmdir libs /S /Q
@@ -41,11 +41,6 @@ rmdir tcl\tcl8.6\msgs /S /Q
 rmdir tcl\tcl8.6\tzdata /S /Q
 cd ..
 
-@echo ............... COPYING THONNY ............................
-copy ThonnyRunner\Release\thonny.exe
-copy ..\..\*.py %BUILDDIR%
-copy ..\..\VERSION %BUILDDIR%
-xcopy ..\..\thonny %BUILDDIR% /S /E /K>NUL
-xcopy ..\..\rope %BUILDDIR% /S /E /K>NUL
-xcopy ..\..\jedi %BUILDDIR% /S /E /K>NUL
+@echo ............... COPYING THONNY LAUNCHER ..........................
+copy ThonnyRunner\Release\thonny.exe %BUILDDIR%
 
