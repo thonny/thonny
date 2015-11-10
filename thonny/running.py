@@ -34,7 +34,7 @@ class Runner:
         get_workbench().add_option("run.interpreter", "")
         
         self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"),
-            get_workbench().get_installation_dir())
+            get_workbench().get_package_dir())
         
         get_workbench().add_view(ShellView, "Shell", "s",
             visible_by_default=True,

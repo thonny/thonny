@@ -141,11 +141,11 @@ class Workbench(tk.Tk):
             ui_utils.set_zoomed(self, True)
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        icon_file = os.path.join(self._get_res_dir(), "thonny.ico")
+        
+        icon_file = os.path.join(self._main_dir, "thonny", "res", "thonny.ico")
         try:
             self.iconbitmap(icon_file, default=icon_file)
         except:
-            
             try:
                 # seems to work in mac
                 self.iconbitmap(icon_file)
@@ -579,11 +579,10 @@ class Workbench(tk.Tk):
         """Returns thonny package directory"""
         return self._main_dir
     
-    def _get_res_dir(self):
-        return os.path.join(self._main_dir, "res")
-    
     def get_image(self, filename_in_res_folder, tk_name=None):
-        img = tk.PhotoImage(tk_name, file=os.path.join(self._get_res_dir(), filename_in_res_folder))
+        img = tk.PhotoImage(tk_name, 
+                            data=pkgutil.get_data("thonny", "res/" + filename_in_res_folder)
+                            )
         self._images.add(img)
         return img
                       
@@ -658,8 +657,8 @@ class Workbench(tk.Tk):
 
     def get_version(self):
         try:
-            with open(os.path.join(self._main_dir, "VERSION")) as fp:
-                return StrictVersion(fp.read().strip())
+            version_str = pkgutil.get_data("thonny", "VERSION").decode("ASCII").strip()
+            return StrictVersion(version_str)
         except:
             return StrictVersion("0.0")
       
