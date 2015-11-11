@@ -580,7 +580,9 @@ class Workbench(tk.Tk):
     
     def get_image(self, filename_in_res_folder, tk_name=None):
         img = tk.PhotoImage(tk_name, 
-                            data=pkgutil.get_data("thonny", "res/" + filename_in_res_folder)
+                            file=os.path.join(self.get_package_dir(),
+                                              "res",
+                                              filename_in_res_folder)
                             )
         self._images.add(img)
         return img
@@ -656,7 +658,8 @@ class Workbench(tk.Tk):
 
     def get_version(self):
         try:
-            version_str = pkgutil.get_data("thonny", "VERSION").decode("ASCII").strip()
+            with open(os.path.join(self.get_package_dir(), "VERSION"), encoding="ASCII") as fp:
+                version_str = fp.read().strip()
             return StrictVersion(version_str)
         except:
             return StrictVersion("0.0")
