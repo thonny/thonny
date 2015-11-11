@@ -10,7 +10,7 @@ import traceback
 
 from thonny import ui_utils
 from thonny.code import EditorNotebook
-from thonny.common import Record, ToplevelCommand
+from thonny.common import Record, ToplevelCommand, UserError
 from thonny.config import ConfigurationManager
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
@@ -914,7 +914,12 @@ class Workbench(tk.Tk):
     def report_exception(self, title="Internal error"):
         exception(title)
         if tk._default_root:
-            tk_messagebox.showerror(title, traceback.format_exc())
+            (typ, value, _) = sys.exc_info()
+            if issubclass(typ, UserError):
+                msg = str(value)
+            else:
+                msg = traceback.format_exc()
+            tk_messagebox.showerror(title, msg)
     
         
     def _save_layout(self):
