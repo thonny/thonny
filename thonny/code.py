@@ -241,7 +241,7 @@ class EditorNotebook(ttk.Notebook):
     
     def save_all_named_editors(self):
         for editor in self.winfo_children():
-            if editor.get_filename():
+            if editor.get_filename() and editor.is_modified():
                 editor.save_file()
     
     def _remember_open_files(self):
