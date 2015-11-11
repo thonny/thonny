@@ -20,7 +20,8 @@ import threading
 from thonny.common import serialize_message, ToplevelCommand, \
     quote_path_for_shell, \
     InlineCommand, parse_shell_command, unquote_path, \
-    CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission
+    CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
+    UserError
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shutil
@@ -323,7 +324,10 @@ class _BackendProxy:
                 # assuming that thonny.exe is in the same dir as pythonw.exe
                 # (NB! thonny.exe in scripts folder delegates running to python.exe)
                 interpreter = interpreter.replace("thonny.exe", "pythonw.exe")
-                
+        
+        if not os.path.exists(interpreter):
+            raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
+                            % interpreter)
         
         backend_launcher = os.path.join(get_workbench().get_package_dir(), 
                                         "backend_private",
