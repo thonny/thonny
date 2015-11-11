@@ -182,6 +182,9 @@ def print_structure(o):
     for attr in dir(o):
         print(attr, "=", getattr(o, attr))
 
+class UserError(RuntimeError):
+    pass
+
 if __name__ == "__main__":
     tr1 = TextRange(1,0,1,10)
     tr2 = TextRange(1,0,1,10)
