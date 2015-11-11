@@ -2,8 +2,7 @@
 import sys
 import os.path
 import tkinter as tk
-from tkinter import ttk
-import tkinter.messagebox as tkMessageBox
+from tkinter import ttk, messagebox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
@@ -407,10 +406,10 @@ class EditorNotebook(ttk.Notebook):
         if editor:
             message = "Do you want to save file before closing?"
             
-        confirm = tkMessageBox.askyesnocancel(
+        confirm = messagebox.askyesnocancel(
                   title="Save On Close",
                   message=message,
-                  default=tkMessageBox.YES,
+                  default=messagebox.YES,
                   master=self)
         
         if confirm:
