@@ -28,7 +28,6 @@ rmdir lib\test /S /Q>NUL
 rmdir lib\plat-* /S /Q>NUL
 
 
-rmdir tcl\tcl8 /S /Q>NUL
 del tcl\*.sh /Q>NUL
 del tcl\tcl8.6\clock.tcl>NUL
 del tcl\tcl8.6\safe.tcl>NUL

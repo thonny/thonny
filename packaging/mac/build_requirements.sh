@@ -37,6 +37,7 @@ chmod 555 $PREFIX/lib/Tk
 
 mkdir $PREFIX/lib/tcl8.6
 mkdir $PREFIX/lib/tk8.6
+cp -R /Library/Frameworks/Tcl.framework/Versions/8.6/Resources/tcl8 $PREFIX/lib
 cp -R /Library/Frameworks/Tcl.framework/Versions/8.6/Resources/Scripts/ $PREFIX/lib/tcl8.6
 cp -R /Library/Frameworks/Tk.framework/Versions/8.6/Resources/Scripts/ $PREFIX/lib/tk8.6
 
