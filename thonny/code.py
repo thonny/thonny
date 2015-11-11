@@ -268,7 +268,7 @@ class EditorNotebook(ttk.Notebook):
             filetypes = _dialog_filetypes, 
             initialdir = get_workbench().get_option("run.working_directory")
         )
-        if filename != "":
+        if filename:
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
             self._remember_open_files()
