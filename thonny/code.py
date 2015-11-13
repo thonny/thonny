@@ -124,7 +124,9 @@ class EditorNotebook(ttk.Notebook):
         ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
         
         get_workbench().add_option("file.reopen_all_files", False)
+        get_workbench().add_option("file.open_files", [])
         get_workbench().add_option("file.current_file", None)
+        get_workbench().add_option("file.recent_files", [])
         
         self._init_commands()
         self.enable_traversal()
@@ -137,8 +139,7 @@ class EditorNotebook(ttk.Notebook):
         """
     
     def _list_recent_files(self):
-        get_workbench().add_option("file.recent_files", [])
-         
+        pass
         # TODO:
         
     
@@ -254,6 +255,9 @@ class EditorNotebook(ttk.Notebook):
                           if editor.get_filename()]
         
         get_workbench().set_option("file.open_files", open_files)
+        
+        if len(open_files) == 0:
+            get_workbench().set_option("file.current_file", None)
     
     def _cmd_new_file(self):
         new_editor = Editor(self)
