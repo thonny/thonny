@@ -599,6 +599,9 @@ class Workbench(tk.Tk):
         view = self.get_view(view_id)
         notebook = view.home_widget.master
         
+        if hasattr(view, "before_show") and view.before_show() == False:
+            return False
+            
         if not view.winfo_ismapped():
             notebook.insert("auto", view.home_widget, text=self._view_records[view_id]["label"])
         
@@ -618,10 +621,16 @@ class Workbench(tk.Tk):
         if "instance" in self._view_records[view_id]:
             # TODO: handle the case, when view is maximized
             view = self._view_records[view_id]["instance"]
+            
+            if hasattr(view, "before_hide") and view.before_hide() == False:
+                return False
+            
             view.home_widget.master.forget(view.home_widget)
             
             self.set_option("view." + view_id + ".visible", False)
+            
             self.event_generate("HideView", view=view, view_id=view_id)
+
         
 
     def event_generate(self, sequence, **kwargs):
