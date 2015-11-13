@@ -13,3 +13,5 @@
 * debug and run file with syntax errors
 
 * close Thonny when program is running
+
+* Heap view works
