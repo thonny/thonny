@@ -6,6 +6,7 @@ from thonny.globals import get_workbench
 import json
 from thonny.base_file_browser import BaseFileBrowser
 import ast
+import os.path
 
 
 class ReplayWindow(tk.Toplevel):
@@ -233,6 +234,7 @@ class ReplayerEditor(ttk.Frame):
                 else:
                     self.code_view.text.delete(event["index1"])
         
+        
     
     def undo_event(self, event):
         if id(event) in self.text_states_before:
@@ -276,6 +278,9 @@ class ReplayerEditorNotebook(ttk.Notebook):
             #print(event.editor_id, id(editor), event)
             self.select(editor)
             editor.replay_event(event)
+            
+            if "filename" in event:
+                self.tab(editor, text=os.path.basename(event["filename"]))
     
     def undo_event(self, event):
         if "text_widget_id" in event:
