@@ -13,25 +13,29 @@ class ReplayWindow(tk.Toplevel):
         tk.Toplevel.__init__(self, get_workbench())
         ui_utils.set_zoomed(self, True)
         
-        self.main_pw   = ttk.PanedWindow(self, orient=tk.HORIZONTAL)
-        self.center_pw  = ttk.PanedWindow(self.main_pw, orient=tk.VERTICAL)
+        self.main_pw   = tk.PanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
+        self.center_pw  = tk.PanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
         self.right_frame = ttk.Frame(self.main_pw)
+        self.right_pw  = tk.PanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
         self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
         shell_book = ttk.Notebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
-        self.log_frame = LogFrame(self.right_frame, self.editor_notebook, self.shell)
+        self.details_frame = EventDetailsFrame(self.right_pw)
+        self.log_frame = LogFrame(self.right_pw, self.editor_notebook, self.shell, self.details_frame)
         self.browser = ReplayerFileBrowser(self.main_pw, self.log_frame)
         self.control_frame = ControlFrame(self.right_frame)
         
         self.main_pw.grid(padx=10, pady=10, sticky=tk.NSEW)
-        self.main_pw.add(self.browser, weight=1)
-        self.main_pw.add(self.center_pw, weight=3)
-        self.main_pw.add(self.right_frame, weight=1)
-        self.center_pw.add(self.editor_notebook, weight=3)
-        self.center_pw.add(shell_book, weight=1)
+        self.main_pw.add(self.browser, width=200)
+        self.main_pw.add(self.center_pw, width=1000)
+        self.main_pw.add(self.right_frame, width=200)
+        self.center_pw.add(self.editor_notebook, height=800)
+        self.center_pw.add(shell_book, height=200)
         shell_book.add(self.shell, text="Shell")
-        self.log_frame.grid(sticky=tk.NSEW)
+        self.right_pw.grid(sticky=tk.NSEW)
         self.control_frame.grid(sticky=tk.NSEW)
+        self.right_pw.add(self.log_frame, height=600)
+        self.right_pw.add(self.details_frame, height=200)
         self.right_frame.columnconfigure(0, weight=1)
         self.right_frame.rowconfigure(0, weight=1)
         
@@ -68,18 +72,24 @@ class ControlFrame(ttk.Frame):
         
 
 class LogFrame(ui_utils.TreeFrame):
-    def __init__(self, master, editor_book, shell):
-        ui_utils.TreeFrame.__init__(self, master, ("desc", "pause", "time"))
+    def __init__(self, master, editor_book, shell, details_frame):
+        ui_utils.TreeFrame.__init__(self, master, ("desc", "pause"))
+        
+        self.tree.heading('desc', text='Event', anchor=tk.W)
+        self.tree.heading('pause', text='Pause (sec)', anchor=tk.W)
+        
         self.configure(border=1, relief=tk.GROOVE)
         
         self.editor_notebook = editor_book
         self.shell = shell
+        self.details_frame = details_frame
         self.all_events = []
         self.last_event_index = -1
         self.loading = False 
 
     def load_log(self, filename):
         self._clear_tree()
+        self.details_frame._clear_tree()
         self.all_events = []
         self.last_event_index = -1
         self.loading = True
@@ -91,7 +101,7 @@ class LogFrame(ui_utils.TreeFrame):
             last_event_time = None
             for event in events:
                 node_id = self.tree.insert("", "end")
-                self.tree.set(node_id, "desc", repr(event))
+                self.tree.set(node_id, "desc", event["sequence"])
                 event_time = datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
                 if last_event_time:
                     delta = event_time - last_event_time
@@ -99,7 +109,6 @@ class LogFrame(ui_utils.TreeFrame):
                 else:
                     pause = 0   
                 self.tree.set(node_id, "pause", str(pause if pause else ""))
-                self.tree.set(node_id, "time", str(event["time"]))
                 self.all_events.append(event)
 
                 last_event_time = event_time
@@ -132,8 +141,12 @@ class LogFrame(ui_utils.TreeFrame):
         iid = self.tree.focus()
         if iid != '':
             self.select_event(self.tree.index(iid))
+            
         
     def select_event(self, event_index):
+        event = self.all_events[event_index]
+        self.details_frame.load_event(event)
+        
         # here event means logged event
         if event_index > self.last_event_index:
             # replay all events between last replayed event up to and including this event
@@ -147,6 +160,23 @@ class LogFrame(ui_utils.TreeFrame):
                 self.undo_event(self.all_events[self.last_event_index])
                 self.last_event_index -= 1
 
+
+class EventDetailsFrame(ui_utils.TreeFrame):
+    def __init__(self, master):
+        ui_utils.TreeFrame.__init__(self, master, columns=("attribute", "value"))
+        self.tree.heading('attribute', text='Attribute', anchor=tk.W)
+        self.tree.heading('value', text='Value', anchor=tk.W)
+        self.configure(border=1, relief=tk.GROOVE)
+    
+    def load_event(self, event):
+        self._clear_tree()
+        for name in self.order_keys(event):
+            node_id = self.tree.insert("", "end")
+            self.tree.set(node_id, "attribute", name)
+            self.tree.set(node_id, "value", event[name])
+    
+    def order_keys(self, event):
+        return event.keys()
 
 class ReplayerCodeView(ttk.Frame):
     def __init__(self, master):
