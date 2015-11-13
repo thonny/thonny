@@ -677,8 +677,9 @@ class Workbench(tk.Tk):
     def in_heap_mode(self):
         # TODO: add a separate command for enabling the heap mode 
         # untie the mode from HeapView
-        return (self._configuration_manager.has_option("view.heap.visible")
-            and self.get_option("view.heap.visible"))
+        
+        return (self._configuration_manager.has_option("view.HeapView.visible")
+            and self.get_option("view.HeapView.visible"))
     
     def update_fonts(self):
         editor_font_size = self.get_option("view.editor_font_size")

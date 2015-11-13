@@ -19,8 +19,11 @@ class HeapView(MemoryFrame):
         self.tree.heading('value', text='Value', anchor=tk.W) 
         
         get_workbench().bind("Heap", self._handle_heap_event, True)
-        get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
-        get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
+        
+        get_workbench().bind("DebuggerProgress", self._request_heap_data, True)
+        get_workbench().bind("ToplevelResult", self._request_heap_data, True)
+        # Showing new globals may introduce new interesting objects
+        get_workbench().bind("Globals", self._request_heap_data, True) 
 
     def _update_data(self, data):
         self._clear_tree()
@@ -28,7 +31,9 @@ class HeapView(MemoryFrame):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "id", format_object_id(value_id))
             self.tree.set(node_id, "value", shorten_repr(data[value_id].repr, MAX_REPR_LENGTH_IN_GRID))
-            
+    
+    def before_show(self):
+        self._request_heap_data(even_when_hidden=True)
 
     def on_select(self, event):
         iid = self.tree.focus()
@@ -36,8 +41,8 @@ class HeapView(MemoryFrame):
             object_id = parse_object_id(self.tree.item(iid)['values'][0])
             get_workbench().event_generate("ObjectSelect", object_id=object_id)
             
-    def _handle_progress_event(self, msg):
-        if self.winfo_ismapped():
+    def _request_heap_data(self, msg=None, even_when_hidden=False):
+        if self.winfo_ismapped() or even_when_hidden:
             # TODO: update itself also when it becomes visible
             get_runner().send_command(InlineCommand("get_heap"))
             
