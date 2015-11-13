@@ -7,6 +7,7 @@ import json
 from thonny.base_file_browser import BaseFileBrowser
 import ast
 import os.path
+from thonny.coloring import SyntaxColorer
 
 
 class ReplayWindow(tk.Toplevel):
@@ -30,8 +31,8 @@ class ReplayWindow(tk.Toplevel):
         self.main_pw.add(self.browser, width=200)
         self.main_pw.add(self.center_pw, width=1000)
         self.main_pw.add(self.right_frame, width=200)
-        self.center_pw.add(self.editor_notebook, height=800)
-        self.center_pw.add(shell_book, height=200)
+        self.center_pw.add(self.editor_notebook, height=700)
+        self.center_pw.add(shell_book, height=300)
         shell_book.add(self.shell, text="Shell")
         self.right_pw.grid(sticky=tk.NSEW)
         self.control_frame.grid(sticky=tk.NSEW)
@@ -94,8 +95,8 @@ class LogFrame(ui_utils.TreeFrame):
         self.all_events = []
         self.last_event_index = -1
         self.loading = True
-        self.editor_notebook.clear()
-        self.shell.clear()
+        self.editor_notebook.reset()
+        self.shell.reset()
         
         with open(filename, encoding="UTF-8") as f:
             events = json.load(f)
@@ -126,14 +127,10 @@ class LogFrame(ui_utils.TreeFrame):
             else:
                 self.editor_notebook.replay_event(event)
     
-    def undo_event(self, event):
-        "this should be called with events in correct order"
-        #print("log undo", event)
-        if "text_widget_id" in event:
-            if event.get("text_widget_context", None) == "shell":
-                self.shell.undo_event(event)
-            else:
-                self.editor_notebook.undo_event(event)
+    def reset(self):
+        self.shell.reset()
+        self.editor_notebook.reset()
+        self.last_event_index = -1
     
     def on_select(self, event):
         # parameter "event" is here tkinter event
@@ -156,10 +153,9 @@ class LogFrame(ui_utils.TreeFrame):
                 self.last_event_index += 1
                 
         elif event_index < self.last_event_index:
-            # undo all events up to and excluding this event
-            while self.last_event_index > event_index:
-                self.undo_event(self.all_events[self.last_event_index])
-                self.last_event_index -= 1
+            # Undo by reseting and replaying again
+            self.reset()
+            self.select_event(event_index)
 
 
 class EventDetailsFrame(ui_utils.TreeFrame):
@@ -217,13 +213,9 @@ class ReplayerEditor(ttk.Frame):
         self.code_view.grid(sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        self.text_states_before = {} # self.text_states[event_id] contains editor content before event with id event_id
     
     def replay_event(self, event):
         if event["sequence"] in ["TextInsert", "TextDelete"]:
-            self.text_states_before[id(event)] = self.code_view.text.get("1.0", "end")
-            self.see_event(event)
-            
             if event["sequence"] == "TextInsert":
                 self.code_view.text.insert(event["index"], event["text"],
                                            ast.literal_eval(event["tags"]))
@@ -233,24 +225,44 @@ class ReplayerEditor(ttk.Frame):
                     self.code_view.text.delete(event["index1"], event["index2"])
                 else:
                     self.code_view.text.delete(event["index1"])
-        
-        
-    
-    def undo_event(self, event):
-        if id(event) in self.text_states_before:
-            self.code_view.text.delete("1.0", "end")
-            self.code_view.text.insert("1.0", self.text_states_before[id(event)])
+            
+                
             self.see_event(event)
-    
+            
+                
     def see_event(self, event):
-        if hasattr(event, "to_position") and event.to_position:
-            self.code_view.text.see(event.to_position)
-            
-        if hasattr(event, "from_position") and event.from_position:
-            self.code_view.text.see(event.from_position)
-            
-        if hasattr(event, "position") and event.position:
-            self.code_view.text.see(event.position)
+        for key in ["index", "index1", "index2"]:
+            if key in event and event[key]:
+                self.code_view.text.see(event[key])
+                print(event[key])
+
+    def reset(self):
+        self.code_view.text.delete("1.0", "end")
+        
+        
+class ReplayerEditorProper(ReplayerEditor):
+    
+    def __init__(self, master):
+        ReplayerEditor.__init__(self, master)
+        self.set_colorer()
+    
+    def set_colorer(self):
+        # TODO: some problem when doing fast rewind
+        return
+    
+        self.colorer = SyntaxColorer(self.code_view.text, 
+                                     get_workbench().get_font("EditorFont"),
+                                     get_workbench().get_font("BoldEditorFont"))
+
+    def replay_event(self, event):
+        ReplayerEditor.replay_event(self, event)
+        # TODO: some problem when doing fast rewind
+        #self.colorer.notify_range("1.0", "end")
+    
+    def reset(self):
+        ReplayerEditor.reset(self)
+        self.set_colorer()
+
 
 class ReplayerEditorNotebook(ttk.Notebook):
     def __init__(self, master):
@@ -266,7 +278,7 @@ class ReplayerEditorNotebook(ttk.Notebook):
     
     def get_editor_by_text_widget_id(self, text_widget_id):
         if text_widget_id not in self._editors_by_text_widget_id:
-            editor = ReplayerEditor(self)
+            editor = ReplayerEditorProper(self)
             self.add(editor, text="<untitled>")
             self._editors_by_text_widget_id[text_widget_id] = editor
             
@@ -282,14 +294,38 @@ class ReplayerEditorNotebook(ttk.Notebook):
             if "filename" in event:
                 self.tab(editor, text=os.path.basename(event["filename"]))
     
-    def undo_event(self, event):
-        if "text_widget_id" in event:
-            editor = self.get_editor_by_text_widget_id(event["text_widget_id"])
-            editor.undo_event(event)
+    def reset(self):
+        for editor in self.winfo_children():
+            self.forget(editor)
+            editor.destroy()
+            
+        self._editors_by_text_widget_id = {}
 
 class ShellFrame(ReplayerEditor):
-    def clear(self):
-        self.code_view.text.delete("1.0", "end")
+    def __init__(self, master):
+        ReplayerEditor.__init__(self, master)
+        
+        # TODO: use same source as shell
+        vert_spacing = 10
+        io_indent = 16
+        self.code_view.text.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
+        self.code_view.text.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
+        self.code_view.text.tag_configure("command", foreground="black")
+        self.code_view.text.tag_configure("version", foreground="DarkGray")
+        self.code_view.text.tag_configure("automagic", foreground="DarkGray")
+        self.code_view.text.tag_configure("value", foreground="DarkBlue") # TODO: see also _text_key_press and _text_key_release
+        self.code_view.text.tag_configure("error", foreground="Red")
+        
+        self.code_view.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
+                                font=get_workbench().get_font("IOFont"))
+        self.code_view.text.tag_configure("stdin", foreground="Blue")
+        self.code_view.text.tag_configure("stdout", foreground="Black")
+        self.code_view.text.tag_configure("stderr", foreground="Red")
+        self.code_view.text.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
+        
+        self.code_view.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
+        self.code_view.text.tag_configure("inactive", foreground="#aaaaaa")
+    
 
 
 def load_plugin():
