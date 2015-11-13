@@ -319,11 +319,7 @@ class _BackendProxy:
         
         interpreter = get_workbench().get_option("run.interpreter")
         if not interpreter:
-            interpreter = sys.executable
-            if interpreter.endswith("thonny.exe"):
-                # assuming that thonny.exe is in the same dir as pythonw.exe
-                # (NB! thonny.exe in scripts folder delegates running to python.exe)
-                interpreter = interpreter.replace("thonny.exe", "pythonw.exe")
+            interpreter = get_current_interpreter()
         
         if not os.path.exists(interpreter):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
@@ -444,5 +440,13 @@ class _BackendProxy:
             else:
                 debug("### BACKEND ###: %s", data.strip())
         
-        
+
+def get_current_interpreter():
+    if sys.executable.endswith("thonny.exe"):
+        # assuming that thonny.exe is in the same dir as pythonw.exe
+        # (NB! thonny.exe in scripts folder delegates running to python.exe)
+        return sys.executable.replace("thonny.exe", "pythonw.exe")
+    else:
+        return sys.executable
+
             
