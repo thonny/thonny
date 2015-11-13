@@ -10,17 +10,19 @@ class GlobalsView(VariablesFrame):
         VariablesFrame.__init__(self, master)
         
         get_workbench().bind("Globals", self._handle_globals_event, True)
-        get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
-        get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
+        get_workbench().bind("DebuggerProgress", self._request_globals, True)
+        get_workbench().bind("ToplevelResult", self._request_globals, True)
         get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
-
+    
+    def before_show(self):
+        self._request_globals(even_when_hidden=True)
+    
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well
         self.update_variables(event.globals)
 
-    def _handle_progress_event(self, event):
-        if self.winfo_ismapped():
-            # TODO: update itself also when it becomes visible
+    def _request_globals(self, event=None, even_when_hidden=False):
+        if self.winfo_ismapped() or even_when_hidden:
             # TODO: module_name
             get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
