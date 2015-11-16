@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 PREFIX=/opt/pythonny
 
 # COMPILE TCL/TK ####################################################################################
@@ -102,9 +104,11 @@ rm $PREFIX/bin/pyvenv-3.5
 rm $PREFIX/lib/libpython3.5m.a
 
 rm -rf $PREFIX/lib/python3.5/__pycache__
-rm -rf $PREFIX/lib/python3.5/config-3.5m # TODO: makefile is required
+# rm -rf $PREFIX/lib/python3.5/config-3.5m # TODO: makefile is required
 rm -rf $PREFIX/lib/python3.5/test
 
 find $PREFIX/lib -name '*.pyc' -delete
+find $PREFIX/lib -name '*.exe' -delete
+
 
     

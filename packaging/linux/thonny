@@ -2,6 +2,6 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export DYLD_LIBRARY_PATH=$DIR/lib
+export LD_LIBRARY_PATH=$DIR/../lib
 
-$DIR/bin/python3.5 -m thonny "$@"
+$DIR/python3.5 -m thonny "$@"
