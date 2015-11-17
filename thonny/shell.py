@@ -118,7 +118,7 @@ class ShellView (ttk.Frame, TextWrapper):
         
         self._command_handlers = {}
         
-        self._last_python_version = None
+        self._last_interpreter = None
     
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
@@ -361,14 +361,13 @@ class ShellView (ttk.Frame, TextWrapper):
             
     
     def _backend_ready(self, event):
-        version_str = "Python " + event.python_version
-        if "thonny" in os.path.basename(event.python_executable):
-            version_str = "Embedded " + version_str
-            
-        if version_str != self._last_python_version:
-            if "Embedded" not in version_str: # to make the first impression even clearer 
-                self._insert_text_directly(version_str, ("version",))
-            self._last_python_version = version_str
+        interpreter = get_workbench().get_option("run.interpreter") 
+        
+        if (interpreter != self._last_interpreter
+            and not (self._last_interpreter is None and not interpreter)):
+                self._insert_text_directly("Python " + event.python_version, ("version",))
+                
+        self._last_interpreter = get_workbench().get_option("run.interpreter")
     
     def _submit_input(self, text_to_be_submitted):
         if self._get_state() == "waiting_toplevel_command":
