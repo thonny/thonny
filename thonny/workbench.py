@@ -684,7 +684,7 @@ class Workbench(tk.Tk):
     def update_fonts(self):
         editor_font_size = self.get_option("view.editor_font_size")
         editor_font_family = self.get_option("view.editor_font_family")
-        io_font_family = self.get_option("view.editor_font_family")
+        io_font_family = self.get_option("view.io_font_family")
         
         self.get_font("IOFont").configure(family=io_font_family,
                                           size=min(editor_font_size - 2,
