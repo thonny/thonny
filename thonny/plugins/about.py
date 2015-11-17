@@ -71,7 +71,7 @@ class AboutDialog(tk.Toplevel):
         license_font = font.nametofont("TkDefaultFont").copy()
         license_font.configure(size=7)
         license_label = ttk.Label(main_frame,
-                                  text="Coppyright (©) 2014 Aivar Annamaa\n"
+                                  text="Coppyright (©) 2015 Aivar Annamaa\n"
                                   + "This program comes with\n"
                                   + "ABSOLUTELY NO WARRANTY!\n"
                                   + "It is free software, and you are welcome to\n"
