@@ -1,8 +1,6 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
-# It doesn't matter which python3 is used for running this installation script,
-# as Thonny installation is not interfering with any specific Python version,
-# Python path won't be modified.
+from __future__ import print_function
 
 import sys
 import os.path
@@ -29,43 +27,16 @@ def create_launcher(source_filename, target_filename, replacements={}):
     
 
 if len(sys.argv) == 1:
-    parent_dir = "/opt"
+    parent_dir = os.path.expanduser("~/apps")
 elif len(sys.argv) == 2:
     parent_dir = os.path.expanduser(sys.argv[1].strip().rstrip("/"))
 else:
     print("Installer should be run with 0 or 1 arguments", file=sys.stderr)
     exit(1)
 
-def python_has_required_modules(python_command):
-    try:
-        result = subprocess.call(python_command + ' -c "import tkinter;import idlelib"', shell=True)
-        return result == 0
-    except:
-        return False
-
 def print_task(desc):
     print((desc + " ").ljust(70, ".") + " ", end="")
 
-
-# Find suitable Python version
-print_task("Checking available Python versions")
-if python_has_required_modules("python3.4"):
-    print("Done!")
-    print("Thonny will use Python 3.4")
-    python = "python3.4"
-elif python_has_required_modules("python3.5"):
-    print("Done!")
-    print("Thonny will use Python 3.5")
-    python = "python3.5"
-else:
-    print("Error!")
-    if shutil.which("python3.4"):
-        print("Python 3.4 exists, but misses tkinter or idlelib", file=sys.stderr)
-    elif shutil.which("python3.5"):
-        print("Python 3.5 exists, but misses tkinter or idlelib", file=sys.stderr)
-    else:
-        print("Can't find neither python3.4 nor python3.5", file=sys.stderr)
-    exit(1)
 
 # define directories    
 source_dir = os.path.dirname(os.path.realpath(__file__))
@@ -88,13 +59,7 @@ try:
             print("Installation is cancelled", file=sys.stderr)
             exit(1)
     
-    shutil.copytree(source_dir + "/share", target_dir + "/share")
-    shutil.copy(source_dir + "/license.txt", target_dir + "/license.txt")
-    os.makedirs(target_dir + "/bin")
-    exe_path = target_dir + "/bin/thonny"
-    create_launcher(source_dir + "/templates/thonny.sh",
-                    exe_path,
-                    {"$target_dir" : target_dir, "$python" : python})
+    shutil.copytree(source_dir, target_dir)
     print("Done!")
     
     
@@ -113,10 +78,14 @@ try:
                     {"$target_dir" : target_dir, "$menu_dir" : menu_dir})
     print("Done!")
     
+    print_task("Compiling Python files")
+    subprocess.check_call([target_dir + "/bin/python3.5",
+                           "-m", "compileall", target_dir + "/lib"])
+    print("Done!")
     
     print()
     print("Installation was successful, you can start Thonny from start menu under")
-    print("Education or Programming, or by calling " + exe_path)
+    print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
     
     print()
     

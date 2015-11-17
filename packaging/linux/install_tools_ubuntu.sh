@@ -6,7 +6,14 @@ sudo apt-get update
 sudo apt-get upgrade
 sudo apt-get --assume-yes install git mercurial # needed below
 sudo apt-get --assume-yes build-dep python # probably installs too much
-sudo apt-get --assume-yes install build-essential libncursesw5-dev libreadline6-dev libssl-dev libgdbm-dev libc6-dev libsqlite3-dev tk-dev libbz2-dev lzma-dev liblzma-dev python-lzma lzma xz-utils xz-lzma
+sudo apt-get --assume-yes install build-essential \
+	libncursesw5-dev libreadline6-dev libssl-dev \
+	libgdbm-dev libc6-dev libsqlite3-dev tk-dev \
+	libbz2-dev zlib1g-dev lzma-dev liblzma-dev xz-utils \
+	libx11-dev
+
+# lzma python-lzma
+
 # probably some of the lzma stuff is not needed ...
 
 

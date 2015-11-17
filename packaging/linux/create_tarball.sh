@@ -21,6 +21,7 @@ mkdir -p $TARGET_DIR
 # copy files
 cp -r $PREFIX/* $TARGET_DIR
 cp thonny $TARGET_DIR/bin
+cp install.py $TARGET_DIR/install
 
 mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates
