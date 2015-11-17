@@ -47,6 +47,9 @@ copy ThonnyRunner\Release\thonny.exe %BUILDDIR%
 @echo ............... ENABLE DPI AWARNESS ..............................
 @REM call EnableDPIAwareness %BUILDDIR%\pythonw.exe
 
+@echo ............... INSTALLING THONNY ...................................
+%BUILDDIR%\python.exe -m pip install --upgrade thonny
+
 @echo ............... RUNNING THONNY ...................................
 %BUILDDIR%\thonny.exe
 
