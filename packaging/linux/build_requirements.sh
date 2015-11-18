@@ -2,6 +2,7 @@
 
 # START BUILDING ####################################################
 PREFIX=/home/aivar/pythonny
+ARCHITECTURE="$(uname -m)"
 
 rm -Rf $PREFIX
 mkdir $PREFIX
@@ -102,6 +103,12 @@ rm -rf $PREFIX/lib/python3.5/test
 
 find $PREFIX/lib -name '*.pyc' -delete
 find $PREFIX/lib -name '*.exe' -delete
+
+# COPY SOME LIBS #########################################
+# using star because it must work both in 32 and 64-bit Ubuntu
+cp /lib/*-linux-gnu/libbz2.so.1.0.4 $PREFIX/lib/libbz2.so.1.0
+cp /lib/*-linux-gnu/libssl.so.1.0.0 $PREFIX/lib/libssl.so.1.0.0
+cp /lib/*-linux-gnu/libcrypto.so.1.0.0 $PREFIX/lib/libcrypto.so.1.0.0
 
 ##########################################################
 # back to original dir

@@ -3,7 +3,7 @@
 # INSTALL TOOLS #####################################################
 # This is written with Ubuntu 12.04 in mind
 sudo apt-get update
-sudo apt-get upgrade
+sudo apt-get --assume-yes upgrade
 sudo apt-get --assume-yes install git mercurial # needed below
 sudo apt-get --assume-yes build-dep python # probably installs too much
 sudo apt-get --assume-yes install build-essential \
