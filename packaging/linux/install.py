@@ -52,14 +52,16 @@ try:
     
     if os.path.exists(target_dir):
         print()
-        answer = input(target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: ").strip()
+        answer = raw_input(target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: ").strip()
         if not answer or answer.lower() == "y":
             shutil.rmtree(target_dir)
         else:
             print("Installation is cancelled", file=sys.stderr)
             exit(1)
     
-    shutil.copytree(source_dir, target_dir)
+    shutil.copytree(source_dir + "/bin", target_dir + "/bin")
+    shutil.copytree(source_dir + "/lib", target_dir + "/lib")
+    shutil.copytree(source_dir + "/include", target_dir + "/include")
     print("Done!")
     
     
@@ -79,17 +81,17 @@ try:
     print("Done!")
     
     print_task("Compiling Python files")
-    subprocess.check_call([target_dir + "/bin/python3.5",
+    return_code = subprocess.call([target_dir + "/bin/python3.5",
                            "-m", "compileall", target_dir + "/lib"])
+    # TODO: why is return code 1 (eg. in 64-bit Fedora 22) even when everything seemed to succeed?
     print("Done!")
     
     print()
     print("Installation was successful, you can start Thonny from start menu under")
     print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
+    print("For uninstalling Thonny call " + target_dir + "/bin/uninstall")
     
-    print()
-    
-except PermissionError as e:
+except OSError as e:
     print()
     print(e, file=sys.stderr)
     exit(1)
