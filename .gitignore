@@ -23,3 +23,5 @@ packaging/windows/ThonnyRunner/ThonnyRunner.sdf
 packaging/windows/ThonnyRunner/ThonnyRunner/Release/ThonnyRunner.res
 thonny.egg-info
 temp_build_dir
+
+packaging/mac/out.txt
