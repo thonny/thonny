@@ -1,5 +1,0 @@
-include MANIFEST.in
-include *.txt
-recursive-include cx_Freeze/initscripts *.py
-recursive-include cx_Freeze/samples *.py
-recursive-include source *.c *.rc *.txt
