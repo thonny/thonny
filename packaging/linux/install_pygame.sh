@@ -16,4 +16,9 @@ cd pygame
 $PREFIX/bin/python3.5 setup.py build
 $PREFIX/bin/python3.5 setup.py install
 
+# clean
+rm -rf $PREFIX/lib/python3.5/site-packages/pygame/tests
+rm -rf $PREFIX/lib/python3.5/site-packages/pygame/examples # not sure if this is worth it
+rm -rf $PREFIX/lib/python3.5/site-packages/pygame/docs
+
 cd ..
