@@ -60,7 +60,7 @@ cd .. # back to tkhtml dir
 cd .. # back to temp_build_dir
 
 
-# INSTALL PYTHON ###############################################
+# COMPILE PYTHON ###############################################
 
 wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tar.xz
 tar xf Python-3.5.0.tar.xz
