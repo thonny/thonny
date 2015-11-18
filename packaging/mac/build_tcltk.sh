@@ -19,6 +19,7 @@ sudo make install
 cd ../..
 
 # MAKE PRIVATE COPY FOR THONNY ########################################
+mkdir -p $PREFIX/lib
 cp -f /Library/Frameworks/Tcl.framework/Versions/8.6/Tcl $PREFIX/lib
 cp -f /Library/Frameworks/Tk.framework/Versions/8.6/Tk $PREFIX/lib
 cp -R /Library/Frameworks/Tcl.framework/Versions/8.6/Resources/tcl8 $PREFIX/lib
@@ -29,7 +30,6 @@ cp -R /Library/Frameworks/Tcl.framework/Versions/8.6/Resources/Scripts/ $PREFIX/
 cp -R /Library/Frameworks/Tk.framework/Versions/8.6/Resources/Scripts/ $PREFIX/lib/tk8.6
 
 # UPDATE LINKS #############################################################################
-RELATIVE_LIBDIR=@executable_path/../lib
 
 chmod 655 $PREFIX/lib/Tcl
 chmod 655 $PREFIX/lib/Tk

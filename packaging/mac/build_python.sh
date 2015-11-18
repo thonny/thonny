@@ -5,15 +5,31 @@ tar xf Python-3.5.0.tar.xz
 cd Python-3.5.0
 
 # compile and install Python
-./configure \
-	--prefix=$PREFIX
-	
+./configure --prefix=$PREFIX LDFLAGS="-L/usr/local/opt/openssl/lib" CPPFLAGS="-I/usr/local/opt/openssl/include"
+
+make
 make altinstall
 
 # check that the newly built Python uses Tk 8.6 for Tkinter
-# $PREFIX/bin/python3.5 -m idlelib
+$PREFIX/bin/python3.5 -m idlelib
+exit
+
+# CREATE PRIVATE COPY #########################################################
+#cp -r $FRAMEWORK_PREFIX/Python $PREFIX/Python
+#cp -r $FRAMEWORK_PREFIX/bin/python3.5 $PREFIX/bin
+#cp -r $FRAMEWORK_PREFIX/lib/* $PREFIX/lib
+#cp -r $FRAMEWORK_PREFIX/include $PREFIX
+
+#chmod -R u+w $PREFIX
 
 # UPDATE LINKS ################################################################
+#install_name_tool -change \
+#    /Library/Frameworks/Python.framework/Versions/3.5/Python \
+#	$RELATIVE_LIBDIR/Tcl \
+#    $PREFIX/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
+
+
+
 # _tkinter ##########################
 install_name_tool -change \
     /Library/Frameworks/Tcl.framework/Versions/8.6/Tcl \
