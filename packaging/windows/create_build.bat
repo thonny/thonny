@@ -41,15 +41,11 @@ rmdir tcl\tcl8.6\msgs /S /Q>NUL
 rmdir tcl\tcl8.6\tzdata /S /Q>NUL
 cd ..
 
-@echo ............... COPYING THONNY LAUNCHER ..........................
-copy ThonnyRunner\Release\thonny.exe %BUILDDIR%
+@echo ............... COPYING VS FILES ..........................
+xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
+xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 
 @echo ............... ENABLE DPI AWARNESS ..............................
 @REM call EnableDPIAwareness %BUILDDIR%\pythonw.exe
 
-@echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python.exe -m pip install --upgrade thonny
-
-@echo ............... RUNNING THONNY ...................................
-%BUILDDIR%\thonny.exe
-
+pause
