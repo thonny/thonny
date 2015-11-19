@@ -665,6 +665,15 @@ class Workbench(tk.Tk):
                 
             self._event_handlers[sequence].add(func)
 
+    def unbind(self, sequence, funcid=None):
+        if sequence.startswith("<"):
+            tk.Tk.unbind(self, sequence, funcid=funcid)
+        else:
+            if (sequence in self._event_handlers 
+                and funcid in self._event_handlers[sequence]):
+                self._event_handlers[sequence].remove(funcid)
+                
+
     def get_version(self):
         try:
             with open(os.path.join(self.get_package_dir(), "VERSION"), encoding="ASCII") as fp:
