@@ -53,7 +53,10 @@ class VariablesFrame(MemoryFrame):
         self._update_memory_model()
         #self.tree.tag_configure("item", font=ui_utils.TREE_FONT)
         
-        
+    def destroy(self):
+        MemoryFrame.destroy(self)
+        get_workbench().unbind("ShowView", self._update_memory_model)
+        get_workbench().unbind("HideView", self._update_memory_model)
 
     def _update_memory_model(self, event=None):
         if get_workbench().in_heap_mode():
