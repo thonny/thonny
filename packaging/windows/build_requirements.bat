@@ -1,14 +1,14 @@
-set BUILDDIR=build
+set PREFIX=pythonny
 
 @echo ............... CLEANING ............................
-rmdir %BUILDDIR% /S /Q
-mkdir %BUILDDIR%
+rmdir %PREFIX% /S /Q
+mkdir %PREFIX%
 
 @echo ............... COPYING PYTHON ............................
-xcopy C:\Python35\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Python35\* %PREFIX% /S /E /K>NUL
 
 @echo ............... CLEANING PYTHON ............................
-cd %BUILDDIR%
+cd %PREFIX%
 move LICENSE.txt PYTHON-LICENSE.txt>NUL
 del README.txt>NUL
 del NEWS.txt>NUL
@@ -42,10 +42,10 @@ rmdir tcl\tcl8.6\tzdata /S /Q>NUL
 cd ..
 
 @echo ............... COPYING VS FILES ..........................
-xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
-xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
+xcopy ucrt_redist\*.dll %PREFIX% /S /E /K>NUL
+xcopy ucrt_redist\api-ms-win*.dll %PREFIX%\DLLs /S /E /K>NUL
 
 @echo ............... ENABLE DPI AWARNESS ..............................
-@REM call EnableDPIAwareness %BUILDDIR%\pythonw.exe
+@REM call EnableDPIAwareness %PREFIX%\pythonw.exe
 
 pause
