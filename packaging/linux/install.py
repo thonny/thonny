@@ -59,9 +59,8 @@ try:
             print("Installation is cancelled", file=sys.stderr)
             exit(1)
     
-    shutil.copytree(source_dir + "/bin", target_dir + "/bin")
-    shutil.copytree(source_dir + "/lib", target_dir + "/lib")
-    shutil.copytree(source_dir + "/include", target_dir + "/include")
+    shutil.copytree(source_dir, target_dir)
+    shutil.rmtree(target_dir + "/templates")    
     print("Done!")
     
     
