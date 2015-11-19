@@ -20,8 +20,10 @@ $MACOS_PATH/bin/python3.5 -m pip install --force-reinstall thonny
 rm $MACOS_PATH/bin/thonny # because this contains absolute paths
 
 # clean unnecessary stuff we don't need after installing thonny
+rm -rf $MACOS_PATH/include
 rm -rf $MACOS_PATH/lib/python3.5/config-3.5m
-rm -rf $MACOS_PATH/lib/python3.5/site-packages/pip
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/pip*
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/setuptools*
 rm -rf $MACOS_PATH/lib/python3.5/ensurepip
 
 # version info ##############################################################

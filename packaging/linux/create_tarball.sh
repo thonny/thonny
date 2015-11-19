@@ -32,6 +32,13 @@ cp Thonny.desktop $TARGET_DIR/templates
 find $TARGET_DIR -type f -name "*.pyo" -delete
 find $TARGET_DIR -type f -name "*.pyc" -delete
 find $TARGET_DIR -type d -name "__pycache__" -delete
+rm -rf $TARGET_DIR/include
+rm -rf $TARGET_DIR/lib/python3.5/config-3.5m
+rm -rf $TARGET_DIR/lib/python3.5/ensurepip
+rm -rf $TARGET_DIR/lib/python3.5/site-packages/pip*
+rm -rf $TARGET_DIR/lib/python3.5/site-packages/setuptools*
+
+
 
 # put it together
 mkdir -p dist
