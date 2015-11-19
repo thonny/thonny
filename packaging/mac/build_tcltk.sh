@@ -7,6 +7,8 @@ cd tcl8.6.4/macosx
 ./configure --enable-framework
 make 
 sudo make install
+sudo chown -R $REGULAR_USER $PREFIX
+sudo chown -R $REGULAR_USER $TEMP_BUILD_DIR
 cd ../..
 
 wget http://prdownloads.sourceforge.net/tcl/tk8.6.4-src.tar.gz
@@ -16,6 +18,8 @@ cd tk8.6.4/macosx
 ./configure --enable-framework --enable-aqua --disable-xss 
 make 
 sudo make install
+sudo chown -R $REGULAR_USER $PREFIX
+sudo chown -R $REGULAR_USER $TEMP_BUILD_DIR
 cd ../..
 
 # MAKE PRIVATE COPY FOR THONNY ########################################
@@ -31,19 +35,14 @@ cp -R /Library/Frameworks/Tk.framework/Versions/8.6/Resources/Scripts/ $PREFIX/l
 
 # UPDATE LINKS #############################################################################
 
-chmod 655 $PREFIX/lib/Tcl
-chmod 655 $PREFIX/lib/Tk
+chmod -R u+w $PREFIX
 
 install_name_tool -id \
 	$RELATIVE_LIBDIR/Tcl \
     $PREFIX/lib/Tcl 
 
-
 install_name_tool -id \
 	$RELATIVE_LIBDIR/Tk \
     $PREFIX/lib/Tk 
  
-chmod 555 $PREFIX/lib/Tcl
-chmod 555 $PREFIX/lib/Tk
-
 

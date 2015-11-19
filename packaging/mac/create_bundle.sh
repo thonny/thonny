@@ -1,15 +1,7 @@
 #!/bin/bash
 
-SOURCE_PREFIX=/opt/pythonny
+PREFIX=/Users/aivar/pythonny
 
-# update thonny installation #####################################################
-$SOURCE_PREFIX/bin/python3.5 -m pip install --force-reinstall thonny
-rm $SOURCE_PREFIX/bin/thonny
-
-
-VERSION=$(<$SOURCE_PREFIX/lib/python3.5/site-packages/thonny/VERSION)
-ARCHITECTURE="$(uname -m)"
-VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 
 # prepare working folder #########################################################
 rm -rf build
@@ -19,8 +11,23 @@ mkdir -p build
 # copy template and source files #################################################
 cp -r Thonny.app.template build/Thonny.app
 
-mkdir -p build/Thonny.app/Contents/MacOS 
-cp -r $SOURCE_PREFIX/* build/Thonny.app/Contents/MacOS
+MACOS_PATH=build/Thonny.app/Contents/MacOS
+mkdir -p $MACOS_PATH 
+cp -r $PREFIX/* $MACOS_PATH
+
+# update/install thonny #####################################################
+$MACOS_PATH/bin/python3.5 -m pip install --force-reinstall thonny
+rm $MACOS_PATH/bin/thonny # because this contains absolute paths
+
+# clean unnecessary stuff we don't need after installing thonny
+rm -rf $MACOS_PATH/lib/python3.5/config-3.5m
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/pip
+rm -rf $MACOS_PATH/lib/python3.5/ensurepip
+
+# version info ##############################################################
+VERSION=$(<$MACOS_PATH/lib/python3.5/site-packages/thonny/VERSION)
+ARCHITECTURE="$(uname -m)"
+VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 
 
 # set version ############################################################
