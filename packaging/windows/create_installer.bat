@@ -10,7 +10,7 @@ xcopy %PREFIX%\* %BUILDDIR% /S /E /K>NUL
 
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python.exe -m pip install --upgrade thonny
+%BUILDDIR%\python.exe -m pip install --no-cache-dir --upgrade thonny
 
 @echo ............... CLEANING PYTHON ...................................
 rmdir %BUILDDIR%\Lib\ensurepip /S /Q>NUL
