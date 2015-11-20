@@ -1,19 +1,28 @@
 #!/usr/bin/env bash
 
-# COMPILE AND INSTALL AS FRAMEWORK ###########################################################
-wget http://prdownloads.sourceforge.net/tcl/tcl8.6.4-src.tar.gz
-tar -xzf tcl8.6.4-src.tar.gz
-cd tcl8.6.4/macosx
+TCLTK_VERSION=8.6.4
+
+# COMPILE AND INSTALL AS FRAMEWORK
+# (Seems that Tkinter won't be built, if I don't install it as framework)
+############################################################
+# wget ftp://ftp.tcl.tk/pub/tcl/tcl8_6/tcl$TCLTK_VERSION-src.tar.gz
+wget http://prdownloads.sourceforge.net/tcl/tcl$TCLTK_VERSION-src.tar.gz
+
+tar -xzf tcl$TCLTK_VERSION-src.tar.gz
+cd tcl$TCLTK_VERSION/macosx
 ./configure --enable-framework
 make 
-sudo make install
+sudo make install NATIVE_TCLSH=$PREFIX/bin/tclsh8.6
 sudo chown -R $REGULAR_USER $PREFIX
 sudo chown -R $REGULAR_USER $TEMP_BUILD_DIR
 cd ../..
 
-wget http://prdownloads.sourceforge.net/tcl/tk8.6.4-src.tar.gz
-tar -xzf tk8.6.4-src.tar.gz
-cd tk8.6.4/macosx
+############################################################
+#wget ftp://ftp.tcl.tk/pub/tcl/tcl8_6/tk$TCLTK_VERSION-src.tar.gz
+wget http://prdownloads.sourceforge.net/tcl/tk$TCLTK_VERSION-src.tar.gz
+
+tar -xzf tk$TCLTK_VERSION-src.tar.gz
+cd tk$TCLTK_VERSION/macosx
 # see http://sourceforge.net/p/tktoolkit/bugs/2588/ for --disable-xss
 ./configure --enable-framework --enable-aqua --disable-xss 
 make 
@@ -45,4 +54,7 @@ install_name_tool -id \
 	$RELATIVE_LIBDIR/Tk \
     $PREFIX/lib/Tk 
  
+# DELETE FRAMEWORKS #############################################################
+sudo rm -rf /Library/Frameworks/Tcl.framework/Versions/8.6/
+sudo rm -rf /Library/Frameworks/Tk.framework/Versions/8.6/
 

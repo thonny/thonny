@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz
-tar xf Python-3.5.0.tgz
-cd Python-3.5.0
+PYTHON_VERISION=3.5.0
+
+curl -O https://www.python.org/ftp/python/$PYTHON_VERISION/Python-$PYTHON_VERISION.tgz
+tar xf Python-$PYTHON_VERISION.tgz
+cd Python-$PYTHON_VERISION
 
 # compile and install Python
-./configure --prefix=$PREFIX LDFLAGS="-L/usr/local/opt/openssl/lib" CPPFLAGS="-I/usr/local/opt/openssl/include"
+./configure --prefix=$PREFIX LDFLAGS="-L$PREFIX/lib" CPPFLAGS="-I$PREFIX/include"
 
 make
 make altinstall

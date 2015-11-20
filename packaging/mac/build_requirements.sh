@@ -16,17 +16,30 @@ cd $TEMP_BUILD_DIR
 # NB! If you update xcode then first do:
 # sudo xcodebuild -license
 
-#rm -Rf $PREFIX
-#mkdir $PREFIX
+rm -rf $PREFIX
+mkdir $PREFIX
 
 
-#$MAIN_DIR/build_tcltk.sh
-#$MAIN_DIR/build_tkhtml.sh
-#$MAIN_DIR/build_python.sh
-#$MAIN_DIR/copy_libraries.sh
-#$MAIN_DIR/update_python_links.sh
-$MAIN_DIR/clean_python.sh
+$MAIN_DIR/build_tcltk.sh
+cd $TEMP_BUILD_DIR
 
+$MAIN_DIR/build_tkhtml.sh
+cd $TEMP_BUILD_DIR
+
+$MAIN_DIR/build_tkdnd.sh
+cd $TEMP_BUILD_DIR
+
+$MAIN_DIR/build_openssl.sh
+cd $TEMP_BUILD_DIR
+
+$MAIN_DIR/build_xz.sh
+cd $TEMP_BUILD_DIR
+
+$MAIN_DIR/build_python.sh
+cd $TEMP_BUILD_DIR
+
+$MAIN_DIR/update_links.sh
+cd $TEMP_BUILD_DIR
 
 
 cd $MAIN_DIR

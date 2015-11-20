@@ -1,5 +1,3 @@
-
-
 from random import randint    
 from hashlib import md5       
 from urllib import request    
@@ -11,7 +9,6 @@ import _decimal
 import _elementtree
 import _hashlib
 import _multiprocessing
-import _overlapped
 import _socket
 import _sqlite3
 import _ssl
@@ -35,6 +32,7 @@ from imp import load_dynamic
 import os
 if os.name == "nt":
     import winsound
+    import _overlapped
 
 # import win32api
 # import win32evtlog
