@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tar.xz
-tar xf Python-3.5.0.tar.xz
+wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tgz
+tar xf Python-3.5.0.tgz
 cd Python-3.5.0
 
 # compile and install Python
