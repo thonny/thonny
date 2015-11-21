@@ -50,6 +50,9 @@ rm $MACOS_PATH/bin/*lz*
 rm $MACOS_PATH/bin/*xz*
 rm $MACOS_PATH/bin/*openssl*
 
+rm -rf $MACOS_PATH/lib/tk8.6/demos
+
+
 # TODO: keep these if you want to use pip in Thonny
 rm -rf $MACOS_PATH/include
 rm -rf $MACOS_PATH/lib/python3.5/config-3.5m

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-export REGULAR_USER=aivar
-export PREFIX=/Users/$REGULAR_USER/pythonny
+export REGULAR_USER=$(whoami)
+export PREFIX=$HOME/pythonny
 export RELATIVE_LIBDIR=@executable_path/../lib
 MAIN_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
 export TEMP_BUILD_DIR=$MAIN_DIR/temp_build_dir
@@ -24,9 +24,6 @@ $MAIN_DIR/build_tcltk.sh
 cd $TEMP_BUILD_DIR
 
 $MAIN_DIR/build_tkhtml.sh
-cd $TEMP_BUILD_DIR
-
-$MAIN_DIR/build_tkdnd.sh
 cd $TEMP_BUILD_DIR
 
 $MAIN_DIR/build_openssl.sh

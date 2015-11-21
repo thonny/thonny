@@ -15,13 +15,10 @@ $PREFIX/bin/tclsh8.6 src/mkdefaultstyle.tcl > htmldefaultstyle.c
 mv *.c src
 mv *.h src
 
-# create build dir
-mkdir build
-cd build
 
 # configure, make and install
-chmod 755 ../configure
-../configure \
+chmod 755 ./configure
+./configure \
 	--prefix=$PREFIX \
 	--with-tcl=$PREFIX/lib \
 	--with-tk=$PREFIX/lib \
@@ -29,8 +26,5 @@ chmod 755 ../configure
 	--with-tkinclude=$PREFIX/include
 
 make install
-cd .. # back to tkhtml dir
-cd .. # back to temp_build_dir
-
 
 
