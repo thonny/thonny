@@ -48,14 +48,8 @@ rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 rmdir %BUILDDIR%\Lib\ensurepip /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\pip /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\pip-7.1.2.dist-info /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\virtualenv_support /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\virtualenv-13.1.2.dist-info /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\setuptools /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\setuptools-18.2.dist-info /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\requests /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\requests_toolbelt /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\requests_toolbelt-0.4.0.dist-info /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\requests-2.8.1.dist-info /S /Q>NUL
 
 
 
