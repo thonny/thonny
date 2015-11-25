@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
-PYTHON_VERISION=3.5.0
+PYTHON_VERSION=3.5.1
+RELEASE_NAME=Python-${PYTHON_VERSION}rc1
 
-curl -O https://www.python.org/ftp/python/$PYTHON_VERISION/Python-$PYTHON_VERISION.tgz
-tar xf Python-$PYTHON_VERISION.tgz
-cd Python-$PYTHON_VERISION
+curl -O https://www.python.org/ftp/python/$PYTHON_VERSION/$RELEASE_NAME.tgz
+tar xf $RELEASE_NAME.tgz
+cd $RELEASE_NAME
 
 # compile and install Python
 ./configure --prefix=$PREFIX LDFLAGS="-L$PREFIX/lib" CPPFLAGS="-I$PREFIX/include"
