@@ -16,7 +16,7 @@ mkdir -p $MACOS_PATH
 cp -r $PREFIX/* $MACOS_PATH
 
 # update/install thonny #####################################################
-$MACOS_PATH/bin/python3.5 -m pip install --force-reinstall thonny
+$MACOS_PATH/bin/python3.5 -m pip install --no-cache-dir thonny
 rm $MACOS_PATH/bin/thonny # because this contains absolute paths
 
 
