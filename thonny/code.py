@@ -86,6 +86,11 @@ class Editor(ttk.Frame):
             if filename == "":
                 return None
             
+            # Seems that in some Python versions defaultextension 
+            # acts funny
+            if filename.lower().endswith(".py.py"):
+                filename = filename[:-3]
+            
             get_workbench().event_generate("SaveAs", editor=self, filename=filename)
                 
         
