@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # START BUILDING ####################################################
-PREFIX=/home/aivar/pythonny
+PREFIX=$HOME/pythonny
 ARCHITECTURE="$(uname -m)"
 
 rm -Rf $PREFIX

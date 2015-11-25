@@ -4,7 +4,7 @@ PREFIX=/home/aivar/pythonny
 
 
 # INSTALL/UPDATE THONNY ###################################
-$PREFIX/bin/python3.5 -m pip install --upgrade thonny
+$PREFIX/bin/python3.5 -m pip install --no-cache-dir thonny
 
 VERSION=$(<$PREFIX/lib/python3.5/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"

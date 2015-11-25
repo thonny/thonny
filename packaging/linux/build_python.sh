@@ -2,9 +2,12 @@
 
 # COMPILE PYTHON ###############################################
 
-wget https://www.python.org/ftp/python/3.5.0/Python-3.5.0.tar.xz
-tar xf Python-3.5.0.tar.xz
-cd Python-3.5.0
+PYTHON_VERSION=3.5.1
+RELEASE_NAME=Python-${PYTHON_VERSION}rc1
+
+wget https://www.python.org/ftp/python/$PYTHON_VERSION/$RELEASE_NAME.tar.xz
+tar xf $RELEASE_NAME.tar.xz
+cd $RELEASE_NAME
 
 # set LD_LIBRARY_PATH (https://mail.python.org/pipermail/tkinter-discuss/2011-March/002808.html)
 export LD_LIBRARY_PATH=$PREFIX/lib
