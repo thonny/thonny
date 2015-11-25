@@ -3,12 +3,6 @@
 PREFIX=/home/aivar/pythonny
 
 
-# INSTALL/UPDATE THONNY ###################################
-$PREFIX/bin/python3.5 -m pip install --no-cache-dir thonny
-
-VERSION=$(<$PREFIX/lib/python3.5/site-packages/thonny/VERSION)
-ARCHITECTURE="$(uname -m)"
-VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 
 # prepare working folder
 rm -rf build
@@ -20,12 +14,22 @@ mkdir -p $TARGET_DIR
 
 # copy files
 cp -r $PREFIX/* $TARGET_DIR
-cp thonny $TARGET_DIR/bin
 cp install.py $TARGET_DIR/install
 
 mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates
 cp Thonny.desktop $TARGET_DIR/templates
+
+# INSTALL/UPDATE THONNY ###################################
+$TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir thonny
+
+VERSION=$(<$TARGET_DIR/lib/python3.5/site-packages/thonny/VERSION)
+ARCHITECTURE="$(uname -m)"
+VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
+
+# override thonny launcher
+rm $TARGET_DIR/bin/thonny
+cp thonny $TARGET_DIR/bin
 
 
 # clean up unnecessary stuff
