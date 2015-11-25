@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # START BUILDING ####################################################
-PREFIX=$HOME/pythonny
+export PREFIX=$HOME/pythonny
 ARCHITECTURE="$(uname -m)"
 
 rm -Rf $PREFIX
@@ -13,6 +13,10 @@ TEMP_DIR=$MAIN_DIR/temp_build_dir
 rm -Rf $TEMP_DIR
 mkdir $TEMP_DIR
 cd $TEMP_DIR
+
+
+echo $PREFIX
+read -n1 -r -p "Press any key to continue..." key
 
 $MAIN_DIR/build_tcltk.sh
 $MAIN_DIR/build_tkhtml.sh
