@@ -18,6 +18,7 @@ AppPublisher=Aivar Annamaa
 AppPublisherURL=http://thonny.cs.ut.ee
 AppSupportURL=http://thonny.cs.ut.ee
 AppUpdatesURL=http://thonny.cs.ut.ee
+MinVersion=6.0
 DefaultDirName={userpf}\Thonny
 DirExistsWarning=auto
 UsePreviousAppDir=yes
