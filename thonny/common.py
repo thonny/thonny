@@ -168,13 +168,18 @@ def quote_path_for_shell(path):
         if (not c.isalpha() 
             and not c.isnumeric()
             and c not in "-_./\\"):
-            return '"' + path + '"'
+            return '"' + path.replace('"', '\\"') + '"'
     else:
         return path
 
 def unquote_path(path):
-    # TODO: may be incomplete
-    return path.strip("'").strip('"').replace("\\\\", "\\")
+    path = path.strip()
+    
+    if (path.startswith("'") and path.endswith("'")
+        or path.startswith('"') and path.endswith('"')):
+        path = path[1:-1]
+        
+    return path.replace("\\\\", "\\").replace('\\"', '"')
 
 
 def print_structure(o):
