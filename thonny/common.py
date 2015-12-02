@@ -145,7 +145,7 @@ def parse_shell_command(cmd_line, split_arguments=True):
         arg_str = parts[1]
         
     if split_arguments:
-        args = shlex.split(arg_str.strip(), posix=False) 
+        args = shlex.split(arg_str.strip(), posix=True) 
     else:
         args = [arg_str]
         
@@ -171,15 +171,6 @@ def quote_path_for_shell(path):
             return '"' + path.replace('"', '\\"') + '"'
     else:
         return path
-
-def unquote_path(path):
-    path = path.strip()
-    
-    if (path.startswith("'") and path.endswith("'")
-        or path.startswith('"') and path.endswith('"')):
-        path = path[1:-1]
-        
-    return path.replace("\\\\", "\\").replace('\\"', '"')
 
 
 def print_structure(o):

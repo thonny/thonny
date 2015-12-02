@@ -18,14 +18,14 @@ import sys
 import threading
 
 from thonny.common import serialize_message, ToplevelCommand, \
-    quote_path_for_shell, \
-    InlineCommand, parse_shell_command, unquote_path, \
+    InlineCommand, parse_shell_command, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
     UserError
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shutil
 import filecmp
+import shlex
 
 
 class Runner:
@@ -108,7 +108,7 @@ class Runner:
             and self._proxy.cwd != script_dir):
             # create compound command
             # start with %cd
-            cmd_line = "%cd " + quote_path_for_shell(script_dir) + "\n"
+            cmd_line = "%cd " + shlex.quote(script_dir) + "\n"
             next_cwd = script_dir
         else:
             # create simple command
@@ -117,7 +117,7 @@ class Runner:
         
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(filename, next_cwd)
-        cmd_line += "%" + mode + " " + quote_path_for_shell(rel_filename) + "\n"
+        cmd_line += "%" + mode + " " + shlex.quote(rel_filename) + "\n"
         
         # submit to shell (shell will execute it)
         get_workbench().get_view("ShellView").submit_command(cmd_line)
@@ -134,7 +134,7 @@ class Runner:
         if len(args) >= 1:
             get_workbench().get_editor_notebook().save_all_named_editors()
             self.send_command(ToplevelCommand(command=command,
-                               filename=unquote_path(args[0]),
+                               filename=args[0],
                                args=args[1:]))
         else:
             raise CommandSyntaxError("Command '%s' takes at least one argument", command)
@@ -154,7 +154,7 @@ class Runner:
         assert command == "cd"
         
         if len(args) == 1:
-            self.send_command(ToplevelCommand(command="cd", path=unquote_path(args[0])))
+            self.send_command(ToplevelCommand(command="cd", path=args[0]))
         else:
             raise CommandSyntaxError("Command 'cd' takes one argument")
 
