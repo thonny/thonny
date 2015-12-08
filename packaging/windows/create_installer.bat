@@ -29,7 +29,6 @@ rmdir %BUILDDIR%\Tools /S /Q>NUL
 rmdir %BUILDDIR%\Scripts /S /Q>NUL
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
-rmdir %BUILDDIR%\lib\plat-* /S /Q>NUL
 
 
 del %BUILDDIR%\tcl\*.sh /Q>NUL
@@ -62,6 +61,10 @@ xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 
 @echo ............... COPYING THONNY LAUNCHER ..........................
 copy ThonnyRunner\Release\thonny.exe %BUILDDIR% /Y
+
+
+@echo ............... ADDING LICENSES ...................................
+copy ..\..\*LICENSE.txt %BUILDDIR% /Y>NUL
 
 
 @echo ............... CREATING INSTALLER ..........................

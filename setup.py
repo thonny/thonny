@@ -16,7 +16,7 @@ setup(
       description="Python IDE for beginners",
       url="http://thonny.cs.ut.ee",
       author="Aivar Annamaa",
-      license="GPLv3",
+      license="MIT",
       classifiers=[
         "Development Status :: 4 - Beta",
         "Environment :: MacOS X",
@@ -26,7 +26,7 @@ setup(
         "Intended Audience :: Education",
         "Intended Audience :: End Users/Desktop",
         "License :: Freeware",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
         "Operating System :: MacOS",
         "Operating System :: Microsoft :: Windows",

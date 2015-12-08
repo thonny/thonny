@@ -76,7 +76,7 @@ class AboutDialog(tk.Toplevel):
                                   + "ABSOLUTELY NO WARRANTY!\n"
                                   + "It is free software, and you are welcome to\n"
                                   + "redistribute it under certain conditions, see\n"
-                                  + "http://www.gnu.org/licenses/gpl-3.0.txt\n"
+                                  + "https://opensource.org/licenses/MIT\n"
                                   + "for details\n",
                                   justify=tk.CENTER, font=license_font)
         license_label.grid()
