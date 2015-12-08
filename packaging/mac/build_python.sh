@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 PYTHON_VERSION=3.5.1
-RELEASE_NAME=Python-${PYTHON_VERSION}rc1
+RELEASE_NAME=Python-${PYTHON_VERSION}
 
 curl -O https://www.python.org/ftp/python/$PYTHON_VERSION/$RELEASE_NAME.tgz
 tar xf $RELEASE_NAME.tgz
@@ -17,5 +17,5 @@ make altinstall
 #$PREFIX/bin/python3.5 -m idlelib
 
 
-
+$PREFIX/bin/python3.5 -m pip install jedi
 
