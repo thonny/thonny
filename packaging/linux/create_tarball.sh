@@ -42,7 +42,8 @@ rm -rf $TARGET_DIR/lib/python3.5/ensurepip
 rm -rf $TARGET_DIR/lib/python3.5/site-packages/pip*
 rm -rf $TARGET_DIR/lib/python3.5/site-packages/setuptools*
 
-
+# copy licenses
+cp ../../*LICENSE.txt $TARGET_DIR
 
 # put it together
 mkdir -p dist
