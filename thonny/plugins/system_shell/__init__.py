@@ -4,8 +4,9 @@ from subprocess import Popen
 import sys
 import os.path
 import shlex
+from thonny.plugins.system_shell.explain_environment import CURRENT_PYTHON_EXEC_PREFIX_KEY
 
-_CURRENT_PYTHON_EXEC_PREFIX = "CURRENT_PYTHON_EXEC_PREFIX"
+
 
 def prepare_windows_environment():
     # In Windows, Python binaries are in different directories
@@ -25,25 +26,43 @@ def prepare_windows_environment():
     current_interpreter_bin_dir = ...
     path_items.insert(0, ) 
 
-def explain_python_environment():
-    assert _CURRENT_PYTHON_EXEC_PREFIX in os.environ
-    print("This session is prepared for using Python installation in")
-    print(os.environ[_CURRENT_PYTHON_EXEC_PREFIX])
-    print()
-    print("Some important commands and their full paths")
-
 def open_system_shell():
+    open_system_shell_unix()
+
+def open_system_shell_unix():
+    env = os.environ.copy()
+    path = env.get("PATH", "")
+    env["PATH"] = os.path.join(sys.exec_prefix, "bin") + os.pathsep + path
+    env[CURRENT_PYTHON_EXEC_PREFIX_KEY] = sys.exec_prefix
+    env["SSS"] = "SSS"
+                   
+    explainer = os.path.join(os.path.dirname(__file__), "explain_environment.py")
+    
+#    Popen("""osascript -e 'tell application "Terminal" to do script "%s"'""" 
+    #Popen("""open -a Terminal . ; osascript -e 'tell application "Terminal" to activate in window 1' """, env=env, shell=True) 
+    
+    Popen("""osascript -e 'tell application "Terminal" to do script "%s %s"' ;  osascript -e 'tell application "Terminal" to activate'""" 
+          % (sys.executable, explainer)
+          ,
+          env=env, shell=True)
+
+    #script = os.path.join(os.path.dirname(__file__), "scr.scpt")
+    #Popen(["/usr/bin/osascript",  script] 
+    #      #% explainer
+    #      ,env=env, shell=False)
+
+def open_system_shell_windows():
     env = os.environ.copy()
     path = env.get("PATH", "")
     env["PATH"] = (sys.exec_prefix + os.pathsep
                    + os.path.join(sys.exec_prefix, "Scripts") + os.pathsep
                    + path)
-    env["CURRENT_PYTHON_EXEC_PREFIX"] = sys.exec_prefix
+    env[CURRENT_PYTHON_EXEC_PREFIX_KEY] = sys.exec_prefix
                    
     explainer = os.path.join(os.path.dirname(__file__), "explain_python_env.bat")
-    
-    Popen('start "Shell for using %s" /w "%s" rrr' % (sys.exec_prefix, explainer),
+    Popen('start "Shell for using %s" /w "%s"' % (sys.exec_prefix, explainer),
           env=env, shell=True)
+    
 
 def load_plugin():
     get_workbench().add_command("OpenSystemShell", "tools", "Open system shell",
