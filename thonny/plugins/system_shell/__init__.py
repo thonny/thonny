@@ -4,8 +4,7 @@ from subprocess import Popen
 import sys
 import os.path
 import shlex
-from thonny.plugins.system_shell.explain_environment import CURRENT_PYTHON_EXEC_PREFIX_KEY
-
+import platform
 
 
 def prepare_windows_environment():
@@ -27,14 +26,15 @@ def prepare_windows_environment():
     path_items.insert(0, ) 
 
 def open_system_shell():
-    open_system_shell_unix()
+    if platform.system() == "Windows":
+        open_system_shell_windows()
+    else:
+        open_system_shell_unix()
 
 def open_system_shell_unix():
     env = os.environ.copy()
     path = env.get("PATH", "")
     env["PATH"] = os.path.join(sys.exec_prefix, "bin") + os.pathsep + path
-    env[CURRENT_PYTHON_EXEC_PREFIX_KEY] = sys.exec_prefix
-    env["SSS"] = "SSS"
                    
     explainer = os.path.join(os.path.dirname(__file__), "explain_environment.py")
     
@@ -57,10 +57,11 @@ def open_system_shell_windows():
     env["PATH"] = (sys.exec_prefix + os.pathsep
                    + os.path.join(sys.exec_prefix, "Scripts") + os.pathsep
                    + path)
-    env[CURRENT_PYTHON_EXEC_PREFIX_KEY] = sys.exec_prefix
-                   
+    
     explainer = os.path.join(os.path.dirname(__file__), "explain_python_env.bat")
-    Popen('start "Shell for using %s" /w "%s"' % (sys.exec_prefix, explainer),
+    explainer = os.path.join(os.path.dirname(__file__), "explain_environment.py")
+    Popen('start "Shell for using %s" /W cmd /K "%s" %s' % 
+          (sys.exec_prefix, sys.executable, explainer),
           env=env, shell=True)
     
 
