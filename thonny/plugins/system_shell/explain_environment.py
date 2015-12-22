@@ -7,18 +7,44 @@ import platform
 import subprocess
 from shutil import which
 
+def create_pythonless_environment():
+    # If I want to call another python version, then 
+    # I need to remove from environment the items installed by current interpreter
+    env = {}
+    
+    for key in os.environ:
+        if ("python" not in key.lower()
+            and key not in ["TK_LIBRARY", "TCL_LIBRARY"]):
+            env[key] = os.environ[key]
+    
+    return env
+
 def _find_commands(logical_command, reference_output, query_arguments,
                    only_shortest=True):
     """Returns the commands that can be used for running given conceptual command
     (python or pip)"""
     
     def is_correct_command(command):
+        # Don't try to run the command itself, but first expand it to full path.
+        # The location of parent executable seems to affect command search.
+        full_path = which(command)
+        if full_path is None:
+            return False
+
+            
         try:
-            output = subprocess.check_output([command] + query_arguments, 
+            output = subprocess.check_output([full_path] + query_arguments, 
                                              universal_newlines=True,
-                                             shell=False)
-            #print("%%%", command, output.strip(), which(command))
-            return output.strip() == reference_output.strip()
+                                             shell=False,
+                                             env=create_pythonless_environment())
+            
+            expected = reference_output.strip()
+            actual = output.strip()
+            if platform.system() == "Windows":
+                expected = expected.lower()
+                actual = actual.lower()
+                
+            return expected == actual
         except:
             return False
     
@@ -31,10 +57,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
     # first look for short commands
     for suffix in version_suffixes:
         command = logical_command + suffix
-        # Don't try to run the command itself, but first expand it to full path.
-        # The location of parent executable seems to affect command search.
-        full_path = which(command)
-        if is_correct_command(full_path):
+        if is_correct_command(command):
             if " " in command:
                 command = '"' + command + '"'
                 
