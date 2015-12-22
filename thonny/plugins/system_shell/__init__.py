@@ -7,24 +7,6 @@ import shlex
 import platform
 
 
-def prepare_windows_environment():
-    # In Windows, Python binaries are in different directories
-    # and those directories contain only Python related stuff,
-    # so it's safe to 
-    env = os.environ.copy()
-    
-    def keep_path_item(x):
-        dir_path = shlex.split()[0] 
-        dir_items = set(os.listdir(dir_path))
-        forbidden_items = {"python", "pythonw",
-                           "python3", "python2.7"}
-        #if  
-    
-    path_items = filter(keep_path_item, env.get("PATH", "").split(os.pathsep))
-    
-    current_interpreter_bin_dir = ...
-    path_items.insert(0, ) 
-
 def open_system_shell():
     if platform.system() == "Windows":
         open_system_shell_windows()

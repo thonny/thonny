@@ -317,10 +317,8 @@ class _BackendProxy:
         my_env["PYTHONIOENCODING"] = "ASCII" # cx_freezed backend won't use this but this enables using external python as fallback in cases of multibyte encodings
         my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
         
-        interpreter = get_workbench().get_option("run.interpreter")
-        if not interpreter:
-            interpreter = get_current_interpreter()
-        
+        interpreter = get_selected_interpreter()
+                
         if not os.path.exists(interpreter):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
                             % interpreter)
@@ -441,7 +439,13 @@ class _BackendProxy:
                 debug("### BACKEND ###: %s", data.strip())
         
 
-def get_current_interpreter():
+def get_selected_interpreter():
+    interpreter = get_workbench().get_option("run.interpreter")
+    if not interpreter:
+        interpreter = get_gui_interpreter()
+    return interpreter
+
+def get_gui_interpreter():
     if sys.executable.endswith("thonny.exe"):
         # assuming that thonny.exe is in the same dir as pythonw.exe
         # (NB! thonny.exe in scripts folder delegates running to python.exe)
