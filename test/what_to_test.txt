@@ -15,3 +15,5 @@
 * close Thonny when program is running
 
 * Heap view works
+
+* All required files end up in sdist (including those from package plugins like system_shell)

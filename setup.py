@@ -38,7 +38,7 @@ setup(
         "Topic :: Software Development :: Debuggers",
       ],
       keywords="IDE education debugger",
-      packages=["thonny", "thonny.plugins"],
+      packages=["thonny", "thonny.plugins", "thonny.plugins.system_shell"],
       package_data={'': ['VERSION',  'res/*', 'backend_private/*.py', 'backend_private/thonny/*.py']},
       entry_points={
         'gui_scripts': [
