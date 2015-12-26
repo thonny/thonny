@@ -13,33 +13,36 @@ def _get_exec_prefix(python_interpreter):
                         env=create_pythonless_environment()
                         ).strip()
 
+def _add_to_path(directory, path):
+    if (directory in path.split(os.pathsep)
+        or platform.system() == "Windows" and directory.lower() in path.lower().split(os.pathsep)):
+        return path
+    else:
+        return directory + os.pathsep + path
+
 def open_system_shell(python_interpreter):
     """Main task is to modify path and open terminal window.
     Bonus (and most difficult) part is executing a script in this window
     for recommending commands for running given python and related pip"""
     
-    print("Asking prefix for", python_interpreter)
     exec_prefix=_get_exec_prefix(python_interpreter)
-    print("Got", exec_prefix)
     env = create_pythonless_environment()
-    path = env.get("PATH", "")
     
     # TODO: what if executable or explainer needs escaping?
     # Maybe try creating a script in temp folder and execute this,
     # passing required paths via environment variables.
     
     if platform.system() == "Windows":
-        env["PATH"] = (exec_prefix + os.pathsep
-                       + os.path.join(exec_prefix, "Scripts") + os.pathsep
-                       + path)
+        env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
+        env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
         cmd_line = 'start "Shell for {interpreter}" /W cmd /K "{interpreter}" {explainer}'
         
     elif platform.system() == "Linux":
-        env["PATH"] = os.path.join(exec_prefix, "bin") + os.pathsep + path
-        cmd_line = """x-terminal-emulator -e 'bash -c "{interpreter} {explainer}" ;bash'"""
+        env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
+        cmd_line = """x-terminal-emulator -e 'bash -c "{interpreter} {explainer}";bash'"""
         
     elif platform.system() == "Darwin":
-        env["PATH"] = os.path.join(exec_prefix, "bin") + os.pathsep + path
+        env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
         cmd_line = """osascript -e 'tell application "Terminal" to do script "{interpreter} {explainer}"' ;  osascript -e 'tell application "Terminal" to activate'"""
     
     else:

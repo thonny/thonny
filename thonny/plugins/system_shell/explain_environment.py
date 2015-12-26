@@ -100,8 +100,8 @@ def _find_commands(logical_command, reference_output, query_arguments,
 
 def _find_python_commands(only_shortest=True):
     return _find_commands("python",
-                         sys.exec_prefix,
-                         ["-c", "import sys; print(sys.exec_prefix)"], only_shortest)
+                         sys.exec_prefix + "\n" + sys.version,
+                         ["-c", "import sys; print(sys.exec_prefix); print(sys.version)"], only_shortest)
 
 def _find_pip_commands(only_shortest=True):
     current_ver_string = _get_pip_version_string()
@@ -147,7 +147,7 @@ def _clear_screen():
 if __name__ == "__main__":
     _clear_screen()
     print("*" * 80)
-    print("This session is prepared for using Python installation in")
+    print("This session is prepared for using Python %s installation in" % platform.python_version())
     print(" ", sys.exec_prefix)
     print("")
     print("Shortest command for running the interpreter:")
