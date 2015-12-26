@@ -5,7 +5,7 @@ from tkinter import ttk
 from tkinter import messagebox
 
 from thonny.config_ui import ConfigurationPage
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import create_string_var
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 import sys
@@ -149,7 +149,10 @@ class InterpreterConfigurationPage(ConfigurationPage):
             used_interpreters.append(interpreter)
         get_workbench().set_option("run.used_interpreters", used_interpreters)
         
-        messagebox.showinfo(None, "New interpreter will be selected at next Run/Debug/Reset")
+        if get_runner().get_state() == "waiting_toplevel_command":
+            get_runner().cmd_reset()
+        else:
+            messagebox.showinfo(None, "New interpreter will be selected at next Run/Debug/Reset")
         
     
 

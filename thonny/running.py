@@ -60,7 +60,7 @@ class Runner:
             include_in_toolbar=True)
         
         get_workbench().add_command('reset', "run", 'Reset',
-            handler=self._cmd_reset,
+            handler=self.cmd_reset,
             default_sequence=None,
             group=20)
         
@@ -166,7 +166,7 @@ class Runner:
         self.execute_current("Run")
     
     
-    def _cmd_reset(self):
+    def cmd_reset(self):
         if get_runner().get_state() == "waiting_toplevel_command":
             get_workbench().get_view("ShellView").submit_command("%Reset\n")
         else:
