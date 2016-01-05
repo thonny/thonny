@@ -12,6 +12,10 @@ xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 %BUILDDIR%\python.exe -m pip install --no-cache-dir thonny
 
 
+@echo ............... INSTALLING easygui ...................................
+%BUILDDIR%\python.exe -m pip install --no-cache-dir easygui
+
+
 @echo ............... CLEANING PYTHON ............................
 move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON-LICENSE.txt>NUL
 del %BUILDDIR%\README.txt>NUL
