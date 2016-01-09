@@ -15,9 +15,12 @@ MACOS_PATH=build/Thonny.app/Contents/MacOS
 mkdir -p $MACOS_PATH 
 cp -r $PREFIX/* $MACOS_PATH
 
-# update/install thonny #####################################################
+# install thonny #####################################################
 $MACOS_PATH/bin/python3.5 -m pip install --no-cache-dir thonny
 rm $MACOS_PATH/bin/thonny # because this contains absolute paths
+
+# install easygui (TODO: temp) #####################################################
+$MACOS_PATH/bin/python3.5 -m pip install --no-cache-dir easygui
 
 
 # clean unnecessary stuff ###################################################
