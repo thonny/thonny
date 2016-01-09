@@ -20,9 +20,13 @@ mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates
 cp Thonny.desktop $TARGET_DIR/templates
 
-# INSTALL/UPDATE THONNY ###################################
 export LD_LIBRARY_PATH=$TARGET_DIR/lib
+
+# INSTALL THONNY ###################################
 $TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir thonny
+
+# INSTALL EASYGUI (TODO: temp) ###################################
+$TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir easygui
 
 VERSION=$(<$TARGET_DIR/lib/python3.5/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
