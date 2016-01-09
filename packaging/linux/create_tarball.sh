@@ -23,7 +23,7 @@ cp Thonny.desktop $TARGET_DIR/templates
 export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 # INSTALL THONNY ###################################
-$TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir thonny
+$TARGET_DIR/bin/python3.5 -m pip install --pre --no-cache-dir thonny
 
 # INSTALL EASYGUI (TODO: temp) ###################################
 $TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir easygui
