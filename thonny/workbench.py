@@ -25,7 +25,13 @@ from thonny.globals import register_runner, get_runner
 from thonny.config_ui import ConfigurationDialog
 import pkgutil
 import configparser
+import socket
+import queue
+from _thread import start_new_thread
+import ast
 
+THONNY_PORT = 4957
+SERVER_SUCCESS = "OK"
 
 class Workbench(tk.Tk):
     """
@@ -52,7 +58,7 @@ class Workbench(tk.Tk):
           notifications about debugger's progress)
           
     """
-    def __init__(self):
+    def __init__(self, server_socket=None):
         self.initializing = True
         
         tk.Tk.__init__(self)
@@ -83,12 +89,11 @@ class Workbench(tk.Tk):
         self._editor_notebook.load_startup_files()
         self._editor_notebook.focus_set()
         
-        self.initializing = False
+        if server_socket is not None:
+            self._init_server_loop(server_socket)
         
-        try:
-            self.mainloop()
-        except SystemExit:
-            self.destroy()
+        self.initializing = False
+
         
     def _init_configuration(self):
         conf_filename = os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
@@ -217,7 +222,23 @@ class Workbench(tk.Tk):
             get_runner().send_command(ToplevelCommand(command="Reset"))
         except:
             self.report_exception("Error when initializing backend")
-
+    
+    def _init_server_loop(self, server_socket):
+        """Socket will listen requests from newer Thonny instances,
+        which try to delegate opening files to older instance"""
+        self._requests_from_socket = queue.Queue()
+        
+        def server_loop():
+            while True:
+                print("Waiting for next client")
+                (client_socket, _) = server_socket.accept()
+                try:
+                    self._handle_socket_request(client_socket)
+                except:
+                    traceback.print_exc()
+        
+        start_new_thread(server_loop, ())
+        self._poll_socket_requests()
 
     def _init_commands(self):
         
@@ -904,7 +925,39 @@ class Workbench(tk.Tk):
                 
             return "end"
 
+    def _handle_socket_request(self, client_socket):
+        """runs in separate thread"""
+        # read the request
+        data = bytes()
+        while True:
+            new_data = client_socket.recv(1024)
+            if len(new_data) > 0:
+                data += new_data
+            else:
+                break
+        
+        self._requests_from_socket.put(data)
+        
+        # respond OK
+        client_socket.sendall(SERVER_SUCCESS.encode(encoding='utf-8'))
+        client_socket.shutdown(socket.SHUT_WR)
+        print("AFTER NEW REQUEST", client_socket)
     
+    def _poll_socket_requests(self):
+        """runs in gui thread"""
+        try:
+            while not self._requests_from_socket.empty():
+                data = self._requests_from_socket.get()
+                args = ast.literal_eval(data.decode("UTF-8"))
+                assert isinstance(args, list)
+                for filename in args:
+                    if os.path.exists(filename):
+                        self._editor_notebook.show_file(filename)
+                        
+                self._become_topmost_window()
+        finally:
+            self.after(50, self._poll_socket_requests)
+
     def _on_close(self):
         if not self._editor_notebook.check_allow_closing():
             return
@@ -965,13 +1018,24 @@ class Workbench(tk.Tk):
             self.set_option("layout.height", self.winfo_height(), False)
         
         self._configuration_manager.save()
-        
+    
+    #def focus_set(self):
+    #    tk.Tk.focus_set(self)
+    #    self._editor_notebook.focus_set()
+    
     def _update_title(self, event):
         self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._runner.get_cwd(), *sys.version_info))
+    
+    def _become_topmost_window(self):
+        self.deiconify()
+        self.attributes('-topmost', True)
+        self.attributes('-topmost', False)
+        self.focus_set()
+        self.lift()
     
 
 class WorkbenchEvent(Record):
     def __init__(self, sequence, **kwargs):
         Record.__init__(self, **kwargs)
         self.sequence = sequence
-        
+

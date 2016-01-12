@@ -1,10 +1,10 @@
 import socket
+from time import sleep
 
 port = 4957
 
 def become_client():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(("localhost", port))
+    s = socket.create_connection(("localhost", port), 0.1)
 
 def become_server():
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -14,7 +14,11 @@ def become_server():
         (clientsocket, address) = serversocket.accept()
         print("got connection:", clientsocket, address)
 
-try:
-    become_server()
-except OSError:
-    become_client()
+
+become_server()
+#become_server()
+
+#try:
+#    become_server()
+#except OSError:
+#    become_client()
