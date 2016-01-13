@@ -954,7 +954,7 @@ class Workbench(tk.Tk):
                     if os.path.exists(filename):
                         self._editor_notebook.show_file(filename)
                         
-                self._become_topmost_window()
+                self.become_topmost_window()
         finally:
             self.after(50, self._poll_socket_requests)
 
@@ -1026,7 +1026,7 @@ class Workbench(tk.Tk):
     def _update_title(self, event):
         self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._runner.get_cwd(), *sys.version_info))
     
-    def _become_topmost_window(self):
+    def become_topmost_window(self):
         self.deiconify()
         self.attributes('-topmost', True)
         self.after_idle(self.attributes, '-topmost', False)

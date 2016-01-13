@@ -334,6 +334,7 @@ class EditorNotebook(ttk.Notebook):
         for arg in args:
             if isinstance(arg, str) and os.path.exists(arg):
                 self.show_file(arg)
+        get_workbench().become_topmost_window()
         
     def get_current_editor(self):
         return get_current_notebook_tab_widget(self)
