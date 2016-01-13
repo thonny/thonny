@@ -25,3 +25,4 @@ thonny.egg-info
 temp_build_dir
 packaging/mac/out.txt
 packaging/windows/pythonny
+packaging/setuptools/*.zip

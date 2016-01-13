@@ -18,7 +18,7 @@ copy thonny\common.py     thonny\backend_private\thonny
 
 @echo ............... CREATING SDIST ................................
 
-C:\Python35\python.exe setup.py sdist -d packaging\setuptools\dist
+C:\Python35\python.exe setup.py sdist -d packaging\setuptools
 
 @echo ............... CLEANING BACKEND_PRIVATE ......................
 
