@@ -74,7 +74,7 @@ try:
     
     print_task("Creating Desktop shortcut")
     create_launcher(source_dir + "/templates/Thonny.desktop",
-                    os.path.expanduser("~/Desktop"),
+                    os.path.expanduser("~/Desktop/Thonny.desktop"),
                     {"$target_dir" : target_dir})
     print("Done!")
     
