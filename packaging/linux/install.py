@@ -72,6 +72,12 @@ try:
                     {"$target_dir" : target_dir})
     print("Done!")
     
+    print_task("Creating Desktop shortcut")
+    create_launcher(source_dir + "/templates/Thonny.desktop",
+                    os.path.expanduser("~/Desktop"),
+                    {"$target_dir" : target_dir})
+    print("Done!")
+    
     
     uninstaller_path = target_dir + "/bin/uninstall"
     print_task("Creating uninstaller (%s)" % uninstaller_path)
