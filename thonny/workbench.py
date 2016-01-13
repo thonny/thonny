@@ -1029,7 +1029,7 @@ class Workbench(tk.Tk):
     def _become_topmost_window(self):
         self.deiconify()
         self.attributes('-topmost', True)
-        self.attributes('-topmost', False)
+        self.after_idle(self.attributes, '-topmost', False)
         self.focus_set()
         self.lift()
     
