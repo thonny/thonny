@@ -2,7 +2,7 @@
 
 import os.path
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Canvas
 from idlelib import PyParse, ParenMatch
 
 from thonny.ui_utils import TextWrapper, AutoScrollbar
@@ -65,6 +65,10 @@ class CodeView(ttk.Frame, TextWrapper):
         def _vertical_scrollbar_update(*args):
             self.vbar.set(*args)
             self.margin.yview(tk.MOVETO, args[0])
+            
+        def _horizontal_scrollbar_update(*args):
+            self.hbar.set(*args)
+            self._update_line_stopper()
         
         self.text = tk.Text(self,
                 #background="#ffffff",
@@ -76,7 +80,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 highlightthickness=0,
                 #highlightcolor="LightBlue",
                 yscrollcommand=_vertical_scrollbar_update,
-                xscrollcommand=self.hbar.set,
+                xscrollcommand=_horizontal_scrollbar_update,
                 borderwidth=0,
                 font=get_workbench().get_font("EditorFont"),
                 wrap=tk.NONE,
@@ -99,8 +103,13 @@ class CodeView(ttk.Frame, TextWrapper):
         def _vertical_scroll(*args):
             self.text.yview(*args)
             self.margin.yview(*args)
+            
+        def _horizontal_scroll(*args):
+            self.text.xview(*args)
+            self._update_line_stopper()
+            
         self.vbar['command'] = _vertical_scroll # TODO: keep line count same in margin
-        self.hbar['command'] = self.text.xview
+        self.hbar['command'] = _horizontal_scroll
         
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
@@ -131,6 +140,10 @@ class CodeView(ttk.Frame, TextWrapper):
         else:  
             self.text.bind("<Button-3>", self._open_context_menu)
 
+        self.line_stopper = Canvas(self.text, borderwidth=0, width=1, height=1200, 
+                                   highlightthickness=0, background="lightgray")
+        self.line_stopper.place(x=600, y=-10)
+        self._update_line_stopper()
         
     def del_word_left(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
@@ -678,6 +691,7 @@ class CodeView(ttk.Frame, TextWrapper):
                     pass
             
             self._update_line_numbers()
+            self._update_line_stopper()
             self.text.see(index)
 
     def _user_text_delete(self, index1, index2=None):
@@ -691,6 +705,7 @@ class CodeView(ttk.Frame, TextWrapper):
             if self.colorer:
                 self.colorer.on_delete(index1, index2)
             self._update_line_numbers()
+            self._update_line_stopper()
     
     def _update_line_numbers(self):
         text_line_count = int(self.text.index("end-1c").split(".")[0])
@@ -704,6 +719,34 @@ class CodeView(ttk.Frame, TextWrapper):
         self.margin.config(state='disabled')
 
 
+    def _update_line_stopper(self):
+        stopper_col = 80
+        
+        try:
+            self.text.update_idletasks()
+            # How far left has text been scrolled
+            first_visible_idx = self.text.index("@0,0")
+            first_visible_col = int(first_visible_idx.split(".")[1])
+            bbox = self.text.bbox(first_visible_idx)
+            first_visible_col_x = bbox[0]
+            
+            stopper_visible_col = stopper_col - first_visible_col
+            delta = first_visible_col_x
+            print(delta)
+        except:
+            # fall back to ignoring scroll position
+            stopper_visible_col = stopper_col
+            delta = 0
+        
+        if stopper_visible_col > -1:
+            x = (get_workbench().get_font("EditorFont").measure((stopper_visible_col-1) * "M") 
+                 + delta + self.text["padx"])
+        else:
+            x = -10
+        
+        #print(first_visible_col, first_visible_col_x)
+        
+        self.line_stopper.place(y=-10, x=x)
     """
     def _show_read_only_warning(self):
         showwarning("Warning",
