@@ -60,7 +60,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 #state='disabled'
                 )
         
-        #self.margin.grid(row=0, column=0, sticky=tk.NSEW)
+        self.margin.grid(row=0, column=0, sticky=tk.NSEW)
         
         def _vertical_scrollbar_update(*args):
             self.vbar.set(*args)
