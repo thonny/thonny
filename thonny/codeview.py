@@ -732,7 +732,6 @@ class CodeView(ttk.Frame, TextWrapper):
             
             stopper_visible_col = stopper_col - first_visible_col
             delta = first_visible_col_x
-            print(delta)
         except:
             # fall back to ignoring scroll position
             stopper_visible_col = stopper_col
