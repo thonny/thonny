@@ -261,6 +261,18 @@ def test_call_with_single_keyword():
                         value=Num @ 1.4  -  1.6
                             n=45""")
 
+def test_call_without_arguments():
+    check_marked_ast("""f()
+""", """/=Module
+    body=[...]
+        0=Expr @ 1.0  -  1.3
+            value=Call @ 1.0  -  1.3
+                func=Name @ 1.0  -  1.1
+                    id='f'
+                    ctx=Load
+                args=[]
+                keywords=[]""")
+
 def check_marked_ast(source, expected_pretty_ast
                      #,expected_for_py_34=None
                      ):

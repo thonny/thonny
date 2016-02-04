@@ -8,6 +8,7 @@ import token
 import tokenize
 import collections
 from thonny.common import TextRange
+import traceback
 
 # TODO: can rely on Py3 
 Thoken = collections.namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
@@ -194,8 +195,14 @@ def mark_text_ranges(node, source):
         # set end markers to this node
         if "lineno" in node._attributes and "col_offset" in node._attributes:
             tokens = _extract_tokens(tokens, node.lineno, node.col_offset, prelim_end_lineno, prelim_end_col_offset)
-            #tokens = 
-            _set_real_end(node, tokens, prelim_end_lineno, prelim_end_col_offset)
+            try:
+                _set_real_end(node, tokens, prelim_end_lineno, prelim_end_col_offset)
+            except:
+                traceback.print_exc() # TODO: log it somewhere
+                # fallback to incorrect marking instead of exception
+                node.end_lineno = node.lineno
+                node.end_col_offset = node.col_offset + 1
+                
         
         # mark its children, starting from last one
         # NB! need to sort children because eg. in dict literal all keys come first and then all values
