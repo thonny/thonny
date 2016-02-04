@@ -273,6 +273,31 @@ def test_call_without_arguments():
                 args=[]
                 keywords=[]""")
 
+def test_call_with_attribute_function_and_keyword_arg():
+    check_marked_ast("""rida.strip().split(maxsplit=1)
+""", """/=Module
+    body=[...]
+        0=Expr @ 1.0  -  1.30
+            value=Call @ 1.0  -  1.30
+                func=Attribute @ 1.0  -  1.18
+                    value=Call @ 1.0  -  1.12
+                        func=Attribute @ 1.0  -  1.10
+                            value=Name @ 1.0  -  1.4
+                                id='rida'
+                                ctx=Load
+                            attr='strip'
+                            ctx=Load
+                        args=[]
+                        keywords=[]
+                    attr='split'
+                    ctx=Load
+                args=[]
+                keywords=[...]
+                    0=keyword
+                        arg='maxsplit'
+                        value=Num @ 1.28  -  1.29
+                            n=1""")
+
 def check_marked_ast(source, expected_pretty_ast
                      #,expected_for_py_34=None
                      ):
