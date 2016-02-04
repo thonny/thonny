@@ -469,4 +469,47 @@ def _get_ordered_child_nodes(node):
     else:
         return ast.iter_child_nodes(node)    
 
+def pretty(node, key="/", level=0):
+    """Used for testing and new test generation via AstView.
+    Don't change the format without updating tests"""
+    if isinstance(node, ast.AST):
+        fields = [(key, val) for key, val in ast.iter_fields(node)]
+        value_label = node.__class__.__name__
+        if isinstance(node, ast.Call):
+            # Try to make 3.4 AST-s more similar to 3.5
+            if sys.version_info[:2] == (3,4):
+                if ("kwargs", None) in fields:
+                    fields.remove(("kwargs", None))
+                if ("starargs", None) in fields:
+                    fields.remove(("starargs", None))
+            
+            # TODO: translate also non-None kwargs and starargs
+            
+    elif isinstance(node, list):
+        fields = list(enumerate(node))
+        if len(node) == 0:
+            value_label = "[]"
+        else:
+            value_label = "[...]"
+    else:
+        fields = []
+        value_label = repr(node)
+    
+    item_text = level * '    ' + str(key) + "=" + value_label
 
+    if hasattr(node, "lineno"):
+        item_text += " @ " + str(getattr(node, "lineno"))
+        if hasattr(node, "col_offset"):
+            item_text += "." + str(getattr(node, "col_offset"))
+        
+        if hasattr(node, "end_lineno"):
+            item_text += "  -  " + str(getattr(node, "end_lineno"))
+            if hasattr(node, "end_col_offset"):
+                item_text += "." + str(getattr(node, "end_col_offset"))
+        
+    lines = [item_text] + [pretty(field_value, field_key, level+1) 
+                           for field_key, field_value in fields] 
+    
+    return "\n".join(lines)
+        
+        
