@@ -18,6 +18,7 @@ class AstView(ui_utils.TreeFrame):
         
         self._current_code_view = None
         self.tree.bind("<<TreeviewSelect>>", self._locate_code)
+        self.tree.bind("<<Copy>>", self._copy_to_clipboard)
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
@@ -34,6 +35,7 @@ class AstView(ui_utils.TreeFrame):
         self.tree.heading('range', text='Code range', anchor=tk.W)
         
         self.tree['show'] = ('headings', 'tree')
+        self._current_source = None
         
         self._update(None)
     
@@ -45,13 +47,13 @@ class AstView(ui_utils.TreeFrame):
             return
         
         self._current_code_view = editor.get_code_view()
-        source = self._current_code_view.get_content()
+        self._current_source = self._current_code_view.get_content()
         selection = self._current_code_view.get_selected_range()
 
         self._clear_tree()
         
         try:
-            root = ast_utils.parse_source(source)
+            root = ast_utils.parse_source(self._current_source)
             selected_ast_node = ast_utils.find_closest_containing_node(root, selection)
             
         except Exception as e:
@@ -122,11 +124,14 @@ class AstView(ui_utils.TreeFrame):
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
     
-
+    def _copy_to_clipboard(self, event):
+        self.clipboard_clear()
+        if self._current_source is not None:
+            pretty_ast = ast_utils.pretty(ast_utils.parse_source(self._current_source))
+            self.clipboard_append(pretty_ast)
+            
 def load_plugin(): 
-    if (get_workbench().get_option("debug_mode")
-        or get_workbench().get_option("expert_mode")):
-        get_workbench().add_view(AstView, "AST", "s")
+    get_workbench().add_view(AstView, "AST", "s")
         
     
         
