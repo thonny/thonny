@@ -247,6 +247,18 @@ def mark_text_ranges(node, source):
                 tokens[:] = tokens[0:i]
                 return   
     
+    def _strip_unclosed_brackets(tokens):
+        level = 0
+        for i in range(len(tokens)-1, -1, -1):
+            if tokens[i][STRING] in "({[":
+                level -= 1
+            elif tokens[i][STRING] in ")}]":
+                level += 1
+
+            if level < 0:
+                tokens[:] = tokens[0:i]
+                level = 0  # keep going, there may be more unclosed brackets
+
     def _set_real_end(node, tokens, prelim_end_lineno, prelim_end_col_offset):
         """
         # shortcut
@@ -270,6 +282,7 @@ def mark_text_ranges(node, source):
         else:
             _strip_trailing_extra_closers(tokens, not isinstance(node, ast.Tuple))
             _strip_trailing_junk_from_expressions(tokens)
+            _strip_unclosed_brackets(tokens)
         
         # set the end markers of this node
         node.end_lineno = tokens[-1][END][0]
