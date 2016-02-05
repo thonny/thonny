@@ -117,9 +117,12 @@ def get_last_child(node):
           and len(node.values)) > 0:
         return node.values[-1]
     
-    elif (isinstance(node, (ast.Return, ast.Delete, ast.Assign, ast.AugAssign, ast.Yield))
+    elif (isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom))
           and node.value is not None):
         return node.value
+    
+    elif isinstance(node, ast.Delete):
+        return node.targets[-1]
     
     elif isinstance(node, ast.Expr):
         return node.value
