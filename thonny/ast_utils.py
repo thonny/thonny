@@ -199,7 +199,7 @@ def mark_text_ranges(node, source):
         if "lineno" in node._attributes and "col_offset" in node._attributes:
             tokens = _extract_tokens(tokens, node.lineno, node.col_offset, prelim_end_lineno, prelim_end_col_offset)
             try:
-                _set_real_end(node, tokens, prelim_end_lineno, prelim_end_col_offset)
+                tokens = _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset)
             except:
                 traceback.print_exc() # TODO: log it somewhere
                 # fallback to incorrect marking instead of exception
@@ -262,7 +262,7 @@ def mark_text_ranges(node, source):
                 tokens[:] = tokens[0:i]
                 level = 0  # keep going, there may be more unclosed brackets
 
-    def _set_real_end(node, tokens, prelim_end_lineno, prelim_end_col_offset):
+    def _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset):
         """
         # shortcut
         node.end_lineno = prelim_end_lineno
@@ -291,16 +291,25 @@ def mark_text_ranges(node, source):
         node.end_lineno = tokens[-1][END][0]
         node.end_col_offset = tokens[-1][END][1]
         
-        # Try to peel off more tokens to give better estimate for children
-        # Empty parens would confuse the children of no argument Call
-        if ((isinstance(node, ast.Call)) 
-            and not (node.args or node.keywords 
-                     or hasattr(node, "starargs") and node.starargs 
-                     or hasattr(node, "kwargs") and node.kwargs)):
-            assert tokens[-1][STRING] == ')'
-            del tokens[-1]
-            _strip_trailing_junk_from_expressions(tokens)
-        # attribute name would confuse the "value" of Attribute
+        # Peel off some trailing tokens which can't be part any 
+        # positioned child node.
+        # TODO: maybe cleaning from parent side is better than
+        # _strip_trailing_junk_from_expressions
+        
+        # Remove trailing empty parens from no-arg call
+        if (isinstance(node, ast.Call) 
+            and _tokens_text(tokens[-2:]) == "()"):
+            del tokens[-2:]
+                
+        # Remove trailing full slice
+        elif isinstance(node, ast.Subscript):
+            if  _tokens_text(tokens[-3:]) == "[:]":
+                del tokens[-3:]
+            
+            elif _tokens_text(tokens[-4:]) == "[::]":
+                del tokens[-4:]
+                
+        # Attribute name would confuse the "value" of Attribute
         elif isinstance(node, ast.Attribute):
             assert tokens[-1][TYPE] == token.NAME
             del tokens[-1]
@@ -491,6 +500,9 @@ def _get_ordered_child_nodes(node):
         return children
     else:
         return ast.iter_child_nodes(node)    
+
+def _tokens_text(tokens):
+    return "".join([t.string for t in tokens])
 
 def pretty(node, key="/", level=0):
     """Used for testing and new test generation via AstView.

@@ -246,29 +246,29 @@ def test_call_with_pos_star_kw():
                             n=45""")
 
 def test_call_with_single_keyword():
-    check_marked_ast("""f(t=45)
+    check_marked_ast("""fff(t=45)
 """, """/=Module
     body=[...]
-        0=Expr @ 1.0  -  1.7
-            value=Call @ 1.0  -  1.7
-                func=Name @ 1.0  -  1.1
-                    id='f'
+        0=Expr @ 1.0  -  1.9
+            value=Call @ 1.0  -  1.9
+                func=Name @ 1.0  -  1.3
+                    id='fff'
                     ctx=Load
                 args=[]
                 keywords=[...]
                     0=keyword
                         arg='t'
-                        value=Num @ 1.4  -  1.6
+                        value=Num @ 1.6  -  1.8
                             n=45""")
 
 def test_call_without_arguments():
-    check_marked_ast("""f()
+    check_marked_ast("""fff()
 """, """/=Module
     body=[...]
-        0=Expr @ 1.0  -  1.3
-            value=Call @ 1.0  -  1.3
-                func=Name @ 1.0  -  1.1
-                    id='f'
+        0=Expr @ 1.0  -  1.5
+            value=Call @ 1.0  -  1.5
+                func=Name @ 1.0  -  1.3
+                    id='fff'
                     ctx=Load
                 args=[]
                 keywords=[]""")
@@ -297,6 +297,65 @@ def test_call_with_attribute_function_and_keyword_arg():
                         arg='maxsplit'
                         value=Num @ 1.28  -  1.29
                             n=1""")
+
+def test_del_from_list_with_integer():
+    check_marked_ast("""del x[0]""", """/=Module
+    body=[...]
+        0=Delete @ 1.0  -  1.8
+            targets=[...]
+                0=Subscript @ 1.4  -  1.8
+                    value=Name @ 1.4  -  1.5
+                        id='x'
+                        ctx=Load
+                    slice=Index
+                        value=Num @ 1.6  -  1.7
+                            n=0
+                    ctx=Del""")
+
+
+def test_del_from_list_with_string():
+    check_marked_ast("""del x["blah"]""", """/=Module
+    body=[...]
+        0=Delete @ 1.0  -  1.13
+            targets=[...]
+                0=Subscript @ 1.4  -  1.13
+                    value=Name @ 1.4  -  1.5
+                        id='x'
+                        ctx=Load
+                    slice=Index
+                        value=Str @ 1.6  -  1.12
+                            s='blah'
+                    ctx=Del""")
+
+def test_full_slice1():
+    check_marked_ast("""blah[:]
+""", """/=Module
+    body=[...]
+        0=Expr @ 1.0  -  1.7
+            value=Subscript @ 1.0  -  1.7
+                value=Name @ 1.0  -  1.4
+                    id='blah'
+                    ctx=Load
+                slice=Slice
+                    lower=None
+                    upper=None
+                    step=None
+                ctx=Load""")
+
+def test_full_slice2():
+    check_marked_ast("""blah[::]
+""", """/=Module
+    body=[...]
+        0=Expr @ 1.0  -  1.8
+            value=Subscript @ 1.0  -  1.8
+                value=Name @ 1.0  -  1.4
+                    id='blah'
+                    ctx=Load
+                slice=Slice
+                    lower=None
+                    upper=None
+                    step=None
+                ctx=Load""")
 
 def check_marked_ast(source, expected_pretty_ast
                      #,expected_for_py_34=None
