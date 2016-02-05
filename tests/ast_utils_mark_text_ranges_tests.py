@@ -357,6 +357,81 @@ def test_full_slice2():
                     step=None
                 ctx=Load""")
 
+def test_non_ascii_letters_with_calls_etc():
+    check_marked_ast("""täpitähed = "täpitähed"
+print(täpitähed["tšahh"])
+pöhh(pöhh=3)
+""", """/=Module
+    body=[...]
+        0=Assign @ 1.0  -  1.23
+            targets=[...]
+                0=Name @ 1.0  -  1.9
+                    id='täpitähed'
+                    ctx=Store
+            value=Str @ 1.12  -  1.23
+                s='täpitähed'
+        1=Expr @ 2.0  -  2.25
+            value=Call @ 2.0  -  2.25
+                func=Name @ 2.0  -  2.5
+                    id='print'
+                    ctx=Load
+                args=[...]
+                    0=Subscript @ 2.6  -  2.24
+                        value=Name @ 2.6  -  2.15
+                            id='täpitähed'
+                            ctx=Load
+                        slice=Index
+                            value=Str @ 2.16  -  2.23
+                                s='tšahh'
+                        ctx=Load
+                keywords=[]
+        2=Expr @ 3.0  -  3.12
+            value=Call @ 3.0  -  3.12
+                func=Name @ 3.0  -  3.4
+                    id='pöhh'
+                    ctx=Load
+                args=[]
+                keywords=[...]
+                    0=keyword
+                        arg='pöhh'
+                        value=Num @ 3.10  -  3.11
+                            n=3""")
+
+def test_nested_binops():
+    """http://bugs.python.org/issue18374"""
+    check_marked_ast("1+2-3", """/=Module
+    body=[...]
+        0=Expr @ 1.0  -  1.5
+            value=BinOp @ 1.0  -  1.5
+                left=BinOp @ 1.0  -  1.3
+                    left=Num @ 1.0  -  1.1
+                        n=1
+                    op=Add
+                    right=Num @ 1.2  -  1.3
+                        n=2
+                op=Sub
+                right=Num @ 1.4  -  1.5
+                    n=3""")
+
+def test_multiline_string():
+    """http://bugs.python.org/issue18370"""
+    check_marked_ast("""pass
+blah = \"\"\"first
+second
+third\"\"\"
+pass""",
+    """/=Module
+    body=[...]
+        0=Pass @ 1.0  -  1.4
+        1=Assign @ 2.0  -  4.8
+            targets=[...]
+                0=Name @ 2.0  -  2.4
+                    id='blah'
+                    ctx=Store
+            value=Str @ 2.7  -  4.8
+                s='first\\nsecond\\nthird'
+        2=Pass @ 5.0  -  5.4""")
+
 def check_marked_ast(source, expected_pretty_ast
                      #,expected_for_py_34=None
                      ):
@@ -369,5 +444,7 @@ def check_marked_ast(source, expected_pretty_ast
     root = ast.parse(source)
     ast_utils.mark_text_ranges(root, source)
     actual_pretty_ast = pretty(root)
-    assert actual_pretty_ast.strip() == dedent(expected_pretty_ast).strip() 
+    #print("ACTUAL", actual_pretty_ast)
+    #print("EXPECTED", expected_pretty_ast)
+    assert actual_pretty_ast.strip() == expected_pretty_ast.strip() 
     
