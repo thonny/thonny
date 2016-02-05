@@ -6,19 +6,8 @@ import io
 import sys
 import token
 import tokenize
-import collections
 from thonny.common import TextRange
 import traceback
-
-# TODO: can rely on Py3 
-Thoken = collections.namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
-
-# token element indices (Py2 tokens aren't named tuples)
-TYPE = 0
-STRING = 1
-START = 2
-END = 3
-#LINE = 4
 
 def extract_text_range(source, text_range):
     lines = source.splitlines(True)
@@ -160,8 +149,6 @@ def get_last_child(node):
     (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
             or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
             # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0 
-            or sys.version_info[0] == 2 and isinstance(node, (ast.Exec, ast.Repr))  # @UndefinedVariable
-            or sys.version_info[0] == 2 and isinstance(node, ast.Print)           # @UndefinedVariable
                 and (node.dest is not None or len(node.values) > 0))
                 
             #"TODO: Import ja ImportFrom"
@@ -180,11 +167,11 @@ def mark_text_ranges(node, source):
     
     
     def _extract_tokens(tokens, lineno, col_offset, end_lineno, end_col_offset):
-        return list(filter((lambda tok: tok[START][0] >= lineno
-                                   and (tok[START][1] >= col_offset or tok[START][0] > lineno)
-                                   and tok[END][0] <= end_lineno
-                                   and (tok[END][1] <= end_col_offset or tok[END][0] < end_lineno)
-                                   and tok[STRING] != ''),
+        return list(filter((lambda tok: tok.start[0] >= lineno
+                                   and (tok.start[1] >= col_offset or tok.start[0] > lineno)
+                                   and tok.end[0] <= end_lineno
+                                   and (tok.end[1] <= end_col_offset or tok.end[0] < end_lineno)
+                                   and tok.string != ''),
                            tokens))
     
             
@@ -223,11 +210,11 @@ def mark_text_ranges(node, source):
 
     
     def _strip_trailing_junk_from_expressions(tokens):
-        while (tokens[-1][TYPE] not in (token.RBRACE, token.RPAR, token.RSQB,
+        while (tokens[-1].type not in (token.RBRACE, token.RPAR, token.RSQB,
                                       token.NAME, token.NUMBER, token.STRING)
-                    and not (hasattr(token, "ELLIPSIS") and tokens[-1][TYPE] == token.ELLIPSIS) 
-                    and tokens[-1][STRING] not in ")}]"
-                    or tokens[-1][STRING] in ['and', 'as', 'assert', 'class', 'def', 'del',
+                    and not (hasattr(token, "ELLIPSIS") and tokens[-1].type == token.ELLIPSIS) 
+                    and tokens[-1].string not in ")}]"
+                    or tokens[-1].string in ['and', 'as', 'assert', 'class', 'def', 'del',
                                               'elif', 'else', 'except', 'exec', 'finally',
                                               'for', 'from', 'global', 'if', 'import', 'in',
                                               'is', 'lambda', 'not', 'or', 'try', 
@@ -237,12 +224,12 @@ def mark_text_ranges(node, source):
     def _strip_trailing_extra_closers(tokens, remove_naked_comma):
         level = 0
         for i in range(len(tokens)):
-            if tokens[i][STRING] in "({[":
+            if tokens[i].string in "({[":
                 level += 1
-            elif tokens[i][STRING] in ")}]":
+            elif tokens[i].string in ")}]":
                 level -= 1
             
-            if level == 0 and tokens[i][STRING] == "," and remove_naked_comma:
+            if level == 0 and tokens[i].string == "," and remove_naked_comma:
                 tokens[:] = tokens[0:i]
                 return
              
@@ -253,9 +240,9 @@ def mark_text_ranges(node, source):
     def _strip_unclosed_brackets(tokens):
         level = 0
         for i in range(len(tokens)-1, -1, -1):
-            if tokens[i][STRING] in "({[":
+            if tokens[i].string in "({[":
                 level -= 1
-            elif tokens[i][STRING] in ")}]":
+            elif tokens[i].string in ")}]":
                 level += 1
 
             if level < 0:
@@ -278,8 +265,8 @@ def mark_text_ranges(node, source):
         
         if isinstance(node, _ast.stmt):
             # remove empty trailing lines
-            while (tokens[-1][TYPE] in (tokenize.NL, tokenize.COMMENT, token.NEWLINE, token.INDENT)
-                   or tokens[-1][STRING] in (":", "else", "elif", "finally", "except")):
+            while (tokens[-1].type in (tokenize.NL, tokenize.COMMENT, token.NEWLINE, token.INDENT)
+                   or tokens[-1].string in (":", "else", "elif", "finally", "except")):
                 del tokens[-1]
                 
         else:
@@ -288,8 +275,8 @@ def mark_text_ranges(node, source):
             _strip_unclosed_brackets(tokens)
         
         # set the end markers of this node
-        node.end_lineno = tokens[-1][END][0]
-        node.end_col_offset = tokens[-1][END][1]
+        node.end_lineno = tokens[-1].end[0]
+        node.end_col_offset = tokens[-1].end[1]
         
         # Peel off some trailing tokens which can't be part any 
         # positioned child node.
@@ -311,69 +298,19 @@ def mark_text_ranges(node, source):
                 
         # Attribute name would confuse the "value" of Attribute
         elif isinstance(node, ast.Attribute):
-            assert tokens[-1][TYPE] == token.NAME
+            assert tokens[-1].type == token.NAME
             del tokens[-1]
             _strip_trailing_junk_from_expressions(tokens)
                 
         return tokens
     
-    def _tokenize(source):
-        if sys.version_info[0] == 2:
-            return list(tokenize.generate_tokens(io.StringIO(source).readline))
-        else:
-            return list(tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline))
-
-    all_tokens = _tokenize(source)
+    all_tokens = list(tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline))
     source_lines = source.splitlines(True) 
     fix_ast_problems(node, source_lines, all_tokens)
     prelim_end_lineno = len(source_lines)
     prelim_end_col_offset = len(source_lines[len(source_lines)-1])
     _mark_text_ranges_rec(node, all_tokens, prelim_end_lineno, prelim_end_col_offset)
     
-
-def tokenize_with_char_offsets(source):
-    # built-in tokenizer gives token offsets in bytes. I need them in chars.
-    
-    if sys.version_info[0] == 2:
-        token_source = tokenize.generate_tokens(io.StringIO(source).readline)
-    else:
-        token_source = tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline)
-    
-    encoding = "UTF-8"
-    char_lines = list(map(lambda line: line + "\n", source.split("\n")))
-    byte_lines = None
-    thokens = []
-    
-    
-    for token in token_source:
-        
-        if token[TYPE] == tokenize.ENCODING:
-            # first token
-            encoding = token[STRING]
-            byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
-            
-            
-        if token[START][0] == 0 or (token[START][1] == 0 and token[END][1] == 0):
-            # just copy information
-            thoken = Thoken(token[TYPE], token[STRING],
-                            token[START][0], token[START][1],
-                            token[END][0], token[END][1])
-        else:
-            # translate byte offsets to char offsets
-            assert token[START][0] > 0 # lineno should be > 0
-            
-            byte_start_line = byte_lines[token[START][0]-1]
-            char_start_col = len(byte_start_line[:token[START][1]].decode(encoding)) 
-            
-            byte_end_line = byte_lines[token[END][0]-1]
-            char_end_col = len(byte_end_line[:token[END][1]].decode(encoding)) 
-            
-            thoken = Thoken(token[TYPE], token[STRING],
-                            token[START][0], char_start_col,
-                            token[END][0], char_end_col)
-        
-        thokens.append(thoken)
-            
 
 
 def value_to_literal(value):
@@ -400,7 +337,7 @@ def fix_ast_problems(tree, source_lines, tokens):
     # Problem 2: 
     # triple-quoted strings have just plain wrong positions: http://bugs.python.org/issue18370
     # Fortunately lexer gives them correct positions
-    string_tokens = list(filter(lambda tok: tok[TYPE] == token.STRING, tokens))
+    string_tokens = list(filter(lambda tok: tok.type == token.STRING, tokens))
     
     # Problem 3:
     # Binary operations have wrong positions: http://bugs.python.org/issue18374
@@ -418,7 +355,7 @@ def fix_ast_problems(tree, source_lines, tokens):
             # fix triple-quote problem
             # get position from tokens
             token = string_tokens.pop(0)
-            node.lineno, node.col_offset = token[START]
+            node.lineno, node.col_offset = token.start
             
         elif ((isinstance(node, ast.Expr) or isinstance(node, ast.Attribute))
             and isinstance(node.value, ast.Str)):
@@ -477,32 +414,6 @@ def compare_node_positions(n1, n2):
     else:
         return 0
 
-def _get_ordered_child_nodes(node):
-    if isinstance(node, ast.Dict):
-        children = []
-        for i in range(len(node.keys)):
-            children.append(node.keys[i])
-            children.append(node.values[i])
-        return children
-    elif isinstance(node, ast.Call):
-        children = [node.func] + node.args
-        
-        for kw in node.keywords:
-            children.append(kw.value)
-        
-        # TODO: take care of Python 3.5 updates (eg. args=[Starred] and keywords)
-        if hasattr(node, "starargs") and node.starargs is not None:
-            children.append(node.starargs)
-        if hasattr(node, "kwargs") and node.kwargs is not None:
-            children.append(node.kwargs)
-        
-        children.sort(key=lambda x: (x.lineno, x.col_offset))
-        return children
-    else:
-        return ast.iter_child_nodes(node)    
-
-def _tokens_text(tokens):
-    return "".join([t.string for t in tokens])
 
 def pretty(node, key="/", level=0):
     """Used for testing and new test generation via AstView.
@@ -546,5 +457,80 @@ def pretty(node, key="/", level=0):
                            for field_key, field_value in fields] 
     
     return "\n".join(lines)
+
+
+def _get_ordered_child_nodes(node):
+    if isinstance(node, ast.Dict):
+        children = []
+        for i in range(len(node.keys)):
+            children.append(node.keys[i])
+            children.append(node.values[i])
+        return children
+    elif isinstance(node, ast.Call):
+        children = [node.func] + node.args
         
+        for kw in node.keywords:
+            children.append(kw.value)
+        
+        # TODO: take care of Python 3.5 updates (eg. args=[Starred] and keywords)
+        if hasattr(node, "starargs") and node.starargs is not None:
+            children.append(node.starargs)
+        if hasattr(node, "kwargs") and node.kwargs is not None:
+            children.append(node.kwargs)
+        
+        children.sort(key=lambda x: (x.lineno, x.col_offset))
+        return children
+    else:
+        return ast.iter_child_nodes(node)    
+
+def _tokens_text(tokens):
+    return "".join([t.string for t in tokens])
+        
+def _tokenize_with_char_offsets(source):
+    """Built-in tokenizer gives token offsets in bytes. I need them in chars.
+    Let's call them "thokens"
+    
+    (Seems that the function is not necessary anymore)
+    """
+    import collections
+    Thoken = collections.namedtuple("Thoken", "type string lineno col_offset end_lineno end_col_offset")
+    
+    token_source = tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline)
+    
+    encoding = "UTF-8"
+    char_lines = list(map(lambda line: line + "\n", source.split("\n")))
+    byte_lines = None
+    thokens = []
+    
+    
+    for token in token_source:
+        
+        if token.type == tokenize.ENCODING:
+            # first token
+            encoding = token.string
+            byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
+            
+            
+        if token.start[0] == 0 or (token.start[1] == 0 and token.end[1] == 0):
+            # just copy information
+            thoken = Thoken(token.type, token.string,
+                            token.start[0], token.start[1],
+                            token.end[0], token.end[1])
+        else:
+            # translate byte offsets to char offsets
+            assert token.start[0] > 0 # lineno should be > 0
+            
+            byte_start_line = byte_lines[token.start[0]-1]
+            char_start_col = len(byte_start_line[:token.start[1]].decode(encoding)) 
+            
+            byte_end_line = byte_lines[token.end[0]-1]
+            char_end_col = len(byte_end_line[:token.end[1]].decode(encoding)) 
+            
+            thoken = Thoken(token.type, token.string,
+                            token.start[0], char_start_col,
+                            token.end[0], char_end_col)
+        
+        thokens.append(thoken)
+            
+
         
