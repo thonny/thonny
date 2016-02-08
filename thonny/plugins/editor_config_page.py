@@ -26,6 +26,10 @@ class EditorConfigurationPage(ConfigurationPage):
                                         values=[0,60,70,80,90,100,110,120])
         self._line_length_combo.grid(row=1, column=1, sticky=tk.E)
         self.columnconfigure(0, weight=1)
+    
+    def apply(self):
+        ConfigurationPage.apply(self)
+        get_workbench().get_editor_notebook().update_appearance()
         
                 
 

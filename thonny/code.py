@@ -43,6 +43,7 @@ class Editor(ttk.Frame):
         
         self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self))
         
+        self.update_appearance()
 
 
     def get_text_widget(self):
@@ -108,6 +109,10 @@ class Editor(ttk.Frame):
     def show(self):
         self.master.select(self)
     
+    def update_appearance(self):
+        self._code_view.set_show_line_numbers(get_workbench().get_option("view.show_line_numbers"))
+        self._code_view.set_line_length_margin(get_workbench().get_option("view.recommended_line_length"))
+        
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
     
@@ -141,6 +146,8 @@ class EditorNotebook(ttk.Notebook):
             if os.path.exists(filename):
                 self._open_file(filename)
         """
+        
+        self.update_appearance()
     
     def _list_recent_files(self):
         pass
@@ -351,7 +358,9 @@ class EditorNotebook(ttk.Notebook):
             
         return editor
     
-        pass
+    def update_appearance(self):
+        for editor in self.winfo_children():
+            editor.update_appearance()
     
     def update_editor_title(self, editor):
         self.tab(editor,

@@ -60,7 +60,7 @@ class CodeView(ttk.Frame, TextWrapper):
                 #state='disabled'
                 )
         
-        self.margin.grid(row=0, column=0, sticky=tk.NSEW)
+        # TODO: not necessary here self.margin.grid(row=0, column=0, sticky=tk.NSEW)
         
         def _vertical_scrollbar_update(*args):
             self.vbar.set(*args)
@@ -68,7 +68,7 @@ class CodeView(ttk.Frame, TextWrapper):
             
         def _horizontal_scrollbar_update(*args):
             self.hbar.set(*args)
-            self._update_line_stopper()
+            self._update_margin_line()
         
         self.text = tk.Text(self,
                 #background="#ffffff",
@@ -106,7 +106,7 @@ class CodeView(ttk.Frame, TextWrapper):
             
         def _horizontal_scroll(*args):
             self.text.xview(*args)
-            self._update_line_stopper()
+            self._update_margin_line()
             
         self.vbar['command'] = _vertical_scroll # TODO: keep line count same in margin
         self.hbar['command'] = _horizontal_scroll
@@ -140,10 +140,11 @@ class CodeView(ttk.Frame, TextWrapper):
         else:  
             self.text.bind("<Button-3>", self._open_context_menu)
 
-        self.line_stopper = Canvas(self.text, borderwidth=0, width=1, height=1200, 
+        self._recommended_line_length=0
+        self.margin_line = Canvas(self.text, borderwidth=0, width=1, height=1200, 
                                    highlightthickness=0, background="lightgray")
-        self.line_stopper.place(x=600, y=-10)
-        self._update_line_stopper()
+        # TODO: not necessary self.margin_line.place(x=600, y=-10)
+        self._update_margin_line()
         
     def del_word_left(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
@@ -527,6 +528,17 @@ class CodeView(ttk.Frame, TextWrapper):
         text.undo_block_stop()
         text.tag_add("sel", head, "insert")
     
+    def set_show_line_numbers(self, value):
+        if value and not self.margin.winfo_ismapped():
+            self.margin.grid(row=0, column=0, sticky=tk.NSEW)
+            self._update_line_numbers()
+        elif not value and self.margin.winfo_ismapped():
+            self.margin.grid_forget()
+    
+    def set_line_length_margin(self, value):
+        self._recommended_line_length = value
+        self._update_margin_line()
+    
     def get_selection_indices(self):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         
@@ -691,7 +703,7 @@ class CodeView(ttk.Frame, TextWrapper):
                     pass
             
             self._update_line_numbers()
-            self._update_line_stopper()
+            self._update_margin_line()
             self.text.see(index)
 
     def _user_text_delete(self, index1, index2=None):
@@ -705,7 +717,7 @@ class CodeView(ttk.Frame, TextWrapper):
             if self.colorer:
                 self.colorer.on_delete(index1, index2)
             self._update_line_numbers()
-            self._update_line_stopper()
+            self._update_margin_line()
     
     def _update_line_numbers(self):
         text_line_count = int(self.text.index("end-1c").split(".")[0])
@@ -719,33 +731,35 @@ class CodeView(ttk.Frame, TextWrapper):
         self.margin.config(state='disabled')
 
 
-    def _update_line_stopper(self):
-        stopper_col = 80
-        
-        try:
-            self.text.update_idletasks()
-            # How far left has text been scrolled
-            first_visible_idx = self.text.index("@0,0")
-            first_visible_col = int(first_visible_idx.split(".")[1])
-            bbox = self.text.bbox(first_visible_idx)
-            first_visible_col_x = bbox[0]
-            
-            stopper_visible_col = stopper_col - first_visible_col
-            delta = first_visible_col_x
-        except:
-            # fall back to ignoring scroll position
-            stopper_visible_col = stopper_col
-            delta = 0
-        
-        if stopper_visible_col > -1:
-            x = (get_workbench().get_font("EditorFont").measure((stopper_visible_col-1) * "M") 
-                 + delta + self.text["padx"])
+    def _update_margin_line(self):
+        if self._recommended_line_length == 0:
+            self.margin_line.place_forget()
         else:
-            x = -10
-        
-        #print(first_visible_col, first_visible_col_x)
-        
-        self.line_stopper.place(y=-10, x=x)
+            try:
+                self.text.update_idletasks()
+                # How far left has text been scrolled
+                first_visible_idx = self.text.index("@0,0")
+                first_visible_col = int(first_visible_idx.split(".")[1])
+                bbox = self.text.bbox(first_visible_idx)
+                first_visible_col_x = bbox[0]
+                
+                margin_line_visible_col = self._recommended_line_length - first_visible_col
+                delta = first_visible_col_x
+            except:
+                # fall back to ignoring scroll position
+                margin_line_visible_col = self._recommended_line_length
+                delta = 0
+            
+            if margin_line_visible_col > -1:
+                x = (get_workbench().get_font("EditorFont").measure((margin_line_visible_col-1) * "M") 
+                     + delta + self.text["padx"])
+            else:
+                x = -10
+            
+            #print(first_visible_col, first_visible_col_x)
+            
+            self.margin_line.place(y=-10, x=x)
+            
     """
     def _show_read_only_warning(self):
         showwarning("Warning",
