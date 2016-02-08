@@ -105,9 +105,6 @@ class Editor(ttk.Frame):
         self._code_view.text.edit_modified(False)
         return self._filename
     
-    def change_font_size(self, delta):
-        self._code_view.change_font_size(delta)
-    
     def show(self):
         self.master.select(self)
     
@@ -354,7 +351,6 @@ class EditorNotebook(ttk.Notebook):
             
         return editor
     
-    def change_font_size(self, delta):
         pass
     
     def update_editor_title(self, editor):
