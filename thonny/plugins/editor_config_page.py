@@ -8,39 +8,56 @@ from thonny.ui_utils import create_string_var
 import textwrap
 
 
-class FontConfigurationPage(ConfigurationPage):
+class EditorConfigurationPage(ConfigurationPage):
     
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
         
+        self._line_numbers_var = get_workbench().get_variable("view.show_line_numbers")
+        self._line_length_var = get_workbench().get_variable("view.recommended_line_length")
         self._family_variable = create_string_var(
             get_workbench().get_option("view.editor_font_family"),
             modification_listener=self._update_preview_font)
-        
         self._size_variable = create_string_var(
             get_workbench().get_option("view.editor_font_size"),
             modification_listener=self._update_preview_font)
         
-        ttk.Label(self, text="Editor font").grid(row=0, column=0, sticky="w")
+        
+        # Line numbers
+        self._line_numbers_checkbox = ttk.Checkbutton(self, text="Show line numbers", 
+                                                      variable=self._line_numbers_var)
+        self._line_numbers_checkbox.grid(row=0, column=0, sticky=tk.W)
+        
+        # Linge length recommender
+        ttk.Label(self, text="Recommended maximum line length\n(Set to 0 to turn off margin line)").grid(row=1, column=0, sticky=tk.W)
+        self._line_length_combo = ttk.Combobox(self, width=4,
+                                        exportselection=False,
+                                        textvariable=self._line_length_var,
+                                        state='readonly',
+                                        values=[0,60,70,80,90,100,110,120])
+        self._line_length_combo.grid(row=2, column=0, sticky=tk.W)
+        
+                
+        ttk.Label(self, text="Editor font").grid(row=10, column=0, sticky="w")
         
         self._family_combo = ttk.Combobox(self,
                                           exportselection=False,
                                           state='readonly',
                                           textvariable=self._family_variable,
                                           values=self._get_families_to_show())
-        self._family_combo.grid(row=1, column=0, sticky=tk.NSEW, padx=(0,10))
+        self._family_combo.grid(row=11, column=0, sticky=tk.NSEW, padx=(0,10))
         
-        ttk.Label(self, text="Size").grid(row=0, column=1, sticky="w")
+        ttk.Label(self, text="Size").grid(row=10, column=1, sticky="w")
         self._size_combo = ttk.Combobox(self, width=4,
                                         exportselection=False,
                                         textvariable=self._size_variable,
                                         state='readonly',
                                         values=[str(x) for x in range(3,73)])
         
-        self._size_combo.grid(row=1, column=1)
+        self._size_combo.grid(row=11, column=1)
         
         
-        ttk.Label(self, text="Preview").grid(row=2, column=0, sticky="w", pady=(10,0))
+        ttk.Label(self, text="Preview").grid(row=12, column=0, sticky="w", pady=(10,0))
         self._preview_font = tk_font.Font()
         self._preview_text = tk.Text(self,
                                 height=10,
@@ -56,7 +73,7 @@ class FontConfigurationPage(ConfigurationPage):
             1234567890
             @$%()[]{}/\_-+
             "Hello " + 'world!'""").strip())
-        self._preview_text.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW, pady=(0,5))
+        self._preview_text.grid(row=13, column=0, columnspan=2, sticky=tk.NSEW, pady=(0,5))
         
             
         self.columnconfigure(0, weight=1)
@@ -83,4 +100,4 @@ class FontConfigurationPage(ConfigurationPage):
         ))
 
 def load_plugin():
-    get_workbench().add_configuration_page("Font", FontConfigurationPage)
+    get_workbench().add_configuration_page("Editor", EditorConfigurationPage)

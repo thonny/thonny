@@ -132,6 +132,8 @@ class EditorNotebook(ttk.Notebook):
         get_workbench().add_option("file.open_files", [])
         get_workbench().add_option("file.current_file", None)
         get_workbench().add_option("file.recent_files", [])
+        get_workbench().add_option("view.show_line_numbers", False)
+        get_workbench().add_option("view.recommended_line_length", 80)
         
         self._init_commands()
         self.enable_traversal()
