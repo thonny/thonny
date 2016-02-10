@@ -65,10 +65,10 @@ class Workbench(tk.Tk):
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
         self._select_theme()
+        self._editor_notebook = None
         thonny.globals.register_workbench(self)
         
         self._init_configuration()
-        
         self._init_diagnostic_logging()
         self._init_fonts()
         self._init_window()
@@ -735,6 +735,9 @@ class Workbench(tk.Tk):
             
         self.get_font("TreeviewFont").configure(size=treeview_font_size)
         style.configure("Treeview", rowheight=rowheight)
+        
+        if self._editor_notebook is not None:
+            self._editor_notebook.update_appearance()
         
     
     def _get_menu_index(self, menu):
