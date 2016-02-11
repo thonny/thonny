@@ -25,6 +25,17 @@ def create_launcher(source_filename, target_filename, replacements={}):
     # https://help.ubuntu.com/community/UnityLaunchersAndDesktopFiles
     os.chmod(target_filename, 0o755)
     
+def try_to_refresh_desktop_and_menus(menu_dir):
+    """In KDE, the .destop files are not taken into account immediately"""
+    for cmd in ["kbuildsycoca5", "kbuildsycoca4", "kbuildsycoca"]:
+        if shutil.which(cmd):
+            subprocess.call([cmd])
+            break
+    
+    udd = "update-desktop-database"
+    if shutil.which(udd):
+        subprocess.call([udd, menu_dir])
+        
 
 if len(sys.argv) == 1:
     parent_dir = os.path.expanduser("~/apps")
@@ -92,10 +103,16 @@ try:
     # TODO: why is return code 1 (eg. in 64-bit Fedora 22) even when everything seemed to succeed?
     print("Done!")
     
+    print_task("Refreshing system menu")
+    try_to_refresh_desktop_and_menus(menu_dir)
+    print("Done!")
+    
+    
     print()
     print("Installation was successful, you can start Thonny from start menu under")
     print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
     print("For uninstalling Thonny call " + target_dir + "/bin/uninstall")
+    
     
 except OSError as e:
     print()
