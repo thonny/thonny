@@ -6,7 +6,7 @@ Exec=$target_dir/bin/thonny %F
 Comment=Python IDE for beginners
 Icon=$target_dir/lib/python3.5/site-packages/thonny/res/thonny.png
 Terminal=false
-Categories=Application;Education;Development;Debugger;IDE;
+Categories=Education;Development;Debugger;IDE;
 MimeType=text/x-python;
 Actions=Edit;
 
