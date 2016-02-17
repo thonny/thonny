@@ -528,17 +528,6 @@ class CodeView(ttk.Frame, TextWrapper):
         text.undo_block_stop()
         text.tag_add("sel", head, "insert")
     
-    def set_show_line_numbers(self, value):
-        if value and not self.margin.winfo_ismapped():
-            self.margin.grid(row=0, column=0, sticky=tk.NSEW)
-            self._update_line_numbers()
-        elif not value and self.margin.winfo_ismapped():
-            self.margin.grid_forget()
-    
-    def set_line_length_margin(self, value):
-        self._recommended_line_length = value
-        self._update_margin_line()
-    
     def get_selection_indices(self):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         
@@ -550,20 +539,7 @@ class CodeView(ttk.Frame, TextWrapper):
             return first, last
         except tk.TclError:
             return None, None
-        
-    def ispythonsource(self, filename):
-        # TODO: doesn't belong here
-        # copied from idlelib.EditorWindow (Python 3.4.2)
-        
-        if not filename or os.path.isdir(filename):
-            return True
-        _, ext = os.path.splitext(os.path.basename(filename))
-        if os.path.normcase(ext) in (".py", ".pyw"):
-            return True
-        line = self.text.get('1.0', '1.0 lineend')
-        return line.startswith('#!') and 'python' in line
     
-
     def is_char_in_string(self, text_index):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # Slightly modified
@@ -582,6 +558,17 @@ class CodeView(ttk.Frame, TextWrapper):
             # The colorizer is missing: assume the worst
             return 1
         
+        
+    def set_show_line_numbers(self, value):
+        if value and not self.margin.winfo_ismapped():
+            self.margin.grid(row=0, column=0, sticky=tk.NSEW)
+            self._update_line_numbers()
+        elif not value and self.margin.winfo_ismapped():
+            self.margin.grid_forget()
+    
+    def set_line_length_margin(self, value):
+        self._recommended_line_length = value
+        self._update_margin_line()
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
