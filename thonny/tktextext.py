@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import font as tkfont
 import time
 
 class TweakableText(tk.Text):
@@ -16,9 +17,9 @@ class TweakableText(tk.Text):
         self.tk.createcommand(self._w, self._dispatch_tk_operation)
         self._tk_proxies = {}
         
-        self.direct_insert = self._register_tk_proxy_function("insert", self.intercept_insert)
-        self.direct_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
-        self.direct_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
+        self._original_insert = self._register_tk_proxy_function("insert", self.intercept_insert)
+        self._original_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
+        self._original_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
     
     def _register_tk_proxy_function(self, operation, function):
         self._tk_proxies[operation] = function
@@ -52,6 +53,19 @@ class TweakableText(tk.Text):
     def intercept_delete(self, index1, index2=None):
         if not self.is_read_only():
             self.direct_delete(index1, index2)
+    
+    def direct_mark(self, *args):
+        self._original_mark(*args)
+        # TODO: filter
+        self.event_generate("<<CursorMove>>")
+    
+    def direct_insert(self, index, chars, tags=()):
+        self._original_insert(index, chars, tags)
+        self.event_generate("<<TextInsert>>")
+    
+    def direct_delete(self, index1, index2=None):
+        self._original_delete(index1, index2)
+        self.event_generate("<<TextDelete>>")
     
 
 
@@ -369,12 +383,137 @@ class EnhancedText(TweakableText):
             return None, None
 
 class TextFrame(ttk.Frame):
-    "Decorates given text with scrollbars, line numbers and print margin"
-    def __init__(self, master, text, **kw):
-        ttk.Frame.__init__(self, master=master, **kw)
-        self._text = text
+    "Decorates text with scrollbars, line numbers and print margin"
+    def __init__(self, master, line_numbers=False, line_length_margin=0,
+                 first_line_number=1, text_class=EnhancedText, **text_options):
+        ttk.Frame.__init__(self, master=master)
+        
+        final_text_options = {'borderwidth' : 0,
+                              'insertwidth' : 2,
+                              'spacing1' : 0,
+                              'spacing3' : 0,
+                              'highlightthickness' : 0,
+                              'inactiveselectbackground' : 'gray',
+                              'padx' : 5,
+                              'pady' : 5
+                               }
+        final_text_options.update(text_options)
+        self.text = text_class(self, **final_text_options)
+        self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        
+        self._margin = tk.Text(self, width=4, padx=5, pady=5,
+                               highlightthickness=0, bd=0, takefocus=False,
+                               font=self.text['font'],
+                               background='#e0e0e0', foreground='#999999',
+                               #state='disabled'
+                               )
+        # margin will be gridded later
+        self._first_line_number = first_line_number
+        self.set_line_numbers(line_numbers)
+
+        self._vbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
+        
+        self._hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+        self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
+        
+        self.text['yscrollcommand'] = self._vertical_scrollbar_update  
+        self.text['xscrollcommand'] = self._horizontal_scrollbar_update    
+        self._vbar['command'] = self._vertical_scroll 
+        self._hbar['command'] = self._horizontal_scroll
+        
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        self._recommended_line_length=line_length_margin
+        self._margin_line = tk.Canvas(self.text, borderwidth=0, width=1, height=1200, 
+                                     highlightthickness=0, background="lightgray")
+        self._update_margin_line()
+        
+        self.text.bind("<<TextInsert>>", self._text_changed, True)
+        self.text.bind("<<TextDelete>>", self._text_changed, True)
+        
+        # TODO: add context menu?
+
+    def set_line_numbers(self, value):
+        if value and not self._margin.winfo_ismapped():
+            self._margin.grid(row=0, column=0, sticky=tk.NSEW)
+            self._update_line_numbers()
+        elif not value and self._margin.winfo_ismapped():
+            self._margin.grid_forget()
     
-    # TODO:
+    def set_line_length_margin(self, value):
+        self._recommended_line_length = value
+        self._update_margin_line()
+    
+    def _text_changed(self, event):
+        self._update_line_numbers()
+        self._update_margin_line()
+    
+    def _vertical_scrollbar_update(self, *args):
+        self._vbar.set(*args)
+        self._margin.yview(tk.MOVETO, args[0])
+        
+    def _horizontal_scrollbar_update(self,*args):
+        self._hbar.set(*args)
+        self._update_margin_line()
+    
+    def _vertical_scroll(self,*args):
+        self.text.yview(*args)
+        self._margin.yview(*args)
+        
+    def _horizontal_scroll(self,*args):
+        self.text.xview(*args)
+        self._update_margin_line()
+    
+    def _update_line_numbers(self):
+        text_line_count = int(self.text.index("end-1c").split(".")[0])
+        
+        self._margin.config(state='normal')
+        self._margin.delete("1.0", "end")
+        for i in range(text_line_count):
+            self._margin.insert("end", str(i + self._first_line_number).rjust(3))
+            if i < text_line_count-1:
+                self._margin.insert("end", "\n") 
+        self._margin.config(state='disabled')
+
+
+    def _update_margin_line(self):
+        if self._recommended_line_length == 0:
+            self._margin_line.place_forget()
+        else:
+            try:
+                self.text.update_idletasks()
+                # How far left has text been scrolled
+                first_visible_idx = self.text.index("@0,0")
+                first_visible_col = int(first_visible_idx.split(".")[1])
+                bbox = self.text.bbox(first_visible_idx)
+                first_visible_col_x = bbox[0]
+                
+                margin_line_visible_col = self._recommended_line_length - first_visible_col
+                delta = first_visible_col_x
+            except:
+                # fall back to ignoring scroll position
+                margin_line_visible_col = self._recommended_line_length
+                delta = 0
+            
+            if margin_line_visible_col > -1:
+                x = (get_text_font(self.text).measure((margin_line_visible_col-1) * "M") 
+                     + delta + self.text["padx"])
+            else:
+                x = -10
+            
+            #print(first_visible_col, first_visible_col_x)
+            
+            self._margin_line.place(y=-10, x=x)
+
+def get_text_font(text):
+    font = text["font"]
+    if isinstance(font, str):
+        return tkfont.nametofont(font)
+    else:
+        return font
+
 
 def classifyws(s, tabwidth):
     raw = effective = 0

@@ -1,9 +1,10 @@
 import tkinter as tk
-from thonny.tktextext import EnhancedText
+from thonny.tktextext import TextFrame
 
 root = tk.Tk()
-text = EnhancedText(root, read_only=True)
-text.grid()
+frame = TextFrame(root, read_only=False, wrap=tk.NONE, line_numbers=True, line_length_margin=13)
+frame.grid()
+text = frame.text
 
 text.direct_insert("1.0", "Essa\n    'tessa\nkossa\nx=34+(45*89*(a+45)")
 text.tag_configure('string', background='yellow')
