@@ -1,8 +1,8 @@
 import tkinter as tk
-from thonny.extext import ExText
+from thonny.tktextext import EnhancedText
 
 root = tk.Tk()
-text = ExText(root, read_only=True)
+text = EnhancedText(root, read_only=True)
 text.grid()
 
 text.direct_insert("1.0", "Essa\n    'tessa\nkossa\nx=34+(45*89*(a+45)")

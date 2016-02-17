@@ -16,9 +16,9 @@ class TweakableText(tk.Text):
         self.tk.createcommand(self._w, self._dispatch_tk_operation)
         self._tk_proxies = {}
         
-        self._original_internal_insert = self._register_tk_proxy_function("insert", self.internal_insert)
-        self._original_internal_delete = self._register_tk_proxy_function("delete", self.internal_delete)
-        self._original_internal_mark = self._register_tk_proxy_function("mark", self.internal_mark)
+        self.direct_insert = self._register_tk_proxy_function("insert", self.intercept_insert)
+        self.direct_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
+        self.direct_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
     
     def _register_tk_proxy_function(self, operation, function):
         self._tk_proxies[operation] = function
@@ -42,25 +42,16 @@ class TweakableText(tk.Text):
     def is_read_only(self):
         return self._read_only
 
-    def internal_mark(self, *args):
-        self._original_internal_mark(*args)
+    def intercept_mark(self, *args):
+        self.direct_mark(*args)
     
-    def internal_insert(self, index, chars, tags=()):
+    def intercept_insert(self, index, chars, tags=()):
         if not self.is_read_only():
-            self._original_internal_insert(index, chars, tags)
+            self.direct_insert(index, chars, tags)
     
-    def internal_delete(self, from_index, to_index=None):
+    def intercept_delete(self, index1, index2=None):
         if not self.is_read_only():
-            self._original_internal_delete(from_index, to_index)
-    
-    def direct_mark(self, *args):
-        self._original_internal_mark(*args)
-    
-    def direct_insert(self, index, chars, tags=()):
-        self._original_internal_insert(index, chars, tags)
-    
-    def direct_delete(self, from_index, to_index=None):
-        self._original_internal_delete(from_index, to_index)
+            self.direct_delete(index1, index2)
     
 
 
@@ -128,11 +119,13 @@ class EnhancedText(TweakableText):
             else:
                 text.bell()     # at start of buffer
             return "break"
+        
         if  chars[-1] not in " \t":
             # easy: delete preceding real char
             text.delete("insert-1c")
             self._log_keypress_for_undo(event)
             return "break"
+        
         # Ick.  It may require *inserting* spaces if we back up over a
         # tab character!  This is written to be clear, not fast.
         tabwidth = self.tabwidth
@@ -248,10 +241,9 @@ class EnhancedText(TweakableText):
         selection.
         """
         def move_at_edge(event):
-            if (len(self.tag_ranges("sel")) > 0 # selection exists
+            if (self.has_selection() 
                 and (event.state & 5) == 0): # no shift(==1) or control(==4) pressed
                 try:
-                    #self.index("sel.first")
                     self.mark_set("insert", ("sel.first+1c", "sel.last-1c")[edge_index])
                 except tk.TclError:
                     pass
@@ -286,6 +278,9 @@ class EnhancedText(TweakableText):
                 lines[pos] = self._make_blanks(effective) + line[raw:]
         self._set_region(head, tail, chars, lines)
         return "break"
+    
+    def has_selection(self):
+        return len(self.tag_ranges("sel")) > 0
     
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
@@ -368,18 +363,18 @@ class EnhancedText(TweakableText):
     def _get_selection_indices(self):
         # If a selection is defined in the text widget, return (start,
         # end) as Tkinter text indices, otherwise return (None, None)
-        try:
-            first = self.index("sel.first")
-            last = self.index("sel.last")
-            return first, last
-        except tk.TclError:
+        if self.has_selection():
+            return self.index("sel.first"), self.index("sel.last")
+        else:
             return None, None
 
 class TextFrame(ttk.Frame):
+    "Decorates given text with scrollbars, line numbers and print margin"
     def __init__(self, master, text, **kw):
         ttk.Frame.__init__(self, master=master, **kw)
         self._text = text
-    "TODO: this will decorate given text with scrollbars, line numbers and print margin"
+    
+    # TODO:
 
 def classifyws(s, tabwidth):
     raw = effective = 0
