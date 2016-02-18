@@ -63,11 +63,11 @@ class TweakableText(tk.Text):
     
     def direct_insert(self, index, chars, tags=()):
         self._original_insert(index, chars, tags)
-        self.event_generate("<<TextInsert>>")
+        self.event_generate("<<TextChange>>")
     
     def direct_delete(self, index1, index2=None):
         self._original_delete(index1, index2)
-        self.event_generate("<<TextDelete>>")
+        self.event_generate("<<TextChange>>")
     
 
 
@@ -432,8 +432,7 @@ class TextFrame(ttk.Frame):
                                      highlightthickness=0, background="lightgray")
         self._update_margin_line()
         
-        self.text.bind("<<TextInsert>>", self._text_changed, True)
-        self.text.bind("<<TextDelete>>", self._text_changed, True)
+        self.text.bind("<<TextChange>>", self._text_changed, True)
         
         # TODO: add context menu?
 
