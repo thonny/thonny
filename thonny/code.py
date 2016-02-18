@@ -24,7 +24,7 @@ class Editor(ttk.Frame):
         assert isinstance(master, EditorNotebook)
         
         # parent of codeview will be workbench so that it can be maximized
-        self._code_view = CodeView(get_workbench(), propose_remove_line_numbers=True, editor=self)
+        self._code_view = CodeView(get_workbench(), propose_remove_line_numbers=True)
         get_workbench().event_generate("EditorTextCreated", editor=self, text_widget=self.get_text_widget())
         
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
@@ -110,7 +110,7 @@ class Editor(ttk.Frame):
         self.master.select(self)
     
     def update_appearance(self):
-        self._code_view.set_show_line_numbers(get_workbench().get_option("view.show_line_numbers"))
+        self._code_view.set_line_numbers(get_workbench().get_option("view.show_line_numbers"))
         self._code_view.set_line_length_margin(get_workbench().get_option("view.recommended_line_length"))
         
     def select_range(self, text_range):
@@ -194,23 +194,6 @@ class EditorNotebook(ttk.Notebook):
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
-        get_workbench().add_command("toggle_comment", "edit", "Toggle comment",
-            self._cmd_toggle_selection_comment,
-            default_sequence=select_sequence("<Control-Key-3>", "<Command-Key-3>"),
-            tester=None, # TODO: not read-only
-            group=50)
-        
-        get_workbench().add_command("comment_selection", "edit", "Comment out",
-            self._cmd_comment_selection,
-            default_sequence="<Alt-Key-3>",
-            tester=None, # TODO: not read-only
-            group=50)
-        
-        get_workbench().add_command("uncomment_selection", "edit", "Uncomment",
-            self._cmd_uncomment_selection,
-            default_sequence="<Alt-Key-4>",
-            tester=None, # TODO: not read-only
-            group=50)
 
         get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
     
@@ -316,18 +299,6 @@ class EditorNotebook(ttk.Notebook):
     
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None
-    
-    def _cmd_toggle_selection_comment(self):
-        if self.get_current_editor() is not None: 
-            self.get_current_editor().get_code_view().toggle_selection_comment()
-            
-    def _cmd_comment_selection(self):
-        if self.get_current_editor() is not None: 
-            self.get_current_editor().get_code_view().comment_selection()
-    
-    def _cmd_uncomment_selection(self):
-        if self.get_current_editor() is not None: 
-            self.get_current_editor().get_code_view().uncomment_selection()
     
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
