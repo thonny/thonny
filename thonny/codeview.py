@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import tkinter as tk
-from idlelib import PyParse, ParenMatch
-
+from thonny import roughparse
+from thonny.parenmatch import ParenMatcher
 from thonny.coloring import SyntaxColorer
 from thonny.common import TextRange
 from thonny.globals import get_workbench
@@ -97,16 +97,6 @@ class CodeView(tktextext.TextFrame):
                 self.colorer.removecolors()
                 self.colorer = None
     
-    def set_up_paren_matching(self):
-        self.text_frame = self # ParenMatch assumes the existence of this attribute
-        self.paren_matcher = ParenMatch.ParenMatch(self)
-        self.paren_matcher.set_style("expression")
-        ParenMatch.ParenMatch.HILITE_CONFIG = {'background': 'lightgray'}
-        
-        # paren_closed_event is called in _user_text_insert
-        # because KeyRelease doesn't give necessary info with Estonian keyboard
-        # restore_event call is also there
-
     
     def select_lines(self, first_line, last_line):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -141,6 +131,14 @@ class CodeView(tktextext.TextFrame):
         self.remove_paren_highlight()
         
     
+    def set_up_paren_matching(self):
+        self.text_frame = self # ParenMatcher assumes the existence of this attribute
+        self.paren_matcher = ParenMatcher(self)
+        
+        # paren_closed_event is called in _user_text_insert
+        # because KeyRelease doesn't give necessary info with Estonian keyboard
+        # restore_event call is also there
+
     def remove_paren_highlight(self): 
         if self.paren_matcher:
             try: 
@@ -148,10 +146,6 @@ class CodeView(tktextext.TextFrame):
             except:
                 pass
         
-
-    
-    
-
     def get_selected_range(self):
         if self.text.has_selection():
             lineno, col_offset = map(int, self.text.index(tk.SEL_FIRST).split("."))
@@ -166,7 +160,7 @@ class CodeView(tktextext.TextFrame):
         get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
     def newline_and_indent_event(self, event):
-        self.log_keypress_for_undo(event)
+        self.text._log_keypress_for_undo(event)
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified
         
@@ -205,7 +199,7 @@ class CodeView(tktextext.TextFrame):
             # adjust indentation for continuations and block
             # open/close first need to find the last stmt
             lno = tktextext.index2line(text.index('insert'))
-            y = PyParse.Parser(self.indentwidth, self.tabwidth)
+            y = roughparse.RoughParser(self.indentwidth, self.tabwidth)
             
             for context in [50, 500, 5000000]:
                 startat = max(lno - context, 1)
@@ -229,22 +223,22 @@ class CodeView(tktextext.TextFrame):
             #    y.set_lo(0)
 
             c = y.get_continuation_type()
-            if c != PyParse.C_NONE:
+            if c != roughparse.C_NONE:
                 # The current stmt hasn't ended yet.
-                if c == PyParse.C_STRING_FIRST_LINE:
+                if c == roughparse.C_STRING_FIRST_LINE:
                     # after the first line of a string; do not indent at all
                     pass
-                elif c == PyParse.C_STRING_NEXT_LINES:
+                elif c == roughparse.C_STRING_NEXT_LINES:
                     # inside a string which started before this line;
                     # just mimic the current indent
                     text.insert("insert", indent)
-                elif c == PyParse.C_BRACKET:
+                elif c == roughparse.C_BRACKET:
                     # line up with the first (if any) element of the
                     # last open bracket structure; else indent one
                     # level beyond the indent of the line with the
                     # last open bracket
                     self.reindent_to(y.compute_bracket_indent())
-                elif c == PyParse.C_BACKSLASH:
+                elif c == roughparse.C_BACKSLASH:
                     # if more than one line in this stmt already, just
                     # mimic the current indent; else if initial line
                     # has a start on an assignment stmt, indent to

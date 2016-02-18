@@ -1,7 +1,7 @@
 #TODO - remove unnecessary imports, organize them to use the same import syntax
 
 from tkinter import Text, Toplevel
-from idlelib.WidgetRedirector import WidgetRedirector
+from thonny.ui_utils import WidgetRedirector
 import jedi
 from thonny.globals import get_workbench
 
