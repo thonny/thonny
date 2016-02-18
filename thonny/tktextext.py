@@ -56,8 +56,10 @@ class TweakableText(tk.Text):
     
     def direct_mark(self, *args):
         self._original_mark(*args)
-        # TODO: filter
-        self.event_generate("<<CursorMove>>")
+        
+        if args[:2] == ('set', 'insert'):
+            self.event_generate("<<CursorMove>>")
+            print(args)
     
     def direct_insert(self, index, chars, tags=()):
         self._original_insert(index, chars, tags)
