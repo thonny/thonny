@@ -9,6 +9,7 @@ from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
 from thonny.ui_utils import TextWrapper
+from traceback import print_exc
 
 
 
@@ -18,11 +19,14 @@ class CodeView(tktextext.TextFrame):
         
         # TODO: propose_remove_line_numbers
         
+        self.num_context_lines = (50, 500, 5000000) # used by parenmatch and Roughparser
         self.colorer = None
         self.set_coloring(True)
         self.set_up_paren_matching()
         
         self.text.bind("<Return>", self.newline_and_indent_event, True)
+        self.text.bind("<<TextChange>>", self._on_text_changed, True)
+        self.text.bind("<<CursorMove>>", self._on_cursor_moved, True)
         
         tktextext.fixwordbreaks(tk._default_root)
         
@@ -45,37 +49,18 @@ class CodeView(tktextext.TextFrame):
         if self.colorer:
             self.colorer.notify_range("1.0", "end")
     
-    def intercept_insert(self, index, chars, tags=None):
-        if self.is_read_only():
-            self.bell()
-        else:
-            self.direct_insert(index, chars, tags)
-            
-            if self.colorer:
-                self.colorer.on_insert(index, chars, tags)
-            
-            if self.paren_matcher: 
-                try:
-                    if chars in (")", "]", "}"):
-                        self.paren_matcher.paren_closed_event(None)
-                    else:
-                        self.remove_paren_highlight()
-                except:
-                    pass
-            
-            self.update_line_numbers()
-            self.update_margin_line()
-            self.text.see(index)
-
-    def intercept_delete(self, index1, index2=None):
-        if self.is_read_only():
-            self.bell()
-        else:
-            self.direct_insert(self, index1, index2)
-            if self.colorer:
-                self.colorer.on_delete(index1, index2)
-            self.update_line_numbers()
-            self.update_margin_line()
+    def _on_cursor_moved(self, event):
+        self.update_paren_highlight()
+    
+    def _on_text_changed(self, event):
+        if self.colorer:
+            self.colorer.notify_range("1.0", "end")
+        
+        
+        self.update_line_numbers()
+        self.update_margin_line()
+        self.update_paren_highlight()
+    
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
         bbox = self.text.bbox(str(lineno - self.first_line_no + 1) 
@@ -134,17 +119,27 @@ class CodeView(tktextext.TextFrame):
     def set_up_paren_matching(self):
         self.text_frame = self # ParenMatcher assumes the existence of this attribute
         self.paren_matcher = ParenMatcher(self)
+        self.indentwidth  = self.text.indentwidth
+        self.tabwidth  = self.text.tabwidth
+        self.context_use_ps1 = False
         
-        # paren_closed_event is called in _user_text_insert
-        # because KeyRelease doesn't give necessary info with Estonian keyboard
-        # restore_event call is also there
-
     def remove_paren_highlight(self): 
         if self.paren_matcher:
             try: 
                 self.paren_matcher.restore_event(None)
             except:
                 pass
+    
+    def update_paren_highlight(self):
+        if self.paren_matcher: 
+            try:
+                char_before_cursor = self.text.get(self.text.index("insert-1c"))
+                if char_before_cursor in (")", "]", "}"):
+                    self.paren_matcher.paren_closed_event(None)
+                else:
+                    self.remove_paren_highlight()
+            except:
+                print_exc()
         
     def get_selected_range(self):
         if self.text.has_selection():
@@ -160,13 +155,16 @@ class CodeView(tktextext.TextFrame):
         get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
     def newline_and_indent_event(self, event):
+        
+        
+        
         self.text._log_keypress_for_undo(event)
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified
         
         text = self.text
-        first, last = self.get_selection_indices()
-        text.undo_block_start()
+        first, last = text._get_selection_indices()
+        text._undo_block_start()
         try:
             if first and last:
                 text.delete(first, last)
@@ -199,9 +197,9 @@ class CodeView(tktextext.TextFrame):
             # adjust indentation for continuations and block
             # open/close first need to find the last stmt
             lno = tktextext.index2line(text.index('insert'))
-            y = roughparse.RoughParser(self.indentwidth, self.tabwidth)
+            y = roughparse.RoughParser(text.indentwidth, text.tabwidth)
             
-            for context in [50, 500, 5000000]:
+            for context in self.num_context_lines:
                 startat = max(lno - context, 1)
                 startatindex = repr(startat) + ".0"
                 rawtext = text.get(startatindex, "insert")
@@ -212,15 +210,6 @@ class CodeView(tktextext.TextFrame):
                 if bod is not None or startat == 1:
                     break
             y.set_lo(bod or 0)
-            #else:
-            #    r = text.tag_prevrange("console", "insert")
-            #    if r:
-            #        startatindex = r[1]
-            #    else:
-            #        startatindex = "1.0"
-            #    rawtext = text.get(startatindex, "insert")
-            #    y.set_str(rawtext)
-            #    y.set_lo(0)
 
             c = y.get_continuation_type()
             if c != roughparse.C_NONE:
@@ -258,15 +247,22 @@ class CodeView(tktextext.TextFrame):
             indent = y.get_base_indent_string()
             text.insert("insert", indent)
             if y.is_block_opener():
-                self.smart_indent_event(event)
+                text.perform_smart_tab(event)
             elif indent and y.is_block_closer():
-                self.smart_backspace_event(event)
+                text.perform_smart_backspace(event)
             return "break"
         finally:
             text.see("insert")
-            text.undo_block_stop()
+            text._undo_block_stop()
             text.event_generate("<<NewLine>>")
 
+    
+    
+    def _is_char_in_string(self, text_index):
+        # in idlelib.EditorWindow this used info from colorer
+        # to speed up things, but I dont want to rely on this
+        return 1
+        
     def _build_char_in_string_func(self, startindex):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         
@@ -280,24 +276,5 @@ class CodeView(tktextext.TextFrame):
             return _icis(_startindex + "+%dc" % offset)
         return inner
     
-    
-    def _is_char_in_string(self, text_index):
-        # copied from idlelib.EditorWindow (Python 3.4.2)
-        # Slightly modified
-        
-        # Is character at text_index in a Python string?  Return 0 for
-        # "guaranteed no", true for anything else.  This info is expensive
-        # to compute ab initio, but is probably already known by the
-        # platform's colorizer.
-        
-        if self.colorer:
-            # Return true iff colorizer hasn't (re)gotten this far
-            # yet, or the character is tagged as being in a string
-            return self.text.tag_prevrange("TODO", text_index) or \
-                   "STRING" in self.text.tag_names(text_index)
-        else:
-            # The colorizer is missing: assume the worst
-            return 1
-        
     
 
