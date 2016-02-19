@@ -19,7 +19,6 @@ class CodeView(tktextext.TextFrame):
         
         # TODO: propose_remove_line_numbers
         
-        self.num_context_lines = (50, 500, 5000000) # used by parenmatch and Roughparser
         self.colorer = None
         self.set_coloring(True)
         self.set_up_paren_matching()
@@ -117,11 +116,7 @@ class CodeView(tktextext.TextFrame):
         
     
     def set_up_paren_matching(self):
-        self.text_frame = self # ParenMatcher assumes the existence of this attribute
-        self.paren_matcher = ParenMatcher(self)
-        self.indentwidth  = self.text.indentwidth
-        self.tabwidth  = self.text.tabwidth
-        self.context_use_ps1 = False
+        self.paren_matcher = ParenMatcher(self.text)
         
     def remove_paren_highlight(self): 
         if self.paren_matcher:
@@ -199,14 +194,14 @@ class CodeView(tktextext.TextFrame):
             lno = tktextext.index2line(text.index('insert'))
             y = roughparse.RoughParser(text.indentwidth, text.tabwidth)
             
-            for context in self.num_context_lines:
+            for context in roughparse.NUM_CONTEXT_LINES:
                 startat = max(lno - context, 1)
                 startatindex = repr(startat) + ".0"
                 rawtext = text.get(startatindex, "insert")
                 y.set_str(rawtext)
                 bod = y.find_good_parse_start(
                           False,
-                          self._build_char_in_string_func(startatindex))
+                          roughparse._build_char_in_string_func(startatindex))
                 if bod is not None or startat == 1:
                     break
             y.set_lo(bod or 0)
@@ -257,24 +252,6 @@ class CodeView(tktextext.TextFrame):
             text.event_generate("<<NewLine>>")
 
     
-    
-    def _is_char_in_string(self, text_index):
-        # in idlelib.EditorWindow this used info from colorer
-        # to speed up things, but I dont want to rely on this
-        return 1
-        
-    def _build_char_in_string_func(self, startindex):
-        # copied from idlelib.EditorWindow (Python 3.4.2)
-        
-        # Our editwin provides a _is_char_in_string function that works
-        # with a Tk text index, but PyParse only knows about offsets into
-        # a string. This builds a function for PyParse that accepts an
-        # offset.
-
-        def inner(offset, _startindex=startindex,
-                  _icis=self._is_char_in_string):
-            return _icis(_startindex + "+%dc" % offset)
-        return inner
     
     
 

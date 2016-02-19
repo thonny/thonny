@@ -52,13 +52,12 @@ class ParenMatcher:
     RESTORE_SEQUENCES = ("<KeyPress>", "<ButtonPress>",
                          "<Key-Return>", "<Key-BackSpace>")
 
-    def __init__(self, editwin):
-        self.editwin = editwin
-        self.text = editwin.text
+    def __init__(self, text):
+        self.text = text
         # Bind the check-restore event to the function restore_event,
         # so that we can then use activate_restore (which calls event_add)
         # and deactivate_restore (which calls event_delete).
-        editwin.text.bind(self.RESTORE_VIRTUAL_EVENT_NAME,
+        text.bind(self.RESTORE_VIRTUAL_EVENT_NAME,
                           self.restore_event)
         self.counter = 0
         self.is_restore_active = 0
@@ -86,7 +85,7 @@ class ParenMatcher:
             self.set_timeout = self.set_timeout_none
 
     def flash_paren_event(self, event):
-        indices = (HyperParser(self.editwin, "insert")
+        indices = (HyperParser(self.text, "insert")
                    .get_surrounding_brackets())
         if indices is None:
             self.warn_mismatched()
@@ -100,7 +99,7 @@ class ParenMatcher:
         closer = self.text.get("insert-1c")
         if closer not in _openers:
             return
-        hp = HyperParser(self.editwin, "insert-1c")
+        hp = HyperParser(self.text, "insert-1c")
         if not hp.is_in_code():
             return
         indices = hp.get_surrounding_brackets(_openers[closer], True)
@@ -156,15 +155,15 @@ class ParenMatcher:
             if index != self.text.index("insert"):
                 self.handle_restore_timer(c)
             else:
-                self.editwin.text_frame.after(CHECK_DELAY, callme, callme)
-        self.editwin.text_frame.after(CHECK_DELAY, callme, callme)
+                self.text.after(CHECK_DELAY, callme, callme)
+        self.text.after(CHECK_DELAY, callme, callme)
 
     def set_timeout_last(self):
         """The last highlight created will be removed after .5 sec"""
         # associate a counter with an event; only disable the "paren"
         # tag if the event is for the most recent timer.
         self.counter += 1
-        self.editwin.text_frame.after(
+        self.text.after(
             self.FLASH_DELAY,
             lambda self=self, c=self.counter: self.handle_restore_timer(c))
 

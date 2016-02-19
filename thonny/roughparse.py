@@ -10,6 +10,7 @@ from collections import Mapping
 import string
 from keyword import iskeyword
 
+NUM_CONTEXT_LINES = (50, 500, 5000000)
 
 # Reason last stmt is continued (or C_NONE if it's not).
 (C_NONE, C_BACKSLASH, C_STRING_FIRST_LINE,
@@ -648,45 +649,31 @@ class HyperParser:
     proper indentation of code.  HyperParser gives additional information on
     the structure of code.
     """
-    def __init__(self, editwin, index):
+    def __init__(self, text, index):
         "To initialize, analyze the surroundings of the given index."
 
-        self.editwin = editwin
-        self.text = text = editwin.text
+        self.text = text
 
-        parser = RoughParser(editwin.indentwidth, editwin.tabwidth)
+        parser = RoughParser(text.indentwidth, text.tabwidth)
 
         def index2line(index):
             return int(float(index))
         lno = index2line(text.index(index))
 
-        if not editwin.context_use_ps1:
-            for context in editwin.num_context_lines:
-                startat = max(lno - context, 1)
-                startatindex = repr(startat) + ".0"
-                stopatindex = "%d.end" % lno
-                # We add the newline because PyParse requires a newline
-                # at end. We add a space so that index won't be at end
-                # of line, so that its status will be the same as the
-                # char before it, if should.
-                parser.set_str(text.get(startatindex, stopatindex)+' \n')
-                bod = parser.find_good_parse_start(
-                          editwin._build_char_in_string_func(startatindex))
-                if bod is not None or startat == 1:
-                    break
-            parser.set_lo(bod or 0)
-        else:
-            r = text.tag_prevrange("console", index)
-            if r:
-                startatindex = r[1]
-            else:
-                startatindex = "1.0"
+        for context in NUM_CONTEXT_LINES:
+            startat = max(lno - context, 1)
+            startatindex = repr(startat) + ".0"
             stopatindex = "%d.end" % lno
-            # We add the newline because PyParse requires it. We add a
-            # space so that index won't be at end of line, so that its
-            # status will be the same as the char before it, if should.
+            # We add the newline because PyParse requires a newline
+            # at end. We add a space so that index won't be at end
+            # of line, so that its status will be the same as the
+            # char before it, if should.
             parser.set_str(text.get(startatindex, stopatindex)+' \n')
-            parser.set_lo(0)
+            bod = parser.find_good_parse_start(
+                      _build_char_in_string_func(startatindex))
+            if bod is not None or startat == 1:
+                break
+        parser.set_lo(bod or 0)
 
         # We want what the parser has, minus the last newline and space.
         self.rawtext = parser.str[:-2]
@@ -932,4 +919,22 @@ class HyperParser:
         return rawtext[last_identifier_pos:self.indexinrawtext]
 
 
+
+def _is_char_in_string(text_index):
+    # in idlelib.EditorWindow this used info from colorer
+    # to speed up things, but I dont want to rely on this
+    return 1
+    
+def _build_char_in_string_func(startindex):
+    # copied from idlelib.EditorWindow (Python 3.4.2)
+    
+    # Our editwin provides a _is_char_in_string function that works
+    # with a Tk text index, but PyParse only knows about offsets into
+    # a string. This builds a function for PyParse that accepts an
+    # offset.
+
+    def inner(offset, _startindex=startindex,
+              _icis=_is_char_in_string):
+        return _icis(_startindex + "+%dc" % offset)
+    return inner
 
