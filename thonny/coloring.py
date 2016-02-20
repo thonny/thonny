@@ -17,18 +17,27 @@ def make_pat():
     builtinlist = [str(name) for name in dir(builtins)
                                         if not name.startswith('_') and \
                                         name not in keyword.kwlist]
+
     # self.file = open("file") :
     # 1st 'file' colorized normal, 2nd as builtin, 3rd as string
     builtin = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", builtinlist) + r"\b"
     comment = matches_any("COMMENT", [r"#[^\n]*"])
     stringprefix = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"
-    sqstring = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*'?"
-    dqstring = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*"?'
+
+    sqstring_open = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*\n?"
+    sqstring_closed = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*'"
+
+    dqstring_open = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*\n?'
+    dqstring_closed = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*"'
+
     sq3string = stringprefix + r"'''[^'\\]*((\\.|'(?!''))[^'\\]*)*(''')?"
     dq3string = stringprefix + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
-    string = matches_any("STRING", [sq3string, dq3string, sqstring, dqstring])
-    return kw + "|" + builtin + "|" + comment + "|" + string +\
-           "|" + matches_any("SYNC", [r"\n"])
+
+    string_open = matches_any("STRING_OPEN", [sqstring_open, dqstring_open])
+    string_closed = matches_any("STRING_CLOSED", [sqstring_closed, dqstring_closed])
+
+    return kw + "|" + builtin + "|" + comment + "|" + matches_any("STRING3", [dq3string, sq3string]) + "|" + \
+           string_closed + "|" + string_open + "|" + matches_any("SYNC", [r"\n"])
 
 class SyntaxColorer:
 
@@ -58,7 +67,10 @@ class SyntaxColorer:
             #"KEYWORD": {'background':None,'foreground':"#ff7700", "font":ui_utils.BOLD_EDITOR_FONT},
             "BUILTIN": {'background':None,'foreground':None},
             #"STRING":  {'background':None,'foreground':"#00AA00"},
-            "STRING":  {'background':None,'foreground':"DarkGreen"},
+            "STRING_CLOSED":  {'background':None,'foreground':"DarkGreen"},
+            "STRING_OPEN": {'background': "Gray", "foreground": "Yellow"},
+            "STRING3":  {'background':None,'foreground':"DarkGreen"},
+            "STRING3_OPEN": {'background': "Gray", "foreground": "Yellow"},
             "DEFINITION": {},
             "BREAK": {'background':None,'foreground':"Purple"},
             "ERROR": {'background':None,'foreground':"Red"},
@@ -195,7 +207,16 @@ class SyntaxColorer:
                     for key, value in m.groupdict().items():
                         if value:
                             a, b = m.span(key)
-                            self.text.tag_add(key,
+                            if key == "STRING3" and value.count('"""') < 2:
+                                str_end = int(float(self.text.index(head + "+%dc" % b)))
+                                file_end = int(float(self.text.index("end")))
+                                if str_end == file_end:
+                                    print(key, value)
+                                    key = "STRING3_OPEN"
+                                else:
+                                    key = None
+                            if key is not None:
+                                self.text.tag_add(key,
                                          head + "+%dc" % a,
                                          head + "+%dc" % b)
                             if value in ("def", "class"):
