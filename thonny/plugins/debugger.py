@@ -221,7 +221,6 @@ class FrameVisualizer:
         self._filename = frame_info.filename
         self._firstlineno = frame_info.firstlineno
         self._source = frame_info.source
-        self._ast = ast_utils.parse_source(frame_info.source, frame_info.filename)
         self._expression_box = ExpressionBox(text_wrapper)
         self._next_frame_visualizer = None
         
