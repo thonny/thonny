@@ -611,7 +611,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
     
     def _on_close(self):
-        showinfo("Can't close yet", "Step until the end of this code to close it")
+        showinfo("Can't close yet", 'Use "Stop" command if you want to cancel debugging')
     
     
     def close(self):
