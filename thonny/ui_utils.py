@@ -47,7 +47,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         
         self._last_window_size = (0,0)
         self._full_size_not_final = True
-        self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
+        self._configure_binding = self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
         self.bind("<B1-Motion>", self._on_mouse_dragged, True)
     
     def insert(self, pos, child, **kw):
@@ -90,6 +90,11 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self.visible_panes.remove(child)
         self._update_visibility()
         self._check_restore_pane_sizes()
+    
+    def destroy(self):
+        get_workbench().unbind("<Configure>", self._configure_binding)
+        tk.PanedWindow.destroy(self)
+        
     
     def is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
