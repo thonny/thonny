@@ -62,7 +62,7 @@ class CodeView(tktextext.TextFrame):
     
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
-        bbox = self.text.bbox(str(lineno - self.first_line_no + 1) 
+        bbox = self.text.bbox(str(lineno - self._first_line_number + 1) 
                               + "."
                               + str(col_offset))
         if isinstance(bbox, tuple):
@@ -94,12 +94,12 @@ class CodeView(tktextext.TextFrame):
         if text_range:
             if isinstance(text_range, int):
                 # it's line number
-                start = str(text_range - self.first_line_no + 1) + ".0"
-                end = str(text_range - self.first_line_no + 1) + ".end"
+                start = str(text_range - self._first_line_number + 1) + ".0"
+                end = str(text_range - self._first_line_number + 1) + ".end"
             elif isinstance(text_range, TextRange):
-                start = str(text_range.lineno - self.first_line_no + 1) \
+                start = str(text_range.lineno - self._first_line_number + 1) \
                     + "." + str(text_range.col_offset)
-                end = str(text_range.end_lineno - self.first_line_no + 1) \
+                end = str(text_range.end_lineno - self._first_line_number + 1) \
                     + "." + str(text_range.end_col_offset)
             else:
                 assert isinstance(text_range, tuple)

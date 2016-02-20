@@ -599,7 +599,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self.main_frame.columnconfigure(0, weight=1)
         
         self._code_book = ttk.Notebook(self.main_pw)
-        self._text_wrapper = CodeView(self._code_book, first_line_no=frame_info.firstlineno)
+        self._text_wrapper = CodeView(self._code_book, first_line_number=frame_info.firstlineno)
         self._code_book.add(self._text_wrapper, text="Source")
         self.main_pw.add(self._code_book, minsize=100)
         
