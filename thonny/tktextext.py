@@ -49,23 +49,28 @@ class TweakableText(tk.Text):
     def intercept_insert(self, index, chars, tags=()):
         if not self.is_read_only():
             self.direct_insert(index, chars, tags)
+        else:
+            self.bell()            
     
     def intercept_delete(self, index1, index2=None):
         if not self.is_read_only():
             self.direct_delete(index1, index2)
+        else:
+            self.bell()            
     
     def direct_mark(self, *args):
         self._original_mark(*args)
-        # TODO: filter
-        self.event_generate("<<CursorMove>>")
+        
+        if args[:2] == ('set', 'insert'):
+            self.event_generate("<<CursorMove>>")
     
     def direct_insert(self, index, chars, tags=()):
         self._original_insert(index, chars, tags)
-        self.event_generate("<<TextInsert>>")
+        self.event_generate("<<TextChange>>")
     
     def direct_delete(self, index1, index2=None):
         self._original_delete(index1, index2)
-        self.event_generate("<<TextDelete>>")
+        self.event_generate("<<TextChange>>")
     
 
 
@@ -88,6 +93,7 @@ class EnhancedText(TweakableText):
         
         self._bind_editing_aids()
         self._bind_movement_aids()
+        self._bind_selection_aids()
     
     def _bind_editing_aids(self):
         self.bind("<Control-BackSpace>", self.delete_word_left, True)
@@ -102,7 +108,10 @@ class EnhancedText(TweakableText):
         self.bind("<Home>", self.perform_smart_home, True)
         self.bind("<Left>", self.move_to_edge_if_selection(0), True)
         self.bind("<Right>", self.move_to_edge_if_selection(1), True)
-        
+    
+    def _bind_selection_aids(self):
+        self.bind("<<Command-a>>" if _running_on_mac() else "<<Control-a>>",
+                  self.select_all, True)
     
     def delete_word_left(self, event):
         self.event_generate('<Meta-Delete>')
@@ -296,6 +305,10 @@ class EnhancedText(TweakableText):
     def has_selection(self):
         return len(self.tag_ranges("sel")) > 0
     
+    def select_all(self, event):
+        self.text.tag_remove("sel", "1.0", tk.END)
+        self.text.tag_add('sel', '1.0', tk.END)
+    
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
         # column logical (meaning use tabs if appropriate) spaces.
@@ -428,27 +441,29 @@ class TextFrame(ttk.Frame):
         self._recommended_line_length=line_length_margin
         self._margin_line = tk.Canvas(self.text, borderwidth=0, width=1, height=1200, 
                                      highlightthickness=0, background="lightgray")
-        self._update_margin_line()
+        self.update_margin_line()
         
-        self.text.bind("<<TextInsert>>", self._text_changed, True)
-        self.text.bind("<<TextDelete>>", self._text_changed, True)
+        self.text.bind("<<TextChange>>", self._text_changed, True)
         
         # TODO: add context menu?
 
+    def focus_set(self):
+        self.text.focus_set()
+    
     def set_line_numbers(self, value):
         if value and not self._margin.winfo_ismapped():
             self._margin.grid(row=0, column=0, sticky=tk.NSEW)
-            self._update_line_numbers()
+            self.update_line_numbers()
         elif not value and self._margin.winfo_ismapped():
             self._margin.grid_forget()
     
     def set_line_length_margin(self, value):
         self._recommended_line_length = value
-        self._update_margin_line()
+        self.update_margin_line()
     
     def _text_changed(self, event):
-        self._update_line_numbers()
-        self._update_margin_line()
+        self.update_line_numbers()
+        self.update_margin_line()
     
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
@@ -456,7 +471,7 @@ class TextFrame(ttk.Frame):
         
     def _horizontal_scrollbar_update(self,*args):
         self._hbar.set(*args)
-        self._update_margin_line()
+        self.update_margin_line()
     
     def _vertical_scroll(self,*args):
         self.text.yview(*args)
@@ -464,9 +479,9 @@ class TextFrame(ttk.Frame):
         
     def _horizontal_scroll(self,*args):
         self.text.xview(*args)
-        self._update_margin_line()
+        self.update_margin_line()
     
-    def _update_line_numbers(self):
+    def update_line_numbers(self):
         text_line_count = int(self.text.index("end-1c").split(".")[0])
         
         self._margin.config(state='normal')
@@ -478,7 +493,7 @@ class TextFrame(ttk.Frame):
         self._margin.config(state='disabled')
 
 
-    def _update_margin_line(self):
+    def update_margin_line(self):
         if self._recommended_line_length == 0:
             self._margin_line.place_forget()
         else:
@@ -530,3 +545,34 @@ def classifyws(s, tabwidth):
 
 def index2line(index):
     return int(float(index))
+
+def fixwordbreaks(root):
+    # Adapted from idlelib.EditorWindow (Python 3.4.2)
+    # Modified to include non-ascii chars
+    
+    # Make sure that Tk's double-click and next/previous word
+    # operations use our definition of a word (i.e. an identifier)
+    tk = root.tk
+    tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
+    tk.call('set', 'tcl_wordchars',     '[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+    tk.call('set', 'tcl_nonwordchars', '[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+
+def _running_on_mac():
+    return tk._default_root.call('tk', 'windowingsystem') == "aqua"
+
+if __name__ == "__main__":
+    # demo
+    root = tk.Tk()
+    frame = TextFrame(root, read_only=False, wrap=tk.NONE, line_numbers=True, line_length_margin=13)
+    frame.grid()
+    text = frame.text
+    
+    text.direct_insert("1.0", "Essa\n    'tessa\nkossa\nx=34+(45*89*(a+45)")
+    text.tag_configure('string', background='yellow')
+    text.tag_add("string", "2.0", "3.0")
+    
+    
+    text.tag_configure('paren', underline=True)
+    text.tag_add("paren", "4.6", "5.0")
+    
+    root.mainloop()
