@@ -8,14 +8,33 @@ from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
-from thonny.ui_utils import TextWrapper
 from traceback import print_exc
 
+class CodeViewText(tktextext.EnhancedText):
+    def intercept_insert(self, index, chars, tags=()):
+        try:
+            # try removing line numbers
+            # TODO: shouldn't it take place only on paste?
+            # TODO: does it occur when opening a file with line numbers in it?
+            #if self._propose_remove_line_numbers and isinstance(chars, str):
+            #    chars = try_remove_linenumbers(chars, self)
+                
+            return tktextext.EnhancedText.intercept_insert(self, index, chars, tags=tags)
+        finally:
+            get_workbench().event_generate("TextInsert", index=index, text=chars, tags=tags, text_widget=self)
 
+    
+    def intercept_delete(self, index1, index2=None):
+        try:
+            return tktextext.EnhancedText.intercept_delete(self, index1, index2=index2)
+        finally:
+            get_workbench().event_generate("TextDelete", index1=index1, index2=index2, text_widget=self)
+            
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
-        tktextext.TextFrame.__init__(self, master, **text_frame_args)
+        tktextext.TextFrame.__init__(self, master, text_class=CodeViewText, undo=True,
+                                     **text_frame_args)
         
         # TODO: propose_remove_line_numbers
         
@@ -110,10 +129,6 @@ class CodeView(tktextext.TextFrame):
                 self.text.mark_set("insert", end) 
             self.text.see(start + " -1 lines")
             
-    def on_text_mouse_click(self, event):
-        TextWrapper.on_text_mouse_click(self, event)
-        self.remove_paren_highlight()
-        
     
     def set_up_paren_matching(self):
         self.paren_matcher = ParenMatcher(self.text)
@@ -159,7 +174,6 @@ class CodeView(tktextext.TextFrame):
         
         text = self.text
         first, last = text._get_selection_indices()
-        text._undo_block_start()
         try:
             if first and last:
                 text.delete(first, last)
@@ -248,7 +262,6 @@ class CodeView(tktextext.TextFrame):
             return "break"
         finally:
             text.see("insert")
-            text._undo_block_stop()
             text.event_generate("<<NewLine>>")
 
     

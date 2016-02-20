@@ -121,8 +121,8 @@ class Debugger:
     def _cmd_run_to_cursor(self):
         visualizer = self._get_topmost_selected_visualizer()
         if visualizer:
-            assert isinstance(visualizer._text_wrapper, CodeView)
-            code_view = visualizer._text_wrapper
+            assert isinstance(visualizer._text_frame, CodeView)
+            code_view = visualizer._text_frame
             selection = code_view.get_selected_range()
             
             target_lineno = visualizer._firstlineno-1 + selection.lineno
@@ -214,14 +214,14 @@ class FrameVisualizer:
     Is responsible for stepping through statements and updating corresponding UI
     in Editor-s, FunctionCallDialog-s, ModuleDialog-s
     """
-    def __init__(self, text_wrapper, frame_info):
-        self._text_wrapper = text_wrapper
-        self._text = text_wrapper.text
+    def __init__(self, text_frame, frame_info):
+        self._text_frame = text_frame
+        self._text = text_frame.text
         self._frame_id = frame_info.id
         self._filename = frame_info.filename
         self._firstlineno = frame_info.firstlineno
         self._source = frame_info.source
-        self._expression_box = ExpressionBox(text_wrapper)
+        self._expression_box = ExpressionBox(text_frame)
         self._next_frame_visualizer = None
         
         self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
@@ -229,14 +229,14 @@ class FrameVisualizer:
         #self._text.tag_configure('after', background="#D7EDD3")
         #self._text.tag_configure('exception', background="#FFBFD6")
         self._text.configure(background="LightYellow")
-        self._text_wrapper.read_only = True
+        self._text_frame.read_only = True
     
     def close(self):
         if self._next_frame_visualizer:
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
             
-        self._text_wrapper.read_only = False
+        self._text_frame.read_only = False
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
         
@@ -352,8 +352,8 @@ class MainFrameVisualizer(FrameVisualizer):
         
 
 class CallFrameVisualizer(FrameVisualizer):
-    def __init__(self, text_wrapper, frame_id):
-        self._dialog = FunctionCallDialog(text_wrapper)
+    def __init__(self, text_frame, frame_id):
+        self._dialog = FunctionCallDialog(text_frame)
         FrameVisualizer.__init__(self, self._dialog.get_code_view(), frame_id)
         
     def close(self):
@@ -582,10 +582,10 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
         self._init_layout_widgets(master, frame_info)
-        FrameVisualizer.__init__(self, self._text_wrapper, frame_info)
+        FrameVisualizer.__init__(self, self._text_frame, frame_info)
         
         self._load_code(frame_info)
-        self._text_wrapper.text.focus()
+        self._text_frame.text.focus()
     
     def _init_layout_widgets(self, master, frame_info):
         self.main_frame= ttk.Frame(self) # just a backgroud behind padding of main_pw, without this OS X leaves white border
@@ -598,15 +598,15 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self.main_frame.columnconfigure(0, weight=1)
         
         self._code_book = ttk.Notebook(self.main_pw)
-        self._text_wrapper = CodeView(self._code_book, 
+        self._text_frame = CodeView(self._code_book, 
                                       first_line_number=frame_info.firstlineno,
                                       font=get_workbench().get_font("EditorFont"))
-        self._code_book.add(self._text_wrapper, text="Source")
+        self._code_book.add(self._text_frame, text="Source")
         self.main_pw.add(self._code_book, minsize=100)
         
     
     def _load_code(self, frame_info):
-        self._text_wrapper.set_content(frame_info.source)
+        self._text_frame.set_content(frame_info.source)
     
     def _update_this_frame(self, msg, frame_info):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
@@ -639,7 +639,7 @@ class FunctionCallDialog(FrameDialog):
             function_label = frame_info.code_name
         
         # change tab label
-        self._code_book.tab(self._text_wrapper, text=function_label)
+        self._code_book.tab(self._text_frame, text=function_label)
     
     def _update_this_frame(self, msg, frame_info):
         FrameDialog._update_this_frame(self, msg, frame_info)
@@ -647,8 +647,8 @@ class FunctionCallDialog(FrameDialog):
 
         
 class ModuleLoadDialog(FrameDialog):
-    def __init__(self, text_wrapper, frame_info):
-        FrameDialog.__init__(self, text_wrapper)
+    def __init__(self, text_frame, frame_info):
+        FrameDialog.__init__(self, text_frame)
     
     
     

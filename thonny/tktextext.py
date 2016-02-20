@@ -43,10 +43,18 @@ class TweakableText(tk.Text):
     def is_read_only(self):
         return self._read_only
 
+    def set_content(self, chars):
+        self.direct_delete("1.0", tk.END)
+        self.direct_insert("1.0", chars)
+        
+        
     def intercept_mark(self, *args):
         self.direct_mark(*args)
     
     def intercept_insert(self, index, chars, tags=()):
+        if chars >= "\uf704" and chars <= "\uf70d": # Function keys F1..F10 in Mac cause these
+            return
+        
         if not self.is_read_only():
             self.direct_insert(index, chars, tags)
         else:
@@ -89,11 +97,11 @@ class EnhancedText(TweakableText):
         
         self._last_event_kind = None
         self._last_key_time = None
-        self._started_undo_blocks = 0        
         
         self._bind_editing_aids()
         self._bind_movement_aids()
         self._bind_selection_aids()
+        self._bind_undo_aids()
     
     def _bind_editing_aids(self):
         self.bind("<Control-BackSpace>", self.delete_word_left, True)
@@ -112,6 +120,20 @@ class EnhancedText(TweakableText):
     def _bind_selection_aids(self):
         self.bind("<<Command-a>>" if _running_on_mac() else "<<Control-a>>",
                   self.select_all, True)
+    
+    def _bind_undo_aids(self):
+        self.bind("<<Undo>>", self._on_undo, True)
+        self.bind("<<Redo>>", self._on_redo, True)
+        self.bind("<<Cut>>", self._on_cut, True)
+        self.bind("<<Copy>>", self._on_copy, True)
+        self.bind("<<Paste>>", self._on_paste, True)
+        self.bind("<FocusIn>", self._on_get_focus, True)
+        self.bind("<FocusOut>", self._on_lose_focus, True)
+        self.bind("<Key>", self._on_key_press, True)
+        self.bind("<1>", self._on_mouse_click, True)
+        self.bind("<2>", self._on_mouse_click, True)
+        self.bind("<3>", self._on_mouse_click, True)
+        
     
     def delete_word_left(self, event):
         self.event_generate('<Meta-Delete>')
@@ -169,11 +191,9 @@ class EnhancedText(TweakableText):
             have = len(chars.expandtabs(tabwidth))
             if have <= want or chars[-1] not in " \t":
                 break
-        text._undo_block_start()
         text.delete("insert-%dc" % ncharsdeleted, "insert")
         if have < want:
             text.insert("insert", ' ' * (want - have))
-        text._undo_block_stop()
         return "break"
     
     def perform_smart_tab(self, event=None):
@@ -187,31 +207,27 @@ class EnhancedText(TweakableText):
         #     indent one level
         
         first, last = self._get_selection_indices()
-        self._undo_block_start()
-        try:
-            if first and last:
-                if index2line(first) != index2line(last):
-                    return self.indent_region(event)
-                self.delete(first, last)
-                self.mark_set("insert", first)
-            prefix = self.get("insert linestart", "insert")
-            raw, effective = classifyws(prefix, self.tabwidth)
-            if raw == len(prefix):
-                # only whitespace to the left
-                self._reindent_to(effective + self.indentwidth)
+        if first and last:
+            if index2line(first) != index2line(last):
+                return self.indent_region(event)
+            self.delete(first, last)
+            self.mark_set("insert", first)
+        prefix = self.get("insert linestart", "insert")
+        raw, effective = classifyws(prefix, self.tabwidth)
+        if raw == len(prefix):
+            # only whitespace to the left
+            self._reindent_to(effective + self.indentwidth)
+        else:
+            # tab to the next 'stop' within or to right of line's text:
+            if self.usetabs:
+                pad = '\t'
             else:
-                # tab to the next 'stop' within or to right of line's text:
-                if self.usetabs:
-                    pad = '\t'
-                else:
-                    effective = len(prefix.expandtabs(self.tabwidth))
-                    n = self.indentwidth
-                    pad = ' ' * (n - effective % n)
-                self.insert("insert", pad)
-            self.see("insert")
-            return "break"
-        finally:
-            self._undo_block_stop()
+                effective = len(prefix.expandtabs(self.tabwidth))
+                n = self.indentwidth
+                pad = ' ' * (n - effective % n)
+            self.insert("insert", pad)
+        self.see("insert")
+        return "break"
 
     def perform_return(self, event):
         # Override this for Python
@@ -312,12 +328,10 @@ class EnhancedText(TweakableText):
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
         # column logical (meaning use tabs if appropriate) spaces.
-        self._undo_block_start()
         if self.compare("insert linestart", "!=", "insert"):
             self.delete("insert linestart", "insert")
         if column:
             self.insert("insert", self._make_blanks(column))
-        self._undo_block_stop()
         
     def _get_region(self):
         first, last = self._get_selection_indices()
@@ -338,21 +352,10 @@ class EnhancedText(TweakableText):
             return
         self.tag_remove("sel", "1.0", "end")
         self.mark_set("insert", head)
-        self._undo_block_start()
         self.delete(head, tail)
         self.insert(head, newchars)
-        self._undo_block_stop()
         self.tag_add("sel", head, "insert")
     
-    def _undo_block_start(self):
-        self._started_undo_blocks += 1
-    
-    def _undo_block_stop(self):
-        self._started_undo_blocks -= 1
-        if self._started_undo_blocks == 0:
-            #self.add_undo_separator() # TODO: get rid of idlelib heritage
-            pass
-        
     def _log_keypress_for_undo(self, e):
         if e is None:
             return
@@ -395,10 +398,44 @@ class EnhancedText(TweakableText):
         else:
             return None, None
 
+    def _on_undo(self, e):
+        self._last_event_kind = "undo"
+        
+    def _on_redo(self, e):
+        self._last_event_kind = "redo"
+        
+    def _on_cut(self, e):
+        self._last_event_kind = "cut"
+        self.edit_separator()        
+        
+    def _on_copy(self, e):
+        self._last_event_kind = "copy"
+        self.edit_separator()        
+        
+    def _on_paste(self, e):
+        self._last_event_kind = "paste"
+        self.edit_separator()        
+    
+    def _on_get_focus(self, e):
+        self._last_event_kind = "get_focus"
+        self.edit_separator()        
+        
+    def _on_lose_focus(self, e):
+        self._last_event_kind = "lose_focus"
+        self.edit_separator()        
+    
+    def _on_key_press(self, e):
+        return self._log_keypress_for_undo(e)
+
+    def _on_mouse_click(self, event):
+        self.edit_separator()
+
+
 class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
     def __init__(self, master, line_numbers=False, line_length_margin=0,
-                 first_line_number=1, text_class=EnhancedText, **text_options):
+                 first_line_number=1, text_class=EnhancedText,
+                 **text_options):
         ttk.Frame.__init__(self, master=master)
         
         final_text_options = {'borderwidth' : 0,

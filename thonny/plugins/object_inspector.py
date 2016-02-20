@@ -5,8 +5,8 @@ import tkinter as tk
 from thonny.memory import format_object_id, VariablesFrame, MemoryFrame,\
     MAX_REPR_LENGTH_IN_GRID
 from thonny.misc_utils import shorten_repr
-from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text,\
-    TextFrame
+from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text
+from thonny.tktextext import TextFrame
 from thonny.common import InlineCommand
 import ast
 from thonny.globals import get_workbench, get_runner
@@ -243,7 +243,7 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
     
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        TextFrame.__init__(self, master, readonly=True)
+        TextFrame.__init__(self, master, read_only=True)
         self.cache = {} # stores file contents for handle id-s
         self.config(borderwidth=1)
         self.text.configure(background="white")
@@ -265,7 +265,7 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
         line_count_term = len(content.splitlines())
         char_count = len(content)
         self.text.configure(height=min(line_count_sep, 10))
-        self.set_content(content)
+        self.text.set_content(content)
         
         assert "file_tell" in object_info
         # f.tell() gives num of bytes read (minus some magic with linebreaks)
@@ -295,7 +295,7 @@ class FunctionInspector(TextFrame, TypeSpecificInspector):
     
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        TextFrame.__init__(self, master, readonly=True)
+        TextFrame.__init__(self, master, read_only=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
 
@@ -305,7 +305,7 @@ class FunctionInspector(TextFrame, TypeSpecificInspector):
     def set_object_info(self, object_info, label):
         line_count = len(object_info["source"].split("\n"))
         self.text.configure(height=min(line_count, 15))
-        self.set_content(object_info["source"])
+        self.text.set_content(object_info["source"])
         label.configure(text="Code")
                 
             
@@ -313,7 +313,7 @@ class StringInspector(TextFrame, TypeSpecificInspector):
     
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        TextFrame.__init__(self, master, readonly=True)
+        TextFrame.__init__(self, master, read_only=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
 
@@ -326,7 +326,7 @@ class StringInspector(TextFrame, TypeSpecificInspector):
         line_count_sep = len(content.split("\n"))
         line_count_term = len(content.splitlines())
         self.text.configure(height=min(line_count_sep, 10))
-        self.set_content(content)
+        self.text.set_content(content)
         label.configure(text="%d %s, %d %s" 
                         % (len(content),
                            "symbol" if len(content) == 1 else "symbols",

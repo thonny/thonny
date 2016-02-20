@@ -424,44 +424,6 @@ class TextWrapper:
             #self.add_undo_separator() # TODO: get rid of idlelib heritage
             pass
 
-class TextFrame(ttk.Frame, TextWrapper):
-    def __init__(self, master, readonly=False):
-        ttk.Frame.__init__(self, master)
-        
-        self.readonly = readonly
-        self.vert_scrollbar = AutoScrollbar(self, orient=tk.VERTICAL)
-        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        self.hor_scrollbar = AutoScrollbar(self, orient=tk.HORIZONTAL)
-        self.hor_scrollbar.grid(row=1, column=0, sticky=tk.NSEW)
-        self.text = tk.Text(self,
-                            borderwidth=0,
-                            yscrollcommand=self.vert_scrollbar.set,
-                            xscrollcommand=self.hor_scrollbar.set,
-                            padx=4,
-                            insertwidth=2,
-                            wrap='none')
-        self.text.grid(row=0, column=0, sticky=tk.NSEW)
-        self.vert_scrollbar['command'] = self.text.yview
-        self.hor_scrollbar['command'] = self.text.xview
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        TextWrapper.__init__(self)
-        
-        
-    def _user_text_insert(self, *args, **kw):
-        if not self.readonly:
-            TextWrapper._user_text_insert(self, *args, **kw)
-    
-    def _user_text_delete(self, *args, **kw):
-        if not self.readonly:
-            TextWrapper._user_text_delete(self, *args, **kw)
-    
-    def set_content(self, content):
-        TextWrapper._user_text_delete(self, "1.0", tk.END)
-        TextWrapper._user_text_insert(self, "1.0", content)
-
-
 
 class WidgetRedirector:
     # Copied for Python 3.3.2 idlelib.WidgetRedirector so that IDLE is not a requirement

@@ -8,13 +8,18 @@ class OutlineView(ttk.Frame):
         ttk.Frame.__init__(self, master)
         self._init_widgets()
         
-        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_frame_contents ,True)
+        self._tab_changed_binding = get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update_frame_contents ,True)
         get_workbench().bind("Save", self._update_frame_contents, True)
         get_workbench().bind("SaveAs", self._update_frame_contents, True)
         get_workbench().bind_class("Text", "<<NewLine>>", self._update_frame_contents, True)
         
         self._update_frame_contents()
-
+    
+    def destroy(self):
+        # TODO: Is editor notebook still living?
+        #get_workbench().get_editor_notebook().unbind("<<NotebookTabChanged>>", self._tab_changed_binding ,True)
+        ttk.Frame.destroy(self)
+    
     def _init_widgets(self):
         #init and place scrollbar
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
