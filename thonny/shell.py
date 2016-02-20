@@ -8,18 +8,53 @@ import traceback
 from thonny import memory
 from thonny.common import ToplevelCommand, parse_shell_command
 from thonny.misc_utils import running_on_mac_os, shorten_repr
-from thonny.ui_utils import TextWrapper
+from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
 import tkinter.font as font
 from thonny.globals import get_workbench, get_runner
 
 
-class ShellView (ttk.Frame, TextWrapper):
-
-    
-    def __init__(self, master):
-        ttk.Frame.__init__(self, master)
+class ShellView (ttk.Frame):
+    def __init__(self, master, **kw):
+        ttk.Frame.__init__(self, master, **kw)
         
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
+        self.text = ShellText(self,
+                            font=get_workbench().get_font("EditorFont"),
+                            #foreground="white",
+                            #background="#666666",
+                            highlightthickness=0,
+                            #highlightcolor="LightBlue",
+                            borderwidth=0,
+                            yscrollcommand=self.vert_scrollbar.set,
+                            padx=4,
+                            insertwidth=2,
+                            height=10,
+                            undo=True,
+                            autoseparators=False)
+        
+        get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
+        
+        self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        self.vert_scrollbar['command'] = self.text.yview
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+
+    def focus_set(self):
+        self.text.focus_set()
+    
+    def add_command(self, command, handler):
+        self.text.add_command(command, handler)
+
+    def submit_command(self, cmd_line):
+        self.text.submit_command(cmd_line)
+
+
+class ShellText(EnhancedTextWithLogging):
+    
+    def __init__(self, master, cnf={}, **kw):
+        EnhancedTextWithLogging.__init__(self, master, cnf, **kw)
         
         self._before_io = True
         self._command_history = [] # actually not really history, because each command occurs only once
@@ -43,75 +78,48 @@ class ShellView (ttk.Frame, TextWrapper):
         self.margin.grid(row=0, column=0)
         """
         
-        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.vert_scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
-        editor_font = font.nametofont(name='TkFixedFont')
-        self.text = tk.Text(self,
-                            font=editor_font,
-                            #foreground="white",
-                            #background="#666666",
-                            highlightthickness=0,
-                            #highlightcolor="LightBlue",
-                            borderwidth=0,
-                            yscrollcommand=self.vert_scrollbar.set,
-                            padx=4,
-                            insertwidth=2,
-                            height=10,
-                            undo=True,
-                            autoseparators=False)
+        self.bind("<Up>", self._arrow_up, True)
+        self.bind("<Down>", self._arrow_down, True)
+        self.bind("<KeyPress>", self._text_key_press, True)
+        self.bind("<KeyRelease>", self._text_key_release, True)
         
-        get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
-        
-        self.text.grid(row=0, column=1, sticky=tk.NSEW)
-        self.text.bind("<Up>", self._arrow_up, "+")
-        self.text.bind("<Down>", self._arrow_down, "+")
-        self.text.bind("<KeyPress>", self._text_key_press, "+")
-        self.text.bind("<KeyRelease>", self._text_key_release, "+")
-        self.text.bind("<Home>", self.home_callback)
-        self.vert_scrollbar['command'] = self.text.yview
-        self.columnconfigure(1, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        TextWrapper.__init__(self)
-        
-        self.text["font"] = get_workbench().get_font("EditorFont")
         vert_spacing = 10
         io_indent = 16
         
-        self.text.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
-        self.text.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
-        self.text.tag_configure("command", foreground="black")
-        self.text.tag_configure("version", foreground="DarkGray")
-        self.text.tag_configure("automagic", foreground="DarkGray")
-        #self.text.tag_configure("value", foreground="DarkGreen")
-        #self.text.tag_configure("value", foreground="#B25300")
-        self.text.tag_configure("value", foreground="DarkBlue") # TODO: see also _text_key_press and _text_key_release
-        self.text.tag_configure("error", foreground="Red")
+        self.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
+        self.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
+        self.tag_configure("command", foreground="black")
+        self.tag_configure("version", foreground="DarkGray")
+        self.tag_configure("automagic", foreground="DarkGray")
+        #self.tag_configure("value", foreground="DarkGreen")
+        #self.tag_configure("value", foreground="#B25300")
+        self.tag_configure("value", foreground="DarkBlue") # TODO: see also _text_key_press and _text_key_release
+        self.tag_configure("error", foreground="Red")
         
-        self.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
+        self.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
                                 font=get_workbench().get_font("IOFont"))
-        self.text.tag_configure("stdin", foreground="Blue")
-        self.text.tag_configure("stdout", foreground="Black")
-        self.text.tag_configure("stderr", foreground="Red")
-        self.text.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
-        self.text.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
-        self.text.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
-        self.text.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
+        self.tag_configure("stdin", foreground="Blue")
+        self.tag_configure("stdout", foreground="Black")
+        self.tag_configure("stderr", foreground="Red")
+        self.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
+        self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
+        self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
+        self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
         
-        self.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
-        self.text.tag_configure("inactive", foreground="#aaaaaa")
+        self.tag_configure("vertically_spaced", spacing1=vert_spacing)
+        self.tag_configure("inactive", foreground="#aaaaaa")
         
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
         # input starts, output_end shows the end of last output,
         # output_insert shows where next incoming program output should be inserted
-        self.text.mark_set("input_start", "end-1c")
-        self.text.mark_gravity("input_start", tk.LEFT)
+        self.mark_set("input_start", "end-1c")
+        self.mark_gravity("input_start", tk.LEFT)
         
-        self.text.mark_set("output_end", "end-1c")
-        self.text.mark_gravity("output_end", tk.LEFT)
+        self.mark_set("output_end", "end-1c")
+        self.mark_gravity("output_end", tk.LEFT)
         
-        self.text.mark_set("output_insert", "end-1c")
-        self.text.mark_gravity("output_insert", tk.RIGHT)
+        self.mark_set("output_insert", "end-1c")
+        self.mark_gravity("output_insert", tk.RIGHT)
         
         
         self.active_object_tags = set()
@@ -125,21 +133,28 @@ class ShellView (ttk.Frame, TextWrapper):
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
         get_workbench().bind("BackendReady", self._backend_ready, True)
         
+    def add_command(self, command, handler):
+        self._command_handlers[command] = handler
         
-
+    def submit_command(self, cmd_line):
+        assert self._get_state() == "waiting_toplevel_command"
+        self.delete("input_start", "end")
+        self.insert("input_start", cmd_line, ("automagic",))
+        self.see("end")
+    
     def _handle_input_request(self, msg):
         self.text_mode = "io"
-        self.text["font"] = get_workbench().get_font("IOFont") # otherwise the cursor is of toplevel size
-        self.text.focus_set()
-        self.text.mark_set("insert", "end")
-        self.text.tag_remove("sel", "1.0", tk.END)
+        self["font"] = get_workbench().get_font("IOFont") # otherwise the cursor is of toplevel size
+        self.focus_set()
+        self.mark_set("insert", "end")
+        self.tag_remove("sel", "1.0", tk.END)
         self._current_input_request = msg
         self._try_submit_input() # try to use leftovers from previous request
-        self.text.see("end")
+        self.see("end")
 
     def _handle_program_output(self, msg):
         self.text_mode = "io"
-        self.text["font"] = get_workbench().get_font("IOFont")
+        self["font"] = get_workbench().get_font("IOFont")
         
         # mark first line of io
         if self._before_io:
@@ -149,12 +164,12 @@ class ShellView (ttk.Frame, TextWrapper):
         else:
             self._insert_text_directly(msg.data, ("io", msg.stream_name))
         
-        self.text.mark_set("output_end", self.text.index("end-1c"))
-        self.text.see("end")
+        self.mark_set("output_end", self.index("end-1c"))
+        self.see("end")
             
     def _handle_toplevel_result(self, msg):
         self.text_mode = "toplevel"
-        self.text["font"] = get_workbench().get_font("EditorFont")
+        self["font"] = get_workbench().get_font("EditorFont")
         self._before_io = True
         if hasattr(msg, "error"):
             self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
@@ -172,56 +187,47 @@ class ShellView (ttk.Frame, TextWrapper):
                     sequence = "<Command-Button-1>"
                 else:
                     sequence = "<Control-Button-1>"
-                self.text.tag_bind(object_tag, sequence,
+                self.tag_bind(object_tag, sequence,
                                    lambda _: get_workbench().event_generate(
                                         "ObjectSelect", object_id=msg.value_info.id))
                 
                 self.active_object_tags.add(object_tag)
         
-        self.text.mark_set("output_end", self.text.index("end-1c"))
+        self.mark_set("output_end", self.index("end-1c"))
         self._insert_prompt()
         self._try_submit_input()
-        self.text.see("end")
+        self.see("end")
             
     def _insert_prompt(self):
         # if previous output didn't put a newline, then do it now
-        if not self.text.index("output_insert").endswith(".0"):
+        if not self.index("output_insert").endswith(".0"):
             # TODO: show a symbol indicating unfinished line
             self._insert_text_directly("\n", ("io",))
         
         prompt_tags = ("toplevel", "prompt")
          
         # if previous line has value or io then add little space
-        prev_line = self.text.index("output_insert - 1 lines")
-        prev_line_tags = self.text.tag_names(prev_line)
+        prev_line = self.index("output_insert - 1 lines")
+        prev_line_tags = self.tag_names(prev_line)
         if "io" in prev_line_tags or "value" in prev_line_tags:
             prompt_tags += ("vertically_spaced",)
-            #self.text.tag_add("last_result_line", prev_line)
+            #self.tag_add("last_result_line", prev_line)
         
         self._insert_text_directly(">>> ", prompt_tags)
-        self.text.edit_reset();
+        self.edit_reset();
     
     
-    
-    def add_command(self, command, handler):
-        self._command_handlers[command] = handler
-        
-    def submit_command(self, cmd_line):
-        assert self._get_state() == "waiting_toplevel_command"
-        self.text.delete("input_start", "end")
-        self.text.insert("input_start", cmd_line, ("automagic",))
-        self.text.see("end")
     
     def _get_state(self):
         return get_runner().get_state()
         
-    def _user_text_insert(self, index, txt, tags=(), **kw):
+    def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()
             and self._in_current_input_range(index)):
             #self._print_marks("before insert")
             # I want all marks to stay in place
-            self.text.mark_gravity("input_start", tk.LEFT)
-            self.text.mark_gravity("output_insert", tk.LEFT)
+            self.mark_gravity("input_start", tk.LEFT)
+            self.mark_gravity("output_insert", tk.LEFT)
             
             if self._get_state() == "waiting_input":
                 tags = tags + ("io", "stdin")
@@ -230,36 +236,36 @@ class ShellView (ttk.Frame, TextWrapper):
             
             # when going back and fixing in the middle of command and pressing ENTER there
             if txt == "\n":
-                self.text.mark_set("insert", "insert lineend")
+                self.mark_set("insert", "insert lineend")
                 index = "insert"
                 
-            TextWrapper._user_text_insert(self, index, txt, tags, **kw)
+            super().intercept_insert(index, txt, tags)
             
             # tag first char of io separately
             if self._get_state() == "waiting_input" and self._before_io:
-                self.text.tag_add("vertically_spaced", index)
+                self.tag_add("vertically_spaced", index)
                 self._before_io = False
             
             self._try_submit_input()
         else:
             self.bell()
             
-    def _user_text_delete(self, index1, index2=None, **kw):
+    def intercept_delete(self, index1, index2=None, **kw):
         if (self._editing_allowed() 
             and self._in_current_input_range(index1)
             and (index2 is None or self._in_current_input_range(index2))):
-            TextWrapper._user_text_delete(self, index1, index2, **kw)
+            self.direct_delete(index1, index2, **kw)
         else:
             self.bell()
     
     def _in_current_input_range(self, index):
-        return self.text.compare(index, ">=", "input_start")
+        return self.compare(index, ">=", "input_start")
     
     def _insert_text_directly(self, txt, tags=()):
         # I want the insertion to go before marks 
         #self._print_marks("before output")
-        self.text.mark_gravity("input_start", tk.RIGHT)
-        self.text.mark_gravity("output_insert", tk.RIGHT)
+        self.mark_gravity("input_start", tk.RIGHT)
+        self.mark_gravity("output_insert", tk.RIGHT)
         tags = tuple(tags)
         
         if "stderr" in tags or "error" in tags:
@@ -280,47 +286,47 @@ class ShellView (ttk.Frame, TextWrapper):
     
     def _insert_text_drctly(self, txt, tags):
         if txt != "":
-            TextWrapper._user_text_insert(self, "output_insert", txt, tags)
+            self.direct_insert("output_insert", txt, tags)
     
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
-        input_text = self.text.get("input_start", "end-1c")
+        input_text = self.get("input_start", "end-1c")
         submittable_text = self._extract_submittable_input(input_text)
         
         if submittable_text is not None:
             # user may have pasted more text than necessary for this request
             # leftover text will be kept in widget, waiting for next request.
-            start_index = self.text.index("input_start")
-            end_index = self.text.index("input_start+{0}c".format(len(submittable_text)))
+            start_index = self.index("input_start")
+            end_index = self.index("input_start+{0}c".format(len(submittable_text)))
             # apply correct tags (if it's leftover then it doesn't have them yet)
             if self._get_state() == "waiting_input":
-                self.text.tag_add("io", start_index, end_index)
-                self.text.tag_add("stdin", start_index, end_index)
+                self.tag_add("io", start_index, end_index)
+                self.tag_add("stdin", start_index, end_index)
             else:
-                self.text.tag_add("toplevel", start_index, end_index)
-                self.text.tag_add("command", start_index, end_index)
+                self.tag_add("toplevel", start_index, end_index)
+                self.tag_add("command", start_index, end_index)
                 
             
             
             # update start mark for next input range
-            self.text.mark_set("input_start", end_index)
+            self.mark_set("input_start", end_index)
             
             # Move output_insert mark after the requested_text
             # Leftover input, if any, will stay after output_insert, 
             # so that any output that will come in before
             # next input request will go before leftover text
-            self.text.mark_set("output_insert", end_index)
+            self.mark_set("output_insert", end_index)
             
             # remove tags from leftover text
             for tag in ("io", "stdin", "toplevel", "command"):
                 # don't remove automagic, because otherwise I can't know it's auto 
-                self.text.tag_remove(tag, end_index, "end")
+                self.tag_remove(tag, end_index, "end")
                 
             self._submit_input(submittable_text)
             # tidy up the tags
-            #self.text.tag_remove("pending_input", "1.0", "end")
-            #self.text.tag_add("submitted_input", start_index, end_index)
-            #self.text.tag_add("pending_input", end_index, "end-1c")
+            #self.tag_remove("pending_input", "1.0", "end")
+            #self.tag_add("submitted_input", start_index, end_index)
+            #self.tag_add("pending_input", end_index, "end-1c")
     
     def _editing_allowed(self):
         return self._get_state() in ('waiting_toplevel_command', 'waiting_input')
@@ -401,12 +407,6 @@ class ShellView (ttk.Frame, TextWrapper):
             get_workbench().event_generate("ShellInput", input_text=text_to_be_submitted)
     
     
-    def focus_set(self):
-        self.text.focus()
-    
-    def is_focused(self):
-        return self.focus_displayof() == self.text
-    
     def _arrow_up(self, event):
         if not self._in_current_input_range("insert"):
             return
@@ -442,36 +442,40 @@ class ShellView (ttk.Frame, TextWrapper):
         return "break"
     
     def _propose_command(self, cmd_line):
-        self.text.delete("input_start", "end")
-        self._user_text_insert("input_start", cmd_line)
+        self.delete("input_start", "end")
+        self.intercept_insert("input_start", cmd_line)
     
     def _text_key_press(self, event):
         # TODO: this underline may confuse, when user is just copying on pasting
         # try to add this underline only when mouse is over the value
         """
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
-            self.text.tag_configure("value", foreground="DarkBlue", underline=1)
+            self.tag_configure("value", foreground="DarkBlue", underline=1)
         """
     
     def _text_key_release(self, event):
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
-            self.text.tag_configure("value", foreground="DarkBlue", underline=0)
+            self.tag_configure("value", foreground="DarkBlue", underline=0)
     
-    def home_callback(self, event):
+    def perform_smart_home(self, event):
+        if (event.state & 4) != 0 and event.keysym == "Home":
+            # state&4==Control. If <Control-Home>, use the Tk binding.
+            return
+        
         if self._in_current_input_range("insert"):
             # on input line, go to just after prompt
-            self.text.mark_set("insert", "input_start")
+            self.mark_set("insert", "input_start")
             return "break"
     
     def _hyperlink_enter(self, event):
-        self.text.config(cursor="hand2")
+        self.config(cursor="hand2")
         
     def _hyperlink_leave(self, event):
-        self.text.config(cursor="")
+        self.config(cursor="")
         
     def _handle_hyperlink(self, event):
         try:
-            line = self.text.get("insert linestart", "insert lineend")
+            line = self.get("insert linestart", "insert lineend")
             matches = re.findall(r'File "([^"]+)", line (\d+)', line)
             if len(matches) == 1 and len(matches[0]) == 2:
                 filename, lineno = matches[0]
@@ -487,43 +491,31 @@ class ShellView (ttk.Frame, TextWrapper):
         """
         Grayes out input & output displayed so far
         """
-        end_index = self.text.index("output_end")
+        end_index = self.index("output_end")
         
-        self.text.tag_add("inactive", "1.0", end_index)
-        self.text.tag_remove("value", "1.0", end_index)
+        self.tag_add("inactive", "1.0", end_index)
+        self.tag_remove("value", "1.0", end_index)
         
         while len(self.active_object_tags) > 0:
-            self.text.tag_remove(self.active_object_tags.pop(), "1.0", "end")
+            self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
     
-    def demo(self):
-        TextWrapper._user_text_insert(self, "end", """Python 3.2.3
->>> %run "c:/my documents/kool/prog/katsetus.py"
-Sisesta esimene arv: 4
-Sisesta teine arv: 6
-Nende arvude summa on 10
->>> " kalanaba ".trim()
-"kalanaba"
->>>>>> 3 + 4
-7
->>> 
-""")
         promptfont = font.Font(family='Courier New', size=10, weight="bold")
-        self.text.tag_add("prompt", "2.0", "2.4")
-        self.text.tag_add("outprompt", "2.0", "2.4")
-        self.text.tag_add("prompt", "6.0", "6.4")
-        self.text.tag_add("prompt", "8.0", "8.7")
-        self.text.tag_add("prompt", "10.0", "10.4")
-        self.text.tag_configure("prompt", foreground="purple", 
+        self.tag_add("prompt", "2.0", "2.4")
+        self.tag_add("outprompt", "2.0", "2.4")
+        self.tag_add("prompt", "6.0", "6.4")
+        self.tag_add("prompt", "8.0", "8.7")
+        self.tag_add("prompt", "10.0", "10.4")
+        self.tag_configure("prompt", foreground="purple", 
                                 spacing1=12, font=promptfont)
-        self.text.tag_configure("outprompt", spacing3=12)
+        self.tag_configure("outprompt", spacing3=12)
         
-        self.text.tag_bind("prompt", "<Enter>", lambda _: self.text.configure(cursor="hand2"))
-        self.text.tag_bind("prompt", "<Leave>", lambda _: self.text.configure(cursor="arrow"))
+        self.tag_bind("prompt", "<Enter>", lambda _: self.configure(cursor="hand2"))
+        self.tag_bind("prompt", "<Leave>", lambda _: self.configure(cursor="arrow"))
         
-        self.text.tag_add("console", "3.0", "6.0")
-        #self.text.tag_configure("console", foreground="white", background="#555555", relief=tk.RAISED, lmargin1=20)
+        self.tag_add("console", "3.0", "6.0")
+        #self.tag_configure("console", foreground="white", background="#555555", relief=tk.RAISED, lmargin1=20)
         consolefont = font.Font(family='Consolas', size=8, weight="normal", slant="italic")
-        self.text.tag_configure("console", lmargin1=16, font=consolefont, foreground="blue")
+        self.tag_configure("console", lmargin1=16, font=consolefont, foreground="blue")
         
         
 

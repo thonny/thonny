@@ -46,7 +46,7 @@ def _complete(codeview, completion):
     get_workbench().event_generate("AutocompleteFinished",
         partial_string=_get_partial_string(completion),
         chosen_completion=completion.name)
-    codeview._user_text_insert(codeview.text.index('insert'), completion.complete)
+    codeview.text.insert(codeview.text.index('insert'), completion.complete)
 
 #top-level container of the vertical list of suggestions
 # TODO: do we need the toplevel?

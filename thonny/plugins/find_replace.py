@@ -171,7 +171,7 @@ class FindDialog(tk.Toplevel):
         #delete the found word
         self.codeview.text.delete(del_start, del_end)
         #insert the new word
-        self.codeview._user_text_insert(del_start, toreplace)
+        self.codeview.text.insert(del_start, toreplace)
         #mark the inserted word boundaries 
         self.last_processed_indexes = (del_start, self.codeview.text.index("%s+%dc" % (del_start, len(toreplace))))
 
@@ -212,7 +212,7 @@ class FindDialog(tk.Toplevel):
             self.codeview.text.delete(currentpos, endpos)
 
             if toreplace != "":
-                self.codeview._user_text_insert(currentpos, toreplace)
+                self.codeview.text.insert(currentpos, toreplace)
                 
             currentpos = self.codeview.text.index("%s+%dc" % (currentpos, len(toreplace)))
 
