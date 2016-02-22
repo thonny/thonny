@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ $1 -eq 8.6 ]
+if [ "$1" == "8.6" ]
 then
 	TCLTK_LONG_VERSION=8.6.4
 	TCLTK_SHORT_VERSION=8.6
