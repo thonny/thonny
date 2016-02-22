@@ -23,8 +23,8 @@ mkdir $PREFIX
 $MAIN_DIR/build_tcltk.sh 8.6
 cd $TEMP_BUILD_DIR
 
-$MAIN_DIR/build_tkhtml.sh
-cd $TEMP_BUILD_DIR
+#$MAIN_DIR/build_tkhtml.sh
+#cd $TEMP_BUILD_DIR
 
 $MAIN_DIR/build_openssl.sh
 cd $TEMP_BUILD_DIR

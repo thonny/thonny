@@ -16,7 +16,7 @@ cd $TEMP_DIR
 
 
 $MAIN_DIR/build_tcltk.sh
-$MAIN_DIR/build_tkhtml.sh
+#$MAIN_DIR/build_tkhtml.sh
 $MAIN_DIR/build_openssl.sh
 $MAIN_DIR/build_xz.sh
 $MAIN_DIR/build_python.sh
