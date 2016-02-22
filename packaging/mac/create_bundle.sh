@@ -9,11 +9,11 @@ mkdir -p build
 
 
 # copy template and source files #################################################
-cp -r Thonny.app.template build/Thonny.app
+cp -R -H Thonny.app.template build/Thonny.app
 
 MACOS_PATH=build/Thonny.app/Contents/MacOS
 mkdir -p $MACOS_PATH 
-cp -r $PREFIX/* $MACOS_PATH
+cp -R -H $PREFIX/* $MACOS_PATH
 
 # install thonny #####################################################
 $MACOS_PATH/bin/python3.5 -m pip install --pre --no-cache-dir thonny
