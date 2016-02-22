@@ -27,7 +27,7 @@ cd $TEMP_BUILD_DIR
 
 
 # _tkinter #####################################################################
-$MAIN_DIR/build_tcltk.sh 8.5
+$MAIN_DIR/build_tcltk.sh 8.6
 cd $TEMP_BUILD_DIR
 
 # Link _tkinter to newly built Tcl/Tk

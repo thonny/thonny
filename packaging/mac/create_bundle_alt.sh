@@ -83,7 +83,7 @@ cp readme.txt build
 
 # create dmg #####################################################################
 mkdir -p dist
-FILENAME=dist/thonny-${VERSION}_alt.dmg
+FILENAME=dist/thonny-${VERSION}.dmg
 rm -f $FILENAME
 hdiutil create -srcfolder build -volname "Thonny $VERSION" $FILENAME
 hdiutil internet-enable -yes $FILENAME
