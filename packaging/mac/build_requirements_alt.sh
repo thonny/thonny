@@ -31,7 +31,8 @@ $MAIN_DIR/build_tcltk.sh 8.5
 cd $TEMP_BUILD_DIR
 
 # Link _tkinter to newly built Tcl/Tk
-# assuming it is originally linked to 8.5
+# assuming it is originally linked either to 8.5 (from official installer)
+# or 8.6 (custom patched)
 
 install_name_tool -change \
     /Library/Frameworks/Tcl.framework/Versions/8.5/Tcl \
@@ -39,7 +40,17 @@ install_name_tool -change \
     $PREFIX/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
 
 install_name_tool -change \
+    /Library/Frameworks/Tcl.framework/Versions/8.6/Tcl \
+	$RELATIVE_LIBDIR/Tcl \
+    $PREFIX/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
+
+install_name_tool -change \
     /Library/Frameworks/Tk.framework/Versions/8.5/Tk \
+	$RELATIVE_LIBDIR/Tk \
+    $PREFIX/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
+
+install_name_tool -change \
+    /Library/Frameworks/Tk.framework/Versions/8.6/Tk \
 	$RELATIVE_LIBDIR/Tk \
     $PREFIX/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
 
