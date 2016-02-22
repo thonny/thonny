@@ -26,14 +26,9 @@ $MACOS_PATH/bin/python3.5 -m pip install --no-cache-dir easygui
 # clean unnecessary stuff ###################################################
 rm -rf $MACOS_PATH/share
 rm -rf $MACOS_PATH/man
-rm -rf $MACOS_PATH/ssl
 rm -rf $MACOS_PATH/lib/python3.5/__pycache__
 rm -rf $MACOS_PATH/lib/python3.5/test
 rm -f $MACOS_PATH/lib/*.a
-rm -f $MACOS_PATH/lib/libcrypto.dylib # delete some symlinks
-rm -f $MACOS_PATH/lib/libssl.dylib
-rm -f $MACOS_PATH/lib/liblzma.dylib
-rm -f $MACOS_PATH/lib/liblzma.la
 
 find $MACOS_PATH/lib -name '*.pyc' -delete
 find $MACOS_PATH/lib -name '*.exe' -delete
