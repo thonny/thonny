@@ -216,7 +216,7 @@ class CodeView(tktextext.TextFrame):
                     # last open bracket structure; else indent one
                     # level beyond the indent of the line with the
                     # last open bracket
-                    self.reindent_to(y.compute_bracket_indent())
+                    self.text._reindent_to(y.compute_bracket_indent())
                 elif c == roughparse.C_BACKSLASH:
                     # if more than one line in this stmt already, just
                     # mimic the current indent; else if initial line
@@ -226,7 +226,7 @@ class CodeView(tktextext.TextFrame):
                     if y.get_num_lines_in_stmt() > 1:
                         text.insert("insert", indent)
                     else:
-                        self.reindent_to(y.compute_backslash_indent())
+                        self.text._reindent_to(y.compute_backslash_indent())
                 else:
                     assert 0, "bogus continuation type %r" % (c,)
                 return "break"
