@@ -509,8 +509,7 @@ def tokenize_with_char_offsets(source):
             # first token
             encoding = token.string
             byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
-            
-            
+        
         if token.start[0] == 0 or (token.start[1] == 0 and token.end[1] == 0):
             # just copy information
             thoken = Thoken(token.type, token.string,
@@ -532,5 +531,6 @@ def tokenize_with_char_offsets(source):
         
         thokens.append(thoken)
             
-
+    
+    return thokens
         
