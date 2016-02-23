@@ -8,6 +8,7 @@ from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
+from thonny.plugins.highlight_names import highlight
 from thonny.ui_utils import TextWrapper
 from traceback import print_exc
 
@@ -26,7 +27,7 @@ class CodeView(tktextext.TextFrame):
         self.text.bind("<Return>", self.newline_and_indent_event, True)
         self.text.bind("<<TextChange>>", self._on_text_changed, True)
         self.text.bind("<<CursorMove>>", self._on_cursor_moved, True)
-        
+
         tktextext.fixwordbreaks(tk._default_root)
         
         if running_on_mac_os():
@@ -50,19 +51,20 @@ class CodeView(tktextext.TextFrame):
     
     def _on_cursor_moved(self, event):
         self.update_paren_highlight()
-    
+        highlight(self.text)
+
     def _on_text_changed(self, event):
         if self.colorer:
             self.colorer.notify_range("1.0", "end")
-        
-        
+
+
         self.update_line_numbers()
         self.update_margin_line()
         self.update_paren_highlight()
-    
+
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
-        bbox = self.text.bbox(str(lineno - self.first_line_no + 1) 
+        bbox = self.text.bbox(str(lineno - self.first_line_no + 1)
                               + "."
                               + str(col_offset))
         if isinstance(bbox, tuple):
@@ -132,7 +134,9 @@ class CodeView(tktextext.TextFrame):
                 if char_before_cursor in (")", "]", "}"):
                     self.paren_matcher.paren_closed_event(None)
                 else:
-                    self.remove_paren_highlight()
+                    if not self.paren_matcher.flash_paren_event(None):
+                        self.remove_paren_highlight()
+
             except:
                 print_exc()
         

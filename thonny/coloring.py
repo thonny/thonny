@@ -211,7 +211,6 @@ class SyntaxColorer:
                                 str_end = int(float(self.text.index(head + "+%dc" % b)))
                                 file_end = int(float(self.text.index("end")))
                                 if str_end == file_end:
-                                    print(key, value)
                                     key = "STRING3_OPEN"
                                 else:
                                     key = None

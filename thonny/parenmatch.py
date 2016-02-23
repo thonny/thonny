@@ -85,14 +85,24 @@ class ParenMatcher:
             self.set_timeout = self.set_timeout_none
 
     def flash_paren_event(self, event):
-        indices = (HyperParser(self.text, "insert")
+        indices = (HyperParser(self.text, "insert+1c")
                    .get_surrounding_brackets())
         if indices is None:
-            self.warn_mismatched()
-            return
+            #self.warn_mismatched()
+            return False
+
+        i = 0
+        while True:
+            if not indices[1].endswith("end") or self.text.compare("insert+%dl+1c" % i, ">=", "end"):
+                break
+            indices = (HyperParser(self.text, "insert+%dl+1c" % i).get_surrounding_brackets())
+            i += 1
+
         self.activate_restore()
         self.create_tag(indices)
-        self.set_timeout_last()
+        self.set_timeout()
+        return True
+
 
     def paren_closed_event(self, event):
         # If it was a shortcut and not really a closing paren, quit.
@@ -139,6 +149,7 @@ class ParenMatcher:
             rightindex = indices[1]
         self.text.tag_add("paren", indices[0], rightindex)
         self.text.tag_config("paren", self.HILITE_CONFIG)
+
 
     # any one of the set_timeout_XXX methods can be used depending on
     # the style
