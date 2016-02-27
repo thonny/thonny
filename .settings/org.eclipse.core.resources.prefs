@@ -18,6 +18,7 @@ encoding//thonny/plugins/debugger.py=utf-8
 encoding//thonny/plugins/find_replace.py=utf-8
 encoding//thonny/plugins/heap.py=utf-8
 encoding//thonny/plugins/main_file_browser.py=utf-8
+encoding//thonny/plugins/moodle/moodle_view.py=utf-8
 encoding//thonny/plugins/object_inspector.py=utf-8
 encoding//thonny/plugins/system_shell/__init__.py=utf-8
 encoding//thonny/plugins/thonny_folders.py=utf-8
