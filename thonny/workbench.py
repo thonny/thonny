@@ -29,6 +29,7 @@ import socket
 import queue
 from _thread import start_new_thread
 import ast
+from thonny.exercise import init_exercise_system
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -83,6 +84,7 @@ class Workbench(tk.Tk):
         self._init_runner()
             
         self._init_commands()
+        init_exercise_system()
         self._load_plugins()
         
         self._update_toolbar()
@@ -173,7 +175,7 @@ class Workbench(tk.Tk):
         self.get_menu("run", "Run")
         self.get_menu("tools", "Tools")
         self.get_menu("help", "Help")
-        
+    
     def _load_plugins(self):
         import thonny.plugins
         
