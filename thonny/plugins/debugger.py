@@ -573,6 +573,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         if master.winfo_toplevel() == get_workbench():
             position_reference = editor_notebook
         else:
+            # align to previous frame
             position_reference = master.winfo_toplevel()
             
         self.geometry("{}x{}+{}+{}".format(editor_notebook.winfo_width(),
