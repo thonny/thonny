@@ -486,7 +486,7 @@ def _get_ordered_child_nodes(node):
 def _tokens_text(tokens):
     return "".join([t.string for t in tokens])
         
-def tokenize_with_char_offsets(source):
+def tokenize_with_char_offsets(source, filter_func=None):
     """Built-in tokenizer gives token offsets in bytes. I need them in chars.
     Let's call them "thokens"
     
@@ -502,35 +502,38 @@ def tokenize_with_char_offsets(source):
     byte_lines = None
     thokens = []
     
-    
-    for token in token_source:
-        
-        if token.type == tokenize.ENCODING:
-            # first token
-            encoding = token.string
-            byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
-        
-        if token.start[0] == 0 or (token.start[1] == 0 and token.end[1] == 0):
-            # just copy information
-            thoken = Thoken(token.type, token.string,
-                            token.start[0], token.start[1],
-                            token.end[0], token.end[1])
-        else:
-            # translate byte offsets to char offsets
-            assert token.start[0] > 0 # lineno should be > 0
-            
-            byte_start_line = byte_lines[token.start[0]-1]
-            char_start_col = len(byte_start_line[:token.start[1]].decode(encoding)) 
-            
-            byte_end_line = byte_lines[token.end[0]-1]
-            char_end_col = len(byte_end_line[:token.end[1]].decode(encoding)) 
-            
-            thoken = Thoken(token.type, token.string,
-                            token.start[0], char_start_col,
-                            token.end[0], char_end_col)
-        
-        thokens.append(thoken)
-            
-    
+    try:
+        for token in token_source:
+
+            if token.type == tokenize.ENCODING:
+                # first token
+                encoding = token.string
+                byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
+
+            if filter_func and not filter_func(token):
+                continue
+
+            if token.start[0] == 0 or (token.start[1] == 0 and token.end[1] == 0):
+                # just copy information
+                thoken = Thoken(token.type, token.string,
+                                token.start[0], token.start[1],
+                                token.end[0], token.end[1])
+            else:
+                # translate byte offsets to char offsets
+                assert token.start[0] > 0 # lineno should be > 0
+
+                byte_start_line = byte_lines[token.start[0]-1]
+                char_start_col = len(byte_start_line[:token.start[1]].decode(encoding))
+
+                byte_end_line = byte_lines[token.end[0]-1]
+                char_end_col = len(byte_end_line[:token.end[1]].decode(encoding))
+
+                thoken = Thoken(token.type, token.string,
+                                token.start[0], char_start_col,
+                                token.end[0], char_end_col)
+
+            thokens.append(thoken)
+    except tokenize.TokenError:
+        pass
+
     return thokens
-        

@@ -93,9 +93,11 @@ class ParenMatcher:
 
         i = 0
         while True:
-            if not indices[1].endswith("end") or self.text.compare("insert+%dl+1c" % i, ">=", "end"):
+            if not indices[1].endswith("end") or\
+                    self.text.compare("insert+%dl+1c" % i, ">=", "end"):
                 break
-            indices = (HyperParser(self.text, "insert+%dl+1c" % i).get_surrounding_brackets())
+            indices = (HyperParser(self.text,
+                                   "insert+%dl+1c" % i).get_surrounding_brackets())
             i += 1
 
         self.activate_restore()

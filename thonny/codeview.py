@@ -49,7 +49,8 @@ class CodeView(tktextext.TextFrame):
             self.colorer.notify_range("1.0", "end")
     
     def _on_cursor_moved(self, event):
-        self.update_paren_highlight()
+        pass
+        # self.update_paren_highlight()
     
     def _on_text_changed(self, event):
         if self.colorer:
@@ -58,7 +59,7 @@ class CodeView(tktextext.TextFrame):
         
         self.update_line_numbers()
         self.update_margin_line()
-        self.update_paren_highlight()
+        #self.update_paren_highlight()
     
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
