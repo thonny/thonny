@@ -8,15 +8,14 @@ from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
-from thonny.plugins.highlight_names import highlight
-from thonny.ui_utils import TextWrapper
 from traceback import print_exc
-
+from thonny.ui_utils import EnhancedTextWithLogging
 
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
-        tktextext.TextFrame.__init__(self, master, **text_frame_args)
+        tktextext.TextFrame.__init__(self, master, text_class=EnhancedTextWithLogging, undo=True,
+                                     **text_frame_args)
         
         # TODO: propose_remove_line_numbers
         
@@ -27,7 +26,7 @@ class CodeView(tktextext.TextFrame):
         self.text.bind("<Return>", self.newline_and_indent_event, True)
         self.text.bind("<<TextChange>>", self._on_text_changed, True)
         self.text.bind("<<CursorMove>>", self._on_cursor_moved, True)
-
+        
         tktextext.fixwordbreaks(tk._default_root)
         
         if running_on_mac_os():
@@ -51,20 +50,19 @@ class CodeView(tktextext.TextFrame):
     
     def _on_cursor_moved(self, event):
         self.update_paren_highlight()
-        highlight(self.text)
-
+    
     def _on_text_changed(self, event):
         if self.colorer:
             self.colorer.notify_range("1.0", "end")
-
-
+        
+        
         self.update_line_numbers()
         self.update_margin_line()
         self.update_paren_highlight()
-
+    
     def get_char_bbox(self, lineno, col_offset):
         self.text.update_idletasks()
-        bbox = self.text.bbox(str(lineno - self.first_line_no + 1)
+        bbox = self.text.bbox(str(lineno - self._first_line_number + 1)
                               + "."
                               + str(col_offset))
         if isinstance(bbox, tuple):
@@ -96,12 +94,12 @@ class CodeView(tktextext.TextFrame):
         if text_range:
             if isinstance(text_range, int):
                 # it's line number
-                start = str(text_range - self.first_line_no + 1) + ".0"
-                end = str(text_range - self.first_line_no + 1) + ".end"
+                start = str(text_range - self._first_line_number + 1) + ".0"
+                end = str(text_range - self._first_line_number + 1) + ".end"
             elif isinstance(text_range, TextRange):
-                start = str(text_range.lineno - self.first_line_no + 1) \
+                start = str(text_range.lineno - self._first_line_number + 1) \
                     + "." + str(text_range.col_offset)
-                end = str(text_range.end_lineno - self.first_line_no + 1) \
+                end = str(text_range.end_lineno - self._first_line_number + 1) \
                     + "." + str(text_range.end_col_offset)
             else:
                 assert isinstance(text_range, tuple)
@@ -111,11 +109,7 @@ class CodeView(tktextext.TextFrame):
             if isinstance(text_range, int):
                 self.text.mark_set("insert", end) 
             self.text.see(start + " -1 lines")
-            
-    def on_text_mouse_click(self, event):
-        TextWrapper.on_text_mouse_click(self, event)
-        self.remove_paren_highlight()
-        
+
     
     def set_up_paren_matching(self):
         self.paren_matcher = ParenMatcher(self.text)
@@ -134,9 +128,7 @@ class CodeView(tktextext.TextFrame):
                 if char_before_cursor in (")", "]", "}"):
                     self.paren_matcher.paren_closed_event(None)
                 else:
-                    if not self.paren_matcher.flash_paren_event(None):
-                        self.remove_paren_highlight()
-
+                    self.remove_paren_highlight()
             except:
                 print_exc()
         
@@ -163,7 +155,6 @@ class CodeView(tktextext.TextFrame):
         
         text = self.text
         first, last = text._get_selection_indices()
-        text._undo_block_start()
         try:
             if first and last:
                 text.delete(first, last)
@@ -225,7 +216,7 @@ class CodeView(tktextext.TextFrame):
                     # last open bracket structure; else indent one
                     # level beyond the indent of the line with the
                     # last open bracket
-                    self.reindent_to(y.compute_bracket_indent())
+                    self.text._reindent_to(y.compute_bracket_indent())
                 elif c == roughparse.C_BACKSLASH:
                     # if more than one line in this stmt already, just
                     # mimic the current indent; else if initial line
@@ -235,7 +226,7 @@ class CodeView(tktextext.TextFrame):
                     if y.get_num_lines_in_stmt() > 1:
                         text.insert("insert", indent)
                     else:
-                        self.reindent_to(y.compute_backslash_indent())
+                        self.text._reindent_to(y.compute_backslash_indent())
                 else:
                     assert 0, "bogus continuation type %r" % (c,)
                 return "break"
@@ -252,7 +243,6 @@ class CodeView(tktextext.TextFrame):
             return "break"
         finally:
             text.see("insert")
-            text._undo_block_stop()
             text.event_generate("<<NewLine>>")
 
     

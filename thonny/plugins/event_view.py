@@ -1,12 +1,12 @@
 """ Helper view for Thonny developers
 """
 
-from thonny.ui_utils import TextFrame
+from thonny.tktextext import TextFrame
 from thonny.globals import get_workbench
 
 class EventsView(TextFrame):
     def __init__(self, master):
-        TextFrame.__init__(self, master, readonly=False)
+        TextFrame.__init__(self, master)
         #self.text.config(wrap=tk.WORD)
         get_workbench().bind("ShowView", self._log_event, True)
         get_workbench().bind("HideView", self._log_event, True)

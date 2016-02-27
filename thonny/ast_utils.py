@@ -486,7 +486,7 @@ def _get_ordered_child_nodes(node):
 def _tokens_text(tokens):
     return "".join([t.string for t in tokens])
         
-def _tokenize_with_char_offsets(source):
+def tokenize_with_char_offsets(source):
     """Built-in tokenizer gives token offsets in bytes. I need them in chars.
     Let's call them "thokens"
     
@@ -509,8 +509,7 @@ def _tokenize_with_char_offsets(source):
             # first token
             encoding = token.string
             byte_lines = list(map(lambda line: line.encode(encoding), char_lines))
-            
-            
+        
         if token.start[0] == 0 or (token.start[1] == 0 and token.end[1] == 0):
             # just copy information
             thoken = Thoken(token.type, token.string,
@@ -532,5 +531,6 @@ def _tokenize_with_char_offsets(source):
         
         thokens.append(thoken)
             
-
+    
+    return thokens
         

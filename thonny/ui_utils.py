@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import time
-import tkinter as tk
 from tkinter import ttk, messagebox
-
-from thonny.misc_utils import try_remove_linenumbers, running_on_mac_os,\
-    running_on_windows, running_on_linux
 from tkinter.dialog import Dialog
-from logging import exception
+
+from thonny import tktextext
 from thonny.globals import get_workbench
+from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
+import tkinter as tk
 
 
 CLAM_BACKGROUND = "#dcdad5"
@@ -47,7 +45,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         
         self._last_window_size = (0,0)
         self._full_size_not_final = True
-        self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
+        self._configure_binding = self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
         self.bind("<B1-Motion>", self._on_mouse_dragged, True)
     
     def insert(self, pos, child, **kw):
@@ -90,6 +88,11 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self.visible_panes.remove(child)
         self._update_visibility()
         self._check_restore_pane_sizes()
+    
+    def destroy(self):
+        get_workbench().unbind("<Configure>", self._configure_binding)
+        tk.PanedWindow.destroy(self)
+        
     
     def is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
@@ -278,272 +281,6 @@ class TreeFrame(ttk.Frame):
     def on_double_click(self, event):
         pass
 
-class TextWrapper:
-    # Used for getting read-only effect
-    # http://tkinter.unpythonic.net/wiki/ReadOnlyText
-
-    
-    def __init__(self, propose_remove_line_numbers=False):
-        self._text_redirector = WidgetRedirector(self.text)
-        self._original_user_text_insert = self._text_redirector.register("insert", self._user_text_insert)
-        self._original_user_text_delete = self._text_redirector.register("delete", self._user_text_delete)
-        
-        self.text.bind("<<Undo>>", self.on_text_undo, True)
-        self.text.bind("<<Redo>>", self.on_text_redo, True)
-        self.text.bind("<<Cut>>", self.on_text_cut, True)
-        self.text.bind("<<Copy>>", self.on_text_copy, True)
-        self.text.bind("<<Paste>>", self.on_text_paste, True)
-        #self.text.bind("<<Selection>>", self.on_text_selection_change, True)
-        self.text.bind("<FocusIn>", self.on_text_get_focus, True)
-        self.text.bind("<FocusOut>", self.on_text_lose_focus, True)
-        self.text.bind("<Key>", self.on_text_key_press, True)
-        self.text.bind("<KeyRelease>", self.on_text_key_release, True)
-        self.text.bind("<1>", self.on_text_mouse_click, True)
-        self.text.bind("<2>", self.on_text_mouse_click, True)
-        self.text.bind("<3>", self.on_text_mouse_click, True)
-
-        self._last_event_kind = None
-        self._last_key_time = 0
-        self._propose_remove_line_numbers = propose_remove_line_numbers
-
-        # These are needed because code copied from idlelib relies on such methods
-        self.started_undo_blocks = 0
-        self.text.undo_block_start = self.undo_block_start
-        self.text.undo_block_stop = self.undo_block_stop
-        # TODO: see idlelib.EditorWindow.reset_undo
- 
-    def _user_text_insert(self, *args, **kw):
-        index = self.text.index(args[0])
-        text = args[1]
-        
-        if text >= "\uf704" and text <= "\uf70d": # Function keys F1..F10 in Mac cause these
-            return
-        
-        # subclass may intercept this forwarding
-#        print("INS", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
-        
-        # try removing line numbers
-        # TODO: shouldn't it take place only on paste?
-        # TODO: does it occur when opening a file with line numbers in it?
-        if self._propose_remove_line_numbers and isinstance(args[1], str):
-            args = tuple((args[0],) + (try_remove_linenumbers(args[1], self.text),) + args[2:])
-        
-        self._original_user_text_insert(*args, **kw)
-#        print("INS'", args[0], args[1], self.text.index(args[0]), self.text.index(tk.INSERT))
-        if len(args) >= 3:
-            tags = args[2]
-        else:
-            tags = None 
-        #log_user_event(TextInsertEvent(self, index, args[1], tags)) TODO:
-        
-        get_workbench().event_generate("TextInsert", index=index, text=text, tags=tags, text_widget=self.text)
-    
-        
-    def _user_text_delete(self, *args, **kw):
-        index1 = self.text.index(args[0])
-        index2 = self.text.index(args[1])
-#        print("DEL", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
-        # subclass may intercept this forwarding
-        self._original_user_text_delete(*args, **kw)
-#        print("DEL'", args[0], args[1], self.text.index(args[0]), self.text.index(args[1]), self.text.index(tk.INSERT))
-        #log_user_event(TextDeleteEvent(self, index1, index2)) TODO:
-        get_workbench().event_generate("TextDelete", index1=index1, index2=index2, text_widget=self.text)
-
-    def on_text_undo(self, e):
-        self._last_event_kind = "undo"
-        
-    def on_text_redo(self, e):
-        self._last_event_kind = "redo"
-        
-    def on_text_cut(self, e):
-        self._last_event_kind = "cut"
-        self.add_undo_separator()        
-        
-    def on_text_copy(self, e):
-        self._last_event_kind = "copy"
-        self.add_undo_separator()        
-        
-    def on_text_paste(self, e):
-        self._last_event_kind = "paste"
-        self.add_undo_separator()        
-    
-    def on_text_get_focus(self, e):
-        self._last_event_kind = "get_focus"
-        self.add_undo_separator()        
-        
-    def on_text_lose_focus(self, e):
-        self._last_event_kind = "lose_focus"
-        self.add_undo_separator()        
-    
-    def on_text_key_release(self, e):
-        pass
-            
-    def on_text_key_press(self, e):
-        return self.log_keypress_for_undo(e)
-        
-    def log_keypress_for_undo(self, e):
-        # NB! this may not execute if the event is cancelled in another handler
-        event_kind = self.get_event_kind(e)
-        
-        if (event_kind != self._last_event_kind
-            or e.char in ("\r", "\n", " ", "\t")
-            or e.keysym in ["Return", "KP_Enter"]
-            or time.time() - self.last_key_time > 2
-            ):
-            self.add_undo_separator()
-            
-        self._last_event_kind = event_kind
-        self.last_key_time = time.time()
-
-    def on_text_mouse_click(self, event):
-        self.add_undo_separator()
-    
-    def add_undo_separator(self):
-        self.text.edit_separator()
-    
-    def get_event_kind(self, event):
-        if event.keysym in ("BackSpace", "Delete"):
-            return "delete"
-        elif event.char:
-            return "insert"
-        else:
-            # eg. e.keysym in ("Left", "Up", "Right", "Down", "Home", "End", "Prior", "Next"):
-            return "other_key"
-
-    def undo_block_start(self):
-        self.started_undo_blocks += 1
-    
-    def undo_block_stop(self):
-        self.started_undo_blocks -= 1
-        if self.started_undo_blocks == 0:
-            #self.add_undo_separator() # TODO: get rid of idlelib heritage
-            pass
-
-class TextFrame(ttk.Frame, TextWrapper):
-    def __init__(self, master, readonly=False):
-        ttk.Frame.__init__(self, master)
-        
-        self.readonly = readonly
-        self.vert_scrollbar = AutoScrollbar(self, orient=tk.VERTICAL)
-        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        self.hor_scrollbar = AutoScrollbar(self, orient=tk.HORIZONTAL)
-        self.hor_scrollbar.grid(row=1, column=0, sticky=tk.NSEW)
-        self.text = tk.Text(self,
-                            borderwidth=0,
-                            yscrollcommand=self.vert_scrollbar.set,
-                            xscrollcommand=self.hor_scrollbar.set,
-                            padx=4,
-                            insertwidth=2,
-                            wrap='none')
-        self.text.grid(row=0, column=0, sticky=tk.NSEW)
-        self.vert_scrollbar['command'] = self.text.yview
-        self.hor_scrollbar['command'] = self.text.xview
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        TextWrapper.__init__(self)
-        
-        
-    def _user_text_insert(self, *args, **kw):
-        if not self.readonly:
-            TextWrapper._user_text_insert(self, *args, **kw)
-    
-    def _user_text_delete(self, *args, **kw):
-        if not self.readonly:
-            TextWrapper._user_text_delete(self, *args, **kw)
-    
-    def set_content(self, content):
-        TextWrapper._user_text_delete(self, "1.0", tk.END)
-        TextWrapper._user_text_insert(self, "1.0", content)
-
-
-
-class WidgetRedirector:
-    # Copied for Python 3.3.2 idlelib.WidgetRedirector so that IDLE is not a requirement
-    def __init__(self, widget):
-        self._operations = {}
-        self.widget = widget            # widget instance
-        self.tk = tk = widget.tk        # widget's root
-        w = widget._w                   # widget's (full) Tk pathname
-        self.orig = w + "_orig"
-        # Rename the Tcl command within Tcl:
-        tk.call("rename", w, self.orig)
-        # Create a new Tcl command whose name is the widget's pathname, and
-        # whose action is to dispatch on the operation passed to the widget:
-        tk.createcommand(w, self.dispatch)
-
-    def __repr__(self):
-        return "WidgetRedirector(%s<%s>)" % (self.widget.__class__.__name__,
-                                             self.widget._w)
-
-    def close(self):
-        for operation in list(self._operations):
-            self.unregister(operation)
-        widget = self.widget; del self.widget
-        orig = self.orig; del self.orig
-        tk = widget.tk
-        w = widget._w
-        tk.deletecommand(w)
-        # restore the original widget Tcl command:
-        tk.call("rename", orig, w)
-
-    def register(self, operation, function):
-        self._operations[operation] = function
-        setattr(self.widget, operation, function)
-        return WidgetRedirector.OriginalCommand(self, operation)
-
-    def unregister(self, operation):
-        if operation in self._operations:
-            function = self._operations[operation]
-            del self._operations[operation]
-            if hasattr(self.widget, operation):
-                delattr(self.widget, operation)
-            return function
-        else:
-            return None
-
-    def dispatch(self, operation, *args):
-        '''Callback from Tcl which runs when the widget is referenced.
-
-        If an operation has been registered in self._operations, apply the
-        associated function to the args passed into Tcl. Otherwise, pass the
-        operation through to Tk via the original Tcl function.
-
-        Note that if a registered function is called, the operation is not
-        passed through to Tk.  Apply the function returned by self.register()
-        to *args to accomplish that.  For an example, see ColorDelegator.py.
-
-        '''
-        m = self._operations.get(operation)
-        try:
-            if m:
-                return m(*args)
-            else:
-                return self.tk.call((self.orig, operation) + args)
-        except tk.TclError:
-            if operation != "index": # TODO: fix also index issues 
-                                    # Seems that index method now doesn't accept "sel_first" if "sel" not in tag_names()
-                                    # Reproduce by pressing enter in editor
-                exception("Exception caught by WidgetRedirector, operation=" + operation)
-            #raise # put it back if you need to debug
-            return ""
-
-
-    class OriginalCommand:
-    
-        def __init__(self, redir, operation):
-            self.redir = redir
-            self.operation = operation
-            self.tk = redir.tk
-            self.orig = redir.orig
-            self.tk_call = self.tk.call
-            self.orig_and_operation = (self.orig, self.operation)
-    
-        def __repr__(self):
-            return "OriginalCommand(%r, %r)" % (self.redir, self.operation)
-    
-        def __call__(self, *args):
-            return self.tk_call(self.orig_and_operation + args)
 
 
 def sequence_to_accelerator(sequence):
@@ -600,6 +337,27 @@ def set_zoomed(toplevel, value):
         else:
             toplevel.wm_state("normal")
 
+class EnhancedTextWithLogging(tktextext.EnhancedText):
+    def direct_insert(self, index, chars, tags=()):
+        try:
+            # try removing line numbers
+            # TODO: shouldn't it take place only on paste?
+            # TODO: does it occur when opening a file with line numbers in it?
+            #if self._propose_remove_line_numbers and isinstance(chars, str):
+            #    chars = try_remove_linenumbers(chars, self)
+                
+            return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags)
+        finally:
+            get_workbench().event_generate("TextInsert", index=index, text=chars, tags=tags, text_widget=self)
+
+    
+    def direct_delete(self, index1, index2=None):
+        try:
+            return tktextext.EnhancedText.direct_delete(self, index1, index2=index2)
+        finally:
+            get_workbench().event_generate("TextDelete", index1=index1, index2=index2, text_widget=self)
+            
+    
 
 class AutoScrollbar(ttk.Scrollbar):
     # http://effbot.org/zone/tkinter-autoscrollbar.htm

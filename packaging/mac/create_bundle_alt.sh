@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PREFIX=/Users/aivar/pythonny
+PREFIX=/Users/aivar/pythonny_alt
 
 
 # prepare working folder #########################################################
@@ -9,11 +9,11 @@ mkdir -p build
 
 
 # copy template and source files #################################################
-cp -r Thonny.app.template build/Thonny.app
+cp -R -H Thonny.app.template build/Thonny.app
 
 MACOS_PATH=build/Thonny.app/Contents/MacOS
 mkdir -p $MACOS_PATH 
-cp -r $PREFIX/* $MACOS_PATH
+cp -R -H $PREFIX/* $MACOS_PATH
 
 # install thonny #####################################################
 $MACOS_PATH/bin/python3.5 -m pip install --pre --no-cache-dir thonny
@@ -26,14 +26,11 @@ $MACOS_PATH/bin/python3.5 -m pip install --no-cache-dir easygui
 # clean unnecessary stuff ###################################################
 rm -rf $MACOS_PATH/share
 rm -rf $MACOS_PATH/man
-rm -rf $MACOS_PATH/ssl
+rm -rf $MACOS_PATH/Resources
+rm -rf $MACOS_PATH/Headers
 rm -rf $MACOS_PATH/lib/python3.5/__pycache__
 rm -rf $MACOS_PATH/lib/python3.5/test
 rm -f $MACOS_PATH/lib/*.a
-rm -f $MACOS_PATH/lib/libcrypto.dylib
-rm -f $MACOS_PATH/lib/libssl.dylib
-rm -f $MACOS_PATH/lib/liblzma.dylib
-rm -f $MACOS_PATH/lib/liblzma.la
 
 find $MACOS_PATH/lib -name '*.pyc' -delete
 find $MACOS_PATH/lib -name '*.exe' -delete
@@ -48,6 +45,8 @@ rm $MACOS_PATH/bin/python3.5m-config
 rm $MACOS_PATH/bin/pyvenv-3.5
 rm $MACOS_PATH/bin/tclsh8.6
 rm $MACOS_PATH/bin/wish8.6
+rm $MACOS_PATH/bin/tclsh
+rm $MACOS_PATH/bin/wish
 rm $MACOS_PATH/bin/c_rehash
 rm $MACOS_PATH/bin/*lz*
 rm $MACOS_PATH/bin/*xz*
@@ -84,7 +83,7 @@ cp readme.txt build
 
 # create dmg #####################################################################
 mkdir -p dist
-FILENAME=dist/thonny-$VERSION.dmg
+FILENAME=dist/thonny-${VERSION}.dmg
 rm -f $FILENAME
 hdiutil create -srcfolder build -volname "Thonny $VERSION" $FILENAME
 hdiutil internet-enable -yes $FILENAME

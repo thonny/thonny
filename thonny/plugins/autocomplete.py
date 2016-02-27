@@ -1,9 +1,9 @@
 #TODO - remove unnecessary imports, organize them to use the same import syntax
 
-from tkinter import Text, Toplevel
-from thonny.ui_utils import WidgetRedirector
+from tkinter import Toplevel
 import jedi
 from thonny.globals import get_workbench
+from thonny.tktextext import TweakableText
 
 
 
@@ -46,7 +46,7 @@ def _complete(codeview, completion):
     get_workbench().event_generate("AutocompleteFinished",
         partial_string=_get_partial_string(completion),
         chosen_completion=completion.name)
-    codeview._user_text_insert(codeview.text.index('insert'), completion.complete)
+    codeview.text.insert(codeview.text.index('insert'), completion.complete)
 
 #top-level container of the vertical list of suggestions
 # TODO: do we need the toplevel?
@@ -73,24 +73,23 @@ class AutocompleteWindow(Toplevel):
         self.overrideredirect(1) #remove the title bar
 
 #inner container showing the list of suggestions
-class AutocompleteWindowText(Text):
+class AutocompleteWindowText(TweakableText):
     def __init__(self, master, codeview, content, *args, **kwargs):
         
         #init the text widget - note the height calculation, #TODO - make the height configurable?
-        Text.__init__(self, master, height=min(len(content), 10), width=30, takefocus=1, insertontime=0, background='#ececea', borderwidth=1, wrap='none', *args, **kwargs)
+        TweakableText.__init__(self, master, height=min(len(content), 10), 
+                               width=30, takefocus=1, insertontime=0, background='#ececea', 
+                               borderwidth=1, wrap='none', read_only=True, 
+                               *args, **kwargs)
 
         self.parent = master
         self.codeview = codeview
-        self.redirector = WidgetRedirector(self) #a (fancy?) way of disabling it
         self.content = content #list of completions
         self.marked_line = None #currently selected line
         #tag for the currently selected line, #TODO - make colours configurable
         self.tag_configure("selected", background="#eefb1a", underline=True)
         self._draw_content() #populate the list
         self.mark_set("insert", '1.0')
-        #redirect insert/delete actions
-        self.insert = self.redirector.register("insert", lambda *args, **kw: "break")
-        self.delete = self.redirector.register("delete", lambda *args, **kw: "break")
         #register event bindings
         self.bind("<B1-Motion>", lambda e: "break", True)
         self.bind("<Double-Button-1>", self._choose_completion, True)

@@ -1,7 +1,13 @@
 #!/usr/bin/env bash
 
-TCLTK_LONG_VERSION=8.6.4
-TCLTK_SHORT_VERSION=8.6
+if [ "$1" == "8.6" ]
+then
+	TCLTK_LONG_VERSION=8.6.4
+	TCLTK_SHORT_VERSION=8.6
+else
+	TCLTK_LONG_VERSION=8.5.19
+	TCLTK_SHORT_VERSION=8.5
+fi
 
 # COMPILE AND INSTALL AS FRAMEWORK
 # (Seems that Tkinter won't be built, if I don't install it as framework)
