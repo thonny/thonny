@@ -543,7 +543,7 @@ class ExpressionBox(tk.Text):
             x = 30
             y = 30
             
-        widget = self._codeview
+        widget = self._codeview.text
         while widget != self.winfo_toplevel():
             x += widget.winfo_x()
             y += widget.winfo_y()
