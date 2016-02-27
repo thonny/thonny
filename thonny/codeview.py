@@ -15,7 +15,7 @@ from thonny.ui_utils import EnhancedTextWithLogging
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         tktextext.TextFrame.__init__(self, master, text_class=EnhancedTextWithLogging, undo=True,
-                                     **text_frame_args)
+                                     wrap=tk.NONE, **text_frame_args)
         
         # TODO: propose_remove_line_numbers
         
