@@ -60,16 +60,6 @@ class CodeView(tktextext.TextFrame):
         self.update_margin_line()
         self.update_paren_highlight()
     
-    def get_char_bbox(self, lineno, col_offset):
-        self.text.update_idletasks()
-        bbox = self.text.bbox(str(lineno - self._first_line_number + 1) 
-                              + "."
-                              + str(col_offset))
-        if isinstance(bbox, tuple):
-            return (bbox[0] - self.text.cget("padx"), bbox[1] - self.text.cget("pady"))
-        else:
-            return (0,0)
-            
     def set_coloring(self, value):
         if value:
             if self.colorer is None:
@@ -146,9 +136,6 @@ class CodeView(tktextext.TextFrame):
         get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
     def newline_and_indent_event(self, event):
-        
-        
-        
         self.text._log_keypress_for_undo(event)
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified
