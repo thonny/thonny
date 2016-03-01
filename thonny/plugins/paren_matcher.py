@@ -4,26 +4,33 @@ from thonny.workbench import Workbench
 from thonny.ast_utils import tokenize_with_char_offsets
 
 
-_openers = {')': '(', ']': '[', '}': '{'}
-
+_OPENERS = {')': '(', ']': '[', '}': '{'}
+_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Pink", "background": "DarkGray"})  # highlight tag configuration
+_UNDERLINE_CONF = ("UNDERLINE", {"underline": 1})
 
 class ParenMatcher:
 
     def __init__(self):
         self.text = None
+        self.bound_ids = {}
 
-    def _on_cursor_move(self, event):
-        self.text.tag_delete("PAREN_HIGHLIGHT")
-        indices = self.find_surrounding()
+    def _on_change(self, event):
+        self.text.tag_delete(_HIGHLIGHT_CONF[0])
+        self.text.tag_delete(_UNDERLINE_CONF[0])
+        indices = self._find_surrounding()
 
         if None in indices:
             return
         else:
-            self.text.tag_config("PAREN_HIGHLIGHT", foreground="Pink", background="DarkGray")
-            self.text.tag_add("PAREN_HIGHLIGHT", indices[0])
-            self.text.tag_add("PAREN_HIGHLIGHT", indices[1])
+            if indices[1] != "end":
+                self.text.tag_config(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
+                self.text.tag_add(_HIGHLIGHT_CONF[0], indices[0])
+                self.text.tag_add(_HIGHLIGHT_CONF[0], indices[1])
+            else:
+                self.text.tag_config(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
+                self.text.tag_add(_UNDERLINE_CONF[0], indices[0], indices[1])
 
-    def find_surrounding(self):
+    def _find_surrounding(self):
         thokens = tokenize_with_char_offsets(
             self.text.get("1.0", "end"),
             filter_func=lambda x: x.string != "" and x.string in "()[]{}")
@@ -37,11 +44,11 @@ class ParenMatcher:
             if t.string in "([{":
                 stacks[t.string].append(t)
             else:
-                s = stacks[_openers[t.string]]
+                s = stacks[_OPENERS[t.string]]
                 if len(s) <= 0:
                     self.text.bell()
                     break
-                opener = stacks[_openers[t.string]].pop()
+                opener = stacks[_OPENERS[t.string]].pop()
                 if self._is_insert_between_indices("%d.%d" % (opener.lineno, opener.col_offset),
                                            "%d.%d" % (t.lineno, t.col_offset)):
                     closer = t
@@ -71,14 +78,16 @@ class ParenMatcher:
     def _on_editor_change(self, event):
 
         if self.text:
-            # unbind event from previous editor's text
-            self.text.unbind("<<CursorMove>>", self.bound_id)
+            # unbind events from previous editor's text
+            for k, v in self.bound_ids.items():
+                self.text.unbind(k, v)
 
         # get the active text widget from the active editor of the active tab of the editor notebook
         self.text = event.widget.get_current_editor().get_text_widget()
 
         # ...and bind the paren checking procedure to that widget's cursor move event
-        self.bound_id = self.text.bind("<<CursorMove>>", self._on_cursor_move, True)
+        self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
+        self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
 
 
 def load_plugin():
