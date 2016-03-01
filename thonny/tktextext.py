@@ -4,6 +4,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
 import time
+from _tkinter import TclError
+import traceback
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
@@ -32,10 +34,22 @@ class TweakableText(tk.Text):
     
     def _dispatch_tk_operation(self, operation, *args):
         f = self._tk_proxies.get(operation)
-        if f:
-            return f(*args)
-        else:
-            return self.tk.call((self._original_widget_name, operation) + args)
+        try:
+            if f:
+                return f(*args)
+            else:
+                return self.tk.call((self._original_widget_name, operation) + args)
+            
+        except TclError as e:
+            if str(e).lower() == '''text doesn't contain any characters tagged with "sel"''':
+                # Some Tk internal actions cause this error
+                if operation == "delete" and args == ("sel.first", "sel.last"):
+                    # This happens on (each?) paste
+                    pass
+                else:
+                    traceback.print_exc()
+            else:
+                raise
     
     def set_read_only(self, value):
         self._read_only = value
@@ -600,7 +614,9 @@ def _running_on_mac():
 if __name__ == "__main__":
     # demo
     root = tk.Tk()
-    frame = TextFrame(root, read_only=False, wrap=tk.NONE, line_numbers=True, line_length_margin=13)
+    frame = TextFrame(root, read_only=False, wrap=tk.NONE,
+                      line_numbers=True, line_length_margin=13,
+                      text_class=TweakableText)
     frame.grid()
     text = frame.text
     

@@ -15,7 +15,7 @@ from thonny.ui_utils import EnhancedTextWithLogging
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         tktextext.TextFrame.__init__(self, master, text_class=EnhancedTextWithLogging, undo=True,
-                                     **text_frame_args)
+                                     wrap=tk.NONE, **text_frame_args)
         
         # TODO: propose_remove_line_numbers
         
@@ -49,8 +49,7 @@ class CodeView(tktextext.TextFrame):
             self.colorer.notify_range("1.0", "end")
     
     def _on_cursor_moved(self, event):
-        pass
-        # self.update_paren_highlight()
+        self.update_paren_highlight()
     
     def _on_text_changed(self, event):
         if self.colorer:
@@ -59,18 +58,8 @@ class CodeView(tktextext.TextFrame):
         
         self.update_line_numbers()
         self.update_margin_line()
-        #self.update_paren_highlight()
+        self.update_paren_highlight()
     
-    def get_char_bbox(self, lineno, col_offset):
-        self.text.update_idletasks()
-        bbox = self.text.bbox(str(lineno - self._first_line_number + 1)
-                              + "."
-                              + str(col_offset))
-        if isinstance(bbox, tuple):
-            return (bbox[0] - self.text.cget("padx"), bbox[1] - self.text.cget("pady"))
-        else:
-            return (0,0)
-            
     def set_coloring(self, value):
         if value:
             if self.colorer is None:
@@ -110,7 +99,7 @@ class CodeView(tktextext.TextFrame):
             if isinstance(text_range, int):
                 self.text.mark_set("insert", end) 
             self.text.see(start + " -1 lines")
-
+            
     
     def set_up_paren_matching(self):
         self.paren_matcher = ParenMatcher(self.text)
@@ -147,9 +136,6 @@ class CodeView(tktextext.TextFrame):
         get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
     def newline_and_indent_event(self, event):
-        
-        
-        
         self.text._log_keypress_for_undo(event)
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified

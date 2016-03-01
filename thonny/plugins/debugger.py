@@ -535,15 +535,18 @@ class ExpressionBox(tk.Text):
                      self._get_mark_name(text_range.end_lineno, text_range.end_col_offset))
         
     def _update_position(self, text_range):
-        bbox = self._codeview.get_char_bbox(text_range.lineno, text_range.col_offset)
+        self._codeview.update_idletasks()
+        text_line_number = text_range.lineno - self._codeview._first_line_number + 1
+        bbox = self._codeview.text.bbox(str(text_line_number) + "." + str(text_range.col_offset))
+        
         if isinstance(bbox, tuple):
-            x = bbox[0] + 6
-            y = bbox[1] - 6
+            x = bbox[0] - self._codeview.text.cget("padx") + 6 
+            y = bbox[1] - self._codeview.text.cget("pady") - 6
         else:
             x = 30
             y = 30
             
-        widget = self._codeview
+        widget = self._codeview.text
         while widget != self.winfo_toplevel():
             x += widget.winfo_x()
             y += widget.winfo_y()
@@ -551,6 +554,7 @@ class ExpressionBox(tk.Text):
             
         self.place(x=x, y=y, anchor=tk.NW)
         self.update_idletasks()
+
     
     def _update_size(self):
         content = self.get("1.0", tk.END)
@@ -573,6 +577,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         if master.winfo_toplevel() == get_workbench():
             position_reference = editor_notebook
         else:
+            # align to previous frame
             position_reference = master.winfo_toplevel()
             
         self.geometry("{}x{}+{}+{}".format(editor_notebook.winfo_width(),

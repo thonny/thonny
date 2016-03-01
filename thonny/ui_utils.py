@@ -90,7 +90,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self._check_restore_pane_sizes()
     
     def destroy(self):
-        get_workbench().unbind("<Configure>", self._configure_binding)
+        self.winfo_toplevel().unbind("<Configure>", self._configure_binding)
         tk.PanedWindow.destroy(self)
         
     
