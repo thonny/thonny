@@ -636,7 +636,13 @@ def _create_var(class_, value, modification_listener):
     def on_write(*args):
         var.modified = True
         if modification_listener:
-            modification_listener()
+            try:
+                modification_listener()
+            except:
+                # Otherwise whole process will be brought down
+                # because for some reason Tk tries to call non-existing method
+                # on variable
+                get_workbench().report_exception()
     
     var.trace("w", on_write)
     return var
