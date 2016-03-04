@@ -8,6 +8,7 @@ _OPENERS = {')': '(', ']': '[', '}': '{'}
 _HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Pink", "background": "DarkGray"})  # highlight tag configuration
 _UNDERLINE_CONF = ("UNDERLINE", {"underline": 1})
 
+
 class ParenMatcher:
 
     def __init__(self):
@@ -50,7 +51,7 @@ class ParenMatcher:
                     break
                 opener = stacks[_OPENERS[t.string]].pop()
                 if self._is_insert_between_indices("%d.%d" % (opener.lineno, opener.col_offset),
-                                           "%d.%d" % (t.lineno, t.col_offset)):
+                                                   "%d.%d" % (t.lineno, t.col_offset)):
                     closer = t
                     break
                 opener = None

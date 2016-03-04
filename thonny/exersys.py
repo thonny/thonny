@@ -4,8 +4,6 @@ from thonny.globals import get_workbench
 import tkinterhtml
 from thonny.ui_utils import create_string_var
 
-ABOUT_EXERCISE_VIEW = "About exercise view"
-
 _plugins = []
 
 def add_plugin(plugin):
@@ -40,9 +38,11 @@ class Exercise:
     
     def get_required_files(self):
         """Return list of required file names"""
+        return []
     
     def get_max_number_of_files(self):
         """Return how many files can be submitted"""
+        return 1
     
     def accept_submission(self, file_names, feedback_reporting_function):
         """Start checking procedure and return.
@@ -54,6 +54,7 @@ class Exercise:
     
     def get_latest_feedback(self):
         """Return latest feedback as html string or None"""
+        return None
     
     def get_state(self):
         '''Return "checking", "cancelling" or "ready"'''
@@ -62,29 +63,31 @@ class ExerciseView(tk.Frame):
     def __init__(self, master, **kw):
         tk.Frame.__init__(self, master, background="white", **kw)
         self._init_widgets()
+        
+        self._courses_and_plugins = {}
     
     def _init_widgets(self):
         padx = 15
         pady = 15
         
-        course_combo_values = [ABOUT_EXERCISE_VIEW] + self._get_known_courses()
+        course_combo_values = self._get_known_courses()
         for plugin in _plugins:      
             course_combo_values.append("<%s>" % plugin.get_open_course_prompt())
             
-        self._course_variable = create_string_var("", self._on_course_change)
+        self._course_title_var = create_string_var("First select a course ...", self._on_course_combo_change)
         self._course_combo = ttk.Combobox(self,
                               exportselection=False,
                               state='readonly',
-                              textvariable=self._course_variable,
-                              values=course_combo_values)
+                              textvariable=self._course_title_var,
+                              values=course_combo_values + ["<open VPL course>", "<open Edu Charm tutorial>"])
         
         self._course_combo.grid(column=1, row=1, sticky=tk.NSEW, padx=padx, pady=pady)
         
-        self._exercise_variable = create_string_var("", self._on_exercise_change)
+        self._exercise_title_var = create_string_var("... then select an exercise ...", self._on_exercise_combo_change)
         self._exercise_title_combo = ttk.Combobox(self,
                               exportselection=False,
                               state='readonly',
-                              textvariable=self._exercise_variable,
+                              textvariable=self._exercise_title_var,
                               values=["<select exercise>", "1. Nädalapalk"])
         
         self._exercise_title_combo.grid(column=1, row=2, sticky=tk.NSEW, padx=padx, pady=(0,pady))
@@ -107,6 +110,8 @@ class ExerciseView(tk.Frame):
 <p>Kui ülesande esitamisel tekib tehnilisi tõrkeid, siis kirjuta aadressil <a target="_blank" href="mailto:prog@ut.ee">prog@ut.ee</a><a target="_blank" href="mailto:marina.lepp@ut.ee"><br /></a></p>        
         """)
         
+        self._task_frame.set_content("""<p>... and exercise description will appear here<p>""")
+        
         self._submit_button = ttk.Button(self, text='Submit `npalk.py`', command=self._on_submit)
         self._submit_button.grid(column=1, row=4, sticky=tk.NSEW, padx=padx, pady=(0, pady))
         
@@ -120,11 +125,43 @@ class ExerciseView(tk.Frame):
     def _on_submit(self):
         print("Submit")
         
-    def _on_course_change(self):
-        print(self._course_variable.get())
-
-    def _on_exercise_change(self):
-        print(self._exercise_variable.get())
+    def _on_course_combo_change(self):
+        obj = self._courses_and_plugins[self._course_title_var.get()]
+        
+        if isinstance(obj, Plugin):
+            course = obj.open_course()
+            # TODO: add new course title to the list
+        else:
+            assert isinstance(obj, Course)
+            course = obj
+        
+        self._load_course(course)
+    
+    def _on_exercise_combo_change(self):
+        exercise = self._get_selected_exercise()
+        self._load_exercise(exercise)
+    
+    def _load_course(self, course):
+        self._course_title_var.set(course.get_title())
+    
+    def _get_selected_course(self):
+        obj = self._courses_and_plugins[self._course_title_var.get()]
+        if isinstance(obj, Course):
+            return obj
+        else:
+            raise RuntimeError("No course is selected")
+    
+    def _get_selected_exercise(self):
+        course = self._get_selected_course()
+        for ex in course.get_exercises():
+            if ex.get_title() == self._exercise_title_var.get():
+                return ex
+        
+        raise RuntimeError("Can't find selected exercise")
+    
+    def _load_exercise(self, exercise):
+        self._exercise_title_var.set(exercise.get_title())
+        self._task_frame.set_content(exercise.get_description())
 
 def init_exercise_system():    
     get_workbench().add_view(ExerciseView, "Exercise", "ne")
