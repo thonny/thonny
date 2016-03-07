@@ -29,7 +29,7 @@ import socket
 import queue
 from _thread import start_new_thread
 import ast
-from thonny.exercise import init_exercise_system
+from thonny.exersys import init_exercise_system
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
