@@ -38,6 +38,7 @@ setup(
         "Topic :: Software Development :: Debuggers",
       ],
       keywords="IDE education debugger",
+      install_requires=["requests", "beautifulsoup4", "jedi", "tkinterhtml"],
       packages=["thonny", "thonny.plugins", "thonny.plugins.system_shell"],
       package_data={'': ['VERSION',  'res/*', 'backend_private/*.py', 'backend_private/thonny/*.py']},
       entry_points={
