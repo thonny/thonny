@@ -20,15 +20,12 @@ class Plugin:
     
     def get_open_course_prompt(self):
         """Don't put <> here"""
-        return "Open a course ..."
+        return "Open a %s course ..." % self.get_id()
     
     def open_course(self, course_id=None):
         """If course_id is None, prompt user about details and return new course object."""
 
 class Course:
-    def get_plugin(self):
-        """Return the plugin associated with this course"""
-    
     def get_id(self):
         """Return the id of this course (eg. url or path)"""
     
@@ -37,9 +34,6 @@ class Course:
     
     def get_exercises(self):
         """Return list of exercise objects"""
-        
-    def _get_descriptor(self):
-        return self.get_plugin().get_id() + ": " + self.get_title() + " @ " + self.get_id()
         
 class Exercise:
     def get_title(self):
@@ -75,31 +69,32 @@ class ExerciseView(tk.Frame):
     def __init__(self, master, **kw):
         tk.Frame.__init__(self, master, background="white", **kw)
         self._init_widgets()
+        self._exercises_by_title = {}
         
-        self._current_course = None
+        self._plugins_by_prompt = {}
     
     def _init_widgets(self):
         padx = 15
         pady = 15
         
-        self._course_title_var = create_string_var("")
+        self._course_combo_var = create_string_var("")
         self._course_combo = ttk.Combobox(self,
                               exportselection=False,
                               state='readonly',
-                              textvariable=self._course_title_var,
+                              textvariable=self._course_combo_var,
                               values=[],
                               postcommand=self._reload_courses_info)
         self._course_combo.bind("<<ComboboxSelected>>", self._on_course_combo_select, True)
         self._course_combo.grid(column=1, row=1, sticky=tk.NSEW, padx=padx, pady=pady)
         
         self._exercise_title_var = create_string_var("")
-        self._exercise_title_combo = ttk.Combobox(self,
+        self._exercise_combo = ttk.Combobox(self,
                               exportselection=False,
                               state='readonly',
                               textvariable=self._exercise_title_var,
                               values=["<select exercise>", "1. Nädalapalk"])
-        
-        self._exercise_title_combo.grid(column=1, row=2, sticky=tk.NSEW, padx=padx, pady=(0,pady))
+        self._exercise_combo.bind("<<ComboboxSelected>>", self._on_exercise_combo_select, True)
+        self._exercise_combo.grid(column=1, row=2, sticky=tk.NSEW, padx=padx, pady=(0,pady))
         
         self._task_frame = tkinterhtml.HtmlFrame(self, borderwidth=1, relief=tk.FLAT,
                                                  horizontal_scrollbar="auto")
@@ -111,12 +106,13 @@ class ExerciseView(tk.Frame):
         self.columnconfigure(1, weight=1)
         self.rowconfigure(3, weight=1)
         
-        self._reset()
+        self._reset_course()
     
-    def _reset(self):
-        self._course_title_var.set("Select a course ...")
+    def _reset_course(self):
+        self._course_combo_var.set("Select a course ...")
         self._exercise_title_var.set("")
-        self._task_frame.set_content("<p></p>")
+        self._task_frame.set_content("<p>&nbsp;</p>")
+        self._exercises_by_title = {}
     
     def _get_known_courses(self):
         """Returns dictionary where key is course title and value is pair of plugin_id and course_id"""
@@ -125,76 +121,62 @@ class ExerciseView(tk.Frame):
     def _reload_courses_info(self, event=None):
         values = []
         
-        for descriptor in self._get_known_courses():
-            values.append(descriptor)
+        for course_title in self._get_known_courses():
+            values.append(course_title)
         
-        # add links for opening new courses
+        # links for opening new courses
         for plugin_id in _plugins:
             plugin = _plugins[plugin_id]
-            prompt = "%s: <%s>" % (plugin_id, plugin.get_open_course_prompt())
+            prompt = "<%s>" % plugin.get_open_course_prompt()
             values.append(prompt)
+            self._plugins_by_prompt[prompt] = plugin
         
         self._course_combo["values"] = values
     
     def _on_course_combo_select(self, event=None):
         selected_item = self._course_combo.get()
-         
-        plugin_id, course_text = selected_item.split(": ", maxsplit=1)
-        plugin = _plugins[plugin_id]
         
-        if course_text.endswith(">"):
+        if selected_item.startswith("<"):
+            plugin = self._plugins_by_prompt[selected_item]
             course_id = None
         else:
-            _, course_id = course_text.split(" @ ")
-            
+            course_id, plugin_id = self._get_known_courses()[selected_item]
+            plugin = _plugins[plugin_id]
+        
         course = plugin.open_course(course_id)
         
         if course:
             self._load_course(course)
         else:
-            self._reset()
+            self._reset_course()
     
-    def _get_plugin_for_opening_link(self, link_text):
-        assert link_text.endswith(">")
-        plugin_id, _ = link_text.split(":", maxsplit=1)
-        return _plugins[plugin_id]
-    
-    def _get_course_by_descriptor(self, descriptor):
-        plugin_id, _, course_id = self._parse_course_descriptor(descriptor)
-        return _plugins[plugin_id].open_course(course_id)
-    
-    def _parse_course_descriptor(self, descriptor):
-        """Course descriptor consists of plugin id, course title and course id, for example:
-        Moodle: Basics of Programming @ https://moodle.ut.ee/course/view.php?id=500
-        returns ("Moodle", "Basics of Programming", "https://moodle.ut.ee/course/view.php?id=500")
-        """
-        plugin_id, course = descriptor.split(": ", maxsplit=1)
-        course_title, course_id = course.split(" @ ", maxsplit=1)
-        return plugin_id, course_title, course_id
-            
-    
-    def _on_exercise_combo_change(self):
-        exercise = self._get_selected_exercise()
+    def _on_exercise_combo_select(self, event=None):
+        print("EXSELECT")
+        title = self._exercise_title_var.get()
+        exercise = self._exercises_by_title[title]
         self._load_exercise(exercise)
     
     def _load_course(self, course):
-        self._course_combo["text"] = course._get_descriptor()
-    
-    def _get_selected_exercise(self):
-        course = self._get_selected_course()
-        for ex in course.get_exercises():
-            if ex.get_title() == self._exercise_title_var.get():
-                return ex
+        self._course_combo_var.set(course.get_title())
         
-        raise RuntimeError("Can't find selected exercise")
-    
-    def _on_submit(self):
-        print("Submit")
+        exercise_titles = []
+        for exercise in course.get_exercises():
+            exercise_titles.append(exercise.get_title())
+            self._exercises_by_title[exercise.get_title()] = exercise
+            
+        self._exercise_combo['values'] = exercise_titles
         
+        if len(exercise_titles) > 0:
+            self._exercise_combo.current(0)
+            self._on_exercise_combo_select()
+    
     def _load_exercise(self, exercise):
         self._exercise_title_var.set(exercise.get_title())
         self._task_frame.set_content(exercise.get_description())
 
+    def _on_submit(self):
+        print("Submit")
+        
 def init_exercise_system():    
     get_workbench().add_option("exersys.known_courses", [])
     get_workbench().add_view(ExerciseView, "Exercise", "ne")
