@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from thonny import exersys, misc_utils
-import urllib.request
+import json
 import requests
 from bs4 import BeautifulSoup
 from tkinter.messagebox import showerror
@@ -75,9 +75,26 @@ class MoodleVplExercise(exersys.Exercise):
         self._course = course
         self._url = url
         self._title = title
+        self._shortdescription = None
+        self._description = None
+        self._maxfiles = None
+        self._requred_files = None
     
     def get_title(self):
         return self._title
+    
+    def _check_fetch_info(self):
+        if self._description is None:
+            self._fetch_info()
+    
+    def _fetch_info(self):
+        info_page = self._course.get_page(self._get_ws_url() + "mod_vpl_info");
+        info = json.loads(info_page.text)
+        self._description = info["intro"]
+        self._short_description = info["shortdescription"]
+        self._maxfiles = info["maxfiles"]
+        self._requred_files = [(entry['name'], entry['data']) for entry in info["reqfiles"]]
+            
     
     def _get_ws_url(self):
         ws_url_page_url = self._url.replace("/view.php", "/views/show_webservice.php")
@@ -91,8 +108,8 @@ class MoodleVplExercise(exersys.Exercise):
         
     
     def get_description(self):
-        return ("<p>TODO: Exercise description\n"+ self._url+"</p><p>WS: "
-                + self._get_ws_url() + "</p>")
+        self._check_fetch_info()
+        return ("<p>" + self._description + "</p>")
 
 class MoodleCourseSelectionForm(tk.Toplevel):
     def __init__(self, master, cnf={}, **kw):
