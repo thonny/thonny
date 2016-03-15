@@ -67,7 +67,7 @@ class Exercise:
 
 class ExerciseView(tk.Frame):
     def __init__(self, master, **kw):
-        tk.Frame.__init__(self, master, background="white", **kw)
+        tk.Frame.__init__(self, master, **kw)
         self._init_widgets()
         self._exercises_by_title = {}
         
@@ -96,9 +96,16 @@ class ExerciseView(tk.Frame):
         self._exercise_combo.bind("<<ComboboxSelected>>", self._on_exercise_combo_select, True)
         self._exercise_combo.grid(column=1, row=2, sticky=tk.NSEW, padx=padx, pady=(0,pady))
         
-        self._task_frame = tkinterhtml.HtmlFrame(self, borderwidth=1, relief=tk.FLAT,
+        self._notebook = ttk.Notebook(self)
+        self._notebook.grid(column=1, row=3, sticky=tk.NSEW, padx=padx, pady=(0, pady))
+        
+        self._task_frame = tkinterhtml.HtmlFrame(self._notebook, borderwidth=0, relief=tk.FLAT,
                                                  horizontal_scrollbar="auto")
-        self._task_frame.grid(column=1, row=3, sticky=tk.NSEW, padx=padx, pady=(0, pady))
+        self._notebook.add(self._task_frame, text="Task  ")
+        
+        self._feedback_frame = tkinterhtml.HtmlFrame(self._notebook, borderwidth=0, relief=tk.FLAT,
+                                                 horizontal_scrollbar="auto")
+        self._notebook.add(self._feedback_frame, text="Feedback  ")
         
         self._submit_button = ttk.Button(self, text='Submit `npalk.py`', command=self._on_submit)
         self._submit_button.grid(column=1, row=4, sticky=tk.NSEW, padx=padx, pady=(0, pady))
@@ -173,6 +180,7 @@ class ExerciseView(tk.Frame):
     def _load_exercise(self, exercise):
         self._exercise_title_var.set(exercise.get_title())
         self._task_frame.set_content(exercise.get_description())
+        self._feedback_frame.set_content(exercise.get_latest_feedback())
 
     def _on_submit(self):
         print("Submit")

@@ -110,6 +110,35 @@ class MoodleVplExercise(exersys.Exercise):
     def get_description(self):
         self._check_fetch_info()
         return ("<p>" + self._description + "</p>")
+    
+    def get_latest_feedback(self):
+        return "<div style='padding:10px'>" + self._get_latest_feedback_content() + "</div>\n"
+    
+    def _get_latest_feedback_content(self):
+        feedback_page = self._course.get_page(self._get_ws_url() + "mod_vpl_open");
+        info = json.loads(feedback_page.text)
+        print(info)
+        if "exception" in info:
+            return ("<p>" + info["exception"] + ": " + info["message"] + "</p>")
+        elif info["evaluation"]:
+            return self._evaluation_result_to_html(info["evaluation"])
+        else:
+            return ("<p>" + info["compilation"] + info["evaluation"] 
+                    + "\nGrade:" + info["grade"] + "</p>") 
+    
+    def _evaluation_result_to_html(self, s):
+        lines = []
+        for line in s.splitlines():
+            if line.startswith("-"):
+                line = "<div style='padding: 10px 0px 3px 0px; font-weight:bold; font-size:larger'>" + line[1:] + "</div>"
+            else:
+                line = line + "<br/>"
+                
+            lines.append(line) 
+            
+        return "\n".join(lines)
+    
+        
 
 class MoodleCourseSelectionForm(tk.Toplevel):
     def __init__(self, master, cnf={}, **kw):
