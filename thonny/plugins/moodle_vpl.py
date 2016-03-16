@@ -43,8 +43,11 @@ class MoodleVplCourse(exersys.Course):
     def get_id(self):
         return self._course_url
     
-    def get_page(self, url):
+    def get_url(self, url):
         return self._session.get(url)
+    
+    def post_url(self, url, data):
+        return self._session.post(url, data)
     
     def _load_exercises_and_title(self):
         self._course_title = None
@@ -55,7 +58,7 @@ class MoodleVplCourse(exersys.Course):
         
         ex_url_prefix = re.sub("/index.php.*$", "/", ex_list_url)
         
-        response = self.get_page(ex_list_url)
+        response = self.get_url(ex_list_url)
 
         soup = BeautifulSoup(response.text, "html.parser")
         for link in soup.find_all("a"):
@@ -88,7 +91,7 @@ class MoodleVplExercise(exersys.Exercise):
             self._fetch_info()
     
     def _fetch_info(self):
-        info_page = self._course.get_page(self._get_ws_url() + "mod_vpl_info");
+        info_page = self._course.get_url(self._get_ws_url() + "mod_vpl_info");
         info = json.loads(info_page.text)
         self._description = info["intro"]
         self._short_description = info["shortdescription"]
@@ -98,7 +101,7 @@ class MoodleVplExercise(exersys.Exercise):
     
     def _get_ws_url(self):
         ws_url_page_url = self._url.replace("/view.php", "/views/show_webservice.php")
-        response = self._course.get_page(ws_url_page_url)
+        response = self._course.get_url(ws_url_page_url)
         soup = BeautifulSoup(response.text, "html.parser")
         for div in soup.find_all("div"):
             if div and div.string and  "/mod/vpl/webservice.php" in div.string:
@@ -115,7 +118,7 @@ class MoodleVplExercise(exersys.Exercise):
         return "<div style='padding:10px'>" + self._get_latest_feedback_content() + "</div>\n"
     
     def _get_latest_feedback_content(self):
-        feedback_page = self._course.get_page(self._get_ws_url() + "mod_vpl_open");
+        feedback_page = self._course.get_url(self._get_ws_url() + "mod_vpl_open");
         info = json.loads(feedback_page.text)
         print(info)
         if "exception" in info:
@@ -138,7 +141,14 @@ class MoodleVplExercise(exersys.Exercise):
             
         return "\n".join(lines)
     
+    
+    def _save_files(self, files):
+        post_args = {}
+        for i in range(len(files)):
+            post_args["files[%d][name]" % i] = files[i]["name"]
+            post_args["files[%d][data]" % i] = files[i]["data"]
         
+        self._course.post_url(self._get_ws_url() + "mod_vpl_save", post_args)
 
 class MoodleCourseSelectionForm(tk.Toplevel):
     def __init__(self, master, cnf={}, **kw):

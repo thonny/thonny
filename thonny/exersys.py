@@ -50,13 +50,19 @@ class Exercise:
         """Return how many files can be submitted"""
         return 1
     
-    def accept_submission(self, file_names, feedback_reporting_function):
+    def accept_submission(self, files, feedback_reporting_function):
         """Start checking procedure and return.
-        Call refresh_ui when checking is complete."""
+        Call refresh_ui when checking is complete.
+        
+        files is list of pairs (file name, content as string)"""
     
     def cancel_submission(self):
         """Try to cancel ongoing submission.
         Call refresh_ui when submission is cancelled."""
+    
+    def get_latest_submission(self):
+        """Return latest submitted files as html string or None"""
+        return None
     
     def get_latest_feedback(self):
         """Return latest feedback as html string or None"""
