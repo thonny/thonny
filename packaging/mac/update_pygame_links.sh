@@ -20,9 +20,15 @@ cp /Library/Frameworks/SDL_mixer.framework/Versions/A/Frameworks/Vorbis.framewor
 cp /Library/Frameworks/SDL_ttf.framework/Versions/A/SDL_ttf $PREFIX/lib
 cp /Library/Frameworks/SDL_ttf.framework/Versions/A/Frameworks/FreeType.framework/Versions/A/FreeType $PREFIX/lib
 
+cp /usr/local/lib/libjpeg.8.dylib $PREFIX/lib
+cp /opt/X11/lib/libpng15.15.dylib $PREFIX/lib
 
 # update all SDL links ##########################
 ls $PREFIX/lib/python3.5/site-packages/pygame/*.so | xargs -n1 install_name_tool -change \
+    @rpath/SDL.framework/Versions/A/SDL \
+	$RELATIVE_LIBDIR/SDL  
+
+find $PREFIX/lib -maxdepth 1 | xargs -n1 install_name_tool -change \
     @rpath/SDL.framework/Versions/A/SDL \
 	$RELATIVE_LIBDIR/SDL  
 
@@ -33,8 +39,21 @@ install_name_tool -change \
 	$PREFIX/lib/python3.5/site-packages/pygame/font.cpython-35m-darwin.so
 
 	
+install_name_tool -id \
+	$RELATIVE_LIBDIR/SDL_image \
+	$PREFIX/lib/SDL_image
+	
+install_name_tool -id \
+	$RELATIVE_LIBDIR/webp \
+	$PREFIX/lib/webp
+		
 install_name_tool -change \
-    @rpath/SDL.framework/Versions/A/SDL_image \
+    @rpath/webp.framework/Versions/A/webp \
+	$RELATIVE_LIBDIR/webp \
+	$PREFIX/lib/SDL_image
+
+install_name_tool -change \
+    @rpath/SDL_image.framework/Versions/A/SDL_image \
 	$RELATIVE_LIBDIR/SDL_image \
 	$PREFIX/lib/python3.5/site-packages/pygame/imageext.cpython-35m-darwin.so
 
@@ -43,10 +62,10 @@ install_name_tool -change \
 	$RELATIVE_LIBDIR/libjpeg.8.dylib \
 	$PREFIX/lib/python3.5/site-packages/pygame/imageext.cpython-35m-darwin.so
 
-#install_name_tool -change \
-#    /opt/X11/lib/libpng15.15.dylib \
-#	$RELATIVE_LIBDIR/libpng15.15.dylib \
-#	$PREFIX/lib/python3.5/site-packages/pygame/imageext.cpython-35m-darwin.so
+install_name_tool -change \
+    /opt/X11/lib/libpng15.15.dylib \
+	$RELATIVE_LIBDIR/libpng15.15.dylib \
+	$PREFIX/lib/python3.5/site-packages/pygame/imageext.cpython-35m-darwin.so
 
 install_name_tool -change \
     @rpath/SDL.framework/Versions/A/SDL_mixer \
