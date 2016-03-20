@@ -11,7 +11,7 @@ xcopy C:\Python35\* %PREFIX% /S /E /K>NUL
 %PREFIX%\python.exe -m pip install --no-cache-dir jedi
 
 @echo ............... INSTALLING NUMPY ...................................
-TODO: http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/numpy-1.10.4+vanilla-cp35-none-win32.whl
+%PREFIX%\python.exe -m pip install --no-cache-dir numpy
 
 @echo ............... INSTALLING PYGAME ...................................
 bitsadmin /transfer myDownloadJob /download /priority normal http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pygame-1.9.2a0-cp35-none-win32.whl .\pygame-1.9.2a0-cp35-none-win32.whl
