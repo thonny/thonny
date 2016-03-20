@@ -54,6 +54,10 @@ rmdir %BUILDDIR%\Lib\site-packages\pip-7.1.2.dist-info /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\setuptools /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\setuptools-18.2.dist-info /S /Q>NUL
 
+@echo ............... CLEANING PYGAME ...................................
+rmdir %BUILDDIR%\Lib\site-packages\pygame\tests /S /Q>NUL
+rmdir %BUILDDIR%\Lib\site-packages\pygame\examples /S /Q>NUL
+rmdir %BUILDDIR%\Lib\site-packages\pygame\docs /S /Q>NUL
 
 
 @echo ............... COPYING VS FILES ..........................
