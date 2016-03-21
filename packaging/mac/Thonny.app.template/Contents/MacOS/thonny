@@ -2,6 +2,4 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-export DYLD_LIBRARY_PATH=$DIR/lib
-
-$DIR/bin/python3.5 -m thonny "$@"
+exec $DIR/../Frameworks/Python.framework/Versions/3.5/bin/python3.5 -m thonny "$@"
