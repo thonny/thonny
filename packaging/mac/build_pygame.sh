@@ -31,3 +31,6 @@ export CFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/Ma
 $PREFIX/bin/python3.5 config.py         # This should find the SDL, jpeg, png, and numpy libraries.
 $PREFIX/bin/python3.5 setup.py build    # This will build in the directory before installing. It should complete with no errors.
 $PREFIX/bin/python3.5 setup.py install  
+
+# add numpy
+$PREFIX/bin/python3.5 -m pip install numpy

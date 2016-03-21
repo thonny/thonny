@@ -65,6 +65,14 @@ rm -rf $MACOS_PATH/lib/python3.5/site-packages/setuptools*
 rm -rf $MACOS_PATH/lib/python3.5/ensurepip
 rm -f $MACOS_PATH/lib/libpython3.5m.a
 
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/numpy/core/tests
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/numpy/lib/tests
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/numpy/ma/tests
+
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/pygame/tests
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/pygame/examples
+rm -rf $MACOS_PATH/lib/python3.5/site-packages/pygame/docs
+
 
 
 
