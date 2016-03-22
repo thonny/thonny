@@ -17,5 +17,9 @@ xcopy C:\Python35\* %PREFIX% /S /E /K>NUL
 bitsadmin /transfer myDownloadJob /download /priority normal http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pygame-1.9.2a0-cp35-none-win32.whl .\pygame-1.9.2a0-cp35-none-win32.whl
 %PREFIX%\python.exe -m pip install --no-cache-dir pygame-1.9.2a0-cp35-none-win32.whl
 
+%PREFIX%\python.exe -m pip install --no-cache-dir pyopengl
+
+%PREFIX%\python.exe -m pip install --no-cache-dir pyopengl-accelerate
+
 
 pause
