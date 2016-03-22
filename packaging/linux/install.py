@@ -111,6 +111,7 @@ try:
     print()
     print("Installation was successful, you can start Thonny from start menu under")
     print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
+    print("If you want to use Pygame, then see https://bitbucket.org/plas/thonny/wiki/Pygame")
     print("For uninstalling Thonny call " + target_dir + "/bin/uninstall")
     
     

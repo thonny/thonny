@@ -22,3 +22,6 @@ rm -rf $PREFIX/lib/python3.5/site-packages/pygame/examples # not sure if this is
 rm -rf $PREFIX/lib/python3.5/site-packages/pygame/docs
 
 cd ..
+
+# install PyOpenGL
+$PREFIX/bin/python3.5 -m pip install pyopengl
