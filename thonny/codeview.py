@@ -21,7 +21,8 @@ class CodeView(tktextext.TextFrame):
         
         self.colorer = None
         self.set_coloring(True)
-        self.set_up_paren_matching()
+        self.paren_matcher = None
+        # self.set_up_paren_matching()
         
         self.text.bind("<Return>", self.newline_and_indent_event, True)
         self.text.bind("<<TextChange>>", self._on_text_changed, True)

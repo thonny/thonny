@@ -42,9 +42,11 @@ class ParenMatcher:
             self.text.tag_config(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
             self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
 
-    def _find_surrounding(self):
+    def _find_surrounding(self, src_str=None):
+        if not src_str:
+            src_str = self.text.get("1.0", "end")
         tokens = tokenize_with_char_offsets(
-            self.text.get("1.0", "end"),
+            src_str,
             filter_func=lambda x: x.string != "" and x.string in "()[]{}")
 
         stack = []
@@ -74,7 +76,7 @@ class ParenMatcher:
 
     def _is_insert_between_indices(self, index1, index2):
         return self.text.compare("insert", ">=", index1) and \
-               self.text.compare("insert", "<=", index2)
+               self.text.compare("insert-1c", "<=", index2)
 
     def _on_editor_change(self, event):
 
