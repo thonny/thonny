@@ -1,0 +1,143 @@
+_freetype.cpython-35m-darwin.so:
+	/opt/X11/lib/libfreetype.6.dylib (compatibility version 19.0.0, current version 19.1.0)
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+base.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+bufferproxy.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+cdrom.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+color.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+constants.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+display.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+draw.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+event.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+fastevent.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+font.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	@rpath/SDL_ttf.framework/Versions/A/SDL_ttf (compatibility version 1.0.0, current version 11.1.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+gfxdraw.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+image.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+imageext.cpython-35m-darwin.so:
+	/opt/X11/lib/libpng15.15.dylib (compatibility version 39.0.0, current version 39.0.0)
+	/usr/local/lib/libjpeg.8.dylib (compatibility version 9.0.0, current version 9.2.0)
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	@rpath/SDL_image.framework/Versions/A/SDL_image (compatibility version 1.0.0, current version 9.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+joystick.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+key.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+mask.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+math.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+mixer.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	@rpath/SDL_mixer.framework/Versions/A/SDL_mixer (compatibility version 1.0.0, current version 13.0.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+mixer_music.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	@rpath/SDL_mixer.framework/Versions/A/SDL_mixer (compatibility version 1.0.0, current version 13.0.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+mouse.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+newbuffer.cpython-35m-darwin.so:
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+overlay.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+pixelarray.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+pixelcopy.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+pypm.cpython-35m-darwin.so:
+	/usr/local/opt/portmidi/lib/libportmidi.dylib (compatibility version 0.0.0, current version 0.0.0)
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/System/Library/Frameworks/CoreMIDI.framework/Versions/A/CoreMIDI (compatibility version 1.0.0, current version 73.0.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+rect.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+rwobject.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+scrap.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+sdlmain_osx.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+surface.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+surflock.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+time.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)
+
+transform.cpython-35m-darwin.so:
+	@rpath/SDL.framework/Versions/A/SDL (compatibility version 1.0.0, current version 12.4.0)
+	/usr/lib/libSystem.B.dylib (compatibility version 1.0.0, current version 1226.10.1)

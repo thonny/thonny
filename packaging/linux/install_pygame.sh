@@ -7,6 +7,8 @@ sudo apt-get  --assume-yes install \
     	libsdl-image1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev \
 	libsmpeg-dev libsdl1.2-dev  libportmidi-dev libswscale-dev \
 	libavformat-dev libavcodec-dev freepats
+
+sudo apt-get  --assume-yes install python-pygame python3-numpy
  
 # Grab source
 hg clone https://bitbucket.org/pygame/pygame
@@ -21,4 +23,10 @@ rm -rf $PREFIX/lib/python3.5/site-packages/pygame/tests
 rm -rf $PREFIX/lib/python3.5/site-packages/pygame/examples # not sure if this is worth it
 rm -rf $PREFIX/lib/python3.5/site-packages/pygame/docs
 
+
+# install PyOpenGL and numpy
+$PREFIX/bin/python3.5 -m pip install numpy
+$PREFIX/bin/python3.5 -m pip install pyopengl
+
 cd ..
+

@@ -20,10 +20,13 @@ $MAIN_DIR/build_tcltk.sh
 $MAIN_DIR/build_openssl.sh
 $MAIN_DIR/build_xz.sh
 $MAIN_DIR/build_python.sh
+$MAIN_DIR/install_pygame.sh
 
 # INSTALL JEDI ######################################
 export LD_LIBRARY_PATH=$PREFIX/lib
 $PREFIX/bin/python3.5 -m pip install jedi
+
+
 
 # COPY SOME LIBS #########################################
 # using star because it must work both in 32 and 64-bit Ubuntu
