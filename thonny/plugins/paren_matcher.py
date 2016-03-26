@@ -5,70 +5,70 @@ from thonny.ast_utils import tokenize_with_char_offsets
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
-_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Pink", "background": "DarkGray"})  # highlight tag configuration
-_UNDERLINE_CONF = ("UNDERLINE", {"underline": 1})
+_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "White", "background": "DarkGray"})  # highlight tag configuration
+_UNDERLINE_CONF = ("UNDERLINE", {"background": "LightGray"})
 
 
 class ParenMatcher:
 
     def __init__(self):
         self.text = None
+        self._remaining = None
         self.bound_ids = {}
 
     def _on_change(self, event):
         self.text.tag_delete(_HIGHLIGHT_CONF[0])
         self.text.tag_delete(_UNDERLINE_CONF[0])
-        indices = self._find_surrounding()
 
+        self._highlight_surrounding()
+        self._highlight_unclosed()
+
+    def _highlight_surrounding(self):
+        indices = self._find_surrounding()
         if None in indices:
             return
         else:
-            if indices[1] != "end":
-                self.text.tag_config(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
-                self.text.tag_add(_HIGHLIGHT_CONF[0], indices[0])
-                self.text.tag_add(_HIGHLIGHT_CONF[0], indices[1])
-            else:
-                self.text.tag_config(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
-                self.text.tag_add(_UNDERLINE_CONF[0], indices[0], indices[1])
+            self.text.tag_config(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
+            self.text.tag_add(_HIGHLIGHT_CONF[0], indices[0])
+            self.text.tag_add(_HIGHLIGHT_CONF[0], indices[1])
+
+    # highlights an unclosed bracket
+    def _highlight_unclosed(self):
+        # anything remaining in the stack is an unmatched opener
+        # since the list is ordered, we can highlight everything starting from the first element
+        if self._remaining:
+            opener = self._remaining[0]
+            open_index = "%d.%d" % (opener.lineno, opener.col_offset)
+            self.text.tag_config(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
+            self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
 
     def _find_surrounding(self):
-        thokens = tokenize_with_char_offsets(
+        tokens = tokenize_with_char_offsets(
             self.text.get("1.0", "end"),
             filter_func=lambda x: x.string != "" and x.string in "()[]{}")
 
-        stacks = {"(": [], "[": [], "{": []}
+        stack = []
+        opener, closer = None, None
+        open_index, close_index = None, None
 
-        opener = None
-        closer = None
-
-        for t in thokens:
+        for t in tokens:
             if t.string in "([{":
-                stacks[t.string].append(t)
-            else:
-                s = stacks[_OPENERS[t.string]]
-                if len(s) <= 0:
+                stack.append(t)
+            elif len(stack) > 0:
+                if stack[-1].string != _OPENERS[t.string]:
                     self.text.bell()
-                    break
-                opener = stacks[_OPENERS[t.string]].pop()
-                if self._is_insert_between_indices("%d.%d" % (opener.lineno, opener.col_offset),
-                                                   "%d.%d" % (t.lineno, t.col_offset)):
-                    closer = t
-                    break
-                opener = None
-
-        if not opener:
-            remaining = [x for s in stacks.values() for x in s]
-            remaining.sort(key=lambda x: x.lineno)
-            remaining.sort(key=lambda x: x.col_offset)
-
-            if len(remaining) > 0:
-                opener = remaining[0]
-
-        open_index = "%d.%d" % (opener.lineno, opener.col_offset) if opener else None
-        close_index = "%d.%d" % (closer.lineno, closer.col_offset) if closer else None
-
-        if not close_index:
-            close_index = "end"
+                    continue
+                if not closer:
+                    opener = stack.pop()
+                    open_index = "%d.%d" % (opener.lineno, opener.col_offset)
+                    token_index = "%d.%d" % (t.lineno, t.col_offset)
+                    if self._is_insert_between_indices(open_index, token_index):
+                        closer = t
+                        close_index = token_index
+                else:
+                    stack.pop()
+        # used by _highlight_unclosed
+        self._remaining = stack
 
         return open_index, close_index
 
