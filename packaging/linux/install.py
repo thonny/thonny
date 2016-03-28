@@ -7,6 +7,51 @@ import os.path
 import shutil
 import subprocess
 
+def which(cmd, mode=os.F_OK | os.X_OK, path=None):
+    """Given a command, mode, and a PATH string, return the path which
+    conforms to the given mode on the PATH, or None if there is no such
+    file.
+
+    `mode` defaults to os.F_OK | os.X_OK. `path` defaults to the result
+    of os.environ.get("PATH"), or can be overridden with a custom search
+    path.
+    (Copied from Python 3.5 shutil)
+    """
+    # Check that a given file can be accessed with the correct mode.
+    # Additionally check that `file` is not a directory, as on Windows
+    # directories pass the os.access check.
+    def _access_check(fn, mode):
+        return (os.path.exists(fn) and os.access(fn, mode)
+                and not os.path.isdir(fn))
+
+    # If we're given a path with a directory part, look it up directly rather
+    # than referring to PATH directories. This includes checking relative to the
+    # current directory, e.g. ./script
+    if os.path.dirname(cmd):
+        if _access_check(cmd, mode):
+            return cmd
+        return None
+
+    if path is None:
+        path = os.environ.get("PATH", os.defpath)
+    if not path:
+        return None
+    path = path.split(os.pathsep)
+
+    files = [cmd]
+
+    seen = set()
+    for dir_ in path:
+        normdir = os.path.normcase(dir_)
+        if not normdir in seen:
+            seen.add(normdir)
+            for thefile in files:
+                name = os.path.join(dir_, thefile)
+                if _access_check(name, mode):
+                    return name
+    return None
+
+
 def create_launcher(source_filename, target_filename, replacements={}):
     target_dir = os.path.dirname(target_filename) 
     if not os.path.exists(target_dir):
@@ -28,12 +73,12 @@ def create_launcher(source_filename, target_filename, replacements={}):
 def try_to_refresh_desktop_and_menus(menu_dir):
     """In KDE, the .destop files are not taken into account immediately"""
     for cmd in ["kbuildsycoca5", "kbuildsycoca4", "kbuildsycoca"]:
-        if shutil.which(cmd):
+        if which(cmd):
             subprocess.call([cmd])
             break
     
     udd = "update-desktop-database"
-    if shutil.which(udd):
+    if which(udd):
         subprocess.call([udd, menu_dir])
         
 
