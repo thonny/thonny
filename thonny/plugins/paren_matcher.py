@@ -24,7 +24,7 @@ class ParenMatcher:
         self._highlight_unclosed()
 
     def _highlight_surrounding(self):
-        indices = self._find_surrounding()
+        indices = self.find_surrounding(self.text)
         if None in indices:
             return
         else:
@@ -42,11 +42,9 @@ class ParenMatcher:
             self.text.tag_config(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
             self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
 
-    def _find_surrounding(self, src_str=None):
-        if not src_str:
-            src_str = self.text.get("1.0", "end")
+    def find_surrounding(self, text):
         tokens = tokenize_with_char_offsets(
-            src_str,
+            text.get("1.0", "end"),
             filter_func=lambda x: x.string != "" and x.string in "()[]{}")
 
         stack = []
@@ -58,7 +56,7 @@ class ParenMatcher:
                 stack.append(t)
             elif len(stack) > 0:
                 if stack[-1].string != _OPENERS[t.string]:
-                    self.text.bell()
+                    text.bell()
                     continue
                 if not closer:
                     opener = stack.pop()
