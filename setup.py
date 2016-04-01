@@ -1,5 +1,10 @@
 from setuptools import setup
 import os.path
+import sys
+
+if sys.version_info < (3,4):
+    raise RuntimeError("Thonny requires Python 3.4 or later")
+
  
 
 with open(os.path.join(os.path.dirname(__file__), 'thonny', 'VERSION'), encoding="ASCII") as f:
