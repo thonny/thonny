@@ -57,9 +57,12 @@ Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 Type: filesandordirs; Name: "{app}\*"
 ; Delete old format settings. New filename is configuration.ini
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
+; Delete old shortcut
+Type: filesandordirs; Name: "{userstartmenu}\Thonny"
+Type: filesandordirs; Name: "{userstartmenu}\Thonny.lnk"
 
 [Icons]
-Name: "{userstartmenu}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{userprograms}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 
 
