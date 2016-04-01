@@ -64,13 +64,11 @@ def windows_post_install():
 
 class CustomInstallCommand(install):
     def run(self):
-        print("STARTING CUSTOM INSTALL")
         install.run(self)
         post_install()
         
 class CustomEggCommand(bdist_egg):
     def run(self):
-        print("STARTING CUSTOM EGG")
         bdist_egg.run(self)
         post_install()
 
