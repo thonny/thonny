@@ -65,7 +65,7 @@ class TweakableText(tk.Text):
     def intercept_mark(self, *args):
         self.direct_mark(*args)
     
-    def intercept_insert(self, index, chars, tags=()):
+    def intercept_insert(self, index, chars, tags=None):
         if chars >= "\uf704" and chars <= "\uf70d": # Function keys F1..F10 in Mac cause these
             return
         
@@ -86,7 +86,7 @@ class TweakableText(tk.Text):
         if args[:2] == ('set', 'insert'):
             self.event_generate("<<CursorMove>>")
     
-    def direct_insert(self, index, chars, tags=()):
+    def direct_insert(self, index, chars, tags=None):
         self._original_insert(index, chars, tags)
         self.event_generate("<<TextChange>>")
     
