@@ -3,7 +3,6 @@
 import tkinter as tk
 from thonny import roughparse
 from thonny.parenmatch import ParenMatcher
-from thonny.coloring import SyntaxColorer
 from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os
@@ -18,9 +17,6 @@ class CodeView(tktextext.TextFrame):
                                      wrap=tk.NONE, **text_frame_args)
         
         # TODO: propose_remove_line_numbers
-        
-        self.colorer = None
-        self.set_coloring(True)
         self.paren_matcher = None
         # self.set_up_paren_matching()
         
@@ -45,33 +41,16 @@ class CodeView(tktextext.TextFrame):
         self.text.direct_insert("1.0", content)
         self.update_line_numbers()
         self.text.edit_reset();
-        
-        if self.colorer:
-            self.colorer.notify_range("1.0", "end")
+
+        self.text.event_generate("<<TextChange>>")
     
     def _on_cursor_moved(self, event):
         self.update_paren_highlight()
     
     def _on_text_changed(self, event):
-        if self.colorer:
-            self.colorer.notify_range("1.0", "end")
-        
-        
         self.update_line_numbers()
         self.update_margin_line()
         self.update_paren_highlight()
-    
-    def set_coloring(self, value):
-        if value:
-            if self.colorer is None:
-                self.colorer = SyntaxColorer(self.text, 
-                                             get_workbench().get_font("EditorFont"),
-                                             get_workbench().get_font("BoldEditorFont"))
-        else:
-            if self.colorer is not None:
-                self.colorer.removecolors()
-                self.colorer = None
-    
     
     def select_lines(self, first_line, last_line):
         self.text.tag_remove("sel", "1.0", tk.END)

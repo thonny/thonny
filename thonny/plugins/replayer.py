@@ -7,7 +7,7 @@ import json
 from thonny.base_file_browser import BaseFileBrowser
 import ast
 import os.path
-from thonny.coloring import SyntaxColorer
+from thonny.plugins.coloring import SyntaxColorer
 
 
 class ReplayWindow(tk.Toplevel):
@@ -250,7 +250,7 @@ class ReplayerEditorProper(ReplayerEditor):
         # TODO: some problem when doing fast rewind
         return
     
-        self.colorer = SyntaxColorer(self.code_view.text, 
+        self.colorer = SyntaxColorer(self.code_view.text,
                                      get_workbench().get_font("EditorFont"),
                                      get_workbench().get_font("BoldEditorFont"))
 
