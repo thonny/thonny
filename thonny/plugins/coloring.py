@@ -52,6 +52,10 @@ class SyntaxColorer:
         self.LoadTagDefs(main_font, bold_font)
         self.bound_ids = {}
 
+        if text:
+            self.config_colors()
+            self.notify_range("1.0", "end")
+
     def config_colors(self):
         for tag, cnf in self.tagdefs.items():
             if cnf:
