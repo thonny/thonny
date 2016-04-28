@@ -12,7 +12,6 @@ def boo():
 for i in range(5):
     boo()
 """
-
 # tuple of tuples, where an inner tuple corresponds to a group of insert positions
 # that should produce the same output (corresponding expected output is in the
 # expected_indices tuple at the same index)
@@ -35,13 +34,28 @@ EMPTY = set()
 FOO_2 = {("5.4", "5.7"), ("6.10", "6.13")}
 EXPECTED_INDICES1 = (FOO_1, BOO_1, EMPTY, FOO_2)
 
-TESTS = (
+TEST_STR2 = """import foo
+def boo():
+    boo = foo + 4
+    x = boo + bow
+"""
+CURSOR_POSITIONS2 = (("1.8", "3.10"),
+                     ("2.4", "2.5"),
+                     ("3.5", "4.9")  # investigate, why 3.4 does not yield results
+                     )
+EXPECTED_INDICES2 = ({("1.7", "1.10"), ("3.10", "3.13")},
+                     {("2.4", "2.7")},
+                     {("3.4", "3.7"), ("4.8", "4.11")}
+                     )
+
+TEST_GROUPS = (
     (CURSOR_POSITIONS1, EXPECTED_INDICES1, TEST_STR1),
+    (CURSOR_POSITIONS2, EXPECTED_INDICES2, TEST_STR2),
 )
 
 
 def run_tests():
-    for test in TESTS:
+    for test in TEST_GROUPS:
         _assert_returns_correct_indices(test[0], test[1], test[2])
 
 
@@ -58,8 +72,11 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
             actual = nh.get_positions()
             expected = expected_indices[i]
 
-            assert actual == expected, "\nExpected: %s\nGot: %s" % (expected, actual)
+            assert actual == expected, "\nInsert position: %s" \
+                                       "\nExpected: %s" \
+                                       "\nGot: %s" % (insert_pos, expected, actual)
         print("\rPassed %d of %d" % (i+1, len(insert_pos_groups)), end="")
+    print()
 
 if __name__ == "__main__":
     run_tests()

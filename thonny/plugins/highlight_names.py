@@ -27,12 +27,13 @@ class NameHighlighter:
     def find_definition(scope, name):
         if NameHighlighter.is_assignment_name(name):
             return name
-        if isinstance(scope, tree.Function) and scope.children[1].value == name.value:
+        if isinstance(scope, tree.Function) and scope.children[1] == name:
             return scope.children[1]
         for c in scope.children:
             if isinstance(c, tree.Function) and c.children[1].value == name.value:
                 return c.children[1]
-
+            if NameHighlighter.is_assignment_node(c) and c.children[0].children[0].value == name.value:
+                return c.children[0].children[0]
             if isinstance(c, tree.BaseNode) and c.type == "suite":
                 for x in c.children:
                     if NameHighlighter.is_assignment_node(x) and x.children[0].children[0].value == name.value:
@@ -52,10 +53,11 @@ class NameHighlighter:
                isinstance(node.children[0], tree.ExprStmt)
 
     @staticmethod
-    def find_usages(name):
+    def find_usages(name, module):
         # search for definition
         definition = NameHighlighter.find_definition(name.get_parent_scope(), name)
         searched_scopes = set()
+
         def find_names_in_node(node):
             names = []
             if isinstance(node, tree.BaseNode):
@@ -67,7 +69,7 @@ class NameHighlighter:
                     sub_result = find_names_in_node(c)
                     if sub_result is None:
                         if node != scope:
-                            return None if node != definition.get_parent_scope() else [definition]
+                            return None if definition and node != definition.get_parent_scope() else [definition]
                         else:
                             sub_result = []
                     names.extend(sub_result)
@@ -78,10 +80,13 @@ class NameHighlighter:
                 names.append(node)
             return names
 
-        if NameHighlighter.is_name_function_definition(definition):
-            scope = definition.get_parent_scope().get_parent_scope()
+        if definition:
+            if NameHighlighter.is_name_function_definition(definition):
+                scope = definition.get_parent_scope().get_parent_scope()
+            else:
+                scope = definition.get_parent_scope()
         else:
-            scope = definition.get_parent_scope()
+            scope = module
 
         usages = find_names_in_node(scope)
 
@@ -104,12 +109,11 @@ class NameHighlighter:
         if not name:
             return set()
 
-        usages = NameHighlighter.find_usages(name)
+        usages = NameHighlighter.find_usages(name, script._parser.module())
 
         return set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
                 for usage in usages)
-
     def _highlight(self, pos_info):
         if not self.text:
             return
@@ -138,7 +142,7 @@ class NameHighlighter:
         self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
 
 
-def load_plugin():
+def _load_plugin():
     wb = get_workbench()  # type:Workbench
     nb = wb.get_editor_notebook()  # type:EditorNotebook
 
