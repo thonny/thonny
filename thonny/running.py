@@ -87,6 +87,30 @@ class Runner:
     def send_program_input(self, data):
         self._proxy.send_program_input(data)
         
+    def execute_script(self, script_path, args, working_directory=None, mode="Run"):
+        if (working_directory is not None and self._proxy.cwd != working_directory):
+            # create compound command
+            # start with %cd
+            cmd_line = "%cd " + shlex.quote(working_directory) + "\n"
+            next_cwd = working_directory
+        else:
+            # create simple command
+            cmd_line = ""
+            next_cwd = self._proxy.cwd
+        
+        # append main command (Run, run, Debug or debug)
+        rel_filename = os.path.relpath(script_path, next_cwd)
+        cmd_line += "%" + mode + " " + shlex.quote(rel_filename)
+        
+        # append args
+        for arg in args:
+            cmd_line += " " + shlex.quote(arg) 
+        
+        cmd_line += "\n"
+        
+        # submit to shell (shell will execute it)
+        get_workbench().get_view("ShellView").submit_command(cmd_line)
+        
     def execute_current(self, mode):
         """
         This method's job is to create a command for running/debugging
@@ -104,23 +128,12 @@ class Runner:
         # changing dir may be required
         script_dir = os.path.realpath(os.path.dirname(filename))
         
-        if (get_workbench().get_option("run.auto_cd") and mode[0].isupper()
-            and self._proxy.cwd != script_dir):
-            # create compound command
-            # start with %cd
-            cmd_line = "%cd " + shlex.quote(script_dir) + "\n"
-            next_cwd = script_dir
+        if get_workbench().get_option("run.auto_cd") and mode[0].isupper():
+            working_directory = script_dir
         else:
-            # create simple command
-            cmd_line = ""
-            next_cwd = self._proxy.cwd
+            working_directory = None
         
-        # append main command (Run, run, Debug or debug)
-        rel_filename = os.path.relpath(filename, next_cwd)
-        cmd_line += "%" + mode + " " + shlex.quote(rel_filename) + "\n"
-        
-        # submit to shell (shell will execute it)
-        get_workbench().get_view("ShellView").submit_command(cmd_line)
+        self.execute_script(filename, [], working_directory, mode)
         
     def handle_execute_from_shell(self, cmd_line):
         """
