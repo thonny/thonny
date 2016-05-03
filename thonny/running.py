@@ -111,7 +111,7 @@ class Runner:
         # submit to shell (shell will execute it)
         get_workbench().get_view("ShellView").submit_command(cmd_line)
         
-    def execute_current(self, command_name):
+    def execute_current(self, command_name, always_change_to_script_dir=False):
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
@@ -128,7 +128,8 @@ class Runner:
         # changing dir may be required
         script_dir = os.path.realpath(os.path.dirname(filename))
         
-        if get_workbench().get_option("run.auto_cd") and command_name[0].isupper():
+        if (get_workbench().get_option("run.auto_cd") 
+            and command_name[0].isupper() or always_change_to_script_dir):
             working_directory = script_dir
         else:
             working_directory = None
