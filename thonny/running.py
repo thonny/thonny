@@ -362,7 +362,9 @@ class _BackendProxy:
             cmd_line.append(cmd.filename)
             if hasattr(cmd, "args"):
                 cmd_line.extend(cmd.args)
-            
+        
+        if hasattr(cmd, "environment"):
+            my_env.update(cmd.environment)            
         
         debug("Starting the backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
