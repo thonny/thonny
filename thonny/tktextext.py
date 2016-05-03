@@ -61,7 +61,6 @@ class TweakableText(tk.Text):
         self.direct_delete("1.0", tk.END)
         self.direct_insert("1.0", chars)
         
-        
     def intercept_mark(self, *args):
         self.direct_mark(*args)
     
@@ -86,6 +85,30 @@ class TweakableText(tk.Text):
         if args[:2] == ('set', 'insert'):
             self.event_generate("<<CursorMove>>")
     
+    def index_sel_first(self):
+        # Tk will give error without this check
+        if self.tag_ranges("sel"):
+            return self.index("sel.first")
+        else:
+            return None
+    
+    def index_sel_last(self):
+        if self.tag_ranges("sel"):
+            return self.index("sel.last")
+        else:
+            return None
+
+    def has_selection(self):
+        return len(self.tag_ranges("sel")) > 0
+    
+    def get_selection_indices(self):
+        # If a selection is defined in the text widget, return (start,
+        # end) as Tkinter text indices, otherwise return (None, None)
+        if self.has_selection():
+            return self.index("sel.first"), self.index("sel.last")
+        else:
+            return None, None
+        
     def direct_insert(self, index, chars, tags=None):
         self._original_insert(index, chars, tags)
         self.event_generate("<<TextChange>>")
@@ -163,7 +186,7 @@ class EnhancedText(TweakableText):
         self._log_keypress_for_undo(event)
         
         text = self
-        first, last = self._get_selection_indices()
+        first, last = self.get_selection_indices()
         if first and last:
             text.delete(first, last)
             text.mark_set("insert", first)
@@ -220,7 +243,7 @@ class EnhancedText(TweakableText):
         # else:
         #     indent one level
         
-        first, last = self._get_selection_indices()
+        first, last = self.get_selection_indices()
         if first and last:
             if index2line(first) != index2line(last):
                 return self.indent_region(event)
@@ -267,12 +290,12 @@ class EnhancedText(TweakableText):
             # shift was not pressed
             self.tag_remove("sel", "1.0", "end")
         else:
-            if not self.index("sel.first"):
+            if not self.index_sel_first():
                 # there was no previous selection
                 self.mark_set("my_anchor", "insert")
             else:
-                if self.compare(self.text.index("sel.first"), "<",
-                                     self.text.index("insert")):
+                if self.compare(self.index_sel_first(), "<",
+                                     self.index("insert")):
                     self.mark_set("my_anchor", "sel.first") # extend back
                 else:
                     self.mark_set("my_anchor", "sel.last") # extend forward
@@ -332,12 +355,9 @@ class EnhancedText(TweakableText):
         self._set_region(head, tail, chars, lines)
         return "break"
     
-    def has_selection(self):
-        return len(self.tag_ranges("sel")) > 0
-    
     def select_all(self, event):
-        self.text.tag_remove("sel", "1.0", tk.END)
-        self.text.tag_add('sel', '1.0', tk.END)
+        self.tag_remove("sel", "1.0", tk.END)
+        self.tag_add('sel', '1.0', tk.END)
     
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
@@ -348,7 +368,7 @@ class EnhancedText(TweakableText):
             self.insert("insert", self._make_blanks(column))
         
     def _get_region(self):
-        first, last = self._get_selection_indices()
+        first, last = self.get_selection_indices()
         if first and last:
             head = self.index(first + " linestart")
             tail = self.index(last + "-1c lineend +1c")
@@ -403,14 +423,6 @@ class EnhancedText(TweakableText):
             return '\t' * ntabs + ' ' * nspaces
         else:
             return ' ' * n
-        
-    def _get_selection_indices(self):
-        # If a selection is defined in the text widget, return (start,
-        # end) as Tkinter text indices, otherwise return (None, None)
-        if self.has_selection():
-            return self.index("sel.first"), self.index("sel.last")
-        else:
-            return None, None
 
     def _on_undo(self, e):
         self._last_event_kind = "undo"
