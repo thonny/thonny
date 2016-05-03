@@ -11,7 +11,7 @@ shell becomes kind of title for the execution.
 
 from _thread import start_new_thread
 import collections
-from logging import info, debug
+from logging import debug
 import os.path
 import subprocess
 import sys
@@ -364,7 +364,7 @@ class _BackendProxy:
                 cmd_line.extend(cmd.args)
             
         
-        info("Starting the backend: %s %s", cmd_line, self.cwd)
+        debug("Starting the backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
@@ -382,7 +382,7 @@ class _BackendProxy:
             raise Exception("Error starting backend process: " + error_msg)
         
         ready_msg = parse_message(ready_line)
-        info("Backend ready: %s", ready_msg)
+        debug("Backend ready: %s", ready_msg)
         get_workbench().event_generate("BackendReady", **ready_msg)
         
         # setup asynchronous output listeners
@@ -416,7 +416,7 @@ class _BackendProxy:
                 if os.path.exists(copy) and filecmp.cmp(original, copy, False):
                     pass
                 else:
-                    info("UPDATING " + copy)
+                    debug("UPDATING " + copy)
                     shutil.copyfile(original, copy)
             
             # now the copy must exist

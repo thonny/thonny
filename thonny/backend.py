@@ -1031,11 +1031,6 @@ class MySourceLoader(SourceLoader):
         
     
 
-def finfo(frame, msg, *args):
-    if logger.isEnabledFor(logging.INFO):
-        logger.info(_get_frame_prefix(frame) + msg, *args)
-        
-
 def fdebug(frame, msg, *args):
     if logger.isEnabledFor(logging.DEBUG):
         logger.debug(_get_frame_prefix(frame) + msg, *args)
