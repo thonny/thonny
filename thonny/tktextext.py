@@ -41,15 +41,16 @@ class TweakableText(tk.Text):
                 return self.tk.call((self._original_widget_name, operation) + args)
             
         except TclError as e:
+            print("OP: ", operation, args)
             if str(e).lower() == '''text doesn't contain any characters tagged with "sel"''':
                 # Some Tk internal actions cause this error
-                if operation == "delete" and args == ("sel.first", "sel.last"):
+                if operation in ["delete", "index"] and args in [("sel.first", "sel.last"), ("sel.first",)]:
                     # This happens on (each?) paste
                     pass
                 else:
                     traceback.print_exc()
             else:
-                raise
+                traceback.print_exc()
     
     def set_read_only(self, value):
         self._read_only = value
