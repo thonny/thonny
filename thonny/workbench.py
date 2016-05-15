@@ -2,7 +2,7 @@
 
 from distutils.version import StrictVersion
 import importlib
-from logging import exception, info, warning
+from logging import exception, warning, debug
 import os.path
 import sys
 from tkinter import ttk, messagebox
@@ -232,7 +232,7 @@ class Workbench(tk.Tk):
         
         def server_loop():
             while True:
-                print("Waiting for next client")
+                debug("Waiting for next client")
                 (client_socket, _) = server_socket.accept()
                 try:
                     self._handle_socket_request(client_socket)
@@ -411,7 +411,7 @@ class Workbench(tk.Tk):
                 handler()
             else:
                 denied = True
-                info("Command '" + command_id + "' execution denied")
+                debug("Command '" + command_id + "' execution denied")
                 self.bell()
                 
             self.event_generate("Command", command_id=command_id, denied=denied)

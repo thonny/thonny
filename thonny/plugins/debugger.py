@@ -248,7 +248,7 @@ class FrameVisualizer:
     def update_this_and_next_frames(self, msg):
         """Must not be used on obsolete frame"""
         
-        #info("State: %s, focus: %s", msg.state, msg.focus)
+        #debug("State: %s, focus: %s", msg.state, msg.focus)
         
         frame_info, next_frame_info = self._find_this_and_next_frame(msg.stack)
         self._update_this_frame(msg, frame_info)

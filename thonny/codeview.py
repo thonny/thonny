@@ -121,7 +121,7 @@ class CodeView(tktextext.TextFrame):
         # slightly modified
         
         text = self.text
-        first, last = text._get_selection_indices()
+        first, last = text.get_selection_indices()
         try:
             if first and last:
                 text.delete(first, last)

@@ -11,7 +11,7 @@ shell becomes kind of title for the execution.
 
 from _thread import start_new_thread
 import collections
-from logging import info, debug
+from logging import debug
 import os.path
 import subprocess
 import sys
@@ -87,7 +87,31 @@ class Runner:
     def send_program_input(self, data):
         self._proxy.send_program_input(data)
         
-    def execute_current(self, mode):
+    def execute_script(self, script_path, args, working_directory=None, command_name="Run"):
+        if (working_directory is not None and self._proxy.cwd != working_directory):
+            # create compound command
+            # start with %cd
+            cmd_line = "%cd " + shlex.quote(working_directory) + "\n"
+            next_cwd = working_directory
+        else:
+            # create simple command
+            cmd_line = ""
+            next_cwd = self._proxy.cwd
+        
+        # append main command (Run, run, Debug or debug)
+        rel_filename = os.path.relpath(script_path, next_cwd)
+        cmd_line += "%" + command_name + " " + shlex.quote(rel_filename)
+        
+        # append args
+        for arg in args:
+            cmd_line += " " + shlex.quote(arg) 
+        
+        cmd_line += "\n"
+        
+        # submit to shell (shell will execute it)
+        get_workbench().get_view("ShellView").submit_command(cmd_line)
+        
+    def execute_current(self, command_name, always_change_to_script_dir=False):
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
@@ -104,23 +128,13 @@ class Runner:
         # changing dir may be required
         script_dir = os.path.realpath(os.path.dirname(filename))
         
-        if (get_workbench().get_option("run.auto_cd") and mode[0].isupper()
-            and self._proxy.cwd != script_dir):
-            # create compound command
-            # start with %cd
-            cmd_line = "%cd " + shlex.quote(script_dir) + "\n"
-            next_cwd = script_dir
+        if (get_workbench().get_option("run.auto_cd") 
+            and command_name[0].isupper() or always_change_to_script_dir):
+            working_directory = script_dir
         else:
-            # create simple command
-            cmd_line = ""
-            next_cwd = self._proxy.cwd
+            working_directory = None
         
-        # append main command (Run, run, Debug or debug)
-        rel_filename = os.path.relpath(filename, next_cwd)
-        cmd_line += "%" + mode + " " + shlex.quote(rel_filename) + "\n"
-        
-        # submit to shell (shell will execute it)
-        get_workbench().get_view("ShellView").submit_command(cmd_line)
+        self.execute_script(filename, [], working_directory, command_name)
         
     def handle_execute_from_shell(self, cmd_line):
         """
@@ -349,9 +363,11 @@ class _BackendProxy:
             cmd_line.append(cmd.filename)
             if hasattr(cmd, "args"):
                 cmd_line.extend(cmd.args)
-            
         
-        info("Starting the backend: %s %s", cmd_line, self.cwd)
+        if hasattr(cmd, "environment"):
+            my_env.update(cmd.environment)            
+        
+        debug("Starting the backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
@@ -369,7 +385,7 @@ class _BackendProxy:
             raise Exception("Error starting backend process: " + error_msg)
         
         ready_msg = parse_message(ready_line)
-        info("Backend ready: %s", ready_msg)
+        debug("Backend ready: %s", ready_msg)
         get_workbench().event_generate("BackendReady", **ready_msg)
         
         # setup asynchronous output listeners
@@ -403,7 +419,7 @@ class _BackendProxy:
                 if os.path.exists(copy) and filecmp.cmp(original, copy, False):
                     pass
                 else:
-                    info("UPDATING " + copy)
+                    debug("UPDATING " + copy)
                     shutil.copyfile(original, copy)
             
             # now the copy must exist
