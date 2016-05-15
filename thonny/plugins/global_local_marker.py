@@ -3,9 +3,10 @@ from jedi.parser import tree
 from thonny.globals import get_workbench
 
 GLOBAL_CONF = {'background': 'White', 'foreground': 'Black'}
-LOCAL_CONF = {'background': 'Pink', 'foreground': 'Brown'}
+LOCAL_CONF = {'underline': 1}
 
-class NameHighlighter:
+
+class GlobLocHighlighter:
 
     def __init__(self):
         self.text = None
@@ -16,77 +17,45 @@ class NameHighlighter:
         globs = []
         locs = []
 
-        def find_names(node, loc_decl_funcs=[], glob_stmts=[]):
-            names = []
-            if node.type == "power" and node.children[0].value not in loc_decl_funcs and \
-                not (isinstance(node.children[1], tree.BaseNode) and
-                            node.children[1].type == "trailer" and node.children[1].children[0].value == "."):
-                children = node.children[1:]
-                globs.append(node.children[0])
+        def process_scope(scope):
+            if isinstance(scope.get_parent_scope(), tree.Module):
+                globs.append(scope.children[1])
             else:
-                children = node.children
-            for c in children:
-                if isinstance(c, tree.Name):
-                    names.append(c)
-                elif isinstance(c, tree.GlobalStmt):
-                    globs.append(c.children[1])
-                    glob_stmts.append(c.children[1].value)
-                elif isinstance(c, tree.BaseNode):
-                    names.extend(find_names(c, loc_decl_funcs, glob_stmts))
-            return names
-
-        def process_subscope(scope, loc_declared_funcs=[]):
-            glob_stmts = []
-            if isinstance(scope, tree.Class):
-
-                supers = scope.get_super_arglist()
-                supers_names = []
-                if isinstance(supers, tree.Name):
-                    globs.append(supers)
-                    supers_names.append(supers)
-                else:
-                    supers_names.extend(find_names(supers))
-                    globs.extend(supers_names)
-
-                children = scope.children[len(supers_names)*2+3:]
-            else:
-                children = scope.children
-            for c in children:
+                locs.append(scope.children[1])
+            for c in scope.children[2:]:
                 if isinstance(c, tree.BaseNode):
+                    process_node(c)
 
-                    if isinstance(c, tree.ClassOrFunc):
-                        loc_declared_funcs.append(c.children[1].value)
-                        locs.append(c.children[1])
-                        process_subscope(c, loc_declared_funcs=loc_declared_funcs)
+        def process_node(node, module_scope=False, local_bindings=[], global_names=[]):
+            if isinstance(node, tree.Name):
+                if isinstance(node.get_definition(), tree.GlobalStmt):
+                    global_names.append(node.value)
+                if not module_scope and node.is_definition() and node.value not in global_names:
+                    local_bindings.append(node.value)
+                if module_scope or node.value not in local_bindings:
+                    globs.append(node)
+                else:
+                    locs.append(node)
+            elif isinstance(node, tree.BaseNode):
+                if node.is_scope():
+                    global_names = []
+                for c in node.children:
+                    process_node(c, module_scope, local_bindings, global_names)
 
-                    elif c.type == "simple_stmt" and isinstance(c.children[0], tree.GlobalStmt):
-                        glob_name = c.children[0].children[1]
-                        glob_stmts.append(glob_name.value)
-                        globs.append(glob_name)
+        def process_module():
+            for c in module.children:
+                if isinstance(c, tree.BaseNode):
+                    if c.is_scope():
+                        process_scope(c)
                     else:
-                        names = find_names(c, loc_decl_funcs=loc_declared_funcs, glob_stmts=glob_stmts)
-                        for name in names:
-                            if name.value in glob_stmts:
-                                globs.append(name)
-                            else:
-                                locs.append(name)
-
-
+                        process_node(c, module_scope=True)
 
         index = self.text.index("insert").split(".")
-        l, c = int(index[0]), int(index[1])
-        script = Script(self.text.get('1.0', 'end'), l, c)
+        line, column = int(index[0]), int(index[1])
+        script = Script(self.text.get('1.0', 'end'), line, column)
         module = script._parser.module()
 
-        # first find names in module scope
-        for child in module.children:
-            if isinstance(child, tree.Scope):
-                globs.append(child.children[1])     # second child of ClassOrFunc is Name
-                if isinstance(child, tree.ClassOrFunc):
-                    process_subscope(child)
-
-            elif tree.is_node(child, "simple_stmt"):
-                globs.extend(find_names(child))
+        process_module()
 
         loc_pos = set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(usage.value)))
@@ -135,8 +104,8 @@ class NameHighlighter:
 
 
 def _load_plugin():
-    wb = get_workbench()  # type:Workbench
-    nb = wb.get_editor_notebook()  # type:EditorNotebook
+    wb = get_workbench()
+    nb = wb.get_editor_notebook()
 
-    name_hl = NameHighlighter()
+    name_hl = GlobLocHighlighter()
     nb.bind("<<NotebookTabChanged>>", name_hl._on_editor_change, True)

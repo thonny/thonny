@@ -4,13 +4,13 @@ from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 
-NAME_CONF = {'background': 'Black', 'foreground': 'White'}
+NAME_CONF = {'background': 'DarkGreen', 'foreground': 'White'}
 
 
 class NameHighlighter:
 
     def __init__(self):
-        self.text = None # type: Text
+        self.text = None  # type: Text
         self.bound_ids = {}
 
     @staticmethod
@@ -24,22 +24,68 @@ class NameHighlighter:
         return isinstance(scope, tree.Function) and scope.children[1].value == name.value
 
     @staticmethod
+    def get_def_from_function_params(func_node, name):
+        params = func_node.params
+        for param in params:
+            if param.children[0].value == name.value:
+                return param.children[0]
+        return None
+
+    # copied from jedi's tree.py with a few modifications
+    @staticmethod
+    def get_statement_for_position(node, pos):
+        for c in node.children:
+            # sorted here, because the end_pos property depends on the last child having the last position,
+            # there seems to be a problem with jedi, where the children of a node are not always in the right order
+            if isinstance(c, tree.Class):
+                c.children.sort(key=lambda x: x.end_pos)
+            if c.start_pos <= pos <= c.end_pos:
+                if c.type not in ('decorated', 'simple_stmt', 'suite') \
+                        and not isinstance(c, (tree.Flow, tree.ClassOrFunc)):
+                    return c
+                else:
+                    try:
+                        return c.get_statement_for_position(pos)
+                    except AttributeError:
+                        print("error")
+                        pass
+        return None
+
+    @staticmethod
+    def is_global_stmt_with_name(node, name_str):
+        return isinstance(node, tree.BaseNode) and node.type == "simple_stmt" and \
+               isinstance(node.children[0], tree.GlobalStmt) and \
+               node.children[0].children[1].value == name_str
+
+    @staticmethod
     def find_definition(scope, name):
-        if NameHighlighter.is_assignment_name(name):
-            return name
-        if isinstance(scope, tree.Function) and scope.children[1] == name:
-            return scope.children[1]
+
+        # if the name is the name of a function definition
+        if isinstance(scope, tree.Function):
+            if scope.children[1] == name:
+                return scope.children[1]  # 0th child is keyword "def", 1st is name
+            else:
+                definition = NameHighlighter.get_def_from_function_params(scope, name)
+                if definition:
+                    return definition
         for c in scope.children:
-            if isinstance(c, tree.Function) and c.children[1].value == name.value:
+            if isinstance(c, tree.Function) and c.children[1].value == name.value and \
+                    not isinstance(c.get_parent_scope(), tree.Class):
                 return c.children[1]
-            if NameHighlighter.is_assignment_node(c) and c.children[0].children[0].value == name.value:
+            if NameHighlighter.is_assignment_node_with_name(c, name.value):
                 return c.children[0].children[0]
             if isinstance(c, tree.BaseNode) and c.type == "suite":
                 for x in c.children:
-                    if NameHighlighter.is_assignment_node(x) and x.children[0].children[0].value == name.value:
+                    if NameHighlighter.is_global_stmt_with_name(x, name.value):
+                        return NameHighlighter.find_definition(scope.get_parent_scope(), name)
+                    if NameHighlighter.is_assignment_node_with_name(x, name.value):
                         return x.children[0].children[0]
         if not isinstance(scope, tree.Module):
             return NameHighlighter.find_definition(scope.get_parent_scope(), name)
+
+        # if name itself is the left side of an assignment statement, then the name is the definition
+        if NameHighlighter.is_assignment_name(name):
+            return name
         return None
 
     @staticmethod
@@ -48,35 +94,72 @@ class NameHighlighter:
         return isinstance(stmt, tree.ExprStmt) and stmt.children[0].value == name.value
 
     @staticmethod
-    def is_assignment_node(node):
+    def is_assignment_node_with_name(node, name_str):
         return isinstance(node, tree.BaseNode) and node.type == "simple_stmt" and \
-               isinstance(node.children[0], tree.ExprStmt)
+               isinstance(node.children[0], tree.ExprStmt) and node.children[0].children[0].value == name_str
 
     @staticmethod
-    def find_usages(name, module):
+    def get_dot_names(stmt):
+        try:
+            if stmt.children[1].children[0].value == ".":
+                return stmt.children[0], stmt.children[1].children[1]
+        except:
+            return ()
+        return ()
+
+    @staticmethod
+    def find_usages(name, stmt, module):
+        dot_names = NameHighlighter.get_dot_names(stmt)
+        if len(dot_names) > 1 and dot_names[1].value == name.value:
+            return set()
+
         # search for definition
         definition = NameHighlighter.find_definition(name.get_parent_scope(), name)
         searched_scopes = set()
 
-        def find_names_in_node(node):
+        is_function_definition = NameHighlighter.is_name_function_definition(definition) if definition else False
+
+        def find_usages_in_node(node, global_encountered=False):
             names = []
             if isinstance(node, tree.BaseNode):
                 if node.is_scope():
+                    global_encountered = False
                     if node in searched_scopes:
                         return names
                     searched_scopes.add(node)
+                    if isinstance(node, tree.Function):
+                        d = NameHighlighter.get_def_from_function_params(node, name)
+                        if d and d != definition:
+                            return []
+
                 for c in node.children:
-                    sub_result = find_names_in_node(c)
+                    dot_names = NameHighlighter.get_dot_names(c)
+                    if len(dot_names) > 1 and dot_names[1].value == name.value:
+                        continue
+                    sub_result = find_usages_in_node(c, global_encountered=global_encountered)
+
                     if sub_result is None:
-                        if node != scope:
+                        if not node.is_scope():
                             return None if definition and node != definition.get_parent_scope() else [definition]
                         else:
                             sub_result = []
                     names.extend(sub_result)
+                    if NameHighlighter.is_global_stmt_with_name(c, name.value):
+                        global_encountered = True
             elif isinstance(node, tree.Name) and node.value == name.value:
-                if (NameHighlighter.is_assignment_name(node) or NameHighlighter.is_name_function_definition(node))\
-                        and definition != node:
-                    return None
+                if definition and definition != node:
+                    if NameHighlighter.is_name_function_definition(node):
+                        if isinstance(node.get_parent_scope().get_parent_scope(), tree.Class):
+                            return []
+                        else:
+                            return None
+                    if NameHighlighter.is_assignment_name(node) and \
+                        not global_encountered and \
+                            (is_function_definition or node.get_parent_scope() != definition.get_parent_scope()):
+                            return None
+                    if NameHighlighter.is_name_function_definition(definition) and \
+                            isinstance(definition.get_parent_scope().get_parent_scope(), tree.Class):
+                        return None
                 names.append(node)
             return names
 
@@ -88,7 +171,7 @@ class NameHighlighter:
         else:
             scope = module
 
-        usages = find_names_in_node(scope)
+        usages = find_usages_in_node(scope)
 
         return usages
 
@@ -98,22 +181,23 @@ class NameHighlighter:
         l, c = int(index[0]), int(index[1])
         script = Script(self.text.get('1.0', 'end'), l, c)
 
-        user_stmt = script._parser.user_stmt()
         name = None
+        stmt = NameHighlighter.get_statement_for_position(script._parser.module(), script._pos)
 
-        if isinstance(user_stmt, tree.Name):
-            name = user_stmt
-        elif isinstance(user_stmt, tree.BaseNode):
-            name = user_stmt.name_for_position(script._pos)
+        if isinstance(stmt, tree.Name):
+            name = stmt
+        elif isinstance(stmt, tree.BaseNode):
+            name = stmt.name_for_position(script._pos)
 
         if not name:
             return set()
 
-        usages = NameHighlighter.find_usages(name, script._parser.module())
+        usages = NameHighlighter.find_usages(name, stmt, script._parser.module())
 
         return set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
                 for usage in usages)
+
     def _highlight(self, pos_info):
         if not self.text:
             return
@@ -142,7 +226,7 @@ class NameHighlighter:
         self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
 
 
-def _load_plugin():
+def load_plugin():
     wb = get_workbench()  # type:Workbench
     nb = wb.get_editor_notebook()  # type:EditorNotebook
 

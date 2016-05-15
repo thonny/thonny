@@ -42,8 +42,8 @@ def make_pat():
     return kw + "|" + builtin + "|" + comment + "|" + matches_any("STRING3", [dq3string, sq3string]) + "|" + \
            string_closed + "|" + string_open + "|" + matches_any("SYNC", [r"\n"])
 
-class SyntaxColorer:
 
+class SyntaxColorer:
     def __init__(self, text, main_font, bold_font):
         self.text = text
         self.prog = re.compile(make_pat(), re.S)
@@ -74,8 +74,6 @@ class SyntaxColorer:
             #"STRING":  {'background':None,'foreground':"#00AA00"},
             "STRING_CLOSED":  {'background':None,'foreground':"DarkGreen"},
             "STRING_OPEN": {'background': "Gray", "foreground": "Yellow"},
-            "STRING3":  {'background':None,'foreground':"DarkGreen"},
-            "STRING3_OPEN": {'background': "Gray", "foreground": "Yellow"},
             "DEFINITION": {},
             "BREAK": {'background':None,'foreground':"Purple"},
             "ERROR": {'background':None,'foreground':"Red"},
@@ -212,13 +210,17 @@ class SyntaxColorer:
                     for key, value in m.groupdict().items():
                         if value:
                             a, b = m.span(key)
-                            if key == "STRING3" and value.count('"""') < 2:
-                                str_end = int(float(self.text.index(head + "+%dc" % b)))
-                                file_end = int(float(self.text.index("end")))
-                                if str_end == file_end:
-                                    key = "STRING3_OPEN"
+                            if key == "STRING3":
+                                if (value.startswith('"""') and value.count('"""') < 2 or
+                                             value.startswith("'''") and value.count("'''") < 2):
+                                    str_end = int(float(self.text.index(head + "+%dc" % b)))
+                                    file_end = int(float(self.text.index("end")))
+                                    if str_end == file_end:
+                                        key = "STRING_OPEN"
+                                    else:
+                                        key = "STRING_CLOSED"
                                 else:
-                                    key = None
+                                    key = "STRING_CLOSED"
                             if key is not None:
                                 self.text.tag_add(key,
                                          head + "+%dc" % a,
@@ -280,7 +282,6 @@ class SyntaxColorer:
         self.config_colors()
         self.notify_range("1.0", "end")
 
-        # ...and bind the paren checking procedure to that widget's cursor move event
         self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
         self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
 
