@@ -178,9 +178,14 @@ class Workbench(tk.Tk):
     
     def _load_plugins(self):
         import thonny.plugins
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")
         
-        for _, module_name, _ in pkgutil.iter_modules(thonny.plugins.__path__,
-                                                       "thonny.plugins."):
+        user_plugins_path = os.path.expanduser(os.path.join("~", ".thonny", "plugins"))
+        sys.path.append(user_plugins_path)
+        self._load_plugins_from_path([user_plugins_path])
+        
+    def _load_plugins_from_path(self, path, prefix=""):
+        for _, module_name, _ in pkgutil.iter_modules(path, prefix):
             try:
                 m = importlib.import_module(module_name)
                 if hasattr(m, "load_plugin"):
