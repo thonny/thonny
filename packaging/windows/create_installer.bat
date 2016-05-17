@@ -11,6 +11,9 @@ xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python.exe -m pip install --pre --no-cache-dir thonny
 
+@echo ............... INSTALLING THONNY ...................................
+%BUILDDIR%\python.exe -m pip install --pre --no-cache-dir tkinterhtml
+
 
 @echo ............... INSTALLING easygui ...................................
 %BUILDDIR%\python.exe -m pip install --no-cache-dir easygui
