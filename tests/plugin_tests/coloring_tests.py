@@ -3,6 +3,7 @@ import tkinter
 from thonny.plugins.coloring import SyntaxColorer
 import tkinter.font as tk_font
 
+
 TEST_STR1 = """def my_function():
     str1 = "aslas'"
     str2 = 'asdasd"asda
