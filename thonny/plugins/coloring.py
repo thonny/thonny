@@ -209,16 +209,20 @@ class SyntaxColorer:
                 while m:
                     for key, value in m.groupdict().items():
                         if value:
+                            value = value.strip()
                             a, b = m.span(key)
                             if key == "STRING3":
-                                if (value.startswith('"""') and value.count('"""') < 2 or
-                                             value.startswith("'''") and value.count("'''") < 2):
+                                if (value.startswith('"""') and not value.endswith('"""') or
+                                             value.startswith("'''") and not value.endswith("'''")):
                                     str_end = int(float(self.text.index(head + "+%dc" % b)))
                                     file_end = int(float(self.text.index("end")))
+
                                     if str_end == file_end:
                                         key = "STRING_OPEN"
                                     else:
-                                        key = "STRING_CLOSED"
+                                        key = None
+                                elif len(value) >= 4 and value[-4] == "\\":
+                                    key = "STRING_OPEN"
                                 else:
                                     key = "STRING_CLOSED"
                             if key is not None:
