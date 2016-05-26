@@ -69,6 +69,11 @@ class NameHighlighter:
                 if definition:
                     return definition
         for c in scope.children:
+            if isinstance(c, tree.BaseNode) and c.type == "simple_stmt" and isinstance(c.children[0], tree.ImportName):
+                for n in c.children[0].get_defined_names():
+                    if n.value == name.value:
+                        return n
+                # print(c.path_for_name(name.value))
             if isinstance(c, tree.Function) and c.children[1].value == name.value and \
                     not isinstance(c.get_parent_scope(), tree.Class):
                 return c.children[1]
@@ -80,12 +85,14 @@ class NameHighlighter:
                         return NameHighlighter.find_definition(scope.get_parent_scope(), name)
                     if NameHighlighter.is_assignment_node_with_name(x, name.value):
                         return x.children[0].children[0]
+
         if not isinstance(scope, tree.Module):
             return NameHighlighter.find_definition(scope.get_parent_scope(), name)
 
         # if name itself is the left side of an assignment statement, then the name is the definition
         if NameHighlighter.is_assignment_name(name):
             return name
+
         return None
 
     @staticmethod
@@ -109,12 +116,14 @@ class NameHighlighter:
 
     @staticmethod
     def find_usages(name, stmt, module):
+        # check if stmt is dot qualified, disregard these
         dot_names = NameHighlighter.get_dot_names(stmt)
         if len(dot_names) > 1 and dot_names[1].value == name.value:
             return set()
 
         # search for definition
         definition = NameHighlighter.find_definition(name.get_parent_scope(), name)
+
         searched_scopes = set()
 
         is_function_definition = NameHighlighter.is_name_function_definition(definition) if definition else False
@@ -169,7 +178,8 @@ class NameHighlighter:
             else:
                 scope = definition.get_parent_scope()
         else:
-            scope = module
+            scope = name.get_parent_scope()
+
 
         usages = find_usages_in_node(scope)
 

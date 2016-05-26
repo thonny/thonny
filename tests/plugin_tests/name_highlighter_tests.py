@@ -6,12 +6,16 @@ TEST_STR1 = """def foo():
     foo()
     pass
 def boo(narg):
-    foo = 2  # 5
+    foo = 2  # line 5
     boo = foo + 4
     print(narg + 2)
 for i in range(5):
     boo()
-narg = 2  # 10
+narg = 2  # line 10
+def bar():
+    x + x
+def blarg():
+    x = 2
 """
 # tuple of tuples, where an inner tuple corresponds to a group of insert positions
 # that should produce the same output (corresponding expected output is in the
@@ -30,6 +34,8 @@ CURSOR_POSITIONS1 = (("1.4", "1.5", "1.7", "2.5"),
                      ("5.7", "6.12"),
                      ("4.10", "7.11"),
                      ("10.2",),
+                     ("12.5", "12.9",),
+                     ("14.5",),
                      )
 
 EXPECTED_INDICES1 = ({("1.4", "1.7"), ("2.4", "2.7")},
@@ -38,6 +44,8 @@ EXPECTED_INDICES1 = ({("1.4", "1.7"), ("2.4", "2.7")},
                      {("5.4", "5.7"), ("6.10", "6.13")},
                      {("4.8", "4.12"), ("7.10", "7.14")},
                      {("10.0", "10.4")},
+                     {("12.4", "12.5"), ("12.8", "12.9")},
+                     {("14.4", "14.5")},
                      )
 
 TEST_STR2 = """import too
