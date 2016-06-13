@@ -68,6 +68,7 @@ class NameHighlighter:
                 definition = NameHighlighter.get_def_from_function_params(scope, name)
                 if definition:
                     return definition
+
         for c in scope.children:
             if isinstance(c, tree.BaseNode) and c.type == "simple_stmt" and isinstance(c.children[0], tree.ImportName):
                 for n in c.children[0].get_defined_names():
@@ -77,33 +78,45 @@ class NameHighlighter:
             if isinstance(c, tree.Function) and c.children[1].value == name.value and \
                     not isinstance(c.get_parent_scope(), tree.Class):
                 return c.children[1]
-            if NameHighlighter.is_assignment_node_with_name(c, name.value):
-                return c.children[0].children[0]
             if isinstance(c, tree.BaseNode) and c.type == "suite":
                 for x in c.children:
                     if NameHighlighter.is_global_stmt_with_name(x, name.value):
                         return NameHighlighter.find_definition(scope.get_parent_scope(), name)
-                    if NameHighlighter.is_assignment_node_with_name(x, name.value):
-                        return x.children[0].children[0]
+                    if isinstance(x, tree.Name) and x.is_definition() and x.value == name.value:
+                        return x
+                    def_candidate = NameHighlighter.find_def_in_simple_node(x, name)
+                    if def_candidate:
+                        return def_candidate
 
         if not isinstance(scope, tree.Module):
             return NameHighlighter.find_definition(scope.get_parent_scope(), name)
 
         # if name itself is the left side of an assignment statement, then the name is the definition
-        if NameHighlighter.is_assignment_name(name):
+        if name.is_definition():
             return name
 
         return None
 
     @staticmethod
-    def is_assignment_name(name):
-        stmt = name.get_definition()
-        return isinstance(stmt, tree.ExprStmt) and stmt.children[0].value == name.value
+    def find_def_in_simple_node(node, name):
+        if isinstance(node, tree.Name) and node.is_definition() and node.value == name.value:
+            return name
+        if not isinstance(node, tree.BaseNode):
+            return None
+        for c in node.children:
+            return NameHighlighter.find_def_in_simple_node(c, name)
 
-    @staticmethod
-    def is_assignment_node_with_name(node, name_str):
-        return isinstance(node, tree.BaseNode) and node.type == "simple_stmt" and \
-               isinstance(node.children[0], tree.ExprStmt) and node.children[0].children[0].value == name_str
+    #@staticmethod
+    #def is_assignment_name(name):
+    #    stmt = name.get_definition()
+    #    print(stmt)
+    #    return isinstance(stmt, tree.ExprStmt) and stmt.name.value == name.value
+
+    #@staticmethod
+    #def is_assignment_node_with_name(node, name_str):
+    #return isinstance(node, tree.BaseNode) and node.
+    #return isinstance(node, tree.BaseNode) and node.type == "simple_stmt" and
+    #isinstance(node.children[0], tree.ExprStmt) and node.children[0].children[0].value == name_str
 
     @staticmethod
     def get_dot_names(stmt):
@@ -162,8 +175,7 @@ class NameHighlighter:
                             return []
                         else:
                             return None
-                    if NameHighlighter.is_assignment_name(node) and \
-                        not global_encountered and \
+                    if node.is_definition() and not global_encountered and \
                             (is_function_definition or node.get_parent_scope() != definition.get_parent_scope()):
                             return None
                     if NameHighlighter.is_name_function_definition(definition) and \
