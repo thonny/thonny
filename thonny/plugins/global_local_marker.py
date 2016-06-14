@@ -66,15 +66,17 @@ class GlobLocHighlighter:
 
         return glob_pos, loc_pos
 
+    def _configure_tags(self):
+        self.text.tag_configure("GLOBAL_NAME", GLOBAL_CONF)
+        self.text.tag_configure("LOCAL_NAME", LOCAL_CONF)
+        self.text.tag_raise("sel")
+        
     def _highlight(self, pos_info):
         if not self.text:
             return
 
-        self.text.tag_delete("GLOBAL_NAME")
-        self.text.tag_config("GLOBAL_NAME", GLOBAL_CONF)
-
-        self.text.tag_delete("LOCAL_NAME")
-        self.text.tag_config("LOCAL_NAME", LOCAL_CONF)
+        self.text.tag_remove("GLOBAL_NAME", "1.0", "end")
+        self.text.tag_remove("LOCAL_NAME", "1.0", "end")
 
         for pos in pos_info[0]:
             start_index, end_index = pos[0], pos[1]
@@ -96,6 +98,7 @@ class GlobLocHighlighter:
 
         # get the active text widget from the active editor of the active tab of the editor notebook
         self.text = event.widget.get_current_editor().get_text_widget()
+        self._configure_tags()
 
         # ...and bind the paren checking procedure to that widget's cursor move event
         self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)

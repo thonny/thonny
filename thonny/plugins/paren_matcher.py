@@ -1,6 +1,4 @@
-from thonny.code import EditorNotebook
 from thonny.globals import get_workbench
-from thonny.workbench import Workbench
 from thonny.ast_utils import tokenize_with_char_offsets
 
 
@@ -17,18 +15,25 @@ class ParenMatcher:
         self.bound_ids = {}
 
     def _on_change(self, event):
-        self.text.tag_delete(_HIGHLIGHT_CONF[0])
-        self.text.tag_delete(_UNDERLINE_CONF[0])
+        self.text.tag_remove(_HIGHLIGHT_CONF[0], "1.0", "end")
+        self.text.tag_remove(_UNDERLINE_CONF[0], "1.0", "end")
 
         self._highlight_surrounding()
         self._highlight_unclosed()
+    
+    def _configure_tags(self):
+        self.text.tag_configure(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
+        self.text.tag_configure(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
+        self.text.tag_lower(_UNDERLINE_CONF[0])
+        self.text.tag_raise("sel")
+        
 
     def _highlight_surrounding(self):
         indices = self.find_surrounding(self.text)
         if None in indices:
             return
         else:
-            self.text.tag_config(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
+            self._configure_tags()
             self.text.tag_add(_HIGHLIGHT_CONF[0], indices[0])
             self.text.tag_add(_HIGHLIGHT_CONF[0], indices[1])
 
@@ -39,7 +44,6 @@ class ParenMatcher:
         if self._remaining:
             opener = self._remaining[0]
             open_index = "%d.%d" % (opener.lineno, opener.col_offset)
-            self.text.tag_config(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
             self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
 
     def find_surrounding(self, text):
@@ -85,6 +89,7 @@ class ParenMatcher:
 
         # get the active text widget from the active editor of the active tab of the editor notebook
         self.text = event.widget.get_current_editor().get_text_widget()
+        self._configure_tags()
 
         # ...and bind the paren checking procedure to that widget's cursor move event
         self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)

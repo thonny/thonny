@@ -1,5 +1,3 @@
-from tkinter import Text
-
 from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
@@ -220,12 +218,17 @@ class NameHighlighter:
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
                 for usage in usages)
 
+
+    def _configure_tags(self):
+        self.text.tag_configure("NAME", NAME_CONF)
+        self.text.tag_raise("sel")
+    
     def _highlight(self, pos_info):
         if not self.text:
             return
 
-        self.text.tag_delete("NAME")
-        self.text.tag_config("NAME", NAME_CONF)
+        self.text.tag_remove("NAME", "1.0", "end")
+
 
         for pos in pos_info:
             start_index, end_index = pos[0], pos[1]
@@ -243,6 +246,7 @@ class NameHighlighter:
 
         # get the active text widget from the active editor of the active tab of the editor notebook
         self.text = event.widget.get_current_editor().get_text_widget()
+        self._configure_tags()
 
         self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
         self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
