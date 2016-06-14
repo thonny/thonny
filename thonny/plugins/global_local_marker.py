@@ -103,7 +103,7 @@ class GlobLocHighlighter:
         self._on_change(None)
 
 
-def _load_plugin():
+def load_plugin():
     wb = get_workbench()
     nb = wb.get_editor_notebook()
 
