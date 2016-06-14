@@ -73,7 +73,7 @@ class SyntaxColorer:
             "BUILTIN": {'background':None,'foreground':None},
             #"STRING":  {'background':None,'foreground':"#00AA00"},
             "STRING_CLOSED":  {'background':None,'foreground':"DarkGreen"},
-            "STRING_OPEN": {'background': "Gray", "foreground": "Yellow"},
+            "STRING_OPEN": {'background': "#c3f9d3", "foreground": "DarkGreen"},
             "DEFINITION": {},
             "BREAK": {'background':None,'foreground':"Purple"},
             "ERROR": {'background':None,'foreground':"Red"},

@@ -3,7 +3,7 @@ from thonny.ast_utils import tokenize_with_char_offsets
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
-_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "White", "background": "DarkGray"})  # highlight tag configuration
+_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Red"})  # highlight tag configuration
 _UNDERLINE_CONF = ("UNDERLINE", {"background": "LightGray"})
 
 

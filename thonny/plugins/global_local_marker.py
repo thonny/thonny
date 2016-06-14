@@ -2,8 +2,9 @@ from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 
-GLOBAL_CONF = {'background': 'White', 'foreground': 'Black'}
-LOCAL_CONF = {'underline': 1}
+GLOBAL_CONF = {}
+LOCAL_CONF = {'font': get_workbench().get_font("ItalicEditorFont"), 
+              'foreground' : "#000055"}
 
 
 class GlobLocHighlighter:

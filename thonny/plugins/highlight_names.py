@@ -2,7 +2,7 @@ from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 
-NAME_CONF = {'background': 'DarkGreen', 'foreground': 'White'}
+NAME_CONF = {'background' : '#e6ecfe'}
 
 
 class NameHighlighter:
