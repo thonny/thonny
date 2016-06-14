@@ -44,17 +44,29 @@ class ParenMatcher:
         # since the list is ordered, we can highlight everything starting from the first element
         if self._remaining:
             opener = self._remaining[0]
-            open_index = "%d.%d" % (opener.lineno, opener.col_offset)
+            open_index = "%d.%d" % (opener.start[0], opener.start[1])
             self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
+    
+    def _get_paren_tokens(self, source):
+        result = []
+        try: 
+            tokens = tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline)
+            for token in tokens:
+                if token.string != "" and token.string in "()[]{}":
+                    result.append(token)
+        except tokenize.TokenError:
+            # happens eg when parens are unbalanced
+            pass
+        
+        return result
 
     def find_surrounding(self, text):
-        source = text.get("1.0", "end")
-        tokens = tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline)
+                
         stack = []
         opener, closer = None, None
         open_index, close_index = None, None
         
-        for t in tokens:
+        for t in self._get_paren_tokens(text.get("1.0", "end")):
             if t.string == "" or t.string not in "()[]{}":
                 continue
             if t.string in "([{":
@@ -74,8 +86,9 @@ class ParenMatcher:
                     stack.pop()
         # used by _highlight_unclosed
         self._remaining = stack
-
+        
         return open_index, close_index
+        
 
     def _is_insert_between_indices(self, index1, index2):
         return self.text.compare("insert", ">=", index1) and \
