@@ -217,6 +217,10 @@ class Workbench(tk.Tk):
             'EditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family")),
             'BoldEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
                                             weight="bold"),
+            'ItalicEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+                                            slant="italic"),
+            'BoldItalicEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+                                            weight="bold", slant="italic"),
             'TreeviewFont' : tk_font.Font(family=default_font.cget("family"),
                                           size=default_font.cget("size"))
         }
@@ -729,6 +733,10 @@ class Workbench(tk.Tk):
         self.get_font("EditorFont").configure(family=editor_font_family,
                                               size=editor_font_size)
         self.get_font("BoldEditorFont").configure(family=editor_font_family,
+                                                  size=editor_font_size)
+        self.get_font("ItalicEditorFont").configure(family=editor_font_family,
+                                                  size=editor_font_size)
+        self.get_font("BoldItalicEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
         
         
