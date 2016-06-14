@@ -1,5 +1,6 @@
 from thonny.globals import get_workbench
-from thonny.ast_utils import tokenize_with_char_offsets
+import tokenize
+import io
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
@@ -47,15 +48,15 @@ class ParenMatcher:
             self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
 
     def find_surrounding(self, text):
-        tokens = tokenize_with_char_offsets(
-            text.get("1.0", "end"),
-            filter_func=lambda x: x.string != "" and x.string in "()[]{}")
-
+        source = text.get("1.0", "end")
+        tokens = tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline)
         stack = []
         opener, closer = None, None
         open_index, close_index = None, None
-
+        
         for t in tokens:
+            if t.string == "" or t.string not in "()[]{}":
+                continue
             if t.string in "([{":
                 stack.append(t)
             elif len(stack) > 0:
@@ -64,8 +65,8 @@ class ParenMatcher:
                     continue
                 if not closer:
                     opener = stack.pop()
-                    open_index = "%d.%d" % (opener.lineno, opener.col_offset)
-                    token_index = "%d.%d" % (t.lineno, t.col_offset)
+                    open_index = "%d.%d" % (opener.start[0], opener.start[1])
+                    token_index = "%d.%d" % (t.start[0], t.start[1])
                     if self._is_insert_between_indices(open_index, token_index):
                         closer = t
                         close_index = token_index
