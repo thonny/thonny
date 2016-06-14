@@ -4,7 +4,8 @@ import io
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
-_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Red"})  # highlight tag configuration
+_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Blue", 
+                                       "font" : get_workbench().get_font("BoldEditorFont")})  # highlight tag configuration
 _UNDERLINE_CONF = ("UNDERLINE", {"background": "LightGray"})
 
 
