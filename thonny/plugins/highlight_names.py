@@ -106,18 +106,6 @@ class NameHighlighter:
         for c in node.children:
             return NameHighlighter.find_def_in_simple_node(c, name)
 
-    #@staticmethod
-    #def is_assignment_name(name):
-    #    stmt = name.get_definition()
-    #    print(stmt)
-    #    return isinstance(stmt, tree.ExprStmt) and stmt.name.value == name.value
-
-    #@staticmethod
-    #def is_assignment_node_with_name(node, name_str):
-    #return isinstance(node, tree.BaseNode) and node.
-    #return isinstance(node, tree.BaseNode) and node.type == "simple_stmt" and
-    #isinstance(node.children[0], tree.ExprStmt) and node.children[0].children[0].value == name_str
-
     @staticmethod
     def get_dot_names(stmt):
         try:
@@ -192,9 +180,7 @@ class NameHighlighter:
         else:
             scope = name.get_parent_scope()
 
-
         usages = find_usages_in_node(scope)
-
         return usages
 
     def get_positions(self):
@@ -211,14 +197,19 @@ class NameHighlighter:
         elif isinstance(stmt, tree.BaseNode):
             name = stmt.name_for_position(script._pos)
 
-        if not name:
+        if not name or self._quote_before_index("%d.%d" % (name.start_pos[0], name.start_pos[1])):
             return set()
 
-        usages = NameHighlighter.find_usages(name, stmt, script._parser.module())
+        # format usage positions as tkinter text widget indices
+        usages = set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
+                      "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
+                        for usage in NameHighlighter.find_usages(name, stmt, script._parser.module()))
 
-        return set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
-                "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
-                for usage in usages)
+        # filter out names that are actually string literals
+        return set(filter(lambda x: not self._quote_before_index(x[0]), usages))
+
+    def _quote_before_index(self, index):
+        return self.text.get(index + "-1c") in "'\""
 
     def _highlight(self, pos_info):
         if not self.text:
