@@ -2,12 +2,10 @@
 
 import tkinter as tk
 from thonny import roughparse
-from thonny.parenmatch import ParenMatcher
 from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
-from traceback import print_exc
 from thonny.ui_utils import EnhancedTextWithLogging
 
 
@@ -17,15 +15,12 @@ class CodeView(tktextext.TextFrame):
                                      wrap=tk.NONE, **text_frame_args)
         
         # TODO: propose_remove_line_numbers
-        self.paren_matcher = None
-        # self.set_up_paren_matching()
         
         # Allow binding to events of all CodeView texts
         self.text.bindtags(self.text.bindtags() + ('CodeViewText',))
         
         self.text.bind("<Return>", self.newline_and_indent_event, True)
         self.text.bind("<<TextChange>>", self._on_text_changed, True)
-        self.text.bind("<<CursorMove>>", self._on_cursor_moved, True)
         
         tktextext.fixwordbreaks(tk._default_root)
         
@@ -47,13 +42,9 @@ class CodeView(tktextext.TextFrame):
 
         self.text.event_generate("<<TextChange>>")
     
-    def _on_cursor_moved(self, event):
-        self.update_paren_highlight()
-    
     def _on_text_changed(self, event):
         self.update_line_numbers()
         self.update_margin_line()
-        self.update_paren_highlight()
     
     def select_lines(self, first_line, last_line):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -84,27 +75,6 @@ class CodeView(tktextext.TextFrame):
             self.text.see(start + " -1 lines")
             
     
-    def set_up_paren_matching(self):
-        self.paren_matcher = ParenMatcher(self.text)
-        
-    def remove_paren_highlight(self): 
-        if self.paren_matcher:
-            try: 
-                self.paren_matcher.restore_event(None)
-            except:
-                pass
-    
-    def update_paren_highlight(self):
-        if self.paren_matcher: 
-            try:
-                char_before_cursor = self.text.get(self.text.index("insert-1c"))
-                if char_before_cursor in (")", "]", "}"):
-                    self.paren_matcher.paren_closed_event(None)
-                else:
-                    self.remove_paren_highlight()
-            except:
-                print_exc()
-        
     def get_selected_range(self):
         if self.text.has_selection():
             lineno, col_offset = map(int, self.text.index(tk.SEL_FIRST).split("."))
