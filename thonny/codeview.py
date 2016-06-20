@@ -20,6 +20,9 @@ class CodeView(tktextext.TextFrame):
         self.paren_matcher = None
         # self.set_up_paren_matching()
         
+        # Allow binding to events of all CodeView texts
+        self.text.bindtags(self.text.bindtags() + ('CodeViewText',))
+        
         self.text.bind("<Return>", self.newline_and_indent_event, True)
         self.text.bind("<<TextChange>>", self._on_text_changed, True)
         self.text.bind("<<CursorMove>>", self._on_cursor_moved, True)
