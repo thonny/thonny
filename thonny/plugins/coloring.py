@@ -84,16 +84,6 @@ class SyntaxColorer:
 
         if DEBUG: print('tagdefs',self.tagdefs)
 
-    def on_insert(self, index, chars, tags=None):
-        index = self.text.index(index)
-        #self.notify_range(index, index + "+%dc" % len(chars))
-        self.notify_range("1.0", "end")
-
-    def on_delete(self, index1, index2=None):
-        index1 = self.text.index(index1)
-        #self.notify_range(index1)
-        self.notify_range("1.0", "end")
-
     after_id = None
     allow_colorizing = True
     colorizing = False
@@ -111,37 +101,6 @@ class SyntaxColorer:
             self.after_id = self.text.after(1, self.recolorize)
 
     close_when_done = None # Window to be closed when done colorizing
-
-    def close(self, close_when_done=None):
-        if self.after_id:
-            after_id = self.after_id
-            self.after_id = None
-            if DEBUG: print("cancel scheduled recolorizer")
-            self.text.after_cancel(after_id)
-        self.allow_colorizing = False
-        self.stop_colorizing = True
-        if close_when_done:
-            if not self.colorizing:
-                close_when_done.destroy()
-            else:
-                self.close_when_done = close_when_done
-
-    def toggle_colorize_event(self, event):
-        if self.after_id:
-            after_id = self.after_id
-            self.after_id = None
-            if DEBUG: print("cancel scheduled recolorizer")
-            self.text.after_cancel(after_id)
-        if self.allow_colorizing and self.colorizing:
-            if DEBUG: print("stop colorizing")
-            self.stop_colorizing = True
-        self.allow_colorizing = not self.allow_colorizing
-        if self.allow_colorizing and not self.colorizing:
-            self.after_id = self.text.after(1, self.recolorize)
-        if DEBUG:
-            print("auto colorizing turned",\
-                  self.allow_colorizing and "on" or "off")
-        return "break"
 
     def recolorize(self):
         self.after_id = None
@@ -270,10 +229,6 @@ class SyntaxColorer:
                 if self.stop_colorizing:
                     if DEBUG: print("colorizing stopped")
                     return
-
-    def removecolors(self):
-        for tag in self.tagdefs:
-            self.text.tag_remove(tag, "1.0", "end")
 
     def _on_editor_change(self, event):
         if self.text:
