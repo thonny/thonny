@@ -182,11 +182,16 @@ class NameHighlighter:
         return usages
 
     def get_positions(self):
+        index = self.text.index("insert")
+        
+        # ignore if cursor in STRING_OPEN
+        if self.text.tag_prevrange("STRING_OPEN", index):
+            return set()
 
-        index = self.text.index("insert").split(".")
-        l, c = int(index[0]), int(index[1])
+        index_parts = index.split('.')
+        l, c = int(index_parts[0]), int(index_parts[1])
         script = Script(self.text.get('1.0', 'end'), l, c)
-
+        
         name = None
         stmt = NameHighlighter.get_statement_for_position(script._parser.module(), script._pos)
 
@@ -195,19 +200,13 @@ class NameHighlighter:
         elif isinstance(stmt, tree.BaseNode):
             name = stmt.name_for_position(script._pos)
 
-        if not name or self._quote_before_index("%d.%d" % (name.start_pos[0], name.start_pos[1])):
+        if not name:
             return set()
 
         # format usage positions as tkinter text widget indices
-        usages = set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
+        return set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                       "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
                         for usage in NameHighlighter.find_usages(name, stmt, script._parser.module()))
-
-        # filter out names that are actually string literals
-        return set(filter(lambda x: not self._quote_before_index(x[0]), usages))
-
-    def _quote_before_index(self, index):
-        return self.text.get(index + "-1c") in "'\""
 
 
     def _configure_tags(self):
