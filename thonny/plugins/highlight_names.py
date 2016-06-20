@@ -190,7 +190,7 @@ class NameHighlighter:
 
         index_parts = index.split('.')
         l, c = int(index_parts[0]), int(index_parts[1])
-        script = Script(self.text.get('1.0', 'end'), l, c)
+        script = Script(self.text.get('1.0', 'end') + ")", l, c)
         
         name = None
         stmt = NameHighlighter.get_statement_for_position(script._parser.module(), script._pos)
