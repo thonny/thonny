@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import sys
+import datetime
 import webbrowser
 import platform
 
@@ -9,7 +9,7 @@ from tkinter import ttk
 import tkinter.font as font
 
 from thonny import misc_utils
-from thonny.misc_utils import running_on_mac_os, get_python_version_string
+from thonny.misc_utils import get_python_version_string
 from thonny.globals import get_workbench
 
 class AboutDialog(tk.Toplevel):
@@ -71,7 +71,9 @@ class AboutDialog(tk.Toplevel):
         license_font = font.nametofont("TkDefaultFont").copy()
         license_font.configure(size=7)
         license_label = ttk.Label(main_frame,
-                                  text="Coppyright (©) 2015 Aivar Annamaa\n"
+                                  text="Coppyright (©) "
+                                  + str(datetime.datetime.now().year)
+                                  + " Aivar Annamaa\n"
                                   + "This program comes with\n"
                                   + "ABSOLUTELY NO WARRANTY!\n"
                                   + "It is free software, and you are welcome to\n"
