@@ -1,15 +1,17 @@
 from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
+import tkinter as tk
 
 NAME_CONF = {'background' : '#e6ecfe'}
 
 
 class NameHighlighter:
 
-    def __init__(self):
-        self.text = None  # type: Text
-        self.bound_ids = {}
+    def __init__(self, text):
+        self.text = text
+        self.text.tag_configure("NAME", NAME_CONF)
+        self.text.tag_raise("sel")
 
     @staticmethod
     def is_name_function_call_name(name):
@@ -209,43 +211,27 @@ class NameHighlighter:
                         for usage in NameHighlighter.find_usages(name, stmt, script._parser.module()))
 
 
-    def _configure_tags(self):
-        self.text.tag_configure("NAME", NAME_CONF)
-        self.text.tag_raise("sel")
-    
-    def _highlight(self, pos_info):
-        if not self.text:
-            return
-
+    def update(self):
         self.text.tag_remove("NAME", "1.0", "end")
 
-
-        for pos in pos_info:
+        for pos in self.get_positions():
             start_index, end_index = pos[0], pos[1]
             self.text.tag_add("NAME", start_index, end_index)
 
-    def _on_change(self, event):
-        highlight_positions = self.get_positions()
-        self._highlight(highlight_positions)
 
-    def _on_editor_change(self, event):
-        if self.text:
-            # unbind events from previous editor's text
-            for k, v in self.bound_ids.items():
-                self.text.unbind(k, v)
-
-        # get the active text widget from the active editor of the active tab of the editor notebook
-        self.text = event.widget.get_current_editor().get_text_widget()
-        self._configure_tags()
-
-        self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
-        self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
+def update_highlighting(event):
+    assert isinstance(event.widget, tk.Text)
+    text = event.widget
+    
+    if not hasattr(text, "name_highlighter"):
+        text.name_highlighter = NameHighlighter(text)
+        
+    text.name_highlighter.update()
 
 
 def load_plugin():
     wb = get_workbench()  # type:Workbench
-    nb = wb.get_editor_notebook()  # type:EditorNotebook
 
-    name_hl = NameHighlighter()
-
-    nb.bind("<<NotebookTabChanged>>", name_hl._on_editor_change, True)
+    wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
+    wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
+    
