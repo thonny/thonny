@@ -268,7 +268,7 @@ class EnhancedText(TweakableText):
         return "break"
 
     def perform_return(self, event):
-        # Override this for Python
+        # Override this for language specific auto indent
         pass
     
     def perform_smart_home(self, event):
