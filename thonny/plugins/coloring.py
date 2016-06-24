@@ -44,9 +44,10 @@ def make_pat():
 class SyntaxColorer:
     def __init__(self, text, main_font, bold_font):
         self.text = text
+        self.after_id = None
+        self.colorizing = False
         self.prog = re.compile(make_pat(), re.S)
         self.idprog = re.compile(r"\s+(\w+)", re.S)
-        self.asprog = re.compile(r".*?\b(as)\b")
         self._load_tag_defs(main_font, bold_font)
         self._config_colors()
         self.notify_active_range()
@@ -70,13 +71,8 @@ class SyntaxColorer:
             "STRING_CLOSED":  {'background':None,'foreground':"DarkGreen"},
             "STRING_OPEN": {'background': "#c3f9d3", "foreground": "DarkGreen"},
             "DEFINITION": {},
-            "BREAK": {'background':None,'foreground':"Purple"},
-            "ERROR": {'background':None,'foreground':"Red"},
             }
 
-    after_id = None
-    colorizing = False
-    
     def _notify_range(self, index1, index2):
         self.text.tag_add("TODO", index1, index2)
         if self.after_id:
@@ -89,6 +85,7 @@ class SyntaxColorer:
 
     def _recolorize(self):
         "manages delayed coloring"
+        print("-------------------------------------------------")
         self.after_id = None
         if self.colorizing:
             return
@@ -128,6 +125,7 @@ class SyntaxColorer:
                 lines_to_get = min(lines_to_get * 2, 100)
                 ok = "SYNC" in self.text.tag_names(next_index + "-1c")
                 line = self.text.get(mark, next_index)
+                print(line, end="")
                 
                 if not line:
                     return
@@ -165,22 +163,6 @@ class SyntaxColorer:
                                 if m1:
                                     a, b = m1.span(1)
                                     self.text.tag_add("DEFINITION",
-                                                 head + "+%dc" % a,
-                                                 head + "+%dc" % b)
-                            elif value == "import":
-                                # color all the "as" words on same line, except
-                                # if in a comment; cheap approximation to the
-                                # truth
-                                if '#' in chars:
-                                    endpos = chars.index('#')
-                                else:
-                                    endpos = len(chars)
-                                while True:
-                                    m1 = self.asprog.match(chars, b, endpos)
-                                    if not m1:
-                                        break
-                                    a, b = m1.span(1)
-                                    self.text.tag_add("KEYWORD",
                                                  head + "+%dc" % a,
                                                  head + "+%dc" % b)
                     m = self.prog.search(chars, m.end())
