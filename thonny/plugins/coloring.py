@@ -1,6 +1,5 @@
 # copied from idlelib and modified
 
-import time
 import re
 import keyword
 import builtins
@@ -8,9 +7,6 @@ import tkinter as tk
 
 from thonny.globals import get_workbench
 from thonny.shell import ShellText
-
-DEBUG = False
-
 
 def matches_any(name, alternates):
     "Return a named group pattern matching list of alternates."
@@ -84,56 +80,33 @@ class SyntaxColorer:
             "hit": {'background':"Yellow",'foreground':None}
             }
 
-        if DEBUG: print('tagdefs',self.tagdefs)
-
     after_id = None
-    allow_colorizing = True
     colorizing = False
     
-    def _notify_range(self, index1, index2=None):
+    def _notify_range(self, index1, index2):
         self.text.tag_add("TODO", index1, index2)
         if self.after_id:
-            if DEBUG: print("colorizing already scheduled")
             return
+        
         if self.colorizing:
             self.stop_colorizing = True
-            if DEBUG: print("stop colorizing")
-        if self.allow_colorizing:
-            if DEBUG: print("schedule colorizing")
-            self.after_id = self.text.after(1, self._recolorize)
-
-    close_when_done = None # Window to be closed when done colorizing
+            
+        self.after_id = self.text.after(1, self._recolorize)
 
     def _recolorize(self):
+        "manages delayed coloring"
         self.after_id = None
-        """ AA
-        if not self.delegate:
-            if DEBUG: print("no delegate")
-            return
-        """
-        if not self.allow_colorizing:
-            if DEBUG: print("auto colorizing is off")
-            return
         if self.colorizing:
-            if DEBUG: print("already colorizing")
             return
+        
         try:
             self.stop_colorizing = False
             self.colorizing = True
-            if DEBUG: print("colorizing...")
-            t0 = time.clock()
             self._recolorize_main()
-            t1 = time.clock()
-            if DEBUG: print("%.3f seconds" % (t1-t0))
         finally:
             self.colorizing = False
-        if self.allow_colorizing and self.text.tag_nextrange("TODO", "1.0"):
-            if DEBUG: print("reschedule colorizing")
+        if self.text.tag_nextrange("TODO", "1.0"):
             self.after_id = self.text.after(1, self._recolorize)
-        if self.close_when_done:
-            top = self.close_when_done
-            self.close_when_done = None
-            top.destroy()
 
     def _recolorize_main(self):
         next_index = "1.0"
@@ -152,6 +125,7 @@ class SyntaxColorer:
             chars = ""
             next_index = head
             lines_to_get = 1
+            
             ok = False
             while not ok:
                 mark = next_index
@@ -160,13 +134,15 @@ class SyntaxColorer:
                 lines_to_get = min(lines_to_get * 2, 100)
                 ok = "SYNC" in self.text.tag_names(next_index + "-1c")
                 line = self.text.get(mark, next_index)
-                ##print head, "get", mark, next_index, "->", repr(line)
+                
                 if not line:
                     return
+                
                 for tag in self.tagdefs:
                     self.text.tag_remove(tag, mark, next_index)
                 chars = chars + line
                 m = self.prog.search(chars)
+                
                 while m:
                     for key, value in m.groupdict().items():
                         if value:
@@ -214,11 +190,13 @@ class SyntaxColorer:
                                                  head + "+%dc" % a,
                                                  head + "+%dc" % b)
                     m = self.prog.search(chars, m.end())
+                
                 if "SYNC" in self.text.tag_names(next_index + "-1c"):
                     head = next_index
                     chars = ""
                 else:
                     ok = False
+                
                 if not ok:
                     # We're in an inconsistent state, and the call to
                     # update may tell us to stop.  It may also change
@@ -229,12 +207,15 @@ class SyntaxColorer:
                     self.text.tag_add("TODO", next_index)
                 self.text.update()
                 if self.stop_colorizing:
-                    if DEBUG: print("colorizing stopped")
                     return
 
 class ShellSyntaxColorer(SyntaxColorer):
     def notify_active_range(self):
-        SyntaxColorer.notify_active_range(self)
+        parts = self.text.tag_prevrange("command", "end")
+        
+        if parts:
+            print("Coloring", parts)
+            self._notify_range(parts[0], parts[1])
 
 def update_coloring(event):
     assert isinstance(event.widget, tk.Text)
@@ -255,3 +236,4 @@ def load_plugin():
     wb = get_workbench() 
 
     wb.bind_class("CodeViewText", "<<TextChange>>", update_coloring, True)
+    wb.bind_class("ShellText", "<<TextChange>>", update_coloring, True)
