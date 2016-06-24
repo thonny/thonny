@@ -3,9 +3,7 @@
 import tkinter as tk
 import jedi
 from thonny.globals import get_workbench
-from thonny.tktextext import TweakableText
-import traceback
-from thonny.codeview import CodeViewText, CodeView
+from thonny.codeview import CodeViewText
 
 
 
@@ -14,203 +12,160 @@ from thonny.codeview import CodeViewText, CodeView
 #2) adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown
 #3) perhaps make the number of maximum autocomplete options to show configurable?
 
-#the primary method that's intended to be called from codeview
-#uses jedi functionality to get a list of completion suggestions based on the code source
-#if 0 suggestions are found, does nothing
-#if 1 suggestion is found, inserts it into the text
-#if 2+ suggestions are found, creates a vertical list of suggestions where the user can choose
-def autocomplete(codeview, row, column, filename):
-    try: 
-        editor = codeview.master
+class Completer(tk.Listbox):
+    def __init__(self, text):
+        tk.Listbox.__init__(self, master=text,
+                            font=get_workbench().get_font("EditorFont"),
+                            activestyle="dotbox",
+                            exportselection=False)
+        
+        self.completions = []
+        self.text = text
+        
+        # Auto indenter will eat up returns, therefore I need to raise the priority
+        # of this binding
+        self.text_priority_bindtag = "completable" + str(self.text.winfo_id())
+        self.text.bindtags((self.text_priority_bindtag,) + self.text.bindtags())
+        self.text.bind_class(self.text_priority_bindtag, "<Key>", self._on_text_keypress, True)
+        
+        self.text.bind("<<TextChange>>", self._on_text_change, True) # Assuming TweakableText
+    
+    def handle_autocomplete_request(self):
+        if self._is_visible():
+            return
+        
+        row, column = self._get_position()
+        self._update_completions()
+        
+        if len(self.completions) == 0:
+            pass
+        elif len(self.completions) == 1:
+            self._insert_completion(self.completions[0]) #insert the only completion
+        else:
+            self._show(self.completions)        
+        
+        
         get_workbench().event_generate("AutocompleteQuery",
-            editor=editor,
+            text_widget=self.text,
             row=row,
-            column=column)
+            column=column,
+            proposed_names=[c.name for c in self.completions])
         
-        script = jedi.Script(codeview.get_content(), row, column, filename)
-        completions = script.completions() 
-
-        if len(completions) == 0:
-            return
-
-        elif len(completions) == 1:
-            _complete(codeview, completions[0]) #insert the only completion
-
-        else:
-            AutocompleteWindow(codeview, completions) #create the window
-    except:
-        # Don't want the crash, rather fail "silently"
-        traceback.print_exc()
-
-def _get_partial_string(completion): #calculates the partial string such as it was for user when autocomplete was called, used for user_logging info
-    return completion.name[:-len(completion.complete)]
-
-#inserts the chosen completion into the current position in the codeview
-def _complete(codeview, completion):
-    get_workbench().event_generate("AutocompleteFinished",
-        partial_string=_get_partial_string(completion),
-        chosen_completion=completion.name)
-    codeview.text.insert(codeview.text.index('insert'), completion.complete)
-
-#top-level container of the vertical list of suggestions
-# TODO: do we need the toplevel?
-class AutocompleteWindow(tk.Toplevel): 
-    def __init__(self, codeview, completions):
-        tk.Toplevel.__init__(self, background='red') #TODO - background configurable
-
-        #create and place the text windget
-        self.text = AutocompleteWindowText(self, codeview, completions)
-        self.text.grid(row=0, column=0)
-
-        #calculate and apply the position of the window
-        insert_index = codeview.text.index("insert");
-        wordlen = len(completions[0].name) - len(completions[0].complete)
-        insert_pos = codeview.text.bbox(str(insert_index) + '-%dc' % wordlen);
-        self.geometry('+%d+%d' % (codeview.text.winfo_rootx() + insert_pos[0] - 2, codeview.text.winfo_rooty() + insert_pos[1] + insert_pos[3]))
-
-        #create bindings
-        self.bind("<Escape>", self.destroy)
-        #TODO: ??? self.bind("<B1-Motion>", lambda e: "break")
-        self.bind("<Double-Button-1>", self.text._set_marked_line)
-        self.bind("<Button-1>", self.text._handle_click)
-        self.bind_all("<Button-1>", self.text._handle_click) #if the click is outside window, destroy it
-        self.overrideredirect(1) #remove the title bar
-
-#inner container showing the list of suggestions
-class AutocompleteWindowText(TweakableText):
-    def __init__(self, master, codeview, completions, *args, **kwargs):
-        #init the text widget - note the height calculation, #TODO - make the height configurable?
-        TweakableText.__init__(self, master, height=min(len(completions), 10), 
-                               width=30, takefocus=1, insertontime=0, background='#ececea', 
-                               borderwidth=1, wrap='none', read_only=False, 
-                               *args, **kwargs)
-
-        self.codeview = codeview
-        self.completions = completions
-        self.marked_line = None #currently selected line
-        #tag for the currently selected line, #TODO - make colours configurable
-        self.tag_configure("selected", background="#eefb1a", underline=True)
-        self._draw_content() #populate the list
-        self.mark_set("insert", '1.0')
-        #register event bindings
-        self.bind("<B1-Motion>", lambda e: "break", True)
-        self.bind("<Double-Button-1>", self._choose_completion, True)
-        self.bind("<Button-1>", self._handle_click, True)
-        self.bind("<Up>", self._up_marked_line, True)
-        self.bind("<Down>", self._down_marked_line, True)
-        self.bind("<Return>", self._choose_completion, True)
-        self.bind("<Escape>", self._ok, True)
-        #set the first completion in the list as selected
-        self._mark_line(1)
-        #force focus in the window
-        self.focus_force()
-
-    #listens to all left clicks - if outside the autocomplete window, close it
-    def _handle_click(self, event):
-        inside_widget = True
-
         
-        if self.master.winfo_containing(event.x_root, event.y_root) != self:
-            inside_widget = False
+    def _show(self, completions):
+        typed_name_length = len(completions[0].name) - len(completions[0].complete)
+        box_x, box_y, _, box_height = self.text.bbox('insert-%dc' % typed_name_length);
+        self.place(x=box_x, y=box_y + box_height,
+                   width=400, height=200)
 
-        if inside_widget:
-            self._set_marked_line(event) #set the market line based on where click was made
-
-        else:
-            self._ok() #destroy the window
-
-    #populate the window with suggestions 
-    def _draw_content(self):
-        names = [completion.name for completion in self.completions]
-        self.insert("1.0", '\n'.join(names))
-
-    #move the marked line up when up key was pressed
-    def _up_marked_line(self, event):
-        self.mark_set("insert", self.index('insert') + '-1l')
-        index = self.index('insert')
-        line = int(index[0:index.index('.')])
-        self._mark_line(line)
-        self.see(index)
-        return 'break'
-
-    #move the marked line down when down key was pressed
-    def _down_marked_line(self, event):
-        self.mark_set("insert", self.index('insert') + '+1l')
-        index = self.index('insert')
-        line = int(index[0:index.index('.')])
-        self._mark_line(line)
-        self.see(index)
-        return 'break'
-
-    #calculate the marked line based on mouse click location
-    def _set_marked_line(self, event):
-        index = self.index('@' + str(event.x) + ',' + str(event.y))
-        line = int(index[0:index.index('.')])
-        self._mark_line(line)
+    def _is_visible(self):
+        return self.winfo_ismapped()
+    
+    def _insert_completion(self, completion=None):
+        if completion is None:
+            completion = self.completions[self.curselection()[0]]
+        
+        get_workbench().event_generate("AutocompleteInsertion",
+            text_widget=self.text,
+            typed_name=completion.name[:-len(completion.complete)],
+            completed_name=completion.name)
+        
+        if self._is_visible():
+            self._close()
             
-    #do the actual line marking - remove previous tag and add the new one
-    def _mark_line(self, newline):
-        if self.marked_line is not None and self.marked_line == newline:
-            return
-
-        self._clear_marked_line()
-        self.marked_line = newline
-
-        start_index = self.index(str(self.marked_line) + '.0')
-        end_index = self.index(str(self.marked_line) + '.end')
-
-        self.tag_add("selected", start_index, end_index);
-
-    #clear the previously marked line
-    def _clear_marked_line(self):
-        if self.marked_line == None:
-            return
-
-        start_index = self.index(str(self.marked_line) + '.0')
-        end_index = self.index(str(self.marked_line) + '.end')
-
-        self.tag_remove("selected", start_index, end_index);
-
-    #finalize choosing the suggestions - insert it into codeview and close window
-    def _choose_completion(self, event=None):
-        completion = self.completions[self.marked_line-1]
-        _complete(self.codeview, completion)
-        self._ok(cancel=False)
+        self.text.insert(self.text.index('insert'), completion.complete)
         
-    #unregister global bindings, destroy both inner and top-level widgets
-    def _ok(self, event=None, cancel=True):
-        if cancel:
-            get_workbench().event_generate("AutocompleteCanceled", editor=self.codeview.master)
-        self.master.unbind_all("<Button-1>")
-        self.master.destroy()
-        self.destroy()
+        try:
+            print(completion.docstring())
+        except:
+            # jedi crashes in some cases
+            pass
+        
+    
+    def _get_filename(self):
+        # TODO: allow completing in shell
+        if not isinstance(self.text, CodeViewText):
+            return None
+        
+        codeview = self.text.master
+        
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if editor.get_code_view() is codeview:
+            return editor.get_filename()
+        else:
+            return None
+    
+    def _move_selection(self, delta):
+        selected = self.curselection()
+        if len(selected) == 0:
+            index = 0
+        else:
+            index = selected[0]
+        
+        index += delta
+        index = max(0, min(self.size()-1, index))
+        
+        self.selection_clear(0, self.size()-1)
+        self.selection_set(index)
+        self.activate(index)
+    
+    def _update_completions(self):
+        row, column = self._get_position()
+        source = self.text.get("1.0", "end-1c")
+        script = jedi.Script(source, row, column, self._get_filename())
+        self.completions = script.completions() 
 
-def on_autocomplete_request(event=None):
+        names = [c.name for c in self.completions]
+        self.delete(0, self.size())
+        self.insert(0, *names)
+        self.activate(0)
+        self.selection_set(0)
+        
+        
+
+    def _get_position(self):
+        return map(int, self.text.index("insert").split("."))
+    
+    def _on_text_keypress(self, event=None):
+        if not self._is_visible():
+            return
+        
+        if event.keysym == "Escape":
+            self._close()
+            return "break"
+        elif event.keysym in ["Up", "KP_Up"]:
+            self._move_selection(-1)
+            return "break"
+        elif event.keysym in ["Down", "KP_Down"]:
+            self._move_selection(1)
+            return "break"
+        elif event.keysym in ["Return", "KP_Enter"]:
+            self._insert_completion()
+            return "break"
+    
+    def _on_text_change(self, event=None):
+        if self._is_visible():
+            self._update_completions()
+
+    
+    def _close(self, event=False):
+        self.place_forget()
+    
+def handle_autocomplete_request(event=None):
     if event is None:
         text = get_workbench().focus_get()
     else:
         text = event.widget
     
-    if not isinstance(text, CodeViewText):
-        return
+    if not hasattr(text, "completer"):
+        text.completer = Completer(text)
     
-    codeview = text.master
-    assert isinstance(codeview, CodeView)
-    
-    editor = get_workbench().get_editor_notebook().get_current_editor()
-    if editor.get_code_view() is codeview:
-        filename = editor.get_filename()
-    else:
-        filename = None
-    
-    
-    row, column = map(int, text.index("insert").split("."))
-    autocomplete(codeview, row, column, filename)
+    text.completer.handle_autocomplete_request()
 
 def load_plugin():
     
     get_workbench().add_command("autocomplete", "edit", "Auto-complete",
-        on_autocomplete_request,
+        handle_autocomplete_request,
         default_sequence="<Control-space>"
         # TODO: tester
         )
