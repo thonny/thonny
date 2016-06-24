@@ -4,8 +4,10 @@ import time
 import re
 import keyword
 import builtins
+import tkinter as tk
 
 from thonny.globals import get_workbench
+from thonny.shell import ShellText
 
 DEBUG = False
 
@@ -49,20 +51,20 @@ class SyntaxColorer:
         self.prog = re.compile(make_pat(), re.S)
         self.idprog = re.compile(r"\s+(\w+)", re.S)
         self.asprog = re.compile(r".*?\b(as)\b")
-        self.LoadTagDefs(main_font, bold_font)
-        self.bound_ids = {}
+        self._load_tag_defs(main_font, bold_font)
+        self._config_colors()
+        self.notify_active_range()
 
-        if text:
-            self.config_colors()
-            self.notify_range("1.0", "end")
+    def notify_active_range(self):
+        self._notify_range("1.0", "end")
 
-    def config_colors(self):
+    def _config_colors(self):
         for tag, cnf in self.tagdefs.items():
             if cnf:
                 self.text.tag_configure(tag, **cnf)
         self.text.tag_raise('sel')
 
-    def LoadTagDefs(self, main_font, bold_font):
+    def _load_tag_defs(self, main_font, bold_font):
         self.tagdefs = {
             "SYNC": {'background':None,'foreground':None},
             "TODO": {'background':None,'foreground':None},
@@ -87,8 +89,8 @@ class SyntaxColorer:
     after_id = None
     allow_colorizing = True
     colorizing = False
-
-    def notify_range(self, index1, index2=None):
+    
+    def _notify_range(self, index1, index2=None):
         self.text.tag_add("TODO", index1, index2)
         if self.after_id:
             if DEBUG: print("colorizing already scheduled")
@@ -98,11 +100,11 @@ class SyntaxColorer:
             if DEBUG: print("stop colorizing")
         if self.allow_colorizing:
             if DEBUG: print("schedule colorizing")
-            self.after_id = self.text.after(1, self.recolorize)
+            self.after_id = self.text.after(1, self._recolorize)
 
     close_when_done = None # Window to be closed when done colorizing
 
-    def recolorize(self):
+    def _recolorize(self):
         self.after_id = None
         """ AA
         if not self.delegate:
@@ -120,20 +122,20 @@ class SyntaxColorer:
             self.colorizing = True
             if DEBUG: print("colorizing...")
             t0 = time.clock()
-            self.recolorize_main()
+            self._recolorize_main()
             t1 = time.clock()
             if DEBUG: print("%.3f seconds" % (t1-t0))
         finally:
             self.colorizing = False
         if self.allow_colorizing and self.text.tag_nextrange("TODO", "1.0"):
             if DEBUG: print("reschedule colorizing")
-            self.after_id = self.text.after(1, self.recolorize)
+            self.after_id = self.text.after(1, self._recolorize)
         if self.close_when_done:
             top = self.close_when_done
             self.close_when_done = None
             top.destroy()
 
-    def recolorize_main(self):
+    def _recolorize_main(self):
         next_index = "1.0"
         while True:
             item = self.text.tag_nextrange("TODO", next_index)
@@ -230,28 +232,26 @@ class SyntaxColorer:
                     if DEBUG: print("colorizing stopped")
                     return
 
-    def _on_editor_change(self, event):
-        if self.text:
-            # unbind events from previous editor's text
-            for k, v in self.bound_ids.items():
-                self.text.unbind(k, v)
+class ShellSyntaxColorer(SyntaxColorer):
+    def notify_active_range(self):
+        SyntaxColorer.notify_active_range(self)
 
-        # get the active text widget from the active editor of the active tab of the editor notebook
-        self.text = event.widget.get_current_editor().get_text_widget()
-        self.config_colors()
-        self.notify_range("1.0", "end")
-
-        self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
-        self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
-
-    def _on_change(self, event):
-        self.notify_range("1.0", "end")
-
+def update_coloring(event):
+    assert isinstance(event.widget, tk.Text)
+    text = event.widget
+    
+    if not hasattr(text, "syntax_colorer"):
+        if isinstance(text, ShellText):
+            class_ = ShellSyntaxColorer
+        else:
+            class_ = SyntaxColorer
+            
+        text.syntax_colorer = class_(text, get_workbench().get_font("EditorFont"),
+                            get_workbench().get_font("BoldEditorFont"))
+    
+    text.syntax_colorer.notify_active_range()
 
 def load_plugin():
+    wb = get_workbench() 
 
-    nb = get_workbench().get_editor_notebook()  # type:EditorNotebook
-    colorer = SyntaxColorer(None, get_workbench().get_font("EditorFont"),
-                            get_workbench().get_font("BoldEditorFont"))
-
-    nb.bind("<<NotebookTabChanged>>", colorer._on_editor_change, True)
+    wb.bind_class("CodeViewText", "<<TextChange>>", update_coloring, True)
