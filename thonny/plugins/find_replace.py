@@ -21,8 +21,10 @@ class FindDialog(tk.Toplevel):
     def __init__(self, master):
         tk.Toplevel.__init__(self, master, borderwidth=15, takefocus=1)
         
-        self.codeview = master; 
-        self._init_found_tag_styles();  #sets up the styles used to highlight found strings
+        self.codeview = master
+        self.codeview.text.tag_configure("hit", background="Yellow", foreground=None)
+        
+        self._init_found_tag_styles()  #sets up the styles used to highlight found strings
         #references to the current set of passive found tags e.g. all words that match the searched term but are not the active string
         self.passive_found_tags = set()
         self.active_found_tag = None    #reference to the currently active (centered) found string

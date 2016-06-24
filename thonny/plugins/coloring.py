@@ -64,20 +64,14 @@ class SyntaxColorer:
         self.tagdefs = {
             "SYNC": {'background':None,'foreground':None},
             "TODO": {'background':None,'foreground':None},
-
             "COMMENT": {'background':None,'foreground':"DarkGray"},
             "KEYWORD": {'background':None,'foreground':"#7f0055", "font":bold_font},
-            #"KEYWORD": {'background':None,'foreground':"#ff7700", "font":ui_utils.BOLD_EDITOR_FONT},
             "BUILTIN": {'background':None,'foreground':None},
-            #"STRING":  {'background':None,'foreground':"#00AA00"},
             "STRING_CLOSED":  {'background':None,'foreground':"DarkGreen"},
             "STRING_OPEN": {'background': "#c3f9d3", "foreground": "DarkGreen"},
             "DEFINITION": {},
             "BREAK": {'background':None,'foreground':"Purple"},
             "ERROR": {'background':None,'foreground':"Red"},
-
-            # The following is used by ReplaceDialog:
-            "hit": {'background':"Yellow",'foreground':None}
             }
 
     after_id = None
