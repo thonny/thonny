@@ -107,6 +107,8 @@ class SyntaxColorer:
                 if cnf:
                     self.text.tag_configure(tag, **cnf)
         
+        self.text.tag_raise("STRING_CLOSED3", "KEYWORD")
+        self.text.tag_raise("STRING_OPEN3", "KEYWORD")
         self.text.tag_raise("STRING_CLOSED3", "STRING_CLOSED")
         self.text.tag_raise("STRING_OPEN3", "STRING_OPEN")
         self.text.tag_raise('sel')
