@@ -356,7 +356,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
         try:
             # index1 may be eg "sel.first" and it doesn't make sense *after* deletion
             concrete_index1 = self.index(index1)
-            if index1 is not None:
+            if index2 is not None:
                 concrete_index2 = self.index(index2)
             else:
                 concrete_index2 = None
