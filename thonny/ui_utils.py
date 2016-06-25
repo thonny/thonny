@@ -345,17 +345,26 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             # TODO: does it occur when opening a file with line numbers in it?
             #if self._propose_remove_line_numbers and isinstance(chars, str):
             #    chars = try_remove_linenumbers(chars, self)
-                
+            concrete_index = self.index(index)
             return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags)
         finally:
-            get_workbench().event_generate("TextInsert", index=index, text=chars, tags=tags, text_widget=self)
+            get_workbench().event_generate("TextInsert", index=concrete_index, 
+                                           text=chars, tags=tags, text_widget=self)
 
     
     def direct_delete(self, index1, index2=None):
         try:
+            # index1 may be eg "sel.first" and it doesn't make sense *after* deletion
+            concrete_index1 = self.index(index1)
+            if index1 is not None:
+                concrete_index2 = self.index(index2)
+            else:
+                concrete_index2 = None
+                
             return tktextext.EnhancedText.direct_delete(self, index1, index2=index2)
         finally:
-            get_workbench().event_generate("TextDelete", index1=index1, index2=index2, text_widget=self)
+            get_workbench().event_generate("TextDelete", index1=concrete_index1,
+                                           index2=concrete_index2, text_widget=self)
             
     
 
