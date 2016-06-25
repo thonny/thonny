@@ -73,8 +73,10 @@ class SyntaxColorer:
         
         self.multiline_regex = re.compile(
             string3
-            + "|" + string_closed 
-            + "|" + string_open
+            + "|" + comment 
+            + "|" + magic_command 
+            #+ "|" + string_closed # need to include single line strings otherwise '"""' ... '""""' will give wrong result
+            + "|" + string_open # (seems that it works faster and also correctly with only open strings)
             , re.S)
         
         self.id_regex = re.compile(r"\s+(\w+)", re.S)
@@ -122,7 +124,7 @@ class SyntaxColorer:
         
         for match in self.uniline_regex.finditer(chars):
             for token_type, token_text in match.groupdict().items():
-                if token_type in self.uniline_tagdefs and token_text:
+                if token_text and token_type in self.uniline_tagdefs:
                     token_text = token_text.strip()
                     match_start, match_end = match.span(token_type)
                     
@@ -143,14 +145,14 @@ class SyntaxColorer:
          
     def _update_multiline_tokens(self, start, end):
         chars = self.text.get(start, end)
-                
         # clear old tags
         for tag in self.multiline_tagdefs:
             self.text.tag_remove(tag, start, end)
         
+        interesting_token_types = list(self.multiline_tagdefs.keys()) + ["STRING3"]
         for match in self.multiline_regex.finditer(chars):
             for token_type, token_text in match.groupdict().items():
-                if token_text:
+                if token_text and token_type in interesting_token_types:
                     token_text = token_text.strip()
                     match_start, match_end = match.span(token_type)
                     if token_type == "STRING3":
@@ -169,10 +171,9 @@ class SyntaxColorer:
                         else:
                             token_type = "STRING_CLOSED3"
                     
-                    if token_type in self.multiline_tagdefs:
-                        self.text.tag_add(token_type,
-                                 start + "+%dc" % match_start,
-                                 start + "+%dc" % match_end)
+                    self.text.tag_add(token_type,
+                             start + "+%dc" % match_start,
+                             start + "+%dc" % match_end)
         
 
 class CodeViewSyntaxColorer(SyntaxColorer):
