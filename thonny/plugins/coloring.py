@@ -1,215 +1,237 @@
-# copied from idlelib and modified
+"""
+Each text will get its on SyntaxColorer.
+
+For performance reasons, coloring is updated in 2 phases:
+    1. recolor single-line tokens on the modified line(s)
+    2. recolor multi-line tokens (triple-quoted strings) in the whole text
+
+First phase may insert wrong tokens inside triple-quoted strings, but the 
+priorities of triple-quoted-string tags are higher and therefore user 
+doesn't see these wrong taggings.
+
+In Shell only current command entry is colored
+    
+Regexes are adapted from idlelib
+"""
 
 import re
 import keyword
 import builtins
-import tkinter as tk
 
 from thonny.globals import get_workbench
 from thonny.shell import ShellText
+from thonny.codeview import CodeViewText
 
 def matches_any(name, alternates):
     "Return a named group pattern matching list of alternates."
     return "(?P<%s>" % name + "|".join(alternates) + ")"
 
-
-def make_pat():
-    kw = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
-    builtinlist = [str(name) for name in dir(builtins)
-                                        if not name.startswith('_') and \
-                                        name not in keyword.kwlist]
-
-    # self.file = open("file") :
-    # 1st 'file' colorized normal, 2nd as builtin, 3rd as string
-    builtin = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", builtinlist) + r"\b"
-    comment = matches_any("COMMENT", [r"#[^\n]*"])
-    stringprefix = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"
-
-    sqstring_open = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*\n?"
-    sqstring_closed = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*'"
-
-    dqstring_open = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*\n?'
-    dqstring_closed = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*"'
-
-    sq3string = stringprefix + r"'''[^'\\]*((\\.|'(?!''))[^'\\]*)*(''')?"
-    dq3string = stringprefix + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
-
-    string_open = matches_any("STRING_OPEN", [sqstring_open, dqstring_open])
-    string_closed = matches_any("STRING_CLOSED", [sqstring_closed, dqstring_closed])
-
-    return kw + "|" + builtin + "|" + comment + "|" + matches_any("STRING3", [dq3string, sq3string]) + "|" + \
-           string_closed + "|" + string_open + "|" + matches_any("SYNC", [r"\n"])
-
-
 class SyntaxColorer:
     def __init__(self, text, main_font, bold_font):
         self.text = text
-        self.after_id = None
-        self.colorizing = False
-        self.prog = re.compile(make_pat(), re.S)
-        self.idprog = re.compile(r"\s+(\w+)", re.S)
-        self._load_tag_defs(main_font, bold_font)
-        self._config_colors()
-        self.notify_active_range()
+        self._compile_regexes()
+        self._config_colors(main_font, bold_font)
+    
+    def _compile_regexes(self):
+        kw = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
+        builtinlist = [str(name) for name in dir(builtins)
+                                            if not name.startswith('_') and \
+                                            name not in keyword.kwlist]
+        
+        # TODO: move builtin handling to global-local
+        builtin = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", builtinlist) + r"\b"
+        comment = matches_any("COMMENT", [r"#[^\n]*"])
+        magic_command = matches_any("MAGIC_COMMAND", [r"^%[^\n]*"]) # used only in shell
+        stringprefix = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"
+        
+        sqstring_open = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*\n?"
+        sqstring_closed = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*'"
+        
+        dqstring_open = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*\n?'
+        dqstring_closed = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*"'
+        
+        sq3string = stringprefix + r"'''[^'\\]*((\\.|'(?!''))[^'\\]*)*(''')?"
+        dq3string = stringprefix + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
+        
+        sq3delimiter = stringprefix + "'''"
+        dq3delimiter = stringprefix + '"""'
+        
+        string_open = matches_any("STRING_OPEN", [sqstring_open, dqstring_open])
+        string_closed = matches_any("STRING_CLOSED", [sqstring_closed, dqstring_closed])
+        string3_delimiter = matches_any("DELIMITER3", [sq3delimiter, dq3delimiter])
+        string3 = matches_any("STRING3", [dq3string, sq3string])
+        
+        self.uniline_regex = re.compile(
+            kw 
+            + "|" + builtin 
+            + "|" + comment 
+            + "|" + magic_command 
+            + "|" + string3_delimiter # to avoid marking """ and ''' as single line string in uniline mode
+            + "|" + string_closed 
+            + "|" + string_open
+            , re.S)
+        
+        self.multiline_regex = re.compile(
+            string3
+            + "|" + string_closed 
+            + "|" + string_open
+            , re.S)
+        
+        self.id_regex = re.compile(r"\s+(\w+)", re.S)
 
-    def notify_active_range(self):
-        self._notify_range("1.0", "end")
-
-    def _config_colors(self):
-        for tag, cnf in self.tagdefs.items():
-            if cnf:
-                self.text.tag_configure(tag, **cnf)
+    def _config_colors(self, main_font, bold_font):
+        string_foreground = "DarkGreen"
+        open_string_background = "#c3f9d3"
+        self.uniline_tagdefs = {
+            "COMMENT"       : {"font":main_font, 'background':None, 'foreground':"DarkGray", },
+            "MAGIC_COMMAND" : {"font":main_font, 'background':None, 'foreground':"DarkGray", },
+            "STRING_CLOSED" : {"font":main_font, 'background':None, 'foreground':string_foreground, },
+            "STRING_OPEN"   : {"font":main_font, 'background': open_string_background, "foreground": string_foreground},
+            "KEYWORD"       : {"font":bold_font, 'background':None, 'foreground':"#7f0055", },
+            "BUILTIN"       : {"font":main_font, 'background':None, 'foreground':None},
+            #"DEFINITION"    : {},
+            }
+        
+        self.multiline_tagdefs = {
+            "STRING_CLOSED3": self.uniline_tagdefs["STRING_CLOSED"],
+            "STRING_OPEN3"  : self.uniline_tagdefs["STRING_OPEN"],
+            }
+        
+        # Note that order of configuring is important for managing correct tag priorities
+        # (as STRING_*3 must have higher priority than other tags, as its 
+        # text may also contain other tags)
+        for tagdefs in [self.multiline_tagdefs, self.uniline_tagdefs]:
+            for tag, cnf in tagdefs.items():
+                if cnf:
+                    self.text.tag_configure(tag, **cnf)
+        
+        self.text.tag_raise("STRING_CLOSED3", "STRING_CLOSED")
+        self.text.tag_raise("STRING_OPEN3", "STRING_OPEN")
         self.text.tag_raise('sel')
 
-    def _load_tag_defs(self, main_font, bold_font):
-        self.tagdefs = {
-            "SYNC": {'background':None,'foreground':None},
-            "TODO": {'background':None,'foreground':None},
-            "COMMENT": {'background':None,'foreground':"DarkGray"},
-            "KEYWORD": {'background':None,'foreground':"#7f0055", "font":bold_font},
-            "BUILTIN": {'background':None,'foreground':None},
-            "STRING_CLOSED":  {'background':None,'foreground':"DarkGreen"},
-            "STRING_OPEN": {'background': "#c3f9d3", "foreground": "DarkGreen"},
-            "DEFINITION": {},
-            }
+    def update_coloring(self, event=None):
+        self._update_uniline_tokens("1.0", "end")
+        self._update_multiline_tokens("1.0", "end")
 
-    def _notify_range(self, index1, index2):
-        self.text.tag_add("TODO", index1, index2)
-        if self.after_id:
-            return
+    def _update_uniline_tokens(self, start, end):
+        chars = self.text.get(start, end)
+                
+        # clear old tags
+        for tag in self.uniline_tagdefs:
+            self.text.tag_remove(tag, start, end)
         
-        if self.colorizing:
-            self.stop_colorizing = True
-            
-        self.after_id = self.text.after(1, self._recolorize)
-
-    def _recolorize(self):
-        "manages delayed coloring"
-        print("-------------------------------------------------")
-        self.after_id = None
-        if self.colorizing:
-            return
+        for match in self.uniline_regex.finditer(chars):
+            for token_type, token_text in match.groupdict().items():
+                if token_type in self.uniline_tagdefs and token_text:
+                    token_text = token_text.strip()
+                    match_start, match_end = match.span(token_type)
+                    
+                    self.text.tag_add(token_type,
+                             start + "+%dc" % match_start,
+                             start + "+%dc" % match_end)
+                    
+                    # Mark also the word following def or class
+                    if token_text in ("def", "class"):
+                        id_match = self.id_regex.match(chars, match_end)
+                        if id_match:
+                            id_match_start, id_match_end = id_match.span(1)
+                            self.text.tag_add("DEFINITION",
+                                         start + "+%dc" % id_match_start,
+                                         start + "+%dc" % id_match_end)
+                
         
-        try:
-            self.stop_colorizing = False
-            self.colorizing = True
-            self._recolorize_main()
-        finally:
-            self.colorizing = False
-        if self.text.tag_nextrange("TODO", "1.0"):
-            self.after_id = self.text.after(1, self._recolorize)
+         
+    def _update_multiline_tokens(self, start, end):
+        chars = self.text.get(start, end)
+                
+        # clear old tags
+        for tag in self.multiline_tagdefs:
+            self.text.tag_remove(tag, start, end)
+        
+        for match in self.multiline_regex.finditer(chars):
+            for token_type, token_text in match.groupdict().items():
+                if token_text:
+                    token_text = token_text.strip()
+                    match_start, match_end = match.span(token_type)
+                    if token_type == "STRING3":
+                        if (token_text.startswith('"""') and not token_text.endswith('"""')
+                            or token_text.startswith("'''") and not token_text.endswith("'''")
+                            or len(token_text) == 3):
+                            str_end = int(float(self.text.index(start + "+%dc" % match_end)))
+                            file_end = int(float(self.text.index("end")))
 
-    def _recolorize_main(self):
-        next_index = "1.0"
-        while True:
-            item = self.text.tag_nextrange("TODO", next_index)
-            if not item:
-                break
-            head, tail = item
-            self.text.tag_remove("SYNC", head, tail)
-            item = self.text.tag_prevrange("SYNC", head)
-            if item:
-                head = item[1]
-            else:
-                head = "1.0"
+                            if str_end == file_end:
+                                token_type = "STRING_OPEN3"
+                            else:
+                                token_type = None
+                        elif len(token_text) >= 4 and token_text[-4] == "\\":
+                            token_type = "STRING_OPEN3"
+                        else:
+                            token_type = "STRING_CLOSED3"
+                    
+                    if token_type in self.multiline_tagdefs:
+                        self.text.tag_add(token_type,
+                                 start + "+%dc" % match_start,
+                                 start + "+%dc" % match_end)
+        
 
-            chars = ""
-            next_index = head
-            lines_to_get = 1
+class CodeViewSyntaxColorer(SyntaxColorer):
+    def update_coloring(self, event):
+        # Try to reduce work by recoloring only changed lines
+        if event.sequence == "TextInsert":
+            index = self.text.index(event.index)
+            start_row = int(index.split(".")[0])
+            end_row = start_row + event.text.count("\n")
+            start_index = "%d.%d" % (start_row, 0)
+            end_index = "%d.%d" % (end_row + 1, 0)
+        elif event.sequence == "TextDelete":
+            index = self.text.index(event.index1)
+            start_row = int(index.split(".")[0])
+            start_index = "%d.%d" % (start_row, 0)
+            end_index = "%d.%d" % (start_row + 1, 0)
+        else:
+            return
             
-            ok = False
-            while not ok:
-                mark = next_index
-                next_index = self.text.index(mark + "+%d lines linestart" %
-                                         lines_to_get)
-                lines_to_get = min(lines_to_get * 2, 100)
-                ok = "SYNC" in self.text.tag_names(next_index + "-1c")
-                line = self.text.get(mark, next_index)
-                print(line, end="")
-                
-                if not line:
-                    return
-                
-                for tag in self.tagdefs:
-                    self.text.tag_remove(tag, mark, next_index)
-                chars = chars + line
-                m = self.prog.search(chars)
-                
-                while m:
-                    for key, value in m.groupdict().items():
-                        if value:
-                            value = value.strip()
-                            a, b = m.span(key)
-                            if key == "STRING3":
-                                if (value.startswith('"""') and not value.endswith('"""') or
-                                             value.startswith("'''") and not value.endswith("'''")):
-                                    str_end = int(float(self.text.index(head + "+%dc" % b)))
-                                    file_end = int(float(self.text.index("end")))
-
-                                    if str_end == file_end:
-                                        key = "STRING_OPEN"
-                                    else:
-                                        key = None
-                                elif len(value) >= 4 and value[-4] == "\\":
-                                    key = "STRING_OPEN"
-                                else:
-                                    key = "STRING_CLOSED"
-                            if key is not None:
-                                self.text.tag_add(key,
-                                         head + "+%dc" % a,
-                                         head + "+%dc" % b)
-                            if value in ("def", "class"):
-                                m1 = self.idprog.match(chars, b)
-                                if m1:
-                                    a, b = m1.span(1)
-                                    self.text.tag_add("DEFINITION",
-                                                 head + "+%dc" % a,
-                                                 head + "+%dc" % b)
-                    m = self.prog.search(chars, m.end())
-                
-                if "SYNC" in self.text.tag_names(next_index + "-1c"):
-                    head = next_index
-                    chars = ""
-                else:
-                    ok = False
-                
-                if not ok:
-                    # We're in an inconsistent state, and the call to
-                    # update may tell us to stop.  It may also change
-                    # the correct value for "next_index" (since this is a
-                    # line.col string, not a true mark).  So leave a
-                    # crumb telling the next_index invocation to resume here
-                    # in case update tells us to leave.
-                    self.text.tag_add("TODO", next_index)
-                self.text.update()
-                if self.stop_colorizing:
-                    return
+        self._update_uniline_tokens(start_index, end_index)
+        
+        # Multiline tokens need to be searched from the whole source
+        self._update_multiline_tokens("1.0", "end")
 
 class ShellSyntaxColorer(SyntaxColorer):
-    def notify_active_range(self):
+    def update_coloring(self, event):
         parts = self.text.tag_prevrange("command", "end")
         
         if parts:
-            print("Coloring", parts)
-            self._notify_range(parts[0], parts[1])
+            end_row, end_col = map(int, self.text.index(parts[1]).split("."))
+            
+            if end_col != 0: # if not just after the last linebreak
+                end_row += 1 # then extend the range to the beginning of next line
+                end_col = 0  # (otherwise open strings are not displayed correctly)
+            
+            start_index = parts[0]
+            end_index = "%d.%d" % (end_row, end_col)
+            
+            self._update_uniline_tokens(start_index, end_index)
+            self._update_multiline_tokens(start_index, end_index)
 
 def update_coloring(event):
-    assert isinstance(event.widget, tk.Text)
-    text = event.widget
+    text = event.text_widget
     
     if not hasattr(text, "syntax_colorer"):
         if isinstance(text, ShellText):
             class_ = ShellSyntaxColorer
+        elif isinstance(text, CodeViewText):
+            class_ = CodeViewSyntaxColorer
         else:
-            class_ = SyntaxColorer
-            
+            return
+        
         text.syntax_colorer = class_(text, get_workbench().get_font("EditorFont"),
                             get_workbench().get_font("BoldEditorFont"))
     
-    text.syntax_colorer.notify_active_range()
+    text.syntax_colorer.update_coloring(event)
 
 def load_plugin():
     wb = get_workbench() 
 
-    wb.bind_class("CodeViewText", "<<TextChange>>", update_coloring, True)
-    wb.bind_class("ShellText", "<<TextChange>>", update_coloring, True)
+    wb.bind("TextInsert", update_coloring, True)
+    wb.bind("TextDelete", update_coloring, True)
