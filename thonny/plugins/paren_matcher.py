@@ -16,15 +16,13 @@ class ParenMatcher:
     def __init__(self, text):
         self.text = text
         self._configure_tags()
-        self._remaining = None
-        
 
     def update_highlighting(self):
         self.text.tag_remove(_HIGHLIGHT_CONF[0], "1.0", "end")
         self.text.tag_remove(_UNDERLINE_CONF[0], "1.0", "end")
 
-        self._highlight_surrounding()
-        self._highlight_unclosed()
+        remaining = self._highlight_surrounding()
+        self._highlight_unclosed(remaining)
     
     def _configure_tags(self):
         self.text.tag_configure(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
@@ -34,20 +32,20 @@ class ParenMatcher:
         
 
     def _highlight_surrounding(self):
-        indices = self._find_surrounding(self.text)
-        if None in indices:
-            return
-        else:
+        indices, remaining = self._find_surrounding()
+        if None not in indices:
             self._configure_tags()
             self.text.tag_add(_HIGHLIGHT_CONF[0], indices[0])
             self.text.tag_add(_HIGHLIGHT_CONF[0], indices[1])
+        
+        return remaining
 
     # highlights an unclosed bracket
-    def _highlight_unclosed(self):
+    def _highlight_unclosed(self, remaining):
         # anything remaining in the stack is an unmatched opener
         # since the list is ordered, we can highlight everything starting from the first element
-        if self._remaining:
-            opener = self._remaining[0]
+        if len(remaining) > 0:
+            opener = remaining[0]
             open_index = "%d.%d" % (opener.start[0], opener.start[1])
             self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
     
@@ -64,20 +62,19 @@ class ParenMatcher:
         
         return result
 
-    def _find_surrounding(self, text):
+    def _find_surrounding(self):
                 
         stack = []
         opener, closer = None, None
         open_index, close_index = None, None
         
-        for t in self._get_paren_tokens(text.get("1.0", "end")):
+        for t in self._get_paren_tokens(self.text.get("1.0", "end")):
             if t.string == "" or t.string not in "()[]{}":
                 continue
             if t.string in "([{":
                 stack.append(t)
             elif len(stack) > 0:
                 if stack[-1].string != _OPENERS[t.string]:
-                    text.bell()
                     continue
                 if not closer:
                     opener = stack.pop()
@@ -88,10 +85,8 @@ class ParenMatcher:
                         close_index = token_index
                 else:
                     stack.pop()
-        # used by _highlight_unclosed
-        self._remaining = stack
         
-        return open_index, close_index
+        return (open_index, close_index), stack
         
 
     def _is_insert_between_indices(self, index1, index2):
