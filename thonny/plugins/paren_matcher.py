@@ -6,10 +6,6 @@ from thonny.shell import ShellText
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
-_HIGHLIGHT_CONF = ("PAREN_HIGHLIGHT", {"foreground": "Blue", 
-                                       "font" : get_workbench().get_font("BoldEditorFont")})  # highlight tag configuration
-_UNDERLINE_CONF = ("UNDERLINE", {"background": "LightGray"})
-
 
 class ParenMatcher:
 
@@ -18,36 +14,41 @@ class ParenMatcher:
         self._configure_tags()
 
     def update_highlighting(self):
-        self.text.tag_remove(_HIGHLIGHT_CONF[0], "1.0", "end")
-        self.text.tag_remove(_UNDERLINE_CONF[0], "1.0", "end")
-
-        remaining = self._highlight_surrounding()
-        self._highlight_unclosed(remaining)
+        start_index = "1.0"
+        end_index = self.text.index("end")
+        remaining = self._highlight_surrounding(start_index, end_index)
+        self._highlight_unclosed(remaining, start_index, end_index)
     
     def _configure_tags(self):
-        self.text.tag_configure(_HIGHLIGHT_CONF[0], **_HIGHLIGHT_CONF[1])
-        self.text.tag_configure(_UNDERLINE_CONF[0], **_UNDERLINE_CONF[1])
-        self.text.tag_lower(_UNDERLINE_CONF[0])
+        self.text.tag_configure("SURROUNDING_PARENS",
+                                foreground="Blue", 
+                                font=get_workbench().get_font("BoldEditorFont"))
+        
+        self.text.tag_configure("UNCLOSED", background="LightGray")
+        
+        self.text.tag_lower("UNCLOSED")
         self.text.tag_raise("sel")
         
 
-    def _highlight_surrounding(self):
-        indices, remaining = self._find_surrounding()
-        if None not in indices:
-            self._configure_tags()
-            self.text.tag_add(_HIGHLIGHT_CONF[0], indices[0])
-            self.text.tag_add(_HIGHLIGHT_CONF[0], indices[1])
+    def _highlight_surrounding(self, start_index, end_index):
+        self.text.tag_remove("SURROUNDING_PARENS", start_index, end_index)
+        open_index, close_index, remaining = self._find_surrounding(start_index, end_index)
+        if None not in [open_index, close_index]:
+            self.text.tag_add("SURROUNDING_PARENS", open_index)
+            self.text.tag_add("SURROUNDING_PARENS", close_index)
         
         return remaining
 
     # highlights an unclosed bracket
-    def _highlight_unclosed(self, remaining):
+    def _highlight_unclosed(self, remaining, start_index, end_index):
+        self.text.tag_remove("UNCLOSED", start_index, end_index)
+
         # anything remaining in the stack is an unmatched opener
         # since the list is ordered, we can highlight everything starting from the first element
         if len(remaining) > 0:
             opener = remaining[0]
             open_index = "%d.%d" % (opener.start[0], opener.start[1])
-            self.text.tag_add(_UNDERLINE_CONF[0], open_index, "end")
+            self.text.tag_add("UNCLOSED", open_index, end_index) 
     
     def _get_paren_tokens(self, source):
         result = []
@@ -62,13 +63,20 @@ class ParenMatcher:
         
         return result
 
-    def _find_surrounding(self):
+    def _find_surrounding(self, start_index, end_index):
                 
         stack = []
         opener, closer = None, None
         open_index, close_index = None, None
         
-        for t in self._get_paren_tokens(self.text.get("1.0", "end")):
+        start_row, start_col = map(int, start_index.split(".")) 
+        source = self.text.get(start_index, end_index)
+        
+        # prepend source with empty lines and spaces to make 
+        # token rows and columns match with widget indices
+        source = ("\n" * (start_row-1)) + (" "*start_col) + source 
+        
+        for t in self._get_paren_tokens(source):
             if t.string == "" or t.string not in "()[]{}":
                 continue
             if t.string in "([{":
@@ -86,7 +94,7 @@ class ParenMatcher:
                 else:
                     stack.pop()
         
-        return (open_index, close_index), stack
+        return open_index, close_index, stack
         
 
     def _is_insert_between_indices(self, index1, index2):
@@ -94,7 +102,13 @@ class ParenMatcher:
                self.text.compare("insert-1c", "<=", index2)
 
 class ShellParenMatcher(ParenMatcher):
-    pass
+    def update_highlighting(self):
+        # TODO: check that cursor is in this range
+        index_parts = self.text.tag_prevrange("command", "end")
+        
+        if index_parts:
+            remaining = self._highlight_surrounding(*index_parts)
+            self._highlight_unclosed(remaining, index_parts[0], "end")
 
 def update_highlighting(event=None):
     text = event.widget
