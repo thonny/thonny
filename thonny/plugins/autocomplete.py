@@ -1,9 +1,10 @@
-#TODO - remove unnecessary imports, organize them to use the same import syntax
-
+import __main__  # @UnresolvedImport
 import tkinter as tk
 import jedi
+from jedi import Interpreter
 from thonny.globals import get_workbench
 from thonny.codeview import CodeViewText
+from thonny.shell import ShellText
 
 
 
@@ -110,17 +111,18 @@ class Completer(tk.Listbox):
         self.activate(index)
     
     def _update_completions(self):
-        row, column = self._get_position()
-        source = self.text.get("1.0", "end-1c")
-        script = jedi.Script(source, row, column, self._get_filename())
-        self.completions = script.completions() 
-
+        self.completions = self._get_completions()
         names = [c.name for c in self.completions]
         self.delete(0, self.size())
         self.insert(0, *names)
         self.activate(0)
         self.selection_set(0)
-        
+    
+    def _get_completions(self):
+        row, column = self._get_position()
+        source = self.text.get("1.0", "end-1c")
+        script = jedi.Script(source, row, column, self._get_filename())
+        return script.completions() 
         
 
     def _get_position(self):
@@ -150,17 +152,28 @@ class Completer(tk.Listbox):
     
     def _close(self, event=False):
         self.place_forget()
-    
+
+class ShellCompleter(Completer):
+    def _get_completions(self):
+        source = self.text.get("insert linestart", "insert") # TODO: allow multiple line input
+        interpreter = Interpreter(source, [__main__.__dict__])
+        return interpreter.completions()
+
 def handle_autocomplete_request(event=None):
     if event is None:
         text = get_workbench().focus_get()
     else:
         text = event.widget
     
-    if not hasattr(text, "completer"):
-        text.completer = Completer(text)
-    
-    text.completer.handle_autocomplete_request()
+    if not hasattr(text, "autocompleter"):
+        if isinstance(text, CodeViewText):
+            text.autocompleter = Completer(text)
+        elif isinstance(text, ShellText):
+            text.autocompleter = ShellCompleter(text)
+        else:
+            return
+
+    text.autocompleter.handle_autocomplete_request()
 
 def load_plugin():
     
