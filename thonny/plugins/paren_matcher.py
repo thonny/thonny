@@ -1,6 +1,8 @@
 from thonny.globals import get_workbench
 import tokenize
 import io
+from thonny.codeview import CodeViewText
+from thonny.shell import ShellText
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
@@ -11,12 +13,13 @@ _UNDERLINE_CONF = ("UNDERLINE", {"background": "LightGray"})
 
 class ParenMatcher:
 
-    def __init__(self):
-        self.text = None
+    def __init__(self, text):
+        self.text = text
+        self._configure_tags()
         self._remaining = None
-        self.bound_ids = {}
+        
 
-    def _on_change(self, event):
+    def update_highlighting(self):
         self.text.tag_remove(_HIGHLIGHT_CONF[0], "1.0", "end")
         self.text.tag_remove(_UNDERLINE_CONF[0], "1.0", "end")
 
@@ -31,7 +34,7 @@ class ParenMatcher:
         
 
     def _highlight_surrounding(self):
-        indices = self.find_surrounding(self.text)
+        indices = self._find_surrounding(self.text)
         if None in indices:
             return
         else:
@@ -61,7 +64,7 @@ class ParenMatcher:
         
         return result
 
-    def find_surrounding(self, text):
+    def _find_surrounding(self, text):
                 
         stack = []
         opener, closer = None, None
@@ -95,26 +98,25 @@ class ParenMatcher:
         return self.text.compare("insert", ">=", index1) and \
                self.text.compare("insert-1c", "<=", index2)
 
-    def _on_editor_change(self, event):
+class ShellParenMatcher(ParenMatcher):
+    pass
 
-        if self.text:
-            # unbind events from previous editor's text
-            for k, v in self.bound_ids.items():
-                self.text.unbind(k, v)
-
-        # get the active text widget from the active editor of the active tab of the editor notebook
-        self.text = event.widget.get_current_editor().get_text_widget()
-        self._configure_tags()
-
-        # ...and bind the paren checking procedure to that widget's cursor move event
-        self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
-        self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
-
+def update_highlighting(event=None):
+    text = event.widget
+    if not hasattr(text, "paren_matcher"):
+        if isinstance(text, CodeViewText):
+            text.paren_matcher = ParenMatcher(text)
+        elif isinstance(text, ShellText):
+            text.paren_matcher = ShellParenMatcher(text)
+        else:
+            return
+    
+    text.paren_matcher.update_highlighting()
 
 def load_plugin():
-    wb = get_workbench()  # type:Workbench
-    nb = wb.get_editor_notebook()  # type:EditorNotebook
-
-    paren_matcher = ParenMatcher()
-
-    nb.bind("<<NotebookTabChanged>>", paren_matcher._on_editor_change, True)
+    wb = get_workbench()  
+    
+    wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
+    wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
+    wb.bind_class("ShellText", "<<CursorMove>>", update_highlighting, True)
+    wb.bind_class("ShellText", "<<TextChange>>", update_highlighting, True)
