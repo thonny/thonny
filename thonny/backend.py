@@ -154,8 +154,15 @@ class VM:
         result_attributes = self._execute_source(cmd.cmd_line, filename, mode,
             hasattr(cmd, "debug_mode") and cmd.debug_mode)
         
-        self._debug("Sending message", result_attributes)
-        self.send_message("ToplevelResult", **result_attributes)
+        
+        if isinstance(cmd, ToplevelCommand):
+            result_type = "ToplevelResult"
+        elif isinstance(cmd, InlineCommand):
+            result_type = "InlineResult"
+        else:
+            raise Exception("Unsuitable command type for cmd_python")
+        
+        self.send_message(result_type, **result_attributes)
 
     
     def _cmd_tkupdate(self, cmd):
