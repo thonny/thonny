@@ -207,7 +207,7 @@ class Runner:
         get_workbench().after(50, self._advance_background_tk_mainloop)
         
     def _poll_vm_messages(self):
-        """I chose polling instead of event_generate
+        """I chose polling instead of event_generate in listener thread,
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
