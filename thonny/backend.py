@@ -96,16 +96,16 @@ class VM:
         
         #if cmd.command != "tkupdate":
         #    debug("MAINLOOP: %s", cmd)
-        response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
+        error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
         try:
             handler = getattr(self, "_cmd_" + cmd.command)
         except AttributeError:
-            self.send_message(response_type, error="Unknown command: " + cmd.command)
+            self.send_message(error_response_type, error="Unknown command: " + cmd.command)
         else:
             try:
                 handler(cmd)
             except:
-                self.send_message(response_type,
+                self.send_message(error_response_type,
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
                 )
         
@@ -123,21 +123,21 @@ class VM:
         self.send_message("ToplevelResult")
     
     def _cmd_Run(self, cmd):
-        self._execute_file(cmd, False)
+        self._execute_file_and_send_result(cmd, False)
     
     def _cmd_run(self, cmd):
-        self._execute_file(cmd, False)
+        self._execute_file_and_send_result(cmd, False)
     
     def _cmd_Debug(self, cmd):
-        self._execute_file(cmd, True)
+        self._execute_file_and_send_result(cmd, True)
     
     def _cmd_debug(self, cmd):
-        self._execute_file(cmd, True)
+        self._execute_file_and_send_result(cmd, True)
     
     def _cmd_python(self, cmd):
-        # let's see if it's single expression or something more complex
         filename = "<pyshell>"
         
+        # let's see if it's single expression or something more complex
         try:
             root = ast.parse(cmd.cmd_line, filename=filename, mode="exec")
         except SyntaxError as e:
@@ -151,9 +151,12 @@ class VM:
             mode = "eval"
         else:
             mode = "exec"
-        
-        self._execute_source(cmd.cmd_line, filename, mode,
+        result_attributes = self._execute_source(cmd.cmd_line, filename, mode,
             hasattr(cmd, "debug_mode") and cmd.debug_mode)
+        
+        self._debug("Sending message", result_attributes)
+        self.send_message("ToplevelResult", **result_attributes)
+
     
     def _cmd_tkupdate(self, cmd):
         tkinter = sys.modules.get("tkinter")
@@ -268,6 +271,9 @@ class VM:
             info["entries"].append((self.export_value(key),
                                      self.export_value(value[key])))
         
+    def _execute_file_and_send_result(self, cmd, debug_mode):
+        result_attributes = self._execute_file(cmd, debug_mode)
+        self.send_message("ToplevelResult", **result_attributes)
     
     def _execute_file(self, cmd, debug_mode):
         source, _ = misc_utils.read_python_file(cmd.filename)
@@ -445,21 +451,21 @@ class Executor:
                 value = eval(bytecode, __main__.__dict__)
                 if value is not None:
                     builtins._ = value 
-                self._vm.send_message("ToplevelResult", value_info=self._vm.export_value(value))
+                return {"value_info" : self._vm.export_value(value)}
             else:
                 assert mode == "exec"
                 exec(bytecode, __main__.__dict__) # <Marker: remove this line from stacktrace>
-                self._vm.send_message("ToplevelResult", context_info="after normal execution", source=source, filename=filename, mode=mode)
+                return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
         except SyntaxError as e:
-            self._vm.send_message("ToplevelResult", error="".join(traceback.format_exception_only(SyntaxError, e)))
+            return {"error" : "".join(traceback.format_exception_only(SyntaxError, e))}
         except ThonnyClientError as e:
-            self._vm.send_message("ToplevelResult", error=str(e))
+            return {"error" : str(e)}
         except:
             # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
             # for VM mainloop they are not exceptions
             e_type, e_value, e_traceback = sys.exc_info()
             self._print_user_exception(e_type, e_value, e_traceback)
-            self._vm.send_message("ToplevelResult", context_info="other unhandled exception")
+            return {"context_info" : "other unhandled exception"}
         finally:
             sys.settrace(None)
     
@@ -494,7 +500,7 @@ class FancyTracer(Executor):
     def execute_source(self, source, filename, mode):
         self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
         
-        Executor.execute_source(self, source, filename, mode)
+        return Executor.execute_source(self, source, filename, mode)
         #assert len(self._custom_stack) == 0
         
     def _install_marker_functions(self):
