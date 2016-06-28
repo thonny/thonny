@@ -8,10 +8,7 @@ from thonny.shell import ShellText
 
 
 
-#TODO list:
-#1) make autocomplete window colors (both bg and fg) configurable
-#2) adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown
-#3) perhaps make the number of maximum autocomplete options to show configurable?
+# TODO: adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown
 
 class Completer(tk.Listbox):
     def __init__(self, text):
@@ -51,7 +48,9 @@ class Completer(tk.Listbox):
             row=row,
             column=column,
             proposed_names=[c.name for c in self.completions])
-        
+    
+    def _handle_inline_result(self, event):
+        "TODO: extract data, update completions and so on"
         
     def _show(self, completions):
         typed_name_length = len(completions[0].name) - len(completions[0].complete)
