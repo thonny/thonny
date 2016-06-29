@@ -45,6 +45,11 @@ rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/tests
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/docs
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pip*
 
+rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/numpy/lib/tests
+rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/numpy/core/tests
+rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/numpy/ma/tests
+
+
 rm $PYTHON_CURRENT/bin/2to3-3.5
 rm $PYTHON_CURRENT/bin/easy_install-3.5
 rm $PYTHON_CURRENT/bin/idle3.5
