@@ -79,7 +79,4 @@ install_name_tool -id \
 	$RELATIVE_LIBDIR/Tk \
     $PREFIX/lib/Tk 
  
-# DELETE FRAMEWORKS #############################################################
-#sudo rm -rf /Library/Frameworks/Tcl.framework/Versions/$TCLTK_SHORT_VERSION
-#sudo rm -rf /Library/Frameworks/Tk.framework/Versions/$TCLTK_SHORT_VERSION
 

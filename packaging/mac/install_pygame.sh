@@ -18,8 +18,7 @@
 
 # Install XQuartz. Mountain Lion OS X no longer includes the X11 window system library. This is different from Lion OS X (http://xquartz.macosforge.org/landing/)
 
-PREFIX=/Users/aivar/pythonny3
-LOCAL_FRAMEWORKS=$PREFIX/Thonny.app/Contents/Frameworks
+LOCAL_FRAMEWORKS=$HOME/build/Thonny.app/Contents/Frameworks
 
 # Get Pygame
 hg clone https://bitbucket.org/pygame/pygame
@@ -36,7 +35,7 @@ $PYTHON_EXE setup.py build    # This will build in the directory before installi
 $PYTHON_EXE setup.py install  
 
 # add numpy
-$PYTHON_EXE -m pip install numpy
+#$PYTHON_EXE -m pip install numpy
 
 # add libpng and libjpg and relink imageext
 cp /usr/local/lib/libjpeg.8.dylib $LOCAL_FRAMEWORKS
