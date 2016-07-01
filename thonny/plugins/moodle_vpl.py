@@ -238,7 +238,7 @@ def _get_saved_password():
 
 
 
-def load_plugin():
+def _load_plugin():
     get_workbench().add_option("moodlevpl.saved_username", "")
     get_workbench().add_option("moodlevpl.saved_password", "")
     get_workbench().add_option("moodlevpl.last_course_url", "")

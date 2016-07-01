@@ -266,5 +266,5 @@ def _cmd_refactor_rename(self):
 def _cmd_refactor_rename_enabled(self):
     return self.editor_notebook.get_current_editor() is not None
 
-def load_plugin_(workbench):
+def _load_plugin_(workbench):
     get_workbench().add_command("refactor_rename", "edit", "Rename identifier", ...)
