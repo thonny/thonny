@@ -1,8 +1,6 @@
-# https://github.com/lektor/lektor/blob/master/gui/bin/make-python-framework-relocatable
+#!/bin/bash
 
-
-PREFIX=/Users/aivar/pythonny3
-LOCAL_FRAMEWORKS=$PREFIX/Thonny.app/Contents/Frameworks
+LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
 
 rm -rf $LOCAL_FRAMEWORKS/SDL*
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PREFIX=/Users/aivar/pythonny3
+PREFIX=$HOME/thonny_template_build
 
 
 # prepare working folder #########################################################
@@ -8,7 +8,7 @@ rm -rf build
 mkdir -p build
 
 
-# copy raw bundle #################################################
+# copy template #################################################
 cp -R -H $PREFIX/Thonny.app build
 
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks

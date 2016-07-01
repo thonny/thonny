@@ -18,7 +18,12 @@
 
 # Install XQuartz. Mountain Lion OS X no longer includes the X11 window system library. This is different from Lion OS X (http://xquartz.macosforge.org/landing/)
 
-LOCAL_FRAMEWORKS=$HOME/build/Thonny.app/Contents/Frameworks
+INITIAL_DIR=$(pwd)
+TEMP_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/temp_build_dir
+LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
+
+cd $TEMP_DIR
+rm -rf $TEMP_DIR/pygame
 
 # Get Pygame
 hg clone https://bitbucket.org/pygame/pygame
@@ -50,4 +55,5 @@ install_name_tool -change \
     /opt/X11/lib/libpng15.15.dylib \
 	@rpath/libpng15.15.dylib \
 	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.5/lib/python3.5/site-packages/pygame/imageext.cpython-35m-darwin.so
-	
+
+cd $INITIAL_DIR

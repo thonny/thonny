@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
+# Should be run once per new version of Python or Tk
+
 # Before running this
 # * Install Python (official dmg)
-# * Build and install Tcl/Tk (from source, because ActiveTcl licence is not compatible)
+# * Build and install Tcl/Tk (from source (install_tcltk.sh), because ActiveTcl licence is not compatible)
 # * Build and install Pygame dependencies (SDL 1.2, libpng, and libjpeg))
 
 # This version takes official Python installation as base
@@ -19,12 +21,10 @@ MAIN_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
 
 $MAIN_DIR/copy_tcltk_frameworks.sh
 $MAIN_DIR/copy_python_framework.sh
-$MAIN_DIR/build_tkinter_against_tk8.6.sh
-$MAIN_DIR/update_tkinter.sh
+$MAIN_DIR/tweak_tkinter.sh
 
-#$MAIN_DIR/copy_sdl_frameworks.sh
-#$MAIN_DIR/install_pygame.sh
-#$MAIN_DIR/update_pygame_links.sh
+$MAIN_DIR/copy_sdl_frameworks.sh
+$MAIN_DIR/install_pygame.sh
 
 
     
