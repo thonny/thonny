@@ -208,7 +208,7 @@ class Workbench(tk.Tk):
         
         self.add_option("view.editor_font_family", default_editor_family)
         self.add_option("view.editor_font_size", 
-                        13 if running_on_mac_os() else 11)
+                        14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
 
