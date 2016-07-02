@@ -22,9 +22,14 @@ TCLL=/Library/Frameworks/Tcl.framework/Versions/8.6
 TKI=/Library/Frameworks/Tk.framework/Versions/8.6/Headers
 TKL=/Library/Frameworks/Tk.framework/Versions/8.6
 
+export MACOSX_DEPLOYMENT_TARGET=10.6
+export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
+export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
+
 ./configure --prefix=$PREFIX LDFLAGS="-L$PREFIX/lib" CPPFLAGS="-I$PREFIX/include" \
 	--with-tcltk-includes="-I$TCLI -I$TKI" \
-	--with-tcltk-libs="-I$TCLL -I$TKL"
+	--with-tcltk-libs="-I$TCLL -I$TKL" \
+	#	--enable-universalsdk
 
 make
 make altinstall # TODO: copy from build dir??

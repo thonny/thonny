@@ -6,6 +6,11 @@ INITIAL_DIR=$(pwd)
 TEMP_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/temp_build_dir
 VERSION=8.6.5
 
+# https://github.com/tcltk/tcl/tree/master/macosx
+export MACOSX_DEPLOYMENT_TARGET=10.6
+export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
+export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
+
 # COMPILE AND INSTALL AS FRAMEWORKS
 # Tcl ###########################################################
 cd $TEMP_DIR
