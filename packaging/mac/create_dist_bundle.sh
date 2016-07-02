@@ -63,7 +63,6 @@ rm $PYTHON_CURRENT/bin/python3.5-32
 rm $PYTHON_CURRENT/bin/python3-config
 rm $PYTHON_CURRENT/bin/python3.5-config
 rm $PYTHON_CURRENT/bin/python3.5m
-rm $PYTHON_CURRENT/bin/python3.5m
 rm $PYTHON_CURRENT/bin/python3.5m-config
 rm $PYTHON_CURRENT/bin/pyvenv-3.5
 
