@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Should be run after new thonny package is uploaded to PyPi
+
 PREFIX=$HOME/thonny_template_build
 
 
