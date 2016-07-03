@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+# Official tkinter is compiled against Tk 8.5, I want 8.6 #################################
+# Let's compile one against 8.6
+# (I tried compiling just Python against framework tcl/tk but for some reason it didn't work
+# so here I compile everything (tcl, tk, python) just to get _tkinter....so
+
 PREFIX=$HOME/pytcltk
 rm -rf $PREFIX
 mkdir -p $PREFIX
@@ -9,15 +14,10 @@ TEMP_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/temp_build_dir
 
 rm -rf $TEMP_DIR/*
 
-#export MACOSX_DEPLOYMENT_TARGET=10.6
-export CFLAGS="-arch i386 -arch x86_64 -I$PREFIX/include"
-#export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6 -I$PREFIX/include"
-#export CFLAGS="-I$PREFIX/include"
-export LDFLAGS="-arch i386 -arch x86_64 -L$PREFIX/lib"
-#export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6 -L$PREFIX/lib"
-#export LDFLAGS="-L$PREFIX/lib"
+export MACOSX_DEPLOYMENT_TARGET=10.6
+export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6 -I$PREFIX/include"
+export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6 -L$PREFIX/lib"
 export CXXFLAGS="$CFLAGS"
-#export CPPFLAGS="$CFLAGS"
 export ARCHFLAGS="-arch i386 -arch x86_64"
 
 export DYLD_LIBRARY_PATH=$PREFIX/lib
@@ -76,4 +76,26 @@ make altinstall # TODO: copy from build dir??
 cd $INITIAL_DIR
 
 
-otool -L ~/pytcltk/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
+# otool -L ~/pytcltk/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
+
+# Copy to framework template ###############################################################
+# LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
+
+TKINTER_FILENAME=_tkinter.cpython-35m-darwin.so
+LOCAL_TKINTER=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.5/lib/python3.5/lib-dynload/$TKINTER_FILENAME
+TKINTER86=$PREFIX/lib/python3.5/lib-dynload/$TKINTER_FILENAME
+cp -f $TKINTER86 $LOCAL_TKINTER
+
+chmod u+w $LOCAL_TKINTER
+
+# Update links ##############################################################################
+install_name_tool -change \
+    $PREFIX/lib/libtk8.6.dylib \
+	@rpath/Tcl.framework/Versions/8.6/Tcl \
+    $LOCAL_TKINTER 
+
+install_name_tool -change \
+    $PREFIX/lib/libtcl8.6.dylib \
+	@rpath/Tk.framework/Versions/8.6/Tk \
+    $LOCAL_TKINTER 
+
