@@ -14,7 +14,7 @@ APP_TEMPLATE=$PREFIX/Thonny.app
 export LOCAL_FRAMEWORKS=$APP_TEMPLATE/Contents/Frameworks
 
 rm -rf $PREFIX
-mkdir $PREFIX
+mkdir -p $PREFIX
 cp -R -H Thonny.app.initial_template $APP_TEMPLATE
 
 MAIN_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
