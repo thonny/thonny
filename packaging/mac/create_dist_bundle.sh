@@ -29,6 +29,11 @@ $PYTHON_CURRENT/bin/python3.5 -m pip install --no-cache-dir easygui
 find $FRAMEWORKS -name '*.h' -delete
 find $FRAMEWORKS -name '*.a' -delete
 
+rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Tcl_debug
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Tk_debug
+rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Resources/Documentation
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Resources/Documentation
+
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Resources/Documentation

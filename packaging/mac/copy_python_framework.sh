@@ -39,14 +39,15 @@ install_name_tool -add_rpath @executable_path/../../../../../../../ $BUNDLE_EXE
 
 
 # update tkinter links
+TKINTER_FILENAME=_tkinter.cpython-35m-darwin.so
 LOCAL_TKINTER=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.5/lib/python3.5/lib-dynload/$TKINTER_FILENAME
 
 install_name_tool -change \
     /Library/Frameworks/Tcl.framework/Versions/8.5/Tcl \
-	@rpath/Tcl.framework/Versions/8.6/Tcl \
+	@rpath/Tcl.framework/Versions/8.5/Tcl \
     $LOCAL_TKINTER 
 
 install_name_tool -change \
-    /Library/Frameworks/Tcl.framework/Versions/8.5/Tcl \
-	@rpath/Tk.framework/Versions/8.6/Tk \
+    /Library/Frameworks/Tk.framework/Versions/8.5/Tk \
+	@rpath/Tk.framework/Versions/8.5/Tk \
     $LOCAL_TKINTER 
