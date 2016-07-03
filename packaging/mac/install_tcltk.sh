@@ -11,6 +11,10 @@ export MACOSX_DEPLOYMENT_TARGET=10.6
 export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
 export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
 
+rm -rf $TEMP_DIR/build
+rm -rf $TEMP_DIR/tcl$VERSION
+rm -rf $TEMP_DIR/tk$VERSION
+
 # COMPILE AND INSTALL AS FRAMEWORKS
 # Tcl ###########################################################
 cd $TEMP_DIR
