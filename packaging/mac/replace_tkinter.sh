@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: produced tkinter doesn't work in 10.6
+
 # Official tkinter is compiled against Tk 8.5, I want 8.6 #################################
 # Let's compile one against 8.6
 # (I tried compiling just Python against framework tcl/tk but for some reason it didn't work

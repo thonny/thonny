@@ -4,8 +4,8 @@
 # Take from environment
 #LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
 
-VERSION=8.6
-WRONG_VERSION=8.5
+VERSION=8.5
+WRONG_VERSION=8.6
 
 rm -rf $LOCAL_FRAMEWORKS/Tcl.framework
 rm -rf $LOCAL_FRAMEWORKS/Tk.framework

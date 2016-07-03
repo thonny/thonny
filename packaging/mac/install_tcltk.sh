@@ -4,7 +4,7 @@
 
 INITIAL_DIR=$(pwd)
 TEMP_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)/temp_build_dir
-VERSION=8.6.5
+VERSION=8.5.19
 
 # https://github.com/tcltk/tcl/tree/master/macosx
 export MACOSX_DEPLOYMENT_TARGET=10.6
