@@ -32,7 +32,12 @@ hg clone https://bitbucket.org/pygame/pygame
 cd pygame
 
 export CC='/usr/bin/gcc' 
-export CFLAGS='-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -I/opt/X11/include'
+export MACOSX_DEPLOYMENT_TARGET=10.6
+export CFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6 -I/opt/X11/include"
+export LDFLAGS="-arch i386 -arch x86_64 -mmacosx-version-min=10.6"
+export CXXFLAGS="$CFLAGS"
+export ARCHFLAGS="-arch i386 -arch x86_64"
+
 
 PYTHON_EXE=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.5/bin/python3.5
 $PYTHON_EXE config.py         # This should find the SDL, jpeg, png, and numpy libraries.
