@@ -38,6 +38,3 @@ install_name_tool -add_rpath @executable_path/../../../../../../../ $BUNDLE_EXE
 # TODO: update curses libraries links in lib
 
 
-
-SITE="$FRAMEWORK/Versions/$VERSION/lib/python$VERSION"
-DYLD_SITE="$SITE/lib-dynload"
