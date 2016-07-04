@@ -23,6 +23,7 @@ DefaultDirName={userpf}\Thonny
 DirExistsWarning=auto
 UsePreviousAppDir=yes
 DefaultGroupName=Thonny
+DisableWelcomePage=no
 DisableProgramGroupPage=yes
 DisableReadyPage=yes
 LicenseFile=../../LICENSE.txt
