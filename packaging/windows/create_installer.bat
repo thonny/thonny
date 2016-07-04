@@ -11,18 +11,6 @@ xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python.exe -m pip install --pre --no-cache-dir thonny
 
-@echo ............... INSTALLING Tkinter ...................................
-%BUILDDIR%\python.exe -m pip install --pre --no-cache-dir tkinterhtml
-
-
-@echo ............... INSTALLING easygui ...................................
-%BUILDDIR%\python.exe -m pip install --no-cache-dir easygui
-
-
-@echo ............... INSTALLING PYGAME ...................................
-bitsadmin /transfer myDownloadJob /download /priority normal http://www.lfd.uci.edu/~gohlke/pythonlibs/djcobkfp/pygame-1.9.2a0-cp35-none-win32.whl .\pygame-1.9.2a0-cp35-none-win32.whl
-%BUILDDIR%\python.exe -m pip install --no-cache-dir pygame-1.9.2a0-cp35-none-win32.whl
-
 
 @echo ............... CLEANING PYTHON ............................
 move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON-LICENSE.txt>NUL
@@ -61,12 +49,6 @@ rmdir %BUILDDIR%\Lib\site-packages\pip /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\pip-7.1.2.dist-info /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\setuptools /S /Q>NUL
 rmdir %BUILDDIR%\Lib\site-packages\setuptools-18.2.dist-info /S /Q>NUL
-
-@echo ............... CLEANING PYGAME ...................................
-rmdir %BUILDDIR%\Lib\site-packages\pygame\tests /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\pygame\examples /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\pygame\docs /S /Q>NUL
-
 
 @echo ............... COPYING VS FILES ..........................
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
