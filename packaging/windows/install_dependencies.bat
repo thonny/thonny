@@ -14,7 +14,7 @@ set BUILDDIR=pythonny
 
 
 @echo ............... INSTALLING PYGAME ...................................
-%BUILDDIR%\python.exe -m pip install --no-cache-dir c:\pygame_wheel\pygame-1.9.2a0-cp35-none-win32.whl
+%BUILDDIR%\python.exe -m pip install --no-cache-dir .\pygame-1.9.2a0-cp35-none-win32.whl
 
 @echo ............... CLEANING PYGAME ...................................
 rmdir %BUILDDIR%\Lib\site-packages\pygame\tests /S /Q>NUL
