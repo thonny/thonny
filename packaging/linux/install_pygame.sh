@@ -25,8 +25,8 @@ rm -rf $PREFIX/lib/python3.5/site-packages/pygame/docs
 
 
 # install PyOpenGL and numpy
-$PREFIX/bin/python3.5 -m pip install numpy
-$PREFIX/bin/python3.5 -m pip install pyopengl
+#$PREFIX/bin/python3.5 -m pip install numpy
+#$PREFIX/bin/python3.5 -m pip install pyopengl
 
 cd ..
 
