@@ -200,11 +200,11 @@ class Workbench(tk.Tk):
         
         default_editor_family = "Courier New"
         families = tk_font.families()
-        if running_on_mac_os() and "Menlo" in families:
-            default_editor_family = "Menlo"
         
-        elif "Consolas" in families:
-            default_editor_family = "Consolas"
+        for family in ["Consolas", "Ubuntu Mono", "Menlo", "DejaVu Sans Mono"]:
+            if family in families:
+                default_editor_family = family
+                break
         
         self.add_option("view.editor_font_family", default_editor_family)
         self.add_option("view.editor_font_size", 
