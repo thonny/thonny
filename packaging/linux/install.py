@@ -6,6 +6,7 @@ import sys
 import os.path
 import shutil
 import subprocess
+import platform
 
 def which(cmd, mode=os.F_OK | os.X_OK, path=None):
     """Given a command, mode, and a PATH string, return the path which
@@ -109,7 +110,7 @@ try:
     if os.path.exists(target_dir):
         print()
         answer = raw_input(target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: ").strip()
-        if not answer or answer.lower() == "y":
+        if not answer or answer.lower() in ["y", "yes"]:
             shutil.rmtree(target_dir)
         else:
             print("Installation is cancelled", file=sys.stderr)
@@ -156,8 +157,38 @@ try:
     print()
     print("Installation was successful, you can start Thonny from start menu under")
     print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
-    print("If you want to use Pygame, then see https://bitbucket.org/plas/thonny/wiki/Pygame")
     print("For uninstalling Thonny call " + target_dir + "/bin/uninstall")
+    print()
+    print("Note that you can't use Pygame library before you install its dependencies.")
+    print("See https://bitbucket.org/plas/thonny/wiki/Pygame for more info.")
+    
+    # Investigate Pygame installation options
+    pygame_install_commands = [
+        ("apt-get", "sudo apt-get --assume-yes install python-pygame"),
+        ("zypper", "sudo zypper --non-interactive install python-pygame"),
+        ("pacman", "pacman -S --noconfirm python2-pygame"),
+        ("urpmi", "sudo urpmi --force python-pygame"),
+        ("yum", "sudo yum -y install pygame"),
+    ]
+    
+    pygame_install_command = None
+    for mgr, cmd in pygame_install_commands:
+        if which(mgr):
+            pygame_install_command = cmd
+            break
+    
+    if "centos" in platform.platform().lower():
+        pygame_install_command = None # it's not so easy in CentOS
+    
+    if pygame_install_command:
+        print()
+        answer = raw_input("Do you want me to install Pygame depencencies for you? [y/N]: ").strip()
+        if answer.lower() in ["y", "yes"]:
+            return_code = subprocess.call(pygame_install_command.split())
+            if return_code:
+                print("See https://bitbucket.org/plas/thonny/wiki/Pygame for more info")
+    
+    
     
     
 except OSError as e:
