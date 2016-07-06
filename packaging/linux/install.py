@@ -184,6 +184,7 @@ try:
         print()
         answer = raw_input("Do you want me to install Pygame depencencies for you? [y/N]: ").strip()
         if answer.lower() in ["y", "yes"]:
+            print(pygame_install_command) # to show the command
             return_code = subprocess.call(pygame_install_command.split())
             if return_code:
                 print("See https://bitbucket.org/plas/thonny/wiki/Pygame for more info")
