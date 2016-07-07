@@ -60,10 +60,18 @@ class AboutDialog(tk.Toplevel):
         url_label.grid()
         url_label.bind("<Button-1>", lambda _:webbrowser.open(url))
         
+        if platform.system() == "Linux":
+            import distro
+            system_desc = distro.name(True)
+            if "32" not in system_desc and "64" not in system_desc:
+                system_desc += " " + self.get_os_word_size_guess()
+        else:
+            system_desc = (platform.system() 
+                        + " " + platform.release()  
+                        + " " + self.get_os_word_size_guess())
+        
         platform_label = ttk.Label(main_frame, justify=tk.CENTER, 
-                                   text=platform.system() + " " 
-                                        + platform.release()  
-                                        + " " + self.get_os_word_size_guess() + "\n"
+                                   text= system_desc + "\n"
                                         + "Python " + get_python_version_string() 
                                         + "Tk " + self.tk.call('info', 'patchlevel'))
         platform_label.grid(pady=20)
@@ -96,9 +104,9 @@ class AboutDialog(tk.Toplevel):
     
     def get_os_word_size_guess(self):
         if "32" in platform.machine() and "64" not in platform.machine():
-            return "(32 bit)"
+            return "(32-bit)"
         elif "64" in platform.machine() and "32" not in platform.machine():
-            return "(64 bit)"
+            return "(64-bit)"
         else:
             return ""
 
