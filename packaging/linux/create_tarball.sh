@@ -14,7 +14,8 @@ mkdir -p $TARGET_DIR
 
 # copy files
 cp -r $PREFIX/* $TARGET_DIR
-cp install.py $TARGET_DIR/install
+cp install.py $TARGET_DIR/install.py
+cp install.sh $TARGET_DIR/install
 
 mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates

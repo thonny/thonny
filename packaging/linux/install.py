@@ -1,4 +1,8 @@
-#!/usr/bin/env python
+"""
+NB! The script should be runnable both with Python 2.7 and Python 3.*
+Because some distros have only Python 2 installed (eg CentOS 7)
+and some only Python 3 (eg latest Fedoras)
+"""
 
 from __future__ import print_function
 
@@ -7,6 +11,10 @@ import os.path
 import shutil
 import subprocess
 import platform
+
+if sys.version_info[0] == 2:
+    input = raw_input  # @UndefinedVariable @ReservedAssignment
+
 
 def which(cmd, mode=os.F_OK | os.X_OK, path=None):
     """Given a command, mode, and a PATH string, return the path which
@@ -109,7 +117,7 @@ try:
     
     if os.path.exists(target_dir):
         print()
-        answer = raw_input(target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: ").strip()
+        answer = input(target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: ").strip()
         if not answer or answer.lower() in ["y", "yes"]:
             shutil.rmtree(target_dir)
         else:
@@ -182,7 +190,7 @@ try:
     
     if pygame_install_command:
         print()
-        answer = raw_input("Do you want me to install Pygame depencencies for you? [y/N]: ").strip()
+        answer = input("Do you want me to install Pygame depencencies for you? [y/N]: ").strip()
         if answer.lower() in ["y", "yes"]:
             print(pygame_install_command) # to show the command
             return_code = subprocess.call(pygame_install_command.split())
