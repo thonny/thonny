@@ -176,6 +176,7 @@ try:
         ("zypper", "sudo zypper --non-interactive install python-pygame"),
         ("pacman", "pacman -S --noconfirm python2-pygame"),
         ("urpmi", "sudo urpmi --force python-pygame"),
+        ("dnf", "sudo dnf -y install pygame"),
         ("yum", "sudo yum -y install pygame"),
     ]
     
