@@ -5,6 +5,7 @@ import shlex
 import platform
 from tkinter.messagebox import showerror
 from thonny.plugins.system_shell.explain_environment import create_pythonless_environment
+import shutil
 
 def _get_exec_prefix(python_interpreter):
     
@@ -39,8 +40,16 @@ def open_system_shell(python_interpreter):
         
     elif platform.system() == "Linux":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
+        if shutil.which("x-terminal-emulator"):
+            cmd = "x-terminal-emulator"
+        elif shutil.which("gnome-terminal"):
+            cmd = "gnome-terminal"
+        elif shutil.which("konsole"):
+            cmd = "konsole"
+        else:
+            raise RuntimeError("Don't know how to open terminal emulator")
         # http://stackoverflow.com/a/4466566/261181
-        cmd_line = """x-terminal-emulator -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
+        cmd_line = cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
         
     elif platform.system() == "Darwin":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
