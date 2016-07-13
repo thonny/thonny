@@ -39,7 +39,8 @@ def open_system_shell(python_interpreter):
         
     elif platform.system() == "Linux":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
-        cmd_line = """x-terminal-emulator -e 'bash -c "{interpreter} {explainer}";bash'"""
+        # http://stackoverflow.com/a/4466566/261181
+        cmd_line = """x-terminal-emulator -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
         
     elif platform.system() == "Darwin":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
