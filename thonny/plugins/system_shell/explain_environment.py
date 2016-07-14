@@ -7,17 +7,6 @@ import platform
 import subprocess
 from shutil import which
 
-def create_pythonless_environment():
-    # If I want to call another python version, then 
-    # I need to remove from environment the items installed by current interpreter
-    env = {}
-    
-    for key in os.environ:
-        if ("python" not in key.lower()
-            and key not in ["TK_LIBRARY", "TCL_LIBRARY"]):
-            env[key] = os.environ[key]
-    
-    return env
 
 def _find_commands(logical_command, reference_output, query_arguments,
                    only_shortest=True):
@@ -35,8 +24,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
         try:
             output = subprocess.check_output([full_path] + query_arguments, 
                                              universal_newlines=True,
-                                             shell=False,
-                                             env=create_pythonless_environment())
+                                             shell=False)
             
             expected = reference_output.strip()
             actual = output.strip()

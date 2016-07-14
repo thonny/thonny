@@ -4,14 +4,26 @@ import os.path
 import shlex
 import platform
 from tkinter.messagebox import showerror
-from thonny.plugins.system_shell.explain_environment import create_pythonless_environment
 import shutil
+
+def _create_pythonless_environment():
+    # If I want to call another python version, then 
+    # I need to remove from environment the items installed by current interpreter
+    env = {}
+    
+    for key in os.environ:
+        if ("python" not in key.lower()
+            and key not in ["TK_LIBRARY", "TCL_LIBRARY"]):
+            env[key] = os.environ[key]
+    
+    return env
+
 
 def _get_exec_prefix(python_interpreter):
     
     return check_output([python_interpreter, "-c", "import sys; print(sys.exec_prefix)"],
                         universal_newlines=True,
-                        env=create_pythonless_environment()
+                        env=_create_pythonless_environment()
                         ).strip()
 
 def _add_to_path(directory, path):
