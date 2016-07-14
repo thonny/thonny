@@ -27,7 +27,7 @@ def open_system_shell(python_interpreter):
     for recommending commands for running given python and related pip"""
     
     exec_prefix=_get_exec_prefix(python_interpreter)
-    env = create_pythonless_environment()
+    env = _create_pythonless_environment()
     
     # TODO: what if executable or explainer needs escaping?
     # Maybe try creating a script in temp folder and execute this,
@@ -53,7 +53,18 @@ def open_system_shell(python_interpreter):
         
     elif platform.system() == "Darwin":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
-        cmd_line = """osascript -e 'tell application "Terminal" to do script "{interpreter} {explainer}"' ;  osascript -e 'tell application "Terminal" to activate'"""
+        # Need to modify environment explicitly as "tell application" won't pass the environment
+        # (at least when Terminal is already active)
+        cmd_line = ("osascript"
+            + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s; {interpreter} {explainer}"'"""
+            + """ -e 'tell application "Terminal" to activate'"""
+        ) % env["PATH"]
+
+        # TODO: at the moment two new terminal windows will be opened when terminal is not already active
+        # https://discussions.apple.com/thread/1738507?tstart=0
+        # IDEA: detect if terminal is already active and do "do script ... in front window" if not
+        # (but seems that sometimes it can't find this "front window")
+
     
     else:
         showerror("Problem", "Don't know how to open system shell on this platform (%s)"
