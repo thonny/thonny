@@ -28,6 +28,9 @@ def _get_exec_prefix(python_interpreter):
                         ).strip()
 
 def _add_to_path(directory, path):
+    # Always prepending to path may seem better, but this could mess up other things.
+    # If the directory contains only one Python distribution executables, then 
+    # it probably won't be in path yet and therefore will be prepended.
     if (directory in path.split(os.pathsep)
         or platform.system() == "Windows" and directory.lower() in path.lower().split(os.pathsep)):
         return path
