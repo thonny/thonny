@@ -5,6 +5,7 @@ import shlex
 import platform
 from tkinter.messagebox import showerror
 import shutil
+from thonny.globals import get_runner
 
 def _create_pythonless_environment():
     # If I want to call another python version, then 
@@ -48,7 +49,7 @@ def open_system_shell(python_interpreter):
     if platform.system() == "Windows":
         env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
-        cmd_line = 'start "Shell for {interpreter}" /W cmd /K "{interpreter}" {explainer}'
+        cmd_line = 'start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}'
         
     elif platform.system() == "Linux":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
@@ -85,7 +86,8 @@ def open_system_shell(python_interpreter):
     
     
     expanded_cmd_line = cmd_line.format(interpreter=python_interpreter.replace("pythonw","python"),
-                          explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"))
+                          explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"),
+                          cwd=get_runner().get_cwd())
     print(expanded_cmd_line) 
     Popen(expanded_cmd_line, env=env, shell=True)
 
