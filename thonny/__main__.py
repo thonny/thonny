@@ -1,6 +1,4 @@
 
-DELEGATION_SUCCESSFUL = "Delegation successful"
-
 def launch():
     import sys
     from thonny import workbench
