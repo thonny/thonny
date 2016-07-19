@@ -58,10 +58,16 @@ def open_system_shell(python_interpreter):
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
         if shutil.which("x-terminal-emulator"):
             cmd = "x-terminal-emulator"
+        elif shutil.which("konsole"):
+            if (shutil.which("gnome-terminal") 
+                and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
+                cmd = "gnome-terminal"
+            else:
+                cmd = "konsole"
         elif shutil.which("gnome-terminal"):
             cmd = "gnome-terminal"
-        elif shutil.which("konsole"):
-            cmd = "konsole"
+        elif shutil.which("terminal"): # XFCE?
+            cmd = "terminal"
         else:
             raise RuntimeError("Don't know how to open terminal emulator")
         # http://stackoverflow.com/a/4466566/261181
