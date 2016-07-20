@@ -21,13 +21,13 @@ def test_regular_closed():
     text_widget = tkinter.Text()
     text_widget.insert("end", TEST_STR1)
 
-    matcher = ParenMatcher()
+    matcher = ParenMatcher(text_widget)
     matcher.text = text_widget
     for i, group in enumerate(insert_pos_groups):
         for insert_pos in group:
             text_widget.mark_set("insert", insert_pos)
 
-            actual = matcher.find_surrounding(text_widget)
+            actual = matcher.find_surrounding("1.0", "end")
             expected = expected_indices[i]
 
             assert actual == expected, "\nExpected: %s\nGot: %s" % (expected, actual)

@@ -9,8 +9,12 @@ _OPENERS = {')': '(', ']': '[', '}': '{'}
 
 class ParenMatcher:
 
-    def __init__(self, text):
+    def __init__(self, text, paren_highlight_font=None):
         self.text = text
+        if paren_highlight_font:
+            self._paren_highlight_font = paren_highlight_font
+        else:
+            self._paren_highlight_font = self.text["font"]    
         self._configure_tags()
 
     def update_highlighting(self):
@@ -22,7 +26,7 @@ class ParenMatcher:
     def _configure_tags(self):
         self.text.tag_configure("SURROUNDING_PARENS",
                                 foreground="Blue", 
-                                font=get_workbench().get_font("BoldEditorFont"))
+                                font=self._paren_highlight_font)
         
         self.text.tag_configure("UNCLOSED", background="LightGray")
         
@@ -32,7 +36,7 @@ class ParenMatcher:
 
     def _highlight_surrounding(self, start_index, end_index):
         self.text.tag_remove("SURROUNDING_PARENS", start_index, end_index)
-        open_index, close_index, remaining = self._find_surrounding(start_index, end_index)
+        open_index, close_index, remaining = self.find_surrounding(start_index, end_index)
         if None not in [open_index, close_index]:
             self.text.tag_add("SURROUNDING_PARENS", open_index)
             self.text.tag_add("SURROUNDING_PARENS", close_index)
@@ -63,7 +67,7 @@ class ParenMatcher:
         
         return result
 
-    def _find_surrounding(self, start_index, end_index):
+    def find_surrounding(self, start_index, end_index):
                 
         stack = []
         opener, closer = None, None
@@ -114,9 +118,9 @@ def update_highlighting(event=None):
     text = event.widget
     if not hasattr(text, "paren_matcher"):
         if isinstance(text, CodeViewText):
-            text.paren_matcher = ParenMatcher(text)
+            text.paren_matcher = ParenMatcher(text, get_workbench().get_font("BoldEditorFont"))
         elif isinstance(text, ShellText):
-            text.paren_matcher = ShellParenMatcher(text)
+            text.paren_matcher = ShellParenMatcher(text, get_workbench().get_font("BoldEditorFont"))
         else:
             return
     
