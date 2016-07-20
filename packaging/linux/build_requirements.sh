@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 # START BUILDING ####################################################
 export PREFIX=$HOME/pythonny
 
@@ -18,24 +20,16 @@ mkdir $TEMP_DIR
 cd $TEMP_DIR
 
 
-$MAIN_DIR/build_tcltk.sh
-#$MAIN_DIR/build_tkhtml.sh
-$MAIN_DIR/build_openssl.sh
+$MAIN_DIR/build_bzip2.sh
 $MAIN_DIR/build_xz.sh
+$MAIN_DIR/build_tcltk.sh
+$MAIN_DIR/build_openssl.sh
 $MAIN_DIR/build_python.sh
-$MAIN_DIR/install_pygame.sh
-
-# INSTALL JEDI ######################################
-#export LD_LIBRARY_PATH=$PREFIX/lib
-#$PREFIX/bin/python3.5 -m pip install jedi
-
-
+#$MAIN_DIR/install_pygame.sh
 
 # COPY SOME LIBS #########################################
-# using star because it must work both in 32 and 64-bit Ubuntu
-cp /lib/*-linux-gnu/libbz2.so.1.0.4 $PREFIX/lib/libbz2.so.1.0
-#cp /lib/*-linux-gnu/libssl.so.1.0.0 $PREFIX/lib/libssl.so.1.0.0
-#cp /lib/*-linux-gnu/libcrypto.so.1.0.0 $PREFIX/lib/libcrypto.so.1.0.0
+# using star because this script must work both in 32 and 64-bit Ubuntu
+#cp /lib/*-linux-gnu/libbz2.so.1.0.4 $PREFIX/lib/libbz2.so.1.0
 
 ##########################################################
 # back to original dir

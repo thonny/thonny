@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 OPENSSL_VERSION="1.0.2h"
 
 wget http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz

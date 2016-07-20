@@ -4,16 +4,33 @@ import os.path
 import shlex
 import platform
 from tkinter.messagebox import showerror
-from thonny.plugins.system_shell.explain_environment import create_pythonless_environment
+import shutil
+from thonny.globals import get_runner
+
+def _create_pythonless_environment():
+    # If I want to call another python version, then 
+    # I need to remove from environment the items installed by current interpreter
+    env = {}
+    
+    for key in os.environ:
+        if ("python" not in key.lower()
+            and key not in ["TK_LIBRARY", "TCL_LIBRARY"]):
+            env[key] = os.environ[key]
+    
+    return env
+
 
 def _get_exec_prefix(python_interpreter):
     
     return check_output([python_interpreter, "-c", "import sys; print(sys.exec_prefix)"],
                         universal_newlines=True,
-                        env=create_pythonless_environment()
+                        env=_create_pythonless_environment()
                         ).strip()
 
 def _add_to_path(directory, path):
+    # Always prepending to path may seem better, but this could mess up other things.
+    # If the directory contains only one Python distribution executables, then 
+    # it probably won't be in path yet and therefore will be prepended.
     if (directory in path.split(os.pathsep)
         or platform.system() == "Windows" and directory.lower() in path.lower().split(os.pathsep)):
         return path
@@ -26,7 +43,7 @@ def open_system_shell(python_interpreter):
     for recommending commands for running given python and related pip"""
     
     exec_prefix=_get_exec_prefix(python_interpreter)
-    env = create_pythonless_environment()
+    env = _create_pythonless_environment()
     
     # TODO: what if executable or explainer needs escaping?
     # Maybe try creating a script in temp folder and execute this,
@@ -35,15 +52,41 @@ def open_system_shell(python_interpreter):
     if platform.system() == "Windows":
         env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
-        cmd_line = 'start "Shell for {interpreter}" /W cmd /K "{interpreter}" {explainer}'
+        cmd_line = 'start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}'
         
     elif platform.system() == "Linux":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
-        cmd_line = """x-terminal-emulator -e 'bash -c "{interpreter} {explainer}";bash'"""
+        if shutil.which("x-terminal-emulator"):
+            cmd = "x-terminal-emulator"
+        elif shutil.which("konsole"):
+            if (shutil.which("gnome-terminal") 
+                and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
+                cmd = "gnome-terminal"
+            else:
+                cmd = "konsole"
+        elif shutil.which("gnome-terminal"):
+            cmd = "gnome-terminal"
+        elif shutil.which("terminal"): # XFCE?
+            cmd = "terminal"
+        else:
+            raise RuntimeError("Don't know how to open terminal emulator")
+        # http://stackoverflow.com/a/4466566/261181
+        cmd_line = cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
         
     elif platform.system() == "Darwin":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
-        cmd_line = """osascript -e 'tell application "Terminal" to do script "{interpreter} {explainer}"' ;  osascript -e 'tell application "Terminal" to activate'"""
+        # Need to modify environment explicitly as "tell application" won't pass the environment
+        # (at least when Terminal is already active)
+        cmd_line = ("osascript"
+            + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s; {interpreter} {explainer}"'"""
+            + """ -e 'tell application "Terminal" to activate'"""
+        ) % env["PATH"]
+
+        # TODO: at the moment two new terminal windows will be opened when terminal is not already active
+        # https://discussions.apple.com/thread/1738507?tstart=0
+        # IDEA: detect if terminal is already active and do "do script ... in front window" if not
+        # (but seems that sometimes it can't find this "front window")
+
     
     else:
         showerror("Problem", "Don't know how to open system shell on this platform (%s)"
@@ -52,7 +95,8 @@ def open_system_shell(python_interpreter):
     
     
     expanded_cmd_line = cmd_line.format(interpreter=python_interpreter.replace("pythonw","python"),
-                          explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"))
+                          explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"),
+                          cwd=get_runner().get_cwd())
     print(expanded_cmd_line) 
     Popen(expanded_cmd_line, env=env, shell=True)
 
