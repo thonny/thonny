@@ -1,17 +1,19 @@
+import tkinter.font as tk_font
 from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 
-GLOBAL_CONF = {}
-LOCAL_CONF = {'font': get_workbench().get_font("ItalicEditorFont"), 
-              'foreground' : "#000055"}
-
-
 class GlobLocHighlighter:
 
-    def __init__(self):
+    def __init__(self, local_variable_font=None):
         self.text = None
         self.bound_ids = {}
+        
+        if local_variable_font:
+            self.local_variable_font=local_variable_font
+        else:
+            # TODO: self.text["font]
+            self.local_variable_font = tk_font.nametofont("TkFixedFont")
 
     def get_positions(self):
 
@@ -68,8 +70,10 @@ class GlobLocHighlighter:
         return glob_pos, loc_pos
 
     def _configure_tags(self):
-        self.text.tag_configure("GLOBAL_NAME", GLOBAL_CONF)
-        self.text.tag_configure("LOCAL_NAME", LOCAL_CONF)
+        self.text.tag_configure("GLOBAL_NAME", {})
+        self.text.tag_configure("LOCAL_NAME",
+                                font=self.local_variable_font, 
+                                foreground="#000055")
         self.text.tag_raise("sel")
         
     def _highlight(self, pos_info):
@@ -111,5 +115,7 @@ def load_plugin():
     wb = get_workbench()
     nb = wb.get_editor_notebook()
 
-    name_hl = GlobLocHighlighter()
+    name_hl = GlobLocHighlighter(get_workbench().get_font("ItalicEditorFont"))
     nb.bind("<<NotebookTabChanged>>", name_hl._on_editor_change, True)
+    
+    
