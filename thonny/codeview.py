@@ -18,7 +18,8 @@ class CodeViewText(EnhancedTextWithLogging):
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
-                                     undo=True, wrap=tk.NONE, **text_frame_args)
+                                     undo=True, wrap=tk.NONE, background="white",
+                                     **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
         
