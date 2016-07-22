@@ -59,15 +59,10 @@ class Runner:
             image_filename="run.run_current_script.gif",
             include_in_toolbar=True)
         
-        get_workbench().add_command('reset', "run", 'Reset',
-            handler=self.cmd_reset,
-            default_sequence=None,
-            group=20)
-        
-        get_workbench().add_command('reset', "run", 'Stop',
-            handler=self._cmd_stop,
+        get_workbench().add_command('reset', "run", 'Stop/Reset',
+            handler=self._cmd_stop_reset,
             default_sequence="<Control-F2>",
-            tester=self._cmd_stop_enabled,
+            tester=self._cmd_stop_reset_enabled,
             group=70,
             image_filename="run.stop.gif",
             include_in_toolbar=True)
@@ -180,21 +175,15 @@ class Runner:
         self.execute_current("Run")
     
     
-    def cmd_reset(self):
+    def _cmd_stop_reset(self):
         if get_runner().get_state() == "waiting_toplevel_command":
             get_workbench().get_view("ShellView").submit_command("%Reset\n")
         else:
             get_runner().send_command(ToplevelCommand(command="Reset"))
     
-    
-    def _cmd_stop(self):
-        """
-        It's basically same as reset, but I don't want to show this big red button
-        when Python is waiting for toplevel command"""
-        get_runner().send_command(ToplevelCommand(command="Reset"))
             
-    def _cmd_stop_enabled(self):
-        return get_runner().get_state() != ("waiting_toplevel_command")
+    def _cmd_stop_reset_enabled(self):
+        return True
             
     def _advance_background_tk_mainloop(self):
         """Enables running Tkinter programs which doesn't call mainloop. 
