@@ -446,7 +446,7 @@ def _check_create_ButtonNotebook_style():
         })]
     )
 
-    def btn_press(event):
+    def letf_btn_press(event):
         try:
             x, y, widget = event.x, event.y, event.widget
             elem = widget.identify(x, y)
@@ -459,7 +459,7 @@ def _check_create_ButtonNotebook_style():
             # may fail, if clicked outside of tab
             pass
     
-    def btn_release(event):
+    def left_btn_release(event):
         x, y, widget = event.x, event.y, event.widget
     
         if not widget.instate(['pressed']):
@@ -482,6 +482,12 @@ def _check_create_ButtonNotebook_style():
             # may fail, when mouse is dragged
             exception("Closing tab")
     
-    get_workbench().bind_class("TNotebook", "<ButtonPress-1>", btn_press, True)
-    get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", btn_release, True)
+    def right_btn_press(event):
+        pass
+    
+    def right_btn_release(event):
+        pass
+    
+    get_workbench().bind_class("TNotebook", "<ButtonPress-1>", letf_btn_press, True)
+    get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", left_btn_release, True)
     
