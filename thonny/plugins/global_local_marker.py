@@ -77,9 +77,6 @@ class GlobLocHighlighter:
         self.text.tag_raise("sel")
         
     def _highlight(self, pos_info):
-        if not self.text:
-            return
-
         self.text.tag_remove("GLOBAL_NAME", "1.0", "end")
         self.text.tag_remove("LOCAL_NAME", "1.0", "end")
 
