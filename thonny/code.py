@@ -182,6 +182,11 @@ class EditorNotebook(ttk.Notebook):
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
+        get_workbench().add_command("close_files", "file", "Close all", 
+            self._cmd_close_files,
+            tester=lambda: self.get_current_editor() is not None,
+            group=10)
+        
         get_workbench().add_command("save_file", "file", "Save", 
             self._cmd_save_file,
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
@@ -272,13 +277,37 @@ class EditorNotebook(ttk.Notebook):
             self.show_file(filename)
             self._remember_open_files()
     
+    def _cmd_close_files(self):
+        self._close_files(None)
+        
+    def _close_files(self, except_index=None):
+        
+        for tab_index in reversed(range(len(self.winfo_children()))):
+            if except_index is not None and tab_index == except_index:
+                continue
+            else:
+                editor = self._get_editor_by_index(tab_index)
+                if self.check_allow_closing(editor):
+                    self.forget(editor)
+                    editor.destroy()
+                
+        self._remember_open_files()
+        
+    
     def _cmd_close_file(self):
-        current_editor = self.get_current_editor()
-        if current_editor:
-            if not self.check_allow_closing(current_editor):
+        self._close_file(None)
+    
+    def _close_file(self, index=None):
+        if index is None:
+            editor = self.get_current_editor()
+        else:
+            editor = self._get_editor_by_index(index)
+            
+        if editor:
+            if not self.check_allow_closing(editor):
                 return
-            self.forget(current_editor)
-            current_editor.destroy()
+            self.forget(editor)
+            editor.destroy()
             self._remember_open_files()
     
     def _cmd_save_file(self):
@@ -317,6 +346,13 @@ class EditorNotebook(ttk.Notebook):
         
     def get_current_editor(self):
         return get_current_notebook_tab_widget(self)
+    
+    def _get_editor_by_index(self, index):
+        tab_id = self.tabs()[index]
+        for child in self.winfo_children():
+            if str(child) == tab_id:
+                return child
+        return None
     
     def show_file(self, filename, text_range=None):
         #self.close_single_untitled_unmodified_editor()
@@ -445,6 +481,16 @@ def _check_create_ButtonNotebook_style():
             })]
         })]
     )
+    
+    menu = tk.Menu(get_workbench(), tearoff=False)
+    menu.popup_index = None
+    
+    menu.add_command(label="Close",
+                     command=lambda:get_workbench().get_editor_notebook()._close_file(menu.popup_index))
+    menu.add_command(label="Close others",
+                     command=lambda:get_workbench().get_editor_notebook()._close_files(menu.popup_index))
+    menu.add_command(label="Close all",
+                     command=lambda:get_workbench().get_editor_notebook()._close_files())
 
     def letf_btn_press(event):
         try:
@@ -483,11 +529,14 @@ def _check_create_ButtonNotebook_style():
             exception("Closing tab")
     
     def right_btn_press(event):
-        pass
+        x, y, widget = event.x, event.y, event.widget
+        elem =  widget.identify(x, y)
+        index = widget.index("@%d,%d" % (x, y))
+        menu.popup_index = index
+        menu.post(*get_workbench().winfo_pointerxy())
     
-    def right_btn_release(event):
-        pass
     
     get_workbench().bind_class("TNotebook", "<ButtonPress-1>", letf_btn_press, True)
     get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", left_btn_release, True)
+    get_workbench().bind_class("TNotebook", "<ButtonPress-3>", right_btn_press, True)
     
