@@ -34,8 +34,7 @@ def test_regular_closed():
     text_widget = tkinter.Text()
     text_widget.insert("end", TEST_STR1)
 
-    highlighter = GlobLocHighlighter()
-    highlighter.text = text_widget
+    highlighter = GlobLocHighlighter(text_widget)
 
     actual_global, actual_local = highlighter.get_positions()
 

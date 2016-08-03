@@ -1,19 +1,19 @@
-import tkinter.font as tk_font
+import tkinter as tk
 from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 
 class GlobLocHighlighter:
 
-    def __init__(self, local_variable_font=None):
-        self.text = None
-        self.bound_ids = {}
+    def __init__(self, text, local_variable_font=None):
+        self.text = text
         
         if local_variable_font:
             self.local_variable_font=local_variable_font
         else:
-            # TODO: self.text["font]
-            self.local_variable_font = tk_font.nametofont("TkFixedFont")
+            self.local_variable_font = self.text["font"]
+        
+        self._configure_tags()
 
     def get_positions(self):
 
@@ -91,31 +91,24 @@ class GlobLocHighlighter:
             start_index, end_index = pos[0], pos[1]
             self.text.tag_add("LOCAL_NAME", start_index, end_index)
 
-    def _on_change(self, event):
+    def update(self, event=None):
         highlight_positions = self.get_positions()
         self._highlight(highlight_positions)
 
-    def _on_editor_change(self, event):
-        if self.text:
-            # unbind events from previous editor's text
-            for k, v in self.bound_ids.items():
-                self.text.unbind(k, v)
 
-        # get the active text widget from the active editor of the active tab of the editor notebook
-        self.text = event.widget.get_current_editor().get_text_widget()
-        self._configure_tags()
-
-        # ...and bind the paren checking procedure to that widget's cursor move event
-        self.bound_ids["<<CursorMove>>"] = self.text.bind("<<CursorMove>>", self._on_change, True)
-        self.bound_ids["<<TextChange>>"] = self.text.bind("<<TextChange>>", self._on_change, True)
-        self._on_change(None)
+def update_highlighting(event):
+    assert isinstance(event.widget, tk.Text)
+    text = event.widget
+    
+    if not hasattr(text, "global_local_highlighter"):
+        text.global_local_highlighter = GlobLocHighlighter(text,
+            get_workbench().get_font("ItalicEditorFont"))
+        
+    text.global_local_highlighter.update(event)
 
 
 def load_plugin():
     wb = get_workbench()
-    nb = wb.get_editor_notebook()
-
-    name_hl = GlobLocHighlighter(get_workbench().get_font("ItalicEditorFont"))
-    nb.bind("<<NotebookTabChanged>>", name_hl._on_editor_change, True)
+    wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     
     
