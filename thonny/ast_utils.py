@@ -270,7 +270,7 @@ def mark_text_ranges(node, source):
                 del tokens[-1]
                 
         else:
-            _strip_trailing_extra_closers(tokens, not isinstance(node, ast.Tuple))
+            _strip_trailing_extra_closers(tokens, not (isinstance(node, ast.Tuple) or isinstance(node, ast.Lambda)))
             _strip_trailing_junk_from_expressions(tokens)
             _strip_unclosed_brackets(tokens)
         
