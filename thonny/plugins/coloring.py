@@ -31,6 +31,8 @@ class SyntaxColorer:
         self.text = text
         self._compile_regexes()
         self._config_colors(main_font, bold_font)
+        self._update_scheduled = False
+        self._dirty_ranges = set()
     
     def _compile_regexes(self):
         kw = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
@@ -113,7 +115,37 @@ class SyntaxColorer:
         self.text.tag_raise("STRING_OPEN3", "STRING_OPEN")
         self.text.tag_raise('sel')
 
-    def update_coloring(self, event=None):
+    def schedule_update(self, event):
+        
+        # Allow reducing work by remembering only changed lines
+        if event.sequence == "TextInsert":
+            index = self.text.index(event.index)
+            start_row = int(index.split(".")[0])
+            end_row = start_row + event.text.count("\n")
+            start_index = "%d.%d" % (start_row, 0)
+            end_index = "%d.%d" % (end_row + 1, 0)
+        elif event.sequence == "TextDelete":
+            index = self.text.index(event.index1)
+            start_row = int(index.split(".")[0])
+            start_index = "%d.%d" % (start_row, 0)
+            end_index = "%d.%d" % (start_row + 1, 0)
+        else:
+            return
+        
+        self._dirty_ranges.add((start_index, end_index))
+        
+        def perform_update():
+            try:
+                self._update_coloring()
+            finally:
+                self._update_scheduled = False
+                self._dirty_ranges = set()
+        
+        if not self._update_scheduled:
+            self._update_scheduled = True
+            self.text.after_idle(perform_update)
+            
+    def _update_coloring(self):
         self._update_uniline_tokens("1.0", "end")
         self._update_multiline_tokens("1.0", "end")
 
@@ -179,29 +211,19 @@ class SyntaxColorer:
         
 
 class CodeViewSyntaxColorer(SyntaxColorer):
-    def update_coloring(self, event):
-        # Try to reduce work by recoloring only changed lines
-        if event.sequence == "TextInsert":
-            index = self.text.index(event.index)
-            start_row = int(index.split(".")[0])
-            end_row = start_row + event.text.count("\n")
-            start_index = "%d.%d" % (start_row, 0)
-            end_index = "%d.%d" % (end_row + 1, 0)
-        elif event.sequence == "TextDelete":
-            index = self.text.index(event.index1)
-            start_row = int(index.split(".")[0])
-            start_index = "%d.%d" % (start_row, 0)
-            end_index = "%d.%d" % (start_row + 1, 0)
-        else:
-            return
-            
-        self._update_uniline_tokens(start_index, end_index)
+    def _update_coloring(self):
+        from time import time
+        t = time()
+        
+        for dirty_range in self._dirty_ranges:
+            self._update_uniline_tokens(*dirty_range)
         
         # Multiline tokens need to be searched from the whole source
         self._update_multiline_tokens("1.0", "end")
+        print("COLOR", time()-t)
 
 class ShellSyntaxColorer(SyntaxColorer):
-    def update_coloring(self, event):
+    def _update_coloring(self):
         parts = self.text.tag_prevrange("command", "end")
         
         if parts:
@@ -231,7 +253,7 @@ def update_coloring(event):
         text.syntax_colorer = class_(text, get_workbench().get_font("EditorFont"),
                             get_workbench().get_font("BoldEditorFont"))
     
-    text.syntax_colorer.update_coloring(event)
+    text.syntax_colorer.schedule_update(event)
 
 def load_plugin():
     wb = get_workbench() 

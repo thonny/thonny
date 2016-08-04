@@ -15,7 +15,8 @@ class LocalsHighlighter:
             self.local_variable_font = self.text["font"]
         
         self._configure_tags()
-
+        self._update_scheduled = False
+        
     def get_positions(self):
 
         locs = []
@@ -89,12 +90,23 @@ class LocalsHighlighter:
             start_index, end_index = pos[0], pos[1]
             self.text.tag_add("LOCAL_NAME", start_index, end_index)
 
-    def update(self, event=None):
+    def schedule_update(self):
+        def perform_update():
+            try:
+                self.update()
+            finally:
+                self._update_scheduled = False
+        
+        if not self._update_scheduled:
+            self._update_scheduled = True
+            self.text.after_idle(perform_update)
+            
+    def update(self):
         from time import time
         t = time()
         highlight_positions = self.get_positions()
         self._highlight(highlight_positions)
-        print(time() - t)
+        print("LOCALS", time() - t)
 
 
 def update_highlighting(event):
@@ -105,7 +117,7 @@ def update_highlighting(event):
         text.local_highlighter = LocalsHighlighter(text,
             get_workbench().get_font("ItalicEditorFont"))
         
-    text.local_highlighter.update(event)
+    text.local_highlighter.schedule_update()
 
 
 def load_plugin():

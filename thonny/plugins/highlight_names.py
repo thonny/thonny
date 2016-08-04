@@ -12,6 +12,7 @@ class NameHighlighter:
         self.text = text
         self.text.tag_configure("NAME", NAME_CONF)
         self.text.tag_raise("sel")
+        self._update_scheduled = False
 
     @staticmethod
     def is_name_function_call_name(name):
@@ -211,12 +212,27 @@ class NameHighlighter:
                         for usage in NameHighlighter.find_usages(name, stmt, script._parser.module()))
 
 
+    def schedule_update(self):
+        def perform_update():
+            try:
+                self.update()
+            finally:
+                self._update_scheduled = False
+        
+        if not self._update_scheduled:
+            self._update_scheduled = True
+            self.text.after_idle(perform_update)
+
     def update(self):
+        from time import time
+        t = time()
         self.text.tag_remove("NAME", "1.0", "end")
 
         for pos in self.get_positions():
             start_index, end_index = pos[0], pos[1]
             self.text.tag_add("NAME", start_index, end_index)
+            
+        print("NAMES", time() - t)
 
 
 def update_highlighting(event):
@@ -226,7 +242,7 @@ def update_highlighting(event):
     if not hasattr(text, "name_highlighter"):
         text.name_highlighter = NameHighlighter(text)
         
-    text.name_highlighter.update()
+    text.name_highlighter.schedule_update()
 
 
 def load_plugin():

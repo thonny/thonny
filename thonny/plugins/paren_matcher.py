@@ -16,12 +16,27 @@ class ParenMatcher:
         else:
             self._paren_highlight_font = self.text["font"]    
         self._configure_tags()
+        self._update_scheduled = False
+    
+    def schedule_update(self):
+        def perform_update():
+            try:
+                self.update_highlighting()
+            finally:
+                self._update_scheduled = False
+        
+        if not self._update_scheduled:
+            self._update_scheduled = True
+            self.text.after_idle(perform_update)
 
     def update_highlighting(self):
+        from time import time
+        t = time()
         start_index = "1.0"
         end_index = self.text.index("end")
         remaining = self._highlight_surrounding(start_index, end_index)
         self._highlight_unclosed(remaining, start_index, end_index)
+        print("PAREN", time()-t)
     
     def _configure_tags(self):
         self.text.tag_configure("SURROUNDING_PARENS",
@@ -124,7 +139,7 @@ def update_highlighting(event=None):
         else:
             return
     
-    text.paren_matcher.update_highlighting()
+    text.paren_matcher.schedule_update()
 
 def load_plugin():
     wb = get_workbench()  
