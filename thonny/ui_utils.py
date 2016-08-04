@@ -653,6 +653,7 @@ def _create_var(class_, value, modification_listener):
                 # on variable
                 get_workbench().report_exception()
     
+    # TODO: https://bugs.python.org/issue22115 (deprecation warning)
     var.trace("w", on_write)
     return var
 
