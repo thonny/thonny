@@ -224,15 +224,11 @@ class NameHighlighter:
             self.text.after_idle(perform_update)
 
     def update(self):
-        from time import time
-        t = time()
         self.text.tag_remove("NAME", "1.0", "end")
 
         for pos in self.get_positions():
             start_index, end_index = pos[0], pos[1]
             self.text.tag_add("NAME", start_index, end_index)
-            
-        print("NAMES", time() - t)
 
 
 def update_highlighting(event):

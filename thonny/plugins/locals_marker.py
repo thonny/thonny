@@ -102,11 +102,8 @@ class LocalsHighlighter:
             self.text.after_idle(perform_update)
             
     def update(self):
-        from time import time
-        t = time()
         highlight_positions = self.get_positions()
         self._highlight(highlight_positions)
-        print("LOCALS", time() - t)
 
 
 def update_highlighting(event):

@@ -30,13 +30,10 @@ class ParenMatcher:
             self.text.after_idle(perform_update)
 
     def update_highlighting(self):
-        from time import time
-        t = time()
         start_index = "1.0"
         end_index = self.text.index("end")
         remaining = self._highlight_surrounding(start_index, end_index)
         self._highlight_unclosed(remaining, start_index, end_index)
-        print("PAREN", time()-t)
     
     def _configure_tags(self):
         self.text.tag_configure("SURROUNDING_PARENS",

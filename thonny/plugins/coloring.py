@@ -212,15 +212,11 @@ class SyntaxColorer:
 
 class CodeViewSyntaxColorer(SyntaxColorer):
     def _update_coloring(self):
-        from time import time
-        t = time()
-        
         for dirty_range in self._dirty_ranges:
             self._update_uniline_tokens(*dirty_range)
         
         # Multiline tokens need to be searched from the whole source
         self._update_multiline_tokens("1.0", "end")
-        print("COLOR", time()-t)
 
 class ShellSyntaxColorer(SyntaxColorer):
     def _update_coloring(self):
