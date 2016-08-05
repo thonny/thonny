@@ -395,8 +395,8 @@ class ShellText(EnhancedTextWithLogging):
                         self._insert_prompt()
                 else:
                     get_runner().send_command(
-                        ToplevelCommand(command="python",
-                                        cmd_line=text_to_be_submitted))
+                        ToplevelCommand(command="execute_source",
+                                        source=text_to_be_submitted))
                 
             except:
                 #raise # TODO:

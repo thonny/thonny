@@ -134,7 +134,7 @@ class VM:
     def _cmd_debug(self, cmd):
         self._execute_file_and_send_result(cmd, True)
     
-    def _cmd_python(self, cmd):
+    def _cmd_execute_source(self, cmd):
         filename = "<pyshell>"
         
         if hasattr(cmd, "global_vars"):
@@ -147,11 +147,11 @@ class VM:
         elif isinstance(cmd, InlineCommand):
             result_type = "InlineResult"
         else:
-            raise Exception("Unsuitable command type for cmd_python")
+            raise Exception("Unsuitable command type for execute_source")
         
         # let's see if it's single expression or something more complex
         try:
-            root = ast.parse(cmd.cmd_line, filename=filename, mode="exec")
+            root = ast.parse(cmd.source, filename=filename, mode="exec")
         except SyntaxError as e:
             self.send_message(result_type,
                 error="".join(traceback.format_exception_only(SyntaxError, e)))
@@ -164,7 +164,7 @@ class VM:
         else:
             mode = "exec"
             
-        result_attributes = self._execute_source(cmd.cmd_line, filename, mode,
+        result_attributes = self._execute_source(cmd.source, filename, mode,
             hasattr(cmd, "debug_mode") and cmd.debug_mode,
             global_vars)
         
