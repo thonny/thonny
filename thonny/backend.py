@@ -137,11 +137,23 @@ class VM:
     def _cmd_python(self, cmd):
         filename = "<pyshell>"
         
+        if hasattr(cmd, "global_vars"):
+            global_vars = cmd.global_vars
+        else:
+            global_vars = __main__.__dict__
+
+        if isinstance(cmd, ToplevelCommand):
+            result_type = "ToplevelResult"
+        elif isinstance(cmd, InlineCommand):
+            result_type = "InlineResult"
+        else:
+            raise Exception("Unsuitable command type for cmd_python")
+        
         # let's see if it's single expression or something more complex
         try:
             root = ast.parse(cmd.cmd_line, filename=filename, mode="exec")
         except SyntaxError as e:
-            self.send_message("ToplevelResult",
+            self.send_message(result_type,
                 error="".join(traceback.format_exception_only(SyntaxError, e)))
             return
             
@@ -151,16 +163,13 @@ class VM:
             mode = "eval"
         else:
             mode = "exec"
+            
         result_attributes = self._execute_source(cmd.cmd_line, filename, mode,
-            hasattr(cmd, "debug_mode") and cmd.debug_mode)
+            hasattr(cmd, "debug_mode") and cmd.debug_mode,
+            global_vars)
         
-        
-        if isinstance(cmd, ToplevelCommand):
-            result_type = "ToplevelResult"
-        elif isinstance(cmd, InlineCommand):
-            result_type = "InlineResult"
-        else:
-            raise Exception("Unsuitable command type for cmd_python")
+        if "__result__" in global_vars:
+            result_attributes["__result__"] = global_vars["__result__"]
         
         self.send_message(result_type, **result_attributes)
 
@@ -290,14 +299,18 @@ class VM:
         code_filename = os.path.abspath(cmd.filename)
         return self._execute_source(source, code_filename, "exec", debug_mode)
     
-    def _execute_source(self, source, filename, execution_mode, debug_mode):
+    def _execute_source(self, source, filename, execution_mode, debug_mode,
+                        global_vars=None):
         if debug_mode:
             self._current_executor = FancyTracer(self)
         else:
             self._current_executor = Executor(self)
         
         try:
-            return self._current_executor.execute_source(source, filename, execution_mode)
+            return self._current_executor.execute_source(source, 
+                                                         filename,
+                                                         execution_mode,
+                                                         global_vars)
         finally:
             self._current_executor = None
     
@@ -448,20 +461,23 @@ class Executor:
     def __init__(self, vm):
         self._vm = vm
     
-    def execute_source(self, source, filename, mode):
+    def execute_source(self, source, filename, mode, global_vars=None):
+        
+        if global_vars is None:
+            global_vars = __main__.__dict__
         
         try:
             bytecode = self._compile_source(source, filename, mode)
             if hasattr(self, "_trace"):
                 sys.settrace(self._trace)    
             if mode == "eval":
-                value = eval(bytecode, __main__.__dict__)
+                value = eval(bytecode, global_vars)
                 if value is not None:
                     builtins._ = value 
                 return {"value_info" : self._vm.export_value(value)}
             else:
                 assert mode == "exec"
-                exec(bytecode, __main__.__dict__) # <Marker: remove this line from stacktrace>
+                exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
                 return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
         except SyntaxError as e:
             return {"error" : "".join(traceback.format_exception_only(SyntaxError, e))}
@@ -504,10 +520,10 @@ class FancyTracer(Executor):
         self._install_marker_functions()
         self._custom_stack = []
     
-    def execute_source(self, source, filename, mode):
+    def execute_source(self, source, filename, mode, global_vars=None):
         self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
         
-        return Executor.execute_source(self, source, filename, mode)
+        return Executor.execute_source(self, source, filename, mode, global_vars)
         #assert len(self._custom_stack) == 0
         
     def _install_marker_functions(self):
