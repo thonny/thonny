@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import font as tk_font
 from thonny.globals import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
