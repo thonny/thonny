@@ -22,7 +22,9 @@ class NameHighlighter:
     @staticmethod
     def is_name_function_definition(name):
         scope = name.get_definition()
-        return isinstance(scope, tree.Function) and scope.children[1].value == name.value
+        return (isinstance(scope, tree.Function) 
+                and hasattr(scope.children[1], "value")
+                and scope.children[1].value == name.value)
 
     @staticmethod
     def get_def_from_function_params(func_node, name):
