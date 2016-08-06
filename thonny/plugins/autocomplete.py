@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import font as tk_font
 from thonny.globals import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
@@ -13,8 +14,9 @@ asynchronous.
 """
 class Completer(tk.Listbox):
     def __init__(self, text):
+        self.font = get_workbench().get_font("EditorFont").copy()
         tk.Listbox.__init__(self, master=text,
-                            font=get_workbench().get_font("EditorFont"),
+                            font=self.font,
                             activestyle="dotbox",
                             exportselection=False)
         
@@ -105,10 +107,28 @@ class Completer(tk.Listbox):
         
         # place box
         if not self._is_visible():
+            
+            self.font.configure(size=get_workbench().get_font("EditorFont")["size"]-2)
+            
+            
+            #_, _, _, list_box_height = self.bbox(0)
+            height = 100 #min(150, list_box_height * len(completions) * 1.15)
             typed_name_length = len(completions[0]["name"]) - len(completions[0]["complete"])
-            box_x, box_y, _, box_height = self.text.bbox('insert-%dc' % typed_name_length);
-            self.place(x=box_x, y=box_y + box_height,
-                       width=400, height=200)
+            text_box_x, text_box_y, _, text_box_height = self.text.bbox('insert-%dc' % typed_name_length);
+            
+            # should the box appear below or above cursor?
+            space_below = self.master.winfo_height() - text_box_y - text_box_height
+            space_above = text_box_y
+            
+            if space_below >= height or space_below > space_above:
+                height = min(height, space_below)
+                y = text_box_y + text_box_height
+            else:
+                height = min(height, space_above)
+                y = text_box_y - height
+                
+            self.place(x=text_box_x, y=y, width=400, height=height)
+                
 
     def _is_visible(self):
         return self.winfo_ismapped()
