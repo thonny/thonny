@@ -139,6 +139,9 @@ class VM:
         
         if hasattr(cmd, "global_vars"):
             global_vars = cmd.global_vars
+        elif hasattr(cmd, "extra_vars"):
+            global_vars = __main__.__dict__.copy() # Don't want to mess with main namespace
+            global_vars.update(cmd.extra_vars)
         else:
             global_vars = __main__.__dict__
 
@@ -170,6 +173,11 @@ class VM:
         
         if "__result__" in global_vars:
             result_attributes["__result__"] = global_vars["__result__"]
+        
+        if hasattr(cmd, "request_id"):
+            result_attributes["request_id"] = cmd.request_id
+        else:
+            result_attributes["request_id"] = None
         
         self.send_message(result_type, **result_attributes)
 
