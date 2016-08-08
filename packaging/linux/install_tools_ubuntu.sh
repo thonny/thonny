@@ -6,7 +6,7 @@ sudo apt-get update
 sudo apt-get --assume-yes upgrade
 sudo apt-get --assume-yes install git mercurial # needed below
 sudo apt-get --assume-yes build-dep python # probably installs too much
-sudo apt-get --assume-yes install build-essential yasm nasm \
+sudo apt-get --assume-yes install build-essential automake libtool yasm nasm \
 	libncursesw5-dev libreadline6-dev libssl-dev \
 	libgdbm-dev libc6-dev libsqlite3-dev tk-dev \
 	libbz2-dev zlib1g-dev lzma-dev liblzma-dev xz-utils \
