@@ -25,8 +25,6 @@ $MAIN_DIR/build_xz.sh
 $MAIN_DIR/build_tcltk.sh
 $MAIN_DIR/build_openssl.sh
 $MAIN_DIR/build_python.sh
-$MAIN_DIR/build_sdl.sh
-$MAIN_DIR/install_pygame.sh
 
 # COPY SOME LIBS #########################################
 # using star because this script must work both in 32 and 64-bit Ubuntu
