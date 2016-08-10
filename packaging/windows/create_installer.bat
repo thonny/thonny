@@ -7,9 +7,12 @@ mkdir %BUILDDIR%
 @echo ............... COPYING PYTHON ...................................
 xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 
+@echo ............... PREPARING PIP ...................................
+cp pip.bat %BUILDDIR%\Scripts
+%BUILDDIR%\Scripts\pip install --upgrade pip
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python.exe -m pip install --pre --no-cache-dir thonny
+%BUILDDIR%\Scripts\pip install --pre --no-cache-dir thonny
 
 
 @echo ............... CLEANING PYTHON ............................
@@ -26,7 +29,7 @@ rmdir %BUILDDIR%\Doc /S /Q>NUL
 rmdir %BUILDDIR%\include /S /Q>NUL
 rmdir %BUILDDIR%\libs /S /Q>NUL
 rmdir %BUILDDIR%\Tools /S /Q>NUL
-rmdir %BUILDDIR%\Scripts /S /Q>NUL
+del /S "%BUILDDIR%\Scripts\*">NUL
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 
@@ -43,12 +46,7 @@ rmdir %BUILDDIR%\tcl\tcl8.6\opt0.4 /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\msgs /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 
-@echo ............... CLEANING PYTHON PIP ...................................
 rmdir %BUILDDIR%\Lib\ensurepip /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\pip /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\pip-7.1.2.dist-info /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\setuptools /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\setuptools-18.2.dist-info /S /Q>NUL
 
 @echo ............... COPYING VS FILES ..........................
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
