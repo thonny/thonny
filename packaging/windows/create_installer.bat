@@ -1,19 +1,18 @@
 @echo off
 
 set BUILDDIR=build
+del %BUILDDIR% /Q
 rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
 xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 
-@echo ............... PREPARING PIP ...................................
-cp pip.bat %BUILDDIR%\Scripts
-%BUILDDIR%\Scripts\pip install --upgrade pip
+@echo ............... UPDATING PIP ...................................
+%BUILDDIR%\python -m pip install --upgrade pip
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\Scripts\pip install --pre --no-cache-dir thonny
-
+%BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
 
 @echo ............... CLEANING PYTHON ............................
 move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON-LICENSE.txt>NUL
@@ -29,7 +28,7 @@ rmdir %BUILDDIR%\Doc /S /Q>NUL
 rmdir %BUILDDIR%\include /S /Q>NUL
 rmdir %BUILDDIR%\libs /S /Q>NUL
 rmdir %BUILDDIR%\Tools /S /Q>NUL
-del /S "%BUILDDIR%\Scripts\*">NUL
+del "%BUILDDIR%\Scripts\*" /Q>NUL
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 
@@ -47,6 +46,13 @@ rmdir %BUILDDIR%\tcl\tcl8.6\msgs /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 
 rmdir %BUILDDIR%\Lib\ensurepip /S /Q>NUL
+
+
+rmdir %BUILDDIR%\Lib\site-packages\tkinterhtml\tkhtml\Linux /S /Q>NUL
+rmdir %BUILDDIR%\Lib\site-packages\tkinterhtml\tkhtml\MacOSX /S /Q>NUL
+
+@echo ............... CREATING pip.bat ...................................
+copy pip.bat %BUILDDIR%\Scripts
 
 @echo ............... COPYING VS FILES ..........................
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
