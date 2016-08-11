@@ -22,8 +22,3 @@ MAIN_DIR=$(cd `dirname "${BASH_SOURCE[0]}"` && pwd)
 $MAIN_DIR/copy_tcltk_frameworks.sh
 $MAIN_DIR/copy_python_framework.sh
 
-$MAIN_DIR/copy_sdl_frameworks.sh
-$MAIN_DIR/install_pygame.sh
-
-
-    
