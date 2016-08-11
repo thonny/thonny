@@ -3,6 +3,7 @@
 # Should be run after new thonny package is uploaded to PyPi
 
 PREFIX=$HOME/thonny_template_build
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
 # prepare working folder #########################################################
@@ -16,18 +17,17 @@ cp -R -H $PREFIX/Thonny.app build
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.5/
 
+# Upgrade pip ##########################################
+$PYTHON_CURRENT/bin/python3.5 -m pip install --upgrade pip
+
 # install thonny #####################################################
 $PYTHON_CURRENT/bin/python3.5 -m pip install --pre --no-cache-dir thonny
 rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
 
-# install easygui (TODO: temp) #####################################################
-$PYTHON_CURRENT/bin/python3.5 -m pip install --no-cache-dir easygui
-
-
 # clean unnecessary stuff ###################################################
-
-find $FRAMEWORKS -name '*.h' -delete
-find $FRAMEWORKS -name '*.a' -delete
+# /include/python3.5m/pyconfig.h
+#find $FRAMEWORKS -name '*.h' -delete
+#find $FRAMEWORKS -name '*.a' -delete
 
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Tk_debug
@@ -50,29 +50,23 @@ rm -rf $PYTHON_CURRENT/lib/python3.5/ensurepip
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/examples
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/tests
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/docs
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pip*
 
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/numpy/lib/tests
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/numpy/core/tests
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/numpy/ma/tests
+rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/tkinterhtml/tkhtml/Windows
+rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/tkinterhtml/tkhtml/Linux
+rm -rf $PYTHON_CURRENT/lib/python3.5/idlelib
 
 
-rm $PYTHON_CURRENT/bin/2to3-3.5
-rm $PYTHON_CURRENT/bin/easy_install-3.5
-rm $PYTHON_CURRENT/bin/idle3.5
-rm $PYTHON_CURRENT/bin/idle3
-rm $PYTHON_CURRENT/bin/pip3.5
-rm $PYTHON_CURRENT/bin/pip3
-rm $PYTHON_CURRENT/bin/pydoc3.5
-rm $PYTHON_CURRENT/bin/python3
-rm $PYTHON_CURRENT/bin/python3-32
-rm $PYTHON_CURRENT/bin/python3.5-32
-rm $PYTHON_CURRENT/bin/python3-config
-rm $PYTHON_CURRENT/bin/python3.5-config
-rm $PYTHON_CURRENT/bin/python3.5m
-rm $PYTHON_CURRENT/bin/python3.5m-config
-rm $PYTHON_CURRENT/bin/pyvenv-3.5
+# clear bin because its scripts have absolute paths
+mv $PYTHON_CURRENT/bin/python3.5 $DIR # save python exe
+rm -rf $PYTHON_CURRENT/bin/*
+mv $DIR/python3.5 $PYTHON_CURRENT/bin/
 
+# create new commands ###############################################################
+cp pip.sh $PYTHON_CURRENT/bin/pip3.5
+cd $PYTHON_CURRENT/bin
+ln -s pip3.5 pip3
+ln -s python3.5 python3
+cd $DIR
 
 # version info ##############################################################
 VERSION=$(<$PYTHON_CURRENT/lib/python3.5/site-packages/thonny/VERSION)
