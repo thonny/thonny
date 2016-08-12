@@ -13,7 +13,7 @@ from thonny import misc_utils
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 
-_dialog_filetypes = [('all files', '.*'), ('Python files', '.py .pyw'), ('text files', '.txt')]
+_dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
 
                 
