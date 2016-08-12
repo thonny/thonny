@@ -31,12 +31,6 @@ $TARGET_DIR/bin/python3.5 -m pip install --upgrade pip
 # INSTALL THONNY ###################################
 $TARGET_DIR/bin/python3.5 -m pip install --pre --no-cache-dir thonny
 
-# INSTALL EASYGUI (TODO: temp) ###################################
-$TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir easygui
-
-# INSTALL PYGAME ###################################
-$TARGET_DIR/bin/python3.5 -m pip install --no-cache-dir pygame
-
 VERSION=$(<$TARGET_DIR/lib/python3.5/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
