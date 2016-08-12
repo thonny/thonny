@@ -150,7 +150,7 @@ class InterpreterConfigurationPage(ConfigurationPage):
         get_workbench().set_option("run.used_interpreters", used_interpreters)
         
         if get_runner().get_state() == "waiting_toplevel_command":
-            get_runner().cmd_reset()
+            get_runner().cmd_stop_reset()
         else:
             messagebox.showinfo(None, "New interpreter will be selected at next Run/Debug/Reset")
         
