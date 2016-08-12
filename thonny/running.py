@@ -326,6 +326,14 @@ class _BackendProxy:
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
                             % interpreter)
         
+        
+        if interpreter == get_gui_interpreter():
+            # in gui environment make "pip install"
+            # use a folder outside thonny installation
+            # in order to keep packages after reinstalling Thonny 
+            my_env["PIP_USER"] = "true"
+            my_env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
+        
         backend_launcher = os.path.join(get_workbench().get_package_dir(), 
                                         "backend_private",
                                         "thonny_backend.py") 

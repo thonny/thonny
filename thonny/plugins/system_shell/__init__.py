@@ -6,6 +6,7 @@ import platform
 from tkinter.messagebox import showerror
 import shutil
 from thonny.globals import get_runner
+from thonny.running import get_gui_interpreter
 
 def _create_pythonless_environment():
     # If I want to call another python version, then 
@@ -98,6 +99,15 @@ def open_system_shell(python_interpreter):
                           explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"),
                           cwd=get_runner().get_cwd())
     print(expanded_cmd_line) 
+    
+    if python_interpreter == get_gui_interpreter():
+        # in gui environment make "pip install"
+        # use a folder outside thonny installation
+        # in order to keep packages after reinstalling Thonny 
+        env["PIP_USER"] = "true"
+        env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
+    
+    
     Popen(expanded_cmd_line, env=env, shell=True)
 
     
