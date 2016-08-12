@@ -41,29 +41,12 @@ VERSION=$(<$TARGET_DIR/lib/python3.5/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 
-# override thonny launcher
-rm $TARGET_DIR/bin/thonny
-cp thonny $TARGET_DIR/bin
-
 
 # clean up unnecessary stuff
 rm -rf $TARGET_DIR/share
 rm -rf $TARGET_DIR/man
 rm -rf $TARGET_DIR/openssl/man
 rm -rf $TARGET_DIR/include/openssl
-
-rm -rf $TARGET_DIR/bin/python3.5m # too big
-rm -rf $TARGET_DIR/bin/openssl
-rm -rf $TARGET_DIR/bin/*z*
-rm -rf $TARGET_DIR/bin/c_rehash
-rm -rf $TARGET_DIR/bin/2to3*
-rm -rf $TARGET_DIR/bin/idle*
-rm -rf $TARGET_DIR/bin/pip* # TODO: don't delete but replace shebang
-rm -rf $TARGET_DIR/bin/pydoc*
-rm -rf $TARGET_DIR/bin/pyvenv*
-rm -rf $TARGET_DIR/bin/tclsh*
-rm -rf $TARGET_DIR/bin/wish*
-
 
 #find $TARGET_DIR -type f -name "*.a" -delete
 find $TARGET_DIR -type f -name "*.pyo" -delete
@@ -78,6 +61,21 @@ rm -rf $TARGET_DIR/lib/python3.5/ensurepip
 
 rm -rf $TARGET_DIR/lib/python3.5/site-packages/tkinterhtml/tkhtml/Windows
 rm -rf $TARGET_DIR/lib/python3.5/site-packages/tkinterhtml/tkhtml/MacOSX
+
+# clear bin because its scripts have absolute paths
+mv $PYTHON_CURRENT/bin/python3.5 $DIR # save python exe
+rm -rf $PYTHON_CURRENT/bin/*
+mv $DIR/python3.5 $PYTHON_CURRENT/bin/
+
+# create new commands ###############################################################
+cp thonny $TARGET_DIR/bin
+cp pip.sh $TARGET_DIR/bin/pip3.5
+cd $TARGET_DIR/bin
+ln -s pip3.5 pip3
+ln -s python3.5 python3
+cd $DIR
+
+
 
 # copy licenses
 cp ../../*LICENSE.txt $TARGET_DIR
