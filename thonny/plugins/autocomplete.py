@@ -170,6 +170,7 @@ class Completer(tk.Listbox):
         self.selection_clear(0, self.size()-1)
         self.selection_set(index)
         self.activate(index)
+        self.see(index)
     
     def _get_request_id(self):
         return "autocomplete_" + str(self.text.winfo_id())
