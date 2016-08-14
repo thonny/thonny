@@ -12,7 +12,7 @@ xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 %BUILDDIR%\python -m pip install --upgrade pip
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
+%BUILDDIR%\python -m pip install --upgrade --pre --no-cache-dir thonny
 
 @echo ............... CLEANING PYTHON ............................
 move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON-LICENSE.txt>NUL

@@ -3,7 +3,7 @@
 set BUILDDIR=build
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\Scripts\pip install --pre --no-cache-dir thonny
+%BUILDDIR%\python -m pip install --pre --upgrade --no-cache-dir thonny
 
 @echo ............... CREATING INSTALLER ..........................
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
