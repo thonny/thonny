@@ -69,7 +69,6 @@ class Completer(tk.Listbox):
         
         row, column = self._get_position()
         result = msg.__result__
-        print("RESULT", result)
         # check if the response is relevant for current state
         if (result["source"] == self.text.get("1.0", "end-1c")
             and result["row"] == row and result["column"] == column):
@@ -133,15 +132,22 @@ class Completer(tk.Listbox):
         return self.winfo_ismapped()
     
     def _insert_completion(self, completion):
+        typed_len = len(completion["name"]) - len(completion["complete"])
+        typed_prefix = self.text.get("insert-{}c".format(typed_len), "insert")
         get_workbench().event_generate("AutocompleteInsertion",
             text_widget=self.text,
-            typed_name=completion["name"][:-len(completion["complete"])],
+            typed_prefix=typed_prefix,
             completed_name=completion["name"])
         
         if self._is_visible():
             self._close()
-            
-        self.text.insert(self.text.index('insert'), completion["complete"])
+        
+        if not completion["name"].startswith(typed_prefix):
+            # eg. case of the prefix was not correct
+            self.text.delete("insert-{}c".format(typed_len), "insert")
+            self.text.insert('insert', completion["name"])
+        else:
+            self.text.insert('insert', completion["complete"])
         
     
     def _get_filename(self):
