@@ -4,7 +4,7 @@ set -e
 
 PREFIX=$HOME/pythonny
 
-
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # prepare working folder
 rm -rf build
@@ -39,16 +39,20 @@ VERSION_NAME=thonny-$VERSION-$ARCHITECTURE
 # clean up unnecessary stuff
 rm -rf $TARGET_DIR/share
 rm -rf $TARGET_DIR/man
-rm -rf $TARGET_DIR/openssl/man
-rm -rf $TARGET_DIR/include/openssl
+rm -rf $TARGET_DIR/openssl
 
-#find $TARGET_DIR -type f -name "*.a" -delete
+find $TARGET_DIR -type f -name "*.a" -delete
 find $TARGET_DIR -type f -name "*.pyo" -delete
 find $TARGET_DIR -type f -name "*.pyc" -delete
 find $TARGET_DIR -type d -name "__pycache__" -delete
 
+rm -rf $TARGET_DIR/lib/tk8.6/demos
+
+
+rm -rf $TARGET_DIR/lib/python3.5/test
+rm -rf $TARGET_DIR/lib/python3.5/idlelib
 rm -rf $TARGET_DIR/lib/python3.5/ensurepip
-#rm -rf $TARGET_DIR/include
+rm -rf $TARGET_DIR/lib/python3.5/distutils/command/*.exe
 #rm -rf $TARGET_DIR/lib/python3.5/config-3.5m
 #rm -rf $TARGET_DIR/lib/python3.5/site-packages/pip*
 #rm -rf $TARGET_DIR/lib/python3.5/site-packages/setuptools*
@@ -56,10 +60,19 @@ rm -rf $TARGET_DIR/lib/python3.5/ensurepip
 rm -rf $TARGET_DIR/lib/python3.5/site-packages/tkinterhtml/tkhtml/Windows
 rm -rf $TARGET_DIR/lib/python3.5/site-packages/tkinterhtml/tkhtml/MacOSX
 
-# clear bin because its scripts have absolute paths
-mv $PYTHON_CURRENT/bin/python3.5 $DIR # save python exe
-rm -rf $PYTHON_CURRENT/bin/*
-mv $DIR/python3.5 $PYTHON_CURRENT/bin/
+# clear most of the include folder ##################################################
+rm -rf $TARGET_DIR/include/lzma
+rm -rf $TARGET_DIR/include/*.h
+mv $TARGET_DIR/include/python3.5m/pyconfig.h $SCRIPT_DIR # pip needs this
+rm $TARGET_DIR/include/python3.5m/*
+mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.5m # put it back
+
+
+
+# clear bin because its scripts have absolute paths #################################
+mv $TARGET_DIR/bin/python3.5 $SCRIPT_DIR # save python exe
+rm -rf $TARGET_DIR/bin/*
+mv $SCRIPT_DIR/python3.5 $TARGET_DIR/bin/
 
 # create new commands ###############################################################
 cp thonny $TARGET_DIR/bin
@@ -67,7 +80,7 @@ cp pip.sh $TARGET_DIR/bin/pip3.5
 cd $TARGET_DIR/bin
 ln -s pip3.5 pip3
 ln -s python3.5 python3
-cd $DIR
+cd $SCRIPT_DIR
 
 
 

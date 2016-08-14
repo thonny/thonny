@@ -3,7 +3,7 @@
 # Should be run after new thonny package is uploaded to PyPi
 
 PREFIX=$HOME/thonny_template_build
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 
 # prepare working folder #########################################################
@@ -57,16 +57,16 @@ rm -rf $PYTHON_CURRENT/lib/python3.5/idlelib
 
 
 # clear bin because its scripts have absolute paths
-mv $PYTHON_CURRENT/bin/python3.5 $DIR # save python exe
+mv $PYTHON_CURRENT/bin/python3.5 $SCRIPT_DIR # save python exe
 rm -rf $PYTHON_CURRENT/bin/*
-mv $DIR/python3.5 $PYTHON_CURRENT/bin/
+mv $SCRIPT_DIR/python3.5 $PYTHON_CURRENT/bin/
 
 # create new commands ###############################################################
 cp pip.sh $PYTHON_CURRENT/bin/pip3.5
 cd $PYTHON_CURRENT/bin
 ln -s pip3.5 pip3
 ln -s python3.5 python3
-cd $DIR
+cd $SCRIPT_DIR
 
 # version info ##############################################################
 VERSION=$(<$PYTHON_CURRENT/lib/python3.5/site-packages/thonny/VERSION)
