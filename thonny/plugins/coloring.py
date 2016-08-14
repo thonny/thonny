@@ -125,7 +125,11 @@ class SyntaxColorer:
             start_index = "%d.%d" % (start_row, 0)
             end_index = "%d.%d" % (end_row + 1, 0)
         elif event.sequence == "TextDelete":
+            assert event.index1 != None
             index = self.text.index(event.index1)
+            assert index != None
+            print(event.index1, type(event.index1))
+            print(index, type(index), event)
             start_row = int(index.split(".")[0])
             start_index = "%d.%d" % (start_row, 0)
             end_index = "%d.%d" % (start_row + 1, 0)
