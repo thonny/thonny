@@ -115,6 +115,8 @@ class TweakableText(tk.Text):
         self.event_generate("<<TextChange>>")
     
     def direct_delete(self, index1, index2=None):
+        if index1.startswith("sel.") and not self.has_selection():
+            return
         self._original_delete(index1, index2)
         self.event_generate("<<TextChange>>")
     
