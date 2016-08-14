@@ -3,6 +3,7 @@ from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 from jedi.parser.tree import Function
+import logging
 
 class LocalsHighlighter:
 
@@ -102,8 +103,11 @@ class LocalsHighlighter:
             self.text.after_idle(perform_update)
             
     def update(self):
-        highlight_positions = self.get_positions()
-        self._highlight(highlight_positions)
+        try:
+            highlight_positions = self.get_positions()
+            self._highlight(highlight_positions)
+        except:
+            logging.exception("Problem when updating local variable tags")
 
 
 def update_highlighting(event):
