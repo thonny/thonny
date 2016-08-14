@@ -45,6 +45,12 @@ def open_system_shell(python_interpreter):
     
     exec_prefix=_get_exec_prefix(python_interpreter)
     env = _create_pythonless_environment()
+    if python_interpreter == get_gui_interpreter():
+        # in gui environment make "pip install"
+        # use a folder outside thonny installation
+        # in order to keep packages after reinstalling Thonny 
+        env["PIP_USER"] = "true"
+        env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
     
     # TODO: what if executable or explainer needs escaping?
     # Maybe try creating a script in temp folder and execute this,
@@ -78,10 +84,17 @@ def open_system_shell(python_interpreter):
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
         # Need to modify environment explicitly as "tell application" won't pass the environment
         # (at least when Terminal is already active)
+        
+        # TODO: osascript won't change Terminal-s env
+        # At the moment I just explicitly set important variables
+        if "PIP_USER" in env:
+            pip_tweak = ';export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}'.format(**env)
+        else:
+            pip_tweak = ''
         cmd_line = ("osascript"
-            + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s; {interpreter} {explainer}"'"""
+            + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; {interpreter} {explainer}"'"""
             + """ -e 'tell application "Terminal" to activate'"""
-        ) % env["PATH"]
+        ) % (env["PATH"], pip_tweak)
 
         # TODO: at the moment two new terminal windows will be opened when terminal is not already active
         # https://discussions.apple.com/thread/1738507?tstart=0
@@ -98,15 +111,6 @@ def open_system_shell(python_interpreter):
     expanded_cmd_line = cmd_line.format(interpreter=python_interpreter.replace("pythonw","python"),
                           explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"),
                           cwd=get_runner().get_cwd())
-    print(expanded_cmd_line) 
-    
-    if python_interpreter == get_gui_interpreter():
-        # in gui environment make "pip install"
-        # use a folder outside thonny installation
-        # in order to keep packages after reinstalling Thonny 
-        env["PIP_USER"] = "true"
-        env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
-    
     
     Popen(expanded_cmd_line, env=env, shell=True)
 
