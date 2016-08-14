@@ -35,16 +35,9 @@ find $FRAMEWORKS -name '*.a' -delete
 
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Tk_debug
-rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Resources/Scripts/demos
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Resources/Scripts/demos
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Resources/Documentation
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Resources/Documentation
-
-rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Tcl_debug
-rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
-rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
-rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Resources/Scripts/demos
-rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Resources/Documentation
-
 
 find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
