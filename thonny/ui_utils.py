@@ -363,7 +363,6 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
                 
             return tktextext.EnhancedText.direct_delete(self, index1, index2=index2)
         finally:
-            if concrete_inde
             get_workbench().event_generate("TextDelete", index1=concrete_index1,
                                            index2=concrete_index2, text_widget=self)
             

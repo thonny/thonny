@@ -41,14 +41,12 @@ class TweakableText(tk.Text):
                 return self.tk.call((self._original_widget_name, operation) + args)
             
         except TclError as e:
-            print("OP: ", operation, args)
-            if str(e).lower() == '''text doesn't contain any characters tagged with "sel"''':
-                # Some Tk internal actions cause this error
-                if operation in ["delete", "index"] and args in [("sel.first", "sel.last"), ("sel.first",)]:
-                    # This happens on (each?) paste
-                    pass
-                else:
-                    traceback.print_exc()
+            # Some Tk internal actions (eg. paste and cut) can cause this error
+            if (str(e).lower() == '''text doesn't contain any characters tagged with "sel"'''
+                and operation in ["delete", "index", "get"] 
+                and args in [("sel.first", "sel.last"), ("sel.first",)]):
+                
+                pass
             else:
                 traceback.print_exc()
     
@@ -67,18 +65,23 @@ class TweakableText(tk.Text):
     
     def intercept_insert(self, index, chars, tags=None):
         if chars >= "\uf704" and chars <= "\uf70d": # Function keys F1..F10 in Mac cause these
-            return
-        
-        if not self.is_read_only():
-            self.direct_insert(index, chars, tags)
+            pass
+        elif self.is_read_only():
+            self.bell()
         else:
-            self.bell()            
+            self.direct_insert(index, chars, tags)
     
     def intercept_delete(self, index1, index2=None):
-        if not self.is_read_only():
-            self.direct_delete(index1, index2)
-        else:
+        if self.is_read_only():
             self.bell()            
+        elif self._is_erroneous_delete(index1, index2):
+            pass
+        else:
+            self.direct_delete(index1, index2)
+    
+    def _is_erroneous_delete(self, index1, index2):
+        """Paste can cause deletes where index1 is sel.start but text has no selection. This would cause errors"""
+        return index1.startswith("sel.") and not self.has_selection()
     
     def direct_mark(self, *args):
         self._original_mark(*args)
@@ -115,8 +118,6 @@ class TweakableText(tk.Text):
         self.event_generate("<<TextChange>>")
     
     def direct_delete(self, index1, index2=None):
-        if index1.startswith("sel.") and not self.has_selection():
-            return
         self._original_delete(index1, index2)
         self.event_generate("<<TextChange>>")
     
