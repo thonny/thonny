@@ -25,18 +25,24 @@ $PYTHON_CURRENT/bin/python3.5 -m pip install --pre --no-cache-dir thonny
 rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
 
 # clean unnecessary stuff ###################################################
-# /include/python3.5m/pyconfig.h
-#find $FRAMEWORKS -name '*.h' -delete
-#find $FRAMEWORKS -name '*.a' -delete
+
+# delete all *.h files except one
+mv $PYTHON_CURRENT/include/python3.5m/pyconfig.h $SCRIPT_DIR # pip needs this
+find $FRAMEWORKS -name '*.h' -delete
+mv $SCRIPT_DIR/pyconfig.h $PYTHON_CURRENT/include/python3.5m # put it back
+
+find $FRAMEWORKS -name '*.a' -delete
 
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Tk_debug
+rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Resources/Scripts/demos
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Resources/Documentation
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Resources/Documentation
 
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
-rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Resources/Documentation
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
+rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Resources/Scripts/demos
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Resources/Documentation
 
 
@@ -46,14 +52,11 @@ rm -rf $PYTHON_CURRENT/Resources/English.lproj/Documentation
 
 rm -rf $PYTHON_CURRENT/share
 rm -rf $PYTHON_CURRENT/lib/python3.5/test
+rm -rf $PYTHON_CURRENT/lib/python3.5/idlelib
 rm -rf $PYTHON_CURRENT/lib/python3.5/ensurepip
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/examples
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/tests
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/pygame/docs
 
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/tkinterhtml/tkhtml/Windows
 rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/tkinterhtml/tkhtml/Linux
-rm -rf $PYTHON_CURRENT/lib/python3.5/idlelib
 
 
 # clear bin because its scripts have absolute paths
