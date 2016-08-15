@@ -274,10 +274,8 @@ class EnhancedText(TweakableText):
         # Override this for language specific auto indent
         pass
     
-    def perform_smart_home(self, event):
-        if (event.state & 4) != 0 and event.keysym == "Home":
-            # state&4==Control. If <Control-Home>, use the Tk binding.
-            return
+    def compute_smart_home_destination_index(self):
+        """Is overridden in shell"""
         
         line = self.get("insert linestart", "insert lineend")
         for insertpt in range(len(line)):
@@ -289,7 +287,15 @@ class EnhancedText(TweakableText):
         lineat = int(self.index("insert").split('.')[1])
         if insertpt == lineat:
             insertpt = 0
-        dest = "insert linestart+"+str(insertpt)+"c"
+        return "insert linestart+"+str(insertpt)+"c"
+    
+    def perform_smart_home(self, event):
+        if (event.state & 4) != 0 and event.keysym == "Home":
+            # state&4==Control. If <Control-Home>, use the Tk binding.
+            return
+        
+        dest = self.compute_smart_home_destination_index()
+        
         if (event.state&1) == 0:
             # shift was not pressed
             self.tag_remove("sel", "1.0", "end")

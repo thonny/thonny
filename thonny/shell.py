@@ -458,16 +458,15 @@ class ShellText(EnhancedTextWithLogging):
     def _text_key_release(self, event):
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
             self.tag_configure("value", foreground="DarkBlue", underline=0)
-    
-    def perform_smart_home(self, event):
-        if (event.state & 4) != 0 and event.keysym == "Home":
-            # state&4==Control. If <Control-Home>, use the Tk binding.
-            return
+
+    def compute_smart_home_destination_index(self):
+        """Is used by EnhancedText"""
         
         if self._in_current_input_range("insert"):
             # on input line, go to just after prompt
-            self.mark_set("insert", "input_start")
-            return "break"
+            return "input_start"
+        else:
+            return super().compute_smart_home_destination_index()
     
     def _hyperlink_enter(self, event):
         self.config(cursor="hand2")
