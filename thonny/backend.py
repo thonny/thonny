@@ -548,6 +548,11 @@ class FancyTracer(Executor):
             if not hasattr(builtins, name):
                 setattr(builtins, name, getattr(self, name))
         
+    def _is_interesting_exception(self, frame):
+        # interested only in exceptions in command frame or it's parent frames
+        cmd = self._current_command
+        return (id(frame) == cmd.frame_id
+                or not self._frame_is_alive(cmd.frame_id))
 
     def _compile_source(self, source, filename, mode):
         root = ast.parse(source, filename, mode)
@@ -626,6 +631,8 @@ class FancyTracer(Executor):
                 
         elif event == "exception":
             self._unhandled_exception = arg[1]
+            if self._is_interesting_exception(frame):
+                self._report_state_and_fetch_next_message()
 
         # TODO: support line event in non-instrumented files
         elif event == "line":
@@ -653,14 +660,19 @@ class FancyTracer(Executor):
              
         # If method decides we're in the right place to respond to the command ...
         if tester(frame, event, args, focus, self._current_command):
+            if event == "after_expression":
+                value = self._vm.export_value(args["value"])
+            else:
+                value = None
+            self._report_state_and_fetch_next_message(value)
+    
+    def _report_state_and_fetch_next_message(self, value=None):
             #self._debug("Completed command: ", self._current_command)
             self._vm.send_message("DebuggerProgress",
                 command=self._current_command.command,
                 stack=self._export_stack(),
                 exception=self._vm.export_value(self._unhandled_exception, True),
-                value=self._vm.export_value(args["value"]) 
-                    if event == "after_expression"
-                    else None
+                value=value
             )
             
             # Fetch next debugger command

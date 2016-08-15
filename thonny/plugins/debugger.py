@@ -13,7 +13,7 @@ from thonny import ast_utils, memory, misc_utils, ui_utils
 from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, showerror
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 
@@ -157,8 +157,6 @@ class Debugger:
         
 
     def _handle_debugger_progress(self, msg):
-        
-        # TODO: if exception then show message
         self._last_progress_message = msg
         
         if self._should_skip_event(msg):
@@ -181,12 +179,18 @@ class Debugger:
         event = msg.stack[-1].last_event
         args = msg.stack[-1].last_event_args
 
-        if (event == "after_expression" 
+        if msg.exception:
+            showerror("Exception", msg.exception.repr)
+            self._check_issue_debugger_command("step")
+            
+        elif (event == "after_expression" 
             and "last_child" in args["node_tags"]
             and "child_of_statement" in args["node_tags"]):
             # This means we're done with the expression, so let's speed up a bit.
             self._check_issue_debugger_command("step")
             # Next event will be before_statement_again
+
+                        
             
     
     def _should_skip_event(self, msg):
