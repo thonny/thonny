@@ -394,8 +394,7 @@ class Workbench(tk.Tk):
         
         Args:
             menu_name: Name of the menu the command should appear in.
-                Standard menu names are "file", "edit", "run", "view", "help" 
-                (these menu names are not transalted, but labels are).
+                Standard menu names are "file", "edit", "run", "view", "help".
                 If a menu with given name doesn't exist, then new menu is created
                 (with label=name).
             command_label: Label for this command
