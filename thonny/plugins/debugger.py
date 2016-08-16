@@ -180,7 +180,11 @@ class Debugger:
         args = msg.stack[-1].last_event_args
 
         if msg.exception:
-            showerror("Exception", msg.exception.repr)
+            showerror("Exception",
+                      # Following is clever but noisy 
+                      msg.exception_lower_stack_description.lstrip() + 
+                      msg.exception.type_name 
+                      + ": " + msg.exception_msg)
             self._check_issue_debugger_command("step")
             
         elif (event == "after_expression" 

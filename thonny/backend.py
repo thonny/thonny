@@ -630,9 +630,18 @@ class FancyTracer(Executor):
                 pass
                 
         elif event == "exception":
-            self._unhandled_exception = arg[1]
+            exc = arg[1]
+            if self._unhandled_exception is None:
+                # this means it's the first time we see this exception
+                exc.causing_frame = frame
+            else:
+                # this means the exception is propagating to older frames
+                # get the causing_frame from previous occurrence
+                exc.causing_frame = self._unhandled_exception.causing_frame 
+            
+            self._unhandled_exception = exc
             if self._is_interesting_exception(frame):
-                self._report_state_and_fetch_next_message()
+                self._report_state_and_fetch_next_message(frame)
 
         # TODO: support line event in non-instrumented files
         elif event == "line":
@@ -664,14 +673,38 @@ class FancyTracer(Executor):
                 value = self._vm.export_value(args["value"])
             else:
                 value = None
-            self._report_state_and_fetch_next_message(value)
+            self._report_state_and_fetch_next_message(frame, value)
     
-    def _report_state_and_fetch_next_message(self, value=None):
+    def _report_state_and_fetch_next_message(self, frame, value=None):
             #self._debug("Completed command: ", self._current_command)
+            
+            if self._unhandled_exception is not None:
+                frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
+                # I want to show frames from current frame to causing_frame
+                if frame == self._unhandled_exception.causing_frame:
+                    interesting_frame_infos = []
+                else:
+                    # c how far is current frame from causing_frame?
+                    _distance = 0
+                    _f = self._unhandled_exception.causing_frame 
+                    while _f != frame:
+                        _distance += 1
+                        _f = _f.f_back
+                        if _f == None:
+                            break
+                    interesting_frame_infos = frame_infos[-_distance:]
+                exception_lower_stack_description = "".join(interesting_frame_infos)
+                exception_msg = str(self._unhandled_exception)
+            else:
+                exception_lower_stack_description = None 
+                exception_msg = None
+            
             self._vm.send_message("DebuggerProgress",
                 command=self._current_command.command,
                 stack=self._export_stack(),
                 exception=self._vm.export_value(self._unhandled_exception, True),
+                exception_msg=exception_msg,
+                exception_lower_stack_description=exception_lower_stack_description,
                 value=value
             )
             
