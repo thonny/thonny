@@ -21,7 +21,6 @@ from thonny.misc_utils import get_python_version_string
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
-from importlib.abc import MetaPathFinder, SourceLoader
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
