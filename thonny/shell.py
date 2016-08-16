@@ -390,6 +390,7 @@ class ShellText(EnhancedTextWithLogging):
                     command, _ = parse_shell_command(text_to_be_submitted)
                     if command in self._command_handlers:
                         self._command_handlers[command](text_to_be_submitted)
+                        get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     else:
                         self._insert_text_directly("Unknown magic command: " + command)
                         self._insert_prompt()
