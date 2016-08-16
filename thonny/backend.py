@@ -985,12 +985,13 @@ class FancyTracer(Executor):
                     new_list = []
                     for node in value:
                         if isinstance(node, _ast.stmt):
+                            self._debug("EBFOMA", node)
                             # add before marker
                             new_list.append(self._create_statement_marker(node, 
                                                                           BEFORE_STATEMENT_MARKER))
                         
                         # original statement
-                        if isinstance(node, _ast.stmt):
+                        if isinstance(node, _ast.AST):
                             self._insert_statement_markers(node)
                         new_list.append(node)
                         
