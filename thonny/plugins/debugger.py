@@ -237,14 +237,14 @@ class FrameVisualizer:
         #self._text.tag_configure('after', background="#D7EDD3")
         #self._text.tag_configure('exception', background="#FFBFD6")
         self._text.configure(background="LightYellow")
-        self._text_frame.read_only = True
+        self._text.set_read_only(True)
     
     def close(self):
         if self._next_frame_visualizer:
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
             
-        self._text_frame.read_only = False
+        self._text.set_read_only(False)
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
         
