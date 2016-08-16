@@ -554,7 +554,6 @@ def _check_create_ButtonNotebook_style():
     
     def right_btn_press(event):
         x, y, widget = event.x, event.y, event.widget
-        elem =  widget.identify(x, y)
         index = widget.index("@%d,%d" % (x, y))
         menu.popup_index = index
         menu.post(*get_workbench().winfo_pointerxy())
