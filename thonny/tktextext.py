@@ -145,13 +145,20 @@ class EnhancedText(TweakableText):
         self._bind_undo_aids()
     
     def _bind_editing_aids(self):
-        self.bind("<Control-BackSpace>", self.delete_word_left, True)
-        self.bind("<Option-BackSpace>", self.delete_word_left, True)
-        self.bind("<Control-Delete>", self.delete_word_right, True)
-        self.bind("<Option-Delete>", self.delete_word_right, True)
-        self.bind("<BackSpace>", self.perform_smart_backspace, True)
-        self.bind("<Return>", self.perform_return, True)
-        self.bind("<Tab>", self.indent_or_dedent, True)
+        
+        def if_not_readonly(fun):
+            def dispatch(event):
+                if not self.is_read_only():
+                    fun(event)
+            return dispatch
+        
+        self.bind("<Control-BackSpace>", if_not_readonly(self.delete_word_left), True)
+        self.bind("<Option-BackSpace>", if_not_readonly(self.delete_word_left), True)
+        self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
+        self.bind("<Option-Delete>", if_not_readonly(self.delete_word_right), True)
+        self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
+        self.bind("<Return>", if_not_readonly(self.perform_return), True)
+        self.bind("<Tab>", if_not_readonly(self.indent_or_dedent), True)
     
     def _bind_movement_aids(self):
         self.bind("<Home>", self.perform_smart_home, True)
