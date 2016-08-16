@@ -1102,15 +1102,6 @@ class CustomStackFrame:
         
 class ThonnyClientError(Exception):
     pass
-
-
-class InstumentationFinder(MetaPathFinder):
-    def find_spec(self, fullname, path, target=None):
-        pass
-        
-class MySourceLoader(SourceLoader):
-    pass
-        
     
 
 def fdebug(frame, msg, *args):
