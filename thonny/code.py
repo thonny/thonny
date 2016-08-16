@@ -125,7 +125,8 @@ class Editor(ttk.Frame):
             if len(args) == 0:
                 return
             filename = args[0]
-            if os.path.basename(self.get_filename()) == filename:
+            self_filename = self.get_filename()
+            if self_filename is not None and os.path.basename(self_filename) == filename:
                 # Not that command has only basename
                 # so this solution may make more editors read-only than necessary
                 self._code_view.text.set_read_only(True)
@@ -144,6 +145,7 @@ class Editor(ttk.Frame):
 
     def destroy(self):
         get_workbench().unbind("AfterKnownMagicCommand", self._listen_for_execute)
+        get_workbench().unbind("ToplevelResult", self._listen_for_toplevel_result)
         ttk.Frame.destroy(self)
     
 class EditorNotebook(ttk.Notebook):
