@@ -12,6 +12,7 @@ from thonny.globals import get_workbench
 from thonny import misc_utils
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
+from thonny.common import parse_shell_command
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -44,6 +45,9 @@ class Editor(ttk.Frame):
             self._code_view.text.edit_modified(False)
         
         self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self))
+        
+        get_workbench().bind("AfterKnownMagicCommand", self._listen_for_execute, True)
+        get_workbench().bind("ToplevelResult", self._listen_for_toplevel_result, True)
         
         self.update_appearance()
 
@@ -114,6 +118,20 @@ class Editor(ttk.Frame):
     def update_appearance(self):
         self._code_view.set_line_numbers(get_workbench().get_option("view.show_line_numbers"))
         self._code_view.set_line_length_margin(get_workbench().get_option("view.recommended_line_length"))
+    
+    def _listen_for_execute(self, event):
+        command, args = parse_shell_command(event.cmd_line)
+        if command.lower() in ["run", "debug"]:
+            if len(args) == 0:
+                return
+            filename = args[0]
+            if os.path.basename(self.get_filename()) == filename:
+                # Not that command has only basename
+                # so this solution may make more editors read-only than necessary
+                self._code_view.text.set_read_only(True)
+    
+    def _listen_for_toplevel_result(self, event):
+        self._code_view.text.set_read_only(False)
         
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
@@ -123,6 +141,10 @@ class Editor(ttk.Frame):
     
     def is_focused(self):
         return self.focus_displayof() == self._code_view.text
+
+    def destroy(self):
+        get_workbench().unbind("AfterKnownMagicCommand", self._listen_for_execute)
+        ttk.Frame.destroy(self)
     
 class EditorNotebook(ttk.Notebook):
     """

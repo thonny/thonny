@@ -12,7 +12,7 @@ from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
 from thonny.misc_utils import shorten_repr
 import ast
-from thonny.codeview import CodeView
+from thonny.codeview import CodeView, READ_ONLY_BACKGROUND
 from tkinter.messagebox import showinfo, showerror
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
@@ -236,7 +236,6 @@ class FrameVisualizer:
         #self._text.tag_configure('before', background="#F8FC9A") TODO: ???
         #self._text.tag_configure('after', background="#D7EDD3")
         #self._text.tag_configure('exception', background="#FFBFD6")
-        self._text.configure(background="LightYellow")
         self._text.set_read_only(True)
     
     def close(self):
@@ -247,8 +246,6 @@ class FrameVisualizer:
         self._text.set_read_only(False)
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
-        
-        self._text.configure(background="White")
     
     def get_frame_id(self):
         return self._frame_id
@@ -288,7 +285,7 @@ class FrameVisualizer:
             self._tag_range(frame_info.last_event_focus, "focus", True)
             self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
         else:
-            self._text.tag_configure('focus', background="LightYellow", borderwidth=1, relief=tk.SOLID)
+            self._text.tag_configure('focus', background=READ_ONLY_BACKGROUND, borderwidth=1, relief=tk.SOLID)
             
         self._expression_box.update_expression(msg, frame_info)
 

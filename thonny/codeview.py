@@ -7,18 +7,33 @@ from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
 from thonny.ui_utils import EnhancedTextWithLogging
 
+EDIT_BACKGROUND="white"
+READ_ONLY_BACKGROUND="LightYellow"
+
 class CodeViewText(EnhancedTextWithLogging):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
+        if not "background" in kw:
+            kw["background"] = EDIT_BACKGROUND
+        
         EnhancedTextWithLogging.__init__(self, master=master, cnf=cnf, **kw)
+        self._original_background = kw["background"]
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)
+    
+    def set_read_only(self, value):
+        EnhancedTextWithLogging.set_read_only(self, value)
+        if value:
+            self.configure(background=READ_ONLY_BACKGROUND)
+        else:
+            self.configure(background=self._original_background)
+
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
-                                     undo=True, wrap=tk.NONE, background="white",
+                                     undo=True, wrap=tk.NONE, background=EDIT_BACKGROUND,
                                      **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
