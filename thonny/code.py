@@ -71,6 +71,7 @@ class Editor(ttk.Frame):
         get_workbench().event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
         self._code_view.focus_set()
+        self.master.remember_recent_file(filename)
         
     def is_modified(self):
         return self._code_view.text.edit_modified()
@@ -108,8 +109,10 @@ class Editor(ttk.Frame):
         f.close()
 
         self._filename = filename
+        self.master.remember_recent_file(filename)
         
         self._code_view.text.edit_modified(False)
+
         return self._filename
     
     def show(self):
@@ -269,6 +272,14 @@ class EditorNotebook(ttk.Notebook):
             if editor.get_filename() and editor.is_modified():
                 editor.save_file()
     
+    def remember_recent_file(self, filename):
+        recents = get_workbench().get_option("file.recent_files")
+        if filename in recents:
+            recents.remove(filename)
+        recents.insert(0, filename)
+        existing_recents = [name for name in recents if os.path.exists(name)]
+        get_workbench().set_option("file.recent_files", existing_recents[:10])
+            
     def _remember_open_files(self):
         if (self.get_current_editor() is not None 
             and self.get_current_editor().get_filename() is not None):
