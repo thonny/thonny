@@ -233,9 +233,8 @@ class FrameVisualizer:
         self._next_frame_visualizer = None
         
         self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
-        #self._text.tag_configure('before', background="#F8FC9A") TODO: ???
-        #self._text.tag_configure('after', background="#D7EDD3")
-        #self._text.tag_configure('exception', background="#FFBFD6")
+        self._text.tag_configure('exception', background="#FFBFD6")
+        self._text.tag_raise("exception", "focus")
         self._text.set_read_only(True)
     
     def close(self):
@@ -283,6 +282,9 @@ class FrameVisualizer:
         if "statement" in frame_info.last_event:
             self._remove_focus_tags()
             self._tag_range(frame_info.last_event_focus, "focus", True)
+            if msg.exception is not None:
+                self._tag_range(frame_info.last_event_focus, "exception", True)
+                
             self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
         else:
             self._text.tag_configure('focus', background=READ_ONLY_BACKGROUND, borderwidth=1, relief=tk.SOLID)
@@ -387,6 +389,8 @@ class ExpressionBox(tk.Text):
         self.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
         self.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
         self.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
+        self.tag_raise("exception", "before")
+        self.tag_raise("exception", "after")
         
         
     def update_expression(self, msg, frame_info):
@@ -400,7 +404,7 @@ class ExpressionBox(tk.Text):
                 self._update_position(focus)
                 self._update_size()
                 
-            self._highlight_range(focus, event)
+            self._highlight_range(focus, event, msg.exception)
             
         
         elif event == "after_expression":
@@ -522,7 +526,7 @@ class ExpressionBox(tk.Text):
                 + "_" + str(node_or_text_range.end_lineno)
                 + "_" + str(node_or_text_range.end_col_offset))
     
-    def _highlight_range(self, text_range, state):
+    def _highlight_range(self, text_range, state, exception):
         debug("EV._highlight_range: %s", text_range)
         self.tag_remove("after", "1.0", "end")
         self.tag_remove("before", "1.0", "end")
@@ -533,12 +537,15 @@ class ExpressionBox(tk.Text):
         elif state.startswith("before"):
             tag = "before"
         else:
-            tag = "exception"
-            
-        self.tag_add(tag,
-                     self._get_mark_name(text_range.lineno, text_range.col_offset),
-                     self._get_mark_name(text_range.end_lineno, text_range.end_col_offset))
+            return
         
+        start_index = self._get_mark_name(text_range.lineno, text_range.col_offset)
+        end_index = self._get_mark_name(text_range.end_lineno, text_range.end_col_offset) 
+        self.tag_add(tag, start_index, end_index)
+        
+        if exception:
+            self.tag_add("exception", start_index, end_index)
+            
     def _update_position(self, text_range):
         self._codeview.update_idletasks()
         text_line_number = text_range.lineno - self._codeview._first_line_number + 1
