@@ -47,15 +47,15 @@ class InterpreterConfigurationPage(ConfigurationPage):
         self.columnconfigure(1, weight=1)
     
     def _select_executable(self):
-        filetypes = [('all files', '.*')]
         if running_on_windows():
-            filetypes.insert(0, ('Exe-files', '.exe'))
+            options = {"filetypes" : [('Exe-files', '.exe'), ('all files', '.*')]}
+        else:
+            options = {}
+
+        # TODO: get dir of current interpreter
+        #options["initialdir"] = get_workbench().get_option("run.working_directory")
             
-        filename = filedialog.askopenfilename(
-            filetypes = filetypes, 
-            # TODO: get dir of current interpreter
-            #initialdir = get_workbench().get_option("run.working_directory")
-            )
+        filename = filedialog.askopenfilename(**options)
         
         if filename:
             self._interpreter_variable.set(os.path.realpath(filename))
