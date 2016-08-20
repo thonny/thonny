@@ -121,6 +121,7 @@ class Editor(ttk.Frame):
     def update_appearance(self):
         self._code_view.set_line_numbers(get_workbench().get_option("view.show_line_numbers"))
         self._code_view.set_line_length_margin(get_workbench().get_option("view.recommended_line_length"))
+        self._code_view.text.event_generate("<<UpdateAppearance>>")
     
     def _listen_for_execute(self, event):
         command, args = parse_shell_command(event.cmd_line)

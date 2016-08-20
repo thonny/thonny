@@ -126,6 +126,7 @@ def load_plugin():
     wb = get_workbench()
     wb.add_option("view.locals_highlighting", True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
+    wb.bind("<<UpdateAppearance>>", update_highlighting, True)
     
 
 def _experiment_with_jedi():

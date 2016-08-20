@@ -147,3 +147,4 @@ def load_plugin():
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind_class("ShellText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("ShellText", "<<TextChange>>", update_highlighting, True)
+    wb.bind("<<UpdateAppearance>>", update_highlighting, True)

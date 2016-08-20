@@ -118,19 +118,21 @@ class SyntaxColorer:
     def schedule_update(self, event):
         
         # Allow reducing work by remembering only changed lines
-        if event.sequence == "TextInsert":
-            index = self.text.index(event.index)
-            start_row = int(index.split(".")[0])
-            end_row = start_row + event.text.count("\n")
-            start_index = "%d.%d" % (start_row, 0)
-            end_index = "%d.%d" % (end_row + 1, 0)
-        elif event.sequence == "TextDelete":
-            index = self.text.index(event.index1)
-            start_row = int(index.split(".")[0])
-            start_index = "%d.%d" % (start_row, 0)
-            end_index = "%d.%d" % (start_row + 1, 0)
+        if hasattr(event, "sequence"):
+            if event.sequence == "TextInsert":
+                index = self.text.index(event.index)
+                start_row = int(index.split(".")[0])
+                end_row = start_row + event.text.count("\n")
+                start_index = "%d.%d" % (start_row, 0)
+                end_index = "%d.%d" % (end_row + 1, 0)
+            elif event.sequence == "TextDelete":
+                index = self.text.index(event.index1)
+                start_row = int(index.split(".")[0])
+                start_index = "%d.%d" % (start_row, 0)
+                end_index = "%d.%d" % (start_row + 1, 0)
         else:
-            return
+            start_index = "1.0"
+            end_index = "end"
         
         self._dirty_ranges.add((start_index, end_index))
         
@@ -242,7 +244,10 @@ class ShellSyntaxColorer(SyntaxColorer):
             self._update_multiline_tokens(start_index, end_index)
 
 def update_coloring(event):
-    text = event.text_widget
+    if hasattr(event, "text_widget"):
+        text = event.text_widget
+    else:
+        text = event.widget
     
     if not hasattr(text, "syntax_colorer"):
         if isinstance(text, ShellText):
@@ -263,3 +268,4 @@ def load_plugin():
     wb.add_option("view.syntax_coloring", True)
     wb.bind("TextInsert", update_coloring, True)
     wb.bind("TextDelete", update_coloring, True)
+    wb.bind("<<UpdateAppearance>>", update_coloring, True)
