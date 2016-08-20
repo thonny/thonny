@@ -93,7 +93,8 @@ class ConfigurationManager:
             os.makedirs(os.path.dirname(self._filename), mode=0o700, exist_ok=True)
         with open(self._filename, 'w', encoding="UTF-8") as fp: 
             self._ini.write(fp)
-            os.chmod(self._filename, 0o600)
+            
+        os.chmod(self._filename, 0o600)
         
 
     def _parse_name(self, name):
