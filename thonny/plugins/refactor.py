@@ -1,3 +1,4 @@
+"""
 from rope.base.project import Project
 from rope.refactor.rename import Rename
 import rope.base.libutils
@@ -89,7 +90,7 @@ class RenameWindow(tk.Toplevel):
         self.refactor_new_variable_name = self.new_name_entry.get()
         self.cancel()
 
-"""
+
 class RefactorRenameStartEvent(thonny.user_logging.UserEvent): #user initiated the refactoring process
     def __init__(self, editor):
         self.editor_id = id(editor)
@@ -107,7 +108,7 @@ class RefactorRenameCompleteEvent(thonny.user_logging.UserEvent): #refactoring p
         self.description = description
         self.offset = offset
         self.affected_files = affected_files
-"""
+
 def _cmd_refactor_rename(self):
     self.log_user_event(thonny.refactor.RefactorRenameStartEvent(self.editor_notebook.get_current_editor()))
     if not self.editor_notebook.get_current_editor():
@@ -268,3 +269,4 @@ def _cmd_refactor_rename_enabled(self):
 
 def _load_plugin_(workbench):
     get_workbench().add_command("refactor_rename", "edit", "Rename identifier", ...)
+"""
