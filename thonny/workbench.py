@@ -33,6 +33,7 @@ from thonny.exersys import init_exercise_system
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
+CONFIGURATION_FILE_NAME = os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
 
 class Workbench(tk.Tk):
     """
@@ -98,16 +99,15 @@ class Workbench(tk.Tk):
 
         
     def _init_configuration(self):
-        conf_filename = os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
         try: 
-            self._configuration_manager = ConfigurationManager(conf_filename)
+            self._configuration_manager = ConfigurationManager(CONFIGURATION_FILE_NAME)
         except configparser.Error:
-            if (os.path.exists(conf_filename) 
+            if (os.path.exists(CONFIGURATION_FILE_NAME) 
                 and messagebox.askyesno("Problem", 
                     "Thonny's configuration file can't be read. It may be corrupt.\n\n"
                     + "Do you want to discard the file and open Thonny with default settings?")):
-                os.remove(conf_filename)
-                self._configuration_manager = ConfigurationManager(conf_filename)
+                os.remove(CONFIGURATION_FILE_NAME)
+                self._configuration_manager = ConfigurationManager(CONFIGURATION_FILE_NAME)
             else:
                 raise
                 
