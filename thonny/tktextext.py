@@ -149,7 +149,9 @@ class EnhancedText(TweakableText):
         def if_not_readonly(fun):
             def dispatch(event):
                 if not self.is_read_only():
-                    fun(event)
+                    return fun(event)
+                else:
+                    return "break"
             return dispatch
         
         self.bind("<Control-BackSpace>", if_not_readonly(self.delete_word_left), True)
