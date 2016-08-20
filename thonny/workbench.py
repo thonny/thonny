@@ -994,8 +994,10 @@ class Workbench(tk.Tk):
         self.destroy()
     
     def destroy(self):
-        get_runner().kill_backend()
-        tk.Tk.destroy(self)
+        try:
+            tk.Tk.destroy(self)
+        finally:
+            get_runner().kill_backend()
     
     def _on_configure(self, event):
         # called when window is moved or resized
