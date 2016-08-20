@@ -114,12 +114,12 @@ class Workbench(tk.Tk):
                 
         self._configuration_pages = {}
 
-        self._configuration_manager.add_option("general.single_instance", 
-                                               SINGLE_INSTANCE_DEFAULT)
+        self.add_option("general.single_instance", SINGLE_INSTANCE_DEFAULT)
+        self.add_option("general.expert_mode", False)
+        self.add_option("debug_mode", False)
 
     
     def _init_diagnostic_logging(self):
-        self.add_option("debug_mode", False)
         logging.basicConfig(format='%(levelname)s:%(message)s',
             level=logging.DEBUG if self.get_option("debug_mode") else logging.INFO)
     
@@ -291,8 +291,6 @@ class Workbench(tk.Tk):
             default_sequence="<Alt-s>",
             group=70)
         
-        
-        self.add_option("general.expert_mode", False)
         if self.get_option("general.expert_mode"):
             
             self.add_command("toggle_maximize_view", "view", "Maximize view",
