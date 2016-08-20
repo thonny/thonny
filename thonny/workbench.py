@@ -34,6 +34,7 @@ from thonny.exersys import init_exercise_system
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
 CONFIGURATION_FILE_NAME = os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
+SINGLE_INSTANCE_DEFAULT = True
 
 class Workbench(tk.Tk):
     """
@@ -112,6 +113,9 @@ class Workbench(tk.Tk):
                 raise
                 
         self._configuration_pages = {}
+
+        self._configuration_manager.add_option("general.single_instance", 
+                                               SINGLE_INSTANCE_DEFAULT)
 
     
     def _init_diagnostic_logging(self):
