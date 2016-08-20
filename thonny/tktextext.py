@@ -6,6 +6,7 @@ from tkinter import font as tkfont
 import time
 from _tkinter import TclError
 import traceback
+from traceback import print_exc
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
@@ -166,6 +167,8 @@ class EnhancedText(TweakableText):
         self.bind("<Home>", self.perform_smart_home, True)
         self.bind("<Left>", self.move_to_edge_if_selection(0), True)
         self.bind("<Right>", self.move_to_edge_if_selection(1), True)
+        self.bind("<Next>", self.perform_page_down, True)
+        self.bind("<Prior>", self.perform_page_up, True)
     
     def _bind_selection_aids(self):
         self.bind("<<Command-a>>" if _running_on_mac() else "<<Control-a>>",
@@ -279,9 +282,40 @@ class EnhancedText(TweakableText):
         self.see("insert")
         return "break"
 
+    def get_cursor_position(self):
+        return map(int, self.index("insert").split("."))
+    
+    def get_line_count(self):
+        return list(map(int, self.index("end-1c").split(".")))[0]
+
     def perform_return(self, event):
         # Override this for language specific auto indent
         pass
+    
+    def perform_page_down(self, event):
+        # if last line is visible then go to last line 
+        # (by default it doesn't move then)
+        try:
+            last_visible_idx = self.index("@0,%d" % self.winfo_height())
+            row, _ = map(int, last_visible_idx.split("."))
+            line_count = self.get_line_count()
+            
+            if (row == line_count 
+                or row == line_count-1): # otherwise tk doesn't show last line
+                self.mark_set("insert", "end")
+        except:
+            print_exc() 
+    
+    def perform_page_up(self, event):
+        # if first line is visible then go there 
+        # (by default it doesn't move then)    
+        try:
+            first_visible_idx = self.index("@0,0")
+            row, _ = map(int, first_visible_idx.split("."))
+            if row == 1:
+                self.mark_set("insert", "1.0")
+        except:
+            print_exc() 
     
     def compute_smart_home_destination_index(self):
         """Is overridden in shell"""
