@@ -2,7 +2,6 @@ from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
 import tkinter as tk
-import traceback
 import logging
 
 NAME_CONF = {'background' : '#e6ecfe'}
@@ -229,13 +228,14 @@ class NameHighlighter:
 
     def update(self):
         self.text.tag_remove("NAME", "1.0", "end")
-
-        try:
-            for pos in self.get_positions():
-                start_index, end_index = pos[0], pos[1]
-                self.text.tag_add("NAME", start_index, end_index)
-        except:
-            logging.exception("Problem when updating name highlighting")
+        
+        if get_workbench().get_option("view.name_highlighting"):
+            try:
+                for pos in self.get_positions():
+                    start_index, end_index = pos[0], pos[1]
+                    self.text.tag_add("NAME", start_index, end_index)
+            except:
+                logging.exception("Problem when updating name highlighting")
 
 
 def update_highlighting(event):
@@ -250,7 +250,7 @@ def update_highlighting(event):
 
 def load_plugin():
     wb = get_workbench()  # type:Workbench
-
+    wb.add_option("view.name_highlighting", True)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     

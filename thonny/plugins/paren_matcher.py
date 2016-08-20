@@ -32,8 +32,12 @@ class ParenMatcher:
     def update_highlighting(self):
         start_index = "1.0"
         end_index = self.text.index("end")
-        remaining = self._highlight_surrounding(start_index, end_index)
-        self._highlight_unclosed(remaining, start_index, end_index)
+        self.text.tag_remove("SURROUNDING_PARENS", start_index, end_index)
+        self.text.tag_remove("UNCLOSED", start_index, end_index)
+
+        if get_workbench().get_option("view.paren_highlighting"):
+            remaining = self._highlight_surrounding(start_index, end_index)
+            self._highlight_unclosed(remaining, start_index, end_index)
     
     def _configure_tags(self):
         self.text.tag_configure("SURROUNDING_PARENS",
@@ -47,7 +51,6 @@ class ParenMatcher:
         
 
     def _highlight_surrounding(self, start_index, end_index):
-        self.text.tag_remove("SURROUNDING_PARENS", start_index, end_index)
         open_index, close_index, remaining = self.find_surrounding(start_index, end_index)
         if None not in [open_index, close_index]:
             self.text.tag_add("SURROUNDING_PARENS", open_index)
@@ -57,8 +60,6 @@ class ParenMatcher:
 
     # highlights an unclosed bracket
     def _highlight_unclosed(self, remaining, start_index, end_index):
-        self.text.tag_remove("UNCLOSED", start_index, end_index)
-
         # anything remaining in the stack is an unmatched opener
         # since the list is ordered, we can highlight everything starting from the first element
         if len(remaining) > 0:
@@ -141,6 +142,7 @@ def update_highlighting(event=None):
 def load_plugin():
     wb = get_workbench()  
     
+    wb.add_option("view.paren_highlighting", True)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind_class("ShellText", "<<CursorMove>>", update_highlighting, True)

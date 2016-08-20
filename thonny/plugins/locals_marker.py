@@ -85,8 +85,6 @@ class LocalsHighlighter:
         self.text.tag_raise("sel")
         
     def _highlight(self, pos_info):
-        self.text.tag_remove("LOCAL_NAME", "1.0", "end")
-
         for pos in pos_info:
             start_index, end_index = pos[0], pos[1]
             self.text.tag_add("LOCAL_NAME", start_index, end_index)
@@ -103,11 +101,14 @@ class LocalsHighlighter:
             self.text.after_idle(perform_update)
             
     def update(self):
-        try:
-            highlight_positions = self.get_positions()
-            self._highlight(highlight_positions)
-        except:
-            logging.exception("Problem when updating local variable tags")
+        self.text.tag_remove("LOCAL_NAME", "1.0", "end")
+        
+        if get_workbench().get_option("view.locals_highlighting"):
+            try:
+                highlight_positions = self.get_positions()
+                self._highlight(highlight_positions)
+            except:
+                logging.exception("Problem when updating local variable tags")
 
 
 def update_highlighting(event):
@@ -123,6 +124,7 @@ def update_highlighting(event):
 
 def load_plugin():
     wb = get_workbench()
+    wb.add_option("view.locals_highlighting", True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     
 

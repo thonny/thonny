@@ -156,6 +156,9 @@ class SyntaxColorer:
         for tag in self.uniline_tagdefs:
             self.text.tag_remove(tag, start, end)
         
+        if not get_workbench().get_option("view.syntax_coloring"):
+            return
+        
         for match in self.uniline_regex.finditer(chars):
             for token_type, token_text in match.groupdict().items():
                 if token_text and token_type in self.uniline_tagdefs:
@@ -182,6 +185,9 @@ class SyntaxColorer:
         # clear old tags
         for tag in self.multiline_tagdefs:
             self.text.tag_remove(tag, start, end)
+        
+        if not get_workbench().get_option("view.syntax_coloring"):
+            return
         
         interesting_token_types = list(self.multiline_tagdefs.keys()) + ["STRING3"]
         for match in self.multiline_regex.finditer(chars):
@@ -254,5 +260,6 @@ def update_coloring(event):
 def load_plugin():
     wb = get_workbench() 
 
+    wb.add_option("view.syntax_coloring", True)
     wb.bind("TextInsert", update_coloring, True)
     wb.bind("TextDelete", update_coloring, True)
