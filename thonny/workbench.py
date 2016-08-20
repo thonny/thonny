@@ -132,10 +132,13 @@ class Workbench(tk.Tk):
         
         # I don't actually need saved options for Full screen/maximize view,
         # but it's easier to create menu items, if I use configuration manager's variables
-        self.add_option("view.full_screen", False) # 
-        self.set_option("view.full_screen", False) # Don't start up with fullscreen to avoid confusion
+        self.add_option("view.full_screen", False)  
         self.add_option("view.maximize_view", False)
-        self.set_option("view.maximize_view", False) # Don't start up with maximized view to avoid confusion
+        
+        # In order to avoid confusion set these settings to False 
+        # even if they were True when Thonny was last run
+        self.set_option("view.full_screen", False)
+        self.set_option("view.maximize_view", False)
         
         
         self.geometry("{0}x{1}+{2}+{3}".format(self.get_option("layout.width"),
