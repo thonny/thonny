@@ -37,6 +37,9 @@ def launch():
         import traceback
         tkinter.messagebox.showerror("Internal error", traceback.format_exc())
         return -1
+    finally:
+        from thonny.globals import get_runner
+        get_runner().kill_backend()
 
 def _should_delegate():
     from thonny import workbench

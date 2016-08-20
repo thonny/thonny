@@ -993,6 +993,10 @@ class Workbench(tk.Tk):
 
         self.destroy()
     
+    def destroy(self):
+        get_runner().kill_backend()
+        tk.Tk.destroy(self)
+    
     def _on_configure(self, event):
         # called when window is moved or resized
         if (hasattr(self, "_maximized_view") # configure may happen before the attribute is defined 

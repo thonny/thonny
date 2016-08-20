@@ -215,6 +215,8 @@ class Runner:
             
         get_workbench().after(50, self._poll_vm_messages)
     
+    def kill_backend(self):
+        self._proxy._kill_current_process()
 
 class _BackendProxy:
     def __init__(self, default_cwd):
