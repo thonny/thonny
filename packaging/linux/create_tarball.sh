@@ -18,6 +18,8 @@ mkdir -p $TARGET_DIR
 cp -r $PREFIX/* $TARGET_DIR
 cp install.py $TARGET_DIR/install.py
 cp install.sh $TARGET_DIR/install
+# copy turtle cfg ##############################################
+cp $SCRIPT_DIR/../turtle.cfg $TARGET_DIR/lib/python3.5
 
 mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates

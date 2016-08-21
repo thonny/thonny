@@ -17,6 +17,9 @@ cp -R -H $PREFIX/Thonny.app build
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.5/
 
+# copy turtle cfg ##############################################
+cp $SCRIPT_DIR/../turtle.cfg $PYTHON_CURRENT/lib/python3.5
+
 # Upgrade pip ##########################################
 $PYTHON_CURRENT/bin/python3.5 -m pip install --upgrade pip
 

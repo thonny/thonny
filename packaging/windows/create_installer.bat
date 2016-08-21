@@ -8,6 +8,9 @@ mkdir %BUILDDIR%
 @echo ............... COPYING PYTHON ...................................
 xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 
+@echo ............... UPDATING TURTLE CONF .............................
+copy ..\turtle.cfg %BUILDDIR%\Lib>NUL
+
 @echo ............... UPDATING PIP ...................................
 %BUILDDIR%\python -m pip install --upgrade pip
 
