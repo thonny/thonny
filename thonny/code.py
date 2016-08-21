@@ -44,7 +44,8 @@ class Editor(ttk.Frame):
             self._load_file(filename)
             self._code_view.text.edit_modified(False)
         
-        self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self))
+        self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self), True)
+        self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
         
         get_workbench().bind("AfterKnownMagicCommand", self._listen_for_execute, True)
         get_workbench().bind("ToplevelResult", self._listen_for_toplevel_result, True)
@@ -137,7 +138,19 @@ class Editor(ttk.Frame):
     
     def _listen_for_toplevel_result(self, event):
         self._code_view.text.set_read_only(False)
-        
+    
+    def _control_tab(self, event):
+        if event.state & 1: # shift was pressed
+            direction = -1
+        else:
+            direction = 1
+        self.master.select_next_prev_editor(direction)
+        return "break"
+    
+    def _shift_control_tab(self, event):
+        self.master.select_next_prev_editor(-1)
+        return "break"
+    
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
     
@@ -382,6 +395,12 @@ class EditorNotebook(ttk.Notebook):
         
     def get_current_editor(self):
         return get_current_notebook_tab_widget(self)
+    
+    def select_next_prev_editor(self, direction):
+        cur_index = self.index(self.select())
+        next_index = (cur_index + direction) % len(self.tabs())
+        self.select(self._get_editor_by_index(next_index))
+        
     
     def _get_editor_by_index(self, index):
         tab_id = self.tabs()[index]
