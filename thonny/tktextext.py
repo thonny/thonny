@@ -1,12 +1,20 @@
+# coding=utf-8
 """Extensions for tk.Text"""
 
-import tkinter as tk
-from tkinter import ttk
-from tkinter import font as tkfont
 import time
-from _tkinter import TclError
 import traceback
-from traceback import print_exc
+
+try:
+    import tkinter as tk
+    from tkinter import ttk
+    from tkinter import font as tkfont
+    from tkinter import TclError
+except ImportError:
+    import Tkinter as tk
+    import ttk
+    import tkFont as tkfont
+    from Tkinter import TclError
+    
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
@@ -304,7 +312,7 @@ class EnhancedText(TweakableText):
                 or row == line_count-1): # otherwise tk doesn't show last line
                 self.mark_set("insert", "end")
         except:
-            print_exc() 
+            traceback.print_exc() 
     
     def perform_page_up(self, event):
         # if first line is visible then go there 
@@ -315,7 +323,7 @@ class EnhancedText(TweakableText):
             if row == 1:
                 self.mark_set("insert", "1.0")
         except:
-            print_exc() 
+            traceback.print_exc() 
     
     def compute_smart_home_destination_index(self):
         """Is overridden in shell"""
@@ -670,8 +678,8 @@ def fixwordbreaks(root):
     # operations use our definition of a word (i.e. an identifier)
     tk = root.tk
     tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
-    tk.call('set', 'tcl_wordchars',     '[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
-    tk.call('set', 'tcl_nonwordchars', '[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+    tk.call('set', 'tcl_wordchars',     u'[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+    tk.call('set', 'tcl_nonwordchars', u'[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
 
 def _running_on_mac():
     return tk._default_root.call('tk', 'windowingsystem') == "aqua"

@@ -26,6 +26,7 @@ encoding//thonny/plugins/thonny_folders.py=utf-8
 encoding//thonny/plugins/variables.py=utf-8
 encoding//thonny/running.py=utf-8
 encoding//thonny/shell.py=utf-8
+encoding//thonny/tktextext.py=utf-8
 encoding//thonny/ui_utils.py=utf-8
 encoding//thonny/workbench.py=utf-8
 encoding/<project>=UTF-8
