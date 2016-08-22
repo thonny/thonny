@@ -67,6 +67,9 @@ ln -s pip3.5 pip3
 ln -s python3.5 python3
 cd $SCRIPT_DIR
 
+# Replace Python.app Info.plist to get name "Thonny" to menubar
+cp -f $SCRIPT_DIR/Python.app.plist $PYTHON_CURRENT/Resources/Python.app/Contents/Info.plist
+
 # version info ##############################################################
 VERSION=$(<$PYTHON_CURRENT/lib/python3.5/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
