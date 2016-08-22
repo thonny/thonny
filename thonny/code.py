@@ -217,6 +217,9 @@ class EditorNotebook(ttk.Notebook):
             image_filename="file.open_file.gif",
             include_in_toolbar=True)
         
+        # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
+        get_workbench().bind_class("Text", "<Control-o>", self._control_o)
+        
         get_workbench().add_command("close_file", "file", "Close", 
             self._cmd_close_file,
             default_sequence=select_sequence("<Control-w>", "<Command-w>"),
@@ -325,6 +328,11 @@ class EditorNotebook(ttk.Notebook):
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
             self._remember_open_files()
+    
+    def _control_o(self, event):
+        # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
+        self._cmd_open_file()
+        return "break"
     
     def _cmd_close_files(self):
         self._close_files(None)
