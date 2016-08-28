@@ -166,40 +166,6 @@ try:
     print("Installation was successful, you can start Thonny from start menu under")
     print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
     print("For uninstalling Thonny call " + target_dir + "/bin/uninstall")
-    print()
-    print("Note that you can't use Pygame library before you install its dependencies.")
-    print("See https://bitbucket.org/plas/thonny/wiki/Pygame for more info.")
-    
-    # Investigate Pygame installation options
-    pygame_install_commands = [
-        ("apt-get", "sudo apt-get --assume-yes install python-pygame"),
-        ("zypper", "sudo zypper --non-interactive install python-pygame"),
-        ("pacman", "pacman -S --noconfirm python2-pygame"),
-        ("urpmi", "sudo urpmi --force python-pygame"),
-        ("dnf", "sudo dnf -y install pygame"),
-        ("yum", "sudo yum -y install pygame"),
-    ]
-    
-    pygame_install_command = None
-    for mgr, cmd in pygame_install_commands:
-        if which(mgr):
-            pygame_install_command = cmd
-            break
-    
-    if "centos" in platform.platform().lower():
-        pygame_install_command = None # it's not so easy in CentOS
-    
-    if pygame_install_command:
-        print()
-        answer = input("Do you want me to install Pygame depencencies for you? [y/N]: ").strip()
-        if answer.lower() in ["y", "yes"]:
-            print(pygame_install_command) # to show the command
-            return_code = subprocess.call(pygame_install_command.split())
-            if return_code:
-                print("See https://bitbucket.org/plas/thonny/wiki/Pygame for more info")
-    
-    
-    
     
 except OSError as e:
     print()
