@@ -39,7 +39,9 @@ def launch():
         return -1
     finally:
         from thonny.globals import get_runner
-        get_runner().kill_backend()
+        runner = get_runner()
+        if runner != None:
+            runner.kill_backend()
 
 def _should_delegate():
     from thonny import workbench
