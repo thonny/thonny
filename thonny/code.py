@@ -92,7 +92,7 @@ class Editor(ttk.Frame):
                 defaultextension = ".py",
                 initialdir = get_workbench().get_option("run.working_directory")
             )
-            if filename == "":
+            if filename in ["", (), None]: # Different tkinter versions may return different values
                 return None
             
             # Seems that in some Python versions defaultextension 
@@ -324,7 +324,7 @@ class EditorNotebook(ttk.Notebook):
             filetypes = _dialog_filetypes, 
             initialdir = get_workbench().get_option("run.working_directory")
         )
-        if filename:
+        if filename: # Note that missing filename may be "" or () depending on tkinter version
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
             self._remember_open_files()
