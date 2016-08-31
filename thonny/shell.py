@@ -33,8 +33,7 @@ class ShellView (ttk.Frame):
                             insertwidth=2,
                             height=10,
                             undo=True,
-                            autoseparators=False,
-                            background="white")
+                            autoseparators=False)
         
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         
