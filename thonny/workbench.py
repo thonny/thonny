@@ -993,6 +993,13 @@ class Workbench(tk.Tk):
 
         self.destroy()
     
+    def focus_get(self):
+        try:
+            return tk.Tk.focus_get(self)
+        except:
+            # This may give error in Ubuntu
+            return None
+    
     def destroy(self):
         try:
             tk.Tk.destroy(self)

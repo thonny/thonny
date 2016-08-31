@@ -7,6 +7,7 @@ BLOCK_COMMENT_PREFIX = "##"
 
 def _get_focused_writable_text():
     widget = get_workbench().focus_get()
+    # In Ubuntu when moving from one menu to another, this may give None when text is actually focused
     if (isinstance(widget, tk.Text) 
         and (not hasattr(widget, "is_read_only") or not widget.is_read_only())):
         return widget 
