@@ -30,14 +30,17 @@ class ParenMatcher:
             self.text.after_idle(perform_update)
 
     def update_highlighting(self):
-        start_index = "1.0"
-        end_index = self.text.index("end")
-        self.text.tag_remove("SURROUNDING_PARENS", start_index, end_index)
-        self.text.tag_remove("UNCLOSED", start_index, end_index)
+        self.text.tag_remove("SURROUNDING_PARENS", "0.1", "end")
+        self.text.tag_remove("UNCLOSED", "0.1", "end")
 
         if get_workbench().get_option("view.paren_highlighting"):
-            remaining = self._highlight_surrounding(start_index, end_index)
-            self._highlight_unclosed(remaining, start_index, end_index)
+            self._update_highlighting_for_active_range()
+    
+    def _update_highlighting_for_active_range(self):
+        start_index = "1.0"
+        end_index = self.text.index("end")
+        remaining = self._highlight_surrounding(start_index, end_index)
+        self._highlight_unclosed(remaining, start_index, end_index)
     
     def _configure_tags(self):
         self.text.tag_configure("SURROUNDING_PARENS",
@@ -119,14 +122,16 @@ class ParenMatcher:
                self.text.compare("insert-1c", "<=", index2)
 
 class ShellParenMatcher(ParenMatcher):
-    def update_highlighting(self):
+    def _update_highlighting_for_active_range(self):
+    
         # TODO: check that cursor is in this range
         index_parts = self.text.tag_prevrange("command", "end")
         
         if index_parts:
-            remaining = self._highlight_surrounding(*index_parts)
-            self._highlight_unclosed(remaining, index_parts[0], "end")
-
+            start_index, end_index = index_parts
+            remaining = self._highlight_surrounding(start_index, end_index)
+            self._highlight_unclosed(remaining, start_index, "end")
+            
 def update_highlighting(event=None):
     text = event.widget
     if not hasattr(text, "paren_matcher"):
