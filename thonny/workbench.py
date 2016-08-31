@@ -261,7 +261,7 @@ class Workbench(tk.Tk):
     def _init_commands(self):
         
         self.add_command("exit", "file", "Exit",
-            self.destroy, 
+            self._on_close, 
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>"))
         
         
