@@ -13,6 +13,7 @@ from thonny import misc_utils
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.common import parse_shell_command
+from thonny.tktextext import rebind_control_a
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -219,6 +220,7 @@ class EditorNotebook(ttk.Notebook):
         
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
         get_workbench().bind_class("Text", "<Control-o>", self._control_o)
+        rebind_control_a(get_workbench())
         
         get_workbench().add_command("close_file", "file", "Close", 
             self._cmd_close_file,

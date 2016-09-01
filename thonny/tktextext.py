@@ -681,6 +681,18 @@ def fixwordbreaks(root):
     tk.call('set', 'tcl_wordchars',     u'[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
     tk.call('set', 'tcl_nonwordchars', u'[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
 
+def rebind_control_a(root):
+    # Tk 8.6 has <<SelectAll>> event but 8.5 doesn't
+    # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
+    def control_a(event):
+        widget = event.widget
+        if isinstance(widget, tk.Text):
+            widget.tag_remove("sel","1.0","end")
+            widget.tag_add("sel","1.0","end")
+        
+    root.bind_class("Text", "<Control-a>", control_a)
+    
+
 def _running_on_mac():
     return tk._default_root.call('tk', 'windowingsystem') == "aqua"
 
