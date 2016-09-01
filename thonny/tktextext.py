@@ -179,7 +179,7 @@ class EnhancedText(TweakableText):
         self.bind("<Prior>", self.perform_page_up, True)
     
     def _bind_selection_aids(self):
-        self.bind("<<Command-a>>" if _running_on_mac() else "<<Control-a>>",
+        self.bind("<Command-a>" if _running_on_mac() else "<Control-a>",
                   self.select_all, True)
     
     def _bind_undo_aids(self):
