@@ -77,8 +77,8 @@ class ParenMatcher:
             for token in tokens:
                 if token.string != "" and token.string in "()[]{}":
                     result.append(token)
-        except tokenize.TokenError:
-            # happens eg when parens are unbalanced
+        except:
+            # happens eg when parens are unbalanced or there is indentation error or ...
             pass
         
         return result
