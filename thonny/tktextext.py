@@ -164,9 +164,7 @@ class EnhancedText(TweakableText):
             return dispatch
         
         self.bind("<Control-BackSpace>", if_not_readonly(self.delete_word_left), True)
-        self.bind("<Option-BackSpace>", if_not_readonly(self.delete_word_left), True)
         self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
-        self.bind("<Option-Delete>", if_not_readonly(self.delete_word_right), True)
         self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
         self.bind("<Tab>", if_not_readonly(self.indent_or_dedent), True)
