@@ -93,3 +93,11 @@ cp ../../*LICENSE.txt $TARGET_DIR
 mkdir -p dist
 tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
 
+
+# create download + install script
+DOWNINSTALL_FILENAME=thonny-$VERSION.sh
+
+DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
+cp downinstall_template.sh $DOWNINSTALL_TARGET
+sed -i "s/VERSION/$VERSION/g" $DOWNINSTALL_TARGET
+
