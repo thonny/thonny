@@ -748,7 +748,14 @@ class FancyTracer(Executor):
         while isinstance(self._current_command, InlineCommand): 
             self._vm.handle_command(self._current_command)
             self._current_command = self._vm._fetch_command()
-            
+    
+    def _get_firstlineno(self, frame):
+        """If module starts with blank line or comment, then frame.f_code.co_firstlineno
+        isn't consistent with inspect.findsource"""
+        if frame.f_code.co_name == "<module>":
+            return 1
+        else:
+            return frame.f_code.co_firstlineno
     
     def _get_source(self, frame):
         try:
@@ -876,7 +883,7 @@ class FancyTracer(Executor):
                 code_name=custom_frame.system_frame.f_code.co_name,
                 locals=self._vm.export_variables(custom_frame.system_frame.f_locals),
                 source=self._get_source(custom_frame.system_frame),
-                firstlineno=custom_frame.system_frame.f_code.co_firstlineno,
+                firstlineno=self._get_firstlineno(custom_frame.system_frame),
                 last_event=custom_frame.last_event,
                 last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
@@ -884,7 +891,6 @@ class FancyTracer(Executor):
         
         return result
 
-    
     def _thonny_hidden_before_stmt(self, text_range, node_tags):
         """
         The code to be debugged will be instrumented with this function
