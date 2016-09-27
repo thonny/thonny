@@ -138,8 +138,12 @@ try:
     print("Done!")
     
     print_task("Creating Desktop shortcut")
+    desktop_path = os.path.expanduser("~/Desktop/Thonny.desktop")
+    if "XDG_DESKTOP_DIR" in os.environ:
+        desktop_path = os.environ["XDG_DESKTOP_DIR"]
+    
     create_launcher(source_dir + "/templates/Thonny.desktop",
-                    os.path.expanduser("~/Desktop/Thonny.desktop"),
+                    desktop_path,
                     {"$target_dir" : target_dir})
     print("Done!")
     
