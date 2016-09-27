@@ -273,6 +273,7 @@ class FrameVisualizer:
     
     def _remove_focus_tags(self):
         self._text.tag_remove("focus", "0.0", "end")
+        self._text.tag_remove("exception", "0.0", "end")
      
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
