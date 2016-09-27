@@ -1,8 +1,9 @@
 import tkinter as tk
-from thonny.tktextext import TextFrame
+from thonny.tktextext import TextFrame, TweakableText
 
 root = tk.Tk()
-frame = TextFrame(root, read_only=False, wrap=tk.NONE, line_numbers=True, line_length_margin=13)
+frame = TextFrame(root, read_only=False, wrap=tk.NONE, line_numbers=True,
+                  line_length_margin=13, text_class=TweakableText)
 frame.grid()
 text = frame.text
 

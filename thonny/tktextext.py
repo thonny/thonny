@@ -55,9 +55,11 @@ class TweakableText(tk.Text):
                 and operation in ["delete", "index", "get"] 
                 and args in [("sel.first", "sel.last"), ("sel.first",)]):
                 
-                pass
+                pass 
             else:
                 traceback.print_exc()
+            
+            return "" # Taken from idlelib.WidgetRedirector
     
     def set_read_only(self, value):
         self._read_only = value
