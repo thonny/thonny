@@ -56,10 +56,15 @@ def open_system_shell(python_interpreter):
     # Maybe try creating a script in temp folder and execute this,
     # passing required paths via environment variables.
     
+    interpreter=python_interpreter.replace("pythonw","python")
+    explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py")
+    cwd=get_runner().get_cwd()
+    
     if platform.system() == "Windows":
         env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
-        cmd_line = 'start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}'
+        cmd_line = ('start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}'
+                    .format(interpreter=interpreter, cwd=cwd, explainer=explainer))
         
     elif platform.system() == "Linux":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
@@ -78,7 +83,8 @@ def open_system_shell(python_interpreter):
         else:
             raise RuntimeError("Don't know how to open terminal emulator")
         # http://stackoverflow.com/a/4466566/261181
-        cmd_line = cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
+        cmd_line = (cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
+                    .format(interpreter=interpreter, explainer=explainer))
         
     elif platform.system() == "Darwin":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
@@ -91,10 +97,11 @@ def open_system_shell(python_interpreter):
             pip_tweak = ';export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}'.format(**env)
         else:
             pip_tweak = ''
-        cmd_line = ("osascript"
+        cmd_line = (("osascript"
             + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; {interpreter} {explainer}"'"""
             + """ -e 'tell application "Terminal" to activate'"""
         ) % (env["PATH"], pip_tweak)
+            .format(interpreter=interpreter, explainer=explainer))
 
         # TODO: at the moment two new terminal windows will be opened when terminal is not already active
         # https://discussions.apple.com/thread/1738507?tstart=0
@@ -107,12 +114,7 @@ def open_system_shell(python_interpreter):
                   % platform.system())
         return
     
-    
-    expanded_cmd_line = cmd_line.format(interpreter=python_interpreter.replace("pythonw","python"),
-                          explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py"),
-                          cwd=get_runner().get_cwd())
-    
-    Popen(expanded_cmd_line, env=env, shell=True)
+    Popen(cmd_line, env=env, shell=True)
 
     
 
