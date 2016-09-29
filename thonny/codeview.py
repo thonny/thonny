@@ -29,6 +29,9 @@ class CodeViewText(EnhancedTextWithLogging):
         else:
             self.configure(background=self._original_background)
 
+    
+    def on_secondary_click(self, event):
+        get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
@@ -39,13 +42,6 @@ class CodeView(tktextext.TextFrame):
         # TODO: propose_remove_line_numbers on paste??
         
         self.text.bind("<<TextChange>>", self._on_text_changed, True)
-        
-        if running_on_mac_os():
-            self.text.bind("<Button-2>", self._open_context_menu)
-            self.text.bind("<Control-Button-1>", self._open_context_menu)
-        else:  
-            self.text.bind("<Button-3>", self._open_context_menu)
-
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -100,6 +96,3 @@ class CodeView(tktextext.TextFrame):
             end_lineno, end_col_offset = lineno, col_offset
             
         return TextRange(lineno, col_offset, end_lineno, end_col_offset)
-    
-    def _open_context_menu(self, event):
-        get_workbench().get_menu("edit").post(event.x_root, event.y_root)

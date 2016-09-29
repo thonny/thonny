@@ -154,6 +154,15 @@ class EnhancedText(TweakableText):
         self._bind_movement_aids()
         self._bind_selection_aids()
         self._bind_undo_aids()
+        self._bind_mouse_aids()
+    
+    def _bind_mouse_aids(self):
+        if _running_on_mac():
+            self.bind("<Button-2>", self.on_secondary_click)
+            self.bind("<Control-Button-1>", self.on_secondary_click)
+        else:  
+            self.bind("<Button-3>", self.on_secondary_click)
+        
     
     def _bind_editing_aids(self):
         
@@ -516,6 +525,11 @@ class EnhancedText(TweakableText):
 
     def _on_mouse_click(self, event):
         self.edit_separator()
+
+    
+    def on_secondary_click(self, event=None):
+        "Use this for invoking context menu"
+        pass
 
 
 class TextFrame(ttk.Frame):
