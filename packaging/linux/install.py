@@ -10,7 +10,6 @@ import sys
 import os.path
 import shutil
 import subprocess
-import platform
 
 if sys.version_info[0] == 2:
     input = raw_input  # @UndefinedVariable @ReservedAssignment
