@@ -63,8 +63,18 @@ def open_system_shell(python_interpreter):
     if platform.system() == "Windows":
         env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
-        cmd_line = ('start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}'
-                    .format(interpreter=interpreter, cwd=cwd, explainer=explainer))
+        # Command line will be something like:
+        # start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}
+        # I'm using list method to avoid quoting problems (last argument can't be quoted)
+        cmd_line = ['start',
+                    'Shell for %s' % interpreter,
+                    '/D',
+                    cwd,
+                    '/W',
+                    'cmd',
+                    '/K',
+                    interpreter,
+                    explainer] 
         Popen(cmd_line, env=env, shell=True)
         
     elif platform.system() == "Linux":
