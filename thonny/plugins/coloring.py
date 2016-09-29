@@ -101,18 +101,11 @@ class SyntaxColorer:
             "STRING_OPEN3"  : self.uniline_tagdefs["STRING_OPEN"],
             }
         
-        # Note that order of configuring is important for managing correct tag priorities
-        # (as STRING_*3 must have higher priority than other tags, as its 
-        # text may also contain other tags)
         for tagdefs in [self.multiline_tagdefs, self.uniline_tagdefs]:
             for tag, cnf in tagdefs.items():
                 if cnf:
                     self.text.tag_configure(tag, **cnf)
         
-        self.text.tag_raise("STRING_CLOSED3", "KEYWORD")
-        self.text.tag_raise("STRING_OPEN3", "KEYWORD")
-        self.text.tag_raise("STRING_CLOSED3", "STRING_CLOSED")
-        self.text.tag_raise("STRING_OPEN3", "STRING_OPEN")
         self.text.tag_raise('sel')
 
     def schedule_update(self, event):
@@ -213,9 +206,15 @@ class SyntaxColorer:
                         else:
                             token_type = "STRING_CLOSED3"
                     
+                    token_start = start + "+%dc" % match_start
+                    token_end = start + "+%dc" % match_end
+                    # clear uniline tags
+                    for tag in self.uniline_tagdefs:
+                        self.text.tag_remove(tag, token_start, token_end)
+                    # add tag
                     self.text.tag_add(token_type,
-                             start + "+%dc" % match_start,
-                             start + "+%dc" % match_end)
+                             token_start,
+                             token_end)
         
 
 class CodeViewSyntaxColorer(SyntaxColorer):
