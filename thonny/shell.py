@@ -10,7 +10,6 @@ from thonny.common import ToplevelCommand, parse_shell_command
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
-import tkinter.font as font
 from thonny.globals import get_workbench, get_runner
 from thonny.codeview import EDIT_BACKGROUND
 
@@ -36,6 +35,9 @@ class ShellView (ttk.Frame):
                             autoseparators=False)
         
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
+        get_workbench().add_command("clear_shell", "edit", "Clear shell",
+                                    self.clear_shell,
+                                    group=200)
         
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
         self.vert_scrollbar['command'] = self.text.yview
@@ -50,6 +52,9 @@ class ShellView (ttk.Frame):
 
     def submit_command(self, cmd_line):
         self.text.submit_command(cmd_line)
+    
+    def clear_shell(self):
+        self.text._clear_shell()
 
 
 class ShellText(EnhancedTextWithLogging):
@@ -138,6 +143,12 @@ class ShellText(EnhancedTextWithLogging):
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
         get_workbench().bind("BackendReady", self._backend_ready, True)
         
+        self._init_menu()
+    
+    def _init_menu(self):
+        self._menu = tk.Menu(self, tearoff=False)
+        self._menu.add_command(label="Clear shell", command=self._clear_shell)
+    
     def add_command(self, command, handler):
         self._command_handlers[command] = handler
         
@@ -263,6 +274,9 @@ class ShellText(EnhancedTextWithLogging):
         else:
             self.bell()
     
+    def on_secondary_click(self, event):
+        self._menu.post(event.x_root, event.y_root)
+        
     def _in_current_input_range(self, index):
         return self.compare(index, ">=", "input_start")
     
@@ -463,6 +477,11 @@ class ShellText(EnhancedTextWithLogging):
     def _text_key_release(self, event):
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
             self.tag_configure("value", foreground="DarkBlue", underline=0)
+
+    def _clear_shell(self):
+        end_index = self.index("output_end")
+        self.direct_delete("1.0", end_index)
+
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
