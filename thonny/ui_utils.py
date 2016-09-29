@@ -7,6 +7,7 @@ from thonny import tktextext
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
 import tkinter as tk
+import traceback
 
 
 CLAM_BACKGROUND = "#dcdad5"
@@ -367,8 +368,14 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
                                            index2=concrete_index2, text_widget=self)
             
     
+class SafeScrollbar(ttk.Scrollbar):
+    def set(self, first, last):
+        try:
+            ttk.Scrollbar.set(self, first, last)
+        except:
+            traceback.print_exc()
 
-class AutoScrollbar(ttk.Scrollbar):
+class AutoScrollbar(SafeScrollbar):
     # http://effbot.org/zone/tkinter-autoscrollbar.htm
     # a vert_scrollbar that hides itself if it's not needed.  only
     # works if you use the grid geometry manager.

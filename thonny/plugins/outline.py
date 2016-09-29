@@ -2,6 +2,7 @@ import re
 import tkinter as tk
 from tkinter import ttk
 from thonny.globals import get_workbench
+from thonny.ui_utils import SafeScrollbar
 
 class OutlineView(ttk.Frame):
     def __init__(self, master):
@@ -26,7 +27,7 @@ class OutlineView(ttk.Frame):
     
     def _init_widgets(self):
         #init and place scrollbar
-        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar = SafeScrollbar(self, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
 
         #init and place tree
