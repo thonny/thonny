@@ -504,24 +504,6 @@ class ShellText(EnhancedTextWithLogging):
         
         while len(self.active_object_tags) > 0:
             self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
-    
-        promptfont = font.Font(family='Courier New', size=10, weight="bold")
-        self.tag_add("prompt", "2.0", "2.4")
-        self.tag_add("outprompt", "2.0", "2.4")
-        self.tag_add("prompt", "6.0", "6.4")
-        self.tag_add("prompt", "8.0", "8.7")
-        self.tag_add("prompt", "10.0", "10.4")
-        self.tag_configure("prompt", foreground="purple", 
-                                spacing1=12, font=promptfont)
-        self.tag_configure("outprompt", spacing3=12)
-        
-        self.tag_bind("prompt", "<Enter>", lambda _: self.configure(cursor="hand2"))
-        self.tag_bind("prompt", "<Leave>", lambda _: self.configure(cursor="arrow"))
-        
-        self.tag_add("console", "3.0", "6.0")
-        #self.tag_configure("console", foreground="white", background="#555555", relief=tk.RAISED, lmargin1=20)
-        consolefont = font.Font(family='Consolas', size=8, weight="normal", slant="italic")
-        self.tag_configure("console", lmargin1=16, font=consolefont, foreground="blue")
         
         
 
