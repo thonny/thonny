@@ -94,7 +94,7 @@ def open_system_shell(python_interpreter):
         else:
             raise RuntimeError("Don't know how to open terminal emulator")
         # http://stackoverflow.com/a/4466566/261181
-        cmd_line = (cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
+        cmd_line = (cmd + """ -e bash -c "{interpreter} {explainer};exec bash -i" """
                     .format(interpreter=interpreter, explainer=explainer))
         Popen(cmd_line, env=env, shell=True)
         
