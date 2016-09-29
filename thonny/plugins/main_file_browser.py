@@ -83,9 +83,11 @@ class MainFileBrowser(BaseFileBrowser):
     
     def on_double_click(self, event):
         path = self.get_selected_path()
-        if path:
+        if os.path.isfile(path):
             get_workbench().get_editor_notebook().show_file(path)
             self.save_current_folder()
+        elif os.path.isdir(path):
+            self.refresh_tree(self.get_selected_node(), True)
     
     
     
