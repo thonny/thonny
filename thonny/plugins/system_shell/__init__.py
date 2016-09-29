@@ -65,6 +65,7 @@ def open_system_shell(python_interpreter):
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
         cmd_line = ('start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}'
                     .format(interpreter=interpreter, cwd=cwd, explainer=explainer))
+        Popen(cmd_line, env=env, shell=True)
         
     elif platform.system() == "Linux":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
@@ -85,6 +86,7 @@ def open_system_shell(python_interpreter):
         # http://stackoverflow.com/a/4466566/261181
         cmd_line = (cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"'"""
                     .format(interpreter=interpreter, explainer=explainer))
+        Popen(cmd_line, env=env, shell=True)
         
     elif platform.system() == "Darwin":
         env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
@@ -107,6 +109,7 @@ def open_system_shell(python_interpreter):
         # https://discussions.apple.com/thread/1738507?tstart=0
         # IDEA: detect if terminal is already active and do "do script ... in front window" if not
         # (but seems that sometimes it can't find this "front window")
+        Popen(cmd_line, env=env, shell=True)
 
     
     else:
@@ -114,7 +117,6 @@ def open_system_shell(python_interpreter):
                   % platform.system())
         return
     
-    Popen(cmd_line, env=env, shell=True)
 
     
 
