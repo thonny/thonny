@@ -16,8 +16,12 @@ class OutlineView(ttk.Frame):
         self._update_frame_contents()
     
     def destroy(self):
-        # TODO: Is editor notebook still living?
-        #get_workbench().get_editor_notebook().unbind("<<NotebookTabChanged>>", self._tab_changed_binding ,True)
+        try:
+            # Not sure if editor notebook is still living
+            get_workbench().get_editor_notebook().unbind("<<NotebookTabChanged>>", self._tab_changed_binding)
+        except:
+            pass
+        self.vert_scrollbar["command"] = None
         ttk.Frame.destroy(self)
     
     def _init_widgets(self):
