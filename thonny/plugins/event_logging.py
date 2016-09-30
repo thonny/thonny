@@ -8,11 +8,10 @@ import zipfile
 from tkinter.filedialog import asksaveasfilename
 import json
 from thonny.shell import ShellView
-from thonny.code import Editor
 
 
 class EventLogger:
-    def __init__(self, filename=None):
+    def __init__(self, filename):
         self._filename = filename
         self._init_logging()
         self._init_commands()
@@ -131,10 +130,13 @@ class EventLogger:
         
         return data
     
+    def _get_log_dir(self):
+        return os.path.dirname(self._filename)
+    
     def _cmd_export(self):
         
         filename = asksaveasfilename (
-                filetypes =  [('all files', '.*'), ('Zip-files', '.zip')], 
+                filetypes =  [('Zip-files', '.zip'), ('all files', '.*')], 
                 defaultextension = ".zip",
                 initialdir = get_workbench().get_option("run.working_directory"),
                 initialfile = time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip")
@@ -143,11 +145,11 @@ class EventLogger:
         if not filename:
             return
         
-        log_dir = os.path.dirname(self._filename)
+        log_dir = self._get_log_dir()
         
         with zipfile.ZipFile(filename, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
             for item in os.listdir(log_dir):
-                if item.endswith(".txt"):
+                if item.endswith(".txt") or item.endswith(".zip"):
                     zipf.write(os.path.join(log_dir, item), arcname=item)
             
     
@@ -160,18 +162,47 @@ class EventLogger:
     def _on_worbench_close(self, event=None):
         with open(self._filename, encoding="UTF-8", mode="w") as fp:
             json.dump(self._events, fp, indent="    ")
+        
+        self._check_compress_logs()
+    
+    def _check_compress_logs(self):
+        # if uncompressed logs have grown over 10MB,
+        # compress these into new zipfile
+        
+        log_dir = self._get_log_dir()
+        total_size = 0
+        uncompressed_files = []
+        for item in os.listdir(log_dir):
+            if item.endswith(".txt"):
+                full_name = os.path.join(log_dir, item)
+                total_size += os.stat(full_name).st_size
+                uncompressed_files.append((item, full_name))
+            
+        if total_size > 10*1024*1024:
+            zip_filename = _generate_timestamp_file_name("zip")            
+            with zipfile.ZipFile(zip_filename, 'w', compression=zipfile.ZIP_DEFLATED) as zipf:
+                for item, full_name in uncompressed_files:
+                    zipf.write(full_name, arcname=item)
+        
+            for _, full_name in uncompressed_files:
+                os.remove(full_name)
+            
 
-def load_plugin():
+def _generate_timestamp_file_name(extension):
     # generate log filename
     folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
     if not os.path.exists(folder):
         os.makedirs(folder)
         
     for i in range(100): 
-        filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.txt".format(i)));
+        filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.{}".format(i, extension)));
         if not os.path.exists(filename):
-            break
+            return filename
     
+    raise RuntimeError()
+
+def load_plugin():
+    filename = _generate_timestamp_file_name("txt")
     # create logger
     EventLogger(filename)
     
