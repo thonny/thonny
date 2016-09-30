@@ -3,7 +3,7 @@
 .DS_Store
 __pycache__
 dist
-build
+build  
 cx_build
 */*.pyc
 MANIFEST
