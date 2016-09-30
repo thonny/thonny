@@ -115,8 +115,8 @@ def open_system_shell(python_interpreter):
         cmd_line = (("osascript"
             + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; {interpreter} {explainer}"'"""
             + """ -e 'tell application "Terminal" to activate'"""
-        ) % (env["PATH"], pip_tweak)
-            .format(interpreter=interpreter, explainer=explainer))
+            ) % (env["PATH"], pip_tweak)
+        ).format(interpreter=interpreter, explainer=explainer)
 
         # TODO: at the moment two new terminal windows will be opened when terminal is not already active
         # https://discussions.apple.com/thread/1738507?tstart=0
