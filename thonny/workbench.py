@@ -62,6 +62,7 @@ class Workbench(tk.Tk):
           
     """
     def __init__(self, server_socket=None):
+        self._destroying = False
         self.initializing = True
         
         tk.Tk.__init__(self)
@@ -1002,7 +1003,10 @@ class Workbench(tk.Tk):
     
     def destroy(self):
         try:
+            self._destroying = True
             tk.Tk.destroy(self)
+        except tk.TclError:
+            exception("Error while destroying workbench")
         finally:
             runner = get_runner()
             if runner != None:
@@ -1025,7 +1029,7 @@ class Workbench(tk.Tk):
     
     def report_exception(self, title="Internal error"):
         exception(title)
-        if tk._default_root:
+        if tk._default_root and not self._destroying:
             (typ, value, _) = sys.exc_info()
             if issubclass(typ, UserError):
                 msg = str(value)
