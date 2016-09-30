@@ -11,6 +11,7 @@ mac/Thonny\.dmg
 RemoteSystemsTempFiles
 \.dmg
 packaging/mac/freezing.log
+packaging/mac
 installer_building.log
 backend_private
 *.iobj
