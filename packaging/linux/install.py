@@ -101,6 +101,11 @@ else:
 def print_task(desc):
     print((desc + " ").ljust(70, ".") + " ", end="")
 
+def get_desktop_path():
+    try:
+        return subprocess.check_output(['xdg-user-dir', 'DESKTOP'])
+    except:
+        return os.path.expanduser("~/Desktop")
 
 # define directories    
 source_dir = os.path.dirname(os.path.realpath(__file__))
@@ -137,12 +142,10 @@ try:
     print("Done!")
     
     print_task("Creating Desktop shortcut")
-    desktop_path = os.path.expanduser("~/Desktop/Thonny.desktop")
-    if "XDG_DESKTOP_DIR" in os.environ:
-        desktop_path = os.environ["XDG_DESKTOP_DIR"]
+    desktop_path = get_desktop_path()
     
     create_launcher(source_dir + "/templates/Thonny.desktop",
-                    desktop_path,
+                    desktop_path + "/Thonny.desktop",
                     {"$target_dir" : target_dir})
     print("Done!")
     
