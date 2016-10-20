@@ -728,7 +728,7 @@ class Workbench(tk.Tk):
             and self.get_option("view.HeapView.visible"))
     
     def update_fonts(self):
-        editor_font_size = self.get_option("view.editor_font_size")
+        editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
         editor_font_family = self.get_option("view.editor_font_family")
         io_font_family = self.get_option("view.io_font_family")
         
@@ -810,8 +810,19 @@ class Workbench(tk.Tk):
         if delta != 0:
             editor_font_size = self.get_option("view.editor_font_size")
             editor_font_size += delta
-            self.set_option("view.editor_font_size", editor_font_size)
+            self.set_option("view.editor_font_size", self._guard_font_size(editor_font_size))
             self.update_fonts()
+    
+    def _guard_font_size(self, size):
+        # https://bitbucket.org/plas/thonny/issues/164/negative-font-size-crashes-thonny
+        MIN_SIZE = 4
+        MAX_SIZE = 200
+        if size < MIN_SIZE:
+            return MIN_SIZE
+        elif size > MAX_SIZE:
+            return MAX_SIZE
+        else:
+            return size
         
         
     
