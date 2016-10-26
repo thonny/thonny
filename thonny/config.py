@@ -4,6 +4,7 @@ import tkinter as tk
 import os.path
 import ast
 from configparser import ConfigParser
+from logging import exception
 
 class ConfigurationManager:
     def __init__(self, filename):
@@ -88,10 +89,22 @@ class ConfigurationManager:
         # store
         if not os.path.exists(self._filename):
             os.makedirs(os.path.dirname(self._filename), mode=0o700, exist_ok=True)
-        with open(self._filename, 'w', encoding="UTF-8") as fp: 
+
+        # Normal saving occasionally creates corrupted file:
+        # https://bitbucket.org/plas/thonny/issues/167/configuration-file-occasionally-gets
+        # Now I'm saving the configuration to a temp file 
+        # and if the save is successful, I replace configuration file with it
+        temp_filename = self._filename + ".temp"             
+        with open(temp_filename, 'w', encoding="UTF-8") as fp:
             self._ini.write(fp)
             
-        os.chmod(self._filename, 0o600)
+        try:
+            ConfigurationManager(temp_filename)
+            # temp file was created successfully
+            os.chmod(self._filename, 0o600)
+            os.replace(temp_filename, self._filename)
+        except:
+            exception("Could not save configuration file. Reverting to previous file.")
         
 
     def _parse_name(self, name):
