@@ -534,8 +534,8 @@ class Workbench(tk.Tk):
     def get_option(self, name):
         return self._configuration_manager.get_option(name)
     
-    def set_option(self, name, value, save_now=True):
-        self._configuration_manager.set_option(name, value, save_now)
+    def set_option(self, name, value):
+        self._configuration_manager.set_option(name, value)
         
     def add_option(self, name, default_value):
         """Registers a new option.
@@ -1052,7 +1052,7 @@ class Workbench(tk.Tk):
     def _save_layout(self):
         self.update_idletasks()
         
-        self.set_option("layout.zoomed", ui_utils.get_zoomed(self), False)
+        self.set_option("layout.zoomed", ui_utils.get_zoomed(self))
         
         # each AutomaticPanedWindow remember it's splits for both 2 and 3 panes
         self.set_option("layout.main_pw_first_pane_size", self._main_pw.first_pane_size)
@@ -1064,10 +1064,10 @@ class Workbench(tk.Tk):
         self.set_option("layout.west_pw_last_pane_size", self._west_pw.last_pane_size)
                 
         if not ui_utils.get_zoomed(self):
-            self.set_option("layout.top", self.winfo_y(), False)
-            self.set_option("layout.left", self.winfo_x(), False)
-            self.set_option("layout.width", self.winfo_width(), False)
-            self.set_option("layout.height", self.winfo_height(), False)
+            self.set_option("layout.top", self.winfo_y())
+            self.set_option("layout.left", self.winfo_x())
+            self.set_option("layout.width", self.winfo_width())
+            self.set_option("layout.height", self.winfo_height())
         
         self._configuration_manager.save()
     

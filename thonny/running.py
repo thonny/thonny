@@ -210,7 +210,7 @@ class Runner:
             
             
             # TODO: maybe distinguish between workbench cwd and backend cwd ??
-            get_workbench().set_option("run.working_directory", self._proxy.cwd, save_now=False)
+            get_workbench().set_option("run.working_directory", self._proxy.cwd)
             get_workbench().update()
             
         get_workbench().after(50, self._poll_vm_messages)

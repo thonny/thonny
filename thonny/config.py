@@ -41,7 +41,7 @@ class ConfigurationManager:
     def has_option(self, name):
         return name in self._defaults
     
-    def set_option(self, name, value, save_now=False):
+    def set_option(self, name, value):
         section, option = self._parse_name(name)
         name = section + "." + option
         if not self._ini.has_section(section):
@@ -55,9 +55,6 @@ class ConfigurationManager:
         # update variable
         if name in self._variables:
             self._variables[name].set(value)
-        
-        if save_now:
-            self.save() 
     
     def add_option(self, name, default_value):
         section, option = self._parse_name(name)
@@ -86,7 +83,7 @@ class ConfigurationManager:
     def save(self):
         # save all tk variables
         for name in self._variables:
-            self.set_option(name, self._variables[name].get(), save_now=False)
+            self.set_option(name, self._variables[name].get())
             
         # store
         if not os.path.exists(self._filename):
