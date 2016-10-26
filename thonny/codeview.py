@@ -3,7 +3,6 @@
 import tkinter as tk
 from thonny.common import TextRange
 from thonny.globals import get_workbench
-from thonny.misc_utils import running_on_mac_os
 from thonny import tktextext
 from thonny.ui_utils import EnhancedTextWithLogging
 
