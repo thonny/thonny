@@ -6,7 +6,7 @@ import platform
 from tkinter.messagebox import showerror
 import shutil
 from thonny.globals import get_runner
-from thonny.running import get_gui_interpreter
+from thonny.running import get_selected_interpreter, is_private_interpreter
 
 def _create_pythonless_environment():
     # If I want to call another python version, then 
@@ -38,17 +38,19 @@ def _add_to_path(directory, path):
     else:
         return directory + os.pathsep + path
 
-def open_system_shell(python_interpreter):
+def open_system_shell():
+    python_interpreter = get_selected_interpreter()
     """Main task is to modify path and open terminal window.
     Bonus (and most difficult) part is executing a script in this window
     for recommending commands for running given python and related pip"""
     
     exec_prefix=_get_exec_prefix(python_interpreter)
     env = _create_pythonless_environment()
-    if python_interpreter == get_gui_interpreter():
-        # in gui environment make "pip install"
+    if is_private_interpreter(python_interpreter):
+        # in Thonny-private environment make "pip install"
         # use a folder outside thonny installation
-        # in order to keep packages after reinstalling Thonny 
+        # in order to keep packages after reinstalling Thonny
+        # TODO: take these values from Runner 
         env["PIP_USER"] = "true"
         env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
     
@@ -135,10 +137,9 @@ def open_system_shell(python_interpreter):
 
 def load_plugin():
     from thonny.globals import get_workbench
-    from thonny.running import get_selected_interpreter
     
     def open_system_shell_for_selected_interpreter(): 
-        open_system_shell(get_selected_interpreter())
+        open_system_shell()
     
     get_workbench().add_command("OpenSystemShell", "tools", "Open system shell",
                     open_system_shell_for_selected_interpreter, group=80)

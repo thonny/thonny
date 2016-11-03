@@ -329,7 +329,7 @@ class _BackendProxy:
                             % interpreter)
         
         
-        if interpreter == get_gui_interpreter():
+        if is_private_interpreter(interpreter):
             # in gui environment make "pip install"
             # use a folder outside thonny installation
             # in order to keep packages after reinstalling Thonny 
