@@ -51,3 +51,6 @@ install_name_tool -change \
     /Library/Frameworks/Tk.framework/Versions/8.5/Tk \
 	@rpath/Tk.framework/Versions/8.5/Tk \
     $LOCAL_TKINTER 
+
+# copy the token signifying Thonny-private Python
+cp thonny_python.ini $NEW_FRAMEWORK_PATH/Versions/$VERSION/bin 

@@ -454,6 +454,10 @@ class _BackendProxy:
                 debug("### BACKEND ###: %s", data.strip())
         
 
+def is_private_interpreter(interpreter):
+    token = os.path.join(os.path.dirname(interpreter), "is_private")
+    return os.path.exists(token)
+
 def get_selected_interpreter():
     interpreter = get_workbench().get_option("run.interpreter")
     if not interpreter:

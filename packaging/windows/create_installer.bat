@@ -7,6 +7,7 @@ mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
 xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
+copy thonny_python.ini %BUILDDIR%
 
 @echo ............... UPDATING TURTLE CONF .............................
 copy ..\turtle.cfg %BUILDDIR%\Lib>NUL

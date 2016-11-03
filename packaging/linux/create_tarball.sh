@@ -21,6 +21,9 @@ cp install.sh $TARGET_DIR/install
 # copy turtle cfg ##############################################
 cp $SCRIPT_DIR/../turtle.cfg $TARGET_DIR/lib/python3.5
 
+# copy the token signifying Thonny-private Python
+cp thonny_python.ini $TARGET_DIR/bin 
+
 mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates
 cp Thonny.desktop $TARGET_DIR/templates
