@@ -664,6 +664,15 @@ def _create_var(class_, value, modification_listener):
     var.trace("w", on_write)
     return var
 
+def shift_is_pressed(event_state):
+    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+    # http://stackoverflow.com/q/32426250/261181
+    return event_state & 0x0001
+
+def control_is_pressed(event_state):
+    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+    # http://stackoverflow.com/q/32426250/261181
+    return event_state & 0x0004
 
 def select_sequence(win_version, mac_version, linux_version=None):
     if running_on_windows():

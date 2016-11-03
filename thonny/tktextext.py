@@ -398,7 +398,7 @@ class EnhancedText(TweakableText):
     
     def indent_or_dedent(self, event=None):
         self._log_keypress_for_undo(event)
-        if event.state in [1,9]: # shift is pressed (1 in Mac, 9 in Win)
+        if event.state & 0x0001: # shift is pressed (http://stackoverflow.com/q/32426250/261181)
             return self.dedent_region(event)
         else:
             return self.perform_smart_tab(event)    
