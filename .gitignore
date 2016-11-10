@@ -22,6 +22,7 @@ packaging/setuptools/thonny.egg-info
 packaging/windows/ThonnyRunner/ThonnyRunner.sdf
 packaging/windows/ThonnyRunner/ThonnyRunner/Release/ThonnyRunner.res
 packaging/mac/out.txt
+packaging/mac/build
 packaging/windows/pythonny
 packaging/setuptools/*.zip
 packaging/mac/freezing.log
