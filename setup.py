@@ -5,10 +5,15 @@ import sys
 if sys.version_info < (3,4):
     raise RuntimeError("Thonny requires Python 3.4 or later")
 
- 
+setupdir = os.path.dirname(__file__)
 
-with open(os.path.join(os.path.dirname(__file__), 'thonny', 'VERSION'), encoding="ASCII") as f:
+with open(os.path.join(setupdir, 'thonny', 'VERSION'), encoding="ASCII") as f:
     version = f.read().strip()
+
+requirements = []
+for line in open(os.path.join(setupdir, 'requirements.txt'), encoding="ASCII"):
+    if line.strip() and not line.startswith('#'):
+        requirements.append(line)
 
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # NB! Before creating sdist, copy source files required by backend to thonny/backend_private
@@ -43,8 +48,7 @@ setup(
         "Topic :: Software Development :: Debuggers",
       ],
       keywords="IDE education debugger",
-      install_requires=["requests", "beautifulsoup4", "jedi", "tkinterhtml",
-                        "distro"],
+      install_requires=requirements,
       packages=["thonny", "thonny.plugins", "thonny.plugins.system_shell"],
       package_data={'': ['VERSION',  'res/*', 'backend_private/*.py', 'backend_private/thonny/*.py']},
       entry_points={
