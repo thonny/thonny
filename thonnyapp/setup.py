@@ -77,7 +77,7 @@ setup(
       name="thonnyapp",
       version="0.9.2",
       description="Launcher for Thonny (see https://pypi.python.org/pypi/thonny)",
-      url="http://thonny.cs.ut.ee",
+      url="http://thonny.org",
       author="Aivar Annamaa",
       license="MIT",
       classifiers=[

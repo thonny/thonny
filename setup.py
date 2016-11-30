@@ -24,7 +24,7 @@ setup(
       name="thonny",
       version=version,
       description="Python IDE for beginners",
-      url="http://thonny.cs.ut.ee",
+      url="http://thonny.org",
       author="Aivar Annamaa",
       license="MIT",
       classifiers=[
