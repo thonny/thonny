@@ -980,7 +980,14 @@ class FancyTracer(Executor):
                 node.tags = set()
             
     
-        
+    def _should_instrument_as_statement(self, node):
+        return (isinstance(node, _ast.stmt)
+                # Shouldn't insert anything before from __future__ import
+                # as this is not a normal statement
+                # https://bitbucket.org/plas/thonny/issues/183/thonny-throws-false-positive-syntaxerror
+                and (not isinstance(node, _ast.ImportFrom)
+                     or node.module != "__future__"))
+    
     def _insert_statement_markers(self, root):
         # find lists of statements and insert before/after markers for each statement
         for name, value in ast.iter_fields(root):
@@ -990,14 +997,14 @@ class FancyTracer(Executor):
                 if len(value) > 0:
                     new_list = []
                     for node in value:
-                        if isinstance(node, _ast.stmt):
-                            self._debug("EBFOMA", node)
+                        if self._should_instrument_as_statement(node):
+                            # self._debug("EBFOMA", node)
                             # add before marker
                             new_list.append(self._create_statement_marker(node, 
                                                                           BEFORE_STATEMENT_MARKER))
                         
                         # original statement
-                        if isinstance(node, _ast.AST):
+                        if self._should_instrument_as_statement(node):
                             self._insert_statement_markers(node)
                         new_list.append(node)
                         
