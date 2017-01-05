@@ -101,8 +101,9 @@ class ConfigurationManager:
         try:
             ConfigurationManager(temp_filename)
             # temp file was created successfully
-            os.chmod(self._filename, 0o600)
+            os.chmod(temp_filename, 0o600)
             os.replace(temp_filename, self._filename)
+            os.chmod(self._filename, 0o600)
         except:
             exception("Could not save configuration file. Reverting to previous file.")
         
