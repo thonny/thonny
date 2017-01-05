@@ -103,7 +103,7 @@ def print_task(desc):
 
 def get_desktop_path():
     try:
-        return subprocess.check_output(['xdg-user-dir', 'DESKTOP'])
+        return subprocess.check_output(['xdg-user-dir', 'DESKTOP']).decode()
     except:
         return os.path.expanduser("~/Desktop")
 
