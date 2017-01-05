@@ -13,6 +13,7 @@ from thonny.ui_utils import ScrollableFrame, TreeFrame
 from thonny.plugins.moodle.config import MoodleConfig
 from thonny.plugins.moodle.htmlparser import *
 from thonny.plugins.moodle.vpl_exercise_proxy import mod_vpl_info
+from thonny import THONNY_USER_DIR
 
 class MoodleViewState(Enum):
     initial = 1
@@ -41,7 +42,7 @@ class MoodleView(ScrollableFrame):
         self._moodle_url = 'https://moodle.ut.ee'
 
         # Load Moodle configuration file from the user directory
-        path = os.path.join('~', '.thonny', 'moodle_assignments.xml')
+        path = os.path.join(THONNY_USER_DIR, 'moodle_assignments.xml')
         self._conf = MoodleConfig(os.path.expanduser(path))
 
         # Course browser

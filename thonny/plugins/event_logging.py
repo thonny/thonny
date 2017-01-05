@@ -8,6 +8,7 @@ import zipfile
 from tkinter.filedialog import asksaveasfilename
 import json
 from thonny.shell import ShellView
+from thonny import THONNY_USER_DIR
 
 
 class EventLogger:
@@ -190,7 +191,7 @@ class EventLogger:
 
 def _generate_timestamp_file_name(extension):
     # generate log filename
-    folder = os.path.expanduser(os.path.join("~", ".thonny", "user_logs"))
+    folder = os.path.expanduser(os.path.join(THONNY_USER_DIR, "user_logs"))
     if not os.path.exists(folder):
         os.makedirs(folder)
         

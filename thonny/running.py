@@ -26,6 +26,7 @@ from thonny.shell import ShellView
 import shutil
 import filecmp
 import shlex
+from thonny import THONNY_USER_DIR
 
 
 class Runner:
@@ -334,7 +335,7 @@ class _BackendProxy:
             # use a folder outside thonny installation
             # in order to keep packages after reinstalling Thonny 
             my_env["PIP_USER"] = "true"
-            my_env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
+            my_env["PYTHONUSERBASE"] = THONNY_USER_DIR
         
         backend_launcher = os.path.join(get_workbench().get_package_dir(), 
                                         "backend_private",

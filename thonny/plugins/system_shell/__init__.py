@@ -7,6 +7,7 @@ from tkinter.messagebox import showerror
 import shutil
 from thonny.globals import get_runner
 from thonny.running import get_selected_interpreter, is_private_interpreter
+from thonny import THONNY_USER_DIR
 
 def _create_pythonless_environment():
     # If I want to call another python version, then 
@@ -52,7 +53,7 @@ def open_system_shell():
         # in order to keep packages after reinstalling Thonny
         # TODO: take these values from Runner 
         env["PIP_USER"] = "true"
-        env["PYTHONUSERBASE"] = os.path.expanduser(os.path.join("~", ".thonny"))
+        env["PYTHONUSERBASE"] = THONNY_USER_DIR
     
     # TODO: what if executable or explainer needs escaping?
     # Maybe try creating a script in temp folder and execute this,

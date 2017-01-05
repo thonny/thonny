@@ -6,6 +6,7 @@ from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 import subprocess
 from thonny.globals import get_workbench
+from thonny import THONNY_USER_DIR
 
 def open_path_in_system_file_manager(path):
     if running_on_mac_os():
@@ -22,7 +23,7 @@ def open_path_in_system_file_manager(path):
 
 def load_plugin():
     def cmd_open_user_dir():
-        open_path_in_system_file_manager(os.path.expanduser(os.path.join("~", ".thonny")))
+        open_path_in_system_file_manager(THONNY_USER_DIR)
         
     def cmd_open_package_dir():
         open_path_in_system_file_manager(get_workbench().get_package_dir())

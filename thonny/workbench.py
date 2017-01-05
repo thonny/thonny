@@ -30,10 +30,11 @@ import queue
 from _thread import start_new_thread
 import ast
 from thonny.exersys import init_exercise_system
+from thonny import THONNY_USER_DIR
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
-CONFIGURATION_FILE_NAME = os.path.expanduser(os.path.join("~", ".thonny", "configuration.ini"))
+CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 SINGLE_INSTANCE_DEFAULT = True
 
 class Workbench(tk.Tk):
@@ -188,7 +189,7 @@ class Workbench(tk.Tk):
         import thonny.plugins
         self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")
         
-        user_plugins_path = os.path.expanduser(os.path.join("~", ".thonny", "plugins"))
+        user_plugins_path = os.path.join(THONNY_USER_DIR, "plugins")
         sys.path.append(user_plugins_path)
         self._load_plugins_from_path([user_plugins_path])
         
