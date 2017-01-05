@@ -3,6 +3,8 @@ import os.path
 THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
 def launch():
+    os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
+    
     import sys
     try:
         from thonny import workbench
