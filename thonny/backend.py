@@ -53,8 +53,7 @@ class VM:
         
         # script mode
         if len(sys.argv) > 1:
-            initial_global_names = ("__builtins__", "__name__", "__package__", "__doc__",
-                                "__file__", "__cached__", "__loader__")
+            special_names_to_remove = set()
             sys.argv[:] = sys.argv[1:] # shift argv[1] to position of script name
             sys.path.insert(0, os.path.abspath(os.path.dirname(sys.argv[0]))) # add program's dir
             __main__.__dict__["__file__"] = sys.argv[0]
@@ -62,13 +61,13 @@ class VM:
         
         # shell mode
         else:
-            initial_global_names = ("__builtins__", "__name__", "__package__", "__doc__")
+            special_names_to_remove = {"__file__", "__cached__"}
             sys.argv[:] = [""] # empty "script name"
             sys.path.insert(0, "")   # current dir
     
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
-            if key not in initial_global_names:
+            if not key.startswith("__") or key in special_names_to_remove:
                 del __main__.__dict__[key] 
         
         # unset __doc__, then exec dares to write doc of the script there
