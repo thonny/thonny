@@ -9,6 +9,8 @@ from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_
 import tkinter as tk
 import traceback
 
+import ctypes
+
 
 CLAM_BACKGROUND = "#dcdad5"
 CALM_WHITE = '#fdfdfd'
@@ -683,3 +685,35 @@ def select_sequence(win_version, mac_version, linux_version=None):
         return linux_version
     else:
         return win_version
+
+class _point_t(ctypes.Structure):
+    _fields_ = [
+            ('x',  ctypes.c_long),
+            ('y',  ctypes.c_long),
+           ]
+
+def get_mouse_position():
+    if not running_on_windows():
+        raise NotImplementedError()
+
+    point = _point_t()
+    result = ctypes.windll.user32.GetCursorPos(ctypes.pointer(point))
+    if result:
+        return (point.x, point.y)
+    else:
+        return None
+  
+def set_mouse_position(x, y):
+    if not running_on_windows():
+        raise NotImplementedError()
+    
+    result = ctypes.windll.user32.SetCursorPos(ctypes.c_long(int(x)), ctypes.c_long(int(y)))
+    if not result:
+        raise Exception("Could not set mouse position")   
+
+def perform_mouse_click(): 
+    if not running_on_windows():
+        raise NotImplementedError()
+
+    ctypes.windll.user32.mouse_event(2,0,0,0,0)
+    ctypes.windll.user32.mouse_event(4,0,0,0,0)

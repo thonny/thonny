@@ -12,9 +12,10 @@ from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand, UserError
 from thonny.config import ConfigurationManager
-from thonny.misc_utils import running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, get_current_notebook_tab_widget, select_sequence
+    create_tooltip, get_current_notebook_tab_widget, select_sequence,\
+    set_mouse_position, perform_mouse_click
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -1085,6 +1086,13 @@ class Workbench(tk.Tk):
         self.after_idle(self.attributes, '-topmost', False)
         self.focus_set()
         self.lift()
+        
+        """
+        # TODO: this is dangerous. What if there is another app below the mouse 
+        if running_on_windows():
+            set_mouse_position(200,200)
+            perform_mouse_click()
+        """
     
 
 class WorkbenchEvent(Record):
