@@ -58,16 +58,9 @@ rmdir %BUILDDIR%\Lib\site-packages\tkinterhtml\tkhtml\MacOSX /S /Q>NUL
 @echo ............... CREATING pip.bat ...................................
 copy pip.bat %BUILDDIR%\Scripts
 
-@echo ............... COPYING VS FILES ..........................
-xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
-xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 
 @echo ............... ENABLE DPI AWARNESS ..............................
 @REM call EnableDPIAwareness %PREFIX%\pythonw.exe
-
-@echo ............... COPYING THONNY LAUNCHER ..........................
-copy ThonnyRunner\Release\thonny.exe %BUILDDIR% /Y
-
 
 @echo ............... ADDING LICENSES ...................................
 copy ..\..\*LICENSE.txt %BUILDDIR% /Y>NUL
