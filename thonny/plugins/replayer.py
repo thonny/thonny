@@ -221,7 +221,7 @@ class ReplayerEditor(ttk.Frame):
                                            ast.literal_eval(event["tags"]))
                 
             elif event["sequence"] == "TextDelete":
-                if event["index2"]:
+                if event["index2"] and event["index2"] != "None":
                     self.code_view.text.delete(event["index1"], event["index2"])
                 else:
                     self.code_view.text.delete(event["index1"])
@@ -232,9 +232,8 @@ class ReplayerEditor(ttk.Frame):
                 
     def see_event(self, event):
         for key in ["index", "index1", "index2"]:
-            if key in event and event[key]:
+            if key in event and event[key] and event[key] != "None":
                 self.code_view.text.see(event[key])
-                print(event[key])
 
     def reset(self):
         self.code_view.text.delete("1.0", "end")
