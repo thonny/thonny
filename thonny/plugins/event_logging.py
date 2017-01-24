@@ -48,7 +48,7 @@ class EventLogger:
             self._bind_all(sequence)
         
         for sequence in ["Command",
-                         "MagicCommand"
+                         "MagicCommand",
                          "Open",
                          "Save",
                          "SaveAs",
