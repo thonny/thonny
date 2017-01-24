@@ -12,10 +12,9 @@ from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand, UserError
 from thonny.config import ConfigurationManager
-from thonny.misc_utils import running_on_mac_os, running_on_windows
+from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, get_current_notebook_tab_widget, select_sequence,\
-    set_mouse_position, perform_mouse_click
+    create_tooltip, get_current_notebook_tab_widget, select_sequence
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
