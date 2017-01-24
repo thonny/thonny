@@ -85,7 +85,7 @@ class Editor(ttk.Frame):
     def save_file(self, ask_filename=False):
         if self._filename is not None and not ask_filename:
             filename = self._filename
-            get_workbench().event_generate("Save", editor=self)
+            get_workbench().event_generate("Save", editor=self, filename=filename)
         else:
             # http://tkinter.unpythonic.net/wiki/tkFileDialog
             filename = asksaveasfilename (
