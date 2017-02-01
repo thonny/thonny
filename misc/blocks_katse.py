@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 
 pos = [0,0]
 
@@ -14,9 +15,11 @@ def drag(e):
     pos[1] = e.y
 
 root = tk.Tk()
+pw = ttk.PanedWindow(root, orient=tk.HORIZONTAL)
+pw.grid()
 
-c = tk.Canvas(root, width=600, height=600)
-c.grid()
+c = tk.Canvas(pw, width=600, height=600, background="white")
+pw.add(c)
 
 p = c.create_polygon(35,75,
                      50,50, 60,50, 240,50, 250,50,
@@ -29,4 +32,10 @@ e = tk.Entry(root, border=0, bg="#ffaaaa")
 c.create_window(150, 75, window=e, tags=("pop",))
 c.bind("<1>", down)
 c.bind("<B1-Motion>", drag)
+
+
+
+c2 = tk.Canvas(pw, width=300, height=600)
+pw.add(c2)
+
 root.mainloop()
