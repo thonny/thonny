@@ -551,7 +551,7 @@ class TextFrame(ttk.Frame):
         final_text_options.update(text_options)
         self.text = text_class(self, **final_text_options)
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
-        
+
         self._margin = tk.Text(self, width=4, padx=5, pady=5,
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
@@ -559,8 +559,11 @@ class TextFrame(ttk.Frame):
                                cursor='arrow',
                                state='disabled'
                                )
+        self._margin.bind("<ButtonRelease-1>", self.on_margin_click)
         self._margin.bind("<Button-1>", self.on_margin_click)
+        self._margin.bind("<Button1-Motion>", self.on_margin_motion)
         self._margin['yscrollcommand'] = self._margin_scroll  
+        self._margin_selection_start = 0
         
         # margin will be gridded later
         self._first_line_number = first_line_number
@@ -670,11 +673,21 @@ class TextFrame(ttk.Frame):
 
     def on_margin_click(self, event=None):
         try:
-            self.text.mark_set("insert", "%s.0" % int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0]))
+            self._margin_selection_start = int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0])
+            self.text.mark_set("insert", "%s.0" % self._margin_selection_start)
+            if event.type == tk.EventType.ButtonPress:
+                self.text.tag_remove("sel", "1.0", tk.END)
         except tk.TclError:
             pass
-        
-        
+
+    def on_margin_motion(self, event=None):
+        try:
+            linepos = int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0])
+            self.text.tag_remove("sel", "1.0", tk.END)
+            self.text.tag_add("sel", "%s.0" % min(self._margin_selection_start, linepos), "%s.end" % max(self._margin_selection_start, linepos - 1))
+            self.text. mark_set("insert", "%s.0" % linepos)
+        except tk.TclError:
+            pass
         
 def get_text_font(text):
     font = text["font"]
