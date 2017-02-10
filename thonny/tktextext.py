@@ -562,8 +562,7 @@ class TextFrame(ttk.Frame):
         self._margin.bind("<ButtonRelease-1>", self.on_margin_click)
         self._margin.bind("<Button-1>", self.on_margin_click)
         self._margin.bind("<Button1-Motion>", self.on_margin_motion)
-        self._margin['yscrollcommand'] = self._margin_scroll  
-        self._margin_selection_start = 0
+        self._margin['yscrollcommand'] = self._margin_scroll
         
         # margin will be gridded later
         self._first_line_number = first_line_number
@@ -673,19 +672,20 @@ class TextFrame(ttk.Frame):
 
     def on_margin_click(self, event=None):
         try:
-            self._margin_selection_start = int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0])
-            self.text.mark_set("insert", "%s.0" % self._margin_selection_start)
+            linepos = self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0]
+            self.text.mark_set("insert", "%s.0" % linepos)
+            self._margin.mark_set("margin_selection_start", "%s.0" % linepos)
             if event.type == "4": # In Python 3.6 you can use tk.EventType.ButtonPress instead of "4" 
-                self.text.tag_remove("sel", "1.0", tk.END)
+                self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
             pass
 
     def on_margin_motion(self, event=None):
         try:
             linepos = int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0])
-            self.text.tag_remove("sel", "1.0", tk.END)
-            self.text.tag_add("sel", "%s.0" % min(self._margin_selection_start, linepos), "%s.end" % max(self._margin_selection_start, linepos - 1))
-            self.text. mark_set("insert", "%s.0" % linepos)
+            margin_selection_start = int(self._margin.index("margin_selection_start").split(".")[0])
+            self.select_lines(min(margin_selection_start, linepos), max(margin_selection_start - 1, linepos - 1))
+            self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
             pass
         
