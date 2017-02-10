@@ -59,9 +59,7 @@ class CodeView(tktextext.TextFrame):
     
     def select_lines(self, first_line, last_line):
         self.text.tag_remove("sel", "1.0", tk.END)
-        self.text.tag_add("sel", 
-                          str(first_line) + ".0",
-                          str(last_line) + ".end")
+        self.text.tag_add("sel", "%s.0" % first_line, "%s.end" % last_line)
     
     def select_range(self, text_range):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -72,10 +70,8 @@ class CodeView(tktextext.TextFrame):
                 start = str(text_range - self._first_line_number + 1) + ".0"
                 end = str(text_range - self._first_line_number + 1) + ".end"
             elif isinstance(text_range, TextRange):
-                start = str(text_range.lineno - self._first_line_number + 1) \
-                    + "." + str(text_range.col_offset)
-                end = str(text_range.end_lineno - self._first_line_number + 1) \
-                    + "." + str(text_range.end_col_offset)
+                start = "%s.%s" % (text_range.lineno - self._first_line_number + 1, text_range.col_offset)
+                end = "%s.%s" % (text_range.end_lineno - self._first_line_number + 1, text_range.end_col_offset)
             else:
                 assert isinstance(text_range, tuple)
                 start, end  = text_range
@@ -83,7 +79,7 @@ class CodeView(tktextext.TextFrame):
             self.text.tag_add("sel", start, end)
             if isinstance(text_range, int):
                 self.text.mark_set("insert", end) 
-            self.text.see(start + " -1 lines")
+            self.text.see("%s -1 lines" % start)
             
     
     def get_selected_range(self):
