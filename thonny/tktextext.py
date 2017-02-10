@@ -675,7 +675,7 @@ class TextFrame(ttk.Frame):
         try:
             self._margin_selection_start = int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0])
             self.text.mark_set("insert", "%s.0" % self._margin_selection_start)
-            if event.type == tk.EventType.ButtonPress:
+            if event.type == "4": # In Python 3.6 you can use tk.EventType.ButtonPress instead of "4" 
                 self.text.tag_remove("sel", "1.0", tk.END)
         except tk.TclError:
             pass
