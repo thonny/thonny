@@ -557,9 +557,10 @@ class TextFrame(ttk.Frame):
                                font=self.text['font'],
                                background='#e0e0e0', foreground='#999999',
                                cursor='arrow',
-                               #state='disabled'
+                               state='disabled'
                                )
         self._margin.bind("<Button-1>", self.on_margin_click)
+        self._margin['yscrollcommand'] = self._margin_scroll  
         
         # margin will be gridded later
         self._first_line_number = first_line_number
@@ -609,6 +610,10 @@ class TextFrame(ttk.Frame):
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
         self._margin.yview(tk.MOVETO, args[0])
+        
+    def _margin_scroll(self, *args):
+        self._vbar.set(*args)
+        self.text.yview(tk.MOVETO, args[0])
         
     def _horizontal_scrollbar_update(self,*args):
         self._hbar.set(*args)
