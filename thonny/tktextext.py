@@ -556,8 +556,11 @@ class TextFrame(ttk.Frame):
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
                                background='#e0e0e0', foreground='#999999',
+                               cursor='arrow',
                                #state='disabled'
                                )
+        self._margin.bind("<Button-1>", self.on_margin_click)
+        
         # margin will be gridded later
         self._first_line_number = first_line_number
         self.set_line_numbers(line_numbers)
@@ -660,6 +663,14 @@ class TextFrame(ttk.Frame):
             
             self._margin_line.place(y=-10, x=x)
 
+    def on_margin_click(self, event=None):
+        try:
+            self.text.mark_set("insert", "%s.0" % int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0]))
+        except tk.TclError:
+            pass
+        
+        
+        
 def get_text_font(text):
     font = text["font"]
     if isinstance(font, str):
