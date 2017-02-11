@@ -8,9 +8,6 @@ def launch():
     import sys
     try:
         from thonny import workbench
-        configuration_manager = workbench.ConfigurationManager(workbench.CONFIGURATION_FILE_NAME)
-        # Setting the default
-        configuration_manager.add_option("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
         
         if _should_delegate():
             # First check if there is existing Thonny instance to handle the request
@@ -53,7 +50,8 @@ def launch():
 
 def _should_delegate():
     from thonny import workbench
-    configuration_manager = workbench.ConfigurationManager(workbench.CONFIGURATION_FILE_NAME)
+    from thonny.config import try_load_configuration
+    configuration_manager = try_load_configuration(workbench.CONFIGURATION_FILE_NAME)
     # Setting the default
     configuration_manager.add_option("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
     # getting the value (may use the default or return saved value)
