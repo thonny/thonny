@@ -4,7 +4,23 @@ import tkinter as tk
 import os.path
 import ast
 from configparser import ConfigParser
+import configparser
 from logging import exception
+from tkinter import messagebox
+
+def try_load_configuration(filename):
+    try: 
+        return ConfigurationManager(filename)
+    except configparser.Error:
+        if (os.path.exists(filename) 
+            and messagebox.askyesno("Problem", 
+                "Thonny's configuration file can't be read. It may be corrupt.\n\n"
+                + "Do you want to discard the file and open Thonny with default settings?")):
+            os.replace(filename, filename + "_corrupt")
+            return ConfigurationManager(filename)
+        else:
+            raise
+    
 
 class ConfigurationManager:
     def __init__(self, filename):
