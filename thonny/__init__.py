@@ -35,6 +35,9 @@ def launch():
         except SystemExit:
             bench.destroy()
         return 0
+    except SystemExit as e:
+        from tkinter import messagebox
+        messagebox.showerror("System exit", str(e))
     except:
         from logging import exception
         exception("Internal error")
