@@ -5,13 +5,13 @@ import importlib
 from logging import exception, warning, debug
 import os.path
 import sys
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import traceback
 
 from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand, UserError
-from thonny.config import ConfigurationManager
+from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence
@@ -24,7 +24,6 @@ import logging
 from thonny.globals import register_runner, get_runner
 from thonny.config_ui import ConfigurationDialog
 import pkgutil
-import configparser
 import socket
 import queue
 from _thread import start_new_thread
@@ -102,18 +101,7 @@ class Workbench(tk.Tk):
 
         
     def _init_configuration(self):
-        try: 
-            self._configuration_manager = ConfigurationManager(CONFIGURATION_FILE_NAME)
-        except configparser.Error:
-            if (os.path.exists(CONFIGURATION_FILE_NAME) 
-                and messagebox.askyesno("Problem", 
-                    "Thonny's configuration file can't be read. It may be corrupt.\n\n"
-                    + "Do you want to discard the file and open Thonny with default settings?")):
-                os.remove(CONFIGURATION_FILE_NAME)
-                self._configuration_manager = ConfigurationManager(CONFIGURATION_FILE_NAME)
-            else:
-                raise
-                
+        self._configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
         self._configuration_pages = {}
 
         self.add_option("general.single_instance", SINGLE_INSTANCE_DEFAULT)
