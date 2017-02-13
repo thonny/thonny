@@ -136,7 +136,7 @@ class ShellText(EnhancedTextWithLogging):
         
         self._command_handlers = {}
         
-        self._last_interpreter = None
+        self._last_configuration = None
     
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
@@ -386,13 +386,13 @@ class ShellText(EnhancedTextWithLogging):
             
     
     def _backend_ready(self, event):
-        interpreter = get_workbench().get_option("run.interpreter") 
+        configuration = get_workbench().get_option("run.configuration") 
         
-        if (interpreter != self._last_interpreter
-            and not (self._last_interpreter is None and not interpreter)):
+        if (configuration != self._last_configuration
+            and not (self._last_configuration is None and not configuration)):
                 self._insert_text_directly("Python " + event.python_version, ("version",))
                 
-        self._last_interpreter = get_workbench().get_option("run.interpreter")
+        self._last_configuration = get_workbench().get_option("run.configuration")
     
     def _submit_input(self, text_to_be_submitted):
         if self._get_state() == "waiting_toplevel_command":

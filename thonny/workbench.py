@@ -527,8 +527,8 @@ class Workbench(tk.Tk):
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
     
-    def add_backend(self, descriptor, backend_class):
-        self._backends[descriptor] = backend_class
+    def add_backend(self, descriptor, proxy_class):
+        self._backends[descriptor] = proxy_class
     
     def get_option(self, name):
         return self._configuration_manager.get_option(name)

@@ -27,15 +27,17 @@ import shutil
 import filecmp
 import shlex
 from thonny import THONNY_USER_DIR
+from thonny.misc_utils import running_on_windows, running_on_mac_os
+from shutil import which
 
 
 class Runner:
     def __init__(self):
         get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
         get_workbench().add_option("run.auto_cd", True)
-        get_workbench().add_option("run.interpreter", "")
+        get_workbench().add_option("run.configuration", "")
         
-        self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"))
+        self._proxy = CPythonProxy(get_workbench().get_option("run.working_directory"))
         
         get_workbench().add_view(ShellView, "Shell", "s",
             visible_by_default=True,
@@ -217,12 +219,61 @@ class Runner:
         get_workbench().after(50, self._poll_vm_messages)
     
     def kill_backend(self):
-        self._proxy._kill_current_process()
+        self._proxy.kill_current_process()
 
-class _BackendProxy:
-    def __init__(self, default_cwd):
-        if os.path.exists(default_cwd):
-            self.cwd = default_cwd
+
+class BackendProxy:
+    """Communicates with backend process.
+    
+    All communication methods must be non-blocking, 
+    ie. suitable for calling from GUI thread."""
+    
+    @classmethod
+    def get_configurations():
+        """Returns a list strings for populating interpreter selection dialog"""
+        raise NotImplementedError()
+
+    def __init__(self, cwd):
+        """Prepares the proxy with given working directory"""
+    
+    def fetch_next_message(self):
+        """Read next message from the queue or None if queue is empty"""
+        raise NotImplementedError()
+
+    def send_command(self, cmd):
+        """Send the command to backend"""
+        raise NotImplementedError()
+
+    def send_program_input(self, data):
+        """Send input data to backend"""
+        raise NotImplementedError()
+        
+    def get_state(self):
+        """Get current state of backend.
+        
+        One of "running", "waiting_input", "waiting_toplevel_command", "waiting_debug_command" """
+        raise NotImplementedError()
+
+    def kill_current_process(self):
+        "Kill the backend"
+        raise NotImplementedError()
+        
+        
+
+class CPythonProxy(BackendProxy):
+    @classmethod
+    def get_configurations():
+        return ["CPython (" + i + ")" for i in CPythonProxy._get_interpreters()]
+        
+    @classmethod
+    def get_configuration_options():
+        # TODO:
+        return CPythonProxy._get_interpreters()
+        
+        
+    def __init__(self, cwd):
+        if os.path.exists(cwd):
+            self.cwd = cwd
         else:
             self.cwd = os.path.expanduser("~")
             
@@ -282,7 +333,7 @@ class _BackendProxy:
                 self._set_state("running")
             
             if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
-                self._kill_current_process()
+                self.kill_current_process()
                 self._start_new_process(cmd)
                  
             self._proc.stdin.write(serialize_message(cmd) + "\n")
@@ -304,7 +355,7 @@ class _BackendProxy:
             self._state = state
     
     
-    def _kill_current_process(self):
+    def kill_current_process(self):
         if self._proc is not None and self._proc.poll() is None: 
             self._proc.kill()
             self._proc = None
@@ -320,8 +371,8 @@ class _BackendProxy:
                 and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
                 my_env[name] = os.environ[name]
                 
-        my_env["PYTHONIOENCODING"] = "ASCII" # cx_freezed backend won't use this but this enables using external python as fallback in cases of multibyte encodings
-        my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
+        my_env["PYTHONIOENCODING"] = "ASCII" 
+        my_env["PYTHONUNBUFFERED"] = "1" 
         
         interpreter = get_selected_interpreter()
                 
@@ -455,12 +506,93 @@ class _BackendProxy:
                 debug("### BACKEND ###: %s", data.strip())
         
 
+
+    @classmethod
+    def _get_interpreters():
+        result = set()
+        
+        if running_on_windows():
+            # registry
+            result.update(CPythonProxy._get_interpreters_from_windows_registry())
+            
+            # Common locations
+            for dir_ in ["C:\\Python34",
+                         "C:\\Python35",
+                         "C:\\Program Files\\Python 3.5",
+                         "C:\\Program Files (x86)\\Python 3.5",
+                         "C:\\Python36",
+                         "C:\\Program Files\\Python 3.6",
+                         "C:\\Program Files (x86)\\Python 3.6",
+                         ]:
+                path = os.path.join(dir_, "pythonw.exe")
+                if os.path.exists(path):
+                    result.add(os.path.realpath(path))  
+        
+        else:
+            # Common unix locations
+            for dir_ in ["/bin", "/usr/bin", "/usr/local/bin",
+                         os.path.expanduser("~/.local/bin")]:
+                for name in ["python3", "python3.4", "python3.5", "python3.6"]:
+                    path = os.path.join(dir_, name)
+                    if os.path.exists(path):
+                        result.add(path)  
+        
+        if running_on_mac_os():
+            for version in ["3.4", "3.5", "3.6"]:
+                dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions",
+                                    version, "bin")
+                path = os.path.join(dir_, "python3")
+                
+                if os.path.exists(path):
+                    result.add(path)
+        
+        for command in ["pythonw", "python3", "python3.4", "python3.5", "python3.6"]:
+            path = which(command)
+            if path is not None:
+                result.add(path)
+        
+        current_configuration = get_workbench().get_option("run.configuration")
+        backend, configuration_option = parse_configuration(current_configuration)
+        if backend == "CPython" and configuration_option and os.path.exists(configuration_option):
+            result.add(os.path.realpath(configuration_option))
+        
+        for path in get_workbench().get_option("run.used_interpreters"):
+            if os.path.exists(path):
+                result.add(os.path.realpath(path))
+        
+        return sorted(result)
+    
+    
+    @classmethod
+    def _get_interpreters_from_windows_registry():
+        import winreg
+        result = set()
+        for key in [winreg.HKEY_LOCAL_MACHINE,
+                    winreg.HKEY_CURRENT_USER]:
+            for version in ["3.4",
+                            "3.5", "3.5-32", "3.5-64",
+                            "3.6", "3.6-32", "3.6-64"]:
+                try:
+                    for subkey in [
+                        'SOFTWARE\\Python\\PythonCore\\' + version + '\\InstallPath',
+                        'SOFTWARE\\Python\\PythonCore\\Wow6432Node\\' + version + '\\InstallPath'
+                                 ]:
+                        dir_ = winreg.QueryValue(key, subkey)
+                        if dir_:
+                            path = os.path.join(dir_, "pythonw.exe")
+                            if os.path.exists(path):
+                                result.add(path)
+                except:
+                    pass
+        
+        return result
+
 def is_private_interpreter(interpreter):
     token = os.path.join(os.path.dirname(interpreter), "is_private")
     return os.path.exists(token)
 
 def get_selected_interpreter():
-    interpreter = get_workbench().get_option("run.interpreter")
+    configuration = get_workbench().get_option("run.configuration")
     if not interpreter:
         interpreter = get_gui_interpreter()
     return interpreter
@@ -473,4 +605,16 @@ def get_gui_interpreter():
     else:
         return sys.executable
 
-            
+
+def parse_configuration(configuration):
+    """
+    "CPython (C:\Python34\pythonw.exe)" becomes ("CPython", "C:\Python34\pythonw.exe")
+    "BBC micro:bit" becomes ("BBC micro:bit", "")
+    """
+    
+    parts = configuration.split("(", maxsplit=1)
+    if len(parts) == 1:
+        return configuration, ""
+    else:
+        return parts[0].strip(), parts[1].strip(" )")
+                
