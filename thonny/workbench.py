@@ -85,6 +85,7 @@ class Workbench(tk.Tk):
         
         self._init_containers()
         
+        self._load_early_plugins()
         self._init_runner()
             
         self._init_commands()
@@ -174,20 +175,25 @@ class Workbench(tk.Tk):
         self.get_menu("tools", "Tools")
         self.get_menu("help", "Help")
     
-    def _load_plugins(self):
+    def _load_early_plugins(self):
+        self._load_plugins("load_early_plugin")
+        
+    def _load_plugins(self, load_function_name="load_plugin"):
         import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
+                                     load_function_name=load_function_name)
         
         user_plugins_path = os.path.join(THONNY_USER_DIR, "plugins")
         sys.path.append(user_plugins_path)
-        self._load_plugins_from_path([user_plugins_path])
+        self._load_plugins_from_path([user_plugins_path],
+                                     load_function_name=load_function_name)
         
-    def _load_plugins_from_path(self, path, prefix=""):
+    def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
             try:
                 m = importlib.import_module(module_name)
-                if hasattr(m, "load_plugin"):
-                    m.load_plugin()
+                if hasattr(m, load_function_name):
+                    getattr(m, load_function_name)()
             except:
                 exception("Failed loading plugin '" + module_name + "'")
     
