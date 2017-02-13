@@ -68,6 +68,7 @@ class Workbench(tk.Tk):
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
+        self._backends = {}
         self._select_theme()
         self._editor_notebook = None
         thonny.globals.register_workbench(self)
@@ -519,7 +520,10 @@ class Workbench(tk.Tk):
     
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
-        
+    
+    def add_backend(self, descriptor, backend_class):
+        self._backends[descriptor] = backend_class
+    
     def get_option(self, name):
         return self._configuration_manager.get_option(name)
     
