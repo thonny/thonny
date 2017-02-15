@@ -234,7 +234,6 @@ class Workbench(tk.Tk):
     def _init_runner(self):
         try:
             register_runner(Runner())
-            get_runner().send_command(ToplevelCommand(command="Reset"))
         except:
             self.report_exception("Error when initializing backend")
     
@@ -529,6 +528,9 @@ class Workbench(tk.Tk):
     
     def add_backend(self, descriptor, proxy_class):
         self._backends[descriptor] = proxy_class
+    
+    def get_backends(self):
+        return self._backends
     
     def get_option(self, name):
         return self._configuration_manager.get_option(name)
@@ -1075,7 +1077,7 @@ class Workbench(tk.Tk):
     #    self._editor_notebook.focus_set()
     
     def _update_title(self, event):
-        self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._runner.get_cwd(), *sys.version_info))
+        self.title("Thonny  -  {}".format(self._runner.get_backend_description()))
     
     def become_topmost_window(self):
         self.deiconify()

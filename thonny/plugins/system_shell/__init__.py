@@ -6,7 +6,7 @@ import platform
 from tkinter.messagebox import showerror
 import shutil
 from thonny.globals import get_runner
-from thonny.running import get_selected_interpreter, is_private_interpreter
+from thonny.running import is_private_interpreter
 from thonny import THONNY_USER_DIR
 
 def _create_pythonless_environment():
@@ -40,10 +40,12 @@ def _add_to_path(directory, path):
         return directory + os.pathsep + path
 
 def open_system_shell():
-    python_interpreter = get_selected_interpreter()
     """Main task is to modify path and open terminal window.
     Bonus (and most difficult) part is executing a script in this window
     for recommending commands for running given python and related pip"""
+    python_interpreter = get_runner().get_interpreter_command()
+    if python_interpreter is None:
+        return
     
     exec_prefix=_get_exec_prefix(python_interpreter)
     env = _create_pythonless_environment()
