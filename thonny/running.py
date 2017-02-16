@@ -27,15 +27,18 @@ import shutil
 import filecmp
 import shlex
 from thonny import THONNY_USER_DIR
+from thonny.misc_utils import running_on_windows, running_on_mac_os
+from shutil import which
 
+DEFAULT_CPYTHON_INTERPRETER = "default"
 
 class Runner:
     def __init__(self):
         get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
         get_workbench().add_option("run.auto_cd", True)
-        get_workbench().add_option("run.interpreter", "")
-        
-        self._proxy = _BackendProxy(get_workbench().get_option("run.working_directory"))
+        get_workbench().add_option("run.backend_configuration", "Python (%s)" % DEFAULT_CPYTHON_INTERPRETER)
+        get_workbench().add_option("run.used_interpreters", [])
+        get_workbench().add_backend("Python", CPythonProxy)
         
         get_workbench().add_view(ShellView, "Shell", "s",
             visible_by_default=True,
@@ -43,6 +46,8 @@ class Runner:
         
         self._init_commands()
         
+        self._proxy = None
+        self.reset_backend()
         self._poll_vm_messages()
         self._advance_background_tk_mainloop()
     
@@ -67,9 +72,13 @@ class Runner:
             group=70,
             image_filename="run.stop.gif",
             include_in_toolbar=True)
-        
+    
     def get_cwd(self):
-        return self._proxy.cwd
+        # TODO: make it nicer
+        if hasattr(self._proxy, "cwd"):
+            return self._proxy.cwd
+        else:
+            return ""
     
     def get_state(self):
         """State is one of "running", "waiting_input", "waiting_debug_command",
@@ -211,18 +220,92 @@ class Runner:
             
             
             # TODO: maybe distinguish between workbench cwd and backend cwd ??
-            get_workbench().set_option("run.working_directory", self._proxy.cwd)
+            get_workbench().set_option("run.working_directory", self.get_cwd())
             get_workbench().update()
             
         get_workbench().after(50, self._poll_vm_messages)
     
+    def reset_backend(self):
+        self.kill_backend()
+        configuration = get_workbench().get_option("run.backend_configuration")
+        backend_name, configuration_option = parse_configuration(configuration)
+        backend_class = get_workbench().get_backends()[backend_name]
+        self._proxy = backend_class(configuration_option)
+        self.send_command(ToplevelCommand(command="Reset"))
+        
     def kill_backend(self):
-        self._proxy._kill_current_process()
+        if self._proxy:
+            self._proxy.kill_current_process()
+            self._proxy = None
 
-class _BackendProxy:
-    def __init__(self, default_cwd):
-        if os.path.exists(default_cwd):
-            self.cwd = default_cwd
+    def get_interpreter_command(self):
+        return self._proxy.get_interpreter_command()
+    
+    def get_backend_description(self):
+        return self._proxy.get_description()
+
+class BackendProxy:
+    """Communicates with backend process.
+    
+    All communication methods must be non-blocking, 
+    ie. suitable for calling from GUI thread."""
+    
+    def __init__(self, configuration_option):
+        """If configuration is "Foo (bar)", then "Foo" is backend descriptor
+        and "bar" is configuration option"""
+    
+    @classmethod
+    def get_configuration_options(cls):
+        """Returns a list strings for populating interpreter selection dialog.
+        The strings are without backend descriptor"""
+        raise NotImplementedError()
+    
+    def get_description(self):
+        """Returns a string that describes the backend"""
+        raise NotImplementedError()        
+
+    def fetch_next_message(self):
+        """Read next message from the queue or None if queue is empty"""
+        raise NotImplementedError()
+
+    def send_command(self, cmd):
+        """Send the command to backend"""
+        raise NotImplementedError()
+
+    def send_program_input(self, data):
+        """Send input data to backend"""
+        raise NotImplementedError()
+        
+    def get_state(self):
+        """Get current state of backend.
+        
+        One of "running", "waiting_input", "waiting_toplevel_command", "waiting_debug_command" """
+        raise NotImplementedError()
+
+    def kill_current_process(self):
+        "Kill the backend"
+        raise NotImplementedError()
+    
+    def get_interpreter_command(self):
+        """Return system command for invoking current interpreter"""
+        raise NotImplementedError()
+    
+
+class CPythonProxy(BackendProxy):
+    @classmethod
+    def get_configuration_options(cls):
+        return [DEFAULT_CPYTHON_INTERPRETER] + CPythonProxy._get_interpreters()
+        
+        
+    def __init__(self, configuration_option):
+        if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
+            self._executable = self._get_gui_interpreter()
+        else:
+            self._executable = configuration_option
+        
+        cwd = get_workbench().get_option("run.working_directory")
+        if os.path.exists(cwd):
+            self.cwd = cwd
         else:
             self.cwd = os.path.expanduser("~")
             
@@ -271,6 +354,11 @@ class _BackendProxy:
         else: 
             return msg
     
+    def get_description(self):
+        # TODO: show backend version and interpreter path
+        return "Python (current dir: {})".format(self.cwd)
+        
+        
     def send_command(self, cmd):
         if not (isinstance(cmd, InlineCommand) and cmd.command == "tkupdate"): 
             debug("Proxy: Sending command: %s", cmd)
@@ -282,7 +370,7 @@ class _BackendProxy:
                 self._set_state("running")
             
             if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
-                self._kill_current_process()
+                self.kill_current_process()
                 self._start_new_process(cmd)
                  
             self._proc.stdin.write(serialize_message(cmd) + "\n")
@@ -304,7 +392,7 @@ class _BackendProxy:
             self._state = state
     
     
-    def _kill_current_process(self):
+    def kill_current_process(self):
         if self._proc is not None and self._proc.poll() is None: 
             self._proc.kill()
             self._proc = None
@@ -320,17 +408,15 @@ class _BackendProxy:
                 and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
                 my_env[name] = os.environ[name]
                 
-        my_env["PYTHONIOENCODING"] = "ASCII" # cx_freezed backend won't use this but this enables using external python as fallback in cases of multibyte encodings
-        my_env["PYTHONUNBUFFERED"] = "1" # I suppose cx_freezed programs don't use this either
+        my_env["PYTHONIOENCODING"] = "ASCII" 
+        my_env["PYTHONUNBUFFERED"] = "1" 
         
-        interpreter = get_selected_interpreter()
-                
-        if not os.path.exists(interpreter):
+        if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
-                            % interpreter)
+                            % self._executable)
         
         
-        if is_private_interpreter(interpreter):
+        if is_private_interpreter(self._executable):
             # in gui environment make "pip install"
             # use a folder outside thonny installation
             # in order to keep packages after reinstalling Thonny 
@@ -351,7 +437,7 @@ class _BackendProxy:
              
         
         cmd_line = [
-            interpreter, 
+            self._executable, 
             '-u', # unbuffered IO (neccessary in Python 3.1)
             '-B', # don't write pyo/pyc files 
                   # (to avoid problems when using different Python versions without write permissions)
@@ -455,22 +541,110 @@ class _BackendProxy:
                 debug("### BACKEND ###: %s", data.strip())
         
 
+
+    @classmethod
+    def _get_interpreters(cls):
+        result = set()
+        
+        if running_on_windows():
+            # registry
+            result.update(CPythonProxy._get_interpreters_from_windows_registry())
+            
+            # Common locations
+            for dir_ in ["C:\\Python34",
+                         "C:\\Python35",
+                         "C:\\Program Files\\Python 3.5",
+                         "C:\\Program Files (x86)\\Python 3.5",
+                         "C:\\Python36",
+                         "C:\\Program Files\\Python 3.6",
+                         "C:\\Program Files (x86)\\Python 3.6",
+                         ]:
+                path = os.path.join(dir_, "pythonw.exe")
+                if os.path.exists(path):
+                    result.add(os.path.realpath(path))  
+        
+        else:
+            # Common unix locations
+            for dir_ in ["/bin", "/usr/bin", "/usr/local/bin",
+                         os.path.expanduser("~/.local/bin")]:
+                for name in ["python3", "python3.4", "python3.5", "python3.6"]:
+                    path = os.path.join(dir_, name)
+                    if os.path.exists(path):
+                        result.add(path)  
+        
+        if running_on_mac_os():
+            for version in ["3.4", "3.5", "3.6"]:
+                dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions",
+                                    version, "bin")
+                path = os.path.join(dir_, "python3")
+                
+                if os.path.exists(path):
+                    result.add(path)
+        
+        for command in ["pythonw", "python3", "python3.4", "python3.5", "python3.6"]:
+            path = which(command)
+            if path is not None:
+                result.add(path)
+        
+        current_configuration = get_workbench().get_option("run.backend_configuration")
+        backend, configuration_option = parse_configuration(current_configuration)
+        if backend == "Python" and configuration_option and os.path.exists(configuration_option):
+            result.add(os.path.realpath(configuration_option))
+        
+        for path in get_workbench().get_option("run.used_interpreters"):
+            if os.path.exists(path):
+                result.add(os.path.realpath(path))
+        
+        return sorted(result)
+    
+    
+    @classmethod
+    def _get_interpreters_from_windows_registry(cls):
+        import winreg
+        result = set()
+        for key in [winreg.HKEY_LOCAL_MACHINE,
+                    winreg.HKEY_CURRENT_USER]:
+            for version in ["3.4",
+                            "3.5", "3.5-32", "3.5-64",
+                            "3.6", "3.6-32", "3.6-64"]:
+                try:
+                    for subkey in [
+                        'SOFTWARE\\Python\\PythonCore\\' + version + '\\InstallPath',
+                        'SOFTWARE\\Python\\PythonCore\\Wow6432Node\\' + version + '\\InstallPath'
+                                 ]:
+                        dir_ = winreg.QueryValue(key, subkey)
+                        if dir_:
+                            path = os.path.join(dir_, "pythonw.exe")
+                            if os.path.exists(path):
+                                result.add(path)
+                except:
+                    pass
+        
+        return result
+    
+    def _get_gui_interpreter(self):
+        if sys.executable.endswith("thonny.exe"):
+            # assuming that thonny.exe is in the same dir as pythonw.exe
+            # (NB! thonny.exe in scripts folder delegates running to python.exe)
+            return sys.executable.replace("thonny.exe", "pythonw.exe")
+        else:
+            return sys.executable
+
 def is_private_interpreter(interpreter):
     token = os.path.join(os.path.dirname(interpreter), "is_private")
     return os.path.exists(token)
 
-def get_selected_interpreter():
-    interpreter = get_workbench().get_option("run.interpreter")
-    if not interpreter:
-        interpreter = get_gui_interpreter()
-    return interpreter
 
-def get_gui_interpreter():
-    if sys.executable.endswith("thonny.exe"):
-        # assuming that thonny.exe is in the same dir as pythonw.exe
-        # (NB! thonny.exe in scripts folder delegates running to python.exe)
-        return sys.executable.replace("thonny.exe", "pythonw.exe")
+
+def parse_configuration(configuration):
+    """
+    "Python (C:\Python34\pythonw.exe)" becomes ("Python", "C:\Python34\pythonw.exe")
+    "BBC micro:bit" becomes ("BBC micro:bit", "")
+    """
+    
+    parts = configuration.split("(", maxsplit=1)
+    if len(parts) == 1:
+        return configuration, ""
     else:
-        return sys.executable
-
-            
+        return parts[0].strip(), parts[1].strip(" )")
+                

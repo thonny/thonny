@@ -1,0 +1,1 @@
+Scripts for creating and uploading Thonny PyPI package.

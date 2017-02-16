@@ -5,13 +5,13 @@ import importlib
 from logging import exception, warning, debug
 import os.path
 import sys
-from tkinter import ttk, messagebox
+from tkinter import ttk
 import traceback
 
 from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, ToplevelCommand, UserError
-from thonny.config import ConfigurationManager
+from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence
@@ -24,7 +24,6 @@ import logging
 from thonny.globals import register_runner, get_runner
 from thonny.config_ui import ConfigurationDialog
 import pkgutil
-import configparser
 import socket
 import queue
 from _thread import start_new_thread
@@ -69,6 +68,7 @@ class Workbench(tk.Tk):
         tk.Tk.__init__(self)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
+        self._backends = {}
         self._select_theme()
         self._editor_notebook = None
         thonny.globals.register_workbench(self)
@@ -85,6 +85,7 @@ class Workbench(tk.Tk):
         
         self._init_containers()
         
+        self._load_early_plugins()
         self._init_runner()
             
         self._init_commands()
@@ -102,18 +103,7 @@ class Workbench(tk.Tk):
 
         
     def _init_configuration(self):
-        try: 
-            self._configuration_manager = ConfigurationManager(CONFIGURATION_FILE_NAME)
-        except configparser.Error:
-            if (os.path.exists(CONFIGURATION_FILE_NAME) 
-                and messagebox.askyesno("Problem", 
-                    "Thonny's configuration file can't be read. It may be corrupt.\n\n"
-                    + "Do you want to discard the file and open Thonny with default settings?")):
-                os.remove(CONFIGURATION_FILE_NAME)
-                self._configuration_manager = ConfigurationManager(CONFIGURATION_FILE_NAME)
-            else:
-                raise
-                
+        self._configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
         self._configuration_pages = {}
 
         self.add_option("general.single_instance", SINGLE_INSTANCE_DEFAULT)
@@ -185,20 +175,25 @@ class Workbench(tk.Tk):
         self.get_menu("tools", "Tools")
         self.get_menu("help", "Help")
     
-    def _load_plugins(self):
+    def _load_early_plugins(self):
+        self._load_plugins("load_early_plugin")
+        
+    def _load_plugins(self, load_function_name="load_plugin"):
         import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
+                                     load_function_name=load_function_name)
         
         user_plugins_path = os.path.join(THONNY_USER_DIR, "plugins")
         sys.path.append(user_plugins_path)
-        self._load_plugins_from_path([user_plugins_path])
+        self._load_plugins_from_path([user_plugins_path],
+                                     load_function_name=load_function_name)
         
-    def _load_plugins_from_path(self, path, prefix=""):
+    def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
             try:
                 m = importlib.import_module(module_name)
-                if hasattr(m, "load_plugin"):
-                    m.load_plugin()
+                if hasattr(m, load_function_name):
+                    getattr(m, load_function_name)()
             except:
                 exception("Failed loading plugin '" + module_name + "'")
     
@@ -239,7 +234,6 @@ class Workbench(tk.Tk):
     def _init_runner(self):
         try:
             register_runner(Runner())
-            get_runner().send_command(ToplevelCommand(command="Reset"))
         except:
             self.report_exception("Error when initializing backend")
     
@@ -531,7 +525,13 @@ class Workbench(tk.Tk):
     
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
-        
+    
+    def add_backend(self, descriptor, proxy_class):
+        self._backends[descriptor] = proxy_class
+    
+    def get_backends(self):
+        return self._backends
+    
     def get_option(self, name):
         return self._configuration_manager.get_option(name)
     
@@ -1077,7 +1077,7 @@ class Workbench(tk.Tk):
     #    self._editor_notebook.focus_set()
     
     def _update_title(self, event):
-        self.title("Thonny  -  Python {1}.{2}.{3}  -  {0}".format(self._runner.get_cwd(), *sys.version_info))
+        self.title("Thonny  -  {}".format(self._runner.get_backend_description()))
     
     def become_topmost_window(self):
         self.deiconify()
