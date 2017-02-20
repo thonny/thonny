@@ -186,12 +186,12 @@ class Workbench(tk.Tk):
         
         # 3rd party plugins from namespace package
         try:
-            import thonnyplugins  # @UnresolvedImport
+            import thonnycontrib  # @UnresolvedImport
         except ImportError:
-            # No 3rd party thonnyplugins installed
+            # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnyplugins.__path__, "thonnyplugins.",
+            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
                                      load_function_name=load_function_name)
         
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
