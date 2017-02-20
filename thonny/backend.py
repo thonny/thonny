@@ -568,6 +568,10 @@ class FancyTracer(Executor):
         return not (
             code is None 
             or code.co_filename is None
+            or code.co_flags & inspect.CO_GENERATOR  # @UndefinedVariable
+            or sys.version_info >= (3,5) and code.co_flags & inspect.CO_COROUTINE  # @UndefinedVariable
+            or sys.version_info >= (3,5) and code.co_flags & inspect.CO_ITERABLE_COROUTINE  # @UndefinedVariable
+            or sys.version_info >= (3,6) and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
             or "importlib._bootstrap" in code.co_filename
             or os.path.normcase(code.co_filename) not in self._instrumented_files 
                 and code.co_name not in self.marker_function_names
