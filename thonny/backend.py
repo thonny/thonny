@@ -926,6 +926,7 @@ class FancyTracer(Executor):
     
 
     def _tag_nodes(self, root):
+        """Marks interesting properties of AST nodes"""
         
         def add_tag(node, tag):
             if not hasattr(node, "tags"):
@@ -973,11 +974,33 @@ class FancyTracer(Executor):
                 
             if isinstance(node, ast.Num):
                 add_tag(node, "NumberLiteral")
+            
+            if isinstance(node, ast.ListComp):
+                add_tag(node.elt, "ListComp.elt")
+                
+            if isinstance(node, ast.SetComp):
+                add_tag(node.elt, "SetComp.elt")
+                
+            if isinstance(node, ast.DictComp):
+                add_tag(node.key, "DictComp.key")
+                add_tag(node.value, "DictComp.value")
                 
             # make sure every node has this field
             if not hasattr(node, "tags"):
                 node.tags = set()
             
+    
+    def _should_instrument_as_expression(self, node):
+        return (isinstance(node, _ast.expr)
+                and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))
+                # TODO: repeatedly evaluated subexpressions of comprehensions
+                # can be supported (but it requires some redesign bot in backend and GUI)
+                and "ListComp.elt" not in node.tags 
+                and "SetComp.elt" not in node.tags
+                and "DictComp.key" not in node.tags
+                and "DictComp.value" not in node.tags
+                )         
+        return 
     
     def _should_instrument_as_statement(self, node):
         return (isinstance(node, _ast.stmt)
@@ -1038,9 +1061,8 @@ class FancyTracer(Executor):
         
         class ExpressionVisitor(ast.NodeTransformer):
             def generic_visit(self, node):
-                if (isinstance(node, _ast.expr)
-                    and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))):
-
+                if isinstance(node, _ast.expr):
+                    if tracer._should_instrument_as_expression(node):
                         # before marker 
                         before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
                         ast.copy_location(before_marker, node)
@@ -1060,7 +1082,11 @@ class FancyTracer(Executor):
                         ast.fix_missing_locations(after_marker)
                         
                         return after_marker
+                    else:
+                        # This expression (and its children) should be ignored
+                        return node
                 else:
+                    # Descend into statements
                     return ast.NodeTransformer.generic_visit(self, node)
         
         return ExpressionVisitor().visit(node)   
