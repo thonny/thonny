@@ -1,9 +1,3 @@
-tkinterhtml
-
-# moodle vpl plugin
-requests
-beautifulsoup4
-
 # locals_marker and highlight_names plugins
 jedi
 

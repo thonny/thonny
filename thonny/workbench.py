@@ -28,7 +28,6 @@ import socket
 import queue
 from _thread import start_new_thread
 import ast
-from thonny.exersys import init_exercise_system
 from thonny import THONNY_USER_DIR
 
 THONNY_PORT = 4957
@@ -89,7 +88,6 @@ class Workbench(tk.Tk):
         self._init_runner()
             
         self._init_commands()
-        init_exercise_system()
         self._load_plugins()
         
         self._update_toolbar()
