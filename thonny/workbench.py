@@ -179,13 +179,19 @@ class Workbench(tk.Tk):
         self._load_plugins("load_early_plugin")
         
     def _load_plugins(self, load_function_name="load_plugin"):
+        # built-in plugins
         import thonny.plugins
         self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
                                      load_function_name=load_function_name)
         
-        user_plugins_path = os.path.join(THONNY_USER_DIR, "plugins")
-        sys.path.append(user_plugins_path)
-        self._load_plugins_from_path([user_plugins_path],
+        # 3rd party plugins from namespace package
+        try:
+            import thonnyplugins  # @UnresolvedImport
+        except ImportError:
+            # No 3rd party thonnyplugins installed
+            pass
+        else:
+            self._load_plugins_from_path(thonnyplugins.__path__, "thonnyplugins.",
                                      load_function_name=load_function_name)
         
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
