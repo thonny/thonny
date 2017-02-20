@@ -51,10 +51,6 @@ rm -rf $PYTHON_CURRENT/lib/python3.5/test
 rm -rf $PYTHON_CURRENT/lib/python3.5/idlelib
 rm -rf $PYTHON_CURRENT/lib/python3.5/ensurepip
 
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/tkinterhtml/tkhtml/Windows
-rm -rf $PYTHON_CURRENT/lib/python3.5/site-packages/tkinterhtml/tkhtml/Linux
-
-
 # clear bin because its scripts have absolute paths
 mv $PYTHON_CURRENT/bin/python3.5 $SCRIPT_DIR # save python exe
 rm -rf $PYTHON_CURRENT/bin/*

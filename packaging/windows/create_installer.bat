@@ -52,9 +52,6 @@ rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 rmdir %BUILDDIR%\Lib\ensurepip /S /Q>NUL
 
 
-rmdir %BUILDDIR%\Lib\site-packages\tkinterhtml\tkhtml\Linux /S /Q>NUL
-rmdir %BUILDDIR%\Lib\site-packages\tkinterhtml\tkhtml\MacOSX /S /Q>NUL
-
 @echo ............... CREATING pip.bat ...................................
 copy pip.bat %BUILDDIR%\Scripts
 

@@ -62,8 +62,6 @@ rm -rf $TARGET_DIR/lib/python3.5/distutils/command/*.exe
 #rm -rf $TARGET_DIR/lib/python3.5/site-packages/pip*
 #rm -rf $TARGET_DIR/lib/python3.5/site-packages/setuptools*
 
-rm -rf $TARGET_DIR/lib/python3.5/site-packages/tkinterhtml/tkhtml/Windows
-rm -rf $TARGET_DIR/lib/python3.5/site-packages/tkinterhtml/tkhtml/MacOSX
 
 # clear most of the include folder ##################################################
 rm -rf $TARGET_DIR/include/lzma
