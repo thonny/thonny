@@ -52,5 +52,29 @@ install_name_tool -change \
 	@rpath/Tk.framework/Versions/8.5/Tk \
     $LOCAL_TKINTER 
 
+# update libcrypto and libssl links
+install_name_tool -id \
+	@rpath/Python.framework/Versions/3.6/lib/libcrypto.1.0.0.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/libcrypto.1.0.0.dylib 
+
+install_name_tool -id \
+	@rpath/Python.framework/Versions/3.6/lib/libssl.1.0.0.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/libssl.1.0.0.dylib 
+
+install_name_tool -change \
+	/Library/Frameworks/Python.framework/Versions/3.6/lib/libcrypto.1.0.0.dylib
+	@rpath/Python.framework/Versions/3.6/lib/libcrypto.1.0.0.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/libssl.1.0.0.dylib
+
+install_name_tool -change \
+	/Library/Frameworks/Python.framework/Versions/3.6/lib/libcrypto.1.0.0.dylib
+	@rpath/Python.framework/Versions/3.6/lib/libcrypto.1.0.0.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/python3.6/lib-dynload/_ssl.cpython-36m-darwin.so
+
+install_name_tool -change \
+	/Library/Frameworks/Python.framework/Versions/3.6/lib/libssl.1.0.0.dylib
+	@rpath/Python.framework/Versions/3.6/lib/libssl.1.0.0.dylib \
+	$LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/python3.6/lib-dynload/_ssl.cpython-36m-darwin.so
+
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $NEW_FRAMEWORK_PATH/Versions/$VERSION/bin 
