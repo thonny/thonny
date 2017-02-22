@@ -23,6 +23,9 @@ cp $SCRIPT_DIR/../turtle.cfg $PYTHON_CURRENT/lib/python3.6
 # Upgrade pip ##########################################
 $PYTHON_CURRENT/bin/python3.6 -m pip install --upgrade pip
 
+# install certifi #####################################################
+$PYTHON_CURRENT/bin/python3.6 -m pip install certifi
+
 # install thonny #####################################################
 $PYTHON_CURRENT/bin/python3.6 -m pip install --pre --no-cache-dir thonny
 rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
