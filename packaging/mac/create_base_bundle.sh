@@ -5,7 +5,6 @@
 # Before running this
 # * Install Python (official dmg)
 # * Build and install Tcl/Tk (from source (install_tcltk.sh), because ActiveTcl licence is not compatible)
-# * Build and install Pygame dependencies (SDL 1.2, libpng, and libjpeg))
 
 # This version takes official Python installation as base
 
