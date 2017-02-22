@@ -49,8 +49,6 @@ rmdir %BUILDDIR%\tcl\tcl8.6\opt0.4 /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\msgs /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 
-rmdir %BUILDDIR%\Lib\ensurepip /S /Q>NUL
-
 
 @echo ............... CREATING pip.bat ...................................
 copy pip.bat %BUILDDIR%\Scripts
