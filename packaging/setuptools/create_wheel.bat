@@ -18,7 +18,7 @@ copy thonny\common.py     thonny\backend_private\thonny
 
 @echo ............... CREATING wheel ................................
 
-C:\Python35\python.exe setup.py bdist_wheel -d packaging\setuptools
+C:\Python36\python.exe setup.py bdist_wheel -d packaging\setuptools
 
 @echo ............... CLEANING BACKEND_PRIVATE ......................
 
