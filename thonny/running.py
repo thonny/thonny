@@ -630,6 +630,9 @@ class CPythonProxy(BackendProxy):
         else:
             return sys.executable
 
+    def get_interpreter_command(self):
+        return self._executable
+
 def is_private_interpreter(interpreter):
     token = os.path.join(os.path.dirname(interpreter), "is_private")
     return os.path.exists(token)
