@@ -411,6 +411,11 @@ class CPythonProxy(BackendProxy):
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
         
+        if running_on_mac_os() and is_private_interpreter(self._executable):
+            # TODO: should it be set already in GUI process??
+            import certifi
+            my_env["SSL_CERT_FILE"] = certify.where()
+        
         if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
                             % self._executable)
