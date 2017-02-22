@@ -56,7 +56,6 @@ rm -rf $TARGET_DIR/lib/tk8.6/demos
 
 rm -rf $TARGET_DIR/lib/python3.6/test
 rm -rf $TARGET_DIR/lib/python3.6/idlelib
-rm -rf $TARGET_DIR/lib/python3.6/ensurepip
 rm -rf $TARGET_DIR/lib/python3.6/distutils/command/*.exe
 #rm -rf $TARGET_DIR/lib/python3.6/config-3.6m
 #rm -rf $TARGET_DIR/lib/python3.6/site-packages/pip*
