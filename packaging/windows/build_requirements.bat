@@ -5,8 +5,8 @@ rmdir %PREFIX% /S /Q
 mkdir %PREFIX%
 
 @echo ............... COPYING PYTHON and Thonny launcher .........
-xcopy .\Python35\* %PREFIX% /S /E /K>NUL
-copy ThonnyRunner35\Release\thonny.exe %PREFIX% /Y
+xcopy .\Python36\* %PREFIX% /S /E /K>NUL
+copy ThonnyRunner36\Release\thonny.exe %PREFIX% /Y
 
 @echo ............... COPYING VS FILES ..........................
 xcopy ucrt_redist\*.dll %PREFIX% /S /E /K>NUL

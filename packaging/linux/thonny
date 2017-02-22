@@ -24,4 +24,4 @@ else
 fi
 
 
-$DIR/python3.5 -m thonny "$@"
+$DIR/python3.6 -m thonny "$@"

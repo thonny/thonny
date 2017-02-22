@@ -58,7 +58,7 @@ cd $INITIAL_DIR
 
 
 # python -------------------------------------------------
-PYTHON_VERSION=3.5.2
+PYTHON_VERSION=3.6.0
 RELEASE_NAME=Python-${PYTHON_VERSION}
 
 cd $TEMP_DIR
@@ -78,14 +78,14 @@ make altinstall # TODO: copy from build dir??
 cd $INITIAL_DIR
 
 
-# otool -L ~/pytcltk/lib/python3.5/lib-dynload/_tkinter.cpython-35m-darwin.so 
+# otool -L ~/pytcltk/lib/python3.6/lib-dynload/_tkinter.cpython-35m-darwin.so 
 
 # Copy to framework template ###############################################################
 # LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
 
 TKINTER_FILENAME=_tkinter.cpython-35m-darwin.so
-LOCAL_TKINTER=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.5/lib/python3.5/lib-dynload/$TKINTER_FILENAME
-TKINTER86=$PREFIX/lib/python3.5/lib-dynload/$TKINTER_FILENAME
+LOCAL_TKINTER=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/python3.6/lib-dynload/$TKINTER_FILENAME
+TKINTER86=$PREFIX/lib/python3.6/lib-dynload/$TKINTER_FILENAME
 cp -f $TKINTER86 $LOCAL_TKINTER
 
 chmod u+w $LOCAL_TKINTER

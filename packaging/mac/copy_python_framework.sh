@@ -4,7 +4,7 @@
 # Take from env
 # LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
 
-VERSION=3.5
+VERSION=3.6
 ORIGINAL_FRAMEWORK_PATH=/Library/Frameworks/Python.framework
 NEW_FRAMEWORK_PATH=$LOCAL_FRAMEWORKS/Python.framework
 
@@ -15,7 +15,7 @@ cp -R $ORIGINAL_FRAMEWORK_PATH/* $NEW_FRAMEWORK_PATH
 
 BIN_EXE=$NEW_FRAMEWORK_PATH/Versions/$VERSION/bin/python$VERSION
 
-# delete everything in bin except python3.5
+# delete everything in bin except python3.6
 #find $NEW_FRAMEWORK_PATH/Versions/$VERSION/bin -type f -maxdepth 1 ! -name python$VERSION -delete
 
 # Make main binaries and libraries relocatable
@@ -39,8 +39,8 @@ install_name_tool -add_rpath @executable_path/../../../../../../../ $BUNDLE_EXE
 
 
 # update tkinter links
-TKINTER_FILENAME=_tkinter.cpython-35m-darwin.so
-LOCAL_TKINTER=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.5/lib/python3.5/lib-dynload/$TKINTER_FILENAME
+TKINTER_FILENAME=_tkinter.cpython-36m-darwin.so
+LOCAL_TKINTER=$LOCAL_FRAMEWORKS/Python.framework/Versions/3.6/lib/python3.6/lib-dynload/$TKINTER_FILENAME
 
 install_name_tool -change \
     /Library/Frameworks/Tcl.framework/Versions/8.5/Tcl \

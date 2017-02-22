@@ -2,4 +2,4 @@
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-exec $DIR/../Frameworks/Python.framework/Versions/3.5/bin/python3.5 -m thonny "$@"
+exec $DIR/../Frameworks/Python.framework/Versions/3.6/bin/python3.6 -m thonny "$@"
