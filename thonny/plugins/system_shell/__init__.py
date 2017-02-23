@@ -8,6 +8,8 @@ import shutil
 from thonny.globals import get_runner
 from thonny.running import is_private_interpreter
 from thonny import THONNY_USER_DIR
+import subprocess
+from time import sleep
 
 def _create_pythonless_environment():
     # If I want to call another python version, then 
@@ -105,7 +107,7 @@ def open_system_shell():
         else:
             raise RuntimeError("Don't know how to open terminal emulator")
         # http://stackoverflow.com/a/4466566/261181
-        cmd_line = (cmd + """ -e 'bash -c "{interpreter} {explainer};exec bash -i"' """
+        cmd_line = (cmd + """ -e $'bash -c "\'{interpreter}\' \'{explainer}\';exec bash -i"' """
                     .format(interpreter=interpreter, explainer=explainer))
         Popen(cmd_line, env=env, shell=True)
         
@@ -120,11 +122,29 @@ def open_system_shell():
             pip_tweak = ';export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}'.format(**env)
         else:
             pip_tweak = ''
-        cmd_line = (("osascript"
-            + """ -e $'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; \'{interpreter}\' \'{explainer}\'"'"""
-            + """ -e 'tell application "Terminal" to activate'"""
-            ) % (env["PATH"], pip_tweak)
-        ).format(interpreter=interpreter, explainer=explainer)
+        
+        script = ("unset TK_LIBRARY; unset TCL_LIBRARY; PATH={} {}; \'{}\' \'{}\'"
+                  .format(env["PATH"], pip_tweak, interpreter, explainer))
+        cmd_line = ("osascript"
+            + """ -e 'if application "Terminal" is running then ' """
+            + """ -e '    tell application "Terminal"           ' """
+            + """ -e '        do script "{script}"              ' """
+            + """ -e '        activate                          ' """
+            + """ -e '    end tell                              ' """
+            + """ -e 'else                                      ' """
+            + """ -e '    tell application "Terminal"           ' """
+            + """ -e '        do script {script}" in window 1   ' """
+            + """ -e '        activate                          ' """
+            + """ -e '    end tell                              ' """
+            + """ -e 'end if                                    ' """
+            .format(script=script))
+
+        #cmd_line = (("osascript"
+        #    + """ -e 'tell application "Terminal" to set term to window 99'"""
+        #    + """ -e $'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; \'{interpreter}\' \'{explainer}\' " in term ' """
+        #    + """ -e 'tell application "Terminal" to activate'"""
+        #    ) % (env["PATH"], pip_tweak)
+        #).format(interpreter=interpreter, explainer=explainer)
 
         # TODO: at the moment two new terminal windows will be opened when terminal is not already active
         # https://discussions.apple.com/thread/1738507?tstart=0
