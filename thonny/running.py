@@ -407,14 +407,12 @@ class CPythonProxy(BackendProxy):
             if ("python" not in name.lower() # skip python vars, because we may use different Python version
                 and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
                 my_env[name] = os.environ[name]
+        
+        # TODO: take care of SSL_CERT_FILE
+        # Unset when we're in builtin python and target python is external
                 
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
-        
-        if running_on_mac_os() and is_private_interpreter(self._executable):
-            # TODO: should it be set already in GUI process??
-            import certifi
-            my_env["SSL_CERT_FILE"] = certify.where()
         
         if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"

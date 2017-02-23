@@ -57,6 +57,9 @@ def open_system_shell():
         env["PIP_USER"] = "true"
         env["PYTHONUSERBASE"] = THONNY_USER_DIR
     
+    # TODO: take care of SSL_CERT_FILE (unset when running external python and set for builtin)
+    # Unset when we're in builtin python and target python is external
+    
     # TODO: what if executable or explainer needs escaping?
     # Maybe try creating a script in temp folder and execute this,
     # passing required paths via environment variables.

@@ -1,5 +1,5 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
+export SSL_CERT_FILE=$DIR/../Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/certifi/cacert.pem
 exec $DIR/../Frameworks/Python.framework/Versions/3.6/bin/python3.6 -m thonny "$@"
