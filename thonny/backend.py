@@ -320,15 +320,6 @@ class VM:
         finally:
             self._current_executor = None
     
-    def _get_source(self, filename):
-        fp = None
-        try:
-            fp, _ = misc_utils.open_py_file(filename)
-            return fp.read()
-        finally:
-            if fp is not None:
-                fp.close()
-    
         
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
