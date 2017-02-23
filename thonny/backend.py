@@ -278,7 +278,6 @@ class VM:
     def _add_function_info(self, value, info):
         try:
             info["source"] = inspect.getsource(value)
-            # findsource gives code for modules???
         except:
             pass
         
@@ -743,26 +742,16 @@ class FancyTracer(Executor):
             self._vm.handle_command(self._current_command)
             self._current_command = self._vm._fetch_command()
     
-    def _get_firstlineno(self, frame):
-        """If module starts with blank line or comment, then frame.f_code.co_firstlineno
-        isn't consistent with inspect.findsource"""
+    def _get_frame_source_info(self, frame):
         if frame.f_code.co_name == "<module>":
-            return 1
+            obj = inspect.getmodule(frame)
         else:
-            return frame.f_code.co_firstlineno
+            obj = frame.f_code
+        
+        lines, index = inspect.getsourcelines(obj)
+        return "".join(lines), index+1
+        
     
-    def _get_source(self, frame):
-        try:
-            if frame.f_code.co_name == "<module>":
-                # getsource doesn't give correct source for modules 
-                # (at least in some Python version or in some cases)
-                lines, _ = inspect.findsource(frame.f_code)
-                return "".join(lines)
-            else:
-                return inspect.getsource(frame.f_code)
-        except:
-            return None
-
     
     def _cmd_exec_completed(self, frame, event, args, focus, cmd):
         """
@@ -870,14 +859,17 @@ class FancyTracer(Executor):
             if "value" in last_event_args:
                 last_event_args["value"] = self._vm.export_value(last_event_args["value"]) 
             
+            system_frame = custom_frame.system_frame
+            source, firstlineno = self._get_frame_source_info(system_frame)
+            
             result.append(FrameInfo(
-                id=id(custom_frame.system_frame),
-                filename=custom_frame.system_frame.f_code.co_filename,
-                module_name=custom_frame.system_frame.f_globals["__name__"],
-                code_name=custom_frame.system_frame.f_code.co_name,
-                locals=self._vm.export_variables(custom_frame.system_frame.f_locals),
-                source=self._get_source(custom_frame.system_frame),
-                firstlineno=self._get_firstlineno(custom_frame.system_frame),
+                id=id(system_frame),
+                filename=system_frame.f_code.co_filename,
+                module_name=system_frame.f_globals["__name__"],
+                code_name=system_frame.f_code.co_name,
+                locals=self._vm.export_variables(system_frame.f_locals),
+                source=source,
+                firstlineno=firstlineno,
                 last_event=custom_frame.last_event,
                 last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
