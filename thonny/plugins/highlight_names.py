@@ -248,7 +248,7 @@ def update_highlighting(event):
     text.name_highlighter.schedule_update()
 
 
-def load_plugin():
+def _load_plugin():
     wb = get_workbench()  # type:Workbench
     wb.add_option("view.name_highlighting", True)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)

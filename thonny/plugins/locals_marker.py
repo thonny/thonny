@@ -122,7 +122,7 @@ def update_highlighting(event):
     text.local_highlighter.schedule_update()
 
 
-def load_plugin():
+def _load_plugin():
     wb = get_workbench()
     wb.add_option("view.locals_highlighting", True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
