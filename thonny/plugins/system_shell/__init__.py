@@ -121,7 +121,7 @@ def open_system_shell():
         else:
             pip_tweak = ''
         cmd_line = (("osascript"
-            + """ -e 'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; {interpreter} {explainer}"'"""
+            + """ -e $'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; \'{interpreter}\' \'{explainer}\'"'"""
             + """ -e 'tell application "Terminal" to activate'"""
             ) % (env["PATH"], pip_tweak)
         ).format(interpreter=interpreter, explainer=explainer)
