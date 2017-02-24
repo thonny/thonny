@@ -3,25 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export LD_LIBRARY_PATH=$DIR/../lib
-
-# prescribe ssl root cert
-# see https://golang.org/src/crypto/x509/root_linux.go
-
-if [ -f "/etc/ssl/certs/ca-certificates.crt" ] # Debian etc
-then
-   export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt 
-elif [ -f "/etc/pki/tls/certs/ca-bundle.crt" ] # Fedora/RHEL
-then
-   export SSL_CERT_FILE=/etc/pki/tls/certs/ca-bundle.crt
-elif [ -f "/etc/ssl/ca-bundle.pem" ] # OpenSUSE
-then
-   export SSL_CERT_FILE=/etc/ssl/ca-bundle.pem
-elif [ -f "/etc/pki/tls/cacert.pem" ] # Fedora/RHEL
-then
-   export SSL_CERT_FILE=/etc/pki/tls/cacert.pem
-else
-   echo "Can't find SSL root cert" >&2
-fi
-
+export SSL_CERT_FILE=$(readlink -m $DIR/../lib/python3.6/site-packages/certifi/cacert.pem)
+export SSL_CERT_DIR=$(readlink -m $DIR/../lib/python3.6/site-packages/certifi)
 
 $DIR/python3.6 -m thonny "$@"
