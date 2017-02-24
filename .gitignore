@@ -10,6 +10,7 @@
 .DS_Store
 __pycache__
 dist
+packaging/linux/build
 build  
 MANIFEST
 RemoteSystemsTempFiles
