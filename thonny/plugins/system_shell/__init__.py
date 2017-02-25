@@ -159,7 +159,7 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
         # argument quotes are given below
         script_in_osascript_argument = script_in_osascript_argument[1:-1]
     
-    # When Terminal is not open, then do script opens two windows
+    # When Terminal is not open, then do script opens two windows.
     # do script ... in window 1 would solve this, but if Terminal is already
     # open, this could run the script in existing terminal (in undesirable env on situation)
     # That's why I check first whether Terminal is runing
