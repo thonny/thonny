@@ -86,18 +86,13 @@ def open_system_shell():
 def _open_shell_in_windows(cwd, env, interpreter, explainer, exec_prefix):
     env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
     env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
-    # Command line will be something like:
-    # start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}
-    # I'm using list method to avoid quoting problems (last argument can't be quoted)
-    cmd_line = ['start',
-                'Shell for %s' % interpreter,
-                '/D',
-                cwd,
-                '/W',
-                'cmd',
-                '/K',
-                interpreter,
-                explainer] 
+    
+    # Yes, the /K argument has weird quoting. Can't explain this, but it works 
+    cmd_line = """start "Shell for {interpreter}" /D "{cwd}" /W cmd /K ""{interpreter}" "{explainer}"" """.format(
+        interpreter=interpreter, 
+        cwd=cwd,
+        explainer=explainer)
+    
     Popen(cmd_line, env=env, shell=True)
 
 def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):

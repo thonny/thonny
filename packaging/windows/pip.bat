@@ -1,1 +1,1 @@
-@%~dp0..\python -m pip %*
+@"%~dp0..\python.exe" -m pip %*
