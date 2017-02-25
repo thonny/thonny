@@ -71,26 +71,42 @@ def open_system_shell():
     cwd=get_runner().get_cwd()
     
     if platform.system() == "Windows":
-        env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
-        env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
-        # Command line will be something like:
-        # start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}
-        # I'm using list method to avoid quoting problems (last argument can't be quoted)
-        cmd_line = ['start',
-                    'Shell for %s' % interpreter,
-                    '/D',
-                    cwd,
-                    '/W',
-                    'cmd',
-                    '/K',
-                    interpreter,
-                    explainer] 
-        Popen(cmd_line, env=env, shell=True)
+        return _open_shell_in_windows(cwd, env, interpreter, explainer, exec_prefix)
         
     elif platform.system() == "Linux":
-        env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
-        if shutil.which("x-terminal-emulator"):
-            cmd = "x-terminal-emulator"
+        return _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix)
+        
+    elif platform.system() == "Darwin":
+        _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix)
+    else:
+        showerror("Problem", "Don't know how to open system shell on this platform (%s)"
+                  % platform.system())
+        return
+
+def _open_shell_in_windows(cwd, env, interpreter, explainer, exec_prefix):
+    env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
+    env["PATH"] = _add_to_path(os.path.join(exec_prefix, "Scripts"), env.get("PATH", ""))
+    # Command line will be something like:
+    # start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{interpreter}" {explainer}
+    # I'm using list method to avoid quoting problems (last argument can't be quoted)
+    cmd_line = ['start',
+                'Shell for %s' % interpreter,
+                '/D',
+                cwd,
+                '/W',
+                'cmd',
+                '/K',
+                interpreter,
+                explainer] 
+    Popen(cmd_line, env=env, shell=True)
+
+def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
+    # No escaping in PATH possible: http://stackoverflow.com/a/29213487/261181
+    # (neither necessary except for colon)
+    env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
+    
+    if shutil.which("x-terminal-emulator"):
+        cmd = "x-terminal-emulator"
 # Can't use konsole, because it doesn't pass on the environment
 #         elif shutil.which("konsole"):
 #             if (shutil.which("gnome-terminal") 
@@ -98,68 +114,76 @@ def open_system_shell():
 #                 cmd = "gnome-terminal"
 #             else:
 #                 cmd = "konsole"
-        elif shutil.which("gnome-terminal"):
-            cmd = "gnome-terminal"
-        elif shutil.which("terminal"): # XFCE?
-            cmd = "terminal"
-        elif shutil.which("xterm"):
-            cmd = "xterm"
-        else:
-            raise RuntimeError("Don't know how to open terminal emulator")
-        # http://stackoverflow.com/a/4466566/261181
-        cmd_line = (cmd + """ -e $'bash -c "\'{interpreter}\' \'{explainer}\';exec bash -i"' """
-                    .format(interpreter=interpreter, explainer=explainer))
-        Popen(cmd_line, env=env, shell=True)
-        
-    elif platform.system() == "Darwin":
-        env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
-        # Need to modify environment explicitly as "tell application" won't pass the environment
-        # (at least when Terminal is already active)
-        
-        # TODO: osascript won't change Terminal-s env
-        # At the moment I just explicitly set important variables
-        if "PIP_USER" in env:
-            pip_tweak = ';export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}'.format(**env)
-        else:
-            pip_tweak = ''
-        
-        script = ("unset TK_LIBRARY; unset TCL_LIBRARY; PATH={} {}; \'{}\' \'{}\'"
-                  .format(env["PATH"], pip_tweak, interpreter, explainer))
-        cmd_line = ("osascript"
-            + """ -e 'if application "Terminal" is running then ' """
-            + """ -e '    tell application "Terminal"           ' """
-            + """ -e '        do script "{script}"              ' """
-            + """ -e '        activate                          ' """
-            + """ -e '    end tell                              ' """
-            + """ -e 'else                                      ' """
-            + """ -e '    tell application "Terminal"           ' """
-            + """ -e '        do script {script}" in window 1   ' """
-            + """ -e '        activate                          ' """
-            + """ -e '    end tell                              ' """
-            + """ -e 'end if                                    ' """
-            .format(script=script))
-
-        #cmd_line = (("osascript"
-        #    + """ -e 'tell application "Terminal" to set term to window 99'"""
-        #    + """ -e $'tell application "Terminal" to do script "unset TK_LIBRARY; unset TCL_LIBRARY; PATH=%s %s; \'{interpreter}\' \'{explainer}\' " in term ' """
-        #    + """ -e 'tell application "Terminal" to activate'"""
-        #    ) % (env["PATH"], pip_tweak)
-        #).format(interpreter=interpreter, explainer=explainer)
-
-        # TODO: at the moment two new terminal windows will be opened when terminal is not already active
-        # https://discussions.apple.com/thread/1738507?tstart=0
-        # IDEA: detect if terminal is already active and do "do script ... in front window" if not
-        # (but seems that sometimes it can't find this "front window")
-        Popen(cmd_line, env=env, shell=True)
-
-    
+    elif shutil.which("gnome-terminal"):
+        cmd = "gnome-terminal"
+    elif shutil.which("terminal"): # XFCE?
+        cmd = "terminal"
+    elif shutil.which("xterm"):
+        cmd = "xterm"
     else:
-        showerror("Problem", "Don't know how to open system shell on this platform (%s)"
-                  % platform.system())
-        return
-    
+        raise RuntimeError("Don't know how to open terminal emulator")
+    # http://stackoverflow.com/a/4466566/261181
+    cmd_line = (cmd + """ -e $'bash -c "\'{interpreter}\' \'{explainer}\';exec bash -i"' """
+                .format(interpreter=interpreter, explainer=explainer))
+    Popen(cmd_line, env=env, shell=True)
 
+def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
+    # No escaping in Linux PATH possible: http://stackoverflow.com/a/29213487/261181
+    # (neither necessary except for colon)
+    # Assuming this applies for OS X as well
     
+    env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
+    
+    # osascript "tell application" won't change Terminal-s env
+    # (at least when Terminal is already active)
+    # At the moment I just explicitly set some important variables
+    # TODO: Did I miss something?
+    script = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(shlex.quote(env["PATH"]))
+    
+    # TODO: delete when virtualenv approach works
+    if "PIP_USER" in env and "PYTHONUSERBASE" in env:
+        script += ";export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}".format(
+            PIP_USER=env["PIP_USER"],
+            PYTHONUSERBASE=shlex.quote(env["PYTHONUSERBASE"]))
+        
+    script += "; {interpreter} {explainer}".format(
+        interpreter=shlex.quote(interpreter),
+        explainer=shlex.quote(explainer))
+    
+    # need to double-quotes and backslashes in AppleScript string
+    # http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string
+    script_in_apple_script_string_literal = (script
+                                             .replace("\\", "\\\\")
+                                             .replace('"', '\\"'))
+    
+    # the script will be inside osascript argument quotes
+    script_in_osascript_argument = shlex.quote(script_in_apple_script_string_literal)
+    if script_in_osascript_argument != script_in_apple_script_string_literal:
+        assert script_in_osascript_argument[0] == "'"
+        assert script_in_osascript_argument[-1] == "'"
+        # argument quotes are given below
+        script_in_osascript_argument = script_in_osascript_argument[1:-1]
+    
+    # When Terminal is not open, then do script opens two windows
+    # do script ... in window 1 would solve this, but if Terminal is already
+    # open, this could run the script in existing terminal (in undesirable env on situation)
+    # That's why I check first whether Terminal is runing
+    cmd_line = ("osascript"
+        + """ -e 'if application "Terminal" is running then ' """
+        + """ -e '    tell application "Terminal"           ' """
+        + """ -e '        do script "{script}"              ' """
+        + """ -e '        activate                          ' """
+        + """ -e '    end tell                              ' """
+        + """ -e 'else                                      ' """
+        + """ -e '    tell application "Terminal"           ' """
+        + """ -e '        do script {script}" in window 1   ' """
+        + """ -e '        activate                          ' """
+        + """ -e '    end tell                              ' """
+        + """ -e 'end if                                    ' """
+        .format(script=script))             
+    
+    Popen(cmd_line, env=env, shell=True)
+
 
 def load_plugin():
     from thonny.globals import get_workbench
