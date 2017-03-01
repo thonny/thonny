@@ -9,7 +9,7 @@ from shutil import which
 
 
 def _find_commands(logical_command, reference_output, query_arguments,
-                   only_shortest=True):
+                   only_best=True):
     """Returns the commands that can be used for running given conceptual command
     (python or pip)"""
     
@@ -37,11 +37,16 @@ def _find_commands(logical_command, reference_output, query_arguments,
             return False
     
     correct_commands = set()
-    version_suffixes = ["",
-                   str(sys.version_info.major),
-                   "%d.%d" % (sys.version_info.major, sys.version_info.minor)
-                   ]
     
+    major = str(sys.version_info.major)
+    minor = "%d.%d" % (sys.version_info.major, sys.version_info.minor)
+                   
+    if platform.system == "Windows":
+        version_suffixes = ["", major, minor]
+    else:
+        version_suffixes = [major, minor, ""]
+        
+        
     # first look for short commands
     for suffix in version_suffixes:
         command = logical_command + suffix
@@ -50,7 +55,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
                 command = '"' + command + '"'
                 
             correct_commands.add(command)
-            if only_shortest:
+            if only_best:
                 return list(correct_commands)
     
     # if no Python found, then use executable
@@ -58,7 +63,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
         and logical_command == "python" 
         and platform.system() != "Windows"): # Unixes tend to use symlinks, not Windows
         correct_commands.add(sys.executable)
-        if only_shortest:
+        if only_best:
             return list(correct_commands)
     
     # if still nothing found, then add full paths
@@ -81,21 +86,21 @@ def _find_commands(logical_command, reference_output, query_arguments,
                         full_command = '"' + full_command + '"'
                         
                     correct_commands.add(full_command)
-                    if only_shortest:
+                    if only_best:
                         return list(correct_commands)
     
     return sorted(correct_commands, key=lambda x: len(x))
 
-def _find_python_commands(only_shortest=True):
+def _find_python_commands(only_best=True):
     return _find_commands("python",
                          sys.exec_prefix + "\n" + sys.version,
-                         ["-c", "import sys; print(sys.exec_prefix); print(sys.version)"], only_shortest)
+                         ["-c", "import sys; print(sys.exec_prefix); print(sys.version)"], only_best)
 
-def _find_pip_commands(only_shortest=True):
+def _find_pip_commands(only_best=True):
     current_ver_string = _get_pip_version_string()
     
     if current_ver_string is not None:
-        commands = _find_commands("pip", current_ver_string, ["--version"], only_shortest)
+        commands = _find_commands("pip", current_ver_string, ["--version"], only_best)
         if len(commands) > 0:
             return commands
         else:
@@ -138,12 +143,12 @@ if __name__ == "__main__":
     print("This session is prepared for using Python %s installation in" % platform.python_version())
     print(" ", sys.exec_prefix)
     print("")
-    print("Shortest command for running the interpreter:")
+    print("Command for running the interpreter:")
     for command in _find_python_commands(True):
         print(" ", command)
         
     print("")
-    print("Shortest command for running pip:")
+    print("Command for running pip:")
     #print(_get_pip_version_string())
     pip_commands = _find_pip_commands(True)
     if len(pip_commands) == 0:
