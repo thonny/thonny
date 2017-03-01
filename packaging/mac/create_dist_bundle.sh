@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Should be run after new thonny package is uploaded to PyPi
 

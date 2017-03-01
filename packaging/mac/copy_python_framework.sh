@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 # https://github.com/lektor/lektor/blob/master/gui/bin/make-python-framework-relocatable
 
 # Take from env

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 # Should be run once per new version of Python or Tk
 

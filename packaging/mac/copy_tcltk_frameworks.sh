@@ -1,5 +1,5 @@
 # https://github.com/lektor/lektor/blob/master/gui/bin/make-python-framework-relocatable
-
+set -e
 
 # Take from environment
 #LOCAL_FRAMEWORKS=$HOME/thonny_template_build/Thonny.app/Contents/Frameworks
