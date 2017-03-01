@@ -50,6 +50,8 @@ def open_system_shell():
         return
     
     exec_prefix=_get_exec_prefix(python_interpreter)
+    if ".." in exec_prefix:
+        exec_prefix = os.path.realpath(exec_prefix)
     env = _create_pythonless_environment()
     if is_private_interpreter(python_interpreter):
         # in Thonny-private environment make "pip install"
@@ -145,37 +147,46 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
         interpreter=shlex.quote(interpreter),
         explainer=shlex.quote(explainer))
     
-    # need to double-quotes and backslashes in AppleScript string
-    # http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string
-    script_in_apple_script_string_literal = (script
+    # The script will be sent to Terminal with 'do script' command, which takes a string.
+    # We'll prepare an AppleScript string literal for this
+    # (http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string):
+    script_as_apple_script_string_literal = ('"' 
+                                             + script
                                              .replace("\\", "\\\\")
-                                             .replace('"', '\\"'))
+                                             .replace('"', '\\"') 
+                                             + '"')
     
-    # the script will be inside osascript argument quotes
-    script_in_osascript_argument = shlex.quote(script_in_apple_script_string_literal)
-    if script_in_osascript_argument != script_in_apple_script_string_literal:
-        assert script_in_osascript_argument[0] == "'"
-        assert script_in_osascript_argument[-1] == "'"
-        # argument quotes are given below
-        script_in_osascript_argument = script_in_osascript_argument[1:-1]
-
     # When Terminal is not open, then do script opens two windows.
     # do script ... in window 1 would solve this, but if Terminal is already
     # open, this could run the script in existing terminal (in undesirable env on situation)
-    # That's why I check first whether Terminal is runing
-    cmd_line = (("osascript"
+    # That's why I need to prepare two variations of the 'do script' command
+    doScriptCmd1 = """        do script %s """             % script_as_apple_script_string_literal
+    doScriptCmd2 = """        do script %s in window 1 """ % script_as_apple_script_string_literal
+    
+    # The whole AppleScript will be executed with osascript, which can take the script
+    # lines as arguments. The lines containing our script need to be shell-quoted:
+    quotedCmd1 = subprocess.list2cmdline([doScriptCmd1])
+    quotedCmd2 = subprocess.list2cmdline([doScriptCmd2])
+    
+    print("OC1:", doScriptCmd1)
+    print("QC1:", quotedCmd1)
+    
+    # Now we can finally assemble the osascript command line
+    cmd_line = ("osascript"
         + """ -e 'if application "Terminal" is running then ' """
         + """ -e '    tell application "Terminal"           ' """
-        + """ -e '        do script "{script}"              ' """
+        + """ -e """    + quotedCmd1
         + """ -e '        activate                          ' """
         + """ -e '    end tell                              ' """
         + """ -e 'else                                      ' """
         + """ -e '    tell application "Terminal"           ' """
-        + """ -e '        do script "{script}" in window 1   ' """
+        + """ -e """    + quotedCmd2
         + """ -e '        activate                          ' """
         + """ -e '    end tell                              ' """
         + """ -e 'end if                                    ' """
-        ).format(script=script))   
+        )
+    
+    #print(cmd_line)
     
     Popen(cmd_line, env=env, shell=True)
 
