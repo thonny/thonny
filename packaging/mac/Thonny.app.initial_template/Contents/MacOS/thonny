@@ -1,5 +1,12 @@
 #!/bin/bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-export SSL_CERT_FILE=$DIR/../Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/certifi/cacert.pem
-exec $DIR/../Frameworks/Python.framework/Versions/3.6/bin/python3.6 -m thonny "$@"
+UGLY_PYTHON_BIN="$DIR/../Frameworks/Python.framework/Versions/3.6/bin"
+UGLY_SSL_CERT_DIR="$DIR/../Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/certifi"
+
+# resolve ..-s in the path
+PYTHON_BIN="$(cd "$UGLY_PYTHON_BIN" && pwd -P)"
+export SSL_CERT_DIR="$(cd "$UGLY_SSL_CERT_DIR" && pwd -P)"
+export SSL_CERT_FILE="$SSL_CERT_DIR/cacert.pem"
+
+exec "$PYTHON_BIN/python3.6" -m thonny "$@"
