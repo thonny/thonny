@@ -141,7 +141,7 @@ if __name__ == "__main__":
     _clear_screen()
     print("*" * 80)
     print("This session is prepared for using Python %s installation in" % platform.python_version())
-    print(" ", sys.exec_prefix)
+    print(" ", os.path.realpath(sys.exec_prefix))
     print("")
     print("Command for running the interpreter:")
     for command in _find_python_commands(True):
