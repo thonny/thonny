@@ -410,6 +410,7 @@ class CPythonProxy(BackendProxy):
         
         # TODO: take care of SSL_CERT_FILE
         # Unset when we're in builtin python and target python is external
+        # And set, wen we're in external and target is builtin (or it's venv)
                 
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
