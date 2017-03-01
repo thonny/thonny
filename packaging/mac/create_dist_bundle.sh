@@ -15,6 +15,10 @@ mkdir -p build
 # copy template #################################################
 cp -R -H $PREFIX/Thonny.app build
 
+# update launch script (might have changed after last create_base_bundle.sh) #####################
+cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/thonny \
+    build/Thonny.app/Contents/MacOS
+
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.6/
 
