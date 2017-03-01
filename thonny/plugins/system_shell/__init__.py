@@ -125,33 +125,37 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
     Popen(cmd_line, env=env, shell=True)
 
 def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
-    # No escaping in Linux PATH possible: http://stackoverflow.com/a/29213487/261181
+    _shellquote = shlex.quote
+    
+    # No quoting inside Linux PATH variable is possible: http://stackoverflow.com/a/29213487/261181
     # (neither necessary except for colon)
     # Assuming this applies for OS X as well
-    
     env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
     
-    # osascript "tell application" won't change Terminal-s env
+    # osascript "tell application" won't change Terminal's env
     # (at least when Terminal is already active)
     # At the moment I just explicitly set some important variables
     # TODO: Did I miss something?
-    script = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(shlex.quote(env["PATH"]))
+    cmd = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(_shellquote(env["PATH"]))
     
     # TODO: delete when virtualenv approach works
     if "PIP_USER" in env and "PYTHONUSERBASE" in env:
-        script += ";export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}".format(
+        cmd += ";export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}".format(
             PIP_USER=env["PIP_USER"],
-            PYTHONUSERBASE=shlex.quote(env["PYTHONUSERBASE"]))
+            PYTHONUSERBASE=_shellquote(env["PYTHONUSERBASE"]))
+    
+    if "SSL_CERT_FILE" in env:
+        cmd += ";export SSL_CERT_FILE=" + _shellquote(env["SSL_CERT_FILE"])
         
-    script += "; {interpreter} {explainer}".format(
-        interpreter=shlex.quote(interpreter),
-        explainer=shlex.quote(explainer))
+    cmd += "; {interpreter} {explainer}".format(
+        interpreter=_shellquote(interpreter),
+        explainer=_shellquote(explainer))
     
     # The script will be sent to Terminal with 'do script' command, which takes a string.
     # We'll prepare an AppleScript string literal for this
     # (http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string):
-    script_as_apple_script_string_literal = ('"' 
-                                             + script
+    cmd_as_apple_script_string_literal = ('"' 
+                                             + cmd
                                              .replace("\\", "\\\\")
                                              .replace('"', '\\"') 
                                              + '"')
@@ -160,10 +164,10 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     # do script ... in window 1 would solve this, but if Terminal is already
     # open, this could run the script in existing terminal (in undesirable env on situation)
     # That's why I need to prepare two variations of the 'do script' command
-    doScriptCmd1 = """        do script %s """             % script_as_apple_script_string_literal
-    doScriptCmd2 = """        do script %s in window 1 """ % script_as_apple_script_string_literal
+    doScriptCmd1 = """        do script %s """             % cmd_as_apple_script_string_literal
+    doScriptCmd2 = """        do script %s in window 1 """ % cmd_as_apple_script_string_literal
     
-    # The whole AppleScript will be executed with osascript, which can take the script
+    # The whole AppleScript will be executed with osascript by giving script
     # lines as arguments. The lines containing our script need to be shell-quoted:
     quotedCmd1 = subprocess.list2cmdline([doScriptCmd1])
     quotedCmd2 = subprocess.list2cmdline([doScriptCmd2])
@@ -189,7 +193,6 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     #print(cmd_line)
     
     Popen(cmd_line, env=env, shell=True)
-
 
 def load_plugin():
     from thonny.globals import get_workbench
