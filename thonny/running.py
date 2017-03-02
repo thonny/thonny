@@ -23,8 +23,6 @@ from thonny.common import serialize_message, ToplevelCommand, \
     UserError
 from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
-import shutil
-import filecmp
 import shlex
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os
@@ -299,6 +297,8 @@ class CPythonProxy(BackendProxy):
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
+            # prepare or use virtualenv with gui interpreter
+            # and use this env's interpreter
             self._executable = self._get_gui_interpreter()
         else:
             self._executable = configuration_option
@@ -481,43 +481,6 @@ class CPythonProxy(BackendProxy):
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
         start_new_thread(self._listen_stderr, ())
-    
-    def _get_backend_private_path(self):
-        return os.path.join(self._thonny_dir, "backend_private")
-    
-    def _check_update_backend_private(self):
-        """In case of frozen thonny, the originals are not available,
-        and we assume the folder is already created and populated.
-        This method is necessary in dev machine, to check that 
-        the private copy is up do date"""
-        
-        bp_path = self._get_backend_private_path()
-        os.makedirs(bp_path, 0o777, True)
-        os.makedirs(os.path.join(bp_path, "thonny"), 0o777, True)
-        
-        for filename in ["thonny_backend.py",
-                         os.path.join("thonny", "__init__.py"),
-                         os.path.join("thonny", "backend.py"),
-                         os.path.join("thonny", "ast_utils.py"),
-                         os.path.join("thonny", "misc_utils.py"),
-                         os.path.join("thonny", "common.py")]:
-            original = os.path.join(self._thonny_dir, filename)
-            copy = os.path.join(bp_path, filename)
-            
-            if os.path.exists(original):
-                # May be dev environment or may be source based distribution
-                if os.path.exists(copy) and filecmp.cmp(original, copy, False):
-                    pass
-                else:
-                    debug("UPDATING " + copy)
-                    shutil.copyfile(original, copy)
-            
-            # now the copy must exist
-            # (either because it was just copied or because it was bundled)
-            if not os.path.exists(copy): 
-                raise AssertionError("Missing file in backend_private: " + original)
-            
-                
     
     def _listen_stdout(self):
         #debug("... started listening to stdout")
