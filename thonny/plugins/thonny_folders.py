@@ -11,6 +11,8 @@ from thonny import THONNY_USER_DIR
 def open_path_in_system_file_manager(path):
     if running_on_mac_os():
         # http://stackoverflow.com/a/3520693/261181
+        # -R doesn't allow showing hidden folders
+        subprocess.Popen(["open", path])
     elif running_on_linux():
         subprocess.Popen(["xdg-open", path])
     else:
@@ -27,7 +29,7 @@ def load_plugin():
     def cmd_open_package_dir():
         open_path_in_system_file_manager(get_workbench().get_package_dir())
         
-    get_workbench().add_command("open_user_dir", "tools", "Open Thonny package folder",
+    get_workbench().add_command("open_package_dir", "tools", "Open Thonny package folder",
                                 cmd_open_package_dir, group=70)
     get_workbench().add_command("open_user_dir", "tools", "Open Thonny user folder",
                                 cmd_open_user_dir, group=70)
