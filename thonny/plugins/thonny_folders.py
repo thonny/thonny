@@ -11,7 +11,6 @@ from thonny import THONNY_USER_DIR
 def open_path_in_system_file_manager(path):
     if running_on_mac_os():
         # http://stackoverflow.com/a/3520693/261181
-        subprocess.Popen(["open", "-R", path])
     elif running_on_linux():
         subprocess.Popen(["xdg-open", path])
     else:
