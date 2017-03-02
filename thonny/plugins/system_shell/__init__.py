@@ -131,7 +131,6 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
     whole_cmd = "{term_cmd} -e {in_term_cmd}".format(term_cmd=term_cmd,
                                                      in_term_cmd=_shellquote(in_term_cmd))
    
-    print(whole_cmd)
     Popen(whole_cmd, env=env, shell=True)
 
 def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
@@ -182,9 +181,6 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     quotedCmd1 = subprocess.list2cmdline([doScriptCmd1])
     quotedCmd2 = subprocess.list2cmdline([doScriptCmd2])
     
-    print("OC1:", doScriptCmd1)
-    print("QC1:", quotedCmd1)
-    
     # Now we can finally assemble the osascript command line
     cmd_line = ("osascript"
         + """ -e 'if application "Terminal" is running then ' """
@@ -199,8 +195,6 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
         + """ -e '    end tell                              ' """
         + """ -e 'end if                                    ' """
         )
-    
-    #print(cmd_line)
     
     Popen(cmd_line, env=env, shell=True)
 
