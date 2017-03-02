@@ -98,31 +98,41 @@ def _open_shell_in_windows(cwd, env, interpreter, explainer, exec_prefix):
     Popen(cmd_line, env=env, shell=True)
 
 def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
+    def _shellquote(s):
+        return subprocess.list2cmdline([s])
+
     # No escaping in PATH possible: http://stackoverflow.com/a/29213487/261181
     # (neither necessary except for colon)
     env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
     
     if shutil.which("x-terminal-emulator"):
-        cmd = "x-terminal-emulator"
+        term_cmd = "x-terminal-emulator"
 # Can't use konsole, because it doesn't pass on the environment
 #         elif shutil.which("konsole"):
 #             if (shutil.which("gnome-terminal") 
 #                 and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
-#                 cmd = "gnome-terminal"
+#                 term_cmd = "gnome-terminal"
 #             else:
-#                 cmd = "konsole"
+#                 term_cmd = "konsole"
     elif shutil.which("gnome-terminal"):
-        cmd = "gnome-terminal"
+        term_cmd = "gnome-terminal"
     elif shutil.which("terminal"): # XFCE?
-        cmd = "terminal"
+        term_cmd = "terminal"
     elif shutil.which("xterm"):
-        cmd = "xterm"
+        term_cmd = "xterm"
     else:
         raise RuntimeError("Don't know how to open terminal emulator")
+    
+    # Need to prevent shell from closing after executing the command:
     # http://stackoverflow.com/a/4466566/261181
-    cmd_line = (cmd + """ -e $'bash -c "\'{interpreter}\' \'{explainer}\';exec bash -i"' """
-                .format(interpreter=interpreter, explainer=explainer))
-    Popen(cmd_line, env=env, shell=True)
+    core_cmd = "{interpreter} {explainer}; exec bash -i".format(interpreter=_shellquote(interpreter),
+                                                                    explainer=_shellquote(explainer))
+    in_term_cmd = "bash -c {core_cmd}".format(core_cmd=_shellquote(core_cmd))
+    whole_cmd = "{term_cmd} -e {in_term_cmd}".format(term_cmd=term_cmd,
+                                                     in_term_cmd=_shellquote(in_term_cmd))
+   
+    print(whole_cmd)
+    Popen(whole_cmd, env=env, shell=True)
 
 def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     _shellquote = shlex.quote
