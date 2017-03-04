@@ -41,11 +41,10 @@ def _find_commands(logical_command, reference_output, query_arguments,
     major = str(sys.version_info.major)
     minor = "%d.%d" % (sys.version_info.major, sys.version_info.minor)
                    
-    if platform.system == "Windows":
+    if platform.system() == "Windows":
         version_suffixes = ["", major, minor]
     else:
         version_suffixes = [major, minor, ""]
-        
         
     # first look for short commands
     for suffix in version_suffixes:
