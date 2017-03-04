@@ -6,7 +6,6 @@ import platform
 from tkinter.messagebox import showerror
 import shutil
 from thonny.globals import get_runner
-from thonny.running import is_private_interpreter
 from thonny import THONNY_USER_DIR
 import subprocess
 from time import sleep
@@ -53,13 +52,6 @@ def open_system_shell():
     if ".." in exec_prefix:
         exec_prefix = os.path.realpath(exec_prefix)
     env = _create_pythonless_environment()
-    if is_private_interpreter(python_interpreter):
-        # in Thonny-private environment make "pip install"
-        # use a folder outside thonny installation
-        # in order to keep packages after reinstalling Thonny
-        # TODO: take these values from Runner 
-        env["PIP_USER"] = "true"
-        env["PYTHONUSERBASE"] = THONNY_USER_DIR
     
     # TODO: take care of SSL_CERT_FILE (unset when running external python and set for builtin)
     # Unset when we're in builtin python and target python is external
@@ -146,12 +138,6 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     # At the moment I just explicitly set some important variables
     # TODO: Did I miss something?
     cmd = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(_shellquote(env["PATH"]))
-    
-    # TODO: delete when virtualenv approach works
-    if "PIP_USER" in env and "PYTHONUSERBASE" in env:
-        cmd += ";export PIP_USER={PIP_USER};export PYTHONUSERBASE={PYTHONUSERBASE}".format(
-            PIP_USER=env["PIP_USER"],
-            PYTHONUSERBASE=_shellquote(env["PYTHONUSERBASE"]))
     
     if "SSL_CERT_FILE" in env:
         cmd += ";export SSL_CERT_FILE=" + _shellquote(env["SSL_CERT_FILE"])

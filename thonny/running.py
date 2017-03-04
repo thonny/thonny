@@ -419,13 +419,6 @@ class CPythonProxy(BackendProxy):
                             % self._executable)
         
         
-        if is_private_interpreter(self._executable):
-            # in gui environment make "pip install"
-            # use a folder outside thonny installation
-            # in order to keep packages after reinstalling Thonny 
-            my_env["PIP_USER"] = "true"
-            my_env["PYTHONUSERBASE"] = THONNY_USER_DIR
-        
         backend_launcher = os.path.join(get_workbench().get_package_dir(), 
                                         "backend_private",
                                         "thonny_backend.py") 
@@ -598,12 +591,6 @@ class CPythonProxy(BackendProxy):
     
     def get_interpreter_command(self):
         return self._executable
-
-def is_private_interpreter(interpreter):
-    token = os.path.join(os.path.dirname(interpreter), "is_private")
-    return os.path.exists(token)
-
-
 
 def parse_configuration(configuration):
     """
