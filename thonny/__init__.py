@@ -1,11 +1,16 @@
 import os.path
+import sys
 
 THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
 def launch():
+    from thonny import running
+    running._check_create_private_venv()
+    _prepared_launch()
+        
+def _prepared_launch():
     os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
     
-    import sys
     try:
         from thonny import workbench
         
@@ -99,3 +104,6 @@ def _delegate_to_existing_instance(args):
             response += new_data
     
     return response.decode("UTF-8") == workbench.SERVER_SUCCESS
+
+
+    

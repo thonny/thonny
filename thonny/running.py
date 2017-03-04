@@ -17,6 +17,7 @@ import subprocess
 import sys
 import threading
 
+import thonny
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_shell_command, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
@@ -297,9 +298,7 @@ class CPythonProxy(BackendProxy):
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
-            # prepare or use virtualenv with gui interpreter
-            # and use this env's interpreter
-            self._executable = self._get_gui_interpreter()
+            self._executable = self._get_private_venv_executable()
         else:
             self._executable = configuration_option
         
@@ -589,6 +588,18 @@ class CPythonProxy(BackendProxy):
         
         return result
     
+    def _get_private_venv_executable(self):
+        venv_path = find_private_venv()
+        assert os.path.exists(venv_path)
+        
+        if running_on_windows():
+            exe = os.path.join(venv_path, "Scripts", "pythonw.exe")
+        else:
+            exe = os.path.join(venv_path, "bin", "python3")
+        
+        assert os.path.exists(exe)
+        return exe
+    
     def _get_gui_interpreter(self):
         if sys.executable.endswith("thonny.exe"):
             # assuming that thonny.exe is in the same dir as pythonw.exe
@@ -596,7 +607,7 @@ class CPythonProxy(BackendProxy):
             return sys.executable.replace("thonny.exe", "pythonw.exe")
         else:
             return sys.executable
-
+    
     def get_interpreter_command(self):
         return self._executable
 
@@ -618,3 +629,46 @@ def parse_configuration(configuration):
     else:
         return parts[0].strip(), parts[1].strip(" )")
                 
+
+def find_private_venv():
+    # find a subfolder in THONNY_USER_DIR containing pyvenv.cfg with correct home
+    for item in sorted(os.listdir(THONNY_USER_DIR)):
+        cfg = os.path.join(THONNY_USER_DIR, item, "pyvenv.cfg")
+        if os.path.exists(cfg) and _cfg_points_to_current_interpreter(cfg):
+            return os.path.join(THONNY_USER_DIR, item)
+    
+    return None
+            
+def _check_create_private_venv():
+    if find_private_venv() is not None:
+        return
+    
+    # TODO: find a free name
+    #for prefix in [""] + list(map(str,range(10))):
+    #    pass
+    venv_name = "Py36"
+    
+    venv_path = os.path.join(THONNY_USER_DIR, venv_name)
+    import venv
+    def action():
+        venv.create(venv_path, system_site_packages=False,
+                clear=False, with_pip=True)
+    
+    from thonny.ui_utils import run_with_busy_window
+    run_with_busy_window(action, description="Preparing environment ...")
+    
+    assert find_private_venv() is not None
+
+
+def _cfg_points_to_current_interpreter(cfg_filename):
+    home = _get_venv_home(cfg_filename)
+    return os.path.realpath(home) == os.path.realpath(sys.base_prefix) 
+
+def _get_venv_home(cfg_filename):
+    with open(cfg_filename, encoding="UTF-8") as fp:
+        for line in fp:
+            if line.replace(" ", "").startswith("home="):
+                _, home = line.split("=", maxsplit=1)
+                return home.strip()
+        
+        raise Exception("Can't find home in " + cfg_filename)
