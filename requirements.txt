@@ -1,5 +1,1 @@
-# locals_marker and highlight_names plugins
 jedi
-
-# about plugin
-distro
