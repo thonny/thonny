@@ -753,7 +753,43 @@ class BusyDialog(tk.Toplevel):
         self.destroy() 
 
 
-def run_with_busy_dialog(root, action, args=()):
+class BusyTk(tk.Tk):
+    def __init__(self, async_result, description, title="Please wait"):
+        self._async_result = async_result
+        tk.Tk.__init__(self)
+        self.update_idletasks()
+
+        w = self.winfo_screenwidth()
+        h = self.winfo_screenheight()
+        size = tuple(int(_) for _ in self.geometry().split('+')[0].split('x'))
+        x = w/2 - size[0]/2
+        y = h/2 - size[1]/2
+        self.geometry("%dx%d+%d+%d" % (size + (x, y)))        
+        
+        main_frame = ttk.Frame(self)
+        main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        self.title(title)
+        self.resizable(height=tk.FALSE, width=tk.FALSE)
+        self.protocol("WM_DELETE_WINDOW", self._ok)
+        desc_label = ttk.Label(main_frame, text=description)
+        desc_label.grid(pady=(0,15))
+        
+        self.update_idletasks()
+        self.after(1000, self._poll)
+    
+    def _poll(self):
+        if self._async_result.ready():
+            self._ok()
+        else:
+            self.after(1000, self._poll)
+    
+    def _ok(self):
+        self.destroy() 
+
+
+def _run_with_busy_dialog(root, action, args=()):
     # http://stackoverflow.com/a/14299004/261181
     from multiprocessing.pool import ThreadPool
     pool = ThreadPool(processes=1)
@@ -761,6 +797,18 @@ def run_with_busy_dialog(root, action, args=()):
     async_result = pool.apply_async(action, args) 
     dlg = BusyDialog(root, async_result)
     dlg.wait_window()
+    
+    return async_result.get()  
+
+
+def run_with_busy_window(action, args=(), description=""):
+    # http://stackoverflow.com/a/14299004/261181
+    from multiprocessing.pool import ThreadPool
+    pool = ThreadPool(processes=1)
+    
+    async_result = pool.apply_async(action, args) 
+    dlg = BusyTk(async_result, description=description)
+    dlg.mainloop()
     
     return async_result.get()  
 
