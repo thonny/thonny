@@ -635,14 +635,27 @@ def _check_create_private_venv():
     #    pass
     venv_name = "Py36"
     
+    base_exe = sys.executable
+    if sys.executable.endswith("thonny.exe"):
+        # assuming that thonny.exe is in the same dir as pythonw.exe
+        # (NB! thonny.exe in scripts folder delegates running to python.exe)
+        base_exe = sys.executable.replace("thonny.exe", "pythonw.exe")
+    
+    
     venv_path = os.path.join(THONNY_USER_DIR, venv_name)
-    import venv
     def action():
+        
         # Don't include system site packages
         # This way all students will have similar configuration
         # independently of system Python (if Thonny is used with system Python)
-        venv.create(venv_path, system_site_packages=False,
-                clear=False, with_pip=True)
+        
+        # NB! Cant run venv.create directly, because in Windows 
+        # it tries to link venv to thonny.exe.
+        # Need to run it via proper python
+        p = subprocess.Popen([base_exe, "-m", "venv", venv_path])
+        p.wait()
+        # TODO: handle errors
+         
     
     from thonny.ui_utils import run_with_busy_window
     run_with_busy_window(action, description="Please wait!\nThonny prepares its environment .")
