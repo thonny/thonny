@@ -754,7 +754,7 @@ class BusyDialog(tk.Toplevel):
 
 
 class BusyTk(tk.Tk):
-    def __init__(self, async_result, description, title="Please wait"):
+    def __init__(self, async_result, description, title="Please wait!"):
         self._async_result = async_result
         tk.Tk.__init__(self)
         self.update_idletasks()
