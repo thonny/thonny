@@ -758,13 +758,13 @@ class BusyTk(tk.Tk):
         self._async_result = async_result
         tk.Tk.__init__(self)
         self.update_idletasks()
-
-        w = self.winfo_screenwidth()
-        h = self.winfo_screenheight()
-        size = tuple(int(_) for _ in self.geometry().split('+')[0].split('x'))
-        x = w/2 - size[0]/2
-        y = h/2 - size[1]/2
-        self.geometry("%dx%d+%d+%d" % (size + (x, y)))        
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        win_width = screen_width // 3
+        win_height = screen_height // 3
+        x = screen_width//2 - win_width//2
+        y = screen_height//2 - win_height//2
+        self.geometry("%dx%d+%d+%d" % (win_width, win_height, x, y))        
         
         main_frame = ttk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
@@ -773,17 +773,18 @@ class BusyTk(tk.Tk):
         self.title(title)
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.protocol("WM_DELETE_WINDOW", self._ok)
-        desc_label = ttk.Label(main_frame, text=description)
-        desc_label.grid(pady=(0,15))
+        self.desc_label = ttk.Label(main_frame, text=description)
+        self.desc_label.grid(padx=20, pady=20, sticky="nsew")
         
         self.update_idletasks()
-        self.after(1000, self._poll)
+        self.after(500, self._poll)
     
     def _poll(self):
         if self._async_result.ready():
             self._ok()
         else:
-            self.after(1000, self._poll)
+            self.after(500, self._poll)
+            self.desc_label["text"] = self.desc_label["text"] + "."
     
     def _ok(self):
         self.destroy() 

@@ -589,7 +589,7 @@ class CPythonProxy(BackendProxy):
         return result
     
     def _get_private_venv_executable(self):
-        venv_path = find_private_venv()
+        venv_path = _find_private_venv()
         assert os.path.exists(venv_path)
         
         if running_on_windows():
@@ -628,10 +628,22 @@ def parse_configuration(configuration):
         return configuration, ""
     else:
         return parts[0].strip(), parts[1].strip(" )")
-                
 
-def find_private_venv():
-    # find a subfolder in THONNY_USER_DIR containing pyvenv.cfg with correct home
+def _find_private_venv():
+    def _cfg_points_to_current_interpreter(cfg_filename):
+        home = _get_venv_home(cfg_filename)
+        return os.path.realpath(home) == os.path.realpath(sys.base_prefix) 
+    
+
+    def _get_venv_home(cfg_filename):
+        with open(cfg_filename, encoding="UTF-8") as fp:
+            for line in fp:
+                if line.replace(" ", "").startswith("home="):
+                    _, home = line.split("=", maxsplit=1)
+                    return home.strip()
+            
+            raise Exception("Can't find home in " + cfg_filename)    # find a subfolder in THONNY_USER_DIR containing pyvenv.cfg with correct home
+        
     for item in sorted(os.listdir(THONNY_USER_DIR)):
         cfg = os.path.join(THONNY_USER_DIR, item, "pyvenv.cfg")
         if os.path.exists(cfg) and _cfg_points_to_current_interpreter(cfg):
@@ -640,7 +652,7 @@ def find_private_venv():
     return None
             
 def _check_create_private_venv():
-    if find_private_venv() is not None:
+    if _find_private_venv() is not None:
         return
     
     # TODO: find a free name
@@ -651,24 +663,14 @@ def _check_create_private_venv():
     venv_path = os.path.join(THONNY_USER_DIR, venv_name)
     import venv
     def action():
+        # Don't include system site packages
+        # This way all students will have similar configuration
+        # independently of system Python (if Thonny is used with system Python)
         venv.create(venv_path, system_site_packages=False,
                 clear=False, with_pip=True)
     
     from thonny.ui_utils import run_with_busy_window
-    run_with_busy_window(action, description="Preparing environment ...")
+    run_with_busy_window(action, description="Please wait!\nThonny prepares its environment .")
     
-    assert find_private_venv() is not None
+    assert _find_private_venv() is not None
 
-
-def _cfg_points_to_current_interpreter(cfg_filename):
-    home = _get_venv_home(cfg_filename)
-    return os.path.realpath(home) == os.path.realpath(sys.base_prefix) 
-
-def _get_venv_home(cfg_filename):
-    with open(cfg_filename, encoding="UTF-8") as fp:
-        for line in fp:
-            if line.replace(" ", "").startswith("home="):
-                _, home = line.split("=", maxsplit=1)
-                return home.strip()
-        
-        raise Exception("Can't find home in " + cfg_filename)
