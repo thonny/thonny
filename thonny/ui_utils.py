@@ -717,3 +717,50 @@ def perform_mouse_click():
 
     ctypes.windll.user32.mouse_event(2,0,0,0,0)
     ctypes.windll.user32.mouse_event(4,0,0,0,0)
+
+class BusyDialog(tk.Toplevel):
+    def __init__(self, master, async_result):
+        self._async_result = async_result
+        tk.Toplevel.__init__(self, master)
+        
+        #self.geometry("200x200")
+        # TODO: position in the center of master
+        self.geometry("+%d+%d" % (master.winfo_rootx() + master.winfo_width() // 2 - 50,
+                                  master.winfo_rooty() + master.winfo_height() // 2 - 150))
+
+        main_frame = ttk.Frame(self)
+        main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        self.title("Busy")
+        self.resizable(height=tk.FALSE, width=tk.FALSE)
+        self.transient(master)
+        self.grab_set()
+        self.protocol("WM_DELETE_WINDOW", self._ok)
+        ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
+        ok_button.grid(pady=(0,15))
+        
+        self.update_idletasks()
+        self.after(1000, self._poll)
+    
+    def _poll(self):
+        if self._async_result.ready():
+            self._ok()
+        else:
+            self.after(1000, self._poll)
+    
+    def _ok(self):
+        self.destroy() 
+
+
+def run_with_busy_dialog(root, action, args=()):
+    # http://stackoverflow.com/a/14299004/261181
+    from multiprocessing.pool import ThreadPool
+    pool = ThreadPool(processes=1)
+    
+    async_result = pool.apply_async(action, args) 
+    dlg = BusyDialog(root, async_result)
+    dlg.wait_window()
+    
+    return async_result.get()  
+
