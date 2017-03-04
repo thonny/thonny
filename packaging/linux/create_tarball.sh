@@ -81,7 +81,6 @@ mv $SCRIPT_DIR/python3.6 $TARGET_DIR/bin/
 
 # create new commands ###############################################################
 cp thonny $TARGET_DIR/bin
-cp pip.sh $TARGET_DIR/bin/pip3.6
 cd $TARGET_DIR/bin
 ln -s pip3.6 pip3
 ln -s python3.6 python3

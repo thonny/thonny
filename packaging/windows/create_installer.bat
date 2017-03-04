@@ -50,10 +50,6 @@ rmdir %BUILDDIR%\tcl\tcl8.6\msgs /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 
 
-@echo ............... CREATING pip.bat ...................................
-copy pip.bat %BUILDDIR%\Scripts
-
-
 @echo ............... ENABLE DPI AWARNESS ..............................
 @REM call EnableDPIAwareness %PREFIX%\pythonw.exe
 

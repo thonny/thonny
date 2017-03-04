@@ -64,7 +64,6 @@ rm -rf $PYTHON_CURRENT/bin/*
 mv $SCRIPT_DIR/python3.6 $PYTHON_CURRENT/bin/
 
 # create new commands ###############################################################
-cp pip.sh $PYTHON_CURRENT/bin/pip3.6
 cd $PYTHON_CURRENT/bin
 ln -s pip3.6 pip3
 ln -s python3.6 python3
