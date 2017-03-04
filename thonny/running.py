@@ -653,6 +653,12 @@ def _check_create_private_venv():
     with open(marker_path, mode="w") as fp:
         fp.write("# This file marks Thonny-private venv")
     
+    # Create recommended pip conf to get rid of list deprecation warning
+    # https://github.com/pypa/pip/issues/4058
+    pip_conf = "pip.ini" if running_on_windows() else "pip.conf"
+    with open(os.path.join(venv_path, pip_conf), mode="w") as fp:
+        fp.write("[list]\nformat = columns")
+    
     assert _find_private_venv() is not None
     
     
