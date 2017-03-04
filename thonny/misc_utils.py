@@ -16,6 +16,7 @@ from codecs import lookup, BOM_UTF8
 import textwrap
 import traceback
 import sys
+import platform
 
 
 class PathSet:
@@ -170,13 +171,13 @@ def open_py_file(filename):
     return text, encoding
 
 def running_on_windows():
-    return tk._default_root.call('tk', 'windowingsystem') == "win32"
+    return platform.system() == "Windows"
     
 def running_on_mac_os():
-    return tk._default_root.call('tk', 'windowingsystem') == "aqua"
+    return platform.system() == "Darwin"
     
 def running_on_linux():
-    return tk._default_root.call('tk', 'windowingsystem') == "x11"
+    return platform.system() == "Linux"
 
 def is_hidden_or_system_file(path):
     if os.path.basename(path).startswith("."):
