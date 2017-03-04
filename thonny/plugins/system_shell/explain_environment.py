@@ -38,16 +38,8 @@ def _find_commands(logical_command, reference_output, query_arguments,
     
     correct_commands = set()
     
-    major = str(sys.version_info.major)
-    minor = "%d.%d" % (sys.version_info.major, sys.version_info.minor)
-                   
-    if platform.system() == "Windows":
-        version_suffixes = ["", major, minor]
-    else:
-        version_suffixes = [major, minor, ""]
-        
     # first look for short commands
-    for suffix in version_suffixes:
+    for suffix in _get_version_suffixes():
         command = logical_command + suffix
         if is_correct_command(command):
             if " " in command:
@@ -76,7 +68,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
                    os.path.join(sys.exec_prefix, "bin"),
                    os.path.join(sys.exec_prefix, "Scripts")]
         
-        for suffix in version_suffixes:
+        for suffix in _get_version_suffixes():
             command = logical_command + suffix
             for folder in folders:
                 full_command = os.path.join(folder, command)
@@ -96,6 +88,21 @@ def _find_python_commands(only_best=True):
                          ["-c", "import sys; print(sys.exec_prefix); print(sys.version)"], only_best)
 
 def _find_pip_commands(only_best=True):
+    # Asking pip version is quite slow.
+    # Trying a shortcut for common case:
+    #  if $(which <command>) lives in the same dir as current interpreter
+    #  and we're using Thonny-private venv, 
+    #  we can trust the command is the right one.
+    pref_cmd = "pip" + _get_version_suffixes()[0]
+    pref_cmd_path = which(pref_cmd)
+    if pref_cmd_path:
+        pref_cmd_dir = os.path.dirname(pref_cmd_path)
+        current_exe_dir = os.path.dirname(sys.executable)
+        if (pref_cmd_dir == current_exe_dir
+            and os.path.isfile(os.path.join(current_exe_dir, "is_private"))):
+            return [pref_cmd];
+    
+    # Fallback
     current_ver_string = _get_pip_version_string()
     
     if current_ver_string is not None:
@@ -109,6 +116,15 @@ def _find_pip_commands(only_best=True):
         return []
     
 
+def _get_version_suffixes():
+    major = str(sys.version_info.major)
+    minor = "%d.%d" % (sys.version_info.major, sys.version_info.minor)
+    
+    if platform.system() == "Windows":
+        return ["", major, minor]
+    else:
+        return [major, minor, ""]
+    
 
 def _get_pip_version_string():
     import io
