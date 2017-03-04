@@ -3,6 +3,7 @@
 
 import time
 import traceback
+from logging import exception
 
 try:
     import tkinter as tk
@@ -614,8 +615,12 @@ class TextFrame(ttk.Frame):
         self._margin.yview(tk.MOVETO, args[0])
         
     def _margin_scroll(self, *args):
-        self._vbar.set(*args)
-        self.text.yview(tk.MOVETO, args[0])
+        # FIXME: this doesn't work properly
+        # Can't scroll to bottom when line numbers are not visible
+        # and can't type normally at the bottom, when line numbers are visible 
+        return
+        #self._vbar.set(*args)
+        #self.text.yview(tk.MOVETO, args[0])
         
     def _horizontal_scrollbar_update(self,*args):
         self._hbar.set(*args)
@@ -678,7 +683,7 @@ class TextFrame(ttk.Frame):
             if event.type == "4": # In Python 3.6 you can use tk.EventType.ButtonPress instead of "4" 
                 self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
-            pass
+            exception()
 
     def on_margin_motion(self, event=None):
         try:
@@ -687,7 +692,7 @@ class TextFrame(ttk.Frame):
             self.select_lines(min(margin_selection_start, linepos), max(margin_selection_start - 1, linepos - 1))
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
-            pass
+            exception()
         
 def get_text_font(text):
     font = text["font"]
