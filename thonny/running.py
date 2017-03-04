@@ -298,7 +298,7 @@ class CPythonProxy(BackendProxy):
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
-            self._executable = self._get_private_venv_executable()
+            self._executable = _get_private_venv_executable()
         else:
             self._executable = configuration_option
         
@@ -588,18 +588,6 @@ class CPythonProxy(BackendProxy):
         
         return result
     
-    def _get_private_venv_executable(self):
-        venv_path = _find_private_venv()
-        assert os.path.exists(venv_path)
-        
-        if running_on_windows():
-            exe = os.path.join(venv_path, "Scripts", "pythonw.exe")
-        else:
-            exe = os.path.join(venv_path, "bin", "python3")
-        
-        assert os.path.exists(exe)
-        return exe
-    
     def _get_gui_interpreter(self):
         if sys.executable.endswith("thonny.exe"):
             # assuming that thonny.exe is in the same dir as pythonw.exe
@@ -672,5 +660,24 @@ def _check_create_private_venv():
     from thonny.ui_utils import run_with_busy_window
     run_with_busy_window(action, description="Please wait!\nThonny prepares its environment .")
     
+    bindir = os.path.dirname(_get_private_venv_executable())
+    # create private env marker
+    marker_path = os.path.join(bindir, "is_private")
+    with open(marker_path, mode="w") as fp:
+        fp.write("# This file marks Thonny-private venv")
+    
     assert _find_private_venv() is not None
+    
+    
 
+def _get_private_venv_executable():
+    venv_path = _find_private_venv()
+    assert os.path.exists(venv_path)
+    
+    if running_on_windows():
+        exe = os.path.join(venv_path, "Scripts", "pythonw.exe")
+    else:
+        exe = os.path.join(venv_path, "bin", "python3")
+    
+    assert os.path.exists(exe)
+    return exe
