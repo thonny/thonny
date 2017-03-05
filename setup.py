@@ -44,7 +44,11 @@ setup(
       ],
       keywords="IDE education debugger",
       install_requires=requirements,
-      packages=["thonny", "thonny.plugins", "thonny.plugins.system_shell"],
+      packages=["thonny",
+                "thonny.shared",  
+                "thonny.shared.thonny",  
+                "thonny.plugins", 
+                "thonny.plugins.system_shell"],
       package_data={'': ['VERSION',  'res/*']},
       entry_points={
         'gui_scripts': [
