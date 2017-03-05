@@ -54,7 +54,7 @@ class AstView(ui_utils.TreeFrame):
         
         try:
             root = ast_utils.parse_source(self._current_source)
-            selected_ast_node = ast_utils.find_closest_containing_node(root, selection)
+            selected_ast_node = _find_closest_containing_node(root, selection)
             
         except Exception as e:
             self.tree.insert("", "end", text=str(e), open=True)
@@ -129,6 +129,23 @@ class AstView(ui_utils.TreeFrame):
         if self._current_source is not None:
             pretty_ast = ast_utils.pretty(ast_utils.parse_source(self._current_source))
             self.clipboard_append(pretty_ast)
+
+def _find_closest_containing_node(tree, text_range):
+    # first look among children
+    for child in ast.iter_child_nodes(tree):
+        result = _find_closest_containing_node(child, text_range)
+        if result is not None:
+            return result
+
+    # no suitable child was found
+    if (hasattr(tree, "lineno")
+        and TextRange(tree.lineno, tree.col_offset, tree.end_lineno, tree.end_col_offset)
+            .contains_smaller_eq(text_range)):
+        return tree
+    # nope
+    else:
+        return None
+
             
 def load_plugin(): 
     get_workbench().add_view(AstView, "AST", "s")

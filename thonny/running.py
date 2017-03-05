@@ -17,7 +17,6 @@ import subprocess
 import sys
 import threading
 
-import thonny
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_shell_command, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
@@ -420,17 +419,8 @@ class CPythonProxy(BackendProxy):
         
         
         backend_launcher = os.path.join(get_workbench().get_package_dir(), 
-                                        "backend_private",
+                                        "shared",
                                         "thonny_backend.py") 
-        
-        if not os.path.exists(backend_launcher):
-            # in dev machine use the main source
-            backend_launcher = os.path.realpath(
-                os.path.join(get_workbench().get_package_dir(), 
-                             "..",
-                             "thonny_backend.py")
-            ) 
-             
         
         cmd_line = [
             self._executable, 

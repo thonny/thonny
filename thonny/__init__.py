@@ -1,6 +1,7 @@
 import os.path
 import sys
 
+
 THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 
 def launch():

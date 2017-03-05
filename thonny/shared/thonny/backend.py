@@ -12,12 +12,11 @@ import logging
 import pydoc
 import builtins
 import site
+import tokenize
 
 import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
-from thonny import misc_utils
-from thonny.misc_utils import get_python_version_string
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
@@ -79,7 +78,7 @@ class VM:
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
-                          python_version=get_python_version_string(),
+                          python_version=_get_python_version_string(),
                           python_executable=sys.executable,
                           cwd=os.getcwd())
         
@@ -297,7 +296,8 @@ class VM:
         self.send_message("ToplevelResult", **result_attributes)
     
     def _execute_file(self, cmd, debug_mode):
-        source, _ = misc_utils.read_python_file(cmd.filename)
+        with tokenize.open(cmd.filename) as fp:
+            source = fp.read()
         
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
@@ -509,8 +509,8 @@ class FancyTracer(Executor):
     def __init__(self, vm):
         self._vm = vm
         self._normcase_thonny_src_dir = os.path.normcase(os.path.dirname(sys.modules["thonny"].__file__)) 
-        self._instrumented_files = misc_utils.PathSet()
-        self._interesting_files = misc_utils.PathSet() # only events happening in these files are reported
+        self._instrumented_files = _PathSet()
+        self._interesting_files = _PathSet() # only events happening in these files are reported
         self._current_command = None
         self._unhandled_exception = None
         self._install_marker_functions()
@@ -1137,4 +1137,35 @@ def fdebug(frame, msg, *args):
 def _get_frame_prefix(frame):
     return str(id(frame)) + " " + ">" * len(inspect.getouterframes(frame, 0)) + " "
     
+def _get_python_version_string(version_info=None):
+    if version_info == None:
+        version_info = sys.version_info
+         
+    result = ".".join(map(str, version_info[:3]))
+    if version_info[3] != "final":
+        result += "-" + version_info[3]
     
+    result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
+    
+    return result    
+
+class _PathSet:
+    "implementation of set whose in operator works well for filenames"
+    def __init__(self):
+        self._normcase_set = set()
+        
+    def add(self, name):
+        self._normcase_set.add(os.path.normcase(name))
+    
+    def remove(self, name):
+        self._normcase_set.remove(os.path.normcase(name))
+    
+    def clear(self):
+        self._normcase_set.clear()
+    
+    def __contains__(self, name):
+        return os.path.normcase(name) in self._normcase_set
+
+    def __iter__(self):
+        for item in self._normcase_set:
+            yield item

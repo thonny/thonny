@@ -15,11 +15,6 @@ for line in open(os.path.join(setupdir, 'requirements.txt'), encoding="ASCII"):
     if line.strip() and not line.startswith('#'):
         requirements.append(line)
 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# NB! Before creating sdist, copy source files required by backend to thonny/backend_private
-# See installers/setuptools/create_sdist.bat 
-# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 setup(
       name="thonny",
       version=version,
@@ -50,7 +45,7 @@ setup(
       keywords="IDE education debugger",
       install_requires=requirements,
       packages=["thonny", "thonny.plugins", "thonny.plugins.system_shell"],
-      package_data={'': ['VERSION',  'res/*', 'backend_private/*.py', 'backend_private/thonny/*.py']},
+      package_data={'': ['VERSION',  'res/*']},
       entry_points={
         'gui_scripts': [
             'thonny = thonny:launch',

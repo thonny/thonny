@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import sys
 import os.path
+import tokenize
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.filedialog import asksaveasfilename
@@ -9,11 +10,12 @@ from tkinter.filedialog import askopenfilename
 from thonny.misc_utils import eqfn
 from thonny.codeview import CodeView
 from thonny.globals import get_workbench
-from thonny import misc_utils
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.common import parse_shell_command
 from thonny.tktextext import rebind_control_a
+import builtins
+import io
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -68,7 +70,8 @@ class Editor(ttk.Frame):
         return self._filename
             
     def _load_file(self, filename):
-        source, self.file_encoding = misc_utils.read_python_file(filename) # TODO: support also text files
+        
+        source, self.file_encoding = _read_python_file(filename) # TODO: support also text files
         self._filename = filename
         get_workbench().event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
@@ -604,3 +607,25 @@ def _check_create_ButtonNotebook_style():
     get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", left_btn_release, True)
     get_workbench().bind_class("TNotebook", "<ButtonPress-3>", right_btn_press, True)
     
+
+def _read_python_file(filename):
+    fp = None
+    try:
+        fp, encoding = _open_py_file(filename)
+        return fp.read(), encoding
+    finally:
+        if fp is not None:
+            fp.close()
+    
+def _open_py_file(filename):
+    """Open a file in read only mode using the encoding detected by
+    detect_encoding().
+    """
+    buffer = builtins.open(filename, 'rb')
+    encoding, _ = tokenize.detect_encoding(buffer.readline)
+    buffer.seek(0)
+    content = io.BytesIO(buffer.read())
+    buffer.close()
+    text = io.TextIOWrapper(content, encoding, line_buffering=True)
+    text.mode = 'r'
+    return text, encoding

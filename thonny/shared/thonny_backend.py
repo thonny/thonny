@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-In dev setup this file lives in the root of the project.
-In installed Thonny, it's located in thonny/backend_private
-
 This file is run by VMProxy
 
 (Why separate file for launching? I want to have clean global scope 

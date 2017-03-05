@@ -15,7 +15,6 @@ build
 MANIFEST
 RemoteSystemsTempFiles
 installer_building.log
-backend_private
 packaging/windows/freezing.log
 packaging/setuptools/*.whl
 packaging/setuptools/thonny.egg-info
