@@ -25,6 +25,6 @@ logger.addHandler(file_handler)
 stream_handler = logging.StreamHandler(stream=sys.stderr)
 logger.addHandler(stream_handler)
 
-from thonny.backend import VM
+from thonny.backend import VM  # @UnresolvedImport
 VM().mainloop()
 
