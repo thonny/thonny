@@ -61,8 +61,12 @@ class AboutDialog(tk.Toplevel):
         url_label.bind("<Button-1>", lambda _:webbrowser.open(url))
         
         if platform.system() == "Linux":
-            import distro
-            system_desc = distro.name(True)
+            try:
+                import distro # distro don't need to be installed
+                system_desc = distro.name(True)
+            except ImportError:
+                system_desc = "Linux"
+                
             if "32" not in system_desc and "64" not in system_desc:
                 system_desc += " " + self.get_os_word_size_guess()
         else:
