@@ -597,7 +597,7 @@ def parse_configuration(configuration):
 def _find_private_venv():
     def _cfg_points_to_current_interpreter(cfg_filename):
         home = _get_venv_home(cfg_filename)
-        return os.path.realpath(home) == os.path.realpath(sys.base_prefix) 
+        return os.path.realpath(home) == os.path.realpath(os.path.dirname(sys.executable)) 
     
 
     def _get_venv_home(cfg_filename):
