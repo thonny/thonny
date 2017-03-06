@@ -594,12 +594,18 @@ def parse_configuration(configuration):
     else:
         return parts[0].strip(), parts[1].strip(" )")
 
-def _find_private_venv():
-    def _cfg_points_to_current_interpreter(cfg_filename):
-        home = _get_venv_home(cfg_filename)
-        return os.path.realpath(home) == os.path.realpath(os.path.dirname(sys.executable)) 
-    
 
+def prepare_private_venv():
+    if os.path.isdir(_get_private_venv_path()):
+        _create_private_venv()
+    else:
+        _check_upgrade_private_venv()
+
+def _check_upgrade_private_venv():
+    # If home is wrong then delete
+    # If version is micro-older, then upgrade
+    
+    # TODO:
     def _get_venv_home(cfg_filename):
         with open(cfg_filename, encoding="UTF-8") as fp:
             for line in fp:
@@ -609,22 +615,8 @@ def _find_private_venv():
             
             raise Exception("Can't find home in " + cfg_filename)    # find a subfolder in THONNY_USER_DIR containing pyvenv.cfg with correct home
         
-    for item in sorted(os.listdir(THONNY_USER_DIR)):
-        cfg = os.path.join(THONNY_USER_DIR, item, "pyvenv.cfg")
-        if os.path.exists(cfg) and _cfg_points_to_current_interpreter(cfg):
-            return os.path.join(THONNY_USER_DIR, item)
-    
-    return None
             
-def _check_create_private_venv():
-    if _find_private_venv() is not None:
-        return
-    
-    # TODO: find a free name
-    #for prefix in [""] + list(map(str,range(10))):
-    #    pass
-    venv_name = "Py36"
-    
+def _create_private_venv():
     base_exe = sys.executable
     if sys.executable.endswith("thonny.exe"):
         # assuming that thonny.exe is in the same dir as pythonw.exe
@@ -632,7 +624,7 @@ def _check_create_private_venv():
         base_exe = sys.executable.replace("thonny.exe", "pythonw.exe")
     
     
-    venv_path = os.path.join(THONNY_USER_DIR, venv_name)
+    venv_path = _get_private_venv_path()
     def action():
         
         # Don't include system site packages
@@ -662,12 +654,14 @@ def _check_create_private_venv():
     with open(os.path.join(venv_path, pip_conf), mode="w") as fp:
         fp.write("[list]\nformat = columns")
     
-    assert _find_private_venv() is not None
+    assert os.path.isdir(_get_private_venv_path())
     
     
+def _get_private_venv_path():
+    return os.path.join(THONNY_USER_DIR, "Py%d%d" % (sys.version_info[0], sys.version_info[1]))
 
 def _get_private_venv_executable():
-    venv_path = _find_private_venv()
+    venv_path = _get_private_venv_path()
     assert os.path.exists(venv_path)
     
     if running_on_windows():
