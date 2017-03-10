@@ -25,7 +25,7 @@ from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shlex
 from thonny import THONNY_USER_DIR
-from thonny.misc_utils import running_on_windows, running_on_mac_os
+from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -596,27 +596,36 @@ def parse_configuration(configuration):
 
 
 def prepare_private_venv():
-    if os.path.isdir(_get_private_venv_path()):
-        _create_private_venv()
+    path = _get_private_venv_path()
+    if os.path.isdir(path):
+        _check_upgrade_private_venv(path)
     else:
-        _check_upgrade_private_venv()
+        _create_private_venv(path, "Please wait!\nThonny prepares its virtual environment .")
 
-def _check_upgrade_private_venv():
-    # If home is wrong then delete
-    # If version is micro-older, then upgrade
+def _check_upgrade_private_venv(path):
+    # If home is wrong then regenerate
+    # If only micro version is different, then upgrade
+    info = _get_venv_info(path)
     
-    # TODO:
-    def _get_venv_home(cfg_filename):
-        with open(cfg_filename, encoding="UTF-8") as fp:
-            for line in fp:
-                if line.replace(" ", "").startswith("home="):
-                    _, home = line.split("=", maxsplit=1)
-                    return home.strip()
-            
-            raise Exception("Can't find home in " + cfg_filename)    # find a subfolder in THONNY_USER_DIR containing pyvenv.cfg with correct home
+    if not eqfn(info["home"], os.path.dirname(sys.executable)):
+        _create_private_venv(path, 
+                             "Thonny's virtual environment was created for another interpreter.\n"
+                             + "Regenerating the virtual environment for current interpreter.\n"
+                             + "(You may need to reinstall your 3rd party packages)\n"
+                             + "Please wait! .",
+                             clear=True)
+    else:
+        venv_version = tuple(map(int, info["version"].split(".")))
+        sys_version = sys.version_info[:3]
+        assert venv_version[0] == sys_version[0]
+        assert venv_version[1] == sys_version[1]
         
+        if venv_version[2] != sys_version[2]:
+            _create_private_venv(path, "Please wait!\nUpgrading Thonny's virtual environment .",
+                                 upgrade=True)
             
-def _create_private_venv():
+
+def _create_private_venv(path, description, clear=False, upgrade=False):
     base_exe = sys.executable
     if sys.executable.endswith("thonny.exe"):
         # assuming that thonny.exe is in the same dir as pythonw.exe
@@ -624,7 +633,6 @@ def _create_private_venv():
         base_exe = sys.executable.replace("thonny.exe", "pythonw.exe")
     
     
-    venv_path = _get_private_venv_path()
     def action():
         
         # Don't include system site packages
@@ -634,13 +642,18 @@ def _create_private_venv():
         # NB! Cant run venv.create directly, because in Windows 
         # it tries to link venv to thonny.exe.
         # Need to run it via proper python
-        p = subprocess.Popen([base_exe, "-m", "venv", venv_path])
+        cmd = [base_exe, "-m", "venv"]
+        if clear:
+            cmd.append("--clear")
+        if upgrade:
+            cmd.append("--upgrade")
+            
+        cmd.append(path)
+        p = subprocess.Popen(cmd)
         p.wait()
-        # TODO: handle errors
          
-    
     from thonny.ui_utils import run_with_busy_window
-    run_with_busy_window(action, description="Please wait!\nThonny prepares its environment .")
+    run_with_busy_window(action, description=description)
     
     bindir = os.path.dirname(_get_private_venv_executable())
     # create private env marker
@@ -651,10 +664,10 @@ def _create_private_venv():
     # Create recommended pip conf to get rid of list deprecation warning
     # https://github.com/pypa/pip/issues/4058
     pip_conf = "pip.ini" if running_on_windows() else "pip.conf"
-    with open(os.path.join(venv_path, pip_conf), mode="w") as fp:
+    with open(os.path.join(path, pip_conf), mode="w") as fp:
         fp.write("[list]\nformat = columns")
     
-    assert os.path.isdir(_get_private_venv_path())
+    assert os.path.isdir(path)
     
     
 def _get_private_venv_path():
@@ -671,3 +684,16 @@ def _get_private_venv_executable():
     
     assert os.path.exists(exe)
     return exe
+
+def _get_venv_info(venv_path):
+    cfg_path = os.path.join(venv_path, "pyvenv.cfg")
+    result = {}
+    
+    with open(cfg_path, encoding="UTF-8") as fp:
+        for line in fp:
+            if "=" in line:
+                key, val = line.split("=", maxsplit=1)
+                result[key.strip()] = val.strip()
+    
+    return result;
+    

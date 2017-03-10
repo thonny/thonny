@@ -7,7 +7,7 @@ THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
 def launch():
     os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
     from thonny import running
-    running._check_create_private_venv()
+    running.prepare_private_venv()
     _prepared_launch()
         
 def _prepared_launch():
