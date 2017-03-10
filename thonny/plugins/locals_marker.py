@@ -1,8 +1,6 @@
 import tkinter as tk
 from jedi import Script
-from jedi.parser import tree
 from thonny.globals import get_workbench
-from jedi.parser.tree import Function
 import logging
 
 class LocalsHighlighter:
@@ -19,6 +17,8 @@ class LocalsHighlighter:
         self._update_scheduled = False
         
     def get_positions(self):
+        from jedi.parser import tree
+        from jedi.parser.tree import Function
 
         locs = []
 
@@ -130,6 +130,8 @@ def _load_plugin():
     
 
 def _experiment_with_jedi():
+    from jedi.parser import tree
+
     prog = """
 def fun():
     pass
