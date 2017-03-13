@@ -23,19 +23,17 @@ class NameHighlighter:
             return set()
 
         index_parts = index.split('.')
-        l, c = int(index_parts[0]), int(index_parts[1])
-        script = Script(self.text.get('1.0', 'end') + ")", line=l, column=c)
-        try:
-            usages = script.usages()
-        except:
-            # TODO: Find out what's wrong
-            #traceback.print_exc()
-            usages = []
+        line, column = int(index_parts[0]), int(index_parts[1])
         
-        result = {("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
-                  "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(usage.name)))
-                for usage in usages}
-        #print(result)
+        # With path="" I get current script usages with module_name == ""
+        script = Script(self.text.get('1.0', 'end') + ")", line=line, column=column, path="")
+        
+        usages = script.usages()
+        
+        result = {("%d.%d" % (usage.line, usage.column),
+                  "%d.%d" % (usage.line, usage.column + len(usage.name)))
+                for usage in usages if usage.module_name == ""}
+        
         return result
 
 
