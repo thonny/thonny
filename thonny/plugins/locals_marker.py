@@ -15,7 +15,8 @@ class LocalsHighlighter:
         self._configure_tags()
         self._update_scheduled = False
     
-    def get_positions(self):
+    def get_positions_simple_but_incorrect(self):
+        # goto_assignments only gives you last assignment to given node
         import jedi
         defs = jedi.names(self.text.get('1.0', 'end'), path="",
                            all_scopes=True, definitions=True, references=True)
@@ -24,14 +25,19 @@ class LocalsHighlighter:
             if definition.parent().type == "function": # is located in a function
                 ass = definition.goto_assignments()
                 if len(ass) > 0 and ass[0].parent().type == "function": # is assigned to in a function
-                    print(definition.name, definition.goto_assignments())
+                    print(definition.name, definition.parent(),
+                          definition.goto_assignments())
+                    try:
+                        print("   ", definition._goto_definitions())
+                    except:
+                        pass
                     pos = ("%d.%d" % (definition.line, definition.column),
                            "%d.%d" % (definition.line, definition.column+len(definition.name)))
                     result.add(pos)
         return result
         
     
-    def _get_positions_old(self):
+    def get_positions_correct_but_using_private_parts(self):
         from jedi import Script
 
         from jedi.parser import tree
@@ -77,17 +83,12 @@ class LocalsHighlighter:
                 for child in node.children:
                     process_node(child, local_names, global_names)
 
-        def process_module():
-            for child in module.children:
-                if isinstance(child, tree.BaseNode) and child.is_scope():
-                    process_scope(child)
-
-        index = self.text.index("insert").split(".")
-        line, column = int(index[0]), int(index[1])
-        script = Script(self.text.get('1.0', 'end'), line, column)
-        module = script._parser.module()
-
-        process_module()
+        source = self.text.get('1.0', 'end')
+        script = Script(source)
+        module = script._get_module_node()
+        for child in module.children:
+            if isinstance(child, tree.BaseNode) and child.is_scope():
+                process_scope(child)
 
         loc_pos = set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(usage.value)))
@@ -122,7 +123,7 @@ class LocalsHighlighter:
         
         if get_workbench().get_option("view.locals_highlighting"):
             try:
-                highlight_positions = self.get_positions()
+                highlight_positions = self.get_positions_correct_but_using_private_parts()
                 self._highlight(highlight_positions)
             except:
                 logging.exception("Problem when updating local variable tags")
