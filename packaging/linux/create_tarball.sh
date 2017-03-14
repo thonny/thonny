@@ -34,6 +34,7 @@ export LD_LIBRARY_PATH=$TARGET_DIR/lib
 $TARGET_DIR/bin/python3.6 -m pip install --upgrade pip
 
 # INSTALL DEPS ###################################
+$TARGET_DIR/bin/python3.6 -m pip install jedi==0.10
 $TARGET_DIR/bin/python3.6 -m pip install --no-cache-dir distro
 $TARGET_DIR/bin/python3.6 -m pip install --no-cache-dir certifi
 
