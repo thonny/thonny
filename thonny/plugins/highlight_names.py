@@ -243,7 +243,10 @@ class VariablesHighlighter(BaseNameHighlighter):
 
 class UsagesHighlighter(BaseNameHighlighter):
     """Script.usages looks tempting method to use, but it only returns last
-    assignments to a variable, not really all usages (with Jedi 0.10)"""
+    assignments to a variable, not really all usages (with Jedi 0.10).
+    
+    TODO: check if this gets fixed in later versions of Jedi"""
+    
     def get_positions_for(self, source, line, column):
         script = Script(source + ")", line=line, column=column, path="")
         
