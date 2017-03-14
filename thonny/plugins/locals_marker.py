@@ -1,5 +1,4 @@
 import tkinter as tk
-from jedi import Script
 from thonny.globals import get_workbench
 import logging
 
@@ -15,8 +14,26 @@ class LocalsHighlighter:
         
         self._configure_tags()
         self._update_scheduled = False
-        
+    
     def get_positions(self):
+        import jedi
+        defs = jedi.names(self.text.get('1.0', 'end'), path="",
+                           all_scopes=True, definitions=True, references=True)
+        result = set()
+        for definition in defs:
+            if definition.parent().type == "function": # is located in a function
+                ass = definition.goto_assignments()
+                if len(ass) > 0 and ass[0].parent().type == "function": # is assigned to in a function
+                    print(definition.name, definition.goto_assignments())
+                    pos = ("%d.%d" % (definition.line, definition.column),
+                           "%d.%d" % (definition.line, definition.column+len(definition.name)))
+                    result.add(pos)
+        return result
+        
+    
+    def _get_positions_old(self):
+        from jedi import Script
+
         from jedi.parser import tree
         from jedi.parser.tree import Function
 
@@ -122,7 +139,7 @@ def update_highlighting(event):
     text.local_highlighter.schedule_update()
 
 
-def _load_plugin():
+def load_plugin():
     wb = get_workbench()
     wb.add_option("view.locals_highlighting", True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
@@ -130,6 +147,8 @@ def _load_plugin():
     
 
 def _experiment_with_jedi():
+    from jedi import Script
+
     from jedi.parser import tree
 
     prog = """
