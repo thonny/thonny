@@ -4,7 +4,7 @@ from thonny.globals import get_workbench
 from thonny.ui_utils import control_is_pressed
 
 
-def goto_definitions(event):
+def goto_definition(event):
     if not control_is_pressed(event.state):
         return
     
@@ -29,6 +29,5 @@ def goto_definitions(event):
     
 
 def load_plugin():
-    wb = get_workbench()  # type:Workbench
-    wb.add_option("view.name_highlighting", True)
-    wb.bind_class("CodeViewText", "<1>", goto_definitions, True)
+    wb = get_workbench()  
+    wb.bind_class("CodeViewText", "<1>", goto_definition, True)
