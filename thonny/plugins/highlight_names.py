@@ -17,7 +17,7 @@ class BaseNameHighlighter:
         self.text.tag_raise("sel")
         self._update_scheduled = False
     
-    def get_positions_for(self, source, line, column):
+    def get_positions_for_script(self, script):
         raise NotImplementedError();
         
     def get_positions(self):
@@ -30,7 +30,9 @@ class BaseNameHighlighter:
         source = self.text.get("1.0", "end") 
         index_parts = index.split('.')
         line, column = int(index_parts[0]), int(index_parts[1])
-        return self.get_positions_for(source, line, column)
+        script = Script(source + ")", line=line, column=column, path="")
+
+        return self.get_positions_for_script(script)
     
     def schedule_update(self):
         def perform_update():
@@ -56,7 +58,7 @@ class BaseNameHighlighter:
 
 
 class VariablesHighlighter(BaseNameHighlighter):
-    """This is heavy, but more correct solution than Script.usages provides 
+    """This is heavy, but more correct solution for variables, than Script.usages provides 
     (at least for Jedi 0.10)"""
     def _is_name_function_call_name(self, name):
         stmt = name.get_definition()
@@ -221,9 +223,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         usages = find_usages_in_node(scope)
         return usages
     
-    def get_positions_for(self, source, line, column):
-        script = Script(source + ")", line, column, path="")
-        
+    def get_positions_for_script(self, script):
         name = None
         module_node = script._get_module_node()
         stmt = self._get_statement_for_position(module_node, script._pos)
@@ -242,14 +242,14 @@ class VariablesHighlighter(BaseNameHighlighter):
                         for usage in self._find_usages(name, stmt, module_node))
 
 class UsagesHighlighter(BaseNameHighlighter):
-    """Script.usages looks tempting method to use, but it only returns last
+    """Script.usages looks tempting method to use for finding variable ocurrences,
+    but it only returns last
     assignments to a variable, not really all usages (with Jedi 0.10).
+    But it finds attribute usages quite nicely.
     
     TODO: check if this gets fixed in later versions of Jedi"""
     
-    def get_positions_for(self, source, line, column):
-        script = Script(source + ")", line=line, column=column, path="")
-        
+    def get_positions_for_script(self, script):
         usages = script.usages()
         
         result = {("%d.%d" % (usage.line, usage.column),
@@ -259,14 +259,20 @@ class UsagesHighlighter(BaseNameHighlighter):
         return result
         
 
+class CombinedHighlighter(VariablesHighlighter, UsagesHighlighter):
+    def get_positions_for_script(self, script):
+        usages = UsagesHighlighter.get_positions_for_script(self, script)
+        variables = VariablesHighlighter.get_positions_for_script(self, script) 
+        return usages | variables
 
 def update_highlighting(event):
     assert isinstance(event.widget, tk.Text)
     text = event.widget
     
     if not hasattr(text, "name_highlighter"):
-        text.name_highlighter = VariablesHighlighter(text)
+        text.name_highlighter = CombinedHighlighter(text)
         # Alternative:
+        #text.name_highlighter = VariablesHighlighter(text)
         #text.name_highlighter = UsagesHighlighter(text)
         
     text.name_highlighter.schedule_update()
