@@ -63,8 +63,8 @@ class Workbench(tk.Tk):
     def __init__(self, server_socket=None):
         self._destroying = False
         self.initializing = True
-        
         tk.Tk.__init__(self)
+        # self.tk.call("tk", "scaling", 2.0)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
         self._backends = {}
