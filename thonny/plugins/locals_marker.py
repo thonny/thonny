@@ -25,12 +25,6 @@ class LocalsHighlighter:
             if definition.parent().type == "function": # is located in a function
                 ass = definition.goto_assignments()
                 if len(ass) > 0 and ass[0].parent().type == "function": # is assigned to in a function
-                    print(definition.name, definition.parent(),
-                          definition.goto_assignments())
-                    try:
-                        print("   ", definition._goto_definitions())
-                    except:
-                        pass
                     pos = ("%d.%d" % (definition.line, definition.column),
                            "%d.%d" % (definition.line, definition.column+len(definition.name)))
                     result.add(pos)
