@@ -671,7 +671,11 @@ def _create_private_venv(path, description, clear=False, upgrade=False):
     
     
 def _get_private_venv_path():
-    return os.path.join(THONNY_USER_DIR, "Py%d%d" % (sys.version_info[0], sys.version_info[1]))
+    if "thonny" in sys.executable.lower():
+        prefix = "BundledPython"
+    else:
+        prefix = "Python" 
+    return os.path.join(THONNY_USER_DIR, prefix + "%d%d" % (sys.version_info[0], sys.version_info[1]))
 
 def _get_private_venv_executable():
     venv_path = _get_private_venv_path()
