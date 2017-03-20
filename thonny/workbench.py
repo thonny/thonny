@@ -10,7 +10,7 @@ import traceback
 
 from thonny import ui_utils
 from thonny.code import EditorNotebook
-from thonny.common import Record, ToplevelCommand, UserError
+from thonny.common import Record, UserError
 from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
@@ -1088,7 +1088,7 @@ class Workbench(tk.Tk):
         editor = self.get_editor_notebook().get_current_editor()
         title_text = "Thonny"
         if editor != None:
-            title_text += " - " + editor.get_long_description()
+            title_text += "  -  " + editor.get_long_description()
             
         self.title(title_text)
     
