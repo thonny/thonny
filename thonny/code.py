@@ -68,7 +68,24 @@ class Editor(ttk.Frame):
             self.save_file()
             
         return self._filename
-            
+    
+    def get_long_description(self):
+        
+        if self._filename is None:
+            result = "<untitled>"
+        else:
+            result = self._filename
+        
+        try:
+            index = self._code_view.text.index("insert")
+            if index and "." in index:
+                line, col = index.split(".")
+                result += "  @  {} : {}".format(line, int(col)+1)
+        except:
+            exception("Finding cursor location")
+        
+        return result
+    
     def _load_file(self, filename):
         
         source, self.file_encoding = _read_python_file(filename) # TODO: support also text files

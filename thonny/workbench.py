@@ -80,7 +80,6 @@ class Workbench(tk.Tk):
         self._init_menu()
         
         self.title("Thonny")
-        self.bind("BackendMessage", self._update_title, True)
         
         self._init_containers()
         
@@ -96,6 +95,11 @@ class Workbench(tk.Tk):
         
         if server_socket is not None:
             self._init_server_loop(server_socket)
+        
+        self.bind_class("CodeViewText", "<<CursorMove>>", self.update_title, True)
+        self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
+        self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
+        self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
         self.initializing = False
 
@@ -1080,8 +1084,13 @@ class Workbench(tk.Tk):
     #    tk.Tk.focus_set(self)
     #    self._editor_notebook.focus_set()
     
-    def _update_title(self, event):
-        self.title("Thonny  -  {}".format(self._runner.get_backend_description()))
+    def update_title(self, event=None):
+        editor = self.get_editor_notebook().get_current_editor()
+        title_text = "Thonny"
+        if editor != None:
+            title_text += " - " + editor.get_long_description()
+            
+        self.title(title_text)
     
     def become_topmost_window(self):
         self.deiconify()
