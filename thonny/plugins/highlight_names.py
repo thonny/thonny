@@ -1,7 +1,3 @@
-# This is a more specific attempt for highlighting names.
-# It stopped working in Jedi 0.10 (because of changes in privates)
-# and was replaced with simpler approach (too simple?)
-# Maybe this code will be useful later.
 from jedi import Script
 from jedi.parser import tree
 from thonny.globals import get_workbench
@@ -30,7 +26,7 @@ class BaseNameHighlighter:
         source = self.text.get("1.0", "end") 
         index_parts = index.split('.')
         line, column = int(index_parts[0]), int(index_parts[1])
-        script = Script(source + ")", line=line, column=column, path="")
+        script = Script(source + "\n___", line=line, column=column, path="")
 
         return self.get_positions_for_script(script)
     
