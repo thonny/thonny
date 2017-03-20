@@ -1,6 +1,6 @@
 import tkinter as tk
 from jedi import Script
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import control_is_pressed
 
 
@@ -15,7 +15,9 @@ def goto_definition(event):
     index = text.index("insert")
     index_parts = index.split('.')
     line, column = int(index_parts[0]), int(index_parts[1])
-    script = Script(source + ")", line=line, column=column, path="")
+    # TODO: find current editor filename
+    script = Script(source, line=line, column=column, path="",
+                    sys_path=get_runner().get_sys_path())
     defs = script.goto_definitions()
     if len(defs) > 0:
         module_path = defs[0].module_path

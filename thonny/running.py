@@ -84,6 +84,9 @@ class Runner:
         """
         return self._proxy.get_state()
     
+    def get_sys_path(self):
+        return self._proxy.get_sys_path()
+    
     def send_command(self, cmd):
         self._proxy.send_command(cmd)
     
@@ -273,7 +276,11 @@ class BackendProxy:
     def send_program_input(self, data):
         """Send input data to backend"""
         raise NotImplementedError()
-        
+    
+    def get_sys_path(self):
+        "backend's sys.path"
+        return []
+    
     def get_state(self):
         """Get current state of backend.
         
@@ -311,6 +318,7 @@ class CPythonProxy(BackendProxy):
         self._state = None
         self._message_queue = None
         self._state_lock = threading.RLock()
+        self._sys_path = []
     
     def fetch_next_message(self):
         msg = self._fetch_next_message()
@@ -383,6 +391,9 @@ class CPythonProxy(BackendProxy):
     def get_state(self):
         with self._state_lock:
             return self._state
+    
+    def get_sys_path(self):
+        return self._sys_path
     
     def _set_state(self, state):
         if self._state != state:
@@ -457,7 +468,8 @@ class CPythonProxy(BackendProxy):
             raise Exception("Error starting backend process: " + error_msg)
         
         ready_msg = parse_message(ready_line)
-        debug("Backend ready: %s", ready_msg)
+        self._sys_path = ready_msg["path"]
+        debug("Backend ready: %s", ready_msg, self._sys_path)
         get_workbench().event_generate("BackendReady", **ready_msg)
         
         # setup asynchronous output listeners
