@@ -1093,19 +1093,25 @@ class Workbench(tk.Tk):
         self.title(title_text)
     
     def become_topmost_window(self):
+        # Looks like at least on Windows all following is required for the window to get focus
+        # (deiconify, ..., iconify, deiconify)
         self.deiconify()
         self.attributes('-topmost', True)
         self.after_idle(self.attributes, '-topmost', False)
-        self.focus_set()
         self.lift()
         
-        """
-        # TODO: this is dangerous. What if there is another app below the mouse 
-        if running_on_windows():
-            set_mouse_position(200,200)
-            perform_mouse_click()
-        """
-    
+        # http://stackoverflow.com/a/13867710/261181
+        self.iconify()
+        self.deiconify()
+        
+        editor = self.get_current_editor()
+        if editor is not None:
+            # This method is meant to be called when new file is opened, so it's safe to 
+            # send the focus to the editor
+            editor.focus_set()
+        else:
+            self.focus_set()
+        
 
 class WorkbenchEvent(Record):
     def __init__(self, sequence, **kwargs):
