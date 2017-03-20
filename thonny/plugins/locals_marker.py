@@ -78,7 +78,7 @@ class LocalsHighlighter:
                     process_node(child, local_names, global_names)
 
         source = self.text.get('1.0', 'end')
-        script = Script(source + "\n___")
+        script = Script(source + ")") # https://github.com/davidhalter/jedi/issues/897
         module = script._get_module_node()
         for child in module.children:
             if isinstance(child, tree.BaseNode) and child.is_scope():

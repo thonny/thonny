@@ -26,7 +26,7 @@ class BaseNameHighlighter:
         source = self.text.get("1.0", "end") 
         index_parts = index.split('.')
         line, column = int(index_parts[0]), int(index_parts[1])
-        script = Script(source + "\n___", line=line, column=column, path="")
+        script = Script(source + ")", line=line, column=column, path="") # https://github.com/davidhalter/jedi/issues/897
 
         return self.get_positions_for_script(script)
     
