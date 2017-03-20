@@ -270,9 +270,10 @@ def update_highlighting(event):
     text = event.widget
     
     if not hasattr(text, "name_highlighter"):
-        text.name_highlighter = CombinedHighlighter(text)
-        # Alternative:
-        #text.name_highlighter = VariablesHighlighter(text)
+        text.name_highlighter = VariablesHighlighter(text)
+        # Alternatives:
+        # NB! usages() is too slow when used on library names 
+        #text.name_highlighter = CombinedHighlighter(text)
         #text.name_highlighter = UsagesHighlighter(text)
         
     text.name_highlighter.schedule_update()
