@@ -537,6 +537,7 @@ class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
     def __init__(self, master, line_numbers=False, line_length_margin=0,
                  first_line_number=1, text_class=EnhancedText,
+                 horizontal_scrollbar=True, vertical_scrollbar=True,
                  **text_options):
         ttk.Frame.__init__(self, master=master)
         
@@ -568,17 +569,18 @@ class TextFrame(ttk.Frame):
         # margin will be gridded later
         self._first_line_number = first_line_number
         self.set_line_numbers(line_numbers)
-
-        self._vbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
         
-        self._hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
+        if vertical_scrollbar:
+            self._vbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+            self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
+            self._vbar['command'] = self._vertical_scroll 
+            self.text['yscrollcommand'] = self._vertical_scrollbar_update  
         
-        self.text['yscrollcommand'] = self._vertical_scrollbar_update  
-        self.text['xscrollcommand'] = self._horizontal_scrollbar_update    
-        self._vbar['command'] = self._vertical_scroll 
-        self._hbar['command'] = self._horizontal_scroll
+        if horizontal_scrollbar:
+            self._hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
+            self._hbar['command'] = self._horizontal_scroll
+            self.text['xscrollcommand'] = self._horizontal_scrollbar_update    
         
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
