@@ -20,7 +20,10 @@ from concurrent.futures.thread import ThreadPoolExecutor
 
 class PipDialog(tk.Toplevel):
     def __init__(self, master):
+        self._state = None # possible values: "listing", "fetching", "idle"
+        
         tk.Toplevel.__init__(self, master)
+        
         
         width = 600
         height = 400
@@ -48,6 +51,19 @@ class PipDialog(tk.Toplevel):
         
         self.bind('<Return>', self._ok, True) 
         self.bind('<Escape>', self._ok, True) 
+    
+    def _set_state(self, state):
+        self._state = state
+        # TODO: update widget availability
+    
+    def _get_state(self):
+        return self._state
+    
+    def _update_list(self):
+        assert self._get_state() in [None, "idle"]
+        self.set_state("listing")
+        
+        
     
     def _create_widgets(self, parent):
         
@@ -147,6 +163,20 @@ def _fetch_url_future(url, timeout=10):
             
     executor = ThreadPoolExecutor(max_workers=1)
     return executor.submit(load_url)
+
+
+def _execute_system_command_and_wait(cmd):
+    encoding = "UTF-8"
+    env = {"PYTHONIOENCODING" : encoding,
+           "PYTHONUNBUFFERED" : "1"}
+    
+    try:
+        output = subprocess.check_output(cmd, "ls non_existent_file; exit 0",
+                            stderr=subprocess.STDOUT, env=env,
+                            universal_newlines=True, encoding=encoding)
+        return (0, output)
+    except subprocess.CalledProcessError as e:
+        return (e.returncode, e.output)
     
 
 def _direct_system_command_to_queue(cmd, event_queue):
