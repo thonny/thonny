@@ -44,6 +44,7 @@ setup(
       ],
       keywords="IDE education debugger",
       install_requires=requirements,
+      python_requires=">=3.4",
       packages=["thonny",
                 "thonny.shared",  
                 "thonny.shared.thonny",  
