@@ -1,38 +1,37 @@
 # -*- coding: utf-8 -*-
 
-import datetime
 import webbrowser
-import platform
 
 import tkinter as tk
 from tkinter import ttk, messagebox
-import tkinter.font as font
 
 from thonny import misc_utils, tktextext
-from thonny.misc_utils import get_python_version_string
 from thonny.globals import get_workbench, get_runner
 import subprocess
 import collections
 import threading
 from urllib.request import urlopen
 import urllib.error
-from concurrent.futures.process import ProcessPoolExecutor
 from concurrent.futures.thread import ThreadPoolExecutor
 import os
 import json
 from distutils.version import LooseVersion
+import logging
+
+_NEW_PACKAGE_CAPTION = "<INSTALL>"
 
 class PipDialog(tk.Toplevel):
     def __init__(self, master):
         self._state = None # possible values: "listing", "fetching", "idle"
         self._process = None
         self._installed_versions = {}
+        self.current_package_data = None
         
         tk.Toplevel.__init__(self, master)
         
         
-        width = 600
-        height = 400
+        width = 700
+        height = 350
         self.geometry("%dx%d+%d+%d" % (width, height,
             master.winfo_rootx() + master.winfo_width() // 2 - width//2,
             master.winfo_rooty() + master.winfo_height() // 2 - height//2))
@@ -57,25 +56,29 @@ class PipDialog(tk.Toplevel):
         self.bind('<Escape>', self._on_close, True) 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
+        #self.listbox.selection_set(0)
+        self._show_instructions()
         self._start_update_list()
     
     def _set_state(self, state):
         self._state = state
-        # TODO: update widget availability
+        widgets = [self.listbox, 
+                           # self.search_box, # looks funny when disabled 
+                           self.search_button,
+                           self.install_button, self.advanced_button, self.uninstall_button]
         if state == "idle":
             self.config(cursor="")
-            for widget in [self.listbox, self.search_box, self.search_button,
-                           self.install_button, self.advanced_button, self.uninstall_button]:
+            for widget in widgets:
                 widget["state"] = tk.NORMAL
         else:
             self.config(cursor="wait")
-            for widget in [self.listbox, self.search_box, self.search_button]:
+            for widget in widgets:
                 widget["state"] = tk.DISABLED
     
     def _get_state(self):
         return self._state
     
-    def _start_update_list(self):
+    def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
         self._process = _create_pip_process(["list", "--format", "json"])
@@ -93,6 +96,8 @@ class PipDialog(tk.Toplevel):
                     if returncode == 0:
                         raw_data = self._process.stdout.read()
                         self._update_list(json.loads(raw_data))
+                        if name_to_show is not None:
+                            self._start_show_package_info(name_to_show)
                     else:   
                         messagebox.showerror("pip list error", self._process.stdout.read())
                     
@@ -102,25 +107,40 @@ class PipDialog(tk.Toplevel):
                     
         
     def _update_list(self, data):
+        self.listbox.delete(1, "end")
         self._installed_versions = {entry["name"] : entry["version"] for entry in data}
-        
         for name in sorted(self._installed_versions.keys(), key=lambda x: x.lower()):
-            print("inserting", name)
             self.listbox.insert("end", name)
         
-        print(data)
+        
     
     def _on_listbox_select(self, event):
         selection = self.listbox.curselection()
         if len(selection) == 1:
-            self._start_show_package_info(self.listbox.get(selection[0]))
+            if selection[0] == 0: # special first item
+                self._show_instructions()
+            else:
+                self._start_show_package_info(self.listbox.get(selection[0]))
     
     def _on_search(self, event=None):
         self._start_show_package_info(self.search_box.get())
     
+    def _show_instructions(self):
+        self.current_package_data = None
+        self.name_label.grid_remove()
+        self.command_frame.grid_remove()
+        self.info_text.delete("1.0", "end")
+        self.info_text.insert("end", "Installing a package\n", ("caption",))
+        self.info_text.insert("end", "Start by entering the name of the package in the search box above and pressing ENTER.\n\n")
+        self.info_text.insert("end", "Upgrading or uninstalling a package\n", ("caption",))
+        self.info_text.insert("end", 'Start by selecting the package from the left.\n\n')
+    
     def _start_show_package_info(self, name):
+        self.current_package_data = None
         self.info_text.delete("1.0", "end")
         self.name_label["text"] = ""
+        self.name_label.grid()
+        self.command_frame.grid()
         
         if name in self._installed_versions:
             self.name_label["text"] = name
@@ -129,7 +149,6 @@ class PipDialog(tk.Toplevel):
         
         
         # Fetch info from PyPI  
-        print("Fetching")
         self._set_state("fetching")
         # Follwing url fetches info about latest version.
         # This is OK even when we're looking an installed older version
@@ -141,7 +160,7 @@ class PipDialog(tk.Toplevel):
             if url_future.done():
                 self._set_state("idle")
                 try:
-                    conn, bin_data = url_future.result()
+                    _, bin_data = url_future.result()
                     raw_data = bin_data.decode("UTF-8")
                     # TODO: check for 404
                     self._show_package_info(json.loads(raw_data))
@@ -152,10 +171,9 @@ class PipDialog(tk.Toplevel):
                 self.after(200, poll_fetch_complete)
         
         poll_fetch_complete()
-        
-        
 
     def _show_package_info(self, data, error_code=None):
+        self.current_package_data = data
         def write(s, tag=None):
             if tag is None:
                 tags = ()
@@ -182,12 +200,29 @@ class PipDialog(tk.Toplevel):
             write_att("Latest stable version", latest_stable_version)
         write_att("Summary", info["summary"])
         write_att("Author", info["author"])
-        write_att("Home-page", info["home_page"], "url")
+        write_att("Homepage", info["home_page"], "url")
         if info.get("bugtrack_url", None):
             write_att("Bugtracker", info["bugtrack_url"], "url")
         if info.get("docs_url", None):
             write_att("Documentation", info["docs_url"], "url")
-        write_att("Licence", info["license"])
+        if info.get("package_url", None):
+            write_att("PyPI page", info["package_url"], "url")
+        
+        self.listbox.select_clear(0, "end")
+        if self._get_installed_version(info["name"]) is not None:
+            self.install_button["text"] = "Upgrade"
+            self.uninstall_button.grid(row=0, column=2)
+            items = list(map(str.lower, self.listbox.get(0, "end")))
+            self.listbox.select_set(items.index(info["name"].lower()))
+            if self._get_installed_version(info["name"]) == latest_stable_version:
+                self.install_button["state"] = "disabled"
+            else: 
+                self.install_button["state"] = "normal"
+        else:
+            self.install_button["text"] = "Install"
+            self.uninstall_button.grid_forget()
+            self.listbox.select_set(0)
+            
     
     def _create_widgets(self, parent):
         
@@ -212,9 +247,9 @@ class PipDialog(tk.Toplevel):
         parent.columnconfigure(0, weight=1)
         
         listframe = ttk.Frame(main_pw)
-        main_pw.add(listframe, weight=1)
         
-        self.listbox = tk.Listbox(listframe)
+        self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=25)
+        self.listbox.insert("end", _NEW_PACKAGE_CAPTION)
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
         self.listbox.grid(row=0, column=0, sticky="nsew") 
         listframe.rowconfigure(0, weight=1)
@@ -223,14 +258,25 @@ class PipDialog(tk.Toplevel):
         info_frame = tk.Frame(main_pw)
         info_frame.columnconfigure(0, weight=1)
         info_frame.rowconfigure(1, weight=1)
+        
+        main_pw.add(listframe, weight=1)
         main_pw.add(info_frame, weight=3)
         
-        self.name_label = ttk.Label(info_frame, text="jedi", font=name_font)
+        self.name_label = ttk.Label(info_frame, text="", font=name_font)
         self.name_label.grid(row=0, column=0, sticky="w", padx=5)
+        
+
         
         info_text_frame = tktextext.TextFrame(info_frame,
                                               horizontal_scrollbar=False)
+        info_text_frame.configure(borderwidth=1)
+        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         self.info_text = info_text_frame.text
+        self.info_text.tag_configure("url", foreground="#3A66DD", underline=True)
+        self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
+        self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
+        self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
+        
         self.info_text.configure(background="SystemButtonFace",
                                  font=tk.font.nametofont("TkDefaultFont"),
                                  wrap="word")
@@ -238,36 +284,20 @@ class PipDialog(tk.Toplevel):
         bold_font.configure(weight="bold")
         self.info_text.tag_configure("caption", font=bold_font)
         
-        self.info_text.insert("1.0", """Installed version: 0.9.0
-Latest version: 0.10.0
-Summary: An autocompletion tool for Python that can be used for text editors.
-Home-page: https://github.com/davidhalter/jedi
-Author: David Halter
-Author-email: davidhalter88@gmail.com
-License: MIT""")
-        info_text_frame.configure(borderwidth=1)
-        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         
+        self.command_frame = ttk.Frame(info_frame)
+        self.command_frame.grid(row=2, column=0, sticky="w")
         
-        command_frame = ttk.Frame(info_frame)
-        command_frame.grid(row=2, column=0, sticky="w")
-        
-        self.install_button = ttk.Button(command_frame, text=" Upgrade ")
+        self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
+                                         command=lambda: self._perform_action("install"))
         self.install_button.grid(row=0, column=0, sticky="w")
         
-        url = "  advanced"
-        url_font = font.nametofont("TkDefaultFont").copy()
-        url_font.configure(underline=1)
-        url_label = ttk.Label(command_frame, text=url,
-                              cursor="hand2",
-                              foreground="blue",
-                              font=url_font,)
-        #url_label.grid(row=0, column=1)
+        self.advanced_button = ttk.Button(self.command_frame, text=" Advanced ... ",
+                                          command=lambda: self._perform_action("advanced"))
+        #self.advanced_button.grid(row=0, column=1, sticky="w")
         
-        self.advanced_button = ttk.Button(command_frame, text=" Advanced upgrade ... ")
-        self.advanced_button.grid(row=0, column=1, sticky="w")
-        
-        self.uninstall_button = ttk.Button(command_frame, text="Uninstall")
+        self.uninstall_button = ttk.Button(self.command_frame, text="Uninstall",
+                                           command=lambda: self._perform_action("uninstall"))
         self.uninstall_button.grid(row=0, column=2, sticky="w")
     
         self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
@@ -275,11 +305,57 @@ License: MIT""")
         
         #self._load_package_info("thonny", "2.0.7")
     
+    def _perform_action(self, action):
+        assert self._get_state() == "idle"
+        assert self.current_package_data is not None
+        data = self.current_package_data
+        name = self.current_package_data["info"]["name"]
+        
+        if action == "install":
+            args = ["install", name]
+        elif action == "uninstall":
+            args = ["uninstall", "-y", name]
+        elif action == "advanced":
+            args = self._ask_advanced_args(name, data)
+            if args is None: # Cancel
+                return
+        else:
+            raise RuntimeError("Unknown action")
+        
+        proc = _create_pip_process(args)
+        # following call blocks
+        _visualize_and_wait(proc)
+        self._start_update_list(name)
+        
     
-            
+    def _ask_advanced_args(self, name, data):
+        # TODO: make the dialog
+        #return ["install",  "--upgrade", name]
+        return None
+    
+    def _handle_url_click(self, event):
+        # http://stackoverflow.com/a/33957256/261181
+        try:
+            index = self.info_text.index("@%s,%s" % (event.x, event.y))
+            tag_indices = list(self.info_text.tag_ranges('url'))
+            for start, end in zip(tag_indices[0::2], tag_indices[1::2]):
+                # check if the tag matches the mouse click index
+                if self.info_text.compare(start, '<=', index) and self.info_text.compare(index, '<', end):
+                    url = self.info_text.get(start, end)
+                    webbrowser.open(url)
+        except:
+            logging.exception("URL clicking")
     
     def _on_close(self, event=None):
         self.destroy()
+        
+    def _get_installed_version(self, name):
+        # looks like pip list is not precise about names
+        for list_name in self._installed_versions:
+            if name.lower() == list_name.lower():
+                return self._installed_versions[list_name]
+        
+        return None
 
 
 def _fetch_url_future(url, timeout=10):
@@ -360,6 +436,10 @@ def _get_latest_stable_version(version_strings):
         
     return str(sorted(versions)[-1])
 
+
+def _visualize_and_wait(proc):
+    # TODO: wait in dialog
+    return proc.wait()
 
 
 def load_plugin():
