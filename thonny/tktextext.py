@@ -76,6 +76,7 @@ class TweakableText(tk.Text):
         self.direct_mark(*args)
     
     def intercept_insert(self, index, chars, tags=None):
+        assert isinstance(chars, str)
         if chars >= "\uf704" and chars <= "\uf70d": # Function keys F1..F10 in Mac cause these
             pass
         elif self.is_read_only():
