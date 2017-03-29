@@ -25,6 +25,7 @@ packaging/windows/ThonnyRunner36/ThonnyRunner.sdf
 packaging/windows/ThonnyRunner36/ThonnyRunner/Release/ThonnyRunner.res
 packaging/windows/ThonnyRunner36/Release/ThonnyRunner.ipdb
 packaging/windows/Python35
+packaging/windows/build
 packaging/windows/Python36
 packaging/mac/out.txt
 packaging/mac/build
