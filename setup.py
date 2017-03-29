@@ -20,7 +20,7 @@ setup(
       version=version,
       description="Python IDE for beginners",
       url="http://thonny.org",
-      author="Aivar Annamaa",
+      author="Aivar Annamaa and others",
       license="MIT",
       classifiers=[
         "Development Status :: 4 - Beta",
