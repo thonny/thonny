@@ -78,27 +78,35 @@ class PipDialog(tk.Toplevel):
         self.search_button.grid(row=0, column=1, sticky="nse", padx=(10,0))
         
         
-        main_pw = ttk.Panedwindow(parent, orient=tk.HORIZONTAL)
+        main_pw = tk.PanedWindow(parent, orient=tk.HORIZONTAL,
+                                 background=ui_utils.get_button_face_color(),
+                                 sashwidth=10)
         main_pw.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
         parent.rowconfigure(1, weight=1)
         parent.columnconfigure(0, weight=1)
         
-        listframe = ttk.Frame(main_pw)
-        
-        self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=25,
-                                  background=ui_utils.CALM_WHITE)
-        self.listbox.insert("end", _NEW_PACKAGE_CAPTION)
-        self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
-        self.listbox.grid(row=0, column=0, sticky="nsew") 
+        listframe = tk.Frame(main_pw, relief="groove", borderwidth=1)
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
+        
+        self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=20,
+                                  background=ui_utils.CALM_WHITE,
+                                  selectborderwidth=0, relief="flat",
+                                  highlightthickness=0)
+        self.listbox.insert("end", _NEW_PACKAGE_CAPTION)
+        self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
+        self.listbox.grid(row=0, column=0, sticky="nsew")
+        list_scrollbar = ttk.Scrollbar(listframe, orient=tk.VERTICAL)
+        list_scrollbar.grid(row=0, column=1, sticky="ns")
+        list_scrollbar['command'] = self.listbox.yview
+        self.listbox["yscrollcommand"] = list_scrollbar.set
         
         info_frame = ttk.Frame(main_pw)
         info_frame.columnconfigure(0, weight=1)
         info_frame.rowconfigure(1, weight=1)
         
-        main_pw.add(listframe, weight=1)
-        main_pw.add(info_frame, weight=3)
+        main_pw.add(listframe)
+        main_pw.add(info_frame)
         
         self.name_label = ttk.Label(info_frame, text="", font=name_font)
         self.name_label.grid(row=0, column=0, sticky="w", padx=5)
@@ -128,7 +136,7 @@ class PipDialog(tk.Toplevel):
         
         self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
                                          command=lambda: self._perform_action("install"))
-        self.install_button.grid(row=0, column=0, sticky="w")
+        self.install_button.grid(row=0, column=0, sticky="w", padx=(0,10))
         
         self.advanced_button = ttk.Button(self.command_frame, text=" Advanced ... ",
                                           command=lambda: self._perform_action("advanced"))
@@ -401,7 +409,7 @@ class SubprocessDialog(tk.Toplevel):
         text_font=tk.font.nametofont("TkFixedFont").copy()
         text_font["size"] = int(text_font["size"] * 0.7)
         text_frame = tktextext.TextFrame(self, read_only=True, horizontal_scrollbar=False,
-                                         background="white",
+                                         background=ui_utils.get_button_face_color(),
                                          font=text_font,
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
