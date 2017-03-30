@@ -234,7 +234,10 @@ class PipDialog(tk.Toplevel):
             # Search box is not made inactive for busy-states
             return
         
-        self._start_show_package_info(self.search_box.get())
+        if self.search_box.get().strip() == "":
+            return
+        
+        self._start_show_package_info(self.search_box.get().strip())
     
     def _show_instructions(self):
         self.current_package_data = None
