@@ -382,7 +382,7 @@ class Workbench(tk.Tk):
         
         if 'xpnative' in style.theme_names():
             # in Win7 'xpnative' gives better scrollbars than 'vista'
-            style.theme_use('xpnative') 
+            style.theme_use('clam') 
         elif 'vista' in style.theme_names():
             style.theme_use('vista')
         elif 'clam' in style.theme_names():
