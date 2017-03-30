@@ -81,7 +81,7 @@ class PipDialog(tk.Toplevel):
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
-        self._process = _create_pip_process(["list", "--format", "json"])
+        self._process, _ = _create_pip_process(["list", "--format", "json"])
         
         def poll_completion():
             if self._process == None:
@@ -96,7 +96,9 @@ class PipDialog(tk.Toplevel):
                     if returncode == 0:
                         raw_data = self._process.stdout.read()
                         self._update_list(json.loads(raw_data))
-                        if name_to_show is not None:
+                        if name_to_show is None:
+                            self._show_instructions()
+                        else:
                             self._start_show_package_info(name_to_show)
                     else:   
                         messagebox.showerror("pip list error", self._process.stdout.read())
@@ -129,23 +131,24 @@ class PipDialog(tk.Toplevel):
         self.current_package_data = None
         self.name_label.grid_remove()
         self.command_frame.grid_remove()
-        self.info_text.delete("1.0", "end")
-        self.info_text.insert("end", "Installing a package\n", ("caption",))
-        self.info_text.insert("end", "Start by entering the name of the package in the search box above and pressing ENTER.\n\n")
-        self.info_text.insert("end", "Upgrading or uninstalling a package\n", ("caption",))
-        self.info_text.insert("end", 'Start by selecting the package from the left.\n\n')
+        self.info_text.direct_delete("1.0", "end")
+        self.info_text.direct_insert("end", "Installing a package\n", ("caption",))
+        self.info_text.direct_insert("end", "Start by entering the name of the package in the search box above and pressing ENTER.\n\n")
+        self.info_text.direct_insert("end", "Upgrading or uninstalling a package\n", ("caption",))
+        self.info_text.direct_insert("end", 'Start by selecting the package from the left.\n\n')
+        self.listbox.select_set(0)
     
     def _start_show_package_info(self, name):
         self.current_package_data = None
-        self.info_text.delete("1.0", "end")
+        self.info_text.direct_delete("1.0", "end")
         self.name_label["text"] = ""
         self.name_label.grid()
         self.command_frame.grid()
         
         if name in self._installed_versions:
             self.name_label["text"] = name
-            self.info_text.insert("end", "Installed version: ", ('caption',))
-            self.info_text.insert("end", self._installed_versions[name] + "\n")
+            self.info_text.direct_insert("end", "Installed version: ", ('caption',))
+            self.info_text.direct_insert("end", self._installed_versions[name] + "\n")
         
         
         # Fetch info from PyPI  
@@ -179,7 +182,7 @@ class PipDialog(tk.Toplevel):
                 tags = ()
             else:
                 tags = (tag,)
-            self.info_text.insert("end", s, tags)
+            self.info_text.direct_insert("end", s, tags)
         
         def write_att(caption, value, value_tag=None):
             write(caption + ": ", "caption")
@@ -267,7 +270,7 @@ class PipDialog(tk.Toplevel):
         
 
         
-        info_text_frame = tktextext.TextFrame(info_frame,
+        info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
                                               horizontal_scrollbar=False)
         info_text_frame.configure(borderwidth=1)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
@@ -312,8 +315,16 @@ class PipDialog(tk.Toplevel):
         name = self.current_package_data["info"]["name"]
         
         if action == "install":
-            args = ["install", name]
+            args = ["install", "--no-cache-dir"]
+            if self._get_installed_version(name) is not None:
+                args.append("--upgrade")
+            args.append(name)
         elif action == "uninstall":
+            if (name in ["pip", "setuptools"]
+                and not messagebox.askyesno("Really uninstall?",
+                    "Package '{}' is required for installing and uninstalling other packages.\n\n".format(name)
+                    + "Are you sure you want to uninstall it?")):
+                return
             args = ["uninstall", "-y", name]
         elif action == "advanced":
             args = self._ask_advanced_args(name, data)
@@ -322,10 +333,17 @@ class PipDialog(tk.Toplevel):
         else:
             raise RuntimeError("Unknown action")
         
-        proc = _create_pip_process(args)
+        proc, cmd = _create_pip_process(args)
         # following call blocks
-        _visualize_and_wait(proc)
-        self._start_update_list(name)
+        title = subprocess.list2cmdline(cmd)
+        
+        def ready():
+            if action == "uninstall":
+                self._show_instructions() # Make the old package go away as fast as possible
+            self._start_update_list(None if action == "uninstall" else name)
+        
+        _show_subprocess_dialog(self, proc, title, ready)
+        
         
     
     def _ask_advanced_args(self, name, data):
@@ -357,7 +375,109 @@ class PipDialog(tk.Toplevel):
         
         return None
 
+class SubprocessDialog(tk.Toplevel):
+    """Shows incrementally the output of given subprocess.
+    Allows cancelling"""
+    
+    def __init__(self, master, proc, title,
+                 ready_handler=None):
+        self._proc = proc
+        self.stdout = ""
+        self.stderr = ""
+        self.returncode = None
+        self.cancelled = False
+        self._ready_handler = ready_handler
+        
+        tk.Toplevel.__init__(self, master)
+        
+        
+        width = 400
+        height = 250
+        self.geometry("%dx%d+%d+%d" % (width, height,
+            master.winfo_rootx() + master.winfo_width() // 2 - width//2,
+            master.winfo_rooty() + master.winfo_height() // 2 - height//2))
 
+        text_font=tk.font.nametofont("TkFixedFont").copy()
+        text_font["size"] = int(text_font["size"] * 0.7)
+        text_frame = tktextext.TextFrame(self, read_only=True, horizontal_scrollbar=False,
+                                         background="white",
+                                         font=text_font,
+                                         wrap="word")
+        text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
+        self.text = text_frame.text
+        
+        self.button = ttk.Button(self, text="Cancel", command=self._close)
+        self.button.grid(row=1, column=0, pady=(0,15))
+        
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        
+
+        self.title(title)
+        if misc_utils.running_on_mac_os():
+            self.configure(background="systemSheetBackground")
+        #self.resizable(height=tk.FALSE, width=tk.FALSE)
+        self.transient(master)
+        self.grab_set() # to make it active and modal
+        self.text.focus_set()
+        
+        
+        self.bind('<Escape>', self._close_if_done, True) # escape-close only if process has completed 
+        self.protocol("WM_DELETE_WINDOW", self._close)
+        self._start_listening()
+    
+    def _start_listening(self):
+        event_queue = collections.deque()
+        
+        def listen_stream(stream_name):
+            stream = getattr(self._proc, stream_name)
+            while True:
+                data = stream.readline()
+                if data == '':
+                    break
+                else:
+                    event_queue.append((stream_name, data))
+                    setattr(self, stream_name, getattr(self, stream_name) + data)
+            
+            self.returncode = self._proc.wait()
+        
+        threading.Thread(target=listen_stream, args=["stdout"]).start()
+        if self._proc.stderr is not None:
+            threading.Thread(target=listen_stream, args=["stderr"]).start()
+        
+        def poll_output_events():
+            while len(event_queue) > 0:
+                stream_name, data = event_queue.popleft()
+                self.text.direct_insert("end", data, tags=(stream_name, ))
+                self.text.see("end")
+            
+            if self._proc.poll() == None:
+                self.after(200, poll_output_events)
+            else:
+                self.button["text"] = "OK"
+                self.button.focus_set()
+                self.text.configure(background="SystemButtonFace")
+                if self._ready_handler is not None:
+                    self._ready_handler()
+        
+        poll_output_events()
+        
+    
+    def _close_if_done(self, event):
+        if self._proc.poll() is not None:
+            self._close(event)        
+
+    def _close(self, event=None):
+        if (self._proc.poll() is None
+            and not messagebox.askyesno("Cancel the process?",
+                "The process is still running.\nAre you sure you want to cancel?")):
+            self._proc.kill()
+            self.cancelled = True
+            return
+        else:
+            self.destroy()
+        
+        
 def _fetch_url_future(url, timeout=10):
     def load_url():
         with urlopen(url, timeout=timeout) as conn:
@@ -379,8 +499,10 @@ def _create_pip_process(args):
                 
     interpreter = get_runner().get_interpreter_command()
     cmd = [interpreter, "-m", "pip"] + args
-    return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            env=env, universal_newlines=True, encoding=encoding)
+    
+    return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            env=env, universal_newlines=True, encoding=encoding),
+            cmd)
 
 def _execute_system_command_and_wait(cmd):
     encoding = "UTF-8"
@@ -396,34 +518,6 @@ def _execute_system_command_and_wait(cmd):
         return (e.returncode, e.output)
     
 
-def _direct_system_command_to_queue(cmd, event_queue):
-    encoding = "UTF-8"
-    env = {"PYTHONIOENCODING" : encoding,
-           "PYTHONUNBUFFERED" : "1"}
-    
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env,
-                            universal_newlines=True, encoding=encoding)
-    
-    proc.events = collections.deque()
-    
-    def listen_stream(stream_name):
-        stream = getattr(proc.stdout, stream_name)
-        while True:
-            data = stream.readline()
-            if data == '':
-                break
-            else:
-                event_queue.append((stream_name, data))
-        
-        returncode = proc.wait()
-        event_queue.append(("returncode", returncode))
-    
-    threading.Thread(target=listen_stream, args=["stdout"]).start()
-    threading.Thread(target=listen_stream, args=["stderr"]).start()
-    
-    return proc 
-    
-    
 def _get_latest_stable_version(version_strings):
     versions = []
     for s in version_strings:
@@ -437,9 +531,9 @@ def _get_latest_stable_version(version_strings):
     return str(sorted(versions)[-1])
 
 
-def _visualize_and_wait(proc):
-    # TODO: wait in dialog
-    return proc.wait()
+def _show_subprocess_dialog(master, proc, title, ready_handler=None):
+    dlg = SubprocessDialog(master, proc, title, ready_handler)
+    dlg.wait_window()
 
 
 def load_plugin():
