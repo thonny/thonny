@@ -15,7 +15,6 @@ import textwrap
 import re
 
 
-CLAM_BACKGROUND = "#dcdad5"
 CALM_WHITE = '#fdfdfd'
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
@@ -31,15 +30,8 @@ class AutomaticPanedWindow(tk.PanedWindow):
         if not "sashwidth" in kwargs:
             kwargs["sashwidth"]=10
         
-        theme = ttk.Style().theme_use()
-        
         if not "background" in kwargs:
-            if theme == "clam":
-                kwargs["background"] = "#DCDAD5"
-            elif theme == "aqua":
-                kwargs["background"] = "systemSheetBackground"
-            else: 
-                kwargs["background"] = "SystemButtonFace"
+            kwargs["background"] = get_button_face_color()
         
         tk.PanedWindow.__init__(self, master, **kwargs)
         
@@ -855,4 +847,12 @@ def remove_line_numbers(s):
     
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
     
+def get_button_face_color():    
+    theme = ttk.Style().theme_use()
     
+    if theme == "clam":
+        return "#dcdad5"
+    elif theme == "aqua":
+        return "systemSheetBackground"
+    else: 
+        return "SystemButtonFace"

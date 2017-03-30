@@ -5,7 +5,7 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny import misc_utils, tktextext
+from thonny import misc_utils, tktextext, ui_utils
 from thonny.globals import get_workbench, get_runner
 import subprocess
 import collections
@@ -36,7 +36,7 @@ class PipDialog(tk.Toplevel):
             master.winfo_rootx() + master.winfo_width() // 2 - width//2,
             master.winfo_rooty() + master.winfo_height() // 2 - height//2))
 
-        main_frame = tk.Frame(self)
+        main_frame = ttk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -60,6 +60,88 @@ class PipDialog(tk.Toplevel):
         self._show_instructions()
         self._start_update_list()
     
+    
+    def _create_widgets(self, parent):
+        
+        header_frame = ttk.Frame(parent)
+        header_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=(15,0))
+        header_frame.columnconfigure(0, weight=1)
+        header_frame.rowconfigure(0, weight=1)
+        
+        name_font = tk.font.nametofont("TkDefaultFont").copy()
+        name_font.configure(size=16)
+        self.search_box = ttk.Entry(header_frame, background=ui_utils.CALM_WHITE)
+        self.search_box.grid(row=0, column=0, sticky="nsew")
+        self.search_box.bind("<Return>", self._on_search, False)
+        
+        self.search_button = ttk.Button(header_frame, text="Search", command=self._on_search)
+        self.search_button.grid(row=0, column=1, sticky="nse", padx=(10,0))
+        
+        
+        main_pw = ttk.Panedwindow(parent, orient=tk.HORIZONTAL)
+        main_pw.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
+        parent.rowconfigure(1, weight=1)
+        parent.columnconfigure(0, weight=1)
+        
+        listframe = ttk.Frame(main_pw)
+        
+        self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=25,
+                                  background=ui_utils.CALM_WHITE)
+        self.listbox.insert("end", _NEW_PACKAGE_CAPTION)
+        self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
+        self.listbox.grid(row=0, column=0, sticky="nsew") 
+        listframe.rowconfigure(0, weight=1)
+        listframe.columnconfigure(0, weight=1)
+        
+        info_frame = ttk.Frame(main_pw)
+        info_frame.columnconfigure(0, weight=1)
+        info_frame.rowconfigure(1, weight=1)
+        
+        main_pw.add(listframe, weight=1)
+        main_pw.add(info_frame, weight=3)
+        
+        self.name_label = ttk.Label(info_frame, text="", font=name_font)
+        self.name_label.grid(row=0, column=0, sticky="w", padx=5)
+        
+
+        
+        info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
+                                              horizontal_scrollbar=False)
+        info_text_frame.configure(borderwidth=1)
+        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
+        self.info_text = info_text_frame.text
+        self.info_text.tag_configure("url", foreground="#3A66DD", underline=True)
+        self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
+        self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
+        self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
+        
+        self.info_text.configure(background=ui_utils.get_button_face_color(),
+                                 font=tk.font.nametofont("TkDefaultFont"),
+                                 wrap="word")
+        bold_font = tk.font.nametofont("TkDefaultFont").copy()
+        bold_font.configure(weight="bold")
+        self.info_text.tag_configure("caption", font=bold_font)
+        
+        
+        self.command_frame = ttk.Frame(info_frame)
+        self.command_frame.grid(row=2, column=0, sticky="w")
+        
+        self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
+                                         command=lambda: self._perform_action("install"))
+        self.install_button.grid(row=0, column=0, sticky="w")
+        
+        self.advanced_button = ttk.Button(self.command_frame, text=" Advanced ... ",
+                                          command=lambda: self._perform_action("advanced"))
+        #self.advanced_button.grid(row=0, column=1, sticky="w")
+        
+        self.uninstall_button = ttk.Button(self.command_frame, text="Uninstall",
+                                           command=lambda: self._perform_action("uninstall"))
+        self.uninstall_button.grid(row=0, column=2, sticky="w")
+    
+        self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
+        self.close_button.grid(row=2, column=3, sticky="e")
+        
+
     def _set_state(self, state):
         self._state = state
         widgets = [self.listbox, 
@@ -227,87 +309,6 @@ class PipDialog(tk.Toplevel):
             self.listbox.select_set(0)
             
     
-    def _create_widgets(self, parent):
-        
-        header_frame = ttk.Frame(parent)
-        header_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=(15,0))
-        header_frame.columnconfigure(0, weight=1)
-        header_frame.rowconfigure(0, weight=1)
-        
-        name_font = tk.font.nametofont("TkDefaultFont").copy()
-        name_font.configure(size=16)
-        self.search_box = ttk.Entry(header_frame)
-        self.search_box.grid(row=0, column=0, sticky="nsew")
-        self.search_box.bind("<Return>", self._on_search, False)
-        
-        self.search_button = ttk.Button(header_frame, text="Search", command=self._on_search)
-        self.search_button.grid(row=0, column=1, sticky="nse", padx=(10,0))
-        
-        
-        main_pw = ttk.Panedwindow(parent, orient=tk.HORIZONTAL)
-        main_pw.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
-        parent.rowconfigure(1, weight=1)
-        parent.columnconfigure(0, weight=1)
-        
-        listframe = ttk.Frame(main_pw)
-        
-        self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=25)
-        self.listbox.insert("end", _NEW_PACKAGE_CAPTION)
-        self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
-        self.listbox.grid(row=0, column=0, sticky="nsew") 
-        listframe.rowconfigure(0, weight=1)
-        listframe.columnconfigure(0, weight=1)
-        
-        info_frame = tk.Frame(main_pw)
-        info_frame.columnconfigure(0, weight=1)
-        info_frame.rowconfigure(1, weight=1)
-        
-        main_pw.add(listframe, weight=1)
-        main_pw.add(info_frame, weight=3)
-        
-        self.name_label = ttk.Label(info_frame, text="", font=name_font)
-        self.name_label.grid(row=0, column=0, sticky="w", padx=5)
-        
-
-        
-        info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
-                                              horizontal_scrollbar=False)
-        info_text_frame.configure(borderwidth=1)
-        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
-        self.info_text = info_text_frame.text
-        self.info_text.tag_configure("url", foreground="#3A66DD", underline=True)
-        self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
-        self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
-        self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
-        
-        self.info_text.configure(background="SystemButtonFace",
-                                 font=tk.font.nametofont("TkDefaultFont"),
-                                 wrap="word")
-        bold_font = tk.font.nametofont("TkDefaultFont").copy()
-        bold_font.configure(weight="bold")
-        self.info_text.tag_configure("caption", font=bold_font)
-        
-        
-        self.command_frame = ttk.Frame(info_frame)
-        self.command_frame.grid(row=2, column=0, sticky="w")
-        
-        self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
-                                         command=lambda: self._perform_action("install"))
-        self.install_button.grid(row=0, column=0, sticky="w")
-        
-        self.advanced_button = ttk.Button(self.command_frame, text=" Advanced ... ",
-                                          command=lambda: self._perform_action("advanced"))
-        #self.advanced_button.grid(row=0, column=1, sticky="w")
-        
-        self.uninstall_button = ttk.Button(self.command_frame, text="Uninstall",
-                                           command=lambda: self._perform_action("uninstall"))
-        self.uninstall_button.grid(row=0, column=2, sticky="w")
-    
-        self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
-        self.close_button.grid(row=2, column=3, sticky="e")
-        
-        #self._load_package_info("thonny", "2.0.7")
-    
     def _perform_action(self, action):
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
@@ -456,7 +457,6 @@ class SubprocessDialog(tk.Toplevel):
             else:
                 self.button["text"] = "OK"
                 self.button.focus_set()
-                self.text.configure(background="SystemButtonFace")
                 if self._ready_handler is not None:
                     self._ready_handler()
         
