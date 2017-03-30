@@ -534,13 +534,13 @@ class EnhancedText(TweakableText):
         pass
 
 
-class TextFrame(ttk.Frame):
+class TextFrame(tk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
     def __init__(self, master, line_numbers=False, line_length_margin=0,
                  first_line_number=1, text_class=EnhancedText,
                  horizontal_scrollbar=True, vertical_scrollbar=True,
                  **text_options):
-        ttk.Frame.__init__(self, master=master)
+        tk.Frame.__init__(self, master=master)
         
         final_text_options = {'borderwidth' : 0,
                               'insertwidth' : 2,

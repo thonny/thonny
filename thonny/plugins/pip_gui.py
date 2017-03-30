@@ -36,7 +36,7 @@ class PipDialog(tk.Toplevel):
             master.winfo_rootx() + master.winfo_width() // 2 - width//2,
             master.winfo_rooty() + master.winfo_height() // 2 - height//2))
 
-        main_frame = ttk.Frame(self)
+        main_frame = tk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -63,7 +63,7 @@ class PipDialog(tk.Toplevel):
     
     def _create_widgets(self, parent):
         
-        header_frame = ttk.Frame(parent)
+        header_frame = tk.Frame(parent)
         header_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=(15,0))
         header_frame.columnconfigure(0, weight=1)
         header_frame.rowconfigure(0, weight=1)
@@ -79,7 +79,7 @@ class PipDialog(tk.Toplevel):
         
         
         main_pw = tk.PanedWindow(parent, orient=tk.HORIZONTAL,
-                                 background=ui_utils.get_button_face_color(),
+                                 background=ui_utils.get_dialog_background_color(),
                                  sashwidth=10)
         main_pw.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
         parent.rowconfigure(1, weight=1)
@@ -101,14 +101,14 @@ class PipDialog(tk.Toplevel):
         list_scrollbar['command'] = self.listbox.yview
         self.listbox["yscrollcommand"] = list_scrollbar.set
         
-        info_frame = ttk.Frame(main_pw)
+        info_frame = tk.Frame(main_pw)
         info_frame.columnconfigure(0, weight=1)
         info_frame.rowconfigure(1, weight=1)
         
         main_pw.add(listframe)
         main_pw.add(info_frame)
         
-        self.name_label = ttk.Label(info_frame, text="", font=name_font)
+        self.name_label = tk.Label(info_frame, text="", font=name_font)
         self.name_label.grid(row=0, column=0, sticky="w", padx=5)
         
 
@@ -123,7 +123,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
-        self.info_text.configure(background=ui_utils.get_button_face_color(),
+        self.info_text.configure(background=ui_utils.get_dialog_background_color(),
                                  font=tk.font.nametofont("TkDefaultFont"),
                                  wrap="word")
         bold_font = tk.font.nametofont("TkDefaultFont").copy()
@@ -131,7 +131,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_configure("caption", font=bold_font)
         
         
-        self.command_frame = ttk.Frame(info_frame)
+        self.command_frame = tk.Frame(info_frame)
         self.command_frame.grid(row=2, column=0, sticky="w")
         
         self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
@@ -409,7 +409,7 @@ class SubprocessDialog(tk.Toplevel):
         text_font=tk.font.nametofont("TkFixedFont").copy()
         text_font["size"] = int(text_font["size"] * 0.7)
         text_frame = tktextext.TextFrame(self, read_only=True, horizontal_scrollbar=False,
-                                         background=ui_utils.get_button_face_color(),
+                                         background=ui_utils.get_dialog_background_color(),
                                          font=text_font,
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)

@@ -856,3 +856,11 @@ def get_button_face_color():
         return "systemSheetBackground"
     else: 
         return "SystemButtonFace"
+    
+def get_dialog_background_color():    
+    theme = ttk.Style().theme_use()
+    
+    if theme == "aqua":
+        return "systemSheetBackground"
+    else: 
+        return "SystemButtonFace"
