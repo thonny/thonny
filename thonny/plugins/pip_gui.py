@@ -19,6 +19,7 @@ from distutils.version import LooseVersion, StrictVersion
 import logging
 import re
 from tkinter.filedialog import askopenfilename
+from logging import exception
 
 LINK_COLOR="#3A66DD"
 
@@ -355,7 +356,11 @@ class PipDialog(tk.Toplevel):
             index = name_or_index
         else:
             normalized_items = list(map(self._normalize_name, self.listbox.get(0, "end")))
-            index = normalized_items.index(self._normalize_name(name_or_index))
+            try:
+                index = normalized_items.index(self._normalize_name(name_or_index))
+            except:
+                exception("Can't find package name from the list: " + name_or_index)
+                return
         
         self.listbox.select_clear(0, "end")
         self.listbox.select_set(index)
@@ -408,6 +413,9 @@ class PipDialog(tk.Toplevel):
         
     
     def _handle_install_file_click(self, event):
+        if self._get_state() != "idle":
+            return 
+        
         filename = askopenfilename (
             filetypes = [('Package', '.whl .zip .tar.gz'), ('all files', '.*')], 
             initialdir = get_workbench().get_option("run.working_directory")
@@ -421,9 +429,21 @@ class PipDialog(tk.Toplevel):
         # following call blocks
         title = subprocess.list2cmdline(cmd)
         
-        _show_subprocess_dialog(self, proc, title)
-        # TODO: how to show this package???
-        self._start_update_list()
+        _, out, _ = _show_subprocess_dialog(self, proc, title)
+        
+        # Try to find out the name of the package we're installing
+        name = None
+        
+        # output should include a line like this:
+        # Installing collected packages: pytz, six, python-dateutil, numpy, pandas
+        inst_lines = re.findall("^Installing collected packages:.*?$", out,
+                                     re.MULTILINE | re.IGNORECASE)  # @UndefinedVariable
+        if len(inst_lines) == 1:
+            # take last element
+            elements = re.split(",|:", inst_lines[0])
+            name = elements[-1].strip()
+        
+        self._start_update_list(name)
     
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
@@ -672,6 +692,7 @@ def _get_latest_stable_version(version_strings):
 def _show_subprocess_dialog(master, proc, title):
     dlg = SubprocessDialog(master, proc, title)
     dlg.wait_window()
+    return dlg.returncode, dlg.stdout, dlg.stderr
 
 
 def _ask_installation_details(master, data, selected_version):
