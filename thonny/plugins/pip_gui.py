@@ -15,10 +15,11 @@ import urllib.error
 from concurrent.futures.thread import ThreadPoolExecutor
 import os
 import json
-from distutils.version import LooseVersion
+from distutils.version import LooseVersion, StrictVersion
 import logging
+import re
 
-_NEW_PACKAGE_CAPTION = "<INSTALL>"
+LINK_COLOR="#3A66DD"
 
 class PipDialog(tk.Toplevel):
     def __init__(self, master):
@@ -47,7 +48,7 @@ class PipDialog(tk.Toplevel):
         #self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(master)
         self.grab_set() # to make it active
-        self.grab_release() # to allow eg. copy something from the editor 
+        #self.grab_release() # to allow eg. copy something from the editor 
         
         self._create_widgets(main_frame)
         
@@ -92,8 +93,8 @@ class PipDialog(tk.Toplevel):
         self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=20,
                                   background=ui_utils.CALM_WHITE,
                                   selectborderwidth=0, relief="flat",
-                                  highlightthickness=0)
-        self.listbox.insert("end", _NEW_PACKAGE_CAPTION)
+                                  highlightthickness=0, borderwidth=0)
+        self.listbox.insert("end", " <INSTALL>")
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
         self.listbox.grid(row=0, column=0, sticky="nsew")
         list_scrollbar = ttk.Scrollbar(listframe, orient=tk.VERTICAL)
@@ -118,7 +119,7 @@ class PipDialog(tk.Toplevel):
         info_text_frame.configure(borderwidth=1)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         self.info_text = info_text_frame.text
-        self.info_text.tag_configure("url", foreground="#3A66DD", underline=True)
+        self.info_text.tag_configure("url", foreground=LINK_COLOR, underline=True)
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
         self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
@@ -136,16 +137,24 @@ class PipDialog(tk.Toplevel):
         
         self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
                                          command=lambda: self._perform_action("install"))
-        self.install_button.grid(row=0, column=0, sticky="w", padx=(0,10))
-        
-        self.advanced_button = ttk.Button(self.command_frame, text=" Advanced ... ",
-                                          command=lambda: self._perform_action("advanced"))
-        #self.advanced_button.grid(row=0, column=1, sticky="w")
+        self.install_button.grid(row=0, column=0, sticky="w", padx=0)
         
         self.uninstall_button = ttk.Button(self.command_frame, text="Uninstall",
                                            command=lambda: self._perform_action("uninstall"))
-        self.uninstall_button.grid(row=0, column=2, sticky="w")
-    
+        self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5,0))
+        
+        """
+        link_font = tk.font.nametofont("TkDefaultFont").copy()
+        link_font["underline"] = 1
+        self.advanced_link = ttk.Label(self.command_frame, text="Advanced ...",
+                                       cursor="hand2",
+                                       foreground=LINK_COLOR, font=link_font)
+        #                              
+        """
+        self.advanced_button = ttk.Button(self.command_frame, text="...", width=3,
+                                          command=lambda: self._perform_action("advanced"))
+        self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5,0))
+        
         self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
         
@@ -201,8 +210,8 @@ class PipDialog(tk.Toplevel):
     def _update_list(self, data):
         self.listbox.delete(1, "end")
         self._installed_versions = {entry["name"] : entry["version"] for entry in data}
-        for name in sorted(self._installed_versions.keys(), key=lambda x: x.lower()):
-            self.listbox.insert("end", name)
+        for name in sorted(self._installed_versions.keys(), key=str.lower):
+            self.listbox.insert("end", " " + name)
         
         
     
@@ -212,9 +221,13 @@ class PipDialog(tk.Toplevel):
             if selection[0] == 0: # special first item
                 self._show_instructions()
             else:
-                self._start_show_package_info(self.listbox.get(selection[0]))
+                self._start_show_package_info(self.listbox.get(selection[0]).strip())
     
     def _on_search(self, event=None):
+        if not self._get_state() == "idle":
+            # Search box is not made inactive for busy-states
+            return
+        
         self._start_show_package_info(self.search_box.get())
     
     def _show_instructions(self):
@@ -226,7 +239,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.direct_insert("end", "Start by entering the name of the package in the search box above and pressing ENTER.\n\n")
         self.info_text.direct_insert("end", "Upgrading or uninstalling a package\n", ("caption",))
         self.info_text.direct_insert("end", 'Start by selecting the package from the left.\n\n')
-        self.listbox.select_set(0)
+        self._select_list_item(0)
     
     def _start_show_package_info(self, name):
         self.current_package_data = None
@@ -235,10 +248,11 @@ class PipDialog(tk.Toplevel):
         self.name_label.grid()
         self.command_frame.grid()
         
-        if name in self._installed_versions:
+        installed_version = self._get_installed_version(name) 
+        if installed_version is not None:
             self.name_label["text"] = name
             self.info_text.direct_insert("end", "Installed version: ", ('caption',))
-            self.info_text.direct_insert("end", self._installed_versions[name] + "\n")
+            self.info_text.direct_insert("end", installed_version + "\n")
         
         
         # Fetch info from PyPI  
@@ -301,12 +315,11 @@ class PipDialog(tk.Toplevel):
         if info.get("package_url", None):
             write_att("PyPI page", info["package_url"], "url")
         
-        self.listbox.select_clear(0, "end")
         if self._get_installed_version(info["name"]) is not None:
             self.install_button["text"] = "Upgrade"
-            self.uninstall_button.grid(row=0, column=2)
-            items = list(map(str.lower, self.listbox.get(0, "end")))
-            self.listbox.select_set(items.index(info["name"].lower()))
+            self.uninstall_button.grid(row=0, column=1)
+            
+            self._select_list_item(info["name"])
             if self._get_installed_version(info["name"]) == latest_stable_version:
                 self.install_button["state"] = "disabled"
             else: 
@@ -314,17 +327,38 @@ class PipDialog(tk.Toplevel):
         else:
             self.install_button["text"] = "Install"
             self.uninstall_button.grid_forget()
-            self.listbox.select_set(0)
+            self._select_list_item(0)
             
+    
+    def _normalize_name(self, name):
+        # looks like (in some cases?) pip list gives the name as it was used during install
+        # ie. the list may contain lowercase entry, when actual metadata has uppercase name 
+        # Example: when you "pip install cx-freeze", then "pip list"
+        # really returns "cx-freeze" although correct name is "cx_Freeze"
+        return name.lower().replace("-", "_").strip()
+    
+    def _select_list_item(self, name_or_index):
+        if isinstance(name_or_index, int):
+            index = name_or_index
+        else:
+            normalized_items = list(map(self._normalize_name, self.listbox.get(0, "end")))
+            index = normalized_items.index(self._normalize_name(name_or_index))
+        
+        self.listbox.select_clear(0, "end")
+        self.listbox.select_set(index)
+        self.listbox.see(index)
+        
+        
     
     def _perform_action(self, action):
         assert self._get_state() == "idle"
         assert self.current_package_data is not None
         data = self.current_package_data
         name = self.current_package_data["info"]["name"]
+        install_args = ["install", "--no-cache-dir"] 
         
         if action == "install":
-            args = ["install", "--no-cache-dir"]
+            args = install_args
             if self._get_installed_version(name) is not None:
                 args.append("--upgrade")
             args.append(name)
@@ -336,9 +370,17 @@ class PipDialog(tk.Toplevel):
                 return
             args = ["uninstall", "-y", name]
         elif action == "advanced":
-            args = self._ask_advanced_args(name, data)
-            if args is None: # Cancel
+            details = _ask_installation_details(self, data, 
+                        _get_latest_stable_version(list(data["releases"].keys())))
+            if details is None: # Cancel
                 return
+            
+            version, upgrade_deps = details
+            args = install_args
+            if upgrade_deps:
+                args.append("--upgrade")
+            args.append(name + "==" + version)
+            
         else:
             raise RuntimeError("Unknown action")
         
@@ -346,19 +388,12 @@ class PipDialog(tk.Toplevel):
         # following call blocks
         title = subprocess.list2cmdline(cmd)
         
-        def ready():
-            if action == "uninstall":
-                self._show_instructions() # Make the old package go away as fast as possible
-            self._start_update_list(None if action == "uninstall" else name)
-        
-        _show_subprocess_dialog(self, proc, title, ready)
+        _show_subprocess_dialog(self, proc, title)
+        if action == "uninstall":
+            self._show_instructions() # Make the old package go away as fast as possible
+        self._start_update_list(None if action == "uninstall" else name)
         
         
-    
-    def _ask_advanced_args(self, name, data):
-        # TODO: make the dialog
-        #return ["install",  "--upgrade", name]
-        return None
     
     def _handle_url_click(self, event):
         # http://stackoverflow.com/a/33957256/261181
@@ -377,9 +412,8 @@ class PipDialog(tk.Toplevel):
         self.destroy()
         
     def _get_installed_version(self, name):
-        # looks like pip list is not precise about names
         for list_name in self._installed_versions:
-            if name.lower() == list_name.lower():
+            if self._normalize_name(name) == self._normalize_name(list_name):
                 return self._installed_versions[list_name]
         
         return None
@@ -388,14 +422,12 @@ class SubprocessDialog(tk.Toplevel):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
     
-    def __init__(self, master, proc, title,
-                 ready_handler=None):
+    def __init__(self, master, proc, title):
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
         self.returncode = None
         self.cancelled = False
-        self._ready_handler = ready_handler
         
         tk.Toplevel.__init__(self, master)
         
@@ -406,20 +438,25 @@ class SubprocessDialog(tk.Toplevel):
             master.winfo_rootx() + master.winfo_width() // 2 - width//2,
             master.winfo_rooty() + master.winfo_height() // 2 - height//2))
 
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        main_frame = ttk.Frame(self) # To get styled background
+        main_frame.grid()
+
         text_font=tk.font.nametofont("TkFixedFont").copy()
         text_font["size"] = int(text_font["size"] * 0.7)
-        text_frame = tktextext.TextFrame(self, read_only=True, horizontal_scrollbar=False,
+        text_frame = tktextext.TextFrame(main_frame, read_only=True, horizontal_scrollbar=False,
                                          background=ui_utils.get_button_face_color(),
                                          font=text_font,
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
         self.text = text_frame.text
         
-        self.button = ttk.Button(self, text="Cancel", command=self._close)
+        self.button = ttk.Button(main_frame, text="Cancel", command=self._close)
         self.button.grid(row=1, column=0, pady=(0,15))
         
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
         
 
         self.title(title)
@@ -465,8 +502,8 @@ class SubprocessDialog(tk.Toplevel):
             else:
                 self.button["text"] = "OK"
                 self.button.focus_set()
-                if self._ready_handler is not None:
-                    self._ready_handler()
+                if self.returncode == 0:
+                    self._close()
         
         poll_output_events()
         
@@ -485,6 +522,92 @@ class SubprocessDialog(tk.Toplevel):
         else:
             self.destroy()
         
+class DetailsDialog(tk.Toplevel):
+    def __init__(self, master, package_metadata, selected_version):
+        tk.Toplevel.__init__(self, master)
+        self.result = None
+        
+        self.title("Advanced install / upgrade / downgrade")
+
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        main_frame = ttk.Frame(self) # To get styled background
+        main_frame.grid()
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        
+        version_label = ttk.Label(main_frame, text="Desired version")
+        version_label.grid(row=0, column=0, columnspan=2, padx=20, pady=(15,0), sticky="w")
+        
+        def version_sort_key(s):
+            # Trying to massage understandable versions into valid StrictVersions
+            if s.replace(".", "").isnumeric(): # stable release
+                s2 = s + "b999" # make it latest beta version
+            elif "rc" in s:
+                s2 = s.replace("rc", "b8")
+            else:
+                s2 = s
+            try:
+                return StrictVersion(s2)
+            except:
+                # use only numbers
+                nums = re.findall(r"\d+", s)
+                while len(nums) < 2:
+                    nums.append("0")
+                return StrictVersion(".".join(nums[:3]))
+        
+        version_strings = list(package_metadata["releases"].keys())
+        version_strings.sort(key=version_sort_key, reverse=True)
+        self.version_combo = ttk.Combobox(main_frame, values=version_strings,
+                              exportselection=False)
+        try:
+            self.version_combo.current(version_strings.index(selected_version))
+        except:
+            pass
+        
+        self.version_combo.state(['!disabled', 'readonly'])
+        self.version_combo.grid(row=1, column=0, columnspan=2, pady=(0,15),
+                                padx=20, sticky="ew")
+        
+        
+        self.update_deps_var = tk.IntVar()
+        self.update_deps_var.set(0)
+        self.update_deps_cb = ttk.Checkbutton(main_frame, text="Upgrade dependencies",
+                                              variable=self.update_deps_var)
+        self.update_deps_cb.grid(row=2, column=0, columnspan=2, padx=20, sticky="w")
+        
+        self.ok_button = ttk.Button(main_frame, text="Install", command=self._ok)
+        self.ok_button.grid(row=3, column=0, pady=15, padx=(20, 0), sticky="se")
+        self.cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self.cancel_button.grid(row=3, column=1, pady=15, padx=(5,20), sticky="se")
+        
+        
+
+        if misc_utils.running_on_mac_os():
+            self.configure(background="systemSheetBackground")
+        #self.resizable(height=tk.FALSE, width=tk.FALSE)
+        self.transient(master)
+        self.grab_set() # to make it active and modal
+        self.version_combo.focus_set()
+        
+        
+        self.bind('<Escape>', self._cancel, True)  
+        self.protocol("WM_DELETE_WINDOW", self._cancel)
+        
+        # Position
+        self.update_idletasks()
+        self.geometry("+%d+%d" % (
+            master.winfo_rootx() + master.winfo_width() // 2 - self.winfo_width()//2,
+            master.winfo_rooty() + master.winfo_height() // 2 - self.winfo_height()//2))
+        
+    
+    def _ok(self, event=None):
+        self.result = self.version_combo.get(), bool(self.update_deps_var.get())
+        self.destroy()
+    
+    def _cancel(self, event=None):
+        self.result = None
+        self.destroy()
         
 def _fetch_url_future(url, timeout=10):
     def load_url():
@@ -512,37 +635,27 @@ def _create_pip_process(args):
                             env=env, universal_newlines=True, encoding=encoding),
             cmd)
 
-def _execute_system_command_and_wait(cmd):
-    encoding = "UTF-8"
-    env = {"PYTHONIOENCODING" : encoding,
-           "PYTHONUNBUFFERED" : "1"}
-    
-    try:
-        output = subprocess.check_output(cmd,
-                            stderr=subprocess.STDOUT, env=env,
-                            universal_newlines=True, encoding=encoding)
-        return (0, output)
-    except subprocess.CalledProcessError as e:
-        return (e.returncode, e.output)
-    
-
 def _get_latest_stable_version(version_strings):
     versions = []
     for s in version_strings:
         if s.replace(".", "").isnumeric(): # Assuming stable versions have only dots and numbers
-            versions.append(LooseVersion(s))
+            versions.append(LooseVersion(s)) # LooseVersion __str__ doesn't change the version string
     
     if len(versions) == 0:
         return None
-        #versions = [LooseVersion(v) for v in version_strings]
         
     return str(sorted(versions)[-1])
 
 
-def _show_subprocess_dialog(master, proc, title, ready_handler=None):
-    dlg = SubprocessDialog(master, proc, title, ready_handler)
+def _show_subprocess_dialog(master, proc, title):
+    dlg = SubprocessDialog(master, proc, title)
     dlg.wait_window()
 
+
+def _ask_installation_details(master, data, selected_version):
+    dlg = DetailsDialog(master, data, selected_version)
+    dlg.wait_window()
+    return dlg.result
 
 def load_plugin():
     def open_pip_gui(*args):
