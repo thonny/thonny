@@ -18,6 +18,7 @@ import json
 from distutils.version import LooseVersion, StrictVersion
 import logging
 import re
+from tkinter.filedialog import askopenfilename
 
 LINK_COLOR="#3A66DD"
 
@@ -31,8 +32,8 @@ class PipDialog(tk.Toplevel):
         tk.Toplevel.__init__(self, master)
         
         
-        width = 700
-        height = 350
+        width = 720
+        height = 370
         self.geometry("%dx%d+%d+%d" % (width, height,
             master.winfo_rootx() + master.winfo_width() // 2 - width//2,
             master.winfo_rooty() + master.winfo_height() // 2 - height//2))
@@ -123,6 +124,10 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
         self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
+        self.info_text.tag_configure("install_file", foreground=LINK_COLOR, underline=True)
+        self.info_text.tag_bind("install_file", "<ButtonRelease-1>", self._handle_install_file_click)
+        self.info_text.tag_bind("install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
+        self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
         self.info_text.configure(background=ui_utils.get_button_face_color(),
                                  font=tk.font.nametofont("TkDefaultFont"),
@@ -235,10 +240,18 @@ class PipDialog(tk.Toplevel):
         self.name_label.grid_remove()
         self.command_frame.grid_remove()
         self.info_text.direct_delete("1.0", "end")
-        self.info_text.direct_insert("end", "Installing a package\n", ("caption",))
-        self.info_text.direct_insert("end", "Start by entering the name of the package in the search box above and pressing ENTER.\n\n")
-        self.info_text.direct_insert("end", "Upgrading or uninstalling a package\n", ("caption",))
-        self.info_text.direct_insert("end", 'Start by selecting the package from the left.\n\n')
+        self.info_text.direct_insert("end", "Install from PyPI\n", ("caption",))
+        self.info_text.direct_insert("end", "If you don't know where to get the package from, "
+                                     + "then most likely you'll want to search the Python Package Index. "
+                                     + "Start by entering the name of the package in the search box above and pressing ENTER.\n\n")
+        
+        self.info_text.direct_insert("end", "Install from local file\n", ("caption",))
+        self.info_text.direct_insert("end", "Click ")
+        self.info_text.direct_insert("end", "here", ("install_file",))
+        self.info_text.direct_insert("end", " to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n\n")
+        
+        self.info_text.direct_insert("end", "Upgrade or uninstall\n", ("caption",))
+        self.info_text.direct_insert("end", 'Start by selecting the package from the left.')
         self._select_list_item(0)
     
     def _start_show_package_info(self, name):
@@ -380,7 +393,6 @@ class PipDialog(tk.Toplevel):
             if upgrade_deps:
                 args.append("--upgrade")
             args.append(name + "==" + version)
-            
         else:
             raise RuntimeError("Unknown action")
         
@@ -395,18 +407,28 @@ class PipDialog(tk.Toplevel):
         
         
     
+    def _handle_install_file_click(self, event):
+        filename = askopenfilename (
+            filetypes = [('Package', '.whl .zip .tar.gz'), ('all files', '.*')], 
+            initialdir = get_workbench().get_option("run.working_directory")
+        )
+        if filename: # Note that missing filename may be "" or () depending on tkinter version
+            self._install_local_file(filename)
+    
+    def _install_local_file(self, filename):
+        args = ["install", filename]
+        proc, cmd = _create_pip_process(args)
+        # following call blocks
+        title = subprocess.list2cmdline(cmd)
+        
+        _show_subprocess_dialog(self, proc, title)
+        # TODO: how to show this package???
+        self._start_update_list()
+    
     def _handle_url_click(self, event):
-        # http://stackoverflow.com/a/33957256/261181
-        try:
-            index = self.info_text.index("@%s,%s" % (event.x, event.y))
-            tag_indices = list(self.info_text.tag_ranges('url'))
-            for start, end in zip(tag_indices[0::2], tag_indices[1::2]):
-                # check if the tag matches the mouse click index
-                if self.info_text.compare(start, '<=', index) and self.info_text.compare(index, '<', end):
-                    url = self.info_text.get(start, end)
-                    webbrowser.open(url)
-        except:
-            logging.exception("URL clicking")
+        url = _extract_click_text(self.info_text, event, "url")
+        if url is not None:
+            webbrowser.open(url)
     
     def _on_close(self, event=None):
         self.destroy()
@@ -656,6 +678,21 @@ def _ask_installation_details(master, data, selected_version):
     dlg = DetailsDialog(master, data, selected_version)
     dlg.wait_window()
     return dlg.result
+
+
+def _extract_click_text(widget, event, tag):
+    # http://stackoverflow.com/a/33957256/261181
+    try:
+        index = widget.index("@%s,%s" % (event.x, event.y))
+        tag_indices = list(widget.tag_ranges(tag))
+        for start, end in zip(tag_indices[0::2], tag_indices[1::2]):
+            # check if the tag matches the mouse click index
+            if widget.compare(start, '<=', index) and widget.compare(index, '<', end):
+                return widget.get(start, end)
+    except:
+        logging.exception("extracting click text")
+        return None
+
 
 def load_plugin():
     def open_pip_gui(*args):
