@@ -87,9 +87,16 @@ class AboutDialog(tk.Toplevel):
                                   + "It is free software, and you are welcome to\n"
                                   + "redistribute it under certain conditions, see\n"
                                   + "https://opensource.org/licenses/MIT\n"
-                                  + "for details\n",
+                                  + "for details",
                                   justify=tk.CENTER, font=license_font)
         license_label.grid()
+        credits_label = ttk.Label(main_frame, text="Credits",
+                              cursor="hand2",
+                              foreground="blue",
+                              font=url_font,)
+        credits_label.grid(pady=(0,10))
+        credits_label.bind("<Button-1>", lambda _:webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CREDITS.rst"))
+        
         
         ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
         ok_button.grid(pady=(0,15))
@@ -117,7 +124,9 @@ def load_plugin():
     def open_about(*args):
         AboutDialog(get_workbench(), get_workbench().get_version())
         
-    get_workbench().add_command("about", "help", "About Thonny", open_about)
+    get_workbench().add_command("changelog", "help", "Version history",
+                                lambda: webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CHANGELOG.rst"), group=60)
+    get_workbench().add_command("about", "help", "About Thonny", open_about, group=61)
     
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)
