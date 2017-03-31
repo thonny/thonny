@@ -476,7 +476,7 @@ class SubprocessDialog(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         main_frame = ttk.Frame(self) # To get styled background
-        main_frame.grid()
+        main_frame.grid(sticky="nsew")
 
         text_font=tk.font.nametofont("TkFixedFont").copy()
         text_font["size"] = int(text_font["size"] * 0.7)

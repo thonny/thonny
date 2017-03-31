@@ -10,7 +10,6 @@ import tkinter as tk
 import tkinter.messagebox as tkMessageBox
 import traceback
 
-import ctypes
 import textwrap
 import re
 
