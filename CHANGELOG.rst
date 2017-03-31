@@ -17,14 +17,14 @@ Unreleased
 * FIXED #114: Crash when trying to change interpreter in macOS.
 * FIXED #142: "Open system shell" failed when Thonny path had spaces in it. Paths are now properly quoted.
 * FIXED #159: Debugging list or set comprehension caused crash
-* FIXED #187: Main modules launched by Thonny were missing `__spec__` attribute.
+* FIXED #187: Main modules launched by Thonny were missing ``__spec__`` attribute.
 * FIXED #195: Debugger crashes when using generators.
 * FIXED #201: "Tools => Open Thonny data folder" now works also in macOS.
-* FIXED #211: Linux installer was failing when using `xdg-user-dir` (thanks to Ryan McQuen)
+* FIXED #211: Linux installer was failing when using ``xdg-user-dir`` (thanks to Ryan McQuen)
 * FIXED: Event logger did not save filenames (eb34c5d).
 * FIXED: Problem in replayer (db78855).
 * TECHNICAL: Bundled Jedi version has been upgraded to 0.10.0.
-* TECHNICAL: 3rd party Thonny plugins must now be under `thonnycontrib` namespace package.
+* TECHNICAL: 3rd party Thonny plugins must now be under ``thonnycontrib`` namespace package.
 * TECHNICAL: Introduced the concept of "eary plugins" (plugins, which get loaded before initializing the runner).
 * TECHNICAL: Refactored the interface between GUI and backend to allow different backend implementations
 * TECHNICAL: Previously, with bundled Python, Thonny was using nasty tricks to force pip install packages install under ~/.thonny. Now it creates a proper virtual environment under ~/.thonny and uses this as the backend by default (instead of using interpreter running the GUI directly).
@@ -36,7 +36,7 @@ Unreleased
 * FIXED: Another take on configuration file corruption. 
 * FIXED: Shift-Tab wasn’t working in some cases.
 * FIXED #165: "Open system shell" did not add Scripts dir to PATH in Windows. 
-* FIXED #183: `from __future__ import` crashed the debugger.
+* FIXED #183: ``from __future__ import`` crashed the debugger.
 
 2.0.6 (2017-01-06)
 ==================
