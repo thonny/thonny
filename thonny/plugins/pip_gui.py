@@ -20,6 +20,9 @@ import logging
 import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
+from thonny.misc_utils import running_on_windows
+from time import sleep
+import signal
 
 LINK_COLOR="#3A66DD"
 
@@ -466,6 +469,7 @@ class SubprocessDialog(tk.Toplevel):
         self.stderr = ""
         self.returncode = None
         self.cancelled = False
+        self._event_queue = collections.deque()
         
         tk.Toplevel.__init__(self, master)
 
@@ -508,8 +512,7 @@ class SubprocessDialog(tk.Toplevel):
         self._start_listening()
     
     def _start_listening(self):
-        event_queue = collections.deque()
-        
+       
         def listen_stream(stream_name):
             stream = getattr(self._proc, stream_name)
             while True:
@@ -517,7 +520,7 @@ class SubprocessDialog(tk.Toplevel):
                 if data == '':
                     break
                 else:
-                    event_queue.append((stream_name, data))
+                    self._event_queue.append((stream_name, data))
                     setattr(self, stream_name, getattr(self, stream_name) + data)
             
             self.returncode = self._proc.wait()
@@ -527,8 +530,8 @@ class SubprocessDialog(tk.Toplevel):
             threading.Thread(target=listen_stream, args=["stderr"]).start()
         
         def poll_output_events():
-            while len(event_queue) > 0:
-                stream_name, data = event_queue.popleft()
+            while len(self._event_queue) > 0:
+                stream_name, data = self._event_queue.popleft()
                 self.text.direct_insert("end", data, tags=(stream_name, ))
                 self.text.see("end")
             
@@ -548,12 +551,35 @@ class SubprocessDialog(tk.Toplevel):
             self._close(event)        
 
     def _close(self, event=None):
-        if (self._proc.poll() is None
-            and not messagebox.askyesno("Cancel the process?",
-                "The process is still running.\nAre you sure you want to cancel?")):
-            self._proc.kill()
-            self.cancelled = True
-            return
+        if self._proc.poll() is None:
+            if messagebox.askyesno("Cancel the process?",
+                "The process is still running.\nAre you sure you want to cancel?"):
+                # try gently first
+                try:
+                    if running_on_windows():
+                        self._proc.send_signal(signal.CTRL_BREAK_EVENT) # alternative: CTRL_C_EVENT
+                    else:
+                        self._proc.terminate()
+                        
+                    sleep(1) # wait a bit
+                except:
+                    pass
+                
+                if self._proc.poll() is None:
+                    # now let's be more concrete
+                    self._proc.kill()
+                
+                self.cancelled = True
+                # fetch output about cancelling
+                while len(self._event_queue) > 0:
+                    stream_name, data = self._event_queue.popleft()
+                    self.text.direct_insert("end", data, tags=(stream_name, ))
+                self.text.direct_insert("end", "\n\nPROCESS CANCELLED")
+                self.text.see("end")
+                    
+                    
+            else:
+                return
         else:
             self.destroy()
         
