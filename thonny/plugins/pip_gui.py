@@ -348,7 +348,9 @@ class PipDialog(tk.Toplevel):
         # ie. the list may contain lowercase entry, when actual metadata has uppercase name 
         # Example: when you "pip install cx-freeze", then "pip list"
         # really returns "cx-freeze" although correct name is "cx_Freeze"
-        return name.lower().replace("-", "_").strip()
+        
+        # https://www.python.org/dev/peps/pep-0503/#id4
+        return re.sub(r"[-_.]+", "-", name).lower().strip()
     
     def _select_list_item(self, name_or_index):
         if isinstance(name_or_index, int):
