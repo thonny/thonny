@@ -32,13 +32,6 @@ class PipDialog(tk.Toplevel):
         
         tk.Toplevel.__init__(self, master)
         
-        
-        width = 720
-        height = 370
-        self.geometry("%dx%d+%d+%d" % (width, height,
-            master.winfo_rootx() + master.winfo_width() // 2 - width//2,
-            master.winfo_rooty() + master.winfo_height() // 2 - height//2))
-
         main_frame = ttk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
         self.rowconfigure(0, weight=1)
@@ -47,7 +40,6 @@ class PipDialog(tk.Toplevel):
         self.title("Manage packages for C:\\Users\\Aivar\\.thonny\\BundledPython36\\python.exe")
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
-        #self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(master)
         self.grab_set() # to make it active
         #self.grab_release() # to allow eg. copy something from the editor 
@@ -58,9 +50,9 @@ class PipDialog(tk.Toplevel):
         
         self.bind('<Escape>', self._on_close, True) 
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        
-        #self.listbox.selection_set(0)
         self._show_instructions()
+        ui_utils.center_window(self, master)
+        
         self._start_update_list()
     
     
@@ -92,7 +84,8 @@ class PipDialog(tk.Toplevel):
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
         
-        self.listbox = tk.Listbox(listframe, activestyle="dotbox", width=20,
+        self.listbox = tk.Listbox(listframe, activestyle="dotbox", 
+                                  width=20, height=10,
                                   background=ui_utils.CALM_WHITE,
                                   selectborderwidth=0, relief="flat",
                                   highlightthickness=0, borderwidth=0)
@@ -117,7 +110,8 @@ class PipDialog(tk.Toplevel):
 
         
         info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
-                                              horizontal_scrollbar=False)
+                                              horizontal_scrollbar=False,
+                                              width=60, height=10)
         info_text_frame.configure(borderwidth=1)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         self.info_text = info_text_frame.text
@@ -286,7 +280,6 @@ class PipDialog(tk.Toplevel):
                 try:
                     _, bin_data = url_future.result()
                     raw_data = bin_data.decode("UTF-8")
-                    # TODO: check for 404
                     self._show_package_info(json.loads(raw_data))
                 except urllib.error.HTTPError as e:
                     self._show_package_info(None, e.code)
@@ -475,13 +468,6 @@ class SubprocessDialog(tk.Toplevel):
         self.cancelled = False
         
         tk.Toplevel.__init__(self, master)
-        
-        
-        width = 400
-        height = 250
-        self.geometry("%dx%d+%d+%d" % (width, height,
-            master.winfo_rootx() + master.winfo_width() // 2 - width//2,
-            master.winfo_rooty() + master.winfo_height() // 2 - height//2))
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -496,6 +482,8 @@ class SubprocessDialog(tk.Toplevel):
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
         self.text = text_frame.text
+        self.text["width"] = 60
+        self.text["height"] = 7
         
         self.button = ttk.Button(main_frame, text="Cancel", command=self._close)
         self.button.grid(row=1, column=0, pady=(0,15))
@@ -515,6 +503,8 @@ class SubprocessDialog(tk.Toplevel):
         
         self.bind('<Escape>', self._close_if_done, True) # escape-close only if process has completed 
         self.protocol("WM_DELETE_WINDOW", self._close)
+        ui_utils.center_window(self, master)
+        
         self._start_listening()
     
     def _start_listening(self):
@@ -577,7 +567,7 @@ class DetailsDialog(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         main_frame = ttk.Frame(self) # To get styled background
-        main_frame.grid()
+        main_frame.grid(sticky="nsew")
         main_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
         
@@ -639,11 +629,7 @@ class DetailsDialog(tk.Toplevel):
         self.bind('<Escape>', self._cancel, True)  
         self.protocol("WM_DELETE_WINDOW", self._cancel)
         
-        # Position
-        self.update_idletasks()
-        self.geometry("+%d+%d" % (
-            master.winfo_rootx() + master.winfo_width() // 2 - self.winfo_width()//2,
-            master.winfo_rooty() + master.winfo_height() // 2 - self.winfo_height()//2))
+        ui_utils.center_window(self, master)
         
     
     def _ok(self, event=None):

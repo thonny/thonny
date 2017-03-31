@@ -864,3 +864,17 @@ def get_dialog_background_color():
         return "systemSheetBackground"
     else: 
         return "SystemButtonFace"
+
+def center_window(win, master=None):
+    # looks like it doesnt take window border into account
+    win.update_idletasks()
+    
+    if master is None:
+        left = win.winfo_screenwidth() - win.winfo_width() // 2
+        top = win.winfo_screenheight() - win.winfo_height() // 2
+    else:
+        left = master.winfo_rootx() + master.winfo_width() // 2 - win.winfo_width() // 2
+        top = master.winfo_rooty() + master.winfo_height() // 2 - win.winfo_height() // 2
+        
+    win.geometry("+%d+%d" % (left, top))
+    

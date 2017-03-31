@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
 
-from thonny import misc_utils
+from thonny import misc_utils, ui_utils
 from thonny.misc_utils import get_python_version_string
 from thonny.globals import get_workbench
 
@@ -16,10 +16,6 @@ class AboutDialog(tk.Toplevel):
     def __init__(self, master, version):
         tk.Toplevel.__init__(self, master)
         
-        #self.geometry("200x200")
-        # TODO: position in the center of master
-        self.geometry("+%d+%d" % (master.winfo_rootx() + master.winfo_width() // 2 - 50,
-                                  master.winfo_rooty() + master.winfo_height() // 2 - 150))
 
         main_frame = ttk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
@@ -100,7 +96,9 @@ class AboutDialog(tk.Toplevel):
         ok_button.focus_set()
         
         self.bind('<Return>', self._ok, True) 
-        self.bind('<Escape>', self._ok, True) 
+        self.bind('<Escape>', self._ok, True)
+        
+        ui_utils.center_window(self, master)        
         self.wait_window()
         
     def _ok(self, event=None):
