@@ -49,7 +49,34 @@ Unreleased
 2.0.4 (2016-10-26)
 ==================
 * FIXED: Configuration file was occasionally getting corrupted (for mysterious reasons, maybe a bug in Python’s configparser)
+* FIXED #104: Negative font size crashed Thonny
+* FIXED #143: Linux installer fails if desktop isn't named "Desktop". (Later turned out this wasn't fixed for all cases). 
 
 2.0.3 (2016-09-30)
 ==================
+* FIXED: Quoting in "Open system shell" in Mac. Again. 
+
+2.0.2 (2016-09-30)
+==================
+* FIXED: Quoting in "Open system shell" in Mac. 
+
+2.0.1 (2016-09-30)
+==================
+* FIXED #106: Don't let user logs grow too big
+
+2.0.0 (2016-09-29)
+==================
+* NEW: Added code completion (powered by Jedi: https://github.com/davidhalter/jedi)
+* NEW: Added new command "Tools => Open system shell" which opens terminal where current Python is in PATH.
+* CHANGED: Single instance mode is now optional (Tools => Options => General)
+* FIXED: Many bugs
+
+1.2.0b2 (2016-02-10)
+====================
+* NEW: Thonny now runs in single instance mode. Previously, when you opened a py file with Thonny, a new Thonny instance (window) was created even if an instance existed already. This became nuisance if you opened several files. Now Thonny works as single instance program, meaning only one instance of Thonny runs at the time. When you open another file, it is opened in existing window.
+* NEW: Editor enhancements. Added option to show line numbers and right margin in the editor. In order to keep first impression cleaner, they are disabled by default. See Tools => Options => Editor. Don't forget that you don't need line numbers for locating lines mentioned in error messages -- you can click them and Thonny shows you the line.
+* FIXED: Some bugs where Thonny couldn't prepare some programs for debugging.
+
+Older versions
+==============
 See https://bitbucket.org/plas/thonny/issues/ and https://bitbucket.org/plas/thonny/commits/ for details 
