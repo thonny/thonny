@@ -559,6 +559,7 @@ class TextFrame(ttk.Frame):
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
                                background='#e0e0e0', foreground='#999999',
+                               selectbackground='#e0e0e0', selectforeground='#999999',
                                cursor='arrow',
                                state='disabled'
                                )
