@@ -22,7 +22,8 @@ copy ..\turtle.cfg %BUILDDIR%\Lib>NUL
 %BUILDDIR%\python -m pip install --upgrade --pre --no-cache-dir thonny
 
 @echo ............... CLEANING PYTHON ............................
-move %BUILDDIR%\LICENSE.txt %BUILDDIR%\PYTHON-LICENSE.txt>NUL
+@rem delete following 3 files to avoid confusion (user may think they're Thonny license etc.)
+del %BUILDDIR%\LICENSE.txt>NUL
 del %BUILDDIR%\README.txt>NUL
 del %BUILDDIR%\NEWS.txt>NUL
 
@@ -57,7 +58,14 @@ rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 @REM call EnableDPIAwareness %PREFIX%\pythonw.exe
 
 @echo ............... ADDING LICENSES ...................................
-copy ..\..\*LICENSE.txt %BUILDDIR% /Y>NUL
+copy ..\..\LICENSE.txt %BUILDDIR% /Y>NUL
+mkdir %BUILDDIR%\licenses
+xcopy ..\..\licenses\* %BUILDDIR%\licenses /S /E /K>NUL
+
+@echo ............... ADDING OTHER STUFF ...................................
+copy ..\..\CHANGELOG.rst %BUILDDIR% /Y>NUL
+copy ..\..\CREDITS.rst %BUILDDIR% /Y>NUL
+copy ..\..\README.rst %BUILDDIR% /Y>NUL
 
 
 @echo ............... CREATING INSTALLER ..........................
