@@ -21,9 +21,9 @@ class EventLogger:
         get_workbench().add_command(
             "export_usage_logs",
             "tools",
-            "Export usage logs ...",
+            "Export usage logs...",
             self._cmd_export,
-            group=60
+            group=110
         )
 
     

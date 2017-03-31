@@ -190,5 +190,5 @@ def load_plugin():
     def open_system_shell_for_selected_interpreter(): 
         open_system_shell()
     
-    get_workbench().add_command("OpenSystemShell", "tools", "Open system shell",
+    get_workbench().add_command("OpenSystemShell", "tools", "Open system shell...",
                     open_system_shell_for_selected_interpreter, group=80)

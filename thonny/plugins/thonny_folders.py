@@ -23,14 +23,14 @@ def open_path_in_system_file_manager(path):
 
 
 def load_plugin():
-    def cmd_open_user_dir():
+    def cmd_open_data_dir():
         open_path_in_system_file_manager(THONNY_USER_DIR)
         
-    def cmd_open_package_dir():
+    def cmd_open_program_dir():
         open_path_in_system_file_manager(get_workbench().get_package_dir())
         
-    get_workbench().add_command("open_package_dir", "tools", "Open Thonny package folder",
-                                cmd_open_package_dir, group=70)
-    get_workbench().add_command("open_user_dir", "tools", "Open Thonny user folder",
-                                cmd_open_user_dir, group=70)
+    get_workbench().add_command("open_program_dir", "tools", "Open Thonny program folder...",
+                                cmd_open_program_dir, group=110)
+    get_workbench().add_command("open_data_dir", "tools", "Open Thonny data folder...",
+                                cmd_open_data_dir, group=110)
     

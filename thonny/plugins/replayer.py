@@ -337,5 +337,6 @@ def load_plugin():
     get_workbench().add_option("tools.replayer_last_browser_folder", None)
     if (get_workbench().get_option("debug_mode")
         or get_workbench().get_option("expert_mode")):
-        get_workbench().add_command("open_replayer", "tools", "Open replayer", 
-                                open_replayer)
+        get_workbench().add_command("open_replayer", "tools", "Open replayer...", 
+                                open_replayer,
+                                group=110)

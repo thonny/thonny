@@ -269,7 +269,7 @@ class Workbench(tk.Tk):
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>"))
         
         
-        self.add_command("show_options", "tools", "Options ...", self._cmd_show_options)
+        self.add_command("show_options", "tools", "Options...", self._cmd_show_options)
         self.createcommand("::tk::mac::ShowPreferences", self._cmd_show_options)
         
         self.add_command("increase_font_size", "view", "Increase font size",
