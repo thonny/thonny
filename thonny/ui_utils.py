@@ -749,4 +749,51 @@ def center_window(win, master=None):
         top = master.winfo_rooty() + master.winfo_height() // 2 - win.winfo_height() // 2
         
     win.geometry("+%d+%d" % (left, top))
+
+class BusyTk(tk.Tk):
+    def __init__(self, async_result, description, title="Please wait!"):
+        self._async_result = async_result
+        tk.Tk.__init__(self)
+        self.update_idletasks()
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        win_width = screen_width // 3
+        win_height = screen_height // 3
+        x = screen_width//2 - win_width//2
+        y = screen_height//2 - win_height//2
+        self.geometry("%dx%d+%d+%d" % (win_width, win_height, x, y))        
+        
+        main_frame = ttk.Frame(self)
+        main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
+        main_frame.rowconfigure(0, weight=1)
+        main_frame.columnconfigure(0, weight=1)
+        self.title(title)
+        self.resizable(height=tk.FALSE, width=tk.FALSE)
+        self.protocol("WM_DELETE_WINDOW", self._ok)
+        self.desc_label = ttk.Label(main_frame, text=description)
+        self.desc_label.grid(padx=20, pady=20, sticky="nsew")
+        
+        self.update_idletasks()
+        self.after(500, self._poll)
     
+    def _poll(self):
+        if self._async_result.ready():
+            self._ok()
+        else:
+            self.after(500, self._poll)
+            self.desc_label["text"] = self.desc_label["text"] + "."
+    
+    def _ok(self):
+        self.destroy() 
+
+
+def run_with_busy_window(action, args=(), description=""):
+    # http://stackoverflow.com/a/14299004/261181
+    from multiprocessing.pool import ThreadPool
+    pool = ThreadPool(processes=1)
+    
+    async_result = pool.apply_async(action, args) 
+    dlg = BusyTk(async_result, description=description)
+    dlg.mainloop()
+    
+    return async_result.get()  
