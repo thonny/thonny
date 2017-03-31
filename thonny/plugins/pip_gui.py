@@ -37,7 +37,7 @@ class PipDialog(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.title("Manage packages for C:\\Users\\Aivar\\.thonny\\BundledPython36\\python.exe")
+        self.title("Manage packages for " + get_runner().get_interpreter_command())
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.transient(master)
