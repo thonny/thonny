@@ -1,3 +1,0 @@
-[gui_scripts]
-thonny = thonny:launch
-

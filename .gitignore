@@ -31,6 +31,8 @@ packaging/mac/out.txt
 packaging/mac/build
 packaging/windows/pythonny
 packaging/setuptools/*.zip
+packaging/setuptools/*.tar.gz
+packaging/setuptools/*.whl
 packaging/mac/freezing.log
 thonny.egg-info
 temp_build_dir
