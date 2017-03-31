@@ -19,8 +19,10 @@ setup(
       name="thonny",
       version=version,
       description="Python IDE for beginners",
+      long_description="Thonny is a simple Python IDE with features useful for learning programming. See http://thonny.org for more info.",
       url="http://thonny.org",
       author="Aivar Annamaa and others",
+      author_email="thonny@googlegroups.com",
       license="MIT",
       classifiers=[
         "Development Status :: 5 - Production/Stable",
@@ -49,6 +51,7 @@ setup(
         "Topic :: Text Editors",
       ],
       keywords="IDE education debugger",
+      platforms=["Windows", "macOS", "Linux"],
       install_requires=requirements,
       python_requires=">=3.4",
       packages=["thonny",
