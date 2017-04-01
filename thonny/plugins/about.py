@@ -13,7 +13,7 @@ from thonny.misc_utils import get_python_version_string
 from thonny.globals import get_workbench
 
 class AboutDialog(tk.Toplevel):
-    def __init__(self, master, version):
+    def __init__(self, master, version_str):
         tk.Toplevel.__init__(self, master)
         
 
@@ -33,10 +33,6 @@ class AboutDialog(tk.Toplevel):
         
         #bg_frame = ttk.Frame(self) # gives proper color in aqua
         #bg_frame.grid()
-        
-        version_str = "%d.%d.%d" % version.version
-        if version.prerelease:
-            version_str += "".join(map(str, version.prerelease))
         
         heading_font = font.nametofont("TkHeadingFont").copy()
         heading_font.configure(size=19, weight="bold")
@@ -122,7 +118,7 @@ class AboutDialog(tk.Toplevel):
 
 def load_plugin():
     def open_about(*args):
-        AboutDialog(get_workbench(), get_workbench().get_version())
+        AboutDialog(get_workbench(), get_workbench().get_version_str())
         
     get_workbench().add_command("changelog", "help", "Version history",
                                 lambda: webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CHANGELOG.rst"), group=60)
