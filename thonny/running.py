@@ -27,6 +27,9 @@ import shlex
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
+import shutil
+import time
+import logging
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
 
@@ -406,7 +409,70 @@ class CPythonProxy(BackendProxy):
             self._proc.kill()
             self._proc = None
             self._message_queue = None
+    
+    def _prepare_launcher(self):
+        """Make jedi and required Thonny files available for the backend.
         
+        I could prepare a special directory for this under thonny package (in thonny distribution), but
+            - some files are required both by frontend and backend
+            - jedi is required by the backend and I don't want to include it in thonny package
+            - I don't want to duplicate files in distribution 
+            - I don't want the distribution to require any preprocessing before running 
+        
+        For these reasons I decided that files required by the backend will be copied from 
+        main original locations to a directory under THONNY_USER_DIR
+        *after* installation, at runtime. As an optimization I won't re-copy if correct version
+        is already in correct location. 
+        """
+        
+        launch_dir = os.path.join(THONNY_USER_DIR, "backend")
+        LAUNCHER_NAME = "backend_launcher.py"
+        launcher_path = os.path.join(launch_dir, LAUNCHER_NAME)
+        ver_file = os.path.join(launch_dir, "thonny", "VERSION")
+        
+        # if thonny VERSION file exists and is same as current version,
+        # then we're done
+        if os.path.exists(ver_file):
+            with open(ver_file) as f:
+                if f.read().strip() == get_workbench().get_version_str():
+                    return launcher_path 
+        
+        # Required stuff is not copied or is not meant for this Thonny version.
+        print("(re)creating backend launch dir")
+        # First delete old version (if it exists)
+        if os.path.exists(launch_dir):
+            try:
+                shutil.rmtree(launch_dir)
+            except:
+                logging.exception("Failure deleting old launch dir")
+                time.sleep(0.5) # wait and try again, because shutil.rmtree has sporadic failures on windows
+                shutil.rmtree(launch_dir, True)
+        
+        # Prepare launch directory
+        os.makedirs(launch_dir, 0o700, True)
+        
+        # Copy thonny stuff
+        thonny_source_dir = get_workbench().get_package_dir()
+        
+        # launch file sits originally in thonny package 
+        # but for backend it will be in right in launch directory
+        shutil.copyfile(os.path.join(thonny_source_dir, LAUNCHER_NAME),
+                        os.path.join(launch_dir, LAUNCHER_NAME))
+        
+        # Copy relevant parts of thonny package
+        thonny_dest_dir = os.path.join(launch_dir, "thonny")
+        os.mkdir(thonny_dest_dir, 0o700)
+        for name in ["__init__.py", "backend.py", "ast_utils.py", "common.py", "VERSION"]:
+            shutil.copyfile(os.path.join(thonny_source_dir, name),
+                            os.path.join(thonny_dest_dir, name))
+        
+        # Copy jedi
+        import jedi
+        shutil.copytree(jedi.__path__[0], os.path.join(launch_dir, "jedi"))
+            
+        # done
+        return launcher_path
+    
     def _start_new_process(self, cmd):
         self._message_queue = collections.deque()
     
@@ -429,9 +495,7 @@ class CPythonProxy(BackendProxy):
                             % self._executable)
         
         
-        backend_launcher = os.path.join(get_workbench().get_package_dir(), 
-                                        "shared",
-                                        "thonny_backend.py") 
+        backend_launcher = self._prepare_launcher() 
         
         cmd_line = [
             self._executable, 
