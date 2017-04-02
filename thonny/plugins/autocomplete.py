@@ -254,6 +254,9 @@ def handle_autocomplete_request(event=None):
     else:
         text = event.widget
     
+    _handle_autocomplete_request_for_text(text)
+
+def _handle_autocomplete_request_for_text(text):
     if not hasattr(text, "autocompleter"):
         if isinstance(text, CodeViewText):
             text.autocompleter = Completer(text)
@@ -264,6 +267,12 @@ def handle_autocomplete_request(event=None):
 
     text.autocompleter.handle_autocomplete_request()
 
+
+def patched_perform_midline_tab(text, event):
+    _handle_autocomplete_request_for_text(text)
+    return "break"
+    
+
 def load_plugin():
     
     get_workbench().add_command("autocomplete", "edit", "Auto-complete",
@@ -271,3 +280,6 @@ def load_plugin():
         default_sequence="<Control-space>"
         # TODO: tester
         )
+    
+    CodeViewText.perform_midline_tab = patched_perform_midline_tab
+    ShellText.perform_midline_tab = patched_perform_midline_tab
