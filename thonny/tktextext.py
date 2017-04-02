@@ -180,7 +180,7 @@ class EnhancedText(TweakableText):
         self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
         self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
-        self.bind("<Tab>", if_not_readonly(self.indent_or_dedent), True)
+        self.bind("<Tab>", if_not_readonly(self.perform_tab), True)
     
     def _bind_movement_aids(self):
         self.bind("<Home>", self.perform_smart_home, True)
@@ -267,6 +267,9 @@ class EnhancedText(TweakableText):
         if have < want:
             text.insert("insert", ' ' * (want - have))
         return "break"
+
+    def perform_midline_tab(self, event=None):
+        "autocompleter can put its magic here"
     
     def perform_smart_tab(self, event=None):
         self._log_keypress_for_undo(event)
@@ -398,12 +401,18 @@ class EnhancedText(TweakableText):
                 
         return move_at_edge
     
-    def indent_or_dedent(self, event=None):
+    def perform_tab(self, event=None):
         self._log_keypress_for_undo(event)
         if event.state & 0x0001: # shift is pressed (http://stackoverflow.com/q/32426250/261181)
             return self.dedent_region(event)
         else:
-            return self.perform_smart_tab(event)    
+            # check whether there are letters before cursor on this line
+            index = self.index("insert")
+            left_text = self.get(index + " linestart", index)
+            if left_text.strip() == "":
+                return self.perform_smart_tab(event)    
+            else:
+                return self.perform_midline_tab(event)
     
     def indent_region(self, event=None):
         head, tail, chars, lines = self._get_region()
