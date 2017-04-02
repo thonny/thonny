@@ -4,6 +4,7 @@ from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
 from thonny.common import InlineCommand
 from textwrap import dedent
+from tkinter import messagebox
 
 
 
@@ -38,20 +39,29 @@ class Completer(tk.Listbox):
         source = self.text.get("1.0", "end-1c")
         
         backend_code = dedent("""\
+        error = None
         try:
             import jedi
             script = jedi.Script(source, row, column, filename)
             completions = [{"name":c.name, "complete":c.complete}
                             for c in script.completions()]
         except ImportError:
-            completions = [{"name":"", "complete":"<could not import jedi>"}]
+            completions = []
+            error = "Could not import jedi"
+        except Exception as e:
+            completions = []
+            error = "Autocomplete error: " + str(e)
+        except:
+            completions = []
+            error = "Autocomplete error"
         
         __result__ = {
             "source"   : source,
             "row"      : row,
             "column"   : column,
             "filename" : filename,
-            "completions" : completions
+            "completions" : completions,
+            "error" : error
         }
         """)
         
@@ -67,12 +77,17 @@ class Completer(tk.Listbox):
         if msg.request_id != self._get_request_id():
             return
         
+        if not hasattr(msg, "__result__"):
+            return
+        
         row, column = self._get_position()
         result = msg.__result__
         # check if the response is relevant for current state
         if (result["source"] == self.text.get("1.0", "end-1c")
             and result["row"] == row and result["column"] == column):
             self._present_completions(result["completions"])
+            if result["error"]:
+                messagebox.showerror("Autocomplete error", result["error"])
         else:
             self._close()
             
