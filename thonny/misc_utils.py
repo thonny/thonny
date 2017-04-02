@@ -3,12 +3,26 @@
 import os.path
 import platform
 import sys
+import shutil
+import time
 
 
 def eqfn(name1, name2):
     return os.path.normcase(name1) == os.path.normcase(name2)
 
+def delete_dir_try_hard(path, hardness=5):
+    # Deleting the folder on Windows is not so easy task
+    # http://bugs.python.org/issue15496
+    for i in range(hardness):
+        if os.path.exists(path):
+            time.sleep(i * 0.5)
+            shutil.rmtree(path, True)
+        else:
+            break
 
+    if os.path.exists(path):
+        # try once more but now without ignoring errors
+        shutil.rmtree(path, False)
 
 def running_on_windows():
     return platform.system() == "Windows"

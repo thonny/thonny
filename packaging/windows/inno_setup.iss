@@ -58,6 +58,8 @@ Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 Type: filesandordirs; Name: "{app}\*"
 ; Delete old format settings. New filename is configuration.ini
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
+; Delete backend directory (Thonny occasionally fails to delete it at runtime)
+Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\backend"
 ; Delete old shortcut
 Type: filesandordirs; Name: "{userstartmenu}\Thonny"
 Type: filesandordirs; Name: "{userstartmenu}\Thonny.lnk"
@@ -120,6 +122,7 @@ Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\*"
+Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\backend"
 
 [Messages]
 ClickNext=

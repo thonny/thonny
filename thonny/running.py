@@ -25,11 +25,13 @@ from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shlex
 from thonny import THONNY_USER_DIR
-from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
+from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn,\
+    delete_dir_try_hard
 from shutil import which
 import shutil
 import time
 import logging
+import test
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
 
@@ -435,21 +437,21 @@ class CPythonProxy(BackendProxy):
         if os.path.exists(ver_file):
             with open(ver_file) as f:
                 if f.read().strip() == get_workbench().get_version_str():
-                    return launcher_path 
+                    return launcher_path
         
         # Required stuff is not copied or is not meant for this Thonny version.
-        print("(re)creating backend launch dir")
+        logging.info("(re)creating backend launch dir")
         # First delete old version (if it exists)
-        if os.path.exists(launch_dir):
-            try:
-                shutil.rmtree(launch_dir)
-            except:
-                logging.exception("Failure deleting old launch dir")
-                time.sleep(0.5) # wait and try again, because shutil.rmtree has sporadic failures on windows
-                shutil.rmtree(launch_dir, True)
+        # start with VERSION so that it's clear that dir is not complete even if whole deletion fails
+        if os.path.exists(ver_file):
+            os.remove(ver_file)
+        
+        delete_dir_try_hard(launch_dir)            
         
         # Prepare launch directory
-        os.makedirs(launch_dir, 0o700, True)
+        if not os.path.exists(launch_dir):
+            os.mkdir(launch_dir, 0o755)
+            #os.makedirs(launch_dir, 0o755)
         
         # Copy thonny stuff
         thonny_source_dir = get_workbench().get_package_dir()
@@ -461,7 +463,7 @@ class CPythonProxy(BackendProxy):
         
         # Copy relevant parts of thonny package
         thonny_dest_dir = os.path.join(launch_dir, "thonny")
-        os.mkdir(thonny_dest_dir, 0o700)
+        os.mkdir(thonny_dest_dir, 0o755)
         for name in ["__init__.py", "backend.py", "ast_utils.py", "common.py", "VERSION"]:
             shutil.copyfile(os.path.join(thonny_source_dir, name),
                             os.path.join(thonny_dest_dir, name))
