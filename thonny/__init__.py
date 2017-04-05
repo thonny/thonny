@@ -108,3 +108,12 @@ def _delegate_to_existing_instance(args):
 
 
     
+def get_version():
+    try:
+        package_dir = os.path.dirname(sys.modules["thonny"].__file__)
+        with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
+            return fp.read().strip()
+    except:
+        return "0.0.0"
+      
+    

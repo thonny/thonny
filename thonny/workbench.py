@@ -719,14 +719,6 @@ class Workbench(tk.Tk):
                 self._event_handlers[sequence].remove(funcid)
                 
 
-    def get_version_str(self):
-        try:
-            with open(os.path.join(self.get_package_dir(), "VERSION"), encoding="ASCII") as fp:
-                return fp.read().strip()
-        except:
-            return "0.0.0"
-      
-    
     def in_heap_mode(self):
         # TODO: add a separate command for enabling the heap mode 
         # untie the mode from HeapView
