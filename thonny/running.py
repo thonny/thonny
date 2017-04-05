@@ -497,14 +497,13 @@ class CPythonProxy(BackendProxy):
                             % self._executable)
         
         
-        backend_launcher = self._prepare_launcher() 
-        
+        import thonny.shared.backend_launcher
         cmd_line = [
             self._executable, 
             '-u', # unbuffered IO (neccessary in Python 3.1)
             '-B', # don't write pyo/pyc files 
                   # (to avoid problems when using different Python versions without write permissions)
-            backend_launcher
+            thonny.shared.backend_launcher.__file__
         ]
         
 
