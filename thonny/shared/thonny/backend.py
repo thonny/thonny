@@ -63,6 +63,10 @@ class VM:
             special_names_to_remove = {"__file__", "__cached__"}
             sys.argv[:] = [""] # empty "script name"
             sys.path.insert(0, "")   # current dir
+        
+        # add jedi
+        if "JEDI_LOCATION" in os.environ:
+            sys.path.append(os.environ["JEDI_LOCATION"])
     
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
