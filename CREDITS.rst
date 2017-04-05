@@ -5,8 +5,8 @@ Credits
 Thonny is thankful to:
 
 Its home
--------
-Thonny was born in University of Tartu (https://www.ut.ee) Institute of Computer Science (https://www.cs.ut.ee) and the main development is being done here.
+--------
+Thonny was born in University of Tartu (https://www.ut.ee), Institute of Computer Science (https://www.cs.ut.ee) and the main development is being done here.
 
 Python
 ------
