@@ -23,7 +23,7 @@ Unreleased
 * FIXED #211: Linux installer was failing when using ``xdg-user-dir`` (thanks to Ryan McQuen)
 * FIXED: Event logger did not save filenames (eb34c5d).
 * FIXED: Problem in replayer (db78855).
-* TECHNICAL: Bundled Jedi version has been upgraded to 0.10.0.
+* TECHNICAL: Bundled Jedi version has been upgraded to 0.10.2.
 * TECHNICAL: 3rd party Thonny plugins must now be under ``thonnycontrib`` namespace package.
 * TECHNICAL: Introduced the concept of "eary plugins" (plugins, which get loaded before initializing the runner).
 * TECHNICAL: Refactored the interface between GUI and backend to allow different backend implementations

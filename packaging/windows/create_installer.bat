@@ -16,7 +16,7 @@ copy ..\turtle.cfg %BUILDDIR%\Lib>NUL
 %BUILDDIR%\python -m pip install --upgrade pip
 
 @echo ............... INSTALLING JEDI ...................................
-%BUILDDIR%\python -m pip install jedi==0.10
+%BUILDDIR%\python -m pip install jedi==0.10.2
 
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -m pip install --upgrade --pre --no-cache-dir thonny

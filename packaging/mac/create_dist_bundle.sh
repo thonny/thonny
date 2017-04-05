@@ -29,7 +29,7 @@ cp $SCRIPT_DIR/../turtle.cfg $PYTHON_CURRENT/lib/python3.6
 $PYTHON_CURRENT/bin/python3.6 -m pip install --upgrade pip
 
 # install jedi #####################################################
-$PYTHON_CURRENT/bin/python3.6 -m pip install jedi==0.10
+$PYTHON_CURRENT/bin/python3.6 -m pip install jedi==0.10.2
 
 # install certifi #####################################################
 $PYTHON_CURRENT/bin/python3.6 -m pip install certifi
