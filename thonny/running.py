@@ -29,9 +29,7 @@ from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn,\
     delete_dir_try_hard
 from shutil import which
 import shutil
-import time
 import logging
-import test
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
 
