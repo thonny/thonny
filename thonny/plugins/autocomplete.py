@@ -3,7 +3,6 @@ from thonny.globals import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
 from thonny.common import InlineCommand
-from textwrap import dedent
 from tkinter import messagebox
 
 
@@ -30,66 +29,34 @@ class Completer(tk.Listbox):
         self.text.bind_class(self.text_priority_bindtag, "<Key>", self._on_text_keypress, True)
         
         self.text.bind("<<TextChange>>", self._on_text_change, True) # Assuming TweakableText
-        
+        self._bind_result_event()
+    
+    def _bind_result_event(self):    
         # TODO: remove binding when editor gets closed
-        get_workbench().bind("InlineResult", self._handle_inline_result, True)
+        get_workbench().bind("EditorCompletions", self._handle_backend_response, True)
     
     def handle_autocomplete_request(self):
         row, column = self._get_position()
         source = self.text.get("1.0", "end-1c")
-        
-        backend_code = dedent("""\
-        error = None
-        try:
-            import jedi
-            script = jedi.Script(source, row, column, filename)
-            completions = [{"name":c.name, "complete":c.complete}
-                            for c in script.completions()]
-        except ImportError:
-            completions = []
-            error = "Could not import jedi"
-        except Exception as e:
-            completions = []
-            error = "Autocomplete error: " + str(e)
-        except:
-            completions = []
-            error = "Autocomplete error"
-        
-        __result__ = {
-            "source"   : source,
-            "row"      : row,
-            "column"   : column,
-            "filename" : filename,
-            "completions" : completions,
-            "error" : error
-        }
-        """)
-        
-        get_runner().send_command(InlineCommand(command="execute_source",
-                                                source=backend_code,
-                                                request_id=self._get_request_id(),
-                                                global_vars={"source" : source,
-                                                             "row" : row,
-                                                             "column" : column,
-                                                             "filename" : self._get_filename()}))
+        get_runner().send_command(InlineCommand(command="editor_autocomplete",
+                                                source=source,
+                                                row=row,
+                                                column=column,
+                                                filename=self._get_filename()))
     
-    def _handle_inline_result(self, msg):
-        if msg.request_id != self._get_request_id():
-            return
-        
-        if not hasattr(msg, "__result__"):
-            return
-        
+    def _handle_backend_response(self, msg):
         row, column = self._get_position()
-        result = msg.__result__
-        # check if the response is relevant for current state
-        if (result["source"] == self.text.get("1.0", "end-1c")
-            and result["row"] == row and result["column"] == column):
-            self._present_completions(result["completions"])
-            if result["error"]:
-                messagebox.showerror("Autocomplete error", result["error"])
-        else:
+        source = self.text.get("1.0", "end-1c")
+        
+        if msg.source != source or msg.row != row or msg.column != column:
+            # situation has changed, information is obsolete
             self._close()
+        elif msg.error:
+            self._close()
+            messagebox.showerror("Autocomplete error", msg.error)
+        else:
+            self._present_completions(msg.completions)
+            
             
     def _present_completions(self, completions):
         self.completions = completions
@@ -226,37 +193,24 @@ class Completer(tk.Listbox):
         self.place_forget()
 
 class ShellCompleter(Completer):
+    def _bind_result_event(self):    
+        # TODO: remove binding when editor gets closed
+        get_workbench().bind("ShellCompletions", self._handle_backend_response, True)
+        
     def handle_autocomplete_request(self):
-        backend_code = dedent("""\
-        import __main__
-        try:
-            import jedi
-            interpreter = jedi.Interpreter(source, [__main__.__dict__])
-            completions = [{"name":c.name, "complete":c.complete}
-                            for c in interpreter.completions()]
-        except ImportError:
-            completions = [{"name":"", "complete":"<could not import jedi>"}]
+        source=self._get_prefix()
         
-        __result__ = {
-            "source"   : source,
-            "completions" : completions
-        }
-        """)
-        
-        get_runner().send_command(InlineCommand(command="execute_source",
-                                                source=backend_code,
-                                                request_id=self._get_request_id(),
-                                                extra_vars={"source" : self._get_prefix()}))
+        get_runner().send_command(InlineCommand(command="shell_autocomplete",
+                                                source=source))
     
-    def _handle_inline_result(self, msg):
-        if msg.request_id != self._get_request_id():
-            return
+    def _handle_backend_response(self, msg):
+        print("Result", msg)
         
         # check if the response is relevant for current state
-        if msg.__result__["source"] == self._get_prefix():
-            self._present_completions(msg.__result__["completions"])
-        else:
+        if msg.source != self._get_prefix():
             self._close()
+        else:
+            self._present_completions(msg.completions)
 
 
     def _get_prefix(self):

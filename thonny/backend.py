@@ -217,6 +217,57 @@ class VM:
             
         self.send_message("Heap", heap=result)
     
+    def _cmd_shell_autocomplete(self, cmd):
+        error = None
+        try:
+            import jedi
+            interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
+            completions = [{"name":c.name, "complete":c.complete}
+                            for c in interpreter.completions()]
+        except ImportError:
+            completions = []
+            error = "Could not import jedi"
+        except Exception as e:
+            completions = []
+            error = "Autocomplete error: " + str(e)
+        except:
+            completions = []
+            error = "Autocomplete error"
+        
+        self.send_message("ShellCompletions", 
+            source=cmd.source,
+            completions=completions,
+            error=error
+        )
+        
+    
+    def _cmd_editor_autocomplete(self, cmd):
+        error = None
+        try:
+            import jedi
+            script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
+            completions = [{"name":c.name, 
+                            "complete":c.complete} 
+                            for c in script.completions()]
+        except ImportError:
+            completions = []
+            error = "Could not import jedi"
+        except Exception as e:
+            completions = []
+            error = "Autocomplete error: " + str(e)
+        except:
+            completions = []
+            error = "Autocomplete error"
+        
+        self.send_message("EditorCompletions", 
+                          source=cmd.source,
+                          row=cmd.row,
+                          column=cmd.column,
+                          filename=cmd.filename,
+                          completions=completions,
+                          error=error)
+        
+    
     def _cmd_get_object_info(self, cmd):
         if cmd.object_id in self._heap:
             value = self._heap[cmd.object_id]
