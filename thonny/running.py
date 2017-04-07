@@ -47,6 +47,8 @@ class Runner:
         self._init_commands()
         
         self._proxy = None
+    
+    def start(self):
         self.reset_backend()
         self._poll_vm_messages()
         self._advance_background_tk_mainloop()

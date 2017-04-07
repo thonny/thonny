@@ -240,7 +240,9 @@ class Workbench(tk.Tk):
         
     def _init_runner(self):
         try:
-            register_runner(Runner())
+            runner = Runner()
+            register_runner(runner)
+            runner.start()
         except:
             self.report_exception("Error when initializing backend")
     
