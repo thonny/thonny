@@ -99,7 +99,7 @@ class ShellText(EnhancedTextWithLogging):
         self.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
         self.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
         self.tag_configure("command", foreground="black")
-        self.tag_configure("version", foreground="DarkGray")
+        self.tag_configure("welcome", foreground="DarkGray")
         self.tag_configure("automagic", foreground="DarkGray")
         #self.tag_configure("value", foreground="DarkGreen")
         #self.tag_configure("value", foreground="#B25300")
@@ -390,7 +390,7 @@ class ShellText(EnhancedTextWithLogging):
         
         if (configuration != self._last_configuration
             and not (self._last_configuration is None and not configuration)):
-                self._insert_text_directly("Python " + event.python_version, ("version",))
+                self._insert_text_directly(event.welcome_text, ("welcome",))
                 
         self._last_configuration = get_workbench().get_option("run.backend_configuration")
     

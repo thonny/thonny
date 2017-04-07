@@ -82,6 +82,7 @@ class VM:
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
+                          welcome_text="Python " + _get_python_version_string(),
                           python_version=_get_python_version_string(),
                           python_executable=sys.executable,
                           cwd=os.getcwd())
