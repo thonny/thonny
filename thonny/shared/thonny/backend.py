@@ -136,52 +136,10 @@ class VM:
         self._execute_file_and_send_result(cmd, True)
     
     def _cmd_execute_source(self, cmd):
-        filename = "<pyshell>"
-        
-        if hasattr(cmd, "global_vars"):
-            global_vars = cmd.global_vars
-        elif hasattr(cmd, "extra_vars"):
-            global_vars = __main__.__dict__.copy() # Don't want to mess with main namespace
-            global_vars.update(cmd.extra_vars)
-        else:
-            global_vars = __main__.__dict__
-
-        if isinstance(cmd, ToplevelCommand):
-            result_type = "ToplevelResult"
-        elif isinstance(cmd, InlineCommand):
-            result_type = "InlineResult"
-        else:
-            raise Exception("Unsuitable command type for execute_source")
-        
-        # let's see if it's single expression or something more complex
-        try:
-            root = ast.parse(cmd.source, filename=filename, mode="exec")
-        except SyntaxError as e:
-            self.send_message(result_type,
-                error="".join(traceback.format_exception_only(SyntaxError, e)))
-            return
-            
-        assert isinstance(root, ast.Module)
-            
-        if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
-            mode = "eval"
-        else:
-            mode = "exec"
-            
-        result_attributes = self._execute_source(cmd.source, filename, mode,
-            hasattr(cmd, "debug_mode") and cmd.debug_mode,
-            global_vars)
-        
-        if "__result__" in global_vars:
-            result_attributes["__result__"] = global_vars["__result__"]
-        
-        if hasattr(cmd, "request_id"):
-            result_attributes["request_id"] = cmd.request_id
-        else:
-            result_attributes["request_id"] = None
-        
-        self.send_message(result_type, **result_attributes)
-
+        return self._execute_source_and_send_result(cmd, "ToplevelResult")
+    
+    def _cmd_execute_source_inline(self, cmd):
+        return self._execute_source_and_send_result(cmd, "InlineResult")
     
     def _cmd_tkupdate(self, cmd):
         tkinter = sys.modules.get("tkinter")
@@ -359,6 +317,46 @@ class VM:
         code_filename = os.path.abspath(cmd.filename)
         return self._execute_source(source, code_filename, "exec", debug_mode)
     
+    def _execute_source_and_send_result(self, cmd, result_type):
+        filename = "<pyshell>"
+        
+        if hasattr(cmd, "global_vars"):
+            global_vars = cmd.global_vars
+        elif hasattr(cmd, "extra_vars"):
+            global_vars = __main__.__dict__.copy() # Don't want to mess with main namespace
+            global_vars.update(cmd.extra_vars)
+        else:
+            global_vars = __main__.__dict__
+
+        # let's see if it's single expression or something more complex
+        try:
+            root = ast.parse(cmd.source, filename=filename, mode="exec")
+        except SyntaxError as e:
+            self.send_message(result_type,
+                error="".join(traceback.format_exception_only(SyntaxError, e)))
+            return
+            
+        assert isinstance(root, ast.Module)
+            
+        if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
+            mode = "eval"
+        else:
+            mode = "exec"
+            
+        result_attributes = self._execute_source(cmd.source, filename, mode,
+            hasattr(cmd, "debug_mode") and cmd.debug_mode,
+            global_vars)
+        
+        if "__result__" in global_vars:
+            result_attributes["__result__"] = global_vars["__result__"]
+        
+        if hasattr(cmd, "request_id"):
+            result_attributes["request_id"] = cmd.request_id
+        else:
+            result_attributes["request_id"] = None
+        
+        self.send_message(result_type, **result_attributes)
+        
     def _execute_source(self, source, filename, execution_mode, debug_mode,
                         global_vars=None):
         if debug_mode:
