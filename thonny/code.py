@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import sys
 import os.path
-import tokenize
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinter.filedialog import asksaveasfilename
@@ -14,8 +13,8 @@ from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.common import parse_shell_command
 from thonny.tktextext import rebind_control_a
-import builtins
-import io
+from thonny import misc_utils
+import tokenize
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -41,7 +40,6 @@ class Editor(ttk.Frame):
         self.rowconfigure(0, weight=1)
         
         self._filename = None
-        self.file_encoding = None
         
         if filename is not None:
             self._load_file(filename)
@@ -87,8 +85,9 @@ class Editor(ttk.Frame):
         return result
     
     def _load_file(self, filename):
-        
-        source, self.file_encoding = _read_python_file(filename) # TODO: support also text files
+        with tokenize.open(filename) as fp: # TODO: support also text files
+            source = fp.read() 
+            
         self._filename = filename
         get_workbench().event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
@@ -125,7 +124,7 @@ class Editor(ttk.Frame):
                 
         
         content = self._code_view.get_content()
-        encoding = self.file_encoding or "UTF-8" 
+        encoding = "UTF-8" # TODO: check for marker in the head of the code 
         f = open(filename, mode="wb", )
         f.write(content.encode(encoding))
         f.close()
@@ -625,24 +624,3 @@ def _check_create_ButtonNotebook_style():
     get_workbench().bind_class("TNotebook", "<ButtonPress-3>", right_btn_press, True)
     
 
-def _read_python_file(filename):
-    fp = None
-    try:
-        fp, encoding = _open_py_file(filename)
-        return fp.read(), encoding
-    finally:
-        if fp is not None:
-            fp.close()
-    
-def _open_py_file(filename):
-    """Open a file in read only mode using the encoding detected by
-    detect_encoding().
-    """
-    buffer = builtins.open(filename, 'rb')
-    encoding, _ = tokenize.detect_encoding(buffer.readline)
-    buffer.seek(0)
-    content = io.BytesIO(buffer.read())
-    buffer.close()
-    text = io.TextIOWrapper(content, encoding, line_buffering=True)
-    text.mode = 'r'
-    return text, encoding

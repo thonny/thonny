@@ -16,6 +16,7 @@ from thonny.codeview import CodeView, READ_ONLY_BACKGROUND
 from tkinter.messagebox import showinfo, showerror
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
+import tokenize
 
 _SUSPENDED_FOCUS_BACKGROUND = "#DCEDF2"
 _ACTIVE_FOCUS_BACKGROUND = "#F8FC9A"
@@ -481,7 +482,9 @@ class ExpressionBox(tk.Text):
             
     
     def _load_expression(self, filename, text_range):
-        whole_source, _ = misc_utils.read_python_file(filename)
+        with tokenize.open(filename) as fp:
+            whole_source = fp.read()
+            
         root = ast_utils.parse_source(whole_source, filename)
         self._main_range = text_range
         assert self._main_range is not None
