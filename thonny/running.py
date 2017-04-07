@@ -25,11 +25,10 @@ from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shlex
 from thonny import THONNY_USER_DIR
-from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn,\
-    delete_dir_try_hard
+from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
 import shutil
-import logging
+
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
 
