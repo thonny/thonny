@@ -15,13 +15,12 @@ from logging import debug
 import os.path
 import subprocess
 import sys
-import threading
 
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_shell_command, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
     UserError
-from thonny.globals import get_workbench, get_runner
+from thonny.globals import get_workbench
 from thonny.shell import ShellView
 import shlex
 from thonny import THONNY_USER_DIR
@@ -46,6 +45,7 @@ class Runner:
         
         self._init_commands()
         
+        self._state = None
         self._proxy = None
     
     def start(self):
@@ -86,12 +86,22 @@ class Runner:
         """State is one of "running", "waiting_input", "waiting_debug_command",
             "waiting_toplevel_command"
         """
-        return self._proxy.get_state()
+        return self._state
     
+    def _set_state(self, state):
+        if self._state != state:
+            debug("BackendProxy state changed: %s ==> %s", self._state, state)
+            self._state = state
+            
     def get_sys_path(self):
         return self._proxy.get_sys_path()
     
     def send_command(self, cmd):
+        if (isinstance(cmd, ToplevelCommand) 
+            or isinstance(cmd, DebuggerCommand)
+            or isinstance(cmd, InputSubmission)):
+            self._set_state("running")
+        
         self._proxy.send_command(cmd)
     
     def send_program_input(self, data):
@@ -183,7 +193,7 @@ class Runner:
             raise CommandSyntaxError("Command 'cd' takes one argument")
 
     def cmd_execution_command_enabled(self):
-        return (self._proxy.get_state() == "waiting_toplevel_command"
+        return (self.get_state() == "waiting_toplevel_command"
                 and get_workbench().get_editor_notebook().get_current_editor() is not None)
     
     def _cmd_run_current_script(self):
@@ -191,10 +201,10 @@ class Runner:
     
     
     def cmd_stop_reset(self):
-        if get_runner().get_state() == "waiting_toplevel_command":
+        if self.get_state() == "waiting_toplevel_command":
             get_workbench().get_view("ShellView").submit_command("%Reset\n")
         else:
-            get_runner().send_command(ToplevelCommand(command="Reset"))
+            self.send_command(ToplevelCommand(command="Reset"))
     
             
     def _cmd_stop_reset_enabled(self):
@@ -206,8 +216,8 @@ class Runner:
         When mainloop is omitted, then program can be interacted with
         from the shell after it runs to the end.
         """
-        if self._proxy.get_state() == "waiting_toplevel_command":
-            self._proxy.send_command(InlineCommand("tkupdate"))
+        if self.get_state() == "waiting_toplevel_command":
+            self.send_command(InlineCommand("tkupdate"))
         get_workbench().after(50, self._advance_background_tk_mainloop)
         
     def _poll_vm_messages(self):
@@ -219,6 +229,14 @@ class Runner:
             msg = self._proxy.fetch_next_message()
             if not msg:
                 break
+            
+            if msg["message_type"] == "ToplevelResult":
+                self._set_state("waiting_toplevel_command") 
+            elif msg["message_type"] == "DebuggerProgress":
+                self._set_state("waiting_debug_command") 
+            elif msg["message_type"] == "InputRequest":
+                self._set_state("waiting_input")
+
             
             debug("Runner: State: %s, Fetched msg: %s", self.get_state(), msg)
             get_workbench().event_generate(msg["message_type"], **msg)
@@ -285,12 +303,6 @@ class BackendProxy:
         "backend's sys.path"
         return []
     
-    def get_state(self):
-        """Get current state of backend.
-        
-        One of "running", "waiting_input", "waiting_toplevel_command", "waiting_debug_command" """
-        raise NotImplementedError()
-
     def kill_current_process(self):
         "Kill the backend"
         raise NotImplementedError()
@@ -319,21 +331,12 @@ class CPythonProxy(BackendProxy):
             self.cwd = os.path.expanduser("~")
             
         self._proc = None
-        self._state = None
         self._message_queue = None
-        self._state_lock = threading.RLock()
         self._sys_path = []
     
     def fetch_next_message(self):
         msg = self._fetch_next_message()
         
-        if msg is not None:
-            if msg["message_type"] == "ToplevelResult":
-                self._set_state("waiting_toplevel_command") 
-            elif msg["message_type"] == "DebuggerProgress":
-                self._set_state("waiting_debug_command") 
-            elif msg["message_type"] == "InputRequest":
-                self._set_state("waiting_input")
         
         return msg 
 
@@ -373,37 +376,21 @@ class CPythonProxy(BackendProxy):
         if not (isinstance(cmd, InlineCommand) and cmd.command == "tkupdate"): 
             debug("Proxy: Sending command: %s", cmd)
             
-        with self._state_lock:
-            if (isinstance(cmd, ToplevelCommand) 
-                or isinstance(cmd, DebuggerCommand)
-                or isinstance(cmd, InputSubmission)):
-                self._set_state("running")
-            
-            if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
-                self.kill_current_process()
-                self._start_new_process(cmd)
-                 
-            self._proc.stdin.write(serialize_message(cmd) + "\n")
-            self._proc.stdin.flush() 
-            
-            if not (hasattr(cmd, "command") and cmd.command == "tkupdate"):
-                debug("BackendProxy: sent a command in state %s: %s", self._state, cmd)
+        if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
+            self.kill_current_process()
+            self._start_new_process(cmd)
+             
+        self._proc.stdin.write(serialize_message(cmd) + "\n")
+        self._proc.stdin.flush() 
+        
+        if not (hasattr(cmd, "command") and cmd.command == "tkupdate"):
+            debug("BackendProxy: sent a command: %s", cmd)
     
     def send_program_input(self, data):
         self.send_command(InputSubmission(data=data))
         
-    def get_state(self):
-        with self._state_lock:
-            return self._state
-    
     def get_sys_path(self):
         return self._sys_path
-    
-    def _set_state(self, state):
-        if self._state != state:
-            debug("BackendProxy state changed: %s ==> %s", self._state, state)
-            self._state = state
-    
     
     def kill_current_process(self):
         if self._proc is not None and self._proc.poll() is None: 
@@ -506,8 +493,8 @@ class CPythonProxy(BackendProxy):
                 if "cwd" in msg:
                     self.cwd = msg["cwd"]
                     
-                with self._state_lock:
-                    self._message_queue.append(msg)
+                # TODO: it was "with self._state_lock:". Is it necessary?
+                self._message_queue.append(msg)
 
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
