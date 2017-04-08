@@ -10,7 +10,7 @@ shell becomes kind of title for the execution.
 
 
 from _thread import start_new_thread
-import collections
+import queue
 from logging import debug
 import os.path
 import subprocess
@@ -28,6 +28,7 @@ from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
 import shutil
 import tokenize
+import collections
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -48,6 +49,7 @@ class Runner:
         
         self._state = None
         self._proxy = None
+        self._postponed_inline_commands = queue.Queue(10)
     
     def start(self):
         self.reset_backend()
@@ -93,20 +95,39 @@ class Runner:
         if self._state != state:
             debug("BackendProxy state changed: %s ==> %s", self._state, state)
             self._state = state
+        
+        if state in self._proxy.allowed_states_for_inline_commands():
+            while not self._postponed_inline_commands.empty():
+                self.send_command(self._postponed_inline_commands.get())
             
     def get_sys_path(self):
         return self._proxy.get_sys_path()
     
     def send_command(self, cmd):
-        if (isinstance(cmd, ToplevelCommand) 
-            or isinstance(cmd, DebuggerCommand)
-            or isinstance(cmd, InputSubmission)):
-            self._set_state("running")
+        if isinstance(cmd, ToplevelCommand):
+            assert self.get_state() == "waiting_toplevel_command"
+        elif isinstance(cmd, DebuggerCommand):
+            assert self.get_state() == "waiting_debugger_command"
+        elif isinstance(cmd, InlineCommand):
+            # Inline commands can be sent in any state,
+            # but some backends don't accept them in some states
+            if self.get_state() not in self._proxy.allowed_states_for_inline_commands():
+                if self._postponed_inline_commands.full(): 
+                    "Can't pile up too many commands. This command will be just ignored"
+                else:
+                    self._postponed_inline_commands.put_nowait(cmd)
+                return
         
         self._proxy.send_command(cmd)
+        
+        if isinstance(cmd, ToplevelCommand) or isinstance(cmd, DebuggerCommand):
+            self._set_state("running")
+        
     
     def send_program_input(self, data):
+        assert self.get_state() == "waiting_input"
         self._proxy.send_program_input(data)
+        self._set_state("running")
         
     def execute_script(self, script_path, args, working_directory=None, command_name="Run"):
         if (working_directory is not None and self._proxy.cwd != working_directory):
@@ -266,6 +287,7 @@ class Runner:
         backend_name, configuration_option = parse_configuration(configuration)
         backend_class = get_workbench().get_backends()[backend_name]
         self._proxy = backend_class(configuration_option)
+        self._state = "waiting_toplevel_command"
         self.send_command(ToplevelCommand(command="Reset"))
         
     def kill_backend(self):
@@ -299,18 +321,21 @@ class BackendProxy:
         """Returns a string that describes the backend"""
         raise NotImplementedError()        
 
-    def fetch_next_message(self):
-        """Read next message from the queue or None if queue is empty"""
-        raise NotImplementedError()
-
     def send_command(self, cmd):
         """Send the command to backend"""
         raise NotImplementedError()
+    
+    def allowed_states_for_inline_commands(self):
+        return ["waiting_toplevel_command", "waiting_debugger_command"]
 
     def send_program_input(self, data):
         """Send input data to backend"""
         raise NotImplementedError()
     
+    def fetch_next_message(self):
+        """Read next message from the queue or None if queue is empty"""
+        raise NotImplementedError()
+
     def get_sys_path(self):
         "backend's sys.path"
         return []
@@ -401,6 +426,10 @@ class CPythonProxy(BackendProxy):
     def send_program_input(self, data):
         self.send_command(InputSubmission(data=data))
         
+    def allowed_states_for_inline_commands(self):
+        return ["waiting_toplevel_command", "waiting_debugger_command", 
+                "waiting_input", "running"]
+
     def get_sys_path(self):
         return self._sys_path
     
@@ -423,6 +452,7 @@ class CPythonProxy(BackendProxy):
         # TODO: clean up old versions
     
     def _start_new_process(self, cmd):
+        # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
     
         # create new backend process

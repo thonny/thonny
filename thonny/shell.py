@@ -153,7 +153,7 @@ class ShellText(EnhancedTextWithLogging):
         self._command_handlers[command] = handler
         
     def submit_command(self, cmd_line):
-        assert self._get_state() == "waiting_toplevel_command"
+        assert get_runner().get_state() == "waiting_toplevel_command"
         self.delete("input_start", "end")
         self.insert("input_start", cmd_line, ("automagic",))
         self.see("end")
@@ -232,11 +232,6 @@ class ShellText(EnhancedTextWithLogging):
         self._insert_text_directly(">>> ", prompt_tags)
         self.edit_reset();
     
-    
-    
-    def _get_state(self):
-        return get_runner().get_state()
-        
     def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()
             and self._in_current_input_range(index)):
@@ -245,7 +240,7 @@ class ShellText(EnhancedTextWithLogging):
             self.mark_gravity("input_start", tk.LEFT)
             self.mark_gravity("output_insert", tk.LEFT)
             
-            if self._get_state() == "waiting_input":
+            if get_runner().get_state() == "waiting_input":
                 tags = tags + ("io", "stdin")
             else:
                 tags = tags + ("toplevel", "command")
@@ -258,7 +253,7 @@ class ShellText(EnhancedTextWithLogging):
             super().intercept_insert(index, txt, tags)
             
             # tag first char of io separately
-            if self._get_state() == "waiting_input" and self._before_io:
+            if get_runner().get_state() == "waiting_input" and self._before_io:
                 self.tag_add("vertically_spaced", index)
                 self._before_io = False
             
@@ -318,7 +313,7 @@ class ShellText(EnhancedTextWithLogging):
             start_index = self.index("input_start")
             end_index = self.index("input_start+{0}c".format(len(submittable_text)))
             # apply correct tags (if it's leftover then it doesn't have them yet)
-            if self._get_state() == "waiting_input":
+            if get_runner().get_state() == "waiting_input":
                 self.tag_add("io", start_index, end_index)
                 self.tag_add("stdin", start_index, end_index)
             else:
@@ -348,17 +343,17 @@ class ShellText(EnhancedTextWithLogging):
             #self.tag_add("pending_input", end_index, "end-1c")
     
     def _editing_allowed(self):
-        return self._get_state() in ('waiting_toplevel_command', 'waiting_input')
+        return get_runner().get_state() in ('waiting_toplevel_command', 'waiting_input')
     
     def _extract_submittable_input(self, input_text):
         
-        if self._get_state() == "waiting_toplevel_command":
+        if get_runner().get_state() == "waiting_toplevel_command":
             # TODO: support also multiline commands
             if "\n" in input_text:
                 return input_text[:input_text.index("\n")+1]
             else:
                 return None
-        elif self._get_state() == "waiting_input":
+        elif get_runner().get_state() == "waiting_input":
             input_request = self._current_input_request
             method = input_request.method
             limit = input_request.limit
@@ -395,7 +390,7 @@ class ShellText(EnhancedTextWithLogging):
         self._last_configuration = get_workbench().get_option("run.backend_configuration")
     
     def _submit_input(self, text_to_be_submitted):
-        if self._get_state() == "waiting_toplevel_command":
+        if get_runner().get_state() == "waiting_toplevel_command":
             # register in history and count
             if text_to_be_submitted in self._command_history:
                 self._command_history.remove(text_to_be_submitted)
@@ -424,6 +419,7 @@ class ShellText(EnhancedTextWithLogging):
                 
             get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)
         else:
+            assert get_runner().get_state() == "waiting_input"
             get_runner().send_program_input(text_to_be_submitted)
             get_workbench().event_generate("ShellInput", input_text=text_to_be_submitted)
     
