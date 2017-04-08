@@ -77,8 +77,8 @@ class VariablesFrame(MemoryFrame):
                 if not name.startswith("__"):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
-                    self.tree.set(node_id, "id", format_object_id(variables[name].id))
-                    self.tree.set(node_id, "value", shorten_repr(variables[name].repr, MAX_REPR_LENGTH_IN_GRID))
+                    self.tree.set(node_id, "id", format_object_id(variables[name]["id"]))
+                    self.tree.set(node_id, "value", shorten_repr(variables[name]["repr"], MAX_REPR_LENGTH_IN_GRID))
     
     
     def on_select(self, event):

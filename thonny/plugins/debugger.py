@@ -184,7 +184,7 @@ class Debugger:
             showerror("Exception",
                       # Following is clever but noisy 
                       msg.exception_lower_stack_description.lstrip() + 
-                      msg.exception.type_name 
+                      msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
             self._check_issue_debugger_command("step")
             
@@ -422,23 +422,23 @@ class ExpressionBox(tk.Text):
             original_focus_text = self.get(start_mark, end_mark)
             self.delete(start_mark, end_mark)
             
-            id_str = memory.format_object_id(msg.value.id)
+            id_str = memory.format_object_id(msg.value["id"])
             if get_workbench().in_heap_mode():
                 value_str = id_str
             elif "StringLiteral" in frame_info.last_event_args["node_tags"]:
                 # No need to show Python replacing double quotes with single quotes
                 value_str = original_focus_text
             else:
-                value_str = shorten_repr(msg.value.repr, 100)
+                value_str = shorten_repr(msg.value["repr"], 100)
             
-            object_tag = "object_" + str(msg.value.id)
+            object_tag = "object_" + str(msg.value["id"])
             self.insert(start_mark, value_str, ('value', 'after', object_tag))
             if misc_utils.running_on_mac_os():
                 sequence = "<Command-Button-1>"
             else:
                 sequence = "<Control-Button-1>"
             self.tag_bind(object_tag, sequence,
-                          lambda _: get_workbench().event_generate("ObjectSelect", object_id=msg.value.id))
+                          lambda _: get_workbench().event_generate("ObjectSelect", object_id=msg.value["id"]))
                 
             self._update_size()
                 
@@ -655,7 +655,7 @@ class FunctionCallDialog(FrameDialog):
         FrameDialog._load_code(self, frame_info)
         
         if hasattr(frame_info, "function"):
-            function_label = frame_info.function.repr
+            function_label = frame_info.function["repr"]
         else:
             function_label = frame_info.code_name
         

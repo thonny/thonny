@@ -97,9 +97,6 @@ class TextRange(Record):
     
     
                  
-class ValueInfo(Record):
-    pass
-
 class FrameInfo(Record):
     def get_description(self):
         return (

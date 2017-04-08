@@ -396,8 +396,8 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
             else:
                 self.tree.set(node_id, "index", "")
                 
-            self.tree.set(node_id, "id", format_object_id(element.id))
-            self.tree.set(node_id, "value", shorten_repr(element.repr, MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "id", format_object_id(element["id"]))
+            self.tree.set(node_id, "value", shorten_repr(element["repr"], MAX_REPR_LENGTH_IN_GRID))
             index += 1
 
         count = len(object_info["elements"])
@@ -450,10 +450,10 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         # TODO: don't show too big number of elements
         for key, value in object_info["entries"]:
             node_id = self.tree.insert("", "end")
-            self.tree.set(node_id, "key_id", format_object_id(key.id))
-            self.tree.set(node_id, "key", shorten_repr(key.repr, MAX_REPR_LENGTH_IN_GRID))
-            self.tree.set(node_id, "id", format_object_id(value.id))
-            self.tree.set(node_id, "value", shorten_repr(value.repr, MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "key_id", format_object_id(key["id"]))
+            self.tree.set(node_id, "key", shorten_repr(key["repr"], MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "id", format_object_id(value["id"]))
+            self.tree.set(node_id, "value", shorten_repr(value["repr"], MAX_REPR_LENGTH_IN_GRID))
 
         count = len(object_info["entries"])
         self.tree.config(height=min(count,10))

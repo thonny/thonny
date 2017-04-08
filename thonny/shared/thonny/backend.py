@@ -18,7 +18,7 @@ import __main__  # @UnresolvedImport
 from thonny import ast_utils
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
-    ValueInfo, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
+    ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -410,9 +410,9 @@ class VM:
         except:
             type_name = type(value).__name__ 
             
-        result = ValueInfo(id=id(value),
-                         repr=repr(value), 
-                         type_name=type_name)
+        result = {'id' : id(value),
+                  'repr' : repr(value), 
+                  'type_name'  : type_name}
         
         return result
     
