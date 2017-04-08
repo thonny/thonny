@@ -75,13 +75,12 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
         
-        self.send_message("Ready",
+        self.send_message("BackendReady",
                           main_dir=self._main_dir,
                           original_argv=original_argv,
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
-                          welcome_text="Python " + _get_python_version_string(),
                           python_version=_get_python_version_string(),
                           python_executable=sys.executable,
                           cwd=os.getcwd())
@@ -121,7 +120,7 @@ class VM:
     
     def _cmd_Reset(self, cmd):
         # nothing to do, because Reset always happens in fresh process
-        self.send_message("ToplevelResult")
+        self.send_message("ToplevelResult", welcome_text="Python " + _get_python_version_string())
     
     def _cmd_Run(self, cmd):
         self._execute_file_and_send_result(cmd, False)

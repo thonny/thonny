@@ -516,7 +516,6 @@ class CPythonProxy(BackendProxy):
         ready_msg = parse_message(ready_line)
         self._sys_path = ready_msg["path"]
         debug("Backend ready: %s", ready_msg, self._sys_path)
-        get_workbench().event_generate("BackendReady", **ready_msg)
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())

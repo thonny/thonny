@@ -141,7 +141,6 @@ class ShellText(EnhancedTextWithLogging):
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
-        get_workbench().bind("BackendReady", self._backend_ready, True)
         
         self._init_menu()
     
@@ -189,7 +188,17 @@ class ShellText(EnhancedTextWithLogging):
         self._before_io = True
         if hasattr(msg, "error"):
             self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
+        
+        if hasattr(msg, "welcome_text"):
+            configuration = get_workbench().get_option("run.backend_configuration") 
             
+            if (configuration != self._last_configuration
+                and not (self._last_configuration is None and not configuration)):
+                    self._insert_text_directly(msg.welcome_text, ("welcome",))
+                    
+            self._last_configuration = get_workbench().get_option("run.backend_configuration")
+            
+        
         if hasattr(msg, "value_info"):
             value_repr = shorten_repr(msg.value_info.repr, 10000)
             if value_repr != "None":
@@ -379,15 +388,6 @@ class ShellText(EnhancedTextWithLogging):
             else:
                 raise AssertionError("only readline is supported at the moment")
             
-    
-    def _backend_ready(self, event):
-        configuration = get_workbench().get_option("run.backend_configuration") 
-        
-        if (configuration != self._last_configuration
-            and not (self._last_configuration is None and not configuration)):
-                self._insert_text_directly(event.welcome_text, ("welcome",))
-                
-        self._last_configuration = get_workbench().get_option("run.backend_configuration")
     
     def _submit_input(self, text_to_be_submitted):
         if get_runner().get_state() == "waiting_toplevel_command":
