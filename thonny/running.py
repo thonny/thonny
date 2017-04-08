@@ -27,6 +27,7 @@ from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
 import shutil
+import tokenize
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -167,9 +168,20 @@ class Runner:
         
         if len(args) >= 1:
             get_workbench().get_editor_notebook().save_all_named_editors()
-            self.send_command(ToplevelCommand(command=command,
+            cmd = ToplevelCommand(command=command,
                                filename=args[0],
-                               args=args[1:]))
+                               args=args[1:])
+            
+            if os.path.isabs(cmd.filename):
+                cmd.full_filename = cmd.filename
+            else:
+                cmd.full_filename = os.path.join(self.get_cwd(), cmd.filename)
+                
+            if command in ["Run", "run", "Debug", "debug"]:
+                with tokenize.open(cmd.full_filename) as fp:
+                    cmd.source = fp.read()
+                
+            self.send_command(cmd)
         else:
             raise CommandSyntaxError("Command '%s' takes at least one argument", command)
 

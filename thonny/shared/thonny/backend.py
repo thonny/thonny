@@ -12,7 +12,6 @@ import logging
 import pydoc
 import builtins
 import site
-import tokenize
 
 import __main__  # @UnresolvedImport
 
@@ -310,13 +309,9 @@ class VM:
         self.send_message("ToplevelResult", **result_attributes)
     
     def _execute_file(self, cmd, debug_mode):
-        with tokenize.open(cmd.filename) as fp:
-            source = fp.read()
-        
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
-        code_filename = os.path.abspath(cmd.filename)
-        return self._execute_source(source, code_filename, "exec", debug_mode)
+        return self._execute_source(cmd.source, cmd.full_filename, "exec", debug_mode)
     
     def _execute_source_and_send_result(self, cmd, result_type):
         filename = "<pyshell>"
