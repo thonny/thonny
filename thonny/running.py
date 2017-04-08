@@ -105,9 +105,11 @@ class Runner:
     
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand):
-            assert self.get_state() == "waiting_toplevel_command"
+            assert self.get_state() == "waiting_toplevel_command", (
+                "Trying to send ToplevelCommand in state " + self.get_state())
         elif isinstance(cmd, DebuggerCommand):
-            assert self.get_state() == "waiting_debugger_command"
+            assert self.get_state() == "waiting_debug_command", (
+                "Trying to send DebuggerCommand in state " + self.get_state())
         elif isinstance(cmd, InlineCommand):
             # Inline commands can be sent in any state,
             # but some backends don't accept them in some states
@@ -377,13 +379,6 @@ class CPythonProxy(BackendProxy):
         self._sys_path = []
     
     def fetch_next_message(self):
-        msg = self._fetch_next_message()
-        
-        
-        return msg 
-
-    
-    def _fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
             return None
         
