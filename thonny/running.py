@@ -117,6 +117,11 @@ class Runner:
                 else:
                     self._postponed_inline_commands.put_nowait(cmd)
                 return
+        else:
+            raise RuntimeError("Unknown command class: " + str(type(cmd)))
+        
+        if cmd.command in ("Run", "Debug", "Reset"):
+            get_workbench().event_generate("BackendRestart")
         
         self._proxy.send_command(cmd)
         
