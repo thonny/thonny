@@ -269,7 +269,7 @@ class Runner:
             msg = self._proxy.fetch_next_message()
             if not msg:
                 break
-            
+
             if msg["message_type"] == "ToplevelResult":
                 self._set_state("waiting_toplevel_command") 
             elif msg["message_type"] == "DebuggerProgress":
@@ -294,7 +294,7 @@ class Runner:
         backend_name, configuration_option = parse_configuration(configuration)
         backend_class = get_workbench().get_backends()[backend_name]
         self._proxy = backend_class(configuration_option)
-        self._state = "waiting_toplevel_command"
+        self._set_state("waiting_toplevel_command")
         self.send_command(ToplevelCommand(command="Reset"))
         
     def kill_backend(self):
