@@ -105,7 +105,8 @@ class Runner:
     
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand):
-            assert self.get_state() == "waiting_toplevel_command", (
+            assert (self.get_state() == "waiting_toplevel_command"
+                    or cmd.command in ["Reset", "Run", "Debug"]), ( 
                 "Trying to send ToplevelCommand in state " + self.get_state())
         elif isinstance(cmd, DebuggerCommand):
             assert self.get_state() == "waiting_debug_command", (
