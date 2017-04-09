@@ -293,6 +293,10 @@ class Runner:
         self.kill_backend()
         configuration = get_workbench().get_option("run.backend_configuration")
         backend_name, configuration_option = parse_configuration(configuration)
+        if backend_name not in get_workbench().get_backends():
+            raise UserError("Can't find backend '{}'. Please select another backend from options"
+                            .format(backend_name))
+        
         backend_class = get_workbench().get_backends()[backend_name]
         self._proxy = backend_class(configuration_option)
         self._set_state("waiting_toplevel_command")
