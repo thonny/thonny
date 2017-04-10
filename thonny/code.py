@@ -614,9 +614,13 @@ def _check_create_ButtonNotebook_style():
     
     def right_btn_press(event):
         x, y, widget = event.x, event.y, event.widget
-        index = widget.index("@%d,%d" % (x, y))
-        menu.popup_index = index
-        menu.post(*get_workbench().winfo_pointerxy())
+        try:
+            if "ButtonNotebook" in widget["style"]:
+                index = widget.index("@%d,%d" % (x, y))
+                menu.popup_index = index
+                menu.post(*get_workbench().winfo_pointerxy())
+        except:
+            pass
     
     
     get_workbench().bind_class("TNotebook", "<ButtonPress-1>", letf_btn_press, True)
