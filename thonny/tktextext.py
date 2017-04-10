@@ -540,7 +540,7 @@ class EnhancedText(TweakableText):
     
     def on_secondary_click(self, event=None):
         "Use this for invoking context menu"
-        pass
+        self.focus_set()
 
 
 class TextFrame(ttk.Frame):

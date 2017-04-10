@@ -30,6 +30,7 @@ class CodeViewText(EnhancedTextWithLogging):
 
     
     def on_secondary_click(self, event):
+        super().on_secondary_click(event)
         get_workbench().get_menu("edit").post(event.x_root, event.y_root)
 
 class CodeView(tktextext.TextFrame):
