@@ -237,7 +237,7 @@ class EnhancedText(TweakableText):
                 text.bell()     # at start of buffer
             return "break"
         
-        if  chars[-1] not in " \t":
+        if chars.strip() != "": # there are non-whitespace chars somewhere to the left of the cursor
             # easy: delete preceding real char
             text.delete("insert-1c")
             self._log_keypress_for_undo(event)
