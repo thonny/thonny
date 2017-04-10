@@ -123,9 +123,10 @@ class Runner:
         if cmd.command in ("Run", "Debug", "Reset"):
             get_workbench().event_generate("BackendRestart")
         
-        self._proxy.send_command(cmd)
+        accepted = self._proxy.send_command(cmd)
         
-        if isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand)):
+        if (accepted is not False 
+            and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
             self._set_state("running")
         
     
