@@ -279,7 +279,7 @@ class Runner:
                 self._set_state("waiting_input")
 
             
-            debug("Runner: State: %s, Fetched msg: %s", self.get_state(), msg)
+            #debug("Runner: State: %s, Fetched msg: %s", self.get_state(), msg)
             get_workbench().event_generate(msg["message_type"], **msg)
             
             
@@ -338,7 +338,7 @@ class BackendProxy:
         raise NotImplementedError()
     
     def allowed_states_for_inline_commands(self):
-        return ["waiting_toplevel_command", "waiting_debugger_command"]
+        return ["waiting_toplevel_command"]
 
     def send_program_input(self, data):
         """Send input data to backend"""
@@ -520,7 +520,7 @@ class CPythonProxy(BackendProxy):
         
         ready_msg = parse_message(ready_line)
         self._sys_path = ready_msg["path"]
-        debug("Backend ready: %s", ready_msg, self._sys_path)
+        debug("Backend ready: %s", ready_msg)
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
