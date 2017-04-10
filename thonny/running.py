@@ -103,6 +103,7 @@ class Runner:
         return self._proxy.get_sys_path()
     
     def send_command(self, cmd):
+        #print("SENDING:", cmd)
         if isinstance(cmd, ToplevelCommand):
             assert (self.get_state() == "waiting_toplevel_command"
                     or cmd.command in ["Reset", "Run", "Debug"]), ( 
@@ -257,6 +258,7 @@ class Runner:
         if len(self._postponed_inline_commands) > 10: 
             "Can't pile up too many commands. This command will be just ignored"
         else:
+            #print("Postponing")
             self._postponed_inline_commands.append(cmd)
             
     def _poll_vm_messages(self):
@@ -271,12 +273,6 @@ class Runner:
             msg = self._proxy.fetch_next_message()
             if not msg:
                 break
-
-            #debug("Runner: State: %s, Fetched msg: %s", self.get_state(), msg)
-            get_workbench().event_generate(msg["message_type"], **msg)
-            
-            # TODO: maybe distinguish between workbench cwd and backend cwd ??
-            get_workbench().set_option("run.working_directory", self.get_cwd())
             
             # change state
             if "command_context" in msg:
@@ -287,7 +283,13 @@ class Runner:
                 self._set_state("waiting_input")
             else:
                 "other messages don't affect the state"
-                
+
+            #print("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
+            get_workbench().event_generate(msg["message_type"], **msg)
+            
+            # TODO: maybe distinguish between workbench cwd and backend cwd ??
+            get_workbench().set_option("run.working_directory", self.get_cwd())
+            
             get_workbench().update()
             
         get_workbench().after(50, self._poll_vm_messages)
