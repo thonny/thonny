@@ -10,7 +10,6 @@ shell becomes kind of title for the execution.
 
 
 from _thread import start_new_thread
-import queue
 from logging import debug
 import os.path
 import subprocess
@@ -29,7 +28,6 @@ from shutil import which
 import shutil
 import tokenize
 import collections
-from thonny.shared.thonny.common import InlineCommand
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
