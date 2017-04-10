@@ -105,6 +105,13 @@ class VM:
                 msg = self.create_message(error_response_type,
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT)))
         
+        if cmd.command == "tkupdate":
+            # tkupdate is special command which doesn't require response
+            return
+        else:
+            msg["command_context"] = command_context
+            msg["command"] = cmd.command
+            self.send_message(msg)
     
     def _cmd_cd(self, cmd):
         try:
