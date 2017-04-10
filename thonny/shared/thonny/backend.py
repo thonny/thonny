@@ -30,7 +30,6 @@ DEBUG = True
 
 logger = logging.getLogger("thonny.backend")
 logger.setLevel(logging.ERROR)
-debug = logger.debug
 info = logger.info
 
 class VM:
@@ -75,7 +74,7 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
         
-        self.send_message("BackendReady",
+        self.send_message(self.create_message("BackendReady",
                           main_dir=self._main_dir,
                           original_argv=original_argv,
                           original_path=original_path,
@@ -83,7 +82,7 @@ class VM:
                           path=sys.path,
                           python_version=_get_python_version_string(),
                           python_executable=sys.executable,
-                          cwd=os.getcwd())
+                          cwd=os.getcwd()))
         
     def mainloop(self):
         while True: 
@@ -94,57 +93,56 @@ class VM:
     def handle_command(self, cmd):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
         
-        #if cmd.command != "tkupdate":
-        #    debug("MAINLOOP: %s", cmd)
         error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
         try:
             handler = getattr(self, "_cmd_" + cmd.command)
         except AttributeError:
-            self.send_message(error_response_type, error="Unknown command: " + cmd.command)
+            self.send_message(self.create_message(error_response_type, error="Unknown command: " + cmd.command))
         else:
             try:
-                handler(cmd)
+                msg = handler(cmd)
+                if msg is None:
+                    self._debug("got NONE for " + str(cmd))
+                self.send_message(msg)
             except:
-                self.send_message(error_response_type,
-                    error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
+                self.send_message(self.create_message(error_response_type,
+                    error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT)))
                 )
         
     
     def _cmd_cd(self, cmd):
         try:
             os.chdir(cmd.path)
-            self.send_message("ToplevelResult")
+            return self.create_message("ToplevelResult")
         except Exception as e:
-            self.send_message("ToplevelResult", error=str(e))
-    
+            # TODO: should output user error
+            return self.create_message("ToplevelResult", error=str(e))
     
     def _cmd_Reset(self, cmd):
         # nothing to do, because Reset always happens in fresh process
-        self.send_message("ToplevelResult", welcome_text="Python " + _get_python_version_string())
+        return self.create_message("ToplevelResult", welcome_text="Python " + _get_python_version_string())
     
     def _cmd_Run(self, cmd):
-        self._execute_file_and_send_result(cmd, False)
+        return self._execute_file(cmd, False)
     
     def _cmd_run(self, cmd):
-        self._execute_file_and_send_result(cmd, False)
+        return self._execute_file(cmd, False)
     
     def _cmd_Debug(self, cmd):
-        self._execute_file_and_send_result(cmd, True)
+        return self._execute_file(cmd, True)
     
     def _cmd_debug(self, cmd):
-        self._execute_file_and_send_result(cmd, True)
+        return self._execute_file(cmd, True)
     
     def _cmd_execute_source(self, cmd):
-        return self._execute_source_and_send_result(cmd, "ToplevelResult")
+        return self._execute_source(cmd, "ToplevelResult")
     
     def _cmd_execute_source_inline(self, cmd):
-        return self._execute_source_and_send_result(cmd, "InlineResult")
+        return self._execute_source(cmd, "InlineResult")
     
     def _cmd_tkupdate(self, cmd):
         tkinter = sys.modules.get("tkinter")
-        if (tkinter is None or tkinter._default_root is None):
-            return
-        else:
+        if tkinter is not None and tkinter._default_root is not None:
             # advance the event loop
             # http://bugs.python.org/issue989712
             # http://bugs.python.org/file6090/run.py.diff
@@ -154,19 +152,21 @@ class VM:
                     pass 
             except:
                 pass
+            
+        return self.create_message("TkUpdatedOnBackend") # necessary only because I want result for each command
     
     
     def _cmd_get_globals(self, cmd):
         if not cmd.module_name in sys.modules:
             raise ThonnyClientError("Module '{0}' is not loaded".format(cmd.module_name))
         
-        self.send_message("Globals", module_name=cmd.module_name,
+        return self.create_message("Globals", module_name=cmd.module_name,
                               globals=self.export_variables(sys.modules[cmd.module_name].__dict__))
     
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
             if id(frame) == cmd.frame_id:
-                self.send_message("Locals", locals=self.export_variables(frame.f_locals))
+                return self.create_message("Locals", locals=self.export_variables(frame.f_locals))
         else:
             raise ThonnyClientError("Frame '{0}' not found".format(cmd.frame_id))
             
@@ -176,7 +176,7 @@ class VM:
         for key in self._heap:
             result[key] = self.export_value(self._heap[key])
             
-        self.send_message("Heap", heap=result)
+        return self.create_message("Heap", heap=result)
     
     def _cmd_shell_autocomplete(self, cmd):
         error = None
@@ -195,7 +195,7 @@ class VM:
             completions = []
             error = "Autocomplete error"
         
-        self.send_message("ShellCompletions", 
+        return self.create_message("ShellCompletions", 
             source=cmd.source,
             completions=completions,
             error=error
@@ -220,7 +220,7 @@ class VM:
             completions = []
             error = "Autocomplete error"
         
-        self.send_message("EditorCompletions", 
+        return self.create_message("EditorCompletions", 
                           source=cmd.source,
                           row=cmd.row,
                           column=cmd.column,
@@ -268,7 +268,7 @@ class VM:
                     "type_id" : id(object),
                     "attributes" : {}}
         
-        self.send_message("ObjectInfo", id=cmd.object_id, info=info)
+        return self.create_message("ObjectInfo", id=cmd.object_id, info=info)
     
     def _add_file_handler_info(self, value, info):
         try:
@@ -303,16 +303,13 @@ class VM:
             info["entries"].append((self.export_value(key),
                                      self.export_value(value[key])))
         
-    def _execute_file_and_send_result(self, cmd, debug_mode):
-        result_attributes = self._execute_file(cmd, debug_mode)
-        self.send_message("ToplevelResult", **result_attributes)
-    
     def _execute_file(self, cmd, debug_mode):
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
-        return self._execute_source(cmd.source, cmd.full_filename, "exec", debug_mode)
+        result_attributes = self._execute_source_ex(cmd.source, cmd.full_filename, "exec", debug_mode) 
+        return self.create_message("ToplevelResult", **result_attributes)
     
-    def _execute_source_and_send_result(self, cmd, result_type):
+    def _execute_source(self, cmd, result_type):
         filename = "<pyshell>"
         
         if hasattr(cmd, "global_vars"):
@@ -327,9 +324,8 @@ class VM:
         try:
             root = ast.parse(cmd.source, filename=filename, mode="exec")
         except SyntaxError as e:
-            self.send_message(result_type,
+            return self.create_message(result_type,
                 error="".join(traceback.format_exception_only(SyntaxError, e)))
-            return
             
         assert isinstance(root, ast.Module)
             
@@ -338,7 +334,7 @@ class VM:
         else:
             mode = "exec"
             
-        result_attributes = self._execute_source(cmd.source, filename, mode,
+        result_attributes = self._execute_source_ex(cmd.source, filename, mode,
             hasattr(cmd, "debug_mode") and cmd.debug_mode,
             global_vars)
         
@@ -350,9 +346,9 @@ class VM:
         else:
             result_attributes["request_id"] = None
         
-        self.send_message(result_type, **result_attributes)
+        return self.create_message(result_type, **result_attributes)
         
-    def _execute_source(self, source, filename, execution_mode, debug_mode,
+    def _execute_source_ex(self, source, filename, execution_mode, debug_mode,
                         global_vars=None):
         if debug_mode:
             self._current_executor = FancyTracer(self)
@@ -391,13 +387,15 @@ class VM:
         cmd = parse_message(line)
         return cmd
 
-    def send_message(self, message_type, **kwargs):
-        
+    def create_message(self, message_type, **kwargs):
         kwargs["message_type"] = message_type
         if "cwd" not in kwargs:
             kwargs["cwd"] = os.getcwd()
-        
-        self._original_stdout.write(serialize_message(kwargs) + "\n")
+            
+        return kwargs
+
+    def send_message(self, msg):
+        self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
         
     def export_value(self, value, skip_None=False):
@@ -460,7 +458,7 @@ class VM:
             try:
                 self._vm._enter_io_function()
                 if data != "":
-                    self._vm.send_message("ProgramOutput", stream_name=self._stream_name, data=data)
+                    self._vm.send_message(self._vm.create_message("ProgramOutput", stream_name=self._stream_name, data=data))
             finally:
                 self._vm._exit_io_function()
         
@@ -476,7 +474,7 @@ class VM:
         def _generic_read(self, method, limit=-1):
             try:
                 self._vm._enter_io_function()
-                self._vm.send_message("InputRequest", method=method, limit=limit)
+                self._vm.send_message(self._vm.create_message("InputRequest", method=method, limit=limit))
                 
                 while True:
                     cmd = self._vm._fetch_command()
@@ -739,14 +737,14 @@ class FancyTracer(Executor):
                 exception_lower_stack_description = None 
                 exception_msg = None
             
-            self._vm.send_message("DebuggerProgress",
+            self._vm.send_message(self._vm.create_message("DebuggerProgress",
                 command=self._current_command.command,
                 stack=self._export_stack(),
                 exception=self._vm.export_value(self._unhandled_exception, True),
                 exception_msg=exception_msg,
                 exception_lower_stack_description=exception_lower_stack_description,
                 value=value
-            )
+            ))
             
             # Fetch next debugger command
             self._current_command = self._vm._fetch_command()
