@@ -93,12 +93,12 @@ class Runner:
     
     def _set_state(self, state):
         if self._state != state:
-            print("Runner state changed: %s ==> %s" % (self._state, state))
+            #print("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
         
-        if state in self._proxy.allowed_states_for_inline_commands():
-            while not self._postponed_inline_commands.empty():
-                self.send_command(self._postponed_inline_commands.get())
+        while (not self._postponed_inline_commands.empty()
+               and self._state in self._proxy.allowed_states_for_inline_commands()):
+            self.send_command(self._postponed_inline_commands.get())
             
     def get_sys_path(self):
         return self._proxy.get_sys_path()
@@ -118,7 +118,6 @@ class Runner:
                 if self._postponed_inline_commands.full(): 
                     "Can't pile up too many commands. This command will be just ignored"
                 else:
-                    print("postponing", cmd)
                     self._postponed_inline_commands.put_nowait(cmd)
                 return
         else:
