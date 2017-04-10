@@ -95,6 +95,7 @@ class Runner:
             self._state = state
         
         while (len(self._postponed_inline_commands) > 0
+               and self._proxy != None
                and self._state in self._proxy.allowed_states_for_inline_commands()):
             self.send_command(self._postponed_inline_commands.pop(0))
             
