@@ -97,15 +97,13 @@ class VM:
         try:
             handler = getattr(self, "_cmd_" + cmd.command)
         except AttributeError:
-            self.send_message(self.create_message(error_response_type, error="Unknown command: " + cmd.command))
+            msg = self.create_message(error_response_type, error="Unknown command: " + cmd.command)
         else:
             try:
                 msg = handler(cmd)
-                self.send_message(msg)
             except:
-                self.send_message(self.create_message(error_response_type,
+                msg = self.create_message(error_response_type,
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT)))
-                )
         
     
     def _cmd_cd(self, cmd):
@@ -1189,7 +1187,7 @@ def _get_python_version_string(version_info=None):
     if version_info[3] != "final":
         result += "-" + version_info[3]
     
-    result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
+    result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)"
     
     return result    
 
