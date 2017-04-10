@@ -60,6 +60,9 @@ Type: filesandordirs; Name: "{app}\*"
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
 ; Delete backend directory (Thonny occasionally fails to delete it at runtime)
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\backend"
+; Delete old 3rd party libs
+Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Python35"
+Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Py36"
 ; Delete old shortcut
 Type: filesandordirs; Name: "{userstartmenu}\Thonny"
 Type: filesandordirs; Name: "{userstartmenu}\Thonny.lnk"
