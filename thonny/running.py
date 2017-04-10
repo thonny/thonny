@@ -86,7 +86,7 @@ class Runner:
             return ""
     
     def get_state(self):
-        """State is one of "running", "waiting_input", "waiting_debug_command",
+        """State is one of "running", "waiting_input", "waiting_debugger_command",
             "waiting_toplevel_command"
         """
         return self._state
@@ -109,7 +109,7 @@ class Runner:
                     or cmd.command in ["Reset", "Run", "Debug"]), ( 
                 "Trying to send ToplevelCommand in state " + self.get_state())
         elif isinstance(cmd, DebuggerCommand):
-            assert self.get_state() == "waiting_debug_command", (
+            assert self.get_state() == "waiting_debugger_command", (
                 "Trying to send DebuggerCommand in state " + self.get_state())
         elif isinstance(cmd, InlineCommand):
             # Inline commands can be sent in any state,
@@ -274,7 +274,7 @@ class Runner:
             if msg["message_type"] == "ToplevelResult":
                 self._set_state("waiting_toplevel_command") 
             elif msg["message_type"] == "DebuggerProgress":
-                self._set_state("waiting_debug_command") 
+                self._set_state("waiting_debugger_command") 
             elif msg["message_type"] == "InputRequest":
                 self._set_state("waiting_input")
 

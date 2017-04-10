@@ -87,7 +87,7 @@ class Debugger:
         cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
         
-        if get_runner().get_state() == "waiting_debug_command":
+        if get_runner().get_state() == "waiting_debugger_command":
             debug("_issue cmd: %s", cmd)
             
             # tell VM the state we are seeing
@@ -101,7 +101,7 @@ class Debugger:
 
 
     def _cmd_stepping_commands_enabled(self):
-        return get_runner().get_state() == "waiting_debug_command"
+        return get_runner().get_state() == "waiting_debugger_command"
     
     def _cmd_step_into(self):
         self._check_issue_debugger_command("step")

@@ -783,7 +783,7 @@ class FancyTracer(Executor):
     
     def _respond_to_inline_commands(self):
         while isinstance(self._current_command, InlineCommand): 
-            self._vm.handle_command(self._current_command, "waiting_debug_command")
+            self._vm.handle_command(self._current_command, "waiting_debugger_command")
             self._current_command = self._vm._fetch_command()
     
     def _get_frame_source_info(self, frame):
