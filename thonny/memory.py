@@ -11,7 +11,10 @@ MAX_REPR_LENGTH_IN_GRID = 100
 
 def format_object_id(object_id):
     # this format aligns with how Python shows memory addresses
-    return "0x" + hex(object_id)[2:].upper() #.rjust(8,'0')
+    if object_id is None:
+        return None
+    else:
+        return "0x" + hex(object_id)[2:].upper() #.rjust(8,'0')
 
 def parse_object_id(object_id_repr):
     return int(object_id_repr, base=16)
@@ -31,7 +34,11 @@ class MemoryFrame(TreeFrame):
         iid = self.tree.focus()
         if iid != '':
             # NB! Assuming id is second column!
-            object_id = parse_object_id(self.tree.item(iid)['values'][1])
+            id_str = self.tree.item(iid)['values'][1]
+            if id_str in ["", None, "None"]:
+                return
+            
+            object_id = parse_object_id(id_str)
             get_workbench().event_generate("ObjectSelect", object_id=object_id)
     
     
@@ -77,8 +84,15 @@ class VariablesFrame(MemoryFrame):
                 if not name.startswith("__"):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
-                    self.tree.set(node_id, "id", format_object_id(variables[name]["id"]))
-                    self.tree.set(node_id, "value", shorten_repr(variables[name]["repr"], MAX_REPR_LENGTH_IN_GRID))
+                    if isinstance(variables[name], dict):
+                        repr_str = variables[name]["repr"]
+                        id_str = variables[name]["id"]
+                    else:
+                        repr_str = variables[name]
+                        id_str = None
+                        
+                    self.tree.set(node_id, "id", format_object_id(id_str))
+                    self.tree.set(node_id, "value", shorten_repr(repr_str, MAX_REPR_LENGTH_IN_GRID))
     
     
     def on_select(self, event):
