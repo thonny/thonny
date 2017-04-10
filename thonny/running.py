@@ -20,7 +20,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_shell_command, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
     UserError
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 from thonny.shell import ShellView
 import shlex
 from thonny import THONNY_USER_DIR
@@ -55,7 +55,6 @@ class Runner:
     def start(self):
         self.reset_backend()
         self._poll_vm_messages()
-        self._advance_background_tk_mainloop()
     
     def _init_commands(self):
         shell = get_workbench().get_view("ShellView")
@@ -253,16 +252,6 @@ class Runner:
     def _cmd_stop_reset_enabled(self):
         return True
             
-    def _advance_background_tk_mainloop(self):
-        """Enables running Tkinter programs which doesn't call mainloop. 
-        
-        When mainloop is omitted, then program can be interacted with
-        from the shell after it runs to the end.
-        """
-        if self.get_state() == "waiting_toplevel_command":
-            self.send_command(InlineCommand("tkupdate"))
-        get_workbench().after(50, self._advance_background_tk_mainloop)
-        
     def _poll_vm_messages(self):
         """I chose polling instead of event_generate in listener thread,
         because event_generate across threads is not reliable
@@ -650,6 +639,18 @@ class CPythonProxy(BackendProxy):
     
     def get_interpreter_command(self):
         return self._executable
+
+    def _advance_background_tk_mainloop(self):
+        """Enables running Tkinter programs which doesn't call mainloop. 
+        
+        When mainloop is omitted, then program can be interacted with
+        from the shell after it runs to the end.
+        """
+        # TODO: if you activate it, then make sure its deactivated before it's activated again
+        if get_runner().get_state() == "waiting_toplevel_command":
+            self.send_command(InlineCommand("tkupdate"))
+        get_workbench().after(50, self._advance_background_tk_mainloop)
+        
 
 def parse_configuration(configuration):
     """
