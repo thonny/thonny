@@ -29,6 +29,7 @@ from shutil import which
 import shutil
 import tokenize
 import collections
+from thonny.shared.thonny.common import InlineCommand
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -93,7 +94,7 @@ class Runner:
     
     def _set_state(self, state):
         if self._state != state:
-            debug("BackendProxy state changed: %s ==> %s", self._state, state)
+            print("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
         
         if state in self._proxy.allowed_states_for_inline_commands():
@@ -118,6 +119,7 @@ class Runner:
                 if self._postponed_inline_commands.full(): 
                     "Can't pile up too many commands. This command will be just ignored"
                 else:
+                    print("postponing", cmd)
                     self._postponed_inline_commands.put_nowait(cmd)
                 return
         else:
@@ -128,7 +130,7 @@ class Runner:
         
         self._proxy.send_command(cmd)
         
-        if isinstance(cmd, ToplevelCommand) or isinstance(cmd, DebuggerCommand):
+        if isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand)):
             self._set_state("running")
         
     
@@ -266,25 +268,30 @@ class Runner:
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
+        if self._proxy is None:
+            return
+        
         while True:
             msg = self._proxy.fetch_next_message()
             if not msg:
                 break
 
-            if msg["message_type"] == "ToplevelResult":
-                self._set_state("waiting_toplevel_command") 
-            elif msg["message_type"] == "DebuggerProgress":
-                self._set_state("waiting_debugger_command") 
-            elif msg["message_type"] == "InputRequest":
-                self._set_state("waiting_input")
-
-            
             #debug("Runner: State: %s, Fetched msg: %s", self.get_state(), msg)
             get_workbench().event_generate(msg["message_type"], **msg)
             
-            
             # TODO: maybe distinguish between workbench cwd and backend cwd ??
             get_workbench().set_option("run.working_directory", self.get_cwd())
+            
+            # change state
+            if "command_context" in msg:
+                # message_context shows the state where corresponding command was sent
+                # Now we got the response and we're return to that state
+                self._set_state(msg["command_context"])
+            elif msg["message_type"] == "InputRequest":
+                self._set_state("waiting_input")
+            else:
+                "other messages don't affect the state"
+                
             get_workbench().update()
             
         get_workbench().after(50, self._poll_vm_messages)
