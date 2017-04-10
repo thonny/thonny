@@ -87,10 +87,10 @@ class VM:
     def mainloop(self):
         while True: 
             cmd = self._fetch_command()
-            self.handle_command(cmd)
+            self.handle_command(cmd, "waiting_toplevel_command")
             
             
-    def handle_command(self, cmd):
+    def handle_command(self, cmd, command_context):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
         
         error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
@@ -101,8 +101,6 @@ class VM:
         else:
             try:
                 msg = handler(cmd)
-                if msg is None:
-                    self._debug("got NONE for " + str(cmd))
                 self.send_message(msg)
             except:
                 self.send_message(self.create_message(error_response_type,
@@ -481,7 +479,7 @@ class VM:
                     if isinstance(cmd, InputSubmission):
                         return cmd.data
                     elif isinstance(cmd, InlineCommand):
-                        self._vm.handle_command(cmd)
+                        self._vm.handle_command(cmd, "waiting_input")
                     else:
                         raise ThonnyClientError("Wrong type of command when waiting for input")
             finally:
@@ -785,7 +783,7 @@ class FancyTracer(Executor):
     
     def _respond_to_inline_commands(self):
         while isinstance(self._current_command, InlineCommand): 
-            self._vm.handle_command(self._current_command)
+            self._vm.handle_command(self._current_command, "waiting_debug_command")
             self._current_command = self._vm._fetch_command()
     
     def _get_frame_source_info(self, frame):
