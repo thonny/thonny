@@ -3,7 +3,6 @@
 from thonny.memory import VariablesFrame
 from thonny.globals import get_workbench, get_runner
 from thonny.common import InlineCommand
-from logging import debug
 
 class GlobalsView(VariablesFrame):
     def __init__(self, master):
@@ -13,7 +12,6 @@ class GlobalsView(VariablesFrame):
         get_workbench().bind("BackendRestart", lambda e=None: self._clear_tree(), True)
         get_workbench().bind("DebuggerProgress", self._request_globals, True)
         get_workbench().bind("ToplevelResult", self._request_globals, True)
-        get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
     def before_show(self):
         self._request_globals(even_when_hidden=True)
