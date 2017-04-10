@@ -746,7 +746,8 @@ class FancyTracer(Executor):
                 exception=self._vm.export_value(self._unhandled_exception, True),
                 exception_msg=exception_msg,
                 exception_lower_stack_description=exception_lower_stack_description,
-                value=value
+                value=value,
+                command_context="waiting_debugger_command"
             ))
             
             # Fetch next debugger command
