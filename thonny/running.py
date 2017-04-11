@@ -600,7 +600,7 @@ class CPythonProxy(BackendProxy):
         
         for command in ["pythonw", "python3", "python3.4", "python3.5", "python3.6"]:
             path = which(command)
-            if path is not None:
+            if path is not None and os.path.isabs(path):
                 result.add(path)
         
         current_configuration = get_workbench().get_option("run.backend_configuration")
