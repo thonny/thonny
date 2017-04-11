@@ -807,12 +807,13 @@ class SubprocessDialog(tk.Toplevel):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
     
-    def __init__(self, master, proc, title):
+    def __init__(self, master, proc, title, autoclose=True):
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
         self.returncode = None
         self.cancelled = False
+        self._autoclose = autoclose
         self._event_queue = collections.deque()
         
         tk.Toplevel.__init__(self, master)
@@ -884,7 +885,7 @@ class SubprocessDialog(tk.Toplevel):
             else:
                 self.button["text"] = "OK"
                 self.button.focus_set()
-                if self.returncode == 0:
+                if self.returncode == 0 and self._autoclose:
                     self._close()
         
         poll_output_events()
