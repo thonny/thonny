@@ -8,8 +8,6 @@ from tkinter import ttk, messagebox
 from thonny import misc_utils, tktextext, ui_utils
 from thonny.globals import get_workbench, get_runner
 import subprocess
-import collections
-import threading
 from urllib.request import urlopen
 import urllib.error
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -20,9 +18,6 @@ import logging
 import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
-from thonny.misc_utils import running_on_windows
-from time import sleep
-import signal
 from thonny.ui_utils import SubprocessDialog
 
 LINK_COLOR="#3A66DD"
