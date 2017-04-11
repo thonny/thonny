@@ -23,6 +23,7 @@ from logging import exception
 from thonny.misc_utils import running_on_windows
 from time import sleep
 import signal
+from thonny.ui_utils import SubprocessDialog
 
 LINK_COLOR="#3A66DD"
 
@@ -461,129 +462,6 @@ class PipDialog(tk.Toplevel):
         
         return None
 
-class SubprocessDialog(tk.Toplevel):
-    """Shows incrementally the output of given subprocess.
-    Allows cancelling"""
-    
-    def __init__(self, master, proc, title):
-        self._proc = proc
-        self.stdout = ""
-        self.stderr = ""
-        self.returncode = None
-        self.cancelled = False
-        self._event_queue = collections.deque()
-        
-        tk.Toplevel.__init__(self, master)
-
-        self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
-        main_frame = ttk.Frame(self) # To get styled background
-        main_frame.grid(sticky="nsew")
-
-        text_font=tk.font.nametofont("TkFixedFont").copy()
-        text_font["size"] = int(text_font["size"] * 0.7)
-        text_frame = tktextext.TextFrame(main_frame, read_only=True, horizontal_scrollbar=False,
-                                         background=ui_utils.get_button_face_color(),
-                                         font=text_font,
-                                         wrap="word")
-        text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
-        self.text = text_frame.text
-        self.text["width"] = 60
-        self.text["height"] = 7
-        
-        self.button = ttk.Button(main_frame, text="Cancel", command=self._close)
-        self.button.grid(row=1, column=0, pady=(0,15))
-        
-        main_frame.rowconfigure(0, weight=1)
-        main_frame.columnconfigure(0, weight=1)
-        
-
-        self.title(title)
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
-        #self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.transient(master)
-        self.grab_set() # to make it active and modal
-        self.text.focus_set()
-        
-        
-        self.bind('<Escape>', self._close_if_done, True) # escape-close only if process has completed 
-        self.protocol("WM_DELETE_WINDOW", self._close)
-        ui_utils.center_window(self, master)
-        
-        self._start_listening()
-    
-    def _start_listening(self):
-       
-        def listen_stream(stream_name):
-            stream = getattr(self._proc, stream_name)
-            while True:
-                data = stream.readline()
-                if data == '':
-                    break
-                else:
-                    self._event_queue.append((stream_name, data))
-                    setattr(self, stream_name, getattr(self, stream_name) + data)
-            
-            self.returncode = self._proc.wait()
-        
-        threading.Thread(target=listen_stream, args=["stdout"]).start()
-        if self._proc.stderr is not None:
-            threading.Thread(target=listen_stream, args=["stderr"]).start()
-        
-        def poll_output_events():
-            while len(self._event_queue) > 0:
-                stream_name, data = self._event_queue.popleft()
-                self.text.direct_insert("end", data, tags=(stream_name, ))
-                self.text.see("end")
-            
-            if self._proc.poll() == None:
-                self.after(200, poll_output_events)
-            else:
-                self.button["text"] = "OK"
-                self.button.focus_set()
-                if self.returncode == 0:
-                    self._close()
-        
-        poll_output_events()
-        
-    
-    def _close_if_done(self, event):
-        if self._proc.poll() is not None:
-            self._close(event)        
-
-    def _close(self, event=None):
-        if self._proc.poll() is None:
-            if messagebox.askyesno("Cancel the process?",
-                "The process is still running.\nAre you sure you want to cancel?"):
-                # try gently first
-                try:
-                    if running_on_windows():
-                        self._proc.send_signal(signal.CTRL_BREAK_EVENT) # alternative: CTRL_C_EVENT
-                    else:
-                        self._proc.terminate()
-                        
-                    sleep(1) # wait a bit
-                except:
-                    pass
-                
-                if self._proc.poll() is None:
-                    # now let's be more concrete
-                    self._proc.kill()
-                
-                self.cancelled = True
-                # fetch output about cancelling
-                while len(self._event_queue) > 0:
-                    stream_name, data = self._event_queue.popleft()
-                    self.text.direct_insert("end", data, tags=(stream_name, ))
-                self.text.direct_insert("end", "\n\nPROCESS CANCELLED")
-                self.text.see("end")
-                    
-                    
-            else:
-                return
-        else:
-            self.destroy()
         
 class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):
