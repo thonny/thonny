@@ -1,5 +1,9 @@
 from jedi import Script
-from jedi.parser import tree
+try:
+    from jedi.parser.python import tree
+except ImportError:
+    from jedi.parser import tree
+    
 from thonny.globals import get_workbench
 import tkinter as tk
 import logging

@@ -33,14 +33,16 @@ class LocalsHighlighter:
     
     def get_positions_correct_but_using_private_parts(self):
         from jedi import Script
-
-        from jedi.parser import tree
-        from jedi.parser.tree import Function
+        
+        try:
+            from jedi.parser.python import tree
+        except ImportError:
+            from jedi.parser import tree
 
         locs = []
 
         def process_scope(scope):
-            if isinstance(scope, Function):
+            if isinstance(scope, tree.Function):
                 # process all children after name node,
                 # (otherwise name of global function will be marked as local def)
                 local_names = set() 
