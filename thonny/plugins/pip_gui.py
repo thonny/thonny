@@ -564,7 +564,8 @@ def _create_pip_process(args):
     cmd = [interpreter, "-m", "pip"] + args
     
     return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            env=env, universal_newlines=True, encoding=encoding),
+                            env=env, universal_newlines=True, encoding=encoding,
+                            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP),
             cmd)
 
 def _get_latest_stable_version(version_strings):

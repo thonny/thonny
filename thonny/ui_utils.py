@@ -16,6 +16,8 @@ import collections
 import threading
 import signal
 from time import sleep
+import subprocess
+import os
 
 
 CALM_WHITE = '#fdfdfd'
@@ -811,6 +813,8 @@ class SubprocessDialog(tk.Toplevel):
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
+        self._stdout_thread = None
+        self._stderr_thread = None
         self.returncode = None
         self.cancelled = False
         self._autoclose = autoclose
@@ -862,17 +866,18 @@ class SubprocessDialog(tk.Toplevel):
             stream = getattr(self._proc, stream_name)
             while True:
                 data = stream.readline()
+                self._event_queue.append((stream_name, data))
+                setattr(self, stream_name, getattr(self, stream_name) + data)
                 if data == '':
                     break
-                else:
-                    self._event_queue.append((stream_name, data))
-                    setattr(self, stream_name, getattr(self, stream_name) + data)
             
             self.returncode = self._proc.wait()
         
-        threading.Thread(target=listen_stream, args=["stdout"]).start()
+        self._stdout_thread = threading.Thread(target=listen_stream, args=["stdout"])
+        self._stdout_thread.start()
         if self._proc.stderr is not None:
-            threading.Thread(target=listen_stream, args=["stderr"]).start()
+            self._stderr_thread = threading.Thread(target=listen_stream, args=["stderr"])
+            self._stderr_thread.start()
         
         def poll_output_events():
             while len(self._event_queue) > 0:
@@ -902,19 +907,23 @@ class SubprocessDialog(tk.Toplevel):
                 # try gently first
                 try:
                     if running_on_windows():
-                        self._proc.send_signal(signal.CTRL_BREAK_EVENT) # alternative: CTRL_C_EVENT
+                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)
                     else:
-                        self._proc.terminate()
+                        os.kill(self._proc.pid, signal.SIGINT)
                         
-                    sleep(1) # wait a bit
-                except:
-                    pass
+                    self._proc.wait(2)
+                except subprocess.TimeoutExpired:
+                    if self._proc.poll() is None:
+                        # now let's be more concrete
+                        self._proc.kill()
                 
-                if self._proc.poll() is None:
-                    # now let's be more concrete
-                    self._proc.kill()
                 
                 self.cancelled = True
+                # Wait for threads to finish
+                self._stdout_thread.join(2)
+                if self._stderr_thread is not None:
+                    self._stderr_thread.join(2)
+                
                 # fetch output about cancelling
                 while len(self._event_queue) > 0:
                     stream_name, data = self._event_queue.popleft()
