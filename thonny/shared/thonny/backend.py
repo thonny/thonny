@@ -97,21 +97,20 @@ class VM:
         try:
             handler = getattr(self, "_cmd_" + cmd.command)
         except AttributeError:
-            msg = self.create_message(error_response_type, error="Unknown command: " + cmd.command)
+            response = self.create_message(error_response_type, error="Unknown command: " + cmd.command)
         else:
             try:
-                msg = handler(cmd)
+                response = handler(cmd)
             except:
-                msg = self.create_message(error_response_type,
+                response = self.create_message(error_response_type,
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT)))
         
-        if cmd.command == "tkupdate":
-            # tkupdate is special command which doesn't require response
-            return
-        else:
-            msg["command_context"] = command_context
-            msg["command"] = cmd.command
-            self.send_message(msg)
+        if response is not None:
+            response["command_context"] = command_context
+            response["command"] = cmd.command
+            if response["message_type"] == "ToplevelResult":
+                self._add_tkinter_info(response)
+            self.send_message(response)
     
     def _cmd_cd(self, cmd):
         try:
@@ -145,7 +144,7 @@ class VM:
     
     def _cmd_tkupdate(self, cmd):
         tkinter = sys.modules.get("tkinter")
-        if tkinter is not None and tkinter._default_root is not None:
+        if tkinter is not None and getattr(tkinter, "_default_root", None) is not None:
             # advance the event loop
             # http://bugs.python.org/issue989712
             # http://bugs.python.org/file6090/run.py.diff
@@ -156,7 +155,7 @@ class VM:
             except:
                 pass
             
-        return self.create_message("TkUpdatedOnBackend") # necessary only because I want result for each command
+        return None
     
     
     def _cmd_get_globals(self, cmd):
@@ -288,7 +287,14 @@ class VM:
         except Exception as e:
             info["file_error"] = "Could not get file content, error:" + str(e)
             pass
-        
+    
+    def _add_tkinter_info(self, msg):
+        tkinter = sys.modules.get("tkinter")
+        # tkinter._default_root is not None,
+        # when window has been created and mainloop isn't called or hasn't ended yet
+        msg["tkinter_is_active"] = (tkinter is not None 
+                                    and getattr(tkinter, "_default_root", None) is not None)
+    
     def _add_function_info(self, value, info):
         try:
             info["source"] = inspect.getsource(value)
