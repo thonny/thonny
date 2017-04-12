@@ -13,7 +13,6 @@ from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.common import parse_shell_command
 from thonny.tktextext import rebind_control_a
-from thonny import misc_utils
 import tokenize
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
@@ -146,7 +145,8 @@ class Editor(ttk.Frame):
     
     def _listen_for_execute(self, event):
         command, args = parse_shell_command(event.cmd_line)
-        if command.lower() in ["run", "debug"]:
+        # Go read-only
+        if command.lower() == "debug":
             if len(args) == 0:
                 return
             filename = args[0]
