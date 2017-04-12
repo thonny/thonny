@@ -48,7 +48,7 @@ class Runner:
         
         self._state = None
         self._proxy = None
-        self._postponed_inline_commands = []
+        self._postponed_commands = []
     
     def start(self):
         self.reset_backend()
@@ -94,10 +94,10 @@ class Runner:
             #print("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
         
-        while (len(self._postponed_inline_commands) > 0
+        while (len(self._postponed_commands) > 0
                and self._proxy != None
                and self._state in self._proxy.allowed_states_for_inline_commands()):
-            self.send_command(self._postponed_inline_commands.pop(0))
+            self.send_command(self._postponed_commands.pop(0))
             
     def get_sys_path(self):
         return self._proxy.get_sys_path()
@@ -115,7 +115,7 @@ class Runner:
             # Inline commands can be sent in any state,
             # but some backends don't accept them in some states
             if self.get_state() not in self._proxy.allowed_states_for_inline_commands():
-                self._postpone_command(cmd)
+                self.postpone_command(cmd)
                 return
         else:
             raise RuntimeError("Unknown command class: " + str(type(cmd)))
@@ -232,8 +232,7 @@ class Runner:
             raise CommandSyntaxError("Command 'cd' takes one argument")
 
     def cmd_execution_command_enabled(self):
-        return (self.get_state() == "waiting_toplevel_command"
-                and get_workbench().get_editor_notebook().get_current_editor() is not None)
+        return get_workbench().get_editor_notebook().get_current_editor() is not None
     
     def _cmd_run_current_script(self):
         self.execute_current("Run")
@@ -249,17 +248,17 @@ class Runner:
     def _cmd_stop_reset_enabled(self):
         return True
     
-    def _postpone_command(self, cmd):
+    def postpone_command(self, cmd):
         # discard older same type command
-        for older_cmd in self._postponed_inline_commands:
+        for older_cmd in self._postponed_commands:
             if older_cmd.command == cmd.command:
-                self._postponed_inline_commands.remove(older_cmd)
+                self._postponed_commands.remove(older_cmd)
         
-        if len(self._postponed_inline_commands) > 10: 
+        if len(self._postponed_commands) > 10: 
             "Can't pile up too many commands. This command will be just ignored"
         else:
             #print("Postponing")
-            self._postponed_inline_commands.append(cmd)
+            self._postponed_commands.append(cmd)
             
     def _poll_vm_messages(self):
         """I chose polling instead of event_generate in listener thread,
@@ -295,7 +294,7 @@ class Runner:
         get_workbench().after(50, self._poll_vm_messages)
     
     def reset_backend(self):
-        self._postponed_inline_commands = []
+        self._postponed_commands = []
         self.kill_backend()
         configuration = get_workbench().get_option("run.backend_configuration")
         backend_name, configuration_option = parse_configuration(configuration)
