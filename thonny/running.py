@@ -682,8 +682,6 @@ class CPythonProxy(BackendProxy):
         else:
             self._tkupdate_loop_id = None
         
-        import turtle
-        
 
 def parse_configuration(configuration):
     """
