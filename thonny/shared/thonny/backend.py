@@ -19,6 +19,7 @@ from thonny import ast_utils
 from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
+import signal
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -84,6 +85,8 @@ class VM:
                           python_executable=sys.executable,
                           cwd=os.getcwd()))
         
+        self._install_signal_handler()
+        
     def mainloop(self):
         while True: 
             cmd = self._fetch_command()
@@ -111,6 +114,15 @@ class VM:
             if response["message_type"] == "ToplevelResult":
                 self._add_tkinter_info(response)
             self.send_message(response)
+    
+    def _install_signal_handler(self):
+        def signal_handler(signal, frame):
+            raise KeyboardInterrupt("Execution interrupted")
+        
+        if os.name == 'nt':
+            signal.signal(signal.SIGBREAK, signal_handler)
+        else:
+            signal.signal(signal.SIGINT, signal_handler)        
     
     def _cmd_cd(self, cmd):
         try:

@@ -28,6 +28,7 @@ from shutil import which
 import shutil
 import tokenize
 import collections
+import signal
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -75,6 +76,11 @@ class Runner:
             group=70,
             image_filename="run.stop.gif",
             include_in_toolbar=True)
+        
+        get_workbench().add_command('interrupt', "run", "Interrupt execution",
+            handler=self._cmd_interrupt,
+            tester=self._cmd_interrupt_enabled,
+            default_sequence="<Control-c>")
     
     def get_cwd(self):
         # TODO: make it nicer
@@ -237,6 +243,22 @@ class Runner:
     def _cmd_run_current_script(self):
         self.execute_current("Run")
     
+    def _cmd_interrupt(self):
+        self.interrupt_backend()
+        
+    def _cmd_interrupt_enabled(self):
+        widget = get_workbench().focus_get()
+        if not running_on_mac_os(): # on Mac Ctrl+C is not used for Copy
+            if hasattr(widget, "selection_get"):
+                try:
+                    if widget.selection_get() != "":
+                        # assuming user meant to copy, not interrupt
+                        # (IDLE seems to follow same logic)
+                        return False
+                except:
+                    pass
+        
+        return get_runner().get_state() != "waiting_toplevel_command"
     
     def cmd_stop_reset(self):
         if self.get_state() == "waiting_toplevel_command":
@@ -306,7 +328,11 @@ class Runner:
         self._proxy = backend_class(configuration_option)
         self._set_state("waiting_toplevel_command")
         self.send_command(ToplevelCommand(command="Reset"))
-        
+    
+    def interrupt_backend(self):
+        if self._proxy is not None:
+            self._proxy.interrupt()
+    
     def kill_backend(self):
         if self._proxy:
             self._proxy.kill_current_process()
@@ -356,6 +382,9 @@ class BackendProxy:
     def get_sys_path(self):
         "backend's sys.path"
         return []
+    
+    def interrupt(self):
+        self.kill_current_process()
     
     def kill_current_process(self):
         "Kill the backend"
@@ -445,11 +474,19 @@ class CPythonProxy(BackendProxy):
     def get_sys_path(self):
         return self._sys_path
     
+    def interrupt(self):
+        if self._proc is not None and self._proc.poll() is None:
+            if running_on_windows():
+                os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)
+            else:
+                self._proc.send_signal(signal.SIGINT)
+    
     def kill_current_process(self):
         if self._proc is not None and self._proc.poll() is None: 
             self._proc.kill()
-            self._proc = None
-            self._message_queue = None
+            
+        self._proc = None
+        self._message_queue = None
     
     def _prepare_jedi(self):
         """Make jedi available for the backend"""
@@ -517,7 +554,8 @@ class CPythonProxy(BackendProxy):
             stderr=subprocess.PIPE,
             cwd=self.cwd,
             env=my_env,
-            universal_newlines=True
+            universal_newlines=True,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
         )
         
         ready_line = self._proc.stdout.readline()
@@ -577,7 +615,7 @@ class CPythonProxy(BackendProxy):
                          "C:\\Program Files\\Python 3.6",
                          "C:\\Program Files (x86)\\Python 3.6",
                          ]:
-                path = os.path.join(dir_, "pythonw.exe")
+                path = os.path.join(dir_, "python.exe")
                 if os.path.exists(path):
                     result.add(os.path.realpath(path))  
         
@@ -632,7 +670,7 @@ class CPythonProxy(BackendProxy):
                                  ]:
                         dir_ = winreg.QueryValue(key, subkey)
                         if dir_:
-                            path = os.path.join(dir_, "pythonw.exe")
+                            path = os.path.join(dir_, "python.exe")
                             if os.path.exists(path):
                                 result.add(path)
                 except:
@@ -642,9 +680,8 @@ class CPythonProxy(BackendProxy):
     
     def _get_gui_interpreter(self):
         if sys.executable.endswith("thonny.exe"):
-            # assuming that thonny.exe is in the same dir as pythonw.exe
-            # (NB! thonny.exe in scripts folder delegates running to python.exe)
-            return sys.executable.replace("thonny.exe", "pythonw.exe")
+            # assuming that thonny.exe is in the same dir as python.exe
+            return sys.executable.replace("thonny.exe", "python.exe")
         else:
             return sys.executable
     
@@ -684,7 +721,7 @@ class CPythonProxy(BackendProxy):
 
 def parse_configuration(configuration):
     """
-    "Python (C:\Python34\pythonw.exe)" becomes ("Python", "C:\Python34\pythonw.exe")
+    "Python (C:\Python34\python.exe)" becomes ("Python", "C:\Python34\python.exe")
     "BBC micro:bit" becomes ("BBC micro:bit", "")
     """
     
@@ -728,9 +765,9 @@ def _check_upgrade_private_venv(path):
 def _create_private_venv(path, description, clear=False, upgrade=False):
     base_exe = sys.executable
     if sys.executable.endswith("thonny.exe"):
-        # assuming that thonny.exe is in the same dir as pythonw.exe
+        # assuming that thonny.exe is in the same dir as python.exe
         # (NB! thonny.exe in scripts folder delegates running to python.exe)
-        base_exe = sys.executable.replace("thonny.exe", "pythonw.exe")
+        base_exe = sys.executable.replace("thonny.exe", "python.exe")
     
     
     def action():
@@ -782,7 +819,7 @@ def _get_private_venv_executable():
     assert os.path.exists(venv_path)
     
     if running_on_windows():
-        exe = os.path.join(venv_path, "Scripts", "pythonw.exe")
+        exe = os.path.join(venv_path, "Scripts", "python.exe")
     else:
         exe = os.path.join(venv_path, "bin", "python3")
     
