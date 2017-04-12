@@ -155,17 +155,20 @@ class VM:
         return self._execute_source(cmd, "InlineResult")
     
     def _cmd_tkupdate(self, cmd):
-        tkinter = sys.modules.get("tkinter")
-        if tkinter is not None and getattr(tkinter, "_default_root", None) is not None:
-            # advance the event loop
-            # http://bugs.python.org/issue989712
-            # http://bugs.python.org/file6090/run.py.diff
-            try:
-                while (tkinter._default_root is not None 
-                       and tkinter._default_root.dooneevent(tkinter._tkinter.DONT_WAIT)):
-                    pass 
-            except:
+        # advance the event loop
+        # http://bugs.python.org/issue989712
+        # http://bugs.python.org/file6090/run.py.diff
+        try:
+            root = self._get_tkinter_default_root()
+            if root is None:
+                return
+            
+            import tkinter
+            while root.dooneevent(tkinter._tkinter.DONT_WAIT):
                 pass
+                 
+        except:
+            pass
             
         return None
     
@@ -284,6 +287,14 @@ class VM:
         
         return self.create_message("ObjectInfo", id=cmd.object_id, info=info)
     
+    def _get_tkinter_default_root(self):
+        tkinter = sys.modules.get("tkinter")
+        if tkinter is not None:
+            return getattr(tkinter, "_default_root", None)
+        else:
+            return None
+
+    
     def _add_file_handler_info(self, value, info):
         try:
             assert isinstance(value.name, str)
@@ -301,11 +312,9 @@ class VM:
             pass
     
     def _add_tkinter_info(self, msg):
-        tkinter = sys.modules.get("tkinter")
         # tkinter._default_root is not None,
         # when window has been created and mainloop isn't called or hasn't ended yet
-        msg["tkinter_is_active"] = (tkinter is not None 
-                                    and getattr(tkinter, "_default_root", None) is not None)
+        msg["tkinter_is_active"] = self._get_tkinter_default_root() is not None
     
     def _add_function_info(self, value, info):
         try:
