@@ -238,7 +238,8 @@ class Runner:
             raise CommandSyntaxError("Command 'cd' takes one argument")
 
     def cmd_execution_command_enabled(self):
-        return get_workbench().get_editor_notebook().get_current_editor() is not None
+        return (get_workbench().get_editor_notebook().get_current_editor() is not None
+                and get_runner().get_state() == "waiting_toplevel_command")
     
     def _cmd_run_current_script(self):
         self.execute_current("Run")

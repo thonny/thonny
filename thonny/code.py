@@ -8,7 +8,7 @@ from tkinter.filedialog import askopenfilename
 
 from thonny.misc_utils import eqfn
 from thonny.codeview import CodeView
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.common import parse_shell_command
@@ -44,7 +44,8 @@ class Editor(ttk.Frame):
             self._load_file(filename)
             self._code_view.text.edit_modified(False)
         
-        self._code_view.text.bind("<<Modified>>", lambda e: master.update_editor_title(self), True)
+        self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
+        self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
         
         get_workbench().bind("AfterKnownMagicCommand", self._listen_for_execute, True)
@@ -180,6 +181,15 @@ class Editor(ttk.Frame):
     def is_focused(self):
         return self.focus_displayof() == self._code_view.text
 
+    def _on_text_modified(self, event):
+        self.master.update_editor_title(self)
+
+    def _on_text_change(self, event):
+        self.master.update_editor_title(self)
+        runner = get_runner()
+        if runner.get_state() != "waiting_toplevel_command":
+            runner.interrupt_backend()
+        
     def destroy(self):
         get_workbench().unbind("AfterKnownMagicCommand", self._listen_for_execute)
         get_workbench().unbind("ToplevelResult", self._listen_for_toplevel_result)
