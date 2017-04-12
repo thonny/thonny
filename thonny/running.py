@@ -481,6 +481,23 @@ class CPythonProxy(BackendProxy):
                 os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)
             else:
                 self._proc.send_signal(signal.SIGINT)
+        
+            # Tkinter programs can't be interrupted so easily:
+            # http://stackoverflow.com/questions/13784232/keyboardinterrupt-taking-a-while
+            # so let's chedule a hard kill in case the program refuses to be interrupted
+            def go_hard():
+                if get_runner().get_state() != "waiting_toplevel_command": # still running
+                    self._proc.kill()
+                    get_workbench().event_generate("ProgramOutput",
+                                                   stream_name="stderr",
+                                                   data="KeyboardInterrupt: Forced reset")
+                    get_runner().send_command(ToplevelCommand(command="Reset"))
+            
+            # Don't use too long wait, otherwise user may have started 
+            # already next command and we don't want to kill this
+            get_workbench().after(100, go_hard)
+            
+                    
     
     def kill_current_process(self):
         if self._proc is not None and self._proc.poll() is None: 
