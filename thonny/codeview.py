@@ -114,7 +114,8 @@ class PythonText(EnhancedText):
             return "break"
         finally:
             text.see("insert")
-            text.event_generate("<<NewLine>>")    
+            text.event_generate("<<NewLine>>")
+            return "break" 
 
 
 class CodeViewText(EnhancedTextWithLogging, PythonText):

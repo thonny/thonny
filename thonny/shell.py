@@ -12,6 +12,7 @@ from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
 from thonny.globals import get_workbench, get_runner
 from thonny.codeview import EDIT_BACKGROUND, PythonText
+from thonny.tktextext import index2line
 
 
 class ShellView (ttk.Frame):
@@ -93,12 +94,16 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.bind("<KeyPress>", self._text_key_press, True)
         self.bind("<KeyRelease>", self._text_key_release, True)
         
+        prompt_font = get_workbench().get_font("BoldEditorFont")
         vert_spacing = 10
         io_indent = 16
+        code_indent = prompt_font.measure(">>> ")
+        
         
         self.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
-        self.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
-        self.tag_configure("command", foreground="black")
+        self.tag_configure("prompt", foreground="purple", font=prompt_font)
+        self.tag_configure("command", foreground="black",
+                           lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure("welcome", foreground="DarkGray")
         self.tag_configure("automagic", foreground="DarkGray")
         #self.tag_configure("value", foreground="DarkGreen")
@@ -220,7 +225,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         self.mark_set("output_end", self.index("end-1c"))
         self._insert_prompt()
-        self._try_submit_input()
+        self._try_submit_input() # Trying to submit leftover code (eg. second magic command)
         self.see("end")
             
     def _insert_prompt(self):
@@ -266,7 +271,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self.tag_add("vertically_spaced", index)
                 self._before_io = False
             
-            self._try_submit_input()
+            #self._try_submit_input()
         else:
             self.bell()
             
@@ -277,7 +282,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.direct_delete(index1, index2, **kw)
         else:
             self.bell()
-            
+    
+    def perform_return(self, event):
+        PythonText.perform_return(self, event)
+        self._try_submit_input()
+        return "break"
+    
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
         self._menu.post(event.x_root, event.y_root)
@@ -467,6 +477,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _arrow_up(self, event):
         if not self._in_current_input_range("insert"):
             return
+
+        insert_line = index2line(self.index("insert"))
+        input_start_line = index2line(self.index("input_start"))
+        if insert_line != input_start_line:
+            # we're in the middle of a multiline command
+            return
         
         if len(self._command_history) == 0 or self._command_history_current_index == 0:
             # can't take previous command
@@ -482,6 +498,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _arrow_down(self, event):
         if not self._in_current_input_range("insert"):
+            return
+        
+        insert_line = index2line(self.index("insert"))
+        last_line = index2line(self.index("end-1c"))
+        if insert_line != last_line:
+            # we're in the middle of a multiline command
             return
         
         if (len(self._command_history) == 0 
@@ -501,6 +523,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _propose_command(self, cmd_line):
         self.delete("input_start", "end")
         self.intercept_insert("input_start", cmd_line)
+        self.see("insert")
     
     def _text_key_press(self, event):
         # TODO: this underline may confuse, when user is just copying on pasting
