@@ -15,16 +15,11 @@ Regexes are adapted from idlelib
 """
 
 import re
-import keyword
-import builtins
 
 from thonny.globals import get_workbench
 from thonny.shell import ShellText
 from thonny.codeview import CodeViewText
 
-def matches_any(name, alternates):
-    "Return a named group pattern matching list of alternates."
-    return "(?P<%s>" % name + "|".join(alternates) + ")"
 
 class SyntaxColorer:
     def __init__(self, text, main_font, bold_font):
@@ -35,50 +30,26 @@ class SyntaxColorer:
         self._dirty_ranges = set()
     
     def _compile_regexes(self):
-        kw = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
-        builtinlist = [str(name) for name in dir(builtins)
-                                            if not name.startswith('_') and \
-                                            name not in keyword.kwlist]
-        
-        # TODO: move builtin handling to global-local
-        builtin = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", builtinlist) + r"\b"
-        comment = matches_any("COMMENT", [r"#[^\n]*"])
-        magic_command = matches_any("MAGIC_COMMAND", [r"^%[^\n]*"]) # used only in shell
-        stringprefix = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"
-        
-        sqstring_open = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*\n?"
-        sqstring_closed = stringprefix + r"'[^'\\\n]*(\\.[^'\\\n]*)*'"
-        
-        dqstring_open = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*\n?'
-        dqstring_closed = stringprefix + r'"[^"\\\n]*(\\.[^"\\\n]*)*"'
-        
-        sq3string = stringprefix + r"'''[^'\\]*((\\.|'(?!''))[^'\\]*)*(''')?"
-        dq3string = stringprefix + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
-        
-        sq3delimiter = stringprefix + "'''"
-        dq3delimiter = stringprefix + '"""'
-        
-        string_open = matches_any("STRING_OPEN", [sqstring_open, dqstring_open])
-        string_closed = matches_any("STRING_CLOSED", [sqstring_closed, dqstring_closed])
-        string3_delimiter = matches_any("DELIMITER3", [sq3delimiter, dq3delimiter])
-        string3 = matches_any("STRING3", [dq3string, sq3string])
+        from thonny.token_utils import BUILTIN, COMMENT, MAGIC_COMMAND, STRING3,\
+            STRING3_DELIMITER, STRING_OPEN, SQSTRING_CLOSED, KW
+            
         
         self.uniline_regex = re.compile(
-            kw 
-            + "|" + builtin 
-            + "|" + comment 
-            + "|" + magic_command 
-            + "|" + string3_delimiter # to avoid marking """ and ''' as single line string in uniline mode
-            + "|" + string_closed 
-            + "|" + string_open
+            KW 
+            + "|" + BUILTIN 
+            + "|" + COMMENT 
+            + "|" + MAGIC_COMMAND 
+            + "|" + STRING3_DELIMITER # to avoid marking """ and ''' as single line string in uniline mode
+            + "|" + SQSTRING_CLOSED 
+            + "|" + STRING_OPEN
             , re.S)
         
         self.multiline_regex = re.compile(
-            string3
-            + "|" + comment 
-            + "|" + magic_command 
+            STRING3
+            + "|" + COMMENT 
+            + "|" + MAGIC_COMMAND 
             #+ "|" + string_closed # need to include single line strings otherwise '"""' ... '""""' will give wrong result
-            + "|" + string_open # (seems that it works faster and also correctly with only open strings)
+            + "|" + STRING_OPEN # (seems that it works faster and also correctly with only open strings)
             , re.S)
         
         self.id_regex = re.compile(r"\s+(\w+)", re.S)
