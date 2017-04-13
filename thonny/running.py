@@ -633,7 +633,7 @@ class CPythonProxy(BackendProxy):
                          "C:\\Program Files\\Python 3.6",
                          "C:\\Program Files (x86)\\Python 3.6",
                          ]:
-                path = os.path.join(dir_, "python.exe")
+                path = os.path.join(dir_, "pythonw.exe")
                 if os.path.exists(path):
                     result.add(os.path.realpath(path))  
         
@@ -688,7 +688,7 @@ class CPythonProxy(BackendProxy):
                                  ]:
                         dir_ = winreg.QueryValue(key, subkey)
                         if dir_:
-                            path = os.path.join(dir_, "python.exe")
+                            path = os.path.join(dir_, "pythonw.exe")
                             if os.path.exists(path):
                                 result.add(path)
                 except:
@@ -698,8 +698,8 @@ class CPythonProxy(BackendProxy):
     
     def _get_gui_interpreter(self):
         if sys.executable.endswith("thonny.exe"):
-            # assuming that thonny.exe is in the same dir as python.exe
-            return sys.executable.replace("thonny.exe", "python.exe")
+            # assuming that thonny.exe is in the same dir as pythonw.exe
+            return sys.executable.replace("thonny.exe", "pythonw.exe")
         else:
             return sys.executable
     
@@ -739,7 +739,7 @@ class CPythonProxy(BackendProxy):
 
 def parse_configuration(configuration):
     """
-    "Python (C:\Python34\python.exe)" becomes ("Python", "C:\Python34\python.exe")
+    "Python (C:\Python34\pythonw.exe)" becomes ("Python", "C:\Python34\pythonw.exe")
     "BBC micro:bit" becomes ("BBC micro:bit", "")
     """
     
@@ -783,9 +783,9 @@ def _check_upgrade_private_venv(path):
 def _create_private_venv(path, description, clear=False, upgrade=False):
     base_exe = sys.executable
     if sys.executable.endswith("thonny.exe"):
-        # assuming that thonny.exe is in the same dir as python.exe
-        # (NB! thonny.exe in scripts folder delegates running to python.exe)
-        base_exe = sys.executable.replace("thonny.exe", "python.exe")
+        # assuming that thonny.exe is in the same dir as pythonw.exe
+        # (NB! thonny.exe in scripts folder delegates running to pythonw.exe)
+        base_exe = sys.executable.replace("thonny.exe", "pythonw.exe")
     
     
     def action():
@@ -837,7 +837,7 @@ def _get_private_venv_executable():
     assert os.path.exists(venv_path)
     
     if running_on_windows():
-        exe = os.path.join(venv_path, "Scripts", "python.exe")
+        exe = os.path.join(venv_path, "Scripts", "pythonw.exe")
     else:
         exe = os.path.join(venv_path, "bin", "python3")
     
