@@ -5,13 +5,13 @@ import re
 from tkinter import ttk
 import traceback
 
-from thonny import memory
+from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_shell_command
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
 from thonny.globals import get_workbench, get_runner
-from thonny.codeview import EDIT_BACKGROUND
+from thonny.codeview import EDIT_BACKGROUND, PythonText
 
 
 class ShellView (ttk.Frame):
@@ -57,7 +57,7 @@ class ShellView (ttk.Frame):
         self.text._clear_shell()
 
 
-class ShellText(EnhancedTextWithLogging):
+class ShellText(EnhancedTextWithLogging, PythonText):
     
     def __init__(self, master, cnf={}, **kw):
         if not "background" in kw:
@@ -277,7 +277,7 @@ class ShellText(EnhancedTextWithLogging):
             self.direct_delete(index1, index2, **kw)
         else:
             self.bell()
-    
+            
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
         self._menu.post(event.x_root, event.y_root)
@@ -315,13 +315,19 @@ class ShellText(EnhancedTextWithLogging):
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
         input_text = self.get("input_start", "end-1c")
+        
+        # user may have pasted more text than necessary for this request
         submittable_text = self._extract_submittable_input(input_text)
         
         if submittable_text is not None:
-            # user may have pasted more text than necessary for this request
+            # make sure submittable text ends with newline
+            # (auto indenter may have put something more there)
+            
+            
             # leftover text will be kept in widget, waiting for next request.
             start_index = self.index("input_start")
             end_index = self.index("input_start+{0}c".format(len(submittable_text)))
+            
             # apply correct tags (if it's leftover then it doesn't have them yet)
             if get_runner().get_state() == "waiting_input":
                 self.tag_add("io", start_index, end_index)
@@ -358,14 +364,17 @@ class ShellText(EnhancedTextWithLogging):
     def _extract_submittable_input(self, input_text):
         
         if get_runner().get_state() == "waiting_toplevel_command":
-            # TODO: support also multiline commands
-            if "\n" in input_text:
+            if input_text.endswith("\n"):
                 if input_text.strip().startswith("%"):
+                    # if several magic command are submitted, then take only first
                     return input_text[:input_text.index("\n")+1]
+                elif self._code_is_ready_for_submission(input_text):
+                    return input_text
                 else:
-                    return input_text[:input_text.rfind("\n")+1]
+                    return None
             else:
                 return None
+            
         elif get_runner().get_state() == "waiting_input":
             input_request = self._current_input_request
             method = input_request.method
@@ -391,7 +400,34 @@ class ShellText(EnhancedTextWithLogging):
                         i += 1
             else:
                 raise AssertionError("only readline is supported at the moment")
-            
+    
+    def _code_is_ready_for_submission(self, source):
+        # Ready to submit if ends with empty line 
+        # or is complete single-line code
+        
+        # First check if it has unclosed parens, unclosed string or ending with : or \
+        parser = roughparse.RoughParser(self.indentwidth, self.tabwidth)
+        parser.set_str(source.rstrip() + "\n")
+        if (parser.get_continuation_type() != roughparse.C_NONE
+                or parser.is_block_opener()):
+            return None
+        
+        # Compound statements need to end with empty line to be considered
+        # complete.
+        lines = source.splitlines()
+        for line in lines:
+            if ((line.startswith(" ") or line.startswith("\t"))
+                and line.strip() != ""):
+                # found an indented line, therefore we have compound statement
+                if lines[-1].strip() == "":
+                    # last line is empty
+                    return source
+                else:
+                    return None
+        
+        # Not compound statement
+        return source
+        
     
     def _submit_input(self, text_to_be_submitted):
         if get_runner().get_state() == "waiting_toplevel_command":
@@ -482,6 +518,8 @@ class ShellText(EnhancedTextWithLogging):
         end_index = self.index("output_end")
         self.direct_delete("1.0", end_index)
 
+    def should_indent_after_empty_line(self):
+        return False
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
