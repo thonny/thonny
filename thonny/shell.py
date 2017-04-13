@@ -161,6 +161,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.delete("input_start", "end")
         self.insert("input_start", cmd_line, ("automagic",))
         self.see("end")
+        self._try_submit_input()
     
     def _handle_input_request(self, msg):
         self.text_mode = "io"
@@ -265,8 +266,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if get_runner().get_state() == "waiting_input" and self._before_io:
                 self.tag_add("vertically_spaced", index)
                 self._before_io = False
+                self._try_submit_input()
             
-            #self._try_submit_input()
+            self.see("insert")
         else:
             self.bell()
             
@@ -283,9 +285,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # then we expect the command to be submitted not linebreak to be inserted
         # (at least that's how IDLE works)
         source = self.get("input_start", "end-1c")
-        # TODO: allow this also for multiline simple statements
-        if "\n" not in source.strip() and self._code_is_ready_for_submission(source):
-            self.mark_set("insert", "insert lineend") # move cursor to line end
+        if (get_runner().get_state() == "waiting_toplevel_command"
+            and "\n" not in source
+            and self._code_is_ready_for_submission(source)):
+            self.mark_set("insert", "end") # move cursor 
                                        
         PythonText.perform_return(self, event)
         self._try_submit_input()
@@ -296,7 +299,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._menu.post(event.x_root, event.y_root)
         
     def _in_current_input_range(self, index):
-        return self.compare(index, ">=", "input_start")
+        try:
+            return self.compare(index, ">=", "input_start")
+        except:
+            return False
     
     def _insert_text_directly(self, txt, tags=()):
         # I want the insertion to go before marks 
@@ -425,22 +431,25 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 or parser.is_block_opener()):
             return None
         
-        # Compound statements need to end with empty line to be considered
+        # Multiline compound statements need to end with empty line to be considered
         # complete.
         lines = source.splitlines()
-        for line in lines:
-            if ((line.startswith(" ") or line.startswith("\t"))
-                and line.strip() != ""):
-                # found an indented line, therefore we have compound statement
-                if lines[-1].strip() == "":
-                    # last line is empty
-                    return source
-                else:
-                    return None
+        # strip starting empty and comment lines
+        while (len(lines) > 0
+               and (lines[0].strip().startswith("#")
+                    or lines[0].strip() == "")):
+            lines.pop(0)
+        
+        compound_keywords = ["if", "while", "for", "with", "try"]
+        if len(lines) > 0:
+            first_word = lines[0].strip().split()[0]
+            if (first_word in compound_keywords
+                and lines[-1].strip() != ""):
+                # last line is not empty
+                return None
         
         # Not compound statement
         return source
-        
     
     def _submit_input(self, text_to_be_submitted):
         if get_runner().get_state() == "waiting_toplevel_command":

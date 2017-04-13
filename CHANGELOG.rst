@@ -6,11 +6,12 @@ Unreleased
 ==========
 
 * NEW: Dialog for managing 3rd party packages / a simple pip GUI. Check it out: "Tools => Manage packages"
-* NEW: Window title now shows full path and cursor location of current file. 
-* NEW: Editor lines can be selected by clicking and/or dragging on line-number margin (thanks to Sven).
-* NEW: Most programs can now be interrupted by Ctrl+C without restarting the process.
-* NEW: You can start editing the code that is still running (the process gets interrupted automatically). This is handy when developing tkinter applications.
-* NEW: Tab can be used as alternative code-completion shortcut.
+* NEW: Shell now supports multiline commands
+* ENHANCEMENT: Window title now shows full path and cursor location of current file. 
+* ENHANCEMENT: Editor lines can be selected by clicking and/or dragging on line-number margin (thanks to Sven).
+* ENHANCEMENT: Most programs can now be interrupted by Ctrl+C without restarting the process.
+* ENHANCEMENT: You can start editing the code that is still running (the process gets interrupted automatically). This is handy when developing tkinter applications.
+* ENHANCEMENT: Tab can be used as alternative code-completion shortcut.
 * ENHANCEMENT: Recommended pip-command now appears faster in System Shell.
 * ENHANCEMENT: Alternative interpreter doesn't need to have jedi installed in order to provide code-completions (see #171: Code auto-complete error)
 * EXPERIMENTAL: Ctrl-click on a name in code tries to locate its definition. NB! Not finished yet!
