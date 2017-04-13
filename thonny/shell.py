@@ -360,7 +360,10 @@ class ShellText(EnhancedTextWithLogging):
         if get_runner().get_state() == "waiting_toplevel_command":
             # TODO: support also multiline commands
             if "\n" in input_text:
-                return input_text[:input_text.index("\n")+1]
+                if input_text.strip().startswith("%"):
+                    return input_text[:input_text.index("\n")+1]
+                else:
+                    return input_text[:input_text.rfind("\n")+1]
             else:
                 return None
         elif get_runner().get_state() == "waiting_input":
