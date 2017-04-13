@@ -259,11 +259,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             else:
                 tags = tags + ("toplevel", "command")
             
-            # when going back and fixing in the middle of command and pressing ENTER there
-            if txt == "\n":
-                self.mark_set("insert", "insert lineend")
-                index = "insert"
-                
             super().intercept_insert(index, txt, tags)
             
             # tag first char of io separately
@@ -284,6 +279,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.bell()
     
     def perform_return(self, event):
+        # if we are fixing the middle of single-line command and pressing ENTER 
+        # then we expect the command to be submitted not linebreak to be inserted
+        # (at least that's how IDLE works)
+        source = self.get("input_start", "end-1c")
+        # TODO: allow this also for multiline simple statements
+        if "\n" not in source.strip() and self._code_is_ready_for_submission(source):
+            self.mark_set("insert", "insert lineend") # move cursor to line end
+                                       
         PythonText.perform_return(self, event)
         self._try_submit_input()
         return "break"
