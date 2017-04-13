@@ -440,7 +440,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     or lines[0].strip() == "")):
             lines.pop(0)
         
-        compound_keywords = ["if", "while", "for", "with", "try"]
+        compound_keywords = ["if", "while", "for", "with", "try", "def", "class", "async", "await"]
         if len(lines) > 0:
             first_word = lines[0].strip().split()[0]
             if (first_word in compound_keywords
