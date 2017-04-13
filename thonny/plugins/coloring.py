@@ -31,7 +31,7 @@ class SyntaxColorer:
     
     def _compile_regexes(self):
         from thonny.token_utils import BUILTIN, COMMENT, MAGIC_COMMAND, STRING3,\
-            STRING3_DELIMITER, STRING_OPEN, SQSTRING_CLOSED, KW
+            STRING3_DELIMITER, STRING_OPEN, KW, STRING_CLOSED
             
         
         self.uniline_regex = re.compile(
@@ -40,7 +40,7 @@ class SyntaxColorer:
             + "|" + COMMENT 
             + "|" + MAGIC_COMMAND 
             + "|" + STRING3_DELIMITER # to avoid marking """ and ''' as single line string in uniline mode
-            + "|" + SQSTRING_CLOSED 
+            + "|" + STRING_CLOSED 
             + "|" + STRING_OPEN
             , re.S)
         
@@ -48,7 +48,7 @@ class SyntaxColorer:
             STRING3
             + "|" + COMMENT 
             + "|" + MAGIC_COMMAND 
-            #+ "|" + string_closed # need to include single line strings otherwise '"""' ... '""""' will give wrong result
+            #+ "|" + STRING_CLOSED # need to include single line strings otherwise '"""' ... '""""' will give wrong result
             + "|" + STRING_OPEN # (seems that it works faster and also correctly with only open strings)
             , re.S)
         
