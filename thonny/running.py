@@ -50,6 +50,7 @@ class Runner:
         self._state = None
         self._proxy = None
         self._postponed_commands = []
+        self._current_toplevel_command = None
     
     def start(self):
         self.reset_backend()
@@ -104,6 +105,9 @@ class Runner:
                and self._proxy != None
                and self._state in self._proxy.allowed_states_for_inline_commands()):
             self.send_command(self._postponed_commands.pop(0))
+    
+    def get_current_toplevel_command(self):
+        return self._current_toplevel_command
             
     def get_sys_path(self):
         return self._proxy.get_sys_path()
@@ -130,6 +134,8 @@ class Runner:
             get_workbench().event_generate("BackendRestart")
         
         accepted = self._proxy.send_command(cmd)
+        if isinstance(cmd, ToplevelCommand):
+            self._current_toplevel_command = cmd
         
         if (accepted is not False 
             and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
@@ -305,6 +311,9 @@ class Runner:
                 self._set_state("waiting_input")
             else:
                 "other messages don't affect the state"
+            
+            if msg["message_type"] == "ToplevelResult":
+                self._current_toplevel_command = None
 
             #print("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
             get_workbench().event_generate(msg["message_type"], **msg)
@@ -477,8 +486,9 @@ class CPythonProxy(BackendProxy):
     
     def interrupt(self):
         if self._proc is not None and self._proc.poll() is None:
+            command_to_interrupt = get_runner().get_current_toplevel_command()
             if running_on_windows():
-                os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)
+                os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
             else:
                 self._proc.send_signal(signal.SIGINT)
         
@@ -486,16 +496,16 @@ class CPythonProxy(BackendProxy):
             # http://stackoverflow.com/questions/13784232/keyboardinterrupt-taking-a-while
             # so let's chedule a hard kill in case the program refuses to be interrupted
             def go_hard():
-                if get_runner().get_state() != "waiting_toplevel_command": # still running
+                if (get_runner().get_state() != "waiting_toplevel_command"
+                    and get_runner().get_current_toplevel_command() == command_to_interrupt): # still running same command
                     self._proc.kill()
                     get_workbench().event_generate("ProgramOutput",
                                                    stream_name="stderr",
                                                    data="KeyboardInterrupt: Forced reset")
                     get_runner().send_command(ToplevelCommand(command="Reset"))
             
-            # Don't use too long wait, otherwise user may have started 
-            # already next command and we don't want to kill this
-            get_workbench().after(100, go_hard)
+            # 100 ms was too little for Mac
+            get_workbench().after(500, go_hard)
             
                     
     
