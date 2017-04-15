@@ -383,12 +383,10 @@ class AutoScrollbar(SafeScrollbar):
     # works if you use the grid geometry manager.
     def set(self, lo, hi):
         # TODO: this can make GUI hang or max out CPU when scrollbar wobbles back and forth
-        """
         if float(lo) <= 0.0 and float(hi) >= 1.0:
             self.grid_remove()
         else:
             self.grid()
-        """
         ttk.Scrollbar.set(self, lo, hi)
     def pack(self, **kw):
         raise tk.TclError("cannot use pack with this widget")
@@ -907,7 +905,7 @@ class SubprocessDialog(tk.Toplevel):
                 # try gently first
                 try:
                     if running_on_windows():
-                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)
+                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
                     else:
                         os.kill(self._proc.pid, signal.SIGINT)
                         
