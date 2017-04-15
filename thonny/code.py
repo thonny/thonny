@@ -6,7 +6,7 @@ from tkinter import ttk, messagebox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
-from thonny.misc_utils import eqfn
+from thonny.misc_utils import eqfn, running_on_mac_os
 from thonny.codeview import CodeView
 from thonny.globals import get_workbench, get_runner
 from logging import exception
@@ -625,6 +625,7 @@ def _check_create_ButtonNotebook_style():
     def right_btn_press(event):
         x, y, widget = event.x, event.y, event.widget
         try:
+            print(widget["style"])
             if "ButtonNotebook" in widget["style"]:
                 index = widget.index("@%d,%d" % (x, y))
                 menu.popup_index = index
@@ -632,9 +633,13 @@ def _check_create_ButtonNotebook_style():
         except:
             pass
     
-    
     get_workbench().bind_class("TNotebook", "<ButtonPress-1>", letf_btn_press, True)
     get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", left_btn_release, True)
-    get_workbench().bind_class("TNotebook", "<ButtonPress-3>", right_btn_press, True)
+    if running_on_mac_os():
+        get_workbench().bind_class("TNotebook", "<ButtonPress-2>", right_btn_press, True)
+        get_workbench().bind_class("TNotebook", "<Control-Button-1>", right_btn_press, True)
+    else:  
+        get_workbench().bind_class("TNotebook", "<ButtonPress-3>", right_btn_press, True)
+    
     
 
