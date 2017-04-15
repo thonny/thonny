@@ -826,7 +826,8 @@ class SubprocessDialog(tk.Toplevel):
         main_frame.grid(sticky="nsew")
 
         text_font=tk.font.nametofont("TkFixedFont").copy()
-        text_font["size"] = int(text_font["size"] * 0.7)
+        text_font["size"] = int(text_font["size"] * 0.9)
+        text_font["family"] = "Courier" if running_on_mac_os() else "Courier New"
         text_frame = tktextext.TextFrame(main_frame, read_only=True, horizontal_scrollbar=False,
                                          background=get_button_face_color(),
                                          font=text_font,
