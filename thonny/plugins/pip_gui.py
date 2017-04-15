@@ -19,6 +19,7 @@ import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog
+from thonny.misc_utils import running_on_windows
 
 LINK_COLOR="#3A66DD"
 
@@ -563,9 +564,13 @@ def _create_pip_process(args):
     interpreter = get_runner().get_interpreter_command()
     cmd = [interpreter, "-m", "pip"] + args
     
+    creationflags = 0
+    if running_on_windows():
+        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+    
     return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             env=env, universal_newlines=True, encoding=encoding,
-                            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP),
+                            creationflags=creationflags),
             cmd)
 
 def _get_latest_stable_version(version_strings):
