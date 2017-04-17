@@ -296,7 +296,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
-        self._menu.post(event.x_root, event.y_root)
+        self._menu.tk_popup(event.x_root, event.y_root)
         
     def _in_current_input_range(self, index):
         try:

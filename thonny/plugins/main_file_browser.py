@@ -79,7 +79,7 @@ class MainFileBrowser(BaseFileBrowser):
         if node_id:
             self.tree.selection_set(node_id)
             self.tree.focus(node_id)
-            self.menu.post(event.x_root, event.y_root)
+            self.menu.tk_popup(event.x_root, event.y_root)
     
     def on_double_click(self, event):
         path = self.get_selected_path()

@@ -628,7 +628,7 @@ def _check_create_ButtonNotebook_style():
             if "ButtonNotebook" in widget["style"]:
                 index = widget.index("@%d,%d" % (x, y))
                 menu.popup_index = index
-                menu.post(*get_workbench().winfo_pointerxy())
+                menu.tk_popup(*get_workbench().winfo_pointerxy())
         except:
             pass
     

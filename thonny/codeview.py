@@ -140,7 +140,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
-        get_workbench().get_menu("edit").post(event.x_root, event.y_root)
+        get_workbench().get_menu("edit").tk_popup(event.x_root, event.y_root)
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
