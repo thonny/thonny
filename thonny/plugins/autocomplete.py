@@ -29,6 +29,11 @@ class Completer(tk.Listbox):
         self.text.bind_class(self.text_priority_bindtag, "<Key>", self._on_text_keypress, True)
         
         self.text.bind("<<TextChange>>", self._on_text_change, True) # Assuming TweakableText
+        
+        # for cases when Listbox gets focus
+        self.bind("<Escape>", self._close)
+        self.bind("<Return>", self._insert_current_selection)
+        self.bind("<Double-Button-1>", self._insert_current_selection)
         self._bind_result_event()
     
     def _bind_result_event(self):    
@@ -181,8 +186,11 @@ class Completer(tk.Listbox):
             return "break"
         elif event.keysym in ["Return", "KP_Enter"]:
             assert self.size() > 0
-            self._insert_completion(self.completions[(self.curselection()[0])])
+            self._insert_current_selection()
             return "break"
+    
+    def _insert_current_selection(self, event=None):
+        self._insert_completion(self.completions[(self.curselection()[0])])
     
     def _on_text_change(self, event=None):
         if self._is_visible():
@@ -191,6 +199,7 @@ class Completer(tk.Listbox):
     
     def _close(self, event=False):
         self.place_forget()
+        self.text.focus_set()
 
 class ShellCompleter(Completer):
     def _bind_result_event(self):    
@@ -204,8 +213,6 @@ class ShellCompleter(Completer):
                                                 source=source))
     
     def _handle_backend_response(self, msg):
-        print("Result", msg)
-        
         # check if the response is relevant for current state
         if msg.source != self._get_prefix():
             self._close()
