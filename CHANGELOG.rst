@@ -14,6 +14,7 @@ Unreleased
 * ENHANCEMENT: Tab can be used as alternative code-completion shortcut.
 * ENHANCEMENT: Recommended pip-command now appears faster in System Shell.
 * ENHANCEMENT: Alternative interpreter doesn't need to have jedi installed in order to provide code-completions (see #171: Code auto-complete error)
+* ENHANCEMENT: Double-click on autocomplete list inserts the completion
 * EXPERIMENTAL: Ctrl-click on a name in code tries to locate its definition. NB! Not finished yet!
 * CHANGED: Bundled Python version has been upgraded to 3.6.1
 * CHANGED: Bundled Python in Mac and Linux new uses SSL certs from certifi project (https://pypi.python.org/pypi/certifi).
