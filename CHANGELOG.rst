@@ -2,8 +2,8 @@
 Version history
 ===============
 
-Unreleased
-==========
+2.1.0b3 (2017-04-17)
+====================
 
 * NEW: Dialog for managing 3rd party packages / a simple pip GUI. Check it out: "Tools => Manage packages"
 * NEW: Shell now supports multiline commands
