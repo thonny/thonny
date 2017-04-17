@@ -16,14 +16,13 @@ def goto_definition(event):
     index_parts = index.split('.')
     line, column = int(index_parts[0]), int(index_parts[1])
     # TODO: find current editor filename
-    script = Script(source, line=line, column=column, path="",
-                    sys_path=get_runner().get_sys_path())
+    script = Script(source, line=line, column=column, path="")
     defs = script.goto_definitions()
     if len(defs) > 0:
         module_path = defs[0].module_path
         module_name = defs[0].module_name
         line = defs[0].line
-        if module_path is not None and line is not None:
+        if module_path and line is not None:
             get_workbench().get_editor_notebook().show_file(module_path, line)
         elif module_name == "" and line is not None: # current editor
             get_workbench().get_editor_notebook().get_current_editor().select_range(line)

@@ -225,7 +225,7 @@ class VariablesHighlighter(BaseNameHighlighter):
     
     def get_positions_for_script(self, script):
         name = None
-        module_node = script._get_module_node()
+        module_node = get_module_node(script)
         stmt = self._get_statement_for_position(module_node, script._pos)
 
         if isinstance(stmt, tree.Name):
@@ -240,6 +240,12 @@ class VariablesHighlighter(BaseNameHighlighter):
         return set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                       "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
                         for usage in self._find_usages(name, stmt, module_node))
+
+def get_module_node(script):
+    if hasattr(script, "_get_module_node"): # Jedi 0.10
+        return script._get_module_node()
+    else:
+        return script._parser.module() # Jedi 0.9
 
 class UsagesHighlighter(BaseNameHighlighter):
     """Script.usages looks tempting method to use for finding variable ocurrences,
