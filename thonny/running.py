@@ -489,7 +489,12 @@ class CPythonProxy(BackendProxy):
         if self._proc is not None and self._proc.poll() is None:
             command_to_interrupt = get_runner().get_current_toplevel_command()
             if running_on_windows():
-                os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                # os.kill gives an error when run via thonny.exe
+                #os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                
+                # ctypes solution doesn't work with thonny.exe, but at least doesn't give an error
+                import ctypes
+                ctypes.windll.kernel32.GenerateConsoleCtrlEvent(1, self._proc.pid)
             else:
                 self._proc.send_signal(signal.SIGINT)
         
