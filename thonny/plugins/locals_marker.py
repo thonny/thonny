@@ -1,6 +1,7 @@
 import tkinter as tk
 from thonny.globals import get_workbench
 import logging
+from thonny.jedi_utils import get_module_node
 
 class LocalsHighlighter:
 
@@ -142,13 +143,6 @@ def load_plugin():
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind("<<UpdateAppearance>>", update_highlighting, True)
     
-
-def get_module_node(script):
-    if hasattr(script, "_get_module_node"):
-        return script._get_module_node()
-    else:
-        return script._parser.module()
-
 
 def _experiment_with_jedi():
     from jedi import Script

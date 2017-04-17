@@ -1,4 +1,5 @@
 from jedi import Script
+from thonny.jedi_utils import get_module_node
 try:
     from jedi.parser.python import tree
 except ImportError:
@@ -240,12 +241,6 @@ class VariablesHighlighter(BaseNameHighlighter):
         return set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                       "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)))
                         for usage in self._find_usages(name, stmt, module_node))
-
-def get_module_node(script):
-    if hasattr(script, "_get_module_node"): # Jedi 0.10
-        return script._get_module_node()
-    else:
-        return script._parser.module() # Jedi 0.9
 
 class UsagesHighlighter(BaseNameHighlighter):
     """Script.usages looks tempting method to use for finding variable ocurrences,
