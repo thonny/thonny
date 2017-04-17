@@ -1126,7 +1126,10 @@ class FancyTracer(Executor):
         class ExpressionVisitor(ast.NodeTransformer):
             def generic_visit(self, node):
                 if isinstance(node, _ast.expr):
-                    if tracer._should_instrument_as_expression(node):
+                    if isinstance(node, ast.Starred):
+                        # keep this node as is, but instrument its children
+                        return ast.NodeTransformer.generic_visit(self, node)
+                    elif tracer._should_instrument_as_expression(node):
                         # before marker 
                         before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
                         ast.copy_location(before_marker, node)

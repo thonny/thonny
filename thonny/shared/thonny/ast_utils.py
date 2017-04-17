@@ -66,7 +66,12 @@ def get_last_child(node):
         elif len(node.keywords) > 0:
             return node.keywords[-1]
         elif len(node.args) > 0:
-            return node.args[-1]
+            # TODO: ast.Starred doesn't exist in Python 3.4  ?? 
+            if isinstance(node.args[-1], ast.Starred):
+                # return the thing under Starred
+                return node.args[-1].value
+            else:
+                return node.args[-1]
         else:
             return node.func
 
