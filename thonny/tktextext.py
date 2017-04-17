@@ -182,6 +182,11 @@ class EnhancedText(TweakableText):
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
         self.bind("<KP_Enter>", if_not_readonly(self.perform_return), True)
         self.bind("<Tab>", if_not_readonly(self.perform_tab), True)
+        try:
+            # Is needed on eg. Ubuntu with Estonian keyboard
+            self.bind("<ISO_Left_Tab>", if_not_readonly(self.perform_tab), True)
+        except:
+            pass
     
     def _bind_movement_aids(self):
         self.bind("<Home>", self.perform_smart_home, True)
