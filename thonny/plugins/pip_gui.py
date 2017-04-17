@@ -570,7 +570,7 @@ def _create_pip_process(args):
         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
     
     return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            env=env, universal_newlines=True, encoding=encoding,
+                            env=env, universal_newlines=True,
                             creationflags=creationflags),
             cmd)
 
