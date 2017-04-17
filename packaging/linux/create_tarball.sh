@@ -18,8 +18,6 @@ mkdir -p $TARGET_DIR
 cp -r $PREFIX/* $TARGET_DIR
 cp install.py $TARGET_DIR/install.py
 cp install.sh $TARGET_DIR/install
-# copy turtle cfg ##############################################
-cp $SCRIPT_DIR/../turtle.cfg $TARGET_DIR/lib/python3.6
 
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $TARGET_DIR/bin 

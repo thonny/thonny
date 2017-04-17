@@ -22,9 +22,6 @@ cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/thonny \
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.6/
 
-# copy turtle cfg ##############################################
-cp $SCRIPT_DIR/../turtle.cfg $PYTHON_CURRENT/lib/python3.6
-
 # Upgrade pip ##########################################
 $PYTHON_CURRENT/bin/python3.6 -m pip install --upgrade pip
 

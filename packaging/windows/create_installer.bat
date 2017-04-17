@@ -9,9 +9,6 @@ mkdir %BUILDDIR%
 xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
 
-@echo ............... UPDATING TURTLE CONF .............................
-copy ..\turtle.cfg %BUILDDIR%\Lib>NUL
-
 @echo ............... UPDATING PIP ...................................
 %BUILDDIR%\python -m pip install --upgrade pip
 
