@@ -11,7 +11,7 @@ from thonny import ui_utils
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError
 from thonny.config import try_load_configuration
-from thonny.misc_utils import running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, running_on_linux
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence
 import tkinter as tk
@@ -1092,9 +1092,10 @@ class Workbench(tk.Tk):
         self.after_idle(self.attributes, '-topmost', False)
         self.lift()
         
-        # http://stackoverflow.com/a/13867710/261181
-        self.iconify()
-        self.deiconify()
+        if not running_on_linux():
+	    # http://stackoverflow.com/a/13867710/261181
+            self.iconify()
+            self.deiconify()
         
         editor = self.get_current_editor()
         if editor is not None:
