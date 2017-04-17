@@ -180,6 +180,7 @@ class EnhancedText(TweakableText):
         self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
         self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
+        self.bind("<KP_Enter>", if_not_readonly(self.perform_return), True)
         self.bind("<Tab>", if_not_readonly(self.perform_tab), True)
     
     def _bind_movement_aids(self):
