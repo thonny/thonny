@@ -511,7 +511,7 @@ class CPythonProxy(BackendProxy):
                     get_runner().send_command(ToplevelCommand(command="Reset"))
             
             # 100 ms was too little for Mac
-            get_workbench().after(500, go_hard)
+            get_workbench().after(250, go_hard)
             
                     
     
