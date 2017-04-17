@@ -625,7 +625,6 @@ def _check_create_ButtonNotebook_style():
     def right_btn_press(event):
         x, y, widget = event.x, event.y, event.widget
         try:
-            print(widget["style"])
             if "ButtonNotebook" in widget["style"]:
                 index = widget.index("@%d,%d" % (x, y))
                 menu.popup_index = index
