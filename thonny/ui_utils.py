@@ -935,3 +935,11 @@ class SubprocessDialog(tk.Toplevel):
                 return
         else:
             self.destroy()
+
+def get_busy_cursor():
+    if running_on_windows():
+        return "wait"
+    elif running_on_mac_os():
+        return "spinning"
+    else:
+        return "watch"

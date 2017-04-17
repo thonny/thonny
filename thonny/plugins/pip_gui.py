@@ -18,7 +18,7 @@ import logging
 import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
-from thonny.ui_utils import SubprocessDialog, AutoScrollbar
+from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor
 from thonny.misc_utils import running_on_windows
 
 LINK_COLOR="#3A66DD"
@@ -171,7 +171,7 @@ class PipDialog(tk.Toplevel):
             for widget in widgets:
                 widget["state"] = tk.NORMAL
         else:
-            self.config(cursor="wait")
+            self.config(cursor=get_busy_cursor())
             for widget in widgets:
                 widget["state"] = tk.DISABLED
     
