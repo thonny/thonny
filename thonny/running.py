@@ -265,7 +265,7 @@ class Runner:
                 except:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
-        print(get_runner().get_state())
+
         return get_runner().get_state() != "waiting_toplevel_command"
     
     def cmd_stop_reset(self):
