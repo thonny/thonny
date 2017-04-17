@@ -17,7 +17,7 @@ Unreleased
 * ENHANCEMENT: Double-click on autocomplete list inserts the completion
 * EXPERIMENTAL: Ctrl-click on a name in code tries to locate its definition. NB! Not finished yet!
 * CHANGED: Bundled Python version has been upgraded to 3.6.1
-* CHANGED: Bundled Python in Mac and Linux new uses SSL certs from certifi project (https://pypi.python.org/pypi/certifi).
+* CHANGED: Bundled Python in Mac and Linux now uses SSL certs from certifi project (https://pypi.python.org/pypi/certifi).
 * REMOVED: Moved incomplete Exercise system to a separate plugin (https://bitbucket.org/plas/thonny-exersys). With this got rid of tkinterhtml, requests and beautifulsoup4 dependencies.
 * FIXED #16: Run doesn't clear variables (again?)
 * FIXED #98: Nested functions crashed the debugger.
