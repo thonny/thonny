@@ -32,6 +32,8 @@ Unreleased
 * FIXED #201: "Tools => Open Thonny data folder" now works also in macOS.
 * FIXED #211: Linux installer was failing when using ``xdg-user-dir`` (thanks to Ryan McQuen)
 * FIXED #213: In single instance mode new Window doesn't get focus
+* FIXED #217: Debugger on Python 3.5 and later can't handle splat operator 
+* FIXED #221: Context menus in Linux can now be closed by clicking elsewhere
 * FIXED: Event logger did not save filenames (eb34c5d).
 * FIXED: Problem in replayer (db78855).
 * TECHNICAL: Bundled Jedi version has been upgraded to 0.10.2.
