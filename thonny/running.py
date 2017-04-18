@@ -847,8 +847,8 @@ def _check_upgrade_private_venv(path):
 def _create_private_venv(path, description, clear=False, upgrade=False):
     base_exe = sys.executable
     if sys.executable.endswith("thonny.exe"):
-        # assuming that thonny.exe is in the same dir as WINDOWS_EXE
-        base_exe = sys.executable.replace("thonny.exe", WINDOWS_EXE)
+        # assuming that thonny.exe is in the same dir as "python.exe"
+        base_exe = sys.executable.replace("thonny.exe", "python.exe")
     
     
     def action():
