@@ -2,6 +2,14 @@
 Version history
 ===============
 
+2.1.0b4 (2017-04-18)
+====================
+
+* CHANGED: If you want to use Thonny with external Python interpreter, then now you should select python.exe instead of pythonw.exe.
+* FIXED #223: Can't interrupt subprocess when Thonny is run via thonny.exe
+* FIXED: Private venv didn't find Tcl/Tk in ubuntu (commit 33eabff)
+* FIXED: Right-click on editor tabs now also works on macOS.
+
 2.1.0b3 (2017-04-17)
 ====================
 
