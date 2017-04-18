@@ -29,6 +29,7 @@ import shutil
 import tokenize
 import collections
 import signal
+import logging
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -551,6 +552,14 @@ class CPythonProxy(BackendProxy):
                 
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
+        
+        # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
+        if self._executable == _get_private_venv_executable():
+            try:
+                my_env["TCL_LIBRARY"] = get_workbench().tk.exprstring('$tcl_library')
+                my_env["TK_LIBRARY"] = get_workbench().tk.exprstring('$tk_library')
+            except:
+                logging.exception("Can't find Tcl/Tk library")
         
         # I don't want to use PYTHONPATH for making jedi available
         # because that would add it to the front of sys.path
