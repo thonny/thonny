@@ -589,8 +589,11 @@ class CPythonProxy(BackendProxy):
             my_env.update(cmd.environment)            
         
         creationflags = 0
+        startupinfo = None
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         
         debug("Starting the backend: %s %s", cmd_line, self.cwd)
         self._proc = subprocess.Popen (
@@ -602,7 +605,8 @@ class CPythonProxy(BackendProxy):
             cwd=self.cwd,
             env=my_env,
             universal_newlines=True,
-            creationflags=creationflags
+            creationflags=creationflags,
+            startupinfo=startupinfo
         )
         
         ready_line = self._proc.stdout.readline()

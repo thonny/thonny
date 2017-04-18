@@ -565,13 +565,16 @@ def _create_pip_process(args):
     interpreter = get_runner().get_interpreter_command()
     cmd = [interpreter, "-m", "pip"] + args
     
-    creationflags = 0
+    startupinfo = None
     if running_on_windows():
         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
     
     return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                             env=env, universal_newlines=True,
-                            creationflags=creationflags),
+                            creationflags=creationflags,
+                            startupinfo=startupinfo),
             cmd)
 
 def _get_latest_stable_version(version_strings):
