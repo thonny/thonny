@@ -816,7 +816,7 @@ def parse_configuration(configuration):
 
 def prepare_private_venv():
     path = _get_private_venv_path()
-    if os.path.isdir(path):
+    if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
         _check_upgrade_private_venv(path)
     else:
         _create_private_venv(path, "Please wait!\nThonny prepares its virtual environment .")
