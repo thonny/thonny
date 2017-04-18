@@ -62,6 +62,8 @@ Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\backend"
 ; Delete old 3rd party libs
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Python35"
+; TEMP
+;Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\BundledPython36"
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Py36"
 ; Delete old shortcut
 Type: filesandordirs; Name: "{userstartmenu}\Thonny"
