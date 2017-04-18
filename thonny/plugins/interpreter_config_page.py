@@ -33,7 +33,7 @@ class InterpreterConfigurationPage(ConfigurationPage):
         another_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(10,0))
         self._select_button = ttk.Button(self,
                                          text="Locate another executable "
-                                         + ("(pythonw.exe) ..." if running_on_windows() else "(python3) ...")
+                                         + ("(python.exe) ..." if running_on_windows() else "(python3) ...")
                                          + "\nNB! Thonny only supports Python 3.4 and later",
                                          command=self._select_executable)
         
