@@ -371,7 +371,11 @@ class Runner:
             import ctypes
             kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
             
-            cmd = [sys.executable, "-c", "import time; time.sleep(3)"]
+            exe = (sys.executable
+                      .replace("thonny.exe", "python.exe") 
+                      .replace("pythonw.exe", "python.exe"))
+            
+            cmd = [exe, "-c", "import time; time.sleep(1)"]
             child = subprocess.Popen(cmd,
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
