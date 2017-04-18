@@ -490,12 +490,10 @@ class CPythonProxy(BackendProxy):
         if self._proc is not None and self._proc.poll() is None:
             command_to_interrupt = get_runner().get_current_toplevel_command()
             if running_on_windows():
-                # os.kill gives an error when run via thonny.exe
-                #os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
-                
-                # ctypes solution doesn't work with thonny.exe, but at least doesn't give an error
-                import ctypes
-                ctypes.windll.kernel32.GenerateConsoleCtrlEvent(1, self._proc.pid)
+                try:
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                except:
+                    logging.exception("Could not interrupt backend process")
             else:
                 self._proc.send_signal(signal.SIGINT)
         
@@ -512,7 +510,8 @@ class CPythonProxy(BackendProxy):
                     get_runner().send_command(ToplevelCommand(command="Reset"))
             
             # 100 ms was too little for Mac
-            get_workbench().after(250, go_hard)
+            # 250 ms was too little for one of the Windows machines
+            get_workbench().after(500, go_hard)
             
                     
     
