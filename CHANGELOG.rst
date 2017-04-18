@@ -2,6 +2,11 @@
 Version history
 ===============
 
+2.1.0b5 (2017-04-18)
+====================
+
+* FIXED: Typo in pipGUI (regression introduced in b4)
+
 2.1.0b4 (2017-04-18)
 ====================
 
