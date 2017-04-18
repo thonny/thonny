@@ -867,7 +867,11 @@ def _create_private_venv(path, description, clear=False, upgrade=False):
             cmd.append("--upgrade")
             
         cmd.append(path)
-        p = subprocess.Popen(cmd)
+        startupinfo = None
+        if running_on_windows():
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        p = subprocess.Popen(cmd, startupinfo=startupinfo)
         p.wait()
          
     from thonny.ui_utils import run_with_busy_window
