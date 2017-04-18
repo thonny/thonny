@@ -30,6 +30,7 @@ import tokenize
 import collections
 import signal
 import logging
+from time import sleep
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -52,6 +53,8 @@ class Runner:
         self._proxy = None
         self._postponed_commands = []
         self._current_toplevel_command = None
+        
+        self._check_alloc_console()
     
     def start(self):
         self.reset_backend()
@@ -355,6 +358,37 @@ class Runner:
     
     def get_backend_description(self):
         return self._proxy.get_description()
+
+    def _check_alloc_console(self):
+        if (sys.executable.endswith("thonny.exe")
+            or sys.executable.endswith("pythonw.exe")):
+            # These don't have console allocated.
+            # Console is required for sending interrupts.
+            
+            # AllocConsole would be easier but flashes console window
+            
+            import ctypes
+            kernel32 = ctypes.WinDLL('kernel32', use_last_error=True)
+            
+            cmd = [sys.executable, "-c", "import time; time.sleep(3)"]
+            child = subprocess.Popen(cmd,
+                                     stdin=subprocess.PIPE,
+                                     stdout=subprocess.PIPE,
+                                     stderr=subprocess.PIPE,
+                                     shell=True)
+            
+            for wait_time in [0.01, 0.1, 0.2]: 
+                sleep(wait_time)
+                result = kernel32.AttachConsole(child.pid)
+                if result:
+                    break
+            
+            else:
+                err = kernel32.GetLastError()
+                print("Could not allocate console. Error code:", err, file=sys.stderr)
+            
+            
+
 
 class BackendProxy:
     """Communicates with backend process.
