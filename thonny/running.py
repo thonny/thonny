@@ -762,13 +762,6 @@ class CPythonProxy(BackendProxy):
         
         return result
     
-    def _get_gui_interpreter(self):
-        if sys.executable.endswith("thonny.exe"):
-            # assuming that thonny.exe is in the same dir as pythonw.exe
-            return sys.executable.replace("thonny.exe", "pythonw.exe")
-        else:
-            return sys.executable
-    
     def get_interpreter_command(self):
         return self._executable
     
