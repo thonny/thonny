@@ -566,6 +566,7 @@ def _create_pip_process(args):
     cmd = [interpreter, "-m", "pip"] + args
     
     startupinfo = None
+    creationflags = 0
     if running_on_windows():
         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
         startupinfo = subprocess.STARTUPINFO()
