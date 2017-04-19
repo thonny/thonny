@@ -48,7 +48,6 @@ class InterpreterConfigurationPage(ConfigurationPage):
         backends = get_workbench().get_backends()
         for backend_name in sorted(backends.keys()):
             backend_class = backends[backend_name]
-            print(backend_name, backend_class)
             for configuration_option in backend_class.get_configuration_options():
                 if configuration_option is None or configuration_option == "":
                     result.append(backend_name)
