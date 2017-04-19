@@ -10,7 +10,7 @@ xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
 
 @echo ............... UPDATING PIP ...................................
-%BUILDDIR%\python -m pip install --upgrade pip
+@rem %BUILDDIR%\python -m pip install --upgrade pip
 
 @echo ............... INSTALLING JEDI ...................................
 %BUILDDIR%\python -m pip install jedi==0.10.2
@@ -37,6 +37,7 @@ del "%BUILDDIR%\Scripts\*" /Q>NUL
 
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 
+%BUILDDIR%\python -m pip uninstall -y pip
 
 del %BUILDDIR%\tcl\*.sh /Q>NUL
 del %BUILDDIR%\tcl\tcl8.6\clock.tcl>NUL
