@@ -30,7 +30,6 @@ import tokenize
 import collections
 import signal
 import logging
-from time import sleep
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -375,22 +374,19 @@ class Runner:
                       .replace("thonny.exe", "python.exe") 
                       .replace("pythonw.exe", "python.exe"))
             
-            cmd = [exe, "-c", "import time; time.sleep(1)"]
+            cmd = [exe, "-c", "print('Hi!'); input()"]
             child = subprocess.Popen(cmd,
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      shell=True)
-            
-            for wait_time in [0.01, 0.1, 0.2]: 
-                sleep(wait_time)
-                result = kernel32.AttachConsole(child.pid)
-                if result:
-                    break
-            
-            else:
+            child.stdout.readline()
+            result = kernel32.AttachConsole(child.pid)
+            if not result:
                 err = kernel32.GetLastError()
                 print("Could not allocate console. Error code:", err, file=sys.stderr)
+            child.stdin.write(b"\n")
+            child.stdin.flush()
             
             
 
