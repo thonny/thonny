@@ -8,6 +8,7 @@ Version history
 * FIXED #224: Tab-indentation didn't work if tail of the text was selected and text didn't end with empty line
 * FIXED: Tab with selected text occasionally invoked code-completion
 * TECHNICAL: Tweaks in Windows console allocation
+* TECHNICAL: Thonny+Python bundles don't include pip anymore (venv gets pip via ensurepip)
 
 2.1.0b5 (2017-04-18)
 ====================
