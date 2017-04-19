@@ -54,7 +54,7 @@ rm -rf $PYTHON_CURRENT/Resources/English.lproj/Documentation
 rm -rf $PYTHON_CURRENT/share
 rm -rf $PYTHON_CURRENT/lib/python3.6/test
 rm -rf $PYTHON_CURRENT/lib/python3.6/idlelib
-$PYTHON_CURRENT/bin/python3.6 -m pip uninstall pip
+$PYTHON_CURRENT/bin/python3.6 -m pip uninstall -y pip
 
 # clear bin because its scripts have absolute paths
 mv $PYTHON_CURRENT/bin/python3.6 $SCRIPT_DIR # save python exe
