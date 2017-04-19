@@ -2,14 +2,19 @@
 Version history
 ===============
 
+2.1.0b6 (2017-04-19)
+====================
+* ENHANCEMENT: Shell now shows location of external interpreter as welcome text
+* FIXED #224: Tab-indentation didn't work if tail of the text was selected and text didn't end with empty line
+* FIXED: Tab with selected text occasionally invoked code-completion
+* TECHNICAL: Tweaks in Windows console allocation
+
 2.1.0b5 (2017-04-18)
 ====================
-
 * FIXED: Typo in pipGUI (regression introduced in b4)
 
 2.1.0b4 (2017-04-18)
 ====================
-
 * CHANGED: If you want to use Thonny with external Python interpreter, then now you should select python.exe instead of pythonw.exe.
 * FIXED #223: Can't interrupt subprocess when Thonny is run via thonny.exe
 * FIXED: Private venv didn't find Tcl/Tk in ubuntu (commit 33eabff)
@@ -17,7 +22,6 @@ Version history
 
 2.1.0b3 (2017-04-17)
 ====================
-
 * NEW: Dialog for managing 3rd party packages / a simple pip GUI. Check it out: "Tools => Manage packages"
 * NEW: Shell now supports multiline commands
 * ENHANCEMENT: Window title now shows full path and cursor location of current file. 
@@ -58,7 +62,6 @@ Version history
 
 2.0.7 (2017-01-06)
 ==================
-
 * FIXED: Making font size too small would crash Thonny.
 * FIXED: Another take on configuration file corruption. 
 * FIXED: Shift-Tab wasn’t working in some cases.
