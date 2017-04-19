@@ -245,8 +245,9 @@ def _handle_autocomplete_request_for_text(text):
 
 
 def patched_perform_midline_tab(text, event):
-    _handle_autocomplete_request_for_text(text)
-    return "break"
+    if not text.has_selection():
+        _handle_autocomplete_request_for_text(text)
+        return "break"
     
 
 def load_plugin():
