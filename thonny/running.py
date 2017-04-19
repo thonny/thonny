@@ -383,7 +383,7 @@ class Runner:
             child.stdout.readline()
             result = kernel32.AttachConsole(child.pid)
             if not result:
-                err = kernel32.GetLastError()
+                err = ctypes.get_last_error()
                 print("Could not allocate console. Error code:", err, file=sys.stderr)
             child.stdin.write(b"\n")
             child.stdin.flush()
