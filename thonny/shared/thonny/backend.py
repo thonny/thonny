@@ -134,7 +134,9 @@ class VM:
     
     def _cmd_Reset(self, cmd):
         # nothing to do, because Reset always happens in fresh process
-        return self.create_message("ToplevelResult", welcome_text="Python " + _get_python_version_string())
+        return self.create_message("ToplevelResult",
+                                   welcome_text="Python " + _get_python_version_string(),
+                                   executable=sys.executable)
     
     def _cmd_Run(self, cmd):
         return self._execute_file(cmd, False)
@@ -1217,15 +1219,13 @@ def fdebug(frame, msg, *args):
 def _get_frame_prefix(frame):
     return str(id(frame)) + " " + ">" * len(inspect.getouterframes(frame, 0)) + " "
     
-def _get_python_version_string(version_info=None):
-    if version_info == None:
-        version_info = sys.version_info
-         
-    result = ".".join(map(str, version_info[:3]))
-    if version_info[3] != "final":
-        result += "-" + version_info[3]
+def _get_python_version_string(add_word_size=False):
+    result = ".".join(map(str, sys.version_info[:3]))
+    if sys.version_info[3] != "final":
+        result += "-" + sys.version_info[3]
     
-    result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)"
+    if add_word_size:
+        result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)"
     
     return result    
 

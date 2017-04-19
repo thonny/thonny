@@ -449,7 +449,7 @@ class CPythonProxy(BackendProxy):
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
-            self._executable = _get_private_venv_executable()
+            self._executable = get_private_venv_executable()
         else:
             self._executable = configuration_option
         
@@ -588,7 +588,7 @@ class CPythonProxy(BackendProxy):
         my_env["PYTHONUNBUFFERED"] = "1" 
         
         # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
-        if self._executable == _get_private_venv_executable():
+        if self._executable == get_private_venv_executable():
             try:
                 my_env["TCL_LIBRARY"] = get_workbench().tk.exprstring('$tcl_library')
                 my_env["TK_LIBRARY"] = get_workbench().tk.exprstring('$tk_library')
@@ -873,7 +873,7 @@ def _create_private_venv(path, description, clear=False, upgrade=False):
     from thonny.ui_utils import run_with_busy_window
     run_with_busy_window(action, description=description)
     
-    bindir = os.path.dirname(_get_private_venv_executable())
+    bindir = os.path.dirname(get_private_venv_executable())
     # create private env marker
     marker_path = os.path.join(bindir, "is_private")
     with open(marker_path, mode="w") as fp:
@@ -895,7 +895,7 @@ def _get_private_venv_path():
         prefix = "Python" 
     return os.path.join(THONNY_USER_DIR, prefix + "%d%d" % (sys.version_info[0], sys.version_info[1]))
 
-def _get_private_venv_executable():
+def get_private_venv_executable():
     venv_path = _get_private_venv_path()
     assert os.path.exists(venv_path)
     
