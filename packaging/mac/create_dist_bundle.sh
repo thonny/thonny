@@ -22,9 +22,6 @@ cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/thonny \
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.6/
 
-# Upgrade pip ##########################################
-$PYTHON_CURRENT/bin/python3.6 -m pip install --upgrade pip
-
 # install jedi #####################################################
 $PYTHON_CURRENT/bin/python3.6 -m pip install jedi==0.10.2
 
