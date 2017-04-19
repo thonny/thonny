@@ -70,7 +70,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._command_history = [] # actually not really history, because each command occurs only once
         self._command_history_current_index = None
         
-        self.text_mode = "toplevel"
         
         """
         self.margin = tk.Text(self,
@@ -163,7 +162,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._try_submit_input()
     
     def _handle_input_request(self, msg):
-        self.text_mode = "io"
         self["font"] = get_workbench().get_font("IOFont") # otherwise the cursor is of toplevel size
         self.focus_set()
         self.mark_set("insert", "end")
@@ -173,7 +171,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
 
     def _handle_program_output(self, msg):
-        self.text_mode = "io"
         self["font"] = get_workbench().get_font("IOFont")
         
         # mark first line of io
@@ -188,7 +185,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
             
     def _handle_toplevel_result(self, msg):
-        self.text_mode = "toplevel"
         self["font"] = get_workbench().get_font("EditorFont")
         self._before_io = True
         if hasattr(msg, "error"):
