@@ -56,6 +56,7 @@ rm -rf $PYTHON_CURRENT/Resources/English.lproj/Documentation
 
 rm -rf $PYTHON_CURRENT/share
 rm -rf $PYTHON_CURRENT/lib/python3.6/test
+rm -rf $PYTHON_CURRENT/lib/python3.6/pip
 rm -rf $PYTHON_CURRENT/lib/python3.6/idlelib
 
 # clear bin because its scripts have absolute paths
@@ -65,7 +66,6 @@ mv $SCRIPT_DIR/python3.6 $PYTHON_CURRENT/bin/
 
 # create new commands ###############################################################
 cd $PYTHON_CURRENT/bin
-ln -s pip3.6 pip3
 ln -s python3.6 python3
 cd $SCRIPT_DIR
 
