@@ -144,6 +144,11 @@ class EnhancedText(TweakableText):
     Most of the code is adapted from idlelib.EditorWindow.
     """ 
     def __init__(self, master=None, cnf={}, **kw):
+        # Parent class shouldn't autoseparate
+        # TODO: take client provided autoseparators value into account 
+        kw["autoseparators"] = False
+        
+        
         TweakableText.__init__(self, master=master, cnf=cnf, **kw)
         self.tabwidth = 8 # See comments in idlelib.EditorWindow 
         self.indentwidth = 4 

@@ -32,8 +32,7 @@ class ShellView (ttk.Frame):
                             padx=4,
                             insertwidth=2,
                             height=10,
-                            undo=True,
-                            autoseparators=False)
+                            undo=True)
         
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         get_workbench().add_command("clear_shell", "edit", "Clear shell",
