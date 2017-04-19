@@ -422,6 +422,16 @@ class EnhancedText(TweakableText):
     
     def indent_region(self, event=None):
         head, tail, chars, lines = self._get_region()
+        
+        # Doesn't work correctly if selection end on last line
+        # and text doesn't end with empty line
+        text_last_line = index2line(self.index("end-1c"))
+        sel_last_line = index2line(tail)
+        if sel_last_line >= text_last_line:
+            while not self.get(head, "end").endswith("\n\n"):
+                self.insert("end", "\n")
+            
+        
         for pos in range(len(lines)):
             line = lines[pos]
             if line:
