@@ -102,11 +102,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("prompt", foreground="purple", font=prompt_font)
         self.tag_configure("command", foreground="black",
                            lmargin1=code_indent, lmargin2=code_indent)
-        self.tag_configure("welcome", foreground="DarkGray")
-        self.tag_configure("automagic", foreground="DarkGray")
-        #self.tag_configure("value", foreground="DarkGreen")
-        #self.tag_configure("value", foreground="#B25300")
-        self.tag_configure("value", foreground="DarkBlue") # TODO: see also _text_key_press and _text_key_release
+        self.tag_configure("welcome", foreground="DarkGray", font=get_workbench().get_font("EditorFont"))
+        self.tag_configure("automagic", foreground="DarkGray", font=get_workbench().get_font("EditorFont"))
+        self.tag_configure("value", foreground="DarkBlue") 
         self.tag_configure("error", foreground="Red")
         
         self.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
