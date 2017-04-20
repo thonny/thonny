@@ -59,7 +59,7 @@ def _should_delegate():
     from thonny.config import try_load_configuration
     configuration_manager = try_load_configuration(workbench.CONFIGURATION_FILE_NAME)
     # Setting the default
-    configuration_manager.add_option("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
+    configuration_manager.set_default("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
     # getting the value (may use the default or return saved value)
     return configuration_manager.get_option("general.single_instance")
 
