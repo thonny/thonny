@@ -11,23 +11,23 @@ def tweak_notebooks():
     style = ttk.Style()
     theme = style.theme_use()
     
-    get_workbench().get_image('gray_line.gif', "gray_line")
-    
-    
-    style.element_create("gray_line", "image", "gray_line",
-                               ("!selected", "gray_line"), 
-                               height=1, width=10, border=1)
-    
-    style.layout('Tab', [
-        ('Notebook.tab', {'sticky': 'nswe', 'children': [
-            ('Notebook.padding', {'sticky': 'nswe', 'side': 'top', 'children': [
-                ('Notebook.focus', {'sticky': 'nswe', 'side': 'top', 'children': [
-                    ('Notebook.label', {'sticky': '', 'side': 'left'}),
-                ]})
+    if theme in ["xpnative", "vista"]:
+        get_workbench().get_image('gray_line.gif', "gray_line")
+        
+        style.element_create("gray_line", "image", "gray_line",
+                                   ("!selected", "gray_line"), 
+                                   height=1, width=10, border=1)
+        
+        style.layout('Tab', [
+            ('Notebook.tab', {'sticky': 'nswe', 'children': [
+                ('Notebook.padding', {'sticky': 'nswe', 'side': 'top', 'children': [
+                    ('Notebook.focus', {'sticky': 'nswe', 'side': 'top', 'children': [
+                        ('Notebook.label', {'sticky': '', 'side': 'left'}),
+                    ]})
+                ]}),
+                ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
             ]}),
-            ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
-        ]}),
-    ])
+        ])
     
     style.configure("Tab", padding=(4,1,0,0))
     if theme == "clam":
