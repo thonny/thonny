@@ -37,3 +37,4 @@ packaging/mac/freezing.log
 thonny.egg-info
 temp_build_dir
 thonnyapp/thonnyapp.egg-info
+thonnycontrib
