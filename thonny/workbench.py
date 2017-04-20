@@ -66,6 +66,8 @@ class Workbench(tk.Tk):
         # self.tk.call("tk", "scaling", 2.0)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
+        self._images = set() # to avoid Python garbage collecting them
+        self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
         self._theme_tweaker = None
         thonny.globals.register_workbench(self)
@@ -78,7 +80,6 @@ class Workbench(tk.Tk):
         self._select_theme()
         self._init_fonts()
         self._init_window()
-        self._images = set() # to avoid Python garbage collecting them
         self._init_menu()
         
         self.title("Thonny")
@@ -561,6 +562,9 @@ class Workbench(tk.Tk):
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
     
+    def map_image(self, original_image, new_image):
+        self._image_mapping[original_image] = new_image
+    
     def add_backend(self, descriptor, proxy_class):
         self._backends[descriptor] = proxy_class
     
@@ -653,6 +657,10 @@ class Workbench(tk.Tk):
         return os.path.dirname(sys.modules["thonny"].__file__)
     
     def get_image(self, filename, tk_name=None):
+        
+        if filename in self._image_mapping:
+            filename = self._image_mapping[filename]
+        
         # if path is relative then interpret it as living in res folder
         if not os.path.isabs(filename):
             filename = os.path.join(self.get_package_dir(), "res", filename)
