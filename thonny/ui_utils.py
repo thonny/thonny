@@ -36,7 +36,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
             kwargs["sashwidth"]=10
         
         if not "background" in kwargs:
-            kwargs["background"] = get_button_face_color()
+            kwargs["background"] = get_main_background()
         
         tk.PanedWindow.__init__(self, master, **kwargs)
         
@@ -731,15 +731,19 @@ def remove_line_numbers(s):
     
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
     
-def get_button_face_color():    
-    theme = ttk.Style().theme_use()
-    
-    if theme == "clam":
-        return "#dcdad5"
-    elif theme == "aqua":
-        return "systemSheetBackground"
-    else: 
-        return "SystemButtonFace"
+def get_main_background():
+    main_background_option = get_workbench().get_option("theme.main_background")
+    if main_background_option is not None:
+        return main_background_option
+    else:    
+        theme = ttk.Style().theme_use()
+        
+        if theme == "clam":
+            return "#dcdad5"
+        elif theme == "aqua":
+            return "systemSheetBackground"
+        else: 
+            return "SystemButtonFace"
     
 def get_dialog_background_color():    
     theme = ttk.Style().theme_use()
@@ -837,7 +841,7 @@ class SubprocessDialog(tk.Toplevel):
         text_font["size"] = int(text_font["size"] * 0.9)
         text_font["family"] = "Courier" if running_on_mac_os() else "Courier New"
         text_frame = tktextext.TextFrame(main_frame, read_only=True, horizontal_scrollbar=False,
-                                         background=get_button_face_color(),
+                                         background=get_main_background(),
                                          font=text_font,
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)

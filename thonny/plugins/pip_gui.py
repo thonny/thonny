@@ -74,7 +74,7 @@ class PipDialog(tk.Toplevel):
         
         
         main_pw = tk.PanedWindow(parent, orient=tk.HORIZONTAL,
-                                 background=ui_utils.get_button_face_color(),
+                                 background=ui_utils.get_main_background(),
                                  sashwidth=10)
         main_pw.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
         parent.rowconfigure(1, weight=1)
@@ -125,7 +125,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
-        self.info_text.configure(background=ui_utils.get_button_face_color(),
+        self.info_text.configure(background=ui_utils.get_main_background(),
                                  font=tk.font.nametofont("TkDefaultFont"),
                                  wrap="word")
         bold_font = tk.font.nametofont("TkDefaultFont").copy()
