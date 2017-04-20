@@ -562,11 +562,12 @@ class _QueryString(_QueryDialog):
 class ToolTip(object):
     """Taken from http://www.voidspace.org.uk/python/weblog/arch_d7_2006_07_01.shtml"""
 
-    def __init__(self, widget):
+    def __init__(self, widget, options):
         self.widget = widget
         self.tipwindow = None
         self.id = None
         self.x = self.y = 0
+        self.options = options
 
     def showtip(self, text):
         "Display text in tooltip window"
@@ -586,10 +587,8 @@ class ToolTip(object):
                        "help", "noActivates")
         except tk.TclError:
             pass
-        label = tk.Label(tw, text=self.text, justify=tk.LEFT,
-                      background="#ffffe0", relief=tk.SOLID, borderwidth=1,
-                      font=("tahoma", "8", "normal"))
-        label.pack(ipadx=1)
+        label = tk.Label(tw, text=self.text, **self.options)
+        label.pack()
 
     def hidetip(self):
         tw = self.tipwindow
@@ -597,8 +596,17 @@ class ToolTip(object):
         if tw:
             tw.destroy()
 
-def create_tooltip(widget, text):
-    toolTip = ToolTip(widget)
+def create_tooltip(widget, text,
+                   background="#ffffe0", relief=tk.SOLID, borderwidth=1, padx=1, pady=0,
+                   **kw):
+    options = kw.copy()
+    options["background"] = background
+    options["relief"] = relief
+    options["borderwidth"] = borderwidth
+    options["padx"] = padx
+    options["pady"] = pady
+    
+    toolTip = ToolTip(widget, options)
     def enter(event):
         toolTip.showtip(text)
     def leave(event):
