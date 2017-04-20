@@ -70,7 +70,7 @@ class AboutDialog(tk.Toplevel):
         platform_label = ttk.Label(main_frame, justify=tk.CENTER, 
                                    text= system_desc + "\n"
                                         + "Python " + get_python_version_string() 
-                                        + "Tk " + self.tk.call('info', 'patchlevel'))
+                                        + "Tk " + ui_utils.get_tk_version_str())
         platform_label.grid(pady=20)
         
         license_font = font.nametofont("TkDefaultFont").copy()

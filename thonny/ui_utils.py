@@ -943,3 +943,15 @@ def get_busy_cursor():
         return "spinning"
     else:
         return "watch"
+
+def get_tk_version_str():
+    return tk._default_root.tk.call('info', 'patchlevel')
+
+def get_tk_version_info():
+    result = []
+    for part in get_tk_version_str().split("."):
+        try:
+            result.append(int(part))
+        except:
+            result.append(0)
+    return tuple(result) 
