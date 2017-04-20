@@ -585,8 +585,6 @@ class Workbench(tk.Tk):
         
         If the name doesn't contain a period, then it will be added under section 
         "general".
-         
-        Don't confuse this method with Tkinter's option_add!
         """
         self._configuration_manager.set_default(name, default_value)
     
@@ -1126,7 +1124,7 @@ class Workbench(tk.Tk):
         self.lift()
         
         if not running_on_linux():
-	    # http://stackoverflow.com/a/13867710/261181
+            # http://stackoverflow.com/a/13867710/261181
             self.iconify()
             self.deiconify()
         

@@ -15,7 +15,6 @@ import re
 import collections
 import threading
 import signal
-from time import sleep
 import subprocess
 import os
 
