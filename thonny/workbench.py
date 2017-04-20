@@ -67,12 +67,15 @@ class Workbench(tk.Tk):
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
         self._backends = {}
-        self._select_theme()
-        self._editor_notebook = None
+        self._theme_tweaker = None
         thonny.globals.register_workbench(self)
         
         self._init_configuration()
         self._init_diagnostic_logging()
+        self._load_early_plugins()
+        
+        self._editor_notebook = None
+        self._select_theme()
         self._init_fonts()
         self._init_window()
         self._images = set() # to avoid Python garbage collecting them
@@ -82,7 +85,6 @@ class Workbench(tk.Tk):
         
         self._init_containers()
         
-        self._load_early_plugins()
         self._init_runner()
             
         self._init_commands()
@@ -148,21 +150,29 @@ class Workbench(tk.Tk):
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         
-        icon_file = os.path.join(self.get_package_dir(), "res", "thonny.ico")
-        try:
-            self.iconbitmap(icon_file, default=icon_file)
-        except:
+        # Window icons
+        window_icons = self.get_option("theme.window_icons") 
+        if window_icons:
+            imgs = [self.get_image(filename) for filename in window_icons]
+            self.iconphoto(True, *imgs)
+        elif running_on_linux() and ui_utils.get_tk_version_info() >= (8,6):
+            self.iconphoto(True, self.get_image("thonny.png"))
+        else:
+            icon_file = os.path.join(self.get_package_dir(), "res", "thonny.ico")
             try:
-                # seems to work in mac
-                self.iconbitmap(icon_file)
+                self.iconbitmap(icon_file, default=icon_file)
             except:
-                pass # TODO: try to get working in Ubuntu  
+                try:
+                    # seems to work in mac
+                    self.iconbitmap(icon_file)
+                except:
+                    pass # TODO: try to get working in Ubuntu  
         
         self.bind("<Configure>", self._on_configure, True)
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        self._menubar = tk.Menu(self)
+        self._menubar = tk.Menu(self, **self.get_option("theme.menubar_options", {}))
         self["menu"] = self._menubar
         self._menus = {}
         self._menu_item_groups = {} # key is pair (menu_name, command_label)
@@ -177,6 +187,7 @@ class Workbench(tk.Tk):
         self.get_menu("help", "Help")
     
     def _load_early_plugins(self):
+        """load_early_plugin can't use nor GUI neither Runner"""
         self._load_plugins("load_early_plugin")
         
     def _load_plugins(self, load_function_name="load_plugin"):
@@ -381,13 +392,20 @@ class Workbench(tk.Tk):
     def _select_theme(self):
         style = ttk.Style()
         
-        if 'xpnative' in style.theme_names():
+        preferred_theme = self.get_option("theme.preferred_theme")
+        
+        if preferred_theme in style.theme_names():
+            style.theme_use(preferred_theme)
+        elif 'xpnative' in style.theme_names():
             # in Win7 'xpnative' gives better scrollbars than 'vista'
             style.theme_use('xpnative') 
         elif 'vista' in style.theme_names():
             style.theme_use('vista')
         elif 'clam' in style.theme_names():
             style.theme_use('clam')
+        
+        if self._theme_tweaker is not None:
+            self._theme_tweaker()
 
         
     def add_command(self, command_id, menu_name, command_label, handler,
@@ -460,16 +478,24 @@ class Workbench(tk.Tk):
         else:
             image = None
         
+        if image and self.get_option("theme.icons_in_menus", True):
+            menu_image = image
+        elif flag_name: 
+            # no image or black next to a checkbox
+            menu_image = None
+        else:
+            menu_image = self.get_image ("16x16_blank.gif")
+        
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
-            
+        
         menu = self.get_menu(menu_name)
         menu.insert(
             self._find_location_for_menu_item(menu_name, command_label, group, position_in_group),
             "checkbutton" if flag_name else "command",
             label=command_label,
             accelerator=accelerator,
-            image=image,
+            image=menu_image, 
             compound=tk.LEFT,
             variable=self.get_variable(flag_name) if flag_name else None,
             command=dispatch_from_menu)
@@ -546,7 +572,10 @@ class Workbench(tk.Tk):
     
     def set_option(self, name, value):
         self._configuration_manager.set_option(name, value)
-        
+    
+    def set_theme_tweaker(self, fun):
+        self._theme_tweaker = fun
+    
     def set_default(self, name, default_value):
         """Registers a new option.
         
@@ -579,7 +608,7 @@ class Workbench(tk.Tk):
             label: translated label, used only when menu with given name doesn't exist yet
         """
         if name not in self._menus:
-            menu = tk.Menu(self._menubar)
+            menu = tk.Menu(self._menubar, self.get_option("theme.menu_options", {}))
             menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
             
@@ -786,8 +815,12 @@ class Workbench(tk.Tk):
                          )
         button.pack(side=tk.LEFT)
         button.tester = tester 
-        create_tooltip(button, command_label 
-                       + (" (" + accelerator + ")" if accelerator else ""))
+        tooltip_text = command_label
+        if accelerator and self.get_option("theme.shortcuts_in_tooltips", True):
+            tooltip_text += " (" + accelerator + ")"
+        create_tooltip(button, tooltip_text,
+                       **self.get_option("theme.tooltip_options", {'padx':3, 'pady':1})
+                       )
         
     def _update_toolbar(self):
         for group_frame in self._toolbar.grid_slaves(0):
