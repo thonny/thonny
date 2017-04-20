@@ -541,8 +541,8 @@ class Workbench(tk.Tk):
     def get_backends(self):
         return self._backends
     
-    def get_option(self, name):
-        return self._configuration_manager.get_option(name)
+    def get_option(self, name, default=None):
+        return self._configuration_manager.get_option(name, default)
     
     def set_option(self, name, value):
         self._configuration_manager.set_option(name, value)

@@ -36,7 +36,7 @@ class ConfigurationManager:
 
         #print(prefs_filename, self.sections())
     
-    def get_option(self, name):
+    def get_option(self, name, secondary_default=None):
         section, option = self._parse_name(name)
         name = section + "." + option
         
@@ -51,10 +51,11 @@ class ConfigurationManager:
             except:
                 return val
         except:
-            if name not in self._defaults:
-                raise KeyError("Option named '{}' doesn't exist".format(name)) 
+            if name in self._defaults:
+                return self._defaults[name]
+            else:
+                return secondary_default
             
-            return self._defaults[name]
     
     def has_option(self, name):
         return name in self._defaults
@@ -74,10 +75,10 @@ class ConfigurationManager:
         if name in self._variables:
             self._variables[name].set(value)
     
-    def add_option(self, name, default_value):
+    def add_option(self, name, primary_default_value):
         section, option = self._parse_name(name)
         name = section + "." + option
-        self._defaults[name] = default_value
+        self._defaults[name] = primary_default_value
 
     def get_variable(self, name):
         section, option = self._parse_name(name)
