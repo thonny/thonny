@@ -147,7 +147,7 @@ def update_highlighting(event=None):
 def load_plugin():
     wb = get_workbench()  
     
-    wb.add_option("view.paren_highlighting", True)
+    wb.set_default("view.paren_highlighting", True)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind_class("ShellText", "<<CursorMove>>", update_highlighting, True)

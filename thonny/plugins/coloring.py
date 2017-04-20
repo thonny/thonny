@@ -235,7 +235,7 @@ def update_coloring(event):
 def load_plugin():
     wb = get_workbench() 
 
-    wb.add_option("view.syntax_coloring", True)
+    wb.set_default("view.syntax_coloring", True)
     wb.bind("TextInsert", update_coloring, True)
     wb.bind("TextDelete", update_coloring, True)
     wb.bind("<<UpdateAppearance>>", update_coloring, True)

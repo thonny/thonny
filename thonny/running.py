@@ -37,10 +37,10 @@ WINDOWS_EXE = "python.exe"
 
 class Runner:
     def __init__(self):
-        get_workbench().add_option("run.working_directory", os.path.expanduser("~"))
-        get_workbench().add_option("run.auto_cd", True)
-        get_workbench().add_option("run.backend_configuration", "Python (%s)" % DEFAULT_CPYTHON_INTERPRETER)
-        get_workbench().add_option("run.used_interpreters", [])
+        get_workbench().set_default("run.working_directory", os.path.expanduser("~"))
+        get_workbench().set_default("run.auto_cd", True)
+        get_workbench().set_default("run.backend_configuration", "Python (%s)" % DEFAULT_CPYTHON_INTERPRETER)
+        get_workbench().set_default("run.used_interpreters", [])
         get_workbench().add_backend("Python", CPythonProxy)
         
         get_workbench().add_view(ShellView, "Shell", "s",

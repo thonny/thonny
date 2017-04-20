@@ -203,12 +203,12 @@ class EditorNotebook(ttk.Notebook):
         _check_create_ButtonNotebook_style()
         ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
         
-        get_workbench().add_option("file.reopen_all_files", False)
-        get_workbench().add_option("file.open_files", [])
-        get_workbench().add_option("file.current_file", None)
-        get_workbench().add_option("file.recent_files", [])
-        get_workbench().add_option("view.show_line_numbers", False)
-        get_workbench().add_option("view.recommended_line_length", 0)
+        get_workbench().set_default("file.reopen_all_files", False)
+        get_workbench().set_default("file.open_files", [])
+        get_workbench().set_default("file.current_file", None)
+        get_workbench().set_default("file.recent_files", [])
+        get_workbench().set_default("view.show_line_numbers", False)
+        get_workbench().set_default("view.recommended_line_length", 0)
         
         self._init_commands()
         self.enable_traversal()

@@ -107,9 +107,9 @@ class Workbench(tk.Tk):
         self._configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
         self._configuration_pages = {}
 
-        self.add_option("general.single_instance", SINGLE_INSTANCE_DEFAULT)
-        self.add_option("general.expert_mode", False)
-        self.add_option("debug_mode", False)
+        self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
+        self.set_default("general.expert_mode", False)
+        self.set_default("debug_mode", False)
 
     
     def _init_diagnostic_logging(self):
@@ -118,19 +118,19 @@ class Workbench(tk.Tk):
     
     def _init_window(self):
         
-        self.add_option("layout.zoomed", False)
-        self.add_option("layout.top", 15)
-        self.add_option("layout.left", 150)
-        self.add_option("layout.width", 700)
-        self.add_option("layout.height", 650)
-        self.add_option("layout.w_width", 200)
-        self.add_option("layout.e_width", 200)
-        self.add_option("layout.s_height", 200)
+        self.set_default("layout.zoomed", False)
+        self.set_default("layout.top", 15)
+        self.set_default("layout.left", 150)
+        self.set_default("layout.width", 700)
+        self.set_default("layout.height", 650)
+        self.set_default("layout.w_width", 200)
+        self.set_default("layout.e_width", 200)
+        self.set_default("layout.s_height", 200)
         
         # I don't actually need saved options for Full screen/maximize view,
         # but it's easier to create menu items, if I use configuration manager's variables
-        self.add_option("view.full_screen", False)  
-        self.add_option("view.maximize_view", False)
+        self.set_default("view.full_screen", False)  
+        self.set_default("view.maximize_view", False)
         
         # In order to avoid confusion set these settings to False 
         # even if they were True when Thonny was last run
@@ -206,7 +206,7 @@ class Workbench(tk.Tk):
     
                                 
     def _init_fonts(self):
-        self.add_option("view.io_font_family", 
+        self.set_default("view.io_font_family", 
                         "Courier" if running_on_mac_os() else "Courier New")
         
         default_editor_family = "Courier New"
@@ -217,8 +217,8 @@ class Workbench(tk.Tk):
                 default_editor_family = family
                 break
         
-        self.add_option("view.editor_font_family", default_editor_family)
-        self.add_option("view.editor_font_size", 
+        self.set_default("view.editor_font_family", default_editor_family)
+        self.set_default("view.editor_font_size", 
                         14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
@@ -330,8 +330,8 @@ class Workbench(tk.Tk):
         self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
         
-        self.add_option("layout.main_pw_first_pane_size", 1/3)
-        self.add_option("layout.main_pw_last_pane_size", 1/3)
+        self.set_default("layout.main_pw_first_pane_size", 1/3)
+        self.set_default("layout.main_pw_last_pane_size", 1/3)
         self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL,
             first_pane_size=self.get_option("layout.main_pw_first_pane_size"),
             last_pane_size=self.get_option("layout.main_pw_last_pane_size")
@@ -341,12 +341,12 @@ class Workbench(tk.Tk):
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
         
-        self.add_option("layout.west_pw_first_pane_size", 1/3)
-        self.add_option("layout.west_pw_last_pane_size", 1/3)
-        self.add_option("layout.center_pw_first_pane_size", 1/3)
-        self.add_option("layout.center_pw_last_pane_size", 1/3)
-        self.add_option("layout.east_pw_first_pane_size", 1/3)
-        self.add_option("layout.east_pw_last_pane_size", 1/3)
+        self.set_default("layout.west_pw_first_pane_size", 1/3)
+        self.set_default("layout.west_pw_last_pane_size", 1/3)
+        self.set_default("layout.center_pw_first_pane_size", 1/3)
+        self.set_default("layout.center_pw_last_pane_size", 1/3)
+        self.set_default("layout.east_pw_first_pane_size", 1/3)
+        self.set_default("layout.east_pw_last_pane_size", 1/3)
         
         self._west_pw = AutomaticPanedWindow(self._main_pw, 1, orient=tk.VERTICAL,
             first_pane_size=self.get_option("layout.west_pw_first_pane_size"),
@@ -435,7 +435,7 @@ class Workbench(tk.Tk):
             self.event_generate("Command", command_id=command_id, denied=denied)
         
         sequence_option_name = "shortcuts." + command_id
-        self.add_option(sequence_option_name, default_sequence)
+        self.set_default(sequence_option_name, default_sequence)
         sequence = self.get_option(sequence_option_name) 
         
         if sequence and not skip_sequence_binding:
@@ -501,9 +501,9 @@ class Workbench(tk.Tk):
         if default_position_key == None:
             default_position_key = label
         
-        self.add_option("view." + view_id + ".visible" , visible_by_default)
-        self.add_option("view." + view_id + ".location", default_location)
-        self.add_option("view." + view_id + ".position_key", default_position_key)
+        self.set_default("view." + view_id + ".visible" , visible_by_default)
+        self.set_default("view." + view_id + ".location", default_location)
+        self.set_default("view." + view_id + ".position_key", default_position_key)
         
         self._view_records[view_id] = {
             "class" : class_,
@@ -547,7 +547,7 @@ class Workbench(tk.Tk):
     def set_option(self, name, value):
         self._configuration_manager.set_option(name, value)
         
-    def add_option(self, name, default_value):
+    def set_default(self, name, default_value):
         """Registers a new option.
         
         If the name contains a period, then the part left to the (first) period
@@ -559,7 +559,7 @@ class Workbench(tk.Tk):
          
         Don't confuse this method with Tkinter's option_add!
         """
-        self._configuration_manager.add_option(name, default_value)
+        self._configuration_manager.set_default(name, default_value)
     
     def get_variable(self, name):
         return self._configuration_manager.get_variable(name)

@@ -75,7 +75,7 @@ class ConfigurationManager:
         if name in self._variables:
             self._variables[name].set(value)
     
-    def add_option(self, name, primary_default_value):
+    def set_default(self, name, primary_default_value):
         section, option = self._parse_name(name)
         name = section + "." + option
         self._defaults[name] = primary_default_value
