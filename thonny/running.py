@@ -20,7 +20,6 @@ from thonny.common import serialize_message, ToplevelCommand, \
     CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
     UserError
 from thonny.globals import get_workbench, get_runner
-from thonny.shell import ShellView
 import shlex
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
@@ -43,6 +42,7 @@ class Runner:
         get_workbench().set_default("run.used_interpreters", [])
         get_workbench().add_backend("Python", CPythonProxy)
         
+        from thonny.shell import ShellView
         get_workbench().add_view(ShellView, "Shell", "s",
             visible_by_default=True,
             default_position_key='A')

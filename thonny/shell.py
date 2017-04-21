@@ -5,7 +5,8 @@ import re
 from tkinter import ttk
 import traceback
 
-from thonny import memory, roughparse, running
+import thonny
+from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_shell_command
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging
@@ -191,7 +192,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if hasattr(msg, "welcome_text"):
             configuration = get_workbench().get_option("run.backend_configuration") 
             welcome_text = msg.welcome_text
-            if hasattr(msg, "executable") and msg.executable != running.get_private_venv_executable():
+            if hasattr(msg, "executable") and msg.executable != thonny.running.get_private_venv_executable():
                 welcome_text += " (" + msg.executable + ")"
             if (configuration != self._last_configuration
                 and not (self._last_configuration is None and not configuration)):
