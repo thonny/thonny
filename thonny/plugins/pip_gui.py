@@ -181,7 +181,7 @@ class PipDialog(tk.Toplevel):
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
-        self._process, _ = _create_pip_process(["list", "--format", "json"])
+        self._process, _ = _create_pip_process(["list", "--pre","--format", "json"])
         
         def poll_completion():
             if self._process == None:
