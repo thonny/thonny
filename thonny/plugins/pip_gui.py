@@ -20,6 +20,7 @@ from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor
 from thonny.misc_utils import running_on_windows
+import sys
 
 LINK_COLOR="#3A66DD"
 
@@ -37,7 +38,7 @@ class PipDialog(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.title("Manage packages for " + get_runner().get_interpreter_command())
+        self.title(self._get_title())
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.transient(master)
@@ -59,25 +60,25 @@ class PipDialog(tk.Toplevel):
     def _create_widgets(self, parent):
         
         header_frame = ttk.Frame(parent)
-        header_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=(15,0))
+        header_frame.grid(row=1, column=0, sticky="nsew", padx=15, pady=(15,0))
         header_frame.columnconfigure(0, weight=1)
-        header_frame.rowconfigure(0, weight=1)
+        header_frame.rowconfigure(1, weight=1)
         
         name_font = tk.font.nametofont("TkDefaultFont").copy()
         name_font.configure(size=16)
         self.search_box = ttk.Entry(header_frame, background=ui_utils.CALM_WHITE)
-        self.search_box.grid(row=0, column=0, sticky="nsew")
+        self.search_box.grid(row=1, column=0, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
         
         self.search_button = ttk.Button(header_frame, text="Search", command=self._on_search)
-        self.search_button.grid(row=0, column=1, sticky="nse", padx=(10,0))
+        self.search_button.grid(row=1, column=1, sticky="nse", padx=(10,0))
         
         
         main_pw = tk.PanedWindow(parent, orient=tk.HORIZONTAL,
                                  background=ui_utils.get_main_background(),
                                  sashwidth=10)
-        main_pw.grid(row=1, column=0, sticky="nsew", padx=15, pady=15)
-        parent.rowconfigure(1, weight=1)
+        main_pw.grid(row=2, column=0, sticky="nsew", padx=15, pady=15)
+        parent.rowconfigure(2, weight=1)
         parent.columnconfigure(0, weight=1)
         
         listframe = ttk.Frame(main_pw, relief="groove", borderwidth=1)
@@ -181,7 +182,7 @@ class PipDialog(tk.Toplevel):
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
-        self._process, _ = _create_pip_process(["list", "--pre","--format", "json"])
+        self._process, _ = self._create_pip_process(["list", "--pre","--format", "json"])
         
         def poll_completion():
             if self._process == None:
@@ -378,6 +379,7 @@ class PipDialog(tk.Toplevel):
             args = install_args
             if self._get_installed_version(name) is not None:
                 args.append("--upgrade")
+            
             args.append(name)
         elif action == "uninstall":
             if (name in ["pip", "setuptools"]
@@ -400,7 +402,7 @@ class PipDialog(tk.Toplevel):
         else:
             raise RuntimeError("Unknown action")
         
-        proc, cmd = _create_pip_process(args)
+        proc, cmd = self._create_pip_process(args)
         # following call blocks
         title = subprocess.list2cmdline(cmd)
         
@@ -424,7 +426,7 @@ class PipDialog(tk.Toplevel):
     
     def _install_local_file(self, filename):
         args = ["install", filename]
-        proc, cmd = _create_pip_process(args)
+        proc, cmd = self._create_pip_process(args)
         # following call blocks
         title = subprocess.list2cmdline(cmd)
         
@@ -459,6 +461,67 @@ class PipDialog(tk.Toplevel):
         
         return None
 
+    def _create_pip_process(self, args):
+        encoding = "UTF-8"
+        env = {}
+        for name in os.environ:
+            if ("python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # skip python vars
+                env[name] = os.environ[name]
+                
+        env["PYTHONIOENCODING"] = encoding
+        env["PYTHONUNBUFFERED"] = "1"
+                    
+        cmd = [self._get_interpreter(), "-m", "pip"] + args
+        
+        startupinfo = None
+        creationflags = 0
+        if running_on_windows():
+            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        
+        return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                env=env, universal_newlines=True,
+                                creationflags=creationflags,
+                                startupinfo=startupinfo),
+                cmd)
+    
+    def _get_interpreter(self):
+        pass
+    
+    def _get_target(self):
+        return None
+        import site
+    
+    def _get_title(self):
+        return "Manage packages for " + self._get_interpreter()
+
+class BackendPipDialog(PipDialog):
+    def _get_interpreter(self):
+        return get_runner().get_interpreter_command()
+
+class FrontendPipDialog(PipDialog):
+    def _get_interpreter(self):
+        return sys.executable.replace("thonny.exe", "python.exe")
+    
+    def _create_widgets(self, parent):
+        bg = "#ffff99"
+        banner = tk.Label(parent, background=bg)
+        banner.grid(row=0, column=0, sticky="nsew")
+        
+        banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plugins and other packages required by the front-end.\n"
+                                + "If you want to install packages for your own programs then close this and choose 'Tools => Manage packages...'",
+                                background=bg, justify="left")
+        banner_text.grid(pady=10, padx=10)
+        
+        PipDialog._create_widgets(self, parent)
+    
+    def _get_title(self):
+        return "Thonny plug-ins"
+
+    def _get_target(self):
+        return get_workbench().get_user_plugins_path()
+    
         
 class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):
@@ -552,31 +615,6 @@ def _fetch_url_future(url, timeout=10):
     return executor.submit(load_url)
 
 
-def _create_pip_process(args):
-    encoding = "UTF-8"
-    env = {}
-    for name in os.environ:
-        if ("python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # skip python vars
-            env[name] = os.environ[name]
-            
-    env["PYTHONIOENCODING"] = encoding
-    env["PYTHONUNBUFFERED"] = "1"
-                
-    interpreter = get_runner().get_interpreter_command()
-    cmd = [interpreter, "-m", "pip"] + args
-    
-    startupinfo = None
-    creationflags = 0
-    if running_on_windows():
-        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
-        startupinfo = subprocess.STARTUPINFO()
-        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-    
-    return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            env=env, universal_newlines=True,
-                            creationflags=creationflags,
-                            startupinfo=startupinfo),
-            cmd)
 
 def _get_latest_stable_version(version_strings):
     versions = []
@@ -617,13 +655,18 @@ def _extract_click_text(widget, event, tag):
 
 
 def load_plugin():
-    def open_pip_gui(*args):
-        pg = PipDialog(get_workbench())
+    def open_backend_pip_gui(*args):
+        pg = BackendPipDialog(get_workbench())
         pg.wait_window()
 
-        
-    get_workbench().add_command("pipgui", "tools", "Manage packages...", open_pip_gui,
+    def open_frontend_pip_gui(*args):
+        pg = FrontendPipDialog(get_workbench())
+        pg.wait_window()
+
+    get_workbench().add_command("backendpipgui", "tools", "Manage packages...", open_backend_pip_gui,
                                 group=80)
+    get_workbench().add_command("backendpipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui,
+                                group=180)
 
 
     
