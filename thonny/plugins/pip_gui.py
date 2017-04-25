@@ -143,7 +143,7 @@ class PipDialog(tk.Toplevel):
         self.command_frame.grid(row=2, column=0, sticky="w")
         
         self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
-                                         command=lambda: self._perform_action("install"))
+                                         command=self._on_click_install)
         self.install_button.grid(row=0, column=0, sticky="w", padx=0)
         
         self.uninstall_button = ttk.Button(self.command_frame, text="Uninstall",
@@ -164,7 +164,11 @@ class PipDialog(tk.Toplevel):
         
         self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
-        
+    
+    def _on_click_install(self):
+        name = self.current_package_data["info"]["name"]
+        if self._confirm_install(name):
+            self._perform_action("install")
 
     def _set_state(self, state):
         self._state = state
@@ -519,10 +523,24 @@ class PipDialog(tk.Toplevel):
     
     def _get_title(self):
         return "Manage packages for " + self._get_interpreter()
+    
+    def _confirm_install(self, name):
+        return True
 
 class BackendPipDialog(PipDialog):
     def _get_interpreter(self):
         return get_runner().get_interpreter_command()
+
+    def _confirm_install(self, name):
+        if name.lower().startswith("thonny"):
+            return messagebox.askyesno("Confirmation", 
+                                     "Looks like you are installing a Thonny-related package.\n"
+                                   + "If you meant to install a Thonny plugin, then you should\n"
+                                   + "close this dialog and choose 'Tools => Manage plugins...'\n"
+                                   + "\n"
+                                   + "Are you sure you want to install '" + name + "' here?")
+        else:
+            return True
 
 class PluginsPipDialog(PipDialog):
     def __init__(self, master):
