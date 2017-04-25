@@ -21,14 +21,16 @@ from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor
 from thonny.misc_utils import running_on_windows
 import sys
+import site
 
 LINK_COLOR="#3A66DD"
 
 class PipDialog(tk.Toplevel):
-    def __init__(self, master):
+    def __init__(self, master, only_user=False):
         self._state = None # possible values: "listing", "fetching", "idle"
         self._process = None
         self._installed_versions = {}
+        self._only_user = only_user
         self.current_package_data = None
         
         tk.Toplevel.__init__(self, master)
@@ -182,7 +184,11 @@ class PipDialog(tk.Toplevel):
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
-        self._process, _ = self._create_pip_process(["list", "--pre","--format", "json"])
+        args = ["list"]
+        if self._only_user:
+            args.append("--user")
+        args.extend(["--pre", "--format", "json"])
+        self._process, _ = self._create_pip_process(args)
         
         def poll_completion():
             if self._process == None:
@@ -374,6 +380,8 @@ class PipDialog(tk.Toplevel):
         data = self.current_package_data
         name = self.current_package_data["info"]["name"]
         install_args = ["install", "--no-cache-dir"] 
+        if self._only_user:
+            install_args.append("--user")
         
         if action == "install":
             args = install_args
@@ -403,9 +411,9 @@ class PipDialog(tk.Toplevel):
             raise RuntimeError("Unknown action")
         
         proc, cmd = self._create_pip_process(args)
-        # following call blocks
         title = subprocess.list2cmdline(cmd)
         
+        # following call blocks
         _show_subprocess_dialog(self, proc, title)
         if action == "uninstall":
             self._show_instructions() # Make the old package go away as fast as possible
@@ -425,7 +433,11 @@ class PipDialog(tk.Toplevel):
             self._install_local_file(filename)
     
     def _install_local_file(self, filename):
-        args = ["install", filename]
+        args = ["install"]
+        if self._only_user:
+            args.append("--user")
+        args.append(filename)
+        
         proc, cmd = self._create_pip_process(args)
         # following call blocks
         title = subprocess.list2cmdline(cmd)
@@ -489,10 +501,6 @@ class PipDialog(tk.Toplevel):
     def _get_interpreter(self):
         pass
     
-    def _get_target(self):
-        return None
-        import site
-    
     def _get_title(self):
         return "Manage packages for " + self._get_interpreter()
 
@@ -500,7 +508,10 @@ class BackendPipDialog(PipDialog):
     def _get_interpreter(self):
         return get_runner().get_interpreter_command()
 
-class FrontendPipDialog(PipDialog):
+class PluginsPipDialog(PipDialog):
+    def __init__(self, master):
+        PipDialog.__init__(self, master, only_user=True)
+    
     def _get_interpreter(self):
         return sys.executable.replace("thonny.exe", "python.exe")
     
@@ -509,8 +520,12 @@ class FrontendPipDialog(PipDialog):
         banner = tk.Label(parent, background=bg)
         banner.grid(row=0, column=0, sticky="nsew")
         
-        banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plugins and other packages required by the front-end.\n"
-                                + "If you want to install packages for your own programs then close this and choose 'Tools => Manage packages...'",
+        banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
+                                + "If you want to install packages for your own programs then close this and choose 'Tools => Manage packages...'\n"
+                                + "\n"
+                                + "This dialog installs packages with 'pip install --user' into " + site.getusersitepackages() + "\n"
+                                + "\n"
+                                + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.",
                                 background=bg, justify="left")
         banner_text.grid(pady=10, padx=10)
         
@@ -518,9 +533,6 @@ class FrontendPipDialog(PipDialog):
     
     def _get_title(self):
         return "Thonny plug-ins"
-
-    def _get_target(self):
-        return get_workbench().get_user_plugins_path()
     
         
 class DetailsDialog(tk.Toplevel):
@@ -660,12 +672,12 @@ def load_plugin():
         pg.wait_window()
 
     def open_frontend_pip_gui(*args):
-        pg = FrontendPipDialog(get_workbench())
+        pg = PluginsPipDialog(get_workbench())
         pg.wait_window()
 
     get_workbench().add_command("backendpipgui", "tools", "Manage packages...", open_backend_pip_gui,
                                 group=80)
-    get_workbench().add_command("backendpipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui,
+    get_workbench().add_command("pluginspipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui,
                                 group=180)
 
 
