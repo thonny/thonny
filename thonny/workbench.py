@@ -94,6 +94,7 @@ class Workbench(tk.Tk):
         self._update_toolbar()
         self._editor_notebook.load_startup_files()
         self._editor_notebook.focus_set()
+        self._open_views()
         
         if server_socket is not None:
             self._init_server_loop(server_socket)
@@ -627,7 +628,6 @@ class Workbench(tk.Tk):
         if "instance" not in self._view_records[view_id]:
             if not create:
                 return None
-            
             class_ = self._view_records[view_id]["class"]
             location = self._view_records[view_id]["location"]
             master = self._view_notebooks[location]
@@ -647,7 +647,7 @@ class Workbench(tk.Tk):
             
             # initially the view will be in it's home_widget
             view.grid(row=0, column=0, sticky=tk.NSEW, in_=view.home_widget)
-            
+            view.hidden = True
             
         return self._view_records[view_id]["instance"]
     
@@ -689,8 +689,9 @@ class Workbench(tk.Tk):
         if hasattr(view, "before_show") and view.before_show() == False:
             return False
             
-        if not view.winfo_ismapped():
+        if view.hidden:
             notebook.insert("auto", view.home_widget, text=self._view_records[view_id]["label"])
+            view.hidden = False
         
         # switch to the tab
         notebook.select(view.home_widget)
@@ -717,6 +718,7 @@ class Workbench(tk.Tk):
             self.set_option("view." + view_id + ".visible", False)
             
             self.event_generate("HideView", view=view, view_id=view_id)
+            view.hidden = True
 
         
 
@@ -1093,6 +1095,13 @@ class Workbench(tk.Tk):
                 msg = traceback.format_exc()
             tk_messagebox.showerror(title, msg)
     
+    def _open_views(self):
+        for nb_name in self._view_notebooks:
+            view_name = self.get_option("layout.notebook_" + nb_name + "_visible_view")
+            if view_name != None:
+                self.show_view(view_name)
+                
+        
         
     def _save_layout(self):
         self.update_idletasks()
