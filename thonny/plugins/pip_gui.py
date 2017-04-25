@@ -305,7 +305,7 @@ class PipDialog(tk.Toplevel):
 
     def _show_package_info(self, name, data, error_code=None):
         self.current_package_data = data
-        print(data)
+        
         def write(s, tag=None):
             if tag is None:
                 tags = ()
