@@ -128,11 +128,14 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
+        default_font = tk.font.nametofont("TkDefaultFont")
         self.info_text.configure(background=ui_utils.get_main_background(),
-                                 font=tk.font.nametofont("TkDefaultFont"),
+                                 font=default_font,
                                  wrap="word")
-        bold_font = tk.font.nametofont("TkDefaultFont").copy()
-        bold_font.configure(weight="bold")
+
+        bold_font = default_font.copy()
+        # need to explicitly copy size, because Tk 8.6 on certain Ubuntus use bigger font in copies
+        bold_font.configure(weight="bold", size=default_font.cget("size"))
         self.info_text.tag_configure("caption", font=bold_font)
         
         
