@@ -385,6 +385,9 @@ class Workbench(tk.Tk):
             'e'  : AutomaticNotebook(self._east_pw, 2),
             'se' : AutomaticNotebook(self._east_pw, 3),
         }
+        
+        for nb_name in self._view_notebooks:
+            self.set_default("layout.notebook_" + nb_name + "_visible_view", None)
 
         self._editor_notebook = EditorNotebook(self._center_pw)
         self._editor_notebook.position_key = 1
@@ -1102,7 +1105,15 @@ class Workbench(tk.Tk):
         self.set_option("layout.center_pw_last_pane_size", self._center_pw.last_pane_size)
         self.set_option("layout.west_pw_first_pane_size", self._west_pw.first_pane_size)
         self.set_option("layout.west_pw_last_pane_size", self._west_pw.last_pane_size)
+        
+        for nb_name in self._view_notebooks:
+            widget = self._view_notebooks[nb_name].get_visible_child()
+            if hasattr(widget, "maximizable_widget"):
+                view = widget.maximizable_widget
+                view_name = type(view).__name__
+                self.set_option("layout.notebook_" + nb_name + "_visible_view", view_name)
                 
+        
         if not ui_utils.get_zoomed(self):
             self.set_option("layout.top", self.winfo_y())
             self.set_option("layout.left", self.winfo_x())

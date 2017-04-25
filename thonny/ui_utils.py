@@ -245,6 +245,14 @@ class AutomaticNotebook(ttk.Notebook):
     
     def is_visible(self):
         return self in self.master.visible_panes
+    
+    def get_visible_child(self):
+        for child in self.winfo_children():
+            if str(child) == str(self.select()):
+                return child
+            
+        return None
+        
         
     def _update_visibility(self):
         if not isinstance(self.master, AutomaticPanedWindow):
