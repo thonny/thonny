@@ -74,10 +74,10 @@ class Runner:
             image_filename="run.run_current_script.gif",
             include_in_toolbar=True)
         
-        get_workbench().add_command('reset', "run", 'Stop/Reset',
-            handler=self.cmd_stop_reset,
+        get_workbench().add_command('reset', "run", 'Interrupt/Reset',
+            handler=self.cmd_interrupt_reset,
             default_sequence="<Control-F2>",
-            tester=self._cmd_stop_reset_enabled,
+            tester=self._cmd_interrupt_reset_enabled,
             group=70,
             image_filename="run.stop.gif",
             include_in_toolbar=True)
@@ -272,14 +272,14 @@ class Runner:
 
         return get_runner().get_state() != "waiting_toplevel_command"
     
-    def cmd_stop_reset(self):
+    def cmd_interrupt_reset(self):
         if self.get_state() == "waiting_toplevel_command":
             get_workbench().get_view("ShellView").submit_command("%Reset\n")
         else:
-            self.send_command(ToplevelCommand(command="Reset"))
+            get_runner().interrupt_backend()
     
             
-    def _cmd_stop_reset_enabled(self):
+    def _cmd_interrupt_reset_enabled(self):
         return True
     
     def postpone_command(self, cmd):
