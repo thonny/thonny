@@ -554,7 +554,7 @@ class Workbench(tk.Tk):
             handler=toggle_view_visibility,
             flag_name="view." + view_id + ".visible",
             group=10,
-            position_in_group="aplhabetic")
+            position_in_group="alphabetic")
         
         if visibility_flag.get():
             self.show_view(view_id, False)
@@ -979,7 +979,7 @@ class Workbench(tk.Tk):
 
                 if sibling_group == group:
                     this_group_exists = True
-                    if position_in_group == "aplhabetic" and sibling_label > command_label:
+                    if position_in_group == "alphabetic" and sibling_label > command_label:
                         return i
                     
                 if sibling_group > group:
