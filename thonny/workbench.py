@@ -642,6 +642,8 @@ class Workbench(tk.Tk):
             view.home_widget.columnconfigure(0, weight=1)
             view.home_widget.rowconfigure(0, weight=1)
             view.home_widget.maximizable_widget = view
+            if hasattr(view, "position_key"):
+                view.home_widget.position_key = view.position_key
             
             # initially the view will be in it's home_widget
             view.grid(row=0, column=0, sticky=tk.NSEW, in_=view.home_widget)
