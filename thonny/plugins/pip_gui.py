@@ -288,16 +288,22 @@ class PipDialog(tk.Toplevel):
                 try:
                     _, bin_data = url_future.result()
                     raw_data = bin_data.decode("UTF-8")
-                    self._show_package_info(json.loads(raw_data))
+                    self._show_package_info(name, json.loads(raw_data))
                 except urllib.error.HTTPError as e:
-                    self._show_package_info(None, e.code)
+                    self._show_package_info(name, self._generate_minimal_data(name), e.code)
                         
             else:
                 self.after(200, poll_fetch_complete)
         
         poll_fetch_complete()
+    
+    def _generate_minimal_data(self, name):
+        return {
+            "info" : {'name' : name},
+            "releases" : {}
+            }
 
-    def _show_package_info(self, data, error_code=None):
+    def _show_package_info(self, name, data, error_code=None):
         self.current_package_data = data
         def write(s, tag=None):
             if tag is None:
@@ -313,9 +319,13 @@ class PipDialog(tk.Toplevel):
             
         if error_code is not None:
             if error_code == 404:
-                write("Could not find the package. Please check spelling!")
+                write("Could not find the package from PyPI.")
+                if not self._get_installed_version(name):
+                    # new package
+                    write("\nPlease check your spelling!")
+                    
             else:
-                write("Could not find the package info. Error code: " + str(error_code))
+                write("Could not find the package info from PyPI. Error code: " + str(error_code))
             return
         
         info = data["info"]
