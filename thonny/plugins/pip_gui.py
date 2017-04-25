@@ -305,6 +305,7 @@ class PipDialog(tk.Toplevel):
 
     def _show_package_info(self, name, data, error_code=None):
         self.current_package_data = data
+        print(data)
         def write(s, tag=None):
             if tag is None:
                 tags = ()
@@ -333,6 +334,8 @@ class PipDialog(tk.Toplevel):
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
             write_att("Latest stable version", latest_stable_version)
+        else:
+            write_att("Latest version", data["info"]["version"])
         write_att("Summary", info["summary"])
         write_att("Author", info["author"])
         write_att("Homepage", info["home_page"], "url")
