@@ -61,8 +61,6 @@ rm -rf $TARGET_DIR/lib/python3.6/distutils/command/*.exe
 #rm -rf $TARGET_DIR/lib/python3.6/site-packages/pip*
 #rm -rf $TARGET_DIR/lib/python3.6/site-packages/setuptools*
 
-$TARGET_DIR/bin/python3.6 -m pip uninstall -y pip
-
 # clear most of the include folder ##################################################
 rm -rf $TARGET_DIR/include/lzma
 rm -rf $TARGET_DIR/include/*.h
