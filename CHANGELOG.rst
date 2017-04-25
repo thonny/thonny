@@ -2,6 +2,16 @@
 Version history
 ===============
 
+2.1.0b7 (2017-04-25)
+====================
+* FIXED: Removed some circular import to support Python 3.4
+* FIXED: pip GUI now also lists installed pre-releases
+* EXPERIMENTAL: GUI for installing Thonny plug-ins (Tools => Manage plug-ins...)
+* TECHNICAL: Thonny+Python bundles again include pip (needed for installing plug-ins)
+* TECHNICAL: Refactored creation of several widgets to support theming
+* TECHNICAL: THONNY_USER_DIR environment variable can now specify where Thonny stores user data (conf files, default virtual env, ...)
+ 
+
 2.1.0b6 (2017-04-19)
 ====================
 * ENHANCEMENT: Shell now shows location of external interpreter as welcome text
