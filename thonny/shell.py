@@ -322,7 +322,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 else:
                     _insert(line, tags)
         else:
-            self._insert_text_drctly(txt, tags)
+            _insert(txt, tags)
             
         #self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
