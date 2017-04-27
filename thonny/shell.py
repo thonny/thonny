@@ -327,9 +327,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         #self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
     
-    def _insert_text_drctly(self, txt, tags):
-        if txt != "":
-            self.direct_insert("output_insert", txt, tags)
     
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
