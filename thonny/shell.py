@@ -501,7 +501,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         else:
             self._command_history_current_index -= 1
         
-        self._propose_command(self._command_history[self._command_history_current_index].strip("\n"))
+        cmd = self._command_history[self._command_history_current_index]
+        if cmd[-1] == "\n": 
+            cmd = cmd[:-1] # remove the submission linebreak
+        self._propose_command(cmd)
         return "break"
     
     def _arrow_down(self, event):
