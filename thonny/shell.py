@@ -257,10 +257,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
             EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
             
-            # tag first char of io separately
-            if get_runner().get_state() == "waiting_input" and self._before_io:
-                self.tag_add("vertically_spaced", index)
-                self._before_io = False
+            if get_runner().get_state() == "waiting_input":
+                if self._before_io:
+                    # tag first char of io differently
+                    self.tag_add("vertically_spaced", index)
+                    self._before_io = False
+                    
                 self._try_submit_input()
             
             self.see("insert")
