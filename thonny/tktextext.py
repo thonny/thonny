@@ -322,8 +322,8 @@ class EnhancedText(TweakableText):
         return list(map(int, self.index("end-1c").split(".")))[0]
 
     def perform_return(self, event):
-        # Override this for language specific auto indent
-        pass
+        self.insert("insert", "\n")
+        return "break"
     
     def perform_page_down(self, event):
         # if last line is visible then go to last line 
