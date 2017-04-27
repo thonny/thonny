@@ -256,7 +256,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             else:
                 tags = tags + ("toplevel", "command")
             
-            super().intercept_insert(index, txt, tags)
+            EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
             
             # tag first char of io separately
             if get_runner().get_state() == "waiting_input" and self._before_io:
