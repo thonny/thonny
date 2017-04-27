@@ -276,14 +276,16 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.bell()
     
     def perform_return(self, event):
-        if get_runner().get_state() == "waiting_program_input":
+        if get_runner().get_state() == "waiting_input":
             # if we are fixing the middle of the input string and pressing ENTER
             # then we expect the whole line to be submitted not linebreak to be inserted
             # (at least that's how IDLE works)
             self.mark_set("insert", "end") # move cursor to the end
             
             # Do the return without auto indent
-            EnhancedTextWithLogging.perform_return(self, event) 
+            EnhancedTextWithLogging.perform_return(self, event)
+             
+            self._try_submit_input()
             
         elif get_runner().get_state() == "waiting_toplevel_command":
             # Same with editin middle of command, but only if it's a single line command
@@ -305,10 +307,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     # Allow auto-indent
                     PythonText.perform_return(self, event)
                 
-        else:
-            EnhancedTextWithLogging.perform_return(self, event)
+            self._try_submit_input()
             
-        self._try_submit_input()
         return "break"
     
     def on_secondary_click(self, event):
