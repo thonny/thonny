@@ -301,6 +301,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             return False
     
     def _insert_text_directly(self, txt, tags=()):
+        def _insert(txt, tags):
+            if txt != "":
+                self.direct_insert("output_insert", txt, tags)
+                
         # I want the insertion to go before marks 
         #self._print_marks("before output")
         self.mark_gravity("input_start", tk.RIGHT)
@@ -312,11 +316,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             for line in txt.splitlines(True):
                 parts = re.split(r'(File .* line \d+.*)$', line, maxsplit=1)
                 if len(parts) == 3 and "<pyshell" not in line:
-                    self._insert_text_drctly(parts[0], tags)
-                    self._insert_text_drctly(parts[1], tags + ("hyperlink",))
-                    self._insert_text_drctly(parts[2], tags)
+                    _insert(parts[0], tags)
+                    _insert(parts[1], tags + ("hyperlink",))
+                    _insert(parts[2], tags)
                 else:
-                    self._insert_text_drctly(line, tags)
+                    _insert(line, tags)
         else:
             self._insert_text_drctly(txt, tags)
             
