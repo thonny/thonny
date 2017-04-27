@@ -117,6 +117,9 @@ class Runner:
         return self._proxy.get_sys_path()
     
     def send_command(self, cmd):
+        if self._proxy is None:
+            return
+        
         #print("SENDING:", cmd)
         if isinstance(cmd, ToplevelCommand):
             assert (self.get_state() == "waiting_toplevel_command"
