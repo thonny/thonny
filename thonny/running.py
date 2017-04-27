@@ -57,8 +57,10 @@ class Runner:
         self._check_alloc_console()
     
     def start(self):
-        self.reset_backend()
-        self._poll_vm_messages()
+        try:
+            self.reset_backend()
+        finally:
+            self._poll_vm_messages()
     
     def _init_commands(self):
         shell = get_workbench().get_view("ShellView")
@@ -302,36 +304,38 @@ class Runner:
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
-        if self._proxy is None:
-            return
-        
-        while True:
-            msg = self._proxy.fetch_next_message()
-            if not msg:
-                break
-            
-            # change state
-            if "command_context" in msg:
-                # message_context shows the state where corresponding command was sent
-                # Now we got the response and we're return to that state
-                self._set_state(msg["command_context"])
-            elif msg["message_type"] == "InputRequest":
-                self._set_state("waiting_input")
-            else:
-                "other messages don't affect the state"
-            
-            if msg["message_type"] == "ToplevelResult":
-                self._current_toplevel_command = None
-
-            #print("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
-            get_workbench().event_generate(msg["message_type"], **msg)
-            
-            # TODO: maybe distinguish between workbench cwd and backend cwd ??
-            get_workbench().set_option("run.working_directory", self.get_cwd())
-            
-            get_workbench().update()
-            
-        get_workbench().after(50, self._poll_vm_messages)
+        try:
+            while self._proxy is not None:
+                msg = self._proxy.fetch_next_message()
+                if not msg:
+                    break
+                
+                # change state
+                if "command_context" in msg:
+                    # message_context shows the state where corresponding command was sent
+                    # Now we got the response and we're return to that state
+                    self._set_state(msg["command_context"])
+                elif msg["message_type"] == "ToplevelResult":
+                    # some ToplevelResult-s don't have command_context
+                    self._set_state("waiting_toplevel_command")
+                elif msg["message_type"] == "InputRequest":
+                    self._set_state("waiting_input")
+                else:
+                    "other messages don't affect the state"
+                
+                if msg["message_type"] == "ToplevelResult":
+                    self._current_toplevel_command = None
+    
+                #print("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
+                get_workbench().event_generate(msg["message_type"], **msg)
+                
+                # TODO: maybe distinguish between workbench cwd and backend cwd ??
+                get_workbench().set_option("run.working_directory", self.get_cwd())
+                
+                get_workbench().update()
+                
+        finally:
+            get_workbench().after(50, self._poll_vm_messages)
     
     def reset_backend(self):
         self._postponed_commands = []
