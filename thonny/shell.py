@@ -277,16 +277,38 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.bell()
     
     def perform_return(self, event):
-        # if we are fixing the middle of single-line command and pressing ENTER 
-        # then we expect the command to be submitted not linebreak to be inserted
-        # (at least that's how IDLE works)
-        source = self.get("input_start", "end-1c")
-        if (get_runner().get_state() == "waiting_toplevel_command"
-            and "\n" not in source
-            and self._code_is_ready_for_submission(source)):
-            self.mark_set("insert", "end") # move cursor 
-                                       
-        PythonText.perform_return(self, event)
+        if get_runner().get_state() == "waiting_program_input":
+            # if we are fixing the middle of the input string and pressing ENTER
+            # then we expect the whole line to be submitted not linebreak to be inserted
+            # (at least that's how IDLE works)
+            self.mark_set("insert", "end") # move cursor to the end
+            
+            # Do the return without auto indent
+            EnhancedTextWithLogging.perform_return(self, event) 
+            
+        elif get_runner().get_state() == "waiting_toplevel_command":
+            # Same with editin middle of command, but only if it's a single line command
+            whole_input = self.get("input_start", "end-1c") # asking the whole input
+            if ("\n" not in whole_input
+                and self._code_is_ready_for_submission(whole_input)):
+                self.mark_set("insert", "end") # move cursor to the end
+                # Do the return without auto indent
+                EnhancedTextWithLogging.perform_return(self, event)
+            else:
+                # Don't want auto indent when code is ready for submission
+                source = self.get("input_start", "insert")
+                tail = self.get("insert", "end")
+                
+                if self._code_is_ready_for_submission(source + "\n", tail):
+                    # No auto-indent
+                    EnhancedTextWithLogging.perform_return(self, event)
+                else:
+                    # Allow auto-indent
+                    PythonText.perform_return(self, event)
+                
+        else:
+            EnhancedTextWithLogging.perform_return()
+            
         self._try_submit_input()
         return "break"
     
@@ -330,15 +352,19 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
-        input_text = self.get("input_start", "end-1c")
+        input_text = self.get("input_start", "insert")
+        tail = self.get("insert", "end")
         
         # user may have pasted more text than necessary for this request
-        submittable_text = self._extract_submittable_input(input_text)
+        submittable_text = self._extract_submittable_input(input_text, tail)
         
         if submittable_text is not None:
-            # make sure submittable text ends with newline
-            # (auto indenter may have put something more there)
-            
+            if get_runner().get_state() == "waiting_toplevel_command":
+                # clean up the tail
+                if len(tail) > 0:
+                    assert tail.strip() == ""
+                    self.delete("insert", "end-1c")
+                    
             
             # leftover text will be kept in widget, waiting for next request.
             start_index = self.index("input_start")
@@ -377,14 +403,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _editing_allowed(self):
         return get_runner().get_state() in ('waiting_toplevel_command', 'waiting_input')
     
-    def _extract_submittable_input(self, input_text):
+    def _extract_submittable_input(self, input_text, tail):
         
         if get_runner().get_state() == "waiting_toplevel_command":
             if input_text.endswith("\n"):
                 if input_text.strip().startswith("%"):
                     # if several magic command are submitted, then take only first
                     return input_text[:input_text.index("\n")+1]
-                elif self._code_is_ready_for_submission(input_text):
+                elif self._code_is_ready_for_submission(input_text, tail):
                     return input_text
                 else:
                     return None
@@ -417,16 +443,19 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             else:
                 raise AssertionError("only readline is supported at the moment")
     
-    def _code_is_ready_for_submission(self, source):
+    def _code_is_ready_for_submission(self, source, tail=""):
         # Ready to submit if ends with empty line 
         # or is complete single-line code
+        
+        if tail.strip() != "":
+            return False
         
         # First check if it has unclosed parens, unclosed string or ending with : or \
         parser = roughparse.RoughParser(self.indentwidth, self.tabwidth)
         parser.set_str(source.rstrip() + "\n")
         if (parser.get_continuation_type() != roughparse.C_NONE
                 or parser.is_block_opener()):
-            return None
+            return False
         
         # Multiline compound statements need to end with empty line to be considered
         # complete.
@@ -441,12 +470,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if len(lines) > 0:
             first_word = lines[0].strip().split()[0]
             if (first_word in compound_keywords
-                and lines[-1].strip() != ""):
+                and not source.replace(" ", "").replace("\t", "").endswith("\n\n")):
                 # last line is not empty
-                return None
+                return False
         
-        # Not compound statement
-        return source
+        return True
     
     def _submit_input(self, text_to_be_submitted):
         if get_runner().get_state() == "waiting_toplevel_command":
