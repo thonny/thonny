@@ -75,14 +75,15 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
         
-        self.send_message(self.create_message("BackendReady",
+        self.send_message(self.create_message("ToplevelResult",
                           main_dir=self._main_dir,
                           original_argv=original_argv,
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
+                          welcome_text="Python " + _get_python_version_string(),
+                          executable=sys.executable,
                           python_version=_get_python_version_string(),
-                          python_executable=sys.executable,
                           cwd=os.getcwd()))
         
         self._install_signal_handler()

@@ -340,9 +340,8 @@ class Runner:
                             .format(backend_name))
         
         backend_class = get_workbench().get_backends()[backend_name]
+        self._set_state("running")
         self._proxy = backend_class(configuration_option)
-        self._set_state("waiting_toplevel_command")
-        self.send_command(ToplevelCommand(command="Reset"))
     
     def interrupt_backend(self):
         if self._proxy is not None:
@@ -463,6 +462,8 @@ class CPythonProxy(BackendProxy):
         self._message_queue = None
         self._sys_path = []
         self._tkupdate_loop_id = None
+        
+        self._start_new_process()
     
     def fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
@@ -569,7 +570,7 @@ class CPythonProxy(BackendProxy):
     
         # TODO: clean up old versions
     
-    def _start_new_process(self, cmd):
+    def _start_new_process(self, cmd=None):
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
     
@@ -643,6 +644,7 @@ class CPythonProxy(BackendProxy):
             startupinfo=startupinfo
         )
         
+        """
         ready_line = self._proc.stdout.readline()
         if ready_line == "": # There was some problem
             error_msg = self._proc.stderr.read()
@@ -651,6 +653,9 @@ class CPythonProxy(BackendProxy):
         ready_msg = parse_message(ready_line)
         self._sys_path = ready_msg["path"]
         debug("Backend ready: %s", ready_msg)
+        """
+        
+        
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
