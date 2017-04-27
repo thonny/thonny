@@ -12,9 +12,6 @@ READ_ONLY_BACKGROUND="LightYellow"
 
 class PythonText(EnhancedText):
     
-    def should_indent_after_empty_line(self):
-        return True
-    
     def perform_return(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified

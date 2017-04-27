@@ -228,7 +228,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _insert_prompt(self):
         # if previous output didn't put a newline, then do it now
         if not self.index("output_insert").endswith(".0"):
-            # TODO: show a symbol indicating unfinished line
             self._insert_text_directly("\n", ("io",))
         
         prompt_tags = ("toplevel", "prompt")
@@ -395,10 +394,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self.tag_remove(tag, end_index, "end")
                 
             self._submit_input(submittable_text)
-            # tidy up the tags
-            #self.tag_remove("pending_input", "1.0", "end")
-            #self.tag_add("submitted_input", start_index, end_index)
-            #self.tag_add("pending_input", end_index, "end-1c")
     
     def _editing_allowed(self):
         return get_runner().get_state() in ('waiting_toplevel_command', 'waiting_input')
@@ -500,7 +495,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                                         source=text_to_be_submitted))
                 
             except:
-                #raise # TODO:
                 get_workbench().report_exception()
                 self._insert_prompt()
                 
@@ -580,9 +574,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _clear_shell(self):
         end_index = self.index("output_end")
         self.direct_delete("1.0", end_index)
-
-    def should_indent_after_empty_line(self):
-        return False
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
