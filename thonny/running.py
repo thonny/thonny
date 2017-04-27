@@ -397,8 +397,14 @@ class BackendProxy:
     ie. suitable for calling from GUI thread."""
     
     def __init__(self, configuration_option):
-        """If configuration is "Foo (bar)", then "Foo" is backend descriptor
-        and "bar" is configuration option"""
+        """Initializes (or starts the initialization of) the backend process.
+        
+        Backend is considered ready when the runner gets a ToplevelResult
+        with attribute "welcome_text" from fetch_next_message.
+        
+        param configuration_option:
+            If configuration is "Foo (bar)", then "Foo" is backend descriptor
+            and "bar" is the configuration option"""
     
     @classmethod
     def get_configuration_options(cls):
@@ -430,10 +436,15 @@ class BackendProxy:
         return []
     
     def interrupt(self):
+        """Tries to interrupt current command without reseting the backend"""
         self.kill_current_process()
     
     def kill_current_process(self):
-        "Kill the backend"
+        """Kill the backend.
+        
+        Is called when Thonny no longer needs this backend 
+        (Thonny gets closed or new backend gets selected)
+        """
         raise NotImplementedError()
     
     def get_interpreter_command(self):
