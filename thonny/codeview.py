@@ -22,36 +22,40 @@ class PythonText(EnhancedText):
         text = event.widget
         assert text is self
         
-        first, last = text.get_selection_indices()
         try:
+            # delete selection
+            first, last = text.get_selection_indices()
             if first and last:
                 text.delete(first, last)
                 text.mark_set("insert", first)
-            line = text.get("insert linestart", "insert")
-            i, n = 0, len(line)
-            while i < n and line[i] in " \t":
-                i = i+1
-            if i == n:
-                # the cursor is in or at leading indentation in a continuation lin
-                if self.should_indent_after_empty_line():
-                    # line; just inject an empty line at the start
-                    text.insert("insert linestart", '\n')
-                else:
-                    text.insert("insert", '\n')
-                return "break"
-            indent = line[:i]
-            # strip whitespace before insert point unless it's in the prompt
-            i = 0
             
-            #last_line_of_prompt = sys.ps1.split('\n')[-1]
-            while line and line[-1] in " \t" : #and line != last_line_of_prompt:
-                line = line[:-1]
-                i = i+1
-            if i:
-                text.delete("insert - %d chars" % i, "insert")
-            # strip whitespace after insert point
-            while text.get("insert") in " \t":
+            # Strip whitespace after insert point
+            # (ie. don't carry whitespace from the right of the cursor over to the new line)
+            while text.get("insert") in [" ", "\t"]:
                 text.delete("insert")
+            
+            left_part = text.get("insert linestart", "insert")
+            # locate first non-white character
+            i = 0
+            n = len(left_part)
+            while i < n and left_part[i] in " \t":
+                i = i+1
+            
+            # is it only whitespace?
+            if i == n:
+                # start the new line with the same whitespace
+                text.insert("insert", '\n' + left_part)
+                return "break"
+            
+            # Turned out the left part contains visible chars
+            # Remember the indent
+            indent = left_part[:i]
+            
+            # Strip whitespace before insert point
+            # (ie. after inserting the linebreak this line doesn't have trailing whitespace)
+            while text.get("insert-1c", "insert") in [" ", "\t"]:
+                text.delete("insert-1c", "insert")
+                
             # start new line
             text.insert("insert", '\n')
     
