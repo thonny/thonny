@@ -306,7 +306,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     PythonText.perform_return(self, event)
                 
         else:
-            EnhancedTextWithLogging.perform_return()
+            EnhancedTextWithLogging.perform_return(self, event)
             
         self._try_submit_input()
         return "break"
