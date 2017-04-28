@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.0b9 (2017-04-28)
+====================
+* FIXED: Backend related regression introduced in b8
+
 2.1.0b8 (2017-04-27)
 ====================
 * CHANGED: (FIXED #231) Stop/Reset button is now Interrupt/Reset button (tries to interrupt a running command instead of reseting. Resets if pressed in idle state)
@@ -9,7 +13,8 @@ Version history
 * FIXED #233: Thonny now remembers which view was on top in a panel.
 * FIXED #234: Multiline support problems in shell (trailing whitespace was causing trouble)
 * FIXED: pip GUI shows latest version number when there is no stable version.
-* FIXED: pip GUI now can handle also packages without PyPI presence 
+* FIXED: pip GUI now can handle also packages without PyPI presence
+* TECHNICAL: Backends are not sent Reset command for initialization anymore.  
 
 2.1.0b7 (2017-04-25)
 ====================
