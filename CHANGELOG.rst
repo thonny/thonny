@@ -2,6 +2,11 @@
 Version history
 ===============
 
+2.1.0b10 (2017-04-29)
+====================
+* CHANGED: Installed plugins now end up under ~/.thonny/plugins
+* TECHNICAL: Backend preparation now occurs when main window has been opened
+
 2.1.0b9 (2017-04-28)
 ====================
 * FIXED: Backend related regression introduced in b8
