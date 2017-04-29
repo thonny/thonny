@@ -92,7 +92,11 @@ class Workbench(tk.Tk):
         self._load_plugins()
         
         self._update_toolbar()
-        self._editor_notebook.load_startup_files()
+        try:
+            self._editor_notebook.load_startup_files()
+        except:
+            self.report_exception()
+            
         self._editor_notebook.focus_set()
         self._open_views()
         
