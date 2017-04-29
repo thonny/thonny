@@ -466,6 +466,7 @@ class CPythonProxy(BackendProxy):
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
+            self._prepare_private_venv()
             self._executable = get_private_venv_executable()
         else:
             self._executable = configuration_option
@@ -820,57 +821,42 @@ class CPythonProxy(BackendProxy):
             self._tkupdate_loop_id = None
         
 
-def parse_configuration(configuration):
-    """
-    "Python (C:\Python34\python.exe)" becomes ("Python", "C:\Python34\python.exe")
-    "BBC micro:bit" becomes ("BBC micro:bit", "")
-    """
-    
-    parts = configuration.split("(", maxsplit=1)
-    if len(parts) == 1:
-        return configuration, ""
-    else:
-        return parts[0].strip(), parts[1].strip(" )")
-
-
-def prepare_private_venv():
-    path = _get_private_venv_path()
-    if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
-        _check_upgrade_private_venv(path)
-    else:
-        _create_private_venv(path, "Please wait!\nThonny prepares its virtual environment .")
-
-def _check_upgrade_private_venv(path):
-    # If home is wrong then regenerate
-    # If only micro version is different, then upgrade
-    info = _get_venv_info(path)
-    
-    if not eqfn(info["home"], os.path.dirname(sys.executable)):
-        _create_private_venv(path, 
-                             "Thonny's virtual environment was created for another interpreter.\n"
-                             + "Regenerating the virtual environment for current interpreter.\n"
-                             + "(You may need to reinstall your 3rd party packages)\n"
-                             + "Please wait! .",
-                             clear=True)
-    else:
-        venv_version = tuple(map(int, info["version"].split(".")))
-        sys_version = sys.version_info[:3]
-        assert venv_version[0] == sys_version[0]
-        assert venv_version[1] == sys_version[1]
+    def _prepare_private_venv(self):
+        path = _get_private_venv_path()
+        if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
+            self._check_upgrade_private_venv(path)
+        else:
+            self._create_private_venv(path, "Please wait!\nThonny prepares its virtual environment .")
         
-        if venv_version[2] != sys_version[2]:
-            _create_private_venv(path, "Please wait!\nUpgrading Thonny's virtual environment .",
-                                 upgrade=True)
+    def _check_upgrade_private_venv(self, path):
+        # If home is wrong then regenerate
+        # If only micro version is different, then upgrade
+        info = _get_venv_info(path)
+        
+        if not eqfn(info["home"], os.path.dirname(sys.executable)):
+            self._create_private_venv(path, 
+                                 "Thonny's virtual environment was created for another interpreter.\n"
+                                 + "Regenerating the virtual environment for current interpreter.\n"
+                                 + "(You may need to reinstall your 3rd party packages)\n"
+                                 + "Please wait! .",
+                                 clear=True)
+        else:
+            venv_version = tuple(map(int, info["version"].split(".")))
+            sys_version = sys.version_info[:3]
+            assert venv_version[0] == sys_version[0]
+            assert venv_version[1] == sys_version[1]
             
-
-def _create_private_venv(path, description, clear=False, upgrade=False):
-    base_exe = sys.executable
-    if sys.executable.endswith("thonny.exe"):
-        # assuming that thonny.exe is in the same dir as "python.exe"
-        base_exe = sys.executable.replace("thonny.exe", "python.exe")
+            if venv_version[2] != sys_version[2]:
+                self._create_private_venv(path, "Please wait!\nUpgrading Thonny's virtual environment .",
+                                     upgrade=True)
+                
     
-    
-    def action():
+    def _create_private_venv(self, path, description, clear=False, upgrade=False):
+        base_exe = sys.executable
+        if sys.executable.endswith("thonny.exe"):
+            # assuming that thonny.exe is in the same dir as "python.exe"
+            base_exe = sys.executable.replace("thonny.exe", "python.exe")
+        
         
         # Don't include system site packages
         # This way all students will have similar configuration
@@ -890,25 +876,42 @@ def _create_private_venv(path, description, clear=False, upgrade=False):
         if running_on_windows():
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        p = subprocess.Popen(cmd, startupinfo=startupinfo)
-        p.wait()
-         
-    from thonny.ui_utils import run_with_busy_window
-    run_with_busy_window(action, description=description)
+        proc = subprocess.Popen(cmd, startupinfo=startupinfo,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.STDOUT,
+                                universal_newlines=True)
+             
+        from thonny.ui_utils import SubprocessDialog
+        dlg = SubprocessDialog(get_workbench(), proc, "Preparing the backend", long_description=description)
+        dlg.wait_window()
+        
+        bindir = os.path.dirname(get_private_venv_executable())
+        # create private env marker
+        marker_path = os.path.join(bindir, "is_private")
+        with open(marker_path, mode="w") as fp:
+            fp.write("# This file marks Thonny-private venv")
+        
+        # Create recommended pip conf to get rid of list deprecation warning
+        # https://github.com/pypa/pip/issues/4058
+        pip_conf = "pip.ini" if running_on_windows() else "pip.conf"
+        with open(os.path.join(path, pip_conf), mode="w") as fp:
+            fp.write("[list]\nformat = columns")
+        
+        assert os.path.isdir(path)
+
+def parse_configuration(configuration):
+    """
+    "Python (C:\Python34\python.exe)" becomes ("Python", "C:\Python34\python.exe")
+    "BBC micro:bit" becomes ("BBC micro:bit", "")
+    """
     
-    bindir = os.path.dirname(get_private_venv_executable())
-    # create private env marker
-    marker_path = os.path.join(bindir, "is_private")
-    with open(marker_path, mode="w") as fp:
-        fp.write("# This file marks Thonny-private venv")
-    
-    # Create recommended pip conf to get rid of list deprecation warning
-    # https://github.com/pypa/pip/issues/4058
-    pip_conf = "pip.ini" if running_on_windows() else "pip.conf"
-    with open(os.path.join(path, pip_conf), mode="w") as fp:
-        fp.write("[list]\nformat = columns")
-    
-    assert os.path.isdir(path)
+    parts = configuration.split("(", maxsplit=1)
+    if len(parts) == 1:
+        return configuration, ""
+    else:
+        return parts[0].strip(), parts[1].strip(" )")
+
+
     
     
 def _get_private_venv_path():

@@ -7,11 +7,6 @@ THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR",
 
 def launch():
     os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
-    from thonny import running
-    running.prepare_private_venv()
-    _prepared_launch()
-        
-def _prepared_launch():
     
     try:
         from thonny import workbench
