@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.0b11 (2017-04-29)
+====================
+* TECHNICAL: Implemented more robust approach for installing Thonny plugins
+
 2.1.0b10 (2017-04-29)
 ====================
 * CHANGED: Installed plugins now end up under ~/.thonny/plugins
