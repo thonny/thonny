@@ -761,15 +761,20 @@ def get_dialog_background_color():
         return "SystemButtonFace"
 
 def center_window(win, master=None):
-    # looks like it doesnt take window border into account
+    # looks like it doesn't take window border into account
     win.update_idletasks()
     
-    if master is None:
-        left = win.winfo_screenwidth() - win.winfo_width() // 2
-        top = win.winfo_screenheight() - win.winfo_height() // 2
+    if getattr(master, "initializing", False):
+        # can't get reliable positions when main window is not in mainloop yet
+        left = (win.winfo_screenwidth() - 600) // 2
+        top = (win.winfo_screenheight() - 400) // 2
     else:
-        left = master.winfo_rootx() + master.winfo_width() // 2 - win.winfo_width() // 2
-        top = master.winfo_rooty() + master.winfo_height() // 2 - win.winfo_height() // 2
+        if master is None:
+            left = win.winfo_screenwidth() - win.winfo_width() // 2
+            top = win.winfo_screenheight() - win.winfo_height() // 2
+        else:
+            left = master.winfo_rootx() + master.winfo_width() // 2 - win.winfo_width() // 2
+            top = master.winfo_rooty() + master.winfo_height() // 2 - win.winfo_height() // 2
         
     win.geometry("+%d+%d" % (left, top))
 
