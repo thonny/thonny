@@ -5,7 +5,7 @@ import sys
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))
 
-THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "user_base")
+THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "plugins")
 
 def launch():
     if os.environ.get("PYTHONUSERBASE") == THONNY_USER_BASE:
