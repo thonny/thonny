@@ -826,7 +826,7 @@ class SubprocessDialog(tk.Toplevel):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
     
-    def __init__(self, master, proc, title, autoclose=True):
+    def __init__(self, master, proc, title, long_description=None, autoclose=True):
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
@@ -855,6 +855,8 @@ class SubprocessDialog(tk.Toplevel):
         self.text = text_frame.text
         self.text["width"] = 60
         self.text["height"] = 7
+        if long_description is not None:
+            self.text.direct_insert("1.0", long_description + "\n\n")
         
         self.button = ttk.Button(main_frame, text="Cancel", command=self._close)
         self.button.grid(row=1, column=0, pady=(0,15))
