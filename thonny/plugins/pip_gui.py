@@ -557,7 +557,7 @@ class PluginsPipDialog(PipDialog):
         banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
                                 + "If you want to install packages for your own programs then close this and choose 'Tools => Manage packages...'\n"
                                 + "\n"
-                                + "This dialog installs packages with 'pip install --user' into " + site.getusersitepackages() + "\n"
+                                + "This dialog installs packages into " + site.getusersitepackages() + "\n"
                                 + "\n"
                                 + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.",
                                 background=bg, justify="left")
