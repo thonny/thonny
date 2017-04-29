@@ -1,39 +1,17 @@
 import os.path
 import sys
 
-
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))
 
 THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "plugins")
 
 def launch():
-    if os.environ.get("PYTHONUSERBASE") == THONNY_USER_BASE:
-        _prepared_env_launch()
-    else:
-        # need to start new process with proper environment
-        env = os.environ.copy()
-        env["PYTHONUSERBASE"] = THONNY_USER_BASE
-        
-        if ("thonny.exe" in sys.executable.lower() 
-            or "-m thonny" in " ".join(sys.argv)):
-            # Thonny was the initial purpose of this process
-            args = sys.argv
-        else:
-            # Invoke Thonny in conventional way
-            args = ["-m", "thonny"]
-        
-        # restart the process with proper environment
-        #os.execvpe(sys.executable, args, env) # doesn't find module thonny when run in IDE
-        import subprocess
-        proc = subprocess.Popen([sys.executable] + args, env=env)
-        proc.wait()
-        
-
-def _prepared_env_launch():
     os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
     
     try:
+        _update_sys_path()
+        
         from thonny import workbench
         
         if _should_delegate():
@@ -74,6 +52,25 @@ def _prepared_env_launch():
         runner = get_runner()
         if runner != None:
             runner.kill_backend()
+
+def _update_sys_path():
+    import site
+    
+    # remove old dir from path
+    if site.getusersitepackages() in sys.path:
+        sys.path.remove(site.getusersitepackages())
+        
+    # compute usersitepackages that plugins installation subprocess would see
+    import subprocess
+    env = os.environ.copy()
+    env["PYTHONUSERBASE"] = THONNY_USER_BASE
+    proc = subprocess.Popen(
+        [sys.executable.replace("thonny.exe", "pythonw.exe"),
+         "-c", "import site; print(site.getusersitepackages())"],
+        universal_newlines=True, env=env, stdout=subprocess.PIPE)
+    plugins_sitepackages = proc.stdout.readline().strip()
+    
+    sys.path.append(plugins_sitepackages)
 
 def _should_delegate():
     from thonny import workbench

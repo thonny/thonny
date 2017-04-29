@@ -5,7 +5,7 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny import misc_utils, tktextext, ui_utils
+from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE
 from thonny.globals import get_workbench, get_runner
 import subprocess
 from urllib.request import urlopen
@@ -493,8 +493,7 @@ class PipDialog(tk.Toplevel):
         
         return None
 
-    def _create_pip_process(self, args):
-        encoding = "UTF-8"
+    def _prepare_env_for_pip_process(self, encoding):
         env = {}
         for name in os.environ:
             if ("python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # skip python vars
@@ -502,6 +501,12 @@ class PipDialog(tk.Toplevel):
                 
         env["PYTHONIOENCODING"] = encoding
         env["PYTHONUNBUFFERED"] = "1"
+        
+        return env
+
+    def _create_pip_process(self, args):
+        encoding = "UTF-8"
+        
                     
         cmd = [self._get_interpreter(), "-m", "pip"] + args
         
@@ -513,7 +518,8 @@ class PipDialog(tk.Toplevel):
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         
         return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                                env=env, universal_newlines=True,
+                                env=self._prepare_env_for_pip_process(encoding),
+                                universal_newlines=True,
                                 creationflags=creationflags,
                                 startupinfo=startupinfo),
                 cmd)
@@ -549,6 +555,12 @@ class PluginsPipDialog(PipDialog):
     def _get_interpreter(self):
         return sys.executable.replace("thonny.exe", "python.exe")
     
+    def _prepare_env_for_pip_process(self, encoding):
+        env = PipDialog._prepare_env_for_pip_process(self, encoding)
+        env["PYTHONUSERBASE"] = THONNY_USER_BASE
+        return env
+        
+        
     def _create_widgets(self, parent):
         bg = "#ffff99"
         banner = tk.Label(parent, background=bg)
@@ -557,7 +569,7 @@ class PluginsPipDialog(PipDialog):
         banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
                                 + "If you want to install packages for your own programs then close this and choose 'Tools => Manage packages...'\n"
                                 + "\n"
-                                + "This dialog installs packages into " + site.getusersitepackages() + "\n"
+                                + "This dialog installs packages into " + THONNY_USER_BASE + "\n"
                                 + "\n"
                                 + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.",
                                 background=bg, justify="left")
