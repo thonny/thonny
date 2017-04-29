@@ -5,7 +5,32 @@ import sys
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))
 
+THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "user_base")
+
 def launch():
+    if os.environ.get("PYTHONUSERBASE") == THONNY_USER_BASE:
+        _prepared_env_launch()
+    else:
+        # need to start new process with proper environment
+        env = os.environ.copy()
+        env["PYTHONUSERBASE"] = THONNY_USER_BASE
+        
+        if ("thonny.exe" in sys.executable.lower() 
+            or "-m thonny" in " ".join(sys.argv)):
+            # Thonny was the initial purpose of this process
+            args = sys.argv
+        else:
+            # Invoke Thonny in conventional way
+            args = ["-m", "thonny"]
+        
+        # restart the process with proper environment
+        #os.execvpe(sys.executable, args, env) # doesn't find module thonny when run in IDE
+        import subprocess
+        proc = subprocess.Popen([sys.executable] + args, env=env)
+        proc.wait()
+        
+
+def _prepared_env_launch():
     os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
     
     try:
