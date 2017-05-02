@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.0 (2017-05-02)
+====================
+* TECHNICAL: Changes in diagnostic logging
+
 2.1.0b11 (2017-04-29)
 ====================
 * TECHNICAL: Implemented more robust approach for installing Thonny plugins
