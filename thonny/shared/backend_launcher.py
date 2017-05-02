@@ -18,13 +18,17 @@ if __name__ == "__main__":
     # set up logging
     logger = logging.getLogger("thonny.backend")
     
-    file_handler = logging.FileHandler(os.path.expanduser(os.path.join("~",".thonny","backend.log")), encoding="UTF-8");
+    file_handler = logging.FileHandler(os.path.expanduser(os.path.join("~",".thonny","backend.log")), 
+                                       encoding="UTF-8",
+                                       mode="w");
     file_handler.setLevel(logging.WARNING);
     logger.addHandler(file_handler)
     
     # TODO: sending log records to original stdout could be better (reading from stderr may introduce sync problems)
     stream_handler = logging.StreamHandler(stream=sys.stderr)
     logger.addHandler(stream_handler)
+    
+    logger.setLevel(logging.INFO)
     
     from thonny.backend import VM  # @UnresolvedImport
     VM().mainloop()

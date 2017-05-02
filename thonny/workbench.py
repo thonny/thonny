@@ -74,6 +74,7 @@ class Workbench(tk.Tk):
         
         self._init_configuration()
         self._init_diagnostic_logging()
+        logging.info("Loading early plugins from " + str(sys.path))
         self._load_early_plugins()
         
         self._editor_notebook = None
@@ -121,9 +122,22 @@ class Workbench(tk.Tk):
 
     
     def _init_diagnostic_logging(self):
-        logging.basicConfig(format='%(levelname)s:%(message)s',
-            level=logging.DEBUG if self.get_option("debug_mode") else logging.INFO)
-    
+        logFormatter = logging.Formatter('%(levelname)s: %(message)s')
+        root_logger = logging.getLogger()
+        
+        log_file = os.path.join(THONNY_USER_DIR, "frontend.log")
+        file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
+        file_handler.setFormatter(logFormatter)
+        file_handler.setLevel(logging.INFO);
+        root_logger.addHandler(file_handler)
+        
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logFormatter)
+        console_handler.setLevel(logging.INFO);
+        root_logger.addHandler(console_handler)
+        
+        root_logger.setLevel(logging.INFO)
+        
     def _init_window(self):
         
         self.set_default("layout.zoomed", False)
