@@ -2,6 +2,11 @@
 Version history
 ===============
 
+2.1.1 (2017-05-03)
+====================
+* FIXED #241: Some menu items gave errors with micro:bit backend.
+* FIXED #242: Focus got stuck on first run (no entry was possible neither in shell nor editor when initialization dialog closed)
+
 2.1.0 (2017-05-02)
 ====================
 * TECHNICAL: Changes in diagnostic logging
