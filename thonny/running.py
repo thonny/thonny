@@ -884,6 +884,7 @@ class CPythonProxy(BackendProxy):
         from thonny.ui_utils import SubprocessDialog
         dlg = SubprocessDialog(get_workbench(), proc, "Preparing the backend", long_description=description)
         dlg.wait_window()
+        get_workbench().become_topmost_window() # Otherwise focus may get stuck somewhere
         
         bindir = os.path.dirname(get_private_venv_executable())
         # create private env marker
