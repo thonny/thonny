@@ -71,7 +71,7 @@ class Runner:
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
-            tester=self.cmd_execution_command_enabled,
+            tester=self._cmd_run_current_script_enabled,
             group=10,
             image_filename="run.run_current_script.gif",
             include_in_toolbar=True)
@@ -252,9 +252,10 @@ class Runner:
         else:
             raise CommandSyntaxError("Command 'cd' takes one argument")
 
-    def cmd_execution_command_enabled(self):
+    def _cmd_run_current_script_enabled(self):
         return (get_workbench().get_editor_notebook().get_current_editor() is not None
-                and get_runner().get_state() == "waiting_toplevel_command")
+                and get_runner().get_state() == "waiting_toplevel_command"
+                and "run" in get_runner().supported_features())
     
     def _cmd_run_current_script(self):
         self.execute_current("Run")
@@ -393,6 +394,12 @@ class Runner:
                 print("Could not allocate console. Error code:", err, file=sys.stderr)
             child.stdin.write(b"\n")
             child.stdin.flush()
+
+    def supported_features(self):
+        if self._proxy is None:
+            return []
+        else:
+            return self._proxy.supported_features()
             
             
 
@@ -457,6 +464,10 @@ class BackendProxy:
     def get_interpreter_command(self):
         """Return system command for invoking current interpreter"""
         raise NotImplementedError()
+    
+    def supported_features(self):
+        return ["run"]
+
     
 
 class CPythonProxy(BackendProxy):
@@ -899,6 +910,10 @@ class CPythonProxy(BackendProxy):
             fp.write("[list]\nformat = columns")
         
         assert os.path.isdir(path)
+
+    def supported_features(self):
+        return ["run", "debug", "pip_gui", "system_shell"]
+
 
 def parse_configuration(configuration):
     """

@@ -40,7 +40,7 @@ class Debugger:
     def _init_commands(self):
         get_workbench().add_command("debug", "run", "Debug current script",
             self._cmd_debug_current_script,
-            tester=get_runner().cmd_execution_command_enabled,
+            tester=self._cmd_debug_current_script_enabled,
             default_sequence="<Control-F5>",
             group=10,
             image_filename="run.debug_current_script.gif",
@@ -82,6 +82,10 @@ class Debugger:
     def _cmd_debug_current_script(self):
         get_runner().execute_current("Debug")
 
+    def _cmd_debug_current_script_enabled(self):
+        return (get_workbench().get_editor_notebook().get_current_editor() is not None
+                and get_runner().get_state() == "waiting_toplevel_command"
+                and "debug" in get_runner().supported_features())
 
     def _check_issue_debugger_command(self, command, **kwargs):
         cmd = DebuggerCommand(command=command, **kwargs)

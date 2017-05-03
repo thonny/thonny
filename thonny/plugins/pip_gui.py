@@ -716,12 +716,16 @@ def load_plugin():
     def open_backend_pip_gui(*args):
         pg = BackendPipDialog(get_workbench())
         pg.wait_window()
+    
+    def open_backend_pip_gui_enabled():
+        return "pip_gui" in get_runner().supported_features()
 
     def open_frontend_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())
         pg.wait_window()
 
     get_workbench().add_command("backendpipgui", "tools", "Manage packages...", open_backend_pip_gui,
+                                tester=open_backend_pip_gui_enabled,
                                 group=80)
     get_workbench().add_command("pluginspipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui,
                                 group=180)

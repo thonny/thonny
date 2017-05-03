@@ -191,4 +191,6 @@ def load_plugin():
         open_system_shell()
     
     get_workbench().add_command("OpenSystemShell", "tools", "Open system shell...",
-                    open_system_shell_for_selected_interpreter, group=80)
+                    open_system_shell_for_selected_interpreter,
+                    tester=lambda: "system_shell" in get_runner().supported_features(),
+                    group=80)
