@@ -586,14 +586,8 @@ class ToolTip(object):
         y = y + cy + self.widget.winfo_rooty() +27
         self.tipwindow = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(1)
+        tw.wm_transient(self.widget)
         tw.wm_geometry("+%d+%d" % (x, y))
-        try:
-            # For Mac OS
-            tw.tk.call("::tk::unsupported::MacWindowStyle",
-                       "style", tw._w,
-                       "help", "noActivates")
-        except tk.TclError:
-            pass
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
 
