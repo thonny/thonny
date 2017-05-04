@@ -837,7 +837,7 @@ class CPythonProxy(BackendProxy):
         if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
             self._check_upgrade_private_venv(path)
         else:
-            self._create_private_venv(path, "Please wait!\nThonny prepares its virtual environment .")
+            self._create_private_venv(path, "Please wait!\nThonny prepares its virtual environment.")
         
     def _check_upgrade_private_venv(self, path):
         # If home is wrong then regenerate
@@ -849,7 +849,7 @@ class CPythonProxy(BackendProxy):
                                  "Thonny's virtual environment was created for another interpreter.\n"
                                  + "Regenerating the virtual environment for current interpreter.\n"
                                  + "(You may need to reinstall your 3rd party packages)\n"
-                                 + "Please wait! .",
+                                 + "Please wait!.",
                                  clear=True)
         else:
             venv_version = tuple(map(int, info["version"].split(".")))
@@ -858,7 +858,7 @@ class CPythonProxy(BackendProxy):
             assert venv_version[1] == sys_version[1]
             
             if venv_version[2] != sys_version[2]:
-                self._create_private_venv(path, "Please wait!\nUpgrading Thonny's virtual environment .",
+                self._create_private_venv(path, "Please wait!\nUpgrading Thonny's virtual environment.",
                                      upgrade=True)
                 
     
