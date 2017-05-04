@@ -402,7 +402,8 @@ class Runner:
             return self._proxy.supported_features()
             
             
-
+    def get_frontend_python(self):
+        return sys.executable.replace("thonny.exe", "pythonw.exe")
 
 class BackendProxy:
     """Communicates with backend process.
