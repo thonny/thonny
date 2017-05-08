@@ -460,7 +460,7 @@ class BackendProxy:
         Is called when Thonny no longer needs this backend 
         (Thonny gets closed or new backend gets selected)
         """
-        raise NotImplementedError()
+        pass
     
     def get_interpreter_command(self):
         """Return system command for invoking current interpreter"""
