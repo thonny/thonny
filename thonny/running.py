@@ -675,16 +675,16 @@ class CPythonProxy(BackendProxy):
             startupinfo=startupinfo
         )
         
-        """
-        ready_line = self._proc.stdout.readline()
-        if ready_line == "": # There was some problem
-            error_msg = self._proc.stderr.read()
-            raise Exception("Error starting backend process: " + error_msg)
-        
-        ready_msg = parse_message(ready_line)
-        self._sys_path = ready_msg["path"]
-        debug("Backend ready: %s", ready_msg)
-        """
+        if cmd:
+            # Consume the ready message, cmd will get its own result message
+            ready_line = self._proc.stdout.readline()
+            if ready_line == "": # There was some problem
+                error_msg = self._proc.stderr.read()
+                raise Exception("Error starting backend process: " + error_msg)
+            
+            #ready_msg = parse_message(ready_line)
+            #self._sys_path = ready_msg["path"]
+            #debug("Backend ready: %s", ready_msg)
         
         
         
