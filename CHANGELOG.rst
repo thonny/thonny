@@ -5,6 +5,7 @@ Version history
 2.1.2 (2017-05-08)
 ====================
 * FIXED #220 and #237: Icon problems in Linux tasbar.
+* FIXED #245: Tooltips not working in Mac
 * FIXED #246: Current script did not get executed if cursor was not in the end of the shell 
 * FIXED #249: Reset, Run and Debug caused double prompt
 
