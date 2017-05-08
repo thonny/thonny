@@ -158,6 +158,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.delete("input_start", "end")
         self.insert("input_start", cmd_line, ("automagic",))
         self.see("end")
+        self.mark_set("insert", "end")
         self._try_submit_input()
     
     def _handle_input_request(self, msg):
