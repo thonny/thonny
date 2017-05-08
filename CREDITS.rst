@@ -23,6 +23,7 @@ Source contributors and frequent bug-reporters
 * Aivar Annamaa
 * Rene Lehtma
 * Filip Schouwenaars
+* Fizban
 * Sven (s_v_e_n)
 * Taavi Ilp
 * Xin Rong
