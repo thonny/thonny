@@ -2,6 +2,12 @@
 Version history
 ===============
 
+2.1.2 (2017-05-08)
+====================
+* FIXED #220 and #237: Icon problems in Linux tasbar.
+* FIXED #246: Current script did not get executed if cursor was not in the end of the shell 
+* FIXED #249: Reset, Run and Debug caused double prompt
+
 2.1.1 (2017-05-03)
 ====================
 * FIXED #241: Some menu items gave errors with micro:bit backend.
