@@ -549,7 +549,7 @@ class CPythonProxy(BackendProxy):
         
     def allowed_states_for_inline_commands(self):
         return ["waiting_toplevel_command", "waiting_debugger_command", 
-                "waiting_input", "running"]
+                "waiting_input"]
 
     def get_sys_path(self):
         return self._sys_path
