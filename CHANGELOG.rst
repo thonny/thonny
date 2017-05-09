@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.5 (2017-05-09)
+====================
+* FIXED: Jedi version checking problem 
+
 2.1.4 (2017-05-09)
 ====================
 (This release is meant for making Thonny work better with system Python 3.4 in Debian Jessie)
