@@ -8,4 +8,11 @@ def get_module_node(script):
 
 def get_version_tuple():
     import jedi
-    return tuple(map(int, jedi.__version__.split(".")))
+    nums = []
+    for item in jedi.__version__.split("."):
+        try:
+            nums.append(int(item))
+        except:
+            nums.append(0)
+            
+    return tuple(nums)
