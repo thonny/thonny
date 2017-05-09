@@ -542,6 +542,7 @@ class CPythonProxy(BackendProxy):
         
         if not (hasattr(cmd, "command") and cmd.command == "tkupdate"):
             debug("BackendProxy: sent a command: %s", cmd)
+        return True 
     
     def send_program_input(self, data):
         self.send_command(InputSubmission(data=data))
