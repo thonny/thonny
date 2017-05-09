@@ -1,9 +1,13 @@
 from jedi import Script
-from thonny.jedi_utils import get_module_node
+import thonny.jedi_utils as jedi_utils
 try:
     from jedi.parser.python import tree
 except ImportError:
-    from jedi.parser import tree
+    try:
+        from jedi.parser import tree
+    except ImportError:
+        # older than jedi 0.9
+        tree = None
     
 from thonny.globals import get_workbench
 import tkinter as tk
@@ -226,7 +230,7 @@ class VariablesHighlighter(BaseNameHighlighter):
     
     def get_positions_for_script(self, script):
         name = None
-        module_node = get_module_node(script)
+        module_node = jedi_utils.get_module_node(script)
         stmt = self._get_statement_for_position(module_node, script._pos)
 
         if isinstance(stmt, tree.Name):
@@ -281,6 +285,10 @@ def update_highlighting(event):
 
 
 def load_plugin():
+    if jedi_utils.get_version_tuple() < (0, 9):
+        logging.warning("Jedi version is too old. Disabling name highlighter")
+        return
+     
     wb = get_workbench()  # type:Workbench
     wb.set_default("view.name_highlighting", True)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)

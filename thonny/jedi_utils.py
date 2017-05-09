@@ -5,3 +5,7 @@ def get_module_node(script):
         return script._get_module()
     else:
         return script._parser.module()
+
+def get_version_tuple():
+    import jedi
+    return tuple(map(int, jedi.__version__.split(".")))

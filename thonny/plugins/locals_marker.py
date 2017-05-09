@@ -1,7 +1,7 @@
 import tkinter as tk
 from thonny.globals import get_workbench
 import logging
-from thonny.jedi_utils import get_module_node
+import thonny.jedi_utils as jedi_utils
 
 class LocalsHighlighter:
 
@@ -82,7 +82,7 @@ class LocalsHighlighter:
 
         source = self.text.get('1.0', 'end')
         script = Script(source + ")") # https://github.com/davidhalter/jedi/issues/897
-        module = get_module_node(script)
+        module = jedi_utils.get_module_node(script)
         for child in module.children:
             if isinstance(child, tree.BaseNode) and child.is_scope():
                 process_scope(child)
@@ -138,33 +138,12 @@ def update_highlighting(event):
 
 
 def load_plugin():
+    if jedi_utils.get_version_tuple() < (0, 9):
+        logging.warning("Jedi version is too old. Disabling locals marker")
+        return 
+    
     wb = get_workbench()
     wb.set_default("view.locals_highlighting", True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind("<<UpdateAppearance>>", update_highlighting, True)
     
-
-def _experiment_with_jedi():
-    from jedi import Script
-
-    from jedi.parser import tree
-
-    prog = """
-def fun():
-    pass
-"""
-    script = Script(prog, 1, 0)
-    module = script._parser.module()
-    
-    def print_node(node, level):
-        print("  "  * level, type(node), node.type,
-              node.value if hasattr(node, "value") else "")
-        
-        if isinstance(node, tree.BaseNode):
-            for child in node.children:
-                print_node(child, level+1)
-            
-    print_node(module, 0)
-
-if __name__ == "__main__":
-    _experiment_with_jedi()
