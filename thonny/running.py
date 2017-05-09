@@ -131,7 +131,7 @@ class Runner:
             assert self.get_state() == "waiting_debugger_command", (
                 "Trying to send DebuggerCommand in state " + self.get_state())
         elif isinstance(cmd, InlineCommand):
-            # Inline commands can be sent in any state,
+            # UI may send inline commands in any state,
             # but some backends don't accept them in some states
             if self.get_state() not in self._proxy.allowed_states_for_inline_commands():
                 self.postpone_command(cmd)
@@ -143,12 +143,13 @@ class Runner:
             get_workbench().event_generate("BackendRestart")
         
         accepted = self._proxy.send_command(cmd)
-        if isinstance(cmd, ToplevelCommand):
-            self._current_toplevel_command = cmd
+        if not accepted:
+            print("NOT ACCEPTED")
         
-        if (accepted is not False 
-            and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
+        if (accepted and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
             self._set_state("running")
+            if isinstance(cmd, ToplevelCommand):
+                self._current_toplevel_command = cmd
         
     
     def send_program_input(self, data):
@@ -313,7 +314,7 @@ class Runner:
                 
                 # change state
                 if "command_context" in msg:
-                    # message_context shows the state where corresponding command was sent
+                    # message_context shows the state where corresponding command was handled in the backend
                     # Now we got the response and we're return to that state
                     self._set_state(msg["command_context"])
                 elif msg["message_type"] == "ToplevelResult":
@@ -530,18 +531,12 @@ class CPythonProxy(BackendProxy):
         
         
     def send_command(self, cmd):
-        if not (isinstance(cmd, InlineCommand) and cmd.command == "tkupdate"): 
-            debug("Proxy: Sending command: %s", cmd)
-            
         if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
             self.kill_current_process()
             self._start_new_process(cmd)
              
         self._proc.stdin.write(serialize_message(cmd) + "\n")
-        self._proc.stdin.flush() 
-        
-        if not (hasattr(cmd, "command") and cmd.command == "tkupdate"):
-            debug("BackendProxy: sent a command: %s", cmd)
+        self._proc.stdin.flush()
         return True 
     
     def send_program_input(self, data):
