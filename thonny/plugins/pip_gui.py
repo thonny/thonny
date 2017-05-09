@@ -631,7 +631,8 @@ class PluginsPipDialog(PipDialog):
         self._clear()
         self.info_text.direct_insert("end", "Outdated or missing pip\n\n", ("caption", ))
         self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old.\n\n"
-                                + "You can install newest version by downloading ")
+                                + "If your system package manager doesn't provide recent pip (9.0.0 or later),\n"
+                                + "then you can install newest version by downloading ")
         self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
         self.info_text.direct_insert("end", " and running it with " 
                                      + self._get_interpreter()
