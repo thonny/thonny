@@ -2,6 +2,13 @@
 Version history
 ===============
 
+2.1.3 (2017-05-09)
+====================
+* FIXED #250: Debugger focus was off by one line in function frames
+* FIXED #251: Debugger timing issue (wrong command type in the backend)
+* FIXED #252: Debugger timing issue (get_globals and debugger commands interfere)
+* FIXED #253: Creating default virtual env does not work when using Debian python3 without ensurepip
+
 2.1.2 (2017-05-08)
 ====================
 * FIXED #220 and #237: Icon problems in Linux tasbar.
