@@ -28,7 +28,6 @@ class Debugger:
         
         self._main_frame_visualizer = None
         self._last_progress_message = None
-        self._follow_up_command = None
         
         get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
@@ -117,11 +116,9 @@ class Debugger:
         # and later I ask it to run to the beginning of new statement/expression.
         
         self._check_issue_debugger_command("exec")
-        self._follow_up_command = "run_to_before"
         
     def _cmd_step_out(self):
         self._check_issue_debugger_command("out")
-        self._follow_up_command = "run_to_before"
 
     def _cmd_run_to_cursor(self):
         visualizer = self._get_topmost_selected_visualizer()
