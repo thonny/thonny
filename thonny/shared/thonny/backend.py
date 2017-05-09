@@ -825,11 +825,14 @@ class FancyTracer(Executor):
     def _get_frame_source_info(self, frame):
         if frame.f_code.co_name == "<module>":
             obj = inspect.getmodule(frame)
+            lineno = 1
         else:
             obj = frame.f_code
+            lineno = obj.co_firstlineno
         
-        lines, index = inspect.getsourcelines(obj)
-        return "".join(lines), index+1
+        # lineno returned by getsourcelines is not consistent between modules vs functions
+        lines, _ = inspect.getsourcelines(obj) 
+        return "".join(lines), lineno
         
     
     
