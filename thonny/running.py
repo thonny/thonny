@@ -293,14 +293,35 @@ class Runner:
         if len(self._postponed_commands) > 10: 
             "Can't pile up too many commands. This command will be just ignored"
         else:
-            #print("Postponing")
             self._postponed_commands.append(cmd)
     
+    def _state_is_suitable(self, cmd):
+        if isinstance(cmd, ToplevelCommand):
+            return (self.get_state() == "waiting_toplevel_command"
+                    or cmd.command in ["Reset", "Run", "Debug"])
+            
+        elif isinstance(cmd, DebuggerCommand):
+            return self.get_state() == "waiting_debugger_command"
+        
+        elif isinstance(cmd, InlineCommand):
+            # UI may send inline commands in any state,
+            # but some backends don't accept them in some states
+            return self.get_state() in self._proxy.allowed_states_for_inline_commands()
+        
+        else:
+            raise RuntimeError("Unknown command class: " + str(type(cmd)))
+    
     def _send_postponed_commands(self):
-        while (len(self._postponed_commands) > 0
-               and self._proxy != None
-               and self._state in self._proxy.allowed_states_for_inline_commands()):
-            self.send_command(self._postponed_commands.pop(0))
+        remaining = []
+        
+        for cmd in self._postponed_commands:
+            if self._state_is_suitable(cmd):
+                logging.debug("Sending postponed command", cmd)
+                self.send_command(cmd)
+            else:
+                remaining.append(cmd)
+        
+        self._postponed_commands = remaining
         
     
     def _poll_vm_messages(self):

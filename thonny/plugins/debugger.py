@@ -90,8 +90,10 @@ class Debugger:
         cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
         
-        if get_runner().get_state() == "waiting_debugger_command":
-            debug("_issue cmd: %s", cmd)
+        state = get_runner().get_state() 
+        if (state == "waiting_debugger_command"
+            or getattr(cmd, "automatic", False) and state == "running"):
+            logging.debug("_check_issue_debugger_command: %s", cmd)
             
             # tell VM the state we are seeing
             cmd.setdefault (
@@ -101,6 +103,8 @@ class Debugger:
             )
             
             get_runner().send_command(cmd)
+        else:
+            logging.debug("Bad state for sending debugger command " + str(command))
 
 
     def _cmd_stepping_commands_enabled(self):
@@ -162,7 +166,7 @@ class Debugger:
         self._last_progress_message = msg
         
         if self._should_skip_event(msg):
-            self._check_issue_debugger_command("run_to_before")
+            self._check_issue_debugger_command("run_to_before", automatic=True)
         else:
             main_frame_id = msg.stack[0].id
             
@@ -187,13 +191,13 @@ class Debugger:
                       msg.exception_lower_stack_description.lstrip() + 
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
-            self._check_issue_debugger_command("step")
+            self._check_issue_debugger_command("step", automatic=True)
             
         elif (event == "after_expression" 
             and "last_child" in args["node_tags"]
             and "child_of_statement" in args["node_tags"]):
             # This means we're done with the expression, so let's speed up a bit.
-            self._check_issue_debugger_command("step")
+            self._check_issue_debugger_command("step", automatic=True)
             # Next event will be before_statement_again
 
                         
