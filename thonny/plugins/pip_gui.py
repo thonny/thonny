@@ -23,6 +23,7 @@ from thonny.misc_utils import running_on_windows
 import sys
 
 LINK_COLOR="#3A66DD"
+PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
 class PipDialog(tk.Toplevel):
     def __init__(self, master, only_user=False):
@@ -169,12 +170,13 @@ class PipDialog(tk.Toplevel):
         if self._confirm_install(name):
             self._perform_action("install")
 
-    def _set_state(self, state):
+    def _set_state(self, state, normal_cursor=False):
         self._state = state
         widgets = [self.listbox, 
                            # self.search_box, # looks funny when disabled 
                            self.search_button,
                            self.install_button, self.advanced_button, self.uninstall_button]
+        
         if state == "idle":
             self.config(cursor="")
             for widget in widgets:
@@ -183,6 +185,9 @@ class PipDialog(tk.Toplevel):
             self.config(cursor=get_busy_cursor())
             for widget in widgets:
                 widget["state"] = tk.DISABLED
+        
+        if normal_cursor:
+            self.config(cursor="")
     
     def _get_state(self):
         return self._state
@@ -195,7 +200,7 @@ class PipDialog(tk.Toplevel):
         self.update()
         self.update_idletasks()
         
-        installer_filename, _ = urlretrieve("https://bootstrap.pypa.io/get-pip.py")
+        installer_filename, _ = urlretrieve(PIP_INSTALLER_URL)
         
         self.info_text.direct_insert("end", "Installing pip, please wait ...\n")
         self.update()
@@ -621,6 +626,17 @@ class PluginsPipDialog(PipDialog):
     
     def _get_title(self):
         return "Thonny plug-ins"
+
+    def _install_pip(self):
+        self._clear()
+        self.info_text.direct_insert("end", "Outdated or missing pip\n\n", ("caption", ))
+        self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old.\n\n"
+                                + "You can install newest version by downloading ")
+        self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
+        self.info_text.direct_insert("end", " and running it with " 
+                                     + self._get_interpreter()
+                                     + " (probably needs admin privileges).")
+        self._set_state("disabled", True)
     
         
 class DetailsDialog(tk.Toplevel):
