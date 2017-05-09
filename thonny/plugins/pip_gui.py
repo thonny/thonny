@@ -8,7 +8,7 @@ from tkinter import ttk, messagebox
 from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE
 from thonny.globals import get_workbench, get_runner
 import subprocess
-from urllib.request import urlopen
+from urllib.request import urlopen, urlretrieve
 import urllib.error
 from concurrent.futures.thread import ThreadPoolExecutor
 import os
@@ -21,7 +21,6 @@ from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor
 from thonny.misc_utils import running_on_windows
 import sys
-import site
 
 LINK_COLOR="#3A66DD"
 
@@ -188,6 +187,37 @@ class PipDialog(tk.Toplevel):
     def _get_state(self):
         return self._state
     
+    def _install_pip(self):
+        self._clear()
+        self.info_text.direct_insert("end", "Installing pip\n\n", ("caption", ))
+        self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old.\n\n"
+                                + "Downloading pip installer (about 1.5 MB), please wait ...\n")
+        self.update()
+        self.update_idletasks()
+        
+        installer_filename, _ = urlretrieve("https://bootstrap.pypa.io/get-pip.py")
+        
+        self.info_text.direct_insert("end", "Installing pip, please wait ...\n")
+        self.update()
+        self.update_idletasks()
+        
+        proc, _ = self._create_backend_process([installer_filename], stderr=subprocess.PIPE)
+        out, err = proc.communicate()
+        os.remove(installer_filename)
+        
+        if err != "":
+            raise RuntimeError("Error while installing pip:\n" + err)
+        
+        self.info_text.direct_insert("end", out  + "\n")
+        self.update()
+        self.update_idletasks()
+        
+        # update list
+        self._start_update_list()
+        
+        
+        
+    
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
@@ -215,7 +245,13 @@ class PipDialog(tk.Toplevel):
                         else:
                             self._start_show_package_info(name_to_show)
                     else:   
-                        messagebox.showerror("pip list error", self._process.stdout.read())
+                        error = self._process.stdout.read()
+                        if ("no module named pip" in error.lower() # pip not installed
+                            or "--format" in error.lower()): # too old pip
+                            self._install_pip()
+                            return
+                        else:
+                            messagebox.showerror("pip list error", error)
                     
                     self._process = None
         
@@ -248,11 +284,14 @@ class PipDialog(tk.Toplevel):
         
         self._start_show_package_info(self.search_box.get().strip())
     
-    def _show_instructions(self):
+    def _clear(self):
         self.current_package_data = None
         self.name_label.grid_remove()
         self.command_frame.grid_remove()
         self.info_text.direct_delete("1.0", "end")
+    
+    def _show_instructions(self):
+        self._clear()
         self.info_text.direct_insert("end", "Install from PyPI\n", ("caption",))
         self.info_text.direct_insert("end", "If you don't know where to get the package from, "
                                      + "then most likely you'll want to search the Python Package Index. "
@@ -504,11 +543,11 @@ class PipDialog(tk.Toplevel):
         
         return env
 
-    def _create_pip_process(self, args):
+    def _create_backend_process(self, args, stderr=subprocess.STDOUT):
         encoding = "UTF-8"
         
                     
-        cmd = [self._get_interpreter(), "-m", "pip"] + args
+        cmd = [self._get_interpreter()] + args
         
         startupinfo = None
         creationflags = 0
@@ -517,12 +556,15 @@ class PipDialog(tk.Toplevel):
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         
-        return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
                                 env=self._prepare_env_for_pip_process(encoding),
                                 universal_newlines=True,
                                 creationflags=creationflags,
                                 startupinfo=startupinfo),
                 cmd)
+
+    def _create_pip_process(self, args):
+        return self._create_backend_process(["-m", "pip"] + args)
     
     def _get_interpreter(self):
         pass

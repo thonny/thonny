@@ -899,6 +899,11 @@ class CPythonProxy(BackendProxy):
             cmd.append("--clear")
         if upgrade:
             cmd.append("--upgrade")
+        
+        try:
+            import ensurepip  # @UnusedImport
+        except ImportError:
+            cmd.append("--without-pip")
             
         cmd.append(path)
         startupinfo = None
