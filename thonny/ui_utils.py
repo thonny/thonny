@@ -913,12 +913,15 @@ class SubprocessDialog(tk.Toplevel):
                 self.text.direct_insert("end", data, tags=(stream_name, ))
                 self.text.see("end")
             
-            if self._proc.poll() == None:
+            self.returncode = self._proc.poll() 
+            if self.returncode == None:
                 self.after(200, poll_output_events)
             else:
                 self.button["text"] = "OK"
                 self.button.focus_set()
-                if self.returncode == 0 and self._autoclose:
+                if self.returncode != 0:
+                    self.text.direct_insert("end", "\n\nReturn code: ", ("stderr", ))
+                elif self._autoclose:
                     self._close()
         
         poll_output_events()
