@@ -106,11 +106,6 @@ class Runner:
         if self._state != state:
             #print("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
-        
-        while (len(self._postponed_commands) > 0
-               and self._proxy != None
-               and self._state in self._proxy.allowed_states_for_inline_commands()):
-            self.send_command(self._postponed_commands.pop(0))
     
     def get_current_toplevel_command(self):
         return self._current_toplevel_command
@@ -300,13 +295,22 @@ class Runner:
         else:
             #print("Postponing")
             self._postponed_commands.append(cmd)
-            
+    
+    def _send_postponed_commands(self):
+        while (len(self._postponed_commands) > 0
+               and self._proxy != None
+               and self._state in self._proxy.allowed_states_for_inline_commands()):
+            self.send_command(self._postponed_commands.pop(0))
+        
+    
     def _poll_vm_messages(self):
         """I chose polling instead of event_generate in listener thread,
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
         try:
+            initial_state = self.get_state()
+            
             while self._proxy is not None:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
@@ -337,6 +341,9 @@ class Runner:
                 get_workbench().update()
                 
         finally:
+            if self.get_state() != initial_state:
+                self._send_postponed_commands()
+                
             get_workbench().after(50, self._poll_vm_messages)
     
     def reset_backend(self):
