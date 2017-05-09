@@ -2,6 +2,16 @@
 Version history
 ===============
 
+2.1.4 (2017-05-09)
+====================
+(This release is meant for making Thonny work better with system Python 3.4 in Debian Jessie)
+
+* FIXED #254: "Manage plug-ins" now gives instructions for installing pip if system is missing it or it's too old 
+* FIXED #255: Name highlighter and locals marker are now quietly disabled when system has too old jedi
+* FIXED: Virtual env dialog now closes properly
+* TECHNICAL: SubprocessDialog now has more robust returncode checking in Linux
+
+
 2.1.3 (2017-05-09)
 ====================
 * FIXED #250: Debugger focus was off by one line in function frames
