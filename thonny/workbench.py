@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import importlib
-from logging import exception, warning, debug
 import os.path
 import sys
 from tkinter import ttk
@@ -236,7 +235,7 @@ class Workbench(tk.Tk):
                 if hasattr(m, load_function_name):
                     getattr(m, load_function_name)()
             except:
-                exception("Failed loading plugin '" + module_name + "'")
+                logging.exception("Failed loading plugin '" + module_name + "'")
     
                                 
     def _init_fonts(self):
@@ -287,7 +286,7 @@ class Workbench(tk.Tk):
         
         def server_loop():
             while True:
-                debug("Waiting for next client")
+                logging.debug("Waiting for next client")
                 (client_socket, _) = server_socket.accept()
                 try:
                     self._handle_socket_request(client_socket)
@@ -473,7 +472,7 @@ class Workbench(tk.Tk):
                 handler()
             else:
                 denied = True
-                debug("Command '" + command_id + "' execution denied")
+                logging.debug("Command '" + command_id + "' execution denied")
                 self.bell()
                 
             self.event_generate("Command", command_id=command_id, denied=denied)
@@ -768,7 +767,7 @@ class Workbench(tk.Tk):
         Otherwise forwards the call to Tk's bind"""
         
         if not add:
-            warning("Workbench.bind({}, ..., add={}) -- did you really want to replace existing bindings?".format(sequence, add))
+            logging.warning("Workbench.bind({}, ..., add={}) -- did you really want to replace existing bindings?".format(sequence, add))
         
         if sequence.startswith("<"):
             tk.Tk.bind(self, sequence, func, add)
@@ -1088,7 +1087,7 @@ class Workbench(tk.Tk):
             self._destroying = True
             tk.Tk.destroy(self)
         except tk.TclError:
-            exception("Error while destroying workbench")
+            logging.exception("Error while destroying workbench")
         finally:
             runner = get_runner()
             if runner != None:
@@ -1110,7 +1109,7 @@ class Workbench(tk.Tk):
         self.report_exception()
     
     def report_exception(self, title="Internal error"):
-        exception(title)
+        logging.exception(title)
         if tk._default_root and not self._destroying:
             (typ, value, _) = sys.exc_info()
             if issubclass(typ, UserError):

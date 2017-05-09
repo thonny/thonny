@@ -104,7 +104,7 @@ class Runner:
     
     def _set_state(self, state):
         if self._state != state:
-            #print("Runner state changed: %s ==> %s" % (self._state, state))
+            logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
     
     def get_current_toplevel_command(self):
@@ -117,29 +117,21 @@ class Runner:
         if self._proxy is None:
             return
         
-        #print("SENDING:", cmd)
-        if isinstance(cmd, ToplevelCommand):
-            assert (self.get_state() == "waiting_toplevel_command"
-                    or cmd.command in ["Reset", "Run", "Debug"]), ( 
-                "Trying to send ToplevelCommand in state " + self.get_state())
-        elif isinstance(cmd, DebuggerCommand):
-            assert self.get_state() == "waiting_debugger_command", (
-                "Trying to send DebuggerCommand in state " + self.get_state())
-        elif isinstance(cmd, InlineCommand):
-            # UI may send inline commands in any state,
-            # but some backends don't accept them in some states
-            if self.get_state() not in self._proxy.allowed_states_for_inline_commands():
-                self.postpone_command(cmd)
+        if not self._state_is_suitable(cmd):
+            if isinstance(cmd, DebuggerCommand) and self.get_state() == "running":
+                # probably waiting behind some InlineCommand
+                self._postpone_command(cmd)
                 return
-        else:
-            raise RuntimeError("Unknown command class: " + str(type(cmd)))
+            elif isinstance(cmd, InlineCommand):
+                self._postpone_command(cmd)
+                return
+            else:
+                raise AssertionError("Trying to send " + str(cmd) + " in state " + self.get_state())
         
         if cmd.command in ("Run", "Debug", "Reset"):
             get_workbench().event_generate("BackendRestart")
         
         accepted = self._proxy.send_command(cmd)
-        if not accepted:
-            print("NOT ACCEPTED")
         
         if (accepted and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
             self._set_state("running")
@@ -284,11 +276,12 @@ class Runner:
     def _cmd_interrupt_reset_enabled(self):
         return True
     
-    def postpone_command(self, cmd):
-        # discard older same type command
-        for older_cmd in self._postponed_commands:
-            if older_cmd.command == cmd.command:
-                self._postponed_commands.remove(older_cmd)
+    def _postpone_command(self, cmd):
+        # in case of InlineCommands, discard older same type command
+        if isinstance(cmd, InlineCommand):
+            for older_cmd in self._postponed_commands:
+                if older_cmd.command == cmd.command:
+                    self._postponed_commands.remove(older_cmd)
         
         if len(self._postponed_commands) > 10: 
             "Can't pile up too many commands. This command will be just ignored"
@@ -353,7 +346,7 @@ class Runner:
                 if msg["message_type"] == "ToplevelResult":
                     self._current_toplevel_command = None
     
-                #print("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
+                #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
                 get_workbench().event_generate(msg["message_type"], **msg)
                 
                 # TODO: maybe distinguish between workbench cwd and backend cwd ??
@@ -420,7 +413,7 @@ class Runner:
             result = kernel32.AttachConsole(child.pid)
             if not result:
                 err = ctypes.get_last_error()
-                print("Could not allocate console. Error code:", err, file=sys.stderr)
+                logging.info("Could not allocate console. Error code: " +str(err))
             child.stdin.write(b"\n")
             child.stdin.flush()
 

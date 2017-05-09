@@ -8,7 +8,6 @@ import tkinter as tk
 from tkinter import ttk
 from thonny.common import DebuggerCommand
 from thonny.memory import VariablesFrame
-from logging import debug
 from thonny import ast_utils, memory, misc_utils, ui_utils
 from thonny.misc_utils import shorten_repr
 import ast
@@ -17,6 +16,7 @@ from tkinter.messagebox import showinfo, showerror
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import tokenize
+import logging
 
 _SUSPENDED_FOCUS_BACKGROUND = "#DCEDF2"
 _ACTIVE_FOCUS_BACKGROUND = "#F8FC9A"
@@ -415,14 +415,14 @@ class ExpressionBox(tk.Text):
             
         
         elif event == "after_expression":
-            debug("EV: after_expression %s", msg)
+            logging.debug("EV: after_expression %s", msg)
             
             self.tag_configure('after', background="#BBEDB2", borderwidth=1, relief=tk.FLAT)
             start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
             end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
             
             assert hasattr(msg, "value")
-            debug("EV: replacing expression with value")
+            logging.debug("EV: replacing expression with value")
 
             original_focus_text = self.get(start_mark, end_mark)
             self.delete(start_mark, end_mark)
@@ -496,7 +496,7 @@ class ExpressionBox(tk.Text):
         main_node = ast_utils.find_expression(root, text_range)
         
         source = ast_utils.extract_text_range(whole_source, text_range)
-        debug("EV.load_exp: %s", (text_range, main_node, source))
+        logging.debug("EV.load_exp: %s", (text_range, main_node, source))
         
         self.delete("1.0", "end")
         self.insert("1.0", source)
@@ -536,7 +536,7 @@ class ExpressionBox(tk.Text):
                 + "_" + str(node_or_text_range.end_col_offset))
     
     def _highlight_range(self, text_range, state, exception):
-        debug("EV._highlight_range: %s", text_range)
+        logging.debug("EV._highlight_range: %s", text_range)
         self.tag_remove("after", "1.0", "end")
         self.tag_remove("before", "1.0", "end")
         self.tag_remove("exception", "1.0", "end")
