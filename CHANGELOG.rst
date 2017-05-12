@@ -2,6 +2,12 @@
 Version history
 ===============
 
+2.1.6 (2017-05-12)
+====================
+* FIXED #260: Strange behaviour when indenting with TAB 
+* FIXED #261: Editing a triple-quoted string breaks coloring in following lines 
+* FIXED: Made outdated pip detection more general 
+
 2.1.5 (2017-05-09)
 ====================
 * FIXED: Jedi version checking problem 
