@@ -252,7 +252,7 @@ class PipDialog(tk.Toplevel):
                     else:   
                         error = self._process.stdout.read()
                         if ("no module named pip" in error.lower() # pip not installed
-                            or "--format" in error.lower()): # too old pip
+                            or "no such option" in error.lower()): # too old pip
                             self._install_pip()
                             return
                         else:
