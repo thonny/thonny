@@ -155,6 +155,9 @@ class SyntaxColorer:
         if not get_workbench().get_option("view.syntax_coloring"):
             return
         
+        # Count number of open multiline strings to be able to detect when string gets closed
+        self.text.number_of_open_multiline_strings = 0
+        
         interesting_token_types = list(self.multiline_tagdefs.keys()) + ["STRING3"]
         for match in self.multiline_regex.finditer(chars):
             for token_type, token_text in match.groupdict().items():
@@ -170,10 +173,12 @@ class SyntaxColorer:
 
                             if str_end == file_end:
                                 token_type = "STRING_OPEN3"
+                                self.text.number_of_open_multiline_strings += 1
                             else:
                                 token_type = None
                         elif len(token_text) >= 4 and token_text[-4] == "\\":
                             token_type = "STRING_OPEN3"
+                            self.text.number_of_open_multiline_strings += 1
                         else:
                             token_type = "STRING_CLOSED3"
                     
@@ -194,7 +199,13 @@ class CodeViewSyntaxColorer(SyntaxColorer):
             self._update_uniline_tokens(*dirty_range)
         
         # Multiline tokens need to be searched from the whole source
+        open_before = getattr(self.text, "number_of_open_multiline_strings", 0)
         self._update_multiline_tokens("1.0", "end")
+        open_after = getattr(self.text, "number_of_open_multiline_strings", 0)
+        
+        if open_after == 0 and open_before != 0:
+            # recolor uniline tokens after closing last open multiline string
+            self._update_uniline_tokens("1.0", "end")
 
 class ShellSyntaxColorer(SyntaxColorer):
     def _update_coloring(self):
