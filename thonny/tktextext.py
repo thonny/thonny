@@ -420,7 +420,7 @@ class EnhancedText(TweakableText):
             # check whether there are letters before cursor on this line
             index = self.index("insert")
             left_text = self.get(index + " linestart", index)
-            if left_text.strip() == "":
+            if left_text.strip() == "" or self.has_selection():
                 return self.perform_smart_tab(event)    
             else:
                 return self.perform_midline_tab(event)
