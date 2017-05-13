@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from thonny.config_ui import ConfigurationPage
 from thonny.globals import get_workbench
+import logging
 
 
 class EditorConfigurationPage(ConfigurationPage):
@@ -10,8 +11,17 @@ class EditorConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
         
-        self.add_checkbox("view.name_highlighting", "Highlight matching names")
-        self.add_checkbox("view.locals_highlighting", "Highlight local variables")
+        try:
+            self.add_checkbox("view.name_highlighting", "Highlight matching names")
+        except:
+            # name matcher may have been disabled
+            logging.warning("Couldn't create name matcher checkbox")
+            
+        try:
+            self.add_checkbox("view.locals_highlighting", "Highlight local variables")
+        except:
+            # locals highlighter may have been disabled
+            logging.warning("Couldn't create name locals highlighter checkbox")
         self.add_checkbox("view.paren_highlighting", "Highlight parentheses")
         self.add_checkbox("view.syntax_coloring", "Highlight syntax elements")
         
