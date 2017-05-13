@@ -2,6 +2,11 @@
 Version history
 ===============
 
+2.1.7 (2017-05-13)
+====================
+* CHANGED: pip GUI now works in read-only mode unless backend is a virtual environment
+* FIXED: Error when non-default backend was used without previously generated Thonny-private virtual environment
+
 2.1.6 (2017-05-12)
 ====================
 * FIXED #260: Strange behaviour when indenting with TAB 
