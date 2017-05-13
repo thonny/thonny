@@ -645,7 +645,7 @@ class PluginsPipDialog(PipDialog):
         banner.grid(row=0, column=0, sticky="nsew")
         
         banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
-                                + "If you want to install packages for your own programs then close this and choose 'Tools => Manage packages...'\n"
+                                + "If you want to install packages for your own programs then close this and choose 'Tools → Manage packages...'\n"
                                 + "\n"
                                 + "This dialog installs packages into " + THONNY_USER_BASE + "\n"
                                 + "\n"
