@@ -233,10 +233,12 @@ class PipDialog(tk.Toplevel):
                                      + self._get_interpreter()
                                      + " (probably needs admin privileges).\n\n")
         
-        self.info_text.direct_insert("end", "Alternatively, if you have an older pip installed, then you can install packages "
-                                     + "on the command line (Tools → Open system shell...)")
+        self.info_text.direct_insert("end", self._instructions_for_command_line_install())
         self._set_state("disabled", True)
-        
+    
+    def _instructions_for_command_line_install(self):
+        return ("Alternatively, if you have an older pip installed, then you can install packages "
+                                     + "on the command line (Tools → Open system shell...)")
     
     def _start_update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
@@ -661,6 +663,9 @@ class PluginsPipDialog(PipDialog):
     def _handle_outdated_or_missing_pip(self):
         return self._provide_pip_install_instructions()
     
+    def _instructions_for_command_line_install(self):
+        # System shell is not suitable without correct PYTHONUSERBASE 
+        return ""
         
 class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):
