@@ -967,14 +967,12 @@ def _get_private_venv_path():
 
 def get_private_venv_executable():
     venv_path = _get_private_venv_path()
-    assert os.path.exists(venv_path)
     
     if running_on_windows():
         exe = os.path.join(venv_path, "Scripts", WINDOWS_EXE)
     else:
         exe = os.path.join(venv_path, "bin", "python3")
     
-    assert os.path.exists(exe)
     return exe
 
 def _get_venv_info(venv_path):
