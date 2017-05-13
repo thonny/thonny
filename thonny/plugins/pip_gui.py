@@ -231,7 +231,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
         self.info_text.direct_insert("end", " and running it with " 
                                      + self._get_interpreter()
-                                     + " (probably needs admin privileges).")
+                                     + " (probably needs admin privileges).\n\n\n")
         
         self.info_text.direct_insert("end", "Alternative\n\n", ("caption", ))
         self.info_text.direct_insert("end", "If you have an older pip installed, then you can install packages\n"
