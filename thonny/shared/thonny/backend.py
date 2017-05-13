@@ -83,6 +83,7 @@ class VM:
                           path=sys.path,
                           welcome_text="Python " + _get_python_version_string(),
                           executable=sys.executable,
+                          in_venv=hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix,
                           python_version=_get_python_version_string(),
                           cwd=os.getcwd()))
         

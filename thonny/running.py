@@ -515,6 +515,7 @@ class CPythonProxy(BackendProxy):
         self._message_queue = None
         self._sys_path = []
         self._tkupdate_loop_id = None
+        self.in_venv = None
         
         self._start_new_process()
     
@@ -525,6 +526,10 @@ class CPythonProxy(BackendProxy):
         msg = self._message_queue.popleft()
         if "tkinter_is_active" in msg:
             self._update_tkupdating(msg)
+        
+        if "in_venv" in msg:
+            self.in_venv = msg["in_venv"]
+            print(self.in_venv)
         
         if msg["message_type"] == "ProgramOutput":
             # combine available output messages to one single message, 
