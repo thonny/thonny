@@ -426,6 +426,9 @@ class Runner:
             
     def get_frontend_python(self):
         return sys.executable.replace("thonny.exe", "pythonw.exe")
+    
+    def using_venv(self):
+        return isinstance(self._proxy,  CPythonProxy) and self._proxy.in_venv
 
 class BackendProxy:
     """Communicates with backend process.
@@ -529,7 +532,6 @@ class CPythonProxy(BackendProxy):
         
         if "in_venv" in msg:
             self.in_venv = msg["in_venv"]
-            print(self.in_venv)
         
         if msg["message_type"] == "ProgramOutput":
             # combine available output messages to one single message, 
