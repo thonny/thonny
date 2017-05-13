@@ -224,8 +224,8 @@ class PipDialog(tk.Toplevel):
         
     def _provide_pip_install_instructions(self):
         self._clear()
-        self.info_text.direct_insert("end", "Outdated or missing pip\n", ("caption", ))
-        self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old.\n\n"
+        self.info_text.direct_insert("end", "Outdated or missing pip\n\n", ("caption", ))
+        self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
                                 + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
                                 + "then you can install newest version by downloading ")
         self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
@@ -233,9 +233,8 @@ class PipDialog(tk.Toplevel):
                                      + self._get_interpreter()
                                      + " (probably needs admin privileges).\n\n")
         
-        self.info_text.direct_insert("end", "Alternative\n", ("caption", ))
-        self.info_text.direct_insert("end", "If you have an older pip installed, then you can install packages "
-                                     + "on the command line (Tools → Open system shell...)\n")
+        self.info_text.direct_insert("end", "Alternatively, if you have an older pip installed, then you can install packages "
+                                     + "on the command line (Tools → Open system shell...)")
         self._set_state("disabled", True)
         
     
