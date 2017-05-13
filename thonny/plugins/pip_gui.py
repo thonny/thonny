@@ -232,6 +232,10 @@ class PipDialog(tk.Toplevel):
         self.info_text.direct_insert("end", " and running it with " 
                                      + self._get_interpreter()
                                      + " (probably needs admin privileges).")
+        
+        self.info_text.direct_insert("end", "Alternative\n\n", ("caption", ))
+        self.info_text.direct_insert("end", "If you have an older pip installed, then you can install packages\n"
+                                     + "on the command line (Tools → Open system shell...)\n")
         self._set_state("disabled", True)
         
     
