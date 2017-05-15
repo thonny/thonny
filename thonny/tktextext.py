@@ -281,6 +281,8 @@ class EnhancedText(TweakableText):
 
     def perform_midline_tab(self, event=None):
         "autocompleter can put its magic here"
+        # by default
+        return self.perform_smart_tab(event)
     
     def perform_smart_tab(self, event=None):
         self._log_keypress_for_undo(event)

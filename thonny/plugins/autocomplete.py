@@ -258,5 +258,11 @@ def load_plugin():
         # TODO: tester
         )
     
-    CodeViewText.perform_midline_tab = patched_perform_midline_tab
-    ShellText.perform_midline_tab = patched_perform_midline_tab
+    get_workbench().set_default("edit.tab_complete_in_editor", True)
+    get_workbench().set_default("edit.tab_complete_in_shell", True)
+    
+    if get_workbench().get_option("edit.tab_complete_in_editor"):
+        CodeViewText.perform_midline_tab = patched_perform_midline_tab
+    
+    if get_workbench().get_option("edit.tab_complete_in_shell"):
+        ShellText.perform_midline_tab = patched_perform_midline_tab

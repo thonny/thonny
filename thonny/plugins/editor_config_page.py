@@ -22,11 +22,14 @@ class EditorConfigurationPage(ConfigurationPage):
         except:
             # locals highlighter may have been disabled
             logging.warning("Couldn't create name locals highlighter checkbox")
+            
         self.add_checkbox("view.paren_highlighting", "Highlight parentheses")
         self.add_checkbox("view.syntax_coloring", "Highlight syntax elements")
         
-        self.add_checkbox("view.show_line_numbers", "Show line numbers", pady=(20,0))
+        self.add_checkbox("edit.tab_complete_in_editor", "Tab-completion in editors (needs restart)", pady=(20,0))
+        self.add_checkbox("edit.tab_complete_in_shell", "Tab-completion in Shell (needs restart)")
         
+        self.add_checkbox("view.show_line_numbers", "Show line numbers", pady=(20,0))
         self._line_length_var = get_workbench().get_variable("view.recommended_line_length")
         label = ttk.Label(self, text="Recommended maximum line length\n(Set to 0 to turn off margin line)")
         label.grid(row=7, column=0, sticky=tk.W)
