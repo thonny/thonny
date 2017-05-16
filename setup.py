@@ -58,8 +58,11 @@ setup(
                 "thonny.shared",  
                 "thonny.shared.thonny",  
                 "thonny.plugins", 
-                "thonny.plugins.system_shell"],
-      package_data={'': ['VERSION',  'res/*']},
+                "thonny.plugins.system_shell",
+                "thonny.plugins.help",
+                ],
+      package_data={'': ['VERSION',  'res/*'],
+                    'thonny.plugins.help' : ['*.rst']},
       entry_points={
         'gui_scripts': [
             'thonny = thonny:launch',
