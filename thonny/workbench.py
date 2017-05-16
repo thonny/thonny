@@ -725,6 +725,7 @@ class Workbench(tk.Tk):
         
         self.set_option("view." + view_id + ".visible", True)
         self.event_generate("ShowView", view=view, view_id=view_id)
+        return view
     
     def hide_view(self, view_id):
         # NB! Don't forget that view.home_widget is added to notebook, not view directly
