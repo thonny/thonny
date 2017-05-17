@@ -10,6 +10,7 @@ from thonny.globals import get_workbench, get_runner
 import subprocess
 from urllib.request import urlopen, urlretrieve
 import urllib.error
+import urllib.parse
 from concurrent.futures.thread import ThreadPoolExecutor
 import os
 import json
@@ -350,7 +351,7 @@ class PipDialog(tk.Toplevel):
         # Follwing url fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
-        url = "https://pypi.python.org/pypi/{}/json".format(name)
+        url = "https://pypi.python.org/pypi/{}/json".format(urllib.parse.quote(name))
         url_future = _fetch_url_future(url)
             
         def poll_fetch_complete():
