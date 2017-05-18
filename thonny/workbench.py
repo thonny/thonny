@@ -98,7 +98,7 @@ class Workbench(tk.Tk):
             self.report_exception()
             
         self._editor_notebook.focus_set()
-        self._open_views()
+        self._try_action(self._open_views)
         
         if server_socket is not None:
             self._init_server_loop(server_socket)
@@ -109,7 +109,12 @@ class Workbench(tk.Tk):
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
         self.initializing = False
-
+    
+    def _try_action(self, action):
+        try:
+            action()
+        except:
+            self.report_exception()
         
     def _init_configuration(self):
         self._configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
@@ -1122,7 +1127,7 @@ class Workbench(tk.Tk):
     def _open_views(self):
         for nb_name in self._view_notebooks:
             view_name = self.get_option("layout.notebook_" + nb_name + "_visible_view")
-            if view_name != None and self.get_option("view." + view_name + ".visible", False):
+            if view_name != None:
                 self.show_view(view_name)
                 
         
@@ -1147,7 +1152,8 @@ class Workbench(tk.Tk):
                 view = widget.maximizable_widget
                 view_name = type(view).__name__
                 self.set_option("layout.notebook_" + nb_name + "_visible_view", view_name)
-                
+            else:
+                self.set_option("layout.notebook_" + nb_name + "_visible_view", None)
         
         if not ui_utils.get_zoomed(self):
             self.set_option("layout.top", self.winfo_y())
