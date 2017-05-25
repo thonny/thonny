@@ -197,9 +197,14 @@ class Completer(tk.Listbox):
             self.handle_autocomplete_request()
 
     
-    def _close(self, event=False):
+    def _close(self, event=None):
         self.place_forget()
+        self.doc_label.place_forget()
         self.text.focus_set()
+    
+    def on_text_click(self, event=None):
+        if self._is_visible():
+            self._close()
 
 class ShellCompleter(Completer):
     def _bind_result_event(self):    
@@ -234,10 +239,12 @@ def handle_autocomplete_request(event=None):
 
 def _handle_autocomplete_request_for_text(text):
     if not hasattr(text, "autocompleter"):
-        if isinstance(text, CodeViewText):
-            text.autocompleter = Completer(text)
-        elif isinstance(text, ShellText):
-            text.autocompleter = ShellCompleter(text)
+        if isinstance(text, (CodeViewText, ShellText)):
+            if isinstance(text, CodeViewText):
+                text.autocompleter = Completer(text)
+            elif isinstance(text, ShellText):
+                text.autocompleter = ShellCompleter(text)
+            text.bind("<1>", text.autocompleter.on_text_click)
         else:
             return
 
