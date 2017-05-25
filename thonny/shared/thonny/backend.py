@@ -435,6 +435,7 @@ class VM:
     def _fetch_command(self):
         line = self._original_stdin.readline()
         if line == "":
+            logger.info("Read stdin EOF")
             sys.exit()
         cmd = parse_message(line)
         return cmd
