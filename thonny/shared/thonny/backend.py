@@ -204,8 +204,8 @@ class VM:
         try:
             import jedi
             interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
-            completions = [{"name":c.name, "complete":c.complete}
-                            for c in interpreter.completions()]
+            completions = self._export_completions(interpreter.completions())
+
         except ImportError:
             completions = []
             error = "Could not import jedi"
@@ -221,16 +221,13 @@ class VM:
             completions=completions,
             error=error
         )
-        
     
     def _cmd_editor_autocomplete(self, cmd):
         error = None
         try:
             import jedi
             script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
-            completions = [{"name":c.name, 
-                            "complete":c.complete} 
-                            for c in script.completions()]
+            completions = self._export_completions(script.completions())
         except ImportError:
             completions = []
             error = "Could not import jedi"
@@ -248,6 +245,17 @@ class VM:
                           filename=cmd.filename,
                           completions=completions,
                           error=error)
+    
+    def _export_completions(self, jedi_completions):
+        result = []
+        for c in jedi_completions:
+            record = {"name":c.name, "complete":c.complete}
+            try:
+                record["docstring"] = c.docstring()
+            except:
+                pass
+            result.append(record)
+        return result
         
     
     def _cmd_get_object_info(self, cmd):
