@@ -254,17 +254,18 @@ class VM:
     def _export_completions(self, jedi_completions):
         result = []
         for c in jedi_completions:
-            record = {"name":c.name, "complete":c.complete, 
-                      "type":c.type, "description":c.description}
-            try:
-                if c.type in ["class", "module", "function"]:
-                    if c.type == "function":
-                        record["docstring"] = c.docstring()
-                    else:
-                        record["docstring"] = c.description + "\n" + c.docstring()
-            except:
-                pass
-            result.append(record)
+            if not c.name.startswith("__"):
+                record = {"name":c.name, "complete":c.complete, 
+                          "type":c.type, "description":c.description}
+                try:
+                    if c.type in ["class", "module", "function"]:
+                        if c.type == "function":
+                            record["docstring"] = c.docstring()
+                        else:
+                            record["docstring"] = c.description + "\n" + c.docstring()
+                except:
+                    pass
+                result.append(record)
         return result
         
     
