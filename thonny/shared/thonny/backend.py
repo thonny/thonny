@@ -20,6 +20,7 @@ from thonny.common import TextRange,\
     parse_message, serialize_message, DebuggerCommand,\
     ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
 import signal
+import warnings
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -203,18 +204,20 @@ class VM:
         error = None
         try:
             import jedi
-            interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
-            completions = self._export_completions(interpreter.completions())
-
         except ImportError:
             completions = []
             error = "Could not import jedi"
-        except Exception as e:
-            completions = []
-            error = "Autocomplete error: " + str(e)
-        except:
-            completions = []
-            error = "Autocomplete error"
+        else:
+            try:
+                #with warnings.catch_warnings():
+                interpreter = jedi.Interpreter(cmd.source, [__main__.__dict__])
+                completions = self._export_completions(interpreter.completions())
+            except Exception as e:
+                completions = []
+                error = "Autocomplete error: " + str(e)
+            except:
+                completions = []
+                error = "Autocomplete error"
         
         return self.create_message("ShellCompletions", 
             source=cmd.source,
@@ -226,8 +229,10 @@ class VM:
         error = None
         try:
             import jedi
-            script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
-            completions = self._export_completions(script.completions())
+            with warnings.catch_warnings():
+                script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
+                completions = self._export_completions(script.completions())
+                
         except ImportError:
             completions = []
             error = "Could not import jedi"
@@ -249,9 +254,14 @@ class VM:
     def _export_completions(self, jedi_completions):
         result = []
         for c in jedi_completions:
-            record = {"name":c.name, "complete":c.complete}
+            record = {"name":c.name, "complete":c.complete, 
+                      "type":c.type, "description":c.description}
             try:
-                record["docstring"] = c.docstring()
+                if c.type in ["class", "module", "function"]:
+                    if c.type == "function":
+                        record["docstring"] = c.docstring()
+                    else:
+                        record["docstring"] = c.description + "\n" + c.docstring()
             except:
                 pass
             result.append(record)

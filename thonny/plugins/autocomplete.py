@@ -22,6 +22,9 @@ class Completer(tk.Listbox):
         self.text = text
         self.completions = []
         
+        self.doc_label = tk.Label(master=text, text="Aaappiiiii", bg="#ffffe0",
+                                  justify="left", anchor="nw")
+        
         # Auto indenter will eat up returns, therefore I need to raise the priority
         # of this binding
         self.text_priority_bindtag = "completable" + str(self.text.winfo_id())
@@ -111,9 +114,30 @@ class Completer(tk.Listbox):
             else:
                 height = min(height, space_above)
                 y = text_box_y - height
-                
-            self.place(x=text_box_x, y=y, width=400, height=height)
-                
+            
+            width = 400    
+            self.place(x=text_box_x, y=y, width=width, height=height)
+            
+            self._update_doc()
+            
+            
+    def _update_doc(self):
+        c = self._get_selected_completion() 
+        
+        if c is None:
+            self.doc_label["text"] = ""
+            self.doc_label.place_forget()
+        else:
+            docstring = c.get("docstring", None)
+            if docstring:
+                self.doc_label["text"] = docstring
+                self.doc_label.place(x=self.winfo_x() + self.winfo_width(),
+                                     y=self.winfo_y(),
+                                     width=400,
+                                     height=self.winfo_height())
+            else:
+                self.doc_label["text"] = ""
+                self.doc_label.place_forget()
 
     def _is_visible(self):
         return self.winfo_ismapped()
@@ -164,6 +188,7 @@ class Completer(tk.Listbox):
         self.selection_set(index)
         self.activate(index)
         self.see(index)
+        self._update_doc()
     
     def _get_request_id(self):
         return "autocomplete_" + str(self.text.winfo_id())
@@ -190,7 +215,14 @@ class Completer(tk.Listbox):
             return "break"
     
     def _insert_current_selection(self, event=None):
-        self._insert_completion(self.completions[(self.curselection()[0])])
+        self._insert_completion(self._get_selected_completion())
+    
+    def _get_selected_completion(self):
+        sel = self.curselection()
+        if len(sel) != 1:
+            return None
+        
+        return self.completions[sel[0]]
     
     def _on_text_change(self, event=None):
         if self._is_visible():
