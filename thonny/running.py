@@ -354,10 +354,10 @@ class Runner:
                 
                 get_workbench().update()
                 
-        finally:
             if self.get_state() != initial_state:
                 self._send_postponed_commands()
                 
+        finally:
             get_workbench().after(50, self._poll_vm_messages)
     
     def reset_backend(self):
