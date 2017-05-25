@@ -30,8 +30,7 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 EXCEPTION_TRACEBACK_LIMIT = 100
 DEBUG = True    
 
-logger = logging.getLogger("thonny.backend")
-logger.setLevel(logging.ERROR)
+logger = logging.getLogger()
 info = logger.info
 
 class VM:

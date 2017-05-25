@@ -16,12 +16,12 @@ if __name__ == "__main__":
     import os.path
     
     # set up logging
-    logger = logging.getLogger("thonny.backend")
+    logger = logging.getLogger()
     
     file_handler = logging.FileHandler(os.path.expanduser(os.path.join("~",".thonny","backend.log")), 
                                        encoding="UTF-8",
                                        mode="w");
-    file_handler.setLevel(logging.WARNING);
+    file_handler.setLevel(logging.INFO);
     logger.addHandler(file_handler)
     
     # TODO: sending log records to original stdout could be better (reading from stderr may introduce sync problems)
