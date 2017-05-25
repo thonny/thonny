@@ -56,6 +56,16 @@ class ShellView (ttk.Frame):
     
     def clear_shell(self):
         self.text._clear_shell()
+        
+    def report_exception(self, prelude=None, conclusion=None):
+        if prelude is not None:
+            self.text.direct_insert("end", prelude + "\n", ("stderr",))
+        
+        self.text.direct_insert("end", traceback.format_exc() + "\n", ("stderr",))
+        
+        if conclusion is not None:
+            self.text.direct_insert("end", conclusion + "\n", ("stderr",))
+        
 
 
 class ShellText(EnhancedTextWithLogging, PythonText):
