@@ -598,7 +598,7 @@ class CPythonProxy(BackendProxy):
                     get_workbench().event_generate("ProgramOutput",
                                                    stream_name="stderr",
                                                    data="KeyboardInterrupt: Forced reset")
-                    get_runner().send_command(ToplevelCommand(command="Reset"))
+                    get_runner().reset_backend()
             
             # 100 ms was too little for Mac
             # 250 ms was too little for one of the Windows machines
