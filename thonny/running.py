@@ -53,6 +53,7 @@ class Runner:
         self._proxy = None
         self._postponed_commands = []
         self._current_toplevel_command = None
+        self._current_command = None
         
         self._check_alloc_console()
     
@@ -106,9 +107,17 @@ class Runner:
         if self._state != state:
             logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
+            if self._state == "waiting_toplevel_command":
+                self._current_toplevel_command = None
+            
+            if self._state != "running":
+                self._current_command = None
     
     def get_current_toplevel_command(self):
         return self._current_toplevel_command
+            
+    def get_current_command(self):
+        return self._current_command
             
     def get_sys_path(self):
         return self._proxy.get_sys_path()
@@ -135,6 +144,7 @@ class Runner:
         
         if (accepted and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
             self._set_state("running")
+            self._current_command = cmd
             if isinstance(cmd, ToplevelCommand):
                 self._current_toplevel_command = cmd
         
@@ -378,6 +388,8 @@ class Runner:
             self._proxy.interrupt()
     
     def kill_backend(self):
+        self._current_toplevel_command = None
+        self._current_command = None
         self._postponed_commands = []
         if self._proxy:
             self._proxy.kill_current_process()
