@@ -92,8 +92,16 @@ class VM:
     def mainloop(self):
         try:
             while True: 
-                cmd = self._fetch_command()
-                self.handle_command(cmd, "waiting_toplevel_command")
+                try:
+                    cmd = self._fetch_command()
+                    self.handle_command(cmd, "waiting_toplevel_command")
+                except KeyboardInterrupt:
+                    logger.exception("Interrupt in mainloop")
+                    # Interrupt must always result in waiting_toplevel_command state
+                    # Don't show error messages, as the interrupted command may have been InlineCommand
+                    # (handlers of ToplevelCommands in normal cases catch the interrupt and provide
+                    # relevant message)  
+                    self.send_message(self.create_message("ToplevelResult"))
         except:
             logger.exception("Crash in mainloop")
             
