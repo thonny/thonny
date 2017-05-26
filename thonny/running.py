@@ -361,7 +361,6 @@ class Runner:
             get_workbench().after(50, self._poll_vm_messages)
     
     def reset_backend(self):
-        self._postponed_commands = []
         self.kill_backend()
         configuration = get_workbench().get_option("run.backend_configuration")
         backend_name, configuration_option = parse_configuration(configuration)
@@ -371,6 +370,7 @@ class Runner:
         
         backend_class = get_workbench().get_backends()[backend_name]
         self._set_state("running")
+        self._proxy = None
         self._proxy = backend_class(configuration_option)
     
     def interrupt_backend(self):
@@ -378,6 +378,7 @@ class Runner:
             self._proxy.interrupt()
     
     def kill_backend(self):
+        self._postponed_commands = []
         if self._proxy:
             self._proxy.kill_current_process()
             self._proxy = None
