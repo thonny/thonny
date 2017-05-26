@@ -90,9 +90,12 @@ class VM:
         self._install_signal_handler()
         
     def mainloop(self):
-        while True: 
-            cmd = self._fetch_command()
-            self.handle_command(cmd, "waiting_toplevel_command")
+        try:
+            while True: 
+                cmd = self._fetch_command()
+                self.handle_command(cmd, "waiting_toplevel_command")
+        except:
+            logger.exception("Crash in mainloop")
             
             
     def handle_command(self, cmd, command_context):
