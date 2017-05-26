@@ -142,6 +142,10 @@ class Workbench(tk.Tk):
         
         root_logger.setLevel(logging.INFO)
         
+        import faulthandler
+        fault_out = open(os.path.join(THONNY_USER_DIR, "frontend_faults.log"), mode="w")
+        faulthandler.enable(fault_out)
+        
     def _init_window(self):
         
         self.set_default("layout.zoomed", False)
