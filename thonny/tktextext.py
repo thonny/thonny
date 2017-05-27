@@ -682,6 +682,11 @@ class TextFrame(ttk.Frame):
             if i < text_line_count-1:
                 self._margin.insert("end", "\n") 
         self._margin.config(state='disabled')
+        
+        # synchronize margin scroll position with text
+        # https://mail.python.org/pipermail/tkinter-discuss/2010-March/002197.html
+        first, _ = self.text.yview()
+        self._margin.yview_moveto(first)
 
 
     def update_margin_line(self):
