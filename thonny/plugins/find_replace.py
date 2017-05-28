@@ -65,7 +65,6 @@ class FindDialog(tk.Toplevel):
         self.find_entry.grid(column=1, row=0, columnspan=2, padx=5);
         if FindDialog.last_searched_word is not None:
             self.find_entry.insert(0, FindDialog.last_searched_word)
-        self.find_entry.focus_force();
 
         #Replace text label
         self.replace_label = ttk.Label(self, text="Replace with:");    #TODO - text to resources package
@@ -125,6 +124,7 @@ class FindDialog(tk.Toplevel):
         
         global _active_find_dialog
         _active_find_dialog = self
+        self.focus_set();
 
         self.wait_window()
     
