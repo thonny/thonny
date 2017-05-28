@@ -284,9 +284,12 @@ def _handle_autocomplete_request_for_text(text):
 
 
 def patched_perform_midline_tab(text, event):
-    if not text.has_selection():
-        _handle_autocomplete_request_for_text(text)
-        return "break"
+    if get_workbench().get_option("edit.tab_complete_in_editor"):
+        if not text.has_selection():
+            _handle_autocomplete_request_for_text(text)
+            return "break"
+    else:
+        return text.perform_smart_tab(event)
     
 
 def load_plugin():
@@ -300,8 +303,5 @@ def load_plugin():
     get_workbench().set_default("edit.tab_complete_in_editor", True)
     get_workbench().set_default("edit.tab_complete_in_shell", True)
     
-    if get_workbench().get_option("edit.tab_complete_in_editor"):
-        CodeViewText.perform_midline_tab = patched_perform_midline_tab
-    
-    if get_workbench().get_option("edit.tab_complete_in_shell"):
-        ShellText.perform_midline_tab = patched_perform_midline_tab
+    CodeViewText.perform_midline_tab = patched_perform_midline_tab
+    ShellText.perform_midline_tab = patched_perform_midline_tab
