@@ -284,7 +284,12 @@ def _handle_autocomplete_request_for_text(text):
 
 
 def patched_perform_midline_tab(text, event):
-    if get_workbench().get_option("edit.tab_complete_in_editor"):
+    if isinstance(text, ShellText):
+        option_name = "edit.tab_complete_in_shell"
+    else:
+        option_name = "edit.tab_complete_in_editor"
+        
+    if get_workbench().get_option(option_name):
         if not text.has_selection():
             _handle_autocomplete_request_for_text(text)
             return "break"
