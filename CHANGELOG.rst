@@ -2,6 +2,24 @@
 Version history
 ===============
 
+2.1.8 (2017-05-28)
+====================
+* ENHANCEMENT: Code completion with Tab-key is now optional (see Tools => Options => Editor)
+* ENHANCEMENT: Clicking on the editor now closes code completion box
+* CHANGED: Code completion box doesn't offer names starting with double underscore anymore.
+* FIXED: Error caused by too fast typing with open code completions box 
+* ENHANCEMENT: Find/Replace dialog can now be operated with F3
+* ENHANCEMENT: Find/Replace pre-selects previously used search string
+* ENHANCEMENT: Find/Replace dialog doesn't block main window anymore
+* FIXED: Find/Replace doesn't ignore spaces in search string anymore 
+* FIXED: Closed views reappeared after restart if they were only views in that notebook  
+* FIXED #264: Debugger fails with with conditional list comprehension 
+* FIXED #265: Error when using two word search string in pip GUI
+* FIXED #266: Occasional incorrect line numbering
+* FIXED #267: Kivy application main window didn't show in Windows
+* TECHNICAL: Better diagnostic logging
+ 
+
 2.1.7 (2017-05-13)
 ====================
 * CHANGED: pip GUI now works in read-only mode unless backend is a virtual environment
