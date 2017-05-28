@@ -268,11 +268,13 @@ class VM:
                 record = {"name":c.name, "complete":c.complete, 
                           "type":c.type, "description":c.description}
                 try:
+                    """ TODO: 
                     if c.type in ["class", "module", "function"]:
                         if c.type == "function":
                             record["docstring"] = c.docstring()
                         else:
                             record["docstring"] = c.description + "\n" + c.docstring()
+                    """
                 except:
                     pass
                 result.append(record)
