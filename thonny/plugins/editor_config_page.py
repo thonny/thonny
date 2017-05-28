@@ -26,8 +26,8 @@ class EditorConfigurationPage(ConfigurationPage):
         self.add_checkbox("view.paren_highlighting", "Highlight parentheses")
         self.add_checkbox("view.syntax_coloring", "Highlight syntax elements")
         
-        self.add_checkbox("edit.tab_complete_in_editor", "Tab-completion in editors", pady=(20,0))
-        self.add_checkbox("edit.tab_complete_in_shell", "Tab-completion in Shell")
+        self.add_checkbox("edit.tab_complete_in_editor", "Allow code completion with Tab-key in editors", pady=(20,0))
+        self.add_checkbox("edit.tab_complete_in_shell",  "Allow code completion with Tab-key in Shell")
         
         self.add_checkbox("view.show_line_numbers", "Show line numbers", pady=(20,0))
         self._line_length_var = get_workbench().get_variable("view.recommended_line_length")
