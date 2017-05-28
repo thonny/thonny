@@ -126,8 +126,6 @@ class FindDialog(tk.Toplevel):
         _active_find_dialog = self
         self.focus_set();
 
-        self.wait_window()
-    
     def focus_set(self):
         self.find_entry.focus_set()
         self.find_entry.selection_range(0, tk.END)
@@ -333,8 +331,17 @@ def load_plugin():
             editor = get_workbench().get_editor_notebook().get_current_editor()
             if editor:
                 FindDialog(editor._code_view)
+
+    
+    def find_f3(event):
+        if _active_find_dialog is None:
+            cmd_open_find_dialog()
+        else:
+            _active_find_dialog._perform_find(event)
          
     get_workbench().add_command("OpenFindDialog", "edit", 'Find & Replace',
         cmd_open_find_dialog,
         default_sequence=select_sequence("<Control-f>", "<Command-f>"))
+    
+    get_workbench().bind("<F3>", find_f3, True)
     
