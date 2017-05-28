@@ -53,7 +53,6 @@ class FindDialog(tk.Toplevel):
             self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(master) 
-        self.grab_set()        
         self.protocol("WM_DELETE_WINDOW", self._ok)
       
         #Find text label
