@@ -66,10 +66,10 @@ class ConfigurationPage(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
     
-    def add_checkbox(self, flag_name, description, row=None, pady=0):
+    def add_checkbox(self, flag_name, description, row=None, pady=0, columnspan=1):
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
-        checkbox.grid(row=row, column=0, sticky=tk.W, pady=pady)
+        checkbox.grid(row=row, column=0, sticky=tk.W, pady=pady, columnspan=columnspan)
                 
     def apply(self):
         """Apply method should return False, when page contains invalid
