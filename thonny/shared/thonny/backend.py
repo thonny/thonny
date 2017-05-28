@@ -1087,6 +1087,11 @@ class FancyTracer(Executor):
             if isinstance(node, ast.DictComp):
                 add_tag(node.key, "DictComp.key")
                 add_tag(node.value, "DictComp.value")
+            
+            if isinstance(node, ast.comprehension):
+                for expr in node.ifs:
+                    add_tag(expr, "comprehension.if")
+                
                 
             # make sure every node has this field
             if not hasattr(node, "tags"):
@@ -1097,11 +1102,12 @@ class FancyTracer(Executor):
         return (isinstance(node, _ast.expr)
                 and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))
                 # TODO: repeatedly evaluated subexpressions of comprehensions
-                # can be supported (but it requires some redesign bot in backend and GUI)
+                # can be supported (but it requires some redesign both in backend and GUI)
                 and "ListComp.elt" not in node.tags 
                 and "SetComp.elt" not in node.tags
                 and "DictComp.key" not in node.tags
                 and "DictComp.value" not in node.tags
+                and "comprehension.if" not in node.tags
                 )         
         return 
     
