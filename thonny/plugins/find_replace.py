@@ -135,7 +135,7 @@ class FindDialog(tk.Toplevel):
 
     #callback for text modifications on the find entry object, used to dynamically enable and disable buttons
     def _update_button_statuses(self, *args):
-        find_text = self.find_entry_var.get().strip()
+        find_text = self.find_entry_var.get()
         if len(find_text) == 0:
             self.find_button.config(state='disabled')
             self.replace_and_find_button.config(state='disabled')
@@ -168,7 +168,7 @@ class FindDialog(tk.Toplevel):
 
         #erase all tags - these would not be correct anyway after new word is inserted
         self._remove_all_tags()
-        toreplace = self.replace_entry.get().strip(); #get the text to replace
+        toreplace = self.replace_entry.get(); #get the text to replace
 
         #delete the found word
         self.codeview.text.delete(del_start, del_end)
@@ -192,12 +192,12 @@ class FindDialog(tk.Toplevel):
     #replaces all occurences of the search string with the replace string
     def _perform_replace_all(self):
 
-        tofind = self.find_entry.get().strip();
+        tofind = self.find_entry.get();
         if len(tofind) == 0:
             self.infotext_label_var.set("Enter string to be replaced.")
             return
         
-        toreplace = self.replace_entry.get().strip();
+        toreplace = self.replace_entry.get();
    
         self._remove_all_tags()
 
@@ -226,7 +226,7 @@ class FindDialog(tk.Toplevel):
         
     def _perform_find(self, event=None):
         self.infotext_label_var.set("");    #reset the info label text
-        tofind = self.find_entry.get().strip(); #get the text to find 
+        tofind = self.find_entry.get(); #get the text to find 
         if len(tofind) == 0:    #in the case of empty string, cancel
             return              #TODO - set warning text to info label?
 
