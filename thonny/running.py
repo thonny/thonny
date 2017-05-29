@@ -340,6 +340,10 @@ class Runner:
                 if not msg:
                     break
                 
+                if msg.get("SystemExit", False):
+                    self.reset_backend()
+                    return
+                
                 # change state
                 if "command_context" in msg:
                     # message_context shows the state where corresponding command was handled in the backend

@@ -591,6 +591,10 @@ class Executor:
             return {"error" : "".join(traceback.format_exception_only(SyntaxError, e))}
         except ThonnyClientError as e:
             return {"error" : str(e)}
+        except SystemExit:
+            e_type, e_value, e_traceback = sys.exc_info()
+            self._print_user_exception(e_type, e_value, e_traceback)
+            return {"SystemExit" : True}
         except:
             # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
             # for VM mainloop they are not exceptions
