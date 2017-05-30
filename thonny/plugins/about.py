@@ -73,10 +73,19 @@ class AboutDialog(tk.Toplevel):
                                         + "Tk " + ui_utils.get_tk_version_str())
         platform_label.grid(pady=20)
         
+        credits_label = ttk.Label(main_frame, text="Made in\nUniversity of Tartu, Estonia\n"
+                                + "with the help from\nopen-source community",
+                              cursor="hand2",
+                              foreground="blue",
+                              font=url_font,
+                              justify=tk.CENTER)
+        credits_label.grid()
+        credits_label.bind("<Button-1>", lambda _:webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CREDITS.rst"))
+        
         license_font = font.nametofont("TkDefaultFont").copy()
         license_font.configure(size=7)
         license_label = ttk.Label(main_frame,
-                                  text="Coppyright (©) "
+                                  text="Copyright (©) "
                                   + str(datetime.datetime.now().year)
                                   + " Aivar Annamaa\n"
                                   + "This program comes with\n"
@@ -86,13 +95,7 @@ class AboutDialog(tk.Toplevel):
                                   + "https://opensource.org/licenses/MIT\n"
                                   + "for details",
                                   justify=tk.CENTER, font=license_font)
-        license_label.grid()
-        credits_label = ttk.Label(main_frame, text="Credits",
-                              cursor="hand2",
-                              foreground="blue",
-                              font=url_font,)
-        credits_label.grid(pady=(0,10))
-        credits_label.bind("<Button-1>", lambda _:webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CREDITS.rst"))
+        license_label.grid(pady=20)
         
         
         ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
