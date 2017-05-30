@@ -28,4 +28,4 @@ Source contributors and frequent bug-reporters
 * Taavi Ilp
 * Xin Rong
 
-Please let us know if we're forgotten to add your name to this list! Also, let us know if you want to remove your name.
+Please let us know if we have forgotten to add your name to this list! Also, let us know if you want to remove your name.
