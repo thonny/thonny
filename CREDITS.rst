@@ -10,7 +10,7 @@ Thonny was born in University of Tartu (https://www.ut.ee), Institute of Compute
 
 Python
 ------
-No comments :)
+It's a really nice language for teaching programming. It also has some nice technical properties, that made Thonny's program animation features pleasure to implement.
 
 Libraries
 --------------
