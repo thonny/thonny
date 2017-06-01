@@ -640,6 +640,12 @@ class TextFrame(ttk.Frame):
             self.update_line_numbers()
         elif not value and self._margin.winfo_ismapped():
             self._margin.grid_forget()
+        
+        # insert first line number (NB! Without trailing linebreak. See update_line_numbers) 
+        self._margin.config(state='normal')
+        self._margin.delete("1.0", "end")
+        self._margin.insert("1.0", str(self._first_line_number))
+        self._margin.config(state='disabled')
     
     def set_line_length_margin(self, value):
         self._recommended_line_length = value
@@ -674,15 +680,25 @@ class TextFrame(ttk.Frame):
         self.update_margin_line()
     
     def update_line_numbers(self):
-        text_line_count = int(self.text.index("end-1c").split(".")[0])
+        text_line_count = int(self.text.index("end").split(".")[0])
+        margin_line_count = int(self._margin.index("end").split(".")[0])
         
-        self._margin.config(state='normal')
-        self._margin.delete("1.0", "end")
-        for i in range(text_line_count):
-            self._margin.insert("end", str(i + self._first_line_number).rjust(3))
-            if i < text_line_count-1:
-                self._margin.insert("end", "\n") 
-        self._margin.config(state='disabled')
+        if text_line_count != margin_line_count:
+            self._margin.config(state='normal')
+            
+            # NB! Text acts weird with last symbol 
+            # (don't really understand whether it automatically keeps a newline there or not)
+            # Following seems to ensure both Text-s have same height
+            if text_line_count > margin_line_count:
+                delta = text_line_count - margin_line_count
+                start = margin_line_count + self._first_line_number - 1
+                for i in range(start, start + delta):
+                    self._margin.insert("end-1c", "\n" + str(i))
+            
+            else:
+                self._margin.delete(line2index(text_line_count)+"-1c", "end-1c")
+                
+            self._margin.config(state='disabled')
         
         # synchronize margin scroll position with text
         # https://mail.python.org/pipermail/tkinter-discuss/2010-March/002197.html
@@ -761,6 +777,9 @@ def classifyws(s, tabwidth):
 
 def index2line(index):
     return int(float(index))
+
+def line2index(line):
+    return str(float(line))
 
 def fixwordbreaks(root):
     # Adapted from idlelib.EditorWindow (Python 3.4.2)
