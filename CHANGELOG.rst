@@ -2,8 +2,15 @@
 Version history
 ===============
 
+2.1.9 (2017-06-01)
+==================
+* FIXED #273: Memory leak in editor margin because of undo log
+* FIXED #275: Updating line numbers is very inefficient
+* FIXED: Pasted text occasionally was hidden below bottom edge of the editor
+* FIXED: sys.exit() didn't really close the backend 
+
 2.1.8 (2017-05-28)
-====================
+==================
 * ENHANCEMENT: Code completion with Tab-key is now optional (see Tools => Options => Editor)
 * ENHANCEMENT: Clicking on the editor now closes code completion box
 * CHANGED: Code completion box doesn't offer names starting with double underscore anymore.
@@ -21,22 +28,22 @@ Version history
  
 
 2.1.7 (2017-05-13)
-====================
+==================
 * CHANGED: pip GUI now works in read-only mode unless backend is a virtual environment
 * FIXED: Error when non-default backend was used without previously generated Thonny-private virtual environment
 
 2.1.6 (2017-05-12)
-====================
+==================
 * FIXED #260: Strange behaviour when indenting with TAB 
 * FIXED #261: Editing a triple-quoted string breaks coloring in following lines 
 * FIXED: Made outdated pip detection more general 
 
 2.1.5 (2017-05-09)
-====================
+==================
 * FIXED: Jedi version checking problem 
 
 2.1.4 (2017-05-09)
-====================
+==================
 (This release is meant for making Thonny work better with system Python 3.4 in Debian Jessie)
 
 * FIXED #254: "Manage plug-ins" now gives instructions for installing pip if system is missing it or it's too old 
@@ -46,34 +53,34 @@ Version history
 
 
 2.1.3 (2017-05-09)
-====================
+==================
 * FIXED #250: Debugger focus was off by one line in function frames
 * FIXED #251: Debugger timing issue (wrong command type in the backend)
 * FIXED #252: Debugger timing issue (get_globals and debugger commands interfere)
 * FIXED #253: Creating default virtual env does not work when using Debian python3 without ensurepip
 
 2.1.2 (2017-05-08)
-====================
+==================
 * FIXED #220 and #237: Icon problems in Linux tasbar.
 * FIXED #245: Tooltips not working in Mac
 * FIXED #246: Current script did not get executed if cursor was not in the end of the shell 
 * FIXED #249: Reset, Run and Debug caused double prompt
 
 2.1.1 (2017-05-03)
-====================
+==================
 * FIXED #241: Some menu items gave errors with micro:bit backend.
 * FIXED #242: Focus got stuck on first run (no entry was possible neither in shell nor editor when initialization dialog closed)
 
 2.1.0 (2017-05-02)
-====================
+==================
 * TECHNICAL: Changes in diagnostic logging
 
 2.1.0b11 (2017-04-29)
-====================
+=====================
 * TECHNICAL: Implemented more robust approach for installing Thonny plugins
 
 2.1.0b10 (2017-04-29)
-====================
+=====================
 * CHANGED: Installed plugins now end up under ~/.thonny/plugins
 * TECHNICAL: Backend preparation now occurs when main window has been opened
 
@@ -92,7 +99,7 @@ Version history
 * TECHNICAL: Backends are not sent Reset command for initialization anymore.  
 
 2.1.0b7 (2017-04-25)
-====================
+==================
 * FIXED: Removed some circular import to support Python 3.4
 * FIXED: pip GUI now also lists installed pre-releases
 * EXPERIMENTAL: GUI for installing Thonny plug-ins (Tools => Manage plug-ins...)
@@ -102,7 +109,7 @@ Version history
  
 
 2.1.0b6 (2017-04-19)
-====================
+==================
 * ENHANCEMENT: Shell now shows location of external interpreter as welcome text
 * FIXED #224: Tab-indentation didn't work if tail of the text was selected and text didn't end with empty line
 * FIXED: Tab with selected text occasionally invoked code-completion
@@ -110,7 +117,7 @@ Version history
 * TECHNICAL: Thonny+Python bundles don't include pip anymore (venv gets pip via ensurepip)
 
 2.1.0b5 (2017-04-18)
-====================
+==================
 * FIXED: Typo in pipGUI (regression introduced in b4)
 
 2.1.0b4 (2017-04-18)
