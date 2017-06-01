@@ -544,7 +544,9 @@ class EnhancedText(TweakableText):
         
     def _on_paste(self, e):
         self._last_event_kind = "paste"
-        self.edit_separator()        
+        self.edit_separator()    
+        self.see("insert")  
+        self.after_idle(lambda : self.see("insert"))  
     
     def _on_get_focus(self, e):
         self._last_event_kind = "get_focus"
