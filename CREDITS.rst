@@ -26,6 +26,7 @@ Source contributors and frequent bug-reporters
 * Fizban
 * Sven (s_v_e_n)
 * Taavi Ilp
+* Toomas Mölder
 * Xin Rong
 
 Please let us know if we have forgotten to add your name to this list! Also, let us know if you want to remove your name.
