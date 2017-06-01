@@ -366,7 +366,9 @@ class Runner:
                 # TODO: maybe distinguish between workbench cwd and backend cwd ??
                 get_workbench().set_option("run.working_directory", self.get_cwd())
                 
-                get_workbench().update()
+                # TODO: is it necessary???
+                # https://stackoverflow.com/a/13520271/261181
+                #get_workbench().update() 
                 
             if self.get_state() != initial_state:
                 self._send_postponed_commands()
