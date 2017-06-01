@@ -646,6 +646,8 @@ class TextFrame(ttk.Frame):
         self._margin.delete("1.0", "end")
         self._margin.insert("1.0", str(self._first_line_number))
         self._margin.config(state='disabled')
+
+        self.update_line_numbers()
     
     def set_line_length_margin(self, value):
         self._recommended_line_length = value
