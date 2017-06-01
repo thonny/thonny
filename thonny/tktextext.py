@@ -595,7 +595,8 @@ class TextFrame(ttk.Frame):
                                background='#e0e0e0', foreground='#999999',
                                selectbackground='#e0e0e0', selectforeground='#999999',
                                cursor='arrow',
-                               state='disabled'
+                               state='disabled',
+                               undo=False
                                )
         self._margin.bind("<ButtonRelease-1>", self.on_margin_click)
         self._margin.bind("<Button-1>", self.on_margin_click)
