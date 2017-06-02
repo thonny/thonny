@@ -88,7 +88,8 @@ class Runner:
         get_workbench().add_command('interrupt', "run", "Interrupt execution",
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
-            default_sequence="<Control-c>")
+            default_sequence="<Control-c>",
+            bell_when_denied=False)
     
     def get_cwd(self):
         # TODO: make it nicer

@@ -451,7 +451,8 @@ class Workbench(tk.Tk):
                     group=99,
                     position_in_group="end",
                     image_filename=None,
-                    include_in_toolbar=False):
+                    include_in_toolbar=False,
+                    bell_when_denied=True):
         """Adds an item to specified menu.
         
         Args:
@@ -482,7 +483,8 @@ class Workbench(tk.Tk):
             else:
                 denied = True
                 logging.debug("Command '" + command_id + "' execution denied")
-                self.bell()
+                if bell_when_denied:
+                    self.bell()
                 
             self.event_generate("Command", command_id=command_id, denied=denied)
         
