@@ -78,6 +78,8 @@ class SyntaxColorer:
                     self.text.tag_configure(tag, **cnf)
         
         self.text.tag_raise('sel')
+        self.text.tag_raise('STRING_CLOSED3')
+        self.text.tag_raise('STRING_OPEN3')
 
     def schedule_update(self, event):
         
