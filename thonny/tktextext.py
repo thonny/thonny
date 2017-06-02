@@ -85,6 +85,9 @@ class TweakableText(tk.Text):
             self.direct_insert(index, chars, tags)
     
     def intercept_delete(self, index1, index2=None):
+        if index1 == "sel.first" and index2 == "sel.last" and not self.has_selection():
+            return
+        
         if self.is_read_only():
             self.bell()            
         elif self._is_erroneous_delete(index1, index2):

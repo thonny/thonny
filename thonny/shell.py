@@ -281,6 +281,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.bell()
             
     def intercept_delete(self, index1, index2=None, **kw):
+        if index1 == "sel.first" and index2 == "sel.last" and not self.has_selection():
+            return
+        
         if (self._editing_allowed() 
             and self._in_current_input_range(index1)
             and (index2 is None or self._in_current_input_range(index2))):
