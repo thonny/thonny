@@ -431,36 +431,34 @@ class EnhancedText(TweakableText):
                 return self.perform_midline_tab(event)
     
     def indent_region(self, event=None):
+        return self._change_indentation(True)
+
+    def dedent_region(self, event=None):
+        return self._change_indentation(False)
+    
+    def _change_indentation(self, increase=True):
         head, tail, chars, lines = self._get_region()
         
-        # Doesn't work correctly if selection end on last line
-        # and text doesn't end with empty line
+        # Text widget plays tricks if selection ends on last line
+        # and content doesn't end with empty line,
         text_last_line = index2line(self.index("end-1c"))
         sel_last_line = index2line(tail)
         if sel_last_line >= text_last_line:
             while not self.get(head, "end").endswith("\n\n"):
                 self.insert("end", "\n")
-            
         
         for pos in range(len(lines)):
             line = lines[pos]
             if line:
                 raw, effective = classifyws(line, self.tabwidth)
-                effective = effective + self.indentwidth
+                if increase:
+                    effective = effective + self.indentwidth
+                else:
+                    effective = max(effective - self.indentwidth, 0)
                 lines[pos] = self._make_blanks(effective) + line[raw:]
         self._set_region(head, tail, chars, lines)
         return "break"
-
-    def dedent_region(self, event=None):
-        head, tail, chars, lines = self._get_region()
-        for pos in range(len(lines)):
-            line = lines[pos]
-            if line:
-                raw, effective = classifyws(line, self.tabwidth)
-                effective = max(effective - self.indentwidth, 0)
-                lines[pos] = self._make_blanks(effective) + line[raw:]
-        self._set_region(head, tail, chars, lines)
-        return "break"
+    
     
     def select_all(self, event):
         self.tag_remove("sel", "1.0", tk.END)
