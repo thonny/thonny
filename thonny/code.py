@@ -15,6 +15,7 @@ from thonny.common import parse_shell_command
 from thonny.tktextext import rebind_control_a
 import tokenize
 from thonny.shared.thonny.common import ToplevelCommand, DebuggerCommand
+from tkinter.messagebox import askyesno
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -125,10 +126,18 @@ class Editor(ttk.Frame):
                 
         
         content = self._code_view.get_content()
-        encoding = "UTF-8" # TODO: check for marker in the head of the code 
-        f = open(filename, mode="wb", )
-        f.write(content.encode(encoding))
-        f.close()
+        encoding = "UTF-8" # TODO: check for marker in the head of the code
+        try: 
+            f = open(filename, mode="wb", )
+            f.write(content.encode(encoding))
+            f.close()
+        except PermissionError:
+            if askyesno("Permission Error",
+                     "Looks like this file or folder is not writable.\n\n"
+                     + "Do you want to save under another folder and/or filename?"):
+                self.save_file(True)
+            return
+            
 
         self._filename = filename
         self.master.remember_recent_file(filename)
