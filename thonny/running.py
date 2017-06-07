@@ -662,6 +662,7 @@ class CPythonProxy(BackendProxy):
                 
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
+        my_env["THONNY_USER_DIR"] = THONNY_USER_DIR
         
         # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
         if self._executable == get_private_venv_executable():

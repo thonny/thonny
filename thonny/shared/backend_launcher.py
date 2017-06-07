@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # set up logging
     logger = logging.getLogger()
     logFormatter = logging.Formatter('%(levelname)s: %(message)s')
-    file_handler = logging.FileHandler(os.path.expanduser(os.path.join("~",".thonny","backend.log")), 
+    file_handler = logging.FileHandler(os.path.expanduser(os.path.join(os.environ["THONNY_USER_DIR"],"backend.log")), 
                                        encoding="UTF-8",
                                        mode="w");
     file_handler.setFormatter(logFormatter)
