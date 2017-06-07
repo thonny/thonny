@@ -193,6 +193,12 @@ class Runner:
         if not filename:
             return
         
+        if editor.is_modified():
+            filename = editor.save_file()
+            if not filename:
+                return 
+            
+        
         # changing dir may be required
         script_dir = os.path.realpath(os.path.dirname(filename))
         

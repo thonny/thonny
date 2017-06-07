@@ -135,8 +135,9 @@ class Editor(ttk.Frame):
             if askyesno("Permission Error",
                      "Looks like this file or folder is not writable.\n\n"
                      + "Do you want to save under another folder and/or filename?"):
-                self.save_file(True)
-            return
+                return self.save_file(True)
+            else:
+                return None
             
 
         self._filename = filename
@@ -327,9 +328,13 @@ class EditorNotebook(ttk.Notebook):
         self._remember_open_files()
     
     def save_all_named_editors(self):
+        all_saved = True
         for editor in self.winfo_children():
             if editor.get_filename() and editor.is_modified():
-                editor.save_file()
+                success = editor.save_file()
+                all_saved = all_saved and success
+        
+        return all_saved
     
     def remember_recent_file(self, filename):
         recents = get_workbench().get_option("file.recent_files")
