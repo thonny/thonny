@@ -7,7 +7,7 @@ THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR",
 THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "plugins")
 
 def launch():
-    os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
+    _prepare_thonny_user_dir()
     
     try:
         _update_sys_path()
@@ -52,6 +52,33 @@ def launch():
         runner = get_runner()
         if runner != None:
             runner.kill_backend()
+
+
+def _prepare_thonny_user_dir():
+    if not os.path.exists(THONNY_USER_DIR):
+        os.makedirs(THONNY_USER_DIR, mode=0o700, exist_ok=True)
+        
+        # user_dir_template is a post-installation means for providing
+        # alternative default user environment in multi-user setups
+        template_dir = os.path.join(os.path.dirname(__file__), "user_dir_template")
+                    
+        if os.path.isdir(template_dir):
+            import shutil
+            
+            def copy_contents(src_dir, dest_dir):
+                # I want the copy to have current user permissions
+                for name in os.listdir(src_dir):
+                    src_item = os.path.join(src_dir, name)
+                    dest_item = os.path.join(dest_dir, name)
+                    if os.path.isdir(src_item):
+                        os.makedirs(dest_item, mode=0o700)
+                        copy_contents(src_item, dest_item)
+                    else:
+                        shutil.copyfile(src_item, dest_item)
+                        os.chmod(dest_item, 0o600)
+                        
+            copy_contents(template_dir, THONNY_USER_DIR)
+            
 
 def _update_sys_path():
     import site
