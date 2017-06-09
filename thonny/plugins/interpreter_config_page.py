@@ -77,15 +77,6 @@ class InterpreterConfigurationPage(ConfigurationPage):
         configuration = self._configuration_variable.get()
         get_workbench().set_option("run.backend_configuration", configuration)
         
-        backend, configuration_option = parse_configuration(configuration)
-        if backend == "Python":
-            # Store used CPython interpreters
-            interpreter = configuration_option
-            used_interpreters = get_workbench().get_option("run.used_interpreters")
-            if interpreter not in used_interpreters:
-                used_interpreters.append(configuration)
-            get_workbench().set_option("run.used_interpreters", used_interpreters)
-        
         get_runner().reset_backend()
         
     
