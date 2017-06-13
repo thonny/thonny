@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from thonny.globals import get_workbench
 from thonny import ui_utils
+from thonny.ui_utils import create_tooltip
 
 class GridFrame(ttk.Frame):
     def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
@@ -39,34 +40,46 @@ class ObjectInspector2(ttk.Frame):
         toolbar = ttk.Frame(self)
         toolbar.grid(row=0, column=0, sticky="nsew")
         
-        def create_navigation_link(col, text, action, padx=0):
-            link = tk.Label(toolbar,
-                            text=text,
-                            #background=ui_utils.CALM_WHITE,
-                            foreground="blue",
-                            cursor="hand2")
-            link.grid(row=0, column=col, sticky=tk.NE, padx=padx, pady=4)
-            link.bind("<Button-1>", action)
-            return link
+        def create_navigation_link(col, image_filename, action, tooltip, padx=0):
+            button = ttk.Button(toolbar, 
+                         #command=handler, 
+                         image=get_workbench().get_image(image_filename), 
+                         style="Toolbutton", # TODO: does this cause problems in some Macs?
+                         state=tk.NORMAL
+                         )
+            ui_utils.create_tooltip(button, tooltip,
+                       **get_workbench().get_option("theme.tooltip_options", {'padx':3, 'pady':1})
+                       )
+            
+            button.grid(row=0, column=col, sticky=tk.NE, padx=padx, pady=4)
+            button.bind("<Button-1>", action)
+            return button
         
-        #def create_page_link():
+        tab1 = tk.Label(toolbar, text=" General ", relief="flat")
+        tab1.grid(row=0, column=1, pady=5, padx=5, sticky="nsew")
         
-        self.back_label = create_navigation_link(1, " << ", self.navigate_back)
-        self.forward_label = create_navigation_link(2, " >> ", self.navigate_forward, (0,10))
+        tab2 = tk.Label(toolbar, text=" Data ", relief="sunken")
+        tab2.grid(row=0, column=2, pady=5, padx=5, sticky="nsew")
+        
+        tab3 = tk.Label(toolbar, text=" Atts ", relief="flat")
+        tab3.grid(row=0, column=3, pady=5, padx=5, sticky="nsew")
+        
+        self.back_button = create_navigation_link(7, "nav_backward.gif", self.navigate_back, "Previous object")
+        self.forward_button = create_navigation_link(8, "nav_forward.gif", self.navigate_forward, "Next object", (0,10))
         self.back_links = []
         self.forward_links = []
         
-        self.search_box = tk.Entry(toolbar, 
-                                    borderwidth=0, 
+        self.search_box = ttk.Entry(toolbar, 
+                                    #borderwidth=1, 
                                     #background=ui_utils.get_main_background()
                                    )
-        self.search_box.grid(row=0, column=0, sticky="nsew", pady=0, padx=0)
+        self.search_box.grid(row=0, column=0, sticky="nsew", pady=5, padx=5)
         toolbar.columnconfigure(0, weight=1)
         
         self.data_frame = GridFrame(self, ["id", "first_name", "last_name", "age"])
         self.data_frame.grid(row=1, column=0, sticky="nsew")
         self.data_frame.tree.heading('id', text='id', anchor=tk.W) 
-        self.data_frame.tree.heading('first_name', text='first_name', anchor=tk.W) 
+        self.data_frame.tree.heading('first_name', text='first_name\nadsf', anchor=tk.W) 
         self.data_frame.tree.heading('last_name', text='last_name', anchor=tk.W) 
         
         self.columnconfigure(0, weight=1)
