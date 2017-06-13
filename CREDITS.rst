@@ -12,11 +12,12 @@ Python
 ------
 It's a really nice language for teaching programming. It also has some nice technical properties, that made Thonny's program animation features pleasure to implement.
 
-Libraries
---------------
+Libraries and resources
+-----------------------
 * jedi (http://jedi.readthedocs.io) is used for code completion, go to definition, etc.
 * certifi (https://pypi.python.org/pypi/certifi) provides SSL certs for bundled Python in Linux and Mac.
-* distro (https://pypi.python.org/pypi/distro) is optionally used for detecting Linux version in About dialog. 
+* distro (https://pypi.python.org/pypi/distro) is optionally used for detecting Linux version in About dialog.
+* Most icons are taken from Eclipse project (https://www.eclipse.org/, http://eclipse-icons.i24.cc/)
 
 Source contributors and frequent bug-reporters
 ----------------------------------------------
