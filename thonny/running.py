@@ -641,6 +641,8 @@ class CPythonProxy(BackendProxy):
                     
     
     def kill_current_process(self):
+        self._cancel_tkupdate_loop()
+        
         if self._proc is not None and self._proc.poll() is None: 
             self._proc.kill()
             
@@ -872,20 +874,22 @@ class CPythonProxy(BackendProxy):
         
         if msg["tkinter_is_active"] and self._tkupdate_loop_id is None:
             # Start updating
-            self._tkupdate_loop_id = self._loop_tkupdate(True)
+            self._loop_tkupdate(True)
         elif not msg["tkinter_is_active"] and self._tkupdate_loop_id is not None:
-            # Cancel updating
-            try:
-                get_workbench().after_cancel(self._tkupdate_loop_id)
-            finally:
-                self._tkupdate_loop_id = None
+            self._cancel_tkupdate_loop()
     
     def _loop_tkupdate(self, force=False):
         if force or get_runner().get_state() == "waiting_toplevel_command":
             self.send_command(InlineCommand("tkupdate"))
-            self._tkupdate_loop_id = get_workbench().after(50, self._loop_tkupdate)
-        else:
-            self._tkupdate_loop_id = None
+            
+        self._tkupdate_loop_id = get_workbench().after(50, self._loop_tkupdate)
+    
+    def _cancel_tkupdate_loop(self):
+        if self._tkupdate_loop_id is not None:
+            try:
+                get_workbench().after_cancel(self._tkupdate_loop_id)
+            finally:
+                self._tkupdate_loop_id = None
         
 
     def _prepare_private_venv(self):
