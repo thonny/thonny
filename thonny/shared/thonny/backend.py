@@ -125,7 +125,10 @@ class VM:
             response["command_context"] = command_context
             response["command"] = cmd.command
             if response["message_type"] == "ToplevelResult":
-                self._add_tkinter_info(response)
+                response["tkinter_is_active"] = (
+                    self._get_tkinter_default_root() is not None
+                    or self._get_qt_app() is not None
+                )
             self.send_message(response)
     
     def _install_signal_handler(self):
@@ -171,16 +174,21 @@ class VM:
     
     def _cmd_tkupdate(self, cmd):
         # advance the event loop
-        # http://bugs.python.org/issue989712
-        # http://bugs.python.org/file6090/run.py.diff
+        
         try:
+            # First try Tkinter:
             root = self._get_tkinter_default_root()
-            if root is None:
-                return
-            
-            import tkinter
-            while root.dooneevent(tkinter._tkinter.DONT_WAIT):
-                pass
+            if root is not None:
+                import tkinter
+                # http://bugs.python.org/issue989712
+                # http://bugs.python.org/file6090/run.py.diff
+                while root.dooneevent(tkinter._tkinter.DONT_WAIT):
+                    pass
+            else:
+                # Try Qt only when Tkinter is not used
+                app = self._get_qt_app()
+                if app is not None:
+                    app.processEvents()
                  
         except:
             pass
@@ -323,9 +331,29 @@ class VM:
         return self.create_message("ObjectInfo", id=cmd.object_id, info=info)
     
     def _get_tkinter_default_root(self):
+        # tkinter._default_root is not None,
+        # when window has been created and mainloop isn't called or hasn't ended yet
         tkinter = sys.modules.get("tkinter")
         if tkinter is not None:
             return getattr(tkinter, "_default_root", None)
+        else:
+            return None
+
+    def _get_qt_app(self):
+        mod = sys.modules.get("PyQt5.QtCore")
+        if mod is None:
+            mod = sys.modules.get("PyQt4.QtCore")
+        if mod is None:
+            mod = sys.modules.get("PySide.QtCore")
+        if mod is None:
+            return None
+            
+        app_class = getattr(mod, "QCoreApplication", None)
+        if app_class is not None:
+            try:
+                return app_class.instance()
+            except:
+                return None
         else:
             return None
 
@@ -345,11 +373,6 @@ class VM:
         except Exception as e:
             info["file_error"] = "Could not get file content, error:" + str(e)
             pass
-    
-    def _add_tkinter_info(self, msg):
-        # tkinter._default_root is not None,
-        # when window has been created and mainloop isn't called or hasn't ended yet
-        msg["tkinter_is_active"] = self._get_tkinter_default_root() is not None
     
     def _add_function_info(self, value, info):
         try:
