@@ -551,7 +551,7 @@ class CPythonProxy(BackendProxy):
         self._proc = None
         self._message_queue = None
         self._sys_path = []
-        self._tkupdate_loop_id = None
+        self._gui_update_loop_id = None
         self.in_venv = None
         
         self._start_new_process()
@@ -561,8 +561,8 @@ class CPythonProxy(BackendProxy):
             return None
         
         msg = self._message_queue.popleft()
-        if "tkinter_is_active" in msg:
-            self._update_tkupdating(msg)
+        if "gui_is_active" in msg:
+            self._update_gui_updating(msg)
         
         if "in_venv" in msg:
             self.in_venv = msg["in_venv"]
@@ -641,7 +641,7 @@ class CPythonProxy(BackendProxy):
                     
     
     def kill_current_process(self):
-        self._cancel_tkupdate_loop()
+        self._cancel_gui_update_loop()
         
         if self._proc is not None and self._proc.poll() is None: 
             self._proc.kill()
@@ -860,36 +860,36 @@ class CPythonProxy(BackendProxy):
         return self._executable
     
     
-    def _update_tkupdating(self, msg):
-        """Enables running Tkinter programs which doesn't call mainloop. 
+    def _update_gui_updating(self, msg):
+        """Enables running Tkinter or Qt programs which doesn't call mainloop. 
         
         When mainloop is omitted, then program can be interacted with
         from the shell after it runs to the end.
         
-        Each ToplevelResponse is supposed to tell, whether tkinter window
-        is open and needs updating.
+        Each ToplevelResponse is supposed to tell, whether gui is active
+        and needs updating.
         """
-        if not "tkinter_is_active" in msg:
+        if not "gui_is_active" in msg:
             return
         
-        if msg["tkinter_is_active"] and self._tkupdate_loop_id is None:
+        if msg["gui_is_active"] and self._gui_update_loop_id is None:
             # Start updating
-            self._loop_tkupdate(True)
-        elif not msg["tkinter_is_active"] and self._tkupdate_loop_id is not None:
-            self._cancel_tkupdate_loop()
+            self._loop_gui_update(True)
+        elif not msg["gui_is_active"] and self._gui_update_loop_id is not None:
+            self._cancel_gui_update_loop()
     
-    def _loop_tkupdate(self, force=False):
+    def _loop_gui_update(self, force=False):
         if force or get_runner().get_state() == "waiting_toplevel_command":
-            self.send_command(InlineCommand("tkupdate"))
+            self.send_command(InlineCommand("process_gui_events"))
             
-        self._tkupdate_loop_id = get_workbench().after(50, self._loop_tkupdate)
+        self._gui_update_loop_id = get_workbench().after(50, self._loop_gui_update)
     
-    def _cancel_tkupdate_loop(self):
-        if self._tkupdate_loop_id is not None:
+    def _cancel_gui_update_loop(self):
+        if self._gui_update_loop_id is not None:
             try:
-                get_workbench().after_cancel(self._tkupdate_loop_id)
+                get_workbench().after_cancel(self._gui_update_loop_id)
             finally:
-                self._tkupdate_loop_id = None
+                self._gui_update_loop_id = None
         
 
     def _prepare_private_venv(self):

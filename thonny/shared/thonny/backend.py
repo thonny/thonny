@@ -125,7 +125,7 @@ class VM:
             response["command_context"] = command_context
             response["command"] = cmd.command
             if response["message_type"] == "ToplevelResult":
-                response["tkinter_is_active"] = (
+                response["gui_is_active"] = (
                     self._get_tkinter_default_root() is not None
                     or self._get_qt_app() is not None
                 )
@@ -172,7 +172,7 @@ class VM:
     def _cmd_execute_source_inline(self, cmd):
         return self._execute_source(cmd, "InlineResult")
     
-    def _cmd_tkupdate(self, cmd):
+    def _cmd_process_gui_events(self, cmd):
         # advance the event loop
         
         try:
