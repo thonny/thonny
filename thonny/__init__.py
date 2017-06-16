@@ -15,6 +15,7 @@ THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "plugins")
 
 def launch():
     _prepare_thonny_user_dir()
+    _misc_prepare()
     
     try:
         _update_sys_path()
@@ -158,7 +159,10 @@ def _delegate_to_existing_instance(args):
     
     return response.decode("UTF-8") == workbench.SERVER_SUCCESS
 
-
+def _misc_prepare():
+    if os.name == "nt":
+        import ctypes
+        ctypes.windll.user32.SetProcessDPIAware()    
     
 def get_version():
     try:
