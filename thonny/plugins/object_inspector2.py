@@ -9,6 +9,9 @@ from thonny.memory import MemoryFrame, format_object_id, MAX_REPR_LENGTH_IN_GRID
     VariablesFrame
 import ast
 from thonny.misc_utils import shorten_repr
+from thonny.ui_utils import update_entry_text, CALM_WHITE
+from thonny.gridtable import GridTable
+
 
 class GridFrame(ttk.Frame):
     def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
@@ -45,34 +48,68 @@ class ObjectInspector2(ttk.Frame):
         
         self.object_id = None
         self.object_info = None
+        
+        self.active_page = None
+        self._create_general_page()
+        self._create_data_page()
+        self._create_attributes_page()
+        
+        toolbar = self._create_toolbar()
+        toolbar.grid(row=0, column=0, sticky="nsew")
+
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        
         get_workbench().bind("ObjectSelect", self.show_object, True)
-
-        # type-specific inspectors
-        self.current_type_specific_inspector = None
-        self.current_type_specific_label = None
-        self.type_specific_inspectors = [ 
-            FileHandleInspector(self.grid_frame),
-            FunctionInspector(self.grid_frame),
-            StringInspector(self.grid_frame),
-            ElementsInspector(self.grid_frame),
-            DictInspector(self.grid_frame),
-        ]
-
         get_workbench().bind("ObjectInfo", self._handle_object_info_event, True)
         get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
         get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
-
-
         
-        
+        self.demo()
+    
+    def _create_toolbar(self):
         toolbar = ttk.Frame(self)
-        #toolbar.grid(row=0, column=0, sticky="nsew")
+        
+        self.search_box = ttk.Entry(toolbar, 
+                                    #borderwidth=1, 
+                                    #background=ui_utils.get_main_background()
+                                   )
+        self.search_box.grid(row=0, column=0, sticky="nsew", pady=5, padx=5)
+        toolbar.columnconfigure(0, weight=1)
+        
+        self.tabs = []
+        
+        def create_tab(col, caption, page):
+            tab = tk.Label(toolbar, text=" "+caption+" ", relief="flat", borderwidth=1)
+            tab.grid(row=0, column=col, pady=5, padx=5, sticky="nsew")
+            self.tabs.append(tab)
+            page.tab = tab
+            
+            def on_click(event):
+                if self.active_page == page:
+                    return
+                else:
+                    if self.active_page is not None:
+                        self.active_page.grid_forget()
+                        self.active_page.tab.configure(relief="flat")
+                    
+                    self.active_page = page
+                    page.grid(row=1, column=0, sticky="nsew")
+                    tab.configure(relief="sunken")
+                
+            
+            tab.bind("<1>", on_click)
+        
+        create_tab(1, "Overview", self.overview_frame)
+        create_tab(2, "Data", self.data_frame)
+        create_tab(3, "Atts", self.attributes_frame)
+        
         
         def create_navigation_link(col, image_filename, action, tooltip, padx=0):
             button = ttk.Button(toolbar, 
                          #command=handler, 
                          image=get_workbench().get_image(image_filename), 
-                         style="Toolbutton", # TODO: does this cause problems in some Macs?
+                         #style="Toolbutton", # TODO: does this cause problems in some Macs?
                          state=tk.NORMAL
                          )
             ui_utils.create_tooltip(button, tooltip,
@@ -83,36 +120,64 @@ class ObjectInspector2(ttk.Frame):
             button.bind("<Button-1>", action)
             return button
         
-        tab1 = tk.Label(toolbar, text=" General ", relief="flat")
-        tab1.grid(row=0, column=1, pady=5, padx=5, sticky="nsew")
         
-        tab2 = tk.Label(toolbar, text=" Data ", relief="sunken")
-        tab2.grid(row=0, column=2, pady=5, padx=5, sticky="nsew")
-        
-        tab3 = tk.Label(toolbar, text=" Atts ", relief="flat")
-        tab3.grid(row=0, column=3, pady=5, padx=5, sticky="nsew")
         
         self.back_button = create_navigation_link(7, "nav_backward.gif", self.navigate_back, "Previous object")
         self.forward_button = create_navigation_link(8, "nav_forward.gif", self.navigate_forward, "Next object", (0,10))
         self.back_links = []
         self.forward_links = []
         
-        self.search_box = ttk.Entry(toolbar, 
-                                    #borderwidth=1, 
-                                    #background=ui_utils.get_main_background()
-                                   )
-        self.search_box.grid(row=0, column=0, sticky="nsew", pady=5, padx=5)
-        toolbar.columnconfigure(0, weight=1)
+        return toolbar
         
-        self.data_frame = GridFrame(self, ["id", "first_name", "last_name", "age"])
-        self.data_frame.grid(row=1, column=0, sticky="nsew")
-        self.data_frame.tree.heading('id', text='id', anchor=tk.W) 
-        self.data_frame.tree.heading('first_name', text='first_name\nadsf', anchor=tk.W) 
-        self.data_frame.tree.heading('last_name', text='last_name', anchor=tk.W) 
+    
+    def _create_general_page(self):
+        self.overview_frame = tk.Frame(self, background=CALM_WHITE)
         
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(1, weight=1)
+        def _add_main_attribute(row, caption):
+            label = tk.Label(self.overview_frame, text=caption + ":  ",
+                             background=CALM_WHITE,
+                             justify=tk.LEFT)
+            label.grid(row=row, column=0, sticky=tk.NW)
+            
+            value = tk.Entry(self.overview_frame,
+                             background=CALM_WHITE,
+                             bd=0,
+                             readonlybackground=CALM_WHITE,
+                             highlightthickness = 0,
+                             state="readonly"
+                             )
+            if row > 0:
+                value.grid(row=row, column=1, columnspan=3, 
+                       sticky=tk.NSEW, pady=2)
+            else:
+                value.grid(row=row, column=1, sticky=tk.NSEW, pady=2)
+            return value
+        
+        self.id_entry   = _add_main_attribute(0, "id")
+        self.repr_entry = _add_main_attribute(1, "repr")
+        self.type_entry = _add_main_attribute(2, "type")
+        self.type_entry.config(cursor="hand2", fg="dark blue")
+        self.type_entry.bind("<Button-1>", self.goto_type)
 
+    def _create_data_page(self):
+        self.data_frame = ttk.Frame(self)
+        # type-specific inspectors
+        self.current_type_specific_inspector = None
+        self.current_type_specific_label = None
+        self.type_specific_inspectors = [ 
+            FileHandleInspector(self.data_frame),
+            FunctionInspector(self.data_frame),
+            StringInspector(self.data_frame),
+            ElementsInspector(self.data_frame),
+            DictInspector(self.data_frame),
+            DataFrameInspector(self.data_frame)
+        ]
+        
+        self.data_frame.columnconfigure(0, weight=1)
+        self.data_frame.rowconfigure(0, weight=1)
+    
+    def _create_attributes_page(self):
+        self.attributes_frame = AttributesFrame(self)        
 
     
     def navigate_back(self, event):
@@ -143,7 +208,7 @@ class ObjectInspector2(ttk.Frame):
                 del self.forward_links[:]
                 
             self.object_id = object_id
-            #update_entry_text(self.id_entry, format_object_id(object_id))
+            update_entry_text(self.id_entry, format_object_id(object_id))
             self.set_object_info(None)
             self.request_object_info()
     
@@ -169,22 +234,23 @@ class ObjectInspector2(ttk.Frame):
     def set_object_info(self, object_info):
         self.object_info = object_info
         if object_info is None:
-            #update_entry_text(self.repr_entry, "")
-            #update_entry_text(self.type_entry, "")
-            self.grid_frame.grid_remove()
+            update_entry_text(self.repr_entry, "")
+            update_entry_text(self.type_entry, "")
+            "self.data_frame.child.grid_remove()"
         else:
-            #update_entry_text(self.repr_entry, object_info["repr"])
-            #update_entry_text(self.type_entry, object_info["type"])
+            update_entry_text(self.repr_entry, object_info["repr"])
+            update_entry_text(self.type_entry, object_info["type"])
             self.attributes_frame.tree.configure(height=len(object_info["attributes"]))
             self.attributes_frame.update_variables(object_info["attributes"])
             self.update_type_specific_info(object_info)
                 
             
             # update layout
-            self._expose(None)
-            if not self.grid_frame.winfo_ismapped():
-                self.grid_frame.grid()
-    
+            #self._expose(None)
+            #if not self.grid_frame.winfo_ismapped():
+            #    self.grid_frame.grid()
+        
+        """
         if self.back_links == []:
             self.back_label.config(foreground="lightgray", cursor="arrow")
         else:
@@ -194,6 +260,7 @@ class ObjectInspector2(ttk.Frame):
             self.forward_label.config(foreground="lightgray", cursor="arrow")
         else:
             self.forward_label.config(foreground="blue", cursor="hand2")
+        """
     
     def update_type_specific_info(self, object_info):
         type_specific_inspector = None
@@ -202,6 +269,7 @@ class ObjectInspector2(ttk.Frame):
                 type_specific_inspector = insp
                 break
         
+        #print("TYPSE", type_specific_inspector)
         if type_specific_inspector != self.current_type_specific_inspector:
             if self.current_type_specific_inspector is not None:
                 self.current_type_specific_inspector.grid_remove() # TODO: or forget?
@@ -212,9 +280,8 @@ class ObjectInspector2(ttk.Frame):
             if type_specific_inspector is not None:
                 self.current_type_specific_label = self._add_block_label (3, "")
                 
-                type_specific_inspector.grid(row=4, 
+                type_specific_inspector.grid(row=0, 
                                              column=0, 
-                                             columnspan=4, 
                                              sticky=tk.NSEW,
                                              padx=(0,10))
                 
@@ -231,11 +298,20 @@ class ObjectInspector2(ttk.Frame):
     
     
     def _add_block_label(self, row, caption):
-        label = tk.Label(self.grid_frame, bg=ui_utils.CALM_WHITE, text=caption)
+        label = tk.Label(self.overview_frame, bg=ui_utils.CALM_WHITE, text=caption)
         label.grid(row=row, column=0, columnspan=4, sticky="nsew", pady=(20,0))
         return label
         
-
+    
+    def demo(self):
+        page = self.data_frame
+        self.active_page = page
+        page.grid(row=1, column=0, sticky="nsew")
+        #tab.configure(relief="sunken")
+        
+        di = DataFrameInspector(self.data_frame)
+        di.grid(row=0, column=0, sticky="nsew")
+        
 
 class DataFrameFrame(ttk.Frame):
     pass
@@ -492,6 +568,16 @@ class AttributesFrame(VariablesFrame):
     def on_double_click(self, event):
         self.show_selected_object_info()
     
+class DataFrameInspector(TypeSpecificInspector, GridTable):
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
+        GridTable.__init__(self, master)
+    
+    def set_object_info(self, object_info, label):
+        pass
+    
+    def applies_to(self, object_info):
+        return True
 
         
         
