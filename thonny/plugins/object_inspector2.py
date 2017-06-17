@@ -5,12 +5,11 @@ from thonny import ui_utils
 from thonny.common import InlineCommand
 from thonny.tktextext import TextFrame
 import logging
-from thonny.memory import MemoryFrame, format_object_id, MAX_REPR_LENGTH_IN_GRID,\
-    VariablesFrame
+import thonny.memory
 import ast
 from thonny.misc_utils import shorten_repr
 from thonny.ui_utils import update_entry_text, CALM_WHITE
-from thonny.gridtable import GridTable, DemoGridTable, ScrollableGridTable
+from thonny.gridtable import ScrollableGridTable
 
 
 class GridFrame(ttk.Frame):
@@ -209,7 +208,7 @@ class ObjectInspector2(ttk.Frame):
                 del self.forward_links[:]
                 
             self.object_id = object_id
-            update_entry_text(self.id_entry, format_object_id(object_id))
+            update_entry_text(self.id_entry, thonny.memory.format_object_id(object_id))
             self.set_object_info(None)
             self.request_object_info()
     
@@ -427,10 +426,10 @@ class StringInspector(TextFrame, TypeSpecificInspector):
                            "line" if line_count_term == 1 else "lines"))
         
 
-class ElementsInspector(MemoryFrame, TypeSpecificInspector):
+class ElementsInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        MemoryFrame.__init__(self, master, ('index', 'id', 'value'))
+        thonny.memory.MemoryFrame.__init__(self, master, ('index', 'id', 'value'))
         self.configure(border=1)
         
         #self.vert_scrollbar.grid_remove()
@@ -489,8 +488,8 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
             else:
                 self.tree.set(node_id, "index", "")
                 
-            self.tree.set(node_id, "id", format_object_id(element["id"]))
-            self.tree.set(node_id, "value", shorten_repr(element["repr"], MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "id", thonny.memory.format_object_id(element["id"]))
+            self.tree.set(node_id, "value", shorten_repr(element["repr"], thonny.memory.MAX_REPR_LENGTH_IN_GRID))
             index += 1
 
         count = len(object_info["elements"])
@@ -502,10 +501,10 @@ class ElementsInspector(MemoryFrame, TypeSpecificInspector):
         ) 
         
 
-class DictInspector(MemoryFrame, TypeSpecificInspector):
+class DictInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        MemoryFrame.__init__(self, master, ('key_id', 'id', 'key', 'value'))
+        thonny.memory.MemoryFrame.__init__(self, master, ('key_id', 'id', 'key', 'value'))
         self.configure(border=1)
         #self.vert_scrollbar.grid_remove()
         self.tree.column('key_id', width=100, anchor=tk.W, stretch=False)
@@ -543,10 +542,10 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         # TODO: don't show too big number of elements
         for key, value in object_info["entries"]:
             node_id = self.tree.insert("", "end")
-            self.tree.set(node_id, "key_id", format_object_id(key["id"]))
-            self.tree.set(node_id, "key", shorten_repr(key["repr"], MAX_REPR_LENGTH_IN_GRID))
-            self.tree.set(node_id, "id", format_object_id(value["id"]))
-            self.tree.set(node_id, "value", shorten_repr(value["repr"], MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "key_id", thonny.memory.format_object_id(key["id"]))
+            self.tree.set(node_id, "key", shorten_repr(key["repr"], thonny.memory.MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "id", thonny.memory.format_object_id(value["id"]))
+            self.tree.set(node_id, "value", shorten_repr(value["repr"], thonny.memory.MAX_REPR_LENGTH_IN_GRID))
 
         count = len(object_info["entries"])
         self.tree.config(height=min(count,10))
@@ -557,9 +556,9 @@ class DictInspector(MemoryFrame, TypeSpecificInspector):
         
         self.update_memory_model()
         
-class AttributesFrame(VariablesFrame):
+class AttributesFrame(thonny.memory.VariablesFrame):
     def __init__(self, master):
-        VariablesFrame.__init__(self, master)
+        thonny.memory.VariablesFrame.__init__(self, master)
         self.configure(border=1)
         self.vert_scrollbar.grid_remove()
        
@@ -572,7 +571,23 @@ class AttributesFrame(VariablesFrame):
 class DataFrameInspector(TypeSpecificInspector, ScrollableGridTable):
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        ScrollableGridTable.__init__(self, master)
+        
+        
+        data_row_count = 50
+        column_count = 16
+        
+        header_row = []
+        for i in range(column_count):
+            header_row.append("Hdr " + str(i) )
+        ScrollableGridTable.__init__(self, master, [header_row], 50, 0, 1)
+        
+        data_rows = {}
+        for r in range(data_row_count):
+            row = []
+            for i in range(column_count):
+                row.append("D" + str(r) + ":" + str(i))
+            data_rows[r] = row
+        self.grid_table.set_data_rows(data_rows)
     
     def set_object_info(self, object_info, label):
         pass
