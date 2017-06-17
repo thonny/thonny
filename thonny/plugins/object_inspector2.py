@@ -10,7 +10,7 @@ from thonny.memory import MemoryFrame, format_object_id, MAX_REPR_LENGTH_IN_GRID
 import ast
 from thonny.misc_utils import shorten_repr
 from thonny.ui_utils import update_entry_text, CALM_WHITE
-from thonny.gridtable import GridTable
+from thonny.gridtable import GridTable, DemoGridTable, ScrollableGridTable
 
 
 class GridFrame(ttk.Frame):
@@ -164,13 +164,14 @@ class ObjectInspector2(ttk.Frame):
         # type-specific inspectors
         self.current_type_specific_inspector = None
         self.current_type_specific_label = None
+        self.di = DataFrameInspector(self.data_frame)
         self.type_specific_inspectors = [ 
             FileHandleInspector(self.data_frame),
             FunctionInspector(self.data_frame),
             StringInspector(self.data_frame),
             ElementsInspector(self.data_frame),
             DictInspector(self.data_frame),
-            DataFrameInspector(self.data_frame)
+            self.di
         ]
         
         self.data_frame.columnconfigure(0, weight=1)
@@ -309,7 +310,7 @@ class ObjectInspector2(ttk.Frame):
         page.grid(row=1, column=0, sticky="nsew")
         #tab.configure(relief="sunken")
         
-        di = DataFrameInspector(self.data_frame)
+        di = self.di
         di.grid(row=0, column=0, sticky="nsew")
         
 
@@ -568,10 +569,10 @@ class AttributesFrame(VariablesFrame):
     def on_double_click(self, event):
         self.show_selected_object_info()
     
-class DataFrameInspector(TypeSpecificInspector, GridTable):
+class DataFrameInspector(TypeSpecificInspector, ScrollableGridTable):
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
-        GridTable.__init__(self, master)
+        ScrollableGridTable.__init__(self, master)
     
     def set_object_info(self, object_info, label):
         pass
