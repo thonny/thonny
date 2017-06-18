@@ -320,6 +320,8 @@ class VM:
                 self._add_elements_info(value, info)
             elif (isinstance(value, dict)):
                 self._add_entries_info(value, info)
+            else:
+                self._try_add_dataframe_info(value, info)
             
         else:
             info = {'id' : cmd.object_id,
@@ -390,7 +392,21 @@ class VM:
         for key in value:
             info["entries"].append((self.export_value(key),
                                      self.export_value(value[key])))
-        
+    
+    def _try_add_dataframe_info(self, value, info):
+        try:
+            if type(value).__name__ == "DataFrame":
+                info["columns"] = value.columns.tolist()
+                info["index"] = value.index.tolist()
+                info["values"] = value.values.tolist()
+                info["row_count"] = len(value)
+                info["is_DataFrame"] = True
+                
+                import pandas as pd  # @UnresolvedImport
+                info["float_format"] = pd.options.display.float_format 
+        except:
+            pass
+    
     def _execute_file(self, cmd, debug_mode):
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__

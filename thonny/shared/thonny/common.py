@@ -156,6 +156,8 @@ def serialize_message(msg):
     return repr(msg).encode("UTF-7").decode("ASCII") 
 
 def parse_message(msg_string):
+    # DataFrames may have nan 
+    nan = float("nan")  # @UnusedVariable
     return eval(msg_string.encode("ASCII").decode("UTF-7"))
 
 

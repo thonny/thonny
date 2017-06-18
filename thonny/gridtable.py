@@ -14,7 +14,7 @@ class GridTable(tk.Frame):
         
         self.bind("<Configure>", self.on_configure, True)
         
-        self.screen_row_height = 27 # TODO:
+        self.screen_row_height = 22 # TODO:
         
         self.first_visible_data_row_no = 0
         self.visible_data_row_count = 0
@@ -30,8 +30,10 @@ class GridTable(tk.Frame):
     
         self.update_header_rows()
     
-    def set_data_rows(self, data_rows):
-        self.data_rows.update(data_rows)
+    def set_data(self, data_rows):
+        # self.data_rows.update(data_rows) # dict version
+        self.data_rows = data_rows
+        self.data_row_count = len(data_rows)
         self.update_screen_data()
     
     
@@ -43,10 +45,6 @@ class GridTable(tk.Frame):
                 w.configure(text=self.get_header_value(row_no, col_no))
  
         self.screen_row_count = self.header_row_count
-    
-    def request_data(self, first_row, last_row):
-        """Post the request for indicated rows"""
-        pass
     
     def get_data_widget(self, screen_row_no, col_no):
         if (screen_row_no, col_no) not in self.data_widgets:
@@ -123,11 +121,14 @@ class GridTable(tk.Frame):
                     w.configure(text=str(value))
     
     def get_data_value(self, row_no, col_no):
+        """ lazy dict version:
         assert 0 <= row_no < self.data_row_count
         if row_no in self.data_rows:
             return self.data_rows[row_no][col_no]
         else:
             return ""
+        """
+        return self.data_rows[row_no][col_no]
                 
     def get_header_value(self, row_no, col_no):
         return self.header_rows[row_no][col_no]
@@ -157,7 +158,7 @@ class ScrollableGridTable(ttk.Frame):
         
         # set up scrolling with canvas
         hscrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self.canvas = tk.Canvas(self, bg=CALM_WHITE, bd=0, highlightthickness=0,
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0,
                            xscrollcommand=hscrollbar.set)
         get_workbench().bind_all("<Control-r>", self.debug)
         hscrollbar.config(command=self.canvas.xview)
@@ -173,7 +174,7 @@ class ScrollableGridTable(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.interior = tk.Frame(self.canvas, bg=CALM_WHITE)
+        self.interior = ttk.Frame(self.canvas)
         self.interior.columnconfigure(0, weight=1)
         self.interior.rowconfigure(0, weight=1)
         self.interior_id = self.canvas.create_window(0,0, 
@@ -183,7 +184,7 @@ class ScrollableGridTable(ttk.Frame):
         self.bind('<Expose>', self._on_expose, True)
         
         
-        self.grid_table = GridTable(self.interior, *gt_args, *gt_kwargs)
+        self.grid_table = GridTable(self.interior, *gt_args, **gt_kwargs)
         self.grid_table.grid(row=0, column=0, sticky=tk.NSEW)
         
         self._update_vertical_scrollbar()

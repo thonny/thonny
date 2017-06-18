@@ -11,36 +11,6 @@ from thonny.misc_utils import shorten_repr
 from thonny.ui_utils import update_entry_text, CALM_WHITE
 from thonny.gridtable import ScrollableGridTable
 
-
-class GridFrame(ttk.Frame):
-    def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
-        ttk.Frame.__init__(self, master)
-        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        if show_scrollbar:
-            self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
-        
-        self.tree = ttk.Treeview(self, columns=columns, displaycolumns=displaycolumns, 
-                                 yscrollcommand=self.vert_scrollbar.set)
-        self.tree['show'] = 'headings'
-        self.tree.grid(row=0, column=0, sticky=tk.NSEW)
-        self.vert_scrollbar['command'] = self.tree.yview
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
-        self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
-        
-    def _clear_tree(self):
-        for child_id in self.tree.get_children():
-            self.tree.delete(child_id)
-    
-    def on_select(self, event):
-        pass
-    
-    def on_double_click(self, event):
-        pass
-
-
-
 class ObjectInspector2(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
@@ -48,10 +18,11 @@ class ObjectInspector2(ttk.Frame):
         self.object_id = None
         self.object_info = None
         
-        self.active_page = None
         self._create_general_page()
         self._create_data_page()
         self._create_attributes_page()
+        self.active_page = self.data_frame
+        self.active_page.grid(row=1, column=0, sticky="nsew")
         
         toolbar = self._create_toolbar()
         toolbar.grid(row=0, column=0, sticky="nsew")
@@ -64,7 +35,7 @@ class ObjectInspector2(ttk.Frame):
         get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
         get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
         
-        self.demo()
+        #self.demo()
     
     def _create_toolbar(self):
         toolbar = ttk.Frame(self)
@@ -79,7 +50,11 @@ class ObjectInspector2(ttk.Frame):
         self.tabs = []
         
         def create_tab(col, caption, page):
-            tab = tk.Label(toolbar, text=" "+caption+" ", relief="flat", borderwidth=1)
+            if page == self.active_page:
+                relief = "sunken"
+            else:
+                relief = "flat"
+            tab = tk.Label(toolbar, text=" "+caption+" ", relief=relief, borderwidth=1)
             tab.grid(row=0, column=col, pady=5, padx=5, sticky="nsew")
             self.tabs.append(tab)
             page.tab = tab
@@ -163,14 +138,14 @@ class ObjectInspector2(ttk.Frame):
         # type-specific inspectors
         self.current_type_specific_inspector = None
         self.current_type_specific_label = None
-        self.di = DataFrameInspector(self.data_frame)
         self.type_specific_inspectors = [ 
             FileHandleInspector(self.data_frame),
             FunctionInspector(self.data_frame),
             StringInspector(self.data_frame),
             ElementsInspector(self.data_frame),
             DictInspector(self.data_frame),
-            self.di
+            DataFrameInspector(self.data_frame),
+            ReprInspector(self.data_frame)
         ]
         
         self.data_frame.columnconfigure(0, weight=1)
@@ -303,18 +278,6 @@ class ObjectInspector2(ttk.Frame):
         return label
         
     
-    def demo(self):
-        page = self.data_frame
-        self.active_page = page
-        page.grid(row=1, column=0, sticky="nsew")
-        #tab.configure(relief="sunken")
-        
-        di = self.di
-        di.grid(row=0, column=0, sticky="nsew")
-        
-
-class DataFrameFrame(ttk.Frame):
-    pass
 
 class ImageFrame(ttk.Frame):
     def __init__(self, master):
@@ -424,6 +387,33 @@ class StringInspector(TextFrame, TypeSpecificInspector):
                            "symbol" if len(content) == 1 else "symbols",
                            line_count_term, 
                            "line" if line_count_term == 1 else "lines"))
+        
+
+class ReprInspector(TextFrame, TypeSpecificInspector):
+    
+    def __init__(self, master):
+        TypeSpecificInspector.__init__(self, master)
+        TextFrame.__init__(self, master, read_only=True)
+        self.config(borderwidth=1)
+        self.text.configure(background="white")
+
+    def applies_to(self, object_info):
+        return True
+    
+    def set_object_info(self, object_info, label):
+        # TODO: don't show too big string
+        content = object_info["repr"]
+        self.text.set_content(content)
+        """
+        line_count_sep = len(content.split("\n"))
+        line_count_term = len(content.splitlines())
+        self.text.configure(height=min(line_count_sep, 10))
+        label.configure(text="%d %s, %d %s" 
+                        % (len(content),
+                           "symbol" if len(content) == 1 else "symbols",
+                           line_count_term, 
+                           "line" if line_count_term == 1 else "lines"))
+        """
         
 
 class ElementsInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
@@ -555,7 +545,7 @@ class DictInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
         ) 
         
         self.update_memory_model()
-        
+
 class AttributesFrame(thonny.memory.VariablesFrame):
     def __init__(self, master):
         thonny.memory.VariablesFrame.__init__(self, master)
@@ -568,11 +558,19 @@ class AttributesFrame(thonny.memory.VariablesFrame):
     def on_double_click(self, event):
         self.show_selected_object_info()
     
-class DataFrameInspector(TypeSpecificInspector, ScrollableGridTable):
+class DataFrameInspector(TypeSpecificInspector, tk.Frame):
     def __init__(self, master):
         TypeSpecificInspector.__init__(self, master)
+        tk.Frame.__init__(self, master)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
         
+        self.table = None
+        self.columns = None
+        self.index = None
+        self.values = None
         
+        """
         data_row_count = 50
         column_count = 16
         
@@ -588,12 +586,34 @@ class DataFrameInspector(TypeSpecificInspector, ScrollableGridTable):
                 row.append("D" + str(r) + ":" + str(i))
             data_rows[r] = row
         self.grid_table.set_data_rows(data_rows)
+        """
     
     def set_object_info(self, object_info, label):
-        pass
+        if self.table is not None and self.columns != object_info["columns"]:
+            self.table.grid_forget()
+            self.table.destroy()
+            self.table = None
+        
+        data = []
+        self.columns = object_info["columns"]
+        index = object_info["index"]
+        values = object_info["values"]
+        assert len(values) == len(index)
+        for i in range(len(values)):
+            data.append([index[i]] + values[i])
+        
+        headers = [""] + self.columns 
+        
+        if self.table is None:
+            self.table = ScrollableGridTable(self, [headers],
+                                             object_info["row_count"], 0, 1)
+            
+            self.table.grid(row=0, column=0, sticky="nsew")
+        
+        self.table.grid_table.set_data(data)
     
     def applies_to(self, object_info):
-        return True
+        return object_info.get("is_DataFrame", False)
 
         
         
