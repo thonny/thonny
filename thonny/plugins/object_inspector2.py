@@ -70,6 +70,10 @@ class ObjectInspector2(ttk.Frame):
                     self.active_page = page
                     page.grid(row=1, column=0, sticky="nsew")
                     tab.configure(relief="sunken")
+                    if (self.active_page == self.attributes_frame
+                        and (self.object_info is None
+                             or self.object_info["attributes"] == {})):
+                        self.request_object_info()
                 
             
             tab.bind("<1>", on_click)
@@ -204,6 +208,7 @@ class ObjectInspector2(ttk.Frame):
     def request_object_info(self): 
         get_runner().send_command(InlineCommand("get_object_info",
                                             object_id=self.object_id,
+                                            include_attributes=self.active_page == self.attributes_frame,
                                             all_attributes=False)) 
                     
     def set_object_info(self, object_info):

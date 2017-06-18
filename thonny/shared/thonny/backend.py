@@ -293,13 +293,14 @@ class VM:
         if cmd.object_id in self._heap:
             value = self._heap[cmd.object_id]
             attributes = {}
-            for name in dir(value):
-                if not name.startswith("__") or cmd.all_attributes:
-                    #attributes[name] = inspect.getattr_static(value, name)
-                    try: 
-                        attributes[name] = getattr(value, name)
-                    except:
-                        pass 
+            if cmd.include_attributes:
+                for name in dir(value):
+                    if not name.startswith("__") or cmd.all_attributes:
+                        #attributes[name] = inspect.getattr_static(value, name)
+                        try: 
+                            attributes[name] = getattr(value, name)
+                        except:
+                            pass 
             
             self._heap[id(type(value))] = type(value)
             
