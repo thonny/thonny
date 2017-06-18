@@ -149,6 +149,7 @@ class ObjectInspector2(ttk.Frame):
             ElementsInspector(self.data_frame),
             DictInspector(self.data_frame),
             DataFrameInspector(self.data_frame),
+            ImageInspector(self.data_frame),
             ReprInspector(self.data_frame)
         ]
         
@@ -206,10 +207,26 @@ class ObjectInspector2(ttk.Frame):
                 
                 
     def request_object_info(self): 
+        if self.active_page is not None:
+            frame_width=self.active_page.winfo_width()
+            frame_height=self.active_page.winfo_height()
+            
+            # in some cases measures are inaccurate
+            if frame_width < 5 or frame_height < 5:
+                frame_width = None
+                frame_height = None
+            #print("pa", frame_width, frame_height)
+        else:
+            frame_width=None
+            frame_height=None
+        
+        
         get_runner().send_command(InlineCommand("get_object_info",
                                             object_id=self.object_id,
                                             include_attributes=self.active_page == self.attributes_frame,
-                                            all_attributes=False)) 
+                                            all_attributes=False,
+                                            frame_width=frame_width,
+                                            frame_height=frame_height)) 
                     
     def set_object_info(self, object_info):
         self.object_info = object_info
@@ -283,11 +300,6 @@ class ObjectInspector2(ttk.Frame):
         return label
         
     
-
-class ImageFrame(ttk.Frame):
-    def __init__(self, master):
-        ttk.Frame.__init__(self, master)
-        self.label = ttk.Label(text="Caption")
 
 class TypeSpecificInspector:
     def __init__(self, master):
@@ -620,6 +632,22 @@ class DataFrameInspector(TypeSpecificInspector, tk.Frame):
     def applies_to(self, object_info):
         return object_info.get("is_DataFrame", False)
 
+class ImageInspector(TypeSpecificInspector, tk.Frame):
+    def __init__(self, master):
+        tk.Frame.__init__(self, master)
+        self.label = tk.Label(self, anchor="nw")
+        self.label.grid(row=0, column=0, sticky="nsew")
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+
+    def set_object_info(self, object_info, label):
+        #print(object_info["image_data"])
+        self.image = tk.PhotoImage(data=object_info["image_data"])
+        self.label.configure(image=self.image)
+    
+    def applies_to(self, object_info):
+        return "image_data" in object_info
+    
         
         
 def load_plugin():

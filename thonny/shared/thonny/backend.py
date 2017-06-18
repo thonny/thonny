@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys 
+import io
 import os.path
 import inspect
 import ast
@@ -323,6 +324,7 @@ class VM:
                 self._add_entries_info(value, info)
             else:
                 self._try_add_dataframe_info(value, info)
+                self._try_add_matplotlib_info(value, info, cmd)
             
         else:
             info = {'id' : cmd.object_id,
@@ -396,7 +398,8 @@ class VM:
     
     def _try_add_dataframe_info(self, value, info):
         try:
-            if type(value).__name__ == "DataFrame":
+            if (type(value).__name__ == "DataFrame"
+                and type(value).__module__ == "pandas.core.frame"):
                 info["columns"] = value.columns.tolist()
                 info["index"] = value.index.tolist()
                 info["values"] = value.values.tolist()
@@ -406,7 +409,37 @@ class VM:
                 import pandas as pd  # @UnresolvedImport
                 info["float_format"] = pd.options.display.float_format 
         except:
-            pass
+            logger.exception("Couldn't add DataFrame info")
+    
+    def _try_add_matplotlib_info(self, value, info, cmd):
+        try:
+            if (type(value).__name__ == "Figure"
+                and type(value).__module__ == "matplotlib.figure"):
+                # TODO: test with ion/ioff
+                
+                frame_width = getattr(cmd, "frame_width", None)
+                frame_height = getattr(cmd, "frame_height", None)
+                if frame_width is not None and frame_height is not None:
+                    frame_ratio = frame_width / frame_height
+                    fig_ratio = value.get_figwidth() / value.get_figheight()
+                    if frame_ratio > fig_ratio:
+                        # image size should depend on height
+                        dpi = frame_height / value.get_figheight()
+                    else:
+                        dpi = frame_width / value.get_figwidth()
+                else:
+                    dpi = None
+                
+                
+                #import matplotlib.pyplot as plt
+                fp = io.BytesIO()
+                value.savefig(fp, format="png", dpi=dpi)
+                
+                import base64
+                info["image_data"] = base64.b64encode(fp.getvalue())
+                fp.close() 
+        except:
+            logger.exception("Couldn't add Figure info")
     
     def _execute_file(self, cmd, debug_mode):
         # args are accepted only in Run and Debug,
