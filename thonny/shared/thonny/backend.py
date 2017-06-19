@@ -214,7 +214,7 @@ class VM:
         command, _ = parse_shell_command(cmd.cmd_line, False)
         try:
             if command in self._magic_handlers:
-                value = self._magic_handlers[command](cmd.cmd_line)
+                value = self._magic_handlers[command](cmd.cmd_line, __main__)
                 if value is not None:
                     return self.create_message("ToplevelResult", value_info=self._vm.export_value(value))
                 else:
