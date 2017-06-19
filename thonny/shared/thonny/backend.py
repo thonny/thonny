@@ -22,6 +22,8 @@ from thonny.common import TextRange,\
     ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
 import signal
 import warnings
+import pkgutil
+import importlib
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -36,6 +38,7 @@ info = logger.info
 
 class VM:
     def __init__(self):
+        self._magic_handlers = {}
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         site.sethelper() # otherwise help function is not available
@@ -76,6 +79,8 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
         
+        self._load_plugins()
+        
         self.send_message(self.create_message("ToplevelResult",
                           main_dir=self._main_dir,
                           original_argv=original_argv,
@@ -106,6 +111,9 @@ class VM:
         except:
             logger.exception("Crash in mainloop")
             
+    def add_magic_command(self, command, handler):
+        """Handler should be 1-argument function taking whole command line"""
+        self._magic_handlers[command] = handler
             
     def handle_command(self, cmd, command_context):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
@@ -132,6 +140,37 @@ class VM:
                 )
             self.send_message(response)
     
+    def _load_plugins(self, load_function_name="load_plugin"):
+        # built-in plugins 
+        import thonny.plugins
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
+                                     load_function_name=load_function_name)
+        
+        # 3rd party plugins from namespace package
+        try:
+            import thonnycontrib  # @UnresolvedImport
+        except ImportError:
+            # No 3rd party plugins installed
+            pass
+        else:
+            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
+                                     load_function_name=load_function_name)
+        
+    def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
+        for _, module_name, _ in pkgutil.iter_modules(path, prefix):
+            if module_name.endswith("backend"):
+                try:
+                    m = importlib.import_module(module_name)
+                    if hasattr(m, load_function_name):
+                        f = getattr(m, load_function_name)
+                        sig = inspect.signature(f)
+                        if len(sig.parameters) == 0:
+                            f()
+                        else:
+                            f(self)
+                except:
+                    logging.exception("Failed loading plugin '" + module_name + "'")
+                
     def _install_signal_handler(self):
         def signal_handler(signal, frame):
             raise KeyboardInterrupt("Execution interrupted")
@@ -169,6 +208,30 @@ class VM:
     
     def _cmd_execute_source(self, cmd):
         return self._execute_source(cmd, "ToplevelResult")
+    
+    def _cmd_execute_magic(self, cmd):
+        from thonny.common import parse_shell_command
+        command, _ = parse_shell_command(cmd.cmd_line, False)
+        try:
+            if command in self._magic_handlers:
+                value = self._magic_handlers[command](cmd.cmd_line)
+                if value is not None:
+                    return self.create_message("ToplevelResult", value_info=self._vm.export_value(value))
+                else:
+                    return self.create_message("ToplevelResult")
+            else:
+                raise RuntimeError("Unknown magic command: " + command)
+        except SystemExit:
+            e_type, e_value, e_traceback = sys.exc_info()
+            self._print_user_exception(e_type, e_value, e_traceback)
+            return self.create_message("ToplevelResult", SystemExit=True)
+        except:
+            # other unhandled exceptions  are printed to stderr, as usual
+            e_type, e_value, e_traceback = sys.exc_info()
+            self._print_user_exception(e_type, e_value, e_traceback)
+            return self.create_message("ToplevelResult", context_info="other unhandled exception")
+            
+        return self.create_message("ToplevelResult")
     
     def _cmd_execute_source_inline(self, cmd):
         return self._execute_source(cmd, "InlineResult")
@@ -501,7 +564,18 @@ class VM:
         finally:
             self._current_executor = None
     
-        
+    def _print_user_exception(self, e_type, e_value, e_traceback):
+        lines = traceback.format_exception(e_type, e_value, e_traceback)
+
+        for line in lines:
+            # skip lines denoting thonny execution frame
+            if ("thonny/backend" in line 
+                or "thonny\\backend" in line
+                or "remove this line from stacktrace" in line):
+                continue
+            else:
+                sys.stderr.write(line)
+                
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
         self._original_stdout = sys.stdout
@@ -666,29 +740,17 @@ class Executor:
             return {"error" : str(e)}
         except SystemExit:
             e_type, e_value, e_traceback = sys.exc_info()
-            self._print_user_exception(e_type, e_value, e_traceback)
+            self._vm._print_user_exception(e_type, e_value, e_traceback)
             return {"SystemExit" : True}
         except:
             # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
             # for VM mainloop they are not exceptions
             e_type, e_value, e_traceback = sys.exc_info()
-            self._print_user_exception(e_type, e_value, e_traceback)
+            self._vm._print_user_exception(e_type, e_value, e_traceback)
             return {"context_info" : "other unhandled exception"}
         finally:
             sys.settrace(None)
     
-    def _print_user_exception(self, e_type, e_value, e_traceback):
-        lines = traceback.format_exception(e_type, e_value, e_traceback)
-
-        for line in lines:
-            # skip lines denoting thonny execution frame
-            if ("thonny/backend" in line 
-                or "thonny\\backend" in line
-                or "remove this line from stacktrace" in line):
-                continue
-            else:
-                sys.stderr.write(line)
-
     def _compile_source(self, source, filename, mode):
         return compile(source, filename, mode)
 

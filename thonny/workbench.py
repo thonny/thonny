@@ -239,12 +239,14 @@ class Workbench(tk.Tk):
         
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
-            try:
-                m = importlib.import_module(module_name)
-                if hasattr(m, load_function_name):
-                    getattr(m, load_function_name)()
-            except:
-                logging.exception("Failed loading plugin '" + module_name + "'")
+            if not module_name.endswith("backend"):
+                # TODO: should end with "frontend"?
+                try:
+                    m = importlib.import_module(module_name)
+                    if hasattr(m, load_function_name):
+                        getattr(m, load_function_name)()
+                except:
+                    logging.exception("Failed loading plugin '" + module_name + "'")
     
                                 
     def _init_fonts(self):
