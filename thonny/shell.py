@@ -503,8 +503,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         self._command_handlers[command](text_to_be_submitted)
                         get_workbench().event_generate("AfterKnownMagicCommand", cmd_line=text_to_be_submitted)
                     else:
-                        self._insert_text_directly("Unknown magic command: " + command)
-                        self._insert_prompt()
+                        # TODO: check for Run, Reset, Debug
+                        get_runner().send_command(ToplevelCommand(command="execute_magic", cmd_line=text_to_be_submitted))
                 else:
                     get_runner().send_command(
                         ToplevelCommand(command="execute_source",
