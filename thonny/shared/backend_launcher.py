@@ -33,6 +33,12 @@ if __name__ == "__main__":
     
     logger.setLevel(logging.INFO)
     
+    # Disable blurry scaling in Windows
+    if os.name == "nt":
+        import ctypes
+        ctypes.windll.user32.SetProcessDPIAware()    
+
+    
     from thonny.backend import VM  # @UnresolvedImport
     VM().mainloop()
     
