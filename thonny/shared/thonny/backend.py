@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sys 
-import io
 import os.path
 import inspect
 import ast
@@ -40,6 +39,7 @@ class VM:
     def __init__(self):
         self._magic_handlers = {}
         self._value_tweakers = []
+        self._object_info_tweakers = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         site.sethelper() # otherwise help function is not available
@@ -120,6 +120,10 @@ class VM:
         """Tweaker should be 2-argument function taking value and export record"""
         self._value_tweakers.append(tweaker)
     
+    def add_object_info_tweaker(self, tweaker):
+        """Tweaker should be 2-argument function taking value and export record"""
+        self._object_info_tweakers.append(tweaker)
+    
     def get_main_module(self):
         return self.__main__
             
@@ -135,6 +139,7 @@ class VM:
             try:
                 response = handler(cmd)
             except:
+                logger.exception("Command failed: " + str(cmd))
                 response = self.create_message(error_response_type,
                     error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT)))
         
@@ -375,7 +380,6 @@ class VM:
                             pass 
             
             self._heap[id(type(value))] = type(value)
-            
             info = {'id' : cmd.object_id,
                     'repr' : repr(value),
                     'type' : str(type(value)),
@@ -393,9 +397,12 @@ class VM:
                 self._add_elements_info(value, info)
             elif (isinstance(value, dict)):
                 self._add_entries_info(value, info)
-            else:
-                self._try_add_dataframe_info(value, info)
-                self._try_add_matplotlib_info(value, info, cmd)
+            
+            for tweaker in self._object_info_tweakers:
+                try:
+                    tweaker(value, info, cmd)
+                except:
+                    logger.exception("Failed object info tweaker: " + str(tweaker))
             
         else:
             info = {'id' : cmd.object_id,
@@ -466,51 +473,6 @@ class VM:
         for key in value:
             info["entries"].append((self.export_value(key),
                                      self.export_value(value[key])))
-    
-    def _try_add_dataframe_info(self, value, info):
-        try:
-            if (type(value).__name__ == "DataFrame"
-                and type(value).__module__ == "pandas.core.frame"):
-                info["columns"] = value.columns.tolist()
-                info["index"] = value.index.tolist()
-                info["values"] = value.values.tolist()
-                info["row_count"] = len(value)
-                info["is_DataFrame"] = True
-                
-                import pandas as pd  # @UnresolvedImport
-                info["float_format"] = pd.options.display.float_format 
-        except:
-            logger.exception("Couldn't add DataFrame info")
-    
-    def _try_add_matplotlib_info(self, value, info, cmd):
-        try:
-            if (type(value).__name__ == "Figure"
-                and type(value).__module__ == "matplotlib.figure"):
-                # TODO: test with ion/ioff
-                
-                frame_width = getattr(cmd, "frame_width", None)
-                frame_height = getattr(cmd, "frame_height", None)
-                if frame_width is not None and frame_height is not None:
-                    frame_ratio = frame_width / frame_height
-                    fig_ratio = value.get_figwidth() / value.get_figheight()
-                    if frame_ratio > fig_ratio:
-                        # image size should depend on height
-                        dpi = frame_height / value.get_figheight()
-                    else:
-                        dpi = frame_width / value.get_figwidth()
-                else:
-                    dpi = None
-                
-                
-                #import matplotlib.pyplot as plt
-                fp = io.BytesIO()
-                value.savefig(fp, format="png", dpi=dpi)
-                
-                import base64
-                info["image_data"] = base64.b64encode(fp.getvalue())
-                fp.close() 
-        except:
-            logger.exception("Couldn't add Figure info")
     
     def _execute_file(self, cmd, debug_mode):
         # args are accepted only in Run and Debug,
