@@ -153,7 +153,8 @@ class BackendGridTable(GridTable):
             
 
 class ScrollableGridTable(ttk.Frame):
-    def __init__(self, master, *gt_args, **gt_kwargs):
+    def __init__(self, master, header_rows, data_row_count, footer_row_count,
+                      frozen_column_count):
         ttk.Frame.__init__(self, master)
         
         # set up scrolling with canvas
@@ -161,17 +162,20 @@ class ScrollableGridTable(ttk.Frame):
         self.canvas = tk.Canvas(self, bd=0, highlightthickness=0,
                            xscrollcommand=hscrollbar.set)
         get_workbench().bind_all("<Control-r>", self.debug)
+        self.create_infopanel(data_row_count)
         hscrollbar.config(command=self.canvas.xview)
         self.canvas.xview_moveto(0)
         self.canvas.yview_moveto(0)
-        self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
-        hscrollbar.grid(row=1, column=0, sticky=tk.NSEW)
+        
+        self.canvas.grid(row=0, column=0, columnspan=2, sticky=tk.NSEW)
+        self.infopanel.grid(row=1, column=0, sticky=tk.NSEW)
+        hscrollbar.grid(row=1, column=1, sticky=tk.NSEW)
         
         # vertical scrollbar performs virtual scrolling
         self.vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, command=self._handle_vertical_scroll)
-        self.vscrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+        self.vscrollbar.grid(row=0, column=2, sticky=tk.NSEW)
         
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
         
         self.interior = ttk.Frame(self.canvas)
@@ -184,7 +188,8 @@ class ScrollableGridTable(ttk.Frame):
         self.bind('<Expose>', self._on_expose, True)
         
         
-        self.grid_table = GridTable(self.interior, *gt_args, **gt_kwargs)
+        self.grid_table = GridTable(self.interior, header_rows, data_row_count, footer_row_count,
+                      frozen_column_count)
         self.grid_table.grid(row=0, column=0, sticky=tk.NSEW)
         
         self._update_vertical_scrollbar()
@@ -192,6 +197,11 @@ class ScrollableGridTable(ttk.Frame):
     def debug(self, event=None):
         print("DE", self.vscrollbar.get())
     
+    def create_infopanel(self, data_row_count):
+        self.infopanel = ttk.Frame(self)
+        self.size_label = ttk.Label(self.infopanel, text=str(data_row_count) + " rows")
+        self.size_label.grid(row=0, column=0, padx=5)
+            
     def _update_vertical_scrollbar(self):
         first = self.grid_table.first_visible_data_row_no / self.grid_table.data_row_count
         last = first + self.grid_table.visible_data_row_count / self.grid_table.data_row_count
