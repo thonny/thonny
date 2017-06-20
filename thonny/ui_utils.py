@@ -285,6 +285,9 @@ class TreeFrame(ttk.Frame):
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
     
+    def clear(self):
+        self._clear_tree()
+    
     def on_select(self, event):
         pass
     

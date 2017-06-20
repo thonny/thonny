@@ -19,9 +19,9 @@ class ObjectInspector2(ttk.Frame):
         self.object_info = None
         
         self._create_general_page()
-        self._create_data_page()
+        self._create_content_page()
         self._create_attributes_page()
-        self.active_page = self.data_frame
+        self.active_page = self.content_page
         self.active_page.grid(row=1, column=0, sticky="nsew")
         
         toolbar = self._create_toolbar()
@@ -70,7 +70,7 @@ class ObjectInspector2(ttk.Frame):
                     self.active_page = page
                     page.grid(row=1, column=0, sticky="nsew")
                     tab.configure(relief="sunken")
-                    if (self.active_page == self.attributes_frame
+                    if (self.active_page == self.attributes_page
                         and (self.object_info is None
                              or self.object_info["attributes"] == {})):
                         self.request_object_info()
@@ -78,9 +78,9 @@ class ObjectInspector2(ttk.Frame):
             
             tab.bind("<1>", on_click)
         
-        create_tab(1, "Overview", self.overview_frame)
-        create_tab(2, "Data", self.data_frame)
-        create_tab(3, "Atts", self.attributes_frame)
+        create_tab(1, "Overview", self.genera_page)
+        create_tab(2, "Data", self.content_page)
+        create_tab(3, "Atts", self.attributes_page)
         
         
         def create_navigation_link(col, image_filename, action, tooltip, padx=0):
@@ -109,15 +109,15 @@ class ObjectInspector2(ttk.Frame):
         
     
     def _create_general_page(self):
-        self.overview_frame = tk.Frame(self, background=CALM_WHITE)
+        self.genera_page = tk.Frame(self, background=CALM_WHITE)
         
         def _add_main_attribute(row, caption):
-            label = tk.Label(self.overview_frame, text=caption + ":  ",
+            label = tk.Label(self.genera_page, text=caption + ":  ",
                              background=CALM_WHITE,
                              justify=tk.LEFT)
             label.grid(row=row, column=0, sticky=tk.NW)
             
-            value = tk.Entry(self.overview_frame,
+            value = tk.Entry(self.genera_page,
                              background=CALM_WHITE,
                              bd=0,
                              readonlybackground=CALM_WHITE,
@@ -137,27 +137,33 @@ class ObjectInspector2(ttk.Frame):
         self.type_entry.config(cursor="hand2", fg="dark blue")
         self.type_entry.bind("<Button-1>", self.goto_type)
 
-    def _create_data_page(self):
-        self.data_frame = ttk.Frame(self)
+    def _create_content_page(self):
+        self.content_page = ttk.Frame(self)
         # type-specific inspectors
         self.current_type_specific_inspector = None
         self.current_type_specific_label = None
-        self.type_specific_inspectors = [ 
-            FileHandleInspector(self.data_frame),
-            FunctionInspector(self.data_frame),
-            StringInspector(self.data_frame),
-            ElementsInspector(self.data_frame),
-            DictInspector(self.data_frame),
-            DataFrameInspector(self.data_frame),
-            ImageInspector(self.data_frame),
-            ReprInspector(self.data_frame)
-        ]
         
-        self.data_frame.columnconfigure(0, weight=1)
-        self.data_frame.rowconfigure(0, weight=1)
+        self.content_inspectors = []
+        # load custom inspectors
+        for insp_class in get_workbench().content_inspector_classes:
+            self.content_inspectors.append(insp_class(self.content_page))
+        
+        # read standard inspectors
+        self.content_inspectors.extend([
+            FileHandleInspector(self.content_page),
+            FunctionInspector(self.content_page),
+            StringInspector(self.content_page),
+            ElementsInspector(self.content_page),
+            DictInspector(self.content_page),
+            ImageInspector(self.content_page),
+            ReprInspector(self.content_page) # fallback content inspector
+        ])
+        
+        self.content_page.columnconfigure(0, weight=1)
+        self.content_page.rowconfigure(0, weight=1)
     
     def _create_attributes_page(self):
-        self.attributes_frame = AttributesFrame(self)        
+        self.attributes_page = AttributesFrame(self)        
 
     
     def navigate_back(self, event):
@@ -223,7 +229,7 @@ class ObjectInspector2(ttk.Frame):
         
         get_runner().send_command(InlineCommand("get_object_info",
                                             object_id=self.object_id,
-                                            include_attributes=self.active_page == self.attributes_frame,
+                                            include_attributes=self.active_page == self.attributes_page,
                                             all_attributes=False,
                                             frame_width=frame_width,
                                             frame_height=frame_height)) 
@@ -233,12 +239,15 @@ class ObjectInspector2(ttk.Frame):
         if object_info is None:
             update_entry_text(self.repr_entry, "")
             update_entry_text(self.type_entry, "")
-            "self.data_frame.child.grid_remove()"
+            if self.current_type_specific_inspector is not None:
+                self.current_type_specific_inspector.grid_remove()
+                self.current_type_specific_inspector = None
+            self.attributes_page.clear()
         else:
             update_entry_text(self.repr_entry, object_info["repr"])
             update_entry_text(self.type_entry, object_info["type"])
-            self.attributes_frame.tree.configure(height=len(object_info["attributes"]))
-            self.attributes_frame.update_variables(object_info["attributes"])
+            self.attributes_page.tree.configure(height=len(object_info["attributes"]))
+            self.attributes_page.update_variables(object_info["attributes"])
             self.update_type_specific_info(object_info)
                 
             
@@ -261,7 +270,7 @@ class ObjectInspector2(ttk.Frame):
     
     def update_type_specific_info(self, object_info):
         type_specific_inspector = None
-        for insp in self.type_specific_inspectors:
+        for insp in self.content_inspectors:
             if insp.applies_to(object_info):
                 type_specific_inspector = insp
                 break
@@ -285,8 +294,7 @@ class ObjectInspector2(ttk.Frame):
             self.current_type_specific_inspector = type_specific_inspector
         
         if self.current_type_specific_inspector is not None:
-            self.current_type_specific_inspector.set_object_info(object_info,
-                                                             self.current_type_specific_label)
+            self.current_type_specific_inspector.set_object_info(object_info)
     
     def goto_type(self, event):
         if self.object_info is not None:
@@ -295,26 +303,29 @@ class ObjectInspector2(ttk.Frame):
     
     
     def _add_block_label(self, row, caption):
-        label = tk.Label(self.overview_frame, bg=ui_utils.CALM_WHITE, text=caption)
+        label = tk.Label(self.genera_page, bg=ui_utils.CALM_WHITE, text=caption)
         label.grid(row=row, column=0, columnspan=4, sticky="nsew", pady=(20,0))
         return label
         
     
 
-class TypeSpecificInspector:
+class ContentInspector:
     def __init__(self, master):
         pass
     
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         pass
+    
+    def get_tab_text(self):
+        return "Content"
     
     def applies_to(self, object_info):
         return False
     
-class FileHandleInspector(TextFrame, TypeSpecificInspector):
+class FileHandleInspector(TextFrame, ContentInspector):
     
     def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
+        ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
         self.cache = {} # stores file contents for handle id-s
         self.config(borderwidth=1)
@@ -325,7 +336,7 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
         return ("file_content" in object_info
                 or "file_error" in object_info)
     
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         
         if "file_content" not in object_info:
             logging.exception("File error: " + object_info["file_error"])
@@ -353,6 +364,8 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
         self.text.tag_add("read", "1.0", pos_index)
         self.text.see(pos_index)
         
+        # TODO: show this info somewhere
+        """
         label.configure(text="Read %d/%d %s, %d/%d %s" 
                         % (read_char_count,
                            char_count,
@@ -360,13 +373,13 @@ class FileHandleInspector(TextFrame, TypeSpecificInspector):
                            read_line_count_term,
                            line_count_term,
                            "line" if line_count_term == 1 else "lines"))
+        """    
             
             
-            
-class FunctionInspector(TextFrame, TypeSpecificInspector):
+class FunctionInspector(TextFrame, ContentInspector):
     
     def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
+        ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
@@ -374,17 +387,19 @@ class FunctionInspector(TextFrame, TypeSpecificInspector):
     def applies_to(self, object_info):
         return "source" in object_info
     
-    def set_object_info(self, object_info, label):
+    def get_tab_text(self):
+        return "Code"
+    
+    def set_object_info(self, object_info):
         line_count = len(object_info["source"].split("\n"))
         self.text.configure(height=min(line_count, 15))
         self.text.set_content(object_info["source"])
-        label.configure(text="Code")
                 
             
-class StringInspector(TextFrame, TypeSpecificInspector):
+class StringInspector(TextFrame, ContentInspector):
     
     def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
+        ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
@@ -392,24 +407,26 @@ class StringInspector(TextFrame, TypeSpecificInspector):
     def applies_to(self, object_info):
         return object_info["type"] == repr(str)
     
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         # TODO: don't show too big string
         content = ast.literal_eval(object_info["repr"])
         line_count_sep = len(content.split("\n"))
         line_count_term = len(content.splitlines())
         self.text.configure(height=min(line_count_sep, 10))
         self.text.set_content(content)
+        """ TODO:
         label.configure(text="%d %s, %d %s" 
                         % (len(content),
                            "symbol" if len(content) == 1 else "symbols",
                            line_count_term, 
                            "line" if line_count_term == 1 else "lines"))
+        """
         
 
-class ReprInspector(TextFrame, TypeSpecificInspector):
+class ReprInspector(TextFrame, ContentInspector):
     
     def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
+        ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
         self.config(borderwidth=1)
         self.text.configure(background="white")
@@ -417,7 +434,7 @@ class ReprInspector(TextFrame, TypeSpecificInspector):
     def applies_to(self, object_info):
         return True
     
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         # TODO: don't show too big string
         content = object_info["repr"]
         self.text.set_content(content)
@@ -433,9 +450,9 @@ class ReprInspector(TextFrame, TypeSpecificInspector):
         """
         
 
-class ElementsInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
+class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
     def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
+        ContentInspector.__init__(self, master)
         thonny.memory.MemoryFrame.__init__(self, master, ('index', 'id', 'value'))
         self.configure(border=1)
         
@@ -479,7 +496,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
     def on_double_click(self, event):
         self.show_selected_object_info()
     
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         assert "elements" in object_info
         
         self.elements_have_indices = object_info["type"] in (repr(tuple), repr(list))
@@ -502,15 +519,16 @@ class ElementsInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
         count = len(object_info["elements"])
         self.tree.config(height=min(count,10))
         
-        
+        """ TODO:
         label.configure (
             text=("%d element" if count == 1 else "%d elements") % count
         ) 
+        """
         
 
-class DictInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
+class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
     def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
+        ContentInspector.__init__(self, master)
         thonny.memory.MemoryFrame.__init__(self, master, ('key_id', 'id', 'key', 'value'))
         self.configure(border=1)
         #self.vert_scrollbar.grid_remove()
@@ -542,7 +560,7 @@ class DictInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
         # NB! this selects value
         self.show_selected_object_info()
 
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         assert "entries" in object_info
         
         self._clear_tree()
@@ -557,82 +575,15 @@ class DictInspector(thonny.memory.MemoryFrame, TypeSpecificInspector):
         count = len(object_info["entries"])
         self.tree.config(height=min(count,10))
         
+        """ TODO:
         label.configure (
             text=("%d entry" if count == 1 else "%d entries") % count
         ) 
+        """
         
         self.update_memory_model()
 
-class AttributesFrame(thonny.memory.VariablesFrame):
-    def __init__(self, master):
-        thonny.memory.VariablesFrame.__init__(self, master)
-        self.configure(border=1)
-        self.vert_scrollbar.grid_remove()
-       
-    def on_select(self, event):
-        pass
-    
-    def on_double_click(self, event):
-        self.show_selected_object_info()
-    
-class DataFrameInspector(TypeSpecificInspector, tk.Frame):
-    def __init__(self, master):
-        TypeSpecificInspector.__init__(self, master)
-        tk.Frame.__init__(self, master)
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-        
-        self.table = None
-        self.columns = None
-        self.index = None
-        self.values = None
-        
-        """
-        data_row_count = 50
-        column_count = 16
-        
-        header_row = []
-        for i in range(column_count):
-            header_row.append("Hdr " + str(i) )
-        ScrollableGridTable.__init__(self, master, [header_row], 50, 0, 1)
-        
-        data_rows = {}
-        for r in range(data_row_count):
-            row = []
-            for i in range(column_count):
-                row.append("D" + str(r) + ":" + str(i))
-            data_rows[r] = row
-        self.grid_table.set_data_rows(data_rows)
-        """
-    
-    def set_object_info(self, object_info, label):
-        if self.table is not None and self.columns != object_info["columns"]:
-            self.table.grid_forget()
-            self.table.destroy()
-            self.table = None
-        
-        data = []
-        self.columns = object_info["columns"]
-        index = object_info["index"]
-        values = object_info["values"]
-        assert len(values) == len(index)
-        for i in range(len(values)):
-            data.append([index[i]] + values[i])
-        
-        headers = [""] + self.columns 
-        
-        if self.table is None:
-            self.table = ScrollableGridTable(self, [headers],
-                                             object_info["row_count"], 0, 1)
-            
-            self.table.grid(row=0, column=0, sticky="nsew")
-        
-        self.table.grid_table.set_data(data)
-    
-    def applies_to(self, object_info):
-        return object_info.get("is_DataFrame", False)
-
-class ImageInspector(TypeSpecificInspector, tk.Frame):
+class ImageInspector(ContentInspector, tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
         self.label = tk.Label(self, anchor="nw")
@@ -640,13 +591,24 @@ class ImageInspector(TypeSpecificInspector, tk.Frame):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-    def set_object_info(self, object_info, label):
+    def set_object_info(self, object_info):
         #print(object_info["image_data"])
         self.image = tk.PhotoImage(data=object_info["image_data"])
         self.label.configure(image=self.image)
     
     def applies_to(self, object_info):
         return "image_data" in object_info
+    
+class AttributesFrame(thonny.memory.VariablesFrame):
+    def __init__(self, master):
+        thonny.memory.VariablesFrame.__init__(self, master)
+        self.configure(border=1)
+       
+    def on_select(self, event):
+        pass
+    
+    def on_double_click(self, event):
+        self.show_selected_object_info()
     
         
         

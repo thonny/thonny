@@ -68,6 +68,7 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
+        self.content_inspector_classes = []
         self._theme_tweaker = None
         thonny.globals.register_workbench(self)
         
@@ -599,11 +600,14 @@ class Workbench(tk.Tk):
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
     
-    def map_image(self, original_image, new_image):
-        self._image_mapping[original_image] = new_image
+    def add_content_inspector(self, inspector_class):
+        self.content_inspector_classes.append(inspector_class)
     
     def add_backend(self, descriptor, proxy_class):
         self._backends[descriptor] = proxy_class
+    
+    def map_image(self, original_image, new_image):
+        self._image_mapping[original_image] = new_image
     
     def get_backends(self):
         return self._backends
