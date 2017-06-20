@@ -13,7 +13,7 @@ from thonny.globals import get_workbench
 import tkinter as tk
 import logging
 
-NAME_CONF = {'background' : '#e6ecfe'}
+NAME_CONF = {'background' : '#e6ecfe', 'relief' : 'flat', 'borderwidth' : 0}
 
 class BaseNameHighlighter:
     def __init__(self, text):
@@ -55,9 +55,11 @@ class BaseNameHighlighter:
         
         if get_workbench().get_option("view.name_highlighting"):
             try:
-                for pos in self.get_positions():
-                    start_index, end_index = pos[0], pos[1]
-                    self.text.tag_add("NAME", start_index, end_index)
+                positions = self.get_positions()
+                if len(positions) > 1:
+                    for pos in positions:
+                        start_index, end_index = pos[0], pos[1]
+                        self.text.tag_add("NAME", start_index, end_index)
             except:
                 logging.exception("Problem when updating name highlighting")
 
