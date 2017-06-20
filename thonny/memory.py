@@ -85,14 +85,17 @@ class VariablesFrame(MemoryFrame):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
                     if isinstance(variables[name], dict):
-                        repr_str = variables[name]["repr"]
+                        if "description" in variables[name]:
+                            description = variables[name]["description"]
+                        else:
+                            description = variables[name]["repr"]
                         id_str = variables[name]["id"]
                     else:
-                        repr_str = variables[name]
+                        description = variables[name]
                         id_str = None
                         
                     self.tree.set(node_id, "id", format_object_id(id_str))
-                    self.tree.set(node_id, "value", shorten_repr(repr_str, MAX_REPR_LENGTH_IN_GRID))
+                    self.tree.set(node_id, "value", shorten_repr(description, MAX_REPR_LENGTH_IN_GRID))
     
     
     def on_select(self, event):

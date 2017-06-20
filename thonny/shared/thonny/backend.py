@@ -39,6 +39,7 @@ info = logger.info
 class VM:
     def __init__(self):
         self._magic_handlers = {}
+        self._value_tweakers = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         site.sethelper() # otherwise help function is not available
@@ -114,6 +115,13 @@ class VM:
     def add_magic_command(self, command, handler):
         """Handler should be 1-argument function taking whole command line"""
         self._magic_handlers[command] = handler
+            
+    def add_value_tweaker(self, tweaker):
+        """Tweaker should be 2-argument function taking value and export record"""
+        self._value_tweakers.append(tweaker)
+    
+    def get_main_module(self):
+        return self.__main__
             
     def handle_command(self, cmd, command_context):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
@@ -624,6 +632,9 @@ class VM:
         result = {'id' : id(value),
                   'repr' : repr(value), 
                   'type_name'  : type_name}
+        
+        for tweaker in self._value_tweakers:
+            tweaker(value, result)
         
         return result
     
