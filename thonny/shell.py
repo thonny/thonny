@@ -51,8 +51,11 @@ class ShellView (ttk.Frame):
     def add_command(self, command, handler):
         self.text.add_command(command, handler)
 
-    def submit_command(self, cmd_line):
-        self.text.submit_command(cmd_line)
+    def submit_python_code(self, cmd_line):
+        self.text.submit_command(cmd_line, ())
+
+    def submit_magic_command(self, cmd_line):
+        self.text.submit_command(cmd_line, ("automagic",))
     
     def clear_shell(self):
         self.text._clear_shell()
@@ -163,10 +166,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def add_command(self, command, handler):
         self._command_handlers[command] = handler
         
-    def submit_command(self, cmd_line):
+    def submit_command(self, cmd_line, tags):
         assert get_runner().get_state() == "waiting_toplevel_command"
         self.delete("input_start", "end")
-        self.insert("input_start", cmd_line, ("automagic",))
+        self.insert("input_start", cmd_line, tags)
         self.see("end")
         self.mark_set("insert", "end")
         self._try_submit_input()

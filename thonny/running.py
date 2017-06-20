@@ -177,7 +177,7 @@ class Runner:
         cmd_line += "\n"
         
         # submit to shell (shell will execute it)
-        get_workbench().get_view("ShellView").submit_command(cmd_line)
+        get_workbench().get_view("ShellView").submit_magic_command(cmd_line)
         
     def execute_current(self, command_name, always_change_to_script_dir=False):
         """
@@ -285,7 +285,7 @@ class Runner:
     
     def cmd_interrupt_reset(self):
         if self.get_state() == "waiting_toplevel_command":
-            get_workbench().get_view("ShellView").submit_command("%Reset\n")
+            get_workbench().get_view("ShellView").submit_magic_command("%Reset\n")
         else:
             get_runner().interrupt_backend()
     
