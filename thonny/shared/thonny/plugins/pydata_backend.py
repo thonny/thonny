@@ -1,6 +1,7 @@
 import io
 import sys
 import logging
+import numpy as np
 
 app = None
 vm = None
@@ -11,23 +12,47 @@ def handle_dataexplore(command_line):
     from pandastable.app import DataExplore
     import tkinter as tk
     global app
-    command, args = parse_shell_command(command_line, False)
-    
-    if app is None:
-        app = DataExplore()
-    else:
-        try:
-            app.state()
-        except tk.TclError:
-            app = DataExplore()
-        
+    _, args = parse_shell_command(command_line, False)
     
     if len(args) == 1 and args[0].strip() != "":
         expr = args[0].strip()
         df = eval(expr, vm.get_main_module().__dict__)
-        app.load_dataframe(df, expr)
+    else:
+        df = None
+    
+    
+    def create_app():
+        global app
+        app = DataExplore()
+        #app.newProject(df=df)
+        
+    if app is None:
+        create_app()
+    else:
+        try:
+            app.state()
+        except tk.TclError:
+            create_app()
+    
+    # Show dataexplore window
+    _bring_up(app.main)
+    #app.bring_to_foreground()
+    
+    # load data
+    #app.load_dataframe(df, expr, select=True)
+    app.load_dataframe(df, expr)
+    
+    # Bring up correct tab
+    ind = app.nb.index('end')-1
+    s = app.nb.tabs()[ind]
+    app.nb.select(s)
+    
 
-def tweak_value(value, record):
+def tweak_numpy_value(value, record):
+    if isinstance(value, np.ndarray):  # @UndefinedVariable
+        record["description"] = "NumPy array [" + " x ".join(map(str, value.shape)) + "]"
+
+def tweak_pandas_value(value, record):
     # "weak" import pandas, because user script maybe uses only numpy
     pd = sys.modules.get("pandas")
     if pd is None:
@@ -35,16 +60,20 @@ def tweak_value(value, record):
     
     if isinstance(value, pd.DataFrame):
         shape = value.shape
-        record["description"] = (type(value).__name__ 
+        record["description"] = ("pandas " + type(value).__name__ 
                                  + " [" + str(shape[0]) + " rows x "
                                  + str(shape[1]) + " columns]")
     elif isinstance(value, pd.Series):
-        record["description"] = ("Series [Name: %s, Length: %d, dtype: %s]" 
-                                 % (value.name, value.shape[0], value.dtype.name))
+        record["description"] = ("pandas " + type(value).__name__ +  
+                                  " [Name: %s, Length: %d, dtype: %s]" 
+                                   % (value.name, value.shape[0], value.dtype.name))
 
 def _check_add_dataframe_info(value, info, cmd):
-    if (type(value).__name__ == "DataFrame"
-        and type(value).__module__ == "pandas.core.frame"):
+    pd = sys.modules.get("pandas")
+    if pd is None:
+        return
+    
+    if isinstance(value, pd.DataFrame):
         info["columns"] = value.columns.tolist()
         info["index"] = value.index.tolist()
         info["values"] = value.values.tolist()
@@ -81,12 +110,32 @@ def _check_add_matplotlib_info(value, info, cmd):
         info["image_data"] = base64.b64encode(fp.getvalue())
         fp.close() 
 
+def _bring_up(window):
+    # copied from thonny.workbench.Workbench
+    # Looks like at least on Windows all following is required for the window to get focus
+    # (deiconify, ..., iconify, deiconify)
+    window.deiconify()
+    window.attributes('-topmost', True)
+    window.after_idle(window.attributes, '-topmost', False)
+    window.lift()
+    
+    """
+    import platform
+    if platform.system() != "Linux":
+        # http://stackoverflow.com/a/13867710/261181
+        self.iconify()
+        self.deiconify()
+    """
+    
         
 
-def load_plugin(vm):
+def load_plugin(_vm):
+    global vm
+    vm = _vm
     vm.add_magic_command("dataexplore", handle_dataexplore)    
     vm.add_magic_command("de", handle_dataexplore)
-    vm.add_value_tweaker(tweak_value)
+    vm.add_value_tweaker(tweak_pandas_value)
+    vm.add_value_tweaker(tweak_numpy_value)
     vm.add_object_info_tweaker(_check_add_dataframe_info)
     vm.add_object_info_tweaker(_check_add_matplotlib_info)
     

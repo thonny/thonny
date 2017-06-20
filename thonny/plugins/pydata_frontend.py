@@ -17,25 +17,6 @@ class DataFrameInspector(ContentInspector, tk.Frame):
         self.columns = None
         self.index = None
         self.values = None
-        
-        """
-        data_row_count = 50
-        column_count = 16
-        
-        header_row = []
-        for i in range(column_count):
-            header_row.append("Hdr " + str(i) )
-        ScrollableGridTable.__init__(self, master, [header_row], 50, 0, 1)
-        
-        data_rows = {}
-        for r in range(data_row_count):
-            row = []
-            for i in range(column_count):
-                row.append("D" + str(r) + ":" + str(i))
-            data_rows[r] = row
-        self.grid_table.set_data_rows(data_rows)
-        """
-        print("Done creatino")
     
     def set_object_info(self, object_info):
         if self.table is not None and self.columns != object_info["columns"]:

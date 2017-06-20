@@ -125,7 +125,7 @@ class VM:
         self._object_info_tweakers.append(tweaker)
     
     def get_main_module(self):
-        return self.__main__
+        return __main__
             
     def handle_command(self, cmd, command_context):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
@@ -227,7 +227,7 @@ class VM:
         command, _ = parse_shell_command(cmd.cmd_line, False)
         try:
             if command in self._magic_handlers:
-                value = self._magic_handlers[command](cmd.cmd_line, __main__)
+                value = self._magic_handlers[command](cmd.cmd_line)
                 if value is not None:
                     return self.create_message("ToplevelResult", value_info=self._vm.export_value(value))
                 else:
