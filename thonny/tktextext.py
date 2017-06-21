@@ -74,6 +74,15 @@ class TweakableText(tk.Text):
         self.direct_insert("1.0", chars)
         
     def set_insertwidth(self, new_width):
+        """Change cursor width
+        
+        NB! Need to be careful with setting text["insertwidth"]!
+        My first straightforward solution caused unexplainable
+        infinite loop of insertions and deletions in the text
+        (Repro: insert a line and a word, select that word and then do Ctrl-Z).
+        
+        This solution seems safe but be careful!
+        """
         if self._suppress_events:
             return
         
