@@ -80,10 +80,8 @@ class TweakableText(tk.Text):
         if self["insertwidth"] != new_width:
             old_suppress = self._suppress_events
             try:
-                print("setting insertwidth to ", new_width)
                 self._suppress_events = True
                 self.config(insertwidth=new_width)
-                #self["insertwidth"] = new_width
             finally:
                 self._suppress_events = old_suppress
 
