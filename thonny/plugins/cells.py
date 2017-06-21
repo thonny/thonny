@@ -51,6 +51,27 @@ def update_editor_cells(event):
             break
 
 
+def _submit_code(code):
+    lines = code.splitlines()
+    
+    # remove starting comments
+    while len(lines) > 0 and lines[0].strip().startswith("#"):
+        lines = lines[1:]
+    
+    # remove starting empty lines
+    while len(lines) > 0 and lines[0].strip() == "":
+        lines = lines[1:]
+    
+    # remove trailing empty lines
+    while len(lines) > 0 and lines[-1].strip() == "":
+        lines = lines[:-1]
+
+    if len(lines) > 0:
+        code = "\n".join(lines) + "\n"
+        shell = get_workbench().show_view("ShellView", False)
+        shell.submit_python_code(code)
+
+
 def _patch_perform_return():
     original_perform_return = CodeViewText.perform_return
 
@@ -63,24 +84,7 @@ def _patch_perform_return():
                  or ui_utils.control_is_pressed(event.state))):
             
             code = text.get(ranges[0], ranges[1]).strip()
-            lines = code.splitlines()
-            
-            # remove starting comments
-            while len(lines) > 0 and lines[0].strip().startswith("#"):
-                lines = lines[1:]
-            
-            # remove starting empty lines
-            while len(lines) > 0 and lines[0].strip() == "":
-                lines = lines[1:]
-            
-            # remove trailing empty lines
-            while len(lines) > 0 and lines[-1].strip() == "":
-                lines = lines[:-1]
-            
-            if len(lines) > 0:
-                code = "\n".join(lines) + "\n"
-                shell = get_workbench().show_view("ShellView", False)
-                shell.submit_python_code(code)
+            _submit_code(code)
             
             if ui_utils.shift_is_pressed(event.state):
                 # advance to next cell
@@ -123,8 +127,17 @@ def dummy(event=None):
 
 
 def run_selection(event=None):
-    print("run_selection")
-
+    widget = get_workbench().focus_get()
+    if isinstance(widget, CodeViewText):
+        text = widget 
+    
+        if text.has_selection():
+            code = text.get("sel.first", "sel.last")
+        else:
+            code = text.get("insert linestart", "insert lineend")
+    
+        _submit_code(code)
+        
 def run_enabled():
     return True
 
