@@ -73,6 +73,20 @@ class TweakableText(tk.Text):
         self.direct_delete("1.0", tk.END)
         self.direct_insert("1.0", chars)
         
+    def set_insertwidth(self, new_width):
+        if self._suppress_events:
+            return
+        
+        if self["insertwidth"] != new_width:
+            old_suppress = self._suppress_events
+            try:
+                print("setting insertwidth to ", new_width)
+                self._suppress_events = True
+                self.config(insertwidth=new_width)
+                #self["insertwidth"] = new_width
+            finally:
+                self._suppress_events = old_suppress
+
     def intercept_mark(self, *args):
         self.direct_mark(*args)
     
