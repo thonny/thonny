@@ -5,7 +5,7 @@ from thonny.globals import get_workbench
 from thonny.codeview import PythonText
 from thonny import ui_utils
 
-cell_regex = re.compile("\n(# ?%%|##)[^\n]*", re.MULTILINE)  # @UndefinedVariable
+cell_regex = re.compile("(^|\n)(# ?%%|##)[^\n]*", re.MULTILINE)  # @UndefinedVariable
 
 
 def update_editor_cells(event):
@@ -31,12 +31,17 @@ def update_editor_cells(event):
     cells = []
     prev_marker = 0
     for match in cell_regex.finditer(source):
-        this_marker = match.start() + 1
+        if match.start() == 0:
+            this_marker = match.start()
+        else:
+            this_marker = match.start() + 1
+        
         cell_start_index = text.index("1.0+%dc" % prev_marker)
         header_end_index = text.index("1.0+%dc" % match.end())
         cell_end_index = text.index("1.0+%dc" % this_marker)
         text.tag_add("CELL_HEADER", cell_end_index, header_end_index)
         cells.append((cell_start_index, cell_end_index)) 
+        
         prev_marker = this_marker
     
     if prev_marker != 0:
@@ -82,10 +87,15 @@ def _patch_perform_return():
             # remove trailing empty lines
             while len(lines) > 0 and lines[-1].strip() == "":
                 lines = lines[:-1]
-                 
-            code = "\n".join(lines) + "\n"
-            shell = get_workbench().show_view("ShellView", False)
-            shell.submit_python_code(code)
+            
+            if len(lines) > 0:
+                code = "\n".join(lines) + "\n"
+                shell = get_workbench().show_view("ShellView", False)
+                shell.submit_python_code(code)
+            
+            if ui_utils.shift_is_pressed(event.state):
+                # advance to next cell
+                text.mark_set("insert", ranges[1])
             
             return "break"
         else:
