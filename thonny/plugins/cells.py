@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from thonny.globals import get_workbench
+from thonny.globals import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny import ui_utils
 
@@ -83,12 +83,13 @@ def _patch_perform_return():
             and (ui_utils.shift_is_pressed(event.state)
                  or ui_utils.control_is_pressed(event.state))):
             
-            code = text.get(ranges[0], ranges[1]).strip()
-            _submit_code(code)
-            
-            if ui_utils.shift_is_pressed(event.state):
-                # advance to next cell
-                text.mark_set("insert", ranges[1])
+            if run_enabled():
+                code = text.get(ranges[0], ranges[1]).strip()
+                _submit_code(code)
+                
+                if ui_utils.shift_is_pressed(event.state):
+                    # advance to next cell
+                    text.mark_set("insert", ranges[1])
             
             return "break"
         else:
@@ -139,7 +140,9 @@ def run_selection(event=None):
         _submit_code(code)
         
 def run_enabled():
-    return True
+    widget = get_workbench().focus_get()
+    return (isinstance(widget, CodeViewText)
+            and get_runner().get_state() == "waiting_toplevel_command")
 
 def load_early_plugin():
     wb = get_workbench() 
