@@ -3,7 +3,7 @@ from thonny.globals import get_workbench
 from thonny.ui_utils import select_sequence
 from thonny.common import TextRange
 
-BLOCK_COMMENT_PREFIX = "##"
+BLOCK_COMMENT_PREFIX = "#"
 
 def _get_focused_writable_text():
     widget = get_workbench().focus_get()
