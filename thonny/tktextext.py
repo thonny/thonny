@@ -23,6 +23,7 @@ class TweakableText(tk.Text):
         tk.Text.__init__(self, master=master, cnf=cnf, **kw)
         
         self._read_only = read_only
+        self._suppress_events = False
         
         self._original_widget_name = self._w + "_orig"
         self.tk.call("rename", self._w, self._original_widget_name)
@@ -102,7 +103,7 @@ class TweakableText(tk.Text):
     def direct_mark(self, *args):
         self._original_mark(*args)
         
-        if args[:2] == ('set', 'insert'):
+        if args[:2] == ('set', 'insert') and not self._suppress_events:
             self.event_generate("<<CursorMove>>")
     
     def index_sel_first(self):
@@ -131,11 +132,13 @@ class TweakableText(tk.Text):
         
     def direct_insert(self, index, chars, tags=None):
         self._original_insert(index, chars, tags)
-        self.event_generate("<<TextChange>>")
+        if not self._suppress_events:
+            self.event_generate("<<TextChange>>")
     
     def direct_delete(self, index1, index2=None):
         self._original_delete(index1, index2)
-        self.event_generate("<<TextChange>>")
+        if not self._suppress_events:
+            self.event_generate("<<TextChange>>")
     
 
 
