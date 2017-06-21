@@ -44,6 +44,10 @@ def update_editor_cells(event):
     if prev_marker != 0:
         cells.append((text.index("1.0+%dc" % prev_marker), "end"))
     
+    #if get_workbench().focus_get() == text:
+    # It's nice to have cell highlighted even when focus 
+    # is elsewhere ? This would act as kind of bookmark. 
+    
     for start_index, end_index in cells:
         if (text.compare(start_index, "<=", "insert")
             and text.compare(end_index, ">", "insert")):
@@ -148,6 +152,8 @@ def load_early_plugin():
     wb = get_workbench() 
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_editor_cells, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_editor_cells, True)
+    wb.bind_class("CodeViewText", "<FocusIn>", update_editor_cells, True)
+    wb.bind_class("CodeViewText", "<FocusOut>", update_editor_cells, True)
 
 def load_plugin():
     wb = get_workbench() 
