@@ -417,6 +417,10 @@ class PipDialog(tk.Toplevel):
             write_att("Documentation", info["docs_url"], "url")
         if info.get("package_url", None):
             write_att("PyPI page", info["package_url"], "url")
+        if info.get("requires_dist", None):
+            # Available only when release is created by a binary wheel
+            # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
+            write_att("Requires", ", ".join(info["requires_dist"]))
         
         if self._get_installed_version(info["name"]) is not None:
             self.install_button["text"] = "Upgrade"
