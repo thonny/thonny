@@ -50,7 +50,7 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
         
-        get_workbench().bind("AfterKnownMagicCommand", self._listen_for_execute, True)
+        get_workbench().bind("DebuggerProgress", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResult", self._listen_for_toplevel_result, True)
         
         self.update_appearance()
@@ -155,18 +155,10 @@ class Editor(ttk.Frame):
         self._code_view.set_line_length_margin(get_workbench().get_option("view.recommended_line_length"))
         self._code_view.text.event_generate("<<UpdateAppearance>>")
     
-    def _listen_for_execute(self, event):
-        command, args = parse_shell_command(event.cmd_line)
+    def _listen_debugger_progress(self, event):
         # Go read-only
-        if command.lower() == "debug":
-            if len(args) == 0:
-                return
-            filename = args[0]
-            self_filename = self.get_filename()
-            if self_filename is not None and os.path.basename(self_filename) == filename:
-                # Not that command has only basename
-                # so this solution may make more editors read-only than necessary
-                self._code_view.text.set_read_only(True)
+        # TODO: check whether this module is active?
+        self._code_view.text.set_read_only(True)
     
     def _listen_for_toplevel_result(self, event):
         self._code_view.text.set_read_only(False)
@@ -203,7 +195,7 @@ class Editor(ttk.Frame):
             runner.interrupt_backend()
         
     def destroy(self):
-        get_workbench().unbind("AfterKnownMagicCommand", self._listen_for_execute)
+        get_workbench().unbind("DebuggerProgress", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResult", self._listen_for_toplevel_result)
         ttk.Frame.destroy(self)
     
