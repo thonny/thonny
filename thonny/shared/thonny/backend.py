@@ -237,6 +237,7 @@ class VM:
         return self._execute_file(cmd, True)
     
     def _cmd_execute_source(self, cmd):
+        """Executes Python source entered into shell"""
         filename = "<pyshell>"
         
         # let's see if it's single expression or something more complex
