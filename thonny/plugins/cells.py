@@ -113,7 +113,10 @@ def _patch_intercept_mark():
     (insert a line and a word, select that word and then do Ctrl-Z).
     
     Looks like this solution is safe, but I don't dare to include
-    it in the main code"""
+    it in the main code.
+    
+    UPADTE: not safe. Select and delete a block of lines. Write a new
+    line and do Ctrl-Z"""
     
     original_intercept_mark = CodeViewText.intercept_mark
     def _patched_intercept_mark(self, *args):
@@ -159,7 +162,7 @@ def load_plugin():
     wb = get_workbench() 
     
     _patch_perform_return()
-    _patch_intercept_mark()
+    #_patch_intercept_mark() # Still causes freezes
     
     wb.add_command('run_cell', "run", 'Run cell',
             handler=dummy, # actual handler is in the patch
