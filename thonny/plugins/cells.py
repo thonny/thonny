@@ -162,6 +162,7 @@ def load_plugin():
     wb = get_workbench() 
     
     _patch_perform_return()
+    # TODO: try changing insertwidth in keyup/mouseup events 
     #_patch_intercept_mark() # Still causes freezes
     
     wb.add_command('run_cell', "run", 'Run cell',
