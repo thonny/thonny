@@ -149,21 +149,17 @@ class VM:
             try:
                 response = handler(cmd)
             except SystemExit:
-                e_type, e_value, e_traceback = sys.exc_info()
-                self._print_user_exception(e_type, e_value, e_traceback)
+                # Must be caused by Thonny or plugins code
+                if isinstance(cmd, ToplevelCommand):
+                    traceback.print_exc()
                 response = self.create_message(error_response_type, SystemExit=True)
             except UserCommandError:
-                e_type, e_value, e_traceback = sys.exc_info()
                 if isinstance(cmd, ToplevelCommand):
+                    e_type, e_value, e_traceback = sys.exc_info()
                     self._print_user_exception(e_type, e_value, e_traceback)
-                response = self.create_message(error_response_type, SystemExit=True)
+                response = self.create_message(error_response_type)
             except:
                 error="Internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
-                # other unhandled exceptions are printed to stderr, as usual
-                if isinstance(cmd, ToplevelCommand):
-                    # Use full stacktrace
-                    traceback.print_exc()
-                    
                 response = self.create_message(error_response_type, 
                                                context_info="other unhandled exception",
                                                error=error)
@@ -171,6 +167,8 @@ class VM:
         if response is not None:
             response["command_context"] = command_context
             response["command"] = cmd.command
+            if hasattr(cmd, "request_id"):
+                response["request_id"] = cmd.request_id
             if response["message_type"] == "ToplevelResult":
                 response["gui_is_active"] = (
                     self._get_tkinter_default_root() is not None
@@ -239,34 +237,28 @@ class VM:
         return self._execute_file(cmd, True)
     
     def _cmd_execute_source(self, cmd):
-        return self._execute_source(cmd, "ToplevelResult")
-    
-    def _cmd_execute_magic(self, cmd):
-        from thonny.common import parse_shell_command
-        command, _ = parse_shell_command(cmd.cmd_line, False)
+        filename = "<pyshell>"
+        
+        # let's see if it's single expression or something more complex
         try:
-            if command in self._magic_handlers:
-                value = self._magic_handlers[command](cmd.cmd_line)
-                if value is not None:
-                    return self.create_message("ToplevelResult", value_info=self._vm.export_value(value))
-                else:
-                    return self.create_message("ToplevelResult")
-            else:
-                raise RuntimeError("Unknown magic command: " + command)
-        except SystemExit:
-            e_type, e_value, e_traceback = sys.exc_info()
-            self._print_user_exception(e_type, e_value, e_traceback)
-            return self.create_message("ToplevelResult", SystemExit=True)
-        except:
-            # other unhandled exceptions  are printed to stderr, as usual
-            e_type, e_value, e_traceback = sys.exc_info()
-            self._print_user_exception(e_type, e_value, e_traceback)
-            return self.create_message("ToplevelResult", context_info="other unhandled exception")
+            root = ast.parse(cmd.source, filename=filename, mode="exec")
+        except SyntaxError as e:
+            error = "".join(traceback.format_exception_only(type(e), e))
+            sys.stderr.write(error)
+            return self.create_message("ToplevelResult")
             
-        return self.create_message("ToplevelResult")
-    
-    def _cmd_execute_source_inline(self, cmd):
-        return self._execute_source(cmd, "InlineResult")
+        assert isinstance(root, ast.Module)
+            
+        if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
+            mode = "eval"
+        else:
+            mode = "exec"
+            
+        result_attributes = self._execute_source(cmd.source, filename, mode,
+            getattr(cmd, "debug_mode", False),
+            getattr(cmd, "global_vars", None))
+        
+        return self.create_message("ToplevelResult", **result_attributes)
     
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
@@ -511,50 +503,10 @@ class VM:
     def _execute_file(self, cmd, debug_mode):
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
-        result_attributes = self._execute_source_ex(cmd.source, cmd.full_filename, "exec", debug_mode) 
+        result_attributes = self._execute_source(cmd.source, cmd.full_filename, "exec", debug_mode) 
         return self.create_message("ToplevelResult", **result_attributes)
     
-    def _execute_source(self, cmd, result_type):
-        filename = "<pyshell>"
-        
-        if hasattr(cmd, "global_vars"):
-            global_vars = cmd.global_vars
-        elif hasattr(cmd, "extra_vars"):
-            global_vars = __main__.__dict__.copy() # Don't want to mess with main namespace
-            global_vars.update(cmd.extra_vars)
-        else:
-            global_vars = __main__.__dict__
-
-        # let's see if it's single expression or something more complex
-        try:
-            root = ast.parse(cmd.source, filename=filename, mode="exec")
-        except SyntaxError as e:
-            return self.create_message(result_type,
-                error="".join(traceback.format_exception_only(SyntaxError, e)))
-            
-        assert isinstance(root, ast.Module)
-            
-        if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
-            mode = "eval"
-        else:
-            mode = "exec"
-            
-        result_attributes = self._execute_source_ex(cmd.source, filename, mode,
-            hasattr(cmd, "debug_mode") and cmd.debug_mode,
-            global_vars)
-        
-        if "__result__" in global_vars:
-            result_attributes["__result__"] = global_vars["__result__"]
-        
-        if hasattr(cmd, "request_id"):
-            result_attributes["request_id"] = cmd.request_id
-        else:
-            result_attributes["request_id"] = None
-        
-        return self.create_message(result_type, **result_attributes)
-        
-    def _execute_source_ex(self, source, filename, execution_mode, debug_mode,
-                        global_vars=None):
+    def _execute_source(self, source, filename, execution_mode, debug_mode, global_vars=None):
         if debug_mode:
             self._current_executor = FancyTracer(self)
         else:
@@ -741,11 +693,8 @@ class Executor:
                 assert mode == "exec"
                 exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
                 return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
-        except SyntaxError as e:
-            return {"error" : "".join(traceback.format_exception_only(SyntaxError, e))}
-        except ThonnyClientError as e:
-            return {"error" : str(e)}
         except SystemExit:
+            # Show withot Thonny frames
             e_type, e_value, e_traceback = sys.exc_info()
             self._vm._print_user_exception(e_type, e_value, e_traceback)
             return {"SystemExit" : True}
