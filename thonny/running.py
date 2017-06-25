@@ -17,7 +17,7 @@ import sys
 
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_shell_command, \
-    CommandSyntaxError, parse_message, DebuggerCommand, InputSubmission,\
+    UserCommandError, parse_message, DebuggerCommand, InputSubmission,\
     UserError
 from thonny.globals import get_workbench, get_runner
 import shlex
@@ -236,7 +236,7 @@ class Runner:
                 
             self.send_command(cmd)
         else:
-            raise CommandSyntaxError("Command '%s' takes at least one argument", command)
+            raise UserCommandError("Command '%s' takes at least one argument", command)
 
     def _handle_reset_from_shell(self, cmd_line):
         command, args = parse_shell_command(cmd_line)
@@ -245,7 +245,7 @@ class Runner:
         if len(args) == 0:
             self.send_command(ToplevelCommand(command="Reset"))
         else:
-            raise CommandSyntaxError("Command 'Reset' doesn't take arguments")
+            raise UserCommandError("Command 'Reset' doesn't take arguments")
         
 
     def _handle_cd_from_shell(self, cmd_line):
@@ -255,7 +255,7 @@ class Runner:
         if len(args) == 1:
             self.send_command(ToplevelCommand(command="cd", path=args[0]))
         else:
-            raise CommandSyntaxError("Command 'cd' takes one argument")
+            raise UserCommandError("Command 'cd' takes one argument")
 
     def _cmd_run_current_script_enabled(self):
         return (get_workbench().get_editor_notebook().get_current_editor() is not None

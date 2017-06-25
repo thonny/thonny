@@ -506,8 +506,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         self._command_handlers[command](text_to_be_submitted)
                         get_workbench().event_generate("AfterKnownMagicCommand", cmd_line=text_to_be_submitted)
                     else:
+                        command, arg = parse_shell_command(text_to_be_submitted, False)
                         # TODO: check for Run, Reset, Debug
-                        get_runner().send_command(ToplevelCommand(command="execute_magic", cmd_line=text_to_be_submitted))
+                        get_runner().send_command(ToplevelCommand(command=command, arg=arg))
                 else:
                     get_runner().send_command(
                         ToplevelCommand(command="execute_source",

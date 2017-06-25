@@ -16,9 +16,11 @@ import site
 import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
-from thonny.common import TextRange,\
+from thonny.common import TextRange, parse_shell_command, \
     parse_message, serialize_message, DebuggerCommand,\
-    ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
+    ToplevelCommand, FrameInfo, InlineCommand, InputSubmission, \
+    UserCommandError
+    
 import signal
 import warnings
 import pkgutil
@@ -37,7 +39,7 @@ info = logger.info
 
 class VM:
     def __init__(self):
-        self._magic_handlers = {}
+        self._command_handlers = {}
         self._value_tweakers = []
         self._object_info_tweakers = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
@@ -112,9 +114,13 @@ class VM:
         except:
             logger.exception("Crash in mainloop")
             
-    def add_magic_command(self, command, handler):
-        """Handler should be 1-argument function taking whole command line"""
-        self._magic_handlers[command] = handler
+    def add_command(self, command_name, handler):
+        """Handler should be 1-argument function taking command object.
+        
+        Handler may return None (in this case no response is sent to frontend)
+        or a response created with create_message
+        """
+        self._command_handlers[command_name] = handler
             
     def add_value_tweaker(self, tweaker):
         """Tweaker should be 2-argument function taking value and export record"""
@@ -131,17 +137,36 @@ class VM:
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
         
         error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
-        try:
-            handler = getattr(self, "_cmd_" + cmd.command)
-        except AttributeError:
+        
+        if cmd.command in self._command_handlers:
+            handler = self._command_handlers[cmd.command]
+        else:
+            handler = getattr(self, "_cmd_" + cmd.command, None)
+        
+        if handler is None:
             response = self.create_message(error_response_type, error="Unknown command: " + cmd.command)
         else:
             try:
                 response = handler(cmd)
+            except SystemExit:
+                e_type, e_value, e_traceback = sys.exc_info()
+                self._print_user_exception(e_type, e_value, e_traceback)
+                response = self.create_message(error_response_type, SystemExit=True)
+            except UserCommandError:
+                e_type, e_value, e_traceback = sys.exc_info()
+                if isinstance(cmd, ToplevelCommand):
+                    self._print_user_exception(e_type, e_value, e_traceback)
+                response = self.create_message(error_response_type, SystemExit=True)
             except:
-                logger.exception("Command failed: " + str(cmd))
-                response = self.create_message(error_response_type,
-                    error="Thonny internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT)))
+                error="Internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
+                # other unhandled exceptions are printed to stderr, as usual
+                if isinstance(cmd, ToplevelCommand):
+                    # Use full stacktrace
+                    traceback.print_exc()
+                    
+                response = self.create_message(error_response_type, 
+                                               context_info="other unhandled exception",
+                                               error=error)
         
         if response is not None:
             response["command_context"] = command_context
@@ -200,12 +225,6 @@ class VM:
         except Exception as e:
             # TODO: should output user error
             return self.create_message("ToplevelResult", error=str(e))
-    
-    def _cmd_Reset(self, cmd):
-        # nothing to do, because Reset always happens in fresh process
-        return self.create_message("ToplevelResult",
-                                   welcome_text="Python " + _get_python_version_string(),
-                                   executable=sys.executable)
     
     def _cmd_Run(self, cmd):
         return self._execute_file(cmd, False)
@@ -345,6 +364,21 @@ class VM:
                           filename=cmd.filename,
                           completions=completions,
                           error=error)
+    
+    def _magic_Reset(self, cmd_line):
+        command, args = parse_shell_command(cmd_line)
+        assert command == "Reset"
+        
+        # nothing to do, because Reset always happens in fresh process
+        return self.create_message("ToplevelResult",
+                                   welcome_text="Python " + _get_python_version_string(),
+                                   executable=sys.executable)
+        
+        if len(args) == 0:
+            self.send_command(ToplevelCommand(command="Reset"))
+        else:
+            raise SyntaxError("Command 'Reset' doesn't take arguments")
+        
     
     def _export_completions(self, jedi_completions):
         result = []

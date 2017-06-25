@@ -132,8 +132,8 @@ def _bring_up(window):
 def load_plugin(_vm):
     global vm
     vm = _vm
-    vm.add_magic_command("dataexplore", handle_dataexplore)    
-    vm.add_magic_command("de", handle_dataexplore)
+    vm.add_command("dataexplore", handle_dataexplore)    
+    vm.add_command("de", handle_dataexplore)
     vm.add_value_tweaker(tweak_pandas_value)
     vm.add_value_tweaker(tweak_numpy_value)
     vm.add_object_info_tweaker(_check_add_dataframe_info)

@@ -127,7 +127,7 @@ class InlineCommand(Record):
         self.command = command
 
 
-class CommandSyntaxError(Exception):
+class UserCommandError(Exception):
     pass
 
 def parse_shell_command(cmd_line, split_arguments=True):
