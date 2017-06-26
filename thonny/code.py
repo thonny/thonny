@@ -11,10 +11,9 @@ from thonny.codeview import CodeView
 from thonny.globals import get_workbench, get_runner
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
-from thonny.common import parse_shell_command
 from thonny.tktextext import rebind_control_a
 import tokenize
-from thonny.shared.thonny.common import ToplevelCommand, DebuggerCommand
+from thonny.common import ToplevelCommand, DebuggerCommand
 from tkinter.messagebox import askyesno
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]

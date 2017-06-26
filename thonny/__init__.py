@@ -50,7 +50,7 @@ def launch():
         messagebox.showerror("System exit", str(e))
     except:
         from logging import exception
-        exception("Internal error")
+        exception("Internal launch or mainloop error")
         import tkinter.messagebox
         import traceback
         tkinter.messagebox.showerror("Internal error", traceback.format_exc())
