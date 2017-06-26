@@ -479,7 +479,6 @@ class CPythonProxy(BackendProxy):
             
             # Rembember the usage of this non-default interpreter
             used_interpreters = get_workbench().get_option("run.used_interpreters")
-            print(used_interpreters)
             if self._executable not in used_interpreters:
                 used_interpreters.append(self._executable)
             get_workbench().set_option("run.used_interpreters", used_interpreters)
