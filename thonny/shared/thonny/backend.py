@@ -25,6 +25,7 @@ import warnings
 import pkgutil
 import importlib
 import tokenize
+import subprocess
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -273,6 +274,14 @@ class VM:
         
         return self.create_message("ToplevelResult", **result_attributes)
     
+    def _cmd_execute_system_command(self, cmd):
+        proc = subprocess.Popen(cmd.argv,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         universal_newlines=True)
+        out, err = proc.communicate()
+        print(out)
+        print(err, file=sys.stderr)
+        
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
         
