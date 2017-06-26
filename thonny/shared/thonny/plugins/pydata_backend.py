@@ -1,22 +1,18 @@
 import io
 import sys
-import logging
 import numpy as np
 
 app = None
 vm = None
 
 
-def handle_dataexplore(command_line):
-    from thonny.common import parse_shell_command
-    from pandastable.app import DataExplore
+def handle_dataexplore(cmd):
+    from pandastable.app import DataExplore  # @UnresolvedImport
     import tkinter as tk
     global app
-    _, args = parse_shell_command(command_line, False)
     
-    if len(args) == 1 and args[0].strip() != "":
-        expr = args[0].strip()
-        df = eval(expr, vm.get_main_module().__dict__)
+    if cmd.args_str:
+        df = eval(cmd.args_str, vm.get_main_module().__dict__)
     else:
         df = None
     
@@ -39,8 +35,9 @@ def handle_dataexplore(command_line):
     #app.bring_to_foreground()
     
     # load data
-    #app.load_dataframe(df, expr, select=True)
-    app.load_dataframe(df, expr)
+    if df is not None:
+        #app.load_dataframe(df, cmd.args_str, select=True)
+        app.load_dataframe(df, cmd.args_str)
     
     # Bring up correct tab
     ind = app.nb.index('end')-1
