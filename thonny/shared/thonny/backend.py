@@ -158,6 +158,10 @@ class VM:
             except UserCommandError as e:
                 sys.stderr.write(str(e) + "\n")
                 response = self.create_message(error_response_type)
+            except KeyboardInterrupt:
+                e_type, e_value, e_traceback = sys.exc_info()
+                self._print_user_exception(e_type, e_value, e_traceback)
+                response = self.create_message(error_response_type)
             except:
                 error="Internal backend error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
                 response = self.create_message(error_response_type, 
