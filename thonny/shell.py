@@ -7,7 +7,7 @@ import traceback
 
 import thonny
 from thonny import memory, roughparse
-from thonny.common import ToplevelCommand, parse_shell_command
+from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
@@ -55,6 +55,9 @@ class ShellView (ttk.Frame):
         self.text.submit_command(cmd_line, ())
 
     def submit_magic_command(self, cmd_line):
+        if isinstance(cmd_line, list):
+            cmd_line = construct_cmd_line(cmd_line)
+            
         self.text.submit_command(cmd_line, ("automagic",))
     
     def clear_shell(self):
@@ -149,8 +152,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         self.active_object_tags = set()
         
-        self._command_handlers = {}
-        
         self._last_configuration = None
     
         get_workbench().bind("InputRequest", self._handle_input_request, True)
@@ -163,9 +164,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._menu = tk.Menu(self, tearoff=False)
         self._menu.add_command(label="Clear shell", command=self._clear_shell)
     
-    def add_command(self, command, handler):
-        self._command_handlers[command] = handler
-        
     def submit_command(self, cmd_line, tags):
         assert get_runner().get_state() == "waiting_toplevel_command"
         self.delete("input_start", "end")
@@ -421,7 +419,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         if get_runner().get_state() == "waiting_toplevel_command":
             if input_text.endswith("\n"):
-                if input_text.strip().startswith("%"):
+                if input_text.strip().startswith("%") or input_text.strip().startswith("!"):
                     # if several magic command are submitted, then take only first
                     return input_text[:input_text.index("\n")+1]
                 elif self._code_is_ready_for_submission(input_text, tail):
@@ -498,17 +496,19 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._command_history.append(text_to_be_submitted)
             self._command_history_current_index = None # meaning command selection is not in process
             
+            cmd_line = text_to_be_submitted.strip()
             try:
                 if text_to_be_submitted.startswith("%"):
-                    command, _ = parse_shell_command(text_to_be_submitted)
+                    argv = parse_cmd_line(cmd_line[1:])
+                    command = argv[0]
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
-                    if command in self._command_handlers:
-                        self._command_handlers[command](text_to_be_submitted)
-                        get_workbench().event_generate("AfterKnownMagicCommand", cmd_line=text_to_be_submitted)
-                    else:
-                        command, arg = parse_shell_command(text_to_be_submitted, False)
-                        # TODO: check for Run, Reset, Debug
-                        get_runner().send_command(ToplevelCommand(command=command, arg=arg))
+                    get_runner().send_command(ToplevelCommand(command=command,
+                                                              args=argv[1:], cmd_line=cmd_line))
+                elif cmd_line.startswith("!"):
+                    argv = parse_cmd_line(cmd_line[1:])
+                    get_workbench().event_generate("SystemCommand", cmd_line=text_to_be_submitted)
+                    get_runner().send_command(ToplevelCommand(command="execute_system_command",
+                                                              argv=argv, cmd_line=cmd_line))
                 else:
                     get_runner().send_command(
                         ToplevelCommand(command="execute_source",

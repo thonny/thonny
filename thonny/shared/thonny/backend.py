@@ -16,15 +16,15 @@ import site
 import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
-from thonny.common import TextRange, parse_shell_command, \
-    parse_message, serialize_message, DebuggerCommand,\
-    ToplevelCommand, FrameInfo, InlineCommand, InputSubmission, \
+from thonny.common import TextRange, parse_message, serialize_message, \
+    DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission, \
     UserCommandError
     
 import signal
 import warnings
 import pkgutil
 import importlib
+import tokenize
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -153,13 +153,11 @@ class VM:
                 if isinstance(cmd, ToplevelCommand):
                     traceback.print_exc()
                 response = self.create_message(error_response_type, SystemExit=True)
-            except UserCommandError:
-                if isinstance(cmd, ToplevelCommand):
-                    e_type, e_value, e_traceback = sys.exc_info()
-                    self._print_user_exception(e_type, e_value, e_traceback)
+            except UserCommandError as e:
+                sys.stderr.write(str(e) + "\n")
                 response = self.create_message(error_response_type)
             except:
-                error="Internal error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
+                error="Internal backend error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
                 response = self.create_message(error_response_type, 
                                                context_info="other unhandled exception",
                                                error=error)
@@ -217,12 +215,15 @@ class VM:
             signal.signal(signal.SIGINT, signal_handler)        
     
     def _cmd_cd(self, cmd):
-        try:
-            os.chdir(cmd.path)
-            return self.create_message("ToplevelResult")
-        except Exception as e:
-            # TODO: should output user error
-            return self.create_message("ToplevelResult", error=str(e))
+        if len(cmd.args) == 1:
+            path = cmd.args[0]
+            try:
+                os.chdir(path)
+                return self.create_message("ToplevelResult")
+            except FileNotFoundError:
+                raise UserCommandError("No such folder: " + path)
+        else:
+            raise UserCommandError("cd takes one parameter") 
     
     def _cmd_Run(self, cmd):
         return self._execute_file(cmd, False)
@@ -358,19 +359,14 @@ class VM:
                           completions=completions,
                           error=error)
     
-    def _magic_Reset(self, cmd_line):
-        command, args = parse_shell_command(cmd_line)
-        assert command == "Reset"
-        
-        # nothing to do, because Reset always happens in fresh process
-        return self.create_message("ToplevelResult",
-                                   welcome_text="Python " + _get_python_version_string(),
-                                   executable=sys.executable)
-        
-        if len(args) == 0:
-            self.send_command(ToplevelCommand(command="Reset"))
+    def _cmd_Reset(self, cmd):
+        if len(cmd.args) == 0:
+            # nothing to do, because Reset always happens in fresh process
+            return self.create_message("ToplevelResult",
+                                       welcome_text="Python " + _get_python_version_string(),
+                                       executable=sys.executable)
         else:
-            raise SyntaxError("Command 'Reset' doesn't take arguments")
+            raise UserCommandError("Command 'Reset' doesn't take arguments")
         
     
     def _export_completions(self, jedi_completions):
@@ -504,8 +500,23 @@ class VM:
     def _execute_file(self, cmd, debug_mode):
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
-        result_attributes = self._execute_source(cmd.source, cmd.full_filename, "exec", debug_mode) 
-        return self.create_message("ToplevelResult", **result_attributes)
+        # TODO: are they?
+        
+        if len(cmd.args) >= 1:
+            sys.argv = cmd.args # TODO: duplicate????????????????????
+            filename = cmd.args[0]
+            if os.path.isabs(filename):
+                full_filename = filename
+            else:
+                full_filename = os.path.abspath(filename)
+                
+            with tokenize.open(full_filename) as fp:
+                source = fp.read()
+            
+            result_attributes = self._execute_source(source, full_filename, "exec", debug_mode) 
+            return self.create_message("ToplevelResult", **result_attributes)
+        else:
+            raise UserCommandError("Command '%s' takes at least one argument", cmd.command)
     
     def _execute_source(self, source, filename, execution_mode, debug_mode, global_vars=None):
         if debug_mode:

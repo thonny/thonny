@@ -31,10 +31,6 @@ class Debugger:
         
         get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
-        
-        get_workbench().get_view("ShellView").add_command("Debug", 
-            get_runner().handle_execute_from_shell)
-        
     
     def _init_commands(self):
         get_workbench().add_command("debug", "run", "Debug current script",

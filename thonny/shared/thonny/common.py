@@ -4,6 +4,8 @@
 Classes used both by front-end and back-end
 """
 import shlex
+import subprocess
+import platform
 
 class Record:
     def __init__(self, **kw):
@@ -130,24 +132,11 @@ class InlineCommand(Record):
 class UserCommandError(Exception):
     pass
 
-def parse_shell_command(cmd_line, split_arguments=True):
-    assert cmd_line.startswith("%")
-    
-    parts = cmd_line.strip().split(maxsplit=1)
-    command = parts[0][1:] # remove %
-    
-    if len(parts) == 1:
-        arg_str = ""
-    else:
-        arg_str = parts[1]
-        
-    if split_arguments:
-        args = shlex.split(arg_str.strip(), posix=True) 
-    else:
-        args = [arg_str]
-        
-    return (command, args)
+def construct_cmd_line(parts):
+    return subprocess.list2cmdline(parts)
 
+def parse_cmd_line(s):
+    return shlex.split(s, posix=platform.system() != "Windows")
 
 def serialize_message(msg):
     # I want to transfer only ASCII chars because 

@@ -16,16 +16,13 @@ import subprocess
 import sys
 
 from thonny.common import serialize_message, ToplevelCommand, \
-    InlineCommand, parse_shell_command, \
-    UserCommandError, parse_message, DebuggerCommand, InputSubmission,\
-    UserError
+    InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
+    UserError, construct_cmd_line
 from thonny.globals import get_workbench, get_runner
-import shlex
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
 import shutil
-import tokenize
 import collections
 import signal
 import logging
@@ -64,11 +61,6 @@ class Runner:
             self._poll_vm_messages()
     
     def _init_commands(self):
-        shell = get_workbench().get_view("ShellView")
-        shell.add_command("Run", self.handle_execute_from_shell)
-        shell.add_command("Reset", self._handle_reset_from_shell)
-        shell.add_command("cd", self._handle_cd_from_shell)
-        
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
@@ -126,7 +118,7 @@ class Runner:
     def send_command(self, cmd):
         if self._proxy is None:
             return
-        
+
         if not self._state_is_suitable(cmd):
             if isinstance(cmd, DebuggerCommand) and self.get_state() == "running":
                 # probably waiting behind some InlineCommand
@@ -159,32 +151,25 @@ class Runner:
         if (working_directory is not None and self._proxy.cwd != working_directory):
             # create compound command
             # start with %cd
-            cmd_line = "%cd " + shlex.quote(working_directory) + "\n"
+            cd_cmd_line = construct_cmd_line(["%cd", working_directory]) + "\n"
             next_cwd = working_directory
         else:
             # create simple command
-            cmd_line = ""
+            cd_cmd_line = ""
             next_cwd = self._proxy.cwd
         
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(script_path, next_cwd)
-        cmd_line += "%" + command_name + " " + shlex.quote(rel_filename)
-        
-        # append args
-        for arg in args:
-            cmd_line += " " + shlex.quote(arg) 
-        
-        cmd_line += "\n"
+        exe_cmd_line = construct_cmd_line(["%" + command_name, rel_filename] + args) + "\n"
         
         # submit to shell (shell will execute it)
-        get_workbench().get_view("ShellView").submit_magic_command(cmd_line)
+        get_workbench().get_view("ShellView").submit_magic_command(cd_cmd_line + exe_cmd_line)
         
     def execute_current(self, command_name, always_change_to_script_dir=False):
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
-        
         editor = get_workbench().get_current_editor()
         if not editor:
             return
@@ -210,53 +195,6 @@ class Runner:
         
         self.execute_script(filename, [], working_directory, command_name)
         
-    def handle_execute_from_shell(self, cmd_line):
-        """
-        Handles all commands that take a filename and 0 or more extra arguments.
-        Passes the command to backend.
-        
-        (Debugger plugin may also use this method)
-        """
-        command, args = parse_shell_command(cmd_line)
-        
-        if len(args) >= 1:
-            get_workbench().get_editor_notebook().save_all_named_editors()
-            cmd = ToplevelCommand(command=command,
-                               filename=args[0],
-                               args=args[1:])
-            
-            if os.path.isabs(cmd.filename):
-                cmd.full_filename = cmd.filename
-            else:
-                cmd.full_filename = os.path.join(self.get_cwd(), cmd.filename)
-                
-            if command in ["Run", "run", "Debug", "debug"]:
-                with tokenize.open(cmd.full_filename) as fp:
-                    cmd.source = fp.read()
-                
-            self.send_command(cmd)
-        else:
-            raise UserCommandError("Command '%s' takes at least one argument", command)
-
-    def _handle_reset_from_shell(self, cmd_line):
-        command, args = parse_shell_command(cmd_line)
-        assert command == "Reset"
-        
-        if len(args) == 0:
-            self.send_command(ToplevelCommand(command="Reset"))
-        else:
-            raise UserCommandError("Command 'Reset' doesn't take arguments")
-        
-
-    def _handle_cd_from_shell(self, cmd_line):
-        command, args = parse_shell_command(cmd_line)
-        assert command == "cd"
-        
-        if len(args) == 1:
-            self.send_command(ToplevelCommand(command="cd", path=args[0]))
-        else:
-            raise UserCommandError("Command 'cd' takes one argument")
-
     def _cmd_run_current_script_enabled(self):
         return (get_workbench().get_editor_notebook().get_current_editor() is not None
                 and get_runner().get_state() == "waiting_toplevel_command"
@@ -384,6 +322,11 @@ class Runner:
             get_workbench().after(50, self._poll_vm_messages)
     
     def reset_backend(self):
+        """Recreate backend proxy / backend process. 
+        
+        Note that technically this is not tied to %Reset command. Backend
+        may choose to execute %Reset simply by eg. clearing variables."""
+        
         self.kill_backend()
         configuration = get_workbench().get_option("run.backend_configuration")
         backend_name, configuration_option = parse_configuration(configuration)
