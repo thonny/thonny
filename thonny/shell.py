@@ -498,12 +498,17 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
             cmd_line = text_to_be_submitted.strip()
             try:
-                if text_to_be_submitted.startswith("%"):
+                if cmd_line.startswith("%"):
+                    parts = cmd_line.split(" ", maxsplit=1)
+                    if len(parts) == 2:
+                        args_str = parts[1].strip()
+                    else:
+                        args_str = ""
                     argv = parse_cmd_line(cmd_line[1:])
                     command = argv[0]
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(ToplevelCommand(command=command,
-                                                              args=argv[1:], cmd_line=cmd_line))
+                                                              args=argv[1:], args_str=args_str, cmd_line=cmd_line))
                 elif cmd_line.startswith("!"):
                     argv = parse_cmd_line(cmd_line[1:])
                     get_workbench().event_generate("SystemCommand", cmd_line=text_to_be_submitted)
