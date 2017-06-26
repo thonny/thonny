@@ -113,6 +113,7 @@ class VM:
                     self.send_message(self.create_message("ToplevelResult"))
         except:
             logger.exception("Crash in mainloop")
+            traceback.print_exc()
             
     def add_command(self, command_name, handler):
         """Handler should be 1-argument function taking command object.
@@ -162,17 +163,27 @@ class VM:
                                                context_info="other unhandled exception",
                                                error=error)
         
-        if response is not None:
-            response["command_context"] = command_context
-            response["command"] = cmd.command
-            if hasattr(cmd, "request_id"):
-                response["request_id"] = cmd.request_id
-            if response["message_type"] == "ToplevelResult":
-                response["gui_is_active"] = (
-                    self._get_tkinter_default_root() is not None
-                    or self._get_qt_app() is not None
-                )
-            self.send_message(response)
+        if response is False:
+            # Command doesn't want to send any response
+            return
+        
+        if response is None and isinstance(cmd, ToplevelCommand):
+            # create simple default response
+            response = self.create_message("ToplevelResult")
+        
+        if isinstance(cmd, ToplevelCommand) and "message_type" not in response:
+            response["message_type"] = "ToplevelResult"
+        
+        response["command_context"] = command_context
+        response["command"] = cmd.command
+        if hasattr(cmd, "request_id"):
+            response["request_id"] = cmd.request_id
+        if response["message_type"] == "ToplevelResult":
+            response["gui_is_active"] = (
+                self._get_tkinter_default_root() is not None
+                or self._get_qt_app() is not None
+            )
+        self.send_message(response)
     
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
@@ -283,7 +294,7 @@ class VM:
         except:
             pass
             
-        return None
+        return False
     
     
     def _cmd_get_globals(self, cmd):
