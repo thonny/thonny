@@ -278,9 +278,9 @@ class VM:
         proc = subprocess.Popen(cmd.argv,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                          universal_newlines=True)
-        out, err = proc.communicate()
-        print(out)
-        print(err, file=sys.stderr)
+        out, err = proc.communicate(input="")
+        print(out, end="")
+        print(err, file=sys.stderr, end="")
         
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
