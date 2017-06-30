@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.11 (2017-07-??)
+===================
+* FIXED #285: Previous used interpreters are not shown in options dialog 
+
 2.1.10 (2017-06-09)
 ===================
 * NEW: More flexibility for classroom setups (see https://bitbucket.org/plas/thonny/wiki/ClassroomSetup) 
