@@ -405,6 +405,8 @@ class Runner:
                                        stream_name="stderr",
                                        data=err)
         
+        get_workbench().become_topmost_window()
+        
     
     def reset_backend(self):
         self.kill_backend()
