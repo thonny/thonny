@@ -14,11 +14,11 @@ if __name__ == "__main__":
     import sys
     import logging
     import os.path
-    
+    THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
     logger = logging.getLogger()
     logFormatter = logging.Formatter('%(levelname)s: %(message)s')
-    file_handler = logging.FileHandler(os.path.expanduser(os.path.join(os.environ["THONNY_USER_DIR"],"backend.log")), 
+    file_handler = logging.FileHandler(os.path.join(THONNY_USER_DIR,"backend.log"), 
                                        encoding="UTF-8",
                                        mode="w");
     file_handler.setFormatter(logFormatter)
@@ -33,12 +33,15 @@ if __name__ == "__main__":
     
     logger.setLevel(logging.INFO)
     
+    import faulthandler
+    fault_out = open(os.path.join(THONNY_USER_DIR, "backend_faults.log"), mode="w")
+    faulthandler.enable(fault_out)    
+    
     # Disable blurry scaling in Windows
     if os.name == "nt":
         import ctypes
         ctypes.windll.user32.SetProcessDPIAware()    
 
-    
     from thonny.backend import VM  # @UnresolvedImport
     VM().mainloop()
     

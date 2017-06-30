@@ -281,9 +281,14 @@ class Runner:
             initial_state = self.get_state()
             
             while self._proxy is not None:
-                msg = self._proxy.fetch_next_message()
-                if not msg:
-                    break
+                try:
+                    msg = self._proxy.fetch_next_message()
+                    if not msg:
+                        break
+                except BackendTerminatedError as exc:
+                    self._report_backend_crash(exc)
+                    self.reset_backend()
+                    return
                 
                 if msg.get("SystemExit", False):
                     self.reset_backend()
@@ -321,6 +326,26 @@ class Runner:
         finally:
             get_workbench().after(50, self._poll_vm_messages)
     
+    def _report_backend_crash(self, exc):
+        err = "Backend terminated (returncode: %s)\n" % exc.returncode
+        
+        try:
+            faults_file = os.path.join(THONNY_USER_DIR, "backend_faults.log")
+            if os.path.exists(faults_file):
+                with open(faults_file, encoding="ASCII") as fp:
+                    err += fp.read()
+        except:
+            logging.exception("Failed retrieving backend faults")
+                
+        err = err.strip() + "\nResetting ...\n"
+        
+        get_workbench().event_generate("ProgramOutput",
+                                       stream_name="stderr",
+                                       data=err)
+        
+        get_workbench().become_topmost_window()
+        
+    
     def reset_backend(self):
         """Recreate backend proxy / backend process. 
         
@@ -342,6 +367,8 @@ class Runner:
     def interrupt_backend(self):
         if self._proxy is not None:
             self._proxy.interrupt()
+        else:
+            logging.warning("Interrupting without proxy")
     
     def kill_backend(self):
         self._current_toplevel_command = None
@@ -500,6 +527,10 @@ class CPythonProxy(BackendProxy):
     
     def fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
+            if self._proc is not None:
+                retcode = self._proc.poll()
+                if retcode is not None:
+                    raise BackendTerminatedError(retcode)
             return None
         
         msg = self._message_queue.popleft()
@@ -554,31 +585,38 @@ class CPythonProxy(BackendProxy):
         return self._sys_path
     
     def interrupt(self):
-        if self._proc is not None and self._proc.poll() is None:
-            command_to_interrupt = get_runner().get_current_toplevel_command()
-            if running_on_windows():
-                try:
-                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
-                except:
-                    logging.exception("Could not interrupt backend process")
-            else:
-                self._proc.send_signal(signal.SIGINT)
         
-            # Tkinter programs can't be interrupted so easily:
-            # http://stackoverflow.com/questions/13784232/keyboardinterrupt-taking-a-while
-            # so let's chedule a hard kill in case the program refuses to be interrupted
-            def go_hard():
-                if (get_runner().get_state() != "waiting_toplevel_command"
-                    and get_runner().get_current_toplevel_command() == command_to_interrupt): # still running same command
-                    self._proc.kill()
-                    get_workbench().event_generate("ProgramOutput",
-                                                   stream_name="stderr",
-                                                   data="KeyboardInterrupt: Forced reset")
-                    get_runner().reset_backend()
+        def do_kill():
+            self._proc.kill()
+            get_workbench().event_generate("ProgramOutput",
+                                           stream_name="stderr",
+                                           data="KeyboardInterrupt: Forced reset")
+            get_runner().reset_backend()
+        
+        if self._proc is not None:
+            if self._proc.poll() is None:
+                command_to_interrupt = get_runner().get_current_toplevel_command()
+                if running_on_windows():
+                    try:
+                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                    except:
+                        logging.exception("Could not interrupt backend process")
+                else:
+                    self._proc.send_signal(signal.SIGINT)
             
-            # 100 ms was too little for Mac
-            # 250 ms was too little for one of the Windows machines
-            get_workbench().after(500, go_hard)
+                # Tkinter programs can't be interrupted so easily:
+                # http://stackoverflow.com/questions/13784232/keyboardinterrupt-taking-a-while
+                # so let's chedule a hard kill in case the program refuses to be interrupted
+                def go_hard():
+                    if (get_runner().get_state() != "waiting_toplevel_command"
+                        and get_runner().get_current_toplevel_command() == command_to_interrupt): # still running same command
+                        do_kill()
+                
+                # 100 ms was too little for Mac
+                # 250 ms was too little for one of the Windows machines
+                get_workbench().after(500, go_hard)
+            else:
+                do_kill()
             
                     
     
@@ -970,4 +1008,8 @@ def _get_venv_info(venv_path):
                 result[key.strip()] = val.strip()
     
     return result;
-    
+
+class BackendTerminatedError(Exception):
+    def __init__(self, returncode):
+        Exception.__init__(self)
+        self.returncode = returncode    
