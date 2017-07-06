@@ -26,6 +26,7 @@ import shutil
 import collections
 import signal
 import logging
+import traceback
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -738,12 +739,19 @@ class CPythonProxy(BackendProxy):
             if data == '':
                 break
             else:
-                msg = parse_message(data)
-                if "cwd" in msg:
-                    self.cwd = msg["cwd"]
-                    
-                # TODO: it was "with self._state_lock:". Is it necessary?
-                self._message_queue.append(msg)
+                try:
+                    msg = parse_message(data)
+                    if "cwd" in msg:
+                        self.cwd = msg["cwd"]
+                        
+                    # TODO: it was "with self._state_lock:". Is it necessary?
+                    self._message_queue.append(msg)
+                except:
+                    logging.exception("\nError when handling message from the backend: " + str(data))
+                    self._message_queue.append({"message_type" : "ProgramOutput",
+                                                "data" : "Error handling message: " + traceback.format_exc(),
+                                                "stream_name" : "stderr"})
+                    raise
 
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
