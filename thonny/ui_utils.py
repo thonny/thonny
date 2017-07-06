@@ -411,7 +411,7 @@ def update_entry_text(entry, text):
     entry.config(state=original_state)
 
 
-class ScrollableFrame(tk.Frame):
+class VerticallyScrollableFrame(tk.Frame):
     # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
     
     def __init__(self, master):
@@ -430,8 +430,6 @@ class ScrollableFrame(tk.Frame):
         self.rowconfigure(0, weight=1)
         
         self.interior = tk.Frame(self.canvas, bg=CALM_WHITE)
-        self.interior.columnconfigure(0, weight=1)
-        self.interior.rowconfigure(0, weight=1)
         self.interior_id = self.canvas.create_window(0,0, 
                                                     window=self.interior, 
                                                     anchor=tk.NW)
@@ -452,6 +450,50 @@ class ScrollableFrame(tk.Frame):
             #print("CAWI", self.canvas.winfo_width())
             self.canvas.itemconfigure(self.interior_id,
                                       width=self.canvas.winfo_width())
+
+
+class ScrollableFrame(tk.Frame):
+    # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
+    
+    def __init__(self, master):
+        tk.Frame.__init__(self, master, bg=CALM_WHITE)
+        
+        # set up scrolling with canvas
+        vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        hscrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
+        self.canvas = tk.Canvas(self, bg=CALM_WHITE, bd=0, highlightthickness=0,
+                           yscrollcommand=vscrollbar.set)
+        vscrollbar.config(command=self.canvas.yview)
+        hscrollbar.config(command=self.canvas.xview)
+        
+        self.canvas.xview_moveto(0)
+        self.canvas.yview_moveto(0)
+        
+        self.canvas.grid(row=0, column=0, sticky=tk.NSEW)
+        vscrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+        hscrollbar.grid(row=1, column=0, sticky=tk.NSEW)
+        
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        self.interior = tk.Frame(self.canvas, bg=CALM_WHITE)
+        self.interior.columnconfigure(0, weight=1)
+        self.interior.rowconfigure(0, weight=1)
+        self.interior_id = self.canvas.create_window(0,0, 
+                                                    window=self.interior, 
+                                                    anchor=tk.NW)
+        self.bind('<Configure>', self._configure_interior, "+")
+        self.bind('<Expose>', self._expose, "+")
+        
+    def _expose(self, event):
+        self.update_idletasks()
+        self._configure_interior(event)
+    
+    def _configure_interior(self, event):
+        # update the scrollbars to match the size of the inner frame
+        size = (self.canvas.winfo_reqwidth() , self.interior.winfo_reqheight())
+        self.canvas.config(scrollregion="0 0 %s %s" % size)
+        
 
 class TtkDialog(Dialog):
     def buttonbox(self):

@@ -5,7 +5,7 @@ import tkinter as tk
 from thonny.memory import format_object_id, VariablesFrame, MemoryFrame,\
     MAX_REPR_LENGTH_IN_GRID
 from thonny.misc_utils import shorten_repr
-from thonny.ui_utils import ScrollableFrame, CALM_WHITE, update_entry_text
+from thonny.ui_utils import VerticallyScrollableFrame, CALM_WHITE, update_entry_text
 from thonny.tktextext import TextFrame
 from thonny.common import InlineCommand
 import ast
@@ -31,10 +31,12 @@ class AttributesFrame(VariablesFrame):
         
     
 
-class ObjectInspector(ScrollableFrame):
+class ObjectInspector(VerticallyScrollableFrame):
     def __init__(self, master):
         
-        ScrollableFrame.__init__(self, master)
+        VerticallyScrollableFrame.__init__(self, master)
+        self.interior.columnconfigure(0, weight=1)
+        self.interior.rowconfigure(0, weight=1)
         
         self.object_id = None
         self.object_info = None
