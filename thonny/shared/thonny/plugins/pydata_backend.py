@@ -5,6 +5,22 @@ import numpy as np
 app = None
 vm = None
 
+def handle_delite(cmd):
+    import tkinter as tk
+    from tkinter import ttk
+    root = tk.Tk()
+    frame = ttk.Frame(root)
+    frame.grid(row=0, column=0, sticky="nsew")
+    root.columnconfigure(0, weight=1)
+    root.rowconfigure(0, weight=1)
+
+    from pandastable import Table
+    #assuming parent is the frame in which you want to place the table
+    pt = Table(frame)
+    pt.show()
+    
+    root.mainloop()
+
 
 def handle_dataexplore(cmd):
     from pandastable.app import DataExplore  # @UnresolvedImport
@@ -133,6 +149,7 @@ def load_plugin(_vm):
     vm = _vm
     vm.add_command("dataexplore", handle_dataexplore)    
     vm.add_command("de", handle_dataexplore)
+    vm.add_command("delite", handle_delite)
     vm.add_value_tweaker(tweak_pandas_value)
     vm.add_value_tweaker(tweak_numpy_value)
     vm.add_object_info_tweaker(_check_add_dataframe_info)
