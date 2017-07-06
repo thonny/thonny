@@ -47,7 +47,9 @@ def handle_dataexplore(cmd):
 
 def tweak_numpy_value(value, record):
     if isinstance(value, np.ndarray):  # @UndefinedVariable
-        record["description"] = "NumPy array [" + " x ".join(map(str, value.shape)) + "]"
+        record["description"] = ("NumPy " + value.dtype.name + " array [" 
+                                 + " x ".join(map(str, value.shape))
+                                 + "]")
 
 def tweak_pandas_value(value, record):
     # "weak" import pandas, because user script maybe uses only numpy
@@ -72,8 +74,8 @@ def _check_add_dataframe_info(value, info, cmd):
     
     if isinstance(value, pd.DataFrame):
         info["columns"] = value.columns.tolist()
-        info["index"] = value.index.tolist()
-        info["values"] = value.values.tolist()
+        info["index"] = value.index.tolist() # TODO: convert to strings
+        info["values"] = value.values.tolist() # TODO: convert to strings
         info["row_count"] = len(value)
         info["is_DataFrame"] = True
         
