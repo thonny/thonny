@@ -27,4 +27,4 @@ class GlobalsView(VariablesFrame):
     
 
 def load_plugin():
-    get_workbench().add_view(GlobalsView, "Variables", "ne")
+    get_workbench().add_view(GlobalsView, "Variables", "ne", default_position_key="AAA")
