@@ -20,6 +20,9 @@ def update_editor_cells(event):
                            font=get_workbench().get_font("BoldEditorFont"),
                            foreground="#665843",
                            )
+        
+        text.tag_lower("CELL_HEADER")
+        text.tag_lower("CURRENT_CELL")
         text.cell_tags_configured = True
     
     text.tag_remove("CURRENT_CELL", "0.1", "end")

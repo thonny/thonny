@@ -49,8 +49,11 @@ class ParenMatcher:
         
         self.text.tag_configure("UNCLOSED", background="LightGray")
         
-        self.text.tag_lower("UNCLOSED")
         self.text.tag_raise("sel")
+        self.text.tag_lower("UNCLOSED")
+        if "CURRENT_CELL" in self.text.tag_names():
+            # CURRENT_CELL is defined in cells plugin
+            self.text.tag_raise("UNCLOSED", "CURRENT_CELL")
         
 
     def _highlight_surrounding(self, start_index, end_index):
