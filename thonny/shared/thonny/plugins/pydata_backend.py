@@ -22,6 +22,43 @@ def handle_delite(cmd):
     root.mainloop()
 
 
+def handle_dfe(cmd):
+    if not cmd.args_str:
+        return {"show_dfe" : True}
+    
+    import pandas as pd
+    df = eval(cmd.args_str, vm.get_main_module().__dict__)
+    desc = df.describe(include="all").round(pd.options.display.precision)
+    
+    def get_att(column, attname, try_int=False):
+        if attname in desc.index:
+            val = desc.at[attname, column]
+            if (try_int and not np.isnan(val) and val == int(val) 
+                and "int" in df[column].dtype.name):
+                return int(val)
+            else:
+                return val
+        else:
+            return None
+    
+    cols = []
+    for column in desc:
+        cols.append({
+            'name' : column,
+            'count' : int(get_att(column, "count")),
+            'mean' : get_att(column, "mean"),
+            'std' : get_att(column, "std"),
+            'min' : get_att(column, "min", True),
+            'median' : get_att(column, "50%", True),
+            'max' : get_att(column, "max", True),
+        })
+  
+    return {"show_dfe" : True,
+            "dataframe_info" : {"row_count" : len(df),
+                      "columns" : cols}
+            }
+
+
 def handle_dataexplore(cmd):
     from pandastable.app import DataExplore  # @UnresolvedImport
     import tkinter as tk
@@ -89,10 +126,7 @@ def _check_add_dataframe_info(value, info, cmd):
         return
     
     if isinstance(value, pd.DataFrame):
-        info["columns"] = value.columns.tolist()
-        info["index"] = value.index.tolist() # TODO: convert to strings
-        info["values"] = value.values.tolist() # TODO: convert to strings
-        info["row_count"] = len(value)
+        info.update(_export_dataframe(value))
         info["is_DataFrame"] = True
         
         import pandas as pd  # @UnresolvedImport
@@ -141,7 +175,17 @@ def _bring_up(window):
         self.iconify()
         self.deiconify()
     """
+
+def _export_dataframe(df, all_rows=False, all_columns=False):
+    import pandas as pd
     
+    # TODO: pd.options.display.max_rows and max_columns
+    return {
+        "columns" : df.columns.tolist(),
+        "index" : df.index.astype(str).tolist(),
+        "values" : df.values.round(pd.options.display.precision).astype(str).tolist(), 
+        "row_count" : len(df)
+    }
         
 
 def load_plugin(_vm):
@@ -150,6 +194,7 @@ def load_plugin(_vm):
     vm.add_command("dataexplore", handle_dataexplore)    
     vm.add_command("de", handle_dataexplore)
     vm.add_command("delite", handle_delite)
+    vm.add_command("dfe", handle_dfe)
     vm.add_value_tweaker(tweak_pandas_value)
     vm.add_value_tweaker(tweak_numpy_value)
     vm.add_object_info_tweaker(_check_add_dataframe_info)
