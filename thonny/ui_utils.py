@@ -435,12 +435,15 @@ class VerticallyScrollableFrame(tk.Frame):
                                                     anchor=tk.NW)
         self.bind('<Configure>', self._configure_interior, "+")
         self.bind('<Expose>', self._expose, "+")
-        
+    
     def _expose(self, event):
         self.update_idletasks()
-        self._configure_interior(event)
+        self.update_scrollbars()
     
     def _configure_interior(self, event):
+        self.update_scrollbars()
+
+    def update_scrollbars(self):
         # update the scrollbars to match the size of the inner frame
         size = (self.canvas.winfo_width() , self.interior.winfo_reqheight())
         self.canvas.config(scrollregion="0 0 %s %s" % size)
@@ -450,7 +453,7 @@ class VerticallyScrollableFrame(tk.Frame):
             #print("CAWI", self.canvas.winfo_width())
             self.canvas.itemconfigure(self.interior_id,
                                       width=self.canvas.winfo_width())
-
+        
 
 class ScrollableFrame(tk.Frame):
     # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
