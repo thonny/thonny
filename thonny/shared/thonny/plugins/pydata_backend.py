@@ -1,6 +1,7 @@
 import io
 import sys
 import numpy as np
+import datetime
 
 app = None
 vm = None
@@ -27,7 +28,8 @@ def handle_dfe(cmd):
         return {"show_dfe" : True}
     
     import pandas as pd
-    df = eval(cmd.args_str, vm.get_main_module().__dict__)
+    df_expr = cmd.args_str
+    df = eval(df_expr, vm.get_main_module().__dict__)
     desc = df.describe(include="all").round(pd.options.display.precision)
     
     def get_att(column, attname, try_int=False):
@@ -41,21 +43,61 @@ def handle_dfe(cmd):
         else:
             return None
     
+    def shorten(s):
+        if len(s) > 10:
+            return s[:7] + '…'
+        else:
+            return s
+    
+    def format_ts(ts):
+        if ts.time() == datetime.time(0):
+            return str(ts)[:10]
+        else:
+            return str(ts)[:10] + '…'
+    
     cols = []
     for column in desc:
+        sort_as_str = False
+        
+        if not pd.isnull(desc.at["first", column]):
+            min_ = format_ts(desc.at["first", column])
+            max_ = format_ts(desc.at["last", column])
+        elif np.issubdtype(df[column].dtype, np.number):
+            min_ = get_att(column, "min", True)
+            max_ = get_att(column, "max", True)
+        #elif df[column].dtype == np.dtype('<M8[ns]'):
+        #    min_ = get_att(column, "first", True)
+        #    max_ = get_att(column, "last", True)
+        else:
+            dropna = df[column].dropna()
+            try:
+                
+                min_ = shorten(str(dropna.min()))
+                max_ = shorten(str(dropna.max()))
+            except TypeError:
+                # Must contain mixed datatypes
+                sort_as_str = True
+                min_ = shorten(dropna.astype(str).min())
+                max_ = shorten(dropna.astype(str).max())
+                    
+            
         cols.append({
             'name' : column,
             'count' : int(get_att(column, "count")),
+            'unique' : get_att(column, "unique", True),
+            #'top' : str(get_att(column, "top")),
             'mean' : get_att(column, "mean"),
             'std' : get_att(column, "std"),
-            'min' : get_att(column, "min", True),
-            'median' : get_att(column, "50%", True),
-            'max' : get_att(column, "max", True),
+            'min' : min_,
+            '50%' : get_att(column, "50%", True),
+            'max' : max_,
+            'sort_as_str' : sort_as_str
         })
   
     return {"show_dfe" : True,
             "dataframe_info" : {"row_count" : len(df),
-                      "columns" : cols}
+                                "columns" : cols,
+                                "df_expr" : df_expr}
             }
 
 
