@@ -257,9 +257,13 @@ class VM:
         """Executes Python source entered into shell"""
         filename = "<pyshell>"
         
+        ws_stripped_source = cmd.source.strip()
+        source = ws_stripped_source.strip("?")
+        num_stripped_question_marks = len(ws_stripped_source) - len(source) 
+        
         # let's see if it's single expression or something more complex
         try:
-            root = ast.parse(cmd.source, filename=filename, mode="exec")
+            root = ast.parse(source, filename=filename, mode="exec")
         except SyntaxError as e:
             error = "".join(traceback.format_exception_only(type(e), e))
             sys.stderr.write(error)
@@ -272,9 +276,11 @@ class VM:
         else:
             mode = "exec"
             
-        result_attributes = self._execute_source(cmd.source, filename, mode,
+        result_attributes = self._execute_source(source, filename, mode,
             getattr(cmd, "debug_mode", False),
             getattr(cmd, "global_vars", None))
+        
+        result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
         
         return self.create_message("ToplevelResult", **result_attributes)
     
