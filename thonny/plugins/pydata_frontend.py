@@ -17,8 +17,6 @@ class DataFrameExplorer(VerticallyScrollableFrame):
         self.colframe = None
     
     def load_dataframe(self, info):
-        print("Got info:", info)
-        
         df_expr = info["df_expr"]
         
         if self.colframe is not None:
@@ -76,6 +74,14 @@ class DataFrameExplorer(VerticallyScrollableFrame):
                 link.bind("<1>", 
                           lambda e: self.send_command_to_shell(expr_template, df_expr, col_name),
                           True)
+                
+        def sort_expr_template(ascending, sort_as_str):
+            expr = "{df}.dropna(subset=['{column}'])"
+            if sort_as_str:
+                expr += ".astype(str)"
+            expr += ".sort_values('{column}', ascending=" + str(ascending) + ").head() ?"
+            return expr
+            
         
         for i, col_info in enumerate(info["columns"]):
             row = i+1
@@ -83,11 +89,13 @@ class DataFrameExplorer(VerticallyScrollableFrame):
             create_checkbutton(row, 0, name)
             create_checkbutton(row, 1, name)
             create_label(row, 2, name, name, anchor="nw", justify="left",
-                         expr_template="{df}['{column}'].dtype")
+                         expr_template="{df}['{column}'].dtype ?")
             create_label(row, 3, name, col_info["count"], hide_zero=True)
             create_label(row, 4, name, info["row_count"] - col_info["count"], hide_zero=True)
-            create_label(row, 5, name, col_info["min"])
-            create_label(row, 6, name, col_info["max"])
+            create_label(row, 5, name, col_info["min"],
+                         expr_template=sort_expr_template(True, col_info["sort_as_str"]))
+            create_label(row, 6, name, col_info["max"],
+                         expr_template=sort_expr_template(False, col_info["sort_as_str"]))
             if math.isnan(col_info["mean"]):
                 if col_info["unique"] == col_info["count"]:
                     unique_text = "all unique"
@@ -126,7 +134,6 @@ class DataFrameInspector(ContentInspector, tk.Frame):
             self.table.grid_forget()
             self.table.destroy()
             self.table = None
-        
         data = []
         self.columns = object_info["columns"]
         index = object_info["index"]

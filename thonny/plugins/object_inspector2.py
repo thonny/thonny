@@ -9,7 +9,6 @@ import thonny.memory
 import ast
 from thonny.misc_utils import shorten_repr
 from thonny.ui_utils import update_entry_text, CALM_WHITE
-from thonny.gridtable import ScrollableGridTable
 
 class ObjectInspector2(ttk.Frame):
     def __init__(self, master):
@@ -244,7 +243,8 @@ class ObjectInspector2(ttk.Frame):
                 self.current_type_specific_inspector = None
             self.attributes_page.clear()
         else:
-            update_entry_text(self.repr_entry, object_info["repr"])
+            # TODO: proper shortening
+            #update_entry_text(self.repr_entry, object_info["repr"][:100])
             update_entry_text(self.type_entry, object_info["type"])
             self.attributes_page.tree.configure(height=len(object_info["attributes"]))
             self.attributes_page.update_variables(object_info["attributes"])

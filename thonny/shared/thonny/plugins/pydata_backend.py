@@ -222,10 +222,12 @@ def _export_dataframe(df, all_rows=False, all_columns=False):
     import pandas as pd
     
     # TODO: pd.options.display.max_rows and max_columns
+    # TODO: take both beginning and end
+    subframe = df.head()
     return {
         "columns" : df.columns.tolist(),
-        "index" : df.index.astype(str).tolist(),
-        "values" : df.values.round(pd.options.display.precision).astype(str).tolist(), 
+        "index" : subframe.index.astype(str).tolist(),
+        "values" : subframe.head().round(pd.options.display.precision).astype(str).values.tolist(), 
         "row_count" : len(df)
     }
         
