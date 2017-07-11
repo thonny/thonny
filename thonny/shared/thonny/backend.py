@@ -273,7 +273,7 @@ class VM:
             
         if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
             mode = "eval"
-        elif isinstance(root.body[-1], ast.Expr):
+        elif len(root.body) > 1 and isinstance(root.body[-1], ast.Expr):
             mode = "exec+eval"
         else:
             mode = "exec"
