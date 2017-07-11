@@ -273,6 +273,8 @@ class VM:
             
         if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
             mode = "eval"
+        elif isinstance(root.body[-1], ast.Expr):
+            mode = "exec+eval"
         else:
             mode = "exec"
             
@@ -723,18 +725,28 @@ class Executor:
             global_vars = __main__.__dict__
         
         try:
-            bytecode = self._compile_source(source, filename, mode)
-            if hasattr(self, "_trace"):
-                sys.settrace(self._trace)    
-            if mode == "eval":
-                value = eval(bytecode, global_vars)
+            if mode == "exec+eval":
+                root = ast.parse(source, filename=filename, mode="exec")
+                statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
+                expression = compile(ast.Expression(root.body[-1].value), filename, "eval")
+                exec(statements, global_vars)
+                value = eval(expression, global_vars)
                 if value is not None:
                     builtins._ = value 
                 return {"value_info" : self._vm.export_value(value)}
             else:
-                assert mode == "exec"
-                exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
-                return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
+                bytecode = self._compile_source(source, filename, mode)
+                if hasattr(self, "_trace"):
+                    sys.settrace(self._trace)    
+                if mode == "eval":
+                    value = eval(bytecode, global_vars)
+                    if value is not None:
+                        builtins._ = value 
+                    return {"value_info" : self._vm.export_value(value)}
+                else:
+                    assert mode == "exec"
+                    exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
+                    return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
         except SystemExit:
             # Show withot Thonny frames
             e_type, e_value, e_traceback = sys.exc_info()
