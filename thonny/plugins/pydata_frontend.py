@@ -26,6 +26,7 @@ class DataFrameExplorer(ttk.Frame):
         get_workbench().bind("ToplevelResult", self._request_plt_info, True)
         get_workbench().bind("PltInfo", self._update_plt_info, True)
         
+        self.columns = {}
         self.colframe = None
         self._last_globals = {}
         self.df_expr = None
@@ -122,11 +123,11 @@ class DataFrameExplorer(ttk.Frame):
             expr += ".sort_values('{column}', ascending=" + str(ascending) + ") ?"
             return expr
         
-        col_names = []
+        self.columns = {}
         for i, col_info in enumerate(info["columns"]):
             row = i+1
             name = col_info["name"]
-            col_names.append(name)
+            self.columns[name] = col_info
             #create_checkbutton(row, 0, name)
             #create_checkbutton(row, 1, name)
             
@@ -158,7 +159,7 @@ class DataFrameExplorer(ttk.Frame):
         
         for combo in [self.x_combo, self.y_combo, self.hue_combo,
                       self.weight_combo, self.row_combo, self.col_combo]:
-            combo.configure(values=col_names)
+            combo.configure(values=list(self.columns.keys()))
     
     def create_label(self, row, col, col_name, value, hide_zero=False, wraplength=100,
                      anchor="ne", justify="right", columnspan=1,
@@ -231,9 +232,24 @@ class DataFrameExplorer(ttk.Frame):
         self.plt_info = msg 
     
     def plot(self, kind):
-        print(kind)   
+        def get_col_info(combo):
+            idx = combo.current()
+            if idx == -1:
+                return None
+            else:
+                name = combo["values"][idx]
+                return self.columns[name]
+            
         
-
+        x = get_col_info(self.x_combo)
+        y = get_col_info(self.y_combo)
+        weight = get_col_info(self.weight_combo)
+        hue = get_col_info(self.hue_combo)
+        col = get_col_info(self.col_combo)
+        row = get_col_info(self.row_combo)
+        
+        print(kind, x, y, weight, hue, col, row)   
+    
 class DataFrameInspector(ContentInspector, tk.Frame):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
