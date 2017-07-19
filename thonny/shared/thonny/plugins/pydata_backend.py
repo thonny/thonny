@@ -60,7 +60,7 @@ def handle_dfe(cmd):
     for column in desc:
         sort_as_str = False
         
-        if not pd.isnull(desc.at["first", column]):
+        if "first" in desc.columns and not pd.isnull(desc.at["first", column]):
             min_ = format_ts(desc.at["first", column])
             max_ = format_ts(desc.at["last", column])
         elif np.issubdtype(df[column].dtype, np.number):

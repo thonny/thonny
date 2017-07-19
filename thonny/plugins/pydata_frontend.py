@@ -80,6 +80,9 @@ class DataFrameExplorer(ttk.Frame):
         for i, name in enumerate(buttons):
             button(i, name)
         
+        stuff = ChannelTrays(self, ["color", "size"])
+        stuff.grid(row=3, column=0, sticky="nsew")
+        
     def load_dataframe(self, info):
         self.df_name = info["df_name"]
         
@@ -131,8 +134,11 @@ class DataFrameExplorer(ttk.Frame):
             #create_checkbutton(row, 0, name)
             #create_checkbutton(row, 1, name)
             
-            self.create_label(row, 2, name, name, anchor="nw", justify="left",
-                         on_click=self.get_name_click_handler(name, col_info))
+            #self.create_label(row, 2, name, name, anchor="nw", justify="left",
+            #             on_click=self.get_name_click_handler(name, col_info))
+            name_widget = SourceFieldWidget(self.colframe, name)
+            name_widget.grid(row=row, column=2, sticky="nsew")
+            
             
             self.create_label(row, 3, name, col_info["count"], hide_zero=True)
             self.create_label(row, 4, name, info["row_count"] - col_info["count"], hide_zero=True)
@@ -287,6 +293,83 @@ class DataFrameInspector(ContentInspector, tk.Frame):
     
     def applies_to(self, object_info):
         return object_info.get("is_DataFrame", False)
+
+
+class FieldWidget(tk.Frame):
+    def __init__(self, master, field_name, include_menu, action_label = " × "):
+        self.background = "LightGray"
+        self.action_label = action_label
+        self.field_name = field_name
+        
+        tk.Frame.__init__(self, master, background=self.background)
+        
+        if include_menu:
+            menu_button = tk.Label(self, text=" ▾ ", background=self.background) # ▼ ▾ 
+            menu_button.grid(row=0, column=0, sticky="nsw")
+            menu_button.bind("<Enter>", self.section_enter, True)
+            menu_button.bind("<Leave>", self.section_leave, True)
+            menu_button.bind("<1>", self.menu_press, True)
+        
+        name_label = tk.Label(self, text=field_name, background=self.background, cursor="fleur",
+                              anchor="w")
+        name_label.bind("<Enter>", self.section_enter, True)
+        name_label.bind("<Leave>", self.section_leave, True)
+        name_label.grid(row=0, column=1, sticky="nsew")
+        
+        action_button = tk.Label(self, text=action_label, background=self.background) # ×
+        action_button.grid(row=0, column=2, sticky="nse")
+        action_button.bind("<Enter>", self.section_enter, True)
+        action_button.bind("<Leave>", self.section_leave, True)
+        action_button.bind("<1>", self.action_press, True)
+        
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+    
+    def section_enter(self, event):
+        event.widget["background"] = "DarkGray"
+        event.widget["foreground"] = "White"
+        
+    def section_leave(self, event):
+        event.widget["background"] = self.background
+        event.widget["foreground"] = "black"
+    
+    def action_press(self, event):
+        print("action")
+    
+    def menu_press(self, event):
+        print("menu")
+
+class SourceFieldWidget(FieldWidget):
+    def __init__(self, master, field_name):
+        FieldWidget.__init__(self, master, field_name, False, " + ")
+    
+    def action_press(self, event):
+        print("Adding", self.field_name)
+
+class UsedFieldWidget(FieldWidget):
+    def __init__(self, master, field_name):
+        FieldWidget.__init__(self, master, field_name, True, " × ")
+    
+    def action_press(self, event):
+        self.destroy()
+
+
+class ChannelTrays(tk.Frame):
+    def __init__(self, master, label_texts):
+        tk.Frame.__init__(self, master, background="pink")
+        
+        for i, text in enumerate(label_texts):
+            label = tk.Label(self, text=text, anchor="w")
+            label.grid(row=i, column=0, sticky="nsew", padx=2, pady=2)
+            tray = tk.Label(self, text=" drop a field here ", anchor="w", 
+                            background="lightYellow", foreground="lightGray")
+            tray.grid(row=i, column=1, sticky="nsew", padx=2, pady=2)
+        
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        
+    
 
 def listen_toplevel_results(event):
     if getattr(event, "show_dfe", False):
