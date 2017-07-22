@@ -2,9 +2,13 @@
 Version history
 ===============
 
-2.1.11 (2017-07-??)
+2.1.11 (2017-07-22)
 ===================
-* FIXED #285: Previous used interpreters are not shown in options dialog 
+* FIXED #31: Infinite print loop freezes Thonny  
+* FIXED #285: Previous used interpreters are not shown in options dialog
+* FIXED #296: Make it more explicit that pip GUI search box needs exact package name
+* FIXED #298: Python crashes keep backend hanging 
+* FIXED #305: Variables table doesn't get updated, if it's blocked by another view
 
 2.1.10 (2017-06-09)
 ===================
