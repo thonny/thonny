@@ -750,7 +750,7 @@ class CPythonProxy(BackendProxy):
                 
                     if len(self._message_queue) > 100:
                         # Probably backend runs an infinite/long print loop.
-                        # Throttle message thougput in order to keep GUI thread responsive.
+                        # Throttle message throughput in order to keep GUI thread responsive.
                         sleep(0.1)
                 except:
                     logging.exception("\nError when handling message from the backend: " + str(data))
