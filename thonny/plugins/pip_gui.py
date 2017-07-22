@@ -138,6 +138,7 @@ class PipDialog(tk.Toplevel):
         # need to explicitly copy size, because Tk 8.6 on certain Ubuntus use bigger font in copies
         bold_font.configure(weight="bold", size=default_font.cget("size"))
         self.info_text.tag_configure("caption", font=bold_font)
+        self.info_text.tag_configure("bold", font=bold_font)
         
         
         self.command_frame = ttk.Frame(info_frame)
@@ -395,7 +396,10 @@ class PipDialog(tk.Toplevel):
                 write("Could not find the package from PyPI.")
                 if not self._get_installed_version(name):
                     # new package
-                    write("\nPlease check your spelling!")
+                    write("\nPlease check your spelling!"
+                          + "\nYou need to enter ")
+                    write("exact package name", "bold")
+                    write("!")
                     
             else:
                 write("Could not find the package info from PyPI. Error code: " + str(error_code))

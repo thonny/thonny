@@ -21,7 +21,7 @@ class GlobalsView(VariablesFrame):
         self.update_variables(event.globals)
     
     def _request_globals(self, event=None, even_when_hidden=False):
-        if self.winfo_ismapped() or even_when_hidden:
+        if not getattr(self, "hidden", False) or even_when_hidden:
             # TODO: module_name
             get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     

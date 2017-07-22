@@ -27,6 +27,7 @@ import collections
 import signal
 import logging
 import traceback
+from time import sleep
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -746,6 +747,11 @@ class CPythonProxy(BackendProxy):
                         
                     # TODO: it was "with self._state_lock:". Is it necessary?
                     self._message_queue.append(msg)
+                
+                    if len(self._message_queue) > 100:
+                        # Probably backend runs an infinite/long print loop.
+                        # Throttle message thougput in order to keep GUI thread responsive.
+                        sleep(0.1)
                 except:
                     logging.exception("\nError when handling message from the backend: " + str(data))
                     self._message_queue.append({"message_type" : "ProgramOutput",
