@@ -29,6 +29,7 @@ import tokenize
 import collections
 import signal
 import logging
+from time import sleep
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
@@ -799,6 +800,11 @@ class CPythonProxy(BackendProxy):
                     
                 # TODO: it was "with self._state_lock:". Is it necessary?
                 self._message_queue.append(msg)
+                
+                if len(self._message_queue) > 100:
+                    # Probably backend runs an infinite/long print loop.
+                    # Throttle message thougput in order to keep GUI thread responsive.
+                    sleep(0.1)
 
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
