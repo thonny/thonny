@@ -19,3 +19,4 @@
 *.jpg binary
 *.gif binary
 *.exe binary
+*.prefs binary
