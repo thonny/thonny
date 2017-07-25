@@ -25,7 +25,7 @@ def try_load_configuration(filename):
 
 class ConfigurationManager:
     def __init__(self, filename):
-        self._ini = ConfigParser()
+        self._ini = ConfigParser(interpolation=None)
         self._filename = filename
         self._defaults = {}
         self._variables = {} # Tk variables
