@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 from thonny.plugins.object_inspector2 import ContentInspector
 from thonny.gridtable import ScrollableGridTable
 from thonny.globals import get_workbench, get_runner
@@ -32,7 +33,59 @@ class DataFrameExplorer(ttk.Frame):
         self.df_expr = None
         self.plt_info = None
     
-    def _init_plotting(self):        
+    
+    def _init_plotting(self):
+        plotframe = ttk.Frame(self)
+        plotframe.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
+        innerpad=5
+        
+        default_font = tk.font.nametofont("TkDefaultFont")
+        bold_font = default_font.copy()
+        bold_font.configure(weight="bold", size=int(default_font.cget("size")*1.5)) # need to explicitly copy size, because Tk 8.6 on certain Ubuntus use bigger font in copies
+        
+        def title(text, row):
+            label = tk.Label(plotframe, text=text, anchor="w", font=bold_font)
+            label.grid(row=row, column=0, sticky="w")
+        
+        def channel(name, row, column, caption=None):
+            if caption == None:
+                caption = name
+            label = ttk.Label(plotframe, text=caption, anchor="w")
+            label.grid(row=row, column=column, sticky="nsew", pady=(2, 0), padx=innerpad)
+            
+            tray = ChannelTray(plotframe)
+            tray.grid(row=row+1, column=column, sticky="nsew", pady=(0, 2), padx=innerpad)
+            self.channel_trays[name] = tray
+            
+            return tray
+        
+        #title("Plot", 0)
+        self.channel_trays = {}
+        
+        channel("x", 1, 0, "x-axis")
+        channel("y", 1, 1, "y-axis")
+        channel("color", 1, 2)
+        
+        ttk.Label(plotframe, text="kind", anchor="w").grid(row=1, column=3, sticky="nsew")
+        kind_combo = ttk.Combobox(plotframe,
+                              exportselection=False,
+                              state='readonly', 
+                              values=["auto", "point", "bar", "line"],
+                              width=5)
+        kind_combo.grid(row=2, column=3, sticky="nsew", pady=(0, 2))
+        
+        #channel("row", 3, 0)
+        #channel("column", 3, 1)
+        
+        plotframe.columnconfigure(0, weight=1)
+        plotframe.columnconfigure(1, weight=1)
+        plotframe.columnconfigure(2, weight=1)
+        plotframe.columnconfigure(3, weight=0)
+        
+        
+        
+    
+    def _init_plotting_old(self):        
         compframe = ttk.Frame(self)
         compframe.grid(row=1, column=0, sticky="nsew", padx=10, pady=10)
         
@@ -76,12 +129,9 @@ class DataFrameExplorer(ttk.Frame):
             bt.grid(row=0, column=i, sticky="nsew", padx=2)
             button_strip.columnconfigure(i, weight=1)
             
-        buttons = ["count", "mean", "quartiles", "corr", "line", "crosstab", "extra"]
+        buttons = ["individual", "count", "summary", "distribution"]
         for i, name in enumerate(buttons):
             button(i, name)
-        
-        stuff = ChannelTrays(self, ["color", "size"])
-        stuff.grid(row=3, column=0, sticky="nsew")
         
     def load_dataframe(self, info):
         self.df_name = info["df_name"]
@@ -101,13 +151,11 @@ class DataFrameExplorer(ttk.Frame):
         #create_title("Plot by", 0, 2)
         create_title("Column name", 2)
         create_title("Count", 3)
-        create_title("Nulls", 4)
-        create_title("Min", 5)
-        create_title("Max", 6)
-        create_title("Med", 7)
-        create_title("Mean", 8)
-        create_title("Std", 9)
-        #create_title("", 11) # Dummy allowing extra room for categorical info
+        create_title("Unique", 4)
+        create_title("Nulls", 5)
+        create_title("Min", 6)
+        create_title("Max", 7)
+        #create_title("...", 8)
         
         def create_checkbutton(row, col, column_name):
             var = tk.BooleanVar(self.colframe, value=False)
@@ -118,12 +166,12 @@ class DataFrameExplorer(ttk.Frame):
             cb.grid(row=row, column=col, sticky="nsew", pady=(0,1))
         
                 
-        def sort_expr_template(ascending, sort_as_str):
+        def sort_expr_template(name, ascending, sort_as_str):
             expr = "{df}"
             #expr += ".dropna(subset=['{column}'])"
             if sort_as_str:
                 expr += ".astype(str)"
-            expr += ".sort_values('{column}', ascending=" + str(ascending) + ") ?"
+            expr += (".sort_values('%s', ascending=" % name) + str(ascending) + ") ?"
             return expr
         
         self.columns = {}
@@ -136,38 +184,28 @@ class DataFrameExplorer(ttk.Frame):
             
             #self.create_label(row, 2, name, name, anchor="nw", justify="left",
             #             on_click=self.get_name_click_handler(name, col_info))
-            name_widget = SourceFieldWidget(self.colframe, name)
+            name_widget = SourceFieldWidget(self.colframe, self, name)
             name_widget.grid(row=row, column=2, sticky="nsew")
             
             
-            self.create_label(row, 3, name, col_info["count"], hide_zero=True)
-            self.create_label(row, 4, name, info["row_count"] - col_info["count"], hide_zero=True)
-            self.create_label(row, 5, name, col_info["min"],
-                         code_template=sort_expr_template(True, col_info["sort_as_str"]))
-            self.create_label(row, 6, name, col_info["max"],
-                         code_template=sort_expr_template(False, col_info["sort_as_str"]))
+            self.create_label(row, 3, col_info["count"], hide_zero=True)
+            self.create_label(row, 4, col_info["unique"], hide_zero=True,
+                              code_template="{df}['%s'].value_counts() ?" % name)
+            self.create_label(row, 5, info["row_count"] - col_info["count"], hide_zero=True)
+            self.create_label(row, 6, col_info["min"],
+                         code_template=sort_expr_template(name, True, col_info["sort_as_str"]))
+            self.create_label(row, 7, col_info["max"],
+                         code_template=sort_expr_template(name, False, col_info["sort_as_str"]))
             
-            if math.isnan(col_info["mean"]):
-                if col_info["unique"] == col_info["count"]:
-                    unique_text = "all unique"
-                else:
-                    unique_text = (str(col_info["unique"]) + " unique" 
-                                   + ("s" if col_info["unique"] != 1 else ""))
-                self.create_label(row, 7, name, unique_text, columnspan=5,
-                             anchor="n", wraplength=None)
-            else:
-                self.create_label(row, 7, name, col_info["50%"])
-                self.create_label(row, 8, name, col_info["mean"], wraplength=60)
-                self.create_label(row, 9, name, col_info["std"], wraplength=60)
             
         self.after_idle(lambda: self.after(100, self.colcontainer.update_scrollbars))
         
         
-        for combo in [self.x_combo, self.y_combo, self.hue_combo,
-                      self.weight_combo, self.row_combo, self.col_combo]:
-            combo.configure(values=list(self.columns.keys()))
+        #for combo in [self.x_combo, self.y_combo, self.hue_combo,
+        #              self.weight_combo, self.row_combo, self.col_combo]:
+        #    combo.configure(values=list(self.columns.keys()))
     
-    def create_label(self, row, col, col_name, value, hide_zero=False, wraplength=100,
+    def create_label(self, row, col, value, hide_zero=False, wraplength=100,
                      anchor="ne", justify="right", columnspan=1,
                      on_click=None, code_template=None):
         
@@ -192,39 +230,14 @@ class DataFrameExplorer(ttk.Frame):
         if on_click is not None:
             link.bind("<1>", on_click, True)
         elif code_template is not None:
-            link.bind("<1>", lambda e: self.send_command_to_shell(code_template, col_name), True)
+            link.bind("<1>", lambda e: self.send_command_to_shell(code_template), True)
     
-    def get_name_click_handler(self, name, col_info):
-        if math.isnan(col_info["mean"]):
-            base_code = "{df}['{column}'].value_counts().plot.barh(sort_columns=True) ?"
-        else:
-            base_code = "{df}['{column}'].hist(bins='auto') ?"
-            
-        def handle_name_click(event):
-            template = ""
-            if self.plt_info is None:
-                plt = "plt"
-                template = "import matplotlib.pyplot as plt\n"
-            else:
-                if not self.plt_info.imported:
-                    template = "import matplotlib.pyplot as " + self.plt_info.name + "\n"
-                plt = self.plt_info.name
-                
-            
-            #template += plt + ".figure(tight_layout=True); "
-            template += plt + ".cla(); "
-            template += base_code
-            
-            self.send_command_to_shell(template, name)
-            #self.send_command_to_shell(plt + ".tight_layout()")
-        
-        return handle_name_click
-        
     
-    def send_command_to_shell(self, expr_template, column_name):
+    def send_command_to_shell(self, expr_template):
         # TODO: check that df_name is really variable name
         # TODO: check that runner state is suitable
-        expr = expr_template.format(df=self.df_name, column=column_name).strip() + "\n"
+        # TODO: empty line for multiline code
+        expr = expr_template.format(df=self.df_name).strip() + "\n"
         get_workbench().show_view("ShellView").submit_python_code(expr)
 
     def _handle_globals_event(self, event):
@@ -237,24 +250,68 @@ class DataFrameExplorer(ttk.Frame):
     def _update_plt_info(self, msg):
         self.plt_info = msg 
     
-    def plot(self, kind):
-        def get_col_info(combo):
-            idx = combo.current()
-            if idx == -1:
+    def add_field_for_plotting(self, field_name):
+        field = UsedFieldWidget(self, self, field_name)
+        old_field = self.channel_trays["x"].accept_field(field)
+        # TODO: temp
+        if old_field is not None:
+            old_field.destroy()
+         
+    
+    def clear_trays(self):
+        for name in self.channel_trays:
+            self.channel_trays[name].clear()
+                
+    
+    def plot(self):
+        def get_channel_info(name):
+            tray = self.channel_trays[name]
+            if tray.field is None:
                 return None
             else:
-                name = combo["values"][idx]
-                return self.columns[name]
+                result = self.columns[tray.field.name].copy()
+                result["function"] = tray.field.function
+                return result
+        
+        x = get_channel_info("x")
+        y = get_channel_info("y")
+        color = get_channel_info("color")
+        
+        # TODO: 
+        kind = "bar"
+        if kind == "auto":
+            "TODO: choose most suitable kind"
+        
+        try:
+            template = self._histogram(x)
+            self.send_command_to_shell(template)
             
+        except BadChannelsError as e:
+            messagebox.showerror("Bad channels", str(e))
         
-        x = get_col_info(self.x_combo)
-        y = get_col_info(self.y_combo)
-        weight = get_col_info(self.weight_combo)
-        hue = get_col_info(self.hue_combo)
-        col = get_col_info(self.col_combo)
-        row = get_col_info(self.row_combo)
+    
+    def _histogram(self, field_info):
+        if math.isnan(field_info["mean"]):
+            base_code = "{df}['%s'].value_counts().sort_index().plot.bar(ax=dfe_ax, sort_columns=True) ?" % field_info["name"]
+        else:
+            base_code = "{df}['%s'].hist(ax=dfe_ax, bins='auto') ?" % field_info["name"]
+            
+        template = ""
+        if self.plt_info is None:
+            plt = "plt"
+            template = "import matplotlib.pyplot as plt\n"
+        else:
+            if not self.plt_info.imported:
+                template = "import matplotlib.pyplot as " + self.plt_info["name"] + "\n"
+            plt = self.plt_info.name
         
-        print(kind, x, y, weight, hue, col, row)   
+        if getattr(self.plt_info, "dfe_fig_exists", False):
+            template += plt + ".close(dfe_fig) # avoid wasting memory\n"
+            
+        template += "dfe_fig, dfe_ax = " + plt +".subplots(tight_layout=True)\n"
+        template += "dfe_ax.set(xlabel='"+field_info["name"]+"', ylabel='count')\n"
+        template += base_code
+        return template
     
 class DataFrameInspector(ContentInspector, tk.Frame):
     def __init__(self, master):
@@ -296,10 +353,11 @@ class DataFrameInspector(ContentInspector, tk.Frame):
 
 
 class FieldWidget(tk.Frame):
-    def __init__(self, master, field_name, include_menu, action_label = " × "):
+    def __init__(self, master, dfe, field_name, include_menu, action_label = " × "):
         self.background = "LightGray"
         self.action_label = action_label
-        self.field_name = field_name
+        self.name = field_name
+        self.dfe = dfe
         
         tk.Frame.__init__(self, master, background=self.background)
         
@@ -310,8 +368,9 @@ class FieldWidget(tk.Frame):
             menu_button.bind("<Leave>", self.section_leave, True)
             menu_button.bind("<1>", self.menu_press, True)
         
-        name_label = tk.Label(self, text=field_name, background=self.background, cursor="fleur",
-                              anchor="w")
+        name_label = tk.Label(self, text=field_name, 
+                              background=self.background, cursor="fleur",
+                              wraplength=100, anchor="w")
         name_label.bind("<Enter>", self.section_enter, True)
         name_label.bind("<Leave>", self.section_leave, True)
         name_label.grid(row=0, column=1, sticky="nsew")
@@ -320,7 +379,8 @@ class FieldWidget(tk.Frame):
         action_button.grid(row=0, column=2, sticky="nse")
         action_button.bind("<Enter>", self.section_enter, True)
         action_button.bind("<Leave>", self.section_leave, True)
-        action_button.bind("<1>", self.action_press, True)
+        action_button.bind("<1>", self.action_click, True)
+        action_button.bind("<Double-Button-1>", self.action_double_click, True)
         
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
@@ -333,43 +393,60 @@ class FieldWidget(tk.Frame):
         event.widget["background"] = self.background
         event.widget["foreground"] = "black"
     
-    def action_press(self, event):
+    def action_click(self, event):
         print("action")
+    
+    def action_double_click(self, event):
+        print("action double")
     
     def menu_press(self, event):
         print("menu")
 
 class SourceFieldWidget(FieldWidget):
-    def __init__(self, master, field_name):
-        FieldWidget.__init__(self, master, field_name, False, " + ")
+    def __init__(self, master, dfe, field_name):
+        FieldWidget.__init__(self, master, dfe, field_name, False, " + ")
     
-    def action_press(self, event):
-        print("Adding", self.field_name)
+    def action_click(self, event):
+        self.dfe.add_field_for_plotting(self.name)
+        self.dfe.plot()
+
+    def action_double_click(self, event):
+        print("dbcl")
+        self.dfe.clear_trays()
+        self.dfe.add_field_for_plotting(self.name)
+        self.dfe.plot()
 
 class UsedFieldWidget(FieldWidget):
-    def __init__(self, master, field_name):
-        FieldWidget.__init__(self, master, field_name, True, " × ")
+    def __init__(self, master, dfe, field_name):
+        FieldWidget.__init__(self, master, dfe, field_name, True, " × ")
+        self.function = None 
     
-    def action_press(self, event):
+    def action_click(self, event):
         self.destroy()
 
 
-class ChannelTrays(tk.Frame):
-    def __init__(self, master, label_texts):
+class ChannelTray(tk.Frame):
+    def __init__(self, master):
+        self.field = None
         tk.Frame.__init__(self, master, background="pink")
-        
-        for i, text in enumerate(label_texts):
-            label = tk.Label(self, text=text, anchor="w")
-            label.grid(row=i, column=0, sticky="nsew", padx=2, pady=2)
-            tray = tk.Label(self, text=" drop a field here ", anchor="w", 
-                            background="lightYellow", foreground="lightGray")
-            tray.grid(row=i, column=1, sticky="nsew", padx=2, pady=2)
         
         self.columnconfigure(1, weight=1)
         self.rowconfigure(0, weight=1)
-        
-        
     
+    def clear(self):
+        if self.field is not None:
+            self.field.destroy()
+            self.field = None
+    
+    def accept_field(self, field):
+        old_field = self.field
+        field.grid(row=0, column=0, in_=self)
+        self.field = field
+        
+        return old_field
+
+class BadChannelsError(RuntimeError):
+    pass
 
 def listen_toplevel_results(event):
     if getattr(event, "show_dfe", False):

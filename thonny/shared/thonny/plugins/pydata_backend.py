@@ -60,10 +60,10 @@ def handle_dfe(cmd):
     for column in desc:
         sort_as_str = False
         
-        if "first" in desc.columns and not pd.isnull(desc.at["first", column]):
+        if "first" in desc.index and not pd.isnull(desc.at["first", column]):
             min_ = format_ts(desc.at["first", column])
             max_ = format_ts(desc.at["last", column])
-        elif np.issubdtype(df[column].dtype, np.number):
+        elif "min" in desc.index and not pd.isnull(desc.at["min", column]):
             min_ = get_att(column, "min", True)
             max_ = get_att(column, "max", True)
         #elif df[column].dtype == np.dtype('<M8[ns]'):
@@ -80,12 +80,15 @@ def handle_dfe(cmd):
                 sort_as_str = True
                 min_ = shorten(dropna.astype(str).min())
                 max_ = shorten(dropna.astype(str).max())
-                    
+        
+        unique = get_att(column, "unique", True)
+        if np.isnan(unique):
+            unique = df[column].nunique()
             
         cols.append({
             'name' : column,
             'count' : int(get_att(column, "count")),
-            'unique' : get_att(column, "unique", True),
+            'unique' : unique,
             #'top' : str(get_att(column, "top")),
             'mean' : get_att(column, "mean"),
             'std' : get_att(column, "std"),
@@ -122,7 +125,8 @@ def handle_get_plt_info(cmd):
     
     return {"message_type" : "PltInfo",
             "name" : plt_name,
-            "imported" : imported}
+            "imported" : imported,
+            "dfe_fig_exists" : "dfe_fig" in globs}
 
 
 def handle_dataexplore(cmd):
