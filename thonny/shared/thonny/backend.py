@@ -1011,7 +1011,12 @@ class FancyTracer(Executor):
         else:
             obj = frame.f_code
             lineno = obj.co_firstlineno
-        
+            
+        assert obj is not None, (
+            "Failed to get source in backend _get_frame_source_info for frame " + str(frame) 
+            + " with f_code.co_name == " + frame.f_code.co_name
+        )
+         
         # lineno returned by getsourcelines is not consistent between modules vs functions
         lines, _ = inspect.getsourcelines(obj) 
         return "".join(lines), lineno
