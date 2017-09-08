@@ -1006,7 +1006,7 @@ class FancyTracer(Executor):
     
     def _get_frame_source_info(self, frame):
         if frame.f_code.co_name == "<module>":
-            obj = inspect.getmodule(frame)
+            obj = frame.f_code
             lineno = 1
         else:
             obj = frame.f_code
