@@ -1,3 +1,7 @@
+======
+Thonny
+======
+
 Thonny is a Python IDE meant for learning programming.
 
 End users
