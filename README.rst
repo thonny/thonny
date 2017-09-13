@@ -7,4 +7,4 @@ See http://thonny.org for more info.
 
 Contributors
 ------------
-See CONTRIBUTING.rst
+See `CONTRIBUTING.rst <CONTRIBUTING.rst>`_
