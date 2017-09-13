@@ -7,4 +7,4 @@ See http://thonny.org for more info.
 
 Contributors
 ------------
-See `CONTRIBUTING.rst <CONTRIBUTING.rst>`_
+Contributions are welcome! See `CONTRIBUTING.rst <https://bitbucket.org/plas/thonny/src/master/CONTRIBUTING.rst>`_ for more info.
