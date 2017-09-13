@@ -200,8 +200,9 @@ def mark_text_ranges(node, source):
 
     def _strip_trailing_junk_from_expressions(tokens):
         while (tokens[-1].type not in (token.RBRACE, token.RPAR, token.RSQB,
-                                      token.NAME, token.NUMBER, token.STRING)
-                    and not (hasattr(token, "ELLIPSIS") and tokens[-1].type == token.ELLIPSIS)
+                                      token.NAME, token.NUMBER, token.STRING,
+                                      token.ELLIPSIS)
+                    and tokens[-1].string != "..." # See https://bugs.python.org/issue31394
                     and tokens[-1].string not in ")}]"
                     or tokens[-1].string in ['and', 'as', 'assert', 'class', 'def', 'del',
                                               'elif', 'else', 'except', 'exec', 'finally',
