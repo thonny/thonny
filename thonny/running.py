@@ -33,6 +33,7 @@ from time import sleep
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
+SAME_AS_FRONTEND_INTERPRETER = "same as front-end"
 WINDOWS_EXE = "python.exe"
 
 class Runner:
@@ -553,12 +554,15 @@ class BackendProxy:
 class CPythonProxy(BackendProxy):
     @classmethod
     def get_configuration_options(cls):
-        return [DEFAULT_CPYTHON_INTERPRETER] + CPythonProxy._get_interpreters()
+        return ([DEFAULT_CPYTHON_INTERPRETER, SAME_AS_FRONTEND_INTERPRETER] 
+                + CPythonProxy._get_interpreters())
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
             self._prepare_private_venv()
             self._executable = get_private_venv_executable()
+        elif configuration_option == SAME_AS_FRONTEND_INTERPRETER:
+            self._executable = sys.executable
         else:
             self._executable = configuration_option
             
