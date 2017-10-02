@@ -563,6 +563,11 @@ class CPythonProxy(BackendProxy):
             self._executable = get_private_venv_executable()
         elif configuration_option == SAME_AS_FRONTEND_INTERPRETER:
             self._executable = sys.executable
+        elif configuration_option.startswith("."):
+            # Relative paths are relative to front-end interpretator directory
+            # (This must be written directly to conf file, as it can't be selected from Options dialog)  
+            self._executable = os.path.normpath(os.path.join(os.path.dirname(sys.executable), 
+                                                             configuration_option)) 
         else:
             self._executable = configuration_option
             
