@@ -480,7 +480,7 @@ class Runner:
             
             
     def get_frontend_python(self):
-        return sys.executable.replace("thonny.exe", "pythonw.exe")
+        return sys.executable.replace("thonny.exe", "python.exe")
     
     def using_venv(self):
         return isinstance(self._proxy,  CPythonProxy) and self._proxy.in_venv
