@@ -733,9 +733,13 @@ class CPythonProxy(BackendProxy):
             except:
                 logging.exception("Can't find Tcl/Tk library")
         
-        # I don't want to use PYTHONPATH for making jedi available
-        # because that would add it to the front of sys.path
-        my_env["JEDI_LOCATION"] = self._prepare_jedi()
+        # If the back-end interpreter is something else than front-end's one,
+        # then it may not have jedi installed. 
+        # In this case fffer front-end's jedi for the back-end
+        if self._executable != sys.executable: 
+            # I don't want to use PYTHONPATH for making jedi available
+            # because that would add it to the front of sys.path
+            my_env["JEDI_LOCATION"] = self._prepare_jedi()
         
         if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
