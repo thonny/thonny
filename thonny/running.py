@@ -562,7 +562,7 @@ class CPythonProxy(BackendProxy):
             self._prepare_private_venv()
             self._executable = get_private_venv_executable()
         elif configuration_option == SAME_AS_FRONTEND_INTERPRETER:
-            self._executable = sys.executable
+            self._executable = get_runner().get_frontend_python()
         elif configuration_option.startswith("."):
             # Relative paths are relative to front-end interpretator directory
             # (This must be written directly to conf file, as it can't be selected from Options dialog)  
@@ -736,7 +736,7 @@ class CPythonProxy(BackendProxy):
         # If the back-end interpreter is something else than front-end's one,
         # then it may not have jedi installed. 
         # In this case fffer front-end's jedi for the back-end
-        if self._executable != sys.executable: 
+        if self._executable != get_runner().get_frontend_python(): 
             # I don't want to use PYTHONPATH for making jedi available
             # because that would add it to the front of sys.path
             my_env["JEDI_LOCATION"] = self._prepare_jedi()
