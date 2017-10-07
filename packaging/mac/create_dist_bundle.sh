@@ -65,6 +65,10 @@ cd $PYTHON_CURRENT/bin
 ln -s python3.6 python3
 cd $SCRIPT_DIR
 
+# copy the token signifying Thonny-private Python
+cp thonny_python.ini $PYTHON_CURRENT/bin 
+
+
 # Replace Python.app Info.plist to get name "Thonny" to menubar
 cp -f $SCRIPT_DIR/Python.app.plist $PYTHON_CURRENT/Resources/Python.app/Contents/Info.plist
 
