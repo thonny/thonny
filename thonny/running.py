@@ -31,6 +31,7 @@ from time import sleep
 
 
 DEFAULT_CPYTHON_INTERPRETER = "default"
+SAME_AS_FRONTEND_INTERPRETER = "same as front-end"
 WINDOWS_EXE = "python.exe"
 
 class Runner:
@@ -423,7 +424,7 @@ class Runner:
             
             
     def get_frontend_python(self):
-        return sys.executable.replace("thonny.exe", "pythonw.exe")
+        return sys.executable.replace("thonny.exe", "python.exe")
     
     def using_venv(self):
         return isinstance(self._proxy,  CPythonProxy) and self._proxy.in_venv
@@ -497,12 +498,20 @@ class BackendProxy:
 class CPythonProxy(BackendProxy):
     @classmethod
     def get_configuration_options(cls):
-        return [DEFAULT_CPYTHON_INTERPRETER] + CPythonProxy._get_interpreters()
+        return ([DEFAULT_CPYTHON_INTERPRETER, SAME_AS_FRONTEND_INTERPRETER] 
+                + CPythonProxy._get_interpreters())
         
     def __init__(self, configuration_option):
         if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
             self._prepare_private_venv()
             self._executable = get_private_venv_executable()
+        elif configuration_option == SAME_AS_FRONTEND_INTERPRETER:
+            self._executable = get_runner().get_frontend_python()
+        elif configuration_option.startswith("."):
+            # Relative paths are relative to front-end interpretator directory
+            # (This must be written directly to conf file, as it can't be selected from Options dialog)  
+            self._executable = os.path.normpath(os.path.join(os.path.dirname(sys.executable), 
+                                                             configuration_option)) 
         else:
             self._executable = configuration_option
             
@@ -644,22 +653,34 @@ class CPythonProxy(BackendProxy):
         # TODO: clean up old versions
     
     def _start_new_process(self, cmd=None):
+        this_python = get_runner().get_frontend_python()
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
     
-        # create new backend process
-        my_env = {}
-        for name in os.environ:
-            if ("python" not in name.lower() # skip python vars, because we may use different Python version
-                and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
-                my_env[name] = os.environ[name]
+        # prepare the environment
+        my_env = os.environ.copy()
         
-        # TODO: take care of SSL_CERT_FILE
-        # Unset when we're in builtin python and target python is external
-        # And set, wen we're in external and target is builtin (or it's venv)
-                
+        # Delete some environment variables if the backend is (based on) a different Python instance
+        if self._executable not in [
+            this_python,
+            this_python.replace("python.exe", "pythonw.exe"),
+            this_python.replace("pythonw.exe", "python.exe"),
+            get_private_venv_executable()]:
+            
+            # Keep only the variables, that are not related to Python
+            my_env = {name : my_env[name] for name in my_env 
+                      if "python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]}
+            
+            # Remove variables used to tweak bundled Thonny-private Python
+            if using_bundled_python():
+                my_env = {name : my_env[name] for name in my_env
+                          if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]}
+        
+        # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
+        
+        
         my_env["THONNY_USER_DIR"] = THONNY_USER_DIR
         
         # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
@@ -670,9 +691,13 @@ class CPythonProxy(BackendProxy):
             except:
                 logging.exception("Can't find Tcl/Tk library")
         
-        # I don't want to use PYTHONPATH for making jedi available
-        # because that would add it to the front of sys.path
-        my_env["JEDI_LOCATION"] = self._prepare_jedi()
+        # If the back-end interpreter is something else than front-end's one,
+        # then it may not have jedi installed. 
+        # In this case fffer front-end's jedi for the back-end
+        if self._executable != get_runner().get_frontend_python(): 
+            # I don't want to use PYTHONPATH for making jedi available
+            # because that would add it to the front of sys.path
+            my_env["JEDI_LOCATION"] = self._prepare_jedi()
         
         if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
@@ -1022,6 +1047,13 @@ def _get_venv_info(venv_path):
                 result[key.strip()] = val.strip()
     
     return result;
+
+
+def using_bundled_python():
+    return os.path.exists(os.path.join(
+        os.path.dirname(sys.executable),
+        "thonny_python.ini"
+    ))
 
 class BackendTerminatedError(Exception):
     def __init__(self, returncode):
