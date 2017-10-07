@@ -707,22 +707,35 @@ class CPythonProxy(BackendProxy):
         # TODO: clean up old versions
     
     def _start_new_process(self, cmd=None):
+        this_python = get_runner().get_frontend_python()
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
     
-        # create new backend process
-        my_env = {}
-        for name in os.environ:
-            if ("python" not in name.lower() # skip python vars, because we may use different Python version
-                and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # They tend to point to frontend Python installation 
-                my_env[name] = os.environ[name]
+        # prepare the environment
+        my_env = os.environ.copy()
         
-        # TODO: take care of SSL_CERT_FILE
-        # Unset when we're in builtin python and target python is external
-        # And set, wen we're in external and target is builtin (or it's venv)
-                
+        # Delete some environment variables if the backend is (based on) a different Python instance
+        if self._executable not in [
+            this_python,
+            this_python.replace("python.exe", "pythonw.exe"),
+            this_python.replace("pythonw.exe", "python.exe"),
+            get_private_venv_executable()]:
+            
+            # Python related variables
+            for name in my_env:
+                if ("python" in name.lower() or name in ["TK_LIBRARY", "TCL_LIBRARY"]):  
+                    del my_env[name]
+            
+            # Variables used to tweak bundled Thonny-private Python
+            if using_bundled_python():
+                del my_env["SSL_CERT_FILE"]
+                del my_env["LD_LIBRARY_PATH"]
+        
+        # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "ASCII" 
         my_env["PYTHONUNBUFFERED"] = "1" 
+        
+        
         my_env["THONNY_USER_DIR"] = THONNY_USER_DIR
         
         # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
@@ -1080,6 +1093,13 @@ def _get_venv_info(venv_path):
                 result[key.strip()] = val.strip()
     
     return result;
+
+
+def using_bundled_python():
+    return os.path.exists(os.path.join(
+        os.path.dirname(sys.executable),
+        "thonny_python.ini"
+    ))
 
 class BackendTerminatedError(Exception):
     def __init__(self, returncode):
