@@ -19,9 +19,6 @@ cp -r $PREFIX/* $TARGET_DIR
 cp install.py $TARGET_DIR/install.py
 cp install.sh $TARGET_DIR/install
 
-# copy the token signifying Thonny-private Python
-cp thonny_python.ini $TARGET_DIR/bin 
-
 mkdir -p $TARGET_DIR/templates
 cp uninstall.sh $TARGET_DIR/templates
 cp Thonny.desktop $TARGET_DIR/templates
@@ -80,6 +77,10 @@ cp thonny $TARGET_DIR/bin
 cd $TARGET_DIR/bin
 ln -s python3.6 python3
 cd $SCRIPT_DIR
+
+# copy the token signifying Thonny-private Python
+cp thonny_python.ini $TARGET_DIR/bin 
+
 
 
 
