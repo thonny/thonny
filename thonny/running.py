@@ -727,8 +727,8 @@ class CPythonProxy(BackendProxy):
             
             # Remove variables used to tweak bundled Thonny-private Python
             if using_bundled_python():
-                del my_env["SSL_CERT_FILE"]
-                del my_env["LD_LIBRARY_PATH"]
+                my_env = {name : my_env[name] for name in my_env
+                          if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]}
         
         # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "ASCII" 
