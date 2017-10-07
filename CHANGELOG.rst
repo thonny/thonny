@@ -2,6 +2,12 @@
 Version history
 ===============
 
+2.1.12 (2017-10-??)
+===================
+* FIXED #303: Allow specifying same interpreter for backend as frontend uses
+* FIXED #304: Allow specifying backend interpreter by relative path
+* FIXED #334: init.tcl not found (Better control over back-end environment variables)  
+
 2.1.11 (2017-07-22)
 ===================
 * FIXED #31: Infinite print loop freezes Thonny  
