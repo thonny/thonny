@@ -721,12 +721,11 @@ class CPythonProxy(BackendProxy):
             this_python.replace("pythonw.exe", "python.exe"),
             get_private_venv_executable()]:
             
-            # Python related variables
-            for name in my_env:
-                if ("python" in name.lower() or name in ["TK_LIBRARY", "TCL_LIBRARY"]):  
-                    del my_env[name]
+            # Keep only the variables, that are not related to Python
+            my_env = {name : my_env[name] for name in my_env 
+                      if "python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]}
             
-            # Variables used to tweak bundled Thonny-private Python
+            # Remove variables used to tweak bundled Thonny-private Python
             if using_bundled_python():
                 del my_env["SSL_CERT_FILE"]
                 del my_env["LD_LIBRARY_PATH"]
