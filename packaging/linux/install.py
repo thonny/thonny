@@ -98,6 +98,10 @@ else:
     print("Installer should be run with 0 or 1 arguments", file=sys.stderr)
     exit(1)
 
+if parent_dir.startswith(os.path.dirname(__file__)):
+    print("Can't install into installer directory", file=sys.stderr)
+    exit(1)
+
 def print_task(desc):
     print((desc + " ").ljust(70, ".") + " ", end="")
 
