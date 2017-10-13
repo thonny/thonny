@@ -35,10 +35,7 @@ class LocalsHighlighter:
     def get_positions_correct_but_using_private_parts(self):
         from jedi import Script
         
-        try:
-            from jedi.parser.python import tree
-        except ImportError:
-            from jedi.parser import tree
+        tree = jedi_utils.import_tree()
 
         locs = []
 
@@ -84,7 +81,7 @@ class LocalsHighlighter:
         script = Script(source + ")") # https://github.com/davidhalter/jedi/issues/897
         module = jedi_utils.get_module_node(script)
         for child in module.children:
-            if isinstance(child, tree.BaseNode) and child.is_scope():
+            if isinstance(child, tree.BaseNode) and jedi_utils.is_scope(child):
                 process_scope(child)
 
         loc_pos = set(("%d.%d" % (usage.start_pos[0], usage.start_pos[1]),

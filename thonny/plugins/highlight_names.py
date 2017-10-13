@@ -1,13 +1,7 @@
 from jedi import Script
 import thonny.jedi_utils as jedi_utils
-try:
-    from jedi.parser.python import tree
-except ImportError:
-    try:
-        from jedi.parser import tree
-    except ImportError:
-        # older than jedi 0.9
-        tree = None
+import traceback
+tree = jedi_utils.import_tree()
     
 from thonny.globals import get_workbench
 import tkinter as tk
@@ -76,7 +70,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                 and scope.children[1].value == name.value)
 
     def _get_def_from_function_params(self, func_node, name):
-        params = func_node.params
+        params = jedi_utils.get_params(func_node)
         for param in params:
             if param.children[0].value == name.value:
                 return param.children[0]
@@ -95,10 +89,9 @@ class VariablesHighlighter(BaseNameHighlighter):
                     return c
                 else:
                     try:
-                        return c.get_statement_for_position(pos)
+                        return jedi_utils.get_statement_of_position(c, pos)
                     except AttributeError:
-                        print("error")
-                        pass
+                        traceback.print_exc()
         return None
 
     def _is_global_stmt_with_name(self, node, name_str):
@@ -124,12 +117,12 @@ class VariablesHighlighter(BaseNameHighlighter):
                         return n
                 # print(c.path_for_name(name.value))
             if isinstance(c, tree.Function) and c.children[1].value == name.value and \
-                    not isinstance(c.get_parent_scope(), tree.Class):
+                    not isinstance(jedi_utils.get_parent_scope(c), tree.Class):
                 return c.children[1]
             if isinstance(c, tree.BaseNode) and c.type == "suite":
                 for x in c.children:
                     if self._is_global_stmt_with_name(x, name.value):
-                        return self._find_definition(scope.get_parent_scope(), name)
+                        return self._find_definition(jedi_utils.get_parent_scope(scope), name)
                     if isinstance(x, tree.Name) and x.is_definition() and x.value == name.value:
                         return x
                     def_candidate = self._find_def_in_simple_node(x, name)
@@ -137,7 +130,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                         return def_candidate
 
         if not isinstance(scope, tree.Module):
-            return self._find_definition(scope.get_parent_scope(), name)
+            return self._find_definition(jedi_utils.get_parent_scope(scope), name)
 
         # if name itself is the left side of an assignment statement, then the name is the definition
         if name.is_definition():
@@ -168,7 +161,7 @@ class VariablesHighlighter(BaseNameHighlighter):
             return set()
 
         # search for definition
-        definition = self._find_definition(name.get_parent_scope(), name)
+        definition = self._find_definition(jedi_utils.get_parent_scope(name), name)
 
         searched_scopes = set()
 
@@ -177,7 +170,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         def find_usages_in_node(node, global_encountered=False):
             names = []
             if isinstance(node, tree.BaseNode):
-                if node.is_scope():
+                if jedi_utils.is_scope(node):
                     global_encountered = False
                     if node in searched_scopes:
                         return names
@@ -194,8 +187,8 @@ class VariablesHighlighter(BaseNameHighlighter):
                     sub_result = find_usages_in_node(c, global_encountered=global_encountered)
 
                     if sub_result is None:
-                        if not node.is_scope():
-                            return None if definition and node != definition.get_parent_scope() else [definition]
+                        if not jedi_utils.is_scope(node):
+                            return None if definition and node != jedi_utils.get_parent_scope(definition) else [definition]
                         else:
                             sub_result = []
                     names.extend(sub_result)
@@ -204,26 +197,26 @@ class VariablesHighlighter(BaseNameHighlighter):
             elif isinstance(node, tree.Name) and node.value == name.value:
                 if definition and definition != node:
                     if self._is_name_function_definition(node):
-                        if isinstance(node.get_parent_scope().get_parent_scope(), tree.Class):
+                        if isinstance(jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(node)), tree.Class):
                             return []
                         else:
                             return None
                     if node.is_definition() and not global_encountered and \
-                            (is_function_definition or node.get_parent_scope() != definition.get_parent_scope()):
+                            (is_function_definition or jedi_utils.get_parent_scope(node) != jedi_utils.get_parent_scope(definition)):
                             return None
                     if self._is_name_function_definition(definition) and \
-                            isinstance(definition.get_parent_scope().get_parent_scope(), tree.Class):
+                            isinstance(jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition)), tree.Class):
                         return None
                 names.append(node)
             return names
 
         if definition:
             if self._is_name_function_definition(definition):
-                scope = definition.get_parent_scope().get_parent_scope()
+                scope = jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition))
             else:
-                scope = definition.get_parent_scope()
+                scope = jedi_utils.get_parent_scope(definition)
         else:
-            scope = name.get_parent_scope()
+            scope = jedi_utils.get_parent_scope(name)
 
         usages = find_usages_in_node(scope)
         return usages
@@ -236,7 +229,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         if isinstance(stmt, tree.Name):
             name = stmt
         elif isinstance(stmt, tree.BaseNode):
-            name = stmt.name_for_position(script._pos)
+            name = jedi_utils.get_name_of_position(stmt, script._pos)
 
         if not name:
             return set()
