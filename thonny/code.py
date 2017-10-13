@@ -15,6 +15,7 @@ from thonny.tktextext import rebind_control_a
 import tokenize
 from thonny.common import ToplevelCommand, DebuggerCommand
 from tkinter.messagebox import askyesno
+import traceback
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -184,7 +185,10 @@ class Editor(ttk.Frame):
         return self.focus_displayof() == self._code_view.text
 
     def _on_text_modified(self, event):
-        self.master.update_editor_title(self)
+        try:
+            self.master.update_editor_title(self)
+        except:
+            traceback.print_exc()
 
     def _on_text_change(self, event):
         self.master.update_editor_title(self)

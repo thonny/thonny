@@ -1,3 +1,49 @@
+# Utils to handle different jedi versions
+
+def import_tree():
+    try:
+        # jedi 0.11
+        from parso.python import tree
+    except ImportError:
+        try:
+            # jedi 0.10
+            from jedi.parser.python import tree
+        except ImportError:
+            # jedi 0.9
+            try:
+                from jedi.parser import tree
+            except:
+                # older versions
+                tree = None
+    
+    return tree
+
+def get_params(func_node):
+    if hasattr(func_node, "get_params"):
+        # parso
+        return func_node.get_params()
+    else:
+        # older jedi
+        return func_node.params
+
+def get_parent_scope(node):    
+    try:
+        # jedi 0.11
+        from jedi import parser_utils
+        return parser_utils.get_parent_scope(node)
+    except ImportError:
+        # Older versions
+        return node.get_parent_scope()
+
+def get_statement_of_position(node, pos):    
+    try:
+        # jedi 0.11
+        from jedi.parser_utils import get_statement_of_position
+        return get_statement_of_position(node, pos)
+    except ImportError:
+        # Older versions
+        return node.get_statement_for_position(pos)
+
 def get_module_node(script):
     if hasattr(script, "_get_module_node"):
         return script._get_module_node()
@@ -5,6 +51,23 @@ def get_module_node(script):
         return script._get_module()
     else:
         return script._parser.module()
+
+def is_scope(node):
+    try:
+        # jedi 0.11
+        from jedi import parser_utils
+        return parser_utils.is_scope(node)
+    except ImportError:
+        # Older versions
+        return node.is_scope()
+
+def get_name_of_position(obj, position):
+    if hasattr(obj, "get_name_of_position"):
+        # parso
+        return obj.get_name_of_position(position)
+    else:
+        # older jedi
+        return obj.name_for_position(position)
 
 def get_version_tuple():
     import jedi

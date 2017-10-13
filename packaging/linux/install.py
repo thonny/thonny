@@ -93,9 +93,13 @@ def try_to_refresh_desktop_and_menus(menu_dir):
 if len(sys.argv) == 1:
     parent_dir = os.path.expanduser("~/apps")
 elif len(sys.argv) == 2:
-    parent_dir = os.path.expanduser(sys.argv[1].strip().rstrip("/"))
+    parent_dir = os.path.abspath(os.path.expanduser(sys.argv[1].strip().rstrip("/")))
 else:
     print("Installer should be run with 0 or 1 arguments", file=sys.stderr)
+    exit(1)
+
+if parent_dir.startswith(os.path.dirname(__file__)):
+    print("Can't install into installer directory", file=sys.stderr)
     exit(1)
 
 def print_task(desc):

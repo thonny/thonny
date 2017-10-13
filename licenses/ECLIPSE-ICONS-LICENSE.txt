@@ -1,4 +1,5 @@
-Several Thonny icons are taken from http://eclipse-icons.i24.cc
+# Several Thonny icons are taken from http://eclipse-icons.i24.cc
+------------------------------
 
 Eclipse Public License - v 1.0
 
