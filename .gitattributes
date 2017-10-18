@@ -4,6 +4,9 @@
 # Explicitly declare text files you want to always be normalized and converted
 # to native line endings on checkout.
 *.txt text
+*.rst text
+.project
+.pydevproject
 
 # Declare files that will always have LF line endings on checkout.
 *.py text eol=lf
