@@ -1,0 +1,17 @@
+# See http://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*.{py,txt,rst,sh}]
+end_of_line = lf
+insert_final_newline = true
+charset = utf-8
+
+[*.py]
+indent_style = space
+indent_size = 4
+
+[*.bat]
+end_of_line = crlf
