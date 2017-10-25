@@ -208,7 +208,7 @@ class EditorNotebook(ttk.Notebook):
     """
     def __init__(self, master):
         _check_create_ButtonNotebook_style()
-        ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook")
+        ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook.TNotebook")
         
         get_workbench().set_default("file.reopen_all_files", False)
         get_workbench().set_default("file.open_files", [])
@@ -571,16 +571,14 @@ def _check_create_ButtonNotebook_style():
         ("active", "pressed", "!disabled", "img_close_active"),
         ("active", "!disabled", "img_close_active"), border=8, sticky='')
 
-    style.layout("ButtonNotebook", [("Notebook.client", {"sticky": "nswe"})])
-
-    style.layout("ButtonNotebook.Tab", [
-        ("ButtonNotebook.tab", {"sticky": "nswe", "children":
-            [("ButtonNotebook.padding", {"side": "top", "sticky": "nswe",
+    style.layout("ButtonNotebook.TNotebook.Tab", [
+        ("Notebook.tab", {"sticky": "nswe", "children":
+            [("Notebook.padding", {"side": "top", "sticky": "nswe",
                                          "children":
-                [("ButtonNotebook.focus", {"side": "top", "sticky": "nswe",
+                [("Notebook.focus", {"side": "top", "sticky": "nswe",
                                            "children":
-                    [("ButtonNotebook.label", {"side": "left", "sticky": ''}),
-                     ("ButtonNotebook.closebutton", {"side": "left", "sticky": ''})
+                    [("Notebook.label", {"side": "left", "sticky": ''}),
+                     ("Notebook.closebutton", {"side": "left", "sticky": ''})
                      ]
                 })]
             })]

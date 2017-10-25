@@ -56,25 +56,11 @@ def tweak_paned_windows(style):
 def base_windows(style):
     
     # Notebooks
-    get_workbench().get_image('gray_line.gif', "gray_line")
-    
-    style.element_create("gray_line", "image", "gray_line",
-                               ("!selected", "gray_line"), 
-                               height=1, width=10, border=1)
-    
-    style.layout('Tab', [
-        ('Notebook.tab', {'sticky': 'nswe', 'children': [
-            ('Notebook.padding', {'sticky': 'nswe', 'side': 'top', 'children': [
-                ('Notebook.focus', {'sticky': 'nswe', 'side': 'top', 'children': [
-                    ('Notebook.label', {'sticky': '', 'side': 'left'}),
-                ]})
-            ]}),
-            ('gray_line', {'sticky': 'we', 'side': 'bottom'}),
-        ]}),
-    ])
-    
-    style.configure("Tab", padding=(4,1,0,0))
-    style.configure("ButtonNotebook.Tab", padding=(4,1,1,3))
+    # With tabmargins I can get a gray line below tab, which separates
+    # tab content from label
+    style.configure("TNotebook", tabmargins=[2, 2, 2, 2])
+    style.configure("Tab", padding=[3,1,3,0])
+    style.configure("ButtonNotebook.TNotebook.Tab", padding=(4,1,1,0))
     
     # other widgets
     tweak_treeviews(style)
