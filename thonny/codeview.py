@@ -122,6 +122,12 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
         if not "background" in kw:
             kw["background"] = get_edit_background()
         
+        if not "foreground" in kw:
+            kw["foreground"] = get_style_option("Code", "foreground", "black")
+        
+        if not "insertbackground" in kw:
+            kw["insertbackground"] = kw["foreground"]
+        
         EnhancedTextWithLogging.__init__(self, master=master, cnf=cnf, **kw)
         self._original_background = kw["background"]
         # Allow binding to events of all CodeView texts

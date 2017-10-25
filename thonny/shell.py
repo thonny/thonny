@@ -9,7 +9,7 @@ import thonny
 from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
-from thonny.ui_utils import EnhancedTextWithLogging
+from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
 import tkinter as tk
 from thonny.globals import get_workbench, get_runner
 from thonny.codeview import get_edit_background, PythonText
@@ -79,6 +79,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def __init__(self, master, cnf={}, **kw):
         if not "background" in kw:
             kw["background"] = get_edit_background()
+        if not "foreground" in kw:
+            kw["foreground"] = get_style_option("Code", "foreground", "black")
+        if not "insertbackground" in kw:
+            kw["insertbackground"] = kw["foreground"]
             
         EnhancedTextWithLogging.__init__(self, master, cnf, **kw)
         self.bindtags(self.bindtags() + ('ShellText',))
@@ -117,7 +121,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         self.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
         self.tag_configure("prompt", foreground="purple", font=prompt_font)
-        self.tag_configure("command", foreground="black",
+        self.tag_configure("command", foreground=kw["foreground"],
                            lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure("welcome", foreground="DarkGray", font=get_workbench().get_font("EditorFont"))
         self.tag_configure("automagic", foreground="DarkGray", font=get_workbench().get_font("EditorFont"))
@@ -126,9 +130,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         self.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
                                 font=get_workbench().get_font("IOFont"))
-        self.tag_configure("stdin", foreground="Blue")
-        self.tag_configure("stdout", foreground="Black")
-        self.tag_configure("stderr", foreground="Red")
+        self.tag_configure("stdin", foreground=get_style_option("StdIn.Shell", "foreground", "Blue"))
+        self.tag_configure("stdout", foreground=get_style_option("StdOut.Shell", "foreground", "Black"))
+        self.tag_configure("stderr", foreground=get_style_option("StdErr.Shell", "foreground", "Red"))
         self.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)

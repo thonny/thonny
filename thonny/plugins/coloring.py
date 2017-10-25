@@ -19,6 +19,7 @@ import re
 from thonny.globals import get_workbench
 from thonny.shell import ShellText
 from thonny.codeview import CodeViewText
+from thonny.ui_utils import get_style_option
 
 
 class SyntaxColorer:
@@ -55,15 +56,15 @@ class SyntaxColorer:
         self.id_regex = re.compile(r"\s+(\w+)", re.S)
 
     def _config_colors(self, main_font, bold_font):
-        string_foreground = "DarkGreen"
-        open_string_background = "#c3f9d3"
+        string_foreground = get_style_option("String.Code", "foreground", "DarkGreen")
+        open_string_background = get_style_option("Open.String.Code", "background", "#c3f9d3")
         self.uniline_tagdefs = {
-            "COMMENT"       : {"font":main_font, 'background':None, 'foreground':"DarkGray", },
-            "MAGIC_COMMAND" : {"font":main_font, 'background':None, 'foreground':"DarkGray", },
+            "COMMENT"       : {"font":main_font, 'background':None, 'foreground' : get_style_option("Comment.Code", "foreground", "DarkGray")},
+            "MAGIC_COMMAND" : {"font":main_font, 'background':None, 'foreground': get_style_option("Magic.Code", "foreground", "DarkGray"), },
             "STRING_CLOSED" : {"font":main_font, 'background':None, 'foreground':string_foreground, },
             "STRING_OPEN"   : {"font":main_font, 'background': open_string_background, "foreground": string_foreground},
-            "KEYWORD"       : {"font":bold_font, 'background':None, 'foreground':"#7f0055", },
-            "BUILTIN"       : {"font":main_font, 'background':None, 'foreground':None},
+            "KEYWORD"       : {"font":bold_font, 'background':None, 'foreground':get_style_option("Keyword.Code", "foreground", "#7f0055"), },
+            "BUILTIN"       : {"font":main_font, 'background':None, 'foreground':get_style_option("Builtin.Code", "foreground", None)},
             #"DEFINITION"    : {},
             }
         

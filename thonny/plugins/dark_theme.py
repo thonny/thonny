@@ -1,11 +1,11 @@
 from thonny.globals import get_workbench
 
-def dark_glam(s):
+def dark_clam(s):
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = "#2a3b26"
     FG = "LightGray"
-    TEXTBG = "#003B00"
+    TEXTBG = "#2e4437"
     s.configure(".", 
                 background=BG,
                 foreground=FG,
@@ -27,8 +27,8 @@ def dark_glam(s):
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkNotebook.c
     s.configure("TNotebook",
                 background=BG,
-                #lightcolor="blue",
-                #darkcolor="white",
+                lightcolor=BG,
+                darkcolor=BG,
                 #bordercolor="red",
                 #tabposition="w",              # Where to place tabs
                 #tabmargins=[2, 50, 2, 0],     # Margins around tab row
@@ -39,7 +39,11 @@ def dark_glam(s):
                 #borderwidth=0,                # ...
                 expand=[17, 17, 17, 17]        # 
     )
-    s.configure("Tab", background=BG)
+    s.configure("Tab", 
+                background=BG,
+                lightcolor=BG,
+                darkcolor=BG,
+                )
     #print(s.layout("TNotebook"))
     
     #s.configure("ButtonNotebook.Tab", background=BG, 
@@ -49,6 +53,7 @@ def dark_glam(s):
     #print(s.map("TNotebook.Tab"))
     s.map("TNotebook.Tab", 
           background=[("selected", "gray"), ("!selected", BG)],
+          lightcolor=[("selected", "#333333"), ("!selected", "#333333")],
           #expand=[("selected", [1,2,13,4])] # can be used to make selected tab bigger 
     )
     
@@ -59,8 +64,8 @@ def dark_glam(s):
     
     
     # Scrollbars
-    SCBACK = "gray"
-    SCBORDER = "DarkGray"
+    SCBACK = "#3b4941"
+    SCBORDER = "#38443d"
     s.configure("TScrollbar", gripcount=0, borderwidth=0, relief="flat", arrowsize=19,
                 darkcolor=SCBACK, lightcolor=SCBACK, bordercolor=SCBORDER,
                 troughcolor=BG,
@@ -98,6 +103,13 @@ def dark_glam(s):
                 background=BG)
     s.map("Toolbutton",
           background=[("disabled", BG)])
+    
+    # Code
+    s.configure("Code", foreground="LightGray")
+    s.configure("String.Code", foreground="LightGreen")
+    s.configure("StdOut.Shell", foreground="LightGray")
+    s.configure("StdIn.Shell", foreground="LightBlue")
+    s.configure("StdErr.Shell", foreground="Crimson")
 
 def load_early_plugin():
-    get_workbench().add_theme("Dark Clam", "Base Clam", dark_glam)
+    get_workbench().add_theme("Dark Clam", "Base Clam", dark_clam)
