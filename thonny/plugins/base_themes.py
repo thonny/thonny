@@ -53,6 +53,10 @@ def tweak_paned_windows(style):
     style.configure("Sash", sashthickness=10)
 
 
+def tweak_menus(style):
+    style.configure("Menubar", 
+                    activeborderwidth=0)
+
 def base_windows(style):
     
     # Notebooks
@@ -63,6 +67,7 @@ def base_windows(style):
     style.configure("ButtonNotebook.TNotebook.Tab", padding=(4,1,1,0))
     
     # other widgets
+    tweak_menus(style)
     tweak_treeviews(style)
     tweak_menubuttons(style)
     tweak_paned_windows(style)
@@ -72,6 +77,7 @@ def base_clam(style):
     style.configure("ButtonNotebook.Tab", padding=(6,4,2,3))
         
     # other widgets
+    tweak_menus(style)
     tweak_treeviews(style)
     tweak_menubuttons(style)
     tweak_paned_windows(style)
@@ -81,6 +87,7 @@ def base_aqua(style):
     style.configure("ButtonNotebook.Tab", padding=(4,1,1,3))
     
     # other widgets
+    tweak_menus(style)
     tweak_treeviews(style)
     tweak_menubuttons(style)
     tweak_paned_windows(style)

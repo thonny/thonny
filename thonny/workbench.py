@@ -12,7 +12,8 @@ from thonny.common import Record, UserError
 from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, get_current_notebook_tab_widget, select_sequence
+    create_tooltip, get_current_notebook_tab_widget, select_sequence,\
+    get_style_options
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -203,10 +204,7 @@ class Workbench(tk.Tk):
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        self._menubar = tk.Menu(self, **self.get_option("theme.menubar_options", {
-            #"relief" : "flat",
-            "activeborderwidth" : 0
-        }))
+        self._menubar = tk.Menu(self, **get_style_options("Menubar"))
         self["menu"] = self._menubar
         self._menus = {}
         self._menu_item_groups = {} # key is pair (menu_name, command_label)
@@ -705,10 +703,7 @@ class Workbench(tk.Tk):
             label: translated label, used only when menu with given name doesn't exist yet
         """
         if name not in self._menus:
-            menu = tk.Menu(self._menubar, self.get_option("theme.menu_options", {
-                #"relief" : "flat",
-                #"activeborderwidth" : 0
-            }))
+            menu = tk.Menu(self._menubar, **get_style_options("Menu"))
             menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
             

@@ -4,11 +4,8 @@ import tkinter as tk
 from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny import tktextext, roughparse
-from thonny.ui_utils import EnhancedTextWithLogging
+from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
 from thonny.tktextext import EnhancedText
-
-EDIT_BACKGROUND="white"
-READ_ONLY_BACKGROUND="LightYellow"
 
 class PythonText(EnhancedText):
     
@@ -123,7 +120,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
         if not "background" in kw:
-            kw["background"] = EDIT_BACKGROUND
+            kw["background"] = get_edit_background()
         
         EnhancedTextWithLogging.__init__(self, master=master, cnf=cnf, **kw)
         self._original_background = kw["background"]
@@ -134,7 +131,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     def set_read_only(self, value):
         EnhancedTextWithLogging.set_read_only(self, value)
         if value:
-            self.configure(background=READ_ONLY_BACKGROUND)
+            self.configure(background=get_readonly_background())
         else:
             self.configure(background=self._original_background)
 
@@ -146,7 +143,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
-                                     undo=True, wrap=tk.NONE, background=EDIT_BACKGROUND,
+                                     undo=True, wrap=tk.NONE, background=get_edit_background(),
                                      **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
@@ -202,3 +199,12 @@ class CodeView(tktextext.TextFrame):
             end_lineno, end_col_offset = lineno, col_offset
             
         return TextRange(lineno, col_offset, end_lineno, end_col_offset)
+
+
+def get_edit_background():
+    return get_style_option("Text", "background", "white")
+
+def get_readonly_background():
+    return get_style_option("Text", "readonlybackground", "LightYellow")
+
+

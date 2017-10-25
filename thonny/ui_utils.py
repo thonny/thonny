@@ -17,6 +17,7 @@ import threading
 import signal
 import subprocess
 import os
+import warnings
 
 
 CALM_WHITE = '#fdfdfd'
@@ -792,7 +793,10 @@ def remove_line_numbers(s):
 def get_main_background():
     main_background_option = get_workbench().get_option("theme.main_background")
     if main_background_option is not None:
+        warnings.warn("theme.main_background is deprecated use style.configure('.', ...) instead")
         return main_background_option
+    elif get_style_option(".", "background"):
+        return get_style_option(".", "background")
     else:    
         theme = ttk.Style().theme_use()
         
@@ -1035,3 +1039,21 @@ def get_tk_version_info():
         except:
             result.append(0)
     return tuple(result) 
+
+def get_style_options(style_name):
+    style = ttk.Style()
+    result = style.configure(style_name)
+    if result is None:
+        return {}
+    else:
+        return result
+    
+    
+
+def get_style_option(style_name, option_name, default=None):
+    style = ttk.Style()
+    setting = style.configure(style_name, option_name)
+    if setting not in [None, ""]:
+        return setting
+    else:
+        return default    

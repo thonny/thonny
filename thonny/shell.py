@@ -12,7 +12,7 @@ from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
 from thonny.globals import get_workbench, get_runner
-from thonny.codeview import EDIT_BACKGROUND, PythonText
+from thonny.codeview import get_edit_background, PythonText
 from thonny.tktextext import index2line
 
 
@@ -78,7 +78,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def __init__(self, master, cnf={}, **kw):
         if not "background" in kw:
-            kw["background"] = EDIT_BACKGROUND
+            kw["background"] = get_edit_background()
             
         EnhancedTextWithLogging.__init__(self, master, cnf, **kw)
         self.bindtags(self.bindtags() + ('ShellText',))
