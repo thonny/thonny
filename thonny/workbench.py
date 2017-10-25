@@ -27,6 +27,7 @@ import queue
 from _thread import start_new_thread
 import ast
 from thonny import THONNY_USER_DIR
+import warnings
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -68,6 +69,7 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
+        self._init_themes()
         self.content_inspector_classes = []
         self._theme_tweaker = None
         thonny.globals.register_workbench(self)
@@ -78,8 +80,8 @@ class Workbench(tk.Tk):
         self._load_early_plugins()
         
         self._editor_notebook = None
-        self._select_theme()
         self._init_fonts()
+        self._select_theme()
         self._init_window()
         self._init_menu()
         
@@ -426,20 +428,34 @@ class Workbench(tk.Tk):
         self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
 
-    def _select_theme(self):
+    def _init_themes(self):
         style = ttk.Style()
         
-        preferred_theme = self.get_option("theme.preferred_theme")
+        self._themes = {}
         
-        if preferred_theme in style.theme_names():
-            style.theme_use(preferred_theme)
-        elif 'xpnative' in style.theme_names():
+        for name in style.theme_names():
+            def load_theme(style, name=name):
+                style.theme_use(name)
+                # TODO: preconfigure ??
+            
+            self._themes[name] = (None, load_theme)
+        
+        
+    def _select_theme(self):
+        preferred_theme = self.get_option("theme.preferred_theme")
+        available_themes = self.get_available_themes()
+        
+        if preferred_theme in available_themes:
+            self._apply_theme(preferred_theme)
+        elif 'Base Windows' in available_themes:
+            self._apply_theme('Base Windows') 
+        elif 'xpnative' in available_themes:
             # in Win7 'xpnative' gives better scrollbars than 'vista'
-            style.theme_use('xpnative') 
-        elif 'vista' in style.theme_names():
-            style.theme_use('vista')
-        elif 'clam' in style.theme_names():
-            style.theme_use('clam')
+            self._apply_theme('xpnative') 
+        elif 'vista' in available_themes:
+            self._apply_theme('vista')
+        elif 'clam' in available_themes:
+            self._apply_theme('clam')
         
         if self._theme_tweaker is not None:
             self._theme_tweaker()
@@ -606,6 +622,43 @@ class Workbench(tk.Tk):
     def add_backend(self, descriptor, proxy_class):
         self._backends[descriptor] = proxy_class
     
+    def add_theme(self, name, parent, styler):
+        self._themes[name] = (parent, styler)
+    
+    
+    def _get_theme_lineage(self, theme):
+        lineage = [theme]
+        temp = theme
+        while True:
+            if temp not in self._themes:
+                raise KeyError("Can't find theme %s for lineage %s" % (theme, lineage))
+            else:
+                parent, _ = self._themes[temp]
+                if parent is None:
+                    return lineage
+                else:
+                    lineage.insert(0, parent)
+                    temp = parent
+    
+    def get_available_themes(self):
+        names = []
+        for name in self._themes:
+            try:
+                # return only those with intact lineage
+                self._get_theme_lineage(name)
+                names.append(name)
+            except KeyError:
+                pass
+            
+        return sorted(names)
+    
+    def _apply_theme(self, name):
+        lineage = self._get_theme_lineage(name)
+        for theme in lineage:
+            _, theme_loader = self._themes[theme]
+            theme_loader(ttk.Style())
+                
+    
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
     
@@ -619,6 +672,7 @@ class Workbench(tk.Tk):
         self._configuration_manager.set_option(name, value)
     
     def set_theme_tweaker(self, fun):
+        warnings.warn("theme_tweaker is deprecated. Use add_theme instead")
         self._theme_tweaker = fun
     
     def set_default(self, name, default_value):
