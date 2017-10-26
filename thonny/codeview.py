@@ -148,6 +148,13 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
+        
+        if "margin_background" not in text_frame_args:
+            text_frame_args["margin_background"] = get_style_option("TextMargin", "background", '#e0e0e0')
+        if "margin_foreground" not in text_frame_args:
+            text_frame_args["margin_foreground"] = get_style_option("TextMargin", "foreground", '#999999')
+        
+        
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
                                      undo=True, wrap=tk.NONE, background=get_edit_background(),
                                      **text_frame_args)

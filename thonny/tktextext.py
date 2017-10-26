@@ -600,6 +600,7 @@ class TextFrame(ttk.Frame):
                  horizontal_scrollbar=True, vertical_scrollbar=True,
                  vertical_scrollbar_class=ttk.Scrollbar,
                  horizontal_scrollbar_class=ttk.Scrollbar,
+                 margin_background='#e0e0e0', margin_foreground='#999999',
                  **text_options):
         ttk.Frame.__init__(self, master=master)
         
@@ -619,8 +620,8 @@ class TextFrame(ttk.Frame):
         self._margin = tk.Text(self, width=4, padx=5, pady=5,
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
-                               background='#e0e0e0', foreground='#999999',
-                               selectbackground='#e0e0e0', selectforeground='#999999',
+                               background=margin_background, foreground=margin_foreground,
+                               selectbackground=margin_background, selectforeground=margin_foreground,
                                cursor='arrow',
                                state='disabled',
                                undo=False
