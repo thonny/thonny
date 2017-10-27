@@ -3,6 +3,7 @@ import tokenize
 import io
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
+from thonny.ui_utils import get_style_option
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
@@ -43,11 +44,12 @@ class ParenMatcher:
         self._highlight_unclosed(remaining, start_index, end_index)
     
     def _configure_tags(self):
+        print(get_style_option("MatchedParens.Code", "foreground", "Blue"))
         self.text.tag_configure("SURROUNDING_PARENS",
-                                foreground="Blue", 
+                                foreground=get_style_option("MatchedParens.Code", "foreground", "Blue"), 
                                 font=self._paren_highlight_font)
         
-        self.text.tag_configure("UNCLOSED", background="LightGray")
+        self.text.tag_configure("UNCLOSED", background=get_style_option("OpenParens.Code", "background", "LightGray"))
         
         self.text.tag_raise("sel")
         self.text.tag_lower("UNCLOSED")

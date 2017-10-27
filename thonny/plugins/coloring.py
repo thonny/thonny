@@ -57,7 +57,7 @@ class SyntaxColorer:
 
     def _config_colors(self, main_font, bold_font):
         string_foreground = get_style_option("String.Code", "foreground", "DarkGreen")
-        open_string_background = get_style_option("Open.String.Code", "background", "#c3f9d3")
+        open_string_background = get_style_option("OpenString.Code", "background", "#c3f9d3")
         self.uniline_tagdefs = {
             "COMMENT"       : {"font":main_font, 'background':None, 'foreground' : get_style_option("Comment.Code", "foreground", "DarkGray")},
             "MAGIC_COMMAND" : {"font":main_font, 'background':None, 'foreground': get_style_option("Magic.Code", "foreground", "DarkGray"), },

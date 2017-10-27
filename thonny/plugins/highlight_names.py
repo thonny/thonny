@@ -1,18 +1,19 @@
 from jedi import Script
 import thonny.jedi_utils as jedi_utils
 import traceback
+from thonny.ui_utils import get_style_option
 tree = jedi_utils.import_tree()
     
 from thonny.globals import get_workbench
 import tkinter as tk
 import logging
 
-NAME_CONF = {'background' : '#e6ecfe', 'relief' : 'flat', 'borderwidth' : 0}
-
 class BaseNameHighlighter:
     def __init__(self, text):
         self.text = text
-        self.text.tag_configure("NAME", NAME_CONF)
+        self.text.tag_configure("NAME", background=get_style_option("MatchedName.Code", "background", '#e6ecfe'),
+                                relief='flat',
+                                borderwidth=0)
         self.text.tag_raise("sel")
         self._update_scheduled = False
     

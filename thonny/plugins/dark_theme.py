@@ -13,11 +13,14 @@ def dark_clam(s):
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = "#2a3b26"
+    BG = "#1D291A"
     FG = "#9E9E9E"
-    TEXTBG = "#2e4437"
+    TEXT_BG = "#2e4437"
+    TEXT_BG = "#273627"
     ACTIVE_TAB = "#677896"
     ACTIVE_TAB = "#4C6346"
     ACTIVE_TAB = "#344D36"
+    ACTIVE_TAB = "#2D452F"
     
     s.configure(".", 
                 background=BG,
@@ -28,7 +31,7 @@ def dark_clam(s):
                 )
 
     s.configure("Text",
-                background=TEXTBG,
+                background=TEXT_BG,
                 readonlybackground="Yellow")
     
     s.configure("TextMargin",
@@ -87,14 +90,16 @@ def dark_clam(s):
     print(s.map("Treeview.Heading"))
     print(s.layout("Treeview.Heading"))
     print(s.element_options("Treeheading.border"))
-    s.configure("Treeview", background=TEXTBG)
+    s.configure("Treeview", background=TEXT_BG)
     s.configure("Treeview.Heading", background=ACTIVE_TAB, lightcolor=ACTIVE_TAB, borderwidth=0)
     
     
     # Scrollbars
     SCROLL_BG = "#334036"
-    #SCROLL_BG = "#2D3D2A"
+    SCROLL_BG = BG
+    SCROLL_BG = ACTIVE_TAB
     SCBORDER = "#38443d"
+    SCBORDER = TEXT_BG
     
     # Remove scrollbar buttons/arrows:
     s.layout("Vertical.TScrollbar", 
@@ -116,16 +121,25 @@ def dark_clam(s):
     )
     
     
-    s.configure("TScrollbar", gripcount=0, borderwidth=0, relief="flat", arrowsize=19,
+    s.configure("TScrollbar", gripcount=0, borderwidth=0, relief="flat",
                 darkcolor=SCROLL_BG, lightcolor=SCROLL_BG, bordercolor=SCBORDER,
-                troughcolor=BG,
+                troughcolor=TEXT_BG,
                 #arrowcolor="white"
                 )
     
     s.map("TScrollbar",
-          background=[("disabled", SCROLL_BG), ("!disabled", SCROLL_BG)],
-          #arrowcolor=[("disabled", BG), ("!disabled", SCROLL_BG)],
-          #troughcolor=[("disabled", "red"), ("!disabled", "red")],
+          background=[("!disabled", SCROLL_BG), ("disabled", SCROLL_BG)],
+          darkcolor=[("!disabled", TEXT_BG), ("disabled", TEXT_BG)],
+          lightcolor=[("!disabled", TEXT_BG), ("disabled", TEXT_BG)],
+    )
+    
+    # Make disabled Hor Scrollbar invisible
+    s.map("Horizontal.TScrollbar",
+          background=[("disabled", BG), ("!disabled", SCROLL_BG)],
+          troughcolor=[("disabled", BG)],
+          bordercolor=[("disabled", BG)],
+          darkcolor=[("disabled", BG)],
+          lightcolor=[("disabled", BG)],
     )
     print(s.map("TScrollbar"))
     
@@ -159,9 +173,15 @@ def dark_clam(s):
           background=[("disabled", BG)])
     
     # Code
-    s.configure("Code", foreground="#B3B3B3")
+    TEXT_FG = "#B3B3B3"
+    s.configure("Code", foreground=TEXT_FG)
     s.configure("String.Code", foreground="#8DC76F")
     s.configure("Keyword.Code", foreground="#9A79AD")
+    s.configure("Local.Code", foreground="#BCCAE8")
+    s.configure("MatchedName.Code", background="#193022")
+    s.configure("MatchedParens.Code", foreground="#F0995B")
+    s.configure("OpenParens.Code", background="#193022")
+    s.configure("OpenString.Code", background="#453B22")
     
     s.configure("StdOut.Shell", foreground="LightGray")
     s.configure("StdIn.Shell", foreground="LightBlue")
