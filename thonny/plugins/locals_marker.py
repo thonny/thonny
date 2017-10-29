@@ -141,7 +141,7 @@ def load_plugin():
         return 
     
     wb = get_workbench()
-    wb.set_default("view.locals_highlighting", True)
+    wb.set_default("view.locals_highlighting", False)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind("<<UpdateAppearance>>", update_highlighting, True)
     

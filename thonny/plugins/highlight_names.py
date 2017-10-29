@@ -286,7 +286,7 @@ def load_plugin():
         return
      
     wb = get_workbench()  # type:Workbench
-    wb.set_default("view.name_highlighting", True)
+    wb.set_default("view.name_highlighting", False)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind("<<UpdateAppearance>>", update_highlighting, True)

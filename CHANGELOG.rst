@@ -2,6 +2,11 @@
 Version history
 ===============
 
+2.1.13 (2017-10-29)
+===================
+* Temporary workaround for #351: Locals and name highlighter occasionally make Thonny freeze
+* Include only required licenses in source dist
+
 2.1.12 (2017-10-13)
 ===================
 * FIXED #303: Allow specifying same interpreter for backend as frontend uses
