@@ -24,6 +24,65 @@ CALM_WHITE = '#fdfdfd'
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
 
+
+class CustomMenubar(ttk.Frame):
+    def __init__(self, master):
+        ttk.Frame.__init__(self, master, style="CustomMenubar.TFrame")
+        self._menus = []
+        self._opened_menu = None
+        
+        
+        ttk.Style().map("CustomMenubarLabel.TLabel",
+              background=[("!active", get_style_option("Menubar", "background", "gray")),
+                          ("active",  get_style_option("Menubar", "activebackground", "LightYellow"))],
+              foreground=[("!active", get_style_option("Menubar", "foreground", "black")),
+                          ("active",  get_style_option("Menubar", "activeforeground", "black"))],
+              )
+    
+    def add_cascade(self, label, menu):
+        label_widget = ttk.Label(self, style="CustomMenubarLabel.TLabel",
+                                 text=label,
+                                 padding=[6,3,6,2], 
+                                 font="TkDefaultFont")
+        
+        if len(self._menus) == 0:
+            padx = (6,0)
+        else:
+            padx = 0
+        
+        label_widget.grid(row=0, column=len(self._menus), padx=padx)
+        
+        def enter(event):
+            label_widget.state(("active",))
+            
+            # Don't know how to open this menu when another menu is open
+            # another tk_popup just doesn't work unless old menu is closed by click or Esc 
+            # https://stackoverflow.com/questions/38081470/is-there-a-way-to-know-if-tkinter-optionmenu-dropdown-is-active
+            # unpost doesn't work in Win and Mac: https://www.tcl.tk/man/tcl8.5/TkCmd/menu.htm#M62
+            #print("ENTER", menu, self._opened_menu)
+            if self._opened_menu is not None:
+                self._opened_menu.unpost()
+                click(event)
+        
+        def leave(event):
+            label_widget.state(("!active",))
+        
+        def click(event):
+            try:
+                #print("Before")
+                self._opened_menu = menu
+                menu.tk_popup(label_widget.winfo_rootx(), 
+                          label_widget.winfo_rooty() + label_widget.winfo_height())
+            finally:
+                #print("After")
+                self._opened_menu = None
+            
+        
+        label_widget.bind("<Enter>", enter, True)
+        label_widget.bind("<Leave>", leave, True)
+        label_widget.bind("<1>", click, True)
+        self._menus.append(menu)
+
 class AutomaticPanedWindow(tk.PanedWindow):
     """
     Enables inserting panes according to their position_key-s.

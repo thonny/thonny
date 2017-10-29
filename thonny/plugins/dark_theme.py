@@ -7,6 +7,7 @@ Darkula
     Scrollbar: #595B5D
     List header: #677896
 """
+from thonny.misc_utils import running_on_windows
 
 
 def dark_clam(s):
@@ -51,7 +52,7 @@ def dark_clam(s):
                 darkcolor=BG,
                 #bordercolor="red",
                 #tabposition="w",              # Where to place tabs
-                tabmargins=[2, 0, 0, 0],     # Margins around tab row
+                tabmargins=[1, 0, 0, 0],     # Margins around tab row
                 #tabplacement="w",             # How to pack tabs within tab row
                 #mintabwidth=20,               # Minimum tab width
                 #padding=[40, 40, 40, 40],     # External padding
@@ -79,6 +80,7 @@ def dark_clam(s):
     #print(s.map("TNotebook.Tab"))
     s.map("TNotebook.Tab", 
           background=[("selected", ACTIVE_TAB), ("!selected", BG)],
+          bordercolor=[("selected", BG), ("!selected", ACTIVE_TAB)],
           #lightcolor=[("selected", "#333333"), ("!selected", "#333333")],
           #lightcolor=[("selected", "white"), ("!selected", "white")],
           lightcolor=[("selected", ACTIVE_TAB), ("!selected", BG)],
@@ -89,10 +91,33 @@ def dark_clam(s):
     # https://stackoverflow.com/questions/32051780/how-to-edit-the-style-of-a-heading-in-treeview-python-ttk
     print(s.map("Treeview.Heading"))
     print(s.layout("Treeview.Heading"))
-    print(s.element_options("Treeheading.border"))
+    print(s.element_options("Treeheading.cell"))
     s.configure("Treeview", background=TEXT_BG)
     s.configure("Treeview.Heading", background=ACTIVE_TAB, lightcolor=ACTIVE_TAB, borderwidth=0)
+    s.map("Treeview.Heading",
+          background=[("!active", ACTIVE_TAB), ("active", ACTIVE_TAB)],
+          )
     
+    SELBG = "#586659"
+    """
+    s.map("Treeview",
+          background=[('selected', 'focus', FG),
+                      ('selected', '!focus', TEXT_BG),
+                      ],
+          foreground=[
+                      ('!selected', FG),
+                      ('selected', 'focus', BG),
+                      ('selected', '!focus', FG),
+                      ],
+    )
+    """
+    s.map("Treeview",
+          background=[('selected', SELBG),
+                      ],
+          foreground=[
+                      ('selected', BG),
+                      ],
+    )
     
     # Scrollbars
     SCROLL_BG = "#334036"
@@ -148,16 +173,29 @@ def dark_clam(s):
     
     # Menus
     s.configure("Menubar",
+                # Regular, system-provided Windows menubar doesn't allow changing colors.
+                # custom=True replaces it with a custom-built menubar.
+                custom=running_on_windows(), 
                 background=BG,
-                activebackground=BG, 
-                foreground="white")
+                foreground=FG,
+                activebackground=FG, 
+                activeforeground=BG, 
+                )
     
     s.configure("Menu",
-                background=BG,
+                background=ACTIVE_TAB,
                 foreground="white",
-                activebackground="white",
-                activeforeground="black",
+                selectcolor="white",
+                borderwidth=0,
+                activebackground=FG,
+                activeforeground=BG,
+                activeborderwidth=0,
+                #relief="flat"
     )
+    
+    s.configure("CustomMenubarLabel.TLabel",
+                space=70,
+                padding=[12,3,0,2])
     
     
     # Buttons

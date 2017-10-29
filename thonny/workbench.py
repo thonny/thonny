@@ -13,7 +13,7 @@ from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence,\
-    get_style_options
+    get_style_options, get_style_option
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -204,8 +204,12 @@ class Workbench(tk.Tk):
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        self._menubar = tk.Menu(self, **get_style_options("Menubar"))
-        self["menu"] = self._menubar
+        if get_style_option("Menubar", "custom", False):
+            self._menubar = ui_utils.CustomMenubar(self)
+            self._menubar.grid(row=0, sticky="nsew")
+        else:
+            self._menubar = tk.Menu(self, **get_style_options("Menubar"))
+            self["menu"] = self._menubar
         self._menus = {}
         self._menu_item_groups = {} # key is pair (menu_name, command_label)
         self._menu_item_testers = {} # key is pair (menu_name, command_label)
@@ -367,9 +371,9 @@ class Workbench(tk.Tk):
         # - a container to be hidden, when a view is maximized and restored when view is back home
         main_frame= ttk.Frame(self) # 
         self._main_frame = main_frame
-        main_frame.grid(row=0, column=0, sticky=tk.NSEW)
+        main_frame.grid(row=1, column=0, sticky=tk.NSEW)
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
         self._maximized_view = None
         
         self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
