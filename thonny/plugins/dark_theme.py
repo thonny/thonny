@@ -98,7 +98,9 @@ def dark_clam(s):
           background=[("!active", ACTIVE_TAB), ("active", ACTIVE_TAB)],
           )
     
-    SELBG = "#586659"
+    #TEXT_BG = "#273627"
+    SELBG = "#375237"
+    SELBG = "#2D3D2D"
     """
     s.map("Treeview",
           background=[('selected', 'focus', FG),
@@ -115,7 +117,7 @@ def dark_clam(s):
           background=[('selected', SELBG),
                       ],
           foreground=[
-                      ('selected', BG),
+                      ('selected', FG),
                       ],
     )
     
