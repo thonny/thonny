@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.14 (2017-11-02)
+===================
+* Added some Linux-specific files to source distribution. No new features or fixes.
+
 2.1.13 (2017-10-29)
 ===================
 * Temporary workaround for #351: Locals and name highlighter occasionally make Thonny freeze
