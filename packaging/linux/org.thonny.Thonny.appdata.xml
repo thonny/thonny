@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2017 Aivar Annamaa <aivar.annamaa@gmail.com> -->
+<component type="desktop-application">
+  <id>org.thonny.Thonny.desktop</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Thonny</name>
+  <summary>Python IDE for beginners</summary>
+
+  <description>
+    <p>Thonny is a simple Python IDE with features useful for learning programming.
+    It comes with a debugger which is able to visualize all the conceptual steps
+    taken to run a Python program (executing statements, evaluating expressions,
+    maintaining the call stack). There is a GUI for installing 3rd party packages
+    and special mode for learning about references.</p>
+    <p>See the homepage for more information, screenshots and a walk-through video.</p>
+  </description>
+  
+  <categories>
+    <category>Development</category>
+    <category>Education</category>
+    <category>Debugger</category>
+    <category>IDE</category>
+    <category>ComputerScience</category>
+  </categories>
+  
+  <launchable type="desktop-id">org.thonny.Thonny.desktop</launchable>
+
+  <url type="homepage">http://thonny.org</url>
+  <url type="bugtracker">https://bitbucket.org/plas/thonny/issues/</url>
+  <url type="help">https://bitbucket.org/plas/thonny/wiki/Home</url>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>http://thonny.org/img/screenshot.png</image>
+      <caption>Thonny stepping through a recursive function</caption>
+    </screenshot>
+  </screenshots>
+
+  <provides>
+    <binary>thonny</binary>
+  </provides>
+
+</component>
