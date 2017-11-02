@@ -8,8 +8,8 @@
   <summary>Python IDE for beginners</summary>
 
   <description>
-    <p>Thonny is a simple Python IDE with features useful for learning programming.</p>
-    <p>It comes with a debugger which is able to visualize all the conceptual steps
+    <p>Thonny is a simple Python IDE with features useful for learning programming.
+    It comes with a debugger which is able to visualize all the conceptual steps
     taken to run a Python program (executing statements, evaluating expressions,
     maintaining the call stack). There is a GUI for installing 3rd party packages
     and special mode for learning about references.</p>
@@ -32,8 +32,8 @@
 
   <screenshots>
     <screenshot type="default">
-      <caption>Thonny stepping through a recursive function</caption>
       <image>http://thonny.org/img/screenshot.png</image>
+      <caption>Thonny stepping through a recursive function</caption>
     </screenshot>
   </screenshots>
 
