@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.15 (2017-11-07)
+===================
+* Removed StartupNotify from Linux .desktop file (StartupNotify=true leaves cursor spinning in Debian)
+
 2.1.14 (2017-11-02)
 ===================
 * Added some Linux-specific files to source distribution. No new features or fixes.

@@ -6,7 +6,6 @@ Exec=/usr/bin/thonny %F
 Comment=Python IDE for beginners
 Icon=thonny
 StartupWMClass=Thonny
-StartupNotify=true
 Terminal=false
 Categories=Education;Development
 Keywords=programming;education
