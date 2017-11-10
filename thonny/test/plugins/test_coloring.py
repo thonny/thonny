@@ -12,9 +12,6 @@ TEST_STR1 = """def my_function():
     sdsds'''
 """
 
-OPEN_TAG_NAME = "STRING_OPEN"
-CLOSED_TAG_NAME = "STRING_CLOSED"
-
 
 def test_open_closed_strings():
 
@@ -23,10 +20,10 @@ def test_open_closed_strings():
 
     font = tk_font.nametofont("TkDefaultFont")
     colorer = SyntaxColorer(text_widget, font, font)
-    colorer.recolorize()
+    colorer._update_coloring()
 
-    open_ranges = text_widget.tag_ranges(OPEN_TAG_NAME)
-    closed_ranges = text_widget.tag_ranges(CLOSED_TAG_NAME)
+    open_ranges = text_widget.tag_ranges("STRING_OPEN")
+    closed_ranges = text_widget.tag_ranges("STRING_CLOSED") + text_widget.tag_ranges("STRING_CLOSED3") 
 
     expected_open_ranges = {('3.11', '4.0'), }
     expected_closed_ranges = {('2.11', '2.19'), ('4.11', '6.12'), }

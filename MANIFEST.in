@@ -5,6 +5,7 @@ include README.rst
 include requirements.txt
 include licenses/ECLIPSE-ICONS-LICENSE.txt
 include packaging/linux/thonny.1
+include packaging/icons/*.png
 include packaging/linux/org.thonny.Thonny.appdata.xml
 include packaging/linux/org.thonny.Thonny.desktop
 

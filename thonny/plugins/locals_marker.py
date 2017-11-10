@@ -17,7 +17,10 @@ class LocalsHighlighter:
         self._configure_tags()
         self._update_scheduled = False
     
-    def get_positions_simple_but_incorrect(self):
+    def get_positions(self):
+        return self._get_positions_correct_but_using_private_parts()
+    
+    def _get_positions_simple_but_incorrect(self):
         # goto_assignments only gives you last assignment to given node
         import jedi
         defs = jedi.names(self.text.get('1.0', 'end'), path="",
@@ -33,7 +36,7 @@ class LocalsHighlighter:
         return result
         
     
-    def get_positions_correct_but_using_private_parts(self):
+    def _get_positions_correct_but_using_private_parts(self):
         from jedi import Script
         
         tree = jedi_utils.import_tree()
@@ -118,7 +121,7 @@ class LocalsHighlighter:
         
         if get_workbench().get_option("view.locals_highlighting"):
             try:
-                highlight_positions = self.get_positions_correct_but_using_private_parts()
+                highlight_positions = self.get_positions()
                 self._highlight(highlight_positions)
             except:
                 logging.exception("Problem when updating local variable tags")

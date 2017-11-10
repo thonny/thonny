@@ -15,8 +15,8 @@ else:
 def test_regular_closed():
     insert_pos_groups = (("1.9", "1.10", "1.13", "1.31"),
                          ("1.30", "1.29", "1.25", "1.15"))
-    expected_indices = (("1.9", "1.30"),
-                        ("1.15", "1.29"))
+    expected_indices = (("1.9", "1.30", []),
+                        ("1.15", "1.29", []))
 
     text_widget = tkinter.Text()
     text_widget.insert("end", TEST_STR1)

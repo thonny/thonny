@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 import os.path
 import sys
 
@@ -54,13 +54,7 @@ setup(
       platforms=["Windows", "macOS", "Linux"],
       install_requires=requirements,
       python_requires=">=3.4",
-      packages=["thonny",
-                "thonny.shared",  
-                "thonny.shared.thonny",  
-                "thonny.plugins", 
-                "thonny.plugins.system_shell",
-                "thonny.plugins.help",
-                ],
+      packages=find_packages(),
       package_data={'': ['VERSION',  'res/*'],
                     'thonny.plugins.help' : ['*.rst']},
       entry_points={
