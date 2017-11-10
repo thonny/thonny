@@ -28,6 +28,7 @@ class SyntaxColorer:
         self._config_colors(main_font, bold_font)
         self._update_scheduled = False
         self._dirty_ranges = set()
+        self._use_coloring = True
     
     def _compile_regexes(self):
         from thonny.token_utils import BUILTIN, COMMENT, MAGIC_COMMAND, STRING3,\
@@ -81,7 +82,8 @@ class SyntaxColorer:
         self.text.tag_raise('STRING_CLOSED3')
         self.text.tag_raise('STRING_OPEN3')
 
-    def schedule_update(self, event):
+    def schedule_update(self, event, use_coloring=True):
+        self._use_coloring = use_coloring
         
         # Allow reducing work by remembering only changed lines
         if hasattr(event, "sequence"):
@@ -124,7 +126,7 @@ class SyntaxColorer:
         for tag in self.uniline_tagdefs:
             self.text.tag_remove(tag, start, end)
         
-        if not get_workbench().get_option("view.syntax_coloring"):
+        if not self._use_coloring:
             return
         
         for match in self.uniline_regex.finditer(chars):
@@ -154,7 +156,7 @@ class SyntaxColorer:
         for tag in self.multiline_tagdefs:
             self.text.tag_remove(tag, start, end)
         
-        if not get_workbench().get_option("view.syntax_coloring"):
+        if not self._use_coloring:
             return
         
         # Count number of open multiline strings to be able to detect when string gets closed
@@ -243,7 +245,7 @@ def update_coloring(event):
         text.syntax_colorer = class_(text, get_workbench().get_font("EditorFont"),
                             get_workbench().get_font("BoldEditorFont"))
     
-    text.syntax_colorer.schedule_update(event)
+    text.syntax_colorer.schedule_update(event, get_workbench().get_option("view.syntax_coloring"))
 
 def load_plugin():
     wb = get_workbench() 

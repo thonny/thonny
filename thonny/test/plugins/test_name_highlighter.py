@@ -1,5 +1,5 @@
 import tkinter
-from thonny.plugins.highlight_names import NameHighlighter
+from thonny.plugins.highlight_names import VariablesHighlighter
 
 
 TEST_STR1 = """def foo():
@@ -85,7 +85,7 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
     text_widget = tkinter.Text()
     text_widget.insert("end", input_str)
 
-    nh = NameHighlighter()
+    nh = VariablesHighlighter()
     nh.text = text_widget
     for i, group in enumerate(insert_pos_groups):
         for insert_pos in group:
