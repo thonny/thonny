@@ -2,6 +2,12 @@
 Version history
 ===============
 
+2.1.16 (2017-11-10)
+===================
+* Tests moved under thonny package
+* Tests included in the source distribution
+* More icons included in the source distribution
+
 2.1.15 (2017-11-07)
 ===================
 * Removed StartupNotify from Linux .desktop file (StartupNotify=true leaves cursor spinning in Debian)
