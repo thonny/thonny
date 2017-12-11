@@ -108,8 +108,8 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
 #                 term_cmd = "konsole"
     elif shutil.which("gnome-terminal"):
         term_cmd = "gnome-terminal"
-    elif shutil.which("terminal"): # XFCE?
-        term_cmd = "terminal"
+    elif shutil.which("xfce4-terminal"):
+        term_cmd = "xfce4-terminal"
     elif shutil.which("xterm"):
         term_cmd = "xterm"
     else:
