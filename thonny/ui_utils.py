@@ -1099,11 +1099,11 @@ def get_tk_version_info():
             result.append(0)
     return tuple(result) 
 
-def get_style_options(style_name):
+def get_style_options(style_name, default={}):
     style = ttk.Style()
     result = style.configure(style_name)
     if result is None:
-        return {}
+        return default
     else:
         return result
     

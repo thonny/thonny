@@ -19,7 +19,7 @@ import re
 from thonny.globals import get_workbench
 from thonny.shell import ShellText
 from thonny.codeview import CodeViewText
-from thonny.ui_utils import get_style_option
+from thonny.ui_utils import get_style_option, get_style_options
 
 
 class SyntaxColorer:
@@ -58,19 +58,20 @@ class SyntaxColorer:
         self.id_regex = re.compile(r"\s+(\w+)", re.S)
 
     def _config_colors(self, main_font, bold_font):
-        base_foreground = None
-        string_foreground = get_style_option("String.Code", "foreground", "DarkGreen")
-        open_string_background = get_style_option("OpenString.Code", "background", "#c3f9d3")
+        default_string_fg = "DarkGreen"
+        default_open_string_bg = "#c3f9d3"
+        
         self.uniline_tagdefs = {
-            "COMMENT"       : {"font":main_font, 'background':None, 'foreground' : get_style_option("Comment.Code", "foreground", "DarkGray")},
-            "MAGIC_COMMAND" : {"font":main_font, 'background':None, 'foreground': get_style_option("Magic.Code", "foreground", "DarkGray"), },
-            "STRING_CLOSED" : {"font":main_font, 'background':None, 'foreground':string_foreground, },
-            "STRING_OPEN"   : {"font":main_font, 'background': open_string_background, "foreground": string_foreground},
-            "KEYWORD"       : {"font":bold_font, 'background':None, 'foreground':get_style_option("Keyword.Code", "foreground", "#7f0055"), },
-            "NUMBER"        : {"font":main_font, 'background':None, 'foreground':get_style_option("Number.Code", "foreground", None)},
-            "BUILTIN"       : {"font":main_font, 'background':None, 'foreground':get_style_option("Builtin.Code", "foreground", base_foreground)},
-            #"DEFINITION"    : {},
-            }
+            "COMMENT"       : get_style_options("Comment.Code", {"foreground" : "DarkGray"}),
+            "MAGIC_COMMAND" : get_style_options("Magic.Code", {"foreground" : "DarkGray"}),
+            "STRING_CLOSED" : get_style_options("String.Code", {"foreground" : default_string_fg}),
+            "STRING_OPEN"   : get_style_options("OpenString.Code", {"foreground" : default_string_fg, 
+                                                                    "background" : default_open_string_bg}),
+            "KEYWORD"       : get_style_options("Keyword.Code", {"foreground" : "#7f0055"}),
+            "NUMBER"        : get_style_options("Number.Code"),
+            "BUILTIN"       : get_style_options("Builtin.Code"),
+            "DEFINITION"    : get_style_options("Definition.Code"),
+        }
         
         self.multiline_tagdefs = {
             "STRING_CLOSED3": self.uniline_tagdefs["STRING_CLOSED"],
