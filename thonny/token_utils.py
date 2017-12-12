@@ -6,13 +6,15 @@ def matches_any(name, alternates):
     "Return a named group pattern matching list of alternates."
     return "(?P<%s>" % name + "|".join(alternates) + ")"
 
-KW = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
+KEYWORD = r"\b" + matches_any("KEYWORD", keyword.kwlist) + r"\b"
 _builtinlist = [str(name) for name in dir(builtins)
                                     if not name.startswith('_') and \
                                     name not in keyword.kwlist]
 
 # TODO: move builtin handling to global-local
 BUILTIN = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", _builtinlist) + r"\b"
+NUMBER = matches_any("NUMBER", [r"[+-]?(\d+(\.\d*)?|\.\d+)([eE][+-]?\d+)?"])
+
 COMMENT = matches_any("COMMENT", [r"#[^\n]*"])
 MAGIC_COMMAND = matches_any("MAGIC_COMMAND", [r"^%[^\n]*"]) # used only in shell
 STRINGPREFIX = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"

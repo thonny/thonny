@@ -33,12 +33,13 @@ class SyntaxColorer:
     
     def _compile_regexes(self):
         from thonny.token_utils import BUILTIN, COMMENT, MAGIC_COMMAND, STRING3,\
-            STRING3_DELIMITER, STRING_OPEN, KW, STRING_CLOSED
+            STRING3_DELIMITER, STRING_OPEN, KEYWORD, STRING_CLOSED, NUMBER
             
         
         self.uniline_regex = re.compile(
-            KW 
+                    KEYWORD 
             + "|" + BUILTIN 
+            + "|" + NUMBER 
             + "|" + COMMENT 
             + "|" + MAGIC_COMMAND 
             + "|" + STRING3_DELIMITER # to avoid marking """ and ''' as single line string in uniline mode
@@ -57,6 +58,7 @@ class SyntaxColorer:
         self.id_regex = re.compile(r"\s+(\w+)", re.S)
 
     def _config_colors(self, main_font, bold_font):
+        base_foreground = None
         string_foreground = get_style_option("String.Code", "foreground", "DarkGreen")
         open_string_background = get_style_option("OpenString.Code", "background", "#c3f9d3")
         self.uniline_tagdefs = {
@@ -65,7 +67,8 @@ class SyntaxColorer:
             "STRING_CLOSED" : {"font":main_font, 'background':None, 'foreground':string_foreground, },
             "STRING_OPEN"   : {"font":main_font, 'background': open_string_background, "foreground": string_foreground},
             "KEYWORD"       : {"font":bold_font, 'background':None, 'foreground':get_style_option("Keyword.Code", "foreground", "#7f0055"), },
-            "BUILTIN"       : {"font":main_font, 'background':None, 'foreground':get_style_option("Builtin.Code", "foreground", None)},
+            "NUMBER"        : {"font":main_font, 'background':None, 'foreground':get_style_option("Number.Code", "foreground", None)},
+            "BUILTIN"       : {"font":main_font, 'background':None, 'foreground':get_style_option("Builtin.Code", "foreground", base_foreground)},
             #"DEFINITION"    : {},
             }
         
