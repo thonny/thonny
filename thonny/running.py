@@ -818,8 +818,15 @@ class CPythonProxy(BackendProxy):
         
         else:
             # Common unix locations
-            for dir_ in ["/bin", "/usr/bin", "/usr/local/bin",
-                         os.path.expanduser("~/.local/bin")]:
+            dirs = ["/bin", "/usr/bin", "/usr/local/bin",
+                    os.path.expanduser("~/.local/bin")]
+            for dir_ in dirs:
+                # if the dir_ is just a link to another dir_, skip it
+                # (not to show items twice)
+                # for example on Fedora /bin -> usr/bin
+                realpath = os.path.realpath(dir_)
+                if realpath != dir_ and realpath in dirs:
+                    continue
                 for name in ["python3", "python3.4", "python3.5", "python3.6"]:
                     path = os.path.join(dir_, name)
                     if os.path.exists(path):
