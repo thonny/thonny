@@ -44,7 +44,6 @@ class ParenMatcher:
         self._highlight_unclosed(remaining, start_index, end_index)
     
     def _configure_tags(self):
-        print(get_style_option("MatchedParens.Code", "foreground", "Blue"))
         self.text.tag_configure("SURROUNDING_PARENS",
                                 foreground=get_style_option("MatchedParens.Code", "foreground", "Blue"), 
                                 font=self._paren_highlight_font)
