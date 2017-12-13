@@ -1,4 +1,3 @@
-from tkinter import ttk
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_windows
 
@@ -11,19 +10,20 @@ Darkula
 """
 
 
-def clean(s, **opts):
+def clean(s,
+          window_background="#1D291A",
+          code_background="#273627",
+          detail_background="#2D452F",
+          foreground="#9E9E9E",
+          **opts):
     get_workbench().apply_theme("Clam", **opts)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
-    BG = "#2a3b26"
-    BG = "#1D291A"
-    FG = "#9E9E9E"
-    TEXT_BG = "#2e4437"
-    TEXT_BG = "#273627"
-    ACTIVE_TAB = "#677896"
-    ACTIVE_TAB = "#4C6346"
-    ACTIVE_TAB = "#344D36"
-    ACTIVE_TAB = "#2D452F"
+    BG = window_background
+    TEXT_BG = code_background
+    ACTIVE_TAB = detail_background
+    
+    FG = foreground
     
     s.configure(".", 
                 background=BG,
@@ -101,7 +101,6 @@ def clean(s, **opts):
           )
     
     #TEXT_BG = "#273627"
-    SELBG = "#375237"
     SELBG = "#2D3D2D"
     """
     s.map("Treeview",
@@ -124,10 +123,7 @@ def clean(s, **opts):
     )
     
     # Scrollbars
-    SCROLL_BG = "#334036"
-    SCROLL_BG = BG
     SCROLL_BG = ACTIVE_TAB
-    SCBORDER = "#38443d"
     SCBORDER = TEXT_BG
     
     # Remove scrollbar buttons/arrows:
