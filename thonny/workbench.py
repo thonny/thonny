@@ -29,6 +29,7 @@ from _thread import start_new_thread
 import ast
 from thonny import THONNY_USER_DIR
 import warnings
+from warnings import warn
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -434,30 +435,26 @@ class Workbench(tk.Tk):
         style = ttk.Style()
         
         self._themes = {}
-        
+        """
         for name in style.theme_names():
             def load_theme(style, name=name):
                 style.theme_use(name)
                 # TODO: preconfigure ??
             
-            self._themes[name] = (None, load_theme)
+            self._themes[name] = load_theme
+        """
         
         
     def _select_theme(self):
         preferred_theme = self.get_option("theme.preferred_theme")
-        available_themes = self.get_available_themes()
+        available_themes = self.get_theme_names()
         
         if preferred_theme in available_themes:
-            self._apply_theme(preferred_theme)
-        elif 'Base Windows' in available_themes:
-            self._apply_theme('Base Windows') 
-        elif 'xpnative' in available_themes:
-            # in Win7 'xpnative' gives better scrollbars than 'vista'
-            self._apply_theme('xpnative') 
-        elif 'vista' in available_themes:
-            self._apply_theme('vista')
-        elif 'clam' in available_themes:
-            self._apply_theme('clam')
+            self.apply_theme(preferred_theme)
+        elif 'Windows' in available_themes:
+            self.apply_theme('Windows') 
+        elif 'Clam' in available_themes:
+            self.apply_theme('Clam')
         
         if self._theme_tweaker is not None:
             self._theme_tweaker()
@@ -624,42 +621,31 @@ class Workbench(tk.Tk):
     def add_backend(self, descriptor, proxy_class):
         self._backends[descriptor] = proxy_class
     
-    def add_theme(self, name, parent, styler):
-        self._themes[name] = (parent, styler)
+    def add_theme(self, name, base, **opts):
+        if name in self._themes:
+            warn("Overwriting theme '%s'" % name)
+        
+        self._themes[name] = (base, opts)
     
+    def get_theme_names(self):
+        return sorted(self._themes.keys())
     
-    def _get_theme_lineage(self, theme):
-        lineage = [theme]
-        temp = theme
-        while True:
-            if temp not in self._themes:
-                raise KeyError("Can't find theme %s for lineage %s" % (theme, lineage))
-            else:
-                parent, _ = self._themes[temp]
-                if parent is None:
-                    return lineage
-                else:
-                    lineage.insert(0, parent)
-                    temp = parent
-    
-    def get_available_themes(self):
-        names = []
-        for name in self._themes:
-            try:
-                # return only those with intact lineage
-                self._get_theme_lineage(name)
-                names.append(name)
-            except KeyError:
-                pass
-            
-        return sorted(names)
-    
-    def _apply_theme(self, name):
-        lineage = self._get_theme_lineage(name)
-        for theme in lineage:
-            _, theme_loader = self._themes[theme]
-            theme_loader(ttk.Style())
-                
+    def apply_theme(self, name, **opts):
+        # TODO: use theme options from configuration
+        
+        try:
+            base, base_opts = self._themes[name]
+            merged_opts = base_opts.copy()
+            merged_opts.update(opts)
+        except KeyError:
+            self.report_exception("Can't find theme '%s'" % name)
+            return
+        
+        if isinstance(base, str):
+            self.apply_theme(base, **merged_opts)
+        else:
+            base(ttk.Style(), **merged_opts)
+       
     
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image

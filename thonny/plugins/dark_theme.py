@@ -1,4 +1,6 @@
+from tkinter import ttk
 from thonny.globals import get_workbench
+from thonny.misc_utils import running_on_windows
 
 """
 Darkula
@@ -7,10 +9,10 @@ Darkula
     Scrollbar: #595B5D
     List header: #677896
 """
-from thonny.misc_utils import running_on_windows
 
 
-def dark_clam(s):
+def clean(s, **opts):
+    get_workbench().apply_theme("Clam", **opts)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = "#2a3b26"
@@ -89,9 +91,9 @@ def dark_clam(s):
     
     # Treeview
     # https://stackoverflow.com/questions/32051780/how-to-edit-the-style-of-a-heading-in-treeview-python-ttk
-    print(s.map("Treeview.Heading"))
-    print(s.layout("Treeview.Heading"))
-    print(s.element_options("Treeheading.cell"))
+    #print(s.map("Treeview.Heading"))
+    #print(s.layout("Treeview.Heading"))
+    #print(s.element_options("Treeheading.cell"))
     s.configure("Treeview", background=TEXT_BG)
     s.configure("Treeview.Heading", background=ACTIVE_TAB, lightcolor=ACTIVE_TAB, borderwidth=0)
     s.map("Treeview.Heading",
@@ -168,7 +170,7 @@ def dark_clam(s):
           darkcolor=[("disabled", BG)],
           lightcolor=[("disabled", BG)],
     )
-    print(s.map("TScrollbar"))
+    #print(s.map("TScrollbar"))
     
     
     
@@ -222,10 +224,12 @@ def dark_clam(s):
     s.configure("MatchedParens.Code", foreground="#F0995B")
     s.configure("OpenParens.Code", background="#193022")
     s.configure("OpenString.Code", background="#453B22")
+    s.configure("Number.Code", foreground="#FFCABF")
+    s.configure("Comment.Code", foreground="#C8DEE6")
     
     s.configure("StdOut.Shell", foreground="LightGray")
     s.configure("StdIn.Shell", foreground="LightBlue")
     s.configure("StdErr.Shell", foreground="Crimson")
 
 def load_early_plugin():
-    get_workbench().add_theme("Dark Clam", "Base Clam", dark_clam)
+    get_workbench().add_theme("Clean Dark", clean)

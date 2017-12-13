@@ -57,8 +57,11 @@ def tweak_menus(style):
     style.configure("Menubar", 
                     activeborderwidth=0)
 
-def base_windows(style):
-    
+def set_palette(keywords, numbers, strings, open_strings):
+    pass
+
+def base_windows(style, **opts):
+    style.theme_use("xpnative")
     # Notebooks
     # With tabmargins I can get a gray line below tab, which separates
     # tab content from label
@@ -72,7 +75,8 @@ def base_windows(style):
     tweak_menubuttons(style)
     tweak_paned_windows(style)
 
-def base_clam(style):
+def base_clam(style, **opts):
+    style.theme_use("clam")
     style.configure("Tab", padding=(4,1,0,0))
     style.configure("ButtonNotebook.Tab", padding=(6,4,2,3))
         
@@ -82,7 +86,8 @@ def base_clam(style):
     tweak_menubuttons(style)
     tweak_paned_windows(style)
 
-def base_aqua(style):
+def base_aqua(style, **opts):
+    style.theme_use("aqua")
     style.configure("Tab", padding=(4,1,0,0))
     style.configure("ButtonNotebook.Tab", padding=(4,1,1,3))
     
@@ -93,9 +98,15 @@ def base_aqua(style):
     tweak_paned_windows(style)
 
 def load_early_plugin():
-    get_workbench().add_theme("Base Windows", "xpnative", base_windows)
-    get_workbench().add_theme("Base Vista", "vista", base_windows)
-    get_workbench().add_theme("Base Clam", "clam", base_clam)
-    get_workbench().add_theme("Base Aqua", "aqua", base_aqua)
+    from tkinter import ttk
+    available_themes = ttk.Style().theme_names()
+    
+    get_workbench().add_theme("Clam", base_clam)
+    
+    if "xpnative" in available_themes:
+        get_workbench().add_theme("Windows", base_windows)
+    if "aqua" in available_themes:
+        get_workbench().add_theme("Aqua", base_aqua)
+        
     
     
