@@ -67,7 +67,7 @@ class InterpreterConfigurationPage(ConfigurationPage):
         filename = filedialog.askopenfilename(**options)
         
         if filename:
-            self._configuration_variable.set("Python (%s)" % os.path.realpath(filename))
+            self._configuration_variable.set("Python ({})".format(filename))
     
     
     def apply(self):
