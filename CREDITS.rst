@@ -22,9 +22,10 @@ Libraries and resources
 Source contributors and frequent bug-reporters
 ----------------------------------------------
 * Aivar Annamaa
-* Rene Lehtma
 * Filip Schouwenaars
 * Fizban
+* Miro Hrončok 
+* Rene Lehtma
 * Sven (s_v_e_n)
 * Taavi Ilp
 * Toomas Mölder
