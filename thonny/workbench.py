@@ -326,11 +326,13 @@ class Workbench(tk.Tk):
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
+            extra_sequences=["<Control-KP_Add>"],
             group=60)
                 
         self.add_command("decrease_font_size", "view", "Decrease font size",
             lambda: self._change_font_size(-1),
             default_sequence=select_sequence("<Control-minus>", "<Command-minus>"),
+            extra_sequences=["<Control-KP_Subtract>"],
             group=60)
         
         self.bind("<Control-MouseWheel>", self._cmd_zoom_with_mouse, True)
