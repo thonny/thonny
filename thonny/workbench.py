@@ -463,6 +463,7 @@ class Workbench(tk.Tk):
     def add_command(self, command_id, menu_name, command_label, handler,
                     tester=None,
                     default_sequence=None,
+                    extra_sequences=[],
                     flag_name=None,
                     skip_sequence_binding=False,
                     accelerator=None,
@@ -512,6 +513,9 @@ class Workbench(tk.Tk):
         
         if sequence and not skip_sequence_binding:
             self.bind_all(sequence, dispatch, True)
+        
+        for extra_sequence in extra_sequences:
+            self.bind_all(extra_sequence, dispatch, True)
         
         
         def dispatch_from_menu():
