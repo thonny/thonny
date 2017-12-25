@@ -30,11 +30,14 @@ import ast
 from thonny import THONNY_USER_DIR
 import warnings
 from warnings import warn
+import collections
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
 CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 SINGLE_INSTANCE_DEFAULT = True
+
+MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"]) 
 
 class Workbench(tk.Tk):
     """
@@ -212,8 +215,7 @@ class Workbench(tk.Tk):
             self._menubar = tk.Menu(self, **get_style_options("Menubar"))
             self["menu"] = self._menubar
         self._menus = {}
-        self._menu_item_groups = {} # key is pair (menu_name, command_label)
-        self._menu_item_testers = {} # key is pair (menu_name, command_label)
+        self._menu_item_specs = {} # key is pair (menu_name, command_label), value is MenuItem
         
         # create standard menus in correct order
         self.get_menu("file", "File")
@@ -549,9 +551,12 @@ class Workbench(tk.Tk):
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
         
+        # remember the details that can't be stored in Tkinter objects
+        self._menu_item_specs[(menu_name, command_label)] = MenuItem(group, position_in_group, tester)
+        
         menu = self.get_menu(menu_name)
         menu.insert(
-            self._find_location_for_menu_item(menu_name, command_label, group, position_in_group),
+            self._find_location_for_menu_item(menu_name, command_label),
             "checkbutton" if flag_name else "command",
             label=command_label,
             accelerator=accelerator,
@@ -559,10 +564,6 @@ class Workbench(tk.Tk):
             compound=tk.LEFT,
             variable=self.get_variable(flag_name) if flag_name else None,
             command=dispatch_from_menu)
-        
-        # remember the details that can't be stored in Tkinter objects
-        self._menu_item_groups[(menu_name, command_label)] = group
-        self._menu_item_testers[(menu_name, command_label)] = tester
         
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
@@ -1044,7 +1045,7 @@ class Workbench(tk.Tk):
             item_data = menu.entryconfigure(i)
             if "label" in item_data:
                 command_label = menu.entrycget(i, "label")
-                tester = self._menu_item_testers[(menu_name, command_label)]
+                tester = self._menu_item_specs[(menu_name, command_label)].tester
 
                 if tester and not tester():
                     menu.entryconfigure(i, state=tk.DISABLED)
@@ -1054,28 +1055,29 @@ class Workbench(tk.Tk):
                     
         
     
-    def _find_location_for_menu_item(self, menu_name, command_label, group,
-            position_in_group="end"):        
+    def _find_location_for_menu_item(self, menu_name, command_label):        
         
         menu = self.get_menu(menu_name)
         
         if menu.index("end") == None: # menu is empty
             return "end"
         
+        specs = self._menu_item_specs[(menu_name, command_label)]
+         
         this_group_exists = False
         for i in range(0, menu.index("end")+1):
             data = menu.entryconfigure(i)
             if "label" in data:
                 # it's a command, not separator
                 sibling_label = menu.entrycget(i, "label")
-                sibling_group = self._menu_item_groups[(menu_name, sibling_label)]
+                sibling_group = self._menu_item_specs[(menu_name, sibling_label)].group
 
-                if sibling_group == group:
+                if sibling_group == specs.group:
                     this_group_exists = True
-                    if position_in_group == "alphabetic" and sibling_label > command_label:
+                    if specs.position_in_group == "alphabetic" and sibling_label > command_label:
                         return i
                     
-                if sibling_group > group:
+                if sibling_group > specs.group:
                     assert not this_group_exists # otherwise we would have found the ending separator
                     menu.insert_separator(i)
                     return i
