@@ -384,6 +384,9 @@ class Runner:
     def get_interpreter_command(self):
         return self._proxy.get_interpreter_command()
     
+    def get_backend_proxy(self):
+        return self._proxy
+    
     def get_backend_description(self):
         return self._proxy.get_description()
 
