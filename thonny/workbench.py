@@ -6,7 +6,7 @@ import sys
 from tkinter import ttk
 import traceback
 
-from thonny import ui_utils
+from thonny import ui_utils, running
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError
 from thonny.config import try_load_configuration
@@ -38,6 +38,7 @@ CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 SINGLE_INSTANCE_DEFAULT = True
 
 MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"]) 
+BackendSpec = collections.namedtuple("BackendSpec", ["name", "proxy_class", "description", "config_page_constructor"]) 
 
 class Workbench(tk.Tk):
     """
@@ -81,6 +82,7 @@ class Workbench(tk.Tk):
         
         self._init_configuration()
         self._init_diagnostic_logging()
+        self._add_main_backends()
         logging.info("Loading early plugins from " + str(sys.path))
         self._load_early_plugins()
         
@@ -289,6 +291,20 @@ class Workbench(tk.Tk):
         }
         
         self.update_fonts()
+    
+    
+    def _add_main_backends(self):
+        self.set_default("run.backend_name", "PrivateVenv")
+        self.set_default("run.used_interpreters", [])
+        
+        self.add_backend("PrivateVenv", running.PrivateVenvCPythonProxy, 
+                         "Default: Virtual environment managed by Thonny", 
+                         "Privavenv")
+        self.add_backend("SameAsFrontend", running.SameAsFrontendCPythonProxy, 
+                         "Same interpreter which runs Thonny",
+                         "Same as front")
+    
+        #from thonny import running_config_page
         
     def _init_runner(self):
         try:
@@ -625,8 +641,8 @@ class Workbench(tk.Tk):
     def add_content_inspector(self, inspector_class):
         self.content_inspector_classes.append(inspector_class)
     
-    def add_backend(self, descriptor, proxy_class):
-        self._backends[descriptor] = proxy_class
+    def add_backend(self, name, proxy_class, description, config_page_constructor):
+        self._backends[name] = BackendSpec(name, proxy_class, description, config_page_constructor)
     
     def add_theme(self, name, base, **opts):
         if name in self._themes:

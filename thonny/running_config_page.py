@@ -10,7 +10,7 @@ from thonny.misc_utils import running_on_windows
 from thonny.running import parse_configuration
 
 
-class InterpreterConfigurationPage(ConfigurationPage):
+class CPythonConfigurationPage(ConfigurationPage):
     
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
@@ -47,7 +47,7 @@ class InterpreterConfigurationPage(ConfigurationPage):
         
         backends = get_workbench().get_backends()
         for backend_name in sorted(backends.keys()):
-            backend_class = backends[backend_name]
+            backend_class = backends[backend_name].proxy_class
             for configuration_option in backend_class.get_configuration_options():
                 if configuration_option is None or configuration_option == "":
                     result.append(backend_name)
@@ -78,8 +78,3 @@ class InterpreterConfigurationPage(ConfigurationPage):
         get_workbench().set_option("run.backend_configuration", configuration)
         
         get_runner().reset_backend()
-        
-    
-
-def load_plugin():
-    get_workbench().add_configuration_page("Interpreter", InterpreterConfigurationPage)

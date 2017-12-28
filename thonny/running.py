@@ -30,17 +30,12 @@ import traceback
 from time import sleep
 
 
-DEFAULT_CPYTHON_INTERPRETER = "default"
-SAME_AS_FRONTEND_INTERPRETER = "same as front-end"
 WINDOWS_EXE = "python.exe"
 
 class Runner:
     def __init__(self):
         get_workbench().set_default("run.working_directory", os.path.expanduser("~"))
         get_workbench().set_default("run.auto_cd", True)
-        get_workbench().set_default("run.backend_configuration", "Python (%s)" % DEFAULT_CPYTHON_INTERPRETER)
-        get_workbench().set_default("run.used_interpreters", [])
-        get_workbench().add_backend("Python", CPythonProxy)
         
         from thonny.shell import ShellView
         get_workbench().add_view(ShellView, "Shell", "s",
@@ -356,16 +351,15 @@ class Runner:
         may choose to execute %Reset simply by eg. clearing variables."""
         
         self.kill_backend()
-        configuration = get_workbench().get_option("run.backend_configuration")
-        backend_name, configuration_option = parse_configuration(configuration)
+        backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
             raise UserError("Can't find backend '{}'. Please select another backend from options"
                             .format(backend_name))
         
-        backend_class = get_workbench().get_backends()[backend_name]
+        backend_class = get_workbench().get_backends()[backend_name].proxy_class
         self._set_state("running")
         self._proxy = None
-        self._proxy = backend_class(configuration_option)
+        self._proxy = backend_class()
     
     def interrupt_backend(self):
         if self._proxy is not None:
@@ -448,12 +442,6 @@ class BackendProxy:
             If configuration is "Foo (bar)", then "Foo" is backend descriptor
             and "bar" is the configuration option"""
     
-    @classmethod
-    def get_configuration_options(cls):
-        """Returns a list strings for populating interpreter selection dialog.
-        The strings are without backend descriptor"""
-        raise NotImplementedError()
-    
     def get_description(self):
         """Returns a string that describes the backend"""
         raise NotImplementedError()        
@@ -499,31 +487,10 @@ class BackendProxy:
     
 
 class CPythonProxy(BackendProxy):
-    @classmethod
-    def get_configuration_options(cls):
-        return ([DEFAULT_CPYTHON_INTERPRETER, SAME_AS_FRONTEND_INTERPRETER] 
-                + CPythonProxy._get_interpreters())
-        
-    def __init__(self, configuration_option):
-        if configuration_option == DEFAULT_CPYTHON_INTERPRETER:
-            self._prepare_private_venv()
-            self._executable = get_private_venv_executable()
-        elif configuration_option == SAME_AS_FRONTEND_INTERPRETER:
-            self._executable = get_runner().get_frontend_python()
-        elif configuration_option.startswith("."):
-            # Relative paths are relative to front-end interpretator directory
-            # (This must be written directly to conf file, as it can't be selected from Options dialog)  
-            self._executable = os.path.normpath(os.path.join(os.path.dirname(sys.executable), 
-                                                             configuration_option)) 
-        else:
-            self._executable = configuration_option
-            
-            # Rembember the usage of this non-default interpreter
-            used_interpreters = get_workbench().get_option("run.used_interpreters")
-            if self._executable not in used_interpreters:
-                used_interpreters.append(self._executable)
-            get_workbench().set_option("run.used_interpreters", used_interpreters)
-            
+    "abstract class"
+    
+    def __init__(self, executable):
+        self._executable = executable
         
         cwd = get_workbench().get_option("run.working_directory")
         if os.path.exists(cwd):
@@ -921,6 +888,16 @@ class CPythonProxy(BackendProxy):
                 self._gui_update_loop_id = None
         
 
+
+    def supported_features(self):
+        return ["run", "debug", "pip_gui", "system_shell"]
+
+
+class PrivateVenvCPythonProxy(CPythonProxy):
+    def __init__(self):
+        self._prepare_private_venv()
+        CPythonProxy.__init__(self, get_private_venv_executable())
+
     def _prepare_private_venv(self):
         path = _get_private_venv_path()
         if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
@@ -1010,25 +987,22 @@ class CPythonProxy(BackendProxy):
         
         assert os.path.isdir(path)
 
-    def supported_features(self):
-        return ["run", "debug", "pip_gui", "system_shell"]
+class SameAsFrontendCPythonProxy(CPythonProxy):
+    def __init__(self):
+        CPythonProxy.__init__(self, get_runner().get_frontend_python())
 
+class UserChosenCPythonProxy(CPythonProxy):
+    def __init__(self):
+        executable = get_workbench().get_option("run.cpython_interpreter")
+        
+        # Rembember the usage of this non-default interpreter
+        used_interpreters = get_workbench().get_option("run.used_interpreters")
+        if executable not in used_interpreters:
+            used_interpreters.append(executable)
+        get_workbench().set_option("run.used_interpreters", used_interpreters)
+        
+        CPythonProxy.__init__(self, executable)
 
-def parse_configuration(configuration):
-    """
-    "Python (C:\Python34\python.exe)" becomes ("Python", "C:\Python34\python.exe")
-    "BBC micro:bit" becomes ("BBC micro:bit", "")
-    """
-    
-    parts = configuration.split("(", maxsplit=1)
-    if len(parts) == 1:
-        return configuration, ""
-    else:
-        return parts[0].strip(), parts[1].strip(" )")
-
-
-    
-    
 def _get_private_venv_path():
     if "thonny" in sys.executable.lower():
         prefix = "BundledPython"
@@ -1069,3 +1043,5 @@ class BackendTerminatedError(Exception):
     def __init__(self, returncode):
         Exception.__init__(self)
         self.returncode = returncode    
+
+
