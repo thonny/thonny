@@ -381,8 +381,8 @@ class Runner:
     def get_backend_proxy(self):
         return self._proxy
     
-    def get_backend_description(self):
-        return self._proxy.get_description()
+    def get_banner(self):
+        return self._proxy.get_banner()
 
     def _check_alloc_console(self):
         if (sys.executable.endswith("thonny.exe")
@@ -420,9 +420,6 @@ class Runner:
             return self._proxy.supported_features()
             
             
-    def get_frontend_python(self):
-        return sys.executable.replace("thonny.exe", "python.exe")
-    
     def using_venv(self):
         return isinstance(self._proxy,  CPythonProxy) and self._proxy.in_venv
 
@@ -442,8 +439,8 @@ class BackendProxy:
             If configuration is "Foo (bar)", then "Foo" is backend descriptor
             and "bar" is the configuration option"""
     
-    def get_description(self):
-        """Returns a string that describes the backend"""
+    def get_banner(self):
+        """Returns a string to display when backend gets connected"""
         raise NotImplementedError()        
 
     def send_command(self, cmd):
@@ -503,6 +500,7 @@ class CPythonProxy(BackendProxy):
         self._sys_path = []
         self._gui_update_loop_id = None
         self.in_venv = None
+        self._badge = None
         
         self._start_new_process()
     
@@ -541,9 +539,8 @@ class CPythonProxy(BackendProxy):
         else: 
             return msg
     
-    def get_description(self):
-        # TODO: show backend version and interpreter path
-        return "Python (current dir: {})".format(self.cwd)
+    def get_banner(self):
+        return self._badge
         
         
     def send_command(self, cmd):
@@ -623,7 +620,7 @@ class CPythonProxy(BackendProxy):
         # TODO: clean up old versions
     
     def _start_new_process(self, cmd=None):
-        this_python = get_runner().get_frontend_python()
+        this_python = get_frontend_python()
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
     
@@ -664,7 +661,7 @@ class CPythonProxy(BackendProxy):
         # If the back-end interpreter is something else than front-end's one,
         # then it may not have jedi installed. 
         # In this case fffer front-end's jedi for the back-end
-        if self._executable != get_runner().get_frontend_python(): 
+        if self._executable != get_frontend_python(): 
             # I don't want to use PYTHONPATH for making jedi available
             # because that would add it to the front of sys.path
             my_env["JEDI_LOCATION"] = self._prepare_jedi()
@@ -763,95 +760,6 @@ class CPythonProxy(BackendProxy):
             else:
                 debug("### BACKEND ###: %s", data.strip())
         
-
-
-    @classmethod
-    def _get_interpreters(cls):
-        result = set()
-        
-        if running_on_windows():
-            # registry
-            result.update(CPythonProxy._get_interpreters_from_windows_registry())
-            
-            # Common locations
-            for dir_ in ["C:\\Python34",
-                         "C:\\Python35",
-                         "C:\\Program Files\\Python 3.5",
-                         "C:\\Program Files (x86)\\Python 3.5",
-                         "C:\\Python36",
-                         "C:\\Program Files\\Python 3.6",
-                         "C:\\Program Files (x86)\\Python 3.6",
-                         ]:
-                path = os.path.join(dir_, WINDOWS_EXE)
-                if os.path.exists(path):
-                    result.add(os.path.realpath(path))  
-        
-        else:
-            # Common unix locations
-            dirs = ["/bin", "/usr/bin", "/usr/local/bin",
-                    os.path.expanduser("~/.local/bin")]
-            for dir_ in dirs:
-                # if the dir_ is just a link to another dir_, skip it
-                # (not to show items twice)
-                # for example on Fedora /bin -> usr/bin
-                realpath = os.path.realpath(dir_)
-                if realpath != dir_ and realpath in dirs:
-                    continue
-                for name in ["python3", "python3.4", "python3.5", "python3.6"]:
-                    path = os.path.join(dir_, name)
-                    if os.path.exists(path):
-                        result.add(path)  
-        
-        if running_on_mac_os():
-            for version in ["3.4", "3.5", "3.6"]:
-                dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions",
-                                    version, "bin")
-                path = os.path.join(dir_, "python3")
-                
-                if os.path.exists(path):
-                    result.add(path)
-        
-        for command in ["pythonw", "python3", "python3.4", "python3.5", "python3.6"]:
-            path = which(command)
-            if path is not None and os.path.isabs(path):
-                result.add(path)
-        
-        current_configuration = get_workbench().get_option("run.backend_configuration")
-        backend, configuration_option = parse_configuration(current_configuration)
-        if backend == "Python" and configuration_option and os.path.exists(configuration_option):
-            result.add(os.path.realpath(configuration_option))
-        
-        for path in get_workbench().get_option("run.used_interpreters"):
-            if os.path.exists(path):
-                result.add(os.path.realpath(path))
-        
-        return sorted(result)
-    
-    
-    @classmethod
-    def _get_interpreters_from_windows_registry(cls):
-        import winreg
-        result = set()
-        for key in [winreg.HKEY_LOCAL_MACHINE,
-                    winreg.HKEY_CURRENT_USER]:
-            for version in ["3.4",
-                            "3.5", "3.5-32", "3.5-64",
-                            "3.6", "3.6-32", "3.6-64"]:
-                try:
-                    for subkey in [
-                        'SOFTWARE\\Python\\PythonCore\\' + version + '\\InstallPath',
-                        'SOFTWARE\\Python\\PythonCore\\Wow6432Node\\' + version + '\\InstallPath'
-                                 ]:
-                        dir_ = winreg.QueryValue(key, subkey)
-                        if dir_:
-                            path = os.path.join(dir_, WINDOWS_EXE)
-                            if os.path.exists(path):
-                                result.add(path)
-                except:
-                    pass
-        
-        return result
-    
     def get_interpreter_command(self):
         return self._executable
     
@@ -899,7 +807,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         CPythonProxy.__init__(self, get_private_venv_executable())
 
     def _prepare_private_venv(self):
-        path = _get_private_venv_path()
+        path = get_private_venv_path()
         if os.path.isdir(path) and os.path.isfile(os.path.join(path, "pyvenv.cfg")):
             self._check_upgrade_private_venv(path)
         else:
@@ -989,21 +897,34 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self):
-        CPythonProxy.__init__(self, get_runner().get_frontend_python())
+        CPythonProxy.__init__(self, get_frontend_python())
+        
+    def fetch_next_message(self):
+        msg = super().fetch_next_message()
+        if msg and "welcome_text" in msg:
+            msg["welcome_text"] += " (" + self._executable + ")"
+        return msg
 
-class UserChosenCPythonProxy(CPythonProxy):
+class CustomCPythonProxy(CPythonProxy):
     def __init__(self):
-        executable = get_workbench().get_option("run.cpython_interpreter")
+        executable = get_workbench().get_option("CustomInterpreter.path")
         
         # Rembember the usage of this non-default interpreter
-        used_interpreters = get_workbench().get_option("run.used_interpreters")
+        used_interpreters = get_workbench().get_option("CustomInterpreter.used_paths")
         if executable not in used_interpreters:
             used_interpreters.append(executable)
-        get_workbench().set_option("run.used_interpreters", used_interpreters)
+        get_workbench().set_option("CustomInterpreter.used_paths", used_interpreters)
         
         CPythonProxy.__init__(self, executable)
 
-def _get_private_venv_path():
+        
+    def fetch_next_message(self):
+        msg = super().fetch_next_message()
+        if msg and "welcome_text" in msg:
+            msg["welcome_text"] += " (" + self._executable + ")"
+        return msg
+    
+def get_private_venv_path():
     if "thonny" in sys.executable.lower():
         prefix = "BundledPython"
     else:
@@ -1011,7 +932,7 @@ def _get_private_venv_path():
     return os.path.join(THONNY_USER_DIR, prefix + "%d%d" % (sys.version_info[0], sys.version_info[1]))
 
 def get_private_venv_executable():
-    venv_path = _get_private_venv_path()
+    venv_path = get_private_venv_path()
     
     if running_on_windows():
         exe = os.path.join(venv_path, "Scripts", WINDOWS_EXE)
@@ -1045,3 +966,5 @@ class BackendTerminatedError(Exception):
         self.returncode = returncode    
 
 
+def get_frontend_python():
+    return sys.executable.replace("thonny.exe", "python.exe")

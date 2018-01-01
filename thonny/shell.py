@@ -156,7 +156,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         self.active_object_tags = set()
         
-        self._last_configuration = None
+        self._last_welcome_text = None
     
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
@@ -205,16 +205,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if hasattr(msg, "error"):
             self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
         
-        if hasattr(msg, "welcome_text"):
-            configuration = get_workbench().get_option("run.backend_configuration") 
-            welcome_text = msg.welcome_text
-            if hasattr(msg, "executable") and msg.executable != thonny.running.get_private_venv_executable():
-                welcome_text += " (" + msg.executable + ")"
-            if (configuration != self._last_configuration
-                and not (self._last_configuration is None and not configuration)):
-                    self._insert_text_directly(welcome_text, ("welcome",))
-                    
-            self._last_configuration = get_workbench().get_option("run.backend_configuration")
+        if hasattr(msg, "welcome_text") and msg.welcome_text != self._last_welcome_text:
+            self._insert_text_directly(msg.welcome_text, ("welcome",))
+            self._last_welcome_text = get_workbench().get_option("run.backend_configuration")
             
         if hasattr(msg, "value_info"):
             num_stripped_question_marks = getattr(msg, "num_stripped_question_marks", 0)

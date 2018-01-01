@@ -295,16 +295,22 @@ class Workbench(tk.Tk):
     
     def _add_main_backends(self):
         self.set_default("run.backend_name", "PrivateVenv")
-        self.set_default("run.used_interpreters", [])
+        self.set_default("CustomInterpreter.used_paths", [])
+        self.set_default("CustomInterpreter.path", "")
         
         self.add_backend("PrivateVenv", running.PrivateVenvCPythonProxy, 
-                         "Default: Virtual environment managed by Thonny", 
-                         "Privavenv")
+                         "A special virtual environment (default)", 
+                         "This virtual environment is automatically maintained by Thonny.\n"
+                         "Location: "+ running.get_private_venv_path()
+                        )
         self.add_backend("SameAsFrontend", running.SameAsFrontendCPythonProxy, 
-                         "Same interpreter which runs Thonny",
-                         "Same as front")
+                         "The same interpreter which runs Thonny",
+                         running.get_frontend_python())
     
-        #from thonny import running_config_page
+        from thonny import running_config_page
+        self.add_backend("CustomCPython", running.CustomCPythonProxy,
+                         "Custom Python interpreter",
+                         running_config_page.CustomCPythonConfigurationPage)
         
     def _init_runner(self):
         try:

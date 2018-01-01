@@ -31,7 +31,7 @@ class BackendConfigurationPage(ConfigurationPage):
             
         self._combo_variable = create_string_var(current_backend_desc)
         
-        label = ttk.Label(self, text="Where should Thonny run your code?")
+        label = ttk.Label(self, text="What should Thonny use for running your code?")
         label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
         
         self._combo = ttk.Combobox(self,
@@ -46,6 +46,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self.rowconfigure(2, weight=1)
         
         self._combo_variable.trace("w", self._backend_changed)
+        self._backend_changed()
     
     def _backend_changed(self, *args):
         backend_desc = self._combo_variable.get()
@@ -54,10 +55,8 @@ class BackendConfigurationPage(ConfigurationPage):
         if page != self._current_page:
             
             if self._current_page is not None:
-                print("forgetting", self._current_page)
                 self._current_page.grid_forget()
             
-            print("gridding", page)
             page.grid(row=2, column=0, sticky="nsew")
             self._current_page = page
     

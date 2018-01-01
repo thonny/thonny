@@ -6,7 +6,7 @@ from thonny.globals import get_workbench
 class ConfigurationDialog(tk.Toplevel):
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
-        width = 400
+        width = 500
         height = 400
         left = max(int(get_workbench().winfo_x() + get_workbench().winfo_width()/2 - width/2), 0)
         top = max(int(get_workbench().winfo_y() + get_workbench().winfo_height()/2 - height/2), 0)
