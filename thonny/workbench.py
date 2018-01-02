@@ -309,7 +309,7 @@ class Workbench(tk.Tk):
     
         from thonny import running_config_page
         self.add_backend("CustomCPython", running.CustomCPythonProxy,
-                         "Custom Python interpreter",
+                         "Custom Python 3 interpreter",
                          running_config_page.CustomCPythonConfigurationPage)
         
     def _init_runner(self):

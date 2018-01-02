@@ -4,8 +4,6 @@ from tkinter import ttk
 from thonny.config_ui import ConfigurationPage
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import create_string_var
-from thonny import workbench
-from thonny.shared.thonny import backend
 
 class OnlyTextConfigurationPage(ConfigurationPage):
     def __init__(self, master, text):
@@ -42,6 +40,12 @@ class BackendConfigurationPage(ConfigurationPage):
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0,10))
         self._combo.state(['!disabled', 'readonly'])
         
+        self.labelframe = ttk.LabelFrame(self, text=" Details ")
+        self.labelframe.grid(row=2, column=0, sticky="nsew")
+        self.labelframe.columnconfigure(0, weight=1)
+        self.labelframe.rowconfigure(0, weight=1)
+        
+        
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
         
@@ -57,17 +61,17 @@ class BackendConfigurationPage(ConfigurationPage):
             if self._current_page is not None:
                 self._current_page.grid_forget()
             
-            page.grid(row=2, column=0, sticky="nsew")
+            page.grid(sticky="nsew", padx=10, pady=5)
             self._current_page = page
     
     def _get_conf_page(self, backend_desc):
         if backend_desc not in self._conf_pages:
             cp_constructor = self._backend_specs_by_desc[backend_desc].config_page_constructor
             if isinstance(cp_constructor, str):
-                self._conf_pages[backend_desc] = OnlyTextConfigurationPage(self, cp_constructor)
+                self._conf_pages[backend_desc] = OnlyTextConfigurationPage(self.labelframe, cp_constructor)
             else:
                 assert issubclass(cp_constructor, ConfigurationPage)
-                self._conf_pages[backend_desc] = cp_constructor(self)
+                self._conf_pages[backend_desc] = cp_constructor(self.labelframe)
         
         return self._conf_pages[backend_desc]
     
