@@ -72,7 +72,7 @@ class BackendConfigurationPage(ConfigurationPage):
         return self._conf_pages[backend_desc]
     
     def apply(self):
-        if not self._combo_variable.modified or self._current_page is None:
+        if self._current_page is None:
             return
         
         elif self._current_page.apply() is False:
@@ -82,7 +82,6 @@ class BackendConfigurationPage(ConfigurationPage):
             backend_desc = self._combo_variable.get()
             backend_name = self._backend_specs_by_desc[backend_desc].name
             get_workbench().set_option("run.backend_name", backend_name)
-            # TODO: Should it reset serial device or just connect to it?
             get_runner().reset_backend()
         
     

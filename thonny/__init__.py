@@ -59,7 +59,7 @@ def launch():
         from thonny.globals import get_runner
         runner = get_runner()
         if runner != None:
-            runner.kill_backend()
+            runner.destroy_backend()
 
 
 def _prepare_thonny_user_dir():

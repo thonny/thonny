@@ -12,7 +12,6 @@ from thonny.running import WINDOWS_EXE
 
 
 class CustomCPythonConfigurationPage(ConfigurationPage):
-    
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
         
@@ -142,5 +141,3 @@ class CustomCPythonConfigurationPage(ConfigurationPage):
         
         configuration = self._configuration_variable.get()
         get_workbench().set_option("CustomInterpreter.path", configuration)
-        
-        get_runner().reset_backend()

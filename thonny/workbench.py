@@ -649,6 +649,13 @@ class Workbench(tk.Tk):
     
     def add_backend(self, name, proxy_class, description, config_page_constructor):
         self._backends[name] = BackendSpec(name, proxy_class, description, config_page_constructor)
+        
+        # assing names to related classes
+        assert proxy_class.backend_name is None
+        proxy_class.backend_name = name
+        if not isinstance(config_page_constructor, str):
+            if not getattr(config_page_constructor, "backend_name", None):
+                config_page_constructor.backend_name = name
     
     def add_theme(self, name, base, **opts):
         if name in self._themes:
@@ -1178,7 +1185,7 @@ class Workbench(tk.Tk):
         finally:
             runner = get_runner()
             if runner != None:
-                runner.kill_backend()
+                runner.destroy_backend()
     
     def _on_configure(self, event):
         # called when window is moved or resized

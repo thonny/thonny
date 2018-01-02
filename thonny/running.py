@@ -345,12 +345,9 @@ class Runner:
         
     
     def reset_backend(self):
-        """Recreate backend proxy / backend process. 
+        """Recreate (or replace) backend proxy / backend process."""
         
-        Note that technically this is not tied to %Reset command. Backend
-        may choose to execute %Reset simply by eg. clearing variables."""
-        
-        self.kill_backend()
+        self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
             raise UserError("Can't find backend '{}'. Please select another backend from options"
@@ -367,12 +364,12 @@ class Runner:
         else:
             logging.warning("Interrupting without proxy")
     
-    def kill_backend(self):
+    def destroy_backend(self):
         self._current_toplevel_command = None
         self._current_command = None
         self._postponed_commands = []
         if self._proxy:
-            self._proxy.kill_current_process()
+            self._proxy.destroy()
             self._proxy = None
 
     def get_interpreter_command(self):
@@ -429,6 +426,8 @@ class BackendProxy:
     All communication methods must be non-blocking, 
     ie. suitable for calling from GUI thread."""
     
+    backend_name = None # Will be overwritten on Workbench.add_backend
+    
     def __init__(self, configuration_option):
         """Initializes (or starts the initialization of) the backend process.
         
@@ -466,10 +465,8 @@ class BackendProxy:
         """Tries to interrupt current command without reseting the backend"""
         self.kill_current_process()
     
-    def kill_current_process(self):
-        """Kill the backend.
-        
-        Is called when Thonny no longer needs this backend 
+    def destroy(self):
+        """Called when Thonny no longer needs this instance 
         (Thonny gets closed or new backend gets selected)
         """
         pass
@@ -598,7 +595,7 @@ class CPythonProxy(BackendProxy):
             
                     
     
-    def kill_current_process(self):
+    def destroy(self):
         self._cancel_gui_update_loop()
         
         if self._proc is not None and self._proc.poll() is None: 
