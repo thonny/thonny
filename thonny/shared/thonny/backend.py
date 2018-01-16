@@ -927,47 +927,50 @@ class FancyTracer(Executor):
             else:
                 value = None
             self._report_state_and_fetch_next_message(frame, value)
+            
+            # if back command:
+            #    otsi ja tagasta vanem seis
     
     def _report_state_and_fetch_next_message(self, frame, value=None):
-            #self._debug("Completed command: ", self._current_command)
-            
-            if self._unhandled_exception is not None:
-                frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
-                # I want to show frames from current frame to causing_frame
-                if frame == self._unhandled_exception.causing_frame:
-                    interesting_frame_infos = []
-                else:
-                    # c how far is current frame from causing_frame?
-                    _distance = 0
-                    _f = self._unhandled_exception.causing_frame 
-                    while _f != frame:
-                        _distance += 1
-                        _f = _f.f_back
-                        if _f == None:
-                            break
-                    interesting_frame_infos = frame_infos[-_distance:]
-                exception_lower_stack_description = "".join(interesting_frame_infos)
-                exception_msg = str(self._unhandled_exception)
+        #self._debug("Completed command: ", self._current_command)
+        
+        if self._unhandled_exception is not None:
+            frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
+            # I want to show frames from current frame to causing_frame
+            if frame == self._unhandled_exception.causing_frame:
+                interesting_frame_infos = []
             else:
-                exception_lower_stack_description = None 
-                exception_msg = None
-            
-            self._vm.send_message(self._vm.create_message("DebuggerProgress",
-                command=self._current_command.command,
-                stack=self._export_stack(),
-                exception=self._vm.export_value(self._unhandled_exception, True),
-                exception_msg=exception_msg,
-                exception_lower_stack_description=exception_lower_stack_description,
-                value=value,
-                command_context="waiting_debugger_command"
-            ))
-            
-            # Fetch next debugger command
-            self._current_command = self._vm._fetch_command()
-            self._debug("got command:", self._current_command)
-            # get non-progress commands out our way
-            self._respond_to_inline_commands()  
-            assert isinstance(self._current_command, DebuggerCommand)
+                # c how far is current frame from causing_frame?
+                _distance = 0
+                _f = self._unhandled_exception.causing_frame 
+                while _f != frame:
+                    _distance += 1
+                    _f = _f.f_back
+                    if _f == None:
+                        break
+                interesting_frame_infos = frame_infos[-_distance:]
+            exception_lower_stack_description = "".join(interesting_frame_infos)
+            exception_msg = str(self._unhandled_exception)
+        else:
+            exception_lower_stack_description = None 
+            exception_msg = None
+        
+        self._vm.send_message(self._vm.create_message("DebuggerProgress",
+            command=self._current_command.command,
+            stack=self._export_stack(),
+            exception=self._vm.export_value(self._unhandled_exception, True),
+            exception_msg=exception_msg,
+            exception_lower_stack_description=exception_lower_stack_description,
+            value=value,
+            command_context="waiting_debugger_command"
+        ))
+        
+        # Fetch next debugger command
+        self._current_command = self._vm._fetch_command()
+        self._debug("got command:", self._current_command)
+        # get non-progress commands out our way
+        self._respond_to_inline_commands()  
+        assert isinstance(self._current_command, DebuggerCommand)
             
         # Return and let Python run to next progress event
         

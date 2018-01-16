@@ -1,3 +1,4 @@
+"""
 import io
 import sys
 import numpy as np
@@ -244,13 +245,13 @@ def _bring_up(window):
     window.after_idle(window.attributes, '-topmost', False)
     window.lift()
     
-    """
+    "_""
     import platform
     if platform.system() != "Linux":
         # http://stackoverflow.com/a/13867710/261181
         self.iconify()
         self.deiconify()
-    """
+    "_""
 
 def _export_dataframe(df, num_rows="all", all_columns=False):
     import pandas as pd
@@ -282,4 +283,4 @@ def load_plugin(_vm):
     vm.add_value_tweaker(tweak_numpy_value)
     vm.add_object_info_tweaker(_check_add_dataframe_info)
     vm.add_object_info_tweaker(_check_add_matplotlib_info)
-    
+"""

@@ -21,7 +21,6 @@ from thonny.common import serialize_message, ToplevelCommand, \
 from thonny.globals import get_workbench, get_runner
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
-from shutil import which
 import shutil
 import collections
 import signal
@@ -132,6 +131,9 @@ class Runner:
             get_workbench().event_generate("BackendRestart")
         
         accepted = self._proxy.send_command(cmd)
+        if get_workbench().get_option("general.debug_mode"):
+            print("SEND CMD:", cmd.command, cmd)
+            
         
         if (accepted and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
             self._set_state("running")
@@ -310,6 +312,10 @@ class Runner:
     
                 #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
                 get_workbench().event_generate(msg["message_type"], **msg)
+                if get_workbench().get_option("general.debug_mode"):
+                    print("GOT:", msg["message_type"], msg)
+            
+
                 
                 # TODO: maybe distinguish between workbench cwd and backend cwd ??
                 get_workbench().set_option("run.working_directory", self.get_cwd())
@@ -463,7 +469,7 @@ class BackendProxy:
     
     def interrupt(self):
         """Tries to interrupt current command without reseting the backend"""
-        self.kill_current_process()
+        self.destroy()
     
     def destroy(self):
         """Called when Thonny no longer needs this instance 
@@ -542,9 +548,9 @@ class CPythonProxy(BackendProxy):
         
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
-            self.kill_current_process()
+            self.destroy()
             self._start_new_process(cmd)
-             
+        
         self._proc.stdin.write(serialize_message(cmd) + "\n")
         self._proc.stdin.flush()
         return True 
@@ -755,7 +761,8 @@ class CPythonProxy(BackendProxy):
             if data == '':
                 break
             else:
-                debug("### BACKEND ###: %s", data.strip())
+                if get_workbench().get_option("general.debug_mode"):
+                    print("### BACKEND ###: %s", data.strip())
         
     def get_interpreter_command(self):
         return self._executable

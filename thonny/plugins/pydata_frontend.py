@@ -455,10 +455,10 @@ def listen_toplevel_results(event):
         if info is not None:
             view.load_dataframe(info)
 
-def load_early_plugin():
+def _load_early_plugin():
     get_workbench().add_content_inspector(DataFrameInspector)
 
 
-def load_plugin():
+def _load_plugin():
     get_workbench().add_view(DataFrameExplorer, "DataFrame explorer", "ne")
     get_workbench().bind("ToplevelResult", listen_toplevel_results, True)

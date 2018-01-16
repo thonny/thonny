@@ -154,14 +154,14 @@ def run_enabled():
     return (isinstance(widget, CodeViewText)
             and get_runner().get_state() == "waiting_toplevel_command")
 
-def load_early_plugin():
+def _load_early_plugin():
     wb = get_workbench() 
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_editor_cells, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_editor_cells, True)
     wb.bind_class("CodeViewText", "<FocusIn>", update_editor_cells, True)
     wb.bind_class("CodeViewText", "<FocusOut>", update_editor_cells, True)
 
-def load_plugin():
+def _load_plugin():
     wb = get_workbench() 
     
     _patch_perform_return()
