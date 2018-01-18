@@ -205,7 +205,10 @@ class Runner:
         self.execute_current("Run")
     
     def _cmd_interrupt(self):
-        self.interrupt_backend()
+        if self._proxy is not None:
+            self._proxy.interrupt()
+        else:
+            logging.warning("Interrupting without proxy")
         
     def _cmd_interrupt_enabled(self):
         widget = get_workbench().focus_get()
@@ -354,12 +357,6 @@ class Runner:
         self._set_state("running")
         self._proxy = None
         self._proxy = backend_class()
-    
-    def interrupt_backend(self):
-        if self._proxy is not None:
-            self._proxy.interrupt()
-        else:
-            logging.warning("Interrupting without proxy")
     
     def destroy_backend(self):
         self._current_toplevel_command = None
@@ -557,40 +554,14 @@ class CPythonProxy(BackendProxy):
         return self._sys_path
     
     def interrupt(self):
-        
-        def do_kill():
-            self._proc.kill()
-            get_workbench().event_generate("ProgramOutput",
-                                           stream_name="stderr",
-                                           data="KeyboardInterrupt: Forced reset")
-            get_runner().restart_backend()
-        
-        if self._proc is not None:
-            if self._proc.poll() is None:
-                command_to_interrupt = get_runner().get_current_toplevel_command()
-                if running_on_windows():
-                    try:
-                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
-                    except:
-                        logging.exception("Could not interrupt backend process")
-                else:
-                    self._proc.send_signal(signal.SIGINT)
-            
-                # Tkinter programs can't be interrupted so easily:
-                # http://stackoverflow.com/questions/13784232/keyboardinterrupt-taking-a-while
-                # so let's chedule a hard kill in case the program refuses to be interrupted
-                def go_hard():
-                    if (get_runner().get_state() != "waiting_toplevel_command"
-                        and get_runner().get_current_toplevel_command() == command_to_interrupt): # still running same command
-                        do_kill()
-                
-                # 100 ms was too little for Mac
-                # 250 ms was too little for one of the Windows machines
-                get_workbench().after(500, go_hard)
+        if self._proc is not None and self._proc.poll() is None:
+            if running_on_windows():
+                try:
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                except:
+                    logging.exception("Could not interrupt backend process")
             else:
-                do_kill()
-            
-                    
+                self._proc.send_signal(signal.SIGINT)
     
     def destroy(self):
         self._cancel_gui_update_loop()
