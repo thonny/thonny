@@ -53,7 +53,7 @@ class Runner:
     
     def start(self):
         try:
-            self.reset_backend()
+            self.restart_backend()
         finally:
             self._poll_vm_messages()
     
@@ -66,10 +66,9 @@ class Runner:
             image_filename="run.run_current_script.gif",
             include_in_toolbar=True)
         
-        get_workbench().add_command('reset', "run", 'Interrupt/Reset',
-            handler=self.cmd_interrupt_reset,
+        get_workbench().add_command('restart', "run", 'Stop/Restart',
+            handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
-            tester=self._cmd_interrupt_reset_enabled,
             group=70,
             image_filename="run.stop.gif",
             include_in_toolbar=True)
@@ -223,16 +222,11 @@ class Runner:
 
         return get_runner().get_state() != "waiting_toplevel_command"
     
-    def cmd_interrupt_reset(self):
-        if self.get_state() == "waiting_toplevel_command":
-            get_workbench().get_view("ShellView").submit_magic_command("%Reset\n")
-        else:
-            get_runner().interrupt_backend()
+    def cmd_stop_restart(self):
+        get_workbench().get_view("ShellView").restart()
+        self.restart_backend()
     
             
-    def _cmd_interrupt_reset_enabled(self):
-        return True
-    
     def _postpone_command(self, cmd):
         # in case of InlineCommands, discard older same type command
         if isinstance(cmd, InlineCommand):
@@ -289,11 +283,11 @@ class Runner:
                         break
                 except BackendTerminatedError as exc:
                     self._report_backend_crash(exc)
-                    self.reset_backend()
+                    self.restart_backend()
                     return
                 
                 if msg.get("SystemExit", False):
-                    self.reset_backend()
+                    self.restart_backend()
                     return
                 
                 # change state
@@ -347,7 +341,7 @@ class Runner:
         get_workbench().become_topmost_window()
         
     
-    def reset_backend(self):
+    def restart_backend(self):
         """Recreate (or replace) backend proxy / backend process."""
         
         self.destroy_backend()
@@ -569,7 +563,7 @@ class CPythonProxy(BackendProxy):
             get_workbench().event_generate("ProgramOutput",
                                            stream_name="stderr",
                                            data="KeyboardInterrupt: Forced reset")
-            get_runner().reset_backend()
+            get_runner().restart_backend()
         
         if self._proc is not None:
             if self._proc.poll() is None:
