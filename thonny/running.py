@@ -297,12 +297,7 @@ class Runner:
                     return
                 
                 # change state
-                if "command_context" in msg:
-                    # TODO: get rid of this
-                    # message_context shows the state where corresponding command was handled in the backend
-                    # Now we got the response and we're return to that state
-                    self._set_state(msg["command_context"])
-                elif msg["message_type"] == "ToplevelResult":
+                if msg["message_type"] == "ToplevelResult":
                     self._set_state("waiting_toplevel_command")
                 elif msg["message_type"] == "DebuggerProgress":
                     self._set_state("waiting_debugger_command")

@@ -104,7 +104,7 @@ class VM:
             while True: 
                 try:
                     cmd = self._fetch_command()
-                    self.handle_command(cmd, "waiting_toplevel_command")
+                    self.handle_command(cmd)
                 except KeyboardInterrupt:
                     logger.exception("Interrupt in mainloop")
                     # Interrupt must always result in waiting_toplevel_command state
@@ -135,7 +135,7 @@ class VM:
     def get_main_module(self):
         return __main__
             
-    def handle_command(self, cmd, command_context):
+    def handle_command(self, cmd):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
         
         error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
@@ -179,7 +179,6 @@ class VM:
         if isinstance(cmd, ToplevelCommand) and "message_type" not in response:
             response["message_type"] = "ToplevelResult"
         
-        response["command_context"] = command_context
         response["command"] = cmd.command
         if hasattr(cmd, "request_id"):
             response["request_id"] = cmd.request_id
@@ -697,7 +696,7 @@ class VM:
                     if isinstance(cmd, InputSubmission):
                         return cmd.data
                     elif isinstance(cmd, InlineCommand):
-                        self._vm.handle_command(cmd, "waiting_input")
+                        self._vm.handle_command(cmd)
                     else:
                         raise ThonnyClientError("Wrong type of command when waiting for input")
             finally:
@@ -961,8 +960,7 @@ class FancyTracer(Executor):
             exception=self._vm.export_value(self._unhandled_exception, True),
             exception_msg=exception_msg,
             exception_lower_stack_description=exception_lower_stack_description,
-            value=value,
-            command_context="waiting_debugger_command"
+            value=value
         ))
         
         # Fetch next debugger command
@@ -1004,7 +1002,7 @@ class FancyTracer(Executor):
     
     def _respond_to_inline_commands(self):
         while isinstance(self._current_command, InlineCommand): 
-            self._vm.handle_command(self._current_command, "waiting_debugger_command")
+            self._vm.handle_command(self._current_command)
             self._current_command = self._vm._fetch_command()
     
     def _get_frame_source_info(self, frame):
