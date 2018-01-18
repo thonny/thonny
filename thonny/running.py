@@ -46,8 +46,6 @@ class Runner:
         self._state = None
         self._proxy = None
         self._postponed_commands = []
-        self._current_toplevel_command = None
-        self._current_command = None
         
         self._check_alloc_console()
     
@@ -96,18 +94,7 @@ class Runner:
         if self._state != state:
             logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
-            if self._state == "waiting_toplevel_command":
-                self._current_toplevel_command = None
-            
-            if self._state != "running":
-                self._current_command = None
     
-    def get_current_toplevel_command(self):
-        return self._current_toplevel_command
-            
-    def get_current_command(self):
-        return self._current_command
-            
     def get_sys_path(self):
         return self._proxy.get_sys_path()
     
@@ -133,11 +120,7 @@ class Runner:
             
         
         if accepted:
-            self._current_command = cmd
-            if isinstance(cmd, ToplevelCommand):
-                self._set_state("running")
-                self._current_toplevel_command = cmd
-            elif isinstance(cmd, DebuggerCommand):
+            if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
                 self._set_state("running")
         
             if cmd.command in ("Run", "Debug", "Reset"):
@@ -301,9 +284,6 @@ class Runner:
                 else:
                     "other messages don't affect the state"
                 
-                if msg["message_type"] == "ToplevelResult":
-                    self._current_toplevel_command = None
-    
                 #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
                 get_workbench().event_generate(msg["message_type"], **msg)
                 if get_workbench().get_option("general.debug_mode"):
@@ -359,8 +339,6 @@ class Runner:
         self._proxy = backend_class()
     
     def destroy_backend(self):
-        self._current_toplevel_command = None
-        self._current_command = None
         self._postponed_commands = []
         if self._proxy:
             self._proxy.destroy()
