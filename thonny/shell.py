@@ -60,8 +60,8 @@ class ShellView (ttk.Frame):
             
         self.text.submit_command(cmd_line, ("automagic",))
     
-    def reset(self):
-        self.text.reset()
+    def restart(self):
+        self.text.restart()
     
     def clear_shell(self):
         self.text._clear_shell()
@@ -260,7 +260,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset();
     
     def restart(self):
-        self._insert_text_directly("\n=================== RESTART =====================\n", ("magic",))
+        self._insert_text_directly("\n=================== RESTART =====================\n", ("automagic",))
     
     def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()
