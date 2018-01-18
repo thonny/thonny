@@ -8,12 +8,11 @@ from tkinter.filedialog import askopenfilename
 
 from thonny.misc_utils import eqfn, running_on_mac_os
 from thonny.codeview import CodeView
-from thonny.globals import get_workbench, get_runner
+from thonny.globals import get_workbench
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.tktextext import rebind_control_a
 import tokenize
-from thonny.common import ToplevelCommand, DebuggerCommand
 from tkinter.messagebox import askyesno
 import traceback
 
@@ -192,10 +191,6 @@ class Editor(ttk.Frame):
 
     def _on_text_change(self, event):
         self.master.update_editor_title(self)
-        runner = get_runner()
-        if (runner.get_state() in ["running", "waiting_debugger_command"]
-            and isinstance(runner.get_current_command(), (ToplevelCommand, DebuggerCommand))): # exclude running InlineCommands
-            runner.interrupt_backend()
         
     def destroy(self):
         get_workbench().unbind("DebuggerProgress", self._listen_debugger_progress)
