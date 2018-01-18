@@ -181,7 +181,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.focus_set()
         self.mark_set("insert", "end")
         self.tag_remove("sel", "1.0", tk.END)
-        self._current_input_request = msg
         self._try_submit_input() # try to use leftovers from previous request
         self.see("end")
 
