@@ -193,7 +193,7 @@ class Editor(ttk.Frame):
     def _on_text_change(self, event):
         self.master.update_editor_title(self)
         runner = get_runner()
-        if (runner.get_state() in ["running", "waiting_input", "waiting_debugger_command"]
+        if (runner.get_state() in ["running", "waiting_debugger_command"]
             and isinstance(runner.get_current_command(), (ToplevelCommand, DebuggerCommand))): # exclude running InlineCommands
             runner.interrupt_backend()
         

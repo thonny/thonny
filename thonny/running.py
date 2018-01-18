@@ -88,7 +88,7 @@ class Runner:
             return ""
     
     def get_state(self):
-        """State is one of "running", "waiting_input", "waiting_debugger_command",
+        """State is one of "running", "waiting_debugger_command",
             "waiting_toplevel_command"
         """
         return self._state
@@ -127,25 +127,27 @@ class Runner:
             else:
                 raise AssertionError("Trying to send " + str(cmd) + " in state " + self.get_state())
         
-        if cmd.command in ("Run", "Debug", "Reset"):
-            get_workbench().event_generate("BackendRestart")
-        
-        accepted = self._proxy.send_command(cmd)
         if get_workbench().get_option("general.debug_mode"):
             print("SEND CMD:", cmd.command, cmd)
             
+        accepted = self._proxy.send_command(cmd) is not False
+            
         
-        if (accepted and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
-            self._set_state("running")
+        if accepted:
             self._current_command = cmd
             if isinstance(cmd, ToplevelCommand):
+                self._set_state("running")
                 self._current_toplevel_command = cmd
+            elif isinstance(cmd, DebuggerCommand):
+                self._set_state("running")
         
+            if cmd.command in ("Run", "Debug", "Reset"):
+                get_workbench().event_generate("BackendRestart")
+                
     
     def send_program_input(self, data):
-        assert self.get_state() == "waiting_input"
+        assert self.get_state() == "running"
         self._proxy.send_program_input(data)
-        self._set_state("running")
         
     def execute_script(self, script_path, args, working_directory=None, command_name="Run"):
         if (working_directory is not None and self._proxy.cwd != working_directory):
@@ -296,14 +298,14 @@ class Runner:
                 
                 # change state
                 if "command_context" in msg:
+                    # TODO: get rid of this
                     # message_context shows the state where corresponding command was handled in the backend
                     # Now we got the response and we're return to that state
                     self._set_state(msg["command_context"])
                 elif msg["message_type"] == "ToplevelResult":
-                    # some ToplevelResult-s don't have command_context
                     self._set_state("waiting_toplevel_command")
-                elif msg["message_type"] == "InputRequest":
-                    self._set_state("waiting_input")
+                elif msg["message_type"] == "DebuggerProgress":
+                    self._set_state("waiting_debugger_command")
                 else:
                     "other messages don't affect the state"
                 
@@ -560,7 +562,7 @@ class CPythonProxy(BackendProxy):
         
     def allowed_states_for_inline_commands(self):
         return ["waiting_toplevel_command", "waiting_debugger_command", 
-                "waiting_input"]
+                "running"]
 
     def get_sys_path(self):
         return self._sys_path
