@@ -350,9 +350,6 @@ class Runner:
     def get_backend_proxy(self):
         return self._proxy
     
-    def get_banner(self):
-        return self._proxy.get_banner()
-
     def _check_alloc_console(self):
         if (sys.executable.endswith("thonny.exe")
             or sys.executable.endswith("pythonw.exe")):
@@ -384,7 +381,7 @@ class Runner:
 
     def supported_features(self):
         if self._proxy is None:
-            return []
+            return set()
         else:
             return self._proxy.supported_features()
             
@@ -398,7 +395,9 @@ class BackendProxy:
     All communication methods must be non-blocking, 
     ie. suitable for calling from GUI thread."""
     
-    backend_name = None # Will be overwritten on Workbench.add_backend
+    # backend_name will be overwritten on Workbench.add_backend
+    # Subclasses don't need to worry about it.
+    backend_name = None 
     
     def __init__(self, configuration_option):
         """Initializes (or starts the initialization of) the backend process.
@@ -410,13 +409,13 @@ class BackendProxy:
             If configuration is "Foo (bar)", then "Foo" is backend descriptor
             and "bar" is the configuration option"""
     
-    def get_banner(self):
-        """Returns a string to display when backend gets connected"""
-        raise NotImplementedError()        
-
     def send_command(self, cmd):
         """Send the command to backend"""
-        raise NotImplementedError()
+        method_name = "_cmd_" + cmd.command
+        if hasattr(self, method_name):
+            return getattr(self, method_name)(cmd)
+        else:
+            return False
     
     def allowed_states_for_inline_commands(self):
         return ["waiting_toplevel_command"]
@@ -435,7 +434,7 @@ class BackendProxy:
     
     def interrupt(self):
         """Tries to interrupt current command without reseting the backend"""
-        self.destroy()
+        pass
     
     def destroy(self):
         """Called when Thonny no longer needs this instance 
@@ -448,7 +447,7 @@ class BackendProxy:
         raise NotImplementedError()
     
     def supported_features(self):
-        return ["run"]
+        return {"run"}
 
     
 
@@ -469,7 +468,6 @@ class CPythonProxy(BackendProxy):
         self._sys_path = []
         self._gui_update_loop_id = None
         self.in_venv = None
-        self._badge = None
         
         self._start_new_process()
     
@@ -508,13 +506,9 @@ class CPythonProxy(BackendProxy):
         else: 
             return msg
     
-    def get_banner(self):
-        return self._badge
-        
-        
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
-            self.destroy()
+            self._close_backend()
             self._start_new_process(cmd)
         
         self._proc.stdin.write(serialize_message(cmd) + "\n")
@@ -542,6 +536,9 @@ class CPythonProxy(BackendProxy):
                 self._proc.send_signal(signal.SIGINT)
     
     def destroy(self):
+        self._close_backend()
+    
+    def _close_backend(self):
         self._cancel_gui_update_loop()
         
         if self._proc is not None and self._proc.poll() is None: 
@@ -742,7 +739,7 @@ class CPythonProxy(BackendProxy):
 
 
     def supported_features(self):
-        return ["run", "debug", "pip_gui", "system_shell"]
+        return {"run", "debug", "pip_gui", "system_shell"}
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):
