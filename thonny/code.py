@@ -129,6 +129,8 @@ class Editor(ttk.Frame):
         try: 
             f = open(filename, mode="wb", )
             f.write(content.encode(encoding))
+            f.flush()
+            os.fsync(f) # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             f.close()
         except PermissionError:
             if askyesno("Permission Error",
