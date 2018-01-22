@@ -32,4 +32,8 @@ install_name_tool -id \
 	@rpath/Tk.framework/Versions/$VERSION/Tk \
     $LOCAL_FRAMEWORKS/Tk.framework/Versions/$VERSION/Tk 
 
+# Get rid of some scripts which get into the way for codesign
+rm $LOCAL_FRAMEWORKS/Tcl.framework/Versions/Current/tclConfig.sh
+rm $LOCAL_FRAMEWORKS/Tk.framework/Versions/Current/tkConfig.sh
+
 # TODO: update executables

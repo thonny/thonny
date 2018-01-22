@@ -123,3 +123,7 @@ install_name_tool -change \
 
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $NEW_FRAMEWORK_PATH/Versions/$VERSION/bin 
+
+# create link to Current version (required by codesign)
+cd $LOCAL_FRAMEWORKS/Python.framework/Versions
+ln -s $VERSION Current
