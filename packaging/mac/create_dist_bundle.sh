@@ -92,3 +92,5 @@ rm -f $FILENAME
 hdiutil create -srcfolder build -volname "Thonny $VERSION" $FILENAME
 hdiutil internet-enable -yes $FILENAME
 
+# sign ######################
+codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $FILENAME
