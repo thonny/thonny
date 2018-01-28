@@ -45,15 +45,13 @@ class Runner:
         
         self._state = None
         self._proxy = None
+        self._polling_after_id = None
         self._postponed_commands = []
         
         self._check_alloc_console()
     
     def start(self):
-        try:
-            self.restart_backend()
-        finally:
-            self._poll_vm_messages()
+        self.restart_backend()
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -259,50 +257,49 @@ class Runner:
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
-        try:
-            initial_state = self.get_state()
+        initial_state = self.get_state()
+        self._polling_after_id = None
+        
+        while self._proxy is not None:
+            try:
+                msg = self._proxy.fetch_next_message()
+                if not msg:
+                    break
+            except BackendTerminatedError as exc:
+                self._report_backend_crash(exc)
+                self.restart_backend()
+                return
             
-            while self._proxy is not None:
-                try:
-                    msg = self._proxy.fetch_next_message()
-                    if not msg:
-                        break
-                except BackendTerminatedError as exc:
-                    self._report_backend_crash(exc)
-                    self.restart_backend()
-                    return
-                
-                if msg.get("SystemExit", False):
-                    self.restart_backend()
-                    return
-                
-                # change state
-                if msg["message_type"] == "ToplevelResult":
-                    self._set_state("waiting_toplevel_command")
-                elif msg["message_type"] == "DebuggerProgress":
-                    self._set_state("waiting_debugger_command")
-                else:
-                    "other messages don't affect the state"
-                
-                #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
-                get_workbench().event_generate(msg["message_type"], **msg)
-                if get_workbench().get_option("general.debug_mode"):
-                    print("GOT:", msg["message_type"], msg)
+            if msg.get("SystemExit", False):
+                self.restart_backend()
+                return
             
+            # change state
+            if msg["message_type"] == "ToplevelResult":
+                self._set_state("waiting_toplevel_command")
+            elif msg["message_type"] == "DebuggerProgress":
+                self._set_state("waiting_debugger_command")
+            else:
+                "other messages don't affect the state"
+            
+            #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
+            get_workbench().event_generate(msg["message_type"], **msg)
+            if get_workbench().get_option("general.debug_mode"):
+                print("GOT:", msg["message_type"], msg)
+        
 
-                
-                # TODO: maybe distinguish between workbench cwd and backend cwd ??
-                get_workbench().set_option("run.working_directory", self.get_cwd())
-                
-                # TODO: is it necessary???
-                # https://stackoverflow.com/a/13520271/261181
-                #get_workbench().update() 
-                
-            if self.get_state() != initial_state:
-                self._send_postponed_commands()
-                
-        finally:
-            get_workbench().after(50, self._poll_vm_messages)
+            
+            # TODO: maybe distinguish between workbench cwd and backend cwd ??
+            get_workbench().set_option("run.working_directory", self.get_cwd())
+            
+            # TODO: is it necessary???
+            # https://stackoverflow.com/a/13520271/261181
+            #get_workbench().update() 
+            
+        if self.get_state() != initial_state:
+            self._send_postponed_commands()
+            
+        self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
     
     def _report_backend_crash(self, exc):
         err = "Backend terminated (returncode: %s)\n" % exc.returncode
@@ -337,8 +334,15 @@ class Runner:
         self._set_state("running")
         self._proxy = None
         self._proxy = backend_class()
+        
+        self._poll_vm_messages()
+        
     
     def destroy_backend(self):
+        if self._polling_after_id is not None:
+            get_workbench().after_cancel(self._polling_after_id)
+            self._polling_after_id = None
+            
         self._postponed_commands = []
         if self._proxy:
             self._proxy.destroy()
