@@ -234,7 +234,7 @@ class Runner:
         elif isinstance(cmd, InlineCommand):
             # UI may send inline commands in any state,
             # but some backends don't accept them in some states
-            return self.get_state() in self._proxy.allowed_states_for_inline_commands()
+            return self._proxy.accepts_inline_command(cmd, self.get_state())
         
         else:
             raise RuntimeError("Unknown command class: " + str(type(cmd)))
@@ -421,8 +421,8 @@ class BackendProxy:
         else:
             return False
     
-    def allowed_states_for_inline_commands(self):
-        return ["waiting_toplevel_command"]
+    def accepts_inline_command(self, cmd, runner_state):
+        return runner_state in ["waiting_toplevel_command"]
 
     def send_program_input(self, data):
         """Send input data to backend"""
@@ -522,8 +522,8 @@ class CPythonProxy(BackendProxy):
     def send_program_input(self, data):
         self.send_command(InputSubmission(data=data))
         
-    def allowed_states_for_inline_commands(self):
-        return ["waiting_toplevel_command", "waiting_debugger_command", 
+    def accepts_inline_command(self, cmd, runner_state):
+        return runner_state in ["waiting_toplevel_command", "waiting_debugger_command", 
                 "running"]
 
     def get_sys_path(self):
