@@ -92,7 +92,7 @@ class BackendConfigurationPage(ConfigurationPage):
             backend_desc = self._combo_variable.get()
             backend_name = self._backend_specs_by_desc[backend_desc].name
             get_workbench().set_option("run.backend_name", backend_name)
-            get_runner().restart_backend()
+            get_runner().restart_backend(False)
         
     
 

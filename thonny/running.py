@@ -51,7 +51,7 @@ class Runner:
         self._check_alloc_console()
     
     def start(self):
-        self.restart_backend()
+        self.restart_backend(False)
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -235,7 +235,7 @@ class Runner:
     
     def cmd_stop_restart(self):
         get_workbench().get_view("ShellView").restart()
-        self.restart_backend()
+        self.restart_backend(True)
     
             
         
@@ -255,11 +255,11 @@ class Runner:
                     break
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
-                self.restart_backend()
+                self.restart_backend(True)
                 return
             
             if msg.get("SystemExit", False):
-                self.restart_backend()
+                self.restart_backend(True)
                 return
             
             # change state
@@ -309,7 +309,7 @@ class Runner:
         get_workbench().become_topmost_window()
         
     
-    def restart_backend(self):
+    def restart_backend(self, clean):
         """Recreate (or replace) backend proxy / backend process."""
         
         self.destroy_backend()
@@ -321,7 +321,7 @@ class Runner:
         backend_class = get_workbench().get_backends()[backend_name].proxy_class
         self._set_state("running")
         self._proxy = None
-        self._proxy = backend_class()
+        self._proxy = backend_class(clean)
         
         self._poll_vm_messages()
         
@@ -391,15 +391,12 @@ class BackendProxy:
     # Subclasses don't need to worry about it.
     backend_name = None 
     
-    def __init__(self, configuration_option):
+    def __init__(self, clean):
         """Initializes (or starts the initialization of) the backend process.
         
         Backend is considered ready when the runner gets a ToplevelResult
         with attribute "welcome_text" from fetch_next_message.
-        
-        param configuration_option:
-            If configuration is "Foo (bar)", then "Foo" is backend descriptor
-            and "bar" is the configuration option"""
+        """
     
     def send_command(self, cmd):
         """Send the command to backend. Return None, 'not_supported' or 'postpone'"""
@@ -727,7 +724,7 @@ class CPythonProxy(BackendProxy):
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):
-    def __init__(self):
+    def __init__(self, clean):
         self._prepare_private_venv()
         CPythonProxy.__init__(self, get_private_venv_executable())
 
@@ -821,7 +818,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         assert os.path.isdir(path)
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
-    def __init__(self):
+    def __init__(self, clean):
         CPythonProxy.__init__(self, get_frontend_python())
         
     def fetch_next_message(self):
@@ -831,7 +828,7 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
         return msg
 
 class CustomCPythonProxy(CPythonProxy):
-    def __init__(self):
+    def __init__(self, clean):
         executable = get_workbench().get_option("CustomInterpreter.path")
         
         # Rembember the usage of this non-default interpreter
