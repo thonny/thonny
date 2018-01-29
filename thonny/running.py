@@ -100,30 +100,57 @@ class Runner:
         if self._proxy is None:
             return
 
-        if not self._state_is_suitable(cmd):
-            if isinstance(cmd, DebuggerCommand) and self.get_state() == "running":
-                # probably waiting behind some InlineCommand
-                self._postpone_command(cmd)
-                return
-            elif isinstance(cmd, InlineCommand):
-                self._postpone_command(cmd)
-                return
-            else:
-                raise AssertionError("Trying to send " + str(cmd) + " in state " + self.get_state())
+        # First sanity check
+        if (isinstance(cmd, ToplevelCommand)
+            and self.get_state() != "waiting_toplevel_command"
+            and cmd.command not in ["Reset", "Run", "Debug"]
+            or 
+            isinstance(cmd, DebuggerCommand)
+            and self.get_state() != "waiting_debugger_command"
+            ):
+            get_workbench().bell()
+            logging.info("Command %s was attempted at state %s" % (cmd, self.get_state()))
+            return
+            
+        # Offer the command
+        response = self._proxy.send_command(cmd)
         
+        if response == "not_supported":
+            return
+        elif response == "postpone":
+            self._postpone_command(cmd)
+            return
+        else:
+            assert response is None
+
         if get_workbench().get_option("general.debug_mode"):
-            print("SEND CMD:", cmd.command, cmd)
+            print("SENT CMD:", cmd.command, cmd)
             
-        accepted = self._proxy.send_command(cmd) is not False
-            
-        
-        if accepted:
-            if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
-                self._set_state("running")
-        
-            if cmd.command in ("Run", "Debug", "Reset"):
-                get_workbench().event_generate("BackendRestart")
+        if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
+            self._set_state("running")
+    
+        if cmd.command in ("Run", "Debug", "Reset"):
+            get_workbench().event_generate("BackendRestart")
                 
+    def _postpone_command(self, cmd):
+        # in case of InlineCommands, discard older same type command
+        if isinstance(cmd, InlineCommand):
+            for older_cmd in self._postponed_commands:
+                if older_cmd.command == cmd.command:
+                    self._postponed_commands.remove(older_cmd)
+        
+        if len(self._postponed_commands) > 10: 
+            "Can't pile up too many commands. This command will be just ignored"
+        else:
+            self._postponed_commands.append(cmd)
+    
+    def _send_postponed_commands(self):
+        todo = self._postponed_commands
+        self._postponed_commands = []
+        
+        for cmd in todo:
+            logging.debug("Sending postponed command", cmd)
+            self.send_command(cmd)
     
     def send_program_input(self, data):
         assert self.get_state() == "running"
@@ -211,45 +238,6 @@ class Runner:
         self.restart_backend()
     
             
-    def _postpone_command(self, cmd):
-        # in case of InlineCommands, discard older same type command
-        if isinstance(cmd, InlineCommand):
-            for older_cmd in self._postponed_commands:
-                if older_cmd.command == cmd.command:
-                    self._postponed_commands.remove(older_cmd)
-        
-        if len(self._postponed_commands) > 10: 
-            "Can't pile up too many commands. This command will be just ignored"
-        else:
-            self._postponed_commands.append(cmd)
-    
-    def _state_is_suitable(self, cmd):
-        if isinstance(cmd, ToplevelCommand):
-            return (self.get_state() == "waiting_toplevel_command"
-                    or cmd.command in ["Reset", "Run", "Debug"])
-            
-        elif isinstance(cmd, DebuggerCommand):
-            return self.get_state() == "waiting_debugger_command"
-        
-        elif isinstance(cmd, InlineCommand):
-            # UI may send inline commands in any state,
-            # but some backends don't accept them in some states
-            return self._proxy.accepts_inline_command(cmd, self.get_state())
-        
-        else:
-            raise RuntimeError("Unknown command class: " + str(type(cmd)))
-    
-    def _send_postponed_commands(self):
-        remaining = []
-        
-        for cmd in self._postponed_commands:
-            if self._state_is_suitable(cmd):
-                logging.debug("Sending postponed command", cmd)
-                self.send_command(cmd)
-            else:
-                remaining.append(cmd)
-        
-        self._postponed_commands = remaining
         
     
     def _poll_vm_messages(self):
@@ -414,16 +402,13 @@ class BackendProxy:
             and "bar" is the configuration option"""
     
     def send_command(self, cmd):
-        """Send the command to backend"""
+        """Send the command to backend. Return None, 'not_supported' or 'postpone'"""
         method_name = "_cmd_" + cmd.command
         if hasattr(self, method_name):
             return getattr(self, method_name)(cmd)
         else:
-            return False
+            return "not_supported"
     
-    def accepts_inline_command(self, cmd, runner_state):
-        return runner_state in ["waiting_toplevel_command"]
-
     def send_program_input(self, data):
         """Send input data to backend"""
         raise NotImplementedError()
@@ -517,15 +502,10 @@ class CPythonProxy(BackendProxy):
         
         self._proc.stdin.write(serialize_message(cmd) + "\n")
         self._proc.stdin.flush()
-        return True 
     
     def send_program_input(self, data):
         self.send_command(InputSubmission(data=data))
         
-    def accepts_inline_command(self, cmd, runner_state):
-        return runner_state in ["waiting_toplevel_command", "waiting_debugger_command", 
-                "running"]
-
     def get_sys_path(self):
         return self._sys_path
     
