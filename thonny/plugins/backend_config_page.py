@@ -24,7 +24,7 @@ class BackendConfigurationPage(ConfigurationPage):
         current_backend_name = get_workbench().get_option("run.backend_name")
         try:
             current_backend_desc = get_workbench().get_backends()[current_backend_name].description
-        except ValueError:
+        except KeyError:
             current_backend_desc = ""
             
         self._combo_variable = create_string_var(current_backend_desc)
@@ -54,6 +54,12 @@ class BackendConfigurationPage(ConfigurationPage):
     
     def _backend_changed(self, *args):
         backend_desc = self._combo_variable.get()
+        
+        if backend_desc == "":
+            if self._current_page is not None:
+                self._current_page.grid_forget()
+            return
+        
         page = self._get_conf_page(backend_desc)
         
         if page != self._current_page:
