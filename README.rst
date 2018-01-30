@@ -3,6 +3,7 @@ Thonny
 ======
 
 Thonny is a Python IDE meant for learning programming.
+Fork for developing backwards debugger.
 
 End users
 ---------
