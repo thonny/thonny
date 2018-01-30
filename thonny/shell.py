@@ -5,7 +5,6 @@ import re
 from tkinter import ttk
 import traceback
 
-import thonny
 from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
@@ -21,7 +20,7 @@ class ShellView (ttk.Frame):
         ttk.Frame.__init__(self, master, **kw)
         
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.vert_scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
+        self.vert_scrollbar.grid(row=0, column=2, rowspan=2, sticky=tk.NSEW)
         self.text = ShellText(self,
                             font=get_workbench().get_font("EditorFont"),
                             #foreground="white",
@@ -40,10 +39,23 @@ class ShellView (ttk.Frame):
                                     self.clear_shell,
                                     group=200)
         
-        self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        self.text.grid(row=1, column=1, sticky=tk.NSEW)
         self.vert_scrollbar['command'] = self.text.yview
         self.columnconfigure(1, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        
+        self.notice = ttk.Label(self, text="", background="#ffff99", padding=3)
+    
+    def set_notice(self, text):
+        if text is None:
+            self.notice.grid_forget()
+        else:
+            self.notice["text"] = text
+            if not self.notice.winfo_ismapped():
+                self.notice.grid(row=0, column=1, sticky="nsew", pady=(0,1))
+                # height of the text was reduced so adjust the scrolling
+                self.update() 
+                self.text.see("end") 
 
     def focus_set(self):
         self.text.focus_set()
