@@ -111,7 +111,7 @@ class Editor(ttk.Frame):
             filename = asksaveasfilename (
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
-                initialdir = get_workbench().get_option("run.working_directory")
+                initialdir = get_workbench().get_cwd()
             )
             if filename in ["", (), None]: # Different tkinter versions may return different values
                 return None
@@ -361,7 +361,7 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_open_file(self):
         filename = askopenfilename (
             filetypes = _dialog_filetypes, 
-            initialdir = get_workbench().get_option("run.working_directory")
+            initialdir = get_workbench().get_cwd()
         )
         if filename: # Note that missing filename may be "" or () depending on tkinter version
             #self.close_single_untitled_unmodified_editor()

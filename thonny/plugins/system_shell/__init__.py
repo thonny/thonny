@@ -5,7 +5,7 @@ import shlex
 import platform
 from tkinter.messagebox import showerror
 import shutil
-from thonny.globals import get_runner
+from thonny.globals import get_runner, get_workbench
 from thonny import THONNY_USER_DIR
 import subprocess
 from time import sleep
@@ -62,7 +62,7 @@ def open_system_shell():
     
     interpreter=python_interpreter.replace("pythonw","python")
     explainer=os.path.join(os.path.dirname(__file__), "explain_environment.py")
-    cwd=get_runner().get_cwd()
+    cwd=get_workbench().get_cwd()
     
     if platform.system() == "Windows":
         return _open_shell_in_windows(cwd, env, interpreter, explainer, exec_prefix)

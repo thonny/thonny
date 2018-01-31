@@ -33,7 +33,6 @@ WINDOWS_EXE = "python.exe"
 
 class Runner:
     def __init__(self):
-        get_workbench().set_default("run.working_directory", os.path.expanduser("~"))
         get_workbench().set_default("run.auto_cd", True)
         
         from thonny.shell import ShellView
@@ -74,13 +73,6 @@ class Runner:
             tester=self._cmd_interrupt_enabled,
             default_sequence="<Control-c>",
             bell_when_denied=False)
-    
-    def get_cwd(self):
-        # TODO: make it nicer
-        if hasattr(self._proxy, "cwd"):
-            return self._proxy.cwd
-        else:
-            return ""
     
     def get_state(self):
         """State is one of "running", "waiting_debugger_command",
@@ -157,7 +149,7 @@ class Runner:
         self._proxy.send_program_input(data)
         
     def execute_script(self, script_path, args, working_directory=None, command_name="Run"):
-        if (working_directory is not None and self._proxy.cwd != working_directory):
+        if (working_directory is not None and get_workbench().get_cwd() != working_directory):
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cmd_line(["%cd", working_directory]) + "\n"
@@ -165,7 +157,7 @@ class Runner:
         else:
             # create simple command
             cd_cmd_line = ""
-            next_cwd = self._proxy.cwd
+            next_cwd = get_workbench().get_cwd()
         
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(script_path, next_cwd)
@@ -277,8 +269,8 @@ class Runner:
         
 
             
-            # TODO: maybe distinguish between workbench cwd and backend cwd ??
-            get_workbench().set_option("run.working_directory", self.get_cwd())
+            if "cwd" in msg:
+                get_workbench().set_cwd(msg["cwd"])
             
             # TODO: is it necessary???
             # https://stackoverflow.com/a/13520271/261181
@@ -443,12 +435,6 @@ class CPythonProxy(BackendProxy):
     def __init__(self, executable):
         self._executable = executable
         
-        cwd = get_workbench().get_option("run.working_directory")
-        if os.path.exists(cwd):
-            self.cwd = cwd
-        else:
-            self.cwd = os.path.expanduser("~")
-            
         self._proc = None
         self._message_queue = None
         self._sys_path = []
@@ -614,14 +600,14 @@ class CPythonProxy(BackendProxy):
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
         
-        debug("Starting the backend: %s %s", cmd_line, self.cwd)
+        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_cwd())
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=self.cwd,
+            cwd=get_workbench().get_cwd(),
             env=my_env,
             universal_newlines=True,
             creationflags=creationflags
@@ -655,10 +641,6 @@ class CPythonProxy(BackendProxy):
             else:
                 try:
                     msg = parse_message(data)
-                    if "cwd" in msg:
-                        self.cwd = msg["cwd"]
-                        
-                    # TODO: it was "with self._state_lock:". Is it necessary?
                     self._message_queue.append(msg)
                 
                     if len(self._message_queue) > 100:
