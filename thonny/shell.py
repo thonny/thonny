@@ -20,7 +20,7 @@ class ShellView (ttk.Frame):
         ttk.Frame.__init__(self, master, **kw)
         
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.vert_scrollbar.grid(row=0, column=2, rowspan=2, sticky=tk.NSEW)
+        self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         self.text = ShellText(self,
                             font=get_workbench().get_font("EditorFont"),
                             #foreground="white",
@@ -52,9 +52,9 @@ class ShellView (ttk.Frame):
         else:
             self.notice["text"] = text
             if not self.notice.winfo_ismapped():
-                self.notice.grid(row=0, column=1, sticky="nsew", pady=(0,1))
+                self.notice.grid(row=0, column=1, columnspan=2, sticky="nsew", pady=(0,1))
                 # height of the text was reduced so adjust the scrolling
-                self.update() 
+                #self.update() 
                 self.text.see("end") 
 
     def focus_set(self):
