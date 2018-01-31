@@ -115,7 +115,7 @@ class Runner:
         # Offer the command
         response = self._proxy.send_command(cmd)
         
-        if response == "not_supported":
+        if response == "discard":
             return
         elif response == "postpone":
             self._postpone_command(cmd)
@@ -399,12 +399,12 @@ class BackendProxy:
         """
     
     def send_command(self, cmd):
-        """Send the command to backend. Return None, 'not_supported' or 'postpone'"""
+        """Send the command to backend. Return None, 'discard' or 'postpone'"""
         method_name = "_cmd_" + cmd.command
         if hasattr(self, method_name):
             return getattr(self, method_name)(cmd)
         else:
-            return "not_supported"
+            return "discard"
     
     def send_program_input(self, data):
         """Send input data to backend"""
