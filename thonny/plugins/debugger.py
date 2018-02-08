@@ -48,7 +48,13 @@ class Debugger:
             group=30,
             image_filename="run.step_over.gif",
             include_in_toolbar=True)
-        
+
+        get_workbench().add_command("step_back", "run", "Step back",
+            self._cmd_step_back,
+            tester=self._cmd_stepping_commands_enabled,
+            default_sequence="<F9>",
+            group=30)
+
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
             tester=self._cmd_stepping_commands_enabled,
@@ -85,7 +91,10 @@ class Debugger:
     def _check_issue_debugger_command(self, command, **kwargs):
         cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
-        
+
+        if get_workbench().get_option("general.debug_mode"):
+            print("LAST DEBUGGER COMMAND:", cmd.command, cmd)
+
         state = get_runner().get_state() 
         if (state == "waiting_debugger_command"
             or getattr(cmd, "automatic", False) and state == "running"):
@@ -116,6 +125,10 @@ class Debugger:
         # and later I ask it to run to the beginning of new statement/expression.
         
         self._check_issue_debugger_command("exec")
+
+    def _cmd_step_back(self):
+
+        self._check_issue_debugger_command("back")
         
     def _cmd_step_out(self):
         self._check_issue_debugger_command("out")
@@ -203,8 +216,9 @@ class Debugger:
         frame_info = msg.stack[-1]
         event = frame_info.last_event
         tags = frame_info.last_event_args["node_tags"]
+        time = msg.time
         
-        if event == "after_statement":
+        if event == "after_statement" and time != "past":
             return True
         
         # TODO: consult also configuration
@@ -677,4 +691,3 @@ class ModuleLoadDialog(FrameDialog):
 def load_plugin():
     Debugger()
     
-        

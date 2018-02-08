@@ -776,6 +776,7 @@ class FancyTracer(Executor):
         self._unhandled_exception = None
         self._install_marker_functions()
         self._custom_stack = []
+        self._past_stacks = []
     
     def execute_source(self, source, filename, mode, global_vars=None):
         self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
@@ -894,7 +895,7 @@ class FancyTracer(Executor):
             
             self._unhandled_exception = exc
             if self._is_interesting_exception(frame):
-                self._report_state_and_fetch_next_message(frame)
+                self._report_state_and_fetch_next_message(frame, self._export_stack())
 
         # TODO: support line event in non-instrumented files
         elif event == "line":
@@ -911,28 +912,61 @@ class FancyTracer(Executor):
         Otherwise sends response and fetches next command.  
         """
         self._debug("Progress event:", event, self._current_command)
+
         focus = TextRange(*args["text_range"])
+
+        #self._debug("Focus:", focus)
+        #self._debug("Args:", args)
         
         self._custom_stack[-1].last_event = event
         self._custom_stack[-1].last_event_focus = focus
         self._custom_stack[-1].last_event_args = args
-        
+
+        self._past_stacks.append(self._export_stack())
+
         # Select the correct method according to the command
         tester = getattr(self, "_cmd_" + self._current_command.command + "_completed")
-             
+
         # If method decides we're in the right place to respond to the command ...
         if tester(frame, event, args, focus, self._current_command):
             if event == "after_expression":
                 value = self._vm.export_value(args["value"])
             else:
                 value = None
-            self._report_state_and_fetch_next_message(frame, value)
-            
+
+
+            if self._current_command.command == "back":
+                self._debug("Astusin tagasi")
+                # take the second-last stack, because the last stack is the current state
+                progress = len(self._past_stacks)-2
+                while -1 < progress < len(self._past_stacks):
+
+                    previous_frame = self._past_stacks[progress]
+
+                    #self._debug("Muudan kuvatavat infot")
+                    #self._debug(previous_frame[-1])
+
+                    # 'time=past' is for avoiding stepping back forward in case of run_to_before command
+                    self._report_state_and_fetch_next_message(frame, previous_frame, time="past")
+
+                    #self._debug("STACKS:",self._past_stacks)
+                    #self._debug("AFTER REPORTING STATE:", self._current_command.command)
+
+                    if self._current_command.command == "back":
+                        progress -= 1
+                        #self._debug("Astusin tagasi - 2")
+                    else:
+                        #self._debug("Astusin edasi - 2")
+                        progress += 1
+                #self._debug("JUMPED OUT!")
+            else:
+                self._report_state_and_fetch_next_message(frame, self._export_stack(), value)
+
             # if back command:
             #    otsi ja tagasta vanem seis
     
-    def _report_state_and_fetch_next_message(self, frame, value=None):
-        #self._debug("Completed command: ", self._current_command)
+    def _report_state_and_fetch_next_message(self, frame, stack, value=None, time = "present"):
+        self._debug("Completed command: ", self._current_command)
         
         if self._unhandled_exception is not None:
             frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
@@ -957,12 +991,13 @@ class FancyTracer(Executor):
         
         self._vm.send_message(self._vm.create_message("DebuggerProgress",
             command=self._current_command.command,
-            stack=self._export_stack(),
+            stack=stack,
             exception=self._vm.export_value(self._unhandled_exception, True),
             exception_msg=exception_msg,
             exception_lower_stack_description=exception_lower_stack_description,
             value=value,
-            command_context="waiting_debugger_command"
+            command_context="waiting_debugger_command",
+            time = time
         ))
         
         # Fetch next debugger command
@@ -1095,7 +1130,10 @@ class FancyTracer(Executor):
     
     def _cmd_step_completed(self, frame, event, args, focus, cmd):
         return True
-    
+
+    def _cmd_back_completed(self, frame, event, args, focus, cmd):
+        return True
+
     def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
         return event.startswith("before")
     
