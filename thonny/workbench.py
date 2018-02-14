@@ -133,6 +133,7 @@ class Workbench(tk.Tk):
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.expert_mode", False)
         self.set_default("debug_mode", False)
+        self.set_default("run.working_directory", os.path.expanduser("~"))
 
     
     def _init_diagnostic_logging(self):
@@ -694,6 +695,16 @@ class Workbench(tk.Tk):
     
     def set_option(self, name, value):
         self._configuration_manager.set_option(name, value)
+    
+    def get_cwd(self):
+        cwd = self.get_option("run.working_directory")
+        if os.path.exists(cwd):
+            return cwd
+        else:
+            return os.path.expanduser("~")
+    
+    def set_cwd(self, value):
+        self.set_option("run.working_directory", value)
     
     def set_theme_tweaker(self, fun):
         warnings.warn("theme_tweaker is deprecated. Use add_theme instead")

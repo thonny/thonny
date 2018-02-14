@@ -8,12 +8,11 @@ from tkinter.filedialog import askopenfilename
 
 from thonny.misc_utils import eqfn, running_on_mac_os
 from thonny.codeview import CodeView
-from thonny.globals import get_workbench, get_runner
+from thonny.globals import get_workbench
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.tktextext import rebind_control_a
 import tokenize
-from thonny.common import ToplevelCommand, DebuggerCommand
 from tkinter.messagebox import askyesno
 import traceback
 
@@ -112,7 +111,7 @@ class Editor(ttk.Frame):
             filename = asksaveasfilename (
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
-                initialdir = get_workbench().get_option("run.working_directory")
+                initialdir = get_workbench().get_cwd()
             )
             if filename in ["", (), None]: # Different tkinter versions may return different values
                 return None
@@ -130,6 +129,8 @@ class Editor(ttk.Frame):
         try: 
             f = open(filename, mode="wb", )
             f.write(content.encode(encoding))
+            f.flush()
+            os.fsync(f) # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             f.close()
         except PermissionError:
             if askyesno("Permission Error",
@@ -192,10 +193,6 @@ class Editor(ttk.Frame):
 
     def _on_text_change(self, event):
         self.master.update_editor_title(self)
-        runner = get_runner()
-        if (runner.get_state() in ["running", "waiting_input", "waiting_debugger_command"]
-            and isinstance(runner.get_current_command(), (ToplevelCommand, DebuggerCommand))): # exclude running InlineCommands
-            runner.interrupt_backend()
         
     def destroy(self):
         get_workbench().unbind("DebuggerProgress", self._listen_debugger_progress)
@@ -364,7 +361,7 @@ class EditorNotebook(ttk.Notebook):
     def _cmd_open_file(self):
         filename = askopenfilename (
             filetypes = _dialog_filetypes, 
-            initialdir = get_workbench().get_option("run.working_directory")
+            initialdir = get_workbench().get_cwd()
         )
         if filename: # Note that missing filename may be "" or () depending on tkinter version
             #self.close_single_untitled_unmodified_editor()

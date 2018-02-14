@@ -33,7 +33,6 @@ WINDOWS_EXE = "python.exe"
 
 class Runner:
     def __init__(self):
-        get_workbench().set_default("run.working_directory", os.path.expanduser("~"))
         get_workbench().set_default("run.auto_cd", True)
         
         from thonny.shell import ShellView
@@ -45,17 +44,13 @@ class Runner:
         
         self._state = None
         self._proxy = None
+        self._polling_after_id = None
         self._postponed_commands = []
-        self._current_toplevel_command = None
-        self._current_command = None
         
         self._check_alloc_console()
     
     def start(self):
-        try:
-            self.reset_backend()
-        finally:
-            self._poll_vm_messages()
+        self.restart_backend(False)
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -66,10 +61,9 @@ class Runner:
             image_filename="run.run_current_script.gif",
             include_in_toolbar=True)
         
-        get_workbench().add_command('reset', "run", 'Interrupt/Reset',
-            handler=self.cmd_interrupt_reset,
+        get_workbench().add_command('restart', "run", 'Stop/Restart',
+            handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
-            tester=self._cmd_interrupt_reset_enabled,
             group=70,
             image_filename="run.stop.gif",
             include_in_toolbar=True)
@@ -80,15 +74,8 @@ class Runner:
             default_sequence="<Control-c>",
             bell_when_denied=False)
     
-    def get_cwd(self):
-        # TODO: make it nicer
-        if hasattr(self._proxy, "cwd"):
-            return self._proxy.cwd
-        else:
-            return ""
-    
     def get_state(self):
-        """State is one of "running", "waiting_input", "waiting_debugger_command",
+        """State is one of "running", "waiting_debugger_command",
             "waiting_toplevel_command"
         """
         return self._state
@@ -97,18 +84,7 @@ class Runner:
         if self._state != state:
             logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
-            if self._state == "waiting_toplevel_command":
-                self._current_toplevel_command = None
-            
-            if self._state != "running":
-                self._current_command = None
     
-    def get_current_toplevel_command(self):
-        return self._current_toplevel_command
-            
-    def get_current_command(self):
-        return self._current_command
-            
     def get_sys_path(self):
         return self._proxy.get_sys_path()
     
@@ -116,39 +92,64 @@ class Runner:
         if self._proxy is None:
             return
 
-        if not self._state_is_suitable(cmd):
-            if isinstance(cmd, DebuggerCommand) and self.get_state() == "running":
-                # probably waiting behind some InlineCommand
-                self._postpone_command(cmd)
-                return
-            elif isinstance(cmd, InlineCommand):
-                self._postpone_command(cmd)
-                return
-            else:
-                raise AssertionError("Trying to send " + str(cmd) + " in state " + self.get_state())
+        # First sanity check
+        if (isinstance(cmd, ToplevelCommand)
+            and self.get_state() != "waiting_toplevel_command"
+            and cmd.command not in ["Reset", "Run", "Debug"]
+            or 
+            isinstance(cmd, DebuggerCommand)
+            and self.get_state() != "waiting_debugger_command"
+            ):
+            get_workbench().bell()
+            logging.info("Command %s was attempted at state %s" % (cmd, self.get_state()))
+            return
+            
+        # Offer the command
+        response = self._proxy.send_command(cmd)
         
+        if response == "discard":
+            return
+        elif response == "postpone":
+            self._postpone_command(cmd)
+            return
+        else:
+            assert response is None
+
+        if get_workbench().get_option("general.debug_mode"):
+            print("SENT CMD:", cmd.command, cmd)
+            
+        if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
+            self._set_state("running")
+    
         if cmd.command in ("Run", "Debug", "Reset"):
             get_workbench().event_generate("BackendRestart")
+                
+    def _postpone_command(self, cmd):
+        # in case of InlineCommands, discard older same type command
+        if isinstance(cmd, InlineCommand):
+            for older_cmd in self._postponed_commands:
+                if older_cmd.command == cmd.command:
+                    self._postponed_commands.remove(older_cmd)
         
-        accepted = self._proxy.send_command(cmd)
-        if get_workbench().get_option("general.debug_mode"):
-            print("SEND CMD:", cmd.command, cmd)
-            
+        if len(self._postponed_commands) > 10: 
+            "Can't pile up too many commands. This command will be just ignored"
+        else:
+            self._postponed_commands.append(cmd)
+    
+    def _send_postponed_commands(self):
+        todo = self._postponed_commands
+        self._postponed_commands = []
         
-        if (accepted and isinstance(cmd, (ToplevelCommand, DebuggerCommand, InlineCommand))):
-            self._set_state("running")
-            self._current_command = cmd
-            if isinstance(cmd, ToplevelCommand):
-                self._current_toplevel_command = cmd
-        
+        for cmd in todo:
+            logging.debug("Sending postponed command", cmd)
+            self.send_command(cmd)
     
     def send_program_input(self, data):
-        assert self.get_state() == "waiting_input"
+        assert self.get_state() == "running"
         self._proxy.send_program_input(data)
-        self._set_state("running")
         
     def execute_script(self, script_path, args, working_directory=None, command_name="Run"):
-        if (working_directory is not None and self._proxy.cwd != working_directory):
+        if (working_directory is not None and get_workbench().get_cwd() != working_directory):
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cmd_line(["%cd", working_directory]) + "\n"
@@ -156,7 +157,7 @@ class Runner:
         else:
             # create simple command
             cd_cmd_line = ""
-            next_cwd = self._proxy.cwd
+            next_cwd = get_workbench().get_cwd()
         
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(script_path, next_cwd)
@@ -204,7 +205,10 @@ class Runner:
         self.execute_current("Run")
     
     def _cmd_interrupt(self):
-        self.interrupt_backend()
+        if self._proxy is not None:
+            self._proxy.interrupt()
+        else:
+            logging.warning("Interrupting without proxy")
         
     def _cmd_interrupt_enabled(self):
         widget = get_workbench().focus_get()
@@ -221,55 +225,11 @@ class Runner:
 
         return get_runner().get_state() != "waiting_toplevel_command"
     
-    def cmd_interrupt_reset(self):
-        if self.get_state() == "waiting_toplevel_command":
-            get_workbench().get_view("ShellView").submit_magic_command("%Reset\n")
-        else:
-            get_runner().interrupt_backend()
+    def cmd_stop_restart(self):
+        get_workbench().get_view("ShellView").restart()
+        self.restart_backend(True)
     
             
-    def _cmd_interrupt_reset_enabled(self):
-        return True
-    
-    def _postpone_command(self, cmd):
-        # in case of InlineCommands, discard older same type command
-        if isinstance(cmd, InlineCommand):
-            for older_cmd in self._postponed_commands:
-                if older_cmd.command == cmd.command:
-                    self._postponed_commands.remove(older_cmd)
-        
-        if len(self._postponed_commands) > 10: 
-            "Can't pile up too many commands. This command will be just ignored"
-        else:
-            self._postponed_commands.append(cmd)
-    
-    def _state_is_suitable(self, cmd):
-        if isinstance(cmd, ToplevelCommand):
-            return (self.get_state() == "waiting_toplevel_command"
-                    or cmd.command in ["Reset", "Run", "Debug"])
-            
-        elif isinstance(cmd, DebuggerCommand):
-            return self.get_state() == "waiting_debugger_command"
-        
-        elif isinstance(cmd, InlineCommand):
-            # UI may send inline commands in any state,
-            # but some backends don't accept them in some states
-            return self.get_state() in self._proxy.allowed_states_for_inline_commands()
-        
-        else:
-            raise RuntimeError("Unknown command class: " + str(type(cmd)))
-    
-    def _send_postponed_commands(self):
-        remaining = []
-        
-        for cmd in self._postponed_commands:
-            if self._state_is_suitable(cmd):
-                logging.debug("Sending postponed command", cmd)
-                self.send_command(cmd)
-            else:
-                remaining.append(cmd)
-        
-        self._postponed_commands = remaining
         
     
     def _poll_vm_messages(self):
@@ -277,58 +237,49 @@ class Runner:
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
-        try:
-            initial_state = self.get_state()
+        initial_state = self.get_state()
+        self._polling_after_id = None
+        
+        while self._proxy is not None:
+            try:
+                msg = self._proxy.fetch_next_message()
+                if not msg:
+                    break
+            except BackendTerminatedError as exc:
+                self._report_backend_crash(exc)
+                self.restart_backend(True)
+                return
             
-            while self._proxy is not None:
-                try:
-                    msg = self._proxy.fetch_next_message()
-                    if not msg:
-                        break
-                except BackendTerminatedError as exc:
-                    self._report_backend_crash(exc)
-                    self.reset_backend()
-                    return
-                
-                if msg.get("SystemExit", False):
-                    self.reset_backend()
-                    return
-                
-                # change state
-                if "command_context" in msg:
-                    # message_context shows the state where corresponding command was handled in the backend
-                    # Now we got the response and we're return to that state
-                    self._set_state(msg["command_context"])
-                elif msg["message_type"] == "ToplevelResult":
-                    # some ToplevelResult-s don't have command_context
-                    self._set_state("waiting_toplevel_command")
-                elif msg["message_type"] == "InputRequest":
-                    self._set_state("waiting_input")
-                else:
-                    "other messages don't affect the state"
-                
-                if msg["message_type"] == "ToplevelResult":
-                    self._current_toplevel_command = None
-    
-                #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
-                get_workbench().event_generate(msg["message_type"], **msg)
-                if get_workbench().get_option("general.debug_mode"):
-                    print("GOT:", msg["message_type"], msg)
+            if msg.get("SystemExit", False):
+                self.restart_backend(True)
+                return
             
+            # change state
+            if msg["message_type"] == "ToplevelResult":
+                self._set_state("waiting_toplevel_command")
+            elif msg["message_type"] == "DebuggerProgress":
+                self._set_state("waiting_debugger_command")
+            else:
+                "other messages don't affect the state"
+            
+            #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
+            get_workbench().event_generate(msg["message_type"], **msg)
+            if get_workbench().get_option("general.debug_mode"):
+                print("GOT:", msg["message_type"], msg)
+        
 
-                
-                # TODO: maybe distinguish between workbench cwd and backend cwd ??
-                get_workbench().set_option("run.working_directory", self.get_cwd())
-                
-                # TODO: is it necessary???
-                # https://stackoverflow.com/a/13520271/261181
-                #get_workbench().update() 
-                
-            if self.get_state() != initial_state:
-                self._send_postponed_commands()
-                
-        finally:
-            get_workbench().after(50, self._poll_vm_messages)
+            
+            if "cwd" in msg:
+                get_workbench().set_cwd(msg["cwd"])
+            
+            # TODO: is it necessary???
+            # https://stackoverflow.com/a/13520271/261181
+            #get_workbench().update() 
+            
+        if self.get_state() != initial_state:
+            self._send_postponed_commands()
+            
+        self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
     
     def _report_backend_crash(self, exc):
         err = "Backend terminated (returncode: %s)\n" % exc.returncode
@@ -350,7 +301,7 @@ class Runner:
         get_workbench().become_topmost_window()
         
     
-    def reset_backend(self):
+    def restart_backend(self, clean):
         """Recreate (or replace) backend proxy / backend process."""
         
         self.destroy_backend()
@@ -362,17 +313,16 @@ class Runner:
         backend_class = get_workbench().get_backends()[backend_name].proxy_class
         self._set_state("running")
         self._proxy = None
-        self._proxy = backend_class()
-    
-    def interrupt_backend(self):
-        if self._proxy is not None:
-            self._proxy.interrupt()
-        else:
-            logging.warning("Interrupting without proxy")
+        self._proxy = backend_class(clean)
+        
+        self._poll_vm_messages()
+        
     
     def destroy_backend(self):
-        self._current_toplevel_command = None
-        self._current_command = None
+        if self._polling_after_id is not None:
+            get_workbench().after_cancel(self._polling_after_id)
+            self._polling_after_id = None
+            
         self._postponed_commands = []
         if self._proxy:
             self._proxy.destroy()
@@ -384,9 +334,6 @@ class Runner:
     def get_backend_proxy(self):
         return self._proxy
     
-    def get_banner(self):
-        return self._proxy.get_banner()
-
     def _check_alloc_console(self):
         if (sys.executable.endswith("thonny.exe")
             or sys.executable.endswith("pythonw.exe")):
@@ -418,7 +365,7 @@ class Runner:
 
     def supported_features(self):
         if self._proxy is None:
-            return []
+            return set()
         else:
             return self._proxy.supported_features()
             
@@ -432,29 +379,25 @@ class BackendProxy:
     All communication methods must be non-blocking, 
     ie. suitable for calling from GUI thread."""
     
-    backend_name = None # Will be overwritten on Workbench.add_backend
+    # backend_name will be overwritten on Workbench.add_backend
+    # Subclasses don't need to worry about it.
+    backend_name = None 
     
-    def __init__(self, configuration_option):
+    def __init__(self, clean):
         """Initializes (or starts the initialization of) the backend process.
         
         Backend is considered ready when the runner gets a ToplevelResult
         with attribute "welcome_text" from fetch_next_message.
-        
-        param configuration_option:
-            If configuration is "Foo (bar)", then "Foo" is backend descriptor
-            and "bar" is the configuration option"""
+        """
     
-    def get_banner(self):
-        """Returns a string to display when backend gets connected"""
-        raise NotImplementedError()        
-
     def send_command(self, cmd):
-        """Send the command to backend"""
-        raise NotImplementedError()
+        """Send the command to backend. Return None, 'discard' or 'postpone'"""
+        method_name = "_cmd_" + cmd.command
+        if hasattr(self, method_name):
+            return getattr(self, method_name)(cmd)
+        else:
+            return "discard"
     
-    def allowed_states_for_inline_commands(self):
-        return ["waiting_toplevel_command"]
-
     def send_program_input(self, data):
         """Send input data to backend"""
         raise NotImplementedError()
@@ -469,7 +412,7 @@ class BackendProxy:
     
     def interrupt(self):
         """Tries to interrupt current command without reseting the backend"""
-        self.destroy()
+        pass
     
     def destroy(self):
         """Called when Thonny no longer needs this instance 
@@ -482,7 +425,7 @@ class BackendProxy:
         raise NotImplementedError()
     
     def supported_features(self):
-        return ["run"]
+        return {"run"}
 
     
 
@@ -492,18 +435,11 @@ class CPythonProxy(BackendProxy):
     def __init__(self, executable):
         self._executable = executable
         
-        cwd = get_workbench().get_option("run.working_directory")
-        if os.path.exists(cwd):
-            self.cwd = cwd
-        else:
-            self.cwd = os.path.expanduser("~")
-            
         self._proc = None
         self._message_queue = None
         self._sys_path = []
         self._gui_update_loop_id = None
         self.in_venv = None
-        self._badge = None
         
         self._start_new_process()
     
@@ -542,66 +478,34 @@ class CPythonProxy(BackendProxy):
         else: 
             return msg
     
-    def get_banner(self):
-        return self._badge
-        
-        
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
-            self.destroy()
+            self._close_backend()
             self._start_new_process(cmd)
         
         self._proc.stdin.write(serialize_message(cmd) + "\n")
         self._proc.stdin.flush()
-        return True 
     
     def send_program_input(self, data):
         self.send_command(InputSubmission(data=data))
         
-    def allowed_states_for_inline_commands(self):
-        return ["waiting_toplevel_command", "waiting_debugger_command", 
-                "waiting_input"]
-
     def get_sys_path(self):
         return self._sys_path
     
     def interrupt(self):
-        
-        def do_kill():
-            self._proc.kill()
-            get_workbench().event_generate("ProgramOutput",
-                                           stream_name="stderr",
-                                           data="KeyboardInterrupt: Forced reset")
-            get_runner().reset_backend()
-        
-        if self._proc is not None:
-            if self._proc.poll() is None:
-                command_to_interrupt = get_runner().get_current_toplevel_command()
-                if running_on_windows():
-                    try:
-                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
-                    except:
-                        logging.exception("Could not interrupt backend process")
-                else:
-                    self._proc.send_signal(signal.SIGINT)
-            
-                # Tkinter programs can't be interrupted so easily:
-                # http://stackoverflow.com/questions/13784232/keyboardinterrupt-taking-a-while
-                # so let's chedule a hard kill in case the program refuses to be interrupted
-                def go_hard():
-                    if (get_runner().get_state() != "waiting_toplevel_command"
-                        and get_runner().get_current_toplevel_command() == command_to_interrupt): # still running same command
-                        do_kill()
-                
-                # 100 ms was too little for Mac
-                # 250 ms was too little for one of the Windows machines
-                get_workbench().after(500, go_hard)
+        if self._proc is not None and self._proc.poll() is None:
+            if running_on_windows():
+                try:
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
+                except:
+                    logging.exception("Could not interrupt backend process")
             else:
-                do_kill()
-            
-                    
+                self._proc.send_signal(signal.SIGINT)
     
     def destroy(self):
+        self._close_backend()
+    
+    def _close_backend(self):
         self._cancel_gui_update_loop()
         
         if self._proc is not None and self._proc.poll() is None: 
@@ -696,14 +600,14 @@ class CPythonProxy(BackendProxy):
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
         
-        debug("Starting the backend: %s %s", cmd_line, self.cwd)
+        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_cwd())
         self._proc = subprocess.Popen (
             cmd_line,
             #bufsize=0,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=self.cwd,
+            cwd=get_workbench().get_cwd(),
             env=my_env,
             universal_newlines=True,
             creationflags=creationflags
@@ -737,10 +641,6 @@ class CPythonProxy(BackendProxy):
             else:
                 try:
                     msg = parse_message(data)
-                    if "cwd" in msg:
-                        self.cwd = msg["cwd"]
-                        
-                    # TODO: it was "with self._state_lock:". Is it necessary?
                     self._message_queue.append(msg)
                 
                     if len(self._message_queue) > 100:
@@ -802,11 +702,11 @@ class CPythonProxy(BackendProxy):
 
 
     def supported_features(self):
-        return ["run", "debug", "pip_gui", "system_shell"]
+        return {"run", "debug", "pip_gui", "system_shell"}
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):
-    def __init__(self):
+    def __init__(self, clean):
         self._prepare_private_venv()
         CPythonProxy.__init__(self, get_private_venv_executable())
 
@@ -900,7 +800,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         assert os.path.isdir(path)
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
-    def __init__(self):
+    def __init__(self, clean):
         CPythonProxy.__init__(self, get_frontend_python())
         
     def fetch_next_message(self):
@@ -910,7 +810,7 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
         return msg
 
 class CustomCPythonProxy(CPythonProxy):
-    def __init__(self):
+    def __init__(self, clean):
         executable = get_workbench().get_option("CustomInterpreter.path")
         
         # Rembember the usage of this non-default interpreter

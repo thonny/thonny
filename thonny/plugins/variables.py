@@ -12,6 +12,7 @@ class GlobalsView(VariablesFrame):
         get_workbench().bind("BackendRestart", lambda e=None: self._clear_tree(), True)
         get_workbench().bind("DebuggerProgress", self._request_globals, True)
         get_workbench().bind("ToplevelResult", self._request_globals, True)
+        get_workbench().bind("InputRequest", self._request_globals, True)
     
     def before_show(self):
         self._request_globals(even_when_hidden=True)

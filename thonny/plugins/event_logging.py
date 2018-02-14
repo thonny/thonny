@@ -139,7 +139,7 @@ class EventLogger:
         filename = asksaveasfilename (
                 filetypes =  [('Zip-files', '.zip'), ('all files', '.*')], 
                 defaultextension = ".zip",
-                initialdir = get_workbench().get_option("run.working_directory"),
+                initialdir = get_workbench().get_cwd(),
                 initialfile = time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip")
         )
         

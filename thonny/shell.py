@@ -5,7 +5,6 @@ import re
 from tkinter import ttk
 import traceback
 
-import thonny
 from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
@@ -21,7 +20,7 @@ class ShellView (ttk.Frame):
         ttk.Frame.__init__(self, master, **kw)
         
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.vert_scrollbar.grid(row=0, column=2, sticky=tk.NSEW)
+        self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         self.text = ShellText(self,
                             font=get_workbench().get_font("EditorFont"),
                             #foreground="white",
@@ -40,10 +39,23 @@ class ShellView (ttk.Frame):
                                     self.clear_shell,
                                     group=200)
         
-        self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        self.text.grid(row=1, column=1, sticky=tk.NSEW)
         self.vert_scrollbar['command'] = self.text.yview
         self.columnconfigure(1, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.rowconfigure(1, weight=1)
+        
+        self.notice = ttk.Label(self, text="", background="#ffff99", padding=3)
+    
+    def set_notice(self, text):
+        if text is None:
+            self.notice.grid_forget()
+        else:
+            self.notice["text"] = text
+            if not self.notice.winfo_ismapped():
+                self.notice.grid(row=0, column=1, columnspan=2, sticky="nsew", pady=(0,1))
+                # height of the text was reduced so adjust the scrolling
+                #self.update() 
+                self.text.see("end") 
 
     def focus_set(self):
         self.text.focus_set()
@@ -59,6 +71,9 @@ class ShellView (ttk.Frame):
             cmd_line = construct_cmd_line(cmd_line)
             
         self.text.submit_command(cmd_line, ("automagic",))
+    
+    def restart(self):
+        self.text.restart()
     
     def clear_shell(self):
         self.text._clear_shell()
@@ -181,7 +196,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.focus_set()
         self.mark_set("insert", "end")
         self.tag_remove("sel", "1.0", tk.END)
-        self._current_input_request = msg
         self._try_submit_input() # try to use leftovers from previous request
         self.see("end")
 
@@ -257,6 +271,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._insert_text_directly(">>> ", prompt_tags)
         self.edit_reset();
     
+    def restart(self):
+        self._insert_text_directly("\n=================== RESTART =====================\n", ("automagic",))
+    
     def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()
             and self._in_current_input_range(index)):
@@ -265,14 +282,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.mark_gravity("input_start", tk.LEFT)
             self.mark_gravity("output_insert", tk.LEFT)
             
-            if get_runner().get_state() == "waiting_input":
-                tags = tags + ("io", "stdin")
-            else:
+            if get_runner().get_state() == "waiting_toplevel_command":
                 tags = tags + ("toplevel", "command")
+            else:
+                tags = tags + ("io", "stdin")
             
             EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
             
-            if get_runner().get_state() == "waiting_input":
+            if get_runner().get_state() != "waiting_toplevel_command":
                 if self._before_io:
                     # tag first char of io differently
                     self.tag_add("vertically_spaced", index)
@@ -296,7 +313,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.bell()
     
     def perform_return(self, event):
-        if get_runner().get_state() == "waiting_input":
+        if get_runner().get_state() == "running":
             # if we are fixing the middle of the input string and pressing ENTER
             # then we expect the whole line to be submitted not linebreak to be inserted
             # (at least that's how IDLE works)
@@ -390,7 +407,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             end_index = self.index("input_start+{0}c".format(len(submittable_text)))
             
             # apply correct tags (if it's leftover then it doesn't have them yet)
-            if get_runner().get_state() == "waiting_input":
+            if get_runner().get_state() == "running":
                 self.tag_add("io", start_index, end_index)
                 self.tag_add("stdin", start_index, end_index)
             else:
@@ -416,7 +433,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._submit_input(submittable_text)
     
     def _editing_allowed(self):
-        return get_runner().get_state() in ('waiting_toplevel_command', 'waiting_input')
+        # TODO: get rid of this
+        return True
     
     def _extract_submittable_input(self, input_text, tail):
         
@@ -432,20 +450,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             else:
                 return None
             
-        elif get_runner().get_state() == "waiting_input":
-            input_request = self._current_input_request
-            method = input_request.method
-            limit = input_request.limit
-            # TODO: what about EOF?
-            if isinstance(limit, int) and limit < 0:
-                limit = None
-            
-            if method == "readline":
-                # TODO: is it correct semantics?
+        elif get_runner().get_state() == "running":
                 i = 0
-                if limit == 0:
-                    return ""
-                
+                limit = None # TODO: simplify
                 while True:
                     if i >= len(input_text):
                         return None
@@ -455,8 +462,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         return input_text[:i+1]
                     else:
                         i += 1
-            else:
-                raise AssertionError("only readline is supported at the moment")
     
     def _code_is_ready_for_submission(self, source, tail=""):
         # Ready to submit if ends with empty line 
@@ -492,6 +497,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         return True
     
     def _submit_input(self, text_to_be_submitted):
+        print("SUBMI", get_runner().get_state(), text_to_be_submitted)
         if get_runner().get_state() == "waiting_toplevel_command":
             # register in history and count
             if text_to_be_submitted in self._command_history:
@@ -528,7 +534,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 
             get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)
         else:
-            assert get_runner().get_state() == "waiting_input"
+            assert get_runner().get_state() == "running"
             get_runner().send_program_input(text_to_be_submitted)
             get_workbench().event_generate("ShellInput", input_text=text_to_be_submitted)
     
@@ -588,6 +594,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("insert")
     
     def _text_key_press(self, event):
+        # Ctrl should underline values
         # TODO: this underline may confuse, when user is just copying on pasting
         # try to add this underline only when mouse is over the value
         """
@@ -596,6 +603,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         """
     
     def _text_key_release(self, event):
+        # Remove value underlining
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
             self.tag_configure("value", foreground="DarkBlue", underline=0)
 
