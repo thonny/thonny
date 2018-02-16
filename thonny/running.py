@@ -131,7 +131,7 @@ class Runner:
                     self._postponed_commands.remove(older_cmd)
         
         if len(self._postponed_commands) > 10: 
-            "Can't pile up too many commands. This command will be just ignored"
+            logging.warning("Can't pile up too many commands. This command will be just ignored")
         else:
             self._postponed_commands.append(cmd)
     
