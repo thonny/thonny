@@ -236,7 +236,6 @@ class Runner:
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
-        initial_state = self.get_state()
         self._polling_after_id = None
         
         while self._proxy is not None:
@@ -275,8 +274,7 @@ class Runner:
             # https://stackoverflow.com/a/13520271/261181
             #get_workbench().update() 
             
-        if self.get_state() != initial_state:
-            self._send_postponed_commands()
+        self._send_postponed_commands()
             
         self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
     
