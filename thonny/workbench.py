@@ -83,7 +83,7 @@ class Workbench(tk.Tk):
         self._init_configuration()
         self._init_diagnostic_logging()
         self._add_main_backends()
-        logging.info("Loading early plugins from " + str(sys.path))
+        logging.debug("Loading early plugins from " + str(sys.path))
         self._load_early_plugins()
         
         self._editor_notebook = None
@@ -132,9 +132,14 @@ class Workbench(tk.Tk):
 
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.expert_mode", False)
-        self.set_default("debug_mode", False)
+        self.set_default("general.debug_mode", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
 
+    def _get_logging_level(self):
+        if self.get_option("general.debug_mode"):
+            return logging.DEBUG
+        else:
+            return logging.INFO
     
     def _init_diagnostic_logging(self):
         logFormatter = logging.Formatter('%(levelname)s: %(message)s')
@@ -143,15 +148,15 @@ class Workbench(tk.Tk):
         log_file = os.path.join(THONNY_USER_DIR, "frontend.log")
         file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
         file_handler.setFormatter(logFormatter)
-        file_handler.setLevel(logging.INFO);
+        file_handler.setLevel(self._get_logging_level());
         root_logger.addHandler(file_handler)
         
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(logFormatter)
-        console_handler.setLevel(logging.INFO);
+        console_handler.setLevel(self._get_logging_level());
         root_logger.addHandler(console_handler)
         
-        root_logger.setLevel(logging.INFO)
+        root_logger.setLevel(self._get_logging_level())
         
         import faulthandler
         fault_out = open(os.path.join(THONNY_USER_DIR, "frontend_faults.log"), mode="w")
@@ -391,6 +396,11 @@ class Workbench(tk.Tk):
                     default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
                     group=80)
         
+        if self.get_option("general.debug_mode"):
+            self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
+    
+    def _print_state_for_debugging(self, event):
+        print(get_runner()._postponed_commands)
             
     def _init_containers(self):
         

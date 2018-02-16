@@ -101,10 +101,11 @@ class Runner:
             and self.get_state() != "waiting_debugger_command"
             ):
             get_workbench().bell()
-            logging.info("Command %s was attempted at state %s" % (cmd, self.get_state()))
+            logging.info("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
             return
             
         # Offer the command
+        logging.debug("RUNNER Sending: %s, %s", cmd.command, cmd)
         response = self._proxy.send_command(cmd)
         
         if response == "discard":
@@ -115,8 +116,6 @@ class Runner:
         else:
             assert response is None
 
-        if get_workbench().get_option("general.debug_mode"):
-            print("SENT CMD:", cmd.command, cmd)
             
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
@@ -141,7 +140,7 @@ class Runner:
         self._postponed_commands = []
         
         for cmd in todo:
-            logging.debug("Sending postponed command", cmd)
+            logging.debug("Sending postponed command: %s", cmd)
             self.send_command(cmd)
     
     def send_program_input(self, data):
@@ -245,6 +244,8 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
+                logging.debug("RUNNER GOT: %s, %s in state: %s", msg["message_type"], msg, self.get_state())
+                
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
                 self.restart_backend(True)
@@ -254,6 +255,7 @@ class Runner:
                 self.restart_backend(True)
                 return
             
+            
             # change state
             if msg["message_type"] == "ToplevelResult":
                 self._set_state("waiting_toplevel_command")
@@ -262,15 +264,12 @@ class Runner:
             else:
                 "other messages don't affect the state"
             
-            #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
-            get_workbench().event_generate(msg["message_type"], **msg)
-            if get_workbench().get_option("general.debug_mode"):
-                print("GOT:", msg["message_type"], msg)
-        
-
-            
             if "cwd" in msg:
+                print("SETTING", msg["cwd"])
                 get_workbench().set_cwd(msg["cwd"])
+            
+            # NB! This may cause another command to be sent before we get to postponed commands
+            get_workbench().event_generate(msg["message_type"], **msg)
             
             # TODO: is it necessary???
             # https://stackoverflow.com/a/13520271/261181
@@ -661,8 +660,7 @@ class CPythonProxy(BackendProxy):
             if data == '':
                 break
             else:
-                if get_workbench().get_option("general.debug_mode"):
-                    print("### BACKEND ###: %s", data.strip())
+                logging.debug("BACKEND: %s", data.strip())
         
     def get_interpreter_command(self):
         return self._executable
