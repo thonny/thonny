@@ -5,11 +5,19 @@ from thonny.config_ui import ConfigurationPage
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import create_string_var
 
-class OnlyTextConfigurationPage(ConfigurationPage):
+
+class BackendDetailsConfigPage(ConfigurationPage):
+    def should_restart(self):
+        raise NotImplementedError()    
+
+class OnlyTextConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master, text):
         ConfigurationPage.__init__(self, master)
         label = ttk.Label(self, text=text)
         label.grid()
+
+    def should_restart(self):
+        return False    
 
 class BackendConfigurationPage(ConfigurationPage):
     
@@ -85,16 +93,18 @@ class BackendConfigurationPage(ConfigurationPage):
         if self._current_page is None:
             return
         
-        elif self._current_page.apply() is False:
+        result = self._current_page.apply()
+        
+        if result is False:
             return False 
         
-        else:
-            backend_desc = self._combo_variable.get()
-            backend_name = self._backend_specs_by_desc[backend_desc].name
-            get_workbench().set_option("run.backend_name", backend_name)
+        backend_desc = self._combo_variable.get()
+        backend_name = self._backend_specs_by_desc[backend_desc].name
+        get_workbench().set_option("run.backend_name", backend_name)
+            
+        if self._combo_variable.modified or self._current_page.should_restart():
             get_runner().restart_backend(False)
         
-    
 
 def load_plugin():
     get_workbench().add_configuration_page("Back-end", BackendConfigurationPage)

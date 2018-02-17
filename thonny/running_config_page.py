@@ -4,14 +4,14 @@ from tkinter import filedialog
 from tkinter import ttk
 
 from thonny.config_ui import ConfigurationPage
-from thonny.globals import get_workbench, get_runner
+from thonny.globals import get_workbench
 from thonny.ui_utils import create_string_var
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from shutil import which
 from thonny.running import WINDOWS_EXE
+from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 
-
-class CustomCPythonConfigurationPage(ConfigurationPage):
+class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
         
@@ -135,8 +135,11 @@ class CustomCPythonConfigurationPage(ConfigurationPage):
         
         return result
     
+    def should_restart(self):
+        return self._configuration_variable.modified
+        
     def apply(self):
-        if not self._configuration_variable.modified:
+        if not self.should_restart():
             return
         
         configuration = self._configuration_variable.get()

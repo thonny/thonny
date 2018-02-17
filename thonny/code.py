@@ -95,12 +95,12 @@ class Editor(ttk.Frame):
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
         
-    def is_modified(self):
+    def should_restart(self):
         return self._code_view.text.edit_modified()
     
     
     def save_file_enabled(self):
-        return self.is_modified() or not self.get_filename()
+        return self.should_restart() or not self.get_filename()
     
     def save_file(self, ask_filename=False):
         if self._filename is not None and not ask_filename:
@@ -322,7 +322,7 @@ class EditorNotebook(ttk.Notebook):
     def save_all_named_editors(self):
         all_saved = True
         for editor in self.winfo_children():
-            if editor.get_filename() and editor.is_modified():
+            if editor.get_filename() and editor.should_restart():
                 success = editor.save_file()
                 all_saved = all_saved and success
         
@@ -430,7 +430,7 @@ class EditorNotebook(ttk.Notebook):
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
         if (len(editors) == 1 
-            and not editors[0].is_modified()
+            and not editors[0].should_restart()
             and not editors[0].get_filename()):
             self._cmd_close_file()
     
@@ -475,16 +475,16 @@ class EditorNotebook(ttk.Notebook):
     
     def update_editor_title(self, editor):
         self.tab(editor,
-            text=self._generate_editor_title(editor.get_filename(), editor.is_modified()))
+            text=self._generate_editor_title(editor.get_filename(), editor.should_restart()))
     
      
-    def _generate_editor_title(self, filename, is_modified=False):
+    def _generate_editor_title(self, filename, should_restart=False):
         if filename is None:
             result = "<untitled>"
         else:
             result = os.path.basename(filename)
         
-        if is_modified:
+        if should_restart:
             result += " *"
         
         return result
@@ -521,9 +521,9 @@ class EditorNotebook(ttk.Notebook):
     
     def check_allow_closing(self, editor=None):
         if not editor:
-            modified_editors = [e for e in self.winfo_children() if e.is_modified()]
+            modified_editors = [e for e in self.winfo_children() if e.should_restart()]
         else:
-            if not editor.is_modified():
+            if not editor.should_restart():
                 return True
             else:
                 modified_editors = [editor]
