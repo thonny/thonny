@@ -273,7 +273,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset();
     
     def restart(self):
-        self._insert_text_directly("\n=================== RESTART =====================\n", ("automagic",))
+        self._insert_text_directly("\n========================= RESTART =========================\n", ("automagic",))
     
     def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()

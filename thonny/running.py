@@ -50,7 +50,7 @@ class Runner:
         self._check_alloc_console()
     
     def start(self):
-        self.restart_backend(False)
+        self.restart_backend(False, True)
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -210,6 +210,8 @@ class Runner:
             logging.warning("Interrupting without proxy")
         
     def _cmd_interrupt_enabled(self):
+        # TODO: distinguish command and Ctrl+C shortcut
+        
         widget = get_workbench().focus_get()
         if not running_on_mac_os(): # on Mac Ctrl+C is not used for Copy
             if hasattr(widget, "selection_get"):
@@ -222,10 +224,10 @@ class Runner:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
 
-        return get_runner().get_state() != "waiting_toplevel_command"
+        # TODO: should it be get_runner().get_state() != "waiting_toplevel_command" ??
+        return True
     
     def cmd_stop_restart(self):
-        get_workbench().get_view("ShellView").restart()
         self.restart_backend(True)
     
             
@@ -298,8 +300,11 @@ class Runner:
         get_workbench().become_topmost_window()
         
     
-    def restart_backend(self, clean):
+    def restart_backend(self, clean, first=False):
         """Recreate (or replace) backend proxy / backend process."""
+        
+        if not first:
+            get_workbench().get_view("ShellView").restart()
         
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
