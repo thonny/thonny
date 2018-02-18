@@ -50,7 +50,7 @@ class Runner:
         self._check_alloc_console()
     
     def start(self):
-        self.restart_backend(False)
+        self.restart_backend(False, True)
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -101,10 +101,11 @@ class Runner:
             and self.get_state() != "waiting_debugger_command"
             ):
             get_workbench().bell()
-            logging.info("Command %s was attempted at state %s" % (cmd, self.get_state()))
+            logging.info("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
             return
             
         # Offer the command
+        logging.debug("RUNNER Sending: %s, %s", cmd.command, cmd)
         response = self._proxy.send_command(cmd)
         
         if response == "discard":
@@ -115,8 +116,6 @@ class Runner:
         else:
             assert response is None
 
-        if get_workbench().get_option("general.debug_mode"):
-            print("SENT CMD:", cmd.command, cmd)
             
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
@@ -132,7 +131,7 @@ class Runner:
                     self._postponed_commands.remove(older_cmd)
         
         if len(self._postponed_commands) > 10: 
-            "Can't pile up too many commands. This command will be just ignored"
+            logging.warning("Can't pile up too many commands. This command will be just ignored")
         else:
             self._postponed_commands.append(cmd)
     
@@ -141,7 +140,7 @@ class Runner:
         self._postponed_commands = []
         
         for cmd in todo:
-            logging.debug("Sending postponed command", cmd)
+            logging.debug("Sending postponed command: %s", cmd)
             self.send_command(cmd)
     
     def send_program_input(self, data):
@@ -179,7 +178,7 @@ class Runner:
         if not filename:
             return
         
-        if editor.is_modified():
+        if editor.should_restart():
             filename = editor.save_file()
             if not filename:
                 return 
@@ -211,6 +210,8 @@ class Runner:
             logging.warning("Interrupting without proxy")
         
     def _cmd_interrupt_enabled(self):
+        # TODO: distinguish command and Ctrl+C shortcut
+        
         widget = get_workbench().focus_get()
         if not running_on_mac_os(): # on Mac Ctrl+C is not used for Copy
             if hasattr(widget, "selection_get"):
@@ -223,10 +224,10 @@ class Runner:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
 
-        return get_runner().get_state() != "waiting_toplevel_command"
+        # TODO: should it be get_runner().get_state() != "waiting_toplevel_command" ??
+        return True
     
     def cmd_stop_restart(self):
-        get_workbench().get_view("ShellView").restart()
         self.restart_backend(True)
     
             
@@ -237,7 +238,6 @@ class Runner:
         because event_generate across threads is not reliable
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
-        initial_state = self.get_state()
         self._polling_after_id = None
         
         while self._proxy is not None:
@@ -245,6 +245,8 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
+                logging.debug("RUNNER GOT: %s, %s in state: %s", msg["message_type"], msg, self.get_state())
+                
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
                 self.restart_backend(True)
@@ -254,6 +256,7 @@ class Runner:
                 self.restart_backend(True)
                 return
             
+            
             # change state
             if msg["message_type"] == "ToplevelResult":
                 self._set_state("waiting_toplevel_command")
@@ -262,22 +265,18 @@ class Runner:
             else:
                 "other messages don't affect the state"
             
-            #logging.debug("Runner: State: %s, Fetched msg: %s" % (self.get_state(), msg))
-            get_workbench().event_generate(msg["message_type"], **msg)
-            if get_workbench().get_option("general.debug_mode"):
-                print("GOT:", msg["message_type"], msg)
-        
-
-            
             if "cwd" in msg:
+                print("SETTING", msg["cwd"])
                 get_workbench().set_cwd(msg["cwd"])
+            
+            # NB! This may cause another command to be sent before we get to postponed commands
+            get_workbench().event_generate(msg["message_type"], **msg)
             
             # TODO: is it necessary???
             # https://stackoverflow.com/a/13520271/261181
             #get_workbench().update() 
             
-        if self.get_state() != initial_state:
-            self._send_postponed_commands()
+        self._send_postponed_commands()
             
         self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
     
@@ -301,8 +300,11 @@ class Runner:
         get_workbench().become_topmost_window()
         
     
-    def restart_backend(self, clean):
+    def restart_backend(self, clean, first=False):
         """Recreate (or replace) backend proxy / backend process."""
+        
+        if not first:
+            get_workbench().get_view("ShellView").restart()
         
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
@@ -661,8 +663,7 @@ class CPythonProxy(BackendProxy):
             if data == '':
                 break
             else:
-                if get_workbench().get_option("general.debug_mode"):
-                    print("### BACKEND ###: %s", data.strip())
+                logging.debug("BACKEND: %s", data.strip())
         
     def get_interpreter_command(self):
         return self._executable
