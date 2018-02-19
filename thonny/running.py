@@ -266,7 +266,6 @@ class Runner:
                 "other messages don't affect the state"
             
             if "cwd" in msg:
-                print("SETTING", msg["cwd"])
                 get_workbench().set_cwd(msg["cwd"])
             
             # NB! This may cause another command to be sent before we get to postponed commands
