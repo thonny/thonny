@@ -13,6 +13,7 @@ import tkinter as tk
 from thonny.globals import get_workbench, get_runner
 from thonny.codeview import get_edit_background, PythonText
 from thonny.tktextext import index2line
+import logging
 
 
 class ShellView (ttk.Frame):
@@ -272,7 +273,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset();
     
     def restart(self):
-        self._insert_text_directly("\n=================== RESTART =====================\n", ("automagic",))
+        self._insert_text_directly("\n========================= RESTART =========================\n", ("automagic",))
     
     def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()
@@ -497,7 +498,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         return True
     
     def _submit_input(self, text_to_be_submitted):
-        print("SUBMI", get_runner().get_state(), text_to_be_submitted)
+        logging.debug("SHELL: submitting %r in state %s", text_to_be_submitted, get_runner().get_state())
         if get_runner().get_state() == "waiting_toplevel_command":
             # register in history and count
             if text_to_be_submitted in self._command_history:

@@ -921,8 +921,6 @@ class FancyTracer(Executor):
         self._custom_stack[-1].last_event_focus = focus
         self._custom_stack[-1].last_event_args = args
 
-        self._past_stacks.append(self._export_stack())
-
         # Select the correct method according to the command
         tester = getattr(self, "_cmd_" + self._current_command.command + "_completed")
 
@@ -930,8 +928,11 @@ class FancyTracer(Executor):
         if tester(frame, event, args, focus, self._current_command):
             if event == "after_expression":
                 value = self._vm.export_value(args["value"])
+                self._custom_stack[-1].assigned_values[focus] = value["repr"]
             else:
                 value = None
+
+            self._past_stacks.append(self._export_stack())
 
 
             if self._current_command.command == "back":
@@ -943,7 +944,7 @@ class FancyTracer(Executor):
                     previous_frame = self._past_stacks[progress]
 
                     #self._debug("Muudan kuvatavat infot")
-                    #self._debug(previous_frame[-1])
+                    self._debug(previous_frame[-1])
 
                     # 'time=past' is for avoiding stepping back forward in case of run_to_before command
                     self._report_state_and_fetch_next_message(frame, previous_frame, time="past")
@@ -961,10 +962,8 @@ class FancyTracer(Executor):
             else:
                 self._report_state_and_fetch_next_message(frame, self._export_stack(), value)
 
-            # if back command:
-            #    otsi ja tagasta vanem seis
     
-    def _report_state_and_fetch_next_message(self, frame, stack, value=None, time = "present"):
+    def _report_state_and_fetch_next_message(self, frame, stack, value=None, time="present"):
         self._debug("Completed command: ", self._current_command)
         
         if self._unhandled_exception is not None:
@@ -1182,6 +1181,7 @@ class FancyTracer(Executor):
                 last_event=custom_frame.last_event,
                 last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
+                assigned_values=custom_frame.assigned_values
             ))
         
         return result
@@ -1441,6 +1441,7 @@ class CustomStackFrame:
         self.id = id(frame)
         self.system_frame = frame
         self.last_event = last_event
+        self.assigned_values = {}
         self.focus = None
         
 class ThonnyClientError(Exception):
