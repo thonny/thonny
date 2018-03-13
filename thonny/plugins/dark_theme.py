@@ -8,6 +8,7 @@ Darkula
     Scrollbar: #595B5D
     List header: #677896
 """
+from thonny.plugins import base_themes
 
 
 def clean(s,
@@ -16,7 +17,7 @@ def clean(s,
           detail_background="#2D452F",
           foreground="#9E9E9E",
           **opts):
-    get_workbench().apply_theme("Clam", **opts)
+    base_themes.base_clam(s)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = window_background

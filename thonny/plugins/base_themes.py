@@ -60,7 +60,7 @@ def tweak_menus(style):
 def set_palette(keywords, numbers, strings, open_strings):
     pass
 
-def base_windows(style, **opts):
+def base_windows(style):
     style.theme_use("xpnative")
     # Notebooks
     # With tabmargins I can get a gray line below tab, which separates
@@ -75,7 +75,7 @@ def base_windows(style, **opts):
     tweak_menubuttons(style)
     tweak_paned_windows(style)
 
-def base_clam(style, **opts):
+def base_clam(style):
     style.theme_use("clam")
     style.configure("Tab", padding=(4,1,0,0))
     style.configure("ButtonNotebook.Tab", padding=(6,4,2,3))
@@ -86,7 +86,7 @@ def base_clam(style, **opts):
     tweak_menubuttons(style)
     tweak_paned_windows(style)
 
-def base_aqua(style, **opts):
+def base_aqua(style):
     style.theme_use("aqua")
     style.configure("Tab", padding=(4,1,0,0))
     style.configure("ButtonNotebook.Tab", padding=(4,1,1,3))

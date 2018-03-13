@@ -75,9 +75,8 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
-        self._init_themes()
+        self._themes = {}
         self.content_inspector_classes = []
-        self._theme_tweaker = None
         thonny.globals.register_workbench(self)
         
         self._init_configuration()
@@ -468,33 +467,17 @@ class Workbench(tk.Tk):
         self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
 
-    def _init_themes(self):
-        style = ttk.Style()
-        
-        self._themes = {}
-        """
-        for name in style.theme_names():
-            def load_theme(style, name=name):
-                style.theme_use(name)
-                # TODO: preconfigure ??
-            
-            self._themes[name] = load_theme
-        """
-        
         
     def _select_theme(self):
         preferred_theme = self.get_option("theme.preferred_theme")
         available_themes = self.get_theme_names()
         
         if preferred_theme in available_themes:
-            self.apply_theme(preferred_theme)
+            self._apply_theme(preferred_theme)
         elif 'Windows' in available_themes:
-            self.apply_theme('Windows') 
+            self._apply_theme('Windows') 
         elif 'Clam' in available_themes:
-            self.apply_theme('Clam')
-        
-        if self._theme_tweaker is not None:
-            self._theme_tweaker()
+            self._apply_theme('Clam')
 
         
     def add_command(self, command_id, menu_name, command_label, handler,
@@ -668,30 +651,24 @@ class Workbench(tk.Tk):
             if not getattr(config_page_constructor, "backend_name", None):
                 config_page_constructor.backend_name = name
     
-    def add_theme(self, name, base, **opts):
+    def add_theme(self, name, func, *args, **kwargs):
         if name in self._themes:
             warn("Overwriting theme '%s'" % name)
         
-        self._themes[name] = (base, opts)
+        self._themes[name] = (func, args, kwargs)
     
     def get_theme_names(self):
         return sorted(self._themes.keys())
     
-    def apply_theme(self, name, **opts):
-        # TODO: use theme options from configuration
+    def _apply_theme(self, name, **opts):
         
         try:
-            base, base_opts = self._themes[name]
-            merged_opts = base_opts.copy()
-            merged_opts.update(opts)
+            func, args, kwargs = self._themes[name]
         except KeyError:
             self.report_exception("Can't find theme '%s'" % name)
             return
         
-        if isinstance(base, str):
-            self.apply_theme(base, **merged_opts)
-        else:
-            base(ttk.Style(), **merged_opts)
+        func(ttk.Style(), *args, **kwargs)
        
     
     def map_image(self, original_image, new_image):
@@ -715,10 +692,6 @@ class Workbench(tk.Tk):
     
     def set_cwd(self, value):
         self.set_option("run.working_directory", value)
-    
-    def set_theme_tweaker(self, fun):
-        warnings.warn("theme_tweaker is deprecated. Use add_theme instead")
-        self._theme_tweaker = fun
     
     def set_default(self, name, default_value):
         """Registers a new option.
