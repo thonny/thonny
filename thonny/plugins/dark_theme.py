@@ -15,8 +15,8 @@ def clean(s,
           window_background="#1D291A",
           code_background="#273627",
           detail_background="#2D452F",
-          foreground="#9E9E9E",
-          **opts):
+          foreground="#9E9E9E"):
+    
     base_themes.base_clam(s)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
