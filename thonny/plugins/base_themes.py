@@ -1,104 +1,73 @@
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_linux
 
-def tweak_treeviews(style):
-    # get rid of Treeview borders
-    style.layout("Treeview", [
-        ('Treeview.treearea', {'sticky': 'nswe'})
-    ])
-    
-    # necessary for Python 2.7 TODO: doesn't help for aqua
-    style.configure("Treeview", background="white")
-    
-    #style.configure("Treeview", font='helvetica 14 bold')
-    style.configure("Treeview", font=get_workbench().get_font("TreeviewFont"))
-
-    #print(style.map("Treeview"))
-    #print(style.layout("Treeview"))
-    #style.configure("Treeview.treearea", font=TREE_FONT)
-    # NB! Some Python or Tk versions (Eg. Py 3.2.3 + Tk 8.5.11 on Raspbian)
-    # can't handle multi word color names in style.map  
+def _treeview_settings():
     light_blue = "#ADD8E6" 
     light_grey = "#D3D3D3"
+    
     if running_on_linux():
-        style.map("Treeview",
-              background=[('selected', 'focus', light_blue),
-                          ('selected', '!focus', light_grey),
-                          ],
-              foreground=[('selected', 'black'),
-                          ],
-              )
+        bg_sel_focus = light_blue
+        fg = "black"
     else:
-        style.map("Treeview",
-              background=[('selected', 'focus', 'SystemHighlight'),
-                          ('selected', '!focus', light_grey),
-                          ],
-              foreground=[('selected', 'SystemHighlightText')],
-              )
-
-def tweak_menubuttons(style):
-    #print(style.layout("TMenubutton"))
-    style.layout("TMenubutton", [
-        ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
-        ('Menubutton.button', {'children': [
-            #('Menubutton.padding', {'children': [
-                ('Menubutton.label', {'sticky': ''})
-            #], 'expand': '1', 'sticky': 'we'})
-        ], 'expand': '1', 'sticky': 'nswe'})
-    ])
+        bg_sel_focus = 'SystemHighlight'
+        fg = 'SystemHighlightText'
     
-    style.configure("TMenubutton", padding=14)
+    return {
+        "Treeview" : {
+            "configure" : {
+                "background" : "white", # TODO: use sys colors , Not required in Python 3 ???
+                "font" : "TreeviewFont"
+            },
+            "map" : {
+                "background" : [('selected', 'focus', bg_sel_focus),
+                                ('selected', '!focus', light_grey)],
+                "foreground" : [('selected', fg)]
+            },
+            "layout" : [
+                # get rid of borders
+                ('Treeview.treearea', {'sticky': 'nswe'})
+            ]
+        }
+    }
 
-def tweak_paned_windows(style):
-    style.configure("Sash", sashthickness=10)
+def _menubutton_settings():
+    return {
+        "TMenubutton" : {
+            "configure" : {
+                "padding" : 14
+            },
+            "layout" : [
+                ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
+                ('Menubutton.button', {'children': [
+                    #('Menubutton.padding', {'children': [
+                        ('Menubutton.label', {'sticky': ''})
+                    #], 'expand': '1', 'sticky': 'we'})
+                ], 'expand': '1', 'sticky': 'nswe'})
+            ]
+        }
+    }
 
-
-def tweak_menus(style):
-    style.configure("Menubar", 
-                    activeborderwidth=0)
-
-def set_palette(keywords, numbers, strings, open_strings):
-    pass
-
-def base_windows(style):
-    style.theme_use("xpnative")
-    # Notebooks
-    # With tabmargins I can get a gray line below tab, which separates
-    # tab content from label
-    style.configure("TNotebook", tabmargins=[2, 2, 2, 2])
-    style.configure("Tab", padding=[3,1,3,0])
-    style.configure("ButtonNotebook.TNotebook.Tab", padding=(4,1,1,0))
-    
-    # other widgets
-    tweak_menus(style)
-    tweak_treeviews(style)
-    tweak_menubuttons(style)
-    tweak_paned_windows(style)
-
-def base_clam(style):
-    style.theme_use("clam")
-    style.configure("Tab", padding=(4,1,0,0))
-    style.configure("ButtonNotebook.Tab", padding=(6,4,2,3))
-        
-    # other widgets
-    tweak_menus(style)
-    tweak_treeviews(style)
-    tweak_menubuttons(style)
-    tweak_paned_windows(style)
-
-def base_aqua(style):
-    style.theme_use("aqua")
-    style.configure("Tab", padding=(4,1,0,0))
-    style.configure("ButtonNotebook.Tab", padding=(4,1,1,3))
-    
-    # other widgets
-    tweak_menus(style)
-    tweak_treeviews(style)
-    tweak_menubuttons(style)
-    tweak_paned_windows(style)
+def _paned_window_settings():
+    return {
+        "Sash" : {
+            "configure" : {
+                "sashthickness" : 10
+            }
+        }
+    }
 
 
-def clam_settings():
+def _menu_settings():
+    return {
+        "Menubar" : {
+            "configure" : {
+                "activeborderwidth" : 0
+            }
+        }
+    }
+
+
+def clam():
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     colors = {
         "disabledfg" :     "#999999",
@@ -314,8 +283,10 @@ def clam_settings():
             }
         }
     }
+    
 
-def windows_settings():
+def xpnative():
+    # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/xpTheme.tcl
     return {
         "." : {
             "configure" : {
@@ -443,21 +414,107 @@ def windows_settings():
                 "foreground" : "#0046d5",
             }
         },
-    }    
+    }
+
+def windows():
+    return [
+        xpnative(),
+        _treeview_settings(),
+        _menubutton_settings(),
+        _paned_window_settings(),
+        _menu_settings(),
+        {
+            "TNotebook" : {
+                "configure" : {
+                    # With tabmargins I can get a gray line below tab, which separates
+                    # tab content from label
+                    "tabmargins" : [2, 2, 2, 2]
+                }
+            },
+            "Tab" : {
+                "configure" : {
+                    "padding" : [3,1,3,0]
+                }
+            },
+            "ButtonNotebook.TNotebook.Tab" : {
+                "configure" : {
+                    "padding" : (4,1,1,0)
+                }
+            }
+        }
+    ]
+
+def enhanced_clam():
+    return [
+        clam(),
+        _treeview_settings(),
+        _menubutton_settings(),
+        _paned_window_settings(),
+        _menu_settings(),
+        {
+            "Tab" : {
+                "configure" : {
+                    "padding" : (40,1,0,0)
+                }
+            },
+            "ButtonNotebook.Tab" : {
+                "configure" : {
+                    "padding" : (6,4,2,3)
+                }
+            },
+            "TScrollbar" : {
+                "configure" : {
+                    "gripcount" : 0
+                }
+            }
+        }
+    ]
+
+def enhanced_aqua():
+    return [
+        _treeview_settings(),
+        _menubutton_settings(),
+        _paned_window_settings(),
+        _menu_settings(),
+        {
+            "Tab" : {
+                "configure" : {
+                    "padding" : (4,1,0,0)
+                }
+            },
+            "ButtonNotebook.Tab" : {
+                "configure" : {
+                    "padding" : (4,1,1,3)
+                }
+            }
+        }
+    ]
+
+
 
 def load_early_plugin():
     from tkinter import ttk
+    original_themes = ttk.Style().theme_names() 
     
     # load all base themes
-    for name in ttk.Style().theme_names():
+    for name in original_themes:
         if name == "clam":
-            settings = clam_settings()
+            settings = clam()
         elif name == "xpnative":
-            settings = windows_settings()
+            settings = xpnative()
         else:
             settings = {}
              
         get_workbench().add_theme(name, None, settings)
-        
+    
+    
+    get_workbench().add_theme("Enhanced Clam", "clam", enhanced_clam())
+    
+    if "xpnative" in original_themes:
+        get_workbench().add_theme("Windows", "xpnative", windows())
+    
+    if "aqua" in original_themes:
+        get_workbench().add_theme("Enhanced Aqua", "aqua", enhanced_aqua())
+    
     
     

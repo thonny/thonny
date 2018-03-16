@@ -28,7 +28,6 @@ import queue
 from _thread import start_new_thread
 import ast
 from thonny import THONNY_USER_DIR
-import warnings
 from warnings import warn
 import collections
 
@@ -281,19 +280,23 @@ class Workbench(tk.Tk):
                         14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
-
-        self._fonts = {
-            'IOFont' : tk_font.Font(family=self.get_option("view.io_font_family")),
-            'EditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family")),
-            'BoldEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+        
+        _fonts = [
+            tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
+            tk_font.Font(name="EditorFont", family=self.get_option("view.editor_font_family")),
+            tk_font.Font(name="BoldEditorFont", family=self.get_option("view.editor_font_family"),
                                             weight="bold"),
-            'ItalicEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+            tk_font.Font(name="ItalicEditorFont", family=self.get_option("view.editor_font_family"),
                                             slant="italic"),
-            'BoldItalicEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+            tk_font.Font(name="BoldItalicEditorFont", family=self.get_option("view.editor_font_family"),
                                             weight="bold", slant="italic"),
-            'TreeviewFont' : tk_font.Font(family=default_font.cget("family"),
-                                          size=default_font.cget("size"))
-        }
+            tk_font.Font(name="TreeviewFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"))            
+        ]
+
+        # TODO: is this dict required?
+        self._fonts = {f.name : f for f in _fonts}
         
         self.update_fonts()
     
@@ -474,10 +477,10 @@ class Workbench(tk.Tk):
         
         if preferred_theme in available_themes:
             self._apply_theme(preferred_theme)
+        elif 'Enhanced Clam' in available_themes:
+            self._apply_theme('Enhanced Clam')
         elif 'Windows' in available_themes:
             self._apply_theme('Windows') 
-        elif 'Clam' in available_themes:
-            self._apply_theme('Clam')
 
         
     def add_command(self, command_id, menu_name, command_label, handler,
@@ -673,15 +676,19 @@ class Workbench(tk.Tk):
                 # reached start of the chain
                 break
         
-        assert parent in style.theme_names()
+        assert temp_name in style.theme_names()
         # only root-parent is relevant for theme_create,
         # because the method actually doesn't take parent settings into account
         # (https://mail.python.org/pipermail/tkinter-discuss/2015-August/003752.html)
-        style.theme_create(name, parent)
+        style.theme_create(name, temp_name)
         
         # apply settings starting from root ancestor
         for settings in total_settings:
-            style.theme_settings(name, settings)
+            if isinstance(settings, dict):
+                style.theme_settings(name, settings)
+            else:
+                for subsettings in settings:
+                    style.theme_settings(name, subsettings)
             
     def _apply_theme(self, name):
         style = ttk.Style()
