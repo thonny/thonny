@@ -228,5 +228,5 @@ def clean(s,
     s.configure("StdIn.Shell", foreground="LightBlue")
     s.configure("StdErr.Shell", foreground="Crimson")
 
-def load_early_plugin():
+def _load_early_plugin():
     get_workbench().add_theme("Clean Dark", clean)

@@ -142,11 +142,11 @@ def clam_settings():
         "TButton" : {
             "configure" : {
                 "anchor" : "center", 
-                "width" : "11", 
+                "width" : 11, 
                 "padding" : 5, 
                 "relief" : "raised"
             },
-            "mape" : {
+            "map" : {
                 "background" : [("disabled", colors["frame"]),
                                 ("pressed", colors["darker"]),
                                 ("active", colors["lighter"])],
@@ -264,7 +264,6 @@ def clam_settings():
             },
             "map" : {
                 "padding" : [("selected", [6, 4, 6, 2])],
-                # TODO:
                 "background" : [("selected", colors["frame"]), 
                                 ("",        colors["darker"])],
                 "lightcolor" : [("selected", colors["lighter"]), 
@@ -315,18 +314,150 @@ def clam_settings():
             }
         }
     }
-    
+
+def windows_settings():
+    return {
+        "." : {
+            "configure" : {
+                "background"        : "SystemButtonFace",
+                "foreground"        : "SystemWindowText",
+                "selectbackground"  : "SystemHighlightText",
+                "selectforeground"  : "SystemHighlight",
+                "font" : "TkDefaultFont",
+            },
+            
+            "map" : {
+                "foreground" : [("disabled", "SystemGrayText")],
+            },
+        },
+            
+        "TButton" : {
+            "configure" : {
+                "anchor" : "center", 
+                "width" : 11, 
+                "padding" : [1, 1], 
+            },
+        },
+        
+        "Toolbutton" : {
+            "configure" : {
+                "padding" :[4, 4],
+            },
+        },
+        
+        "TCheckbutton" : {
+            "configure" : {
+                "padding" :  2,
+            },
+        },
+        
+        # TRadiobutton has same style as TCheckbutton
+        "TRadiobutton" : {
+            "configure" : {
+                "padding" :  2,
+            },
+        },
+        
+        "TMenubutton" : {
+            "configure" : {
+                "padding" : [8, 4],
+            }
+        },
+        
+        "TEntry" : {
+            "configure" : {
+                "padding" : [2, 2, 2, 4],
+            },
+            "map" : {
+                "selectbackground" : [("!focus", "SystemWindow")],
+                "selectforeground" : [("!focus", "SystemWindowText")]
+            }
+        },
+        
+        "TCombobox" : {
+            "configure" : {
+                "padding" : 2,
+            },
+            "map" : {
+                "selectbackground" : [("!focus", "SystemWindow")],
+                "selectforeground" : [("!focus", "SystemWindowText")],
+                "foreground" : [("disabled", "SystemGrayText"),
+                                ("readonly", "focus", "SystemHighlightText")],
+                "focusfill" : [("readonly", "focus", "SystemHighlight")]
+            }
+        },
+        
+        "ComboboxPopdownFrame" : {
+            "configure" : {
+                "relief" : "solid",
+                "borderwidth" : 1
+            }
+        },
+        
+        "TSpinbox" : {
+            "configure" : {
+                "padding" : [2, 0, 14, 0],
+            },
+            "map" : {
+                "selectbackground" : [("!focus", "SystemWindow")],
+                "selectforeground" : [("!focus", "SystemWindowText")],
+            }
+        },
+        
+        "TNotebook" : {
+            "configure" : {
+                "tabmargins" : [2, 2, 2, 0]
+            }
+        },
+        
+        "TNotebook.Tab" : {
+            "map" : {
+                "expand" : [("selected", [2, 2, 2, 2])],
+            }
+        },
+        
+        "Treeview" : {
+            "configure" : {
+                "background" : "SystemWindow",
+            },
+            "map" : {
+                "background" : [("disabled", "SystemButtonFace"),
+                                ("!disabled", "!selected", "SystemWindow"),
+                                ("selected", "SystemHighlight")],
+                "foreground" : [("disabled", "SystemGrayText"),
+                                ("!disabled", "!selected", "SystemWindowText"),
+                                ("selected", "SystemHighlightText")]        
+            }
+        },
+        
+        
+        "Heading" : { # Treeview heading
+            "configure" : {
+                "font" : "TkHeadingFont",
+                "relief" : "raised"
+            }
+        },
+        
+        "TLabelframe.Label" : {
+            "configure" : {
+                "foreground" : "#0046d5",
+            }
+        },
+    }    
 
 def load_early_plugin():
     from tkinter import ttk
-    available_themes = ttk.Style().theme_names()
     
-    get_workbench().add_theme("Clam", base_clam)
-    
-    if "xpnative" in available_themes:
-        get_workbench().add_theme("Windows", base_windows)
-    if "aqua" in available_themes:
-        get_workbench().add_theme("Aqua", base_aqua)
+    # load all base themes
+    for name in ttk.Style().theme_names():
+        if name == "clam":
+            settings = clam_settings()
+        elif name == "xpnative":
+            settings = windows_settings()
+        else:
+            settings = {}
+             
+        get_workbench().add_theme(name, None, settings)
         
     
     

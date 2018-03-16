@@ -651,25 +651,45 @@ class Workbench(tk.Tk):
             if not getattr(config_page_constructor, "backend_name", None):
                 config_page_constructor.backend_name = name
     
-    def add_theme(self, name, func, *args, **kwargs):
+    def add_theme(self, name, parent, settings):
         if name in self._themes:
             warn("Overwriting theme '%s'" % name)
         
-        self._themes[name] = (func, args, kwargs)
+        self._themes[name] = (parent, settings)
     
     def get_theme_names(self):
         return sorted(self._themes.keys())
     
-    def _apply_theme(self, name, **opts):
+    def _register_theme_as_tk_theme(self, name, style):
+        # collect settings from all ancestors
+        total_settings = []
+        temp_name = name
+        while True:
+            parent, settings = self._themes[temp_name]
+            total_settings.insert(0, settings)
+            if parent is not None:
+                temp_name = parent
+            else:
+                # reached start of the chain
+                break
         
-        try:
-            func, args, kwargs = self._themes[name]
-        except KeyError:
-            self.report_exception("Can't find theme '%s'" % name)
-            return
+        assert parent in style.theme_names()
+        # only root-parent is relevant for theme_create,
+        # because the method actually doesn't take parent settings into account
+        # (https://mail.python.org/pipermail/tkinter-discuss/2015-August/003752.html)
+        style.theme_create(name, parent)
         
-        func(ttk.Style(), *args, **kwargs)
-       
+        # apply settings starting from root ancestor
+        for settings in total_settings:
+            style.theme_settings(name, settings)
+            
+    def _apply_theme(self, name):
+        style = ttk.Style()
+        
+        if name not in style.theme_names():
+            self._register_theme_as_tk_theme(name, style)
+        
+        style.theme_use(name)
     
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
