@@ -21,8 +21,8 @@ class FontConfigurationPage(ConfigurationPage):
             get_workbench().get_option("view.editor_font_size"),
             modification_listener=self._update_preview_font)
         
-        self._theme_variable = create_string_var(
-            get_workbench().get_option("theme.preferred_theme"),
+        self._ui_theme_variable = create_string_var(
+            get_workbench().get_option("theme.ui_theme"),
             #modification_listener=self._update_preview_font
             )
         
@@ -45,12 +45,12 @@ class FontConfigurationPage(ConfigurationPage):
         self._size_combo.grid(row=1, column=1)
         
         ttk.Label(self, text="UI Theme").grid(row=2, column=0, sticky="w", pady=(10, 0))
-        self._theme_combo = ttk.Combobox(self,
+        self._ui_theme_combo = ttk.Combobox(self,
                                         exportselection=False,
-                                        textvariable=self._theme_variable,
+                                        textvariable=self._ui_theme_variable,
                                         state='readonly',
-                                        values=get_workbench().get_theme_names())
-        self._theme_combo.grid(row=3, column=0, sticky="nsew")
+                                        values=get_workbench().get_ui_theme_names())
+        self._ui_theme_combo.grid(row=3, column=0, sticky="nsew")
         
         
         ttk.Label(self, text="Preview").grid(row=4, column=0, sticky="w", pady=(10,0))
@@ -79,11 +79,11 @@ class FontConfigurationPage(ConfigurationPage):
     def apply(self):
         if (not self._family_variable.modified
             and not self._size_variable.modified
-            and not self._theme_variable.modified):
+            and not self._ui_theme_variable.modified):
             return
         
-        if self._theme_variable.modified:
-            get_workbench().set_option("theme.preferred_theme", self._theme_variable.get())
+        if self._ui_theme_variable.modified:
+            get_workbench().set_option("theme.ui_theme", self._ui_theme_variable.get())
             get_workbench().update_theme()
         get_workbench().set_option("view.editor_font_size", int(self._size_variable.get()))
         get_workbench().set_option("view.editor_font_family", self._family_variable.get())

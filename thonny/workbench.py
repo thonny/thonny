@@ -476,9 +476,9 @@ class Workbench(tk.Tk):
 
         
     def _init_theming(self):
-        self._themes = {}
+        self._ui_themes = {}
         # following will be overwritten by plugins.base_themes
-        self.set_default("theme.preferred_theme",
+        self.set_default("theme.ui_theme",
                          "xpnative" if running_on_windows() else "clam")
     
         
@@ -653,21 +653,21 @@ class Workbench(tk.Tk):
             if not getattr(config_page_constructor, "backend_name", None):
                 config_page_constructor.backend_name = name
     
-    def add_theme(self, name, parent, settings):
-        if name in self._themes:
+    def add_ui_theme(self, name, parent, settings):
+        if name in self._ui_themes:
             warn("Overwriting theme '%s'" % name)
         
-        self._themes[name] = (parent, settings)
+        self._ui_themes[name] = (parent, settings)
     
-    def get_theme_names(self):
-        return sorted(self._themes.keys())
+    def get_ui_theme_names(self):
+        return sorted(self._ui_themes.keys())
     
-    def _register_theme_as_tk_theme(self, name, style):
+    def _register_ui_theme_as_tk_theme(self, name, style):
         # collect settings from all ancestors
         total_settings = []
         temp_name = name
         while True:
-            parent, settings = self._themes[temp_name]
+            parent, settings = self._ui_themes[temp_name]
             total_settings.insert(0, settings)
             if parent is not None:
                 temp_name = parent
@@ -689,24 +689,24 @@ class Workbench(tk.Tk):
                 for subsettings in settings:
                     style.theme_settings(name, subsettings)
             
-    def _apply_theme(self, name):
+    def _apply_ui_theme(self, name):
         style = ttk.Style()
         
         if name not in style.theme_names():
-            self._register_theme_as_tk_theme(name, style)
+            self._register_ui_theme_as_tk_theme(name, style)
         
         style.theme_use(name)
     
     def update_theme(self):
-        preferred_theme = self.get_option("theme.preferred_theme")
-        available_themes = self.get_theme_names()
+        preferred_theme = self.get_option("theme.ui_theme")
+        available_themes = self.get_ui_theme_names()
         
         if preferred_theme in available_themes:
-            self._apply_theme(preferred_theme)
+            self._apply_ui_theme(preferred_theme)
         elif 'Enhanced Clam' in available_themes:
-            self._apply_theme('Enhanced Clam')
+            self._apply_ui_theme('Enhanced Clam')
         elif 'Windows' in available_themes:
-            self._apply_theme('Windows') 
+            self._apply_ui_theme('Windows') 
 
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image

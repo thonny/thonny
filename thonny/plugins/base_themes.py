@@ -505,24 +505,24 @@ def load_early_plugin():
         else:
             settings = {}
              
-        get_workbench().add_theme(name, None, settings)
+        get_workbench().add_ui_theme(name, None, settings)
     
     
-    get_workbench().add_theme("Enhanced Clam", "clam", enhanced_clam())
+    get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam())
     
     if "xpnative" in original_themes:
-        get_workbench().add_theme("Windows", "xpnative", windows())
+        get_workbench().add_ui_theme("Windows", "xpnative", windows())
     
     if "aqua" in original_themes:
-        get_workbench().add_theme("Enhanced Aqua", "aqua", enhanced_aqua())
+        get_workbench().add_ui_theme("Enhanced Aqua", "aqua", enhanced_aqua())
     
 
-    if "Windows" in get_workbench().get_theme_names():
-        get_workbench().set_default("theme.preferred_theme",
+    if "Windows" in get_workbench().get_ui_theme_names():
+        get_workbench().set_default("theme.ui_theme",
                      "Windows")
         
-    elif "Enhanced Clam" in get_workbench().get_theme_names():
-        get_workbench().set_default("theme.preferred_theme",
+    elif "Enhanced Clam" in get_workbench().get_ui_theme_names():
+        get_workbench().set_default("theme.ui_theme",
                      "Enhanced Clam")
         
     

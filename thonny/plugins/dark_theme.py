@@ -229,4 +229,4 @@ def clean(s,
     s.configure("StdErr.Shell", foreground="Crimson")
 
 def _load_early_plugin():
-    get_workbench().add_theme("Clean Dark", clean)
+    get_workbench().add_ui_theme("Clean Dark", clean)
