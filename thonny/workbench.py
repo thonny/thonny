@@ -477,6 +477,7 @@ class Workbench(tk.Tk):
         
     def _init_theming(self):
         self._ui_themes = {}
+        self._syntax_themes = {}
         # following will be overwritten by plugins.base_themes
         self.set_default("theme.ui_theme",
                          "xpnative" if running_on_windows() else "clam")
@@ -658,6 +659,13 @@ class Workbench(tk.Tk):
             warn("Overwriting theme '%s'" % name)
         
         self._ui_themes[name] = (parent, settings)
+    
+    def add_syntax_theme(self, name, parent, settings):
+        if name in self._ui_themes:
+            warn("Overwriting theme '%s'" % name)
+        
+        self._syntax_themes[name] = (parent, settings)
+        
     
     def get_ui_theme_names(self):
         return sorted(self._ui_themes.keys())
