@@ -599,6 +599,8 @@ class PipDialog(tk.Toplevel):
                 cmd)
 
     def _create_pip_process(self, args):
+        if "--disable-pip-version-check" not in args:
+            args.append("--disable-pip-version-check")
         return self._create_backend_process(["-m", "pip"] + args)
     
     def _get_interpreter(self):
