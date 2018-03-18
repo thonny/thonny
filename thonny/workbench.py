@@ -10,7 +10,8 @@ from thonny import ui_utils, running
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError
 from thonny.config import try_load_configuration
-from thonny.misc_utils import running_on_mac_os, running_on_linux
+from thonny.misc_utils import running_on_mac_os, running_on_linux,\
+    running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence,\
     get_style_options, get_style_option
@@ -64,6 +65,8 @@ class Workbench(tk.Tk):
           notifications about debugger's progress)
           
     """
+
+    
     def __init__(self, server_socket=None):
         self._destroying = False
         self.initializing = True
@@ -74,19 +77,18 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
-        self._themes = {}
         self.content_inspector_classes = []
         thonny.globals.register_workbench(self)
         
         self._init_configuration()
         self._init_diagnostic_logging()
         self._add_main_backends()
-        logging.debug("Loading early plugins from " + str(sys.path))
+        self._init_theming()
         self._load_early_plugins()
         
         self._editor_notebook = None
         self._init_fonts()
-        self._select_theme()
+        self.update_theme()
         self._init_window()
         self._init_menu()
         
@@ -132,6 +134,7 @@ class Workbench(tk.Tk):
         self.set_default("general.expert_mode", False)
         self.set_default("general.debug_mode", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
+        
 
     def _get_logging_level(self):
         if self.get_option("general.debug_mode"):
@@ -233,6 +236,7 @@ class Workbench(tk.Tk):
     
     def _load_early_plugins(self):
         """load_early_plugin can't use nor GUI neither Runner"""
+        logging.debug("Loading early plugins from " + str(sys.path))
         self._load_plugins("load_early_plugin")
         
     def _load_plugins(self, load_function_name="load_plugin"):
@@ -471,17 +475,12 @@ class Workbench(tk.Tk):
         self._center_pw.insert("auto", self._editor_notebook)
 
         
-    def _select_theme(self):
-        preferred_theme = self.get_option("theme.preferred_theme")
-        available_themes = self.get_theme_names()
-        
-        if preferred_theme in available_themes:
-            self._apply_theme(preferred_theme)
-        elif 'Enhanced Clam' in available_themes:
-            self._apply_theme('Enhanced Clam')
-        elif 'Windows' in available_themes:
-            self._apply_theme('Windows') 
-
+    def _init_theming(self):
+        self._themes = {}
+        # following will be overwritten by plugins.base_themes
+        self.set_default("theme.preferred_theme",
+                         "xpnative" if running_on_windows() else "clam")
+    
         
     def add_command(self, command_id, menu_name, command_label, handler,
                     tester=None,
@@ -698,6 +697,17 @@ class Workbench(tk.Tk):
         
         style.theme_use(name)
     
+    def update_theme(self):
+        preferred_theme = self.get_option("theme.preferred_theme")
+        available_themes = self.get_theme_names()
+        
+        if preferred_theme in available_themes:
+            self._apply_theme(preferred_theme)
+        elif 'Enhanced Clam' in available_themes:
+            self._apply_theme('Enhanced Clam')
+        elif 'Windows' in available_themes:
+            self._apply_theme('Windows') 
+
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
     

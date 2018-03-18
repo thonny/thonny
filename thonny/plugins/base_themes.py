@@ -516,5 +516,14 @@ def load_early_plugin():
     if "aqua" in original_themes:
         get_workbench().add_theme("Enhanced Aqua", "aqua", enhanced_aqua())
     
+
+    if "Windows" in get_workbench().get_theme_names():
+        get_workbench().set_default("theme.preferred_theme",
+                     "Windows")
+        
+    elif "Enhanced Clam" in get_workbench().get_theme_names():
+        get_workbench().set_default("theme.preferred_theme",
+                     "Enhanced Clam")
+        
     
     

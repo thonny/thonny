@@ -21,6 +21,11 @@ class FontConfigurationPage(ConfigurationPage):
             get_workbench().get_option("view.editor_font_size"),
             modification_listener=self._update_preview_font)
         
+        self._theme_variable = create_string_var(
+            get_workbench().get_option("theme.preferred_theme"),
+            #modification_listener=self._update_preview_font
+            )
+        
         ttk.Label(self, text="Editor font").grid(row=0, column=0, sticky="w")
         
         self._family_combo = ttk.Combobox(self,
@@ -39,8 +44,16 @@ class FontConfigurationPage(ConfigurationPage):
         
         self._size_combo.grid(row=1, column=1)
         
+        ttk.Label(self, text="UI Theme").grid(row=2, column=0, sticky="w", pady=(10, 0))
+        self._theme_combo = ttk.Combobox(self,
+                                        exportselection=False,
+                                        textvariable=self._theme_variable,
+                                        state='readonly',
+                                        values=get_workbench().get_theme_names())
+        self._theme_combo.grid(row=3, column=0, sticky="nsew")
         
-        ttk.Label(self, text="Preview").grid(row=2, column=0, sticky="w", pady=(10,0))
+        
+        ttk.Label(self, text="Preview").grid(row=4, column=0, sticky="w", pady=(10,0))
         self._preview_font = tk_font.Font()
         self._preview_text = tk.Text(self,
                                 height=10,
@@ -56,18 +69,22 @@ class FontConfigurationPage(ConfigurationPage):
             1234567890
             @$%()[]{}/\_-+
             "Hello " + 'world!'""").strip())
-        self._preview_text.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW, pady=(0,5))
+        self._preview_text.grid(row=5, column=0, columnspan=2, sticky=tk.NSEW, pady=(0,5))
         
             
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(3, weight=1)
+        self.rowconfigure(5, weight=1)
         self._update_preview_font()
     
     def apply(self):
         if (not self._family_variable.modified
-            and not self._size_variable.modified):
+            and not self._size_variable.modified
+            and not self._theme_variable.modified):
             return
         
+        if self._theme_variable.modified:
+            get_workbench().set_option("theme.preferred_theme", self._theme_variable.get())
+            get_workbench().update_theme()
         get_workbench().set_option("view.editor_font_size", int(self._size_variable.get()))
         get_workbench().set_option("view.editor_font_family", self._family_variable.get())
         get_workbench().update_fonts()
@@ -83,4 +100,4 @@ class FontConfigurationPage(ConfigurationPage):
         ))
 
 def load_plugin():
-    get_workbench().add_configuration_page("Font", FontConfigurationPage)
+    get_workbench().add_configuration_page("Theme & Font", FontConfigurationPage)
