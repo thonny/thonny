@@ -18,7 +18,7 @@ import sys
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
     UserError, construct_cmd_line
-from thonny.globals import get_workbench, get_runner
+from thonny.globals import get_workbench, get_runner, get_shell
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 import shutil
@@ -163,7 +163,7 @@ class Runner:
         exe_cmd_line = construct_cmd_line(["%" + command_name, rel_filename] + args) + "\n"
         
         # submit to shell (shell will execute it)
-        get_workbench().get_view("ShellView").submit_magic_command(cd_cmd_line + exe_cmd_line)
+        get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
         
     def execute_current(self, command_name, always_change_to_script_dir=False):
         """
@@ -266,7 +266,6 @@ class Runner:
                 "other messages don't affect the state"
             
             if "cwd" in msg:
-                print("SETTING", msg["cwd"])
                 get_workbench().set_cwd(msg["cwd"])
             
             # NB! This may cause another command to be sent before we get to postponed commands
@@ -304,7 +303,7 @@ class Runner:
         """Recreate (or replace) backend proxy / backend process."""
         
         if not first:
-            get_workbench().get_view("ShellView").restart()
+            get_shell().restart()
         
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")

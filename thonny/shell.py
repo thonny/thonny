@@ -70,7 +70,10 @@ class ShellView (ttk.Frame):
     def submit_magic_command(self, cmd_line):
         if isinstance(cmd_line, list):
             cmd_line = construct_cmd_line(cmd_line)
-            
+        
+        if not cmd_line.endswith("\n"):
+            cmd_line += "\n"
+        
         self.text.submit_command(cmd_line, ("automagic",))
     
     def restart(self):

@@ -10,7 +10,8 @@ from thonny import ui_utils, running
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError
 from thonny.config import try_load_configuration
-from thonny.misc_utils import running_on_mac_os, running_on_linux
+from thonny.misc_utils import running_on_mac_os, running_on_linux,\
+    running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence,\
     get_style_options, get_style_option
@@ -28,7 +29,6 @@ import queue
 from _thread import start_new_thread
 import ast
 from thonny import THONNY_USER_DIR
-import warnings
 from warnings import warn
 import collections
 
@@ -65,6 +65,8 @@ class Workbench(tk.Tk):
           notifications about debugger's progress)
           
     """
+
+    
     def __init__(self, server_socket=None):
         self._destroying = False
         self.initializing = True
@@ -75,20 +77,18 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
-        self._init_themes()
         self.content_inspector_classes = []
-        self._theme_tweaker = None
         thonny.globals.register_workbench(self)
         
         self._init_configuration()
         self._init_diagnostic_logging()
         self._add_main_backends()
-        logging.debug("Loading early plugins from " + str(sys.path))
+        self._init_theming()
         self._load_early_plugins()
         
         self._editor_notebook = None
         self._init_fonts()
-        self._select_theme()
+        self.update_theme()
         self._init_window()
         self._init_menu()
         
@@ -134,6 +134,7 @@ class Workbench(tk.Tk):
         self.set_default("general.expert_mode", False)
         self.set_default("general.debug_mode", False)
         self.set_default("run.working_directory", os.path.expanduser("~"))
+        
 
     def _get_logging_level(self):
         if self.get_option("general.debug_mode"):
@@ -235,6 +236,7 @@ class Workbench(tk.Tk):
     
     def _load_early_plugins(self):
         """load_early_plugin can't use nor GUI neither Runner"""
+        logging.debug("Loading early plugins from " + str(sys.path))
         self._load_plugins("load_early_plugin")
         
     def _load_plugins(self, load_function_name="load_plugin"):
@@ -282,19 +284,23 @@ class Workbench(tk.Tk):
                         14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
-
-        self._fonts = {
-            'IOFont' : tk_font.Font(family=self.get_option("view.io_font_family")),
-            'EditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family")),
-            'BoldEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+        
+        _fonts = [
+            tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
+            tk_font.Font(name="EditorFont", family=self.get_option("view.editor_font_family")),
+            tk_font.Font(name="BoldEditorFont", family=self.get_option("view.editor_font_family"),
                                             weight="bold"),
-            'ItalicEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+            tk_font.Font(name="ItalicEditorFont", family=self.get_option("view.editor_font_family"),
                                             slant="italic"),
-            'BoldItalicEditorFont' : tk_font.Font(family=self.get_option("view.editor_font_family"),
+            tk_font.Font(name="BoldItalicEditorFont", family=self.get_option("view.editor_font_family"),
                                             weight="bold", slant="italic"),
-            'TreeviewFont' : tk_font.Font(family=default_font.cget("family"),
-                                          size=default_font.cget("size"))
-        }
+            tk_font.Font(name="TreeviewFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"))            
+        ]
+
+        # TODO: is this dict required?
+        self._fonts = {f.name : f for f in _fonts}
         
         self.update_fonts()
     
@@ -468,34 +474,14 @@ class Workbench(tk.Tk):
         self._editor_notebook.position_key = 1
         self._center_pw.insert("auto", self._editor_notebook)
 
-    def _init_themes(self):
-        style = ttk.Style()
         
-        self._themes = {}
-        """
-        for name in style.theme_names():
-            def load_theme(style, name=name):
-                style.theme_use(name)
-                # TODO: preconfigure ??
-            
-            self._themes[name] = load_theme
-        """
-        
-        
-    def _select_theme(self):
-        preferred_theme = self.get_option("theme.preferred_theme")
-        available_themes = self.get_theme_names()
-        
-        if preferred_theme in available_themes:
-            self.apply_theme(preferred_theme)
-        elif 'Windows' in available_themes:
-            self.apply_theme('Windows') 
-        elif 'Clam' in available_themes:
-            self.apply_theme('Clam')
-        
-        if self._theme_tweaker is not None:
-            self._theme_tweaker()
-
+    def _init_theming(self):
+        self._ui_themes = {}
+        self._syntax_themes = {}
+        # following will be overwritten by plugins.base_themes
+        self.set_default("theme.ui_theme",
+                         "xpnative" if running_on_windows() else "clam")
+    
         
     def add_command(self, command_id, menu_name, command_label, handler,
                     tester=None,
@@ -668,32 +654,68 @@ class Workbench(tk.Tk):
             if not getattr(config_page_constructor, "backend_name", None):
                 config_page_constructor.backend_name = name
     
-    def add_theme(self, name, base, **opts):
-        if name in self._themes:
+    def add_ui_theme(self, name, parent, settings):
+        if name in self._ui_themes:
             warn("Overwriting theme '%s'" % name)
         
-        self._themes[name] = (base, opts)
+        self._ui_themes[name] = (parent, settings)
     
-    def get_theme_names(self):
-        return sorted(self._themes.keys())
-    
-    def apply_theme(self, name, **opts):
-        # TODO: use theme options from configuration
+    def add_syntax_theme(self, name, parent, settings):
+        if name in self._ui_themes:
+            warn("Overwriting theme '%s'" % name)
         
-        try:
-            base, base_opts = self._themes[name]
-            merged_opts = base_opts.copy()
-            merged_opts.update(opts)
-        except KeyError:
-            self.report_exception("Can't find theme '%s'" % name)
-            return
+        self._syntax_themes[name] = (parent, settings)
         
-        if isinstance(base, str):
-            self.apply_theme(base, **merged_opts)
-        else:
-            base(ttk.Style(), **merged_opts)
-       
     
+    def get_ui_theme_names(self):
+        return sorted(self._ui_themes.keys())
+    
+    def _register_ui_theme_as_tk_theme(self, name, style):
+        # collect settings from all ancestors
+        total_settings = []
+        temp_name = name
+        while True:
+            parent, settings = self._ui_themes[temp_name]
+            total_settings.insert(0, settings)
+            if parent is not None:
+                temp_name = parent
+            else:
+                # reached start of the chain
+                break
+        
+        assert temp_name in style.theme_names()
+        # only root-parent is relevant for theme_create,
+        # because the method actually doesn't take parent settings into account
+        # (https://mail.python.org/pipermail/tkinter-discuss/2015-August/003752.html)
+        style.theme_create(name, temp_name)
+        
+        # apply settings starting from root ancestor
+        for settings in total_settings:
+            if isinstance(settings, dict):
+                style.theme_settings(name, settings)
+            else:
+                for subsettings in settings:
+                    style.theme_settings(name, subsettings)
+            
+    def _apply_ui_theme(self, name):
+        style = ttk.Style()
+        
+        if name not in style.theme_names():
+            self._register_ui_theme_as_tk_theme(name, style)
+        
+        style.theme_use(name)
+    
+    def update_theme(self):
+        preferred_theme = self.get_option("theme.ui_theme")
+        available_themes = self.get_ui_theme_names()
+        
+        if preferred_theme in available_themes:
+            self._apply_ui_theme(preferred_theme)
+        elif 'Enhanced Clam' in available_themes:
+            self._apply_ui_theme('Enhanced Clam')
+        elif 'Windows' in available_themes:
+            self._apply_ui_theme('Windows') 
+
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
     
@@ -715,10 +737,6 @@ class Workbench(tk.Tk):
     
     def set_cwd(self, value):
         self.set_option("run.working_directory", value)
-    
-    def set_theme_tweaker(self, fun):
-        warnings.warn("theme_tweaker is deprecated. Use add_theme instead")
-        self._theme_tweaker = fun
     
     def set_default(self, name, default_value):
         """Registers a new option.

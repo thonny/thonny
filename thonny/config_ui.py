@@ -4,6 +4,8 @@ from thonny.globals import get_workbench
 
 
 class ConfigurationDialog(tk.Toplevel):
+    last_shown_tab_index = 0
+    
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
         width = 500
@@ -42,6 +44,8 @@ class ConfigurationDialog(tk.Toplevel):
         
         self.bind("<Return>", self._ok, True)
         self.bind("<Escape>", self._cancel, True)
+        
+        self._notebook.select(self._notebook.tabs()[ConfigurationDialog.last_shown_tab_index])
     
     def _ok(self, event=None):
         for title in sorted(self._pages):
@@ -56,6 +60,10 @@ class ConfigurationDialog(tk.Toplevel):
     
     def _cancel(self, event=None):
         self.destroy()
+    
+    def destroy(self):
+        ConfigurationDialog.last_shown_tab_index = self._notebook.index(self._notebook.select())
+        tk.Toplevel.destroy(self)
 
 class ConfigurationPage(ttk.Frame):
     """This is an example dummy implementation of a configuration page.

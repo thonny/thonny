@@ -8,15 +8,16 @@ Darkula
     Scrollbar: #595B5D
     List header: #677896
 """
+from thonny.plugins import base_themes
 
 
 def clean(s,
           window_background="#1D291A",
           code_background="#273627",
           detail_background="#2D452F",
-          foreground="#9E9E9E",
-          **opts):
-    get_workbench().apply_theme("Clam", **opts)
+          foreground="#9E9E9E"):
+    
+    base_themes.base_clam(s)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = window_background
@@ -227,5 +228,5 @@ def clean(s,
     s.configure("StdIn.Shell", foreground="LightBlue")
     s.configure("StdErr.Shell", foreground="Crimson")
 
-def load_early_plugin():
-    get_workbench().add_theme("Clean Dark", clean)
+def _load_early_plugin():
+    get_workbench().add_ui_theme("Clean Dark", clean)
