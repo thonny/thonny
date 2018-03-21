@@ -950,7 +950,7 @@ class FancyTracer(Executor):
         self._debug("Initiated stepping in History")
         # take the second-last stack, because the last stack is the current state
         progress = len(self._past_messages) - 1
-        while progress < len(self._past_messages) :
+        while progress < len(self._past_messages):
             direction = "present"
 
             # Determine the correct message
@@ -973,7 +973,7 @@ class FancyTracer(Executor):
                 self._debug("Stepped over")
                 current_command, current_frame = self._get_frame_and_command_from_history(progress)
 
-                while progress < len(self._past_messages) -1  and (not self._cmd_exec_completed(current_frame,
+                while progress < len(self._past_messages) -1 and (not self._cmd_exec_completed(current_frame,
                                                    current_frame.last_event,
                                                    current_frame.last_event_args,
                                                    current_frame.last_event_focus,
@@ -986,18 +986,20 @@ class FancyTracer(Executor):
                 self._debug("Stepped")
                 progress += 1
             elif self._current_command.command == "run_to_before":
-                self._debug("Last_event:", self._get_frame_and_command_from_history(progress)[1].last_event)
+                #self._debug("Last_event:", self._get_frame_and_command_from_history(progress)[1].last_event)
                 while "before_" not in self._get_frame_and_command_from_history(progress)[1].last_event and progress < len(self._past_messages) - 1:
                     self._debug("Skipped to before")
                     progress += 1
 
-            if progress == len(self._past_messages):
-                self._debug("progress before termination:", progress)
-                break
             # Send message
             # direction='past' is for avoiding stepping back forward in case of run_to_before command
             #self._debug("Current command before sending:", self._current_command.command)
             self._send_and_fetch_message(self._past_messages[progress], direction)
+
+            # Terminate history browsing when stepping out of history scope
+            if progress == len(self._past_messages) - 1 and self._current_command.command in ("exec", "step"):
+                #self._debug("progress before termination:", progress)
+                break
 
 
     def _get_frame_and_command_from_history(self, progress):
