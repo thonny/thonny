@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.17 (2018-03-21)
+===================
+* FIXED #409: Package manager crashed after release of pip 9.0.2
+
 2.1.16 (2017-11-10)
 ===================
 * Tests moved under thonny package
