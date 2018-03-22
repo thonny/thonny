@@ -17,4 +17,7 @@ def get_workbench():
 
 def get_runner():    
     return _runner
+
+def get_shell():
+    return get_workbench().get_view("ShellView")
     

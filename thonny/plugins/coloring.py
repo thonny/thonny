@@ -45,7 +45,7 @@ class SyntaxColorer:
             + "|" + STRING3_DELIMITER # to avoid marking """ and ''' as single line string in uniline mode
             + "|" + STRING_CLOSED 
             + "|" + STRING_OPEN
-            , re.S)
+            , re.S)  # @UndefinedVariable
         
         self.multiline_regex = re.compile(
             STRING3
@@ -53,9 +53,9 @@ class SyntaxColorer:
             + "|" + MAGIC_COMMAND 
             #+ "|" + STRING_CLOSED # need to include single line strings otherwise '"""' ... '""""' will give wrong result
             + "|" + STRING_OPEN # (seems that it works faster and also correctly with only open strings)
-            , re.S)
+            , re.S)  # @UndefinedVariable
         
-        self.id_regex = re.compile(r"\s+(\w+)", re.S)
+        self.id_regex = re.compile(r"\s+(\w+)", re.S)  # @UndefinedVariable
 
     def _config_colors(self, main_font, bold_font):
         default_string_fg = "DarkGreen"

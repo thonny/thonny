@@ -89,13 +89,10 @@ class AutomaticPanedWindow(tk.PanedWindow):
     Automatically adds/removes itself to/from its master AutomaticPanedWindow.
     Fixes some style glitches.
     """ 
+
+    
     def __init__(self, master, position_key=None,
                 first_pane_size=1/3, last_pane_size=1/3, **kwargs):
-        if not "sashwidth" in kwargs:
-            kwargs["sashwidth"]=10
-        
-        if not "background" in kwargs:
-            kwargs["background"] = get_main_background()
         
         tk.PanedWindow.__init__(self, master, **kwargs)
         
@@ -108,7 +105,9 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self._last_window_size = (0,0)
         self._full_size_not_final = True
         self._configure_binding = self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
+        self._update_appearance_binding = self.winfo_toplevel().bind("<<ThemeChanged>>", self._update_appearance, True)
         self.bind("<B1-Motion>", self._on_mouse_dragged, True)
+        self._update_appearance()
     
     def insert(self, pos, child, **kw):
         if pos == "auto":
@@ -153,8 +152,10 @@ class AutomaticPanedWindow(tk.PanedWindow):
     
     def destroy(self):
         self.winfo_toplevel().unbind("<Configure>", self._configure_binding)
+        self.winfo_toplevel().unbind("<<ThemeChanged>>", self._update_appearance_binding)
         tk.PanedWindow.destroy(self)
         
+    
     
     def is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
@@ -266,6 +267,11 @@ class AutomaticPanedWindow(tk.PanedWindow):
         if len(self.panes()) > 0 and not self.is_visible():
             self.master.insert("auto", self)
         
+    
+    def _update_appearance(self, event=None):
+        self.configure(sashwidth=10) # TODO: consult theme
+        self.configure(background=get_main_background())
+    
     
 
 class AutomaticNotebook(ttk.Notebook):

@@ -55,6 +55,12 @@ class Debugger:
             default_sequence="<F9>",
             group=30)
 
+        get_workbench().add_command("step_back_over", "run", "Step back over",
+            self._cmd_step_back_over,
+            tester=self._cmd_stepping_commands_enabled,
+            default_sequence="<F10>",
+            group=30)
+
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
             tester=self._cmd_stepping_commands_enabled,
@@ -127,8 +133,10 @@ class Debugger:
         self._check_issue_debugger_command("exec")
 
     def _cmd_step_back(self):
-
         self._check_issue_debugger_command("back")
+
+    def _cmd_step_back_over(self):
+        self._check_issue_debugger_command("back_over")
         
     def _cmd_step_out(self):
         self._check_issue_debugger_command("out")
@@ -222,7 +230,7 @@ class Debugger:
             return True
         
         # TODO: consult also configuration
-        if "call_function" in tags:
+        if "call_function" in tags and time != "past":
             return True
         else:
             return False

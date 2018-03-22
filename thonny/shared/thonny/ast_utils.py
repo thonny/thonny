@@ -205,7 +205,7 @@ def mark_text_ranges(node, source):
                     and tokens[-1].string != "..." # See https://bugs.python.org/issue31394
                     and tokens[-1].string not in ")}]"
                     or tokens[-1].string in ['and', 'as', 'assert', 'class', 'def', 'del',
-                                              'elif', 'else', 'except', 'exec', 'finally',
+                                              'elif', 'else', 'except', 'finally',
                                               'for', 'from', 'global', 'if', 'import', 'in',
                                               'is', 'lambda', 'not', 'or', 'try',
                                               'while', 'with', 'yield']):
