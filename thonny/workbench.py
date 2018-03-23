@@ -696,6 +696,9 @@ class Workbench(tk.Tk):
         
         # apply settings starting from root ancestor
         for settings in total_settings:
+            if callable(settings):
+                settings = settings()
+            
             if isinstance(settings, dict):
                 style.theme_settings(name, settings)
             else:
