@@ -196,6 +196,7 @@ class EnhancedText(TweakableText):
         self._theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
                                                            self._reload_syntax_options, True)
         
+        self._reload_syntax_options()
     
     def _bind_mouse_aids(self):
         if _running_on_mac():
