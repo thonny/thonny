@@ -29,7 +29,7 @@ class Editor(ttk.Frame):
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(get_workbench(),
                                    propose_remove_line_numbers=True,
-                                   font=get_workbench().get_font("EditorFont"))
+                                   font="EditorFont")
         get_workbench().event_generate("EditorTextCreated", editor=self, text_widget=self.get_text_widget())
         
         self._code_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self)

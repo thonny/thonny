@@ -37,4 +37,5 @@ def default_dark():
 def load_early_plugin():
     get_workbench().add_syntax_theme("Default light", None, default_light)
     get_workbench().add_syntax_theme("Default dark", None, default_light)
+    get_workbench().set_default("view.syntax_theme", "Default light")
     

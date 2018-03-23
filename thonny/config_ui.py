@@ -8,7 +8,7 @@ class ConfigurationDialog(tk.Toplevel):
     
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
-        width = 500
+        width = 700
         height = 400
         left = max(int(get_workbench().winfo_x() + get_workbench().winfo_width()/2 - width/2), 0)
         top = max(int(get_workbench().winfo_y() + get_workbench().winfo_height()/2 - height/2), 0)
@@ -59,6 +59,13 @@ class ConfigurationDialog(tk.Toplevel):
         self.destroy()
     
     def _cancel(self, event=None):
+        for title in sorted(self._pages):
+            try:
+                page = self._pages[title]
+                page.cancel()
+            except:
+                get_workbench().report_exception("Error when cancelling options in " + title)
+                
         self.destroy()
     
     def destroy(self):
@@ -83,4 +90,7 @@ class ConfigurationPage(ttk.Frame):
         """Apply method should return False, when page contains invalid
         input and configuration dialog should not be closed."""
         pass
-        
+    
+    def cancel(self):
+        """Called when dialog gets cancelled"""
+        pass

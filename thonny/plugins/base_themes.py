@@ -518,10 +518,10 @@ def load_early_plugin():
     
 
     if "Windows" in get_workbench().get_ui_theme_names():
-        get_workbench().set_default("theme.ui_theme", "Windows")
+        get_workbench().set_default("view.ui_theme", "Windows")
         
     elif "Enhanced Clam" in get_workbench().get_ui_theme_names():
-        get_workbench().set_default("theme.ui_theme", "Enhanced Clam")
+        get_workbench().set_default("view.ui_theme", "Enhanced Clam")
         
     
     

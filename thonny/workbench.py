@@ -88,7 +88,7 @@ class Workbench(tk.Tk):
         
         self._editor_notebook = None
         self._init_fonts()
-        self.update_theme()
+        self.update_themes()
         self._init_window()
         self._init_menu()
         
@@ -479,7 +479,9 @@ class Workbench(tk.Tk):
         self._ui_themes = {}
         self._syntax_themes = {}
         # following will be overwritten by plugins.base_themes
-        self.set_default("theme.ui_theme",
+        self.set_default("view.ui_theme",
+                         "xpnative" if running_on_windows() else "clam")
+        self.set_default("view.ui_theme",
                          "xpnative" if running_on_windows() else "clam")
     
         
@@ -670,6 +672,9 @@ class Workbench(tk.Tk):
     def get_ui_theme_names(self):
         return sorted(self._ui_themes.keys())
     
+    def get_syntax_theme_names(self):
+        return sorted(self._syntax_themes.keys())
+    
     def _register_ui_theme_as_tk_theme(self, name, style):
         # collect settings from all ancestors
         total_settings = []
@@ -705,8 +710,28 @@ class Workbench(tk.Tk):
         
         style.theme_use(name)
     
-    def update_theme(self):
-        preferred_theme = self.get_option("theme.ui_theme")
+    def _apply_syntax_theme(self, name):
+        def get_settings(name):
+            parent, settings = self._syntax_themes[name]
+            if callable(settings):
+                settings = settings()
+                
+            if parent is None:
+                return settings
+            else:
+                result = get_settings(parent)
+                for key in settings:
+                    if key in result:
+                        result[key].update(settings[key])
+                    else:
+                        result[key] = settings[key]
+                return result
+        
+        from thonny import tktextext
+        tktextext.set_syntax_options(get_settings(name))
+    
+    def update_themes(self):
+        preferred_theme = self.get_option("view.ui_theme")
         available_themes = self.get_ui_theme_names()
         
         if preferred_theme in available_themes:
@@ -714,7 +739,9 @@ class Workbench(tk.Tk):
         elif 'Enhanced Clam' in available_themes:
             self._apply_ui_theme('Enhanced Clam')
         elif 'Windows' in available_themes:
-            self._apply_ui_theme('Windows') 
+            self._apply_ui_theme('Windows')
+        
+        self._apply_syntax_theme(self.get_option("view.syntax_theme"))
 
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
