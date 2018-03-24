@@ -193,10 +193,12 @@ class EnhancedText(TweakableText):
         self._bind_undo_aids()
         self._bind_mouse_aids()
         
-        self._theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
-                                                           self._reload_syntax_options, True)
+        self._ui_theme_change_binding = tk._default_root.bind("<<ThemeChanged>>", 
+                                                           self._reload_theme_options, True)
+        self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
+                                                           self._reload_theme_options, True)
         
-        self._reload_syntax_options()
+        self._reload_theme_options()
     
     def _bind_mouse_aids(self):
         if _running_on_mac():
@@ -500,6 +502,10 @@ class EnhancedText(TweakableText):
         self.tag_remove("sel", "1.0", tk.END)
         self.tag_add('sel', '1.0', tk.END)
     
+    def set_read_only(self, value):
+        TweakableText.set_read_only(self, value)
+        self._reload_theme_options()
+    
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
         # column logical (meaning use tabs if appropriate) spaces.
@@ -615,12 +621,30 @@ class EnhancedText(TweakableText):
         
         self._syntax_options = syntax_options
     
-    def _reload_syntax_options(self, event=None):
+    def _reload_theme_options(self, event=None):
         global _syntax_options
+        
+        style = ttk.Style()
+        
+        states = []
+        if self.is_read_only():
+            states.append("readonly")
+        if self.focus_get() == self:
+            states.append("focus")
+        
+        background = style.lookup("Text", "background", states)
+        self.configure(background=background)
+        
+        foreground = style.lookup("Text", "foreground", states)
+        self.configure(foreground=foreground)
+        
+        self.configure(insertbackground=foreground) # TODO: allow this to be themed?
+        
         self.set_syntax_options(_syntax_options)
     
     def destroy(self):
-        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._theme_change_binding)
+        tk._default_root.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
+        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
         TweakableText.destroy(self)
         
         

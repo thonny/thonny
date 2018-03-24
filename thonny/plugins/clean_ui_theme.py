@@ -53,17 +53,17 @@ def clean(window_background="#1D291A",
             }
         },
         
-        "Tab" : {
+        "TNotebook.Tab" : {
             "configure" : {
-                #background=BG,
-                #lightcolor="gray",
+                "background" : BG,
+                "lightcolor" : "gray",
                 "darkcolor" : "red",
                 #bordercolor="#4F634A",
                 "bordercolor" : detail_background,
                 "borderwidth" : 10,
             },
             
-            "map" : { # TODO: või TNotebook.Tab ??
+            "map" : { 
                 "background" : [("selected", detail_background), ("!selected", window_background)],
                 "bordercolor" : [("selected", window_background), ("!selected", detail_background)],
                 #lightcolor=[("selected", "#333333"), ("!selected", "#333333")],
@@ -164,8 +164,7 @@ def clean(window_background="#1D291A",
         "Text" : {
             "configure" : {
                 "background" : code_background,
-                "readonlybackground" : "Yellow"
-            }
+            },
         },
         
         "TextMargin" : {
@@ -216,7 +215,6 @@ def clean(window_background="#1D291A",
 def dark_syntax_theme():    
     
     default_fg = "#B3B3B3" # TODO: where to specify base color?
-    
     string_fg = "#8DC76F"
     open_string_bg = "#453B22"
     

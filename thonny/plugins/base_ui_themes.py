@@ -1,5 +1,6 @@
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_linux
+from thonny.ui_utils import CALM_WHITE
 
 def _treeview_settings():
     light_blue = "#ADD8E6" 
@@ -440,6 +441,15 @@ def windows():
                 "configure" : {
                     "padding" : (4,1,1,0)
                 }
+            },
+            "Text" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                    "foreground" : "SystemWindowText"
+                },
+                "map" : {
+                    "background" : [("readonly", "Yellow")]
+                }
             }
         }
     ]
@@ -465,6 +475,14 @@ def enhanced_clam():
             "TScrollbar" : {
                 "configure" : {
                     "gripcount" : 0
+                }
+            },
+            "Text" : {
+                "configure" : {
+                    "background" : CALM_WHITE
+                },
+                "map" : {
+                    "background" : [("readonly", "Yellow")]
                 }
             }
         }

@@ -11,7 +11,7 @@ from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
 import tkinter as tk
 from thonny.globals import get_workbench, get_runner
-from thonny.codeview import get_edit_background, PythonText
+from thonny.codeview import PythonText
 from thonny.tktextext import index2line
 import logging
 
@@ -96,12 +96,6 @@ class ShellView (ttk.Frame):
 class ShellText(EnhancedTextWithLogging, PythonText):
     
     def __init__(self, master, cnf={}, **kw):
-        if not "background" in kw:
-            kw["background"] = get_edit_background()
-        if not "foreground" in kw:
-            kw["foreground"] = get_style_option("Code", "foreground", "black")
-        if not "insertbackground" in kw:
-            kw["insertbackground"] = kw["foreground"]
             
         EnhancedTextWithLogging.__init__(self, master, cnf, **kw)
         self.bindtags(self.bindtags() + ('ShellText',))

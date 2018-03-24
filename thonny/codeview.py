@@ -119,28 +119,11 @@ class PythonText(EnhancedText):
 class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
-        if not "background" in kw:
-            kw["background"] = get_edit_background()
-        
-        if not "foreground" in kw:
-            kw["foreground"] = get_style_option("Code", "foreground", "black")
-        
-        if not "insertbackground" in kw:
-            kw["insertbackground"] = kw["foreground"]
-        
         EnhancedTextWithLogging.__init__(self, master=master, cnf=cnf, **kw)
         self._original_background = kw["background"]
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)
-    
-    def set_read_only(self, value):
-        EnhancedTextWithLogging.set_read_only(self, value)
-        if value:
-            self.configure(background=get_readonly_background())
-        else:
-            self.configure(background=self._original_background)
-
     
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
@@ -156,8 +139,7 @@ class CodeView(tktextext.TextFrame):
         
         
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
-                                     undo=True, wrap=tk.NONE, background=get_edit_background(),
-                                     **text_frame_args)
+                                     undo=True, wrap=tk.NONE, **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
         
@@ -212,12 +194,5 @@ class CodeView(tktextext.TextFrame):
             end_lineno, end_col_offset = lineno, col_offset
             
         return TextRange(lineno, col_offset, end_lineno, end_col_offset)
-
-
-def get_edit_background():
-    return get_style_option("Text", "background", "white")
-
-def get_readonly_background():
-    return get_style_option("Text", "readonlybackground", "LightYellow")
 
 
