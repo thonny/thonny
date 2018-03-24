@@ -290,7 +290,7 @@ class FrameVisualizer:
                 
             self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
         else:
-            self._text.tag_configure('focus', background=get_readonly_background(), borderwidth=1, relief=tk.SOLID)
+            self._text.tag_configure('focus', background="", borderwidth=1, relief=tk.SOLID)
             
         self._expression_box.update_expression(msg, frame_info)
 

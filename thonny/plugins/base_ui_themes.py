@@ -68,6 +68,20 @@ def _menu_settings():
     }
 
 
+def _text_settings():
+    return {
+        "Text" : {
+            "configure" : {
+                "background" : "SystemWindow",
+                "foreground" : "SystemWindowText"
+            },
+            "map" : {
+                "background" : [("readonly", "Yellow")]
+            }
+        }
+    }
+
+
 def clam():
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     colors = {
@@ -424,6 +438,7 @@ def windows():
         _menubutton_settings(),
         _paned_window_settings(),
         _menu_settings(),
+        _text_settings(),
         {
             "TNotebook" : {
                 "configure" : {
@@ -442,15 +457,6 @@ def windows():
                     "padding" : (4,1,1,0)
                 }
             },
-            "Text" : {
-                "configure" : {
-                    "background" : "SystemWindow",
-                    "foreground" : "SystemWindowText"
-                },
-                "map" : {
-                    "background" : [("readonly", "Yellow")]
-                }
-            }
         }
     ]
 
@@ -461,6 +467,7 @@ def enhanced_clam():
         _menubutton_settings(),
         _paned_window_settings(),
         _menu_settings(),
+        _text_settings(),
         {
             "Tab" : {
                 "configure" : {
@@ -477,14 +484,6 @@ def enhanced_clam():
                     "gripcount" : 0
                 }
             },
-            "Text" : {
-                "configure" : {
-                    "background" : CALM_WHITE
-                },
-                "map" : {
-                    "background" : [("readonly", "Yellow")]
-                }
-            }
         }
     ]
 

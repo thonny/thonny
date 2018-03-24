@@ -120,7 +120,6 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
         EnhancedTextWithLogging.__init__(self, master=master, cnf=cnf, **kw)
-        self._original_background = kw["background"]
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)

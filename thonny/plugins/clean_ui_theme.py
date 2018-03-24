@@ -209,34 +209,5 @@ def clean(window_background="#1D291A",
     
     
 
-    
-    
-
-def dark_syntax_theme():    
-    
-    default_fg = "#B3B3B3" # TODO: where to specify base color?
-    string_fg = "#8DC76F"
-    open_string_bg = "#453B22"
-    
-    return {
-        "definition"    : {"foreground" : default_fg},
-        "magic"         : {"foreground" : default_fg},
-        "string"        : {"foreground" : string_fg},
-        "string3"       : {"foreground" : string_fg},
-        "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
-        "open_string3"  : {"foreground" : string_fg, "background" : open_string_bg},
-        "keyword"       : {"foreground" : "#9A79AD", "font" : "BoldEditorFont"},
-        "number"        : {"foreground" : "#FFCABF"},
-        "comment"       : {"foreground" : "#C8DEE6"}
-    }
-    #s.configure("Local.Code", foreground="#BCCAE8")
-    #s.configure("MatchedName.Code", background="#193022")
-    #s.configure("MatchedParens.Code", foreground="#F0995B")
-    #s.configure("OpenParens.Code", background="#193022")
-    
-    #s.configure("StdOut.Shell", foreground="LightGray")
-    #s.configure("StdIn.Shell", foreground="LightBlue")
-    #s.configure("StdErr.Shell", foreground="Crimson")
-
 def load_early_plugin():
     get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", clean)

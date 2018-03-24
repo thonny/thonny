@@ -616,7 +616,10 @@ class EnhancedText(TweakableText):
         
         # apply new options
         for tag_name in syntax_options:
-            self.tag_configure(tag_name, **syntax_options[tag_name])
+            if tag_name == "TEXT":
+                self.configure(**syntax_options[tag_name])
+            else:
+                self.tag_configure(tag_name, **syntax_options[tag_name])
         
         self._syntax_options = syntax_options
     
@@ -628,8 +631,10 @@ class EnhancedText(TweakableText):
         states = []
         if self.is_read_only():
             states.append("readonly")
-        if self.focus_get() == self:
-            states.append("focus")
+        
+        # Following crashes when a combobox is focused
+        #if self.focus_get() == self:
+        #    states.append("focus")
         
         background = style.lookup("Text", "background", states)
         self.configure(background=background)
