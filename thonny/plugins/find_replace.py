@@ -29,9 +29,7 @@ class FindDialog(tk.Toplevel):
         self.rowconfigure(1, weight=1)
         
         self.codeview = master
-        self.codeview.text.tag_configure("hit", background="Yellow", foreground=None)
         
-        self._init_found_tag_styles()  #sets up the styles used to highlight found strings
         #references to the current set of passive found tags e.g. all words that match the searched term but are not the active string
         self.passive_found_tags = set()
         self.active_found_tag = None    #reference to the currently active (centered) found string
@@ -244,13 +242,13 @@ class FindDialog(tk.Toplevel):
                 search_start_index = self.last_processed_indexes[1];
             
             if self.active_found_tag is not None:
-                self.codeview.text.tag_remove("currentfound", self.active_found_tag[0], self.active_found_tag[1]);  #remove the active tag from the previously found string
+                self.codeview.text.tag_remove("current_found", self.active_found_tag[0], self.active_found_tag[1]);  #remove the active tag from the previously found string
                 self.passive_found_tags.add((self.active_found_tag[0], self.active_found_tag[1]))                   #..and set it to passive instead
                 self.codeview.text.tag_add("found", self.active_found_tag[0], self.active_found_tag[1]);
         
         else: #start a new search, start from the current insert line position
             if self.active_found_tag is not None:
-                self.codeview.text.tag_remove("currentfound", self.active_found_tag[0], self.active_found_tag[1]); #remove the previous active tag if it was present
+                self.codeview.text.tag_remove("current_found", self.active_found_tag[0], self.active_found_tag[1]); #remove the previous active tag if it was present
             for tag in self.passive_found_tags:
                 self.codeview.text.tag_remove("found", tag[0], tag[1]);                                            #and remove all the previous passive tags that were present
             search_start_index = self.codeview.text.index("insert");    #start searching from the current insert position
@@ -270,7 +268,7 @@ class FindDialog(tk.Toplevel):
         self.last_processed_indexes = (wordstart, self.codeview.text.index("%s+1c" % wordstart)); #sets the data about last search      
         self.codeview.text.see(wordstart); #moves the view to the found index
         wordend = self.codeview.text.index("%s+%dc" % (wordstart, len(tofind))); #calculates the end index of the found string
-        self.codeview.text.tag_add("currentfound", wordstart, wordend); #tags the found word as active
+        self.codeview.text.tag_add("current_found", wordstart, wordend); #tags the found word as active
         self.active_found_tag = (wordstart, wordend);
         self.replace_and_find_button.config(state='normal')
         self.replace_button.config(state='normal')
@@ -297,7 +295,7 @@ class FindDialog(tk.Toplevel):
             self.codeview.text.tag_remove("found", tag[0], tag[1]); #removes the passive tags
 
         if self.active_found_tag is not None:
-            self.codeview.text.tag_remove("currentfound", self.active_found_tag[0], self.active_found_tag[1]); #removes the currently active tag   
+            self.codeview.text.tag_remove("current_found", self.active_found_tag[0], self.active_found_tag[1]); #removes the currently active tag   
 
         self.active_found_tag = None
         self.replace_and_find_button.config(state='disabled')
@@ -324,12 +322,6 @@ class FindDialog(tk.Toplevel):
             self.codeview.text.tag_add("found", currentpos, endpos);
             
             currentpos = self.codeview.text.index("%s+1c" % currentpos);
-
-    #initializes the tagging styles 
-    def _init_found_tag_styles(self):
-        self.codeview.text.tag_configure("found", foreground="blue", underline=True) #TODO - style
-        self.codeview.text.tag_configure("currentfound", foreground="white", background="red")  #TODO - style
-
 
 def load_plugin():
     def cmd_open_find_dialog():

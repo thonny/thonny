@@ -715,7 +715,12 @@ class Workbench(tk.Tk):
     
     def _apply_syntax_theme(self, name):
         def get_settings(name):
-            parent, settings = self._syntax_themes[name]
+            try:
+                parent, settings = self._syntax_themes[name]
+            except KeyError:
+                self.report_exception("Can't find theme '%s'" % name)
+                return {}
+            
             if callable(settings):
                 settings = settings()
                 
