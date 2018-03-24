@@ -193,8 +193,7 @@ class EnhancedText(TweakableText):
         self._bind_undo_aids()
         self._bind_mouse_aids()
         
-        self._ui_theme_change_binding = tk._default_root.bind("<<ThemeChanged>>", 
-                                                           self._reload_theme_options, True)
+        self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
         self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
                                                            self._reload_theme_options, True)
         
@@ -643,7 +642,7 @@ class EnhancedText(TweakableText):
         self.set_syntax_options(_syntax_options)
     
     def destroy(self):
-        tk._default_root.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
+        self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
         tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
         TweakableText.destroy(self)
         
