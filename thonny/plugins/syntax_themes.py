@@ -126,7 +126,35 @@ def idle_dark():
         "found"                 : {"foreground" : "", "underline" : True},
         "current_found"         : {"foreground" : "#002240", "background" : "#fbfbfb"},
     }
+
+def desert():
+    normal_fg = "#f0e68c"
+    string_fg = "#ffa0a0"
+    
+    return {
+        "TEXT"          : {"foreground" : normal_fg, "insertbackground" : normal_fg, "background" : "#333333"},
+        "sel"           : {"foreground" : "#000000", "background" : "gray"},
         
+        "number"        : {"foreground" : normal_fg},
+        "definition"    : {"foreground" : "#98fb98"},
+        "string"        : {"foreground" : string_fg},
+        "string3"       : {"foreground" : string_fg},
+        "open_string"   : {"foreground" : string_fg},
+        "open_string3"  : {"foreground" : string_fg},
+        "keyword"       : {"foreground" : "#cc6600"},
+        "builtin"       : {"foreground" : "#519e51"},
+        "comment"       : {"foreground" : "#87ceeb"},
+        
+        "prompt"        : {"foreground" : "#87ceeb"},
+        "stdin"         : {"foreground" : normal_fg},
+        "stdout"        : {"foreground" : "#eeeeee"},
+        "value"         : {"foreground" : "#eeeeee"},
+        "stderr"        : {"foreground" : "#ff3e40"},
+        
+        "found"                 : {"foreground" : "", "underline" : True},
+        "current_found"         : {"foreground" : "#ffffff", "background" : "#333333"},
+    }
+    
 
 
 def load_early_plugin():
@@ -134,6 +162,7 @@ def load_early_plugin():
     get_workbench().add_syntax_theme("Default Dark", None, default_dark)
     get_workbench().add_syntax_theme("IDLE Classic", "Default Light", idle_classic)
     get_workbench().add_syntax_theme("IDLE Dark", "Default Dark", idle_dark)
+    get_workbench().add_syntax_theme("Desert", "Default Dark", desert)
     
     get_workbench().set_default("view.syntax_theme", "Default Light")
     
