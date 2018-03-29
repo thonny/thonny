@@ -19,14 +19,13 @@ import re
 from thonny.globals import get_workbench
 from thonny.shell import ShellText
 from thonny.codeview import CodeViewText
-from thonny.ui_utils import get_style_option, get_style_options
 
 
 class SyntaxColorer:
-    def __init__(self, text, main_font, bold_font):
+    def __init__(self, text):
         self.text = text
         self._compile_regexes()
-        self._config_colors(main_font, bold_font)
+        self._config_tags()
         self._update_scheduled = False
         self._dirty_ranges = set()
         self._use_coloring = True
@@ -57,35 +56,13 @@ class SyntaxColorer:
         
         self.id_regex = re.compile(r"\s+(\w+)", re.S)  # @UndefinedVariable
 
-    def _config_colors(self, main_font, bold_font):
-        default_string_fg = "DarkGreen"
-        default_open_string_bg = "#c3f9d3"
-        
-        self.uniline_tagdefs = {
-            "COMMENT"       : get_style_options("Comment.Code", {"foreground" : "DarkGray"}),
-            "MAGIC_COMMAND" : get_style_options("Magic.Code", {"foreground" : "DarkGray"}),
-            "STRING_CLOSED" : get_style_options("String.Code", {"foreground" : default_string_fg}),
-            "STRING_OPEN"   : get_style_options("OpenString.Code", {"foreground" : default_string_fg, 
-                                                                    "background" : default_open_string_bg}),
-            "KEYWORD"       : get_style_options("Keyword.Code", {"foreground" : "#7f0055"}),
-            "NUMBER"        : get_style_options("Number.Code"),
-            "BUILTIN"       : get_style_options("Builtin.Code"),
-            "DEFINITION"    : get_style_options("Definition.Code"),
-        }
-        
-        self.multiline_tagdefs = {
-            "STRING_CLOSED3": self.uniline_tagdefs["STRING_CLOSED"],
-            "STRING_OPEN3"  : self.uniline_tagdefs["STRING_OPEN"],
-            }
-        
-        for tagdefs in [self.multiline_tagdefs, self.uniline_tagdefs]:
-            for tag, cnf in tagdefs.items():
-                if cnf:
-                    self.text.tag_configure(tag, **cnf)
-        
+    def _config_tags(self):
+        self.uniline_tagdefs = {"comment", "magic", "string", "open_string", 
+                                "keyword", "number", "builtin", "definition"}
+        self.multiline_tagdefs = {"string3", "open_string3"}
         self.text.tag_raise('sel')
-        self.text.tag_raise('STRING_CLOSED3')
-        self.text.tag_raise('STRING_OPEN3')
+        self.text.tag_raise('string3')
+        self.text.tag_raise('open_string3')
 
     def schedule_update(self, event, use_coloring=True):
         self._use_coloring = use_coloring
@@ -149,7 +126,7 @@ class SyntaxColorer:
                         id_match = self.id_regex.match(chars, match_end)
                         if id_match:
                             id_match_start, id_match_end = id_match.span(1)
-                            self.text.tag_add("DEFINITION",
+                            self.text.tag_add("definition",
                                          start + "+%dc" % id_match_start,
                                          start + "+%dc" % id_match_end)
                 
@@ -167,13 +144,13 @@ class SyntaxColorer:
         # Count number of open multiline strings to be able to detect when string gets closed
         self.text.number_of_open_multiline_strings = 0
         
-        interesting_token_types = list(self.multiline_tagdefs.keys()) + ["STRING3"]
+        interesting_token_types = list(self.multiline_tagdefs) + ["string3"]
         for match in self.multiline_regex.finditer(chars):
             for token_type, token_text in match.groupdict().items():
                 if token_text and token_type in interesting_token_types:
                     token_text = token_text.strip()
                     match_start, match_end = match.span(token_type)
-                    if token_type == "STRING3":
+                    if token_type == "string3":
                         if (token_text.startswith('"""') and not token_text.endswith('"""')
                             or token_text.startswith("'''") and not token_text.endswith("'''")
                             or len(token_text) == 3):
@@ -181,15 +158,15 @@ class SyntaxColorer:
                             file_end = int(float(self.text.index("end")))
 
                             if str_end == file_end:
-                                token_type = "STRING_OPEN3"
+                                token_type = "open_string3"
                                 self.text.number_of_open_multiline_strings += 1
                             else:
                                 token_type = None
                         elif len(token_text) >= 4 and token_text[-4] == "\\":
-                            token_type = "STRING_OPEN3"
+                            token_type = "open_string3"
                             self.text.number_of_open_multiline_strings += 1
                         else:
-                            token_type = "STRING_CLOSED3"
+                            token_type = "string3"
                     
                     token_start = start + "+%dc" % match_start
                     token_end = start + "+%dc" % match_end
@@ -247,8 +224,7 @@ def update_coloring(event):
         else:
             return
         
-        text.syntax_colorer = class_(text, get_workbench().get_font("EditorFont"),
-                            get_workbench().get_font("BoldEditorFont"))
+        text.syntax_colorer = class_(text)
     
     text.syntax_colorer.schedule_update(event, get_workbench().get_option("view.syntax_coloring"))
 

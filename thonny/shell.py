@@ -11,7 +11,7 @@ from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
 import tkinter as tk
 from thonny.globals import get_workbench, get_runner
-from thonny.codeview import get_edit_background, PythonText
+from thonny.codeview import PythonText
 from thonny.tktextext import index2line
 import logging
 
@@ -74,7 +74,7 @@ class ShellView (ttk.Frame):
         if not cmd_line.endswith("\n"):
             cmd_line += "\n"
         
-        self.text.submit_command(cmd_line, ("automagic",))
+        self.text.submit_command(cmd_line, ("magic",))
     
     def restart(self):
         self.text.restart()
@@ -96,12 +96,6 @@ class ShellView (ttk.Frame):
 class ShellText(EnhancedTextWithLogging, PythonText):
     
     def __init__(self, master, cnf={}, **kw):
-        if not "background" in kw:
-            kw["background"] = get_edit_background()
-        if not "foreground" in kw:
-            kw["foreground"] = get_style_option("Code", "foreground", "black")
-        if not "insertbackground" in kw:
-            kw["insertbackground"] = kw["foreground"]
             
         EnhancedTextWithLogging.__init__(self, master, cnf, **kw)
         self.bindtags(self.bindtags() + ('ShellText',))
@@ -137,28 +131,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         io_indent = 16
         code_indent = prompt_font.measure(">>> ")
         
-        
-        self.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
-        self.tag_configure("prompt", foreground="purple", font=prompt_font)
-        self.tag_configure("command", foreground=kw["foreground"],
-                           lmargin1=code_indent, lmargin2=code_indent)
-        self.tag_configure("welcome", foreground="DarkGray", font=get_workbench().get_font("EditorFont"))
-        self.tag_configure("automagic", foreground="DarkGray", font=get_workbench().get_font("EditorFont"))
-        self.tag_configure("value", foreground="DarkBlue") 
-        self.tag_configure("error", foreground="Red")
-        
+        self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
-                                font=get_workbench().get_font("IOFont"))
-        self.tag_configure("stdin", foreground=get_style_option("StdIn.Shell", "foreground", "Blue"))
-        self.tag_configure("stdout", foreground=get_style_option("StdOut.Shell", "foreground", "Black"))
-        self.tag_configure("stderr", foreground=get_style_option("StdErr.Shell", "foreground", "Red"))
-        self.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
+                                font="IOFont")
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
         
         self.tag_configure("vertically_spaced", spacing1=vert_spacing)
-        self.tag_configure("inactive", foreground="#aaaaaa")
         
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
         # input starts, output_end shows the end of last output,
@@ -221,10 +201,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self["font"] = get_workbench().get_font("EditorFont")
         self._before_io = True
         if hasattr(msg, "error"):
-            self._insert_text_directly(msg.error + "\n", ("toplevel", "error"))
+            self._insert_text_directly(msg.error + "\n", ("toplevel", "stderr"))
         
         if hasattr(msg, "welcome_text") and msg.welcome_text != self._last_welcome_text:
-            self._insert_text_directly(msg.welcome_text, ("welcome",))
+            self._insert_text_directly(msg.welcome_text, ("comment",))
             self._last_welcome_text = get_workbench().get_option("run.backend_configuration")
             
         if hasattr(msg, "value_info"):
@@ -276,7 +256,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset();
     
     def restart(self):
-        self._insert_text_directly("\n========================= RESTART =========================\n", ("automagic",))
+        self._insert_text_directly("\n========================= RESTART =========================\n", ("magic",))
     
     def intercept_insert(self, index, txt, tags=()):
         if (self._editing_allowed()
@@ -431,7 +411,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
             # remove tags from leftover text
             for tag in ("io", "stdin", "toplevel", "command"):
-                # don't remove automagic, because otherwise I can't know it's auto 
+                # don't remove magic, because otherwise I can't know it's auto 
                 self.tag_remove(tag, end_index, "end")
                 
             self._submit_input(submittable_text)

@@ -15,7 +15,8 @@ except ImportError:
     import ttk
     import tkFont as tkfont
     from Tkinter import TclError
-    
+
+_syntax_options = {}
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
@@ -59,7 +60,8 @@ class TweakableText(tk.Text):
                 
                 pass 
             else:
-                traceback.print_exc()
+                exception("[_dispatch_tk_operation] operation: "  + operation + ", args:" + repr(args))
+                #traceback.print_exc()
             
             return "" # Taken from idlelib.WidgetRedirector
     
@@ -177,6 +179,7 @@ class EnhancedText(TweakableText):
         
         
         TweakableText.__init__(self, master=master, cnf=cnf, **kw)
+        self._syntax_options = {}
         self.tabwidth = 8 # See comments in idlelib.EditorWindow 
         self.indentwidth = 4 
         self.usetabs = False
@@ -189,6 +192,12 @@ class EnhancedText(TweakableText):
         self._bind_selection_aids()
         self._bind_undo_aids()
         self._bind_mouse_aids()
+        
+        self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
+        self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
+                                                           self._reload_theme_options, True)
+        
+        self._reload_theme_options()
     
     def _bind_mouse_aids(self):
         if _running_on_mac():
@@ -244,6 +253,10 @@ class EnhancedText(TweakableText):
         self.bind("<2>", self._on_mouse_click, True)
         self.bind("<3>", self._on_mouse_click, True)
         
+    
+    def tag_reset(self, tag_name):
+        empty_conf = {key : "" for key in self.tag_configure(tag_name)}
+        self.tag_configure(empty_conf)                 
     
     def delete_word_left(self, event):
         self.event_generate('<Meta-Delete>')
@@ -488,6 +501,10 @@ class EnhancedText(TweakableText):
         self.tag_remove("sel", "1.0", tk.END)
         self.tag_add('sel', '1.0', tk.END)
     
+    def set_read_only(self, value):
+        TweakableText.set_read_only(self, value)
+        self._reload_theme_options()
+    
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
         # column logical (meaning use tabs if appropriate) spaces.
@@ -592,6 +609,49 @@ class EnhancedText(TweakableText):
         "Use this for invoking context menu"
         self.focus_set()
 
+    def set_syntax_options(self, syntax_options):
+        # clear old options
+        for tag_name in self._syntax_options:
+            self.tag_reset(tag_name)
+        
+        # apply new options
+        for tag_name in syntax_options:
+            if tag_name == "TEXT":
+                self.configure(**syntax_options[tag_name])
+            else:
+                self.tag_configure(tag_name, **syntax_options[tag_name])
+        
+        self._syntax_options = syntax_options
+    
+    def _reload_theme_options(self, event=None):
+        global _syntax_options
+        
+        style = ttk.Style()
+        
+        states = []
+        if self.is_read_only():
+            states.append("readonly")
+        
+        # Following crashes when a combobox is focused
+        #if self.focus_get() == self:
+        #    states.append("focus")
+        
+        background = style.lookup("Text", "background", states)
+        self.configure(background=background)
+        
+        foreground = style.lookup("Text", "foreground", states)
+        self.configure(foreground=foreground)
+        
+        self.configure(insertbackground=foreground) # TODO: allow this to be themed?
+        
+        self.set_syntax_options(_syntax_options)
+    
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
+        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
+        TweakableText.destroy(self)
+        
+        
 
 class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
@@ -783,6 +843,14 @@ class TextFrame(ttk.Frame):
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
             exception()
+
+def set_syntax_options(syntax_options):
+    global _syntax_options
+    _syntax_options = syntax_options
+    
+    assert tk._default_root is not None
+    tk._default_root.event_generate("<<SyntaxThemeChanged>>")
+     
         
 def get_text_font(text):
     font = text["font"]

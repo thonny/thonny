@@ -105,7 +105,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self._last_window_size = (0,0)
         self._full_size_not_final = True
         self._configure_binding = self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
-        self._update_appearance_binding = self.winfo_toplevel().bind("<<ThemeChanged>>", self._update_appearance, True)
+        self._update_appearance_binding = self.bind("<<ThemeChanged>>", self._update_appearance, True)
         self.bind("<B1-Motion>", self._on_mouse_dragged, True)
         self._update_appearance()
     
@@ -152,7 +152,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
     
     def destroy(self):
         self.winfo_toplevel().unbind("<Configure>", self._configure_binding)
-        self.winfo_toplevel().unbind("<<ThemeChanged>>", self._update_appearance_binding)
+        self.unbind("<<ThemeChanged>>", self._update_appearance_binding)
         tk.PanedWindow.destroy(self)
         
     

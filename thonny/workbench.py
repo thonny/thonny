@@ -88,7 +88,7 @@ class Workbench(tk.Tk):
         
         self._editor_notebook = None
         self._init_fonts()
-        self.update_theme()
+        self.update_themes()
         self._init_window()
         self._init_menu()
         
@@ -268,6 +268,14 @@ class Workbench(tk.Tk):
     
                                 
     def _init_fonts(self):
+        # Remember original standard fonts so that it's possible to reset themes
+        std_fonts = {"TkDefaultFont", "TkTextFont", "TkFixedFont", "TkMenuFont", "TkHeadingFont",
+                     "TkCaptionFont", "TkSmallCaptionFont", "TkIconFont", "TkTooltipFont"}
+        self._original_font_specs = {
+            name : tk_font.nametofont(name).configure() for name in std_fonts
+        }
+        
+        # set up editor and shell fonts
         self.set_default("view.io_font_family", 
                         "Courier" if running_on_mac_os() else "Courier New")
         
@@ -476,10 +484,13 @@ class Workbench(tk.Tk):
 
         
     def _init_theming(self):
+        self._style = ttk.Style()
         self._ui_themes = {}
         self._syntax_themes = {}
         # following will be overwritten by plugins.base_themes
-        self.set_default("theme.ui_theme",
+        self.set_default("view.ui_theme",
+                         "xpnative" if running_on_windows() else "clam")
+        self.set_default("view.ui_theme",
                          "xpnative" if running_on_windows() else "clam")
     
         
@@ -670,7 +681,10 @@ class Workbench(tk.Tk):
     def get_ui_theme_names(self):
         return sorted(self._ui_themes.keys())
     
-    def _register_ui_theme_as_tk_theme(self, name, style):
+    def get_syntax_theme_names(self):
+        return sorted(self._syntax_themes.keys())
+    
+    def _register_ui_theme_as_tk_theme(self, name):
         # collect settings from all ancestors
         total_settings = []
         temp_name = name
@@ -683,30 +697,56 @@ class Workbench(tk.Tk):
                 # reached start of the chain
                 break
         
-        assert temp_name in style.theme_names()
+        assert temp_name in self._style.theme_names()
         # only root-parent is relevant for theme_create,
         # because the method actually doesn't take parent settings into account
         # (https://mail.python.org/pipermail/tkinter-discuss/2015-August/003752.html)
-        style.theme_create(name, temp_name)
+        self._style.theme_create(name, temp_name)
         
         # apply settings starting from root ancestor
         for settings in total_settings:
+            if callable(settings):
+                settings = settings()
+            
             if isinstance(settings, dict):
-                style.theme_settings(name, settings)
+                self._style.theme_settings(name, settings)
             else:
                 for subsettings in settings:
-                    style.theme_settings(name, subsettings)
+                    self._style.theme_settings(name, subsettings)
             
     def _apply_ui_theme(self, name):
-        style = ttk.Style()
+        if name not in self._style.theme_names():
+            self._register_ui_theme_as_tk_theme(name)
         
-        if name not in style.theme_names():
-            self._register_ui_theme_as_tk_theme(name, style)
+        self._style.theme_use(name)
         
-        style.theme_use(name)
+    def _apply_syntax_theme(self, name):
+        def get_settings(name):
+            try:
+                parent, settings = self._syntax_themes[name]
+            except KeyError:
+                self.report_exception("Can't find theme '%s'" % name)
+                return {}
+            
+            if callable(settings):
+                settings = settings()
+                
+            if parent is None:
+                return settings
+            else:
+                result = get_settings(parent)
+                for key in settings:
+                    if key in result:
+                        result[key].update(settings[key])
+                    else:
+                        result[key] = settings[key]
+                return result
+        
+        from thonny import tktextext
+        tktextext.set_syntax_options(get_settings(name))
     
-    def update_theme(self):
-        preferred_theme = self.get_option("theme.ui_theme")
+    def update_themes(self):
+        preferred_theme = self.get_option("view.ui_theme")
         available_themes = self.get_ui_theme_names()
         
         if preferred_theme in available_themes:
@@ -714,7 +754,9 @@ class Workbench(tk.Tk):
         elif 'Enhanced Clam' in available_themes:
             self._apply_ui_theme('Enhanced Clam')
         elif 'Windows' in available_themes:
-            self._apply_ui_theme('Windows') 
+            self._apply_ui_theme('Windows')
+        
+        self._apply_syntax_theme(self.get_option("view.syntax_theme"))
 
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
@@ -817,8 +859,9 @@ class Workbench(tk.Tk):
     
     def get_image(self, filename, tk_name=None):
         
-        if filename in self._image_mapping:
-            filename = self._image_mapping[filename]
+        themed_version = self._style.lookup("IMAGES", filename)
+        if themed_version:
+            filename = themed_version
         
         # if path is relative then interpret it as living in res folder
         if not os.path.isabs(filename):
