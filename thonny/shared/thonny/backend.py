@@ -81,7 +81,7 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
         
-        self._load_shared_modules(init_msg.get("shared_modules", {}))
+        self._load_shared_modules(init_msg["frontend_sys_path"])
         self._load_plugins()
         
         self.send_message(self.create_message("ToplevelResult",
@@ -188,16 +188,10 @@ class VM:
             )
         self.send_message(response)
     
-    def _load_shared_modules(self, mods):
-        # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
-        import importlib.util
-        for name, file in mods:
-            spec = importlib.util.spec_from_file_location(name, file)
-            assert spec is not None
-            mod = importlib.util.module_from_spec(spec)
-            sys.modules[name] = mod
-            spec.loader.exec_module(mod)
-        
+    def _load_shared_modules(self, frontend_sys_path):
+        for name in ["parso", "jedi", "thonnycontrib"]:
+            load_module_from_alternative_path(name, frontend_sys_path)
+
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
         import thonny.plugins
@@ -1458,3 +1452,16 @@ class _PathSet:
     def __iter__(self):
         for item in self._normcase_set:
             yield item
+
+def load_module_from_alternative_path(module_name, path, force=False):
+    from importlib.machinery import PathFinder
+    spec = PathFinder.find_spec(module_name, path)
+    
+    if spec is None and not force:
+        return
+    
+    from importlib.util import module_from_spec
+    module = module_from_spec(spec)
+    sys.modules[module_name] = module
+    if spec.loader is not None:
+        spec.loader.exec_module(module)

@@ -492,7 +492,10 @@ class CPythonProxy(BackendProxy):
             self._close_backend()
             self._start_new_process(cmd)
         
-        self._proc.stdin.write(serialize_message(cmd) + "\n")
+        self._send_msg(cmd)
+    
+    def _send_msg(self, msg):
+        self._proc.stdin.write(serialize_message(msg) + "\n")
         self._proc.stdin.flush()
     
     def send_program_input(self, data):
@@ -522,25 +525,7 @@ class CPythonProxy(BackendProxy):
             
         self._proc = None
         self._message_queue = None
-    
-    
-    def _share_modules(self):
-        """give information about certain modules in this environment
-        which could be reused by backend so that it's not necessary
-        to install these to backend environment"""
-        mods = []
-        try:
-            import parso
-            mods.append(parso)
-        except ImportError:
-            "Older jedi versions didn't use parso"
-        
-        import jedi
-        mods.append(jedi)
-        
-        return [(m.__name__, m.__file__) for m in mods]
-        
-    
+
     def _start_new_process(self, cmd=None):
         this_python = get_frontend_python()
         # deque, because in one occasion I need to put messages back
@@ -622,7 +607,7 @@ class CPythonProxy(BackendProxy):
         )
         
         # send init message
-        self.send_command({"shared_modules" : self._share_modules()})
+        self._send_msg({"frontend_sys_path" : sys.path})
         
         if cmd:
             # Consume the ready message, cmd will get its own result message
