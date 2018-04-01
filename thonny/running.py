@@ -514,17 +514,23 @@ class CPythonProxy(BackendProxy):
         self._proc = None
         self._message_queue = None
     
-    def _prepare_jedi(self):
-        """Make jedi available for the backend"""
-        
-        # Copy jedi
-        import jedi
-        dirname = os.path.join(THONNY_USER_DIR, "jedi_" + str(jedi.__version__))
-        if not os.path.exists(dirname):
-            shutil.copytree(jedi.__path__[0], os.path.join(dirname, "jedi"))
-        return dirname
     
-        # TODO: clean up old versions
+    def _share_modules(self):
+        """give information about certain modules in this environment
+        which could be reused by backend so that it's not necessary
+        to install these to backend environment"""
+        mods = []
+        try:
+            import parso
+            mods.append(parso)
+        except ImportError:
+            "Older jedi versions didn't use parso"
+        
+        import jedi
+        mods.append(jedi)
+        
+        return [(m.__name__, m.__file__) for m in mods]
+        
     
     def _start_new_process(self, cmd=None):
         this_python = get_frontend_python()
@@ -565,13 +571,6 @@ class CPythonProxy(BackendProxy):
             except:
                 logging.exception("Can't find Tcl/Tk library")
         
-        # If the back-end interpreter is something else than front-end's one,
-        # then it may not have jedi installed. 
-        # In this case fffer front-end's jedi for the back-end
-        if self._executable != get_frontend_python(): 
-            # I don't want to use PYTHONPATH for making jedi available
-            # because that would add it to the front of sys.path
-            my_env["JEDI_LOCATION"] = self._prepare_jedi()
         
         if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
@@ -613,6 +612,9 @@ class CPythonProxy(BackendProxy):
             creationflags=creationflags
         )
         
+        # send init message
+        self.send_command({"shared_modules" : self._share_modules()})
+        
         if cmd:
             # Consume the ready message, cmd will get its own result message
             ready_line = self._proc.stdout.readline()
@@ -623,8 +625,6 @@ class CPythonProxy(BackendProxy):
             #ready_msg = parse_message(ready_line)
             #self._sys_path = ready_msg["path"]
             #debug("Backend ready: %s", ready_msg)
-        
-        
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())

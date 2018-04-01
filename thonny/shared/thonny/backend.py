@@ -51,6 +51,8 @@ class VM:
         self._current_executor = None
         self._io_level = 0
         
+        init_msg = self._fetch_command()
+        
         original_argv = sys.argv.copy()
         original_path = sys.path.copy()
         
@@ -71,10 +73,6 @@ class VM:
             sys.argv[:] = [""] # empty "script name"
             sys.path.insert(0, "")   # current dir
         
-        # add jedi
-        if "JEDI_LOCATION" in os.environ:
-            sys.path.append(os.environ["JEDI_LOCATION"])
-    
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
             if not key.startswith("__") or key in special_names_to_remove:
@@ -83,6 +81,7 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
         
+        self._load_shared_modules(init_msg.get("shared_modules", {}))
         self._load_plugins()
         
         self.send_message(self.create_message("ToplevelResult",
@@ -189,6 +188,16 @@ class VM:
             )
         self.send_message(response)
     
+    def _load_shared_modules(self, mods):
+        # https://docs.python.org/3/library/importlib.html#importing-a-source-file-directly
+        import importlib.util
+        for name, file in mods:
+            spec = importlib.util.spec_from_file_location(name, file)
+            assert spec is not None
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules[name] = mod
+            spec.loader.exec_module(mod)
+        
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
         import thonny.plugins
@@ -228,6 +237,7 @@ class VM:
             signal.signal(signal.SIGBREAK, signal_handler)
         else:
             signal.signal(signal.SIGINT, signal_handler)        
+    
     
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
@@ -368,6 +378,7 @@ class VM:
         error = None
         try:
             import jedi
+            self._debug(jedi.__file__, sys.path)
             with warnings.catch_warnings():
                 script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
                 completions = self._export_completions(script.completions())
