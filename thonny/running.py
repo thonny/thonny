@@ -48,6 +48,16 @@ class Runner:
         self._postponed_commands = []
         
         self._check_alloc_console()
+        
+        # temporary
+        self._remove_obsolete_jedi_copies()
+    
+    def _remove_obsolete_jedi_copies(self):
+        """Thonny 2.1 used to copy jedi in order to make it available
+        for the backend"""
+        for item in os.listdir(THONNY_USER_DIR):
+            if item.startswith("jedi_0."):
+                shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
     
     def start(self):
         self.restart_backend(False, True)
@@ -440,7 +450,6 @@ class CPythonProxy(BackendProxy):
         self._sys_path = []
         self._gui_update_loop_id = None
         self.in_venv = None
-        
         self._start_new_process()
     
     def fetch_next_message(self):
