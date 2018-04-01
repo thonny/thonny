@@ -249,7 +249,6 @@ class Runner:
                 
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
-                self.restart_backend(True)
                 return
             
             if msg.get("SystemExit", False):
@@ -290,7 +289,7 @@ class Runner:
         except:
             logging.exception("Failed retrieving backend faults")
                 
-        err = err.strip() + "\nResetting ...\n"
+        err = err.strip() + "\nUse 'Stop/Restart' to restart the backend ...\n"
         
         get_workbench().event_generate("ProgramOutput",
                                        stream_name="stderr",
