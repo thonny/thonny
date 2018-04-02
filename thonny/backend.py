@@ -51,6 +51,8 @@ class VM:
         self._current_executor = None
         self._io_level = 0
 
+        init_msg = self._fetch_command()
+
         original_argv = sys.argv.copy()
         original_path = sys.path.copy()
 
@@ -71,10 +73,6 @@ class VM:
             sys.argv[:] = [""] # empty "script name"
             sys.path.insert(0, "")   # current dir
 
-        # add jedi
-        if "JEDI_LOCATION" in os.environ:
-            sys.path.append(os.environ["JEDI_LOCATION"])
-
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
             if not key.startswith("__") or key in special_names_to_remove:
@@ -83,6 +81,7 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
+        self._load_shared_modules(init_msg["frontend_sys_path"])
         self._load_plugins()
 
         self.send_message(self.create_message("ToplevelResult",
@@ -189,37 +188,40 @@ class VM:
             )
         self.send_message(response)
 
+    def _load_shared_modules(self, frontend_sys_path):
+        for name in ["parso", "jedi", "thonnycontrib"]:
+            load_module_from_alternative_path(name, frontend_sys_path)
+
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
-        import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
+        import thonny.plugins.backend
+        self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend",
                                      load_function_name=load_function_name)
 
         # 3rd party plugins from namespace package
         try:
-            import thonnycontrib  # @UnresolvedImport
+            import thonnycontrib.backend  # @UnresolvedImport
         except ImportError:
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
+            self._load_plugins_from_path(thonnycontrib.backend.__path__, "thonnycontrib.backend",
                                      load_function_name=load_function_name)
 
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
-            if module_name.endswith("backend"):
-                try:
-                    m = importlib.import_module(module_name)
-                    if hasattr(m, load_function_name):
-                        f = getattr(m, load_function_name)
-                        sig = inspect.signature(f)
-                        if len(sig.parameters) == 0:
-                            f()
-                        else:
-                            f(self)
-                except:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
-
+            try:
+                m = importlib.import_module(module_name)
+                if hasattr(m, load_function_name):
+                    f = getattr(m, load_function_name)
+                    sig = inspect.signature(f)
+                    if len(sig.parameters) == 0:
+                        f()
+                    else:
+                        f(self)
+            except:
+                logging.exception("Failed loading plugin '" + module_name + "'")
+                
     def _install_signal_handler(self):
         def signal_handler(signal, frame):
             raise KeyboardInterrupt("Execution interrupted")
@@ -227,7 +229,8 @@ class VM:
         if os.name == 'nt':
             signal.signal(signal.SIGBREAK, signal_handler)
         else:
-            signal.signal(signal.SIGINT, signal_handler)
+            signal.signal(signal.SIGINT, signal_handler)        
+
 
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
@@ -368,6 +371,7 @@ class VM:
         error = None
         try:
             import jedi
+            self._debug(jedi.__file__, sys.path)
             with warnings.catch_warnings():
                 script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
                 completions = self._export_completions(script.completions())
@@ -1655,3 +1659,16 @@ class _PathSet:
     def __iter__(self):
         for item in self._normcase_set:
             yield item
+
+def load_module_from_alternative_path(module_name, path, force=False):
+    from importlib.machinery import PathFinder
+    spec = PathFinder.find_spec(module_name, path)
+
+    if spec is None and not force:
+        return
+
+    from importlib.util import module_from_spec
+    module = module_from_spec(spec)
+    sys.modules[module_name] = module
+    if spec.loader is not None:
+        spec.loader.exec_module(module)

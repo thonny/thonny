@@ -53,7 +53,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         filename = filedialog.askopenfilename(**options)
         
         if filename:
-            self._configuration_variable.set("Python ({})".format(filename))
+            self._configuration_variable.set(filename)
     
     
     def _get_interpreters(self):
