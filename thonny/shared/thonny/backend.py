@@ -194,18 +194,18 @@ class VM:
 
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
-        import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
+        import thonny.plugins.backend
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.backend",
                                      load_function_name=load_function_name)
         
         # 3rd party plugins from namespace package
         try:
-            import thonnycontrib  # @UnresolvedImport
+            import thonnycontrib.backend  # @UnresolvedImport
         except ImportError:
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
+            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.backend",
                                      load_function_name=load_function_name)
         
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
