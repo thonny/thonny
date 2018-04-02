@@ -195,7 +195,7 @@ class VM:
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
         import thonny.plugins.backend
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.backend",
+        self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend",
                                      load_function_name=load_function_name)
         
         # 3rd party plugins from namespace package
@@ -205,23 +205,22 @@ class VM:
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.backend",
+            self._load_plugins_from_path(thonnycontrib.backend.__path__, "thonnycontrib.backend",
                                      load_function_name=load_function_name)
         
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
-            if module_name.endswith("backend"):
-                try:
-                    m = importlib.import_module(module_name)
-                    if hasattr(m, load_function_name):
-                        f = getattr(m, load_function_name)
-                        sig = inspect.signature(f)
-                        if len(sig.parameters) == 0:
-                            f()
-                        else:
-                            f(self)
-                except:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
+            try:
+                m = importlib.import_module(module_name)
+                if hasattr(m, load_function_name):
+                    f = getattr(m, load_function_name)
+                    sig = inspect.signature(f)
+                    if len(sig.parameters) == 0:
+                        f()
+                    else:
+                        f(self)
+            except:
+                logging.exception("Failed loading plugin '" + module_name + "'")
                 
     def _install_signal_handler(self):
         def signal_handler(signal, frame):
