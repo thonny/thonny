@@ -96,6 +96,35 @@ def clean(window_background="#1D291A",
             }
         },
         
+        "TEntry" : {
+            "configure" : {
+                "fieldbackground" : code_background,
+                "lightcolor" : "LightGreen",
+            },
+            "map" : {
+                "background" : [("readonly", code_background)],
+                "bordercolor" : [],
+                "lightcolor" : [],
+                "darkcolor" : []
+            }
+        },
+        
+        "TCombobox" : {
+            "configure" : {
+                "background" : code_background,
+                "fieldbackground" : code_background,
+                "arrowcolor" : foreground,
+                "foreground" : foreground,
+                "padding" :12,
+            },
+            "map" : {
+                "background" : [("active", code_background)],
+                "fieldbackground" : [],
+                "foreground" : [],
+                "arrowcolor" : []
+            }
+        },
+        
         "TScrollbar" : {
             "configure" : {
                 "gripcount" : 0,
@@ -142,12 +171,12 @@ def clean(window_background="#1D291A",
         
         "TButton" : {
             "configure" : {
-                "background" : "gray" # TODO:
+                "background" : code_background,
+                "foreground" : foreground,
             },
             
             "map" : {
-                "background" : [("disabled", "red"), # TODO:
-                                ("!disabled", "gray")]            
+                "background" : [("disabled", "gray")]            
             }
         },
         
@@ -161,9 +190,16 @@ def clean(window_background="#1D291A",
             }
         },
         
+        "TLabel" : {
+            "configure"  : {
+                "foreground" : FG
+            }
+        },
+        
         "Text" : {
             "configure" : {
                 "background" : code_background,
+                "foreground" : foreground
             },
         },
         

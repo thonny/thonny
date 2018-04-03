@@ -69,7 +69,7 @@ class PipDialog(tk.Toplevel):
         
         name_font = tk.font.nametofont("TkDefaultFont").copy()
         name_font.configure(size=16)
-        self.search_box = ttk.Entry(header_frame, background=ui_utils.CALM_WHITE)
+        self.search_box = ttk.Entry(header_frame)
         self.search_box.grid(row=1, column=0, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
         
