@@ -75,6 +75,8 @@ def _text_settings():
                 "background" : "SystemWindow",
                 "foreground" : "SystemWindowText"
             },
+        },
+        "Syntax.Text" : {
             "map" : {
                 "background" : [("readonly", "Yellow")]
             }

@@ -563,6 +563,37 @@ class ScrollableFrame(tk.Frame):
         size = (self.canvas.winfo_reqwidth() , self.interior.winfo_reqheight())
         self.canvas.config(scrollregion="0 0 %s %s" % size)
         
+class ThemedListbox(tk.Listbox):
+    def __init__(self, master=None, cnf={}, **kw):
+        super().__init__(master=master, cnf=cnf, **kw)
+    
+        self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", 
+                                                  self._reload_theme_options, True)
+        self._reload_theme_options()
+        
+    def _reload_theme_options(self, event=None):
+        style = ttk.Style()
+        
+        states = []
+        if self["state"] == "disabled":
+            states.append("disabled")
+        
+        # Following crashes when a combobox is focused
+        #if self.focus_get() == self:
+        #    states.append("focus")
+        
+        background = style.lookup(self.get_style_name(), "background", states)
+        self.configure(background=background)
+        
+        foreground = style.lookup(self.get_style_name(), "foreground", states)
+        self.configure(foreground=foreground)
+    
+    def get_style_name(self):
+        return "Listbox"
+    
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
+        super().destroy()
 
 class TtkDialog(Dialog):
     def buttonbox(self):

@@ -88,7 +88,7 @@ class PipDialog(tk.Toplevel):
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
         
-        self.listbox = tk.Listbox(listframe, activestyle="dotbox", 
+        self.listbox = ui_utils.ThemedListbox(listframe, activestyle="dotbox", 
                                   width=20, height=10,
                                   background=ui_utils.CALM_WHITE,
                                   selectborderwidth=0, relief="flat",
@@ -130,8 +130,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
         default_font = tk.font.nametofont("TkDefaultFont")
-        self.info_text.configure(background=ui_utils.get_main_background(),
-                                 font=default_font,
+        self.info_text.configure(font=default_font,
                                  wrap="word")
 
         bold_font = default_font.copy()
