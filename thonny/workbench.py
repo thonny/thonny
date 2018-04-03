@@ -742,8 +742,8 @@ class Workbench(tk.Tk):
                         result[key] = settings[key]
                 return result
         
-        from thonny import tktextext
-        tktextext.set_syntax_options(get_settings(name))
+        from thonny import codeview
+        codeview.set_syntax_options(get_settings(name))
     
     def update_themes(self):
         preferred_theme = self.get_option("view.ui_theme")
