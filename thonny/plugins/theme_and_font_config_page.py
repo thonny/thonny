@@ -9,7 +9,7 @@ import textwrap
 from thonny.codeview import CodeView
 
 
-class FontConfigurationPage(ConfigurationPage):
+class ThemeAndFontConfigurationPage(ConfigurationPage):
     
     def __init__(self, master):
         
@@ -119,4 +119,4 @@ class FontConfigurationPage(ConfigurationPage):
         ))
 
 def load_plugin():
-    get_workbench().add_configuration_page("Theme & Font", FontConfigurationPage)
+    get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)
