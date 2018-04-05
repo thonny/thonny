@@ -11,7 +11,7 @@ from thonny.memory import VariablesFrame
 from thonny import ast_utils, memory, misc_utils, ui_utils
 from thonny.misc_utils import shorten_repr
 import ast
-from thonny.codeview import CodeView, get_readonly_background
+from thonny.codeview import CodeView
 from tkinter.messagebox import showinfo, showerror
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
@@ -312,7 +312,7 @@ class FrameVisualizer:
                 
             self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
         else:
-            self._text.tag_configure('focus', background=get_readonly_background(), borderwidth=1, relief=tk.SOLID)
+            self._text.tag_configure('focus', background="", borderwidth=1, relief=tk.SOLID)
             
         self._expression_box.update_expression(msg, frame_info)
 

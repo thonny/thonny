@@ -51,6 +51,8 @@ class VM:
         self._current_executor = None
         self._io_level = 0
 
+        init_msg = self._fetch_command()
+
         original_argv = sys.argv.copy()
         original_path = sys.path.copy()
 
@@ -71,10 +73,6 @@ class VM:
             sys.argv[:] = [""] # empty "script name"
             sys.path.insert(0, "")   # current dir
 
-        # add jedi
-        if "JEDI_LOCATION" in os.environ:
-            sys.path.append(os.environ["JEDI_LOCATION"])
-
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
             if not key.startswith("__") or key in special_names_to_remove:
@@ -83,6 +81,7 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
+        self._load_shared_modules(init_msg["frontend_sys_path"])
         self._load_plugins()
 
         self.send_message(self.create_message("ToplevelResult",
@@ -189,37 +188,40 @@ class VM:
             )
         self.send_message(response)
 
+    def _load_shared_modules(self, frontend_sys_path):
+        for name in ["parso", "jedi", "thonnycontrib"]:
+            load_module_from_alternative_path(name, frontend_sys_path)
+
     def _load_plugins(self, load_function_name="load_plugin"):
         # built-in plugins 
-        import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
+        import thonny.plugins.backend
+        self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend",
                                      load_function_name=load_function_name)
 
         # 3rd party plugins from namespace package
         try:
-            import thonnycontrib  # @UnresolvedImport
+            import thonnycontrib.backend  # @UnresolvedImport
         except ImportError:
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
+            self._load_plugins_from_path(thonnycontrib.backend.__path__, "thonnycontrib.backend",
                                      load_function_name=load_function_name)
 
     def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
-            if module_name.endswith("backend"):
-                try:
-                    m = importlib.import_module(module_name)
-                    if hasattr(m, load_function_name):
-                        f = getattr(m, load_function_name)
-                        sig = inspect.signature(f)
-                        if len(sig.parameters) == 0:
-                            f()
-                        else:
-                            f(self)
-                except:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
-
+            try:
+                m = importlib.import_module(module_name)
+                if hasattr(m, load_function_name):
+                    f = getattr(m, load_function_name)
+                    sig = inspect.signature(f)
+                    if len(sig.parameters) == 0:
+                        f()
+                    else:
+                        f(self)
+            except:
+                logging.exception("Failed loading plugin '" + module_name + "'")
+                
     def _install_signal_handler(self):
         def signal_handler(signal, frame):
             raise KeyboardInterrupt("Execution interrupted")
@@ -227,7 +229,8 @@ class VM:
         if os.name == 'nt':
             signal.signal(signal.SIGBREAK, signal_handler)
         else:
-            signal.signal(signal.SIGINT, signal_handler)
+            signal.signal(signal.SIGINT, signal_handler)        
+
 
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
@@ -368,6 +371,7 @@ class VM:
         error = None
         try:
             import jedi
+            self._debug(jedi.__file__, sys.path)
             with warnings.catch_warnings():
                 script = jedi.Script(cmd.source, cmd.row, cmd.column, cmd.filename)
                 completions = self._export_completions(script.completions())
@@ -920,6 +924,7 @@ class FancyTracer(Executor):
         self._custom_stack[-1].last_event_args = args
 
         # Select the correct method according to the command
+        """
         tester = getattr(self, "_cmd_" + self._current_command.command + "_completed")
 
         value = self._vm.export_value(args["value"] if event == "after_expression" else None)
@@ -940,69 +945,90 @@ class FancyTracer(Executor):
         else:
             # Save message not sent to user
             self._save_debugger_progress_message(frame, value, self._current_command)
+        """
+        value = self._vm.export_value(args["value"] if event == "after_expression" else None)
+        if value is not None:
+            self._custom_stack[-1].assigned_values[focus] = value["repr"]
+
+        self._save_debugger_progress_message(frame, value, self._current_command)
+
+        #self._debug("Current command before handling browsing:", self._current_command)
+        #self._debug("Is command automatic:", getattr(self._current_command, "automatic", False))
+        #if self._current_command.state != None and "after_" in self._current_command.state and getattr(self._current_command, "automatic", False):
+        #    self._debug("Removing", self._current_command)
+        #    self._send_and_fetch_message(self._past_messages[-1])
+        #    del self._past_messages[-1]
+        try:
+            self._handle_message_selection()
+        except Exception as e:
+            self._debug(traceback.format_exc())
 
 
-    def _handle_browsing_past(self):
+    # Todo: Fix some bugs encountered when stepping over in past (gets stuck in certain conditions / steps too far)
+    # Some of those bugs may be caused by front-end
+    # Todo: Do not save or skip some messages while stepping back (stepping backwards needs more steps than forward)
+    def _handle_message_selection(self):
         """
         For handling reversible debugging
         :return:
         """
         self._debug("Initiated stepping in History")
-        # take the second-last stack, because the last stack is the current state
+
         progress = len(self._past_messages) - 1
+        direction = "present"
+
         while progress < len(self._past_messages):
-            direction = "present"
+            current_command, current_frame = self._get_command_and_frame_from_history(progress)
+            frame = current_frame,
+            event = current_frame.last_event
+            args = current_frame.last_event_args
+            focus = current_frame.last_event_focus
+            cmd = current_command
 
-            # Determine the correct message
-            if self._current_command.command == "back" and progress != 0:  # Step back
-                self._debug("Stepped back")
-                progress -= 1
-                direction = "past"
+            self._debug("Current direction:",direction)
 
-            # Todo: Check if needed
-            # elif self._current_command.command == "back_over":
-            #     self._debug("Stepped back over")
-            #     progress -= 1 #if self._past_messages[progress] else 0
-            #     while not self._past_messages[progress] and progress < len(self._past_messages):
-            #         self._debug("Skipped message not sent to user")
-            #         progress -= 1
-            #     direction = "past"
+            tester = getattr(self, "_cmd_" + self._current_command.command + "_completed")
+            new_progress = tester(frame, event, args, focus, cmd, progress)
 
-            # Todo: Fix case where step over gets stuck (f6 f6 f9 f9 f9 f9 f6 f6)
-            elif self._current_command.command == "exec":  # Step over
-                self._debug("Stepped over")
-                current_command, current_frame = self._get_frame_and_command_from_history(progress)
-
-                while progress < len(self._past_messages) -1 and (not self._cmd_exec_completed(current_frame,
-                                                   current_frame.last_event,
-                                                   current_frame.last_event_args,
-                                                   current_frame.last_event_focus,
-                                                   current_command) or current_command.state == None or "before_" not in current_command.state): #and progress < len(self._past_messages):
-                    #self._debug("progress while processing:", progress)
-                    progress += 1
-                    current_command, current_frame = self._get_frame_and_command_from_history(progress)
-
-            elif self._current_command.command == "step":# Step
-                self._debug("Stepped")
-                progress += 1
-            elif self._current_command.command == "run_to_before":
-                #self._debug("Last_event:", self._get_frame_and_command_from_history(progress)[1].last_event)
-                while "before_" not in self._get_frame_and_command_from_history(progress)[1].last_event and progress < len(self._past_messages) - 1:
-                    self._debug("Skipped to before")
-                    progress += 1
-
-            # Send message
-            # direction='past' is for avoiding stepping back forward in case of run_to_before command
-            #self._debug("Current command before sending:", self._current_command.command)
-            self._send_and_fetch_message(self._past_messages[progress], direction)
-
-            # Terminate history browsing when stepping out of history scope
-            if progress == len(self._past_messages) - 1 and self._current_command.command in ("exec", "step"):
-                #self._debug("progress before termination:", progress)
+            self._debug("Current command after new progress:", self._current_command)
+            self._debug("Progress command after new progress:", cmd)
+            self._debug("Current progress after new progress:", new_progress, ", changed by:", new_progress - progress)
+            if direction == "past":
+                direction = "present"
+            if self._current_command.command in ("exec", "run_to_before") and new_progress >= len(self._past_messages):
+                self._debug("Exiting history browsing for", self._current_command.command,"continuation")
                 break
+            elif new_progress >= len(self._past_messages): # Reached end of history, ask for new command
+                self._debug("Progress exceeded")
+                progress = len(self._past_messages)-1
+                self._send_and_fetch_message(self._past_messages[progress], direction)
+                progress += 1
+            elif new_progress < 0: # Reached start of sent messages. Ask for new command.
+                self._debug("Reached first command")
+                progress = 0
+                self._send_and_fetch_message(self._past_messages[progress], direction)
+            elif progress < new_progress: # Stepped forward in history
+                self._debug("Progress has increased")
+                progress = new_progress
+                self._send_and_fetch_message(self._past_messages[progress], direction)
+            elif progress > new_progress: # Stepped back
+                self._debug("Progress has decreased")
+                progress = new_progress
+                direction = "past"
+                self._send_and_fetch_message(self._past_messages[progress], direction)
+            elif progress == new_progress: # New command hasn't altered the current progress. Ask for new command
+                self._debug("Progress hasn't changed")
+                self._send_and_fetch_message(self._past_messages[progress], direction)
+                #progress += 1
+            else:
+                self._debug("Unhandled case")
+                progress = new_progress
+                self._send_and_fetch_message(self._past_messages[progress], direction)
 
 
-    def _get_frame_and_command_from_history(self, progress):
+        self._debug("Stepping in history ended")
+
+    def _get_command_and_frame_from_history(self, progress):
         return self._past_messages[progress]["command"], self._past_messages[progress]["stack"][-1]
 
 
@@ -1032,7 +1058,7 @@ class FancyTracer(Executor):
         else:
             exception_lower_stack_description = None
             exception_msg = None
-        #self._debug("Saved command:", command)
+        self._debug("Saved command:", command)
         self._past_messages.append(
             self._vm.create_message("DebuggerProgress",
                                     command=command, #self._current_command,#.command,
@@ -1048,9 +1074,10 @@ class FancyTracer(Executor):
         message["time"] = time
         self._vm.send_message(message)
 
+        self._debug("Waiting for command")
         # Fetch next debugger command
         self._current_command = self._vm._fetch_command()
-        self._debug("got command:", self._current_command)
+        self._debug("Got command:", self._current_command)
         # get non-progress commands out our way
         self._respond_to_inline_commands()
         assert isinstance(self._current_command, DebuggerCommand)
@@ -1153,106 +1180,148 @@ class FancyTracer(Executor):
 
 
 
-    def _cmd_exec_completed(self, frame, event, args, focus, cmd):
+    def _cmd_exec_completed(self, frame, event, args, focus, cmd, progress):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
         """
-
+        self._debug("exec has been chosen")
         # it's meant to be executed in before* state, but if we're not there
         # we'll step there
-
-        if cmd.state not in ("before_expression", "before_expression_again",
-                             "before_statement", "before_statement_again"):
-            return self._cmd_step_completed(frame, event, args, focus, cmd)
-
-        if type(frame) == FrameInfo:
-            frame_id = frame.id
-        else:
-            frame_id = id(frame)
-
-        self._debug("Frame ids:", frame_id, cmd.frame_id)
-
-        if frame_id == cmd.frame_id:
-            if focus.is_smaller_in(cmd.focus):
-                # we're executing a child of command focus,
-                # keep running
-                return False
-
-            elif focus == cmd.focus:
-
-                if event.startswith("before_"):
-                    # we're just starting
-                    return False
-
-                elif (event == "after_expression"
-                      and cmd.state in ("before_expression", "before_expression_again")
-                      or
-                      event == "after_statement"
-                      and cmd.state in ("before_statement", "before_statement_again")):
-                    # Normal completion
-                    # Maybe there was an exception, but this is forgotten now
-                    cmd._unhandled_exception = False
-                    self._debug("Exec normal")
-                    return True
+        while progress < len(self._past_messages):
+            self._debug("progress in exec:", progress)
+            current_command, current_frame = self._get_command_and_frame_from_history(progress)
+            frame = current_frame
+            event = current_frame.last_event
+            args = current_frame.last_event_args
+            focus = current_frame.last_event_focus
+            cmd = current_command
 
 
-                elif (cmd.state in ("before_statement", "before_statement_again")
-                      and event == "after_expression"):
-                    # Same code range can contain expression statement and expression.
-                    # Here we need to run just a bit more
-                    return False
+            if cmd.state not in ("before_expression", "before_expression_again",
+                                 "before_statement", "before_statement_again"):
+                self._debug("cmd state in exec:", cmd.state)
+                progress += 1
+                continue
+                #return self._cmd_step_completed(frame, event, args, focus, cmd, progress)
+
+            if type(frame) == FrameInfo:
+                frame_id = frame.id
+            else:
+                frame_id = id(frame)
+
+            self._debug("Frame ids:", frame_id, cmd.frame_id)
+
+            if frame_id == cmd.frame_id:
+                if focus.is_smaller_in(cmd.focus):
+                    # we're executing a child of command focus,
+                    # keep running
+                    progress += 1
+                    continue
+
+                elif focus == cmd.focus:
+
+                    if event.startswith("before_"):
+                        # we're just starting
+                        progress += 1
+                        continue
+
+                    elif (event == "after_expression"
+                          and cmd.state in ("before_expression", "before_expression_again")
+                          or
+                          event == "after_statement"
+                          and cmd.state in ("before_statement", "before_statement_again")):
+                        # Normal completion
+                        # Maybe there was an exception, but this is forgotten now
+                        cmd._unhandled_exception = False
+                        self._debug("Exec normal")
+                        return progress
+
+
+                    elif (cmd.state in ("before_statement", "before_statement_again")
+                          and event == "after_expression"):
+                        # Same code range can contain expression statement and expression.
+                        # Here we need to run just a bit more
+                        progress += 1
+                        continue
+
+                    else:
+                        # shouldn't be here
+                        raise AssertionError("Unexpected state in responding to " + str(cmd))
 
                 else:
-                    # shouldn't be here
-                    raise AssertionError("Unexpected state in responding to " + str(cmd))
+                    # We're outside of starting focus, assumedly because of an exception
+                    self._debug("Exec outside", cmd.focus, focus)
+                    return progress
 
             else:
-                # We're outside of starting focus, assumedly because of an exception
-                self._debug("Exec outside", cmd.focus, focus)
-                return True
-
-        else:
-            # We're in another frame
-            if self._frame_is_alive(cmd.frame_id):
-                # We're in a successor frame, keep running
-                return False
-            else:
-                # Original frame has completed, assumedly because of an exception
-                # We're done
-                self._debug("Exec wrong frame")
-                return True
+                # We're in another frame
+                if self._frame_is_alive(cmd.frame_id):
+                    # We're in a successor frame, keep running
+                    progress += 1
+                    continue
+                else:
+                    # Original frame has completed, assumedly because of an exception
+                    # We're done
+                    self._debug("Exec wrong frame")
+                    return progress
+        self._debug("exec progress has exceeded messages list")
+        return progress
 
 
 
-    def _cmd_step_completed(self, frame, event, args, focus, cmd):
-        return True
+    def _cmd_step_completed(self, frame, event, args, focus, cmd, progress):
+        self._debug("step has been chosen")
+        self._debug("increasing progress:", progress + 1)
+        #if progress != 0:
+        return progress + 1
+        #else: return progress
 
-    def _cmd_back_completed(self, frame, event, args, focus, cmd):
-        return True
+    def _cmd_back_completed(self, frame, event, args, focus, cmd, progress):
+        self._debug("back has been chosen")
+        self._debug("decreasing progress:", progress - 1)
+        return progress - 1
 
-    def _cmd_back_over_completed(self, frame, event, args, focus, cmd):
-        return True
+    #def _cmd_back_over_completed(self, frame, event, args, focus, cmd):
+    #    return True
 
-    def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
-        return event.startswith("before")
+    def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd, progress):
+        self._debug("run to before has been chosen")
+        self._debug("Current event in run to before:", event)
+        while progress < len(self._past_messages) and not event.startswith("before"):
+            current_command, current_frame = self._get_command_and_frame_from_history(progress)
+            event = current_frame.last_event
+            self._debug("Current event in run to before2:", event)
 
-    def _cmd_out_completed(self, frame, event, args, focus, cmd):
+            progress += 1
+        return progress
+
+    def _cmd_out_completed(self, frame, event, args, focus, cmd, progress):
         """Complete current frame"""
-        return (
+        self._debug("out has been chosen")
+        while progress < len(self._past_messages) and not (
             # the frame has completed
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level 
-            or id(frame) == cmd.frame_id and focus.contains_smaller(cmd.focus)
-        )
+            or id(frame) == cmd.frame_id and focus.contains_smaller(cmd.focus)):
 
+            current_command, current_frame = self._get_command_and_frame_from_history(progress)
+            event = current_frame.last_event
 
-    def _cmd_line_completed(self, frame, event, args, focus, cmd):
+            progress += 1
+        return progress
 
-        return (event == "before_statement"
+    def _cmd_line_completed(self, frame, event, args, focus, cmd, progress):
+        self._debug("line has been chosen")
+        while progress < len(self._past_messages) and not (event == "before_statement"
             and os.path.normcase(frame.f_code.co_filename) == os.path.normcase(cmd.target_filename)
             and focus.lineno == cmd.target_lineno
-            and (focus != cmd.focus or id(frame) != cmd.frame_id))
+            and (focus != cmd.focus or id(frame) != cmd.frame_id)):
+            current_command, current_frame = self._get_command_and_frame_from_history(progress)
+            event = current_frame.last_event
+
+            progress += 1
+        return progress
 
 
     def _frame_is_alive(self, frame_id):
@@ -1590,3 +1659,16 @@ class _PathSet:
     def __iter__(self):
         for item in self._normcase_set:
             yield item
+
+def load_module_from_alternative_path(module_name, path, force=False):
+    from importlib.machinery import PathFinder
+    spec = PathFinder.find_spec(module_name, path)
+
+    if spec is None and not force:
+        return
+
+    from importlib.util import module_from_spec
+    module = module_from_spec(spec)
+    sys.modules[module_name] = module
+    if spec.loader is not None:
+        spec.loader.exec_module(module)

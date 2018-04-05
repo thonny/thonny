@@ -1,12 +1,5 @@
 import os.path
 import sys
-import runpy
-
-try:
-    runpy.run_module("thonny.customize", run_name="__main__")
-except ImportError:
-    pass
-
 
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))

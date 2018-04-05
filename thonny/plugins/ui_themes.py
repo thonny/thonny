@@ -1,5 +1,6 @@
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_linux
+from thonny.ui_utils import CALM_WHITE
 
 def _treeview_settings():
     light_blue = "#ADD8E6" 
@@ -62,6 +63,20 @@ def _menu_settings():
         "Menubar" : {
             "configure" : {
                 "activeborderwidth" : 0
+            }
+        }
+    }
+
+
+def _text_settings():
+    return {
+        "Text" : {
+            "configure" : {
+                "background" : "SystemWindow",
+                "foreground" : "SystemWindowText"
+            },
+            "map" : {
+                "background" : [("readonly", "Yellow")]
             }
         }
     }
@@ -423,6 +438,7 @@ def windows():
         _menubutton_settings(),
         _paned_window_settings(),
         _menu_settings(),
+        _text_settings(),
         {
             "TNotebook" : {
                 "configure" : {
@@ -440,7 +456,7 @@ def windows():
                 "configure" : {
                     "padding" : (4,1,1,0)
                 }
-            }
+            },
         }
     ]
 
@@ -451,6 +467,7 @@ def enhanced_clam():
         _menubutton_settings(),
         _paned_window_settings(),
         _menu_settings(),
+        _text_settings(),
         {
             "Tab" : {
                 "configure" : {
@@ -466,7 +483,7 @@ def enhanced_clam():
                 "configure" : {
                     "gripcount" : 0
                 }
-            }
+            },
         }
     ]
 
@@ -518,10 +535,10 @@ def load_early_plugin():
     
 
     if "Windows" in get_workbench().get_ui_theme_names():
-        get_workbench().set_default("theme.ui_theme", "Windows")
+        get_workbench().set_default("view.ui_theme", "Windows")
         
     elif "Enhanced Clam" in get_workbench().get_ui_theme_names():
-        get_workbench().set_default("theme.ui_theme", "Enhanced Clam")
+        get_workbench().set_default("view.ui_theme", "Enhanced Clam")
         
     
     

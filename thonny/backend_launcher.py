@@ -14,6 +14,20 @@ if __name__ == "__main__":
     import sys
     import logging
     import os.path
+    
+    # remove script dir from path
+    sys.path.pop(0)
+    
+    # import thonny relative to this script (not from current interpreter path)
+    import importlib.util
+    spec = importlib.util.spec_from_file_location (
+        "thonny", 
+        os.path.join(os.path.dirname(__file__), "__init__.py")
+    )
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["thonny"] = module
+    spec.loader.exec_module(module)
+    
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
     logger = logging.getLogger()

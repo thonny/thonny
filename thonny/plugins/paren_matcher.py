@@ -3,19 +3,14 @@ import tokenize
 import io
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
-from thonny.ui_utils import get_style_option
 
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
 
 class ParenMatcher:
 
-    def __init__(self, text, paren_highlight_font=None):
+    def __init__(self, text):
         self.text = text
-        if paren_highlight_font:
-            self._paren_highlight_font = paren_highlight_font
-        else:
-            self._paren_highlight_font = self.text["font"]    
         self._configure_tags()
         self._update_scheduled = False
     
@@ -31,8 +26,8 @@ class ParenMatcher:
             self.text.after_idle(perform_update)
 
     def update_highlighting(self):
-        self.text.tag_remove("SURROUNDING_PARENS", "0.1", "end")
-        self.text.tag_remove("UNCLOSED", "0.1", "end")
+        self.text.tag_remove("surrounding_parens", "0.1", "end")
+        self.text.tag_remove("unclosed_expression", "0.1", "end")
 
         if get_workbench().get_option("view.paren_highlighting"):
             self._update_highlighting_for_active_range()
@@ -44,24 +39,18 @@ class ParenMatcher:
         self._highlight_unclosed(remaining, start_index, end_index)
     
     def _configure_tags(self):
-        self.text.tag_configure("SURROUNDING_PARENS",
-                                foreground=get_style_option("MatchedParens.Code", "foreground", "Blue"), 
-                                font=self._paren_highlight_font)
-        
-        self.text.tag_configure("UNCLOSED", background=get_style_option("OpenParens.Code", "background", "LightGray"))
-        
         self.text.tag_raise("sel")
-        self.text.tag_lower("UNCLOSED")
+        self.text.tag_lower("unclosed_expression")
         if "CURRENT_CELL" in self.text.tag_names():
             # CURRENT_CELL is defined in cells plugin
-            self.text.tag_raise("UNCLOSED", "CURRENT_CELL")
+            self.text.tag_raise("unclosed_expression", "CURRENT_CELL")
         
 
     def _highlight_surrounding(self, start_index, end_index):
         open_index, close_index, remaining = self.find_surrounding(start_index, end_index)
         if None not in [open_index, close_index]:
-            self.text.tag_add("SURROUNDING_PARENS", open_index)
-            self.text.tag_add("SURROUNDING_PARENS", close_index)
+            self.text.tag_add("surrounding_parens", open_index)
+            self.text.tag_add("surrounding_parens", close_index)
         
         return remaining
 
@@ -72,7 +61,7 @@ class ParenMatcher:
         if len(remaining) > 0:
             opener = remaining[0]
             open_index = "%d.%d" % (opener.start[0], opener.start[1])
-            self.text.tag_add("UNCLOSED", open_index, end_index) 
+            self.text.tag_add("unclosed_expression", open_index, end_index) 
     
     def _get_paren_tokens(self, source):
         result = []
@@ -140,9 +129,9 @@ def update_highlighting(event=None):
     text = event.widget
     if not hasattr(text, "paren_matcher"):
         if isinstance(text, CodeViewText):
-            text.paren_matcher = ParenMatcher(text, get_workbench().get_font("BoldEditorFont"))
+            text.paren_matcher = ParenMatcher(text)
         elif isinstance(text, ShellText):
-            text.paren_matcher = ShellParenMatcher(text, get_workbench().get_font("BoldEditorFont"))
+            text.paren_matcher = ShellParenMatcher(text)
         else:
             return
     

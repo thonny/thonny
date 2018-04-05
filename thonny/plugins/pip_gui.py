@@ -352,7 +352,7 @@ class PipDialog(tk.Toplevel):
         # Follwing url fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
-        url = "https://pypi.python.org/pypi/{}/json".format(urllib.parse.quote(name))
+        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
         url_future = _fetch_url_future(url)
             
         def poll_fetch_complete():

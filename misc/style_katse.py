@@ -15,8 +15,7 @@ e1 = ttk.Entry(root)
 e1.grid(pady=10, padx=10)
 
 s = ttk.Style()
-s.theme_use("clam")
-
+#print(s.element_options("Combobox.field"))
 
 s.theme_settings("clam", {
     "TButton" : {
@@ -34,5 +33,9 @@ s.theme_settings("clam", {
     }
 })
 
+e1.bind("<<ThemeChanged>>", lambda e: print("E!"), True)
+e1.destroy()
+
+s.theme_use("clam")
 
 root.mainloop()

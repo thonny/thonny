@@ -1,7 +1,6 @@
 import tkinter
 
 from thonny.plugins.coloring import SyntaxColorer
-import tkinter.font as tk_font
 
 
 TEST_STR1 = """def my_function():
@@ -18,8 +17,7 @@ def test_open_closed_strings():
     text_widget = tkinter.Text()
     text_widget.insert("insert", TEST_STR1)
 
-    font = tk_font.nametofont("TkDefaultFont")
-    colorer = SyntaxColorer(text_widget, font, font)
+    colorer = SyntaxColorer(text_widget)
     colorer._update_coloring()
 
     open_ranges = text_widget.tag_ranges("STRING_OPEN")

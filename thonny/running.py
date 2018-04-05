@@ -48,6 +48,16 @@ class Runner:
         self._postponed_commands = []
         
         self._check_alloc_console()
+        
+        # temporary
+        self._remove_obsolete_jedi_copies()
+    
+    def _remove_obsolete_jedi_copies(self):
+        """Thonny 2.1 used to copy jedi in order to make it available
+        for the backend"""
+        for item in os.listdir(THONNY_USER_DIR):
+            if item.startswith("jedi_0."):
+                shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
     
     def start(self):
         self.restart_backend(False, True)
@@ -249,7 +259,6 @@ class Runner:
                 
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
-                self.restart_backend(True)
                 return
             
             if msg.get("SystemExit", False):
@@ -290,7 +299,7 @@ class Runner:
         except:
             logging.exception("Failed retrieving backend faults")
                 
-        err = err.strip() + "\nResetting ...\n"
+        err = err.strip() + "\nUse 'Stop/Restart' to restart the backend ...\n"
         
         get_workbench().event_generate("ProgramOutput",
                                        stream_name="stderr",
@@ -441,7 +450,6 @@ class CPythonProxy(BackendProxy):
         self._sys_path = []
         self._gui_update_loop_id = None
         self.in_venv = None
-        
         self._start_new_process()
     
     def fetch_next_message(self):
@@ -484,7 +492,10 @@ class CPythonProxy(BackendProxy):
             self._close_backend()
             self._start_new_process(cmd)
         
-        self._proc.stdin.write(serialize_message(cmd) + "\n")
+        self._send_msg(cmd)
+    
+    def _send_msg(self, msg):
+        self._proc.stdin.write(serialize_message(msg) + "\n")
         self._proc.stdin.flush()
     
     def send_program_input(self, data):
@@ -514,19 +525,7 @@ class CPythonProxy(BackendProxy):
             
         self._proc = None
         self._message_queue = None
-    
-    def _prepare_jedi(self):
-        """Make jedi available for the backend"""
-        
-        # Copy jedi
-        import jedi
-        dirname = os.path.join(THONNY_USER_DIR, "jedi_" + str(jedi.__version__))
-        if not os.path.exists(dirname):
-            shutil.copytree(jedi.__path__[0], os.path.join(dirname, "jedi"))
-        return dirname
-    
-        # TODO: clean up old versions
-    
+
     def _start_new_process(self, cmd=None):
         this_python = get_frontend_python()
         # deque, because in one occasion I need to put messages back
@@ -566,26 +565,19 @@ class CPythonProxy(BackendProxy):
             except:
                 logging.exception("Can't find Tcl/Tk library")
         
-        # If the back-end interpreter is something else than front-end's one,
-        # then it may not have jedi installed. 
-        # In this case fffer front-end's jedi for the back-end
-        if self._executable != get_frontend_python(): 
-            # I don't want to use PYTHONPATH for making jedi available
-            # because that would add it to the front of sys.path
-            my_env["JEDI_LOCATION"] = self._prepare_jedi()
         
         if not os.path.exists(self._executable):
             raise UserError("Interpreter (%s) not found. Please recheck corresponding option!"
                             % self._executable)
         
         
-        import thonny.shared.backend_launcher
+        import thonny.backend_launcher
         cmd_line = [
             self._executable, 
             '-u', # unbuffered IO (neccessary in Python 3.1)
             '-B', # don't write pyo/pyc files 
                   # (to avoid problems when using different Python versions without write permissions)
-            thonny.shared.backend_launcher.__file__
+            thonny.backend_launcher.__file__
         ]
         
 
@@ -614,6 +606,9 @@ class CPythonProxy(BackendProxy):
             creationflags=creationflags
         )
         
+        # send init message
+        self._send_msg({"frontend_sys_path" : sys.path})
+        
         if cmd:
             # Consume the ready message, cmd will get its own result message
             ready_line = self._proc.stdout.readline()
@@ -624,8 +619,6 @@ class CPythonProxy(BackendProxy):
             #ready_msg = parse_message(ready_line)
             #self._sys_path = ready_msg["path"]
             #debug("Backend ready: %s", ready_msg)
-        
-        
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
