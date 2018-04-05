@@ -170,11 +170,12 @@ class EnhancedText(TweakableText):
     
     Most of the code is adapted from idlelib.EditorWindow.
     """ 
-    def __init__(self, master=None, cnf={}, **kw):
+    def __init__(self, master=None, style="Text", cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account 
         kw["autoseparators"] = False
-        
+        self._style = style
+        self._original_options = kw.copy()
         
         super().__init__(master=master, cnf=cnf, **kw)
         self.tabwidth = 8 # See comments in idlelib.EditorWindow 
@@ -604,9 +605,6 @@ class EnhancedText(TweakableText):
         "Use this for invoking context menu"
         self.focus_set()
 
-    def get_style_name(self):
-        return "Text"
-        
     def _reload_theme_options(self, event=None):
         
         style = ttk.Style()
@@ -619,10 +617,10 @@ class EnhancedText(TweakableText):
         #if self.focus_get() == self:
         #    states.append("focus")
         
-        background = style.lookup(self.get_style_name(), "background", states)
+        background = style.lookup(self._style, "background", states)
         self.configure(background=background)
         
-        foreground = style.lookup(self.get_style_name(), "foreground", states)
+        foreground = style.lookup(self._style, "foreground", states)
         self.configure(foreground=foreground)
         
         self.configure(insertbackground=foreground) # TODO: allow this to be themed?
@@ -640,9 +638,11 @@ class TextFrame(ttk.Frame):
                  horizontal_scrollbar=True, vertical_scrollbar=True,
                  vertical_scrollbar_class=ttk.Scrollbar,
                  horizontal_scrollbar_class=ttk.Scrollbar,
+                 borderwidth=0, relief="sunken",
                  margin_background='#e0e0e0', margin_foreground='#999999',
                  **text_options):
-        ttk.Frame.__init__(self, master=master)
+        ttk.Frame.__init__(self, master=master, borderwidth=borderwidth,
+                           relief=relief)
         
         final_text_options = {'borderwidth' : 0,
                               'insertwidth' : 2,

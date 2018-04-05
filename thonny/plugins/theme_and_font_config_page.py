@@ -70,8 +70,11 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                                     pady=(10,0), columnspan=4)
         self._preview_codeview = CodeView(self,
                                 height=10,
-                                borderwidth=1,
-                                font="EditorFont")
+                                font="EditorFont",
+                                #relief="sunken",
+                                #borderwidth=1,
+                                )
+        
         self._preview_codeview.set_content(textwrap.dedent("""
             if bar is None:
                 print("This is not", 33)

@@ -14,6 +14,7 @@ def clean(window_background="#1D291A",
           detail_background="#2D452F",
           foreground="#9E9E9E"):
     
+    # https://wiki.tcl.tk/37973
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = window_background
@@ -113,15 +114,28 @@ def clean(window_background="#1D291A",
             "configure" : {
                 "background" : code_background,
                 "fieldbackground" : code_background,
+                "selectbackground" : code_background,
                 "arrowcolor" : foreground,
                 "foreground" : foreground,
+                "seleftforeground" : foreground,
                 "padding" :12,
             },
             "map" : {
                 "background" : [("active", code_background)],
                 "fieldbackground" : [],
+                "selectbackground" : [],
+                "selectforeground" : [],
                 "foreground" : [],
                 "arrowcolor" : []
+            }
+        },
+        
+        "ComboboxListbox" : {
+            "configure" : {
+                "relief" : "solid",
+                "borderwidth" : 15,
+                "background" : code_background,
+                "foreground" : foreground,
             }
         },
         
@@ -171,7 +185,7 @@ def clean(window_background="#1D291A",
         
         "TButton" : {
             "configure" : {
-                "background" : code_background,
+                "background" : detail_background,
                 "foreground" : foreground,
             },
             
@@ -187,6 +201,15 @@ def clean(window_background="#1D291A",
             
             "map" : {
                 "background": [("disabled", BG)]
+            }
+        },
+        
+        "TFrame" : {
+            "configure"  : {
+                "bordercolor" : "red",
+                "lightcolor" : "green",
+                "darkcolor" : "blue",
+                "borderwidth" : 17,
             }
         },
         
@@ -208,6 +231,13 @@ def clean(window_background="#1D291A",
                 "backgronud" : detail_background,
                 "foreground" : "#466148" # TODO:
             }
+        },
+        
+        "Listbox" : {
+            "configure" : {
+                "background" : code_background,
+                "foreground" : foreground
+            },
         },
         
         "Menubar" : {
