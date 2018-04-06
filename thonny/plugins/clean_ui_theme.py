@@ -14,6 +14,7 @@ def clean(window_background="#1D291A",
           detail_background="#2D452F",
           foreground="#9E9E9E"):
     
+    # https://wiki.tcl.tk/37973
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     BG = window_background
@@ -96,6 +97,48 @@ def clean(window_background="#1D291A",
             }
         },
         
+        "TEntry" : {
+            "configure" : {
+                "fieldbackground" : code_background,
+                "lightcolor" : "LightGreen",
+            },
+            "map" : {
+                "background" : [("readonly", code_background)],
+                "bordercolor" : [],
+                "lightcolor" : [],
+                "darkcolor" : []
+            }
+        },
+        
+        "TCombobox" : {
+            "configure" : {
+                "background" : code_background,
+                "fieldbackground" : code_background,
+                "selectbackground" : code_background,
+                "arrowcolor" : foreground,
+                "foreground" : foreground,
+                "seleftforeground" : foreground,
+                "padding" :12,
+            },
+            "map" : {
+                "background" : [("active", code_background)],
+                "fieldbackground" : [],
+                "selectbackground" : [],
+                "selectforeground" : [],
+                "foreground" : [],
+                "arrowcolor" : []
+            }
+        },
+        
+        "ComboboxListbox" : {
+            "configure" : {
+                "relief" : "solid",
+                "borderwidth" : 15,
+                "background" : code_background,
+                "foreground" : foreground,
+            }
+        },
+        
         "TScrollbar" : {
             "configure" : {
                 "gripcount" : 0,
@@ -142,12 +185,12 @@ def clean(window_background="#1D291A",
         
         "TButton" : {
             "configure" : {
-                "background" : "gray" # TODO:
+                "background" : detail_background,
+                "foreground" : foreground,
             },
             
             "map" : {
-                "background" : [("disabled", "red"), # TODO:
-                                ("!disabled", "gray")]            
+                "background" : [("disabled", "gray")]            
             }
         },
         
@@ -161,9 +204,25 @@ def clean(window_background="#1D291A",
             }
         },
         
+        "TFrame" : {
+            "configure"  : {
+                "bordercolor" : "red",
+                "lightcolor" : "green",
+                "darkcolor" : "blue",
+                "borderwidth" : 17,
+            }
+        },
+        
+        "TLabel" : {
+            "configure"  : {
+                "foreground" : FG
+            }
+        },
+        
         "Text" : {
             "configure" : {
                 "background" : code_background,
+                "foreground" : foreground
             },
         },
         
@@ -172,6 +231,13 @@ def clean(window_background="#1D291A",
                 "backgronud" : detail_background,
                 "foreground" : "#466148" # TODO:
             }
+        },
+        
+        "Listbox" : {
+            "configure" : {
+                "background" : code_background,
+                "foreground" : foreground
+            },
         },
         
         "Menubar" : {

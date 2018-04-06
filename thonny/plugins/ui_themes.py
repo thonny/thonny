@@ -75,6 +75,8 @@ def _text_settings():
                 "background" : "SystemWindow",
                 "foreground" : "SystemWindowText"
             },
+        },
+        "Syntax.Text" : {
             "map" : {
                 "background" : [("readonly", "Yellow")]
             }
@@ -84,41 +86,39 @@ def _text_settings():
 
 def clam():
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
-    colors = {
-        "disabledfg" :     "#999999",
-        "frame" :          "#dcdad5",
-        "window" :         "#ffffff",
-        "dark" :           "#cfcdc8",
-        "darker" :         "#bab5ab",
-        "darkest" :        "#9e9a91",
-        "lighter" :        "#eeebe7",
-        "lightest" :       "#ffffff",
-        "selectbg" :       "#4a6984",
-        "selectfg" :       "#ffffff",
-        "altindicator" :   "#5895bc",
-        "disabledaltindicator" :    "#a0a0a0",
-    }
+    defaultfg =      "#000000"
+    disabledfg =     "#999999"
+    frame =          "#dcdad5"
+    window =         "#ffffff"
+    dark =           "#cfcdc8"
+    darker =         "#bab5ab"
+    darkest =        "#9e9a91"
+    lighter =        "#eeebe7"
+    selectbg =       "#4a6984"
+    selectfg =       "#ffffff"
+    altindicator =   "#5895bc"
+    disabledaltindicator =    "#a0a0a0"
     
     return {
         "." : {
             "configure" : {
-                "background"        : colors["frame"],
-                "foreground"        : "black",
-                "bordercolor"       : colors["darkest"],
-                "darkcolor"         : colors["dark"],
-                "lightcolor"        : colors["lighter"],
-                "troughcolor"       : colors["darker"],
-                "selectbackground"  : colors["selectbg"],
-                "selectforeground"  : colors["selectfg"],
+                "background"        : frame,
+                "foreground"        : defaultfg,
+                "bordercolor"       : darkest,
+                "darkcolor"         : dark,
+                "lightcolor"        : lighter,
+                "troughcolor"       : darker,
+                "selectbackground"  : selectbg,
+                "selectforeground"  : selectfg,
                 "selectborderwidth" : 0,
                 "font" : "TkDefaultFont",
             },
             
             "map" : {
-                "background" : [("disabled", colors["frame"]), 
-                                ("active", colors["lighter"])],
-                "foreground" : [("disabled", colors["disabledfg"])],
-                "selectbackground" : [("!focus", colors["darkest"])],
+                "background" : [("disabled", frame), 
+                                ("active", lighter)],
+                "foreground" : [("disabled", disabledfg)],
+                "selectbackground" : [("!focus", darkest)],
                 "selectforeground" : [("!focus", "white")]
             },
         },
@@ -131,11 +131,11 @@ def clam():
                 "relief" : "raised"
             },
             "map" : {
-                "background" : [("disabled", colors["frame"]),
-                                ("pressed", colors["darker"]),
-                                ("active", colors["lighter"])],
-                "lightcolor" : [("pressed", colors["darker"])],
-                "darkcolor"  : [("pressed", colors["darker"])],
+                "background" : [("disabled", frame),
+                                ("pressed", darker),
+                                ("active", lighter)],
+                "lightcolor" : [("pressed", darker)],
+                "darkcolor"  : [("pressed", darker)],
                 "bordercolor": [("alternate", "#000000")],
             }
         },
@@ -151,11 +151,11 @@ def clam():
                             ("selected", "sunken"),
                             ("pressed", "sunken"),
                             ("active", "raised")],
-                "background" : [("disabled", colors["frame"]),
-                                ("pressed", colors["darker"]),
-                                ("active", colors["lighter"])],
-                "lightcolor" : [("pressed", colors["darker"])],
-                "darkcolor" : [("pressed", colors["darker"])]
+                "background" : [("disabled", frame),
+                                ("pressed", darker),
+                                ("active", lighter)],
+                "lightcolor" : [("pressed", darker)],
+                "darkcolor" : [("pressed", darker)]
             }
         },
         
@@ -166,10 +166,10 @@ def clam():
                 "padding" :  2,
             },
             "map" : {
-                "indicatorbackground" : [("pressed", colors["frame"]),
-                                         ("!disabled", "alternate", colors["altindicator"]),
-                                         ("disabled", "alternate", colors["disabledaltindicator"]),
-                                         ("disabled", colors["frame"])]
+                "indicatorbackground" : [("pressed", frame),
+                                         ("!disabled", "alternate", altindicator),
+                                         ("disabled", "alternate", disabledaltindicator),
+                                         ("disabled", frame)]
             }
         },
         
@@ -181,10 +181,10 @@ def clam():
                 "padding" :  2,
             },
             "map" : {
-                "indicatorbackground" : [("pressed", colors["frame"]),
-                                         ("!disabled", "alternate", colors["altindicator"]),
-                                         ("disabled", "alternate", colors["disabledaltindicator"]),
-                                         ("disabled", colors["frame"])]
+                "indicatorbackground" : [("pressed", frame),
+                                         ("!disabled", "alternate", altindicator),
+                                         ("disabled", "alternate", disabledaltindicator),
+                                         ("disabled", frame)]
             }
         },
         
@@ -202,8 +202,8 @@ def clam():
                 "insertwidth" : 1
             },
             "map" : {
-                "background" : [("readonly", colors["frame"])],
-                "bordercolor" : [("focus", colors["selectbg"])],
+                "background" : [("readonly", frame)],
+                "bordercolor" : [("focus", selectbg)],
                 "lightcolor" : [("focus", "#6f9dc6")],
                 "darkcolor" : [("focus", "#6f9dc6")]
             }
@@ -215,12 +215,12 @@ def clam():
                 "insertwidth" : 1,
             },
             "map" : {
-                "background" : [("active", colors["lighter"]),
-                                ("pressed", colors["lighter"])],
-                "fieldbackground" : [("readonly", "focus", colors["selectbg"]),
-                                     ("readonly", colors["frame"])],
-                "foreground" : [("readonly", "focus", colors["selectfg"])],
-                "arrowcolor" : [("disabled", colors["disabledfg"])]
+                "background" : [("active", lighter),
+                                ("pressed", lighter)],
+                "fieldbackground" : [("readonly", "focus", selectbg),
+                                     ("readonly", frame)],
+                "foreground" : [("readonly", "focus", selectfg)],
+                "arrowcolor" : [("disabled", disabledfg)]
             }
         },
         
@@ -237,8 +237,8 @@ def clam():
                 "padding" : [2, 0, 10, 0],
             },
             "map" : {
-                "background" : [("readonly", colors["frame"])],
-                "arrowcolor" : [("disabled", colors["disabledfg"])]
+                "background" : [("readonly", frame)],
+                "arrowcolor" : [("disabled", disabledfg)]
             }
         },
         
@@ -248,24 +248,24 @@ def clam():
             },
             "map" : {
                 "padding" : [("selected", [6, 4, 6, 2])],
-                "background" : [("selected", colors["frame"]), 
-                                ("",        colors["darker"])],
-                "lightcolor" : [("selected", colors["lighter"]), 
-                                ("",        colors["dark"])], 
+                "background" : [("selected", frame), 
+                                ("",        darker)],
+                "lightcolor" : [("selected", lighter), 
+                                ("",        dark)], 
             }
         },
         
         "Treeview" : {
             "configure" : {
-                "background" : colors["window"],
+                "background" : window,
             },
             "map" : {
-                "background" : [("disabled", colors["frame"]),
-                                ("!disabled", "!selected", colors["window"]),
-                                ("selected", colors["selectbg"])],
-                "foreground" : [("disabled", colors["disabledfg"]),
-                                ("!disabled", "!selected", "black"),
-                                ("selected", colors["selectfg"])]        
+                "background" : [("disabled", frame),
+                                ("!disabled", "!selected", window),
+                                ("selected", selectbg)],
+                "foreground" : [("disabled", disabledfg),
+                                ("!disabled", "!selected", defaultfg),
+                                ("selected", selectfg)]        
             }
         },
         
@@ -287,7 +287,7 @@ def clam():
         
         "TProgressbar" : {
             "configure" : {
-                "background" : colors["frame"]
+                "background" : frame
             }
         },
         

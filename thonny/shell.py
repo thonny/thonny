@@ -97,7 +97,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def __init__(self, master, cnf={}, **kw):
             
-        EnhancedTextWithLogging.__init__(self, master, cnf, **kw)
+        super().__init__(master, cnf, **kw)
         self.bindtags(self.bindtags() + ('ShellText',))
         
         self._before_io = True
