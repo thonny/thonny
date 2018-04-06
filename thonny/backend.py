@@ -933,7 +933,7 @@ class FancyTracer(Executor):
         if tester(frame, event, args, focus, self._current_command):
 
             if value is not None:
-                self._custom_stack[-1].assigned_values[focus] = value["repr"]
+                self._custom_stack[-1].current_evaluations.append((focus, value["repr"]))
 
             # Save and send message
             self._save_debugger_progress_message(frame, value,self._current_command)
@@ -946,9 +946,30 @@ class FancyTracer(Executor):
             # Save message not sent to user
             self._save_debugger_progress_message(frame, value, self._current_command)
         """
-        value = self._vm.export_value(args["value"] if event == "after_expression" else None)
+        
+        # store information about current statement / expression
+        if "statement" in event:
+            self._custom_stack[-1].current_root_expression = None
+            self._custom_stack[-1].current_statement = focus
+            self._custom_stack[-1].current_evaluations = []
+            
+        else:
+            assert len(self._past_messages) > 0
+            prev_custom_frame = self._past_messages[-1]["stack"][-1]
+            prev_event = prev_custom_frame.last_event
+            prev_focus = prev_custom_frame.last_event_focus
+            
+            if (event == "before_expression"
+                and (id(frame) != prev_custom_frame.id
+                     or "statement" in prev_event
+                     or focus.not_smaller_eq_in(prev_focus))):
+                self._custom_stack[-1].current_root_expression = focus
+                self._custom_stack[-1].current_evaluations = []
+                
+        
+        value = self._vm.export_value(args["value"]) if event == "after_expression" else None
         if value is not None:
-            self._custom_stack[-1].assigned_values[focus] = value["repr"]
+            self._custom_stack[-1].current_evaluations.append((focus, value))
 
         self._save_debugger_progress_message(frame, value, self._current_command)
 
@@ -1354,7 +1375,9 @@ class FancyTracer(Executor):
                 last_event=custom_frame.last_event,
                 last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
-                assigned_values=custom_frame.assigned_values
+                current_evaluations=custom_frame.current_evaluations,
+                current_statement=custom_frame.current_statement,
+                current_root_expression=custom_frame.current_root_expression,
             ))
 
         return result
@@ -1614,8 +1637,10 @@ class CustomStackFrame:
         self.id = id(frame)
         self.system_frame = frame
         self.last_event = last_event
-        self.assigned_values = {}
+        self.current_evaluations = []
         self.focus = None
+        self.current_statement = None
+        self.current_root_expression = None
 
 class ThonnyClientError(Exception):
     pass
