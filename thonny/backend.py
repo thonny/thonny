@@ -933,7 +933,7 @@ class FancyTracer(Executor):
         if tester(frame, event, args, focus, self._current_command):
 
             if value is not None:
-                self._custom_stack[-1].assigned_values[focus] = value["repr"]
+                self._custom_stack[-1].assigned_values.append((focus, value["repr"]))
 
             # Save and send message
             self._save_debugger_progress_message(frame, value,self._current_command)
@@ -951,7 +951,7 @@ class FancyTracer(Executor):
         if "statement" in event:
             self._custom_stack[-1].current_root_expression = None
             self._custom_stack[-1].current_statement = focus
-            self._custom_stack[-1].assigned_values = {}
+            self._custom_stack[-1].assigned_values = []
             
         else:
             assert len(self._past_messages) > 0
@@ -964,12 +964,12 @@ class FancyTracer(Executor):
                      or "statement" in prev_event
                      or focus.not_smaller_eq_in(prev_focus))):
                 self._custom_stack[-1].current_root_expression = focus
-                self._custom_stack[-1].assigned_values = {}
+                self._custom_stack[-1].assigned_values = []
                 
         
         value = self._vm.export_value(args["value"]) if event == "after_expression" else None
         if value is not None:
-            self._custom_stack[-1].assigned_values[focus] = value
+            self._custom_stack[-1].assigned_values.append((focus, value))
 
         self._save_debugger_progress_message(frame, value, self._current_command)
 
@@ -1637,7 +1637,7 @@ class CustomStackFrame:
         self.id = id(frame)
         self.system_frame = frame
         self.last_event = last_event
-        self.assigned_values = {}
+        self.assigned_values = []
         self.focus = None
         self.current_statement = None
         self.current_root_expression = None
