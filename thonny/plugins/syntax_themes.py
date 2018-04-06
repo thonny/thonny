@@ -1,13 +1,14 @@
 from thonny.globals import get_workbench
 
 def default_light():
+    default_fg = "black"
     light_fg = "DarkGray"
     string_fg = "DarkGreen"
     open_string_bg = "#c3f9d3"
     
     return {
-        "TEXT"          : {"foreground" : "black", "insertbackground" : "black"},
-        "definition"    : {"foreground" : "black", "font" : "BoldEditorFont"},
+        "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg},
+        "definition"    : {"foreground" : default_fg, "font" : "BoldEditorFont"},
         "string"        : {"foreground" : string_fg},
         "string3"       : {"foreground" : string_fg},
         "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
@@ -33,6 +34,12 @@ def default_light():
         "found" : {"foreground" : "blue", "underline" : True},
         "current_found" : {"foreground" : "white", "background" : "red"},
         
+        # debugger
+        "active_focus"    : {"background" : "#F8FC9A", "borderwidth" : 1, "relief" : "solid"},
+        "suspended_focus" : {"background" : ""       , "borderwidth" : 1, "relief" : "solid"},
+        "completed_focus" : {"background" : "#BBEDB2", "borderwidth" : 1, "relief" : "flat"},
+        "exception_focus" : {"background" : "#FFBFD6", "borderwidth" : 1, "relief" : "solid"},
+        "expression_box"  : {"background" : "#DCEDF2", "foreground" : default_fg},
     }
 
 def default_dark():
@@ -69,6 +76,12 @@ def default_dark():
         "surrounding_parens"  : {"foreground" : "#F0995B", "font" : "BoldEditorFont"},
         "unclosed_expression"  : {"background" : "#193022"},
         
+        # debugger
+        "active_focus"    : {"background" : "#807238", "borderwidth" : 1, "relief" : "solid"},
+        "suspended_focus" : {"background" : ""       , "borderwidth" : 1, "relief" : "solid"},
+        "completed_focus" : {"background" : "#807238", "borderwidth" : 1, "relief" : "flat"},
+        "exception_focus" : {"background" : "#FFBFD6", "borderwidth" : 1, "relief" : "solid"},
+        "expression_box"  : {"background" : "#506E67", "foreground" : default_fg},
     }
 
 

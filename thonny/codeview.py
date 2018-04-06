@@ -242,4 +242,9 @@ def set_syntax_options(syntax_options):
     assert tk._default_root is not None
     tk._default_root.event_generate("<<SyntaxThemeChanged>>")
      
+def get_syntax_options_for_tag(tag, **base_options):
+    global _syntax_options
+    if tag in _syntax_options:
+        base_options.update(_syntax_options[tag])
+    return base_options
 
