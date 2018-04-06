@@ -7,7 +7,44 @@ from thonny import tktextext, roughparse
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
 from thonny.tktextext import EnhancedText
 
-class PythonText(EnhancedText):
+_syntax_options = {}
+
+class SyntaxText(EnhancedText):
+    def __init__(self, master=None, cnf={}, **kw):
+        self._syntax_options = {}
+        super().__init__(master=master, cnf=cnf, **kw)
+        self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
+                                                           self._reload_syntax_options, True)
+        self._reload_syntax_options()
+
+    def set_syntax_options(self, syntax_options):
+        # clear old options
+        for tag_name in self._syntax_options:
+            self.tag_reset(tag_name)
+        
+        # apply new options
+        for tag_name in syntax_options:
+            if tag_name == "TEXT":
+                self.configure(**syntax_options[tag_name])
+            else:
+                self.tag_configure(tag_name, **syntax_options[tag_name])
+        
+        self._syntax_options = syntax_options
+    
+    def _reload_theme_options(self, event=None):
+        super()._reload_theme_options(event)
+        self._reload_syntax_options(event)
+        
+    def _reload_syntax_options(self, event=None):
+        global _syntax_options
+        self.set_syntax_options(_syntax_options)
+    
+    def destroy(self):
+        super().destroy()
+        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
+
+    
+class PythonText(SyntaxText):
     
     def perform_return(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
@@ -119,15 +156,19 @@ class PythonText(EnhancedText):
 class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
-        EnhancedTextWithLogging.__init__(self, master=master, cnf=cnf, **kw)
+        
+        super().__init__(master=master, cnf=cnf, **kw)
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)
+        
     
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
         get_workbench().get_menu("edit").tk_popup(event.x_root, event.y_root)
-
+        
+    
+    
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         
@@ -194,4 +235,11 @@ class CodeView(tktextext.TextFrame):
             
         return TextRange(lineno, col_offset, end_lineno, end_col_offset)
 
+def set_syntax_options(syntax_options):
+    global _syntax_options
+    _syntax_options = syntax_options
+    
+    assert tk._default_root is not None
+    tk._default_root.event_generate("<<SyntaxThemeChanged>>")
+     
 

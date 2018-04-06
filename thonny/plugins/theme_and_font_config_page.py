@@ -9,7 +9,7 @@ import textwrap
 from thonny.codeview import CodeView
 
 
-class FontConfigurationPage(ConfigurationPage):
+class ThemeAndFontConfigurationPage(ConfigurationPage):
     
     def __init__(self, master):
         
@@ -70,8 +70,11 @@ class FontConfigurationPage(ConfigurationPage):
                                                     pady=(10,0), columnspan=4)
         self._preview_codeview = CodeView(self,
                                 height=10,
-                                borderwidth=1,
-                                font="EditorFont")
+                                font="EditorFont",
+                                #relief="sunken",
+                                #borderwidth=1,
+                                )
+        
         self._preview_codeview.set_content(textwrap.dedent("""
             if bar is None:
                 print("This is not", 33)
@@ -119,4 +122,4 @@ class FontConfigurationPage(ConfigurationPage):
         ))
 
 def load_plugin():
-    get_workbench().add_configuration_page("Theme & Font", FontConfigurationPage)
+    get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)

@@ -434,35 +434,7 @@ class ExpressionBox(tk.Text):
         
         elif event == "after_expression":
             logging.debug("EV: after_expression %s", msg)
-            
-            self.tag_configure('after', background="#BBEDB2", borderwidth=1, relief=tk.FLAT)
-            start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
-            end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
-            
-            assert hasattr(msg, "value")
-            logging.debug("EV: replacing expression with value")
-
-            original_focus_text = self.get(start_mark, end_mark)
-            self.delete(start_mark, end_mark)
-            
-            id_str = memory.format_object_id(msg.value["id"])
-            if get_workbench().in_heap_mode():
-                value_str = id_str
-            elif "StringLiteral" in frame_info.last_event_args["node_tags"]:
-                # No need to show Python replacing double quotes with single quotes
-                value_str = original_focus_text
-            else:
-                value_str = shorten_repr(msg.value["repr"], 100)
-            
-            object_tag = "object_" + str(msg.value["id"])
-            self.insert(start_mark, value_str, ('value', 'after', object_tag))
-            if misc_utils.running_on_mac_os():
-                sequence = "<Command-Button-1>"
-            else:
-                sequence = "<Control-Button-1>"
-            self.tag_bind(object_tag, sequence,
-                          lambda _: get_workbench().event_generate("ObjectSelect", object_id=msg.value["id"]))
-                
+            self._replace(focus, msg.value)
             self._update_size()
                 
             
@@ -503,6 +475,28 @@ class ExpressionBox(tk.Text):
         for mark in self.mark_names():
             self.mark_unset(mark)
             
+    def _replace(self, focus, value):
+        
+        self.tag_configure('after', background="#BBEDB2", borderwidth=1, relief=tk.FLAT)
+        start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
+        end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
+        
+        self.delete(start_mark, end_mark)
+        
+        id_str = memory.format_object_id(value["id"])
+        if get_workbench().in_heap_mode():
+            value_str = id_str
+        else:
+            value_str = shorten_repr(value["repr"], 100)
+        
+        object_tag = "object_" + str(value["id"])
+        self.insert(start_mark, value_str, ('value', 'after', object_tag))
+        if misc_utils.running_on_mac_os():
+            sequence = "<Command-Button-1>"
+        else:
+            sequence = "<Control-Button-1>"
+        self.tag_bind(object_tag, sequence,
+                      lambda _: get_workbench().event_generate("ObjectSelect", object_id=value["id"]))
     
     def _load_expression(self, filename, text_range):
         with tokenize.open(filename) as fp:

@@ -720,6 +720,14 @@ class Workbench(tk.Tk):
         
         self._style.theme_use(name)
         
+        # https://wiki.tcl.tk/37973#pagetocfe8b22ab
+        for setting in ["background", "foreground", 
+                        "selectBackground", "selectForeground"
+                        ]:
+            value = self._style.lookup("Listbox", setting)
+            if value:
+                self.option_add("*TCombobox*Listbox." + setting, value)
+        
     def _apply_syntax_theme(self, name):
         def get_settings(name):
             try:
@@ -742,8 +750,8 @@ class Workbench(tk.Tk):
                         result[key] = settings[key]
                 return result
         
-        from thonny import tktextext
-        tktextext.set_syntax_options(get_settings(name))
+        from thonny import codeview
+        codeview.set_syntax_options(get_settings(name))
     
     def update_themes(self):
         preferred_theme = self.get_option("view.ui_theme")

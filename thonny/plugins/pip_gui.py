@@ -19,7 +19,8 @@ import logging
 import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
-from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor
+from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
+    get_main_background
 from thonny.misc_utils import running_on_windows
 import sys
 
@@ -69,7 +70,7 @@ class PipDialog(tk.Toplevel):
         
         name_font = tk.font.nametofont("TkDefaultFont").copy()
         name_font.configure(size=16)
-        self.search_box = ttk.Entry(header_frame, background=ui_utils.CALM_WHITE)
+        self.search_box = ttk.Entry(header_frame)
         self.search_box.grid(row=1, column=0, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
         
@@ -88,7 +89,7 @@ class PipDialog(tk.Toplevel):
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
         
-        self.listbox = tk.Listbox(listframe, activestyle="dotbox", 
+        self.listbox = ui_utils.ThemedListbox(listframe, activestyle="dotbox", 
                                   width=20, height=10,
                                   background=ui_utils.CALM_WHITE,
                                   selectborderwidth=0, relief="flat",
@@ -115,8 +116,10 @@ class PipDialog(tk.Toplevel):
         
         info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
                                               horizontal_scrollbar=False,
+                                              style="PipInfo.Text",
                                               vertical_scrollbar_class=AutoScrollbar,
                                               width=60, height=10)
+        ttk.Style().configure("PipInfo.Text", background=get_main_background())
         info_text_frame.configure(borderwidth=1)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         self.info_text = info_text_frame.text
@@ -130,8 +133,7 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
         default_font = tk.font.nametofont("TkDefaultFont")
-        self.info_text.configure(background=ui_utils.get_main_background(),
-                                 font=default_font,
+        self.info_text.configure(font=default_font,
                                  wrap="word")
 
         bold_font = default_font.copy()

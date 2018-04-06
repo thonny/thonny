@@ -16,12 +16,10 @@ except ImportError:
     import tkFont as tkfont
     from Tkinter import TclError
 
-_syntax_options = {}
-
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
     def __init__(self, master=None, cnf={}, read_only=False, **kw):
-        tk.Text.__init__(self, master=master, cnf=cnf, **kw)
+        super().__init__(master=master, cnf=cnf, **kw)
         
         self._read_only = read_only
         self._suppress_events = False
@@ -172,14 +170,14 @@ class EnhancedText(TweakableText):
     
     Most of the code is adapted from idlelib.EditorWindow.
     """ 
-    def __init__(self, master=None, cnf={}, **kw):
+    def __init__(self, master=None, style="Text", cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account 
         kw["autoseparators"] = False
+        self._style = style
+        self._original_options = kw.copy()
         
-        
-        TweakableText.__init__(self, master=master, cnf=cnf, **kw)
-        self._syntax_options = {}
+        super().__init__(master=master, cnf=cnf, **kw)
         self.tabwidth = 8 # See comments in idlelib.EditorWindow 
         self.indentwidth = 4 
         self.usetabs = False
@@ -194,8 +192,6 @@ class EnhancedText(TweakableText):
         self._bind_mouse_aids()
         
         self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
-        self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
-                                                           self._reload_theme_options, True)
         
         self._reload_theme_options()
     
@@ -609,22 +605,7 @@ class EnhancedText(TweakableText):
         "Use this for invoking context menu"
         self.focus_set()
 
-    def set_syntax_options(self, syntax_options):
-        # clear old options
-        for tag_name in self._syntax_options:
-            self.tag_reset(tag_name)
-        
-        # apply new options
-        for tag_name in syntax_options:
-            if tag_name == "TEXT":
-                self.configure(**syntax_options[tag_name])
-            else:
-                self.tag_configure(tag_name, **syntax_options[tag_name])
-        
-        self._syntax_options = syntax_options
-    
     def _reload_theme_options(self, event=None):
-        global _syntax_options
         
         style = ttk.Style()
         
@@ -636,19 +617,16 @@ class EnhancedText(TweakableText):
         #if self.focus_get() == self:
         #    states.append("focus")
         
-        background = style.lookup("Text", "background", states)
+        background = style.lookup(self._style, "background", states)
         self.configure(background=background)
         
-        foreground = style.lookup("Text", "foreground", states)
+        foreground = style.lookup(self._style, "foreground", states)
         self.configure(foreground=foreground)
         
         self.configure(insertbackground=foreground) # TODO: allow this to be themed?
         
-        self.set_syntax_options(_syntax_options)
-    
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
-        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
         TweakableText.destroy(self)
         
         
@@ -660,9 +638,11 @@ class TextFrame(ttk.Frame):
                  horizontal_scrollbar=True, vertical_scrollbar=True,
                  vertical_scrollbar_class=ttk.Scrollbar,
                  horizontal_scrollbar_class=ttk.Scrollbar,
+                 borderwidth=0, relief="sunken",
                  margin_background='#e0e0e0', margin_foreground='#999999',
                  **text_options):
-        ttk.Frame.__init__(self, master=master)
+        ttk.Frame.__init__(self, master=master, borderwidth=borderwidth,
+                           relief=relief)
         
         final_text_options = {'borderwidth' : 0,
                               'insertwidth' : 2,
@@ -844,13 +824,6 @@ class TextFrame(ttk.Frame):
         except tk.TclError:
             exception()
 
-def set_syntax_options(syntax_options):
-    global _syntax_options
-    _syntax_options = syntax_options
-    
-    assert tk._default_root is not None
-    tk._default_root.event_generate("<<SyntaxThemeChanged>>")
-     
         
 def get_text_font(text):
     font = text["font"]
