@@ -948,21 +948,26 @@ class FancyTracer(Executor):
         """
         
         # store information about current statement / expression
-        if "statement" in event:
+        if event == "before_statement_again":
+            # keep the expression information from last event
+            self._custom_stack[-1].current_root_expression = self._custom_stack[-1].current_root_expression
+            self._custom_stack[-1].current_evaluations = self._custom_stack[-1].current_evaluations
+            
+        elif "statement" in event:
             self._custom_stack[-1].current_root_expression = None
             self._custom_stack[-1].current_statement = focus
             self._custom_stack[-1].current_evaluations = []
             
         else:
             assert len(self._past_messages) > 0
-            prev_custom_frame = self._past_messages[-1]["stack"][-1]
-            prev_event = prev_custom_frame.last_event
-            prev_focus = prev_custom_frame.last_event_focus
+            prev_msg_frame = self._past_messages[-1]["stack"][-1]
+            prev_event = prev_msg_frame.last_event
+            prev_root_expression = prev_msg_frame.current_root_expression
             
             if (event == "before_expression"
-                and (id(frame) != prev_custom_frame.id
+                and (id(frame) != prev_msg_frame.id
                      or "statement" in prev_event
-                     or focus.not_smaller_eq_in(prev_focus))):
+                     or focus.not_smaller_eq_in(prev_root_expression))):
                 self._custom_stack[-1].current_root_expression = focus
                 self._custom_stack[-1].current_evaluations = []
                 
@@ -1375,7 +1380,7 @@ class FancyTracer(Executor):
                 last_event=custom_frame.last_event,
                 last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
-                current_evaluations=custom_frame.current_evaluations,
+                current_evaluations=custom_frame.current_evaluations.copy(),
                 current_statement=custom_frame.current_statement,
                 current_root_expression=custom_frame.current_root_expression,
             ))
