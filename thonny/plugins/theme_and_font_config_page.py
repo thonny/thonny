@@ -83,6 +83,8 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             """).strip())
         self._preview_codeview.grid(row=4, column=0, columnspan=4, sticky=tk.NSEW, pady=(0,5))
         
+        (ttk.Label(self, text="NB! Some style elements change only after restarting Thonny")
+         .grid(row=5, column=0, columnspan=4, sticky="w", pady=(0, 5)))
             
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)

@@ -279,8 +279,8 @@ class AutomaticNotebook(ttk.Notebook):
     Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
     """
-    def __init__(self, master, position_key):
-        ttk.Notebook.__init__(self, master)
+    def __init__(self, master, position_key, style="AutomaticNotebook.TNotebook"):
+        ttk.Notebook.__init__(self, master, style=style)
         self.position_key = position_key
     
     def add(self, child, **kw):
@@ -581,12 +581,14 @@ class ThemedListbox(tk.Listbox):
         # Following crashes when a combobox is focused
         #if self.focus_get() == self:
         #    states.append("focus")
-        
-        background = style.lookup(self.get_style_name(), "background", states)
-        self.configure(background=background)
-        
-        foreground = style.lookup(self.get_style_name(), "foreground", states)
-        self.configure(foreground=foreground)
+        opts = {}
+        for key in ["background", "foreground", 
+                     "highlightthickness", "highlightcolor", "highlightbackground"]:
+            value = style.lookup(self.get_style_name(), key, states)
+            if value:
+                opts[key] = value
+                
+        self.configure(opts)
     
     def get_style_name(self):
         return "Listbox"
