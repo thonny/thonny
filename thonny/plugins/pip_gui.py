@@ -91,9 +91,11 @@ class PipDialog(tk.Toplevel):
         
         self.listbox = ui_utils.ThemedListbox(listframe, activestyle="dotbox", 
                                   width=20, height=10,
-                                  background=ui_utils.CALM_WHITE,
                                   selectborderwidth=0, relief="flat",
-                                  highlightthickness=0, borderwidth=0)
+                                  #highlightthickness=4,
+                                  #highlightbackground="red",
+                                  #highlightcolor="green",
+                                  borderwidth=0)
         self.listbox.insert("end", " <INSTALL>")
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
         self.listbox.grid(row=0, column=0, sticky="nsew")
@@ -292,8 +294,10 @@ class PipDialog(tk.Toplevel):
         
     
     def _on_listbox_select(self, event):
+        self.listbox.focus_set()
         selection = self.listbox.curselection()
         if len(selection) == 1:
+            self.listbox.activate(selection[0])
             if selection[0] == 0: # special first item
                 self._show_instructions()
             else:

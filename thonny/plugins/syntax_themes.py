@@ -76,6 +76,10 @@ def default_dark():
         "surrounding_parens"  : {"foreground" : "#F0995B", "font" : "BoldEditorFont"},
         "unclosed_expression"  : {"background" : "#193022"},
         
+        # find/replace
+        "found" : {"underline" : True},
+        "current_found" : {"foreground" : "white", "background" : "red"},
+        
         # debugger
         "active_focus"    : {"background" : "#807238", "borderwidth" : 1, "relief" : "solid"},
         "suspended_focus" : {"background" : ""       , "borderwidth" : 1, "relief" : "solid"},

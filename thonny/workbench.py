@@ -726,6 +726,7 @@ class Workbench(tk.Tk):
                         ]:
             value = self._style.lookup("Listbox", setting)
             if value:
+                #self.option_add("*Listbox." + setting, value)
                 self.option_add("*TCombobox*Listbox." + setting, value)
         
     def _apply_syntax_theme(self, name):

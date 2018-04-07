@@ -12,7 +12,8 @@ Darkula
 def clean(window_background="#1D291A",
           code_background="#273627",
           detail_background="#2D452F",
-          foreground="#9E9E9E"):
+          foreground="#9E9E9E",
+          disabled_foreground="#485C49"):
     
     # https://wiki.tcl.tk/37973
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
@@ -24,6 +25,12 @@ def clean(window_background="#1D291A",
     SELBG = "#2D3D2D"
     SCROLL_BG = ACTIVE_TAB
     SCBORDER = TEXT_BG
+    
+    focus_border = "lightgreen"
+    nonfocus_border = "#3A5234"
+    
+    lighter_detail_background = "#3C6E40"
+    darker_detail_background = "#33402F"
     
     return {
         "." : {
@@ -42,7 +49,7 @@ def clean(window_background="#1D291A",
                 #"background" : window_background,
                 #??"lightcolor"=BG,
                 #??"darkcolor"=BG,
-                #bordercolor="red",
+                "bordercolor" : detail_background,
                 #tabposition="w",              # Where to place tabs
                 "tabmargins" : [1, 0, 0, 0],     # Margins around tab row
                 #tabplacement="w",             # How to pack tabs within tab row
@@ -51,6 +58,18 @@ def clean(window_background="#1D291A",
                 #relief="flat",                # not sure whether this does anything
                 #borderwidth=0,                # ...
                 #expand=[17, 17, 17, 17]        #
+            }
+        },
+        
+        "ButtonNotebook.TNotebook" : {
+            "configure" : {
+                "bordercolor" : window_background,
+            }
+        },
+        
+        "AutomaticNotebook.TNotebook" : {
+            "configure" : {
+                "bordercolor" : window_background,
             }
         },
         
@@ -100,12 +119,13 @@ def clean(window_background="#1D291A",
         "TEntry" : {
             "configure" : {
                 "fieldbackground" : code_background,
-                "lightcolor" : "LightGreen",
+                "lightcolor" : nonfocus_border,
+                "insertcolor" : foreground,
             },
             "map" : {
                 "background" : [("readonly", code_background)],
                 "bordercolor" : [],
-                "lightcolor" : [],
+                "lightcolor" : [("focus", focus_border)],
                 "darkcolor" : []
             }
         },
@@ -115,10 +135,13 @@ def clean(window_background="#1D291A",
                 "background" : code_background,
                 "fieldbackground" : code_background,
                 "selectbackground" : code_background,
+                "lightcolor" : code_background,
+                "darkcolor" : code_background,
+                "bordercolor" : code_background,
                 "arrowcolor" : foreground,
                 "foreground" : foreground,
                 "seleftforeground" : foreground,
-                "padding" :12,
+                #"padding" : [12,2,12,2],
             },
             "map" : {
                 "background" : [("active", code_background)],
@@ -130,7 +153,7 @@ def clean(window_background="#1D291A",
             }
         },
         
-        "ComboboxListbox" : {
+        "__ComboboxListbox" : {
             "configure" : {
                 "relief" : "solid",
                 "borderwidth" : 15,
@@ -190,7 +213,11 @@ def clean(window_background="#1D291A",
             },
             
             "map" : {
-                "background" : [("disabled", "gray")]            
+                "foreground" : [("disabled", disabled_foreground),
+                                ("alternate", "white")],
+                "background" : [("pressed", darker_detail_background),
+                                ("active", lighter_detail_background)],
+                "bordercolor": [("alternate", "#1B211C")]           
             }
         },
         
@@ -204,7 +231,7 @@ def clean(window_background="#1D291A",
             }
         },
         
-        "TFrame" : {
+        "__TFrame" : {
             "configure"  : {
                 "bordercolor" : "red",
                 "lightcolor" : "green",
@@ -228,15 +255,18 @@ def clean(window_background="#1D291A",
         
         "TextMargin" : {
             "configure" : {
-                "backgronud" : detail_background,
-                "foreground" : "#466148" # TODO:
+                "background" : darker_detail_background,
+                "foreground" : "#466148" 
             }
         },
         
         "Listbox" : {
             "configure" : {
                 "background" : code_background,
-                "foreground" : foreground
+                "foreground" : foreground,
+                "highlightbackground" : nonfocus_border,
+                "highlightcolor" : focus_border,
+                "highlightthickness" : 1,
             },
         },
         
