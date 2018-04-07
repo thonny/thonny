@@ -1025,7 +1025,7 @@ class FancyTracer(Executor):
                 self._send_and_fetch_message(self._past_messages[progress], direction)
                 progress += 1
             elif new_progress < 0: # Reached start of sent messages. Ask for new command.
-                self._debug("Reached first command")
+                self._debug("Reached first command, setting progress to 0")
                 progress = 0
                 self._send_and_fetch_message(self._past_messages[progress], direction)
             elif progress < new_progress: # Stepped forward in history
@@ -1313,8 +1313,8 @@ class FancyTracer(Executor):
             current_command, current_frame = self._get_command_and_frame_from_history(progress)
             event = current_frame.last_event
             self._debug("Current event in run to before2:", event)
-
-            progress += 1
+            if not event.startswith("before"):
+                progress += 1
         return progress
 
     def _cmd_out_completed(self, frame, event, args, focus, cmd, progress):

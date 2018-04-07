@@ -627,7 +627,7 @@ class EnhancedText(TweakableText):
         
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
-        TweakableText.destroy(self)
+        super().destroy()
         
         
 
@@ -660,7 +660,7 @@ class TextFrame(ttk.Frame):
         self._margin = tk.Text(self, width=4, padx=5, pady=5,
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
-                               background=margin_background, foreground=margin_foreground,
+                               background='#e0e0e0', foreground=margin_foreground,
                                selectbackground=margin_background, selectforeground=margin_foreground,
                                cursor='arrow',
                                state='disabled',
@@ -691,12 +691,17 @@ class TextFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self._recommended_line_length=line_length_margin
-        self._margin_line = tk.Canvas(self.text, borderwidth=0, width=1, height=1200, 
-                                     highlightthickness=0, background="lightgray")
+        margin_line_color = ttk.Style().lookup("TextMargin", "background", default="LightGray")
+        self._margin_line = tk.Canvas(self.text, borderwidth=0, width=1, height=2000, 
+                                     highlightthickness=0,
+                                     background=margin_line_color)
         self.update_margin_line()
         
         self.text.bind("<<TextChange>>", self._text_changed, True)
         
+        self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
+        self._reload_theme_options()
+
         # TODO: add context menu?
 
     def focus_set(self):
@@ -824,6 +829,18 @@ class TextFrame(ttk.Frame):
         except tk.TclError:
             exception()
 
+    def _reload_theme_options(self, event=None):
+        
+        style = ttk.Style()
+        background = style.lookup("TextMargin", "background")
+        self._margin.configure(background=background, selectbackground=background)
+        
+        foreground = style.lookup("TextMargin", "foreground")
+        self._margin.configure(foreground=foreground, selectforeground=foreground)
+        
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
+        super().destroy()
         
 def get_text_font(text):
     font = text["font"]

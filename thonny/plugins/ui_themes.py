@@ -80,7 +80,13 @@ def _text_settings():
             "map" : {
                 "background" : [("readonly", "Yellow")]
             }
-        }
+        },
+        "TextMargin" : {
+            "configure" : {
+                "background" : '#e0e0e0',
+                "foreground" : '#999999' 
+            }
+        },
     }
 
 
@@ -211,7 +217,7 @@ def clam():
         
         "TCombobox" : {
             "configure" : {
-                "padding" : 1,
+                "padding" : [4,2,2,2],
                 "insertwidth" : 1,
             },
             "map" : {

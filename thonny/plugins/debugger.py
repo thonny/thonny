@@ -11,15 +11,12 @@ from thonny.memory import VariablesFrame
 from thonny import ast_utils, memory, misc_utils, ui_utils
 from thonny.misc_utils import shorten_repr
 import ast
-from thonny.codeview import CodeView
+from thonny.codeview import CodeView, get_syntax_options_for_tag
 from tkinter.messagebox import showinfo, showerror
 from thonny.globals import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import tokenize
 import logging
-
-_SUSPENDED_FOCUS_BACKGROUND = "#DCEDF2"
-_ACTIVE_FOCUS_BACKGROUND = "#F8FC9A"
 
 class Debugger:
     def __init__(self):
@@ -256,8 +253,10 @@ class FrameVisualizer:
         self._expression_box = ExpressionBox(text_frame)
         self._next_frame_visualizer = None
         
-        self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
-        self._text.tag_configure('exception', background="#FFBFD6")
+        # TODO: rely on tags configured in SyntaxText
+        self._text.tag_configure('focus', get_syntax_options_for_tag("active_focus"))
+        self._text.tag_configure('exception', get_syntax_options_for_tag("exception_focus"))
+        
         self._text.tag_raise("exception", "focus")
         self._text.set_read_only(True)
     
@@ -309,10 +308,11 @@ class FrameVisualizer:
             self._tag_range(frame_info.last_event_focus, "focus", True)
             if msg.exception is not None:
                 self._tag_range(frame_info.last_event_focus, "exception", True)
-                
-            self._text.tag_configure('focus', background=_ACTIVE_FOCUS_BACKGROUND, borderwidth=1, relief=tk.SOLID)
+            
+            # TODO: use different tags?
+            self._text.tag_configure('focus', get_syntax_options_for_tag("active_focus"))
         else:
-            self._text.tag_configure('focus', background="", borderwidth=1, relief=tk.SOLID)
+            self._text.tag_configure('focus', get_syntax_options_for_tag("suspended_focus"))
             
         self._expression_box.update_expression(msg, frame_info)
 
@@ -394,26 +394,30 @@ class CallFrameVisualizer(FrameVisualizer):
 
 class ExpressionBox(tk.Text):
     def __init__(self, codeview):
-        tk.Text.__init__(self, codeview.winfo_toplevel(), #codeview.text,
-                         height=1,
-                         width=1,
-                         relief=tk.RAISED,
-                         background="#DCEDF2",
-                         borderwidth=1,
-                         highlightthickness=0,
-                         padx=7,
-                         pady=7,
-                         wrap=tk.NONE,
-                         font=get_workbench().get_font("EditorFont"))
+        
+        opts = dict(height=1,
+                     width=1,
+                     relief=tk.RAISED,
+                     background="#DCEDF2",
+                     borderwidth=1,
+                     highlightthickness=0,
+                     padx=7,
+                     pady=7,
+                     wrap=tk.NONE,
+                     font="EditorFont")
+        
+        opts.update(get_syntax_options_for_tag("expression_box"))
+        
+        tk.Text.__init__(self, codeview.winfo_toplevel(), **opts)
         self._codeview = codeview
         
         self._main_range = None
         self._last_focus = None
         
-        self.tag_config("value", foreground="Blue")
-        self.tag_configure('before', background="#F8FC9A", borderwidth=1, relief=tk.SOLID)
-        self.tag_configure('after', background="#D7EDD3", borderwidth=1, relief=tk.FLAT)
-        self.tag_configure('exception', background="#FFBFD6", borderwidth=1, relief=tk.SOLID)
+        self.tag_configure("value", get_syntax_options_for_tag("value"))
+        self.tag_configure('before', get_syntax_options_for_tag("active_focus"))
+        self.tag_configure('after', get_syntax_options_for_tag("completed_focus"))
+        self.tag_configure('exception', get_syntax_options_for_tag("exception_focus"))
         self.tag_raise("exception", "before")
         self.tag_raise("exception", "after")
         
@@ -445,7 +449,9 @@ class ExpressionBox(tk.Text):
             # we're at final stage of executing parent statement 
             # (eg. assignment after the LHS has been evaluated)
             # don't close yet
-            self.tag_configure('after', background="#DCEDF2", borderwidth=1, relief=tk.FLAT)
+            opts = get_syntax_options_for_tag("completed_focus")
+            opts["background"] = ""
+            self.tag_configure('after', opts)
         
         elif event == "exception":
             "TODO:"   
@@ -477,7 +483,7 @@ class ExpressionBox(tk.Text):
             
     def _replace(self, focus, value):
         
-        self.tag_configure('after', background="#BBEDB2", borderwidth=1, relief=tk.FLAT)
+        self.tag_configure('after', get_syntax_options_for_tag("completed_focus"))
         start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
         end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
         
