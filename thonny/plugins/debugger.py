@@ -233,12 +233,6 @@ class FrameVisualizer:
         self._source = frame_info.source
         self._expression_box = ExpressionBox(text_frame)
         self._next_frame_visualizer = None
-        
-        # TODO: rely on tags configured in SyntaxText
-        self._text.tag_configure('focus', get_syntax_options_for_tag("active_focus"))
-        self._text.tag_configure('exception', get_syntax_options_for_tag("exception_focus"))
-        
-        self._text.tag_raise("exception", "focus")
         self._text.set_read_only(True)
     
     def close(self):
@@ -276,25 +270,27 @@ class FrameVisualizer:
         
     
     def _remove_focus_tags(self):
-        self._text.tag_remove("focus", "0.0", "end")
-        self._text.tag_remove("exception", "0.0", "end")
+        for name in ["exception_focus", "active_focus", 
+                     "completed_focus", "suspended_focus"]:
+            self._text.tag_remove(name, "0.0", "end")
      
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
         
-        # TODO: if focus is in expression, then find and highlight closest
-        # statement
         if "statement" in frame_info.last_event:
-            self._remove_focus_tags()
-            self._tag_range(frame_info.last_event_focus, "focus", True)
             if msg.exception is not None:
-                self._tag_range(frame_info.last_event_focus, "exception", True)
-            
-            # TODO: use different tags?
-            self._text.tag_configure('focus', get_syntax_options_for_tag("active_focus"))
+                stmt_tag = "exception_focus"
+            elif frame_info.last_event.startswith("before"):
+                stmt_tag = "active_focus"
+            else:
+                stmt_tag = "completed_focus"
         else:
-            self._text.tag_configure('focus', get_syntax_options_for_tag("suspended_focus"))
+            assert "expression" in frame_info.last_event
+            stmt_tag = "suspended_focus"
             
+        self._remove_focus_tags()
+        self._tag_range(frame_info.current_statement, stmt_tag)
+        
         self._expression_box.update_expression(msg, frame_info)
 
     def _find_this_and_next_frame(self, stack):
@@ -309,7 +305,7 @@ class FrameVisualizer:
             raise AssertionError("Frame doesn't exist anymore")
         
     
-    def _tag_range(self, text_range, tag, see=False):
+    def _tag_range(self, text_range, tag):
         first_line, first_col, last_line = self._get_text_range_block(text_range)
         
         for lineno in range(first_line, last_line+1):
@@ -451,14 +447,10 @@ class ExpressionBox(tk.Text):
             
             
     def _replace(self, focus, value):
-        #print("REPL", repr(self.get("1.0", "end")), focus, value["repr"])
-        #self.tag_configure('after', get_syntax_options_for_tag("completed_focus"))
         start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
         end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
         
-        #print("MARKS", start_mark, end_mark)
         self.delete(start_mark, end_mark)
-        #print("AFTER 0", repr(self.get("1.0", "end")))
         
         id_str = memory.format_object_id(value["id"])
         if get_workbench().in_heap_mode():

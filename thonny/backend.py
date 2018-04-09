@@ -948,17 +948,19 @@ class FancyTracer(Executor):
         """
         
         # store information about current statement / expression
-        if event == "before_statement_again":
-            # keep the expression information from last event
-            self._custom_stack[-1].current_root_expression = self._custom_stack[-1].current_root_expression
-            self._custom_stack[-1].current_evaluations = self._custom_stack[-1].current_evaluations
-            
-        elif "statement" in event:
-            self._custom_stack[-1].current_root_expression = None
+        if "statement" in event:
             self._custom_stack[-1].current_statement = focus
-            self._custom_stack[-1].current_evaluations = []
             
+            if event == "before_statement_again":
+                # keep the expression information from last event
+                self._custom_stack[-1].current_root_expression = self._custom_stack[-1].current_root_expression
+                self._custom_stack[-1].current_evaluations = self._custom_stack[-1].current_evaluations
+            
+            else:
+                self._custom_stack[-1].current_root_expression = None
+                self._custom_stack[-1].current_evaluations = []
         else:
+            # see whether current_root_expression needs to be updated
             assert len(self._past_messages) > 0
             prev_msg_frame = self._past_messages[-1]["stack"][-1]
             prev_event = prev_msg_frame.last_event
