@@ -92,9 +92,6 @@ class Debugger:
                 and "debug" in get_runner().supported_features())
 
     def _check_issue_debugger_command(self, command, **kwargs):
-        if kwargs.get("automatic", False):
-            raise RuntimeError("Automatic commands forbidden for now")
-        
         cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
 
@@ -102,8 +99,7 @@ class Debugger:
             print("LAST DEBUGGER COMMAND:", cmd.command, cmd)
 
         state = get_runner().get_state() 
-        if (state == "waiting_debugger_command"
-            or getattr(cmd, "automatic", False) and state == "running"):
+        if (state == "waiting_debugger_command"):
             logging.debug("_check_issue_debugger_command: %s", cmd)
             
             # tell VM the state we are seeing
@@ -182,47 +178,27 @@ class Debugger:
     def _handle_debugger_progress(self, msg):
         self._last_progress_message = msg
         
-        if self._should_skip_event(msg):
-            #self._check_issue_debugger_command("run_to_before", automatic=True)
-            pass
-        else:
-            main_frame_id = msg.stack[0].id
-            
-            # clear obsolete main frame visualizer
-            if (self._main_frame_visualizer 
-                and self._main_frame_visualizer.get_frame_id() != main_frame_id):
-                self._main_frame_visualizer.close()
-                self._main_frame_visualizer = None
-                
-            if not self._main_frame_visualizer:
-                self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
-                
-            self._main_frame_visualizer.update_this_and_next_frames(msg)
+        main_frame_id = msg.stack[0].id
         
-        # advance automatically in some cases
-        event = msg.stack[-1].last_event
-        args = msg.stack[-1].last_event_args
-
+        # clear obsolete main frame visualizer
+        if (self._main_frame_visualizer 
+            and self._main_frame_visualizer.get_frame_id() != main_frame_id):
+            self._main_frame_visualizer.close()
+            self._main_frame_visualizer = None
+            
+        if not self._main_frame_visualizer:
+            self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
+            
+        self._main_frame_visualizer.update_this_and_next_frames(msg)
+        
         if msg.exception:
             showerror("Exception",
-                      # Following is clever but noisy 
                       msg.exception_lower_stack_description.lstrip() + 
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
-            self._check_issue_debugger_command("step", automatic=True)
-        
-        """
-        elif (event == "after_expression" 
-            and "last_child" in args["node_tags"]
-            and "child_of_statement" in args["node_tags"]):
-            # This means we're done with the expression, so let's speed up a bit.
-            self._check_issue_debugger_command("step", automatic=True)
-            # Next event will be before_statement_again
-        """
-                        
-            
     
     def _should_skip_event(self, msg):
+        return False
         frame_info = msg.stack[-1]
         event = frame_info.last_event
         tags = frame_info.last_event_args["node_tags"]
@@ -430,7 +406,7 @@ class ExpressionBox(tk.Text):
     def update_expression(self, msg, frame_info):
         focus = frame_info.last_event_focus
         event = frame_info.last_event
-        print("FRI", focus, len(frame_info.current_evaluations))
+        print("FRI", event, focus, len(frame_info.current_evaluations))
         if frame_info.current_root_expression is not None:
             self._load_expression(frame_info.filename, frame_info.current_root_expression)
             
