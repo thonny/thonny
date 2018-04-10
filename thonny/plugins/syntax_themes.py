@@ -59,7 +59,7 @@ def default_dark():
         "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
         "open_string3"  : {"foreground" : string_fg, "background" : open_string_bg},
         "builtin"       : {"foreground" : default_fg},
-        "keyword"       : {"foreground" : "#9A79AD", "font" : "BoldEditorFont"},
+        "keyword"       : {"foreground" : "#B088CF", "font" : "BoldEditorFont"},
         "number"        : {"foreground" : "#FFCABF"},
         "comment"       : {"foreground" : "#C8DEE6"},
         

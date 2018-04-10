@@ -530,7 +530,6 @@ def load_early_plugin():
              
         get_workbench().add_ui_theme(name, None, settings)
     
-    
     get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam())
     
     if "xpnative" in original_themes:
@@ -540,10 +539,10 @@ def load_early_plugin():
         get_workbench().add_ui_theme("Enhanced Aqua", "aqua", enhanced_aqua())
     
 
-    if "Windows" in get_workbench().get_ui_theme_names():
+    if "Windows" in get_workbench().get_usable_ui_theme_names():
         get_workbench().set_default("view.ui_theme", "Windows")
         
-    elif "Enhanced Clam" in get_workbench().get_ui_theme_names():
+    elif "Enhanced Clam" in get_workbench().get_usable_ui_theme_names():
         get_workbench().set_default("view.ui_theme", "Enhanced Clam")
         
     

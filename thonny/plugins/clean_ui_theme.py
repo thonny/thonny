@@ -2,23 +2,24 @@ from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_windows
 
 
-def clean(frame_background="#1D291A",
-          text_background="#273627",
-          normal_detail="#2D452F",
-          high_detail="#3C6E40",
-          low_detail="#33402F",
-          normal_foreground="#9E9E9E",
-          high_foreground="#eeeeee",
-          low_foreground="#485C49",
+def clean(frame_background,
+          text_background,
+          normal_detail,
+          high_detail,
+          low_detail,
+          normal_foreground,
+          high_foreground,
+          low_foreground,
+          custom_menubar=None,
           ):
     
-    # https://wiki.tcl.tk/37973
+    # https://wiki.tcl.tk/37973 (Changing colors)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
     
     
     
-    return {
+    settings = {
         "." : {
             "configure" : {
                 "foreground" : normal_foreground,
@@ -239,12 +240,11 @@ def clean(frame_background="#1D291A",
                 "highlightthickness" : 1,
             },
         },
-        
         "Menubar" : {
             "configure" : {
                 # Regular, system-provided Windows menubar doesn't allow changing colors.
                 # custom=True replaces it with a custom-built menubar.
-                "custom" : running_on_windows(), 
+                "custom" : running_on_windows() if custom_menubar is None else custom_menubar, 
                 "background" : frame_background,
                 "foreground" : normal_foreground,
                 "activebackground" : normal_foreground, 
@@ -256,12 +256,12 @@ def clean(frame_background="#1D291A",
             "configure" : {
                 "background" : normal_detail,
                 "foreground" : high_foreground,
-                "selectcolor" : high_foreground,
+                "selectcolor" : normal_foreground,
                 "borderwidth" : 0,
                 "activebackground" : normal_foreground,
                 "activeforeground" : frame_background,
                 "activeborderwidth" : 0,
-                #"relief" : "flat"
+                "relief" : "flat"
             }
         },
         
@@ -274,6 +274,44 @@ def clean(frame_background="#1D291A",
     }
     
     
-
+    return settings
+    
+    
 def load_early_plugin():
-    get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", clean)
+    get_workbench().add_ui_theme("Clean Dark Green", "Enhanced Clam", 
+        clean(frame_background="#1D291A",
+              text_background="#273627",
+              normal_detail="#2D452F",
+              high_detail="#3C6E40",
+              low_detail="#33402F",
+              normal_foreground="#9E9E9E",
+              high_foreground="#eeeeee",
+              low_foreground="#485C49",
+        )
+    )
+
+    get_workbench().add_ui_theme("Clean Dark Blue", "Enhanced Clam", 
+        clean(frame_background="#1A1C29",
+              text_background="#272936",
+              normal_detail="#2D3345",
+              high_detail="#3C436E",
+              low_detail="#2F3640",
+              normal_foreground="#9E9E9E",
+              high_foreground="#eeeeee",
+              low_foreground="#484A5C",
+        )
+    )
+
+    get_workbench().add_ui_theme("Clean Sepia", "Enhanced Clam", 
+        clean(frame_background="#E8E7DC",
+              text_background="#F7F6F0",
+              normal_detail="#DEDCC8",
+              high_detail="#eeebe7",
+              low_detail="#D4D0B8",
+              normal_foreground="#222222",
+              high_foreground="#000000",
+              low_foreground="#999999",
+              custom_menubar=0,
+        )
+    )
+

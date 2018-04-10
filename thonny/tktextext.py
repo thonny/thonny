@@ -834,6 +834,7 @@ class TextFrame(ttk.Frame):
         style = ttk.Style()
         background = style.lookup("TextMargin", "background")
         self._margin.configure(background=background, selectbackground=background)
+        self._margin_line.configure(background=background)
         
         foreground = style.lookup("TextMargin", "foreground")
         self._margin.configure(foreground=foreground, selectforeground=foreground)

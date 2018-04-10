@@ -217,11 +217,14 @@ class Workbench(tk.Tk):
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        if get_style_option("Menubar", "custom", False):
+        if get_style_option("Menubar", "custom", False) == "True":
             self._menubar = ui_utils.CustomMenubar(self)
             self._menubar.grid(row=0, sticky="nsew")
         else:
-            self._menubar = tk.Menu(self, **get_style_options("Menubar"))
+            opts = get_style_options("Menubar")
+            if "custom" in opts:
+                del opts["custom"]
+            self._menubar = tk.Menu(self, **opts)
             self["menu"] = self._menubar
         self._menus = {}
         self._menu_item_specs = {} # key is pair (menu_name, command_label), value is MenuItem
@@ -678,8 +681,9 @@ class Workbench(tk.Tk):
         self._syntax_themes[name] = (parent, settings)
         
     
-    def get_ui_theme_names(self):
-        return sorted(self._ui_themes.keys())
+    def get_usable_ui_theme_names(self):
+        return sorted([name for name in self._ui_themes 
+                       if self._ui_themes[name][0] is not None])
     
     def get_syntax_theme_names(self):
         return sorted(self._syntax_themes.keys())
@@ -729,6 +733,11 @@ class Workbench(tk.Tk):
                 #self.option_add("*Listbox." + setting, value)
                 self.option_add("*TCombobox*Listbox." + setting, value)
         
+        if hasattr(self, "_menus"):
+            # if menus have been initialized, ie. when theme is being changed
+            for menu in self._menus.values():
+                menu.configure(get_style_options("Menu"))
+        
     def _apply_syntax_theme(self, name):
         def get_settings(name):
             try:
@@ -756,7 +765,7 @@ class Workbench(tk.Tk):
     
     def update_themes(self):
         preferred_theme = self.get_option("view.ui_theme")
-        available_themes = self.get_ui_theme_names()
+        available_themes = self.get_usable_ui_theme_names()
         
         if preferred_theme in available_themes:
             self._apply_ui_theme(preferred_theme)

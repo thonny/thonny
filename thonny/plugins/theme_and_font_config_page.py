@@ -37,7 +37,8 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                         exportselection=False,
                                         textvariable=self._ui_theme_variable,
                                         state='readonly',
-                                        values=get_workbench().get_ui_theme_names())
+                                        height=15,
+                                        values=get_workbench().get_usable_ui_theme_names())
         self._ui_theme_combo.grid(row=2, column=0, sticky="nsew", padx=(0, 10))
         
         ttk.Label(self, text="Syntax theme").grid(row=1, column=1, sticky="w", pady=(10, 0))
