@@ -221,7 +221,7 @@ def clean(frame_background,
             },
         },
         
-        "TextMargin" : {
+        "Gutter" : {
             "configure" : {
                 "background" : low_detail,
                 "foreground" : low_foreground 

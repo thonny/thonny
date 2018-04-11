@@ -81,7 +81,7 @@ def _text_settings():
                 "background" : [("readonly", "Yellow")]
             }
         },
-        "TextMargin" : {
+        "Gutter" : {
             "configure" : {
                 "background" : '#e0e0e0',
                 "foreground" : '#999999' 
