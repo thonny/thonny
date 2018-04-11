@@ -463,7 +463,6 @@ class Runner:
             
             cmd = [exe + "ee", "-c", "print('Hi!'); input()"]
             child = subprocess.Popen(cmd,
-                                     env=create_pythonless_environment(),
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
