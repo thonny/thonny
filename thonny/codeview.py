@@ -30,6 +30,9 @@ class SyntaxText(EnhancedText):
                 self.tag_configure(tag_name, **syntax_options[tag_name])
         
         self._syntax_options = syntax_options
+        
+        if "current_line" in syntax_options:
+            self.tag_lower("current_line")
     
     def _reload_theme_options(self, event=None):
         super()._reload_theme_options(event)
@@ -157,7 +160,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
         
-        super().__init__(master=master, cnf=cnf, **kw)
+        super().__init__(master=master, tag_current_line=True, cnf=cnf, **kw)
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)

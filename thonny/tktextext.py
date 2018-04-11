@@ -170,7 +170,7 @@ class EnhancedText(TweakableText):
     
     Most of the code is adapted from idlelib.EditorWindow.
     """ 
-    def __init__(self, master=None, style="Text", cnf={}, **kw):
+    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account 
         kw["autoseparators"] = False
@@ -184,6 +184,7 @@ class EnhancedText(TweakableText):
         
         self._last_event_kind = None
         self._last_key_time = None
+        self._last_line_no = None
         
         self._bind_editing_aids()
         self._bind_movement_aids()
@@ -194,6 +195,11 @@ class EnhancedText(TweakableText):
         self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
         
         self._reload_theme_options()
+        
+        if tag_current_line:
+            self.bind("<<CursorMove>>", self._tag_current_line, True)
+            self._tag_current_line()
+
     
     def _bind_mouse_aids(self):
         if _running_on_mac():
@@ -231,6 +237,7 @@ class EnhancedText(TweakableText):
         self.bind("<Right>", self.move_to_edge_if_selection(1), True)
         self.bind("<Next>", self.perform_page_down, True)
         self.bind("<Prior>", self.perform_page_up, True)
+
     
     def _bind_selection_aids(self):
         self.bind("<Command-a>" if _running_on_mac() else "<Control-a>",
@@ -600,6 +607,12 @@ class EnhancedText(TweakableText):
     def _on_mouse_click(self, event):
         self.edit_separator()
 
+    def _tag_current_line(self, event=None):
+        lineno = int(self.index("insert").split(".")[0])
+        if lineno != self._last_line_no:
+            self.tag_remove("current_line", "1.0", "end")
+            self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")
+            self._last_line_no = lineno
     
     def on_secondary_click(self, event=None):
         "Use this for invoking context menu"
