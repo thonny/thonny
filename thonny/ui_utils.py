@@ -1151,7 +1151,8 @@ def get_style_options(style_name, default={}):
 def get_style_option(style_name, option_name, default=None):
     style = ttk.Style()
     setting = style.configure(style_name, option_name)
-    if setting not in [None, ""]:
-        return setting
+    if setting in [None, ""]:
+        return default
     else:
-        return default    
+        return setting
+        

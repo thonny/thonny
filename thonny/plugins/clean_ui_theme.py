@@ -32,7 +32,10 @@ def clean(frame_background,
             },
             
             "map" : {
-                "foreground" : [("disabled", low_foreground)],
+                "foreground" : [("disabled", low_foreground),
+                                ("active", high_foreground)],
+                "background" : [("disabled", frame_background), 
+                                ("active", high_detail)],
                 "selectbackground" : [("!focus", low_detail)],
                 "selectforeground" : [("!focus", normal_foreground)]
             },
@@ -198,19 +201,50 @@ def clean(frame_background,
             }
         },
         
+        "TCheckbutton" : {
+            "configure" : {
+                "indicatorbackground" : normal_foreground,
+            },
+            "map" : {
+                "indicatorbackground" : [("pressed", high_foreground),
+                                         ("!disabled", "alternate", high_foreground),
+                                         ("disabled", "alternate", low_detail),
+                                         ("disabled", low_detail)]
+            }
+        },
+        
+        "TRadiobutton" : {
+            "configure" : {
+                "indicatorbackground" : normal_foreground,
+            },
+            "map" : {
+                "indicatorbackground" : [("pressed", high_foreground),
+                                         ("!disabled", "alternate", high_foreground),
+                                         ("disabled", "alternate", low_detail),
+                                         ("disabled", low_detail)]
+            }
+        },
+        
         "Toolbutton" : {
             "configure" : {
                 "background" : frame_background
             },
             
             "map" : {
-                "background": [("disabled", frame_background)]
+                "background": [("disabled", frame_background),
+                               ("active", high_detail)]
             }
         },
         
         "TLabel" : {
             "configure"  : {
                 "foreground" : normal_foreground
+            }
+        },
+        
+        "Url.TLabel" : {
+            "configure"  : {
+                "foreground" : high_foreground,
             }
         },
         
@@ -278,6 +312,18 @@ def clean(frame_background,
     
     
 def load_early_plugin():
+    get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", 
+        clean(frame_background="#252525",
+              text_background="#2d2d2d",
+              normal_detail="#3D3D3D",
+              high_detail="#6E6E6E",
+              low_detail="#404040",
+              normal_foreground="#9f9f9f",
+              high_foreground="#eeeeee",
+              low_foreground="#595959",
+        )
+    )
+
     get_workbench().add_ui_theme("Clean Dark Green", "Enhanced Clam", 
         clean(frame_background="#1D291A",
               text_background="#273627",

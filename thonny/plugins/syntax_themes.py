@@ -2,13 +2,18 @@ from thonny.globals import get_workbench
 
 def default_light():
     default_fg = "black"
+    default_bg = "#fdfdfd"
     light_fg = "DarkGray"
     string_fg = "DarkGreen"
     open_string_bg = "#c3f9d3"
     
     return {
-        "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg},
-        "definition"    : {"foreground" : default_fg, "font" : "BoldEditorFont"},
+        "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg,
+                           "background" : default_bg},
+        "GUTTER"        : {"foreground" : "#999999", "background" : "#e0e0e0"},
+        "current_line"  : {"background" : "#f5f5f5"},
+        
+        "definition"    : {"foreground" : "DarkBlue", "font" : "BoldEditorFont"},
         "string"        : {"foreground" : string_fg},
         "string3"       : {"foreground" : string_fg},
         "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
@@ -27,7 +32,7 @@ def default_light():
         "hyperlink"     : {"foreground" : "#3A66DD", "underline" : True},
         
         # paren matcher
-        "surrounding_parens"  : {"foreground" : "Blue", "font" : "BoldEditorFont"},
+        "surrounding_parens"  : {"foreground" : "Blue", "background" : default_bg, "font" : "BoldEditorFont"},
         "unclosed_expression"  : {"background" : "LightGray"},
         
         # find/replace
@@ -45,23 +50,27 @@ def default_light():
 def default_dark():
     default_fg = "#B3B3B3" 
     string_fg = "#8DC76F"
-    open_string_bg = "#453B22"
-    
+    open_string_bg = "#224533"
+        
     #s.configure("Local.Code", foreground="#BCCAE8")
     #s.configure("MatchedName.Code", background="#193022")
     
     return {
-        "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg},
-        #"sel"           : {"foreground" : ""},
+        "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg,
+                           "background" : "#2d2d2d"},
+        "GUTTER"        : {"foreground" : "#606060", "background" : "#323232"},
+        "current_line"  : {"background" : "#363636"},
+        "sel"           : {"foreground" : "#eeeeee", "background" : "#6E6E6E"},
+        
         "definition"    : {"foreground" : default_fg},
         "string"        : {"foreground" : string_fg},
         "string3"       : {"foreground" : string_fg},
         "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
         "open_string3"  : {"foreground" : string_fg, "background" : open_string_bg},
         "builtin"       : {"foreground" : default_fg},
-        "keyword"       : {"foreground" : "#B088CF", "font" : "BoldEditorFont"},
+        "keyword"       : {"foreground" : "#A9B1C9", "font" : "BoldEditorFont"},
         "number"        : {"foreground" : "#FFCABF"},
-        "comment"       : {"foreground" : "#C8DEE6"},
+        "comment"       : {"foreground" : "#D4D44E"},
         
         # shell
         "prompt"        : {"foreground" : "#5BEBBB", "font" : "BoldEditorFont"},
@@ -74,7 +83,7 @@ def default_dark():
         
         # paren matcher
         "surrounding_parens"  : {"foreground" : "#F0995B", "font" : "BoldEditorFont"},
-        "unclosed_expression"  : {"background" : "#193022"},
+        "unclosed_expression"  : {"background" : "#000000"},
         
         # find/replace
         "found" : {"underline" : True},
@@ -88,6 +97,49 @@ def default_dark():
         "expression_box"  : {"background" : "#506E67", "foreground" : default_fg},
     }
 
+def default_dark_green():
+    open_string_bg = "#453B22"
+    
+    return {
+        "TEXT"          : {"background" : "#273627"},
+        "GUTTER"        : {"background" : "#33402F"},
+        "current_line"  : {"background" : "#2E402E"},
+        "sel"           : {"background" : "#6E6E6E"},
+        "unclosed_expression"  : {"background" : "#0F1F15"},
+        
+        "open_string"   : {"background" : open_string_bg},
+        "open_string3"  : {"background" : open_string_bg},
+
+        "keyword"       : {"foreground" : "#88CFB6", "font" : "BoldEditorFont"},
+        
+        # debugger
+        "active_focus"    : {"background" : "#807238"},
+        "completed_focus" : {"background" : "#807238"},
+        "exception_focus" : {"background" : "#FFBFD6"},
+        "expression_box"  : {"background" : "#506E67"},
+    }
+    
+
+def default_dark_blue():
+    open_string_bg = "#224533"
+    return {
+        "TEXT"          : {"background" : "#272936"},
+        "GUTTER"        : {"background" : "#2F3640"},
+        "current_line"  : {"background" : "#2D3040"},
+        "sel"           : {"background" : "#6E6E6E"},
+        "unclosed_expression"  : {"background" : "#100B21"},
+        "open_string"   : {"background" : open_string_bg},
+        "open_string3"  : {"background" : open_string_bg},
+        
+        "keyword"       : {"foreground" : "#8899CF", "font" : "BoldEditorFont"},
+
+        # debugger
+        "active_focus"    : {"background" : "#807238"},
+        "completed_focus" : {"background" : "#807238"},
+        "exception_focus" : {"background" : "#FFBFD6"},
+        "expression_box"  : {"background" : "#506E67"},
+    }
+    
 
 def idle_classic():
     string_fg = "#00aa00"
@@ -213,6 +265,8 @@ def zenburn():
 def load_early_plugin():
     get_workbench().add_syntax_theme("Default Light", None, default_light)
     get_workbench().add_syntax_theme("Default Dark", None, default_dark)
+    get_workbench().add_syntax_theme("Default Dark Green", "Default Dark", default_dark_green)
+    get_workbench().add_syntax_theme("Default Dark Blue", "Default Dark", default_dark_blue)
     get_workbench().add_syntax_theme("Desert Sunset", "Default Dark", desert_sunset)
     get_workbench().add_syntax_theme("Zenburn", "Default Dark", zenburn)
     get_workbench().add_syntax_theme("IDLE Classic", "Default Light", idle_classic)

@@ -80,8 +80,9 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                 )
         
         self._preview_codeview.set_content(textwrap.dedent("""
-            if bar is None:
-                print("This is not", 33)
+            def foo(bar):
+                if bar is None: # This is a comment
+                    print("The answer is", 33)
             
             unclosed_string = "blah, blah
             """).strip())

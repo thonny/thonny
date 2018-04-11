@@ -1,6 +1,5 @@
 from thonny.globals import get_workbench
 from thonny.misc_utils import running_on_linux
-from thonny.ui_utils import CALM_WHITE
 
 def _treeview_settings():
     light_blue = "#ADD8E6" 
@@ -90,6 +89,16 @@ def _text_settings():
     }
 
 
+def _label_settings():
+    return {
+        "Url.TLabel" : {
+            "configure" : {
+                "foreground" : "blue"
+            },
+        },
+    }
+
+
 def clam():
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     defaultfg =      "#000000"
@@ -168,7 +177,7 @@ def clam():
         "TCheckbutton" : {
             "configure" : {
                 "indicatorbackground" : "#ffffff",
-                "indicatormargin" : [1, 1, 4, 1],
+                "indicatormargin" : [1, 1, 6, 1],
                 "padding" :  2,
             },
             "map" : {
@@ -183,7 +192,7 @@ def clam():
         "TRadiobutton" : {
             "configure" : {
                 "indicatorbackground" : "#ffffff",
-                "indicatormargin" : [1, 1, 4, 1],
+                "indicatormargin" : [1, 1, 6, 1],
                 "padding" :  2,
             },
             "map" : {
@@ -302,7 +311,7 @@ def clam():
                 "sashthickness" : 6,
                 "gripcount" : 10
             }
-        }
+        },
     }
     
 
@@ -445,6 +454,7 @@ def windows():
         _paned_window_settings(),
         _menu_settings(),
         _text_settings(),
+        _label_settings(),
         {
             "TNotebook" : {
                 "configure" : {
@@ -463,6 +473,17 @@ def windows():
                     "padding" : (4,1,1,0)
                 }
             },
+            
+            "Listbox" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                    "foreground" : "SystemWindowText",
+                    "disabledforeground" : "SystemGrayText",
+                    "highlightbackground" : "SystemActiveBorder",
+                    "highlightcolor" : "SystemActiveBorder",
+                    "highlightthickness" : 1,
+                },
+            },
         }
     ]
 
@@ -474,6 +495,7 @@ def enhanced_clam():
         _paned_window_settings(),
         _menu_settings(),
         _text_settings(),
+        _label_settings(),
         {
             "Tab" : {
                 "configure" : {
@@ -489,6 +511,17 @@ def enhanced_clam():
                 "configure" : {
                     "gripcount" : 0
                 }
+            },
+            
+            "Listbox" : {
+                "configure" : {
+                    "background" : "white",
+                    "foreground" : "black",
+                    "disabledforeground" : "#999999",
+                    "highlightbackground" : "#4a6984",
+                    "highlightcolor" : "#4a6984",
+                    "highlightthickness" : 1,
+                },
             },
         }
     ]
