@@ -57,7 +57,10 @@ class Runner:
         self._current_toplevel_command = None
         self._current_command = None
         
-        self._check_alloc_console()
+        try:
+            self._check_alloc_console()
+        except:
+            get_workbench().report_exception("Can't allocate console")
     
     def start(self):
         try:
@@ -458,7 +461,7 @@ class Runner:
                       .replace("thonny.exe", "python.exe") 
                       .replace("pythonw.exe", "python.exe"))
             
-            cmd = [exe, "-c", "print('Hi!'); input()"]
+            cmd = [exe + "ee", "-c", "print('Hi!'); input()"]
             child = subprocess.Popen(cmd,
                                      env=create_pythonless_environment(),
                                      stdin=subprocess.PIPE,
