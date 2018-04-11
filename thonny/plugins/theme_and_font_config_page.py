@@ -46,6 +46,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                         exportselection=False,
                                         textvariable=self._syntax_theme_variable,
                                         state='readonly',
+                                        height=15,
                                         values=get_workbench().get_syntax_theme_names())
         self._syntax_theme_combo.grid(row=2, column=1, sticky="nsew", padx=(0, 10))
         
@@ -54,6 +55,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         self._family_combo = ttk.Combobox(self,
                                           exportselection=False,
                                           state='readonly',
+                                          height=15,
                                           textvariable=self._family_variable,
                                           values=self._get_families_to_show())
         self._family_combo.grid(row=2, column=2, sticky=tk.NSEW, padx=(0,10))
@@ -63,7 +65,8 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                         exportselection=False,
                                         textvariable=self._size_variable,
                                         state='readonly',
-                                        values=[str(x) for x in range(3,73)])
+                                        height=15,
+                                      values=[str(x) for x in range(3,73)])
         self._size_combo.grid(row=2, column=3, sticky="nsew")
         
         
