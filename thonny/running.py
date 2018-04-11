@@ -460,6 +460,7 @@ class Runner:
             
             cmd = [exe, "-c", "print('Hi!'); input()"]
             child = subprocess.Popen(cmd,
+                                     env=create_pythonless_environment(),
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
@@ -712,23 +713,18 @@ class CPythonProxy(BackendProxy):
         self._message_queue = collections.deque()
     
         # prepare the environment
-        my_env = os.environ.copy()
         
         # Delete some environment variables if the backend is (based on) a different Python instance
-        if self._executable not in [
+        if self._executable in [
             this_python,
             this_python.replace("python.exe", "pythonw.exe"),
             this_python.replace("pythonw.exe", "python.exe"),
             get_private_venv_executable()]:
             
+            my_env = os.environ.copy()
+        else:
             # Keep only the variables, that are not related to Python
-            my_env = {name : my_env[name] for name in my_env 
-                      if "python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]}
-            
-            # Remove variables used to tweak bundled Thonny-private Python
-            if using_bundled_python():
-                my_env = {name : my_env[name] for name in my_env
-                          if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]}
+            my_env = create_pythonless_environment()
         
         # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "ASCII" 
@@ -1093,6 +1089,20 @@ def _get_venv_info(venv_path):
     
     return result;
 
+def create_pythonless_environment():
+    my_env = os.environ.copy()
+    
+    # Keep only the variables, that are not related to Python
+    my_env = {name : my_env[name] for name in my_env 
+              if "PYTHON" not in name 
+              and name not in ["TK_LIBRARY", "TCL_LIBRARY"]}
+    
+    # Remove variables used to tweak bundled Thonny-private Python
+    if using_bundled_python():
+        my_env = {name : my_env[name] for name in my_env
+                  if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]}
+    
+    return my_env
 
 def using_bundled_python():
     return os.path.exists(os.path.join(
