@@ -93,6 +93,7 @@ def idle_classic():
     string_fg = "#00aa00"
     return {
         "TEXT"          : {"foreground" : "black", "insertbackground" : "black", "background" : "white"},
+        "GUTTER"        : {"foreground" : "gray", "background" : "#efefef"},
         "sel"           : {"foreground" : "black", "background" : "gray"},
         
         "number"        : {"foreground" : "black"},
@@ -144,12 +145,14 @@ def idle_dark():
         "current_found"         : {"foreground" : "#002240", "background" : "#fbfbfb"},
     }
 
-def desert():
+def desert_sunset():
     normal_fg = "#f0e68c"
     string_fg = "#ffa0a0"
     
     return {
-        "TEXT"          : {"foreground" : normal_fg, "insertbackground" : normal_fg, "background" : "#333333"},
+        "TEXT"          : {"foreground" : normal_fg, "insertbackground" : normal_fg, 
+                           "background" : "#333333"},
+        "GUTTER"        : {"foreground" : "gray", "background" : "#404040"},
         "sel"           : {"foreground" : "#000000", "background" : "gray"},
         
         "number"        : {"foreground" : normal_fg},
@@ -172,14 +175,50 @@ def desert():
         "current_found"         : {"foreground" : "#ffffff", "background" : "#333333"},
     }
     
-
-
+def zenburn():
+    # https://github.com/mig/gedit-themes/blob/master/zenburn.xml
+    # https://github.com/trusktr/gedit-color-schemes/blob/master/gtksourceview-3.0/styles/zenburn.xml
+    normal_fg = "#dcdccc"
+    string_fg = "#cc9393"
+    
+    return {
+        "TEXT"          : {"foreground" : normal_fg, "insertbackground" : normal_fg, 
+                           "background" : "#3f3f3f"},
+        "GUTTER"        : {"foreground" : "#7f8f8f", "background" : "#464646"},
+        "current_line"  : {"background" : "#4A4A4A"},
+        "sel"           : {"foreground" : "white", "background" : "#506070"},
+        
+        "number"        : {"foreground" : "#8cd0d3"},
+        "definition"    : {"foreground" : "#f4a020", "font" : "BoldEditorFont"},
+        "string"        : {"foreground" : string_fg},
+        "string3"       : {"foreground" : string_fg},
+        "open_string"   : {"foreground" : string_fg},
+        "open_string3"  : {"foreground" : string_fg},
+        "keyword"       : {"foreground" : "#f0dfaf", "font" : "BoldEditorFont"},
+        "builtin"       : {"foreground" : "#efef8f"},
+        "comment"       : {"foreground" : "#7f9f7f"},
+        
+        "prompt"        : {"foreground" : "#87ceeb"},
+        "stdin"         : {"foreground" : normal_fg},
+        "stdout"        : {"foreground" : "#eeeeee"},
+        "value"         : {"foreground" : "#eeeeee"},
+        "stderr"        : {"foreground" : "#ff3e40"},
+        
+        # paren matcher
+        "surrounding_parens"  : {"background" : "#709080", "foreground" : "white",
+                                 "font" : "BoldEditorFont"},
+    }
+    
+    
 def load_early_plugin():
     get_workbench().add_syntax_theme("Default Light", None, default_light)
     get_workbench().add_syntax_theme("Default Dark", None, default_dark)
+    get_workbench().add_syntax_theme("Desert Sunset", "Default Dark", desert_sunset)
+    get_workbench().add_syntax_theme("Zenburn", "Default Dark", zenburn)
     get_workbench().add_syntax_theme("IDLE Classic", "Default Light", idle_classic)
-    get_workbench().add_syntax_theme("IDLE Dark", "Default Dark", idle_dark)
-    get_workbench().add_syntax_theme("Desert", "Default Dark", desert)
+    
+    # Comments in IDLE Dark really hurt the eyes
+    #get_workbench().add_syntax_theme("IDLE Dark", "Default Dark", idle_dark)
     
     get_workbench().set_default("view.syntax_theme", "Default Light")
     
