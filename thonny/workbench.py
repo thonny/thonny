@@ -14,7 +14,7 @@ from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, get_current_notebook_tab_widget, select_sequence,\
-    get_style_options, get_style_option
+    get_style_configuration, lookup_style_option
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -217,11 +217,11 @@ class Workbench(tk.Tk):
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        if get_style_option("Menubar", "custom", False) == "True":
+        if lookup_style_option("Menubar", "custom", False) == "True":
             self._menubar = ui_utils.CustomMenubar(self)
             self._menubar.grid(row=0, sticky="nsew")
         else:
-            opts = get_style_options("Menubar")
+            opts = get_style_configuration("Menubar")
             if "custom" in opts:
                 del opts["custom"]
             self._menubar = tk.Menu(self, **opts)
@@ -736,7 +736,7 @@ class Workbench(tk.Tk):
         if hasattr(self, "_menus"):
             # if menus have been initialized, ie. when theme is being changed
             for menu in self._menus.values():
-                menu.configure(get_style_options("Menu"))
+                menu.configure(get_style_configuration("Menu"))
         
     def _apply_syntax_theme(self, name):
         def get_settings(name):
@@ -828,7 +828,7 @@ class Workbench(tk.Tk):
             label: translated label, used only when menu with given name doesn't exist yet
         """
         if name not in self._menus:
-            menu = tk.Menu(self._menubar, **get_style_options("Menu"))
+            menu = tk.Menu(self._menubar, **get_style_configuration("Menu"))
             menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
             

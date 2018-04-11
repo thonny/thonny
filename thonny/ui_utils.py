@@ -33,10 +33,10 @@ class CustomMenubar(ttk.Frame):
         
         
         ttk.Style().map("CustomMenubarLabel.TLabel",
-              background=[("!active", get_style_option("Menubar", "background", "gray")),
-                          ("active",  get_style_option("Menubar", "activebackground", "LightYellow"))],
-              foreground=[("!active", get_style_option("Menubar", "foreground", "black")),
-                          ("active",  get_style_option("Menubar", "activeforeground", "black"))],
+              background=[("!active", lookup_style_option("Menubar", "background", "gray")),
+                          ("active",  lookup_style_option("Menubar", "activebackground", "LightYellow"))],
+              foreground=[("!active", lookup_style_option("Menubar", "foreground", "black")),
+                          ("active",  lookup_style_option("Menubar", "activeforeground", "black"))],
               )
     
     def add_cascade(self, label, menu):
@@ -269,8 +269,8 @@ class AutomaticPanedWindow(tk.PanedWindow):
         
     
     def _update_appearance(self, event=None):
-        self.configure(sashwidth=10) # TODO: consult theme
-        self.configure(background=get_main_background())
+        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 10))
+        self.configure(background=lookup_style_option("TPanedWindow", "background"))
     
     
 
@@ -888,31 +888,6 @@ def remove_line_numbers(s):
     
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
     
-def get_main_background():
-    main_background_option = get_workbench().get_option("theme.main_background")
-    if main_background_option is not None:
-        warnings.warn("theme.main_background is deprecated use style.configure('.', ...) instead")
-        return main_background_option
-    elif get_style_option(".", "background"):
-        return get_style_option(".", "background")
-    else:    
-        theme = ttk.Style().theme_use()
-        
-        if theme == "clam":
-            return "#dcdad5"
-        elif theme == "aqua":
-            return "systemSheetBackground"
-        else: 
-            return "SystemButtonFace"
-    
-def get_dialog_background_color():    
-    theme = ttk.Style().theme_use()
-    
-    if theme == "aqua":
-        return "systemSheetBackground"
-    else: 
-        return "SystemButtonFace"
-
 def center_window(win, master=None):
     # looks like it doesn't take window border into account
     win.update_idletasks()
@@ -1006,7 +981,7 @@ class SubprocessDialog(tk.Toplevel):
         text_font["size"] = int(text_font["size"] * 0.9)
         text_font["family"] = "Courier" if running_on_mac_os() else "Courier New"
         text_frame = tktextext.TextFrame(main_frame, read_only=True, horizontal_scrollbar=False,
-                                         background=get_main_background(),
+                                         background=lookup_style_option("TFrame", "background"),
                                          font=text_font,
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
@@ -1138,7 +1113,7 @@ def get_tk_version_info():
             result.append(0)
     return tuple(result) 
 
-def get_style_options(style_name, default={}):
+def get_style_configuration(style_name, default={}):
     style = ttk.Style()
     result = style.configure(style_name)
     if result is None:
@@ -1148,9 +1123,9 @@ def get_style_options(style_name, default={}):
     
     
 
-def get_style_option(style_name, option_name, default=None):
+def lookup_style_option(style_name, option_name, default=None):
     style = ttk.Style()
-    setting = style.configure(style_name, option_name)
+    setting = style.lookup(style_name, option_name)
     if setting in [None, ""]:
         return default
     else:

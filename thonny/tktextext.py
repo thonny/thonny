@@ -194,6 +194,7 @@ class EnhancedText(TweakableText):
         
         self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
         
+        self._initial_configuration = self.configure()
         self._reload_theme_options()
         
         if tag_current_line:
@@ -630,8 +631,9 @@ class EnhancedText(TweakableText):
         #if self.focus_get() == self:
         #    states.append("focus")
         
-        background = style.lookup(self._style, "background", states)
-        self.configure(background=background)
+        if "background" not in self._initial_configuration:
+            background = style.lookup(self._style, "background", states)
+            self.configure(background=background)
         
         foreground = style.lookup(self._style, "foreground", states)
         self.configure(foreground=foreground)

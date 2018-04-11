@@ -1,7 +1,7 @@
 from jedi import Script
 import thonny.jedi_utils as jedi_utils
 import traceback
-from thonny.ui_utils import get_style_option
+from thonny.ui_utils import lookup_style_option
 tree = jedi_utils.import_tree()
     
 from thonny.globals import get_workbench
@@ -11,7 +11,7 @@ import logging
 class BaseNameHighlighter:
     def __init__(self, text):
         self.text = text
-        self.text.tag_configure("NAME", background=get_style_option("MatchedName.Code", "background", '#e6ecfe'),
+        self.text.tag_configure("NAME", background=lookup_style_option("MatchedName.Code", "background", '#e6ecfe'),
                                 relief='flat',
                                 borderwidth=0)
         self.text.tag_raise("sel")

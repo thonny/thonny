@@ -20,7 +20,7 @@ import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
-    get_main_background, get_style_option, get_style_options
+    lookup_style_option
 from thonny.misc_utils import running_on_windows
 import sys
 
@@ -78,8 +78,8 @@ class PipDialog(tk.Toplevel):
         
         
         main_pw = tk.PanedWindow(parent, orient=tk.HORIZONTAL,
-                                 background=ui_utils.get_main_background(),
-                                 sashwidth=10)
+                                 background=lookup_style_option("TPanedWindow", "background"),
+                                 sashwidth=15)
         main_pw.grid(row=2, column=0, sticky="nsew", padx=15, pady=15)
         parent.rowconfigure(2, weight=1)
         parent.columnconfigure(0, weight=1)
@@ -117,14 +117,13 @@ class PipDialog(tk.Toplevel):
         
         info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
                                               horizontal_scrollbar=False,
-                                              style="PipInfo.Text",
+                                              background=lookup_style_option("TFrame", "background"),
                                               vertical_scrollbar_class=AutoScrollbar,
                                               width=60, height=10)
-        ttk.Style().configure("PipInfo.Text", background=get_main_background())
         info_text_frame.configure(borderwidth=0)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         self.info_text = info_text_frame.text
-        link_color = get_style_option("Url.TLabel", "foreground", "red")
+        link_color = lookup_style_option("Url.TLabel", "foreground", "red")
         self.info_text.tag_configure("url", foreground=link_color, underline=True)
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
         self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))

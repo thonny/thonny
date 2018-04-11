@@ -2,7 +2,7 @@ import tkinter as tk
 from thonny.globals import get_workbench
 import logging
 import thonny.jedi_utils as jedi_utils
-from thonny.ui_utils import get_style_option
+from thonny.ui_utils import lookup_style_option
 
 class LocalsHighlighter:
 
@@ -97,7 +97,7 @@ class LocalsHighlighter:
     def _configure_tags(self):
         self.text.tag_configure("LOCAL_NAME",
                                 font=self.local_variable_font, 
-                                foreground=get_style_option("Local.Code", "foreground", "#000055"))
+                                foreground=lookup_style_option("Local.Code", "foreground", "#000055"))
         self.text.tag_raise("sel")
         
     def _highlight(self, pos_info):

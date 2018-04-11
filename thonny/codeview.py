@@ -4,7 +4,7 @@ import tkinter as tk
 from thonny.common import TextRange
 from thonny.globals import get_workbench
 from thonny import tktextext, roughparse
-from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
+from thonny.ui_utils import EnhancedTextWithLogging, lookup_style_option
 from thonny.tktextext import EnhancedText
 
 _syntax_options = {}
