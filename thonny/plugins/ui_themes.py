@@ -1,5 +1,5 @@
 from thonny import get_workbench
-from thonny.misc_utils import running_on_linux
+from thonny.misc_utils import running_on_linux, running_on_windows
 
 def _treeview_settings():
     light_blue = "#ADD8E6" 
@@ -70,8 +70,8 @@ def _text_settings():
     return {
         "Text" : {
             "configure" : {
-                "background" : "SystemWindow",
-                "foreground" : "SystemWindowText"
+                "background" : "SystemWindow" if running_on_windows() else "white",
+                "foreground" : "SystemWindowText" if running_on_windows() else "black",
             },
         },
         "Syntax.Text" : {
