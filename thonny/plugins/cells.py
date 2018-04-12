@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import re
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny import ui_utils
 

@@ -8,7 +8,7 @@ from tkinter.messagebox import showerror
 from tkinter.simpledialog import askstring
 
 from thonny import misc_utils
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.base_file_browser import BaseFileBrowser
 
         

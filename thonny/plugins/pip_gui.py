@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 import subprocess
 from urllib.request import urlopen, urlretrieve
 import urllib.error

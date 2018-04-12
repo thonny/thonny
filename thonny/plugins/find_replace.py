@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import misc_utils
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.ui_utils import select_sequence
 
 #TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference

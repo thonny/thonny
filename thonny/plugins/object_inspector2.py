@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny import ui_utils
 from thonny.common import InlineCommand
 from thonny.tktextext import TextFrame

@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox
 from tkinter.dialog import Dialog
 
 from thonny import tktextext, misc_utils
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
 import tkinter as tk
 import tkinter.messagebox as tkMessageBox

@@ -2,7 +2,7 @@
 """
 
 from thonny.tktextext import TextFrame
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 class EventsView(TextFrame):
     def __init__(self, master):

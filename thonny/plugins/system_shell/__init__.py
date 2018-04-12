@@ -5,7 +5,7 @@ import shlex
 import platform
 from tkinter.messagebox import showerror
 import shutil
-from thonny.globals import get_runner, get_workbench
+from thonny import get_runner, get_workbench
 from thonny import THONNY_USER_DIR
 import subprocess
 from time import sleep
@@ -185,7 +185,7 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     Popen(cmd_line, env=env, shell=True)
 
 def load_plugin():
-    from thonny.globals import get_workbench
+    from thonny import get_workbench
     
     def open_system_shell_for_selected_interpreter(): 
         open_system_shell()

@@ -49,7 +49,7 @@ def launch():
         tkinter.messagebox.showerror("Internal error", traceback.format_exc())
         return -1
     finally:
-        from thonny.globals import get_runner
+        from thonny import get_runner
         runner = get_runner()
         if runner != None:
             runner.destroy_backend()
@@ -165,4 +165,13 @@ def get_version():
     except:
         return "0.0.0"
       
-    
+_workbench = None    
+def get_workbench():    
+    return _workbench
+
+_runner = None
+def get_runner():    
+    return _runner
+
+def get_shell():
+    return get_workbench().get_view("ShellView")

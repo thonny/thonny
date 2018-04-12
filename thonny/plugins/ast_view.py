@@ -7,7 +7,7 @@ import tkinter as tk
 from thonny import ast_utils
 from thonny import ui_utils
 from thonny.common import TextRange
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 class AstView(ui_utils.TreeFrame):
     def __init__(self, master):

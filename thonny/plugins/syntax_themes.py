@@ -1,4 +1,4 @@
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 def default_light():
     default_fg = "black"

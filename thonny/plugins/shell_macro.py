@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from thonny import misc_utils, ui_utils
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.codeview import CodeView
 
 class ShellMacroDialog(tk.Toplevel):

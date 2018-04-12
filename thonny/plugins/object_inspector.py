@@ -9,7 +9,7 @@ from thonny.ui_utils import VerticallyScrollableFrame, CALM_WHITE, update_entry_
 from thonny.tktextext import TextFrame
 from thonny.common import InlineCommand
 import ast
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from logging import exception
 
 

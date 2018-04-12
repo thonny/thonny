@@ -4,7 +4,7 @@ import traceback
 from thonny.ui_utils import lookup_style_option
 tree = jedi_utils.import_tree()
     
-from thonny.globals import get_workbench
+from thonny import get_workbench
 import tkinter as tk
 import logging
 

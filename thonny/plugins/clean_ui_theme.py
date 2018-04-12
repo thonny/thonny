@@ -1,4 +1,4 @@
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.misc_utils import running_on_windows
 
 

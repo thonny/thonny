@@ -8,7 +8,7 @@ from tkinter.filedialog import askopenfilename
 
 from thonny.misc_utils import eqfn, running_on_mac_os
 from thonny.codeview import CodeView
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from logging import exception
 from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
 from thonny.tktextext import rebind_control_a

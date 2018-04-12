@@ -19,9 +19,9 @@ import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
 from thonny.running import Runner
-import thonny.globals
+import thonny
 import logging
-from thonny.globals import register_runner, get_runner
+from thonny import get_runner
 from thonny.config_ui import ConfigurationDialog
 import pkgutil
 import socket
@@ -68,6 +68,8 @@ class Workbench(tk.Tk):
 
     
     def __init__(self, server_socket=None):
+        thonny._workbench = self
+        
         self._destroying = False
         self.initializing = True
         tk.Tk.__init__(self, className="Thonny")
@@ -81,7 +83,6 @@ class Workbench(tk.Tk):
         self._view_records = {}
         self._editor_notebook = None
         self.content_inspector_classes = []
-        thonny.globals.register_workbench(self)
         
         self._init_configuration()
         self._init_diagnostic_logging()
@@ -336,7 +337,7 @@ class Workbench(tk.Tk):
     def _init_runner(self):
         try:
             runner = Runner()
-            register_runner(runner)
+            thonny._runner = runner
             runner.start()
         except:
             self.report_exception("Error when initializing backend")

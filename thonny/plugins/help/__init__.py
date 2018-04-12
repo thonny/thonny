@@ -3,7 +3,7 @@ import tkinter.font
 import os.path
 from tkinter import ttk
 from thonny import tktextext
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 class HelpView(ttk.Frame):
     def __init__(self, master):

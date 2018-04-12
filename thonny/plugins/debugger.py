@@ -13,7 +13,7 @@ from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView, get_syntax_options_for_tag
 from tkinter.messagebox import showinfo, showerror
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import tokenize
 import logging

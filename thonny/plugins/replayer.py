@@ -2,7 +2,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from datetime import datetime
 from thonny import ui_utils
-from thonny.globals import get_workbench
+from thonny import get_workbench
 import json
 from thonny.base_file_browser import BaseFileBrowser
 import ast

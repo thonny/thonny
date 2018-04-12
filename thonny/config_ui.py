@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 
 class ConfigurationDialog(tk.Toplevel):

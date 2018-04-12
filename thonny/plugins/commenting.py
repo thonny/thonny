@@ -1,5 +1,5 @@
 import tkinter as tk
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.ui_utils import select_sequence
 from thonny.common import TextRange
 

@@ -1,5 +1,5 @@
 import tkinter as tk
-from thonny.globals import get_workbench
+from thonny import get_workbench
 import logging
 import thonny.jedi_utils as jedi_utils
 from thonny.ui_utils import lookup_style_option

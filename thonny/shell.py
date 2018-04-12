@@ -10,7 +10,7 @@ from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
 from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.codeview import PythonText
 from thonny.tktextext import index2line
 import logging

@@ -4,7 +4,7 @@ from tkinter import filedialog
 from tkinter import ttk
 
 from thonny.config_ui import ConfigurationPage
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.ui_utils import create_string_var
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from shutil import which

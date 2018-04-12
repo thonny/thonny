@@ -1,4 +1,4 @@
-from thonny.globals import get_workbench
+from thonny import get_workbench
 import tokenize
 import io
 from thonny.codeview import CodeViewText
