@@ -548,7 +548,7 @@ def enhanced_aqua():
 
 
 
-def load_early_plugin():
+def load_plugin():
     from tkinter import ttk
     original_themes = ttk.Style().theme_names() 
     

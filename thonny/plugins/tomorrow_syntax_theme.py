@@ -136,7 +136,7 @@ def tomorrow_night_eighties():
                                  "font" : "BoldEditorFont"},
     }
 
-def load_early_plugin():
+def load_plugin():
     get_workbench().add_syntax_theme("Tomorrow", "Default Light", tomorrow)
     get_workbench().add_syntax_theme("Tomorrow Night", "Default Dark", tomorrow_night)
     get_workbench().add_syntax_theme("Tomorrow Night Blue", "Tomorrow Night", tomorrow_night_blue)

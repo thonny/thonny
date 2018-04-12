@@ -311,7 +311,7 @@ def clean(frame_background,
     return settings
     
     
-def load_early_plugin():
+def load_plugin():
     get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", 
         clean(frame_background="#252525",
               text_background="#2d2d2d",

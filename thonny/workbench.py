@@ -77,30 +77,31 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
+        self._commands = []
+        self._view_records = {}
+        self._editor_notebook = None
         self.content_inspector_classes = []
         thonny.globals.register_workbench(self)
         
         self._init_configuration()
         self._init_diagnostic_logging()
         self._add_main_backends()
-        self._init_theming()
-        self._load_early_plugins()
-        
-        self._editor_notebook = None
         self._init_fonts()
-        self.update_themes()
+        self._init_theming()
         self._init_window()
-        self._init_menu()
         
-        self.title("Thonny")
+        self._load_plugins()
+        
+        self.reload_themes()
+        self._init_menu()
         
         self._init_containers()
         
         self._init_runner()
-            
-        self._init_commands()
-        self._load_plugins()
+        self._show_views()
         
+        self._init_commands()
+        self._init_icon()
         self._update_toolbar()
         try:
             self._editor_notebook.load_startup_files()
@@ -118,6 +119,7 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
+        self._publish_commands()
         self.initializing = False
     
     def _try_action(self, action):
@@ -164,6 +166,7 @@ class Workbench(tk.Tk):
         faulthandler.enable(fault_out)
         
     def _init_window(self):
+        self.title("Thonny")
         
         self.set_default("layout.zoomed", False)
         self.set_default("layout.top", 15)
@@ -194,7 +197,9 @@ class Workbench(tk.Tk):
             ui_utils.set_zoomed(self, True)
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        
+        self.bind("<Configure>", self._on_configure, True)
+    
+    def _init_icon(self):
         # Window icons
         window_icons = self.get_option("theme.window_icons") 
         if window_icons:
@@ -213,7 +218,6 @@ class Workbench(tk.Tk):
                 except:
                     pass # TODO: try to get working in Ubuntu  
         
-        self.bind("<Configure>", self._on_configure, True)
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
@@ -237,16 +241,10 @@ class Workbench(tk.Tk):
         self.get_menu("tools", "Tools")
         self.get_menu("help", "Help")
     
-    def _load_early_plugins(self):
-        """load_early_plugin can't use nor GUI neither Runner"""
-        logging.debug("Loading early plugins from " + str(sys.path))
-        self._load_plugins("load_early_plugin")
-        
-    def _load_plugins(self, load_function_name="load_plugin"):
+    def _load_plugins(self):
         # built-in plugins
         import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
-                                     load_function_name=load_function_name)
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")
         
         # 3rd party plugins from namespace package
         try:
@@ -255,19 +253,18 @@ class Workbench(tk.Tk):
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
-                                     load_function_name=load_function_name)
+            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.")
         
-    def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
+    def _load_plugins_from_path(self, path, prefix):
+        load_function_name="load_plugin"
+        
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
-            if not module_name.endswith("backend"):
-                # TODO: should end with "frontend"?
-                try:
-                    m = importlib.import_module(module_name)
-                    if hasattr(m, load_function_name):
-                        getattr(m, load_function_name)()
-                except:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
+            try:
+                m = importlib.import_module(module_name)
+                if hasattr(m, load_function_name):
+                    getattr(m, load_function_name)()
+            except:
+                logging.exception("Failed loading plugin '" + module_name + "'")
     
                                 
     def _init_fonts(self):
@@ -465,7 +462,6 @@ class Workbench(tk.Tk):
             last_pane_size=self.get_option("layout.east_pw_last_pane_size")
         )
         
-        self._view_records = {}
         self._view_notebooks = {
             'nw' : AutomaticNotebook(self._west_pw, 1),
             'w'  : AutomaticNotebook(self._west_pw, 2),
@@ -497,7 +493,19 @@ class Workbench(tk.Tk):
                          "xpnative" if running_on_windows() else "clam")
     
         
-    def add_command(self, command_id, menu_name, command_label, handler,
+    def add_command(self, command_id, menu_name, command_label, handler, **kw):
+        kw.update(dict(command_id=command_id,
+                       menu_name=menu_name,
+                       command_label=command_label,
+                       handler=handler))
+        
+        self._commands.append(kw)
+    
+    def _publish_commands(self):
+        for cmd in self._commands:
+            self._publish_command(**cmd)
+        
+    def _publish_command(self, command_id, menu_name, command_label, handler,
                     tester=None,
                     default_sequence=None,
                     extra_sequences=[],
@@ -625,14 +633,15 @@ class Workbench(tk.Tk):
         self.set_default("view." + view_id + ".location", default_location)
         self.set_default("view." + view_id + ".position_key", default_position_key)
         
+        visibility_flag = self.get_variable("view." + view_id + ".visible")
+        
         self._view_records[view_id] = {
             "class" : class_,
             "label" : label,
             "location" : self.get_option("view." + view_id + ".location"),
-            "position_key" : self.get_option("view." + view_id + ".position_key")
+            "position_key" : self.get_option("view." + view_id + ".position_key"),
+            "visibility_flag" : visibility_flag,
         }
-        
-        visibility_flag = self.get_variable("view." + view_id + ".visible")
         
         # handler
         def toggle_view_visibility():
@@ -649,9 +658,6 @@ class Workbench(tk.Tk):
             group=10,
             position_in_group="alphabetic")
         
-        if visibility_flag.get():
-            self.show_view(view_id, False)
-    
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
     
@@ -763,7 +769,7 @@ class Workbench(tk.Tk):
         from thonny import codeview
         codeview.set_syntax_options(get_settings(name))
     
-    def update_themes(self):
+    def reload_themes(self):
         preferred_theme = self.get_option("view.ui_theme")
         available_themes = self.get_usable_ui_theme_names()
         
@@ -775,6 +781,12 @@ class Workbench(tk.Tk):
             self._apply_ui_theme('Windows')
         
         self._apply_syntax_theme(self.get_option("view.syntax_theme"))
+    
+    def _show_views(self):
+        for view_id in self._view_records:
+            if self._view_records[view_id]["visibility_flag"].get():
+                self.show_view(view_id, False)
+
 
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image

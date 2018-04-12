@@ -110,7 +110,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             get_workbench().set_option("view.syntax_theme", self._original_syntax_theme)
             get_workbench().set_option("view.editor_font_size", self._original_size)
             get_workbench().set_option("view.editor_font_family", self._original_family)
-            get_workbench().update_themes()
+            get_workbench().reload_themes()
             get_workbench().update_fonts()
             
                 
@@ -119,7 +119,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         get_workbench().set_option("view.syntax_theme", self._syntax_theme_variable.get())
         get_workbench().set_option("view.editor_font_size", int(self._size_variable.get()))
         get_workbench().set_option("view.editor_font_family", self._family_variable.get())
-        get_workbench().update_themes()
+        get_workbench().reload_themes()
         get_workbench().update_fonts()
     
     def _get_families_to_show(self):
