@@ -310,7 +310,8 @@ def clean(frame_background,
                 "background" : frame_background,
                 "foreground" : normal_foreground,
                 "activebackground" : normal_foreground, 
-                "activeforeground" : frame_background, 
+                "activeforeground" : frame_background,
+                "relief" : "flat",
             }
         },
         

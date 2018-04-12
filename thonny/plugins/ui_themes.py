@@ -60,9 +60,10 @@ def _menu_settings():
     return {
         "Menubar" : {
             "configure" : {
-                "activeborderwidth" : 0
+                "activeborderwidth" : 0,
+                "relief" : "flat",
             }
-        }
+        },
     }
 
 
