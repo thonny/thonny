@@ -132,8 +132,7 @@ def update_highlighting(event):
     text = event.widget
     
     if not hasattr(text, "local_highlighter"):
-        text.local_highlighter = LocalsHighlighter(text,
-            get_workbench().get_font("ItalicEditorFont"))
+        text.local_highlighter = LocalsHighlighter(text, "ItalicEditorFont")
         
     text.local_highlighter.schedule_update()
 

@@ -17,7 +17,7 @@ def update_editor_cells(event):
                            background="LightYellow"
                            )
         text.tag_configure("CELL_HEADER", 
-                           font=get_workbench().get_font("BoldEditorFont"),
+                           font="BoldEditorFont",
                            foreground="#665843",
                            )
         

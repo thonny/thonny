@@ -23,7 +23,7 @@ class ShellView (ttk.Frame):
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         self.text = ShellText(self,
-                            font=get_workbench().get_font("EditorFont"),
+                            font="EditorFont",
                             #foreground="white",
                             #background="#666666",
                             highlightthickness=0,
@@ -126,7 +126,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.bind("<KeyPress>", self._text_key_press, True)
         self.bind("<KeyRelease>", self._text_key_release, True)
         
-        prompt_font = get_workbench().get_font("BoldEditorFont")
+        prompt_font = tk.font.nametofont("BoldEditorFont")
         vert_spacing = 10
         io_indent = 16
         code_indent = prompt_font.measure(">>> ")

@@ -53,7 +53,7 @@ class Workbench(tk.Tk):
         * communication between other components (see event_generate and bind)
         * configuration services (get_option, set_option, add_defaults)
         * loading translations
-        * maintaining fonts (get_font, increasing and decreasing font size)
+        * maintaining fonts (named fonts, increasing and decreasing font size)
     
     After workbench and plugins get loaded, 3 kinds of events start happening:
         
@@ -218,7 +218,7 @@ class Workbench(tk.Tk):
                     # seems to work in mac
                     self.iconbitmap(icon_file)
                 except:
-                    pass # TODO: try to get working in Ubuntu  
+                    pass   
         
         
     def _init_menu(self):
@@ -295,9 +295,10 @@ class Workbench(tk.Tk):
 
         default_font = tk_font.nametofont("TkDefaultFont")
         
-        _fonts = [
+        self._fonts = [
             tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
             tk_font.Font(name="EditorFont", family=self.get_option("view.editor_font_family")),
+            tk_font.Font(name="SmallEditorFont", family=self.get_option("view.editor_font_family")),
             tk_font.Font(name="BoldEditorFont", family=self.get_option("view.editor_font_family"),
                                             weight="bold"),
             tk_font.Font(name="ItalicEditorFont", family=self.get_option("view.editor_font_family"),
@@ -309,9 +310,6 @@ class Workbench(tk.Tk):
                         size=default_font.cget("size"))            
         ]
 
-        # TODO: is this dict required?
-        self._fonts = {f.name : f for f in _fonts}
-        
         self.update_fonts()
     
     
@@ -827,13 +825,6 @@ class Workbench(tk.Tk):
     def get_variable(self, name):
         return self._configuration_manager.get_variable(name)
     
-    def get_font(self, name):
-        """
-        Supported names are EditorFont and BoldEditorFont
-        """
-        return self._fonts[name]
-    
-    
     def get_menu(self, name, label=None):
         """Gives the menu with given name. Creates if not created yet.
         
@@ -1005,16 +996,18 @@ class Workbench(tk.Tk):
         editor_font_family = self.get_option("view.editor_font_family")
         io_font_family = self.get_option("view.io_font_family")
         
-        self.get_font("IOFont").configure(family=io_font_family,
+        tk_font.nametofont("IOFont").configure(family=io_font_family,
                                           size=min(editor_font_size - 2,
                                                    int(editor_font_size * 0.8 + 3)))
-        self.get_font("EditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("EditorFont").configure(family=editor_font_family,
                                               size=editor_font_size)
-        self.get_font("BoldEditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("SmallEditorFont").configure(family=editor_font_family,
+                                              size=editor_font_size-2)
+        tk_font.nametofont("BoldEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
-        self.get_font("ItalicEditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("ItalicEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
-        self.get_font("BoldItalicEditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("BoldItalicEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
         
         
@@ -1026,7 +1019,7 @@ class Workbench(tk.Tk):
             treeview_font_size = int(editor_font_size * 0.7 + 2)
             rowheight = int(treeview_font_size * 2.0 + 6)
             
-        self.get_font("TreeviewFont").configure(size=treeview_font_size)
+        tk_font.nametofont("TreeviewFont").configure(size=treeview_font_size)
         style.configure("Treeview", rowheight=rowheight)
         
         if self._editor_notebook is not None:

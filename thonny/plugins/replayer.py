@@ -187,7 +187,7 @@ class ReplayerCodeView(ttk.Frame):
                 yscrollcommand=self.vbar.set,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
-                font=get_workbench().get_font("EditorFont"),
+                font="EditorFont",
                 wrap=tk.NONE,
                 insertwidth=2,
                 #selectborderwidth=2,
@@ -249,9 +249,7 @@ class ReplayerEditorProper(ReplayerEditor):
         # TODO: some problem when doing fast rewind
         return
     
-        self.colorer = SyntaxColorer(self.code_view.text,
-                                     get_workbench().get_font("EditorFont"),
-                                     get_workbench().get_font("BoldEditorFont"))
+        self.colorer = SyntaxColorer(self.code_view.text)
 
     def replay_event(self, event):
         ReplayerEditor.replay_event(self, event)
@@ -307,8 +305,8 @@ class ShellFrame(ReplayerEditor):
         # TODO: use same source as shell
         vert_spacing = 10
         io_indent = 16
-        self.code_view.text.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
-        self.code_view.text.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
+        self.code_view.text.tag_configure("toplevel", font="EditorFont")
+        self.code_view.text.tag_configure("prompt", foreground="purple", font="BoldEditorFont")
         self.code_view.text.tag_configure("command", foreground="black")
         self.code_view.text.tag_configure("version", foreground="DarkGray")
         self.code_view.text.tag_configure("automagic", foreground="DarkGray")
@@ -316,7 +314,7 @@ class ShellFrame(ReplayerEditor):
         self.code_view.text.tag_configure("error", foreground="Red")
         
         self.code_view.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
-                                font=get_workbench().get_font("IOFont"))
+                                font="IOFont")
         self.code_view.text.tag_configure("stdin", foreground="Blue")
         self.code_view.text.tag_configure("stdout", foreground="Black")
         self.code_view.text.tag_configure("stderr", foreground="Red")
