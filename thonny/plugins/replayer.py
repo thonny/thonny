@@ -1,24 +1,26 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from datetime import datetime
-from thonny import ui_utils
+from thonny import ui_utils, codeview
 from thonny import get_workbench
 import json
 from thonny.base_file_browser import BaseFileBrowser
 import ast
 import os.path
 from thonny.plugins.coloring import SyntaxColorer
+from thonny.ui_utils import lookup_style_option
 
 
 class ReplayWindow(tk.Toplevel):
     def __init__(self):
-        tk.Toplevel.__init__(self, get_workbench())
+        tk.Toplevel.__init__(self, get_workbench(),
+                             background=lookup_style_option("TFrame", "background"))
         ui_utils.set_zoomed(self, True)
         
-        self.main_pw   = tk.PanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
-        self.center_pw  = tk.PanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
+        self.main_pw   = ReplayerPanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
+        self.center_pw  = ReplayerPanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
         self.right_frame = ttk.Frame(self.main_pw)
-        self.right_pw  = tk.PanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
+        self.right_pw  = ReplayerPanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
         self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
         shell_book = ttk.Notebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
@@ -183,7 +185,7 @@ class ReplayerCodeView(ttk.Frame):
         self.vbar.grid(row=0, column=2, sticky=tk.NSEW)
         self.hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
         self.hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
-        self.text = tk.Text(self,
+        self.text = codeview.SyntaxText(self,
                 yscrollcommand=self.vbar.set,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
@@ -324,6 +326,11 @@ class ShellFrame(ReplayerEditor):
         self.code_view.text.tag_configure("inactive", foreground="#aaaaaa")
     
 
+class ReplayerPanedWindow(tk.PanedWindow):
+    def __init__(self, master=None, cnf={}, **kw):
+        cnf.update(kw)
+        cnf["background"] = lookup_style_option("TFrame", "background")
+        super().__init__(master=master, cnf=cnf)
 
 def load_plugin():
     def open_replayer():

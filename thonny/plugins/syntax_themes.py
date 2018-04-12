@@ -39,6 +39,9 @@ def default_light():
         "found" : {"foreground" : "blue", "underline" : True},
         "current_found" : {"foreground" : "white", "background" : "red"},
         
+        "matched_name" : {"background" : "#e6ecfe"},
+        "local_name" : {"font" : "ItalicEditorFont"},
+         
         # debugger
         "active_focus"    : {"background" : "#F8FC9A", "borderwidth" : 1, "relief" : "solid"},
         "suspended_focus" : {"background" : ""       , "borderwidth" : 1, "relief" : "solid"},
@@ -88,6 +91,9 @@ def default_dark():
         # find/replace
         "found" : {"underline" : True},
         "current_found" : {"foreground" : "white", "background" : "red"},
+        
+        "matched_name" : {"background" : "#474747"}, 
+        "local_name" : {"font" : "ItalicEditorFont"},
         
         # debugger
         "active_focus"    : {"background" : "#807238", "borderwidth" : 1, "relief" : "solid"},

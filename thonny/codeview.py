@@ -33,6 +33,8 @@ class SyntaxText(EnhancedText):
         
         if "current_line" in syntax_options:
             self.tag_lower("current_line")
+        
+        self.tag_raise("sel")
     
     def _reload_theme_options(self, event=None):
         super()._reload_theme_options(event)

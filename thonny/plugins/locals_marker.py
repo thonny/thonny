@@ -2,19 +2,12 @@ import tkinter as tk
 from thonny import get_workbench
 import logging
 import thonny.jedi_utils as jedi_utils
-from thonny.ui_utils import lookup_style_option
 
 class LocalsHighlighter:
 
-    def __init__(self, text, local_variable_font=None):
+    def __init__(self, text):
         self.text = text
         
-        if local_variable_font:
-            self.local_variable_font=local_variable_font
-        else:
-            self.local_variable_font = self.text["font"]
-        
-        self._configure_tags()
         self._update_scheduled = False
     
     def get_positions(self):
@@ -94,16 +87,11 @@ class LocalsHighlighter:
 
         return loc_pos
 
-    def _configure_tags(self):
-        self.text.tag_configure("LOCAL_NAME",
-                                font=self.local_variable_font, 
-                                foreground=lookup_style_option("Local.Code", "foreground", "#000055"))
-        self.text.tag_raise("sel")
         
     def _highlight(self, pos_info):
         for pos in pos_info:
             start_index, end_index = pos[0], pos[1]
-            self.text.tag_add("LOCAL_NAME", start_index, end_index)
+            self.text.tag_add("local_name", start_index, end_index)
 
     def schedule_update(self):
         def perform_update():
@@ -117,7 +105,7 @@ class LocalsHighlighter:
             self.text.after_idle(perform_update)
             
     def update(self):
-        self.text.tag_remove("LOCAL_NAME", "1.0", "end")
+        self.text.tag_remove("local_name", "1.0", "end")
         
         if get_workbench().get_option("view.locals_highlighting"):
             try:
@@ -132,7 +120,7 @@ def update_highlighting(event):
     text = event.widget
     
     if not hasattr(text, "local_highlighter"):
-        text.local_highlighter = LocalsHighlighter(text, "ItalicEditorFont")
+        text.local_highlighter = LocalsHighlighter(text)
         
     text.local_highlighter.schedule_update()
 

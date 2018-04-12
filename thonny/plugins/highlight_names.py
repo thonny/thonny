@@ -1,7 +1,6 @@
 from jedi import Script
 import thonny.jedi_utils as jedi_utils
 import traceback
-from thonny.ui_utils import lookup_style_option
 tree = jedi_utils.import_tree()
     
 from thonny import get_workbench
@@ -11,10 +10,6 @@ import logging
 class BaseNameHighlighter:
     def __init__(self, text):
         self.text = text
-        self.text.tag_configure("NAME", background=lookup_style_option("MatchedName.Code", "background", '#e6ecfe'),
-                                relief='flat',
-                                borderwidth=0)
-        self.text.tag_raise("sel")
         self._update_scheduled = False
     
     def get_positions_for_script(self, script):
@@ -23,8 +18,10 @@ class BaseNameHighlighter:
     def get_positions(self):
         index = self.text.index("insert")
         
-        # ignore if cursor in STRING_OPEN
-        if self.text.tag_prevrange("STRING_OPEN", index):
+        # ignore if cursor in open string
+        if (self.text.tag_prevrange("open_string", index)
+            or self.text.tag_prevrange("open_string3", index)):
+            
             return set()
 
         source = self.text.get("1.0", "end") 
@@ -46,7 +43,7 @@ class BaseNameHighlighter:
             self.text.after_idle(perform_update)
 
     def update(self):
-        self.text.tag_remove("NAME", "1.0", "end")
+        self.text.tag_remove("matched_name", "1.0", "end")
         
         if get_workbench().get_option("view.name_highlighting"):
             try:
@@ -54,7 +51,7 @@ class BaseNameHighlighter:
                 if len(positions) > 1:
                     for pos in positions:
                         start_index, end_index = pos[0], pos[1]
-                        self.text.tag_add("NAME", start_index, end_index)
+                        self.text.tag_add("matched_name", start_index, end_index)
             except:
                 logging.exception("Problem when updating name highlighting")
 

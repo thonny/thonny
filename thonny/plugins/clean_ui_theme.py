@@ -248,6 +248,34 @@ def clean(frame_background,
             }
         },
         
+        "TScale" : {
+            "configure" : {
+                "background" : high_detail,
+                "troughcolor" : normal_detail,
+                "lightcolor" : high_detail,
+                "darkcolor" : high_detail,
+                #"bordercolor" : "red",
+                #"sliderlength" : 40,
+                #"sliderthickness" : 60,
+                "gripcount" : 0,
+            },
+            "map" : {
+                "background" : [],
+                "troughcolor" : [],
+            }
+        },
+        
+        "TScale.slider" : {
+            "configure" : {
+                "background" : "red",
+                "troughcolor" : "yellow",
+                "lightcolor" : "green",
+                "darkcolor" : "white",
+                "sliderlength" : 40,
+                "sliderthickness" : 60,
+            }
+        },
+        
         "Text" : {
             "configure" : {
                 "background" : text_background,

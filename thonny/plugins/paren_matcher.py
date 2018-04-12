@@ -11,7 +11,6 @@ class ParenMatcher:
 
     def __init__(self, text):
         self.text = text
-        self._configure_tags()
         self._update_scheduled = False
     
     def schedule_update(self):
@@ -38,14 +37,6 @@ class ParenMatcher:
         remaining = self._highlight_surrounding(start_index, end_index)
         self._highlight_unclosed(remaining, start_index, end_index)
     
-    def _configure_tags(self):
-        self.text.tag_raise("sel")
-        self.text.tag_lower("unclosed_expression")
-        if "CURRENT_CELL" in self.text.tag_names():
-            # CURRENT_CELL is defined in cells plugin
-            self.text.tag_raise("unclosed_expression", "CURRENT_CELL")
-        
-
     def _highlight_surrounding(self, start_index, end_index):
         open_index, close_index, remaining = self.find_surrounding(start_index, end_index)
         if None not in [open_index, close_index]:
