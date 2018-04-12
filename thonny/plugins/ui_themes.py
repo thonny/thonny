@@ -15,7 +15,6 @@ def _treeview_settings():
     return {
         "Treeview" : {
             "configure" : {
-                "background" : "white", # TODO: use sys colors , Not required in Python 3 ???
                 "font" : "TreeviewFont"
             },
             "map" : {

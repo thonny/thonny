@@ -402,8 +402,10 @@ class Workbench(tk.Tk):
             self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
             self.bind("<Escape>", self._unmaximize_view, True)
             
-            if not running_on_mac_os():
-                # TODO: approach working in Win/Linux doesn't work in mac as it should and only confuses
+            if running_on_mac_os():
+                # Doesn't work as it should and only confuses
+                pass
+            else:
                 self.add_command("toggle_maximize_view", "view", "Full screen",
                     self._cmd_toggle_full_screen,
                     flag_name="view.full_screen",
@@ -428,7 +430,7 @@ class Workbench(tk.Tk):
         self.rowconfigure(1, weight=1)
         self._maximized_view = None
         
-        self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
+        self._toolbar = ttk.Frame(main_frame, padding=0) 
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
         
         self.set_default("layout.main_pw_first_pane_size", 1/3)
@@ -494,6 +496,28 @@ class Workbench(tk.Tk):
     
         
     def add_command(self, command_id, menu_name, command_label, handler, **kw):
+        """Registers an item to be shown in specified menu.
+        
+        Args:
+            menu_name: Name of the menu the command should appear in.
+                Standard menu names are "file", "edit", "run", "view", "help".
+                If a menu with given name doesn't exist, then new menu is created
+                (with label=name).
+            command_label: Label for this command
+            handler: Function to be called when the command is invoked. 
+                Should be callable with one argument (the event or None).
+            tester: Function to be called for determining if command is available or not.
+                Should be callable with one argument (the event or None).
+                Should return True or False.
+                If None then command is assumed to be always available.
+            default_sequence: Default shortcut (Tk style)
+            flag_name: Used for toggle commands. Indicates the name of the boolean option.
+            group: Used for grouping related commands together. Value should be int. 
+                Groups with smaller numbers appear before.
+        
+        Returns:
+            None
+        """     
         kw.update(dict(command_id=command_id,
                        menu_name=menu_name,
                        command_label=command_label,
@@ -517,28 +541,6 @@ class Workbench(tk.Tk):
                     image_filename=None,
                     include_in_toolbar=False,
                     bell_when_denied=True):
-        """Adds an item to specified menu.
-        
-        Args:
-            menu_name: Name of the menu the command should appear in.
-                Standard menu names are "file", "edit", "run", "view", "help".
-                If a menu with given name doesn't exist, then new menu is created
-                (with label=name).
-            command_label: Label for this command
-            handler: Function to be called when the command is invoked. 
-                Should be callable with one argument (the event or None).
-            tester: Function to be called for determining if command is available or not.
-                Should be callable with one argument (the event or None).
-                Should return True or False.
-                If None then command is assumed to be always available.
-            default_sequence: Default shortcut (Tk style)
-            flag_name: Used for toggle commands. Indicates the name of the boolean option.
-            group: Used for grouping related commands together. Value should be int. 
-                Groups with smaller numbers appear before.
-        
-        Returns:
-            None
-        """     
         
         def dispatch(event=None):
             if not tester or tester():
@@ -1046,7 +1048,7 @@ class Workbench(tk.Tk):
         button = ttk.Button(group_frame, 
                          command=handler, 
                          image=image, 
-                         style="Toolbutton", # TODO: does this cause problems in some Macs?
+                         style="Toolbutton", 
                          state=tk.NORMAL
                          )
         button.pack(side=tk.LEFT)
