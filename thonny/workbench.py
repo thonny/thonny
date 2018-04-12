@@ -121,6 +121,7 @@ class Workbench(tk.Tk):
         
         self._publish_commands()
         self.initializing = False
+        self.event_generate("<<WorkbenchInitialized>>")
     
     def _try_action(self, action):
         try:
