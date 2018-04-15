@@ -13,8 +13,7 @@ from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, get_current_notebook_tab_widget, select_sequence,\
-    get_style_configuration, lookup_style_option
+    create_tooltip, select_sequence, get_style_configuration, lookup_style_option
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -93,6 +92,7 @@ class Workbench(tk.Tk):
         
         self._load_plugins()
         
+        self._init_images()
         self.reload_themes()
         self._init_menu()
         
@@ -268,6 +268,10 @@ class Workbench(tk.Tk):
             except:
                 logging.exception("Failed loading plugin '" + module_name + "'")
     
+    def _init_images(self):
+        self.get_image('tab_close.gif', "img_close")
+        self.get_image('tab_close_active.gif', "img_close_active")
+        
                                 
     def _init_fonts(self):
         # Remember original standard fonts so that it's possible to reset themes
@@ -307,8 +311,20 @@ class Workbench(tk.Tk):
                                             weight="bold", slant="italic"),
             tk_font.Font(name="TreeviewFont", 
                         family=default_font.cget("family"),
-                        size=default_font.cget("size"))            
+                        size=default_font.cget("size")),  
+                      
+            tk_font.Font(name="BoldTkDefaultFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"),
+                        weight="bold"),            
+                      
+            tk_font.Font(name="UnderlineTkDefaultFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"),
+                        underline=1),            
         ]
+        
+        
 
         self.update_fonts()
     
@@ -739,6 +755,11 @@ class Workbench(tk.Tk):
             value = self._style.lookup("Listbox", setting)
             if value:
                 self.option_add("*TCombobox*Listbox." + setting, value)
+                self.option_add("*Listbox." + setting, value)
+        
+        text_opts = self._style.configure("Text")
+        for key in text_opts:
+            self.option_add("*Text." + key, text_opts[key])
         
         if hasattr(self, "_menus"):
             # if menus have been initialized, ie. when theme is being changed
@@ -862,6 +883,7 @@ class Workbench(tk.Tk):
             view.home_widget.columnconfigure(0, weight=1)
             view.home_widget.rowconfigure(0, weight=1)
             view.home_widget.maximizable_widget = view
+            view.home_widget.close = lambda: self.hide_view(view_id)
             if hasattr(view, "position_key"):
                 view.home_widget.position_key = view.position_key
             
@@ -1116,7 +1138,7 @@ class Workbench(tk.Tk):
         # find the widget that can be relocated
         widget = self.focus_get()
         if isinstance(widget, EditorNotebook) or isinstance(widget, AutomaticNotebook):
-            current_tab = get_current_notebook_tab_widget(widget)
+            current_tab = widget.get_current_child()
             if current_tab is None:
                 return
             
