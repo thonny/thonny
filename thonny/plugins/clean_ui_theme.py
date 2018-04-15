@@ -82,7 +82,9 @@ def clean(frame_background,
         
         "Treeview" : {
             "configure" : {
-                "background" : text_background, 
+                "background" : text_background,
+                "borderwidth" : 0,
+                "relief" : "flat",
             },
             "map" : {
                 "background" : [('selected', 'focus', high_detail),
@@ -273,6 +275,58 @@ def clean(frame_background,
                 "darkcolor" : "white",
                 "sliderlength" : 40,
                 "sliderthickness" : 60,
+            }
+        },
+        
+        
+        "Red.TFrame" : {
+            "configure" : {
+                "background" : "red",
+                "padding" : 99
+            }
+        },
+        
+        "ViewBody.TFrame" : {
+            "configure" : {
+                "background" : text_background,
+            }
+        },
+        
+        "ViewToolbar.TFrame" : {
+            "configure" : {
+                "background" : normal_detail,
+            }
+        },
+        
+        "ViewTab.TLabel" : {
+            "configure" : {
+                "background" : normal_detail,
+                "padding" : [5, 0],
+            },
+        },
+        
+        "ViewToolbar.TLabel" : {
+            "configure" : {
+                "background" : normal_detail,
+                "padding" : [5, 0],
+            },
+        },
+        
+        "Active.ViewTab.TLabel" : {
+            "configure" : {
+                "foreground" : high_foreground,
+                #"font" : "BoldTkDefaultFont",
+                "background" : text_background
+            }
+        },
+        
+        "Inactive.ViewTab.TLabel" : {
+            "configure" : {
+                "foreground" : normal_foreground,
+                "font" : "UnderlineTkDefaultFont",
+            },
+            "map" : {
+                "background" : [("hover", high_detail)]
             }
         },
         

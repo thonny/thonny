@@ -26,6 +26,11 @@ def _treeview_settings():
                 # get rid of borders
                 ('Treeview.treearea', {'sticky': 'nswe'})
             ]
+        },
+        "treearea" : {
+            "configure" : {
+                "borderwidth" : 0
+            },
         }
     }
 
@@ -98,6 +103,34 @@ def _label_settings():
         },
     }
 
+
+def _button_notebook_settings():
+    # Adapted from https://github.com/python/cpython/blob/2.7/Demo/tkinter/ttk/notebook_closebtn.py
+    return {
+        "closebutton" : {
+            "element create" : (
+                "image", "img_close",
+                ("active", "pressed", "!disabled", "img_close_active"),
+                ("active", "!disabled", "img_close_active"), 
+                {"border" : 8, "sticky" : ''}                
+            )
+        },
+        "ButtonNotebook.TNotebook.Tab" : {
+            "layout" : [
+                ("Notebook.tab", {"sticky": "nswe", "children":
+                    [("Notebook.padding", {"side": "top", "sticky": "nswe",
+                                                 "children":
+                        [("Notebook.focus", {"side": "top", "sticky": "nswe",
+                                                   "children":
+                            [("Notebook.label", {"side": "left", "sticky": ''}),
+                             ("Notebook.closebutton", {"side": "left", "sticky": ''})
+                             ]
+                        })]
+                    })]
+                })
+            ]
+        }
+    }
 
 def clam():
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
@@ -455,6 +488,7 @@ def windows():
         _menu_settings(),
         _text_settings(),
         _label_settings(),
+        _button_notebook_settings(),
         {
             "TNotebook" : {
                 "configure" : {
@@ -496,6 +530,7 @@ def enhanced_clam():
         _menu_settings(),
         _text_settings(),
         _label_settings(),
+        _button_notebook_settings(),
         {
             "Tab" : {
                 "configure" : {
