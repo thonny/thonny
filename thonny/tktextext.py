@@ -184,7 +184,6 @@ class EnhancedText(TweakableText):
         
         self._last_event_kind = None
         self._last_key_time = None
-        self._last_line_no = None
         
         self._bind_editing_aids()
         self._bind_movement_aids()
@@ -199,6 +198,7 @@ class EnhancedText(TweakableText):
         
         if tag_current_line:
             self.bind("<<CursorMove>>", self._tag_current_line, True)
+            self.bind("<<TextChange>>", self._tag_current_line, True)
             self._tag_current_line()
 
     
@@ -609,11 +609,10 @@ class EnhancedText(TweakableText):
         self.edit_separator()
 
     def _tag_current_line(self, event=None):
+        # we may be on the same line as with prev event but tag needs extension
         lineno = int(self.index("insert").split(".")[0])
-        if lineno != self._last_line_no:
-            self.tag_remove("current_line", "1.0", "end")
-            self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")
-            self._last_line_no = lineno
+        self.tag_remove("current_line", "1.0", "end")
+        self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")
     
     def on_secondary_click(self, event=None):
         "Use this for invoking context menu"
