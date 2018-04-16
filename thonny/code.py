@@ -492,18 +492,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return None
     
     
-    def focus_set(self):
-        editor = self.get_current_editor()
-        if editor: 
-            editor.focus_set()
-        else:
-            super().focus_set()
-
-    def current_editor_is_focused(self):
-        editor = self.get_current_editor()
-        return editor.is_focused()
-
-    
     def check_allow_closing(self, editor=None):
         if not editor:
             modified_editors = [e for e in self.winfo_children() if e.should_restart()]

@@ -357,14 +357,25 @@ class ClosableNotebook(ttk.Notebook):
 
     def get_child_by_index(self, index):
         tab_id = self.tabs()[index]
-        for child in self.winfo_children():
-            if str(child) == tab_id:
-                return child
-        return None
+        if tab_id:
+            return self.nametowidget(tab_id)
+        else:
+            return None
 
     def get_current_child(self):
-        return self.get_child_by_index(self.index(self.select()))    
+        child_id = self.select()
+        if child_id:
+            return self.nametowidget(child_id)
+        else:
+            return None
     
+    def focus_set(self):
+        editor = self.get_current_child()
+        if editor: 
+            editor.focus_set()
+        else:
+            super().focus_set()
+            
     def _check_update_style(self):
         style = ttk.Style()
         if "closebutton" in style.element_names():
