@@ -16,7 +16,7 @@ Regexes are adapted from idlelib
 
 import re
 
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.shell import ShellText
 from thonny.codeview import CodeViewText
 

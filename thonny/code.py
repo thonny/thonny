@@ -6,11 +6,11 @@ from tkinter import ttk, messagebox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
-from thonny.misc_utils import eqfn, running_on_mac_os
+from thonny.misc_utils import eqfn
 from thonny.codeview import CodeView
-from thonny.globals import get_workbench
+from thonny import get_workbench, ui_utils
 from logging import exception
-from thonny.ui_utils import get_current_notebook_tab_widget, select_sequence
+from thonny.ui_utils import select_sequence
 from thonny.tktextext import rebind_control_a
 import tokenize
 from tkinter.messagebox import askyesno
@@ -199,13 +199,12 @@ class Editor(ttk.Frame):
         get_workbench().unbind("ToplevelResult", self._listen_for_toplevel_result)
         ttk.Frame.destroy(self)
     
-class EditorNotebook(ttk.Notebook):
+class EditorNotebook(ui_utils.ClosableNotebook):
     """
     Manages opened files / modules
     """
     def __init__(self, master):
-        _check_create_ButtonNotebook_style()
-        ttk.Notebook.__init__(self, master, padding=0, style="ButtonNotebook.TNotebook")
+        super().__init__(master, padding=0)
         
         get_workbench().set_default("file.reopen_all_files", False)
         get_workbench().set_default("file.open_files", [])
@@ -262,7 +261,7 @@ class EditorNotebook(ttk.Notebook):
             group=10)
         
         get_workbench().add_command("close_files", "file", "Close all", 
-            self._cmd_close_files,
+            self.close_tabs,
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
@@ -373,16 +372,13 @@ class EditorNotebook(ttk.Notebook):
         self._cmd_open_file()
         return "break"
     
-    def _cmd_close_files(self):
-        self._close_files(None)
-        
     def _close_files(self, except_index=None):
         
         for tab_index in reversed(range(len(self.winfo_children()))):
             if except_index is not None and tab_index == except_index:
                 continue
             else:
-                editor = self._get_editor_by_index(tab_index)
+                editor = self.get_child_by_index(tab_index)
                 if self.check_allow_closing(editor):
                     self.forget(editor)
                     editor.destroy()
@@ -391,13 +387,10 @@ class EditorNotebook(ttk.Notebook):
         
     
     def _cmd_close_file(self):
-        self._close_file(None)
+        self.close_tab(self.index(self.select()))
     
-    def _close_file(self, index=None):
-        if index is None:
-            editor = self.get_current_editor()
-        else:
-            editor = self._get_editor_by_index(index)
+    def close_tab(self, index):
+        editor = self.get_child_by_index(index)
             
         if editor:
             if not self.check_allow_closing(editor):
@@ -441,20 +434,12 @@ class EditorNotebook(ttk.Notebook):
         get_workbench().become_topmost_window()
         
     def get_current_editor(self):
-        return get_current_notebook_tab_widget(self)
+        return self.get_current_child()
     
     def select_next_prev_editor(self, direction):
         cur_index = self.index(self.select())
         next_index = (cur_index + direction) % len(self.tabs())
-        self.select(self._get_editor_by_index(next_index))
-        
-    
-    def _get_editor_by_index(self, index):
-        tab_id = self.tabs()[index]
-        for child in self.winfo_children():
-            if str(child) == tab_id:
-                return child
-        return None
+        self.select(self.get_child_by_index(next_index))
     
     def show_file(self, filename, text_range=None):
         #self.close_single_untitled_unmodified_editor()
@@ -507,18 +492,6 @@ class EditorNotebook(ttk.Notebook):
             return None
     
     
-    def focus_set(self):
-        editor = self.get_current_editor()
-        if editor: 
-            editor.focus_set()
-        else:
-            super().focus_set()
-
-    def current_editor_is_focused(self):
-        editor = self.get_current_editor()
-        return editor.is_focused()
-
-    
     def check_allow_closing(self, editor=None):
         if not editor:
             modified_editors = [e for e in self.winfo_children() if e.should_restart()]
@@ -553,98 +526,3 @@ class EditorNotebook(ttk.Notebook):
         else:
             return True
         
-
-def _check_create_ButtonNotebook_style():
-    """Taken from http://svn.python.org/projects/python/trunk/Demo/tkinter/ttk/notebook_closebtn.py"""
-    style = ttk.Style()
-    if "closebutton" in style.element_names():
-        # It's done already
-        return
-
-    get_workbench().get_image('tab_close.gif', "img_close")
-    get_workbench().get_image('tab_close_active.gif', "img_close_active")
-    
-    style.element_create("closebutton", "image", "img_close",
-        ("active", "pressed", "!disabled", "img_close_active"),
-        ("active", "!disabled", "img_close_active"), border=8, sticky='')
-
-    style.layout("ButtonNotebook.TNotebook.Tab", [
-        ("Notebook.tab", {"sticky": "nswe", "children":
-            [("Notebook.padding", {"side": "top", "sticky": "nswe",
-                                         "children":
-                [("Notebook.focus", {"side": "top", "sticky": "nswe",
-                                           "children":
-                    [("Notebook.label", {"side": "left", "sticky": ''}),
-                     ("Notebook.closebutton", {"side": "left", "sticky": ''})
-                     ]
-                })]
-            })]
-        })]
-    )
-    
-    menu = tk.Menu(get_workbench(), tearoff=False)
-    menu.popup_index = None
-    
-    menu.add_command(label="Close",
-                     command=lambda:get_workbench().get_editor_notebook()._close_file(menu.popup_index))
-    menu.add_command(label="Close others",
-                     command=lambda:get_workbench().get_editor_notebook()._close_files(menu.popup_index))
-    menu.add_command(label="Close all",
-                     command=lambda:get_workbench().get_editor_notebook()._close_files())
-
-    def letf_btn_press(event):
-        try:
-            x, y, widget = event.x, event.y, event.widget
-            elem = widget.identify(x, y)
-            index = widget.index("@%d,%d" % (x, y))
-        
-            if "closebutton" in elem:
-                widget.state(['pressed'])
-                widget.pressed_index = index
-        except:
-            # may fail, if clicked outside of tab
-            pass
-    
-    def left_btn_release(event):
-        x, y, widget = event.x, event.y, event.widget
-    
-        if not widget.instate(['pressed']):
-            return
-    
-        try:
-            elem =  widget.identify(x, y)
-            index = widget.index("@%d,%d" % (x, y))
-        
-            if "closebutton" in elem and widget.pressed_index == index:
-                if isinstance(widget, EditorNotebook):
-                    widget._cmd_close_file()
-                else:
-                    widget.forget(index)
-                    widget.event_generate("<<NotebookClosedTab>>")
-        
-            widget.state(["!pressed"])
-            widget.pressed_index = None
-        except:
-            # may fail, when mouse is dragged
-            exception("Closing tab")
-    
-    def right_btn_press(event):
-        x, y, widget = event.x, event.y, event.widget
-        try:
-            if "ButtonNotebook" in widget["style"]:
-                index = widget.index("@%d,%d" % (x, y))
-                menu.popup_index = index
-                menu.tk_popup(*get_workbench().winfo_pointerxy())
-        except:
-            pass
-    
-    get_workbench().bind_class("TNotebook", "<ButtonPress-1>", letf_btn_press, True)
-    get_workbench().bind_class("TNotebook", "<ButtonRelease-1>", left_btn_release, True)
-    if running_on_mac_os():
-        get_workbench().bind_class("TNotebook", "<ButtonPress-2>", right_btn_press, True)
-        get_workbench().bind_class("TNotebook", "<Control-Button-1>", right_btn_press, True)
-    else:  
-        get_workbench().bind_class("TNotebook", "<ButtonPress-3>", right_btn_press, True)
-    
-    
-

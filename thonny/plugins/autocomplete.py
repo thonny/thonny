@@ -1,5 +1,5 @@
 import tkinter as tk
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
 from thonny.common import InlineCommand
@@ -13,9 +13,8 @@ asynchronous.
 """
 class Completer(tk.Listbox):
     def __init__(self, text):
-        self.font = get_workbench().get_font("EditorFont").copy()
         tk.Listbox.__init__(self, master=text,
-                            font=self.font,
+                            font="SmallEditorFont",
                             activestyle="dotbox",
                             exportselection=False)
         
@@ -95,8 +94,6 @@ class Completer(tk.Listbox):
         
         # place box
         if not self._is_visible():
-            
-            self.font.configure(size=get_workbench().get_font("EditorFont")["size"]-2)
             
             
             #_, _, _, list_box_height = self.bbox(0)

@@ -18,7 +18,7 @@ import sys
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
     UserError, construct_cmd_line
-from thonny.globals import get_workbench, get_runner, get_shell
+from thonny import get_workbench, get_runner, get_shell
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 import shutil

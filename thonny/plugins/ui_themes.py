@@ -1,6 +1,5 @@
-from thonny.globals import get_workbench
-from thonny.misc_utils import running_on_linux
-from thonny.ui_utils import CALM_WHITE
+from thonny import get_workbench
+from thonny.misc_utils import running_on_linux, running_on_windows
 
 def _treeview_settings():
     light_blue = "#ADD8E6" 
@@ -16,7 +15,6 @@ def _treeview_settings():
     return {
         "Treeview" : {
             "configure" : {
-                "background" : "white", # TODO: use sys colors , Not required in Python 3 ???
                 "font" : "TreeviewFont"
             },
             "map" : {
@@ -28,6 +26,11 @@ def _treeview_settings():
                 # get rid of borders
                 ('Treeview.treearea', {'sticky': 'nswe'})
             ]
+        },
+        "treearea" : {
+            "configure" : {
+                "borderwidth" : 0
+            },
         }
     }
 
@@ -62,9 +65,10 @@ def _menu_settings():
     return {
         "Menubar" : {
             "configure" : {
-                "activeborderwidth" : 0
+                "activeborderwidth" : 0,
+                "relief" : "flat",
             }
-        }
+        },
     }
 
 
@@ -72,8 +76,8 @@ def _text_settings():
     return {
         "Text" : {
             "configure" : {
-                "background" : "SystemWindow",
-                "foreground" : "SystemWindowText"
+                "background" : "SystemWindow" if running_on_windows() else "white",
+                "foreground" : "SystemWindowText" if running_on_windows() else "black",
             },
         },
         "Syntax.Text" : {
@@ -81,7 +85,7 @@ def _text_settings():
                 "background" : [("readonly", "Yellow")]
             }
         },
-        "TextMargin" : {
+        "Gutter" : {
             "configure" : {
                 "background" : '#e0e0e0',
                 "foreground" : '#999999' 
@@ -89,6 +93,44 @@ def _text_settings():
         },
     }
 
+
+def _label_settings():
+    return {
+        "Url.TLabel" : {
+            "configure" : {
+                "foreground" : "blue"
+            },
+        },
+    }
+
+
+def _button_notebook_settings():
+    # Adapted from https://github.com/python/cpython/blob/2.7/Demo/tkinter/ttk/notebook_closebtn.py
+    return {
+        "closebutton" : {
+            "element create" : (
+                "image", "img_close",
+                ("active", "pressed", "!disabled", "img_close_active"),
+                ("active", "!disabled", "img_close_active"), 
+                {"border" : 8, "sticky" : ''}                
+            )
+        },
+        "ButtonNotebook.TNotebook.Tab" : {
+            "layout" : [
+                ("Notebook.tab", {"sticky": "nswe", "children":
+                    [("Notebook.padding", {"side": "top", "sticky": "nswe",
+                                                 "children":
+                        [("Notebook.focus", {"side": "top", "sticky": "nswe",
+                                                   "children":
+                            [("Notebook.label", {"side": "left", "sticky": ''}),
+                             ("Notebook.closebutton", {"side": "left", "sticky": ''})
+                             ]
+                        })]
+                    })]
+                })
+            ]
+        }
+    }
 
 def clam():
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
@@ -168,7 +210,7 @@ def clam():
         "TCheckbutton" : {
             "configure" : {
                 "indicatorbackground" : "#ffffff",
-                "indicatormargin" : [1, 1, 4, 1],
+                "indicatormargin" : [1, 1, 6, 1],
                 "padding" :  2,
             },
             "map" : {
@@ -183,7 +225,7 @@ def clam():
         "TRadiobutton" : {
             "configure" : {
                 "indicatorbackground" : "#ffffff",
-                "indicatormargin" : [1, 1, 4, 1],
+                "indicatormargin" : [1, 1, 6, 1],
                 "padding" :  2,
             },
             "map" : {
@@ -302,7 +344,7 @@ def clam():
                 "sashthickness" : 6,
                 "gripcount" : 10
             }
-        }
+        },
     }
     
 
@@ -445,6 +487,8 @@ def windows():
         _paned_window_settings(),
         _menu_settings(),
         _text_settings(),
+        _label_settings(),
+        _button_notebook_settings(),
         {
             "TNotebook" : {
                 "configure" : {
@@ -463,6 +507,17 @@ def windows():
                     "padding" : (4,1,1,0)
                 }
             },
+            
+            "Listbox" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                    "foreground" : "SystemWindowText",
+                    "disabledforeground" : "SystemGrayText",
+                    "highlightbackground" : "SystemActiveBorder",
+                    "highlightcolor" : "SystemActiveBorder",
+                    "highlightthickness" : 1,
+                },
+            },
         }
     ]
 
@@ -474,6 +529,8 @@ def enhanced_clam():
         _paned_window_settings(),
         _menu_settings(),
         _text_settings(),
+        _label_settings(),
+        _button_notebook_settings(),
         {
             "Tab" : {
                 "configure" : {
@@ -489,6 +546,17 @@ def enhanced_clam():
                 "configure" : {
                     "gripcount" : 0
                 }
+            },
+            
+            "Listbox" : {
+                "configure" : {
+                    "background" : "white",
+                    "foreground" : "black",
+                    "disabledforeground" : "#999999",
+                    "highlightbackground" : "#4a6984",
+                    "highlightcolor" : "#4a6984",
+                    "highlightthickness" : 1,
+                },
             },
         }
     ]
@@ -515,7 +583,7 @@ def enhanced_aqua():
 
 
 
-def load_early_plugin():
+def load_plugin():
     from tkinter import ttk
     original_themes = ttk.Style().theme_names() 
     
@@ -530,7 +598,6 @@ def load_early_plugin():
              
         get_workbench().add_ui_theme(name, None, settings)
     
-    
     get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam())
     
     if "xpnative" in original_themes:
@@ -540,10 +607,10 @@ def load_early_plugin():
         get_workbench().add_ui_theme("Enhanced Aqua", "aqua", enhanced_aqua())
     
 
-    if "Windows" in get_workbench().get_ui_theme_names():
+    if "Windows" in get_workbench().get_usable_ui_theme_names():
         get_workbench().set_default("view.ui_theme", "Windows")
         
-    elif "Enhanced Clam" in get_workbench().get_ui_theme_names():
+    elif "Enhanced Clam" in get_workbench().get_usable_ui_theme_names():
         get_workbench().set_default("view.ui_theme", "Enhanced Clam")
         
     

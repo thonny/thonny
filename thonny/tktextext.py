@@ -170,7 +170,7 @@ class EnhancedText(TweakableText):
     
     Most of the code is adapted from idlelib.EditorWindow.
     """ 
-    def __init__(self, master=None, style="Text", cnf={}, **kw):
+    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account 
         kw["autoseparators"] = False
@@ -193,7 +193,14 @@ class EnhancedText(TweakableText):
         
         self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
         
+        self._initial_configuration = self.configure()
         self._reload_theme_options()
+        
+        if tag_current_line:
+            self.bind("<<CursorMove>>", self._tag_current_line, True)
+            self.bind("<<TextChange>>", self._tag_current_line, True)
+            self._tag_current_line()
+
     
     def _bind_mouse_aids(self):
         if _running_on_mac():
@@ -231,6 +238,7 @@ class EnhancedText(TweakableText):
         self.bind("<Right>", self.move_to_edge_if_selection(1), True)
         self.bind("<Next>", self.perform_page_down, True)
         self.bind("<Prior>", self.perform_page_up, True)
+
     
     def _bind_selection_aids(self):
         self.bind("<Command-a>" if _running_on_mac() else "<Control-a>",
@@ -600,6 +608,11 @@ class EnhancedText(TweakableText):
     def _on_mouse_click(self, event):
         self.edit_separator()
 
+    def _tag_current_line(self, event=None):
+        # we may be on the same line as with prev event but tag needs extension
+        lineno = int(self.index("insert").split(".")[0])
+        self.tag_remove("current_line", "1.0", "end")
+        self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")
     
     def on_secondary_click(self, event=None):
         "Use this for invoking context menu"
@@ -617,8 +630,9 @@ class EnhancedText(TweakableText):
         #if self.focus_get() == self:
         #    states.append("focus")
         
-        background = style.lookup(self._style, "background", states)
-        self.configure(background=background)
+        if "background" not in self._initial_configuration:
+            background = style.lookup(self._style, "background", states)
+            self.configure(background=background)
         
         foreground = style.lookup(self._style, "foreground", states)
         self.configure(foreground=foreground)
@@ -639,7 +653,7 @@ class TextFrame(ttk.Frame):
                  vertical_scrollbar_class=ttk.Scrollbar,
                  horizontal_scrollbar_class=ttk.Scrollbar,
                  borderwidth=0, relief="sunken",
-                 margin_background='#e0e0e0', margin_foreground='#999999',
+                 gutter_background='#e0e0e0', gutter_foreground='#999999',
                  **text_options):
         ttk.Frame.__init__(self, master=master, borderwidth=borderwidth,
                            relief=relief)
@@ -657,21 +671,21 @@ class TextFrame(ttk.Frame):
         self.text = text_class(self, **final_text_options)
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
 
-        self._margin = tk.Text(self, width=4, padx=5, pady=5,
+        self._gutter = tk.Text(self, width=4, padx=5, pady=5,
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
-                               background='#e0e0e0', foreground=margin_foreground,
-                               selectbackground=margin_background, selectforeground=margin_foreground,
+                               background='#e0e0e0', foreground=gutter_foreground,
+                               selectbackground=gutter_background, selectforeground=gutter_foreground,
                                cursor='arrow',
                                state='disabled',
                                undo=False
                                )
-        self._margin.bind("<ButtonRelease-1>", self.on_margin_click)
-        self._margin.bind("<Button-1>", self.on_margin_click)
-        self._margin.bind("<Button1-Motion>", self.on_margin_motion)
-        self._margin['yscrollcommand'] = self._margin_scroll
+        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click)
+        self._gutter.bind("<Button-1>", self.on_gutter_click)
+        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion)
+        self._gutter['yscrollcommand'] = self._gutter_scroll
         
-        # margin will be gridded later
+        # gutter will be gridded later
         self._first_line_number = first_line_number
         self.set_line_numbers(line_numbers)
         
@@ -691,7 +705,7 @@ class TextFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self._recommended_line_length=line_length_margin
-        margin_line_color = ttk.Style().lookup("TextMargin", "background", default="LightGray")
+        margin_line_color = ttk.Style().lookup("Gutter", "background", default="LightGray")
         self._margin_line = tk.Canvas(self.text, borderwidth=0, width=1, height=2000, 
                                      highlightthickness=0,
                                      background=margin_line_color)
@@ -708,17 +722,17 @@ class TextFrame(ttk.Frame):
         self.text.focus_set()
     
     def set_line_numbers(self, value):
-        if value and not self._margin.winfo_ismapped():
-            self._margin.grid(row=0, column=0, sticky=tk.NSEW)
+        if value and not self._gutter.winfo_ismapped():
+            self._gutter.grid(row=0, column=0, sticky=tk.NSEW)
             self.update_line_numbers()
-        elif not value and self._margin.winfo_ismapped():
-            self._margin.grid_forget()
+        elif not value and self._gutter.winfo_ismapped():
+            self._gutter.grid_forget()
         
         # insert first line number (NB! Without trailing linebreak. See update_line_numbers) 
-        self._margin.config(state='normal')
-        self._margin.delete("1.0", "end")
-        self._margin.insert("1.0", str(self._first_line_number))
-        self._margin.config(state='disabled')
+        self._gutter.config(state='normal')
+        self._gutter.delete("1.0", "end")
+        self._gutter.insert("1.0", str(self._first_line_number))
+        self._gutter.config(state='disabled')
 
         self.update_line_numbers()
     
@@ -732,9 +746,9 @@ class TextFrame(ttk.Frame):
     
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
-        self._margin.yview(tk.MOVETO, args[0])
+        self._gutter.yview(tk.MOVETO, args[0])
         
-    def _margin_scroll(self, *args):
+    def _gutter_scroll(self, *args):
         # FIXME: this doesn't work properly
         # Can't scroll to bottom when line numbers are not visible
         # and can't type normally at the bottom, when line numbers are visible 
@@ -748,7 +762,7 @@ class TextFrame(ttk.Frame):
     
     def _vertical_scroll(self,*args):
         self.text.yview(*args)
-        self._margin.yview(*args)
+        self._gutter.yview(*args)
         
     def _horizontal_scroll(self,*args):
         self.text.xview(*args)
@@ -756,10 +770,10 @@ class TextFrame(ttk.Frame):
     
     def update_line_numbers(self):
         text_line_count = int(self.text.index("end").split(".")[0])
-        margin_line_count = int(self._margin.index("end").split(".")[0])
+        margin_line_count = int(self._gutter.index("end").split(".")[0])
         
         if text_line_count != margin_line_count:
-            self._margin.config(state='normal')
+            self._gutter.config(state='normal')
             
             # NB! Text acts weird with last symbol 
             # (don't really understand whether it automatically keeps a newline there or not)
@@ -768,17 +782,17 @@ class TextFrame(ttk.Frame):
                 delta = text_line_count - margin_line_count
                 start = margin_line_count + self._first_line_number - 1
                 for i in range(start, start + delta):
-                    self._margin.insert("end-1c", "\n" + str(i))
+                    self._gutter.insert("end-1c", "\n" + str(i))
             
             else:
-                self._margin.delete(line2index(text_line_count)+"-1c", "end-1c")
+                self._gutter.delete(line2index(text_line_count)+"-1c", "end-1c")
                 
-            self._margin.config(state='disabled')
+            self._gutter.config(state='disabled')
         
-        # synchronize margin scroll position with text
+        # synchronize gutter scroll position with text
         # https://mail.python.org/pipermail/tkinter-discuss/2010-March/002197.html
         first, _ = self.text.yview()
-        self._margin.yview_moveto(first)
+        self._gutter.yview_moveto(first)
 
 
     def update_margin_line(self):
@@ -810,21 +824,21 @@ class TextFrame(ttk.Frame):
             
             self._margin_line.place(y=-10, x=x)
 
-    def on_margin_click(self, event=None):
+    def on_gutter_click(self, event=None):
         try:
-            linepos = self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0]
+            linepos = self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0]
             self.text.mark_set("insert", "%s.0" % linepos)
-            self._margin.mark_set("margin_selection_start", "%s.0" % linepos)
+            self._gutter.mark_set("gutter_selection_start", "%s.0" % linepos)
             if event.type == "4": # In Python 3.6 you can use tk.EventType.ButtonPress instead of "4" 
                 self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
             exception()
 
-    def on_margin_motion(self, event=None):
+    def on_gutter_motion(self, event=None):
         try:
-            linepos = int(self._margin.index("@%s,%s" % (event.x, event.y)).split(".")[0])
-            margin_selection_start = int(self._margin.index("margin_selection_start").split(".")[0])
-            self.select_lines(min(margin_selection_start, linepos), max(margin_selection_start - 1, linepos - 1))
+            linepos = int(self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0])
+            gutter_selection_start = int(self._gutter.index("gutter_selection_start").split(".")[0])
+            self.select_lines(min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1))
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
             exception()
@@ -832,11 +846,12 @@ class TextFrame(ttk.Frame):
     def _reload_theme_options(self, event=None):
         
         style = ttk.Style()
-        background = style.lookup("TextMargin", "background")
-        self._margin.configure(background=background, selectbackground=background)
+        background = style.lookup("Gutter", "background")
+        self._gutter.configure(background=background, selectbackground=background)
+        self._margin_line.configure(background=background)
         
-        foreground = style.lookup("TextMargin", "foreground")
-        self._margin.configure(foreground=foreground, selectforeground=foreground)
+        foreground = style.lookup("Gutter", "foreground")
+        self._gutter.configure(foreground=foreground, selectforeground=foreground)
         
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
@@ -894,22 +909,3 @@ def rebind_control_a(root):
 
 def _running_on_mac():
     return tk._default_root.call('tk', 'windowingsystem') == "aqua"
-
-if __name__ == "__main__":
-    # demo
-    root = tk.Tk()
-    frame = TextFrame(root, read_only=False, wrap=tk.NONE,
-                      line_numbers=True, line_length_margin=13,
-                      text_class=TweakableText)
-    frame.grid()
-    text = frame.text
-    
-    text.direct_insert("1.0", "Essa\n    'tessa\nkossa\nx=34+(45*89*(a+45)")
-    text.tag_configure('string', background='yellow')
-    text.tag_add("string", "2.0", "3.0")
-    
-    
-    text.tag_configure('paren', underline=True)
-    text.tag_add("paren", "4.6", "5.0")
-    
-    root.mainloop()

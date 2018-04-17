@@ -13,7 +13,7 @@ from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView, get_syntax_options_for_tag
 from tkinter.messagebox import showinfo, showerror
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import tokenize
 import logging
@@ -611,7 +611,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         self._code_book = ttk.Notebook(self.main_pw)
         self._text_frame = CodeView(self._code_book, 
                                       first_line_number=frame_info.firstlineno,
-                                      font=get_workbench().get_font("EditorFont"))
+                                      font="EditorFont")
         self._code_book.add(self._text_frame, text="Source")
         self.main_pw.add(self._code_book, minsize=100)
         

@@ -11,7 +11,7 @@ import tkinter.font as font
 import thonny
 from thonny import misc_utils, ui_utils
 from thonny.misc_utils import get_python_version_string
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 class AboutDialog(tk.Toplevel):
     def __init__(self, master):
@@ -46,9 +46,8 @@ class AboutDialog(tk.Toplevel):
         url = "http://thonny.org"
         url_font = font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
-        url_label = ttk.Label(main_frame, text=url,
+        url_label = ttk.Label(main_frame, text=url, style="Url.TLabel",
                               cursor="hand2",
-                              foreground="blue",
                               font=url_font,)
         url_label.grid()
         url_label.bind("<Button-1>", lambda _:webbrowser.open(url))
@@ -75,8 +74,8 @@ class AboutDialog(tk.Toplevel):
         
         credits_label = ttk.Label(main_frame, text="Made in\nUniversity of Tartu, Estonia\n"
                                 + "with the help from\nopen-source community",
+                              style="Url.TLabel",
                               cursor="hand2",
-                              foreground="blue",
                               font=url_font,
                               justify=tk.CENTER)
         credits_label.grid()

@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny.config_ui import ConfigurationPage
-from thonny.globals import get_workbench
+from thonny import get_workbench
 import logging
 
 

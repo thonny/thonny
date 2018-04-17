@@ -1,24 +1,26 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 from datetime import datetime
-from thonny import ui_utils
-from thonny.globals import get_workbench
+from thonny import ui_utils, codeview
+from thonny import get_workbench
 import json
 from thonny.base_file_browser import BaseFileBrowser
 import ast
 import os.path
 from thonny.plugins.coloring import SyntaxColorer
+from thonny.ui_utils import lookup_style_option
 
 
 class ReplayWindow(tk.Toplevel):
     def __init__(self):
-        tk.Toplevel.__init__(self, get_workbench())
+        tk.Toplevel.__init__(self, get_workbench(),
+                             background=lookup_style_option("TFrame", "background"))
         ui_utils.set_zoomed(self, True)
         
-        self.main_pw   = tk.PanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
-        self.center_pw  = tk.PanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
+        self.main_pw   = ReplayerPanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
+        self.center_pw  = ReplayerPanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
         self.right_frame = ttk.Frame(self.main_pw)
-        self.right_pw  = tk.PanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
+        self.right_pw  = ReplayerPanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
         self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
         shell_book = ttk.Notebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
@@ -183,11 +185,11 @@ class ReplayerCodeView(ttk.Frame):
         self.vbar.grid(row=0, column=2, sticky=tk.NSEW)
         self.hbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
         self.hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
-        self.text = tk.Text(self,
+        self.text = codeview.SyntaxText(self,
                 yscrollcommand=self.vbar.set,
                 xscrollcommand=self.hbar.set,
                 borderwidth=0,
-                font=get_workbench().get_font("EditorFont"),
+                font="EditorFont",
                 wrap=tk.NONE,
                 insertwidth=2,
                 #selectborderwidth=2,
@@ -249,9 +251,7 @@ class ReplayerEditorProper(ReplayerEditor):
         # TODO: some problem when doing fast rewind
         return
     
-        self.colorer = SyntaxColorer(self.code_view.text,
-                                     get_workbench().get_font("EditorFont"),
-                                     get_workbench().get_font("BoldEditorFont"))
+        self.colorer = SyntaxColorer(self.code_view.text)
 
     def replay_event(self, event):
         ReplayerEditor.replay_event(self, event)
@@ -307,8 +307,8 @@ class ShellFrame(ReplayerEditor):
         # TODO: use same source as shell
         vert_spacing = 10
         io_indent = 16
-        self.code_view.text.tag_configure("toplevel", font=get_workbench().get_font("EditorFont"))
-        self.code_view.text.tag_configure("prompt", foreground="purple", font=get_workbench().get_font("BoldEditorFont"))
+        self.code_view.text.tag_configure("toplevel", font="EditorFont")
+        self.code_view.text.tag_configure("prompt", foreground="purple", font="BoldEditorFont")
         self.code_view.text.tag_configure("command", foreground="black")
         self.code_view.text.tag_configure("version", foreground="DarkGray")
         self.code_view.text.tag_configure("automagic", foreground="DarkGray")
@@ -316,7 +316,7 @@ class ShellFrame(ReplayerEditor):
         self.code_view.text.tag_configure("error", foreground="Red")
         
         self.code_view.text.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
-                                font=get_workbench().get_font("IOFont"))
+                                font="IOFont")
         self.code_view.text.tag_configure("stdin", foreground="Blue")
         self.code_view.text.tag_configure("stdout", foreground="Black")
         self.code_view.text.tag_configure("stderr", foreground="Red")
@@ -326,6 +326,11 @@ class ShellFrame(ReplayerEditor):
         self.code_view.text.tag_configure("inactive", foreground="#aaaaaa")
     
 
+class ReplayerPanedWindow(tk.PanedWindow):
+    def __init__(self, master=None, cnf={}, **kw):
+        cnf.update(kw)
+        cnf["background"] = lookup_style_option("TFrame", "background")
+        super().__init__(master=master, cnf=cnf)
 
 def load_plugin():
     def open_replayer():

@@ -13,15 +13,14 @@ from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, get_current_notebook_tab_widget, select_sequence,\
-    get_style_options, get_style_option
+    create_tooltip, select_sequence, get_style_configuration, lookup_style_option
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
 from thonny.running import Runner
-import thonny.globals
+import thonny
 import logging
-from thonny.globals import register_runner, get_runner
+from thonny import get_runner
 from thonny.config_ui import ConfigurationDialog
 import pkgutil
 import socket
@@ -53,7 +52,7 @@ class Workbench(tk.Tk):
         * communication between other components (see event_generate and bind)
         * configuration services (get_option, set_option, add_defaults)
         * loading translations
-        * maintaining fonts (get_font, increasing and decreasing font size)
+        * maintaining fonts (named fonts, increasing and decreasing font size)
     
     After workbench and plugins get loaded, 3 kinds of events start happening:
         
@@ -68,6 +67,8 @@ class Workbench(tk.Tk):
 
     
     def __init__(self, server_socket=None):
+        thonny._workbench = self
+        
         self._destroying = False
         self.initializing = True
         tk.Tk.__init__(self, className="Thonny")
@@ -77,30 +78,31 @@ class Workbench(tk.Tk):
         self._images = set() # to avoid Python garbage collecting them
         self._image_mapping = {} # to allow specify different images in a theme
         self._backends = {}
+        self._commands = []
+        self._view_records = {}
+        self._editor_notebook = None
         self.content_inspector_classes = []
-        thonny.globals.register_workbench(self)
         
         self._init_configuration()
         self._init_diagnostic_logging()
         self._add_main_backends()
-        self._init_theming()
-        self._load_early_plugins()
-        
-        self._editor_notebook = None
         self._init_fonts()
-        self.update_themes()
+        self._init_theming()
         self._init_window()
-        self._init_menu()
         
-        self.title("Thonny")
+        self._load_plugins()
+        
+        self._init_images()
+        self.reload_themes()
+        self._init_menu()
         
         self._init_containers()
         
         self._init_runner()
-            
-        self._init_commands()
-        self._load_plugins()
+        self._show_views()
         
+        self._init_commands()
+        self._init_icon()
         self._update_toolbar()
         try:
             self._editor_notebook.load_startup_files()
@@ -118,7 +120,9 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
+        self._publish_commands()
         self.initializing = False
+        self.event_generate("<<WorkbenchInitialized>>")
     
     def _try_action(self, action):
         try:
@@ -164,6 +168,7 @@ class Workbench(tk.Tk):
         faulthandler.enable(fault_out)
         
     def _init_window(self):
+        self.title("Thonny")
         
         self.set_default("layout.zoomed", False)
         self.set_default("layout.top", 15)
@@ -194,7 +199,9 @@ class Workbench(tk.Tk):
             ui_utils.set_zoomed(self, True)
         
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        
+        self.bind("<Configure>", self._on_configure, True)
+    
+    def _init_icon(self):
         # Window icons
         window_icons = self.get_option("theme.window_icons") 
         if window_icons:
@@ -211,17 +218,19 @@ class Workbench(tk.Tk):
                     # seems to work in mac
                     self.iconbitmap(icon_file)
                 except:
-                    pass # TODO: try to get working in Ubuntu  
+                    pass   
         
-        self.bind("<Configure>", self._on_configure, True)
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        if get_style_option("Menubar", "custom", False):
+        if lookup_style_option("Menubar", "custom", False) == "True":
             self._menubar = ui_utils.CustomMenubar(self)
             self._menubar.grid(row=0, sticky="nsew")
         else:
-            self._menubar = tk.Menu(self, **get_style_options("Menubar"))
+            opts = get_style_configuration("Menubar")
+            if "custom" in opts:
+                del opts["custom"]
+            self._menubar = tk.Menu(self, **opts)
             self["menu"] = self._menubar
         self._menus = {}
         self._menu_item_specs = {} # key is pair (menu_name, command_label), value is MenuItem
@@ -234,16 +243,10 @@ class Workbench(tk.Tk):
         self.get_menu("tools", "Tools")
         self.get_menu("help", "Help")
     
-    def _load_early_plugins(self):
-        """load_early_plugin can't use nor GUI neither Runner"""
-        logging.debug("Loading early plugins from " + str(sys.path))
-        self._load_plugins("load_early_plugin")
-        
-    def _load_plugins(self, load_function_name="load_plugin"):
+    def _load_plugins(self):
         # built-in plugins
         import thonny.plugins
-        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.",
-                                     load_function_name=load_function_name)
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")
         
         # 3rd party plugins from namespace package
         try:
@@ -252,20 +255,23 @@ class Workbench(tk.Tk):
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.",
-                                     load_function_name=load_function_name)
+            self._load_plugins_from_path(thonnycontrib.__path__, "thonnycontrib.")
         
-    def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
+    def _load_plugins_from_path(self, path, prefix):
+        load_function_name="load_plugin"
+        
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
-            if not module_name.endswith("backend"):
-                # TODO: should end with "frontend"?
-                try:
-                    m = importlib.import_module(module_name)
-                    if hasattr(m, load_function_name):
-                        getattr(m, load_function_name)()
-                except:
-                    logging.exception("Failed loading plugin '" + module_name + "'")
+            try:
+                m = importlib.import_module(module_name)
+                if hasattr(m, load_function_name):
+                    getattr(m, load_function_name)()
+            except:
+                logging.exception("Failed loading plugin '" + module_name + "'")
     
+    def _init_images(self):
+        self.get_image('tab_close.gif', "img_close")
+        self.get_image('tab_close_active.gif', "img_close_active")
+        
                                 
     def _init_fonts(self):
         # Remember original standard fonts so that it's possible to reset themes
@@ -293,9 +299,10 @@ class Workbench(tk.Tk):
 
         default_font = tk_font.nametofont("TkDefaultFont")
         
-        _fonts = [
+        self._fonts = [
             tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
             tk_font.Font(name="EditorFont", family=self.get_option("view.editor_font_family")),
+            tk_font.Font(name="SmallEditorFont", family=self.get_option("view.editor_font_family")),
             tk_font.Font(name="BoldEditorFont", family=self.get_option("view.editor_font_family"),
                                             weight="bold"),
             tk_font.Font(name="ItalicEditorFont", family=self.get_option("view.editor_font_family"),
@@ -304,12 +311,21 @@ class Workbench(tk.Tk):
                                             weight="bold", slant="italic"),
             tk_font.Font(name="TreeviewFont", 
                         family=default_font.cget("family"),
-                        size=default_font.cget("size"))            
+                        size=default_font.cget("size")),  
+                      
+            tk_font.Font(name="BoldTkDefaultFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"),
+                        weight="bold"),            
+                      
+            tk_font.Font(name="UnderlineTkDefaultFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"),
+                        underline=1),            
         ]
-
-        # TODO: is this dict required?
-        self._fonts = {f.name : f for f in _fonts}
         
+        
+
         self.update_fonts()
     
     
@@ -335,7 +351,7 @@ class Workbench(tk.Tk):
     def _init_runner(self):
         try:
             runner = Runner()
-            register_runner(runner)
+            thonny._runner = runner
             runner.start()
         except:
             self.report_exception("Error when initializing backend")
@@ -402,8 +418,10 @@ class Workbench(tk.Tk):
             self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
             self.bind("<Escape>", self._unmaximize_view, True)
             
-            if not running_on_mac_os():
-                # TODO: approach working in Win/Linux doesn't work in mac as it should and only confuses
+            if running_on_mac_os():
+                # Doesn't work as it should and only confuses
+                pass
+            else:
                 self.add_command("toggle_maximize_view", "view", "Full screen",
                     self._cmd_toggle_full_screen,
                     flag_name="view.full_screen",
@@ -428,7 +446,7 @@ class Workbench(tk.Tk):
         self.rowconfigure(1, weight=1)
         self._maximized_view = None
         
-        self._toolbar = ttk.Frame(main_frame, padding=0) # TODO: height=30 ?
+        self._toolbar = ttk.Frame(main_frame, padding=0) 
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
         
         self.set_default("layout.main_pw_first_pane_size", 1/3)
@@ -462,7 +480,6 @@ class Workbench(tk.Tk):
             last_pane_size=self.get_option("layout.east_pw_last_pane_size")
         )
         
-        self._view_records = {}
         self._view_notebooks = {
             'nw' : AutomaticNotebook(self._west_pw, 1),
             'w'  : AutomaticNotebook(self._west_pw, 2),
@@ -494,19 +511,8 @@ class Workbench(tk.Tk):
                          "xpnative" if running_on_windows() else "clam")
     
         
-    def add_command(self, command_id, menu_name, command_label, handler,
-                    tester=None,
-                    default_sequence=None,
-                    extra_sequences=[],
-                    flag_name=None,
-                    skip_sequence_binding=False,
-                    accelerator=None,
-                    group=99,
-                    position_in_group="end",
-                    image_filename=None,
-                    include_in_toolbar=False,
-                    bell_when_denied=True):
-        """Adds an item to specified menu.
+    def add_command(self, command_id, menu_name, command_label, handler, **kw):
+        """Registers an item to be shown in specified menu.
         
         Args:
             menu_name: Name of the menu the command should appear in.
@@ -528,6 +534,29 @@ class Workbench(tk.Tk):
         Returns:
             None
         """     
+        kw.update(dict(command_id=command_id,
+                       menu_name=menu_name,
+                       command_label=command_label,
+                       handler=handler))
+        
+        self._commands.append(kw)
+    
+    def _publish_commands(self):
+        for cmd in self._commands:
+            self._publish_command(**cmd)
+        
+    def _publish_command(self, command_id, menu_name, command_label, handler,
+                    tester=None,
+                    default_sequence=None,
+                    extra_sequences=[],
+                    flag_name=None,
+                    skip_sequence_binding=False,
+                    accelerator=None,
+                    group=99,
+                    position_in_group="end",
+                    image_filename=None,
+                    include_in_toolbar=False,
+                    bell_when_denied=True):
         
         def dispatch(event=None):
             if not tester or tester():
@@ -622,14 +651,15 @@ class Workbench(tk.Tk):
         self.set_default("view." + view_id + ".location", default_location)
         self.set_default("view." + view_id + ".position_key", default_position_key)
         
+        visibility_flag = self.get_variable("view." + view_id + ".visible")
+        
         self._view_records[view_id] = {
             "class" : class_,
             "label" : label,
             "location" : self.get_option("view." + view_id + ".location"),
-            "position_key" : self.get_option("view." + view_id + ".position_key")
+            "position_key" : self.get_option("view." + view_id + ".position_key"),
+            "visibility_flag" : visibility_flag,
         }
-        
-        visibility_flag = self.get_variable("view." + view_id + ".visible")
         
         # handler
         def toggle_view_visibility():
@@ -646,9 +676,6 @@ class Workbench(tk.Tk):
             group=10,
             position_in_group="alphabetic")
         
-        if visibility_flag.get():
-            self.show_view(view_id, False)
-    
     def add_configuration_page(self, title, page_class):
         self._configuration_pages[title] = page_class
     
@@ -678,8 +705,9 @@ class Workbench(tk.Tk):
         self._syntax_themes[name] = (parent, settings)
         
     
-    def get_ui_theme_names(self):
-        return sorted(self._ui_themes.keys())
+    def get_usable_ui_theme_names(self):
+        return sorted([name for name in self._ui_themes 
+                       if self._ui_themes[name][0] is not None])
     
     def get_syntax_theme_names(self):
         return sorted(self._syntax_themes.keys())
@@ -726,8 +754,17 @@ class Workbench(tk.Tk):
                         ]:
             value = self._style.lookup("Listbox", setting)
             if value:
-                #self.option_add("*Listbox." + setting, value)
                 self.option_add("*TCombobox*Listbox." + setting, value)
+                self.option_add("*Listbox." + setting, value)
+        
+        text_opts = self._style.configure("Text")
+        for key in text_opts:
+            self.option_add("*Text." + key, text_opts[key])
+        
+        if hasattr(self, "_menus"):
+            # if menus have been initialized, ie. when theme is being changed
+            for menu in self._menus.values():
+                menu.configure(get_style_configuration("Menu"))
         
     def _apply_syntax_theme(self, name):
         def get_settings(name):
@@ -754,9 +791,9 @@ class Workbench(tk.Tk):
         from thonny import codeview
         codeview.set_syntax_options(get_settings(name))
     
-    def update_themes(self):
+    def reload_themes(self):
         preferred_theme = self.get_option("view.ui_theme")
-        available_themes = self.get_ui_theme_names()
+        available_themes = self.get_usable_ui_theme_names()
         
         if preferred_theme in available_themes:
             self._apply_ui_theme(preferred_theme)
@@ -766,6 +803,12 @@ class Workbench(tk.Tk):
             self._apply_ui_theme('Windows')
         
         self._apply_syntax_theme(self.get_option("view.syntax_theme"))
+    
+    def _show_views(self):
+        for view_id in self._view_records:
+            if self._view_records[view_id]["visibility_flag"].get():
+                self.show_view(view_id, False)
+
 
     def map_image(self, original_image, new_image):
         self._image_mapping[original_image] = new_image
@@ -804,13 +847,6 @@ class Workbench(tk.Tk):
     def get_variable(self, name):
         return self._configuration_manager.get_variable(name)
     
-    def get_font(self, name):
-        """
-        Supported names are EditorFont and BoldEditorFont
-        """
-        return self._fonts[name]
-    
-    
     def get_menu(self, name, label=None):
         """Gives the menu with given name. Creates if not created yet.
         
@@ -819,7 +855,7 @@ class Workbench(tk.Tk):
             label: translated label, used only when menu with given name doesn't exist yet
         """
         if name not in self._menus:
-            menu = tk.Menu(self._menubar, **get_style_options("Menu"))
+            menu = tk.Menu(self._menubar, **get_style_configuration("Menu"))
             menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
             
@@ -847,6 +883,7 @@ class Workbench(tk.Tk):
             view.home_widget.columnconfigure(0, weight=1)
             view.home_widget.rowconfigure(0, weight=1)
             view.home_widget.maximizable_widget = view
+            view.home_widget.close = lambda: self.hide_view(view_id)
             if hasattr(view, "position_key"):
                 view.home_widget.position_key = view.position_key
             
@@ -982,16 +1019,18 @@ class Workbench(tk.Tk):
         editor_font_family = self.get_option("view.editor_font_family")
         io_font_family = self.get_option("view.io_font_family")
         
-        self.get_font("IOFont").configure(family=io_font_family,
+        tk_font.nametofont("IOFont").configure(family=io_font_family,
                                           size=min(editor_font_size - 2,
                                                    int(editor_font_size * 0.8 + 3)))
-        self.get_font("EditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("EditorFont").configure(family=editor_font_family,
                                               size=editor_font_size)
-        self.get_font("BoldEditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("SmallEditorFont").configure(family=editor_font_family,
+                                              size=editor_font_size-2)
+        tk_font.nametofont("BoldEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
-        self.get_font("ItalicEditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("ItalicEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
-        self.get_font("BoldItalicEditorFont").configure(family=editor_font_family,
+        tk_font.nametofont("BoldItalicEditorFont").configure(family=editor_font_family,
                                                   size=editor_font_size)
         
         
@@ -1003,7 +1042,7 @@ class Workbench(tk.Tk):
             treeview_font_size = int(editor_font_size * 0.7 + 2)
             rowheight = int(treeview_font_size * 2.0 + 6)
             
-        self.get_font("TreeviewFont").configure(size=treeview_font_size)
+        tk_font.nametofont("TreeviewFont").configure(size=treeview_font_size)
         style.configure("Treeview", rowheight=rowheight)
         
         if self._editor_notebook is not None:
@@ -1030,7 +1069,7 @@ class Workbench(tk.Tk):
         button = ttk.Button(group_frame, 
                          command=handler, 
                          image=image, 
-                         style="Toolbutton", # TODO: does this cause problems in some Macs?
+                         style="Toolbutton", 
                          state=tk.NORMAL
                          )
         button.pack(side=tk.LEFT)
@@ -1099,7 +1138,7 @@ class Workbench(tk.Tk):
         # find the widget that can be relocated
         widget = self.focus_get()
         if isinstance(widget, EditorNotebook) or isinstance(widget, AutomaticNotebook):
-            current_tab = get_current_notebook_tab_widget(widget)
+            current_tab = widget.get_current_child()
             if current_tab is None:
                 return
             

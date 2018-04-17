@@ -2,9 +2,9 @@
 
 import tkinter as tk
 from thonny.common import TextRange
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny import tktextext, roughparse
-from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
+from thonny.ui_utils import EnhancedTextWithLogging, lookup_style_option
 from thonny.tktextext import EnhancedText
 
 _syntax_options = {}
@@ -30,6 +30,11 @@ class SyntaxText(EnhancedText):
                 self.tag_configure(tag_name, **syntax_options[tag_name])
         
         self._syntax_options = syntax_options
+        
+        if "current_line" in syntax_options:
+            self.tag_lower("current_line")
+        
+        self.tag_raise("sel")
     
     def _reload_theme_options(self, event=None):
         super()._reload_theme_options(event)
@@ -157,7 +162,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
         
-        super().__init__(master=master, cnf=cnf, **kw)
+        super().__init__(master=master, tag_current_line=True, cnf=cnf, **kw)
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)
@@ -172,18 +177,16 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         
-        if "margin_background" not in text_frame_args:
-            text_frame_args["margin_background"] = get_style_option("TextMargin", "background", '#e0e0e0')
-        if "margin_foreground" not in text_frame_args:
-            text_frame_args["margin_foreground"] = get_style_option("TextMargin", "foreground", '#999999')
-        
-        
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
                                      undo=True, wrap=tk.NONE, **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
         
         self.text.bind("<<TextChange>>", self._on_text_changed, True)
+        self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
+                                                           self._reload_theme_options, True)
+        
+        self._reload_theme_options()
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -234,6 +237,18 @@ class CodeView(tktextext.TextFrame):
             end_lineno, end_col_offset = lineno, col_offset
             
         return TextRange(lineno, col_offset, end_lineno, end_col_offset)
+
+    def destroy(self):
+        super().destroy()
+        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
+    
+    def _reload_theme_options(self, event=None):
+        super()._reload_theme_options(event)
+        
+        if "GUTTER" in _syntax_options:
+            self._gutter.configure(_syntax_options["GUTTER"])
+            if "background" in _syntax_options["GUTTER"]:
+                self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
 
 def set_syntax_options(syntax_options):
     global _syntax_options

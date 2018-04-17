@@ -4,7 +4,7 @@ from tkinter import ttk
 
 from thonny.ui_utils import TreeFrame
 from thonny import misc_utils
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 
 _dummy_node_text = "..."

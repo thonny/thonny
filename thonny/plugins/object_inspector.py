@@ -5,11 +5,11 @@ import tkinter as tk
 from thonny.memory import format_object_id, VariablesFrame, MemoryFrame,\
     MAX_REPR_LENGTH_IN_GRID
 from thonny.misc_utils import shorten_repr
-from thonny.ui_utils import VerticallyScrollableFrame, CALM_WHITE, update_entry_text
+from thonny.ui_utils import VerticallyScrollableFrame, update_entry_text
 from thonny.tktextext import TextFrame
 from thonny.common import InlineCommand
 import ast
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from logging import exception
 
 
@@ -42,20 +42,17 @@ class ObjectInspector(VerticallyScrollableFrame):
         self.object_info = None
         get_workbench().bind("ObjectSelect", self.show_object, True)
         
-        self.grid_frame = tk.Frame(self.interior, bg=CALM_WHITE) 
+        self.grid_frame = tk.Frame(self.interior) 
         self.grid_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=(10,0), pady=15)
         self.grid_frame.columnconfigure(1, weight=1)
         
         def _add_main_attribute(row, caption):
             label = tk.Label(self.grid_frame, text=caption + ":  ",
-                             background=CALM_WHITE,
                              justify=tk.LEFT)
             label.grid(row=row, column=0, sticky=tk.NW)
             
             value = tk.Entry(self.grid_frame,
-                             background=CALM_WHITE,
                              bd=0,
-                             readonlybackground=CALM_WHITE,
                              highlightthickness = 0,
                              state="readonly"
                              )
@@ -104,7 +101,6 @@ class ObjectInspector(VerticallyScrollableFrame):
     def create_navigation_link(self, col, text, action, padx=0):
         link = tk.Label(self.grid_frame,
                         text=text,
-                        background=CALM_WHITE,
                         foreground="blue",
                         cursor="hand2")
         link.grid(row=0, column=col, sticky=tk.NE, padx=padx)
@@ -226,7 +222,7 @@ class ObjectInspector(VerticallyScrollableFrame):
     
     
     def _add_block_label(self, row, caption):
-        label = tk.Label(self.grid_frame, bg=CALM_WHITE, text=caption)
+        label = tk.Label(self.grid_frame, text=caption)
         label.grid(row=row, column=0, columnspan=4, sticky="nsew", pady=(20,0))
         return label
             

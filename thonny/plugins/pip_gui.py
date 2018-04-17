@@ -6,7 +6,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 
 from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 import subprocess
 from urllib.request import urlopen, urlretrieve
 import urllib.error
@@ -20,11 +20,10 @@ import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
-    get_main_background
+    lookup_style_option
 from thonny.misc_utils import running_on_windows
 import sys
 
-LINK_COLOR="#3A66DD"
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
 class PipDialog(tk.Toplevel):
@@ -79,13 +78,13 @@ class PipDialog(tk.Toplevel):
         
         
         main_pw = tk.PanedWindow(parent, orient=tk.HORIZONTAL,
-                                 background=ui_utils.get_main_background(),
-                                 sashwidth=10)
+                                 background=lookup_style_option("TPanedWindow", "background"),
+                                 sashwidth=15)
         main_pw.grid(row=2, column=0, sticky="nsew", padx=15, pady=15)
         parent.rowconfigure(2, weight=1)
         parent.columnconfigure(0, weight=1)
         
-        listframe = ttk.Frame(main_pw, relief="groove", borderwidth=1)
+        listframe = ttk.Frame(main_pw, relief="flat", borderwidth=1)
         listframe.rowconfigure(0, weight=1)
         listframe.columnconfigure(0, weight=1)
         
@@ -118,18 +117,18 @@ class PipDialog(tk.Toplevel):
         
         info_text_frame = tktextext.TextFrame(info_frame, read_only=True,
                                               horizontal_scrollbar=False,
-                                              style="PipInfo.Text",
+                                              background=lookup_style_option("TFrame", "background"),
                                               vertical_scrollbar_class=AutoScrollbar,
                                               width=60, height=10)
-        ttk.Style().configure("PipInfo.Text", background=get_main_background())
-        info_text_frame.configure(borderwidth=1)
+        info_text_frame.configure(borderwidth=0)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
         self.info_text = info_text_frame.text
-        self.info_text.tag_configure("url", foreground=LINK_COLOR, underline=True)
+        link_color = lookup_style_option("Url.TLabel", "foreground", "red")
+        self.info_text.tag_configure("url", foreground=link_color, underline=True)
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
         self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
-        self.info_text.tag_configure("install_file", foreground=LINK_COLOR, underline=True)
+        self.info_text.tag_configure("install_file", foreground=link_color, underline=True)
         self.info_text.tag_bind("install_file", "<ButtonRelease-1>", self._handle_install_file_click)
         self.info_text.tag_bind("install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))

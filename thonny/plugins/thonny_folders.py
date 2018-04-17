@@ -5,7 +5,7 @@ import os.path
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 import subprocess
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny import THONNY_USER_DIR
 
 def open_path_in_system_file_manager(path):

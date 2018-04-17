@@ -1,7 +1,7 @@
 import os.path
 import tkinter as tk
 import time
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.workbench import WorkbenchEvent
 from datetime import datetime
 import zipfile 

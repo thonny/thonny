@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny import ui_utils
 from thonny.common import InlineCommand
 from thonny.tktextext import TextFrame
@@ -8,11 +8,11 @@ import logging
 import thonny.memory
 import ast
 from thonny.misc_utils import shorten_repr
-from thonny.ui_utils import update_entry_text, CALM_WHITE
+from thonny.ui_utils import update_entry_text
 
 class ObjectInspector2(ttk.Frame):
     def __init__(self, master):
-        ttk.Frame.__init__(self, master)
+        ttk.Frame.__init__(self, master, style="ViewBody.TFrame")
         
         self.object_id = None
         self.object_info = None
@@ -24,7 +24,7 @@ class ObjectInspector2(ttk.Frame):
         self.active_page.grid(row=1, column=0, sticky="nsew")
         
         toolbar = self._create_toolbar()
-        toolbar.grid(row=0, column=0, sticky="nsew")
+        toolbar.grid(row=0, column=0, sticky="nsew", pady=(0,1))
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
@@ -37,9 +37,10 @@ class ObjectInspector2(ttk.Frame):
         #self.demo()
     
     def _create_toolbar(self):
-        toolbar = ttk.Frame(self)
+        toolbar = ttk.Frame(self, style="ViewToolbar.TFrame")
         
-        self.search_box = ttk.Entry(toolbar, 
+        self.search_box = ttk.Label(toolbar, style="ViewToolbar.TLabel",
+                                    text="'hello\\nworld" 
                                     #borderwidth=1, 
                                     #background=ui_utils.get_main_background()
                                    )
@@ -52,8 +53,8 @@ class ObjectInspector2(ttk.Frame):
             if page == self.active_page:
                 relief = "sunken"
             else:
-                relief = "flat"
-            tab = tk.Label(toolbar, text=" "+caption+" ", relief=relief, borderwidth=1)
+                relief = "raised"
+            tab = ttk.Label(toolbar, text=caption, style="Inactive.ViewTab.TLabel")
             tab.grid(row=0, column=col, pady=5, padx=5, sticky="nsew")
             self.tabs.append(tab)
             page.tab = tab
@@ -64,11 +65,11 @@ class ObjectInspector2(ttk.Frame):
                 else:
                     if self.active_page is not None:
                         self.active_page.grid_forget()
-                        self.active_page.tab.configure(relief="flat")
+                        self.active_page.tab.configure(style="Inactive.ViewTab.TLabel")
                     
                     self.active_page = page
-                    page.grid(row=1, column=0, sticky="nsew")
-                    tab.configure(relief="sunken")
+                    page.grid(row=1, column=0, sticky="nsew", padx=0)
+                    tab.configure(style="Active.ViewTab.TLabel")
                     if (self.active_page == self.attributes_page
                         and (self.object_info is None
                              or self.object_info["attributes"] == {})):
@@ -77,7 +78,7 @@ class ObjectInspector2(ttk.Frame):
             
             tab.bind("<1>", on_click)
         
-        create_tab(1, "Overview", self.genera_page)
+        create_tab(1, "Overview", self.general_page)
         create_tab(2, "Data", self.content_page)
         create_tab(3, "Atts", self.attributes_page)
         
@@ -108,18 +109,15 @@ class ObjectInspector2(ttk.Frame):
         
     
     def _create_general_page(self):
-        self.genera_page = tk.Frame(self, background=CALM_WHITE)
+        self.general_page = ttk.Frame(self, style="ViewBody.TFrame")
         
         def _add_main_attribute(row, caption):
-            label = tk.Label(self.genera_page, text=caption + ":  ",
-                             background=CALM_WHITE,
+            label = ttk.Label(self.general_page, text=caption + ":  ",
                              justify=tk.LEFT)
             label.grid(row=row, column=0, sticky=tk.NW)
             
-            value = tk.Entry(self.genera_page,
-                             background=CALM_WHITE,
+            value = tk.Entry(self.general_page,
                              bd=0,
-                             readonlybackground=CALM_WHITE,
                              highlightthickness = 0,
                              state="readonly"
                              )
@@ -137,7 +135,7 @@ class ObjectInspector2(ttk.Frame):
         self.type_entry.bind("<Button-1>", self.goto_type)
 
     def _create_content_page(self):
-        self.content_page = ttk.Frame(self)
+        self.content_page = ttk.Frame(self, style="ViewBody.TFrame")
         # type-specific inspectors
         self.current_type_specific_inspector = None
         self.current_type_specific_label = None
@@ -303,7 +301,7 @@ class ObjectInspector2(ttk.Frame):
     
     
     def _add_block_label(self, row, caption):
-        label = tk.Label(self.genera_page, bg=ui_utils.CALM_WHITE, text=caption)
+        label = ttk.Label(self.general_page, text=caption)
         label.grid(row=row, column=0, columnspan=4, sticky="nsew", pady=(20,0))
         return label
         
@@ -401,8 +399,8 @@ class StringInspector(TextFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
-        self.config(borderwidth=1)
-        self.text.configure(background="white")
+        #self.config(borderwidth=1)
+        #self.text.configure(background="white")
 
     def applies_to(self, object_info):
         return object_info["type"] == repr(str)
@@ -428,8 +426,8 @@ class ReprInspector(TextFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
-        self.config(borderwidth=1)
-        self.text.configure(background="white")
+        #self.config(borderwidth=1)
+        #self.text.configure(background="white")
 
     def applies_to(self, object_info):
         return True
@@ -602,7 +600,7 @@ class ImageInspector(ContentInspector, tk.Frame):
 class AttributesFrame(thonny.memory.VariablesFrame):
     def __init__(self, master):
         thonny.memory.VariablesFrame.__init__(self, master)
-        self.configure(border=1)
+        self.configure(border=0)
        
     def on_select(self, event):
         pass

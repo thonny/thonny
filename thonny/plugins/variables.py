@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from thonny.memory import VariablesFrame
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.common import InlineCommand
 
 class GlobalsView(VariablesFrame):

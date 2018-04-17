@@ -5,7 +5,7 @@ import tkinter.font as tk_font
 
 from thonny.ui_utils import TreeFrame
 from thonny.misc_utils import shorten_repr
-from thonny.globals import get_workbench
+from thonny import get_workbench
 
 MAX_REPR_LENGTH_IN_GRID = 100
 

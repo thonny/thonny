@@ -4,7 +4,7 @@ from tkinter import ttk, messagebox
 from tkinter.dialog import Dialog
 
 from thonny import tktextext, misc_utils
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
 import tkinter as tk
 import tkinter.messagebox as tkMessageBox
@@ -17,10 +17,8 @@ import threading
 import signal
 import subprocess
 import os
-import warnings
+import logging
 
-
-CALM_WHITE = '#fdfdfd'
 
 _images = set() # for keeping references to tkinter images to avoid garbace colleting them
 
@@ -33,10 +31,10 @@ class CustomMenubar(ttk.Frame):
         
         
         ttk.Style().map("CustomMenubarLabel.TLabel",
-              background=[("!active", get_style_option("Menubar", "background", "gray")),
-                          ("active",  get_style_option("Menubar", "activebackground", "LightYellow"))],
-              foreground=[("!active", get_style_option("Menubar", "foreground", "black")),
-                          ("active",  get_style_option("Menubar", "activeforeground", "black"))],
+              background=[("!active", lookup_style_option("Menubar", "background", "gray")),
+                          ("active",  lookup_style_option("Menubar", "activebackground", "LightYellow"))],
+              foreground=[("!active", lookup_style_option("Menubar", "foreground", "black")),
+                          ("active",  lookup_style_option("Menubar", "activeforeground", "black"))],
               )
     
     def add_cascade(self, label, menu):
@@ -269,22 +267,159 @@ class AutomaticPanedWindow(tk.PanedWindow):
         
     
     def _update_appearance(self, event=None):
-        self.configure(sashwidth=10) # TODO: consult theme
-        self.configure(background=get_main_background())
+        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 10))
+        self.configure(background=lookup_style_option("TPanedWindow", "background"))
     
+class ClosableNotebook(ttk.Notebook):
+    def __init__(self, master, style="ButtonNotebook.TNotebook", **kw):
+        super().__init__(master, style=style, **kw)
+        
+        self.tab_menu = self.create_tab_menu()
+        self._popup_index = None
+        self.pressed_index = None
+        
+        self.bind("<ButtonPress-1>", self._letf_btn_press, True)
+        self.bind("<ButtonRelease-1>", self._left_btn_release, True)
+        if running_on_mac_os():
+            self.bind("<ButtonPress-2>", self._right_btn_press, True)
+            self.bind("<Control-Button-1>", self._right_btn_press, True)
+        else:  
+            self.bind("<ButtonPress-3>", self._right_btn_press, True)
+        
+        self._check_update_style()
+    
+    def create_tab_menu(self):
+        menu = tk.Menu(self.winfo_toplevel(), tearoff=False)
+        menu.add_command(label="Close", command=self._close_tab_from_menu)
+        menu.add_command(label="Close others", command=self._close_other_tabs)
+        menu.add_command(label="Close all", command=self.close_tabs)
+        return menu
+    
+    def _letf_btn_press(self, event):
+        try:
+            elem = self.identify(event.x, event.y)
+            index = self.index("@%d,%d" % (event.x, event.y))
+        
+            if "closebutton" in elem:
+                self.state(['pressed'])
+                self.pressed_index = index
+        except:
+            # may fail, if clicked outside of tab
+            return
+    
+    def _left_btn_release(self, event):
+        if not self.instate(['pressed']):
+            return
+    
+        try:
+            elem =  self.identify(event.x, event.y)
+            index = self.index("@%d,%d" % (event.x, event.y))
+        except:
+            # may fail, when mouse is dragged
+            return
+        else:
+            if "closebutton" in elem and self.pressed_index == index:
+                self.close_tab(index)
+        
+            self.state(["!pressed"])
+        finally:
+            self.pressed_index = None
+    
+    def _right_btn_press(self, event):
+        try:
+            index = self.index("@%d,%d" % (event.x, event.y))
+            self._popup_index = index
+            self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
+        except:
+            logging.exception("Opening tab menu")
+    
+    def _close_tab_from_menu(self):
+        self.close_tab(self._popup_index)
+    
+    def _close_other_tabs(self):
+        self.close_tabs(self._popup_index)
+    
+    def close_tabs(self, except_index=None):
+        for tab_index in reversed(range(len(self.winfo_children()))):
+            if except_index is not None and tab_index == except_index:
+                continue
+            else:
+                self.close_tab(tab_index)
+                    
+    def close_tab(self, index):
+        child = self.get_child_by_index(index)
+        print(type(child), vars(child))
+        if hasattr(child, "close"):
+            child.close()
+        else:
+            self.forget(index)
+            child.destroy()
+
+    def get_child_by_index(self, index):
+        tab_id = self.tabs()[index]
+        if tab_id:
+            return self.nametowidget(tab_id)
+        else:
+            return None
+
+    def get_current_child(self):
+        child_id = self.select()
+        if child_id:
+            return self.nametowidget(child_id)
+        else:
+            return None
+    
+    def focus_set(self):
+        editor = self.get_current_child()
+        if editor: 
+            editor.focus_set()
+        else:
+            super().focus_set()
+            
+    def _check_update_style(self):
+        style = ttk.Style()
+        if "closebutton" in style.element_names():
+            # It's done already
+            return
+        
+        # respect if required images have been defined already
+        if "img_close" not in self.image_names():
+            img_dir = os.path.join(os.path.dirname(__file__), "res")
+            ClosableNotebook._close_img = tk.PhotoImage("img_tab_close", 
+                file=os.path.join(img_dir, "tab_close.gif"))
+            ClosableNotebook._close_active_img = tk.PhotoImage("img_tab_close_active", 
+                file=os.path.join(img_dir, "tab_close_active.gif"))
+        
+        style.element_create("closebutton", "image", "img_tab_close",
+            ("active", "pressed", "!disabled", "img_tab_close_active"),
+            ("active", "!disabled", "img_tab_close_active"), border=8, sticky='')
+    
+        style.layout("ButtonNotebook.TNotebook.Tab", [
+            ("Notebook.tab", {"sticky": "nswe", "children":
+                [("Notebook.padding", {"side": "top", "sticky": "nswe",
+                                             "children":
+                    [("Notebook.focus", {"side": "top", "sticky": "nswe",
+                                               "children":
+                        [("Notebook.label", {"side": "left", "sticky": ''}),
+                         ("Notebook.closebutton", {"side": "left", "sticky": ''})
+                         ]
+                    })]
+                })]
+            })]
+        )
     
 
-class AutomaticNotebook(ttk.Notebook):
+class AutomaticNotebook(ClosableNotebook):
     """
     Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
     """
-    def __init__(self, master, position_key, style="AutomaticNotebook.TNotebook"):
-        ttk.Notebook.__init__(self, master, style=style)
+    def __init__(self, master, position_key):
+        super().__init__(master)
         self.position_key = position_key
     
     def add(self, child, **kw):
-        ttk.Notebook.add(self, child, **kw)
+        super().add(child, **kw)
         self._update_visibility()
     
     def insert(self, pos, child, **kw):
@@ -298,15 +433,15 @@ class AutomaticNotebook(ttk.Notebook):
             else:
                 pos = "end"
             
-        ttk.Notebook.insert(self, pos, child, **kw)
+        super().insert(pos, child, **kw)
         self._update_visibility()
     
     def hide(self, tab_id):
-        ttk.Notebook.hide(self, tab_id)
+        super().hide(tab_id)
         self._update_visibility()
     
     def forget(self, tab_id):
-        ttk.Notebook.forget(self, tab_id)
+        super().forget(tab_id)
         self._update_visibility()
     
     def is_visible(self):
@@ -477,15 +612,15 @@ def update_entry_text(entry, text):
     entry.config(state=original_state)
 
 
-class VerticallyScrollableFrame(tk.Frame):
+class VerticallyScrollableFrame(ttk.Frame):
     # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
     
     def __init__(self, master):
-        tk.Frame.__init__(self, master, bg=CALM_WHITE)
+        ttk.Frame.__init__(self, master)
         
         # set up scrolling with canvas
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.canvas = tk.Canvas(self, bg=CALM_WHITE, bd=0, highlightthickness=0,
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0,
                            yscrollcommand=vscrollbar.set)
         vscrollbar.config(command=self.canvas.yview)
         self.canvas.xview_moveto(0)
@@ -495,7 +630,7 @@ class VerticallyScrollableFrame(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.interior = tk.Frame(self.canvas, bg=CALM_WHITE)
+        self.interior = ttk.Frame(self.canvas)
         self.interior_id = self.canvas.create_window(0,0, 
                                                     window=self.interior, 
                                                     anchor=tk.NW)
@@ -521,16 +656,16 @@ class VerticallyScrollableFrame(tk.Frame):
                                       width=self.canvas.winfo_width())
         
 
-class ScrollableFrame(tk.Frame):
+class ScrollableFrame(ttk.Frame):
     # http://tkinter.unpythonic.net/wiki/VerticalScrolledFrame
     
     def __init__(self, master):
-        tk.Frame.__init__(self, master, bg=CALM_WHITE)
+        ttk.Frame.__init__(self, master)
         
         # set up scrolling with canvas
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         hscrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self.canvas = tk.Canvas(self, bg=CALM_WHITE, bd=0, highlightthickness=0,
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0,
                            yscrollcommand=vscrollbar.set)
         vscrollbar.config(command=self.canvas.yview)
         hscrollbar.config(command=self.canvas.xview)
@@ -545,7 +680,7 @@ class ScrollableFrame(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.interior = tk.Frame(self.canvas, bg=CALM_WHITE)
+        self.interior = ttk.Frame(self.canvas)
         self.interior.columnconfigure(0, weight=1)
         self.interior.rowconfigure(0, weight=1)
         self.interior_id = self.canvas.create_window(0,0, 
@@ -786,12 +921,6 @@ def askstring(title, prompt, **kw):
     return d.result
 
 
-def get_current_notebook_tab_widget(notebook):    
-    for child in notebook.winfo_children():
-        if str(child) == str(notebook.select()):
-            return child
-        
-    return None
 
 def create_string_var(value, modification_listener=None):
     """Creates a tk.StringVar with "modified" attribute
@@ -888,31 +1017,6 @@ def remove_line_numbers(s):
     
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
     
-def get_main_background():
-    main_background_option = get_workbench().get_option("theme.main_background")
-    if main_background_option is not None:
-        warnings.warn("theme.main_background is deprecated use style.configure('.', ...) instead")
-        return main_background_option
-    elif get_style_option(".", "background"):
-        return get_style_option(".", "background")
-    else:    
-        theme = ttk.Style().theme_use()
-        
-        if theme == "clam":
-            return "#dcdad5"
-        elif theme == "aqua":
-            return "systemSheetBackground"
-        else: 
-            return "SystemButtonFace"
-    
-def get_dialog_background_color():    
-    theme = ttk.Style().theme_use()
-    
-    if theme == "aqua":
-        return "systemSheetBackground"
-    else: 
-        return "SystemButtonFace"
-
 def center_window(win, master=None):
     # looks like it doesn't take window border into account
     win.update_idletasks()
@@ -1006,7 +1110,7 @@ class SubprocessDialog(tk.Toplevel):
         text_font["size"] = int(text_font["size"] * 0.9)
         text_font["family"] = "Courier" if running_on_mac_os() else "Courier New"
         text_frame = tktextext.TextFrame(main_frame, read_only=True, horizontal_scrollbar=False,
-                                         background=get_main_background(),
+                                         background=lookup_style_option("TFrame", "background"),
                                          font=text_font,
                                          wrap="word")
         text_frame.grid(row=0, column=0, sticky=tk.NSEW, padx=15, pady=15)
@@ -1138,7 +1242,7 @@ def get_tk_version_info():
             result.append(0)
     return tuple(result) 
 
-def get_style_options(style_name, default={}):
+def get_style_configuration(style_name, default={}):
     style = ttk.Style()
     result = style.configure(style_name)
     if result is None:
@@ -1148,10 +1252,18 @@ def get_style_options(style_name, default={}):
     
     
 
-def get_style_option(style_name, option_name, default=None):
+def lookup_style_option(style_name, option_name, default=None):
     style = ttk.Style()
-    setting = style.configure(style_name, option_name)
-    if setting not in [None, ""]:
-        return setting
+    setting = style.lookup(style_name, option_name)
+    if setting in [None, ""]:
+        return default
     else:
-        return default    
+        return setting
+        
+if __name__ == "__main__":
+    root = tk.Tk()
+    closa = ClosableNotebook(root)
+    closa.add(ttk.Button(closa, text="B1"), text="B1")
+    closa.add(ttk.Button(closa, text="B2"), text="B2")
+    closa.grid()
+    root.mainloop()

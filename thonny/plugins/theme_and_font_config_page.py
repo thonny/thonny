@@ -3,7 +3,7 @@ from tkinter import font as tk_font
 from tkinter import ttk
 
 from thonny.config_ui import ConfigurationPage
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.ui_utils import create_string_var
 import textwrap
 from thonny.codeview import CodeView
@@ -37,7 +37,8 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                         exportselection=False,
                                         textvariable=self._ui_theme_variable,
                                         state='readonly',
-                                        values=get_workbench().get_ui_theme_names())
+                                        height=15,
+                                        values=get_workbench().get_usable_ui_theme_names())
         self._ui_theme_combo.grid(row=2, column=0, sticky="nsew", padx=(0, 10))
         
         ttk.Label(self, text="Syntax theme").grid(row=1, column=1, sticky="w", pady=(10, 0))
@@ -45,6 +46,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                         exportselection=False,
                                         textvariable=self._syntax_theme_variable,
                                         state='readonly',
+                                        height=15,
                                         values=get_workbench().get_syntax_theme_names())
         self._syntax_theme_combo.grid(row=2, column=1, sticky="nsew", padx=(0, 10))
         
@@ -53,6 +55,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         self._family_combo = ttk.Combobox(self,
                                           exportselection=False,
                                           state='readonly',
+                                          height=15,
                                           textvariable=self._family_variable,
                                           values=self._get_families_to_show())
         self._family_combo.grid(row=2, column=2, sticky=tk.NSEW, padx=(0,10))
@@ -62,7 +65,8 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                         exportselection=False,
                                         textvariable=self._size_variable,
                                         state='readonly',
-                                        values=[str(x) for x in range(3,73)])
+                                        height=15,
+                                      values=[str(x) for x in range(3,73)])
         self._size_combo.grid(row=2, column=3, sticky="nsew")
         
         
@@ -76,8 +80,9 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
                                 )
         
         self._preview_codeview.set_content(textwrap.dedent("""
-            if bar is None:
-                print("This is not", 33)
+            def foo(bar):
+                if bar is None: # This is a comment
+                    print("The answer is", 33)
             
             unclosed_string = "blah, blah
             """).strip())
@@ -105,7 +110,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             get_workbench().set_option("view.syntax_theme", self._original_syntax_theme)
             get_workbench().set_option("view.editor_font_size", self._original_size)
             get_workbench().set_option("view.editor_font_family", self._original_family)
-            get_workbench().update_themes()
+            get_workbench().reload_themes()
             get_workbench().update_fonts()
             
                 
@@ -114,7 +119,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         get_workbench().set_option("view.syntax_theme", self._syntax_theme_variable.get())
         get_workbench().set_option("view.editor_font_size", int(self._size_variable.get()))
         get_workbench().set_option("view.editor_font_family", self._family_variable.get())
-        get_workbench().update_themes()
+        get_workbench().reload_themes()
         get_workbench().update_fonts()
     
     def _get_families_to_show(self):

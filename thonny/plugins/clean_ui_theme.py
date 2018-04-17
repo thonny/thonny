@@ -1,150 +1,141 @@
-from thonny.globals import get_workbench
+from thonny import get_workbench
 from thonny.misc_utils import running_on_windows
 
-"""
-Darkula
-    Main dark: #282828
-    Lighter dark (sidebar): #3C3F41
-    Scrollbar: #595B5D
-    List header: #677896
-"""
 
-def clean(window_background="#1D291A",
-          code_background="#273627",
-          detail_background="#2D452F",
-          foreground="#9E9E9E",
-          disabled_foreground="#485C49"):
+def clean(frame_background,
+          text_background,
+          normal_detail,
+          high_detail,
+          low_detail,
+          normal_foreground,
+          high_foreground,
+          low_foreground,
+          custom_menubar=None,
+          ):
     
-    # https://wiki.tcl.tk/37973
+    # https://wiki.tcl.tk/37973 (Changing colors)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkClamTheme.c
-    BG = window_background
-    TEXT_BG = code_background
-    ACTIVE_TAB = detail_background
-    FG = foreground
-    SELBG = "#2D3D2D"
-    SCROLL_BG = ACTIVE_TAB
-    SCBORDER = TEXT_BG
     
-    focus_border = "lightgreen"
-    nonfocus_border = "#3A5234"
     
-    lighter_detail_background = "#3C6E40"
-    darker_detail_background = "#33402F"
     
-    return {
+    settings = {
         "." : {
             "configure" : {
-                "foreground" : foreground,
-                "background" : window_background,
-                "lightcolor" : window_background,
-                "darkcolor"  : window_background,
-                "bordercolor" : window_background,
-            }
+                "foreground" : normal_foreground,
+                "background" : frame_background,
+                "lightcolor" : frame_background,
+                "darkcolor"  : frame_background,
+                "bordercolor" : frame_background,
+                "selectbackground"  : high_detail,
+                "selectforeground"  : high_foreground,
+            },
+            
+            "map" : {
+                "foreground" : [("disabled", low_foreground),
+                                ("active", high_foreground)],
+                "background" : [("disabled", frame_background), 
+                                ("active", high_detail)],
+                "selectbackground" : [("!focus", low_detail)],
+                "selectforeground" : [("!focus", normal_foreground)]
+            },
         },
         
         "TNotebook" : {
             # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkNotebook.c
             "configure" : {
-                #"background" : window_background,
-                #??"lightcolor"=BG,
-                #??"darkcolor"=BG,
-                "bordercolor" : detail_background,
-                #tabposition="w",              # Where to place tabs
+                "bordercolor" : normal_detail,
                 "tabmargins" : [1, 0, 0, 0],     # Margins around tab row
-                #tabplacement="w",             # How to pack tabs within tab row
-                #mintabwidth=20,               # Minimum tab width
-                #padding=[40, 40, 40, 40],     # External padding
-                #relief="flat",                # not sure whether this does anything
-                #borderwidth=0,                # ...
-                #expand=[17, 17, 17, 17]        #
             }
         },
         
         "ButtonNotebook.TNotebook" : {
             "configure" : {
-                "bordercolor" : window_background,
+                "bordercolor" : frame_background,
             }
         },
         
         "AutomaticNotebook.TNotebook" : {
             "configure" : {
-                "bordercolor" : window_background,
+                "bordercolor" : frame_background,
             }
         },
         
         "TNotebook.Tab" : {
             "configure" : {
-                "background" : BG,
-                "lightcolor" : "gray",
-                "darkcolor" : "red",
-                #bordercolor="#4F634A",
-                "bordercolor" : detail_background,
+                "background" : frame_background,
+                "bordercolor" : normal_detail,
                 "borderwidth" : 10,
             },
             
             "map" : { 
-                "background" : [("selected", detail_background), ("!selected", window_background)],
-                "bordercolor" : [("selected", window_background), ("!selected", detail_background)],
-                #lightcolor=[("selected", "#333333"), ("!selected", "#333333")],
-                #lightcolor=[("selected", "white"), ("!selected", "white")],
-                "lightcolor" : [("selected", detail_background), ("!selected", window_background)],
-                #expand=[("selected", [1,2,13,4])] # can be used to make selected tab bigger 
+                "background" : [("selected", normal_detail),
+                                ("!selected", "!active", frame_background),
+                                ("active", "!selected", high_detail)],
+                "bordercolor" : [("selected", frame_background),
+                                 ("!selected", normal_detail)],
+                "lightcolor" : [("selected", normal_detail),
+                                ("!selected", frame_background)],
                      
             }
         },
         
         "Treeview" : {
             "configure" : {
-                "background" : code_background, # TODO: should be set in parent
+                "background" : text_background,
+                "borderwidth" : 0,
+                "relief" : "flat",
             },
             "map" : {
-                "background" : [('selected', SELBG)],
-                "foreground" : [('selected', FG)],
+                "background" : [('selected', 'focus', high_detail),
+                                ('selected', '!focus', low_detail)],
+                "foreground" : [('selected', 'focus', high_foreground),
+                                ('selected', '!focus', normal_foreground)],
             }
         },
         
         "Treeview.Heading" : {
         # https://stackoverflow.com/questions/32051780/how-to-edit-the-style-of-a-heading-in-treeview-python-ttk
             "configure" : {
-                "background" : ACTIVE_TAB,
-                "lightcolor" : ACTIVE_TAB,
+                "background" : normal_detail,
+                "lightcolor" : normal_detail,
                 "borderwidth" : 0
             },
             "map" : {
-                "background" : [("!active", ACTIVE_TAB), ("active", ACTIVE_TAB)]
+                "background" : [("!active", normal_detail),
+                                ("active", normal_detail)]
             }
         },
         
         "TEntry" : {
             "configure" : {
-                "fieldbackground" : code_background,
-                "lightcolor" : nonfocus_border,
-                "insertcolor" : foreground,
+                "fieldbackground" : text_background,
+                "lightcolor" : normal_detail,
+                "insertcolor" : normal_foreground,
             },
             "map" : {
-                "background" : [("readonly", code_background)],
+                "background" : [("readonly", text_background)],
                 "bordercolor" : [],
-                "lightcolor" : [("focus", focus_border)],
+                "lightcolor" : [("focus", high_detail)],
                 "darkcolor" : []
             }
         },
         
         "TCombobox" : {
             "configure" : {
-                "background" : code_background,
-                "fieldbackground" : code_background,
-                "selectbackground" : code_background,
-                "lightcolor" : code_background,
-                "darkcolor" : code_background,
-                "bordercolor" : code_background,
-                "arrowcolor" : foreground,
-                "foreground" : foreground,
-                "seleftforeground" : foreground,
+                "background" : text_background,
+                "fieldbackground" : text_background,
+                "selectbackground" : text_background,
+                "lightcolor" : text_background,
+                "darkcolor" : text_background,
+                "bordercolor" : text_background,
+                "arrowcolor" : normal_foreground,
+                "foreground" : normal_foreground,
+                "seleftforeground" : normal_foreground,
                 #"padding" : [12,2,12,2],
             },
             "map" : {
-                "background" : [("active", code_background)],
+                "background" : [("active", text_background)],
                 "fieldbackground" : [],
                 "selectbackground" : [],
                 "selectforeground" : [],
@@ -153,30 +144,21 @@ def clean(window_background="#1D291A",
             }
         },
         
-        "__ComboboxListbox" : {
-            "configure" : {
-                "relief" : "solid",
-                "borderwidth" : 15,
-                "background" : code_background,
-                "foreground" : foreground,
-            }
-        },
-        
         "TScrollbar" : {
             "configure" : {
                 "gripcount" : 0,
                 "borderwidth" : 0,
                 "relief" : "flat",
-                "darkcolor" : SCROLL_BG,
-                "lightcolor" : SCROLL_BG,
-                "bordercolor" : SCBORDER,
-                "troughcolor" : TEXT_BG,
+                "darkcolor" : normal_detail,
+                "lightcolor" : normal_detail,
+                "bordercolor" : text_background,
+                "troughcolor" : text_background,
                 #arrowcolor="white"
             },
             "map" : {
-                "background" : [("!disabled", SCROLL_BG), ("disabled", SCROLL_BG)],
-                "darkcolor" : [("!disabled", TEXT_BG), ("disabled", TEXT_BG)],
-                "lightcolor" : [("!disabled", TEXT_BG), ("disabled", TEXT_BG)],
+                "background" : [("!disabled", normal_detail), ("disabled", normal_detail)],
+                "darkcolor" : [("!disabled", text_background), ("disabled", text_background)],
+                "lightcolor" : [("!disabled", text_background), ("disabled", text_background)],
             }
         },
         
@@ -198,100 +180,205 @@ def clean(window_background="#1D291A",
             ],
             "map" : {
                 # Make disabled Hor Scrollbar invisible
-                "background" : [("disabled", BG), ("!disabled", SCROLL_BG)],
-                "troughcolor" : [("disabled", BG)],
-                "bordercolor" : [("disabled", BG)],
-                "darkcolor" : [("disabled", BG)],
-                "lightcolor" : [("disabled", BG)],
+                "background" : [("disabled", frame_background), ("!disabled", normal_detail)],
+                "troughcolor" : [("disabled", frame_background)],
+                "bordercolor" : [("disabled", frame_background)],
+                "darkcolor" : [("disabled", frame_background)],
+                "lightcolor" : [("disabled", frame_background)],
             }
         },
         
         "TButton" : {
             "configure" : {
-                "background" : detail_background,
-                "foreground" : foreground,
+                "background" : normal_detail,
+                "foreground" : normal_foreground,
             },
             
             "map" : {
-                "foreground" : [("disabled", disabled_foreground),
-                                ("alternate", "white")],
-                "background" : [("pressed", darker_detail_background),
-                                ("active", lighter_detail_background)],
-                "bordercolor": [("alternate", "#1B211C")]           
+                "foreground" : [("disabled", low_foreground),
+                                ("alternate", high_foreground)],
+                "background" : [("pressed", low_detail),
+                                ("active", high_detail)],
+                "bordercolor": [("alternate", high_detail)]           
+            }
+        },
+        
+        "TCheckbutton" : {
+            "configure" : {
+                "indicatorbackground" : normal_foreground,
+            },
+            "map" : {
+                "indicatorbackground" : [("pressed", high_foreground),
+                                         ("!disabled", "alternate", high_foreground),
+                                         ("disabled", "alternate", low_detail),
+                                         ("disabled", low_detail)]
+            }
+        },
+        
+        "TRadiobutton" : {
+            "configure" : {
+                "indicatorbackground" : normal_foreground,
+            },
+            "map" : {
+                "indicatorbackground" : [("pressed", high_foreground),
+                                         ("!disabled", "alternate", high_foreground),
+                                         ("disabled", "alternate", low_detail),
+                                         ("disabled", low_detail)]
             }
         },
         
         "Toolbutton" : {
             "configure" : {
-                "background" : BG
+                "background" : frame_background
             },
             
             "map" : {
-                "background": [("disabled", BG)]
-            }
-        },
-        
-        "__TFrame" : {
-            "configure"  : {
-                "bordercolor" : "red",
-                "lightcolor" : "green",
-                "darkcolor" : "blue",
-                "borderwidth" : 17,
+                "background": [("disabled", frame_background),
+                               ("active", high_detail)]
             }
         },
         
         "TLabel" : {
             "configure"  : {
-                "foreground" : FG
+                "foreground" : normal_foreground
+            }
+        },
+        
+        "Url.TLabel" : {
+            "configure"  : {
+                "foreground" : high_foreground,
+            }
+        },
+        
+        "TScale" : {
+            "configure" : {
+                "background" : high_detail,
+                "troughcolor" : normal_detail,
+                "lightcolor" : high_detail,
+                "darkcolor" : high_detail,
+                #"bordercolor" : "red",
+                #"sliderlength" : 40,
+                #"sliderthickness" : 60,
+                "gripcount" : 0,
+            },
+            "map" : {
+                "background" : [],
+                "troughcolor" : [],
+            }
+        },
+        
+        "TScale.slider" : {
+            "configure" : {
+                "background" : "red",
+                "troughcolor" : "yellow",
+                "lightcolor" : "green",
+                "darkcolor" : "white",
+                "sliderlength" : 40,
+                "sliderthickness" : 60,
+            }
+        },
+        
+        
+        "Red.TFrame" : {
+            "configure" : {
+                "background" : "red",
+                "padding" : 99
+            }
+        },
+        
+        "ViewBody.TFrame" : {
+            "configure" : {
+                "background" : text_background,
+            }
+        },
+        
+        "ViewToolbar.TFrame" : {
+            "configure" : {
+                "background" : normal_detail,
+            }
+        },
+        
+        "ViewTab.TLabel" : {
+            "configure" : {
+                "background" : normal_detail,
+                "padding" : [5, 0],
+            },
+        },
+        
+        "ViewToolbar.TLabel" : {
+            "configure" : {
+                "background" : normal_detail,
+                "padding" : [5, 0],
+            },
+        },
+        
+        "Active.ViewTab.TLabel" : {
+            "configure" : {
+                "foreground" : high_foreground,
+                #"font" : "BoldTkDefaultFont",
+                "background" : text_background
+            }
+        },
+        
+        "Inactive.ViewTab.TLabel" : {
+            "configure" : {
+                "foreground" : normal_foreground,
+                "font" : "UnderlineTkDefaultFont",
+            },
+            "map" : {
+                "background" : [("hover", high_detail)]
             }
         },
         
         "Text" : {
             "configure" : {
-                "background" : code_background,
-                "foreground" : foreground
+                "background" : text_background,
+                "foreground" : normal_foreground
             },
         },
         
-        "TextMargin" : {
+        "Gutter" : {
             "configure" : {
-                "background" : darker_detail_background,
-                "foreground" : "#466148" 
+                "background" : low_detail,
+                "foreground" : low_foreground 
             }
         },
         
         "Listbox" : {
             "configure" : {
-                "background" : code_background,
-                "foreground" : foreground,
-                "highlightbackground" : nonfocus_border,
-                "highlightcolor" : focus_border,
+                "background" : text_background,
+                "foreground" : normal_foreground,
+                "selectbackground" : high_detail,
+                "selectforeground" : high_foreground,
+                "disabledforeground" : low_foreground,
+                "highlightbackground" : normal_detail,
+                "highlightcolor" : high_detail,
                 "highlightthickness" : 1,
             },
         },
-        
         "Menubar" : {
             "configure" : {
                 # Regular, system-provided Windows menubar doesn't allow changing colors.
                 # custom=True replaces it with a custom-built menubar.
-                "custom" : running_on_windows(), 
-                "background" : BG,
-                "foreground" : FG,
-                "activebackground" : FG, 
-                "activeforeground" : BG, 
+                "custom" : running_on_windows() if custom_menubar is None else custom_menubar, 
+                "background" : frame_background,
+                "foreground" : normal_foreground,
+                "activebackground" : normal_foreground, 
+                "activeforeground" : frame_background,
+                "relief" : "flat",
             }
         },
         
         "Menu" : {
             "configure" : {
-                "background" : ACTIVE_TAB,
-                "foreground" : "white",
-                "selectcolor" : "white",
+                "background" : normal_detail,
+                "foreground" : high_foreground,
+                "selectcolor" : normal_foreground,
                 "borderwidth" : 0,
-                "activebackground" : FG,
-                "activeforeground" : BG,
+                "activebackground" : normal_foreground,
+                "activeforeground" : frame_background,
                 "activeborderwidth" : 0,
-                #relief="flat"
+                "relief" : "flat"
             }
         },
         
@@ -304,6 +391,56 @@ def clean(window_background="#1D291A",
     }
     
     
+    return settings
+    
+    
+def load_plugin():
+    get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", 
+        clean(frame_background="#252525",
+              text_background="#2d2d2d",
+              normal_detail="#3D3D3D",
+              high_detail="#6E6E6E",
+              low_detail="#404040",
+              normal_foreground="#9f9f9f",
+              high_foreground="#eeeeee",
+              low_foreground="#595959",
+        )
+    )
 
-def load_early_plugin():
-    get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", clean)
+    get_workbench().add_ui_theme("Clean Dark Green", "Enhanced Clam", 
+        clean(frame_background="#1D291A",
+              text_background="#273627",
+              normal_detail="#2D452F",
+              high_detail="#3C6E40",
+              low_detail="#33402F",
+              normal_foreground="#9E9E9E",
+              high_foreground="#eeeeee",
+              low_foreground="#485C49",
+        )
+    )
+
+    get_workbench().add_ui_theme("Clean Dark Blue", "Enhanced Clam", 
+        clean(frame_background="#1A1C29",
+              text_background="#272936",
+              normal_detail="#2D3345",
+              high_detail="#3C436E",
+              low_detail="#2F3640",
+              normal_foreground="#9E9E9E",
+              high_foreground="#eeeeee",
+              low_foreground="#484A5C",
+        )
+    )
+
+    get_workbench().add_ui_theme("Clean Sepia", "Enhanced Clam", 
+        clean(frame_background="#E8E7DC",
+              text_background="#F7F6F0",
+              normal_detail="#DEDCC8",
+              high_detail="#eeebe7",
+              low_detail="#D4D0B8",
+              normal_foreground="#222222",
+              high_foreground="#000000",
+              low_foreground="#999999",
+              custom_menubar=0,
+        )
+    )
+

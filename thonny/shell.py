@@ -8,9 +8,9 @@ import traceback
 from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
-from thonny.ui_utils import EnhancedTextWithLogging, get_style_option
+from thonny.ui_utils import EnhancedTextWithLogging
 import tkinter as tk
-from thonny.globals import get_workbench, get_runner
+from thonny import get_workbench, get_runner
 from thonny.codeview import PythonText
 from thonny.tktextext import index2line
 import logging
@@ -23,7 +23,7 @@ class ShellView (ttk.Frame):
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         self.text = ShellText(self,
-                            font=get_workbench().get_font("EditorFont"),
+                            font="EditorFont",
                             #foreground="white",
                             #background="#666666",
                             highlightthickness=0,
@@ -126,7 +126,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.bind("<KeyPress>", self._text_key_press, True)
         self.bind("<KeyRelease>", self._text_key_release, True)
         
-        prompt_font = get_workbench().get_font("BoldEditorFont")
+        prompt_font = tk.font.nametofont("BoldEditorFont")
         vert_spacing = 10
         io_indent = 16
         code_indent = prompt_font.measure(">>> ")
@@ -176,7 +176,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._try_submit_input()
     
     def _handle_input_request(self, msg):
-        self["font"] = get_workbench().get_font("IOFont") # otherwise the cursor is of toplevel size
         self.focus_set()
         self.mark_set("insert", "end")
         self.tag_remove("sel", "1.0", tk.END)
@@ -184,8 +183,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
 
     def _handle_program_output(self, msg):
-        self["font"] = get_workbench().get_font("IOFont")
-        
         # mark first line of io
         if self._before_io:
             self._insert_text_directly(msg.data[0], ("io", msg.stream_name, "vertically_spaced"))
@@ -198,7 +195,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
             
     def _handle_toplevel_result(self, msg):
-        self["font"] = get_workbench().get_font("EditorFont")
         self._before_io = True
         if hasattr(msg, "error"):
             self._insert_text_directly(msg.error + "\n", ("toplevel", "stderr"))
