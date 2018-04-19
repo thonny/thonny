@@ -938,7 +938,7 @@ class FancyTracer(Executor):
         else:
             # see whether current_root_expression needs to be updated
             assert len(self._past_messages) > 0
-            prev_msg_frame = self._past_messages[-1]["stack"][-1]
+            prev_msg_frame = self._past_messages[-1][0]["stack"][-1]
             prev_event = prev_msg_frame.last_event
             prev_root_expression = prev_msg_frame.current_root_expression
 
@@ -981,17 +981,19 @@ class FancyTracer(Executor):
             cmd = self._current_command
 
             tester = getattr(self, "_cmd_" + cmd.command + "_completed")
-            cmd_complete = tester(frame, event, args, focus, cmd)
+            cmd_complete = tester(frame, event, args, focus, cmd, progress)
 
             self._debug("Current command:", self._current_command)
             self._debug("Command complete:", cmd_complete)
 
             if cmd_complete:
-                self._send_and_fetch_message(self._past_messages[progress])
+                self._past_messages[progress][1] = True
+                self._send_and_fetch_message(self._past_messages[progress][0])
 
-            if self._current_command.command == "back":
+            if self._current_command.command == "undo":
                 if progress > 0:
                     self._debug("Progress decreased by 1:", progress)
+                    self._past_messages[progress][1] = False
                     progress -= 1
             else:
                 if progress < len(self._past_messages) - 1:
@@ -1006,7 +1008,7 @@ class FancyTracer(Executor):
 
 
     def _get_frame_from_history(self, progress):
-        return self._past_messages[progress]["stack"][-1]
+        return self._past_messages[progress][0]["stack"][-1]
 
 
     def _save_debugger_progress_message(self, frame, value, command):
@@ -1037,7 +1039,7 @@ class FancyTracer(Executor):
             exception_msg = None
 
         self._debug("Saved command:", command)
-        self._past_messages.append(
+        self._past_messages.append([(
             self._vm.create_message("DebuggerProgress",
                                     command=command, #self._current_command,#.command,
                                     stack=self._export_stack(),
@@ -1045,7 +1047,8 @@ class FancyTracer(Executor):
                                     exception_msg=exception_msg,
                                     exception_lower_stack_description=exception_lower_stack_description,
                                     value=value
-                                    ))
+                                    )),
+            False])
 
 
     def _send_and_fetch_message(self, message):
@@ -1156,7 +1159,7 @@ class FancyTracer(Executor):
 
 
 
-    def _cmd_exec_completed(self, frame, event, args, focus, cmd):
+    def _cmd_exec_completed(self, frame, event, args, focus, cmd, progress):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
@@ -1170,23 +1173,26 @@ class FancyTracer(Executor):
 
         self._debug("Frame ids:", frame_id, cmd.frame_id)
 
-        # We're in the same frame
         if frame_id == cmd.frame_id:
+            # We're in the same frame
             if "before_" in cmd.state:
                 if focus.contains_smaller_eq(cmd.focus) and "after_" in event \
-                        and (("_expression" in cmd.state and "_expression" in event)
-                             or ("_statement" in cmd.state and "_statement" in event)):
+                    and (("_expression" in cmd.state and "_expression" in event)
+                         or ("_statement" in cmd.state and "_statement" in event)):
                     self._debug("Exec: cmd called from before_ state")
                     return True
                 else:
+                    # Keep running
                     return False
             elif "after_" in cmd.state:
                 if focus != cmd.focus or "before_" in event \
                         or "_expression" in cmd.state and "_statement" in event \
                         or "_statement" in cmd.state and "_expression" in event:
+                    # The state has changed, complete
                     self._debug("Exec: cmd called from after_ state")
                     return True
                 else:
+                    # Keep running
                     return False
         else:
             # We're in another frame
@@ -1201,13 +1207,13 @@ class FancyTracer(Executor):
                 return True
 
 
-    def _cmd_step_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_completed(self, frame, event, args, focus, cmd, progress):
         self._debug("step has been chosen")
         return True
 
-    def _cmd_back_completed(self, frame, event, args, focus, cmd):
-        self._debug("back has been chosen")
-        return True
+    def _cmd_undo_completed(self, frame, event, args, focus, cmd, progress):
+        self._debug("undo has been chosen")
+        return self._past_messages[progress][1]
 
     #def _cmd_back_over_completed(self, frame, event, args, focus, cmd):
     #    return True
@@ -1216,7 +1222,7 @@ class FancyTracer(Executor):
         self._debug("run to before has been chosen")
         return event.startswith("before")
 
-    def _cmd_out_completed(self, frame, event, args, focus, cmd):
+    def _cmd_out_completed(self, frame, event, args, focus, cmd, progress):
         """Complete current frame"""
         self._debug("out has been chosen")
         if type(frame) == FrameInfo:
@@ -1230,7 +1236,7 @@ class FancyTracer(Executor):
             or frame_id == cmd.frame_id and focus.contains_smaller(cmd.focus)
         )
 
-    def _cmd_line_completed(self, frame, event, args, focus, cmd):
+    def _cmd_line_completed(self, frame, event, args, focus, cmd, progress):
         self._debug("line has been chosen")
         if type(frame) == FrameInfo:
             frame_id = frame.id

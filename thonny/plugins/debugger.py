@@ -46,16 +46,10 @@ class Debugger:
             image_filename="run.step_over.gif",
             include_in_toolbar=True)
 
-        get_workbench().add_command("step_back", "run", "Step back",
-            self._cmd_step_back,
+        get_workbench().add_command("undo_command", "run", "Undo command",
+            self._cmd_undo_command,
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F9>",
-            group=30)
-
-        get_workbench().add_command("step_back_over", "run", "Step back over",
-            self._cmd_step_back_over,
-            tester=self._cmd_stepping_commands_enabled,
-            default_sequence="<F10>",
             group=30)
 
         get_workbench().add_command("step_into", "run", "Step into",
@@ -128,11 +122,8 @@ class Debugger:
         
         self._check_issue_debugger_command("exec")
 
-    def _cmd_step_back(self):
-        self._check_issue_debugger_command("back")
-
-    def _cmd_step_back_over(self):
-        self._check_issue_debugger_command("back_over")
+    def _cmd_undo_command(self):
+        self._check_issue_debugger_command("undo")
         
     def _cmd_step_out(self):
         self._check_issue_debugger_command("out")
