@@ -441,8 +441,10 @@ class VM:
             info = {'id' : cmd.object_id,
                     'repr' : repr(value),
                     'type' : str(type(value)),
+                    'full_type_name' : str(type(value)).replace("<class '", "").replace("'>", "").strip(),
                     'type_id' : id(type(value)),
                     'attributes': self.export_variables(attributes)}
+                
             
             if isinstance(value, _io.TextIOWrapper):
                 self._add_file_handler_info(value, info)
