@@ -441,6 +441,7 @@ class VM:
             info = {'id' : cmd.object_id,
                     'repr' : repr(value),
                     'type' : str(type(value)),
+                    'full_type_name' : str(type(value)).replace("<class '", "").replace("'>", "").strip(),
                     'type_id' : id(type(value)),
                     'attributes': self.export_variables(attributes)}
 

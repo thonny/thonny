@@ -298,6 +298,12 @@ def clean(frame_background,
             }
         },
         
+        "ViewToolbar.Toolbutton" : {
+            "configure" : {
+                "background" : normal_detail,
+            }
+        },
+        
         "ViewTab.TLabel" : {
             "configure" : {
                 "background" : normal_detail,

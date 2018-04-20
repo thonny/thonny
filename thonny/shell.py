@@ -577,6 +577,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # Ctrl should underline values
         # TODO: this underline may confuse, when user is just copying on pasting
         # try to add this underline only when mouse is over the value
+        
+        # TODO: take theme into account
         """
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
             self.tag_configure("value", foreground="DarkBlue", underline=1)
@@ -584,9 +586,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _text_key_release(self, event):
         # Remove value underlining
+        # TODO: take theme into account
+        """
         if event.keysym in ("Control_L", "Control_R", "Command"):  # TODO: check in Mac
             self.tag_configure("value", foreground="DarkBlue", underline=0)
-
+        """
+        
     def _clear_shell(self):
         end_index = self.index("output_end")
         self.direct_delete("1.0", end_index)
