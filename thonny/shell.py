@@ -104,23 +104,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._command_history = [] # actually not really history, because each command occurs only once
         self._command_history_current_index = None
         
-        
-        """
-        self.margin = tk.Text(self,
-                width = 4,
-                padx = 4,
-                highlightthickness = 0,
-                takefocus = 0,
-                bd = 0,
-                #font = self.font,
-                cursor = "dotbox",
-                background = '#e0e0e0',
-                foreground = '#999999',
-                #state='disabled'
-                )
-        self.margin.grid(row=0, column=0)
-        """
-        
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
         self.bind("<KeyPress>", self._text_key_press, True)
@@ -139,6 +122,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
         
         self.tag_configure("vertically_spaced", spacing1=vert_spacing)
+        
+        self.tag_configure("suppressed_io", elide=True)
         
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
         # input starts, output_end shows the end of last output,
@@ -160,6 +145,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
+        get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
         
         self._init_menu()
     
@@ -230,10 +216,25 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     self.active_object_tags.add(object_tag)
         
         self.mark_set("output_end", self.index("end-1c"))
+        self._update_visible_io(None)
         self._insert_prompt()
         self._try_submit_input() # Trying to submit leftover code (eg. second magic command)
         self.see("end")
-            
+    
+    def _handle_debugger_progress(self, msg):
+        if msg.is_new:
+            self._update_visible_io(None)
+        else:
+            self._update_visible_io(sum(msg.stream_symbol_counts.values()))
+    
+    def _update_visible_io(self, num_visible_chars):
+        self.tag_remove("suppressed_io", "1.0", "end")
+        if num_visible_chars is not None:
+            start_index = self.index("command_io_start+" + str(num_visible_chars) + "c")
+            self.tag_add("suppressed_io", start_index, "end")
+        
+        self.see("end")
+    
     def _insert_prompt(self):
         # if previous output didn't put a newline, then do it now
         if not self.index("output_insert").endswith(".0"):
@@ -508,6 +509,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         ToplevelCommand(command="execute_source",
                                         source=text_to_be_submitted))
                 
+                # remember the place where the output of this command started 
+                self.mark_set("command_io_start", "output_insert")
+                self.mark_gravity("command_io_start", "left")
             except:
                 get_workbench().report_exception()
                 self._insert_prompt()
