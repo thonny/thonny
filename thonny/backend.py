@@ -660,6 +660,7 @@ class VM:
         def __init__(self, vm, target_stream):
             self._vm = vm
             self._target_stream = target_stream
+            self._processed_symbol_count = 0
 
         def isatty(self):
             return True
@@ -679,6 +680,7 @@ class VM:
                 self._vm._enter_io_function()
                 if data != "":
                     self._vm.send_message(self._vm.create_message("ProgramOutput", stream_name=self._stream_name, data=data))
+                    self._processed_symbol_count += len(data)
             finally:
                 self._vm._exit_io_function()
 
@@ -699,6 +701,7 @@ class VM:
                 while True:
                     cmd = self._vm._fetch_command()
                     if isinstance(cmd, InputSubmission):
+                        self._processed_symbol_count += len(cmd.data)
                         return cmd.data
                     elif isinstance(cmd, InlineCommand):
                         self._vm.handle_command(cmd)
@@ -1038,6 +1041,13 @@ class FancyTracer(Executor):
 
         if len(self._past_messages) > 0:
             self._past_messages[-1][0]["is_new"] = False
+
+        symbols_by_streams = {
+            "stdin": sys.stdin._processed_symbol_count,
+            "stdout": sys.stdout._processed_symbol_count,
+            "stderr": sys.stderr._processed_symbol_count
+        }
+
         self._past_messages.append([(
             self._vm.create_message("DebuggerProgress",
                                     command=self._current_command,#.command,
@@ -1047,7 +1057,8 @@ class FancyTracer(Executor):
                                     exception_msg=exception_msg,
                                     exception_lower_stack_description=exception_lower_stack_description,
                                     value=value,
-                                    is_new=True
+                                    is_new=True,
+                                    stream_symbol_counts=symbols_by_streams
                                     )),
             False])  # Flag for identifying if the message has been sent to front-end
 
