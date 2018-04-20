@@ -2,8 +2,8 @@ from setuptools import setup, find_packages
 import os.path
 import sys
 
-if sys.version_info < (3,4):
-    raise RuntimeError("Thonny requires Python 3.4 or later")
+if sys.version_info < (3,5):
+    raise RuntimeError("Thonny requires Python 3.5 or later")
 
 setupdir = os.path.dirname(__file__)
 
@@ -53,7 +53,7 @@ setup(
       keywords="IDE education debugger",
       platforms=["Windows", "macOS", "Linux"],
       install_requires=requirements,
-      python_requires=">=3.4",
+      python_requires=">=3.5",
       packages=find_packages(),
       package_data={'': ['VERSION',  'res/*'],
                     'thonny.plugins.help' : ['*.rst']},
