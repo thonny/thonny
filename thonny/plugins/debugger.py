@@ -45,7 +45,13 @@ class Debugger:
             group=30,
             image_filename="run.step_over.gif",
             include_in_toolbar=True)
-        
+
+        get_workbench().add_command("undo_command", "run", "Undo command",
+            self._cmd_undo_command,
+            tester=self._cmd_stepping_commands_enabled,
+            default_sequence="<F9>",
+            group=30)
+
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
             tester=self._cmd_stepping_commands_enabled,
@@ -82,10 +88,12 @@ class Debugger:
     def _check_issue_debugger_command(self, command, **kwargs):
         cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
-        
+
+        if get_workbench().get_option("general.debug_mode"):
+            print("LAST DEBUGGER COMMAND:", cmd.command, cmd)
+
         state = get_runner().get_state() 
-        if (state == "waiting_debugger_command"
-            or getattr(cmd, "automatic", False) and state == "running"):
+        if (state == "waiting_debugger_command"):
             logging.debug("_check_issue_debugger_command: %s", cmd)
             
             # tell VM the state we are seeing
@@ -113,6 +121,9 @@ class Debugger:
         # and later I ask it to run to the beginning of new statement/expression.
         
         self._check_issue_debugger_command("exec")
+
+    def _cmd_undo_command(self):
+        self._check_issue_debugger_command("undo")
         
     def _cmd_step_out(self):
         self._check_issue_debugger_command("out")
@@ -158,54 +169,37 @@ class Debugger:
     def _handle_debugger_progress(self, msg):
         self._last_progress_message = msg
         
-        if self._should_skip_event(msg):
-            self._check_issue_debugger_command("run_to_before", automatic=True)
-        else:
-            main_frame_id = msg.stack[0].id
-            
-            # clear obsolete main frame visualizer
-            if (self._main_frame_visualizer 
-                and self._main_frame_visualizer.get_frame_id() != main_frame_id):
-                self._main_frame_visualizer.close()
-                self._main_frame_visualizer = None
-                
-            if not self._main_frame_visualizer:
-                self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
-                
-            self._main_frame_visualizer.update_this_and_next_frames(msg)
+        main_frame_id = msg.stack[0].id
         
-        # advance automatically in some cases
-        event = msg.stack[-1].last_event
-        args = msg.stack[-1].last_event_args
-
+        # clear obsolete main frame visualizer
+        if (self._main_frame_visualizer 
+            and self._main_frame_visualizer.get_frame_id() != main_frame_id):
+            self._main_frame_visualizer.close()
+            self._main_frame_visualizer = None
+            
+        if not self._main_frame_visualizer:
+            self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
+            
+        self._main_frame_visualizer.update_this_and_next_frames(msg)
+        
         if msg.exception:
             showerror("Exception",
-                      # Following is clever but noisy 
                       msg.exception_lower_stack_description.lstrip() + 
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
-            self._check_issue_debugger_command("step", automatic=True)
-            
-        elif (event == "after_expression" 
-            and "last_child" in args["node_tags"]
-            and "child_of_statement" in args["node_tags"]):
-            # This means we're done with the expression, so let's speed up a bit.
-            self._check_issue_debugger_command("step", automatic=True)
-            # Next event will be before_statement_again
-
-                        
-            
     
     def _should_skip_event(self, msg):
+        return False
         frame_info = msg.stack[-1]
         event = frame_info.last_event
         tags = frame_info.last_event_args["node_tags"]
+        time = msg.time
         
-        if event == "after_statement":
+        if event == "after_statement" and time != "past":
             return True
         
         # TODO: consult also configuration
-        if "call_function" in tags:
+        if "call_function" in tags and time != "past":
             return True
         else:
             return False
@@ -230,12 +224,6 @@ class FrameVisualizer:
         self._source = frame_info.source
         self._expression_box = ExpressionBox(text_frame)
         self._next_frame_visualizer = None
-        
-        # TODO: rely on tags configured in SyntaxText
-        self._text.tag_configure('focus', get_syntax_options_for_tag("active_focus"))
-        self._text.tag_configure('exception', get_syntax_options_for_tag("exception_focus"))
-        
-        self._text.tag_raise("exception", "focus")
         self._text.set_read_only(True)
     
     def close(self):
@@ -273,25 +261,27 @@ class FrameVisualizer:
         
     
     def _remove_focus_tags(self):
-        self._text.tag_remove("focus", "0.0", "end")
-        self._text.tag_remove("exception", "0.0", "end")
+        for name in ["exception_focus", "active_focus", 
+                     "completed_focus", "suspended_focus"]:
+            self._text.tag_remove(name, "0.0", "end")
      
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
         
-        # TODO: if focus is in expression, then find and highlight closest
-        # statement
         if "statement" in frame_info.last_event:
-            self._remove_focus_tags()
-            self._tag_range(frame_info.last_event_focus, "focus", True)
             if msg.exception is not None:
-                self._tag_range(frame_info.last_event_focus, "exception", True)
-            
-            # TODO: use different tags?
-            self._text.tag_configure('focus', get_syntax_options_for_tag("active_focus"))
+                stmt_tag = "exception_focus"
+            elif frame_info.last_event.startswith("before"):
+                stmt_tag = "active_focus"
+            else:
+                stmt_tag = "completed_focus"
         else:
-            self._text.tag_configure('focus', get_syntax_options_for_tag("suspended_focus"))
+            assert "expression" in frame_info.last_event
+            stmt_tag = "suspended_focus"
             
+        self._remove_focus_tags()
+        self._tag_range(frame_info.current_statement, stmt_tag)
+        
         self._expression_box.update_expression(msg, frame_info)
 
     def _find_this_and_next_frame(self, stack):
@@ -306,7 +296,7 @@ class FrameVisualizer:
             raise AssertionError("Frame doesn't exist anymore")
         
     
-    def _tag_range(self, text_range, tag, see=False):
+    def _tag_range(self, text_range, tag):
         first_line, first_col, last_line = self._get_text_range_block(text_range)
         
         for lineno in range(first_line, last_line+1):
@@ -389,8 +379,8 @@ class ExpressionBox(tk.Text):
         tk.Text.__init__(self, codeview.winfo_toplevel(), **opts)
         self._codeview = codeview
         
-        self._main_range = None
         self._last_focus = None
+        self._last_root_expression = None
         
         self.tag_configure("value", get_syntax_options_for_tag("value"))
         self.tag_configure('before', get_syntax_options_for_tag("active_focus"))
@@ -403,42 +393,26 @@ class ExpressionBox(tk.Text):
     def update_expression(self, msg, frame_info):
         focus = frame_info.last_event_focus
         event = frame_info.last_event
-        
-        if event in ("before_expression", "before_expression_again"):
-            # (re)load stuff
-            if self._main_range is None or focus.not_smaller_eq_in(self._main_range):
-                self._load_expression(frame_info.filename, focus)
-                self._update_position(focus)
-                self._update_size()
-                
-            self._highlight_range(focus, event, msg.exception)
+        print("FRI", event, focus, len(frame_info.current_evaluations))
+        if frame_info.current_root_expression is not None:
+            self._load_expression(frame_info.filename, frame_info.current_root_expression)
             
-        
-        elif event == "after_expression":
-            logging.debug("EV: after_expression %s", msg)
-            self._replace(focus, msg.value)
+            for subrange, value in frame_info.current_evaluations:
+                self._replace(subrange, value)
+            
+            if "expression" in event:
+                # Event may be also after_statement_again
+                self._highlight_range(focus, event, msg.exception)
+                
+            self._update_position(frame_info.current_root_expression)
             self._update_size()
-                
             
-                
-        elif (event == "before_statement_again"
-              and self._main_range is not None # TODO: shouldn't need this 
-              and self._main_range.is_smaller_eq_in(focus)):
-            # we're at final stage of executing parent statement 
-            # (eg. assignment after the LHS has been evaluated)
-            # don't close yet
-            opts = get_syntax_options_for_tag("completed_focus")
-            opts["background"] = ""
-            self.tag_configure('after', opts)
-        
-        elif event == "exception":
-            "TODO:"   
-        
         else:
             # hide and clear on non-expression events
             self.clear_debug_view()
 
         self._last_focus = focus
+        self._last_root_expression = frame_info.current_root_expression
         
         
     def get_focused_text(self):
@@ -453,15 +427,17 @@ class ExpressionBox(tk.Text):
         self.place_forget()
         self._main_range = None
         self._last_focus = None
+        self._clear_expression()
+    
+    def _clear_expression(self):
         for tag in self.tag_names():
             self.tag_remove(tag, "1.0", "end")
             
-        for mark in self.mark_names():
-            self.mark_unset(mark)
+        self.mark_unset(*self.mark_names())
+        self.delete("1.0", "end")
+            
             
     def _replace(self, focus, value):
-        
-        self.tag_configure('after', get_syntax_options_for_tag("completed_focus"))
         start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
         end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
         
@@ -474,27 +450,28 @@ class ExpressionBox(tk.Text):
             value_str = shorten_repr(value["repr"], 100)
         
         object_tag = "object_" + str(value["id"])
-        self.insert(start_mark, value_str, ('value', 'after', object_tag))
+        self.insert(start_mark, value_str, ('value', object_tag))
         if misc_utils.running_on_mac_os():
             sequence = "<Command-Button-1>"
         else:
             sequence = "<Control-Button-1>"
         self.tag_bind(object_tag, sequence,
                       lambda _: get_workbench().event_generate("ObjectSelect", object_id=value["id"]))
+        
+        #print("AFTER 9", repr(self.get("1.0", "end")))
     
     def _load_expression(self, filename, text_range):
         with tokenize.open(filename) as fp:
             whole_source = fp.read()
             
         root = ast_utils.parse_source(whole_source, filename)
-        self._main_range = text_range
-        assert self._main_range is not None
         main_node = ast_utils.find_expression(root, text_range)
         
         source = ast_utils.extract_text_range(whole_source, text_range)
         logging.debug("EV.load_exp: %s", (text_range, main_node, source))
         
-        self.delete("1.0", "end")
+        self._clear_expression()
+        
         self.insert("1.0", source)
         
         # create node marks
@@ -515,12 +492,15 @@ class ExpressionBox(tk.Text):
                 start_mark = self._get_mark_name(node.lineno, node.col_offset) 
                 if not start_mark in self.mark_names():
                     self.mark_set(start_mark, index1)
+                    #print("Creating mark", start_mark, index1)
                     self.mark_gravity(start_mark, tk.LEFT)
                 
                 end_mark = self._get_mark_name(node.end_lineno, node.end_col_offset) 
                 if not end_mark in self.mark_names():
                     self.mark_set(end_mark, index2)
+                    #print("Creating mark", end_mark, index2)
                     self.mark_gravity(end_mark, tk.RIGHT)
+                
                     
     def _get_mark_name(self, lineno, col_offset):
         return str(lineno) + "_" + str(col_offset)
@@ -677,4 +657,3 @@ class ModuleLoadDialog(FrameDialog):
 def load_plugin():
     Debugger()
     
-        
