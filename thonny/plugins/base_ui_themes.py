@@ -518,6 +518,51 @@ def windows():
                     "highlightthickness" : 1,
                 },
             },
+            "ViewBody.TFrame" : {
+                "configure" : {
+                    "background" : "SystemButtonFace", # to create the fine line below toolbar
+                }
+            },
+            
+            "ViewToolbar.TFrame" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                }
+            },
+            
+            "ViewToolbar.Toolbutton" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                }
+            },
+            
+            "ViewTab.TLabel" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                    "padding" : [5, 0],
+                },
+            },
+            
+            "ViewToolbar.TLabel" : {
+                "configure" : {
+                    "background" : "SystemWindow",
+                    "padding" : [5, 0],
+                },
+            },
+            
+            "Active.ViewTab.TLabel" : {
+                "configure" : {
+                    #"font" : "BoldTkDefaultFont",
+                    "relief" : "sunken",
+                    "borderwidth" : 1,
+                }
+            },
+            
+            "Inactive.ViewTab.TLabel" : {
+                "configure" : {
+                    "font" : "UnderlineTkDefaultFont",
+                },
+            },
         }
     ]
 

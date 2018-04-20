@@ -344,7 +344,6 @@ class FunctionInspector(TextFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
         TextFrame.__init__(self, master, read_only=True)
-        self.config(borderwidth=1)
         self.text.configure(background="white")
 
     def applies_to(self, object_info):
