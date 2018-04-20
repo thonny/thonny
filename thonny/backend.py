@@ -900,7 +900,7 @@ class FancyTracer(Executor):
             self._unhandled_exception = exc
             if self._is_interesting_exception(frame):
                 self._save_debugger_progress_message(frame , None, self._current_command)
-                self._send_and_fetch_message(self._past_messages[-1])
+                self._send_and_fetch_next_debugger_progress_message(self._past_messages[-1])
 
         # TODO: support line event in non-instrumented files
         elif event == "line":
@@ -954,26 +954,24 @@ class FancyTracer(Executor):
         if value is not None:
             self._custom_stack[-1].current_evaluations.append((focus, value))
 
+        # Save the current command and frame data
         self._save_debugger_progress_message(frame, value, self._current_command)
 
-        try:
-            # Select the correct method according to the command
-            self._handle_message_selection()
-        except Exception as e:
-            self._debug(traceback.format_exc())
+        # Select the correct method according to the command
+        self._handle_message_selection()
 
 
     def _handle_message_selection(self):
         """
         For handling reversible debugging
-        :return:
+        :return: Let Python run to the next progress event
         """
-        self._debug("Initiated stepping in History")
 
+        # Choose the most recently saved message
         progress = len(self._past_messages) - 1
-        direction = "present"
 
         while progress < len(self._past_messages):
+            # Get the message data
             current_frame = self._get_frame_from_history(progress)
             frame = current_frame
             event = current_frame.last_event
@@ -981,31 +979,30 @@ class FancyTracer(Executor):
             focus = current_frame.last_event_focus
             cmd = self._current_command
 
+            # Has the command completed?
             tester = getattr(self, "_cmd_" + cmd.command + "_completed")
             cmd_complete = tester(frame, event, args, focus, cmd, progress)
 
-            self._debug("Current command:", self._current_command)
-            self._debug("Command complete:", cmd_complete)
-
             if cmd_complete:
-                self._past_messages[progress][1] = True
-                self._send_and_fetch_message(self._past_messages[progress][0])
+                # Last command has completed, send message and fetch the next command
+                self._past_messages[progress][1] = True  # Add "shown to user" flag
+                self._send_and_fetch_next_debugger_progress_message(self._past_messages[progress][0])
 
             if self._current_command.command == "undo":
+                # Undo has been chosen, move the pointer backwards
                 if progress > 0:
-                    self._debug("Progress decreased by 1:", progress)
-                    self._past_messages[progress][1] = False
+                    self._past_messages[progress][1] = False  # Remove "shown to user" flag
                     progress -= 1
             else:
+                # Other progress events move the pointer forward
                 if progress < len(self._past_messages) - 1:
-                    self._debug("Progress increased by 1:", progress)
+                    # Move the pointer forward (in past)
                     progress += 1
                 else:
-                    self._debug("Exiting history browsing for", self._current_command.command, "continuation")
+                    # No more messages saved, continue running to the next progress event
                     break
 
-        self._debug("Progress by the end:", progress)
-        self._debug("Stepping in history ended")
+        # Saved messages are no longer enough, let Python run to the next progress event
 
 
     def _get_frame_from_history(self, progress):
@@ -1052,7 +1049,7 @@ class FancyTracer(Executor):
             False])
 
 
-    def _send_and_fetch_message(self, message):
+    def _send_and_fetch_next_debugger_progress_message(self, message):
         self._vm.send_message(message)
 
         self._debug("Waiting for command")
@@ -1063,9 +1060,7 @@ class FancyTracer(Executor):
         self._respond_to_inline_commands()
         assert isinstance(self._current_command, DebuggerCommand)
 
-        # Return and let Python run to next progress event
-
-
+    """
     def _report_state_and_fetch_next_message(self, frame, stack, value=None):
         self._debug("Completed command: ", self._current_command)
 
@@ -1107,7 +1102,7 @@ class FancyTracer(Executor):
         assert isinstance(self._current_command, DebuggerCommand)
 
         # Return and let Python run to next progress event
-
+    """
 
     def _try_interpret_as_again_event(self, frame, original_event, original_args):
         """
@@ -1158,21 +1153,17 @@ class FancyTracer(Executor):
         lines, _ = inspect.getsourcelines(obj)
         return "".join(lines), lineno
 
-
-
     def _cmd_exec_completed(self, frame, event, args, focus, cmd, progress):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
         """
-        self._debug("exec has been chosen")
 
+        # Make sure the correct frame_id is selected
         if type(frame) == FrameInfo:
             frame_id = frame.id
         else:
             frame_id = id(frame)
-
-        self._debug("Frame ids:", frame_id, cmd.frame_id)
 
         if frame_id == cmd.frame_id:
             # We're in the same frame
@@ -1180,7 +1171,6 @@ class FancyTracer(Executor):
                 if focus.contains_smaller_eq(cmd.focus) and "after_" in event \
                     and (("_expression" in cmd.state and "_expression" in event)
                          or ("_statement" in cmd.state and "_statement" in event)):
-                    self._debug("Exec: cmd called from before_ state")
                     return True
                 else:
                     # Keep running
@@ -1189,8 +1179,7 @@ class FancyTracer(Executor):
                 if focus != cmd.focus or "before_" in event \
                         or "_expression" in cmd.state and "_statement" in event \
                         or "_statement" in cmd.state and "_expression" in event:
-                    # The state has changed, complete
-                    self._debug("Exec: cmd called from after_ state")
+                    # The state has changed, command has completed
                     return True
                 else:
                     # Keep running
@@ -1207,25 +1196,18 @@ class FancyTracer(Executor):
                 self._debug("Exec wrong frame")
                 return True
 
-
     def _cmd_step_completed(self, frame, event, args, focus, cmd, progress):
-        self._debug("step has been chosen")
         return True
 
     def _cmd_undo_completed(self, frame, event, args, focus, cmd, progress):
-        self._debug("undo has been chosen")
+        # Check if the selected message has been previously sent to front-end
         return self._past_messages[progress][1]
 
-    #def _cmd_back_over_completed(self, frame, event, args, focus, cmd):
-    #    return True
-
     def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
-        self._debug("run to before has been chosen")
         return event.startswith("before")
 
     def _cmd_out_completed(self, frame, event, args, focus, cmd, progress):
         """Complete current frame"""
-        self._debug("out has been chosen")
         if type(frame) == FrameInfo:
             frame_id = frame.id
         else:
@@ -1238,7 +1220,6 @@ class FancyTracer(Executor):
         )
 
     def _cmd_line_completed(self, frame, event, args, focus, cmd, progress):
-        self._debug("line has been chosen")
         if type(frame) == FrameInfo:
             frame_id = frame.id
         else:
@@ -1247,7 +1228,6 @@ class FancyTracer(Executor):
                 and os.path.normcase(frame.filename) == os.path.normcase(cmd.target_filename)
                 and focus.lineno == cmd.target_lineno
                 and (focus != cmd.focus or frame_id != cmd.frame_id))
-
 
     def _frame_is_alive(self, frame_id):
         for frame in self._custom_stack:
