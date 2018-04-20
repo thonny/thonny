@@ -899,7 +899,7 @@ class FancyTracer(Executor):
 
             self._unhandled_exception = exc
             if self._is_interesting_exception(frame):
-                self._save_debugger_progress_message(frame , None, self._current_command)
+                self._save_debugger_progress_message(frame , None)
                 self._send_and_fetch_next_debugger_progress_message(self._past_messages[-1])
 
         # TODO: support line event in non-instrumented files
@@ -955,7 +955,7 @@ class FancyTracer(Executor):
             self._custom_stack[-1].current_evaluations.append((focus, value))
 
         # Save the current command and frame data
-        self._save_debugger_progress_message(frame, value, self._current_command)
+        self._save_debugger_progress_message(frame, value)
 
         # Select the correct method according to the command
         self._handle_message_selection()
@@ -1009,7 +1009,7 @@ class FancyTracer(Executor):
         return self._past_messages[progress][0]["stack"][-1]
 
 
-    def _save_debugger_progress_message(self, frame, value, command):
+    def _save_debugger_progress_message(self, frame, value):
         # Todo: Don't save messages that shouldnt be shown to user at any time.
         #if "call_function" in self._custom_stack[-1].last_event_args["node_tags"] or \
         #    self._custom_stack[-1].last_event == "after_statement":
@@ -1036,17 +1036,20 @@ class FancyTracer(Executor):
             exception_lower_stack_description = None
             exception_msg = None
 
-        self._debug("Saved command:", command)
+        if len(self._past_messages) > 0:
+            self._past_messages[-1][0]["is_new"] = False
         self._past_messages.append([(
             self._vm.create_message("DebuggerProgress",
-                                    command=command, #self._current_command,#.command,
+                                    command=self._current_command,#.command,
                                     stack=self._export_stack(),
+                                    globals=self._vm.export_variables(self._custom_stack[-1].system_frame.f_globals),
                                     exception=self._vm.export_value(self._unhandled_exception, True),
                                     exception_msg=exception_msg,
                                     exception_lower_stack_description=exception_lower_stack_description,
-                                    value=value
+                                    value=value,
+                                    is_new=True
                                     )),
-            False])
+            False])  # Flag for identifying if the message has been sent to front-end
 
 
     def _send_and_fetch_next_debugger_progress_message(self, message):
