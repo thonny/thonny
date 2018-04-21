@@ -92,6 +92,7 @@ class Workbench(tk.Tk):
         self._init_fonts()
         self._init_theming()
         self._init_window()
+        self._runner = Runner()
         
         self._load_plugins()
         
@@ -101,7 +102,7 @@ class Workbench(tk.Tk):
         
         self._init_containers()
         
-        self._init_runner()
+        self._start_runner()
         self._show_views()
         
         self._init_commands()
@@ -352,11 +353,10 @@ class Workbench(tk.Tk):
                          "Custom Python 3 interpreter",
                          running_config_page.CustomCPythonConfigurationPage)
         
-    def _init_runner(self):
+    def _start_runner(self):
         try:
-            runner = Runner()
-            thonny._runner = runner
-            runner.start()
+            thonny._runner = self._runner
+            self._runner.start()
         except:
             self.report_exception("Error when initializing backend")
     
