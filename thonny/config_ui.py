@@ -8,8 +8,9 @@ class ConfigurationDialog(tk.Toplevel):
     
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
-        width = 700
-        height = 400
+        scale = get_workbench().scale
+        width = scale(400) 
+        height = scale(250)
         left = max(int(get_workbench().winfo_x() + get_workbench().winfo_width()/2 - width/2), 0)
         top = max(int(get_workbench().winfo_y() + get_workbench().winfo_height()/2 - height/2), 0)
         self.geometry("%dx%d+%d+%d" % (width, height, left, top))

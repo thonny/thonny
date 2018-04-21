@@ -72,7 +72,6 @@ class Workbench(tk.Tk):
         self._destroying = False
         self.initializing = True
         tk.Tk.__init__(self, className="Thonny")
-        # self.tk.call("tk", "scaling", 2.0)
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
         self._images = set() # to avoid Python garbage collecting them
@@ -85,6 +84,10 @@ class Workbench(tk.Tk):
         
         self._init_configuration()
         self._init_diagnostic_logging()
+        
+        self._default_scaling_factor = self.tk.call("tk", "scaling")
+        self.update_scaling()
+        
         self._add_main_backends()
         self._init_fonts()
         self._init_theming()
@@ -137,6 +140,7 @@ class Workbench(tk.Tk):
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.expert_mode", False)
         self.set_default("general.debug_mode", False)
+        self.set_default("general.scaling", "auto")
         self.set_default("run.working_directory", os.path.expanduser("~"))
         
 
@@ -712,6 +716,19 @@ class Workbench(tk.Tk):
     def get_syntax_theme_names(self):
         return sorted(self._syntax_themes.keys())
     
+    def scale(self, value):
+        if isinstance(value, (int, float)):
+            # using int instead of round so that thin lines will stay
+            # one pixel even with scaling_factor 1.67
+            result = int(self._scaling_factor * value)
+            if result == 0 and value > 0:
+                # don't lose thin lines because of scaling
+                return 1
+            else:
+                return result
+        else:
+            raise NotImplementedError("Only numeric dimensions supported at the moment")
+    
     def _register_ui_theme_as_tk_theme(self, name):
         # collect settings from all ancestors
         total_settings = []
@@ -765,6 +782,8 @@ class Workbench(tk.Tk):
             # if menus have been initialized, ie. when theme is being changed
             for menu in self._menus.values():
                 menu.configure(get_style_configuration("Menu"))
+        
+        self.update_fonts()
         
     def _apply_syntax_theme(self, name):
         def get_settings(name):
@@ -913,9 +932,18 @@ class Workbench(tk.Tk):
         if not os.path.isabs(filename):
             filename = os.path.join(self.get_package_dir(), "res", filename)
             
-        img = tk.PhotoImage(tk_name, file=filename)
-        self._images.add(img)
-        return img
+        if self._scaling_factor >= 2.0:
+            img = tk.PhotoImage(file=filename)
+            # can't use zoom method, because this doesn't allow name
+            img2 = tk.PhotoImage(tk_name)
+            self.tk.call(img2, 'copy', img.name, '-zoom',
+                         int(self._scaling_factor), int(self._scaling_factor))
+            self._images.add(img2)
+            return img2
+        else:
+            img = tk.PhotoImage(tk_name, file=filename)
+            self._images.add(img)
+            return img
                       
     def show_view(self, view_id, set_focus=True):
         """View must be already registered.
@@ -1014,6 +1042,20 @@ class Workbench(tk.Tk):
         return (self._configuration_manager.has_option("view.HeapView.visible")
             and self.get_option("view.HeapView.visible"))
     
+    def update_scaling(self):
+        scaling = self.get_option("general.scaling")
+        if scaling == "auto":
+            self._scaling_factor = self.winfo_screenheight() / 460
+            
+            # if computed scaling is close enought to the default one, then use default
+            if (self._scaling_factor / self._default_scaling_factor > 0.9
+                and self._scaling_factor / self._default_scaling_factor < 1.1):
+                self._scaling_factor = self._default_scaling_factor
+        else:
+            self._scaling_factor = scaling
+            
+        self.tk.call("tk", "scaling", self._scaling_factor)
+    
     def update_fonts(self):
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
         editor_font_family = self.get_option("view.editor_font_family")
@@ -1037,10 +1079,10 @@ class Workbench(tk.Tk):
         style = ttk.Style()
         if running_on_mac_os():
             treeview_font_size = int(editor_font_size * 0.7 + 4)
-            rowheight = int(treeview_font_size*1.2 + 4 )
+            rowheight = int(treeview_font_size*1.2 + self.scale(4))
         else:
             treeview_font_size = int(editor_font_size * 0.7 + 2)
-            rowheight = int(treeview_font_size * 2.0 + 6)
+            rowheight = int(treeview_font_size * 2.5 + self.scale(3))
             
         tk_font.nametofont("TreeviewFont").configure(size=treeview_font_size)
         style.configure("Treeview", rowheight=rowheight)

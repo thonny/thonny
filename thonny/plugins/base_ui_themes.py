@@ -1,6 +1,10 @@
 from thonny import get_workbench
 from thonny.misc_utils import running_on_linux, running_on_windows
 
+def scale(value):
+    # dimensions in this module were designed with a 1.67 scale
+    return get_workbench().scale(value / 1.67)
+
 def _treeview_settings():
     light_blue = "#ADD8E6" 
     light_grey = "#D3D3D3"
@@ -38,7 +42,7 @@ def _menubutton_settings():
     return {
         "TMenubutton" : {
             "configure" : {
-                "padding" : 14
+                "padding" : scale(14)
             },
             "layout" : [
                 ('Menubutton.dropdown', {'side': 'right', 'sticky': 'ns'}),
@@ -55,7 +59,7 @@ def _paned_window_settings():
     return {
         "Sash" : {
             "configure" : {
-                "sashthickness" : 10
+                "sashthickness" : scale(10)
             }
         }
     }
@@ -112,7 +116,7 @@ def _button_notebook_settings():
                 "image", "img_close",
                 ("active", "pressed", "!disabled", "img_close_active"),
                 ("active", "!disabled", "img_close_active"), 
-                {"border" : 8, "sticky" : ''}                
+                {"border" : scale(8), "sticky" : ''}                
             )
         },
         "ButtonNotebook.TNotebook.Tab" : {
@@ -174,8 +178,8 @@ def clam():
         "TButton" : {
             "configure" : {
                 "anchor" : "center", 
-                "width" : 11, 
-                "padding" : 5, 
+                "width" : scale(11), 
+                "padding" : scale(5), 
                 "relief" : "raised"
             },
             "map" : {
@@ -191,7 +195,7 @@ def clam():
         "Toolbutton" : {
             "configure" : {
                 "anchor" : "center",
-                "padding" : 2,
+                "padding" : scale(2),
                 "relief" : "flat"
             },
             "map" : {
@@ -210,8 +214,8 @@ def clam():
         "TCheckbutton" : {
             "configure" : {
                 "indicatorbackground" : "#ffffff",
-                "indicatormargin" : [1, 1, 6, 1],
-                "padding" :  2,
+                "indicatormargin" : [scale(1), scale(1), scale(6), scale(1)],
+                "padding" :  scale(2),
             },
             "map" : {
                 "indicatorbackground" : [("pressed", frame),
@@ -225,8 +229,8 @@ def clam():
         "TRadiobutton" : {
             "configure" : {
                 "indicatorbackground" : "#ffffff",
-                "indicatormargin" : [1, 1, 6, 1],
-                "padding" :  2,
+                "indicatormargin" : [scale(1), scale(1), scale(6), scale(1)],
+                "padding" :  scale(2),
             },
             "map" : {
                 "indicatorbackground" : [("pressed", frame),
@@ -238,16 +242,16 @@ def clam():
         
         "TMenubutton" : {
             "configure" : {
-                "width" : 11,
-                "padding" : 5,
+                "width" : scale(11),
+                "padding" : scale(5),
                 "relief" : "raised"
             }
         },
         
         "TEntry" : {
             "configure" : {
-                "padding" : 1,
-                "insertwidth" : 1
+                "padding" : scale(1),
+                "insertwidth" : scale(1)
             },
             "map" : {
                 "background" : [("readonly", frame)],
@@ -259,8 +263,8 @@ def clam():
         
         "TCombobox" : {
             "configure" : {
-                "padding" : [4,2,2,2],
-                "insertwidth" : 1,
+                "padding" : [scale(4),scale(2),scale(2),scale(2)],
+                "insertwidth" : scale(1),
             },
             "map" : {
                 "background" : [("active", lighter),
@@ -275,14 +279,14 @@ def clam():
         "ComboboxPopdownFrame" : {
             "configure" : {
                 "relief" : "solid",
-                "borderwidth" : 1
+                "borderwidth" : scale(1)
             }
         },
         
         "TSpinbox" : {
             "configure" : {
-                "arrowsize" : 10,
-                "padding" : [2, 0, 10, 0],
+                "arrowsize" : scale(10),
+                "padding" : [scale(2), 0, scale(10), 0],
             },
             "map" : {
                 "background" : [("readonly", frame)],
@@ -292,10 +296,10 @@ def clam():
         
         "TNotebook.Tab" : {
             "configure" : {
-                "padding" : [6, 2, 6, 2]
+                "padding" : [scale(6), scale(2), scale(6), scale(2)]
             },
             "map" : {
-                "padding" : [("selected", [6, 4, 6, 2])],
+                "padding" : [("selected", [scale(6), scale(4), scale(6), scale(4)])],
                 "background" : [("selected", frame), 
                                 ("",        darker)],
                 "lightcolor" : [("selected", lighter), 
@@ -322,14 +326,14 @@ def clam():
             "configure" : {
                 "font" : "TkHeadingFont",
                 "relief" : "raised",
-                "padding" : [3, 3, 3, 3]
+                "padding" : [scale(3), scale(3), scale(3), scale(3)]
             }
         },
         
         "TLabelframe" : {
             "configure" : {
                 "labeloutside" : True,
-                "labelmargins" : [0, 0, 0, 4]
+                "labelmargins" : [0, 0, 0, scale(4)]
             }
         },
         
@@ -341,7 +345,7 @@ def clam():
         
         "Sash" : {
             "configure" : {
-                "sashthickness" : 6,
+                "sashthickness" : scale(6),
                 "gripcount" : 10
             }
         },
@@ -368,39 +372,39 @@ def xpnative():
         "TButton" : {
             "configure" : {
                 "anchor" : "center", 
-                "width" : 11, 
-                "padding" : [1, 1], 
+                "width" : scale(11), 
+                "padding" : [scale(1), scale(1)], 
             },
         },
         
         "Toolbutton" : {
             "configure" : {
-                "padding" :[4, 4],
+                "padding" :[scale(4), scale(4)],
             },
         },
         
         "TCheckbutton" : {
             "configure" : {
-                "padding" :  2,
+                "padding" :  scale(2),
             },
         },
         
         # TRadiobutton has same style as TCheckbutton
         "TRadiobutton" : {
             "configure" : {
-                "padding" :  2,
+                "padding" :  scale(2),
             },
         },
         
         "TMenubutton" : {
             "configure" : {
-                "padding" : [8, 4],
+                "padding" : [scale(8), scale(4)],
             }
         },
         
         "TEntry" : {
             "configure" : {
-                "padding" : [2, 2, 2, 4],
+                "padding" : [scale(2), scale(2), scale(2), scale(4)],
             },
             "map" : {
                 "selectbackground" : [("!focus", "SystemWindow")],
@@ -410,7 +414,7 @@ def xpnative():
         
         "TCombobox" : {
             "configure" : {
-                "padding" : 2,
+                "padding" : scale(2),
             },
             "map" : {
                 "selectbackground" : [("!focus", "SystemWindow")],
@@ -424,13 +428,13 @@ def xpnative():
         "ComboboxPopdownFrame" : {
             "configure" : {
                 "relief" : "solid",
-                "borderwidth" : 1
+                "borderwidth" : scale(1)
             }
         },
         
         "TSpinbox" : {
             "configure" : {
-                "padding" : [2, 0, 14, 0],
+                "padding" : [scale(2), 0, scale(14), 0],
             },
             "map" : {
                 "selectbackground" : [("!focus", "SystemWindow")],
@@ -440,13 +444,13 @@ def xpnative():
         
         "TNotebook" : {
             "configure" : {
-                "tabmargins" : [2, 2, 2, 0]
+                "tabmargins" : [scale(2), scale(2), scale(2), 0]
             }
         },
         
         "TNotebook.Tab" : {
             "map" : {
-                "expand" : [("selected", [2, 2, 2, 2])],
+                "expand" : [("selected", [scale(2), scale(2), scale(2), scale(2)])],
             }
         },
         
@@ -494,17 +498,17 @@ def windows():
                 "configure" : {
                     # With tabmargins I can get a gray line below tab, which separates
                     # tab content from label
-                    "tabmargins" : [2, 2, 2, 2]
+                    "tabmargins" : [scale(2), scale(2), scale(2), scale(2)]
                 }
             },
             "Tab" : {
                 "configure" : {
-                    "padding" : [3,1,3,0]
+                    "padding" : [scale(3),scale(1),scale(3),0]
                 }
             },
             "ButtonNotebook.TNotebook.Tab" : {
                 "configure" : {
-                    "padding" : (4,1,1,0)
+                    "padding" : (scale(4),scale(1),scale(1),0)
                 }
             },
             
@@ -515,7 +519,7 @@ def windows():
                     "disabledforeground" : "SystemGrayText",
                     "highlightbackground" : "SystemActiveBorder",
                     "highlightcolor" : "SystemActiveBorder",
-                    "highlightthickness" : 1,
+                    "highlightthickness" : scale(1),
                 },
             },
             "ViewBody.TFrame" : {
@@ -539,14 +543,14 @@ def windows():
             "ViewTab.TLabel" : {
                 "configure" : {
                     "background" : "SystemWindow",
-                    "padding" : [5, 0],
+                    "padding" : [scale(5), 0],
                 },
             },
             
             "ViewToolbar.TLabel" : {
                 "configure" : {
                     "background" : "SystemWindow",
-                    "padding" : [5, 0],
+                    "padding" : [scale(5), 0],
                 },
             },
             
@@ -554,7 +558,7 @@ def windows():
                 "configure" : {
                     #"font" : "BoldTkDefaultFont",
                     "relief" : "sunken",
-                    "borderwidth" : 1,
+                    "borderwidth" : scale(1),
                 }
             },
             
@@ -577,19 +581,36 @@ def enhanced_clam():
         _label_settings(),
         _button_notebook_settings(),
         {
-            "Tab" : {
-                "configure" : {
-                    "padding" : (40,1,0,0)
-                }
-            },
             "ButtonNotebook.Tab" : {
                 "configure" : {
-                    "padding" : (6,4,2,3)
+                    "padding" : (scale(6),scale(4),scale(2),scale(3))
                 }
             },
+            
             "TScrollbar" : {
                 "configure" : {
-                    "gripcount" : 0
+                    "gripcount" : 0,
+                    "arrowsize" : scale(14),
+                    #"arrowcolor" : "DarkGray"
+                    #"width" : 99 # no effect
+                }
+            },
+            
+            "TCombobox" : {
+                "configure" : {
+                    "arrowsize" : scale(14),
+                }
+            },
+                
+            "TCheckbutton" : {
+                "configure" : {
+                    "indicatorsize" : scale(12)
+                }
+            },
+            
+            "TRadiobutton" : {
+                "configure" : {
+                    "indicatorsize" : scale(12)
                 }
             },
             
@@ -600,7 +621,7 @@ def enhanced_clam():
                     "disabledforeground" : "#999999",
                     "highlightbackground" : "#4a6984",
                     "highlightcolor" : "#4a6984",
-                    "highlightthickness" : 1,
+                    "highlightthickness" : scale(1),
                 },
             },
         }
@@ -615,12 +636,12 @@ def enhanced_aqua():
         {
             "Tab" : {
                 "configure" : {
-                    "padding" : (4,1,0,0)
+                    "padding" : (scale(4),scale(1),0,0)
                 }
             },
             "ButtonNotebook.Tab" : {
                 "configure" : {
-                    "padding" : (4,1,1,3)
+                    "padding" : (scale(4),scale(1),scale(1),scale(3))
                 }
             }
         }
@@ -635,21 +656,21 @@ def load_plugin():
     # load all base themes
     for name in original_themes:
         if name == "clam":
-            settings = clam()
+            settings = clam
         elif name == "xpnative":
-            settings = xpnative()
+            settings = xpnative
         else:
             settings = {}
              
         get_workbench().add_ui_theme(name, None, settings)
     
-    get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam())
+    get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam)
     
     if "xpnative" in original_themes:
-        get_workbench().add_ui_theme("Windows", "xpnative", windows())
+        get_workbench().add_ui_theme("Windows", "xpnative", windows)
     
     if "aqua" in original_themes:
-        get_workbench().add_ui_theme("Enhanced Aqua", "aqua", enhanced_aqua())
+        get_workbench().add_ui_theme("Enhanced Aqua", "aqua", enhanced_aqua)
     
 
     if "Windows" in get_workbench().get_usable_ui_theme_names():

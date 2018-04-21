@@ -1,5 +1,6 @@
 from thonny import get_workbench
 from thonny.misc_utils import running_on_windows
+from thonny.ui_utils import scale
 
 
 def clean(frame_background,
@@ -45,7 +46,7 @@ def clean(frame_background,
             # https://github.com/tcltk/tk/blob/master/generic/ttk/ttkNotebook.c
             "configure" : {
                 "bordercolor" : normal_detail,
-                "tabmargins" : [1, 0, 0, 0],     # Margins around tab row
+                "tabmargins" : [scale(1), 0, 0, 0],     # Margins around tab row
             }
         },
         
@@ -65,7 +66,6 @@ def clean(frame_background,
             "configure" : {
                 "background" : frame_background,
                 "bordercolor" : normal_detail,
-                "borderwidth" : 10,
             },
             
             "map" : { 
@@ -205,25 +205,23 @@ def clean(frame_background,
         
         "TCheckbutton" : {
             "configure" : {
-                "indicatorbackground" : normal_foreground,
+                "indicatorforeground" : normal_foreground,
+                "indicatorbackground" : text_background,
             },
             "map" : {
-                "indicatorbackground" : [("pressed", high_foreground),
-                                         ("!disabled", "alternate", high_foreground),
-                                         ("disabled", "alternate", low_detail),
-                                         ("disabled", low_detail)]
+                "indicatorforeground" : [("disabled", "alternate", low_foreground),
+                                         ("disabled", low_foreground)]
             }
         },
         
         "TRadiobutton" : {
             "configure" : {
-                "indicatorbackground" : normal_foreground,
+                "indicatorforeground" : normal_foreground,
+                "indicatorbackground" : text_background,
             },
             "map" : {
-                "indicatorbackground" : [("pressed", high_foreground),
-                                         ("!disabled", "alternate", high_foreground),
-                                         ("disabled", "alternate", low_detail),
-                                         ("disabled", low_detail)]
+                "indicatorforeground" : [("disabled", "alternate", low_foreground),
+                                         ("disabled", low_foreground)]
             }
         },
         
@@ -273,18 +271,11 @@ def clean(frame_background,
                 "troughcolor" : "yellow",
                 "lightcolor" : "green",
                 "darkcolor" : "white",
-                "sliderlength" : 40,
-                "sliderthickness" : 60,
+                #"sliderlength" : 40,
+                #"sliderthickness" : 60,
             }
         },
         
-        
-        "Red.TFrame" : {
-            "configure" : {
-                "background" : "red",
-                "padding" : 99
-            }
-        },
         
         "ViewBody.TFrame" : {
             "configure" : {
@@ -314,7 +305,7 @@ def clean(frame_background,
         "ViewToolbar.TLabel" : {
             "configure" : {
                 "background" : normal_detail,
-                "padding" : [5, 0],
+                "padding" : [scale(4), 0],
             },
         },
         
@@ -390,8 +381,7 @@ def clean(frame_background,
         
         "CustomMenubarLabel.TLabel" : {
             "configure" : {
-                "space" : 70,
-                "padding" : [12,3,0,2]
+                "padding" : [scale(10),scale(2),0,scale(15)]
             }
         }
     }

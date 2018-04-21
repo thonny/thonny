@@ -472,7 +472,8 @@ class TreeFrame(ttk.Frame):
         if show_scrollbar:
             self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
         
-        self.tree = ttk.Treeview(self, columns=columns, displaycolumns=displaycolumns, 
+        self.tree = ttk.Treeview(self, columns=columns, 
+                                 displaycolumns=displaycolumns, 
                                  yscrollcommand=self.vert_scrollbar.set)
         self.tree['show'] = 'headings'
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
@@ -1259,6 +1260,9 @@ def lookup_style_option(style_name, option_name, default=None):
         return default
     else:
         return setting
+
+def scale(value):
+    return get_workbench().scale(value)
         
 if __name__ == "__main__":
     root = tk.Tk()
