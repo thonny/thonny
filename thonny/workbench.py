@@ -1047,9 +1047,10 @@ class Workbench(tk.Tk):
         if scaling == "auto":
             self._scaling_factor = self.winfo_screenheight() / 460
             
-            # if computed scaling is close enought to the default one, then use default
-            if (self._scaling_factor / self._default_scaling_factor > 0.9
-                and self._scaling_factor / self._default_scaling_factor < 1.1):
+            # if resolution is in a common range
+            # or computed scaling is close enought to the default one, then trust the default
+            if (460 <= self.winfo_screenheight() <= 1080
+                or 0.9 < (self._scaling_factor / self._default_scaling_factor) < 1.1):
                 self._scaling_factor = self._default_scaling_factor
         else:
             self._scaling_factor = scaling
