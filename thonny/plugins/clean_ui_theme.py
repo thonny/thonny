@@ -391,6 +391,8 @@ def clean(frame_background,
     
     
 def load_plugin():
+    dark_images = {"tab-close-active" : "tab-close-active-clam-dark"}
+    
     get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", 
         clean(frame_background="#252525",
               text_background="#2d2d2d",
@@ -400,7 +402,8 @@ def load_plugin():
               normal_foreground="#9f9f9f",
               high_foreground="#eeeeee",
               low_foreground="#595959",
-        )
+        ),
+        dark_images
     )
 
     get_workbench().add_ui_theme("Clean Dark Green", "Enhanced Clam", 
@@ -412,7 +415,8 @@ def load_plugin():
               normal_foreground="#9E9E9E",
               high_foreground="#eeeeee",
               low_foreground="#485C49",
-        )
+        ),
+        dark_images
     )
 
     get_workbench().add_ui_theme("Clean Dark Blue", "Enhanced Clam", 
@@ -424,7 +428,8 @@ def load_plugin():
               normal_foreground="#9E9E9E",
               high_foreground="#eeeeee",
               low_foreground="#484A5C",
-        )
+        ),
+        dark_images
     )
 
     get_workbench().add_ui_theme("Clean Sepia", "Enhanced Clam", 

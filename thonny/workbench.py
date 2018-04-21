@@ -76,7 +76,8 @@ class Workbench(tk.Tk):
         self._event_handlers = {}
         self._images = set() # to avoid Python garbage collecting them
         self._default_image_mapping = {} # to allow specify default alternative images
-        self._theme_image_mapping = {} # theme-based alternative images
+        self._image_mapping_by_theme = {} # theme-based alternative images
+        self._current_theme_name = None
         self._backends = {}
         self._commands = []
         self._view_records = {}
@@ -90,12 +91,12 @@ class Workbench(tk.Tk):
         self.update_scaling()
         
         self._add_main_backends()
-        self._init_fonts()
         self._init_theming()
         self._init_window()
         self._runner = Runner()
         
         self._load_plugins()
+        self._init_fonts()
         
         self.reload_themes()
         self._init_menu()
@@ -274,13 +275,6 @@ class Workbench(tk.Tk):
                 logging.exception("Failed loading plugin '" + module_name + "'")
     
     def _init_fonts(self):
-        # Remember original standard fonts so that it's possible to reset themes
-        std_fonts = {"TkDefaultFont", "TkTextFont", "TkFixedFont", "TkMenuFont", "TkHeadingFont",
-                     "TkCaptionFont", "TkSmallCaptionFont", "TkIconFont", "TkTooltipFont"}
-        self._original_font_specs = {
-            name : tk_font.nametofont(name).configure() for name in std_fonts
-        }
-        
         # set up editor and shell fonts
         self.set_default("view.io_font_family", 
                         "Courier" if running_on_mac_os() else "Courier New")
@@ -727,10 +721,14 @@ class Workbench(tk.Tk):
     def _register_ui_theme_as_tk_theme(self, name):
         # collect settings from all ancestors
         total_settings = []
+        total_images = {}
         temp_name = name
         while True:
-            parent, settings, _ = self._ui_themes[temp_name]
+            parent, settings, images = self._ui_themes[temp_name]
             total_settings.insert(0, settings)
+            for img_name in images:
+                total_images.setdefault(img_name, images[img_name])
+                 
             if parent is not None:
                 temp_name = parent
             else:
@@ -742,6 +740,11 @@ class Workbench(tk.Tk):
         # because the method actually doesn't take parent settings into account
         # (https://mail.python.org/pipermail/tkinter-discuss/2015-August/003752.html)
         self._style.theme_create(name, temp_name)
+        self._image_mapping_by_theme[name] = total_images
+        
+        # load images
+        self.get_image('tab-close', "img_close")
+        self.get_image('tab-close-active', "img_close_active")
         
         # apply settings starting from root ancestor
         for settings in total_settings:
@@ -755,11 +758,8 @@ class Workbench(tk.Tk):
                     self._style.theme_settings(name, subsettings)
             
     def _apply_ui_theme(self, name):
-        # (re)load images
-        self._theme_image_mapping = self._ui_themes[name][2]
-        self.get_image('tab-close', "img_close")
-        self.get_image('tab-close-active', "img_close_active")
         
+        self._current_theme_name = name
         if name not in self._style.theme_names():
             self._register_ui_theme_as_tk_theme(name)
         
@@ -924,8 +924,8 @@ class Workbench(tk.Tk):
     
     def get_image(self, filename, tk_name=None):
         
-        if filename in self._theme_image_mapping:
-            filename = self._theme_image_mapping[filename]
+        if (filename in self._image_mapping_by_theme[self._current_theme_name]):
+            filename = self._image_mapping_by_theme[self._current_theme_name][filename]
             
         if filename in self._default_image_mapping:
             filename = self._default_image_mapping[filename]

@@ -661,7 +661,9 @@ def load_plugin():
              
         get_workbench().add_ui_theme(name, None, settings)
     
-    get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam)
+    get_workbench().add_ui_theme("Enhanced Clam", "clam", enhanced_clam, 
+                                 {"tab-close" : "tab-close-clam",
+                                  "tab-close-active" : "tab-close-active-clam"})
     
     if "xpnative" in original_themes:
         get_workbench().add_ui_theme("Windows", "xpnative", windows)
