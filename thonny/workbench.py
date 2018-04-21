@@ -209,11 +209,7 @@ class Workbench(tk.Tk):
     
     def _init_icon(self):
         # Window icons
-        window_icons = self.get_option("theme.window_icons") 
-        if window_icons:
-            imgs = [self.get_image(filename) for filename in window_icons]
-            self.iconphoto(True, *imgs)
-        elif running_on_linux() and ui_utils.get_tk_version_info() >= (8,6):
+        if running_on_linux() and ui_utils.get_tk_version_info() >= (8,6):
             self.iconphoto(True, self.get_image("thonny.png"))
         else:
             icon_file = os.path.join(self.get_package_dir(), "res", "thonny.ico")
@@ -229,7 +225,7 @@ class Workbench(tk.Tk):
         
     def _init_menu(self):
         self.option_add('*tearOff', tk.FALSE)
-        if lookup_style_option("Menubar", "custom", False) == "True":
+        if lookup_style_option("Menubar", "custom", False):
             self._menubar = ui_utils.CustomMenubar(self)
             self._menubar.grid(row=0, sticky="nsew")
         else:
@@ -592,7 +588,7 @@ class Workbench(tk.Tk):
         else:
             _image = None
         
-        if _image and self.get_option("theme.icons_in_menus", True):
+        if _image and lookup_style_option("OPTIONS", "icons_in_menus", True):
             menu_image = _image
         elif flag_name: 
             # no image or black next to a checkbox
@@ -736,7 +732,7 @@ class Workbench(tk.Tk):
                 break
         
         assert temp_name in self._style.theme_names()
-        # only root-parent is relevant for theme_create,
+        # only root of the ancestors is relevant for theme_create,
         # because the method actually doesn't take parent settings into account
         # (https://mail.python.org/pipermail/tkinter-discuss/2015-August/003752.html)
         self._style.theme_create(name, temp_name)
@@ -758,7 +754,6 @@ class Workbench(tk.Tk):
                     self._style.theme_settings(name, subsettings)
             
     def _apply_ui_theme(self, name):
-        
         self._current_theme_name = name
         if name not in self._style.theme_names():
             self._register_ui_theme_as_tk_theme(name)
@@ -1123,11 +1118,9 @@ class Workbench(tk.Tk):
         button.pack(side=tk.LEFT)
         button.tester = tester 
         tooltip_text = command_label
-        if accelerator and self.get_option("theme.shortcuts_in_tooltips", True):
+        if accelerator and lookup_style_option("OPTIONS", "shortcuts_in_tooltips", default=True):
             tooltip_text += " (" + accelerator + ")"
-        create_tooltip(button, tooltip_text,
-                       **self.get_option("theme.tooltip_options", {'padx':3, 'pady':1})
-                       )
+        create_tooltip(button, tooltip_text)
         
     def _update_toolbar(self):
         for group_frame in self._toolbar.grid_slaves(0):

@@ -8,7 +8,7 @@ import traceback
 from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
-from thonny.ui_utils import EnhancedTextWithLogging
+from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration
 import tkinter as tk
 from thonny import get_workbench, get_runner
 from thonny.codeview import PythonText
@@ -150,7 +150,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._init_menu()
     
     def _init_menu(self):
-        self._menu = tk.Menu(self, tearoff=False)
+        self._menu = tk.Menu(self, tearoff=False,
+                             **get_style_configuration("Menu"))
         self._menu.add_command(label="Clear shell", command=self._clear_shell)
     
     def submit_command(self, cmd_line, tags):

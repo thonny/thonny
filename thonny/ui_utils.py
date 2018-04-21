@@ -289,7 +289,8 @@ class ClosableNotebook(ttk.Notebook):
         #self._check_update_style()
     
     def create_tab_menu(self):
-        menu = tk.Menu(self.winfo_toplevel(), tearoff=False)
+        menu = tk.Menu(self.winfo_toplevel(), tearoff=False,
+                       **get_style_configuration("Menu"))
         menu.add_command(label="Close", command=self._close_tab_from_menu)
         menu.add_command(label="Close others", command=self._close_other_tabs)
         menu.add_command(label="Close all", command=self.close_tabs)
@@ -889,15 +890,14 @@ class ToolTip(object):
         if tw:
             tw.destroy()
 
-def create_tooltip(widget, text,
-                   background="#ffffe0", relief=tk.SOLID, borderwidth=1, padx=1, pady=0,
-                   **kw):
-    options = kw.copy()
-    options["background"] = background
-    options["relief"] = relief
-    options["borderwidth"] = borderwidth
-    options["padx"] = padx
-    options["pady"] = pady
+def create_tooltip(widget, text, **kw):
+    options = get_style_configuration("Tooltip")
+    options.setdefault("background", "#ffffe0")
+    options.setdefault("relief", "solid")
+    options.setdefault("borderwidth", 1)
+    options.setdefault("padx", 1)
+    options.setdefault("pady", 0)
+    options.update(kw)
     
     toolTip = ToolTip(widget, options)
     def enter(event):
@@ -1258,6 +1258,10 @@ def lookup_style_option(style_name, option_name, default=None):
     setting = style.lookup(style_name, option_name)
     if setting in [None, ""]:
         return default
+    elif setting == "True":
+        return True
+    elif setting == "False":
+        return False
     else:
         return setting
 

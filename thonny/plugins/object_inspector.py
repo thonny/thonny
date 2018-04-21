@@ -89,9 +89,7 @@ class ObjectInspector(ttk.Frame):
                          style="ViewToolbar.Toolbutton", # TODO: does this cause problems in some Macs?
                          state=tk.NORMAL
                          )
-            ui_utils.create_tooltip(button, tooltip,
-                       **get_workbench().get_option("theme.tooltip_options", {'padx':3, 'pady':1})
-                       )
+            ui_utils.create_tooltip(button, tooltip)
             
             button.grid(row=0, column=col, sticky=tk.NE, padx=padx, pady=4)
             button.bind("<Button-1>", action)
