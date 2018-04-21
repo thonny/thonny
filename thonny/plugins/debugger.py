@@ -35,7 +35,7 @@ class Debugger:
             tester=self._cmd_debug_current_script_enabled,
             default_sequence="<Control-F5>",
             group=10,
-            image_filename="run.debug_current_script.gif",
+            image="debug-current-script",
             include_in_toolbar=True)
         
         get_workbench().add_command("step_over", "run", "Step over",
@@ -43,7 +43,7 @@ class Debugger:
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F6>",
             group=30,
-            image_filename="run.step_over.gif",
+            image="step-over",
             include_in_toolbar=True)
 
         get_workbench().add_command("undo_command", "run", "Undo command",
@@ -57,7 +57,7 @@ class Debugger:
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F7>",
             group=30,
-            image_filename="run.step_into.gif",
+            image="step-into",
             include_in_toolbar=True)
         
         get_workbench().add_command("step_out", "run", "Step out",
@@ -65,7 +65,7 @@ class Debugger:
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F8>",
             group=30,
-            image_filename="run.step_out.gif",
+            image="step-out",
             include_in_toolbar=True)
         
         get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
@@ -73,7 +73,7 @@ class Debugger:
             tester=self._cmd_run_to_cursor_enabled,
             default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
             group=30,
-            image_filename="run.run_to_cursor.gif",
+            image="run-to-cursor",
             include_in_toolbar=False)
 
     

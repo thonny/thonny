@@ -75,7 +75,8 @@ class Workbench(tk.Tk):
         tk.Tk.report_callback_exception = self._on_tk_exception
         self._event_handlers = {}
         self._images = set() # to avoid Python garbage collecting them
-        self._image_mapping = {} # to allow specify different images in a theme
+        self._default_image_mapping = {} # to allow specify default alternative images
+        self._theme_image_mapping = {} # theme-based alternative images
         self._backends = {}
         self._commands = []
         self._view_records = {}
@@ -96,7 +97,6 @@ class Workbench(tk.Tk):
         
         self._load_plugins()
         
-        self._init_images()
         self.reload_themes()
         self._init_menu()
         
@@ -273,11 +273,6 @@ class Workbench(tk.Tk):
             except:
                 logging.exception("Failed loading plugin '" + module_name + "'")
     
-    def _init_images(self):
-        self.get_image('tab_close.gif', "img_close")
-        self.get_image('tab_close_active.gif', "img_close_active")
-        
-                                
     def _init_fonts(self):
         # Remember original standard fonts so that it's possible to reset themes
         std_fonts = {"TkDefaultFont", "TkTextFont", "TkFixedFont", "TkMenuFont", "TkHeadingFont",
@@ -558,7 +553,7 @@ class Workbench(tk.Tk):
                     accelerator=None,
                     group=99,
                     position_in_group="end",
-                    image_filename=None,
+                    image=None,
                     include_in_toolbar=False,
                     bell_when_denied=True):
         
@@ -598,18 +593,18 @@ class Workbench(tk.Tk):
                 
             dispatch(None)
         
-        if image_filename:
-            image = self.get_image(image_filename)
+        if image:
+            _image = self.get_image(image)
         else:
-            image = None
+            _image = None
         
-        if image and self.get_option("theme.icons_in_menus", True):
-            menu_image = image
+        if _image and self.get_option("theme.icons_in_menus", True):
+            menu_image = _image
         elif flag_name: 
             # no image or black next to a checkbox
             menu_image = None
         else:
-            menu_image = self.get_image ("16x16_blank.gif")
+            menu_image = self.get_image ("16x16-blank")
         
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
@@ -630,7 +625,7 @@ class Workbench(tk.Tk):
         
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
-            self._add_toolbar_button(image, command_label, accelerator, handler, tester,
+            self._add_toolbar_button(_image, command_label, accelerator, handler, tester,
                 toolbar_group)
         
     
@@ -696,14 +691,14 @@ class Workbench(tk.Tk):
             if not getattr(config_page_constructor, "backend_name", None):
                 config_page_constructor.backend_name = name
     
-    def add_ui_theme(self, name, parent, settings):
+    def add_ui_theme(self, name, parent, settings, images={}):
         if name in self._ui_themes:
             warn("Overwriting theme '%s'" % name)
         
-        self._ui_themes[name] = (parent, settings)
+        self._ui_themes[name] = (parent, settings, images)
     
     def add_syntax_theme(self, name, parent, settings):
-        if name in self._ui_themes:
+        if name in self._syntax_themes:
             warn("Overwriting theme '%s'" % name)
         
         self._syntax_themes[name] = (parent, settings)
@@ -734,7 +729,7 @@ class Workbench(tk.Tk):
         total_settings = []
         temp_name = name
         while True:
-            parent, settings = self._ui_themes[temp_name]
+            parent, settings, _ = self._ui_themes[temp_name]
             total_settings.insert(0, settings)
             if parent is not None:
                 temp_name = parent
@@ -760,6 +755,11 @@ class Workbench(tk.Tk):
                     self._style.theme_settings(name, subsettings)
             
     def _apply_ui_theme(self, name):
+        # (re)load images
+        self._theme_image_mapping = self._ui_themes[name][2]
+        self.get_image('tab-close', "img_close")
+        self.get_image('tab-close-active', "img_close_active")
+        
         if name not in self._style.theme_names():
             self._register_ui_theme_as_tk_theme(name)
         
@@ -829,8 +829,8 @@ class Workbench(tk.Tk):
                 self.show_view(view_id, False)
 
 
-    def map_image(self, original_image, new_image):
-        self._image_mapping[original_image] = new_image
+    def update_image_mapping(self, mapping):
+        self._default_image_mapping.update(mapping)
     
     def get_backends(self):
         return self._backends
@@ -924,13 +924,18 @@ class Workbench(tk.Tk):
     
     def get_image(self, filename, tk_name=None):
         
-        themed_version = self._style.lookup("IMAGES", filename)
-        if themed_version:
-            filename = themed_version
-        
+        if filename in self._theme_image_mapping:
+            filename = self._theme_image_mapping[filename]
+            
+        if filename in self._default_image_mapping:
+            filename = self._default_image_mapping[filename]
+            
         # if path is relative then interpret it as living in res folder
         if not os.path.isabs(filename):
             filename = os.path.join(self.get_package_dir(), "res", filename)
+            if (not os.path.exists(filename)
+                and os.path.exists(filename + ".gif")):
+                filename = filename + ".gif"
             
         if self._scaling_factor >= 2.0:
             img = tk.PhotoImage(file=filename)

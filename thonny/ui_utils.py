@@ -286,7 +286,7 @@ class ClosableNotebook(ttk.Notebook):
         else:  
             self.bind("<ButtonPress-3>", self._right_btn_press, True)
         
-        self._check_update_style()
+        #self._check_update_style()
     
     def create_tab_menu(self):
         menu = tk.Menu(self.winfo_toplevel(), tearoff=False)

@@ -27,11 +27,11 @@ class BaseFileBrowser(TreeFrame):
         self.hor_scrollbar.grid(row=1, column=0, sticky="nsew")
         
         wb = get_workbench()
-        self.folder_icon = wb.get_image("folder.gif")
-        self.python_file_icon = wb.get_image("python_file.gif")
-        self.text_file_icon = wb.get_image("text_file.gif")
-        self.generic_file_icon = wb.get_image("generic_file.gif")
-        self.hard_drive_icon = wb.get_image("hard_drive2.gif")
+        self.folder_icon = wb.get_image("folder")
+        self.python_file_icon = wb.get_image("python-file")
+        self.text_file_icon = wb.get_image("text-file")
+        self.generic_file_icon = wb.get_image("generic-file")
+        self.hard_drive_icon = wb.get_image("hard-drive")
         
         self.tree.column('#0', width=500, anchor=tk.W)
         

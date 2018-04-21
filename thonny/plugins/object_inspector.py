@@ -104,8 +104,8 @@ class ObjectInspector(ttk.Frame):
         
         self.title_label.bind("<Configure>", configure, True)
         
-        self.back_button = create_navigation_link(1, "nav_backward.gif", self.navigate_back, "Previous object", (5,0))
-        self.forward_button = create_navigation_link(2, "nav_forward.gif", self.navigate_forward, "Next object")
+        self.back_button = create_navigation_link(1, "nav-backward", self.navigate_back, "Previous object", (5,0))
+        self.forward_button = create_navigation_link(2, "nav-forward", self.navigate_forward, "Next object")
         self.back_links = []
         self.forward_links = []
         

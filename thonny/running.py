@@ -68,14 +68,14 @@ class Runner:
             default_sequence="<F5>",
             tester=self._cmd_run_current_script_enabled,
             group=10,
-            image_filename="run.run_current_script.gif",
+            image="run-current-script",
             include_in_toolbar=True)
         
         get_workbench().add_command('restart', "run", 'Stop/Restart',
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
             group=70,
-            image_filename="run.stop.gif",
+            image="stop",
             include_in_toolbar=True)
         
         get_workbench().add_command('interrupt', "run", "Interrupt execution",

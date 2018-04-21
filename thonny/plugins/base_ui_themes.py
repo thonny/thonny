@@ -116,24 +116,21 @@ def _button_notebook_settings():
                 "image", "img_close",
                 ("active", "pressed", "!disabled", "img_close_active"),
                 ("active", "!disabled", "img_close_active"), 
-                {"border" : scale(8), "sticky" : ''}                
+                {"padding" : scale(2), "sticky" : ''}                
             )
         },
         "ButtonNotebook.TNotebook.Tab" : {
             "layout" : [
-                ("Notebook.tab", {"sticky": "nswe", "children":
-                    [("Notebook.padding", {"side": "top", "sticky": "nswe",
-                                                 "children":
-                        [("Notebook.focus", {"side": "top", "sticky": "nswe",
-                                                   "children":
-                            [("Notebook.label", {"side": "left", "sticky": ''}),
-                             ("Notebook.closebutton", {"side": "left", "sticky": ''})
-                             ]
-                        })]
-                    })]
-                })
+                ("Notebook.tab", {"sticky": "nswe", "children": [
+                    ("Notebook.padding", {"side": "top", "sticky": "nswe", "children": [
+                        ("Notebook.focus", {"side": "left", "sticky": "nswe", "children": [
+                            ("Notebook.label", {"side": "left", "sticky": ''}),
+                        ]}),
+                        ("Notebook.closebutton", {"side": "right", "sticky": ''})
+                    ]})
+                ]})
             ]
-        }
+        },
     }
 
 def clam():

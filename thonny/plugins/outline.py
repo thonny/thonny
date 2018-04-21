@@ -47,8 +47,8 @@ class OutlineView(ttk.Frame):
         # self.tree.heading('#0', text='Item (type @ line)', anchor=tk.W)
         self.tree['show'] = ('tree',)
         
-        self._class_img = get_workbench().get_image("class.gif")
-        self._method_img = get_workbench().get_image("method.gif")
+        self._class_img = get_workbench().get_image("outline-class")
+        self._method_img = get_workbench().get_image("outline-method")
 
     def _update_frame_contents(self, event=None):
         self._clear_tree()

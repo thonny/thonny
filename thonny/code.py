@@ -240,14 +240,14 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self._cmd_new_file,
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             group=10,
-            image_filename="file.new_file.gif",
+            image="new-file",
             include_in_toolbar=True)
         
         get_workbench().add_command("open_file", "file", "Open...", 
             self._cmd_open_file,
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             group=10,
-            image_filename="file.open_file.gif",
+            image="open-file",
             include_in_toolbar=True)
         
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -270,7 +270,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             tester=self._cmd_save_file_enabled,
             group=10,
-            image_filename="file.save_file.gif",
+            image="save-file",
             include_in_toolbar=True)
         
         get_workbench().add_command("save_file_as", "file", "Save as...",
