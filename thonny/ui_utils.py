@@ -416,7 +416,11 @@ class AutomaticNotebook(ClosableNotebook):
     Remember its own position key. Automatically updates its visibility.
     """
     def __init__(self, master, position_key):
-        super().__init__(master)
+        if get_workbench().get_mode() == "simple":
+            style="TNotebook"
+        else:
+            style="ButtonNotebook.TNotebook"
+        super().__init__(master, style=style)
         self.position_key = position_key
     
     def add(self, child, **kw):
@@ -891,7 +895,7 @@ class ToolTip(object):
             tw.destroy()
 
 def create_tooltip(widget, text, **kw):
-    options = get_style_configuration("Tooltip")
+    options = get_style_configuration("Tooltip").copy()
     options.setdefault("background", "#ffffe0")
     options.setdefault("relief", "solid")
     options.setdefault("borderwidth", 1)
@@ -1245,6 +1249,8 @@ def get_tk_version_info():
 
 def get_style_configuration(style_name, default={}):
     style = ttk.Style()
+    # NB! style.configure seems to reuse the returned dict 
+    # Don't change it without copying first
     result = style.configure(style_name)
     if result is None:
         return default

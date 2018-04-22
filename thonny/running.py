@@ -64,6 +64,7 @@ class Runner:
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
+            caption="Run",
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
             tester=self._cmd_run_current_script_enabled,
@@ -72,6 +73,7 @@ class Runner:
             include_in_toolbar=True)
         
         get_workbench().add_command('restart', "run", 'Stop/Restart',
+            caption="Stop",
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
             group=70,

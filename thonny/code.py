@@ -152,7 +152,9 @@ class Editor(ttk.Frame):
         self.master.select(self)
     
     def update_appearance(self):
-        self._code_view.set_line_numbers(get_workbench().get_option("view.show_line_numbers"))
+        self._code_view.set_line_numbers(
+            get_workbench().get_option("view.show_line_numbers")
+            or get_workbench().get_mode() == "simple")
         self._code_view.set_line_length_margin(get_workbench().get_option("view.recommended_line_length"))
         self._code_view.text.event_generate("<<UpdateAppearance>>")
     
@@ -238,6 +240,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         
         get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,
+            caption="New",
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             group=10,
             image="new-file",
@@ -245,6 +248,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         
         get_workbench().add_command("open_file", "file", "Open...", 
             self._cmd_open_file,
+            caption="Load",
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             group=10,
             image="open-file",
@@ -267,6 +271,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         
         get_workbench().add_command("save_file", "file", "Save", 
             self._cmd_save_file,
+            caption="Save",
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             tester=self._cmd_save_file_enabled,
             group=10,

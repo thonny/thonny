@@ -32,6 +32,7 @@ class Debugger:
     def _init_commands(self):
         get_workbench().add_command("debug", "run", "Debug current script",
             self._cmd_debug_current_script,
+            caption="Debug",
             tester=self._cmd_debug_current_script_enabled,
             default_sequence="<Control-F5>",
             group=10,
@@ -40,6 +41,7 @@ class Debugger:
         
         get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
+            caption="Over",
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F6>",
             group=30,
@@ -48,12 +50,14 @@ class Debugger:
 
         get_workbench().add_command("undo_command", "run", "Undo command",
             self._cmd_undo_command,
+            caption="Back",
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F9>",
             group=30)
 
         get_workbench().add_command("step_into", "run", "Step into",
             self._cmd_step_into,
+            caption="Into",
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F7>",
             group=30,
@@ -62,6 +66,7 @@ class Debugger:
         
         get_workbench().add_command("step_out", "run", "Step out",
             self._cmd_step_out,
+            caption="Out",
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F8>",
             group=30,

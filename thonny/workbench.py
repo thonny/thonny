@@ -227,13 +227,15 @@ class Workbench(tk.Tk):
         self.option_add('*tearOff', tk.FALSE)
         if lookup_style_option("Menubar", "custom", False):
             self._menubar = ui_utils.CustomMenubar(self)
-            self._menubar.grid(row=0, sticky="nsew")
+            if self.get_mode() != "simple":
+                self._menubar.grid(row=0, sticky="nsew")
         else:
             opts = get_style_configuration("Menubar")
             if "custom" in opts:
                 del opts["custom"]
             self._menubar = tk.Menu(self, **opts)
-            self["menu"] = self._menubar
+            if self.get_mode() != "simple":
+                self["menu"] = self._menubar
         self._menus = {}
         self._menu_item_specs = {} # key is pair (menu_name, command_label), value is MenuItem
         
@@ -544,6 +546,7 @@ class Workbench(tk.Tk):
                     group=99,
                     position_in_group="end",
                     image=None,
+                    caption=None,
                     include_in_toolbar=False,
                     bell_when_denied=True):
         
@@ -615,7 +618,7 @@ class Workbench(tk.Tk):
         
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
-            self._add_toolbar_button(_image, command_label, accelerator, handler, tester,
+            self._add_toolbar_button(_image, command_label, caption, accelerator, handler, tester,
                 toolbar_group)
         
     
@@ -640,7 +643,10 @@ class Workbench(tk.Tk):
         self.set_default("view." + view_id + ".location", default_location)
         self.set_default("view." + view_id + ".position_key", default_position_key)
         
-        visibility_flag = self.get_variable("view." + view_id + ".visible")
+        if self.get_mode() == "simple":
+            visibility_flag = tk.BooleanVar(value=view_id in ["ShellView", "GlobalsView"])
+        else:
+            visibility_flag = self.get_variable("view." + view_id + ".visible")
         
         self._view_records[view_id] = {
             "class" : class_,
@@ -700,6 +706,13 @@ class Workbench(tk.Tk):
     
     def get_syntax_theme_names(self):
         return sorted(self._syntax_themes.keys())
+    
+    def get_mode(self):
+        return "simple"
+        if os.environ.get("THONNY_SIMPLEMODE"):
+            return "simple"
+        else:
+            return "regular"
     
     def scale(self, value):
         if isinstance(value, (int, float)):
@@ -1099,13 +1112,19 @@ class Workbench(tk.Tk):
         else:
             return None
     
-    def _add_toolbar_button(self, image, command_label, accelerator, handler, 
+    def _add_toolbar_button(self, image, command_label, caption, accelerator, handler, 
                             tester, toolbar_group):
         
+        assert caption is not None and len(caption) > 0,\
+            "Missing caption for '%s'. Toolbar commands must have caption." % command_label
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:
             group_frame = ttk.Frame(self._toolbar)
-            group_frame.grid(row=0, column=toolbar_group, padx=(0, 10))
+            if self.get_mode() == "simple":
+                padx = 0
+            else:
+                padx = (0, 10)
+            group_frame.grid(row=0, column=toolbar_group, padx=padx)
         else:
             group_frame = slaves[0]
         
@@ -1113,14 +1132,18 @@ class Workbench(tk.Tk):
                          command=handler, 
                          image=image, 
                          style="Toolbutton", 
-                         state=tk.NORMAL
+                         state=tk.NORMAL,
+                         text=caption,
+                         compound="top" if self.get_mode() == "simple" else None,
+                         pad=(15,0) if self.get_mode() == "simple" else 0
                          )
         button.pack(side=tk.LEFT)
         button.tester = tester 
         tooltip_text = command_label
-        if accelerator and lookup_style_option("OPTIONS", "shortcuts_in_tooltips", default=True):
-            tooltip_text += " (" + accelerator + ")"
-        create_tooltip(button, tooltip_text)
+        if self.get_mode() != "simple":
+            if accelerator and lookup_style_option("OPTIONS", "shortcuts_in_tooltips", default=True):
+                tooltip_text += " (" + accelerator + ")"
+            create_tooltip(button, tooltip_text)
         
     def _update_toolbar(self):
         for group_frame in self._toolbar.grid_slaves(0):
