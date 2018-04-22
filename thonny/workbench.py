@@ -708,7 +708,6 @@ class Workbench(tk.Tk):
         return sorted(self._syntax_themes.keys())
     
     def get_mode(self):
-        return "simple"
         if os.environ.get("THONNY_SIMPLEMODE"):
             return "simple"
         else:
