@@ -321,11 +321,18 @@ class VM:
 
 
     def _cmd_get_globals(self, cmd):
-        if not cmd.module_name in sys.modules:
-            raise ThonnyClientError("Module '{0}' is not loaded".format(cmd.module_name))
-
-        return self.create_message("Globals", module_name=cmd.module_name,
-                              globals=self.export_variables(sys.modules[cmd.module_name].__dict__))
+        try:
+            if self._current_executor is None:
+                result = self.export_globals(cmd.module_name)
+            else:
+                result = self._current_executor.export_globals(cmd.module_name)
+                
+            return self.create_message("Globals", module_name=cmd.module_name,
+                              globals=result)
+        except Exception as e:
+            return self.create_message("Globals", module_name=cmd.module_name,
+                                       error=str(e))
+            
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
@@ -402,7 +409,12 @@ class VM:
                                        executable=sys.executable)
         else:
             raise UserCommandError("Command 'Reset' doesn't take arguments")
-
+    
+    def export_globals(self, module_name):
+        if module_name in sys.modules:
+            return self.export_variables(sys.modules[module_name].__dict__)
+        else:
+            raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _export_completions(self, jedi_completions):
         result = []
@@ -767,6 +779,9 @@ class Executor:
             return {"context_info" : "other unhandled exception"}
         finally:
             sys.settrace(None)
+    
+    def export_globals(self, module_name):
+        return self._vm.export_globals(module_name)
 
     def _compile_source(self, source, filename, mode):
         return compile(source, filename, mode)
@@ -790,7 +805,12 @@ class FancyTracer(Executor):
 
         return Executor.execute_source(self, source, filename, mode, global_vars)
         #assert len(self._custom_stack) == 0
-
+    
+    def export_globals(self, module_name):
+        # TODO: if globals are not available for current user-visible state
+        # then raise exception
+        return self._vm.export_globals(module_name)
+    
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
         # into builtin scope        
