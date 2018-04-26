@@ -94,6 +94,7 @@ class VM:
                           executable=sys.executable,
                           in_venv=hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix,
                           python_version=_get_python_version_string(),
+                          loaded_modules=list(sys.modules.keys()),
                           cwd=os.getcwd()))
 
         self._install_signal_handler()
@@ -182,6 +183,7 @@ class VM:
         if hasattr(cmd, "request_id"):
             response["request_id"] = cmd.request_id
         if response["message_type"] == "ToplevelResult":
+            response["loaded_modules"] = list(sys.modules.keys())
             response["gui_is_active"] = (
                 self._get_tkinter_default_root() is not None
                 or self._get_qt_app() is not None
@@ -1078,6 +1080,7 @@ class FancyTracer(Executor):
                                     exception_lower_stack_description=exception_lower_stack_description,
                                     value=value,
                                     is_new=True,
+                                    loaded_modules=list(sys.modules.keys()),
                                     stream_symbol_counts=symbols_by_streams
                                     )),
             False])  # Flag for identifying if the message has been sent to front-end
