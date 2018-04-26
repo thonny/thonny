@@ -509,6 +509,15 @@ def windows():
                 }
             },
             
+            "TCombobox" : {
+                "map" : {
+                    "selectbackground"  : [("readonly", "!focus", "SystemWindow"),
+                                           ("readonly", "focus", "SystemHighlight")],
+                    "selectforeground"  : [("readonly", "!focus", "SystemWindowText"),
+                                           ("readonly", "focus", "SystemHighlightText")],
+                }
+            },
+            
             "Listbox" : {
                 "configure" : {
                     "background" : "SystemWindow",
@@ -596,6 +605,10 @@ def enhanced_clam():
             "TCombobox" : {
                 "configure" : {
                     "arrowsize" : scale(14),
+                },
+                "map" : {
+                    "selectbackground"  : [("readonly", "!focus", "#dcdad5")],
+                    "selectforeground"  : [("readonly", "!focus", "#000000")],
                 }
             },
                 
