@@ -1134,7 +1134,7 @@ class Workbench(tk.Tk):
                          state=tk.NORMAL,
                          text=caption,
                          compound="top" if self.get_mode() == "simple" else None,
-                         pad=(15,0) if self.get_mode() == "simple" else 0
+                         pad=(15,0) if self.get_mode() == "simple" else None
                          )
         button.pack(side=tk.LEFT)
         button.tester = tester 
