@@ -708,10 +708,7 @@ class Workbench(tk.Tk):
         return sorted(self._syntax_themes.keys())
     
     def get_mode(self):
-        if os.environ.get("THONNY_SIMPLEMODE"):
-            return "simple"
-        else:
-            return "regular"
+        return os.environ.get("THONNY_MODE", "regular")
     
     def scale(self, value):
         if isinstance(value, (int, float)):
