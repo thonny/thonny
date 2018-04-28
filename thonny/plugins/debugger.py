@@ -48,8 +48,8 @@ class Debugger:
             image="step-over",
             include_in_toolbar=True)
 
-        get_workbench().add_command("undo_command", "run", "Undo command",
-            self._cmd_undo_command,
+        get_workbench().add_command("step_back", "run", "Step back",
+            self._cmd_step_back,
             caption="Back",
             tester=self._cmd_stepping_commands_enabled,
             default_sequence="<F9>",
@@ -127,8 +127,8 @@ class Debugger:
         
         self._check_issue_debugger_command("exec")
 
-    def _cmd_undo_command(self):
-        self._check_issue_debugger_command("undo")
+    def _cmd_step_back(self):
+        self._check_issue_debugger_command("back")
         
     def _cmd_step_out(self):
         self._check_issue_debugger_command("out")

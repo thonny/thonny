@@ -325,7 +325,7 @@ class VM:
     def _cmd_get_globals(self, cmd):
         try:
             if self._current_executor is None:
-                result = self.export_globals(cmd.module_name)
+                result = self.export_latest_globals(cmd.module_name)
             else:
                 result = self._current_executor.export_globals(cmd.module_name)
                 
@@ -412,7 +412,7 @@ class VM:
         else:
             raise UserCommandError("Command 'Reset' doesn't take arguments")
     
-    def export_globals(self, module_name):
+    def export_latest_globals(self, module_name):
         if module_name in sys.modules:
             return self.export_variables(sys.modules[module_name].__dict__)
         else:
@@ -783,7 +783,7 @@ class Executor:
             sys.settrace(None)
     
     def export_globals(self, module_name):
-        return self._vm.export_globals(module_name)
+        return self._vm.export_latest_globals(module_name)
 
     def _compile_source(self, source, filename, mode):
         return compile(source, filename, mode)
@@ -801,6 +801,8 @@ class FancyTracer(Executor):
         self._install_marker_functions()
         self._custom_stack = []
         self._past_messages = []
+        self._past_globals = []
+        self._current_state = 0
 
     def execute_source(self, source, filename, mode, global_vars=None):
         self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
@@ -809,9 +811,10 @@ class FancyTracer(Executor):
         #assert len(self._custom_stack) == 0
     
     def export_globals(self, module_name):
-        # TODO: if globals are not available for current user-visible state
-        # then raise exception
-        return self._vm.export_globals(module_name)
+        if module_name in self._past_globals[self._current_state]:
+            return self._past_globals[self._current_state][module_name]
+        else:
+            raise RuntimeError("Globals of unknown module requested.")
     
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
@@ -992,12 +995,9 @@ class FancyTracer(Executor):
         :return: Let Python run to the next progress event
         """
 
-        # Choose the most recently saved message
-        progress = len(self._past_messages) - 1
-
-        while progress < len(self._past_messages):
+        while self._current_state < len(self._past_messages):
             # Get the message data
-            current_frame = self._get_frame_from_history(progress)
+            current_frame = self._get_frame_from_history()
             frame = current_frame
             event = current_frame.last_event
             args = current_frame.last_event_args
@@ -1006,39 +1006,30 @@ class FancyTracer(Executor):
 
             # Has the command completed?
             tester = getattr(self, "_cmd_" + cmd.command + "_completed")
-            cmd_complete = tester(frame, event, args, focus, cmd, progress)
+            cmd_complete = tester(frame, event, args, focus, cmd)
 
             if cmd_complete:
                 # Last command has completed, send message and fetch the next command
-                self._past_messages[progress][1] = True  # Add "shown to user" flag
-                self._send_and_fetch_next_debugger_progress_message(self._past_messages[progress][0])
+                self._past_messages[self._current_state][1] = True  # Add "shown to user" flag
+                self._send_and_fetch_next_debugger_progress_message(self._past_messages[self._current_state][0])
 
-            if self._current_command.command == "undo":
-                # Undo has been chosen, move the pointer backwards
-                if progress > 0:
-                    self._past_messages[progress][1] = False  # Remove "shown to user" flag
-                    progress -= 1
+            if self._current_command.command == "back":
+                # Step back has been chosen, move the pointer backwards
+                if self._current_state > 0:
+                    self._past_messages[self._current_state][1] = False  # Remove "shown to user" flag
+                    self._current_state -= 1
             else:
                 # Other progress events move the pointer forward
-                if progress < len(self._past_messages) - 1:
-                    # Move the pointer forward (in past)
-                    progress += 1
-                else:
-                    # No more messages saved, continue running to the next progress event
-                    break
+                self._current_state += 1
 
         # Saved messages are no longer enough, let Python run to the next progress event
 
 
-    def _get_frame_from_history(self, progress):
-        return self._past_messages[progress][0]["stack"][-1]
+    def _get_frame_from_history(self):
+        return self._past_messages[self._current_state][0]["stack"][-1]
 
 
     def _save_debugger_progress_message(self, frame, value):
-        # Todo: Don't save messages that shouldnt be shown to user at any time.
-        #if "call_function" in self._custom_stack[-1].last_event_args["node_tags"] or \
-        #    self._custom_stack[-1].last_event == "after_statement":
-        #    return
 
         if self._unhandled_exception is not None:
             frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
@@ -1070,11 +1061,18 @@ class FancyTracer(Executor):
             "stderr": sys.stderr._processed_symbol_count
         }
 
+        # Save the __main__ module's variables
+        self._past_globals.append({"__main__":self._vm.export_variables(vars(sys.modules["__main__"]))})
+
+        # If the current module is not __main__, save the current module's variables
+        current_module_globals = self._custom_stack[-1].system_frame.f_globals
+        if current_module_globals["__name__"] != "__main__":
+            self._past_globals[-1][current_module_globals["__name__"]] = self._vm.export_variables(current_module_globals)
+
         self._past_messages.append([(
             self._vm.create_message("DebuggerProgress",
                                     command=self._current_command,#.command,
                                     stack=self._export_stack(),
-                                    globals=self._vm.export_variables(self._custom_stack[-1].system_frame.f_globals),
                                     exception=self._vm.export_value(self._unhandled_exception, True),
                                     exception_msg=exception_msg,
                                     exception_lower_stack_description=exception_lower_stack_description,
@@ -1190,7 +1188,7 @@ class FancyTracer(Executor):
         lines, _ = inspect.getsourcelines(obj)
         return "".join(lines), lineno
 
-    def _cmd_exec_completed(self, frame, event, args, focus, cmd, progress):
+    def _cmd_exec_completed(self, frame, event, args, focus, cmd):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
@@ -1225,25 +1223,23 @@ class FancyTracer(Executor):
             # We're in another frame
             if self._frame_is_alive(cmd.frame_id):
                 # We're in a successor frame, keep running
-                self._debug("Exec successor frame")
                 return False
             else:
                 # Original frame has completed, assumedly because of an exception
                 # We're done
-                self._debug("Exec wrong frame")
                 return True
 
-    def _cmd_step_completed(self, frame, event, args, focus, cmd, progress):
+    def _cmd_step_completed(self, frame, event, args, focus, cmd):
         return True
 
-    def _cmd_undo_completed(self, frame, event, args, focus, cmd, progress):
+    def _cmd_back_completed(self, frame, event, args, focus, cmd):
         # Check if the selected message has been previously sent to front-end
-        return self._past_messages[progress][1]
+        return self._past_messages[self._current_state][1]
 
     def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
         return event.startswith("before")
 
-    def _cmd_out_completed(self, frame, event, args, focus, cmd, progress):
+    def _cmd_out_completed(self, frame, event, args, focus, cmd):
         """Complete current frame"""
         if type(frame) == FrameInfo:
             frame_id = frame.id
@@ -1256,7 +1252,7 @@ class FancyTracer(Executor):
             or frame_id == cmd.frame_id and focus.contains_smaller(cmd.focus)
         )
 
-    def _cmd_line_completed(self, frame, event, args, focus, cmd, progress):
+    def _cmd_line_completed(self, frame, event, args, focus, cmd):
         if type(frame) == FrameInfo:
             frame_id = frame.id
         else:
