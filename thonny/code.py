@@ -95,12 +95,12 @@ class Editor(ttk.Frame):
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
         
-    def should_restart(self):
+    def is_modified(self):
         return self._code_view.text.edit_modified()
     
     
     def save_file_enabled(self):
-        return self.should_restart() or not self.get_filename()
+        return self.is_modified() or not self.get_filename()
     
     def save_file(self, ask_filename=False):
         if self._filename is not None and not ask_filename:
@@ -326,7 +326,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def save_all_named_editors(self):
         all_saved = True
         for editor in self.winfo_children():
-            if editor.get_filename() and editor.should_restart():
+            if editor.get_filename() and editor.is_modified():
                 success = editor.save_file()
                 all_saved = all_saved and success
         
@@ -428,7 +428,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
         if (len(editors) == 1 
-            and not editors[0].should_restart()
+            and not editors[0].is_modified()
             and not editors[0].get_filename()):
             self._cmd_close_file()
     
@@ -465,16 +465,16 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     
     def update_editor_title(self, editor):
         self.tab(editor,
-            text=self._generate_editor_title(editor.get_filename(), editor.should_restart()))
+            text=self._generate_editor_title(editor.get_filename(), editor.is_modified()))
     
      
-    def _generate_editor_title(self, filename, should_restart=False):
+    def _generate_editor_title(self, filename, is_modified=False):
         if filename is None:
             result = "<untitled>"
         else:
             result = os.path.basename(filename)
         
-        if should_restart:
+        if is_modified:
             result += " *"
         
         return result
@@ -499,9 +499,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     
     def check_allow_closing(self, editor=None):
         if not editor:
-            modified_editors = [e for e in self.winfo_children() if e.should_restart()]
+            modified_editors = [e for e in self.winfo_children() if e.is_modified()]
         else:
-            if not editor.should_restart():
+            if not editor.is_modified():
                 return True
             else:
                 modified_editors = [editor]

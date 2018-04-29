@@ -190,7 +190,7 @@ class Runner:
         if not filename:
             return
         
-        if editor.should_restart():
+        if editor.is_modified():
             filename = editor.save_file()
             if not filename:
                 return 
