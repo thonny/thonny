@@ -928,7 +928,7 @@ class FancyTracer(Executor):
             self._unhandled_exception = exc
             if self._is_interesting_exception(frame):
                 self._save_debugger_progress_message(frame , None)
-                self._send_and_fetch_next_debugger_progress_message(self._past_messages[-1])
+                self._send_and_fetch_next_debugger_progress_message(self._past_messages[-1][0])
 
         # TODO: support line event in non-instrumented files
         elif event == "line":
