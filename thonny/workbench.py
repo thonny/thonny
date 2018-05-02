@@ -1210,7 +1210,6 @@ class Workbench(tk.Tk):
         while widget is not None:
             if hasattr(widget, "home_widget"):
                 # if widget is view, then widget.master is workbench
-                widget.grid(row=0, column=0, sticky=tk.NSEW, in_=widget.master)
                 widget.grid(row=1, column=0, sticky=tk.NSEW, in_=widget.master)
                 # hide main_frame
                 self._main_frame.grid_forget()
