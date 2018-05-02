@@ -1006,7 +1006,10 @@ class FancyTracer(Executor):
 
             # Has the command completed?
             tester = getattr(self, "_cmd_" + cmd.command + "_completed")
-            cmd_complete = tester(frame, event, args, focus, cmd)
+            cmd_complete = (
+                event != "after_statement"
+                and tester(frame, event, args, focus, cmd)
+            )
 
             if cmd_complete:
                 # Last command has completed, send message and fetch the next command
