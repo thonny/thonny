@@ -813,10 +813,12 @@ class FancyTracer(Executor):
         #assert len(self._custom_stack) == 0
     
     def export_globals(self, module_name):
-        if module_name in self._past_globals[self._current_state]:
+        if not self.is_in_past():
+            return self._vm.export_latest_globals(module_name)
+        elif module_name in self._past_globals[self._current_state]:
             return self._past_globals[self._current_state][module_name]
         else:
-            raise RuntimeError("Globals of unknown module requested.")
+            raise RuntimeError("Past state not available for this module")
     
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
