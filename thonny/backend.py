@@ -1006,10 +1006,8 @@ class FancyTracer(Executor):
 
             # Has the command completed?
             tester = getattr(self, "_cmd_" + cmd.command + "_completed")
-            cmd_complete = (
-                event != "after_statement"
-                and tester(frame, event, args, focus, cmd)
-            )
+            cmd_complete = tester(frame, event, args, focus, cmd)
+
 
             if cmd_complete:
                 # Last command has completed, send message and fetch the next command
@@ -1206,9 +1204,8 @@ class FancyTracer(Executor):
         if frame_id == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
-                if focus.contains_smaller_eq(cmd.focus) and "after_" in event \
-                    and (("_expression" in cmd.state and "_expression" in event)
-                         or ("_statement" in cmd.state and "_statement" in event)):
+                if focus.not_smaller_eq_in(cmd.focus):
+                    # Focus has changed, command has completed
                     return True
                 else:
                     # Keep running
