@@ -1230,7 +1230,7 @@ class FancyTracer(Executor):
                 return True
 
     def _cmd_step_completed(self, frame, event, args, focus, cmd):
-        return True
+        return event != "after_statement"
 
     def _cmd_back_completed(self, frame, event, args, focus, cmd):
         # Check if the selected message has been previously sent to front-end
@@ -1240,6 +1240,14 @@ class FancyTracer(Executor):
         return event.startswith("before")
 
     def _cmd_out_completed(self, frame, event, args, focus, cmd):
+        if self._current_state == 0:
+            return False
+        
+        if event == "after_statement":
+            return False
+        
+        prev_state_frame = self._past_messages[self._current_state-1][0]["stack"][-1]
+        
         """Complete current frame"""
         if type(frame) == FrameInfo:
             frame_id = frame.id
@@ -1249,7 +1257,10 @@ class FancyTracer(Executor):
             # the frame has completed
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
+            # TODO: expression inside statement expression has same range as its parent
             or frame_id == cmd.frame_id and focus.contains_smaller(cmd.focus)
+            # or we were there in prev state
+            or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
         )
 
     def _cmd_line_completed(self, frame, event, args, focus, cmd):
