@@ -2,6 +2,42 @@
 Version history
 ===============
 
+2.2.0b1 (2018-05-??)
+====================
+TODO: hide after_statement states
+TODO: check Thonny version in plug-in installation
+TODO: Test object inspector
+
+* NEW: Added support for stepping back in time during debugging (Run => Undo command)
+* NEW: Added support for UI and syntax theming (https://bitbucket.org/plas/thonny/wiki/Theming)
+* NEW: Added several built-in dark themes
+* NEW: Added support for display scaling / high-DPI screens (Tools => Options => General)
+* NEW: Added closing buttons to the tabs of all views 
+* NEW: Added support for (CPython) back-end plug-ins (https://bitbucket.org/plas/thonny/wiki/Plugins)
+* NEW: Current editor line can be highlighted (Tools => Options => Editor)
+* NEW: Thonny can be started in simple mode (https://bitbucket.org/plas/thonny/wiki/Modes) 
+* NEW: Variables view now allows viewing variables from other modules beside __main__ 
+* CHANGED: Dropped support for Python 3.4 (both for front-end and back-end)
+* CHANGED: Reorganized back-end configuration ("Tools => Options => Back-end" instead of "Tools => Options => Interpreter")
+* CHANGED: The roles of Interrupt and Stop commands are now more clear: Stop always restarts the backend and Interrupt only tries to interrupt 
+* CHANGED: Editing the running program doesn't interrupt it anymore.  
+* CHANGED: Object inspector now shows attributes and object overview on different tabs
+* CHANGED: Can't set thonny.THONNY_USER_DIR directly in customize.py anymore (https://bitbucket.org/plas/thonny/wiki/DeploymentOptions)
+* CHANGED: For plug-in writers: Unified early and late plug-ins (load_early_plugin should be renamed to load_plugin)
+* CHANGED: For plug-in writers: get_workbench and get_runner moved from thonny.globals to thonny
+* FIXED #396: exec causes range marker to crash
+* FIXED #368: "Open system shell" doesn't work in Xfce (fix by Miro Hrončok) 
+* FIXED: Now it's possible to specify a link as backend interpreter (fix by Miro Hrončok)
+* FIXED: Made zooming with Ctrl++ / Ctrl+- work on the numpad on Linux
+* TECHNICAL: Changed the location and sharing of backend.py, common.py, ast_utils.py
+* TECHNICAL: Cleaner approach for sharing jedi with the back-end
+* TECHNICAL: Package manager now uses pypi.org instead of pypi.python.org
+* TECHNICAL: Several changes in Runner and BackendProxy interface
+* TECHNICAL: Saving an editor now forces writing to disk (see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it)
+
+
+
+
 2.1.17 (2018-03-21)
 ===================
 * FIXED #409: Package manager crashed after release of pip 9.0.2
