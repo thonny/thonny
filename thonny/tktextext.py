@@ -609,10 +609,15 @@ class EnhancedText(TweakableText):
         self.edit_separator()
 
     def _tag_current_line(self, event=None):
-        # we may be on the same line as with prev event but tag needs extension
-        lineno = int(self.index("insert").split(".")[0])
         self.tag_remove("current_line", "1.0", "end")
-        self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")
+        
+        # Let's show current line only with readable text
+        # (this fits well with Thonny debugger,
+        # otherwise debugger focus box and current line interact in an ugly way)
+        if not self.is_read_only():
+            # we may be on the same line as with prev event but tag needs extension
+            lineno = int(self.index("insert").split(".")[0])
+            self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")
     
     def on_secondary_click(self, event=None):
         "Use this for invoking context menu"
