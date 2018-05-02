@@ -897,8 +897,9 @@ class FancyTracer(Executor):
 
                 marker_function_args = frame.f_locals.copy()
                 del marker_function_args["self"]
-
-                self._handle_progress_event(frame.f_back, event, marker_function_args)
+                
+                if "call_function" not in marker_function_args["node_tags"]:
+                    self._handle_progress_event(frame.f_back, event, marker_function_args)
                 self._try_interpret_as_again_event(frame.f_back, event, marker_function_args)
 
 
@@ -1418,7 +1419,6 @@ class FancyTracer(Executor):
             if not hasattr(node, "tags"):
                 node.tags = set()
 
-
     def _should_instrument_as_expression(self, node):
         return (isinstance(node, _ast.expr)
                 and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))
@@ -1430,7 +1430,6 @@ class FancyTracer(Executor):
                 and "DictComp.value" not in node.tags
                 and "comprehension.if" not in node.tags
                 )
-        return
 
     def _should_instrument_as_statement(self, node):
         return (isinstance(node, _ast.stmt)
