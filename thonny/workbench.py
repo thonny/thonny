@@ -1211,6 +1211,7 @@ class Workbench(tk.Tk):
             if hasattr(widget, "home_widget"):
                 # if widget is view, then widget.master is workbench
                 widget.grid(row=0, column=0, sticky=tk.NSEW, in_=widget.master)
+                widget.grid(row=1, column=0, sticky=tk.NSEW, in_=widget.master)
                 # hide main_frame
                 self._main_frame.grid_forget()
                 self._maximized_view = widget
@@ -1224,7 +1225,7 @@ class Workbench(tk.Tk):
             return
         
         # restore main_frame
-        self._main_frame.grid(row=0, column=0, sticky=tk.NSEW, in_=self)
+        self._main_frame.grid(row=1, column=0, sticky=tk.NSEW, in_=self)
         # put the maximized view back to its home_widget
         self._maximized_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.home_widget)
         self._maximized_view = None
@@ -1382,7 +1383,7 @@ class Workbench(tk.Tk):
         if (hasattr(self, "_maximized_view") # configure may happen before the attribute is defined 
             and self._maximized_view):
             # grid again, otherwise it acts weird
-            self._maximized_view.grid(row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.master)
+            self._maximized_view.grid(row=1, column=0, sticky=tk.NSEW, in_=self._maximized_view.master)
     
     def _on_tk_exception(self, exc, val, tb):
         # copied from tkinter.Tk.report_callback_exception with modifications
