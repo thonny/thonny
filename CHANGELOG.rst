@@ -8,7 +8,7 @@ TODO: hide after_statement states
 TODO: check Thonny version in plug-in installation
 TODO: Test object inspector
 
-* NEW: Added support for stepping back in time during debugging (Run => Undo command) by Alar Leemet
+* NEW: Added support for stepping back in time during debugging (Run => Step back) by Alar Leemet
 * NEW: Added support for UI and syntax theming (https://bitbucket.org/plas/thonny/wiki/Theming)
 * NEW: Added several built-in dark themes
 * NEW: Added support for display scaling / high-DPI screens (Tools => Options => General)
