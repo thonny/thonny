@@ -771,7 +771,7 @@ class Executor:
         except SystemExit:
             # Show withot Thonny frames
             e_type, e_value, e_traceback = sys.exc_info()
-            self._vm._print_user_exception(e_type, e_value, e_traceback)
+            #self._vm._print_user_exception(e_type, e_value, e_traceback)
             return {"SystemExit" : True}
         except:
             # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
