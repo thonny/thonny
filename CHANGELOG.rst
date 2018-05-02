@@ -8,7 +8,7 @@ TODO: hide after_statement states
 TODO: check Thonny version in plug-in installation
 TODO: Test object inspector
 
-* NEW: Added support for stepping back in time during debugging (Run => Undo command)
+* NEW: Added support for stepping back in time during debugging (Run => Undo command) by Alar Leemet
 * NEW: Added support for UI and syntax theming (https://bitbucket.org/plas/thonny/wiki/Theming)
 * NEW: Added several built-in dark themes
 * NEW: Added support for display scaling / high-DPI screens (Tools => Options => General)
@@ -25,10 +25,12 @@ TODO: Test object inspector
 * CHANGED: Can't set thonny.THONNY_USER_DIR directly in customize.py anymore (https://bitbucket.org/plas/thonny/wiki/DeploymentOptions)
 * CHANGED: For plug-in writers: Unified early and late plug-ins (load_early_plugin should be renamed to load_plugin)
 * CHANGED: For plug-in writers: get_workbench and get_runner moved from thonny.globals to thonny
-* FIXED #396: exec causes range marker to crash
+* FIXED #358: Hide the stacktrace of SystemExit
 * FIXED #368: "Open system shell" doesn't work in Xfce (fix by Miro Hrončok) 
-* FIXED: Now it's possible to specify a link as backend interpreter (fix by Miro Hrončok)
-* FIXED: Made zooming with Ctrl++ / Ctrl+- work on the numpad on Linux
+* FIXED #370: Made zooming with Ctrl++ / Ctrl+- work on the numpad on Linux
+* FIXED #372: Now it's possible to specify a link as backend interpreter (fix by Miro Hrončok)
+* FIXED #396: exec causes range marker to crash
+* FIXED #403: Window width may become negative
 * TECHNICAL: Changed the location and sharing of backend.py, common.py, ast_utils.py
 * TECHNICAL: Cleaner approach for sharing jedi with the back-end
 * TECHNICAL: Package manager now uses pypi.org instead of pypi.python.org
