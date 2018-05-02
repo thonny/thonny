@@ -194,8 +194,10 @@ class EnhancedText(TweakableText):
         self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
         
         self._initial_configuration = self.configure()
+        self._regular_insertwidth = self["insertwidth"]
         self._reload_theme_options()
         
+        self._should_tag_current_line = tag_current_line
         if tag_current_line:
             self.bind("<<CursorMove>>", self._tag_current_line, True)
             self.bind("<<TextChange>>", self._tag_current_line, True)
@@ -508,7 +510,9 @@ class EnhancedText(TweakableText):
     def set_read_only(self, value):
         TweakableText.set_read_only(self, value)
         self._reload_theme_options()
-    
+        if self._should_tag_current_line:
+            self._tag_current_line()
+        
     def _reindent_to(self, column):
         # Delete from beginning of line to insert point, then reinsert
         # column logical (meaning use tabs if appropriate) spaces.
@@ -614,7 +618,7 @@ class EnhancedText(TweakableText):
         # Let's show current line only with readable text
         # (this fits well with Thonny debugger,
         # otherwise debugger focus box and current line interact in an ugly way)
-        if not self.is_read_only():
+        if self._should_tag_current_line and not self.is_read_only():
             # we may be on the same line as with prev event but tag needs extension
             lineno = int(self.index("insert").split(".")[0])
             self.tag_add("current_line", str(lineno) + ".0",  str(lineno+1) + ".0")

@@ -173,6 +173,17 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
         get_workbench().get_menu("edit").tk_popup(event.x_root, event.y_root)
+    
+    def set_read_only(self, value):
+        super().set_read_only(value)
+                
+        if value:
+            if self["insertwidth"] > 0:
+                self._regular_insertwidth = self["insertwidth"]
+            self.configure(insertwidth=0)
+        else:
+            self.configure(insertwidth=self._regular_insertwidth)
+
         
     
     
