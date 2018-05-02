@@ -50,10 +50,10 @@ class ObjectInspector(ttk.Frame):
         
         def create_tab(col, caption, page):
             if page == self.active_page:
-                relief = "sunken"
+                style = "Active.ViewTab.TLabel"
             else:
-                relief = "raised"
-            tab = ttk.Label(toolbar, text=caption, style="Inactive.ViewTab.TLabel")
+                style = "Inactive.ViewTab.TLabel"
+            tab = ttk.Label(toolbar, text=caption, style=style)
             tab.grid(row=0, column=col, pady=5, padx=5, sticky="nsew")
             self.tabs.append(tab)
             page.tab = tab
@@ -211,8 +211,11 @@ class ObjectInspector(ttk.Frame):
                     
     def set_object_info(self, object_info):
         self.object_info = object_info
-        if object_info is None:
-            self._set_title("")
+        if object_info is None or "error" in object_info:
+            if object_info is None:
+                self._set_title("")
+            else:
+                self._set_title(object_info["error"])
             if self.current_content_inspector is not None:
                 self.current_content_inspector.grid_remove()
                 self.current_content_inspector = None

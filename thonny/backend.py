@@ -439,7 +439,12 @@ class VM:
 
 
     def _cmd_get_object_info(self, cmd):
-        if cmd.object_id in self._heap:
+        if (isinstance(self._current_executor, FancyTracer)
+            and self._current_executor.is_in_past()):
+            info = {'id' : cmd.object_id,
+                    "error": "past info not available"}
+            
+        elif cmd.object_id in self._heap:
             value = self._heap[cmd.object_id]
             attributes = {}
             if cmd.include_attributes:
@@ -479,10 +484,7 @@ class VM:
 
         else:
             info = {'id' : cmd.object_id,
-                    "repr": "<object info not found>",
-                    "type" : "object",
-                    "type_id" : id(object),
-                    "attributes" : {}}
+                    "error": "object info not available"}
 
         return self.create_message("ObjectInfo", id=cmd.object_id, info=info)
 
@@ -863,7 +865,9 @@ class FancyTracer(Executor):
                 and code.co_name not in self.marker_function_names
             or self._vm.is_doing_io()
         )
-
+    
+    def is_in_past(self):
+        return self._current_state < len(self._past_messages)-1
 
     def _trace(self, frame, event, arg):
         """
