@@ -45,8 +45,12 @@ class LocalsHighlighter:
                 for child in scope.children[2:]:
                     process_node(child, local_names, global_names)
             else:
-                for child in scope.subscopes:
-                    process_scope(child)
+                if hasattr(scope, "subscopes"):
+                    for child in scope.subscopes:
+                        process_scope(child)
+                elif hasattr(scope, "children"):
+                    for child in scope.children:
+                        process_scope(child)
         
         def process_node(node, local_names, global_names):
             if isinstance(node, tree.GlobalStmt):
