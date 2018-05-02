@@ -4,7 +4,7 @@ import tkinter as tk
 from thonny.common import TextRange
 from thonny import get_workbench
 from thonny import tktextext, roughparse
-from thonny.ui_utils import EnhancedTextWithLogging, lookup_style_option
+from thonny.ui_utils import EnhancedTextWithLogging
 from thonny.tktextext import EnhancedText
 
 _syntax_options = {}
@@ -162,7 +162,9 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
     def __init__(self, master=None, cnf={}, **kw):
         
-        super().__init__(master=master, tag_current_line=True, cnf=cnf, **kw)
+        super().__init__(master=master,
+                         tag_current_line=get_workbench().get_option("view.highlight_current_line"), 
+                         cnf=cnf, **kw)
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ('CodeViewText',))
         tktextext.fixwordbreaks(tk._default_root)

@@ -25,6 +25,7 @@ class EditorConfigurationPage(ConfigurationPage):
             
         self.add_checkbox("view.paren_highlighting", "Highlight parentheses")
         self.add_checkbox("view.syntax_coloring", "Highlight syntax elements")
+        self.add_checkbox("view.highlight_current_line", "Highlight current line (requires reopening the editor)")
         
         self.add_checkbox("edit.tab_complete_in_editor", "Allow code completion with Tab-key in editors", 
                           columnspan=2, pady=(20,0), )

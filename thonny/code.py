@@ -212,6 +212,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("file.open_files", [])
         get_workbench().set_default("file.current_file", None)
         get_workbench().set_default("file.recent_files", [])
+        get_workbench().set_default("view.highlight_current_line", False)
         get_workbench().set_default("view.show_line_numbers", False)
         get_workbench().set_default("view.recommended_line_length", 0)
         
