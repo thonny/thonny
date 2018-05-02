@@ -398,7 +398,7 @@ class ExpressionBox(tk.Text):
     def update_expression(self, msg, frame_info):
         focus = frame_info.last_event_focus
         event = frame_info.last_event
-        print("FRI", event, focus, len(frame_info.current_evaluations))
+        
         if frame_info.current_root_expression is not None:
             self._load_expression(frame_info.filename, frame_info.current_root_expression)
             
