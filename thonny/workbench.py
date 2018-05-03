@@ -1068,6 +1068,7 @@ class Workbench(tk.Tk):
             self._scaling_factor = scaling
         
         if running_on_mac_os():
+            self._scaling_factor *= 1.7
             
         self.tk.call("tk", "scaling", self._scaling_factor)
     
