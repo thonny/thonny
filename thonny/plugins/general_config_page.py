@@ -25,7 +25,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         self._debug_checkbox.grid(row=3, column=0, sticky=tk.W, columnspan=2)
         
         self._scaling_var = get_workbench().get_variable("general.scaling")
-        self._scaling_label = ttk.Label(self, text="UI scaling factor")
+        self._scaling_label = ttk.Label(self, text="UI scaling factor\n(at the moment seems to work\nonly in Windows)")
         self._scaling_label.grid(row=4, column=0, sticky=tk.W, padx=(0, 10))
         scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0, 
                            round(get_workbench()._default_scaling_factor, 2)})
