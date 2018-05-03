@@ -420,7 +420,7 @@ class AutomaticNotebook(ClosableNotebook):
             style="TNotebook"
         else:
             style="ButtonNotebook.TNotebook"
-        super().__init__(master, style=style)
+        super().__init__(master, style=style, padding=0)
         self.position_key = position_key
     
     def add(self, child, **kw):

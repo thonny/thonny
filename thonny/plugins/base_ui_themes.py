@@ -480,6 +480,91 @@ def xpnative():
         },
     }
 
+def aqua():
+    # https://github.com/tcltk/tk/blob/master/library/ttk/aquaTheme.tcl
+    return {
+        "." : {
+            "configure" : {
+                "font" : "TkDefaultFont",
+                "background" : "systemWindowBody",
+                "foreground" : "systemModelessDialogActiveText",
+                "selectbackground" : "systemHighlight",
+                "selectforeground" : "systemModelessDialogActiveText",
+                "selectborderwidth" : 0,
+                "insertwidth" : 1,
+                "stipple" : "",
+            },
+            "map" : {
+                "foreground" : [("disabled", "systemModelessDialogInactiveText"),
+                                ("background", "systemModelessDialogInactiveText")],
+                "selectbackground" : [("background", "systemHighlightSecondary"),
+                                      ("!focus", "systemHighlightSecondary")],
+                "selectforeground" : [("background", "systemModelessDialogInactiveText"),
+                                      ("!focus", "systemDialogActiveText")],
+            },
+        },
+        "TButton" : {
+            "configure" : {
+                "anchor" : "center",
+                "width" : "6"
+            },
+        },
+        "Toolbutton" : {
+            "configure" : {
+                "padding" : 4,
+            },
+        },
+        "TNotebook" : {
+            "configure" : {
+                "tabmargins" : [10, 0],
+                "tabposition" : "n",
+                "padding" : [18, 8, 18, 17],
+            },
+        },
+        "TNotebook.Tab" : {
+            "configure" : {
+                "padding" : [12, 3, 12, 2],
+            },
+        },
+        "TCombobox" : {
+            "configure" : {
+                "postoffset" : [5, -2, -10, 0]
+            },
+        },
+        "Heading" : {
+            "configure" : {
+                "font" : "TkHeadingFont",
+            },
+        },
+        "Treeview" : {
+            "configure" : {
+                "rowheight" : 18,
+                "background" : "white"
+            },
+            "map" : {
+                "background" : [("disabled", "systemDialogBackgroundInactive"),
+                                ("!disabled", "!selected", "systemWindowBody"),
+                                ("selected", "background", "systemHighlightSecondary"),
+                                ("selected", "systemHighlight")],
+                "foreground" : [("disabled", "systemModelessDialogInactiveText"),
+                                ("!disabled", "!selected", "black"),
+                                ("selected", "systemModelessDialogActiveText")],
+            },
+        },
+        "TProgressbar" : {
+            "configure" : {
+                "period" : 100,
+                "maxphase" : 255
+            },
+        },
+        "Labelframe" : {
+            "configure" : {
+                "labeloutside" : True,
+                "labelmargins" : [14, 0, 14, 4]
+            },
+        },
+    }
+
 def windows():
     return [
         xpnative(),
@@ -641,19 +726,24 @@ def enhanced_aqua():
     return [
         _treeview_settings(),
         _menubutton_settings(),
-        _paned_window_settings(),
+        #_paned_window_settings(),
         _menu_settings(),
         {
-            "Tab" : {
+            "TPanedWindow" : {
                 "configure" : {
-                    "padding" : (scale(4),scale(1),0,0)
+                    "background" : "systemDialogBackgroundActive",
                 }
             },
-            "ButtonNotebook.Tab" : {
+            "TFrame" : {
                 "configure" : {
-                    "padding" : (scale(4),scale(1),scale(1),scale(3))
+                    "background" : "systemDialogBackgroundActive",
                 }
-            }
+            },
+            "Tab" : {
+                "map" : {
+                    "foreground" : [("selected", "white")]
+                }
+            },
         }
     ]
 
@@ -669,6 +759,8 @@ def load_plugin():
             settings = clam
         elif name == "xpnative":
             settings = xpnative
+        elif name == "aqua":
+            settings = aqua
         else:
             settings = {}
              
@@ -682,7 +774,7 @@ def load_plugin():
         get_workbench().add_ui_theme("Windows", "xpnative", windows)
     
     if "aqua" in original_themes:
-        get_workbench().add_ui_theme("Enhanced Aqua", "aqua", enhanced_aqua)
+        get_workbench().add_ui_theme("Kind of Aqua", "aqua", enhanced_aqua)
     
 
     if "Windows" in get_workbench().get_usable_ui_theme_names():

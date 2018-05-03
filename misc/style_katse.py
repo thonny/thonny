@@ -4,38 +4,18 @@ from tkinter import font
 from tkinter.font import nametofont
 
 root = tk.Tk()
+style = ttk.Style()
+print(style.layout("TFrame"))
+style.layout("TFrame", [])
+style.configure("TFrame", background="pink")
 
-b1 = ttk.Button(root, text="essa")
-b1.grid(pady=10)
+nb = ttk.Notebook(root)
+nb.grid(sticky="nsew")
 
-b2 = ttk.Button(root, text="tessa")
-b2.grid(pady=10)
+nb.add(ttk.Button(nb, text="bt"), text="nunu")
 
-e1 = ttk.Entry(root)
-e1.grid(pady=10, padx=10)
+nb.add(tk.Frame(nb, background="pink"), text="fr")
 
-s = ttk.Style()
-#print(s.element_options("Combobox.field"))
-
-s.theme_settings("clam", {
-    "TButton" : {
-        "configure" : {
-            "background" : "red"
-        }
-    }
-})
-
-s.theme_settings("clam", {
-    "TButton" : {
-        "configure" : {
-            "foreground" : "blue"
-        }
-    }
-})
-
-e1.bind("<<ThemeChanged>>", lambda e: print("E!"), True)
-e1.destroy()
-
-s.theme_use("clam")
-
+root.columnconfigure(0, weight=1)
+root.rowconfigure(0, weight=1)
 root.mainloop()

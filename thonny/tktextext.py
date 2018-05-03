@@ -641,12 +641,13 @@ class EnhancedText(TweakableText):
         
         if "background" not in self._initial_configuration:
             background = style.lookup(self._style, "background", states)
-            self.configure(background=background)
+            if background:
+                self.configure(background=background)
         
         foreground = style.lookup(self._style, "foreground", states)
-        self.configure(foreground=foreground)
-        
-        self.configure(insertbackground=foreground) # TODO: allow this to be themed?
+        if foreground:
+            self.configure(foreground=foreground)
+            self.configure(insertbackground=foreground) 
         
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
@@ -858,11 +859,13 @@ class TextFrame(ttk.Frame):
         
         style = ttk.Style()
         background = style.lookup("Gutter", "background")
-        self._gutter.configure(background=background, selectbackground=background)
-        self._margin_line.configure(background=background)
+        if background:
+            self._gutter.configure(background=background, selectbackground=background)
+            self._margin_line.configure(background=background)
         
         foreground = style.lookup("Gutter", "foreground")
-        self._gutter.configure(foreground=foreground, selectforeground=foreground)
+        if foreground:
+            self._gutter.configure(foreground=foreground, selectforeground=foreground)
         
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
