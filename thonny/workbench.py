@@ -830,6 +830,21 @@ class Workbench(tk.Tk):
         
         self._apply_syntax_theme(self.get_option("view.syntax_theme"))
     
+    def uses_dark_ui_theme(self):
+        
+        name = self._style.theme_use()
+        while True:
+            if "dark" in name.lower():
+                return True
+            
+            name, _, _ = self._ui_themes[name]
+            if name is None:
+                # reached start of the chain
+                break
+        
+        return False
+        
+    
     def _show_views(self):
         for view_id in self._view_records:
             if self._view_records[view_id]["visibility_flag"].get():

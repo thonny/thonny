@@ -20,7 +20,7 @@ import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
-    lookup_style_option
+    lookup_style_option, scrollbar_style
 from thonny.misc_utils import running_on_windows
 import sys
 
@@ -98,7 +98,7 @@ class PipDialog(tk.Toplevel):
         self.listbox.insert("end", " <INSTALL>")
         self.listbox.bind("<<ListboxSelect>>", self._on_listbox_select, True)
         self.listbox.grid(row=0, column=0, sticky="nsew")
-        list_scrollbar = AutoScrollbar(listframe, orient=tk.VERTICAL)
+        list_scrollbar = AutoScrollbar(listframe, orient=tk.VERTICAL, style=scrollbar_style("Vertical"))
         list_scrollbar.grid(row=0, column=1, sticky="ns")
         list_scrollbar['command'] = self.listbox.yview
         self.listbox["yscrollcommand"] = list_scrollbar.set
@@ -119,6 +119,8 @@ class PipDialog(tk.Toplevel):
                                               horizontal_scrollbar=False,
                                               background=lookup_style_option("TFrame", "background"),
                                               vertical_scrollbar_class=AutoScrollbar,
+                                              vertical_scrollbar_style=scrollbar_style("Vertical"),
+                                              horizontal_scrollbar_style=scrollbar_style("Horizontal"),
                                               width=60, height=10)
         info_text_frame.configure(borderwidth=0)
         info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))

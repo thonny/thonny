@@ -661,6 +661,8 @@ class TextFrame(ttk.Frame):
                  horizontal_scrollbar=True, vertical_scrollbar=True,
                  vertical_scrollbar_class=ttk.Scrollbar,
                  horizontal_scrollbar_class=ttk.Scrollbar,
+                 vertical_scrollbar_style=None,
+                 horizontal_scrollbar_style=None,
                  borderwidth=0, relief="sunken",
                  gutter_background='#e0e0e0', gutter_foreground='#999999',
                  **text_options):
@@ -699,13 +701,13 @@ class TextFrame(ttk.Frame):
         self.set_line_numbers(line_numbers)
         
         if vertical_scrollbar:
-            self._vbar = vertical_scrollbar_class(self, orient=tk.VERTICAL)
+            self._vbar = vertical_scrollbar_class(self, orient=tk.VERTICAL, style=vertical_scrollbar_style)
             self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
             self._vbar['command'] = self._vertical_scroll 
             self.text['yscrollcommand'] = self._vertical_scrollbar_update  
         
         if horizontal_scrollbar:
-            self._hbar = horizontal_scrollbar_class(self, orient=tk.HORIZONTAL)
+            self._hbar = horizontal_scrollbar_class(self, orient=tk.HORIZONTAL, style=horizontal_scrollbar_style)
             self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
             self._hbar['command'] = self._horizontal_scroll
             self.text['xscrollcommand'] = self._horizontal_scrollbar_update    

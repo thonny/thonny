@@ -8,7 +8,8 @@ import traceback
 from thonny import memory, roughparse
 from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
 from thonny.misc_utils import running_on_mac_os, shorten_repr
-from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration
+from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration,\
+    scrollbar_style
 import tkinter as tk
 from thonny import get_workbench, get_runner
 from thonny.codeview import PythonText
@@ -20,7 +21,8 @@ class ShellView (ttk.Frame):
     def __init__(self, master, **kw):
         ttk.Frame.__init__(self, master, **kw)
         
-        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, 
+                                            style=scrollbar_style("Vertical"))
         self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         self.text = ShellText(self,
                             font="EditorFont",

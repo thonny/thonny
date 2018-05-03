@@ -473,7 +473,8 @@ class AutomaticNotebook(ClosableNotebook):
 class TreeFrame(ttk.Frame):
     def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
         ttk.Frame.__init__(self, master)
-        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
+        # http://wiki.tcl.tk/44444#pagetoc50f90d9a
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, style=scrollbar_style("Vertical"))
         if show_scrollbar:
             self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
         
@@ -501,7 +502,14 @@ class TreeFrame(ttk.Frame):
     def on_double_click(self, event):
         pass
 
-
+def scrollbar_style(orientation):
+    # In mac ttk.Scrollbar uses native rendering unless style attribute is set
+    # see http://wiki.tcl.tk/44444#pagetoc50f90d9a
+    # Native rendering doesn't look good in dark themes
+    if running_on_mac_os() and get_workbench().uses_dark_ui_theme():
+        return orientation + ".TScrollbar"
+    else:
+        return None
 
 def sequence_to_accelerator(sequence):
     """Translates Tk event sequence to customary shortcut string
@@ -588,6 +596,9 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             
     
 class SafeScrollbar(ttk.Scrollbar):
+    def __init__(self, master=None, **kw):
+        super().__init__(master=master, **kw)
+    
     def set(self, first, last):
         try:
             ttk.Scrollbar.set(self, first, last)
@@ -598,6 +609,10 @@ class AutoScrollbar(SafeScrollbar):
     # http://effbot.org/zone/tkinter-autoscrollbar.htm
     # a vert_scrollbar that hides itself if it's not needed.  only
     # works if you use the grid geometry manager.
+    
+    def __init__(self, master=None, **kw):
+        super().__init__(master=master, **kw)
+    
     def set(self, lo, hi):
         # TODO: this can make GUI hang or max out CPU when scrollbar wobbles back and forth
         if float(lo) <= 0.0 and float(hi) >= 1.0:

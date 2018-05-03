@@ -2,9 +2,9 @@
 
 import tkinter as tk
 from thonny.common import TextRange
-from thonny import get_workbench
+from thonny import get_workbench, ui_utils
 from thonny import tktextext, roughparse
-from thonny.ui_utils import EnhancedTextWithLogging
+from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 from thonny.tktextext import EnhancedText
 
 _syntax_options = {}
@@ -191,7 +191,10 @@ class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
         
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
-                                     undo=True, wrap=tk.NONE, **text_frame_args)
+                                     undo=True, wrap=tk.NONE,
+                                     vertical_scrollbar_style=scrollbar_style("Vertical"), 
+                                     horizontal_scrollbar_style=scrollbar_style("Horizontal"), 
+                                     **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
         
