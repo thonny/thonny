@@ -781,8 +781,9 @@ class Workbench(tk.Tk):
                 self.option_add("*Listbox." + setting, value)
         
         text_opts = self._style.configure("Text")
-        for key in text_opts:
-            self.option_add("*Text." + key, text_opts[key])
+        if text_opts:
+            for key in text_opts:
+                self.option_add("*Text." + key, text_opts[key])
         
         if hasattr(self, "_menus"):
             # if menus have been initialized, ie. when theme is being changed
