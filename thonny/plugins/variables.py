@@ -11,6 +11,8 @@ class GlobalsView(ttk.Frame):
     def __init__(self, master):
         super().__init__(master)
         
+        get_workbench().set_default("view.globals_module_selector", False)
+        
         self._module_name_variable = create_string_var("__main__",
             modification_listener=self._request_globals)
         self.module_name_combo = ttk.Combobox(self,
@@ -20,7 +22,10 @@ class GlobalsView(ttk.Frame):
                                         height=20,
                                         values=[])
         
-        self.module_name_combo.grid(row=0, column=0, sticky="nsew")
+        if (get_workbench().get_option("view.globals_module_selector")
+            and get_workbench().get_mode() != "simple"
+            or self._module_name_variable.get() != "__main__"):
+            self.module_name_combo.grid(row=0, column=0, sticky="nsew")
         
         self.variables_frame = VariablesFrame(self)
         self.variables_frame.grid(row=1, column=0, sticky="nsew")
