@@ -26,7 +26,7 @@ cp Thonny.desktop $TARGET_DIR/templates
 export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 # INSTALL DEPS ###################################
-$TARGET_DIR/bin/python3.6 -m pip install jedi==0.10.2
+$TARGET_DIR/bin/python3.6 -m pip install jedi==0.12
 $TARGET_DIR/bin/python3.6 -m pip install --no-cache-dir distro
 $TARGET_DIR/bin/python3.6 -m pip install --no-cache-dir certifi
 
