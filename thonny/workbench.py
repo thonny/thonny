@@ -87,8 +87,7 @@ class Workbench(tk.Tk):
         self._init_configuration()
         self._init_diagnostic_logging()
         
-        self._default_scaling_factor = self.tk.call("tk", "scaling")
-        self.update_scaling()
+        self._init_scaling()
         
         self._add_main_backends()
         self._init_theming()
@@ -1069,7 +1068,9 @@ class Workbench(tk.Tk):
         return (self._configuration_manager.has_option("view.HeapView.visible")
             and self.get_option("view.HeapView.visible"))
     
-    def update_scaling(self):
+    def _init_scaling(self):
+        self._default_scaling_factor = self.tk.call("tk", "scaling")
+        
         scaling = self.get_option("general.scaling")
         if scaling == "auto":
             self._scaling_factor = self.winfo_screenheight() / 460
@@ -1086,6 +1087,14 @@ class Workbench(tk.Tk):
             self._scaling_factor *= 1.7
             
         self.tk.call("tk", "scaling", self._scaling_factor)
+        
+        # update system fonts which are given in pixel sizes
+        for name in tk_font.names():
+            f = tk_font.nametofont(name)
+            orig_size = f.cget("size")
+            if orig_size < 0:
+                # meaning its absolute value means height in pixels
+                f.configure(size=-orig_size * self._scaling_factor)
     
     def update_fonts(self):
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
