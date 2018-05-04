@@ -33,7 +33,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             modification_listener=self._update_appearance)
         
         ttk.Label(self, text="UI theme").grid(row=1, column=0, sticky="w", pady=(10, 0))
-        self._ui_theme_combo = ttk.Combobox(self,
+        self._ui_theme_combo = ttk.Combobox(self, width=15,
                                         exportselection=False,
                                         textvariable=self._ui_theme_variable,
                                         state='readonly',
@@ -42,7 +42,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         self._ui_theme_combo.grid(row=2, column=0, sticky="nsew", padx=(0, 10))
         
         ttk.Label(self, text="Syntax theme").grid(row=1, column=1, sticky="w", pady=(10, 0))
-        self._syntax_theme_combo = ttk.Combobox(self,
+        self._syntax_theme_combo = ttk.Combobox(self, width=15,
                                         exportselection=False,
                                         textvariable=self._syntax_theme_variable,
                                         state='readonly',
@@ -52,7 +52,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         
         
         ttk.Label(self, text="Editor font").grid(row=1, column=2, sticky="w", pady=(10, 0))
-        self._family_combo = ttk.Combobox(self,
+        self._family_combo = ttk.Combobox(self, width=15,
                                           exportselection=False,
                                           state='readonly',
                                           height=15,
@@ -61,7 +61,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         self._family_combo.grid(row=2, column=2, sticky=tk.NSEW, padx=(0,10))
         
         ttk.Label(self, text="Size").grid(row=1, column=3, sticky="w", pady=(10, 0))
-        self._size_combo = ttk.Combobox(self, width=4,
+        self._size_combo = ttk.Combobox(self, width=5,
                                         exportselection=False,
                                         textvariable=self._size_variable,
                                         state='readonly',
