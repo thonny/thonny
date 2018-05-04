@@ -1151,8 +1151,10 @@ class SubprocessDialog(tk.Toplevel):
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         #self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.transient(master)
-        self.grab_set() # to make it active and modal
+        if not running_on_mac_os():
+            # occasionally following causes dialog to stay behind main win on mac
+            self.transient(master)
+            self.grab_set() # to make it active and modal
         self.text.focus_set()
         
         
