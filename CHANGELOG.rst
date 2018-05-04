@@ -2,7 +2,7 @@
 Version history
 ===============
 
-2.2.0b1 (2018-05-??)
+2.2.0b1 (2018-05-04)
 ====================
 * NEW: Added support for stepping back in time during debugging (Run => Step back) by Alar Leemet. If you accidentally stepped over an interesting part of code, then now you can step back and step into.
 * NEW: Added support for UI and syntax theming (https://bitbucket.org/plas/thonny/wiki/Theming)
