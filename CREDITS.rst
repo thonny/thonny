@@ -22,6 +22,7 @@ Libraries and resources
 Source contributors and frequent bug-reporters
 ----------------------------------------------
 * Aivar Annamaa
+* Alar Leemet
 * Filip Schouwenaars
 * Fizban
 * Miro Hrončok 
