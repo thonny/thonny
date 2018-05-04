@@ -7,12 +7,12 @@ Version history
 * NEW: Added support for stepping back in time during debugging (Run => Step back) by Alar Leemet. If you accidentally stepped over an interesting part of code, then now you can step back and step into.
 * NEW: Added support for UI and syntax theming (https://bitbucket.org/plas/thonny/wiki/Theming)
 * NEW: Added several built-in dark themes
-* NEW: Added support for display scaling / high-DPI screens (Tools => Options => General). [Doesn't work properly in Mac, yet]
+* NEW: Added support for display scaling / high-DPI screens (Tools => Options => General)
 * NEW: Added closing buttons to the tabs of all views 
 * NEW: Added support for (CPython) back-end plug-ins (https://bitbucket.org/plas/thonny/wiki/Plugins)
 * NEW: Current editor line can be highlighted (Tools => Options => Editor)
 * NEW: Thonny can be started in simple mode (https://bitbucket.org/plas/thonny/wiki/Modes) 
-* NEW: Variables view now allows viewing variables from other modules beside __main__ 
+* NEW: Variables view now allows viewing variables from other modules beside __main__  (Tools => Options => General)
 * CHANGED: Dropped support for Python 3.4 (both for front-end and back-end)
 * CHANGED: Reorganized back-end configuration ("Tools => Options => Back-end" instead of "Tools => Options => Interpreter")
 * CHANGED: The roles of Interrupt and Stop commands are now more clear: Stop always restarts the backend and Interrupt only tries to interrupt 
