@@ -1088,13 +1088,16 @@ class Workbench(tk.Tk):
             
         self.tk.call("tk", "scaling", self._scaling_factor)
         
-        # update system fonts which are given in pixel sizes
-        for name in tk_font.names():
-            f = tk_font.nametofont(name)
-            orig_size = f.cget("size")
-            if orig_size < 0:
-                # meaning its absolute value means height in pixels
-                f.configure(size=-orig_size * self._scaling_factor)
+        if scaling != "auto":
+            # update system fonts which are given in pixel sizes
+            for name in tk_font.names():
+                f = tk_font.nametofont(name)
+                orig_size = f.cget("size")
+                if orig_size < 0:
+                    # meaning its absolute value means height in pixels
+                    f.configure(size=int(-orig_size * 
+                        (self._scaling_factor / self._default_scaling_factor)
+                        ))
     
     def update_fonts(self):
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
