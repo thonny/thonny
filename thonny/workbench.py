@@ -1105,7 +1105,6 @@ class Workbench(tk.Tk):
                 orig_size = f.cget("size")
                 assert orig_size > 0
                 f.configure(size=int(orig_size * self._scaling_factor / 1.7))
-                print(orig_size, self._scaling_factor)
     
     def update_fonts(self):
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
