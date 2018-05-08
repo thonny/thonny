@@ -503,7 +503,7 @@ class Workbench(tk.Tk):
                          "xpnative" if running_on_windows() else "clam")
     
         
-    def add_command(self, command_id, menu_name, command_label, handler, **kw):
+    def add_command(self, command_id, menu_name, command_label, handler, tester=None, **kw):
         """Registers an item to be shown in specified menu.
         
         Args:
@@ -529,7 +529,8 @@ class Workbench(tk.Tk):
         kw.update(dict(command_id=command_id,
                        menu_name=menu_name,
                        command_label=command_label,
-                       handler=handler))
+                       handler=handler,
+                       tester=tester))
         
         self._commands.append(kw)
     
