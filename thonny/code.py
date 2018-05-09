@@ -68,6 +68,17 @@ class Editor(ttk.Frame):
             
         return self._filename
     
+    def get_title(self):
+        if self.get_filename() is None:
+            result = "<untitled>"
+        else:
+            result = os.path.basename(self.get_filename())
+        
+        if self.is_modified():
+            result += " *"
+        
+        return result
+    
     def get_long_description(self):
         
         if self._filename is None:
@@ -359,7 +370,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _cmd_new_file(self):
         new_editor = Editor(self)
         get_workbench().event_generate("NewFile", editor=new_editor)
-        self.add(new_editor, text=self._generate_editor_title(None))
+        self.add(new_editor, text=new_editor.get_title())
         self.select(new_editor)
         new_editor.focus_set()
     
@@ -464,25 +475,14 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         for editor in self.winfo_children():
             editor.update_appearance()
     
-    def update_editor_title(self, editor):
-        self.tab(editor,
-            text=self._generate_editor_title(editor.get_filename(), editor.is_modified()))
-    
+    def update_editor_title(self, editor, title=None):
+        if title is None:
+            title = editor.get_title()
+        self.tab(editor, text=title)
      
-    def _generate_editor_title(self, filename, is_modified=False):
-        if filename is None:
-            result = "<untitled>"
-        else:
-            result = os.path.basename(filename)
-        
-        if is_modified:
-            result += " *"
-        
-        return result
-    
     def _open_file(self, filename):
         editor = Editor(self, filename)
-        self.add(editor, text=self._generate_editor_title(filename))
+        self.add(editor, text=editor.get_title())
               
         return editor
         

@@ -352,8 +352,24 @@ class MainFrameVisualizer(FrameVisualizer):
     Takes care of stepping in the main module
     """
     def __init__(self, frame_info):
-        editor = get_workbench().get_editor_notebook().show_file(frame_info.filename)
-        FrameVisualizer.__init__(self, editor.get_code_view(), frame_info)
+        self.editor = get_workbench().get_editor_notebook().show_file(frame_info.filename)
+        FrameVisualizer.__init__(self, self.editor.get_code_view(), frame_info)
+    
+    def _update_this_frame(self, msg, frame_info):
+        FrameVisualizer._update_this_frame(self, msg, frame_info)
+        if msg.is_new:
+            self._decorate_editor_title("")
+        else:
+            self._decorate_editor_title("   <<< REPLYING >>> ")
+    
+    def _decorate_editor_title(self, suffix):
+        self.editor.master.update_editor_title(self.editor, 
+                                               self.editor.get_title() + suffix)
+    
+    def close(self):
+        FrameVisualizer.close(self)
+        self._decorate_editor_title("")
+        
         
 
 class CallFrameVisualizer(FrameVisualizer):
