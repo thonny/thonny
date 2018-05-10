@@ -356,26 +356,10 @@ class PipDialog(tk.Toplevel):
         
         # Fetch info from PyPI  
         self._set_state("fetching")
-        # Follwing url fetches info about latest version.
+        # Follwing fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
-        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
-        url_future = _fetch_url_future(url)
-            
-        def poll_fetch_complete():
-            if url_future.done():
-                self._set_state("idle")
-                try:
-                    _, bin_data = url_future.result()
-                    raw_data = bin_data.decode("UTF-8")
-                    self._show_package_info(name, json.loads(raw_data))
-                except urllib.error.HTTPError as e:
-                    self._show_package_info(name, self._generate_minimal_data(name), e.code)
-                        
-            else:
-                self.after(200, poll_fetch_complete)
-        
-        poll_fetch_complete()
+        _start_fetching_package_info(name, None, self._show_package_info)
     
     def _generate_minimal_data(self, name):
         return {
@@ -447,7 +431,8 @@ class PipDialog(tk.Toplevel):
             self.install_button["text"] = "Install"
             self.uninstall_button.grid_forget()
             self._select_list_item(0)
-            
+
+        self._set_state("idle")            
     
     def _normalize_name(self, name):
         # looks like (in some cases?) pip list gives the name as it was used during install
@@ -800,6 +785,34 @@ def _ask_installation_details(master, data, selected_version):
     dlg = DetailsDialog(master, data, selected_version)
     dlg.wait_window()
     return dlg.result
+
+def _start_fetching_package_info(name, version_str, completion_handler):
+    # Fetch info from PyPI  
+    if version_str is None:
+        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
+    else:
+        url = "https://pypi.org/pypi/{}/{}/json".format(
+            urllib.parse.quote(name), version_str)
+        
+    url_future = _fetch_url_future(url)
+        
+    def poll_fetch_complete():
+        if url_future.done():
+            try:
+                _, bin_data = url_future.result()
+                raw_data = bin_data.decode("UTF-8")
+                completion_handler(name, json.loads(raw_data))
+            except urllib.error.HTTPError as e:
+                completion_handler(name, {
+                    "info" : {'name' : name},
+                    "error" : str(e),
+                    "releases" : {}
+                },
+                e.code)
+        else:
+            tk._default_root.after(200, poll_fetch_complete)
+    
+    poll_fetch_complete()
 
 
 def _extract_click_text(widget, event, tag):
