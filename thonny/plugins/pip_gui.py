@@ -14,7 +14,7 @@ import urllib.parse
 from concurrent.futures.thread import ThreadPoolExecutor
 import os
 import json
-from distutils.version import LooseVersion, StrictVersion
+from packaging.requirements import Requirement
 import logging
 import re
 from tkinter.filedialog import askopenfilename
@@ -23,6 +23,9 @@ from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
     lookup_style_option, scrollbar_style
 from thonny.misc_utils import running_on_windows
 import sys
+import thonny
+from distutils.version import StrictVersion, LooseVersion
+from tkinter.messagebox import showerror
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
@@ -171,9 +174,7 @@ class PipDialog(tk.Toplevel):
         self.close_button.grid(row=2, column=3, sticky="e")
     
     def _on_click_install(self):
-        name = self.current_package_data["info"]["name"]
-        if self._confirm_install(name):
-            self._perform_action("install")
+        self._perform_action("install")
 
     def _set_state(self, state, normal_cursor=False):
         self._state = state
@@ -470,6 +471,9 @@ class PipDialog(tk.Toplevel):
             install_args.append("--user")
         
         if action == "install":
+            if not self._confirm_install(self.current_package_data):
+                return
+            
             args = install_args
             if self._get_installed_version(name) is not None:
                 args.append("--upgrade")
@@ -488,7 +492,10 @@ class PipDialog(tk.Toplevel):
             if details is None: # Cancel
                 return
             
-            version, upgrade_deps = details
+            version, package_data, upgrade_deps = details
+            if not self._confirm_install(package_data):
+                return
+            
             args = install_args
             if upgrade_deps:
                 args.append("--upgrade")
@@ -601,7 +608,7 @@ class PipDialog(tk.Toplevel):
     def _get_title(self):
         return "Manage packages for " + self._get_interpreter()
     
-    def _confirm_install(self, name):
+    def _confirm_install(self, package_data):
         return True
     
     def _read_only(self):
@@ -611,14 +618,16 @@ class BackendPipDialog(PipDialog):
     def _get_interpreter(self):
         return get_runner().get_interpreter_command()
 
-    def _confirm_install(self, name):
+    def _confirm_install(self, package_data):
+        name = package_data["info"]["name"]
+
         if name.lower().startswith("thonny"):
             return messagebox.askyesno("Confirmation", 
                                      "Looks like you are installing a Thonny-related package.\n"
                                    + "If you meant to install a Thonny plugin, then you should\n"
                                    + "close this dialog and choose 'Tools → Manage plugins...'\n"
                                    + "\n"
-                                   + "Are you sure you want to install '" + name + "' here?")
+                                   + "Are you sure you want to install '" + name + "' for the back-end?")
         else:
             return True
 
@@ -635,6 +644,21 @@ class PluginsPipDialog(PipDialog):
     def __init__(self, master):
         PipDialog.__init__(self, master, only_user=True)
     
+    def _conflicts_with_thonny_version(self, req_strings):
+        try:
+            conflicts = []
+            for req_string in req_strings:
+                req = Requirement(req_string)
+                if (req.name == "thonny" 
+                    and not req.specifier.contains(thonny.get_version(), True)):
+                    print("CONF", req, repr(thonny.get_version()))
+                    conflicts.append(req_string)
+            
+            return conflicts
+        except:
+            logging.exception("Problem computing conflicts")
+            return None
+    
     def _get_interpreter(self):
         return sys.executable.replace("thonny.exe", "python.exe")
     
@@ -643,7 +667,27 @@ class PluginsPipDialog(PipDialog):
         env["PYTHONUSERBASE"] = THONNY_USER_BASE
         return env
         
+    def _confirm_install(self, package_data):
+        name = package_data["info"]["name"]
+        reqs = package_data["info"].get("requires_dist", None)
         
+        if name.lower().startswith("thonny-") and not reqs:
+            showerror("Thonny plugin without requirements",
+                      "Looks like you are trying to install an outdated Thonny\n"
+                      + "plug-in (it doesn't specify required Thonny version).\n\n"
+                      + "If you still want it, then please install it from the command line.")
+            return False
+        elif reqs:
+            conflicts = self._conflicts_with_thonny_version(reqs)
+            if conflicts:
+                showerror("Unsuitable requirements",
+                          "This package requires different Thonny version:\n\n  "
+                          + "\n  ".join(conflicts) 
+                          + "\n\nIf you still want it, then please install it from the command line.")
+                return False
+            
+        return True
+    
     def _create_widgets(self, parent):
         bg = "#ffff99"
         banner = tk.Label(parent, background=bg)
@@ -674,7 +718,8 @@ class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):
         tk.Toplevel.__init__(self, master)
         self.result = None
-        
+        self._version_data = None
+        self._package_name = package_metadata["info"]["name"]
         self.title("Advanced install / upgrade / downgrade")
 
         self.rowconfigure(0, weight=1)
@@ -688,6 +733,7 @@ class DetailsDialog(tk.Toplevel):
         version_label.grid(row=0, column=0, columnspan=2, padx=20, pady=(15,0), sticky="w")
         
         def version_sort_key(s):
+            # TODO: use packaging module 
             # Trying to massage understandable versions into valid StrictVersions
             if s.replace(".", "").isnumeric(): # stable release
                 s2 = s + "b999" # make it latest beta version
@@ -706,28 +752,32 @@ class DetailsDialog(tk.Toplevel):
         
         version_strings = list(package_metadata["releases"].keys())
         version_strings.sort(key=version_sort_key, reverse=True)
-        self.version_combo = ttk.Combobox(main_frame, values=version_strings,
-                              exportselection=False)
-        try:
-            self.version_combo.current(version_strings.index(selected_version))
-        except:
-            pass
+        self.version_var = ui_utils.create_string_var(selected_version, self._start_fetching_version_info)
+        self.version_combo = ttk.Combobox(
+            main_frame,
+            textvariable = self.version_var,               
+            values=version_strings,
+            exportselection=False
+        )
         
         self.version_combo.state(['!disabled', 'readonly'])
         self.version_combo.grid(row=1, column=0, columnspan=2, pady=(0,15),
                                 padx=20, sticky="ew")
         
+        self.requires_label = ttk.Label(main_frame, text="")
+        self.requires_label.grid(row=2, column=0, columnspan=2, pady=(0,15),
+                                 padx=20, sticky="ew")
         
         self.update_deps_var = tk.IntVar()
         self.update_deps_var.set(0)
         self.update_deps_cb = ttk.Checkbutton(main_frame, text="Upgrade dependencies",
                                               variable=self.update_deps_var)
-        self.update_deps_cb.grid(row=2, column=0, columnspan=2, padx=20, sticky="w")
+        self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
         
         self.ok_button = ttk.Button(main_frame, text="Install", command=self._ok)
-        self.ok_button.grid(row=3, column=0, pady=15, padx=(20, 0), sticky="se")
+        self.ok_button.grid(row=4, column=0, pady=15, padx=(20, 0), sticky="se")
         self.cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
-        self.cancel_button.grid(row=3, column=1, pady=15, padx=(5,20), sticky="se")
+        self.cancel_button.grid(row=4, column=1, pady=15, padx=(5,20), sticky="se")
         
         
 
@@ -744,9 +794,59 @@ class DetailsDialog(tk.Toplevel):
         
         ui_utils.center_window(self, master)
         
+        if self.version_var.get().strip():
+            self._start_fetching_version_info()
+    
+    def _set_state(self, state):
+        self._state = state
+        widgets = [self.version_combo, 
+                   # self.search_box, # looks funny when disabled 
+                   self.ok_button,
+                   self.update_deps_cb]
+        
+        if state == "idle":
+            self.config(cursor="")
+            for widget in widgets:
+                if widget == self.version_combo:
+                    widget.state(["!disabled", "readonly"])
+                else:
+                    widget["state"] = tk.NORMAL
+        else:
+            self.config(cursor=get_busy_cursor())
+            for widget in widgets:
+                widget["state"] = tk.DISABLED
+        
+        if self.version_var.get().strip() == "" or not self._version_data:
+            self.ok_button["state"] = tk.DISABLED
+        
+    def _start_fetching_version_info(self):
+        self._set_state("busy")
+        _start_fetching_package_info(self._package_name,
+                                     self.version_var.get(),
+                                     self._show_version_info)
+    
+    def _show_version_info(self, name, info, error_code=None):
+        self._version_data = info
+        if (not error_code
+            and "requires_dist" in info["info"] 
+            and isinstance(info["info"]["requires_dist"], list)):
+            reqs = "Requires:\n  * " + "\n  * ".join(info["info"]["requires_dist"])
+        elif error_code:
+            reqs = "Error code: " + str(error_code)
+            if "error" in info:
+                reqs += "\nError: " + info["error"]
+        else:
+            reqs = ""
+        
+        self.requires_label.configure(text=reqs)
+        self._set_state("idle")
     
     def _ok(self, event=None):
-        self.result = self.version_combo.get(), bool(self.update_deps_var.get())
+        self.result = (
+            self.version_var.get(),
+            self._version_data,
+            bool(self.update_deps_var.get())
+        )
         self.destroy()
     
     def _cancel(self, event=None):
@@ -767,6 +867,7 @@ def _get_latest_stable_version(version_strings):
     versions = []
     for s in version_strings:
         if s.replace(".", "").isnumeric(): # Assuming stable versions have only dots and numbers
+            # TODO: use packaging module? 
             versions.append(LooseVersion(s)) # LooseVersion __str__ doesn't change the version string
     
     if len(versions) == 0:
@@ -792,7 +893,8 @@ def _start_fetching_package_info(name, version_str, completion_handler):
         url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
     else:
         url = "https://pypi.org/pypi/{}/{}/json".format(
-            urllib.parse.quote(name), version_str)
+            urllib.parse.quote(name), 
+            urllib.parse.quote(version_str))
         
     url_future = _fetch_url_future(url)
         
@@ -828,6 +930,46 @@ def _extract_click_text(widget, event, tag):
         logging.exception("extracting click text")
         return None
 
+"""
+def parse_requirement(req_str):
+    req_str = req_str.strip()
+    name = re.split("[(<>=)]", req_str)[0].strip()
+    assert len(name) > 0
+    
+    constraints_strings = [part.strip() 
+                   for part in (
+                       req_str[len(name):]
+                       .replace('(', '')
+                       .replace(')', '')
+                       .split(",")
+                    )]
+    
+    constraints = []
+    for cs in constraints_strings:
+        m = re.search("\d", cs)
+        assert m
+        op = cs[:m.start()]
+        version = cs[m.start():]
+        constraints.append((op, version))
+        
+    return name, constraints
+
+def version_satisfies_constraints(ver, constraints):
+    for cop, cver in constraints:
+        pass
+
+def version_satisfies_constraint(ver, cop, cver):
+    # https://www.python.org/dev/peps/pep-0440/#version-specifiers
+    if ((cop == "" or "=" in cop)
+        # cver may be shorter
+        and (ver).startswith(cver + ".0")):
+        return True
+    
+    # equality was not allowed or not found
+    if ()
+    
+        
+""" 
 
 def load_plugin():
     def open_backend_pip_gui(*args):
@@ -848,4 +990,5 @@ def load_plugin():
                                 group=180)
 
 
-    
+if __name__ == "__main__":
+    print("2.1.0" in Requirement("thonny (>=2.1.0b2, ==2.1)").specifier)
