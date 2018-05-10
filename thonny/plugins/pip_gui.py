@@ -651,7 +651,6 @@ class PluginsPipDialog(PipDialog):
                 req = Requirement(req_string)
                 if (req.name == "thonny" 
                     and not req.specifier.contains(thonny.get_version(), True)):
-                    print("CONF", req, repr(thonny.get_version()))
                     conflicts.append(req_string)
             
             return conflicts
