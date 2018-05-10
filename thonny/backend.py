@@ -998,7 +998,7 @@ class FancyTracer(Executor):
 
     def _handle_message_selection(self):
         """
-        For handling reversible debugging
+        Selects the correct message according to current command for both past and present states
         :return: Let Python run to the next progress event
         """
 
@@ -1023,7 +1023,7 @@ class FancyTracer(Executor):
 
             if self._current_command.command == "back":
                 # Step back has been chosen, move the pointer backwards
-                if self._current_state > 0:
+                if self._current_state > 0:  # Don't let the pointer have negative values
                     self._past_messages[self._current_state][1] = False  # Remove "shown to user" flag
                     self._current_state -= 1
             else:
@@ -1034,11 +1034,19 @@ class FancyTracer(Executor):
 
 
     def _get_frame_from_history(self):
+        """
+        :return: Returns the last frame from the stack of the current state
+        """
         return self._past_messages[self._current_state][0]["stack"][-1]
 
 
     def _save_debugger_progress_message(self, frame, value):
-
+        """
+        Creates and saves the debugger progress message for possible reporting to the front-end
+        :param frame: Current frame, for checking if an exception occurred
+        :param value: The returned value of the statement/expression
+        :return:
+        """
         if self._unhandled_exception is not None:
             frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
             # I want to show frames from current frame to causing_frame
@@ -1063,6 +1071,7 @@ class FancyTracer(Executor):
         if len(self._past_messages) > 0:
             self._past_messages[-1][0]["is_new"] = False
 
+        # Count the symbols that have been sent by each stream by now.
         symbols_by_streams = {
             "stdin": sys.stdin._processed_symbol_count,
             "stdout": sys.stdout._processed_symbol_count,
@@ -1093,6 +1102,11 @@ class FancyTracer(Executor):
 
 
     def _send_and_fetch_next_debugger_progress_message(self, message):
+        """
+        Sends a message to the front-end and fetches the next message
+        :param message: The message to be sent
+        :return:
+        """
         self._vm.send_message(message)
 
         self._debug("Waiting for command")
@@ -1103,49 +1117,6 @@ class FancyTracer(Executor):
         self._respond_to_inline_commands()
         assert isinstance(self._current_command, DebuggerCommand)
 
-    """
-    def _report_state_and_fetch_next_message(self, frame, stack, value=None):
-        self._debug("Completed command: ", self._current_command)
-
-        if self._unhandled_exception is not None:
-            frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
-            # I want to show frames from current frame to causing_frame
-            if frame == self._unhandled_exception.causing_frame:
-                interesting_frame_infos = []
-            else:
-                # c how far is current frame from causing_frame?
-                _distance = 0
-                _f = self._unhandled_exception.causing_frame
-                while _f != frame:
-                    _distance += 1
-                    _f = _f.f_back
-                    if _f == None:
-                        break
-                interesting_frame_infos = frame_infos[-_distance:]
-            exception_lower_stack_description = "".join(interesting_frame_infos)
-            exception_msg = str(self._unhandled_exception)
-        else:
-            exception_lower_stack_description = None
-            exception_msg = None
-
-        self._vm.send_message(self._vm.create_message("DebuggerProgress",
-            command=self._current_command.command,
-            stack=stack,
-            exception=self._vm.export_value(self._unhandled_exception, True),
-            exception_msg=exception_msg,
-            exception_lower_stack_description=exception_lower_stack_description,
-            value=value
-        ))
-
-        # Fetch next debugger command
-        self._current_command = self._vm._fetch_command()
-        self._debug("got command:", self._current_command)
-        # get non-progress commands out our way
-        self._respond_to_inline_commands()
-        assert isinstance(self._current_command, DebuggerCommand)
-
-        # Return and let Python run to next progress event
-    """
 
     def _try_interpret_as_again_event(self, frame, original_event, original_args):
         """
