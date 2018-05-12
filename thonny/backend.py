@@ -951,7 +951,7 @@ class FancyTracer(Executor):
         and _trace will call it again in another state.
         Otherwise sends response and fetches next command.  
         """
-        self._debug("Progress event:", event, self._current_command)
+        #self._debug("Progress event:", event, self._current_command)
 
         focus = TextRange(*args["text_range"])
 
@@ -985,12 +985,11 @@ class FancyTracer(Executor):
                 self._custom_stack[-1].current_root_expression = focus
                 self._custom_stack[-1].current_evaluations = []
 
-        value = self._vm.export_value(args["value"]) if event == "after_expression" else None
-        if value is not None:
-            self._custom_stack[-1].current_evaluations.append((focus, value))
+        if event == "after_expression":
+            self._custom_stack[-1].current_evaluations.append((focus, self._vm.export_value(args["value"])))
 
         # Save the current command and frame data
-        self._save_debugger_progress_message(frame, value)
+        self._save_debugger_progress_message(frame)
 
         # Select the correct method according to the command
         self._handle_message_selection()
@@ -1040,7 +1039,7 @@ class FancyTracer(Executor):
         return self._past_messages[self._current_state][0]["stack"][-1]
 
 
-    def _save_debugger_progress_message(self, frame, value):
+    def _save_debugger_progress_message(self, frame):
         """
         Creates and saves the debugger progress message for possible reporting to the front-end
         :param frame: Current frame, for checking if an exception occurred
@@ -1088,12 +1087,10 @@ class FancyTracer(Executor):
 
         self._past_messages.append([(
             self._vm.create_message("DebuggerProgress",
-                                    command=self._current_command,#.command,
                                     stack=self._export_stack(),
                                     exception=self._vm.export_value(self._unhandled_exception, True),
                                     exception_msg=exception_msg,
                                     exception_lower_stack_description=exception_lower_stack_description,
-                                    value=value,
                                     is_new=True,
                                     loaded_modules=list(sys.modules.keys()),
                                     stream_symbol_counts=symbols_by_streams
