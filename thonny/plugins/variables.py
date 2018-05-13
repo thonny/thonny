@@ -41,6 +41,9 @@ class GlobalsView(ttk.Frame):
         get_workbench().bind("ToplevelResult", self._handle_progress, True)
         get_workbench().bind("InputRequest", self._handle_progress, True)
     
+    def before_show(self):
+        self._handle_progress(even_when_hidden=True)
+        
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well
         error = getattr(event, "error", None)
