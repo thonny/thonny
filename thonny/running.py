@@ -327,9 +327,12 @@ class Runner:
         self._proxy = None
         self._proxy = backend_class(clean)
         
+        if not first:
+            self.start_polling()
+    
+    def start_polling(self):
         self._poll_vm_messages()
         
-    
     def destroy_backend(self):
         if self._polling_after_id is not None:
             get_workbench().after_cancel(self._polling_after_id)

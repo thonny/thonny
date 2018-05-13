@@ -1,1 +1,2 @@
 jedi>=0.9
+packaging
