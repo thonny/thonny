@@ -125,6 +125,7 @@ class Workbench(tk.Tk):
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
         self._publish_commands()
+        self._runner.start_polling()
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
     
