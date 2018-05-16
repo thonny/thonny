@@ -54,6 +54,7 @@ class GlobalsView(ttk.Frame):
             if not self.error_label.winfo_ismapped():
                 self.error_label.grid(row=1, column=0, sticky="nsew")
         else:
+            self._update_modules_list(event)
             self.variables_frame.update_variables(event.globals)
             if self.error_label.winfo_ismapped():
                 self.error_label.grid_remove()
@@ -65,10 +66,9 @@ class GlobalsView(ttk.Frame):
             self._update_modules_list(event)
             self._request_globals()
     
-    def _request_globals(self, event=None):    
-            # TODO: module_name
-            get_runner().send_command(InlineCommand("get_globals", 
-                                                    module_name=self._module_name_variable.get()))
+    def _request_globals(self, event=None):
+        get_runner().send_command(InlineCommand("get_globals", 
+                                                module_name=self._module_name_variable.get()))
     
     def _update_modules_list(self, event):
         if not hasattr(event, "loaded_modules"):
