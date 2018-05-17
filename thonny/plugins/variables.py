@@ -30,7 +30,7 @@ class GlobalsView(ttk.Frame):
         self.variables_frame = VariablesFrame(self)
         self.variables_frame.grid(row=1, column=0, sticky="nsew")
         
-        self.error_label = ttk.Label(self, text="Error", anchor="center")
+        self.error_label = ttk.Label(self, text="Error", anchor="center", wraplength="5cm")
         
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
