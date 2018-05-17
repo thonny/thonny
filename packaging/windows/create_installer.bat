@@ -16,7 +16,7 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -m pip install jedi==0.10.2
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
+%BUILDDIR%\python -m pip install --pre --no-cache-dir thonny==2.1.*
 
 @echo ............... CLEANING PYTHON ............................
 @rem delete following 3 files to avoid confusion (user may think they're Thonny license etc.)
