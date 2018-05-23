@@ -291,9 +291,16 @@ class VM:
         return self.create_message("ToplevelResult", **result_attributes)
 
     def _cmd_execute_system_command(self, cmd):
+        # TODO: how to publish stdout as it arrives?
+        env = dict(os.environ).copy()
+        env["PYTHONIOENCODING"] = "ascii"
         proc = subprocess.Popen(cmd.argv,
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                         universal_newlines=True)
+                         shell=True,
+                         env=env,
+                         universal_newlines=True,
+                         encoding="ascii",
+                         errors='backslashreplace')
         out, err = proc.communicate(input="")
         print(out, end="")
         print(err, file=sys.stderr, end="")
