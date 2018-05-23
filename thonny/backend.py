@@ -1028,7 +1028,6 @@ class FancyTracer(Executor):
             elif exc is None or self._current_state != len(self._past_messages) - 1:
                 # Other progress events move the pointer forward,
                 # unless we are displaying the last state and an exception occurred
-                self._debug("Exception", exc)
                 self._current_state += 1
 
         # Saved messages are no longer enough, let Python run to the next progress event
