@@ -1091,8 +1091,7 @@ class BusyTk(tk.Tk):
     def _ok(self):
         self.destroy() 
 
-
-def run_with_busy_window(action, args=(), description=""):
+def run_with_busy_window(action, args=(), description="Working"):
     # http://stackoverflow.com/a/14299004/261181
     from multiprocessing.pool import ThreadPool
     pool = ThreadPool(processes=1)

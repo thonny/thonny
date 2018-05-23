@@ -5,6 +5,9 @@ import platform
 import sys
 import shutil
 import time
+import subprocess
+from tkinter.messagebox import askyesno
+from tkinter.filedialog import askdirectory
 
 
 def eqfn(name1, name2):
@@ -74,7 +77,85 @@ def get_win_drives():
 
     return drives
 
+def list_volumes():
+    "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
+    if os.name == 'posix':
+        # 'posix' means we're on Linux or OSX (Mac).
+        # Call the unix "mount" command to list the mounted volumes.
+        mount_output = subprocess.check_output('mount').splitlines()
+        return [x.split()[2].decode("utf-8") for x in mount_output]
+    
+    elif os.name == 'nt':
+        # 'nt' means we're on Windows.
+        import ctypes
 
+        #
+        # In certain circumstances, volumes are allocated to USB
+        # storage devices which cause a Windows popup to raise if their
+        # volume contains no media. Wrapping the check in SetErrorMode
+        # with SEM_FAILCRITICALERRORS (1) prevents this popup.
+        #
+        old_mode = ctypes.windll.kernel32.SetErrorMode(1)  # @UndefinedVariable
+        try:
+            volumes = []
+            for disk in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
+                path = '{}:\\'.format(disk)
+                if (os.path.exists(path)):
+                    volumes.append(path)
+            
+            return volumes
+        finally:
+            ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
+    else:
+        # No support for unknown operating systems.
+        raise NotImplementedError('OS "{}" not supported.'.format(os.name))
+
+def get_win_volume_name(path):
+    """
+    Each disk or external device connected to windows has an attribute
+    called "volume name". This function returns the volume name for
+    the given disk/device.
+    Code from http://stackoverflow.com/a/12056414
+    """
+    import ctypes
+    vol_name_buf = ctypes.create_unicode_buffer(1024)
+    ctypes.windll.kernel32.GetVolumeInformationW(  # @UndefinedVariable
+        ctypes.c_wchar_p(path), vol_name_buf,
+        ctypes.sizeof(vol_name_buf), None, None, None, None, 0)
+    return vol_name_buf.value
+
+
+def find_volumes_by_name(volume_name):
+    volumes = list_volumes()
+    if os.name == "nt":
+        return [volume for volume in volumes 
+                if get_win_volume_name(volume).upper() == volume_name.upper()]
+    else:
+        return [volume for volume in volumes 
+                if volume.endswith(volume_name)]
+
+def find_volume_by_name(volume_name,
+                        not_found_msg="Could not find disk '%s'. Do you want to locate it yourself?",
+                        found_several_msg="Found several '%s' disks. Do you want to choose one yourself?"):
+    
+    volumes = find_volumes_by_name(volume_name)
+    if len(volumes) == 1:
+        return volumes[0]
+    else:
+        if len(volumes) == 0:
+            msg = not_found_msg % volume_name
+        else:
+            msg = found_several_msg % volume_name
+        
+        if askyesno("Can't find suitable disk", msg):
+            path = askdirectory()
+            if path:
+                return path
+    
+    return None
+            
+            
+            
 
 def shorten_repr(original_repr, max_len=1000):
     if len(original_repr) > max_len:
