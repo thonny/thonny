@@ -9,25 +9,14 @@ from thonny import get_runner, get_workbench
 from thonny import THONNY_USER_DIR
 import subprocess
 from time import sleep
-
-def _create_pythonless_environment():
-    # If I want to call another python version, then 
-    # I need to remove from environment the items installed by current interpreter
-    env = {}
-    
-    for key in os.environ:
-        if ("python" not in key.lower()
-            and key not in ["TK_LIBRARY", "TCL_LIBRARY"]):
-            env[key] = os.environ[key]
-    
-    return env
+from thonny.running import create_pythonless_environment
 
 
 def _get_exec_prefix(python_interpreter):
     
     return check_output([python_interpreter, "-c", "import sys; print(sys.exec_prefix)"],
                         universal_newlines=True,
-                        env=_create_pythonless_environment()
+                        env=create_pythonless_environment()
                         ).strip()
 
 def _add_to_path(directory, path):
@@ -51,7 +40,7 @@ def open_system_shell():
     exec_prefix=_get_exec_prefix(python_interpreter)
     if ".." in exec_prefix:
         exec_prefix = os.path.realpath(exec_prefix)
-    env = _create_pythonless_environment()
+    env = create_pythonless_environment()
     
     # TODO: take care of SSL_CERT_FILE (unset when running external python and set for builtin)
     # Unset when we're in builtin python and target python is external

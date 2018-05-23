@@ -556,10 +556,12 @@ class CPythonProxy(BackendProxy):
                           if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]}
         
         # variables controlling communication with the back-end process
-        my_env["PYTHONIOENCODING"] = "ASCII" 
-        my_env["PYTHONUNBUFFERED"] = "1" 
+        my_env["PYTHONIOENCODING"] = "utf-8" 
         
+        # Front-end requires different PYTHONUSERBASE, back-end doesn't
+        del my_env["PYTHONUSERBASE"]
         
+        # Let back-end know about plug-ins
         my_env["THONNY_USER_DIR"] = THONNY_USER_DIR
         
         # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
@@ -579,7 +581,7 @@ class CPythonProxy(BackendProxy):
         import thonny.backend_launcher
         cmd_line = [
             self._executable, 
-            '-u', # unbuffered IO (neccessary in Python 3.1)
+            '-u', # unbuffered IO
             '-B', # don't write pyo/pyc files 
                   # (to avoid problems when using different Python versions without write permissions)
             thonny.backend_launcher.__file__
@@ -739,12 +741,6 @@ class PrivateVenvCPythonProxy(CPythonProxy):
                 
     
     def _create_private_venv(self, path, description, clear=False, upgrade=False):
-        base_exe = sys.executable
-        if sys.executable.endswith("thonny.exe"):
-            # assuming that thonny.exe is in the same dir as "python.exe"
-            base_exe = sys.executable.replace("thonny.exe", "python.exe")
-        
-        
         # Don't include system site packages
         # This way all students will have similar configuration
         # independently of system Python (if Thonny is used with system Python)
@@ -752,26 +748,20 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         # NB! Cant run venv.create directly, because in Windows 
         # it tries to link venv to thonny.exe.
         # Need to run it via proper python
-        cmd = [base_exe, "-m", "venv"]
+        args = ["-m", "venv"]
         if clear:
-            cmd.append("--clear")
+            args.append("--clear")
         if upgrade:
-            cmd.append("--upgrade")
+            args.append("--upgrade")
         
         try:
             import ensurepip  # @UnusedImport
         except ImportError:
-            cmd.append("--without-pip")
+            args.append("--without-pip")
             
-        cmd.append(path)
-        startupinfo = None
-        if running_on_windows():
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        proc = subprocess.Popen(cmd, startupinfo=startupinfo,
-                                stdout=subprocess.PIPE,
-                                stderr=subprocess.STDOUT,
-                                universal_newlines=True)
+        args.append(path)
+        
+        proc = create_frontend_python_process(args)
              
         from thonny.ui_utils import SubprocessDialog
         dlg = SubprocessDialog(get_workbench(), proc, "Preparing the backend", long_description=description)
@@ -861,6 +851,70 @@ def using_bundled_python():
         os.path.dirname(sys.executable),
         "thonny_python.ini"
     ))
+
+def create_pythonless_environment():
+    # If I want to call another python version, then 
+    # I need to remove from environment the items installed by current interpreter
+    env = {}
+    
+    for key in os.environ:
+        if ("python" not in key.lower()
+            and key not in ["TK_LIBRARY", "TCL_LIBRARY"]):
+            env[key] = os.environ[key]
+    
+    return env
+
+
+
+def create_backend_python_process(args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
+    """Used for running helper commands (eg. pip) on CPython backend.
+    Assumes current backend is CPython."""
+    
+    # TODO: if backend == frontend, then delegate to create_frontend_python_process
+    
+    python_exe = get_runner().get_interpreter_command()
+    
+    env = create_pythonless_environment()
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUNBUFFERED"] = "1"
+    
+    # TODO: remove frontend python from path and add backend python to it
+    
+    return _create_python_process(python_exe, args, stdin, stdout, stderr, env=env)
+    
+
+def create_frontend_python_process(args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT):
+    """Used for running helper commands (eg. for installing plug-ins on by the plug-ins)"""
+    python_exe = get_frontend_python().replace("pythonw.exe", "python.exe") 
+    return _create_python_process(python_exe, args, stdin, stdout, stderr)
+    
+def _create_python_process(python_exe, args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           shell=False, env=None, universal_newlines=True, encoding="utf-8"):
+    
+    cmd = [python_exe] + args
+    
+    if running_on_windows():
+        creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
+        startupinfo = subprocess.STARTUPINFO()
+        startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+    else:
+        startupinfo = None
+        creationflags = 0
+    
+    proc = subprocess.Popen(cmd,
+                            stdin=stdin,
+                            stdout=stdout,
+                            stderr=stderr,
+                            shell=shell,
+                            env=env,
+                            universal_newlines=universal_newlines,
+                            startupinfo=startupinfo,
+                            creationflags=creationflags,
+                            encoding=encoding)
+    
+    proc.cmd = cmd
+    return proc
+
 
 class BackendTerminatedError(Exception):
     def __init__(self, returncode):

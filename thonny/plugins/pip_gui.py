@@ -5,7 +5,7 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE
+from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE, running
 from thonny import get_workbench, get_runner
 import subprocess
 from urllib.request import urlopen, urlretrieve
@@ -21,7 +21,6 @@ from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
     lookup_style_option, scrollbar_style
-from thonny.misc_utils import running_on_windows
 import sys
 import thonny
 from distutils.version import StrictVersion, LooseVersion
@@ -215,7 +214,7 @@ class PipDialog(tk.Toplevel):
         self.update()
         self.update_idletasks()
         
-        proc, _ = self._create_backend_process([installer_filename], stderr=subprocess.PIPE)
+        proc, _ = self._create_python_process([installer_filename], stderr=subprocess.PIPE)
         out, err = proc.communicate()
         os.remove(installer_filename)
         
@@ -566,41 +565,13 @@ class PipDialog(tk.Toplevel):
         
         return None
 
-    def _prepare_env_for_pip_process(self, encoding):
-        env = {}
-        for name in os.environ:
-            if ("python" not in name.lower() and name not in ["TK_LIBRARY", "TCL_LIBRARY"]): # skip python vars
-                env[name] = os.environ[name]
-                
-        env["PYTHONIOENCODING"] = encoding
-        env["PYTHONUNBUFFERED"] = "1"
-        
-        return env
-
-    def _create_backend_process(self, args, stderr=subprocess.STDOUT):
-        encoding = "UTF-8"
-        
-                    
-        cmd = [self._get_interpreter()] + args
-        
-        startupinfo = None
-        creationflags = 0
-        if running_on_windows():
-            creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        
-        return (subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr,
-                                env=self._prepare_env_for_pip_process(encoding),
-                                universal_newlines=True,
-                                creationflags=creationflags,
-                                startupinfo=startupinfo),
-                cmd)
+    def _create_python_process(self, args):
+        raise NotImplementedError()
 
     def _create_pip_process(self, args):
         if "--disable-pip-version-check" not in args:
             args.append("--disable-pip-version-check")
-        return self._create_backend_process(["-m", "pip"] + args)
+        return self._create_python_process(["-m", "pip"] + args, stderr=subprocess.STDOUT)
     
     def _get_interpreter(self):
         pass
@@ -617,6 +588,10 @@ class PipDialog(tk.Toplevel):
 class BackendPipDialog(PipDialog):
     def _get_interpreter(self):
         return get_runner().get_interpreter_command()
+    
+    def _create_python_process(self, args, stderr):
+        proc = running.create_backend_python_process(args, stderr=stderr)
+        return proc, proc.cmd
 
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]
@@ -661,11 +636,11 @@ class PluginsPipDialog(PipDialog):
     def _get_interpreter(self):
         return sys.executable.replace("thonny.exe", "python.exe")
     
-    def _prepare_env_for_pip_process(self, encoding):
-        env = PipDialog._prepare_env_for_pip_process(self, encoding)
-        env["PYTHONUSERBASE"] = THONNY_USER_BASE
-        return env
-        
+    def _create_python_process(self, args, stderr):
+        assert os.environ.get("PYTHONUSERBASE") == THONNY_USER_BASE
+        proc = running.create_frontend_python_process(args, stderr=stderr)
+        return proc, proc.cmd
+
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]
         reqs = package_data["info"].get("requires_dist", None)
