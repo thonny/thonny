@@ -328,13 +328,13 @@ class VM:
                 result = self.export_latest_globals(cmd.module_name)
             else:
                 result = self._current_executor.export_globals(cmd.module_name)
-                
+
             return self.create_message("Globals", module_name=cmd.module_name,
                               globals=result)
         except Exception as e:
             return self.create_message("Globals", module_name=cmd.module_name,
                                        error=str(e))
-            
+
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
@@ -411,7 +411,7 @@ class VM:
                                        executable=sys.executable)
         else:
             raise UserCommandError("Command 'Reset' doesn't take arguments")
-    
+
     def export_latest_globals(self, module_name):
         if module_name in sys.modules:
             return self.export_variables(sys.modules[module_name].__dict__)
@@ -443,7 +443,7 @@ class VM:
             and self._current_executor.is_in_past()):
             info = {'id' : cmd.object_id,
                     "error": "past info not available"}
-            
+
         elif cmd.object_id in self._heap:
             value = self._heap[cmd.object_id]
             attributes = {}
@@ -783,7 +783,7 @@ class Executor:
             return {"context_info" : "other unhandled exception"}
         finally:
             sys.settrace(None)
-    
+
     def export_globals(self, module_name):
         return self._vm.export_latest_globals(module_name)
 
@@ -811,7 +811,7 @@ class FancyTracer(Executor):
 
         return Executor.execute_source(self, source, filename, mode, global_vars)
         #assert len(self._custom_stack) == 0
-    
+
     def export_globals(self, module_name):
         if not self.is_in_past():
             return self._vm.export_latest_globals(module_name)
@@ -819,7 +819,7 @@ class FancyTracer(Executor):
             return self._past_globals[self._current_state][module_name]
         else:
             raise RuntimeError("Past state not available for this module")
-    
+
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
         # into builtin scope        
@@ -867,7 +867,7 @@ class FancyTracer(Executor):
                 and code.co_name not in self.marker_function_names
             or self._vm.is_doing_io()
         )
-    
+
     def is_in_past(self):
         return self._current_state < len(self._past_messages)-1
 
@@ -899,7 +899,7 @@ class FancyTracer(Executor):
 
                 marker_function_args = frame.f_locals.copy()
                 del marker_function_args["self"]
-                
+
                 if "call_function" not in marker_function_args["node_tags"]:
                     self._handle_progress_event(frame.f_back, event, marker_function_args)
                 self._try_interpret_as_again_event(frame.f_back, event, marker_function_args)
@@ -934,8 +934,8 @@ class FancyTracer(Executor):
 
             self._unhandled_exception = exc
             if self._is_interesting_exception(frame):
-                self._save_debugger_progress_message(frame , None)
-                self._send_and_fetch_next_debugger_progress_message(self._past_messages[-1][0])
+                self._save_debugger_progress_message(frame)
+                self._handle_message_selection()
 
         # TODO: support line event in non-instrumented files
         elif event == "line":
@@ -1009,14 +1009,14 @@ class FancyTracer(Executor):
             args = current_frame.last_event_args
             focus = current_frame.last_event_focus
             cmd = self._current_command
+            exc = self._past_messages[self._current_state][0]["exception"]
 
             # Has the command completed?
             tester = getattr(self, "_cmd_" + cmd.command + "_completed")
             cmd_complete = tester(frame, event, args, focus, cmd)
 
-
-            if cmd_complete:
-                # Last command has completed, send message and fetch the next command
+            if cmd_complete or exc is not None:
+                # Last command has completed or a state caused an exception, send message and fetch the next command
                 self._past_messages[self._current_state][1] = True  # Add "shown to user" flag
                 self._send_and_fetch_next_debugger_progress_message(self._past_messages[self._current_state][0])
 
@@ -1025,8 +1025,10 @@ class FancyTracer(Executor):
                 if self._current_state > 0:  # Don't let the pointer have negative values
                     self._past_messages[self._current_state][1] = False  # Remove "shown to user" flag
                     self._current_state -= 1
-            else:
-                # Other progress events move the pointer forward
+            elif exc is None or self._current_state != len(self._past_messages) - 1:
+                # Other progress events move the pointer forward,
+                # unless we are displaying the last state and an exception occurred
+                self._debug("Exception", exc)
                 self._current_state += 1
 
         # Saved messages are no longer enough, let Python run to the next progress event
@@ -1217,12 +1219,12 @@ class FancyTracer(Executor):
     def _cmd_out_completed(self, frame, event, args, focus, cmd):
         if self._current_state == 0:
             return False
-        
+
         if event == "after_statement":
             return False
-        
+
         prev_state_frame = self._past_messages[self._current_state-1][0]["stack"][-1]
-        
+
         """Complete current frame"""
         if type(frame) == FrameInfo:
             frame_id = frame.id
