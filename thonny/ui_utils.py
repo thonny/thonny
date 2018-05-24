@@ -1102,6 +1102,93 @@ def run_with_busy_window(action, args=(), description="Working"):
     
     return async_result.get()  
 
+class FileCopyDialog(tk.Toplevel):
+    def __init__(self, master, source, destination, description=None):
+        self._source = source
+        self._destination = destination 
+        self._old_bytes_copied = 0
+        self._bytes_copied = 0
+        self._done = False
+        self._cancelled = False
+        self._closed = False
+        
+        super().__init__(master)
+        
+        main_frame = ttk.Frame(self) # To get styled background
+        main_frame.grid(row=0, column=0, sticky="nsew")
+        self.rowconfigure(0, weight=1)
+        self.columnconfigure(0, weight=1)
+        
+        self.title("Copying")
+        
+        if description is None:
+            description = "Copying\n  %s\nto\n  %s" % (source, destination)
+        
+        label = ttk.Label(main_frame, text=description)
+        label.grid(row=0, column=0, columnspan=2, sticky="nw", padx=15, pady=15)
+        
+        self._bar = ttk.Progressbar(main_frame, maximum=os.path.getsize(source), length=200)
+        self._bar.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
+        
+        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self._cancel_button.grid(row=2, column=1, sticky="ne", padx=15, pady=15)
+        self._bar.focus_set()
+        
+        main_frame.columnconfigure(0, weight=1)
+        
+        self._update_progress()
+
+        if not running_on_mac_os():
+            # occasionally following causes dialog to stay behind main win on mac
+            self.transient(master)
+            self.grab_set() # to make it active and modal
+            
+        self.bind('<Escape>', self._cancel, True) # escape-close only if process has completed 
+        self.protocol("WM_DELETE_WINDOW", self._cancel)
+        center_window(self, master)
+    
+    def start_and_wait(self):
+        def work():
+            self._copy_progess = 0
+            
+            with open(self._source, "rb") as fsrc:
+                with open(self._destination, 'wb') as fdst:
+                    while True:
+                        buf = fsrc.read(8*1024)
+                        if not buf:
+                            break
+                        
+                        fdst.write(buf)
+                        self._bytes_copied += len(buf)
+            
+            self._done = True
+        
+        threading.Thread(target=work).start()
+        
+        self.wait_window()
+    
+    def _update_progress(self):
+        if self._done:
+            if not self._closed:
+                self._close()
+            return
+        
+        self._bar.step(self._bytes_copied - self._old_bytes_copied)
+        self._old_bytes_copied = self._bytes_copied
+        
+        self.after(100, self._update_progress)
+    
+    def _close(self):
+        self.destroy()
+        self._closed = True
+    
+    
+    def _cancel(self, event=None):
+        self._cancelled = True
+        self._close()
+         
+        
+        
 
 class SubprocessDialog(tk.Toplevel):
     """Shows incrementally the output of given subprocess.
