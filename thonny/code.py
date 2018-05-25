@@ -84,7 +84,7 @@ class Editor(ttk.Frame):
         if self._filename is None:
             result = "<untitled>"
         else:
-            result = self._filename
+            result = os.path.normpath(self._filename)
         
         try:
             index = self._code_view.text.index("insert")
