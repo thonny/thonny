@@ -255,7 +255,7 @@ class ShellCompleter(Completer):
 
 
     def _get_prefix(self):
-        return self.text.get("insert linestart", "insert") # TODO: allow multiple line input
+        return self.text.get("input_start", "insert") # TODO: allow multiple line input
 
         
 def handle_autocomplete_request(event=None):
