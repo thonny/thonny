@@ -86,7 +86,7 @@ def execute_macro():
             shell = get_workbench().show_view("ShellView")
             shell.submit_python_code(source.strip() + "\n")
 
-def load_plugin():
+def _load_plugin():
     get_workbench().set_default("run.shell_macro_main", None)
     get_workbench().add_command("configure_shell_macro", "run", "Configure shell macro...",
                                 show_dialog)
