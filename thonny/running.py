@@ -84,6 +84,7 @@ class Runner:
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
             default_sequence="<Control-c>",
+            group=70,
             bell_when_denied=False)
     
     def get_state(self):
