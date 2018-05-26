@@ -162,6 +162,8 @@ class AutomaticPanedWindow(tk.PanedWindow):
             return self in self.master.visible_panes
     
     def _on_window_resize(self, event):
+        if event.width < 10 or event.height < 10:
+            return
         window = self.winfo_toplevel()
         window_size = (window.winfo_width(), window.winfo_height())
         initializing = hasattr(window, "initializing") and window.initializing
@@ -222,8 +224,6 @@ class AutomaticPanedWindow(tk.PanedWindow):
         
     
     def _set_pane_size(self, which, size):
-        #print("setsize", which, size)
-        self.update_idletasks()
         
         if self.cget("orient") == tk.HORIZONTAL:
             full_size = self.winfo_width()
