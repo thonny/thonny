@@ -35,22 +35,12 @@ class Runner:
     def __init__(self):
         get_workbench().set_default("run.auto_cd", True)
         
-        from thonny.shell import ShellView
-        get_workbench().add_view(ShellView, "Shell", "s",
-            visible_by_default=True,
-            default_position_key='A')
-        
         self._init_commands()
-        
         self._state = None
         self._proxy = None
         self._polling_after_id = None
         self._postponed_commands = []
         
-        self._check_alloc_console()
-        
-        # temporary
-        self._remove_obsolete_jedi_copies()
     
     def _remove_obsolete_jedi_copies(self):
         """Thonny 2.1 used to copy jedi in order to make it available
@@ -60,7 +50,10 @@ class Runner:
                 shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
     
     def start(self):
+        self._check_alloc_console()
         self.restart_backend(False, True)
+        # temporary
+        self._remove_obsolete_jedi_copies()
     
     def _init_commands(self):
         get_workbench().add_command('run_current_script', "run", 'Run current script',
@@ -328,10 +321,6 @@ class Runner:
         self._proxy = None
         self._proxy = backend_class(clean)
         
-        if not first:
-            self.start_polling()
-    
-    def start_polling(self):
         self._poll_vm_messages()
         
     def destroy_backend(self):

@@ -42,8 +42,8 @@ class GlobalsView(ttk.Frame):
         get_workbench().bind("InputRequest", self._handle_progress, True)
     
     def before_show(self):
-        self._handle_progress(even_when_hidden=True)
-        
+        self._request_globals()
+    
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well
         error = getattr(event, "error", None)
@@ -61,12 +61,14 @@ class GlobalsView(ttk.Frame):
             if not self.variables_frame.winfo_ismapped():
                 self.variables_frame.grid(row=1, column=0, sticky="nsew")
     
-    def _handle_progress(self, event=None, even_when_hidden=False):
-        if not getattr(self, "hidden", False) or even_when_hidden:
-            self._update_modules_list(event)
-            self._request_globals()
+    def _handle_progress(self, event=None):
+        self._update_modules_list(event)
+        self._request_globals()
     
     def _request_globals(self, event=None):
+        if get_runner() is None:
+            return
+        
         get_runner().send_command(InlineCommand("get_globals", 
                                                 module_name=self._module_name_variable.get()))
     

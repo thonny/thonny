@@ -30,6 +30,7 @@ import ast
 from thonny import THONNY_USER_DIR
 from warnings import warn
 import collections
+from thonny.shell import ShellView
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -92,8 +93,7 @@ class Workbench(tk.Tk):
         self._add_main_backends()
         self._init_theming()
         self._init_window()
-        self._runner = Runner()
-        
+        self.add_view(ShellView, "Shell", "s", visible_by_default=True, default_position_key='A')
         self._load_plugins()
         self._init_fonts()
         
@@ -102,7 +102,6 @@ class Workbench(tk.Tk):
         
         self._init_containers()
         
-        self._start_runner()
         self._show_views()
         
         self._init_commands()
@@ -124,10 +123,11 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
+        self._runner = Runner()
         self._publish_commands()
-        self._runner.start_polling()
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
+        self.after(1, self._start_runner) # Show UI already before waiting for the backend to start
     
     def _try_action(self, action):
         try:
@@ -344,6 +344,7 @@ class Workbench(tk.Tk):
         
     def _start_runner(self):
         try:
+            self.update_idletasks() # allow UI to complete
             thonny._runner = self._runner
             self._runner.start()
         except:
@@ -1186,7 +1187,7 @@ class Workbench(tk.Tk):
     def _update_toolbar(self):
         for group_frame in self._toolbar.grid_slaves(0):
             for button in group_frame.pack_slaves():
-                if button.tester and not button.tester():
+                if thonny._runner is None or button.tester and not button.tester():
                     button["state"] = tk.DISABLED
                 else:
                     button["state"] = tk.NORMAL
