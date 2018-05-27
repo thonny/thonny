@@ -94,6 +94,7 @@ class Workbench(tk.Tk):
         self._init_theming()
         self._init_window()
         self.add_view(ShellView, "Shell", "s", visible_by_default=True, default_position_key='A')
+        self._runner = Runner()
         self._load_plugins()
         self._init_fonts()
         
@@ -123,7 +124,6 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         
-        self._runner = Runner()
         self._publish_commands()
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")

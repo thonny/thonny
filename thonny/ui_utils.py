@@ -1194,7 +1194,8 @@ class SubprocessDialog(tk.Toplevel):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
     
-    def __init__(self, master, proc, title, long_description=None, autoclose=True):
+    def __init__(self, master, proc, title, long_description=None, autoclose=True,
+                 conclusion="Done."):
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
@@ -1204,6 +1205,7 @@ class SubprocessDialog(tk.Toplevel):
         self.cancelled = False
         self._autoclose = autoclose
         self._event_queue = collections.deque()
+        self._conclusion = conclusion
         
         tk.Toplevel.__init__(self, master)
 
@@ -1285,6 +1287,9 @@ class SubprocessDialog(tk.Toplevel):
                     self.text.direct_insert("end", "\n\nReturn code: ", ("stderr", ))
                 elif self._autoclose:
                     self._close()
+                else:
+                    self.text.direct_insert("end", "\n\n" + self._conclusion)
+                self.text.see("end")
         
         poll_output_events()
         
