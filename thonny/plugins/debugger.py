@@ -360,7 +360,7 @@ class MainFrameVisualizer(FrameVisualizer):
         if msg.is_new:
             self._decorate_editor_title("")
         else:
-            self._decorate_editor_title("   <<< REPLYING >>> ")
+            self._decorate_editor_title("   <<< REPLAYING >>> ")
     
     def _decorate_editor_title(self, suffix):
         self.editor.master.update_editor_title(self.editor, 
