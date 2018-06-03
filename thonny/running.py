@@ -216,6 +216,8 @@ class Runner:
             logging.warning("Interrupting without proxy")
         
     def _cmd_interrupt_enabled(self):
+        if not self._proxy.is_functional():
+            return False
         # TODO: distinguish command and Ctrl+C shortcut
         
         widget = get_workbench().focus_get()
@@ -424,6 +426,10 @@ class BackendProxy:
         (Thonny gets closed or new backend gets selected)
         """
         pass
+    
+    def is_functional(self):
+        """Used in MicroPython proxies"""
+        return True
     
     def get_interpreter_command(self):
         """Return system command for invoking current interpreter"""
