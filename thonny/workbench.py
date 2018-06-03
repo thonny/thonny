@@ -142,7 +142,7 @@ class Workbench(tk.Tk):
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.expert_mode", False)
         self.set_default("general.debug_mode", False)
-        self.set_default("general.scaling", "auto")
+        self.set_default("general.scaling", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
         
 
@@ -1075,14 +1075,8 @@ class Workbench(tk.Tk):
         self._default_scaling_factor = self.tk.call("tk", "scaling")
         
         scaling = self.get_option("general.scaling")
-        if scaling == "auto":
-            self._scaling_factor = self.winfo_screenheight() / 460
-            
-            # if resolution is in a common range
-            # or computed scaling is close enought to the default one, then trust the default
-            if (460 <= self.winfo_screenheight() <= 1080
-                or 0.9 < (self._scaling_factor / self._default_scaling_factor) < 1.1):
-                self._scaling_factor = self._default_scaling_factor
+        if scaling in ["default", "auto"]: # auto was used in 2.2b3
+            self._scaling_factor = self._default_scaling_factor
         else:
             self._scaling_factor = scaling
         
@@ -1091,7 +1085,7 @@ class Workbench(tk.Tk):
             
         self.tk.call("tk", "scaling", self._scaling_factor)
         
-        if running_on_linux() and scaling != "auto":
+        if running_on_linux() and scaling not in ["default", "auto"]:
             # update system fonts which are given in pixel sizes
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
@@ -1101,7 +1095,7 @@ class Workbench(tk.Tk):
                     f.configure(size=int(orig_size * 
                         (self._scaling_factor / self._default_scaling_factor)
                     ))
-        elif running_on_mac_os() and scaling != "auto":
+        elif running_on_mac_os() and scaling not in ["default", "auto"]:
             # update system fonts
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
