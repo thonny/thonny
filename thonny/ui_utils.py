@@ -1103,11 +1103,13 @@ def run_with_busy_window(action, args=(), description="Working"):
     return async_result.get()  
 
 class FileCopyDialog(tk.Toplevel):
-    def __init__(self, master, source, destination, description=None):
+    def __init__(self, master, source, destination, description=None,
+                 fsync=True):
         self._source = source
         self._destination = destination 
         self._old_bytes_copied = 0
         self._bytes_copied = 0
+        self._fsync = fsync
         self._done = False
         self._cancelled = False
         self._closed = False
@@ -1154,12 +1156,16 @@ class FileCopyDialog(tk.Toplevel):
             with open(self._source, "rb") as fsrc:
                 with open(self._destination, 'wb') as fdst:
                     while True:
-                        buf = fsrc.read(8*1024)
+                        buf = fsrc.read(16*1024)
                         if not buf:
                             break
                         
                         fdst.write(buf)
+                        fdst.flush()
+                        if self._fsync:
+                            os.fsync(fdst)
                         self._bytes_copied += len(buf)
+                        
             
             self._done = True
         
