@@ -418,6 +418,9 @@ class BackendProxy:
         "backend's sys.path"
         return []
     
+    def get_backend_name(self):
+        return type(self).backend_name
+    
     def interrupt(self):
         """Tries to interrupt current command without reseting the backend"""
         pass
