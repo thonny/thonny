@@ -311,6 +311,7 @@ class Runner:
         
         if not first:
             get_shell().restart()
+            get_shell().update_idletasks()
         
         self.destroy_backend()
         backend_name = get_workbench().get_option("run.backend_name")
