@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.2.0b4 (2018-06-05)
+====================
+* FIXED: Couldn't open menus with None backend
+
 2.2.0b3 (2018-06-05)
 ====================
 * FIXED #425: Too big automatic scaling
