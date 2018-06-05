@@ -224,7 +224,8 @@ class Runner:
         if not running_on_mac_os(): # on Mac Ctrl+C is not used for Copy
             if hasattr(widget, "selection_get"):
                 try:
-                    if widget.selection_get() != "":
+                    selection = widget.selection_get()
+                    if isinstance(selection, str) and len(selection) > 0:
                         # assuming user meant to copy, not interrupt
                         # (IDLE seems to follow same logic)
                         return False
