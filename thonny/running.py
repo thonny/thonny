@@ -216,7 +216,7 @@ class Runner:
             logging.warning("Interrupting without proxy")
         
     def _cmd_interrupt_enabled(self):
-        if not self._proxy.is_functional():
+        if not self._proxy or not self._proxy.is_functional():
             return False
         # TODO: distinguish command and Ctrl+C shortcut
         
