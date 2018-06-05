@@ -224,6 +224,7 @@ class EnhancedText(TweakableText):
         
         self.bind("<Control-BackSpace>", if_not_readonly(self.delete_word_left), True)
         self.bind("<Control-Delete>", if_not_readonly(self.delete_word_right), True)
+        self.bind("<Control-d>", self._redirect_ctrld, True) 
         self.bind("<BackSpace>", if_not_readonly(self.perform_smart_backspace), True)
         self.bind("<Return>", if_not_readonly(self.perform_return), True)
         self.bind("<KP_Enter>", if_not_readonly(self.perform_return), True)
@@ -258,7 +259,12 @@ class EnhancedText(TweakableText):
         self.bind("<1>", self._on_mouse_click, True)
         self.bind("<2>", self._on_mouse_click, True)
         self.bind("<3>", self._on_mouse_click, True)
-        
+    
+    def _redirect_ctrld(self, event):
+        # I want to disable the deletion effect of CtrlD in the text but still 
+        # keep the event for other purposes
+        self.event_generate("<<CtrlDInText>>")
+        return "break"
     
     def tag_reset(self, tag_name):
         empty_conf = {key : "" for key in self.tag_configure(tag_name)}
