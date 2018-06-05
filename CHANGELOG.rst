@@ -2,6 +2,19 @@
 Version history
 ===============
 
+2.2.0b3 (2018-06-05)
+====================
+* FIXED #425: Too big automatic scaling
+* FIXED #427: Can't run files with spaces in filename
+* FIXED: Fixed a bug when debugging and encountering an exception (by Alar Leemet)
+* ENHANCEMENT: Show indicator about stepping in the past in the text of editor tabs
+* ENHANCEMENT: Added Thonny version guards for installing plug-ins
+* EXPERIMENTAL: Preliminary support for running system commands in Thonny shell (eg. `!ls` or `!dir`)
+* TECHNICAL: thonny.exe in Windows bundle is now signed
+* TECHNICAL: Delay starting of Runner until UI is shown
+* TECHNICAL: Various enhancements to support MicroPython plug-ins 
+
+
 2.2.0b2 (2018-05-04)
 ====================
 * FIXED: Options dialog crashes when Variables view hasn't been created yet
