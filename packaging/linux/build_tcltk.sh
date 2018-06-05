@@ -3,8 +3,8 @@
 set -e
 
 # COMPILE TCL/TK ####################################################
-# wget http://prdownloads.sourceforge.net/tcl/tcl8.6.7-src.tar.gz
-VERSION=8.6.7
+# wget http://prdownloads.sourceforge.net/tcl/tcl8.6.8-src.tar.gz
+VERSION=8.6.8
 wget ftp://ftp.tcl.tk/pub/tcl/tcl8_6/tcl$VERSION-src.tar.gz
 tar -xzf tcl$VERSION-src.tar.gz
 cd tcl$VERSION/unix
