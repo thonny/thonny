@@ -792,7 +792,7 @@ class _QueryDialog(TtkDialog):
         self.initialvalue = initialvalue
         self.selection_range = selection_range
 
-        Dialog.__init__(self, master, title)
+        super().__init__(master, title)
 
     def destroy(self):
         self.entry = None

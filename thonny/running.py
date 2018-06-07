@@ -559,9 +559,6 @@ class CPythonProxy(BackendProxy):
         # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "utf-8" 
         
-        # Front-end requires different PYTHONUSERBASE, back-end doesn't
-        del my_env["PYTHONUSERBASE"]
-        
         # Let back-end know about plug-ins
         my_env["THONNY_USER_DIR"] = THONNY_USER_DIR
         

@@ -13,7 +13,7 @@ from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
         
         self._configuration_variable = create_string_var(
             get_workbench().get_option("CustomInterpreter.path"))

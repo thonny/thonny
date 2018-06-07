@@ -5,7 +5,7 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny import misc_utils, tktextext, ui_utils, THONNY_USER_BASE, running
+from thonny import misc_utils, tktextext, ui_utils, running
 from thonny import get_workbench, get_runner
 import subprocess
 from urllib.request import urlopen, urlretrieve
@@ -637,7 +637,6 @@ class PluginsPipDialog(PipDialog):
         return sys.executable.replace("thonny.exe", "python.exe")
     
     def _create_python_process(self, args, stderr):
-        assert os.environ.get("PYTHONUSERBASE") == THONNY_USER_BASE
         proc = running.create_frontend_python_process(args, stderr=stderr)
         return proc, proc.cmd
 
@@ -667,10 +666,11 @@ class PluginsPipDialog(PipDialog):
         banner = tk.Label(parent, background=bg)
         banner.grid(row=0, column=0, sticky="nsew")
         
+        import site
         banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
                                 + "If you want to install packages for your own programs then close this and choose 'Tools → Manage packages...'\n"
                                 + "\n"
-                                + "This dialog installs packages into " + THONNY_USER_BASE + "\n"
+                                + "This dialog installs packages into " + site.getusersitepackages() + "\n"
                                 + "\n"
                                 + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.",
                                 background=bg, justify="left")
@@ -684,10 +684,6 @@ class PluginsPipDialog(PipDialog):
     def _handle_outdated_or_missing_pip(self):
         return self._provide_pip_install_instructions()
     
-    def _instructions_for_command_line_install(self):
-        # System shell is not suitable without correct PYTHONUSERBASE 
-        return ""
-        
 class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):
         tk.Toplevel.__init__(self, master)

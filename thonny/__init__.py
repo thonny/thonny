@@ -4,16 +4,11 @@ import sys
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))
 
-# Thonny will use different directory for user packages
-THONNY_USER_BASE = os.path.join(THONNY_USER_DIR, "plugins")
-
 def launch():
     _prepare_thonny_user_dir()
     _misc_prepare()
     
     try:
-        _update_sys_path()
-        
         from thonny import workbench
         
         if _should_delegate():
@@ -80,25 +75,6 @@ def _prepare_thonny_user_dir():
                         
             copy_contents(template_dir, THONNY_USER_DIR)
             
-
-def _update_sys_path():
-    import site
-    
-    # Thonny will use different directory for user packages
-    # remove old dir from path
-    if site.getusersitepackages() in sys.path:
-        sys.path.remove(site.getusersitepackages())
-        
-    # compute new usersitepackages
-    import subprocess
-    os.environ["PYTHONUSERBASE"] = THONNY_USER_BASE
-    proc = subprocess.Popen(
-        [sys.executable.replace("thonny.exe", "pythonw.exe").replace("python.exe", "pythonw.exe"),
-         "-c", "import site; print(site.getusersitepackages())"],
-        universal_newlines=True, stdout=subprocess.PIPE)
-    plugins_sitepackages = proc.stdout.readline().strip()
-    
-    sys.path.append(plugins_sitepackages)
 
 def _should_delegate():
     from thonny import workbench
