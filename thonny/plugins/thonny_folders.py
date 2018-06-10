@@ -1,25 +1,9 @@
 # -*- coding: utf-8 -*-
 """Adds commands for opening certain Thonny folders"""
 
-import os.path
-from thonny.misc_utils import running_on_mac_os, running_on_linux,\
-    running_on_windows
-import subprocess
 from thonny import get_workbench
 from thonny import THONNY_USER_DIR
-
-def open_path_in_system_file_manager(path):
-    if running_on_mac_os():
-        # http://stackoverflow.com/a/3520693/261181
-        # -R doesn't allow showing hidden folders
-        subprocess.Popen(["open", path])
-    elif running_on_linux():
-        subprocess.Popen(["xdg-open", path])
-    else:
-        assert running_on_windows()
-        subprocess.Popen(["explorer", path])
-
-
+from thonny.ui_utils import open_path_in_system_file_manager
 
 
 def load_plugin():

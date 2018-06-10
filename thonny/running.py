@@ -473,6 +473,13 @@ class CPythonProxy(BackendProxy):
         if "in_venv" in msg:
             self.in_venv = msg["in_venv"]
         
+        if "path" in msg:
+            self._sys_path = msg["path"]
+        
+        if "prefix" in msg:
+            self._sys_prefix = msg["prefix"]
+            
+        
         if msg["message_type"] == "ProgramOutput":
             # combine available output messages to one single message, 
             # in order to put less pressure on UI code
@@ -620,10 +627,6 @@ class CPythonProxy(BackendProxy):
             if ready_line == "": # There was some problem
                 error_msg = self._proc.stderr.read()
                 raise Exception("Error starting backend process: " + error_msg)
-            
-            #ready_msg = parse_message(ready_line)
-            #self._sys_path = ready_msg["path"]
-            #debug("Backend ready: %s", ready_msg)
         
         # setup asynchronous output listeners
         start_new_thread(self._listen_stdout, ())
@@ -664,6 +667,14 @@ class CPythonProxy(BackendProxy):
         
     def get_interpreter_command(self):
         return self._executable
+    
+    def get_site_packages(self):
+        for d in self._sys_path:
+            if (("site-packages" in d or "dist-packages" in d) 
+                and os.path.normpath(d).startswith(os.path.normpath(self._sys_prefix))):
+                return d
+        else:
+            return None
     
     
     def _update_gui_updating(self, msg):

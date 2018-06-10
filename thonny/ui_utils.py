@@ -1387,6 +1387,19 @@ def lookup_style_option(style_name, option_name, default=None):
 
 def scale(value):
     return get_workbench().scale(value)
+
+def open_path_in_system_file_manager(path):
+    if running_on_mac_os():
+        # http://stackoverflow.com/a/3520693/261181
+        # -R doesn't allow showing hidden folders
+        subprocess.Popen(["open", path])
+    elif running_on_linux():
+        subprocess.Popen(["xdg-open", path])
+    else:
+        assert running_on_windows()
+        subprocess.Popen(["explorer", path])
+
+
         
 if __name__ == "__main__":
     root = tk.Tk()

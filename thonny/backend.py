@@ -90,6 +90,7 @@ class VM:
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
+                          prefix=sys.prefix,
                           welcome_text="Python " + _get_python_version_string(),
                           executable=sys.executable,
                           in_venv=hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix,

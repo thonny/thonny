@@ -20,20 +20,20 @@ import re
 from tkinter.filedialog import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
-    lookup_style_option, scrollbar_style
+    lookup_style_option, scrollbar_style, open_path_in_system_file_manager
 import sys
 import thonny
 from distutils.version import StrictVersion, LooseVersion
 from tkinter.messagebox import showerror
+from os import makedirs
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
 class PipDialog(tk.Toplevel):
-    def __init__(self, master, only_user=False):
+    def __init__(self, master):
         self._state = None # possible values: "listing", "fetching", "idle"
         self._process = None
         self._installed_versions = {}
-        self._only_user = only_user
         self.current_package_data = None
         
         tk.Toplevel.__init__(self, master)
@@ -91,7 +91,7 @@ class PipDialog(tk.Toplevel):
         listframe.columnconfigure(0, weight=1)
         
         self.listbox = ui_utils.ThemedListbox(listframe, activestyle="dotbox", 
-                                  width=20, height=10,
+                                  width=20, height=15,
                                   selectborderwidth=0, relief="flat",
                                   #highlightthickness=4,
                                   #highlightbackground="red",
@@ -136,6 +136,10 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("install_file", "<ButtonRelease-1>", self._handle_install_file_click)
         self.info_text.tag_bind("install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
+        self.info_text.tag_configure("target_directory", foreground=link_color, underline=True)
+        self.info_text.tag_bind("target_directory", "<ButtonRelease-1>", self._handle_target_directory_click)
+        self.info_text.tag_bind("target_directory", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
+        self.info_text.tag_bind("target_directory", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
         default_font = tk.font.nametofont("TkDefaultFont")
         self.info_text.configure(font=default_font,
@@ -251,7 +255,7 @@ class PipDialog(tk.Toplevel):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
         args = ["list"]
-        if self._only_user:
+        if self._use_user_install():
             args.append("--user")
         args.extend(["--pre", "--format", "json"])
         self._process, _ = self._create_pip_process(args)
@@ -323,8 +327,13 @@ class PipDialog(tk.Toplevel):
     def _show_instructions(self):
         self._clear()
         if self._read_only():
+            self.info_text.direct_insert("end", "Browse the packages\n", ("caption",))
             self.info_text.direct_insert("end", "With current interpreter you can only browse the packages here.\n"
-                                       + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.")
+                                       + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n\n")
+            
+            if self._get_target_directory():
+                self.info_text.direct_insert("end", "Inspect packages' directory\n", ("caption",))
+                self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
         else:            
             self.info_text.direct_insert("end", "Install from PyPI\n", ("caption",))
             self.info_text.direct_insert("end", "If you don't know where to get the package from, "
@@ -337,7 +346,12 @@ class PipDialog(tk.Toplevel):
             self.info_text.direct_insert("end", " to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n\n")
             
             self.info_text.direct_insert("end", "Upgrade or uninstall\n", ("caption",))
-            self.info_text.direct_insert("end", 'Start by selecting the package from the left.')
+            self.info_text.direct_insert("end", 'Start by selecting the package from the left.\n\n')
+            
+            if self._get_target_directory():
+                self.info_text.direct_insert("end", "Inspect target directory\n", ("caption",))
+                self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
+                
         self._select_list_item(0)
     
     def _start_show_package_info(self, name):
@@ -466,7 +480,7 @@ class PipDialog(tk.Toplevel):
         data = self.current_package_data
         name = self.current_package_data["info"]["name"]
         install_args = ["install", "--no-cache-dir"] 
-        if self._only_user:
+        if self._use_user_install():
             install_args.append("--user")
         
         if action == "install":
@@ -524,9 +538,13 @@ class PipDialog(tk.Toplevel):
         if filename: # Note that missing filename may be "" or () depending on tkinter version
             self._install_local_file(filename)
     
+    def _handle_target_directory_click(self, event):
+        if self._get_target_directory():
+            open_path_in_system_file_manager(self._get_target_directory())
+    
     def _install_local_file(self, filename):
         args = ["install"]
-        if self._only_user:
+        if self._use_user_install():
             args.append("--user")
         args.append(filename)
         
@@ -576,6 +594,12 @@ class PipDialog(tk.Toplevel):
     def _get_interpreter(self):
         pass
     
+    def _use_user_install(self):
+        raise NotImplementedError()
+    
+    def _get_target_directory(self):
+        raise NotImplementedError()
+    
     def _get_title(self):
         return "Manage packages for " + self._get_interpreter()
     
@@ -586,6 +610,11 @@ class PipDialog(tk.Toplevel):
         return False
 
 class BackendPipDialog(PipDialog):
+    def __init__(self, master):
+        self._backend_proxy = get_runner().get_backend_proxy()
+        super().__init__(master)
+        assert isinstance(self._backend_proxy, running.CPythonProxy)
+    
     def _get_interpreter(self):
         return get_runner().get_interpreter_command()
     
@@ -600,7 +629,7 @@ class BackendPipDialog(PipDialog):
             return messagebox.askyesno("Confirmation", 
                                      "Looks like you are installing a Thonny-related package.\n"
                                    + "If you meant to install a Thonny plugin, then you should\n"
-                                   + "close this dialog and choose 'Tools → Manage plugins...'\n"
+                                   + "choose 'Tools → Manage plugins...' instead\n"
                                    + "\n"
                                    + "Are you sure you want to install '" + name + "' for the back-end?")
         else:
@@ -612,12 +641,22 @@ class BackendPipDialog(PipDialog):
         else:
             self._provide_pip_install_instructions()
         
+    def _use_user_install(self):
+        return False
+    
+    def _get_target_directory(self):
+        return self._backend_proxy.get_site_packages()
+    
     def _read_only(self):
         return not get_runner().using_venv()
 
 class PluginsPipDialog(PipDialog):
     def __init__(self, master):
-        PipDialog.__init__(self, master, only_user=True)
+        PipDialog.__init__(self, master)
+        
+        # make sure directory exists, so user can put her plug-ins there
+        d = self._get_target_directory()
+        makedirs(d, exist_ok=True)
     
     def _conflicts_with_thonny_version(self, req_strings):
         try:
@@ -661,16 +700,30 @@ class PluginsPipDialog(PipDialog):
             
         return True
     
+    def _use_user_install(self):
+        # True, unless we're in a virtualenv or venv
+        return not (hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix)
+    
+    def _get_target_directory(self):
+        if self._use_user_install():
+            import site
+            assert hasattr(site, "getusersitepackages")
+            return site.getusersitepackages()
+        else:
+            for d in sys.path:
+                if (("site-packages" in d or "dist-packages" in d) 
+                    and os.path.normpath(d).startswith(os.path.normpath(sys.prefix))):
+                    return d
+            else:
+                return None
+    
     def _create_widgets(self, parent):
         bg = "#ffff99"
         banner = tk.Label(parent, background=bg)
         banner.grid(row=0, column=0, sticky="nsew")
         
-        import site
         banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
-                                + "If you want to install packages for your own programs then close this and choose 'Tools → Manage packages...'\n"
-                                + "\n"
-                                + "This dialog installs packages into " + site.getusersitepackages() + "\n"
+                                + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n"
                                 + "\n"
                                 + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.",
                                 background=bg, justify="left")
