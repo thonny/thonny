@@ -912,6 +912,10 @@ def fixwordbreaks(root):
     # operations use our definition of a word (i.e. an identifier)
     tk = root.tk
     tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
+    """ TODO: Idle updated following to 
+    tk.call('set', 'tcl_wordchars', r'\w')
+    tk.call('set', 'tcl_nonwordchars', r'\W')
+    """
     tk.call('set', 'tcl_wordchars',     u'[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
     tk.call('set', 'tcl_nonwordchars', u'[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
 
