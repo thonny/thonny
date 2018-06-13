@@ -247,16 +247,16 @@ class VM:
             raise UserCommandError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        return self._execute_file(cmd, False)
+        return self._execute_file(cmd, SimpleRunner)
 
     def _cmd_run(self, cmd):
-        return self._execute_file(cmd, False)
+        return self._execute_file(cmd, SimpleRunner)
 
     def _cmd_Debug(self, cmd):
-        return self._execute_file(cmd, True)
+        return self._execute_file(cmd, FancyTracer)
 
     def _cmd_debug(self, cmd):
-        return self._execute_file(cmd, True)
+        return self._execute_file(cmd, FancyTracer)
 
     def _cmd_execute_source(self, cmd):
         """Executes Python source entered into shell"""
@@ -557,7 +557,7 @@ class VM:
             info["entries"].append((self.export_value(key),
                                      self.export_value(value[key])))
 
-    def _execute_file(self, cmd, debug_mode):
+    def _execute_file(self, cmd, executor_class):
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
         # TODO: are they?
@@ -573,16 +573,13 @@ class VM:
             with tokenize.open(full_filename) as fp:
                 source = fp.read()
 
-            result_attributes = self._execute_source(source, full_filename, "exec", debug_mode)
+            result_attributes = self._execute_source(source, full_filename, "exec", executor_class)
             return self.create_message("ToplevelResult", **result_attributes)
         else:
             raise UserCommandError("Command '%s' takes at least one argument", cmd.command)
 
-    def _execute_source(self, source, filename, execution_mode, debug_mode, global_vars=None):
-        if debug_mode:
-            self._current_executor = FancyTracer(self)
-        else:
-            self._current_executor = Executor(self)
+    def _execute_source(self, source, filename, execution_mode, executor_class, global_vars=None):
+        self._current_executor = executor_class(self)
 
         try:
             return self._current_executor.execute_source(source,
@@ -744,8 +741,6 @@ class VM:
             return self._generic_read("readlines", limit)
 
 
-
-
 class Executor:
     def __init__(self, vm):
         self._vm = vm
@@ -798,6 +793,8 @@ class Executor:
     def _compile_source(self, source, filename, mode):
         return compile(source, filename, mode)
 
+class SimpleRunner(Executor):
+    pass
 
 class FancyTracer(Executor):
 
