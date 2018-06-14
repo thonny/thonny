@@ -284,7 +284,7 @@ class VM:
             mode = "exec"
 
         result_attributes = self._execute_source(source, filename, mode,
-            getattr(cmd, "debug_mode", False),
+            FancyTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
             getattr(cmd, "global_vars", None))
 
         result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
