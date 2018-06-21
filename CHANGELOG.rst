@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.18 (2018-06-22)
+===================
+* FIXED #450: Locals marker doesn't work with jedi 0.12
+
 2.1.17 (2018-03-21)
 ===================
 * FIXED #409: Package manager crashed after release of pip 9.0.2
