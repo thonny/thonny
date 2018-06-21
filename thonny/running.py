@@ -200,7 +200,9 @@ class Runner:
         else:
             working_directory = None
         
-        args = shlex.split(get_workbench().get_option("view.program_arguments"))        
+        args_str = get_workbench().get_option("run.program_arguments")
+        get_workbench().log_program_arguments_string(args_str)
+        args = shlex.split(args_str)        
         
         self.execute_script(filename, args, working_directory, command_name)
         

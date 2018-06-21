@@ -848,10 +848,12 @@ class Workbench(tk.Tk):
         return False
     
     def _init_program_arguments_frame(self):
-        self.set_default("view.show_program_arguments", True)
-        self.set_default("view.program_arguments", "")
+        self.set_default("view.show_program_arguments", False)
+        self.set_default("run.program_arguments", "")
+        self.set_default("run.past_program_arguments", [])
+        
         visibility_var = self.get_variable("view.show_program_arguments")
-        content_var = self.get_variable("view.program_arguments")
+        content_var = self.get_variable("run.program_arguments")
         
         frame = ttk.Frame(self._toolbar)
         col = 1000
@@ -860,8 +862,10 @@ class Workbench(tk.Tk):
         label = ttk.Label(frame, text="Program arguments:")
         label.grid(row=0, column=0, sticky="nse", padx=5)
         
-        entry = ttk.Entry(frame, width=80, textvariable=content_var)
-        entry.grid(row=0, column=1, sticky="nsew", padx=5)
+        self.program_arguments_box = ttk.Combobox(frame, width=80, height=15,
+                                                  textvariable=content_var,
+                                                  values=[""] + self.get_option("run.past_program_arguments"))
+        self.program_arguments_box.grid(row=0, column=1, sticky="nsew", padx=5)
         
         frame.columnconfigure(1, weight=1)
         
@@ -882,6 +886,25 @@ class Workbench(tk.Tk):
                          group=11)
         
         update_visibility()
+    
+    def log_program_arguments_string(self, arg_str):
+        arg_str = arg_str.strip()
+        self.set_option("run.program_arguments", arg_str)
+        
+        if arg_str == "":
+            # empty will be handled differently
+            return
+        
+        past_args = self.get_option("run.past_program_arguments")
+        
+        if arg_str in past_args:
+            past_args.remove(arg_str)
+        
+        past_args.insert(0, arg_str)
+        past_args = past_args[:10]
+        
+        self.set_option("run.past_program_arguments", past_args)
+        self.program_arguments_box.configure(values=[""] + past_args)
     
     def _show_views(self):
         for view_id in self._view_records:
