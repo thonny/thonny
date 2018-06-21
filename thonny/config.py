@@ -46,6 +46,8 @@ class ConfigurationManager:
             
         try:
             val = self._ini.get(section, option)
+            if name in self._defaults and isinstance(self._defaults[name], str):
+                return val                
             try:
                 return ast.literal_eval(val)
             except:
