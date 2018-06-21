@@ -252,6 +252,9 @@ class VM:
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
 
+    def _cmd_DebugLite(self, cmd):
+        return self._execute_file(cmd, SimpleTracer)
+
     def _cmd_Debug(self, cmd):
         return self._execute_file(cmd, FancyTracer)
 
@@ -796,14 +799,80 @@ class Executor:
 class SimpleRunner(Executor):
     pass
 
-class FancyTracer(Executor):
-
+class Tracer(Executor):
     def __init__(self, vm):
         self._vm = vm
         self._normcase_thonny_src_dir = os.path.normcase(os.path.dirname(sys.modules["thonny"].__file__))
-        self._instrumented_files = _PathSet()
-        self._interesting_files = _PathSet() # only events happening in these files are reported
         self._current_command = None
+        
+    def _should_skip_frame(self, frame):
+        code = frame.f_code
+
+        return (
+            code is None
+            or code.co_filename is None
+            or code.co_flags & inspect.CO_GENERATOR  # @UndefinedVariable
+            or sys.version_info >= (3,5) and code.co_flags & inspect.CO_COROUTINE  # @UndefinedVariable
+            or sys.version_info >= (3,5) and code.co_flags & inspect.CO_ITERABLE_COROUTINE  # @UndefinedVariable
+            or sys.version_info >= (3,6) and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
+            or "importlib._bootstrap" in code.co_filename
+            or self._vm.is_doing_io()
+        )
+
+
+class SimpleTracer(Tracer):
+    def _trace(self, frame, event, arg):
+        if self._should_skip_frame(frame):
+            return None
+        
+        print(frame, frame.f_lineno, event, arg)
+        """
+        if event == "call":
+        elif event == "line":
+        """    
+            
+        return self._trace
+    
+    def _should_skip_frame(self, frame):
+        code = frame.f_code
+        return (super()._should_skip_frame(frame)
+                or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir))
+
+    def _export_stack(self):
+        result = []
+
+        for custom_frame in self._custom_stack:
+
+            last_event_args = custom_frame.last_event_args.copy()
+            if "value" in last_event_args:
+                last_event_args["value"] = self._vm.export_value(last_event_args["value"])
+
+            system_frame = custom_frame.system_frame
+            source, firstlineno = self._get_frame_source_info(system_frame)
+
+            result.append(FrameInfo(
+                id=id(system_frame),
+                filename=system_frame.f_code.co_filename,
+                module_name=system_frame.f_globals["__name__"],
+                code_name=system_frame.f_code.co_name,
+                locals=self._vm.export_variables(system_frame.f_locals),
+                source=source,
+                firstlineno=firstlineno,
+                last_event=custom_frame.last_event,
+                last_event_args=last_event_args,
+                last_event_focus=custom_frame.last_event_focus,
+                current_evaluations=custom_frame.current_evaluations.copy(),
+                current_statement=custom_frame.current_statement,
+                current_root_expression=custom_frame.current_root_expression,
+            ))
+
+        return result
+    
+class FancyTracer(Tracer):
+
+    def __init__(self, vm):
+        super().__init__(vm)
+        self._instrumented_files = _PathSet()
         self._unhandled_exception = None
         self._install_marker_functions()
         self._custom_stack = []
@@ -856,22 +925,14 @@ class FancyTracer(Executor):
 
         return compile(root, filename, mode)
 
-    def _may_step_in(self, code):
-
-        return not (
-            code is None
-            or code.co_filename is None
-            or code.co_flags & inspect.CO_GENERATOR  # @UndefinedVariable
-            or sys.version_info >= (3,5) and code.co_flags & inspect.CO_COROUTINE  # @UndefinedVariable
-            or sys.version_info >= (3,5) and code.co_flags & inspect.CO_ITERABLE_COROUTINE  # @UndefinedVariable
-            or sys.version_info >= (3,6) and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
-            or "importlib._bootstrap" in code.co_filename
-            or os.path.normcase(code.co_filename) not in self._instrumented_files
-                and code.co_name not in self.marker_function_names
-            or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir)
-                and code.co_name not in self.marker_function_names
-            or self._vm.is_doing_io()
-        )
+    def _should_skip_frame(self, frame):
+        code = frame.f_code
+        return (super()._should_skip_frame(frame)
+                or os.path.normcase(code.co_filename) not in self._instrumented_files
+                    and code.co_name not in self.marker_function_names
+                or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir)
+                    and code.co_name not in self.marker_function_names
+                )
 
     def is_in_past(self):
         return self._current_state < len(self._past_messages)-1
@@ -881,8 +942,8 @@ class FancyTracer(Executor):
         1) Detects marker calls and responds to client queries in these spots
         2) Maintains a customized view of stack
         """
-        if not self._may_step_in(frame.f_code):
-            return
+        if self._should_skip_frame(frame):
+            return None
 
         code_name = frame.f_code.co_name
 

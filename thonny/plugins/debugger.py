@@ -39,6 +39,13 @@ class Debugger:
             image="debug-current-script",
             include_in_toolbar=True)
         
+        get_workbench().add_command("debuglite", "run", "DebugLite current script",
+            self._cmd_debug_lite_current_script,
+            caption="DebugLite",
+            tester=self._cmd_debug_current_script_enabled,
+            default_sequence="<Shift-F5>",
+            group=10)
+        
         get_workbench().add_command("step_over", "run", "Step over",
             self._cmd_step_over,
             caption="Over",
@@ -84,6 +91,9 @@ class Debugger:
     
     def _cmd_debug_current_script(self):
         get_runner().execute_current("Debug")
+
+    def _cmd_debug_lite_current_script(self):
+        get_runner().execute_current("DebugLite")
 
     def _cmd_debug_current_script_enabled(self):
         return (get_workbench().get_editor_notebook().get_current_editor() is not None
