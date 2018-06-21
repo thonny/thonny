@@ -45,7 +45,9 @@ def get_statement_of_position(node, pos):
         return node.get_statement_for_position(pos)
 
 def get_module_node(script):
-    if hasattr(script, "_get_module_node"):
+    if hasattr(script, "_module_node"): # Jedi 0.12
+        return script._module_node
+    elif hasattr(script, "_get_module_node"): # Jedi 0.10 - 0.11
         return script._get_module_node()
     elif hasattr(script, "_get_module"):
         return script._get_module()
