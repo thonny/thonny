@@ -27,6 +27,7 @@ import signal
 import logging
 import traceback
 from time import sleep
+import shlex
 
 
 WINDOWS_EXE = "python.exe"
@@ -199,7 +200,9 @@ class Runner:
         else:
             working_directory = None
         
-        self.execute_script(filename, [], working_directory, command_name)
+        args = shlex.split(get_workbench().get_option("view.program_arguments"))        
+        
+        self.execute_script(filename, args, working_directory, command_name)
         
     def _cmd_run_current_script_enabled(self):
         return (get_workbench().get_editor_notebook().get_current_editor() is not None

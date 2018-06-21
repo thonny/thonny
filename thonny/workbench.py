@@ -102,6 +102,7 @@ class Workbench(tk.Tk):
         self._init_menu()
         
         self._init_containers()
+        self._init_program_arguments_frame()
         
         self._show_views()
         
@@ -845,7 +846,42 @@ class Workbench(tk.Tk):
                 break
         
         return False
+    
+    def _init_program_arguments_frame(self):
+        self.set_default("view.show_program_arguments", True)
+        self.set_default("view.program_arguments", "")
+        visibility_var = self.get_variable("view.show_program_arguments")
+        content_var = self.get_variable("view.program_arguments")
         
+        frame = ttk.Frame(self._toolbar)
+        col = 1000
+        self._toolbar.columnconfigure(col, weight=1)
+        
+        label = ttk.Label(frame, text="Program arguments:")
+        label.grid(row=0, column=0, sticky="nse", padx=5)
+        
+        entry = ttk.Entry(frame, width=80, textvariable=content_var)
+        entry.grid(row=0, column=1, sticky="nsew", padx=5)
+        
+        frame.columnconfigure(1, weight=1)
+        
+        def update_visibility():
+            if visibility_var.get():
+                if not frame.winfo_ismapped():
+                    frame.grid(row=0, column=col, sticky="nse")
+            else:
+                if frame.winfo_ismapped():
+                    frame.grid_remove()
+                    
+        def toggle():
+            visibility_var.set(not visibility_var.get())
+            update_visibility()
+            
+        self.add_command("viewargs", "view", "Program arguments",
+                         toggle, flag_name="view.show_program_arguments",
+                         group=11)
+        
+        update_visibility()
     
     def _show_views(self):
         for view_id in self._view_records:
