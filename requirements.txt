@@ -1,2 +1,2 @@
-jedi>=0.9
+jedi>=0.10
 packaging
