@@ -20,8 +20,8 @@ def test_open_closed_strings():
     colorer = SyntaxColorer(text_widget)
     colorer._update_coloring()
 
-    open_ranges = text_widget.tag_ranges("STRING_OPEN")
-    closed_ranges = text_widget.tag_ranges("STRING_CLOSED") + text_widget.tag_ranges("STRING_CLOSED3") 
+    open_ranges = text_widget.tag_ranges("open_string")
+    closed_ranges = text_widget.tag_ranges("string") + text_widget.tag_ranges("string3") 
 
     expected_open_ranges = {('3.11', '4.0'), }
     expected_closed_ranges = {('2.11', '2.19'), ('4.11', '6.12'), }

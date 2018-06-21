@@ -61,8 +61,12 @@ class SyntaxColorer:
                                 "keyword", "number", "builtin", "definition"}
         self.multiline_tagdefs = {"string3", "open_string3"}
         self.text.tag_raise('sel')
-        self.text.tag_raise('string3')
-        self.text.tag_raise('open_string3')
+        tags = self.text.tag_names()
+        # take into account that without themes some tags may be undefined
+        if "string3" in tags:
+            self.text.tag_raise('string3')
+        if "open_string3" in tags:
+            self.text.tag_raise('open_string3')
 
     def schedule_update(self, event, use_coloring=True):
         self._use_coloring = use_coloring
