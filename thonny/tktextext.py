@@ -663,7 +663,8 @@ class EnhancedText(TweakableText):
 
 class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
-    def __init__(self, master, line_numbers=False, line_length_margin=0,
+    def __init__(self, master, line_numbers=False, extra_gutter=False,
+                 line_length_margin=0,
                  first_line_number=1, text_class=EnhancedText,
                  horizontal_scrollbar=True, vertical_scrollbar=True,
                  vertical_scrollbar_class=ttk.Scrollbar,
@@ -687,39 +688,56 @@ class TextFrame(ttk.Frame):
                                }
         final_text_options.update(text_options)
         self.text = text_class(self, **final_text_options)
-        self.text.grid(row=0, column=1, sticky=tk.NSEW)
+        self.text.grid(row=0, column=2, sticky=tk.NSEW)
 
-        self._line_numbers_gutter = tk.Text(self, width=4, padx=5, pady=5,
+        self._line_numbers_gutter = tk.Text(self, width=5, padx=0, pady=5,
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
                                background='#e0e0e0', foreground=gutter_foreground,
                                selectbackground=gutter_background, selectforeground=gutter_foreground,
                                cursor='arrow',
                                state='disabled',
-                               undo=False
+                               undo=False,
+                               wrap="none"
+                               )
+        self._extra_gutter = tk.Text(self, width=1, padx=2, pady=5,
+                               highlightthickness=0, bd=0, takefocus=False,
+                               font=self.text['font'],
+                               background='#e0e0e0', foreground=gutter_foreground,
+                               selectbackground=gutter_background, selectforeground=gutter_foreground,
+                               cursor='arrow',
+                               state='disabled',
+                               undo=False,
+                               wrap="none"
                                )
         self._line_numbers_gutter.bind("<ButtonRelease-1>", self.on_gutter_click)
         self._line_numbers_gutter.bind("<Button-1>", self.on_gutter_click)
         self._line_numbers_gutter.bind("<Button1-Motion>", self.on_gutter_motion)
         self._line_numbers_gutter['yscrollcommand'] = self._gutter_scroll
+        self._extra_gutter['yscrollcommand'] = self._gutter_scroll
+        
+        # need tags for justifying and rmargin
+        self._line_numbers_gutter.tag_configure("content", justify="right", rmargin=6)
+        self._extra_gutter.tag_configure("content", rmargin=3)
         
         # gutter will be gridded later
         self._first_line_number = first_line_number
         self.set_line_numbers(line_numbers)
+        self.set_extra_gutter(extra_gutter)
         
         if vertical_scrollbar:
             self._vbar = vertical_scrollbar_class(self, orient=tk.VERTICAL, style=vertical_scrollbar_style)
-            self._vbar.grid(row=0, column=2, sticky=tk.NSEW)
+            self._vbar.grid(row=0, column=3, sticky=tk.NSEW)
             self._vbar['command'] = self._vertical_scroll 
             self.text['yscrollcommand'] = self._vertical_scrollbar_update  
         
         if horizontal_scrollbar:
             self._hbar = horizontal_scrollbar_class(self, orient=tk.HORIZONTAL, style=horizontal_scrollbar_style)
-            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=2)
+            self._hbar.grid(row=1, column=0, sticky=tk.NSEW, columnspan=3)
             self._hbar['command'] = self._horizontal_scroll
             self.text['xscrollcommand'] = self._horizontal_scrollbar_update    
         
-        self.columnconfigure(1, weight=1)
+        self.columnconfigure(2, weight=1)
         self.rowconfigure(0, weight=1)
 
         self._recommended_line_length=line_length_margin
@@ -740,31 +758,40 @@ class TextFrame(ttk.Frame):
         self.text.focus_set()
     
     def set_line_numbers(self, value):
-        if value and not self._line_numbers_gutter.winfo_ismapped():
-            self._line_numbers_gutter.grid(row=0, column=0, sticky=tk.NSEW)
-            self.update_line_numbers()
-        elif not value and self._line_numbers_gutter.winfo_ismapped():
-            self._line_numbers_gutter.grid_forget()
+        self._set_gutter(self._line_numbers_gutter, 0, value, 
+                         self.compute_line_numbers_gutter_line(self._first_line_number))
+        self.update_line_numbers_gutter()
+    
+    def set_extra_gutter(self, value):
+        self._set_gutter(self._extra_gutter, 1, value,
+                         self.compute_extra_gutter_line(self._first_line_number))
+        self.update_extra_gutter()
+    
+    def _set_gutter(self, gutter, column, value, first_val):
+        if value and not gutter.winfo_ismapped():
+            gutter.grid(row=0, column=column, sticky=tk.NSEW)
+        elif not value and gutter.winfo_ismapped():
+            gutter.grid_forget()
         
-        # insert first line number (NB! Without trailing linebreak. See update_line_numbers) 
-        self._line_numbers_gutter.config(state='normal')
-        self._line_numbers_gutter.delete("1.0", "end")
-        self._line_numbers_gutter.insert("1.0", str(self._first_line_number))
-        self._line_numbers_gutter.config(state='disabled')
+        # insert first line number (NB! Without trailing linebreak. See update_gutter) 
+        gutter.config(state='normal')
+        gutter.delete("1.0", "end")
+        gutter.insert("1.0", first_val, ("content",))
+        gutter.config(state='disabled')
 
-        self.update_line_numbers()
     
     def set_line_length_margin(self, value):
         self._recommended_line_length = value
         self.update_margin_line()
     
     def _text_changed(self, event):
-        self.update_line_numbers()
+        self.update_gutters()
         self.update_margin_line()
     
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
         self._line_numbers_gutter.yview(tk.MOVETO, args[0])
+        self._extra_gutter.yview(tk.MOVETO, args[0])
         
     def _gutter_scroll(self, *args):
         # FIXME: this doesn't work properly
@@ -781,37 +808,55 @@ class TextFrame(ttk.Frame):
     def _vertical_scroll(self,*args):
         self.text.yview(*args)
         self._line_numbers_gutter.yview(*args)
+        self._extra_gutter.yview(*args)
         
     def _horizontal_scroll(self,*args):
         self.text.xview(*args)
         self.update_margin_line()
     
-    def update_line_numbers(self):
-        text_line_count = int(self.text.index("end").split(".")[0])
-        margin_line_count = int(self._line_numbers_gutter.index("end").split(".")[0])
+    def update_line_numbers_gutter(self):
+        self._update_gutter(self._line_numbers_gutter, 
+                            self.compute_line_numbers_gutter_line)
         
-        if text_line_count != margin_line_count:
-            self._line_numbers_gutter.config(state='normal')
+    def update_extra_gutter(self):
+        self._update_gutter(self._extra_gutter, 
+                            self.compute_extra_gutter_line)
+        
+    def update_gutters(self):
+        self.update_line_numbers_gutter()
+        self.update_extra_gutter()
+    
+    def _update_gutter(self, gutter, line_computer):
+        text_line_count = int(self.text.index("end").split(".")[0])
+        gutter_line_count = int(gutter.index("end").split(".")[0])
+        
+        if text_line_count != gutter_line_count:
+            gutter.config(state='normal')
             
             # NB! Text acts weird with last symbol 
             # (don't really understand whether it automatically keeps a newline there or not)
             # Following seems to ensure both Text-s have same height
-            if text_line_count > margin_line_count:
-                delta = text_line_count - margin_line_count
-                start = margin_line_count + self._first_line_number - 1
+            if text_line_count > gutter_line_count:
+                delta = text_line_count - gutter_line_count
+                start = gutter_line_count + self._first_line_number - 1
                 for i in range(start, start + delta):
-                    self._line_numbers_gutter.insert("end-1c", "\n" + str(i))
-            
+                    gutter.insert("end-1c", "\n", ("content",))
+                    gutter.insert("end-1c", line_computer(i), ("content",))
             else:
-                self._line_numbers_gutter.delete(line2index(text_line_count)+"-1c", "end-1c")
+                gutter.delete(line2index(text_line_count)+"-1c", "end-1c")
                 
-            self._line_numbers_gutter.config(state='disabled')
+            gutter.config(state='disabled')
         
         # synchronize gutter scroll position with text
         # https://mail.python.org/pipermail/tkinter-discuss/2010-March/002197.html
         first, _ = self.text.yview()
-        self._line_numbers_gutter.yview_moveto(first)
+        gutter.yview_moveto(first)
+    
+    def compute_extra_gutter_line(self, lineno):
+        return " "
 
+    def compute_line_numbers_gutter_line(self, lineno):
+        return str(lineno)
 
     def update_margin_line(self):
         if self._recommended_line_length == 0:
@@ -864,14 +909,16 @@ class TextFrame(ttk.Frame):
     def _reload_theme_options(self, event=None):
         
         style = ttk.Style()
-        background = style.lookup("Gutter", "background")
+        background = style.lookup("GUTTER", "background")
         if background:
             self._line_numbers_gutter.configure(background=background, selectbackground=background)
+            self._extra_gutter.configure(background=background, selectbackground=background)
             self._margin_line.configure(background=background)
         
-        foreground = style.lookup("Gutter", "foreground")
+        foreground = style.lookup("GUTTER", "foreground")
         if foreground:
             self._line_numbers_gutter.configure(foreground=foreground, selectforeground=foreground)
+            self._extra_gutter.configure(foreground=foreground, selectforeground=foreground)
         
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)

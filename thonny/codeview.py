@@ -198,13 +198,13 @@ class CodeView(tktextext.TextFrame):
     def set_content(self, content):
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)
-        self.update_line_numbers()
+        self.update_gutters()
         self.text.edit_reset();
 
         self.text.event_generate("<<TextChange>>")
     
     def _on_text_changed(self, event):
-        self.update_line_numbers()
+        self.update_gutters()
         self.update_margin_line()
     
     def select_lines(self, first_line, last_line):
@@ -251,8 +251,12 @@ class CodeView(tktextext.TextFrame):
         
         if "GUTTER" in _syntax_options:
             self._line_numbers_gutter.configure(_syntax_options["GUTTER"])
+            self._extra_gutter.configure(_syntax_options["GUTTER"])
             if "background" in _syntax_options["GUTTER"]:
                 self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
+        
+        if "breakpoint" in _syntax_options:
+            self._extra_gutter.configure(_syntax_options["breakpoint"])
 
 def set_syntax_options(syntax_options):
     global _syntax_options

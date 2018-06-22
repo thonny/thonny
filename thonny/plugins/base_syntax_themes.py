@@ -11,6 +11,7 @@ def default_light():
         "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg,
                            "background" : default_bg},
         "GUTTER"        : {"foreground" : "#999999", "background" : "#e0e0e0"},
+        "breakpoint"    : {"foreground" : "crimson"},
         "current_line"  : {"background" : "#f5f5f5"},
         
         "definition"    : {"foreground" : "DarkBlue", "font" : "BoldEditorFont"},
@@ -62,6 +63,7 @@ def default_dark():
         "TEXT"          : {"foreground" : default_fg, "insertbackground" : default_fg,
                            "background" : "#2d2d2d"},
         "GUTTER"        : {"foreground" : "#606060", "background" : "#323232"},
+        "breakpoint"    : {"foreground" : "pink"},
         "current_line"  : {"background" : "#363636"},
         "sel"           : {"foreground" : "#eeeeee", "background" : "#6E6E6E"},
         
