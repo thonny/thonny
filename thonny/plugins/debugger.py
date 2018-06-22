@@ -17,6 +17,7 @@ from thonny import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import tokenize
 import logging
+from thonny.code import get_current_breakpoints
 
 class Debugger:
     def __init__(self):
@@ -115,7 +116,8 @@ class Debugger:
             cmd.setdefault (
                 frame_id=self._last_progress_message.stack[-1].id,
                 state=self._last_progress_message.stack[-1].last_event,
-                focus=self._last_progress_message.stack[-1].last_event_focus
+                focus=self._last_progress_message.stack[-1].last_event_focus,
+                breakpoints=get_current_breakpoints()
             )
             
             get_runner().send_command(cmd)
@@ -160,7 +162,8 @@ class Debugger:
         return (self._cmd_stepping_commands_enabled()
                 and self._get_topmost_selected_visualizer() is not None
                 )
-
+    
+        
     def _get_topmost_selected_visualizer(self):
         
         visualizer = self._main_frame_visualizer

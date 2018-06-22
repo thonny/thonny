@@ -453,6 +453,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def get_current_editor(self):
         return self.get_current_child()
     
+    def get_all_editors(self):
+        return self.winfo_children()
+    
     def select_next_prev_editor(self, direction):
         cur_index = self.index(self.select())
         next_index = (cur_index + direction) % len(self.tabs())
@@ -532,3 +535,12 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         else:
             return True
         
+def get_current_breakpoints():
+    result = {}
+    
+    for editor in get_workbench().get_editor_notebook().get_all_editors():
+        filename = editor.get_filename()
+        if filename:
+            result[os.path.realpath(filename)] = editor.get_code_view().get_breakpoint_line_numbers()
+    
+    return result

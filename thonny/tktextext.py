@@ -758,16 +758,16 @@ class TextFrame(ttk.Frame):
         self.text.focus_set()
     
     def set_line_numbers(self, value):
-        self._set_gutter(self._line_numbers_gutter, 0, value, 
-                         self.compute_line_numbers_gutter_line(self._first_line_number))
+        content, tags = self.compute_line_numbers_gutter_line(self._first_line_number)
+        self._set_gutter(self._line_numbers_gutter, 0, value, content, tags)
         self.update_line_numbers_gutter()
     
     def set_extra_gutter(self, value):
-        self._set_gutter(self._extra_gutter, 1, value,
-                         self.compute_extra_gutter_line(self._first_line_number))
+        content, tags = self.compute_extra_gutter_line(self._first_line_number)
+        self._set_gutter(self._extra_gutter, 1, value, content, tags)
         self.update_extra_gutter()
     
-    def _set_gutter(self, gutter, column, value, first_val):
+    def _set_gutter(self, gutter, column, value, first_val, tags):
         if value and not gutter.winfo_ismapped():
             gutter.grid(row=0, column=column, sticky=tk.NSEW)
         elif not value and gutter.winfo_ismapped():
@@ -776,7 +776,7 @@ class TextFrame(ttk.Frame):
         # insert first line number (NB! Without trailing linebreak. See update_gutter) 
         gutter.config(state='normal')
         gutter.delete("1.0", "end")
-        gutter.insert("1.0", first_val, ("content",))
+        gutter.insert("1.0", first_val, ("content", ) + tags)
         gutter.config(state='disabled')
 
     
@@ -814,19 +814,30 @@ class TextFrame(ttk.Frame):
         self.text.xview(*args)
         self.update_margin_line()
     
-    def update_line_numbers_gutter(self):
+    def update_line_numbers_gutter(self, clean=True):
         self._update_gutter(self._line_numbers_gutter, 
-                            self.compute_line_numbers_gutter_line)
+                            self.compute_line_numbers_gutter_line,
+                            clean)
         
-    def update_extra_gutter(self):
+    def update_extra_gutter(self, clean=True):
         self._update_gutter(self._extra_gutter, 
-                            self.compute_extra_gutter_line)
+                            self.compute_extra_gutter_line,
+                            clean)
         
-    def update_gutters(self):
-        self.update_line_numbers_gutter()
-        self.update_extra_gutter()
+    def update_gutters(self, clean=True):
+        self.update_line_numbers_gutter(clean)
+        self.update_extra_gutter(clean)
     
-    def _update_gutter(self, gutter, line_computer):
+    def _update_gutter(self, gutter, line_computer, clean=True):
+        if clean:
+            gutter.config(state='normal')
+            gutter.delete("1.0", "end")
+            # need to add first item separately, because Text can't report 0 rows
+            content, tags = line_computer(self._first_line_number)
+            gutter.insert("end-1c", content, tags + ("content",))
+            
+            gutter.config(state='disabled')
+        
         text_line_count = int(self.text.index("end").split(".")[0])
         gutter_line_count = int(gutter.index("end").split(".")[0])
         
@@ -841,7 +852,10 @@ class TextFrame(ttk.Frame):
                 start = gutter_line_count + self._first_line_number - 1
                 for i in range(start, start + delta):
                     gutter.insert("end-1c", "\n", ("content",))
-                    gutter.insert("end-1c", line_computer(i), ("content",))
+                    content, tags = line_computer(i)
+                    tags += ("content", )
+                        
+                    gutter.insert("end-1c", content, tags)
             else:
                 gutter.delete(line2index(text_line_count)+"-1c", "end-1c")
                 
@@ -853,10 +867,10 @@ class TextFrame(ttk.Frame):
         gutter.yview_moveto(first)
     
     def compute_extra_gutter_line(self, lineno):
-        return " "
+        return " ", ()
 
     def compute_line_numbers_gutter_line(self, lineno):
-        return str(lineno)
+        return str(lineno), ("line_number",)
 
     def update_margin_line(self):
         if self._recommended_line_length == 0:

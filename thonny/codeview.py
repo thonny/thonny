@@ -2,12 +2,13 @@
 
 import tkinter as tk
 from thonny.common import TextRange
-from thonny import get_workbench, ui_utils
+from thonny import get_workbench
 from thonny import tktextext, roughparse
 from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 from thonny.tktextext import EnhancedText
 
 _syntax_options = {}
+BREAKPOINT_SYMBOL = "•"
 
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
@@ -191,6 +192,10 @@ class CodeView(tktextext.TextFrame):
                                                            self._reload_theme_options, True)
         
         self._reload_theme_options()
+        self._line_numbers_gutter.bind('<Double-Button-1>', self._toggle_breakpoint, True)
+        #self.text.tag_configure("breakpoint_line", background="pink")
+        self._line_numbers_gutter.tag_configure("breakpoint", background="crimson",
+                                                font="BoldEditorFont", foreground="white")
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -206,6 +211,28 @@ class CodeView(tktextext.TextFrame):
     def _on_text_changed(self, event):
         self.update_gutters()
         self.update_margin_line()
+    
+    def _toggle_breakpoint(self, event):
+        index = "@%d,%d" % (event.x, event.y)
+        start_index = index + " linestart"
+        end_index = index + " lineend"
+        
+        if self.text.tag_nextrange("breakpoint_line", start_index, end_index):
+            self.text.tag_remove("breakpoint_line", start_index, end_index)
+        else:
+            self.text.tag_add("breakpoint_line", start_index, end_index)
+        
+        self.update_line_numbers_gutter(clean=True)
+    
+    def compute_line_numbers_gutter_line(self, lineno):
+        content, tags = super().compute_line_numbers_gutter_line(lineno)
+        visual_line_number = self._first_line_number + lineno - 1 
+        linestart = str(visual_line_number) + ".0"
+        if self.text.tag_nextrange("breakpoint_line", linestart, linestart + " lineend"):
+            return BREAKPOINT_SYMBOL + content, tags# + ("breakpoint", )
+        else:
+            return content, tags
+    
     
     def select_lines(self, first_line, last_line):
         self.text.tag_remove("sel", "1.0", tk.END)
@@ -230,7 +257,13 @@ class CodeView(tktextext.TextFrame):
             if isinstance(text_range, int):
                 self.text.mark_set("insert", end) 
             self.text.see("%s -1 lines" % start)
-            
+    
+    def get_breakpoint_line_numbers(self):
+        result = set()
+        for num_line in self._line_numbers_gutter.get("1.0", "end").splitlines():
+            if BREAKPOINT_SYMBOL in num_line:
+                result.add(int(num_line.replace(BREAKPOINT_SYMBOL, "")))
+        return result
     
     def get_selected_range(self):
         if self.text.has_selection():
@@ -250,8 +283,15 @@ class CodeView(tktextext.TextFrame):
         super()._reload_theme_options(event)
         
         if "GUTTER" in _syntax_options:
-            self._line_numbers_gutter.configure(_syntax_options["GUTTER"])
-            self._extra_gutter.configure(_syntax_options["GUTTER"])
+            opts = _syntax_options["GUTTER"].copy()
+            if "background" in opts and "selectbackground" not in opts:
+                opts["selectbackground"] = opts["background"]
+            if "foreground" in opts and "selectforeground" not in opts:
+                opts["selectforeground"] = opts["foreground"]
+                
+            self._line_numbers_gutter.configure(opts)
+            self._extra_gutter.configure(opts)
+            
             if "background" in _syntax_options["GUTTER"]:
                 self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
         

@@ -28,6 +28,7 @@ import logging
 import traceback
 from time import sleep
 import shlex
+from thonny.code import get_current_breakpoints
 
 
 WINDOWS_EXE = "python.exe"
@@ -110,6 +111,10 @@ class Runner:
             get_workbench().bell()
             logging.info("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
             return
+        
+        # Attach extra info
+        if "debug" in cmd.command.lower():
+            cmd.breakpoints = get_current_breakpoints()
             
         # Offer the command
         logging.debug("RUNNER Sending: %s, %s", cmd.command, cmd)
