@@ -689,7 +689,7 @@ class TextFrame(ttk.Frame):
         self.text = text_class(self, **final_text_options)
         self.text.grid(row=0, column=1, sticky=tk.NSEW)
 
-        self._gutter = tk.Text(self, width=4, padx=5, pady=5,
+        self._line_numbers_gutter = tk.Text(self, width=4, padx=5, pady=5,
                                highlightthickness=0, bd=0, takefocus=False,
                                font=self.text['font'],
                                background='#e0e0e0', foreground=gutter_foreground,
@@ -698,10 +698,10 @@ class TextFrame(ttk.Frame):
                                state='disabled',
                                undo=False
                                )
-        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click)
-        self._gutter.bind("<Button-1>", self.on_gutter_click)
-        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion)
-        self._gutter['yscrollcommand'] = self._gutter_scroll
+        self._line_numbers_gutter.bind("<ButtonRelease-1>", self.on_gutter_click)
+        self._line_numbers_gutter.bind("<Button-1>", self.on_gutter_click)
+        self._line_numbers_gutter.bind("<Button1-Motion>", self.on_gutter_motion)
+        self._line_numbers_gutter['yscrollcommand'] = self._gutter_scroll
         
         # gutter will be gridded later
         self._first_line_number = first_line_number
@@ -740,17 +740,17 @@ class TextFrame(ttk.Frame):
         self.text.focus_set()
     
     def set_line_numbers(self, value):
-        if value and not self._gutter.winfo_ismapped():
-            self._gutter.grid(row=0, column=0, sticky=tk.NSEW)
+        if value and not self._line_numbers_gutter.winfo_ismapped():
+            self._line_numbers_gutter.grid(row=0, column=0, sticky=tk.NSEW)
             self.update_line_numbers()
-        elif not value and self._gutter.winfo_ismapped():
-            self._gutter.grid_forget()
+        elif not value and self._line_numbers_gutter.winfo_ismapped():
+            self._line_numbers_gutter.grid_forget()
         
         # insert first line number (NB! Without trailing linebreak. See update_line_numbers) 
-        self._gutter.config(state='normal')
-        self._gutter.delete("1.0", "end")
-        self._gutter.insert("1.0", str(self._first_line_number))
-        self._gutter.config(state='disabled')
+        self._line_numbers_gutter.config(state='normal')
+        self._line_numbers_gutter.delete("1.0", "end")
+        self._line_numbers_gutter.insert("1.0", str(self._first_line_number))
+        self._line_numbers_gutter.config(state='disabled')
 
         self.update_line_numbers()
     
@@ -764,7 +764,7 @@ class TextFrame(ttk.Frame):
     
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
-        self._gutter.yview(tk.MOVETO, args[0])
+        self._line_numbers_gutter.yview(tk.MOVETO, args[0])
         
     def _gutter_scroll(self, *args):
         # FIXME: this doesn't work properly
@@ -780,7 +780,7 @@ class TextFrame(ttk.Frame):
     
     def _vertical_scroll(self,*args):
         self.text.yview(*args)
-        self._gutter.yview(*args)
+        self._line_numbers_gutter.yview(*args)
         
     def _horizontal_scroll(self,*args):
         self.text.xview(*args)
@@ -788,10 +788,10 @@ class TextFrame(ttk.Frame):
     
     def update_line_numbers(self):
         text_line_count = int(self.text.index("end").split(".")[0])
-        margin_line_count = int(self._gutter.index("end").split(".")[0])
+        margin_line_count = int(self._line_numbers_gutter.index("end").split(".")[0])
         
         if text_line_count != margin_line_count:
-            self._gutter.config(state='normal')
+            self._line_numbers_gutter.config(state='normal')
             
             # NB! Text acts weird with last symbol 
             # (don't really understand whether it automatically keeps a newline there or not)
@@ -800,17 +800,17 @@ class TextFrame(ttk.Frame):
                 delta = text_line_count - margin_line_count
                 start = margin_line_count + self._first_line_number - 1
                 for i in range(start, start + delta):
-                    self._gutter.insert("end-1c", "\n" + str(i))
+                    self._line_numbers_gutter.insert("end-1c", "\n" + str(i))
             
             else:
-                self._gutter.delete(line2index(text_line_count)+"-1c", "end-1c")
+                self._line_numbers_gutter.delete(line2index(text_line_count)+"-1c", "end-1c")
                 
-            self._gutter.config(state='disabled')
+            self._line_numbers_gutter.config(state='disabled')
         
         # synchronize gutter scroll position with text
         # https://mail.python.org/pipermail/tkinter-discuss/2010-March/002197.html
         first, _ = self.text.yview()
-        self._gutter.yview_moveto(first)
+        self._line_numbers_gutter.yview_moveto(first)
 
 
     def update_margin_line(self):
@@ -844,9 +844,9 @@ class TextFrame(ttk.Frame):
 
     def on_gutter_click(self, event=None):
         try:
-            linepos = self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0]
+            linepos = self._line_numbers_gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0]
             self.text.mark_set("insert", "%s.0" % linepos)
-            self._gutter.mark_set("gutter_selection_start", "%s.0" % linepos)
+            self._line_numbers_gutter.mark_set("gutter_selection_start", "%s.0" % linepos)
             if event.type == "4": # In Python 3.6 you can use tk.EventType.ButtonPress instead of "4" 
                 self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
@@ -854,8 +854,8 @@ class TextFrame(ttk.Frame):
 
     def on_gutter_motion(self, event=None):
         try:
-            linepos = int(self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0])
-            gutter_selection_start = int(self._gutter.index("gutter_selection_start").split(".")[0])
+            linepos = int(self._line_numbers_gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0])
+            gutter_selection_start = int(self._line_numbers_gutter.index("gutter_selection_start").split(".")[0])
             self.select_lines(min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1))
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
@@ -866,12 +866,12 @@ class TextFrame(ttk.Frame):
         style = ttk.Style()
         background = style.lookup("Gutter", "background")
         if background:
-            self._gutter.configure(background=background, selectbackground=background)
+            self._line_numbers_gutter.configure(background=background, selectbackground=background)
             self._margin_line.configure(background=background)
         
         foreground = style.lookup("Gutter", "foreground")
         if foreground:
-            self._gutter.configure(foreground=foreground, selectforeground=foreground)
+            self._line_numbers_gutter.configure(foreground=foreground, selectforeground=foreground)
         
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)

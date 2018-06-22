@@ -250,7 +250,7 @@ class CodeView(tktextext.TextFrame):
         super()._reload_theme_options(event)
         
         if "GUTTER" in _syntax_options:
-            self._gutter.configure(_syntax_options["GUTTER"])
+            self._line_numbers_gutter.configure(_syntax_options["GUTTER"])
             if "background" in _syntax_options["GUTTER"]:
                 self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
 
