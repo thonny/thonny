@@ -20,7 +20,7 @@ def default_light():
         "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
         "open_string3"  : {"foreground" : string_fg, "background" : open_string_bg},
         "keyword"       : {"foreground" : "#7f0055", "font" : "BoldEditorFont"},
-        "builtin"       : {"foreground" : "black"},
+        "builtin"       : {"foreground" : "#7f0055"},
         "number"        : {"foreground" : "#B04600"},
         "comment"       : {"foreground" : light_fg},
         
@@ -72,7 +72,7 @@ def default_dark():
         "string3"       : {"foreground" : string_fg},
         "open_string"   : {"foreground" : string_fg, "background" : open_string_bg},
         "open_string3"  : {"foreground" : string_fg, "background" : open_string_bg},
-        "builtin"       : {"foreground" : default_fg},
+        "builtin"       : {"foreground" : "#A9B1C9"},
         "keyword"       : {"foreground" : "#A9B1C9", "font" : "BoldEditorFont"},
         "number"        : {"foreground" : "#FFCABF"},
         "comment"       : {"foreground" : "#D4D44E"},
@@ -119,6 +119,7 @@ def default_dark_green():
         "open_string3"  : {"background" : open_string_bg},
 
         "keyword"       : {"foreground" : "#88CFB6", "font" : "BoldEditorFont"},
+        "builtin"       : {"foreground" : "#88CFB6"},
         
         # debugger
         "active_focus"    : {"background" : "#807238"},
@@ -140,6 +141,7 @@ def default_dark_blue():
         "open_string3"  : {"background" : open_string_bg},
         
         "keyword"       : {"foreground" : "#8899CF", "font" : "BoldEditorFont"},
+        "builtin"       : {"foreground" : "#8899CF"},
 
         # debugger
         "active_focus"    : {"background" : "#807238"},
