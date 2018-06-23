@@ -196,8 +196,12 @@ class CodeView(tktextext.TextFrame):
         self._reload_theme_options()
         self._line_numbers_gutter.bind('<Double-Button-1>', self._toggle_breakpoint, True)
         #self.text.tag_configure("breakpoint_line", background="pink")
-        self._line_numbers_gutter.tag_configure("breakpoint", background="crimson",
-                                                font="BoldEditorFont", foreground="white")
+        self._line_numbers_gutter.tag_configure("breakpoint", foreground="crimson")
+        
+        editor_font = tk.font.nametofont("EditorFont")
+        spacer_font = editor_font.copy()
+        spacer_font.configure(size=editor_font.cget("size") // 4)
+        self._line_numbers_gutter.tag_configure("spacer", font=spacer_font)
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
@@ -229,13 +233,16 @@ class CodeView(tktextext.TextFrame):
         self.update_line_numbers_gutter(clean=True)
     
     def compute_line_numbers_gutter_line(self, lineno):
-        content, tags = super().compute_line_numbers_gutter_line(lineno)
         visual_line_number = self._first_line_number + lineno - 1 
         linestart = str(visual_line_number) + ".0"
+        
+        yield from super().compute_line_numbers_gutter_line(lineno)
+        yield " ", ("spacer", )
+        
         if self.text.tag_nextrange("breakpoint_line", linestart, linestart + " lineend"):
-            return BREAKPOINT_SYMBOL + content, tags# + ("breakpoint", )
+            yield BREAKPOINT_SYMBOL, ("breakpoint", )
         else:
-            return content, tags
+            yield " ", ()
     
     
     def select_lines(self, first_line, last_line):
@@ -300,7 +307,7 @@ class CodeView(tktextext.TextFrame):
                 self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
         
         if "breakpoint" in _syntax_options:
-            self._extra_gutter.configure(_syntax_options["breakpoint"])
+            self._line_numbers_gutter.tag_configure("breakpoint", _syntax_options["breakpoint"])
 
 def set_syntax_options(syntax_options):
     global _syntax_options
