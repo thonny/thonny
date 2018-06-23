@@ -8,7 +8,9 @@ from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 from thonny.tktextext import EnhancedText
 
 _syntax_options = {}
-BREAKPOINT_SYMBOL = "•"
+#BREAKPOINT_SYMBOL = "•" # Bullet
+#BREAKPOINT_SYMBOL = "○" # White circle
+BREAKPOINT_SYMBOL = "●" # Black circle
 
 class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
@@ -220,7 +222,9 @@ class CodeView(tktextext.TextFrame):
         if self.text.tag_nextrange("breakpoint_line", start_index, end_index):
             self.text.tag_remove("breakpoint_line", start_index, end_index)
         else:
-            self.text.tag_add("breakpoint_line", start_index, end_index)
+            line_content = self.text.get(start_index, end_index).strip()
+            if line_content and line_content[0] != "#":
+                self.text.tag_add("breakpoint_line", start_index, end_index)
         
         self.update_line_numbers_gutter(clean=True)
     

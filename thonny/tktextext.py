@@ -785,6 +785,7 @@ class TextFrame(ttk.Frame):
         self.update_margin_line()
     
     def _text_changed(self, event):
+        "# TODO: make more efficient"
         self.update_gutters()
         self.update_margin_line()
     
@@ -829,6 +830,9 @@ class TextFrame(ttk.Frame):
         self.update_extra_gutter(clean)
     
     def _update_gutter(self, gutter, line_computer, clean=True):
+        # TODO: make it more efficient
+        # by default clean only if line counts in gutter and text differ
+        
         if clean:
             gutter.config(state='normal')
             gutter.delete("1.0", "end")
