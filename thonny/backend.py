@@ -288,7 +288,7 @@ class VM:
 
         result_attributes = self._execute_source(source, filename, mode,
             FancyTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
-            getattr(cmd, "global_vars", None))
+            global_vars=getattr(cmd, "global_vars", None))
 
         result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
 
@@ -576,19 +576,22 @@ class VM:
             with tokenize.open(full_filename) as fp:
                 source = fp.read()
 
-            result_attributes = self._execute_source(source, full_filename, "exec", executor_class)
+            result_attributes = self._execute_source(source, full_filename, "exec", executor_class,
+                                                     cmd=cmd)
             return self.create_message("ToplevelResult", **result_attributes)
         else:
             raise UserCommandError("Command '%s' takes at least one argument", cmd.command)
 
-    def _execute_source(self, source, filename, execution_mode, executor_class, global_vars=None):
+    def _execute_source(self, source, filename, execution_mode, executor_class, 
+                        global_vars=None, cmd=None):
         self._current_executor = executor_class(self)
 
         try:
             return self._current_executor.execute_source(source,
                                                          filename,
                                                          execution_mode,
-                                                         global_vars)
+                                                         global_vars,
+                                                         cmd)
         finally:
             self._current_executor = None
 
@@ -748,7 +751,7 @@ class Executor:
     def __init__(self, vm):
         self._vm = vm
 
-    def execute_source(self, source, filename, mode, global_vars=None):
+    def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
 
         if global_vars is None:
             global_vars = __main__.__dict__
@@ -880,10 +883,22 @@ class FancyTracer(Tracer):
         self._past_globals = []
         self._current_state = 0
 
-    def execute_source(self, source, filename, mode, global_vars=None):
-        self._current_command = DebuggerCommand(command="step", state=None, focus=None, frame_id=None, exception=None)
+    def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
+        if cmd and getattr(cmd, "breakpoints", None):
+            command = "resume"
+            breakpoints = cmd.breakpoints
+        else:
+            command = "step"
+            breakpoints = {}
+            
+        self._current_command = DebuggerCommand(command=command, 
+                                                state=None,
+                                                focus=None,
+                                                frame_id=None,
+                                                exception=None,
+                                                breakpoints=breakpoints)
 
-        return Executor.execute_source(self, source, filename, mode, global_vars)
+        return Executor.execute_source(self, source, filename, mode, global_vars, cmd)
         #assert len(self._custom_stack) == 0
 
     def export_globals(self, module_name):
@@ -1175,7 +1190,7 @@ class FancyTracer(Tracer):
 
         self._debug("Waiting for command")
         # Fetch next debugger command
-        self._current_command = self._vm._fetch_command()
+        self._current_command = self._fetch_command()
         self._debug("Got command:", self._current_command)
         # get non-progress commands out our way
         self._respond_to_inline_commands()
@@ -1212,7 +1227,10 @@ class FancyTracer(Tracer):
     def _respond_to_inline_commands(self):
         while isinstance(self._current_command, InlineCommand):
             self._vm.handle_command(self._current_command)
-            self._current_command = self._vm._fetch_command()
+            self._current_command = self._fetch_command()
+    
+    def _fetch_command(self):
+        return self._vm._fetch_command()
 
     def _get_frame_source_info(self, frame):
         if frame.f_code.co_name == "<module>":
@@ -1236,6 +1254,9 @@ class FancyTracer(Tracer):
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
         """
+        
+        if self._at_a_breakpoint(frame, event, focus, cmd):
+            return True
 
         # Make sure the correct frame_id is selected
         if type(frame) == FrameInfo:
@@ -1278,9 +1299,6 @@ class FancyTracer(Tracer):
         # Check if the selected message has been previously sent to front-end
         return self._past_messages[self._current_state][1]
 
-    def _cmd_run_to_before_completed(self, frame, event, args, focus, cmd):
-        return event.startswith("before")
-
     def _cmd_out_completed(self, frame, event, args, focus, cmd):
         if self._current_state == 0:
             return False
@@ -1288,6 +1306,9 @@ class FancyTracer(Tracer):
         if event == "after_statement":
             return False
 
+        if self._at_a_breakpoint(frame, event, focus, cmd):
+            return True
+        
         prev_state_frame = self._past_messages[self._current_state-1][0]["stack"][-1]
 
         """Complete current frame"""
@@ -1305,15 +1326,26 @@ class FancyTracer(Tracer):
             or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
         )
 
-    def _cmd_line_completed(self, frame, event, args, focus, cmd):
+    def _cmd_resume_completed(self, frame, event, args, focus, cmd):
+        return self._at_a_breakpoint(frame, event, focus, cmd)
+    
+    def _at_a_breakpoint(self, frame, event, focus, cmd):
         if type(frame) == FrameInfo:
             frame_id = frame.id
         else:
             frame_id = id(frame)
-        return (event == "before_statement"
-                and os.path.normcase(frame.filename) == os.path.normcase(cmd.target_filename)
-                and focus.lineno == cmd.target_lineno
-                and (focus != cmd.focus or frame_id != cmd.frame_id))
+        
+        return (event in ["before_statement", "before_expression"]
+                and frame.filename in cmd.breakpoints
+                and focus.lineno in cmd.breakpoints[frame.filename]
+                # consider only first event on a line
+                # (but take into account that same line may be reentered)
+                and (cmd.focus is None 
+                     or (cmd.focus.lineno != focus.lineno)
+                     or (cmd.focus == focus and cmd.state == event) 
+                     or frame_id != cmd.frame_id
+                     )
+                )
 
     def _frame_is_alive(self, frame_id):
         for frame in self._custom_stack:

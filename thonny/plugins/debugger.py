@@ -76,9 +76,17 @@ class Debugger:
             self._cmd_step_out,
             caption="Out",
             tester=self._cmd_stepping_commands_enabled,
-            default_sequence="<F8>",
             group=30,
             image="step-out",
+            include_in_toolbar=True)
+        
+        get_workbench().add_command("resume", "run", "Resume",
+            self._cmd_resume,
+            caption="Resume",
+            tester=self._cmd_stepping_commands_enabled,
+            default_sequence="<F8>",
+            group=30,
+            image="resume",
             include_in_toolbar=True)
         
         get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
@@ -139,6 +147,9 @@ class Debugger:
         
         self._check_issue_debugger_command("exec")
 
+    def _cmd_resume(self):
+        self._check_issue_debugger_command("resume")
+
     def _cmd_step_back(self):
         self._check_issue_debugger_command("back")
         
@@ -153,10 +164,11 @@ class Debugger:
             selection = code_view.get_selected_range()
             
             target_lineno = visualizer._firstlineno-1 + selection.lineno
-            self._check_issue_debugger_command("line",
-                                               target_filename=visualizer._filename, 
-                                               target_lineno=target_lineno,
-                                               )
+            breakpoints=get_current_breakpoints()
+            if visualizer._filename not in breakpoints:
+                breakpoints[visualizer._filename] = set()
+            breakpoints[visualizer._filename].add(target_lineno)
+            self._check_issue_debugger_command("resume", breakpoints=breakpoints)
 
     def _cmd_run_to_cursor_enabled(self):
         return (self._cmd_stepping_commands_enabled()

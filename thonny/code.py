@@ -541,6 +541,8 @@ def get_current_breakpoints():
     for editor in get_workbench().get_editor_notebook().get_all_editors():
         filename = editor.get_filename()
         if filename:
-            result[os.path.realpath(filename)] = editor.get_code_view().get_breakpoint_line_numbers()
+            linenos = editor.get_code_view().get_breakpoint_line_numbers()
+            if linenos:
+                result[os.path.realpath(filename)] = linenos
     
     return result
