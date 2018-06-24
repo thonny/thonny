@@ -828,11 +828,14 @@ class SimpleTracer(Tracer):
         if self._should_skip_frame(frame):
             return None
         
-        print(frame, frame.f_lineno, event, arg)
+        #print(frame, frame.f_lineno, event, arg)
         """
         if event == "call":
         elif event == "line":
-        """    
+        """
+        if event == "line":
+            report_state
+            fetch_new_command
             
         return self._trace
     
@@ -841,16 +844,12 @@ class SimpleTracer(Tracer):
         return (super()._should_skip_frame(frame)
                 or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir))
 
-    def _export_stack(self):
+    def _export_stack(self, newest_frame):
         result = []
-
-        for custom_frame in self._custom_stack:
-
-            last_event_args = custom_frame.last_event_args.copy()
-            if "value" in last_event_args:
-                last_event_args["value"] = self._vm.export_value(last_event_args["value"])
-
-            system_frame = custom_frame.system_frame
+        
+        system_frame = newest_frame
+        
+        while system_frame is not None:
             source, firstlineno = self._get_frame_source_info(system_frame)
 
             result.append(FrameInfo(
@@ -858,16 +857,12 @@ class SimpleTracer(Tracer):
                 filename=system_frame.f_code.co_filename,
                 module_name=system_frame.f_globals["__name__"],
                 code_name=system_frame.f_code.co_name,
-                locals=self._vm.export_variables(system_frame.f_locals),
+                #locals=self._vm.export_variables(system_frame.f_locals),
                 source=source,
                 firstlineno=firstlineno,
-                last_event=custom_frame.last_event,
-                last_event_args=last_event_args,
-                last_event_focus=custom_frame.last_event_focus,
-                current_evaluations=custom_frame.current_evaluations.copy(),
-                current_statement=custom_frame.current_statement,
-                current_root_expression=custom_frame.current_root_expression,
             ))
+            
+            system_frame = system_frame.f_back
 
         return result
     
