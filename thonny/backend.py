@@ -839,6 +839,14 @@ class Tracer(Executor):
             or self._vm.is_doing_io()
         )
 
+    def _respond_to_inline_commands(self):
+        while isinstance(self._current_command, InlineCommand):
+            self._vm.handle_command(self._current_command)
+            self._current_command = self._fetch_command()
+    
+    def _fetch_command(self):
+        return self._vm._fetch_command()
+
 
 class SimpleTracer(Tracer):
     def _trace(self, frame, event, arg):
@@ -862,8 +870,9 @@ class SimpleTracer(Tracer):
                                     )
             
             self._vm.send_message(msg)
-            self._current_command = self._vm._fetch_command()
-            
+            self._current_command = self._fetch_command()
+            self._respond_to_inline_commands()
+            print("Got", self._current_command)
         return self._trace
     
     def _should_skip_frame(self, frame):
@@ -1235,15 +1244,6 @@ class FancyTracer(Tracer):
                                else "before_statement_again")
 
                 self._handle_progress_event(frame, again_event, again_args)
-
-
-    def _respond_to_inline_commands(self):
-        while isinstance(self._current_command, InlineCommand):
-            self._vm.handle_command(self._current_command)
-            self._current_command = self._fetch_command()
-    
-    def _fetch_command(self):
-        return self._vm._fetch_command()
 
 
     def _cmd_exec_completed(self, frame, event, args, focus, cmd):
