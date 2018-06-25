@@ -808,6 +808,23 @@ class Tracer(Executor):
         self._normcase_thonny_src_dir = os.path.normcase(os.path.dirname(sys.modules["thonny"].__file__))
         self._current_command = None
         
+    def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
+        if cmd and getattr(cmd, "breakpoints", None):
+            command = "resume"
+            breakpoints = cmd.breakpoints
+        else:
+            command = "step"
+            breakpoints = {}
+            
+        self._current_command = DebuggerCommand(command=command, 
+                                                state=None,
+                                                focus=None,
+                                                frame_id=None,
+                                                exception=None,
+                                                breakpoints=breakpoints)
+
+        return Executor.execute_source(self, source, filename, mode, global_vars, cmd)
+        #assert len(self._custom_stack) == 0
     def _should_skip_frame(self, frame):
         code = frame.f_code
 
@@ -834,8 +851,18 @@ class SimpleTracer(Tracer):
         elif event == "line":
         """
         if event == "line":
-            report_state
-            fetch_new_command
+            msg = self._vm.create_message("LineDebuggerProgress",
+                                    stack=self._export_stack(frame),
+                                    exception=None, #self._vm.export_value(self._unhandled_exception, True),
+                                    exception_msg=None, #exception_msg,
+                                    exception_lower_stack_description=None, #exception_lower_stack_description,
+                                    is_new=True,
+                                    loaded_modules=list(sys.modules.keys()),
+                                    stream_symbol_counts=0 #symbols_by_streams
+                                    )
+            
+            self._vm.send_message(msg)
+            self._current_command = self._vm._fetch_command()
             
         return self._trace
     
@@ -850,17 +877,25 @@ class SimpleTracer(Tracer):
         system_frame = newest_frame
         
         while system_frame is not None:
-            source, firstlineno = self._get_frame_source_info(system_frame)
+            module_name = system_frame.f_globals["__name__"]
+            code_name = system_frame.f_code.co_name
+            
+            source, firstlineno = _get_frame_source_info(system_frame)
 
-            result.append(FrameInfo(
+            result.insert(0, FrameInfo(
                 id=id(system_frame),
                 filename=system_frame.f_code.co_filename,
-                module_name=system_frame.f_globals["__name__"],
-                code_name=system_frame.f_code.co_name,
+                module_name=module_name,
+                code_name=code_name,
+                lineno=system_frame.f_lineno,
                 #locals=self._vm.export_variables(system_frame.f_locals),
                 source=source,
                 firstlineno=firstlineno,
             ))
+            
+            if module_name == "__main__" and code_name == "<module>":
+                # this was last frame relevant to the user
+                break
             
             system_frame = system_frame.f_back
 
@@ -878,23 +913,6 @@ class FancyTracer(Tracer):
         self._past_globals = []
         self._current_state = 0
 
-    def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
-        if cmd and getattr(cmd, "breakpoints", None):
-            command = "resume"
-            breakpoints = cmd.breakpoints
-        else:
-            command = "step"
-            breakpoints = {}
-            
-        self._current_command = DebuggerCommand(command=command, 
-                                                state=None,
-                                                focus=None,
-                                                frame_id=None,
-                                                exception=None,
-                                                breakpoints=breakpoints)
-
-        return Executor.execute_source(self, source, filename, mode, global_vars, cmd)
-        #assert len(self._custom_stack) == 0
 
     def export_globals(self, module_name):
         if not self.is_in_past():
@@ -1227,22 +1245,6 @@ class FancyTracer(Tracer):
     def _fetch_command(self):
         return self._vm._fetch_command()
 
-    def _get_frame_source_info(self, frame):
-        if frame.f_code.co_name == "<module>":
-            obj = frame.f_code
-            lineno = 1
-        else:
-            obj = frame.f_code
-            lineno = obj.co_firstlineno
-
-        assert obj is not None, (
-            "Failed to get source in backend _get_frame_source_info for frame " + str(frame)
-            + " with f_code.co_name == " + frame.f_code.co_name
-        )
-
-        # lineno returned by getsourcelines is not consistent between modules vs functions
-        lines, _ = inspect.getsourcelines(obj)
-        return "".join(lines), lineno
 
     def _cmd_exec_completed(self, frame, event, args, focus, cmd):
         """
@@ -1359,7 +1361,7 @@ class FancyTracer(Tracer):
                 last_event_args["value"] = self._vm.export_value(last_event_args["value"])
 
             system_frame = custom_frame.system_frame
-            source, firstlineno = self._get_frame_source_info(system_frame)
+            source, firstlineno = _get_frame_source_info(system_frame)
 
             result.append(FrameInfo(
                 id=id(system_frame),
@@ -1679,6 +1681,24 @@ class _PathSet:
     def __iter__(self):
         for item in self._normcase_set:
             yield item
+
+def _get_frame_source_info(frame):
+    if frame.f_code.co_name == "<module>":
+        obj = frame.f_code
+        lineno = 1
+    else:
+        obj = frame.f_code
+        lineno = obj.co_firstlineno
+
+    assert obj is not None, (
+        "Failed to get source in backend _get_frame_source_info for frame " + str(frame)
+        + " with f_code.co_name == " + frame.f_code.co_name
+    )
+
+    # lineno returned by getsourcelines is not consistent between modules vs functions
+    lines, _ = inspect.getsourcelines(obj)
+    return "".join(lines), lineno
+
 
 def load_module_from_alternative_path(module_name, path, force=False):
     from importlib.machinery import PathFinder
