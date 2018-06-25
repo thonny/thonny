@@ -193,6 +193,11 @@ class Editor(ttk.Frame):
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
     
+    def see_line(self, lineno):
+        # first see an earlier line in order to push target line downwards
+        self._code_view.text.see("%d.0" % max(lineno-4, 1))
+        self._code_view.text.see("%d.0" % lineno)
+    
     def focus_set(self):
         self._code_view.focus_set()
     

@@ -103,17 +103,37 @@ class SimpleDebugger(Debugger):
         
     def _handle_debugger_progress(self, msg):
         self._last_progress_message = msg
-        print("HANDL")
+        self.highlight_a_frame(msg.stack[-1])
     
     def handle_toplevel_result(self, msg):
         super().handle_toplevel_result(msg)
-        get_workbench().unbind("SimpleDebuggerProgress", self._handle_debugger_progress)    
+        get_workbench().unbind("SimpleDebuggerProgress", self._handle_debugger_progress)
+        self._remove_focus_tags()
+    
+    def _remove_focus_tags(self):
+        for editor in get_workbench().get_editor_notebook().get_all_editors():    
+            for name in ["exception_focus", "active_focus", 
+                         "completed_focus", "suspended_focus"]:
+                editor.get_code_view().text.tag_remove(name, "1.0", "end")
             
     def command_enabled(self, command):
         if command == "step_back":
             return False
         else:
             return super().command_enabled(command)
+    
+    def highlight_a_frame(self, frame_info):
+        enb = get_workbench().get_editor_notebook()
+        
+        # show the location
+        target_editor = enb.show_file(frame_info.filename)
+        target_editor.see_line(frame_info.lineno)
+        
+        self._remove_focus_tags()
+        # add highlight
+        target_editor.get_code_view().text.tag_add("active_focus",
+                                            "%d.0" % frame_info.lineno,
+                                            "%d.0" % (frame_info.lineno+1))
 
 
 class FancyDebugger(Debugger):
