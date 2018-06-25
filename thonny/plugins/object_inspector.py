@@ -30,7 +30,8 @@ class ObjectInspector(ttk.Frame):
         
         get_workbench().bind("ObjectSelect", self.show_object, True)
         get_workbench().bind("ObjectInfo", self._handle_object_info_event, True)
-        get_workbench().bind("DebuggerProgress", self._handle_progress_event, True)
+        get_workbench().bind("FancyDebuggerProgress", self._handle_progress_event, True)
+        get_workbench().bind("SimpleDebuggerProgress", self._handle_progress_event, True)
         get_workbench().bind("ToplevelResult", self._handle_progress_event, True)
         
         #self.demo()

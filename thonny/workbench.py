@@ -1090,7 +1090,8 @@ class Workbench(tk.Tk):
             tk.Tk.event_generate(self, sequence, **kwargs)
         else:
             if sequence in self._event_handlers:
-                for handler in self._event_handlers[sequence]:
+                # copy, so that event handler can remove itself during iteration
+                for handler in self._event_handlers[sequence].copy():
                     try:
                         # Yes, I'm creating separate event object for each handler
                         # so that they can't misuse the mutabilty

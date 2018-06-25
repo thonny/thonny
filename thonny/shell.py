@@ -147,7 +147,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
-        get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
+        get_workbench().bind("FancyDebuggerProgress", self._handle_fancy_debugger_progress, True)
         
         self._init_menu()
     
@@ -224,7 +224,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._try_submit_input() # Trying to submit leftover code (eg. second magic command)
         self.see("end")
     
-    def _handle_debugger_progress(self, msg):
+    def _handle_fancy_debugger_progress(self, msg):
         if msg.is_new:
             self._update_visible_io(None)
         else:

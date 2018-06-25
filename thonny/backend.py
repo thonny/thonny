@@ -252,7 +252,7 @@ class VM:
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
 
-    def _cmd_DebugLite(self, cmd):
+    def _cmd_LineDebug(self, cmd):
         return self._execute_file(cmd, SimpleTracer)
 
     def _cmd_Debug(self, cmd):
@@ -813,7 +813,7 @@ class Tracer(Executor):
             command = "resume"
             breakpoints = cmd.breakpoints
         else:
-            command = "step"
+            command = "step_into"
             breakpoints = {}
             
         self._current_command = DebuggerCommand(command=command, 
@@ -859,7 +859,8 @@ class SimpleTracer(Tracer):
         elif event == "line":
         """
         if event == "line":
-            msg = self._vm.create_message("LineDebuggerProgress",
+            print("line")
+            msg = self._vm.create_message("SimpleDebuggerProgress",
                                     stack=self._export_stack(frame),
                                     exception=None, #self._vm.export_value(self._unhandled_exception, True),
                                     exception_msg=None, #exception_msg,
@@ -1190,7 +1191,7 @@ class FancyTracer(Tracer):
             self._past_globals[-1][current_module_globals["__name__"]] = self._vm.export_variables(current_module_globals)
 
         self._past_messages.append([(
-            self._vm.create_message("DebuggerProgress",
+            self._vm.create_message("FancyDebuggerProgress",
                                     stack=self._export_stack(),
                                     exception=self._vm.export_value(self._unhandled_exception, True),
                                     exception_msg=exception_msg,
@@ -1246,7 +1247,7 @@ class FancyTracer(Tracer):
                 self._handle_progress_event(frame, again_event, again_args)
 
 
-    def _cmd_exec_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_over_completed(self, frame, event, args, focus, cmd):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
@@ -1289,14 +1290,14 @@ class FancyTracer(Tracer):
                 # We're done
                 return True
 
-    def _cmd_step_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_into_completed(self, frame, event, args, focus, cmd):
         return event != "after_statement"
 
-    def _cmd_back_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_back_completed(self, frame, event, args, focus, cmd):
         # Check if the selected message has been previously sent to front-end
         return self._past_messages[self._current_state][1]
 
-    def _cmd_out_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_out_completed(self, frame, event, args, focus, cmd):
         if self._current_state == 0:
             return False
 

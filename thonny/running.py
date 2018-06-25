@@ -278,7 +278,7 @@ class Runner:
             # change state
             if msg["message_type"] == "ToplevelResult":
                 self._set_state("waiting_toplevel_command")
-            elif msg["message_type"] in ["DebuggerProgress", "LineDebuggerProgress"]:
+            elif msg["message_type"].endswith("DebuggerProgress"):
                 self._set_state("waiting_debugger_command")
             else:
                 "other messages don't affect the state"

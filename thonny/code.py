@@ -49,7 +49,8 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
         
-        get_workbench().bind("DebuggerProgress", self._listen_debugger_progress, True)
+        get_workbench().bind("FancyDebuggerProgress", self._listen_debugger_progress, True)
+        get_workbench().bind("SimpleDebuggerProgress", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResult", self._listen_for_toplevel_result, True)
         
         self.update_appearance()
@@ -208,7 +209,8 @@ class Editor(ttk.Frame):
         self.master.update_editor_title(self)
         
     def destroy(self):
-        get_workbench().unbind("DebuggerProgress", self._listen_debugger_progress)
+        get_workbench().unbind("FancyDebuggerProgress", self._listen_debugger_progress)
+        get_workbench().unbind("SimpleDebuggerProgress", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResult", self._listen_for_toplevel_result)
         ttk.Frame.destroy(self)
     

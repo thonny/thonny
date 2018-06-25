@@ -11,7 +11,8 @@ class EventsView(TextFrame):
         get_workbench().bind("ShowView", self._log_event, True)
         get_workbench().bind("HideView", self._log_event, True)
         get_workbench().bind("ToplevelResult", self._log_event, True)
-        get_workbench().bind("DebuggerProgress", self._log_event, True)
+        get_workbench().bind("FancyDebuggerProgress", self._log_event, True)
+        get_workbench().bind("SimpleDebuggerProgress", self._log_event, True)
         get_workbench().bind("ProgramOutput", self._log_event, True)
         get_workbench().bind("InputRequest", self._log_event, True)
     
@@ -22,7 +23,7 @@ class EventsView(TextFrame):
             if name not in ["sequence", "setdefault", "update"] and not name.startswith("_"):
                 self.text.insert("end", "    " + name + ": " + repr(getattr(event, name))[:100] + "\n")
         
-        if event.sequence == "DebuggerProgress":
+        if event.sequence == "FancyDebuggerProgress":
             frame = event.stack[-1]
             self.text.insert("end", "    " + "event" + ": " + frame.last_event + "\n") 
             self.text.insert("end", "    " + "focus" + ": " + str(frame.last_event_focus) + "\n") 

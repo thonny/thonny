@@ -8,7 +8,7 @@ import tkinter as tk
 from tkinter import ttk
 from thonny.common import DebuggerCommand
 from thonny.memory import VariablesFrame
-from thonny import ast_utils, memory, misc_utils, ui_utils
+from thonny import ast_utils, memory, misc_utils, ui_utils, code
 from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView, get_syntax_options_for_tag
@@ -17,104 +17,20 @@ from thonny import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import tokenize
 import logging
-from thonny.code import get_current_breakpoints
+
+_current_debugger = None
 
 class Debugger:
     def __init__(self):
-        
-        self._init_commands()
-        
-        self._main_frame_visualizer = None
         self._last_progress_message = None
-        
-        get_workbench().bind("DebuggerProgress", self._handle_debugger_progress, True)
-        get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
+        get_workbench().bind("ToplevelResult", self.handle_toplevel_result, True)
     
-    def _init_commands(self):
-        get_workbench().add_command("debug", "run", "Debug current script",
-            self._cmd_debug_current_script,
-            caption="Debug",
-            tester=self._cmd_debug_current_script_enabled,
-            default_sequence="<Control-F5>",
-            group=10,
-            image="debug-current-script",
-            include_in_toolbar=True)
-        
-        get_workbench().add_command("debuglite", "run", "DebugLite current script",
-            self._cmd_debug_lite_current_script,
-            caption="DebugLite",
-            tester=self._cmd_debug_current_script_enabled,
-            default_sequence="<Shift-F5>",
-            group=10)
-        
-        get_workbench().add_command("step_over", "run", "Step over",
-            self._cmd_step_over,
-            caption="Over",
-            tester=self._cmd_stepping_commands_enabled,
-            default_sequence="<F6>",
-            group=30,
-            image="step-over",
-            include_in_toolbar=True)
+    def debug_current_script(self):
+        raise NotImplementedError()
 
-        get_workbench().add_command("step_back", "run", "Step back",
-            self._cmd_step_back,
-            caption="Back",
-            tester=self._cmd_stepping_commands_enabled,
-            default_sequence="<F9>",
-            group=30)
-
-        get_workbench().add_command("step_into", "run", "Step into",
-            self._cmd_step_into,
-            caption="Into",
-            tester=self._cmd_stepping_commands_enabled,
-            default_sequence="<F7>",
-            group=30,
-            image="step-into",
-            include_in_toolbar=True)
-        
-        get_workbench().add_command("step_out", "run", "Step out",
-            self._cmd_step_out,
-            caption="Out",
-            tester=self._cmd_stepping_commands_enabled,
-            group=30,
-            image="step-out",
-            include_in_toolbar=True)
-        
-        get_workbench().add_command("resume", "run", "Resume",
-            self._cmd_resume,
-            caption="Resume",
-            tester=self._cmd_stepping_commands_enabled,
-            default_sequence="<F8>",
-            group=30,
-            image="resume",
-            include_in_toolbar=True)
-        
-        get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
-            self._cmd_run_to_cursor,
-            tester=self._cmd_run_to_cursor_enabled,
-            default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
-            group=30,
-            image="run-to-cursor",
-            include_in_toolbar=False)
-
-    
-    def _cmd_debug_current_script(self):
-        get_runner().execute_current("Debug")
-
-    def _cmd_debug_lite_current_script(self):
-        get_runner().execute_current("DebugLite")
-
-    def _cmd_debug_current_script_enabled(self):
-        return (get_workbench().get_editor_notebook().get_current_editor() is not None
-                and get_runner().get_state() == "waiting_toplevel_command"
-                and "debug" in get_runner().supported_features())
-
-    def _check_issue_debugger_command(self, command, **kwargs):
+    def check_issue_command(self, command, **kwargs):
         cmd = DebuggerCommand(command=command, **kwargs)
         self._last_debugger_command = cmd
-
-        if get_workbench().get_option("general.debug_mode"):
-            print("LAST DEBUGGER COMMAND:", cmd.command, cmd)
 
         state = get_runner().get_state() 
         if (state == "waiting_debugger_command"):
@@ -123,40 +39,93 @@ class Debugger:
             # tell VM the state we are seeing
             cmd.setdefault (
                 frame_id=self._last_progress_message.stack[-1].id,
-                state=self._last_progress_message.stack[-1].last_event,
-                focus=self._last_progress_message.stack[-1].last_event_focus,
-                breakpoints=get_current_breakpoints()
+                breakpoints=self.get_command_breakpoints(command)
             )
+            
+            if hasattr(self._last_progress_message.stack[-1], "last_event"):
+                cmd.setdefault (
+                    state=self._last_progress_message.stack[-1].last_event,
+                    focus=self._last_progress_message.stack[-1].last_event_focus,
+                )
+
             
             get_runner().send_command(cmd)
         else:
             logging.debug("Bad state for sending debugger command " + str(command))
 
-
-    def _cmd_stepping_commands_enabled(self):
-        return get_runner().get_state() == "waiting_debugger_command"
+    def get_command_breakpoints(self, command):
+        breakpoints = code.get_current_breakpoints()
+        if command == "run_to_cursor":
+            bp = self.get_run_to_cursor_breakpoint()
+            if bp is not None:
+                path, line = bp
+                if path not in breakpoints:
+                    breakpoints[path] = set()
+                breakpoints[path].add(line)
+        return breakpoints
     
-    def _cmd_step_into(self):
-        self._check_issue_debugger_command("step")
+    def get_run_to_cursor_breakpoint(self):
+        return None
+
+    def command_enabled(self, command):
+        if get_runner().get_state() != "waiting_debugger_command":
+            return False
+        
+        if command == "run_to_cursor":
+            return self.get_run_to_cursor_breakpoint() is not None
+        
+        return True
     
-    def _cmd_step_over(self):
-        # Step over should stop when new statement or expression is selected.
-        # At the same time, I need to get value from after_expression event.
-        # Therefore I ask backend to stop first after the focus
-        # and later I ask it to run to the beginning of new statement/expression.
+    def handle_toplevel_result(self, msg):
+        global _current_debugger
+        _current_debugger = None
+        get_workbench().unbind("ToplevelResult", self.handle_toplevel_result)
+            
+            
+class SimpleDebugger(Debugger):
+    def __init__(self):
+        super().__init__()
+        get_workbench().bind("SimpleDebuggerProgress", self._handle_debugger_progress, True)
+    
+    def debug_current_script(self):
+        get_runner().execute_current("LineDebug")
+    
+    def get_run_to_cursor_breakpoint(self):
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if editor:
+            filename = editor.get_filename()
+            selection = editor.get_code_view().get_selected_range()
+            lineno = selection.lineno
+            if filename and lineno:
+                return filename, lineno
+            
+        return None
         
-        self._check_issue_debugger_command("exec")
+    def _handle_debugger_progress(self, msg):
+        self._last_progress_message = msg
+        print("HANDL")
+    
+    def handle_toplevel_result(self, msg):
+        super().handle_toplevel_result(msg)
+        get_workbench().unbind("SimpleDebuggerProgress", self._handle_debugger_progress)    
+            
+    def command_enabled(self, command):
+        if command == "step_back":
+            return False
+        else:
+            return super().command_enabled(command)
 
-    def _cmd_resume(self):
-        self._check_issue_debugger_command("resume")
 
-    def _cmd_step_back(self):
-        self._check_issue_debugger_command("back")
-        
-    def _cmd_step_out(self):
-        self._check_issue_debugger_command("out")
-
-    def _cmd_run_to_cursor(self):
+class FancyDebugger(Debugger):
+    def __init__(self):
+        super().__init__()
+        self._main_frame_visualizer = None
+        get_workbench().bind("FancyDebuggerProgress", self._handle_debugger_progress, True)
+    
+    def debug_current_script(self):
+        get_runner().execute_current("Debug")
+    
+    def get_run_to_cursor_breakpoint(self):
         visualizer = self._get_topmost_selected_visualizer()
         if visualizer:
             assert isinstance(visualizer._text_frame, CodeView)
@@ -164,38 +133,10 @@ class Debugger:
             selection = code_view.get_selected_range()
             
             target_lineno = visualizer._firstlineno-1 + selection.lineno
-            breakpoints=get_current_breakpoints()
-            if visualizer._filename not in breakpoints:
-                breakpoints[visualizer._filename] = set()
-            breakpoints[visualizer._filename].add(target_lineno)
-            self._check_issue_debugger_command("resume", breakpoints=breakpoints)
-
-    def _cmd_run_to_cursor_enabled(self):
-        return (self._cmd_stepping_commands_enabled()
-                and self._get_topmost_selected_visualizer() is not None
-                )
-    
-        
-    def _get_topmost_selected_visualizer(self):
-        
-        visualizer = self._main_frame_visualizer
-        if visualizer is None:
-            return None
-        
-        while visualizer._next_frame_visualizer is not None:
-            visualizer = visualizer._next_frame_visualizer
-        
-        topmost_text_widget = visualizer._text
-        focused_widget = get_workbench().focus_get()
-        
-        if focused_widget is None:
-            return None
-        elif focused_widget == topmost_text_widget:
-            return visualizer
+            return visualizer._filename, target_lineno
         else:
             return None
         
-
     def _handle_debugger_progress(self, msg):
         self._last_progress_message = msg
         
@@ -218,27 +159,31 @@ class Debugger:
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
     
-    def _should_skip_event(self, msg):
-        return False
-        frame_info = msg.stack[-1]
-        event = frame_info.last_event
-        tags = frame_info.last_event_args["node_tags"]
-        time = msg.time
-        
-        if event == "after_statement" and time != "past":
-            return True
-        
-        # TODO: consult also configuration
-        if "call_function" in tags and time != "past":
-            return True
-        else:
-            return False
-    
-    def _handle_toplevel_result(self, msg):
+    def handle_toplevel_result(self, msg):
+        super().handle_toplevel_result(msg)
+        get_workbench().unbind("FancyDebuggerProgress", self._handle_debugger_progress)    
         if self._main_frame_visualizer is not None:
             self._main_frame_visualizer.close()
-            self._main_frame_visualizer = None    
-
+            self._main_frame_visualizer = None
+            
+    def _get_topmost_selected_visualizer(self):
+        visualizer = self._main_frame_visualizer
+        if visualizer is None:
+            return None
+        
+        while visualizer._next_frame_visualizer is not None:
+            visualizer = visualizer._next_frame_visualizer
+        
+        topmost_text_widget = visualizer._text
+        focused_widget = get_workbench().focus_get()
+        
+        if focused_widget is None:
+            return None
+        elif focused_widget == topmost_text_widget:
+            return visualizer
+        else:
+            return None
+        
 
 class FrameVisualizer:
     """
@@ -698,8 +643,96 @@ class ModuleLoadDialog(FrameDialog):
     def __init__(self, text_frame, frame_info):
         FrameDialog.__init__(self, text_frame)
     
+
+def _debugger_command_enabled(command):
+    if _current_debugger is None:
+        return False
+    else:
+        return _current_debugger.command_enabled(command)
     
-    
+def _issue_debugger_command(command):
+    if _current_debugger is None:
+        raise AssertionError("Trying to send debugger command without debugger")
+    else:
+        return _current_debugger.check_issue_command(command)
+
+def _start_debug_enabled():
+    return (_current_debugger is None
+            and get_workbench().get_editor_notebook().get_current_editor() is not None
+            and get_runner().get_state() == "waiting_toplevel_command"
+            and "debug" in get_runner().supported_features())
+
+def _start_debug(debugger_class):
+    global _current_debugger
+    _current_debugger = debugger_class()
+    _current_debugger.debug_current_script()
+
 def load_plugin():
-    Debugger()
+    
+    get_workbench().add_command("debug", "run", "Debug current script",
+        lambda: _start_debug(FancyDebugger),
+        caption="Debug",
+        tester=_start_debug_enabled,
+        default_sequence="<Control-F5>",
+        group=10,
+        image="debug-current-script",
+        include_in_toolbar=True)
+    
+    get_workbench().add_command("debuglite", "run", "DebugLite current script",
+        lambda: _start_debug(SimpleDebugger),
+        caption="DebugLite",
+        tester=_start_debug_enabled,
+        default_sequence="<Shift-F5>",
+        group=10)
+    
+    get_workbench().add_command("step_over", "run", "Step over",
+        lambda:_issue_debugger_command("step_over"),
+        caption="Over",
+        tester=lambda: _debugger_command_enabled("step_over"),
+        default_sequence="<F6>",
+        group=30,
+        image="step-over",
+        include_in_toolbar=True)
+
+    get_workbench().add_command("step_back", "run", "Step back",
+        lambda:_issue_debugger_command("step_back"),
+        caption="Back",
+        tester=lambda: _debugger_command_enabled("step_back"),
+        default_sequence="<F9>",
+        group=30)
+
+    get_workbench().add_command("step_into", "run", "Step into",
+        lambda:_issue_debugger_command("step_into"),
+        caption="Into",
+        tester=lambda: _debugger_command_enabled("step_into"),
+        default_sequence="<F7>",
+        group=30,
+        image="step-into",
+        include_in_toolbar=True)
+    
+    get_workbench().add_command("step_out", "run", "Step out",
+        lambda:_issue_debugger_command("step_out"),
+        caption="Out",
+        tester=lambda: _debugger_command_enabled("step_out"),
+        group=30,
+        image="step-out",
+        include_in_toolbar=True)
+    
+    get_workbench().add_command("resume", "run", "Resume",
+        lambda:_issue_debugger_command("resume"),
+        caption="Resume",
+        tester=lambda: _debugger_command_enabled("resume"),
+        default_sequence="<F8>",
+        group=30,
+        image="resume",
+        include_in_toolbar=True)
+    
+    get_workbench().add_command("run_to_cursor", "run", "Run to cursor",
+        lambda:_issue_debugger_command("run_to_cursor"),
+        tester=lambda: _debugger_command_enabled("run_to_cursor"),
+        default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
+        group=30,
+        image="run-to-cursor",
+        include_in_toolbar=False)
+
     
