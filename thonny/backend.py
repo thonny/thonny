@@ -807,6 +807,7 @@ class Tracer(Executor):
         self._vm = vm
         self._normcase_thonny_src_dir = os.path.normcase(os.path.dirname(sys.modules["thonny"].__file__))
         self._current_command = None
+        self._unhandled_exception = None
         
     def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
         if cmd and getattr(cmd, "breakpoints", None):
@@ -839,6 +840,11 @@ class Tracer(Executor):
             or self._vm.is_doing_io()
         )
 
+    def _is_interesting_exception(self, frame):
+        # interested only in exceptions in command frame or it's parent frames
+        return (id(frame) == self._current_command.frame_id
+                or not self._frame_is_alive(self._current_command.frame_id))
+
     def _respond_to_inline_commands(self):
         while isinstance(self._current_command, InlineCommand):
             self._vm.handle_command(self._current_command)
@@ -846,6 +852,45 @@ class Tracer(Executor):
     
     def _fetch_command(self):
         return self._vm._fetch_command()
+    
+    def _save_exception_info(self, frame, arg):
+        exc = arg[1]
+        if self._unhandled_exception is None:
+            # this means it's the first time we see this exception
+            exc.causing_frame = frame
+        else:
+            # this means the exception is propagating to older frames
+            # get the causing_frame from previous occurrence
+            exc.causing_frame = self._unhandled_exception.causing_frame
+
+        self._unhandled_exception = exc
+        
+    def _export_exception_info(self, frame):
+        result = {
+            "exception" : self._vm.export_value(self._unhandled_exception, True)
+        }
+        if self._unhandled_exception is not None:
+            frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
+            # I want to show frames from current frame to causing_frame
+            if frame == self._unhandled_exception.causing_frame:
+                interesting_frame_infos = []
+            else:
+                # c how far is current frame from causing_frame?
+                _distance = 0
+                _f = self._unhandled_exception.causing_frame
+                while _f != frame:
+                    _distance += 1
+                    _f = _f.f_back
+                    if _f == None:
+                        break
+                interesting_frame_infos = frame_infos[-_distance:]
+            result["exception_lower_stack_description"] = "".join(interesting_frame_infos)
+            result["exception_msg"] = str(self._unhandled_exception)
+        else:
+            result["exception_lower_stack_description"] = None
+            result["exception_msg"] = None
+        
+        return result
 
 
 class SimpleTracer(Tracer):
@@ -861,6 +906,7 @@ class SimpleTracer(Tracer):
             return None
         
         if event == "call": 
+            self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
             # can we skip this frame?
             if (self._current_command.command == "step_over"
                 and not self._current_command.breakpoints):
@@ -871,24 +917,35 @@ class SimpleTracer(Tracer):
         elif event == "return":
             self._alive_frame_ids.remove(id(frame)) 
           
+        elif event == "exception":
+            self._save_exception_info(frame, arg)
+            
+            if self._is_interesting_exception(frame):
+                self._report_current_state(frame)
+                self._current_command = self._fetch_command()
+                self._respond_to_inline_commands()
+            
         elif event == "line":
+            self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
+            
             handler = getattr(self, "_cmd_%s_completed" % self._current_command.command)
             if handler(frame, self._current_command):
-                msg = self._vm.create_message("SimpleDebuggerProgress",
-                                        stack=self._export_stack(frame),
-                                        exception=None, #self._vm.export_value(self._unhandled_exception, True),
-                                        exception_msg=None, #exception_msg,
-                                        exception_lower_stack_description=None, #exception_lower_stack_description,
-                                        is_new=True,
-                                        loaded_modules=list(sys.modules.keys()),
-                                        stream_symbol_counts=0 #symbols_by_streams
-                                        )
-                
-                self._vm.send_message(msg)
+                self._report_current_state(frame)
                 self._current_command = self._fetch_command()
                 self._respond_to_inline_commands()
 
         return self._trace
+    
+    def _report_current_state(self, frame):
+        msg = self._vm.create_message("SimpleDebuggerProgress",
+                                stack=self._export_stack(frame),
+                                is_new=True,
+                                loaded_modules=list(sys.modules.keys()),
+                                stream_symbol_counts=None,
+                                **self._export_exception_info(frame)
+                                )
+        
+        self._vm.send_message(msg)
     
     def _cmd_step_into_completed(self, frame, cmd):
         return True
@@ -915,6 +972,9 @@ class SimpleTracer(Tracer):
         code = frame.f_code
         return (super()._should_skip_frame(frame)
                 or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir))
+
+    def _frame_is_alive(self, frame_id):
+        return frame_id in self._alive_frame_ids
 
     def _export_stack(self, newest_frame):
         result = []
@@ -951,7 +1011,6 @@ class FancyTracer(Tracer):
     def __init__(self, vm):
         super().__init__(vm)
         self._instrumented_files = _PathSet()
-        self._unhandled_exception = None
         self._install_marker_functions()
         self._custom_stack = []
         self._past_messages = []
@@ -980,12 +1039,6 @@ class FancyTracer(Tracer):
         for name in self.marker_function_names:
             if not hasattr(builtins, name):
                 setattr(builtins, name, getattr(self, name))
-
-    def _is_interesting_exception(self, frame):
-        # interested only in exceptions in command frame or it's parent frames
-        cmd = self._current_command
-        return (id(frame) == cmd.frame_id
-                or not self._frame_is_alive(cmd.frame_id))
 
     def _compile_source(self, source, filename, mode):
         root = ast.parse(source, filename, mode)
@@ -1186,26 +1239,6 @@ class FancyTracer(Tracer):
         :param value: The returned value of the statement/expression
         :return:
         """
-        if self._unhandled_exception is not None:
-            frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
-            # I want to show frames from current frame to causing_frame
-            if frame == self._unhandled_exception.causing_frame:
-                interesting_frame_infos = []
-            else:
-                # c how far is current frame from causing_frame?
-                _distance = 0
-                _f = self._unhandled_exception.causing_frame
-                while _f != frame:
-                    _distance += 1
-                    _f = _f.f_back
-                    if _f == None:
-                        break
-                interesting_frame_infos = frame_infos[-_distance:]
-            exception_lower_stack_description = "".join(interesting_frame_infos)
-            exception_msg = str(self._unhandled_exception)
-        else:
-            exception_lower_stack_description = None
-            exception_msg = None
 
         if len(self._past_messages) > 0:
             self._past_messages[-1][0]["is_new"] = False
@@ -1225,17 +1258,15 @@ class FancyTracer(Tracer):
         if current_module_globals["__name__"] != "__main__":
             self._past_globals[-1][current_module_globals["__name__"]] = self._vm.export_variables(current_module_globals)
 
-        self._past_messages.append([(
-            self._vm.create_message("FancyDebuggerProgress",
+        msg = self._vm.create_message("FancyDebuggerProgress",
                                     stack=self._export_stack(),
-                                    exception=self._vm.export_value(self._unhandled_exception, True),
-                                    exception_msg=exception_msg,
-                                    exception_lower_stack_description=exception_lower_stack_description,
                                     is_new=True,
                                     loaded_modules=list(sys.modules.keys()),
-                                    stream_symbol_counts=symbols_by_streams
-                                    )),
-            False])  # Flag for identifying if the message has been sent to front-end
+                                    stream_symbol_counts=symbols_by_streams,
+                                    **self._export_exception_info(frame)
+                                    )
+        
+        self._past_messages.append([msg, False])  # 2nd lement is a flag for identifying if the message has been sent to front-end
 
 
     def _send_and_fetch_next_debugger_progress_message(self, message):

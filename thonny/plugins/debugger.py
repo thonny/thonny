@@ -103,7 +103,7 @@ class SimpleDebugger(Debugger):
         
     def _handle_debugger_progress(self, msg):
         self._last_progress_message = msg
-        self.highlight_a_frame(msg.stack[-1])
+        self.highlight_a_frame(-1)
     
     def handle_toplevel_result(self, msg):
         super().handle_toplevel_result(msg)
@@ -122,7 +122,8 @@ class SimpleDebugger(Debugger):
         else:
             return super().command_enabled(command)
     
-    def highlight_a_frame(self, frame_info):
+    def highlight_a_frame(self, frame_index):
+        frame_info = self._last_progress_message.stack[frame_index]
         enb = get_workbench().get_editor_notebook()
         
         # show the location
@@ -131,7 +132,15 @@ class SimpleDebugger(Debugger):
         
         self._remove_focus_tags()
         # add highlight
-        target_editor.get_code_view().text.tag_add("active_focus",
+        
+        if (self._last_progress_message.exception is not None
+            and (frame_index == -1 or frame_index == len(self._last_progress_message.stack)-1)):
+            tag = "exception_focus"
+        else:
+            tag = "active_focus"
+            
+        
+        target_editor.get_code_view().text.tag_add(tag,
                                             "%d.0" % frame_info.lineno,
                                             "%d.0" % (frame_info.lineno+1))
 

@@ -6,7 +6,7 @@ def kala(x,
 for x in range(3):
     print(x)
 
-x = 32
+x = 32 / 0
 kala(x,
      x,1)
 kala(4,2,1)
