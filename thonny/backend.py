@@ -849,33 +849,68 @@ class Tracer(Executor):
 
 
 class SimpleTracer(Tracer):
+    def __init__(self, vm):
+        super().__init__(vm)
+        
+        self._alive_frame_ids = set()
+    
     def _trace(self, frame, event, arg):
+        
+        # is this frame interesting at all?
         if self._should_skip_frame(frame):
             return None
         
-        #print(frame, frame.f_lineno, event, arg)
-        """
-        if event == "call":
+        if event == "call": 
+            # can we skip this frame?
+            if (self._current_command.command == "step_over"
+                and not self._current_command.breakpoints):
+                return None
+            else:
+                self._alive_frame_ids.add(id(frame))
+        
+        elif event == "return":
+            self._alive_frame_ids.remove(id(frame)) 
+          
         elif event == "line":
-        """
-        if event == "line":
-            print("line")
-            msg = self._vm.create_message("SimpleDebuggerProgress",
-                                    stack=self._export_stack(frame),
-                                    exception=None, #self._vm.export_value(self._unhandled_exception, True),
-                                    exception_msg=None, #exception_msg,
-                                    exception_lower_stack_description=None, #exception_lower_stack_description,
-                                    is_new=True,
-                                    loaded_modules=list(sys.modules.keys()),
-                                    stream_symbol_counts=0 #symbols_by_streams
-                                    )
-            
-            self._vm.send_message(msg)
-            self._current_command = self._fetch_command()
-            self._respond_to_inline_commands()
-            print("Got", self._current_command)
+            handler = getattr(self, "_cmd_%s_completed" % self._current_command.command)
+            if handler(frame, self._current_command):
+                msg = self._vm.create_message("SimpleDebuggerProgress",
+                                        stack=self._export_stack(frame),
+                                        exception=None, #self._vm.export_value(self._unhandled_exception, True),
+                                        exception_msg=None, #exception_msg,
+                                        exception_lower_stack_description=None, #exception_lower_stack_description,
+                                        is_new=True,
+                                        loaded_modules=list(sys.modules.keys()),
+                                        stream_symbol_counts=0 #symbols_by_streams
+                                        )
+                
+                self._vm.send_message(msg)
+                self._current_command = self._fetch_command()
+                self._respond_to_inline_commands()
+
         return self._trace
     
+    def _cmd_step_into_completed(self, frame, cmd):
+        return True
+
+    def _cmd_step_over_completed(self, frame, cmd):
+        frame_id = id(frame)
+        return (frame_id == cmd.frame_id
+                or cmd.frame_id not in self._alive_frame_ids
+                or self._at_a_breakpoint(frame, cmd))
+        
+    def _cmd_step_out_completed(self, frame, cmd):
+        return (cmd.frame_id not in self._alive_frame_ids
+                or self._at_a_breakpoint(frame, cmd))
+
+    def _cmd_resume_completed(self, frame, cmd):
+        return self._at_a_breakpoint(frame, cmd)
+    
+    def _at_a_breakpoint(self, frame, cmd):
+        filename = frame.f_code.co_filename
+        return (filename in cmd.breakpoints
+                and frame.f_lineno in cmd.breakpoints[filename])
+
     def _should_skip_frame(self, frame):
         code = frame.f_code
         return (super()._should_skip_frame(frame)

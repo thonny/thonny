@@ -36,7 +36,7 @@ class GlobalsView(ttk.Frame):
         self.rowconfigure(1, weight=1)
         
         get_workbench().bind("Globals", self._handle_globals_event, True)
-        get_workbench().bind("BackendRestart", lambda e=None: self.variables_frame._clear_tree(), True)
+        get_workbench().bind("BackendRestart", self._backend_restart, True)
         get_workbench().bind("FancyDebuggerProgress", self._handle_progress, True)
         get_workbench().bind("SimpleDebuggerProgress", self._handle_progress, True)
         get_workbench().bind("ToplevelResult", self._handle_progress, True)
@@ -45,6 +45,9 @@ class GlobalsView(ttk.Frame):
     def before_show(self):
         self._request_globals()
     
+    def _backend_restart(self, event):
+        self.variables_frame._clear_tree()
+        
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well
         error = getattr(event, "error", None)

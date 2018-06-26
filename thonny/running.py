@@ -132,7 +132,7 @@ class Runner:
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
     
-        if cmd.command in ("Run", "Debug", "Reset"):
+        if cmd.command in ("Run", "Debug", "LineDebug", "Reset"):
             get_workbench().event_generate("BackendRestart")
                 
     def _postpone_command(self, cmd):
@@ -511,7 +511,7 @@ class CPythonProxy(BackendProxy):
             return msg
     
     def send_command(self, cmd):
-        if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "Reset"):
+        if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "LineDebug", "Reset"):
             self._close_backend()
             self._start_new_process(cmd)
         

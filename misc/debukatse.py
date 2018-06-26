@@ -1,10 +1,15 @@
-x = 33
-
 def kala(x,
-         y):
-    y = x*x
-    print(z)
-    return y + x
+         y,
+         z):
+    print("tere", x)
+    
+for x in range(3):
+    print(x)
 
-z = 23
-print(kala(z))
+x = 32
+kala(x,
+     x,1)
+kala(4,2,1)
+print("valma")
+
+    
