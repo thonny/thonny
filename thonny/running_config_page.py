@@ -10,6 +10,7 @@ from thonny.misc_utils import running_on_windows, running_on_mac_os
 from shutil import which
 from thonny.running import WINDOWS_EXE
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
+from thonny.common import actual_path
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
@@ -74,7 +75,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                          ]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
-                    result.add(os.path.realpath(path))  
+                    result.add(actual_path(path))  
         
         else:
             # Common unix locations
@@ -84,8 +85,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 # if the dir_ is just a link to another dir_, skip it
                 # (not to show items twice)
                 # for example on Fedora /bin -> usr/bin
-                realpath = os.path.realpath(dir_)
-                if realpath != dir_ and realpath in dirs:
+                apath = actual_path(dir_)
+                if apath != dir_ and apath in dirs:
                     continue
                 for name in ["python3", "python3.4", "python3.5", "python3.6"]:
                     path = os.path.join(dir_, name)
@@ -108,7 +109,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         
         for path in get_workbench().get_option("CustomInterpreter.used_paths"):
             if os.path.exists(path):
-                result.add(os.path.realpath(path))
+                result.add(actual_path(path))
         
         return sorted(result)
     

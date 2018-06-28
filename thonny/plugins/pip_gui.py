@@ -26,6 +26,7 @@ import thonny
 from distutils.version import StrictVersion, LooseVersion
 from tkinter.messagebox import showerror
 from os import makedirs
+from thonny.common import path_startswith
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
@@ -712,7 +713,7 @@ class PluginsPipDialog(PipDialog):
         else:
             for d in sys.path:
                 if (("site-packages" in d or "dist-packages" in d) 
-                    and os.path.normpath(d).startswith(os.path.normpath(sys.prefix))):
+                    and path_startswith(d, sys.prefix)):
                     return d
             else:
                 return None

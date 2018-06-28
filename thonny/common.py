@@ -3,6 +3,7 @@
 """
 Classes used both by front-end and back-end
 """
+import os.path
 import shlex
 
 class Record:
@@ -164,10 +165,36 @@ def print_structure(o):
     for attr in dir(o):
         print(attr, "=", getattr(o, attr))
 
+def actual_path(name):
+    """In Windows return the path with the case it is stored in the filesystem"""
+    assert os.path.isabs(name)
+    
+    if os.name == "nt":
+        name = os.path.realpath(name)
+        from ctypes import create_unicode_buffer, windll
+
+        buf = create_unicode_buffer(512)
+        windll.kernel32.GetLongPathNameW(name, buf, 512)  # @UndefinedVariable
+        assert len(buf.value) >= 2
+        if buf.value[1] == ":":
+            # ensure drive letter is capital
+            return buf.value[0].upper() + buf.value[1:]
+        else:
+            return buf.value
+    else:
+        return os.path.realpath(name)
+
+def is_same_path(name1, name2):
+    return os.path.realpath(os.path.normcase(name1)) == os.path.realpath(os.path.normcase(name2))
+
+def path_startswith(child_name, dir_name):
+    normchild = os.path.realpath(os.path.normcase(child_name))
+    normdir = os.path.realpath(os.path.normcase(dir_name))
+    return normdir == normchild or normchild.startswith(normdir.rstrip(os.path.sep) + os.path.sep)
+    
+
 class UserError(RuntimeError):
     pass
 
 if __name__ == "__main__":
-    tr1 = TextRange(1,0,1,10)
-    tr2 = TextRange(1,0,1,10)
-    print(tr2.contains_smaller(tr1))
+    print(repr(actual_path("c:\\users/aivar/DesKTOp")))

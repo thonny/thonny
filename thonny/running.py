@@ -17,10 +17,11 @@ import sys
 
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
-    UserError, construct_cmd_line
+    UserError, construct_cmd_line, actual_path, path_startswith
 from thonny import get_workbench, get_runner, get_shell
 from thonny import THONNY_USER_DIR
-from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
+from thonny.misc_utils import running_on_windows, running_on_mac_os
+from thonny.common import is_same_path
 import shutil
 import collections
 import signal
@@ -197,7 +198,7 @@ class Runner:
             
         
         # changing dir may be required
-        script_dir = os.path.realpath(os.path.dirname(filename))
+        script_dir = actual_path(os.path.dirname(filename))
         
         if (get_workbench().get_option("run.auto_cd") 
             and command_name[0].isupper() or always_change_to_script_dir):
@@ -681,7 +682,7 @@ class CPythonProxy(BackendProxy):
     def get_site_packages(self):
         for d in self._sys_path:
             if (("site-packages" in d or "dist-packages" in d) 
-                and os.path.normpath(d).startswith(os.path.normpath(self._sys_prefix))):
+                and path_startswith(d, self._sys_prefix)):
                 return d
         else:
             return None
@@ -741,7 +742,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         # If only micro version is different, then upgrade
         info = _get_venv_info(path)
         
-        if not eqfn(info["home"], os.path.dirname(sys.executable)):
+        if not is_same_path(info["home"], os.path.dirname(sys.executable)):
             self._create_private_venv(path, 
                                  "Thonny's virtual environment was created for another interpreter.\n"
                                  + "Regenerating the virtual environment for current interpreter.\n"

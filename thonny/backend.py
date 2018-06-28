@@ -805,7 +805,7 @@ class SimpleRunner(Executor):
 class Tracer(Executor):
     def __init__(self, vm):
         self._vm = vm
-        self._normcase_thonny_src_dir = os.path.normcase(os.path.dirname(sys.modules["thonny"].__file__))
+        self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._current_command = None
         self._unhandled_exception = None
         
@@ -971,7 +971,7 @@ class SimpleTracer(Tracer):
     def _should_skip_frame(self, frame):
         code = frame.f_code
         return (super()._should_skip_frame(frame)
-                or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir))
+                or code.co_filename.startswith(self._thonny_src_dir))
 
     def _frame_is_alive(self, frame_id):
         return frame_id in self._alive_frame_ids
@@ -1010,7 +1010,7 @@ class FancyTracer(Tracer):
 
     def __init__(self, vm):
         super().__init__(vm)
-        self._instrumented_files = _PathSet()
+        self._instrumented_files = set()
         self._install_marker_functions()
         self._custom_stack = []
         self._past_messages = []
@@ -1054,9 +1054,9 @@ class FancyTracer(Tracer):
     def _should_skip_frame(self, frame):
         code = frame.f_code
         return (super()._should_skip_frame(frame)
-                or os.path.normcase(code.co_filename) not in self._instrumented_files
+                or code.co_filename not in self._instrumented_files
                     and code.co_name not in self.marker_function_names
-                or os.path.normcase(code.co_filename).startswith(self._normcase_thonny_src_dir)
+                or code.co_filename.startswith(self._thonny_src_dir)
                     and code.co_name not in self.marker_function_names
                 )
 
@@ -1727,27 +1727,6 @@ def _get_python_version_string(add_word_size=False):
         result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)"
 
     return result
-
-class _PathSet:
-    "implementation of set whose in operator works well for filenames"
-    def __init__(self):
-        self._normcase_set = set()
-
-    def add(self, name):
-        self._normcase_set.add(os.path.normcase(name))
-
-    def remove(self, name):
-        self._normcase_set.remove(os.path.normcase(name))
-
-    def clear(self):
-        self._normcase_set.clear()
-
-    def __contains__(self, name):
-        return os.path.normcase(name) in self._normcase_set
-
-    def __iter__(self):
-        for item in self._normcase_set:
-            yield item
 
 def _get_frame_source_info(frame):
     if frame.f_code.co_name == "<module>":

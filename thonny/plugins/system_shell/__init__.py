@@ -10,6 +10,7 @@ from thonny import THONNY_USER_DIR
 import subprocess
 from time import sleep
 from thonny.running import create_pythonless_environment
+from thonny.common import actual_path
 
 
 def _get_exec_prefix(python_interpreter):
@@ -39,7 +40,7 @@ def open_system_shell():
     
     exec_prefix=_get_exec_prefix(python_interpreter)
     if ".." in exec_prefix:
-        exec_prefix = os.path.realpath(exec_prefix)
+        exec_prefix = actual_path(exec_prefix)
     env = create_pythonless_environment()
     
     # TODO: take care of SSL_CERT_FILE (unset when running external python and set for builtin)
@@ -174,8 +175,6 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     Popen(cmd_line, env=env, shell=True)
 
 def load_plugin():
-    from thonny import get_workbench
-    
     def open_system_shell_for_selected_interpreter(): 
         open_system_shell()
     

@@ -6,7 +6,6 @@ from tkinter import ttk, messagebox
 from tkinter.filedialog import asksaveasfilename
 from tkinter.filedialog import askopenfilename
 
-from thonny.misc_utils import eqfn
 from thonny.codeview import CodeView
 from thonny import get_workbench, ui_utils
 from logging import exception
@@ -15,6 +14,7 @@ from thonny.tktextext import rebind_control_a
 import tokenize
 from tkinter.messagebox import askyesno
 import traceback
+from thonny.common import is_same_path, actual_path
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -85,7 +85,7 @@ class Editor(ttk.Frame):
         if self._filename is None:
             result = "<untitled>"
         else:
-            result = os.path.normpath(self._filename)
+            result = self._filename
         
         try:
             index = self._code_view.text.index("insert")
@@ -100,8 +100,10 @@ class Editor(ttk.Frame):
     def _load_file(self, filename):
         with tokenize.open(filename) as fp: # TODO: support also text files
             source = fp.read() 
-            
+        
+        filename = actual_path(filename) # Make sure Windows filenames have proper format
         self._filename = filename
+        
         get_workbench().event_generate("Open", editor=self, filename=filename)
         self._code_view.set_content(source)
         self._code_view.focus_set()
@@ -153,7 +155,7 @@ class Editor(ttk.Frame):
                 return None
             
 
-        self._filename = filename
+        self._filename = actual_path(filename)
         self.master.remember_recent_file(filename)
         
         self._code_view.text.edit_modified(False)
@@ -386,6 +388,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             filetypes = _dialog_filetypes, 
             initialdir = get_workbench().get_cwd()
         )
+        print(filename)
         if filename: # Note that missing filename may be "" or () depending on tkinter version
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
@@ -499,7 +502,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def get_editor(self, filename, open_when_necessary=False):
         for child in self.winfo_children():
             child_filename = child.get_filename(False)
-            if child_filename and eqfn(child.get_filename(), filename):
+            if child_filename and is_same_path(child.get_filename(), filename):
                 return child
         
         if open_when_necessary:
@@ -550,6 +553,6 @@ def get_current_breakpoints():
         if filename:
             linenos = editor.get_code_view().get_breakpoint_line_numbers()
             if linenos:
-                result[os.path.realpath(filename)] = linenos
+                result[filename] = linenos
     
     return result
