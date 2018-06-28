@@ -26,6 +26,7 @@ if __name__ == "__main__":
     )
     module = importlib.util.module_from_spec(spec)
     sys.modules["thonny"] = module
+    assert spec.loader is not None
     spec.loader.exec_module(module)
     
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]

@@ -5,16 +5,10 @@ import time
 import traceback
 from logging import exception
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    from tkinter import font as tkfont
-    from tkinter import TclError
-except ImportError:
-    import Tkinter as tk
-    import ttk
-    import tkFont as tkfont
-    from Tkinter import TclError
+import tkinter as tk
+from tkinter import ttk
+from tkinter import font as tkfont
+from tkinter import TclError
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""

@@ -9,6 +9,7 @@ import sys
 from collections import Mapping
 import string
 from keyword import iskeyword
+from typing import Dict  # @UnusedImport
 
 NUM_CONTEXT_LINES = (50, 500, 5000000)
 
@@ -228,11 +229,11 @@ class RoughParser:
     # brackets to '(', close brackets to ')' while preserving quotes,
     # backslashes, newlines and hashes. This is to be passed to
     # str.translate() in _study1().
-    _tran = {}
-    _tran.update((ord(c), ord('(')) for c in "({[")
-    _tran.update((ord(c), ord(')')) for c in ")}]")
-    _tran.update((ord(c), ord(c)) for c in "\"'\\\n#")
-    _tran = StringTranslatePseudoMapping(_tran, default_value=ord('x'))
+    _tran1 = {} # type: Dict[int, int]
+    _tran1.update((ord(c), ord('(')) for c in "({[")
+    _tran1.update((ord(c), ord(')')) for c in ")}]")
+    _tran1.update((ord(c), ord(c)) for c in "\"'\\\n#")
+    _tran = StringTranslatePseudoMapping(_tran1, default_value=ord('x'))
 
     # As quickly as humanly possible <wink>, find the line numbers (0-
     # based) of the non-continuation lines.

@@ -165,7 +165,7 @@ def print_structure(o):
     for attr in dir(o):
         print(attr, "=", getattr(o, attr))
 
-def actual_path(name):
+def actual_path(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
     assert os.path.isabs(name)
     
@@ -176,11 +176,15 @@ def actual_path(name):
         buf = create_unicode_buffer(512)
         windll.kernel32.GetLongPathNameW(name, buf, 512)  # @UndefinedVariable
         assert len(buf.value) >= 2
-        if buf.value[1] == ":":
+        
+        result = buf.value
+        assert isinstance(result, str) 
+        
+        if result[1] == ":":
             # ensure drive letter is capital
-            return buf.value[0].upper() + buf.value[1:]
+            return result[0].upper() + result[1:]
         else:
-            return buf.value
+            return result
     else:
         return os.path.realpath(name)
 

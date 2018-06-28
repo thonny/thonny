@@ -25,7 +25,7 @@ from thonny.config_ui import ConfigurationDialog
 import pkgutil
 import socket
 import queue
-from _thread import start_new_thread
+from threading import Thread
 import ast
 from thonny import THONNY_USER_DIR
 from warnings import warn
@@ -365,7 +365,7 @@ class Workbench(tk.Tk):
                 except:
                     traceback.print_exc()
         
-        start_new_thread(server_loop, ())
+        Thread(target=server_loop).start()
         self._poll_socket_requests()
 
     def _init_commands(self):

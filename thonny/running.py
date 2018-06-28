@@ -9,7 +9,7 @@ shell becomes kind of title for the execution.
 """ 
 
 
-from _thread import start_new_thread
+from threading import Thread
 from logging import debug
 import os.path
 import subprocess
@@ -640,8 +640,8 @@ class CPythonProxy(BackendProxy):
                 raise Exception("Error starting backend process: " + error_msg)
         
         # setup asynchronous output listeners
-        start_new_thread(self._listen_stdout, ())
-        start_new_thread(self._listen_stderr, ())
+        Thread(target=self._listen_stdout).start()
+        Thread(target=self._listen_stderr).start()
     
     def _listen_stdout(self):
         #debug("... started listening to stdout")

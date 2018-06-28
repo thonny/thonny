@@ -7,7 +7,9 @@ from thonny import tktextext, roughparse
 from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 from thonny.tktextext import EnhancedText
 
-_syntax_options = {}
+from typing import Dict, Union  # @UnusedImport
+
+_syntax_options = {} # type: Dict[str, Union[str, int]]
 #BREAKPOINT_SYMBOL = "•" # Bullet
 #BREAKPOINT_SYMBOL = "○" # White circle
 BREAKPOINT_SYMBOL = "●" # Black circle

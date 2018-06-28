@@ -1,13 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
-from thonny.ui_utils import CALM_WHITE
 import math
 from thonny import get_workbench
 
 class GridTable(tk.Frame):
     def __init__(self, master, header_rows, data_row_count, footer_row_count,
                       frozen_column_count):
-        tk.Frame.__init__(self, master)
+        super().__init__(master)
         
         self.header_widgets = {}
         self.data_widgets = {}
@@ -62,7 +61,7 @@ class GridTable(tk.Frame):
         if col_no < self.frozen_column_count:
             background=None
         else:
-            background=CALM_WHITE
+            background="white"
         
         return tk.Label(self, background=background, anchor="e", padx=7, text="")
     
@@ -148,7 +147,7 @@ class GridTable(tk.Frame):
 
 class BackendGridTable(GridTable):
     def __init__(self, master):
-        GridTable.__init__(self, master)
+        super().__init__(master)
 
             
 

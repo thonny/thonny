@@ -20,9 +20,6 @@ import os
 import logging
 
 
-_images = set() # for keeping references to tkinter images to avoid garbace colleting them
-
-
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master, style="CustomMenubar.TFrame")

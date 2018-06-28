@@ -5,7 +5,7 @@ import os.path
 import inspect
 import ast
 import _ast
-import _io
+import io
 import traceback
 import types
 import logging
@@ -475,7 +475,7 @@ class VM:
                     'type_id' : id(type(value)),
                     'attributes': self.export_variables(attributes)}
 
-            if isinstance(value, _io.TextIOWrapper):
+            if isinstance(value, io.TextIOWrapper):
                 self._add_file_handler_info(value, info)
             elif (type(value) in (types.BuiltinFunctionType, types.BuiltinMethodType,
                                  types.FunctionType, types.LambdaType, types.MethodType)):
