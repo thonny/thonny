@@ -1,4 +1,5 @@
 import tkinter
+from typing import Sequence, Set  # @UnusedImport
 from thonny.plugins.highlight_names import VariablesHighlighter
 
 
@@ -36,7 +37,7 @@ CURSOR_POSITIONS1 = (("1.4", "1.5", "1.7", "2.5"),
                      ("10.2",),
                      ("12.5", "12.9",),
                      ("14.5",),
-                     )
+                     ) 
 
 EXPECTED_INDICES1 = ({("1.4", "1.7"), ("2.4", "2.7")},
                      {("4.4", "4.7"), ("9.4", "9.7")},
@@ -46,7 +47,7 @@ EXPECTED_INDICES1 = ({("1.4", "1.7"), ("2.4", "2.7")},
                      {("10.0", "10.4")},
                      {("12.4", "12.5"), ("12.8", "12.9")},
                      {("14.4", "14.5")},
-                     )
+                     ) # type: Sequence[Set[Sequence[str]]]
 
 TEST_STR2 = """import too
 def foo():
@@ -75,7 +76,7 @@ TEST_GROUPS = (
 )
 
 
-def run_tests():
+def test_all():
     for i, test in enumerate(TEST_GROUPS):
         print("Running test group %d: " % (i + 1))
         _assert_returns_correct_indices(test[0], test[1], test[2])
@@ -85,8 +86,7 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
     text_widget = tkinter.Text()
     text_widget.insert("end", input_str)
 
-    nh = VariablesHighlighter()
-    nh.text = text_widget
+    nh = VariablesHighlighter(text_widget)
     for i, group in enumerate(insert_pos_groups):
         for insert_pos in group:
             text_widget.mark_set("insert", insert_pos)
@@ -100,5 +100,3 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
         print("\rPassed %d of %d" % (i+1, len(insert_pos_groups)), end="")
     print()
 
-if __name__ == "__main__":
-    run_tests()

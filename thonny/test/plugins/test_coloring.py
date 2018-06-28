@@ -33,11 +33,3 @@ def test_open_closed_strings():
     assert closed_ranges_set == expected_closed_ranges
     print("test passed")
 
-
-def run_tests():
-    test_open_closed_strings()
-
-if __name__ == "__main__":
-    print("Test input: ")
-    print(TEST_STR1)
-    run_tests()

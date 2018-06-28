@@ -34,10 +34,3 @@ def test_regular_closed():
         print("\rPassed %d of %d" % (i+1, len(insert_pos_groups)), end="")
 
 
-def run_tests():
-    test_regular_closed()
-
-if __name__ == "__main__":
-    print("Test input: ")
-    print(TEST_STR1)
-    run_tests()
