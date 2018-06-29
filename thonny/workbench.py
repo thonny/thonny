@@ -365,7 +365,7 @@ class Workbench(tk.Tk):
                 except:
                     traceback.print_exc()
         
-        Thread(target=server_loop).start()
+        Thread(target=server_loop, daemon=True).start()
         self._poll_socket_requests()
 
     def _init_commands(self):

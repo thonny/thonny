@@ -1166,7 +1166,7 @@ class FileCopyDialog(tk.Toplevel):
             
             self._done = True
         
-        threading.Thread(target=work).start()
+        threading.Thread(target=work, daemon=True).start()
         
         self.wait_window()
     
@@ -1268,10 +1268,10 @@ class SubprocessDialog(tk.Toplevel):
             
             self.returncode = self._proc.wait()
         
-        self._stdout_thread = threading.Thread(target=listen_stream, args=["stdout"])
+        self._stdout_thread = threading.Thread(target=listen_stream, args=["stdout"], daemon=True)
         self._stdout_thread.start()
         if self._proc.stderr is not None:
-            self._stderr_thread = threading.Thread(target=listen_stream, args=["stderr"])
+            self._stderr_thread = threading.Thread(target=listen_stream, args=["stderr"], daemon=True)
             self._stderr_thread.start()
         
         def poll_output_events():

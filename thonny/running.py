@@ -640,8 +640,8 @@ class CPythonProxy(BackendProxy):
                 raise Exception("Error starting backend process: " + error_msg)
         
         # setup asynchronous output listeners
-        Thread(target=self._listen_stdout).start()
-        Thread(target=self._listen_stderr).start()
+        Thread(target=self._listen_stdout, daemon=True).start()
+        Thread(target=self._listen_stderr, daemon=True).start()
     
     def _listen_stdout(self):
         #debug("... started listening to stdout")
