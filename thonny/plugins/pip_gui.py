@@ -995,7 +995,7 @@ def version_satisfies_constraint(ver, cop, cver):
         
 """ 
 
-def load_plugin():
+def load_plugin() -> None:
     def open_backend_pip_gui(*args):
         pg = BackendPipDialog(get_workbench())
         pg.wait_window()

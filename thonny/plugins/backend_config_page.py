@@ -106,5 +106,5 @@ class BackendConfigurationPage(ConfigurationPage):
             get_runner().restart_backend(False)
         
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_configuration_page("Back-end", BackendConfigurationPage)

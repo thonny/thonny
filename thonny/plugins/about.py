@@ -119,7 +119,7 @@ class AboutDialog(tk.Toplevel):
             return ""
 
 
-def load_plugin():
+def load_plugin() -> None:
     def open_about(*args):
         AboutDialog(get_workbench())
         

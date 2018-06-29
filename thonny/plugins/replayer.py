@@ -332,7 +332,7 @@ class ReplayerPanedWindow(tk.PanedWindow):
         cnf["background"] = lookup_style_option("TFrame", "background")
         super().__init__(master=master, cnf=cnf)
 
-def load_plugin():
+def load_plugin() -> None:
     def open_replayer():
         win = ReplayWindow()
         win.focus_set()

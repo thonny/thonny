@@ -29,6 +29,6 @@ def goto_definition(event):
     
     
 
-def load_plugin():
+def load_plugin() -> None:
     wb = get_workbench()  
     wb.bind_class("CodeViewText", "<1>", goto_definition, True)

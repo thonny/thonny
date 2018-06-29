@@ -128,5 +128,5 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             tk_font.families()
         ))
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)

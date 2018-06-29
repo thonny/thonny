@@ -94,7 +94,7 @@ class HelpView(ttk.Frame):
 def open_help():
     get_workbench().show_view("HelpView")
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_view(HelpView, "Help", "ne")
     get_workbench().add_command("help_contents", "help", "Help contents",
                                 open_help,

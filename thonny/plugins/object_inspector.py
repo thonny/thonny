@@ -575,5 +575,5 @@ class AttributesFrame(thonny.memory.VariablesFrame):
     
         
         
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_view(ObjectInspector, "Object inspector", "se")

@@ -129,7 +129,7 @@ def update_highlighting(event):
     text.local_highlighter.schedule_update()
 
 
-def load_plugin():
+def load_plugin() -> None:
     if jedi_utils.get_version_tuple() < (0, 9):
         logging.warning("Jedi version is too old. Disabling locals marker")
         return 

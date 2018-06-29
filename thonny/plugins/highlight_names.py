@@ -277,12 +277,12 @@ def update_highlighting(event):
     text.name_highlighter.schedule_update()
 
 
-def load_plugin():
+def load_plugin() -> None:
     if jedi_utils.get_version_tuple() < (0, 9):
         logging.warning("Jedi version is too old. Disabling name highlighter")
         return
      
-    wb = get_workbench()  # type:Workbench
+    wb = get_workbench()  
     wb.set_default("view.name_highlighting", False)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)

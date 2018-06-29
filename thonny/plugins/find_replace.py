@@ -323,7 +323,7 @@ class FindDialog(tk.Toplevel):
             
             currentpos = self.codeview.text.index("%s+1c" % currentpos);
 
-def load_plugin():
+def load_plugin() -> None:
     def cmd_open_find_dialog():
         if _active_find_dialog is not None:
             _active_find_dialog.focus_set()

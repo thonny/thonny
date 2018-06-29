@@ -121,5 +121,5 @@ class OutlineView(ttk.Frame):
             get_workbench().event_generate("OutlineDoubleClick",
                 item_text=self.tree.item(self.tree.focus(), option='text'))
 
-def load_plugin(): 
+def load_plugin() -> None: 
     get_workbench().add_view(OutlineView, "Outline", "ne")

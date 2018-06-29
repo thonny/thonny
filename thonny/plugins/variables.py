@@ -83,5 +83,5 @@ class GlobalsView(ttk.Frame):
             self.module_name_combo.configure(values=sorted(event.loaded_modules))
     
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_view(GlobalsView, "Variables", "ne", default_position_key="AAA")

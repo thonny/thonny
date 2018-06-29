@@ -91,6 +91,6 @@ class MainFileBrowser(BaseFileBrowser):
     
     
     
-def load_plugin(): 
+def load_plugin() -> None: 
     get_workbench().set_default("file.last_browser_folder", None)
     get_workbench().add_view(MainFileBrowser, "Files", "nw")

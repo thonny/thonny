@@ -4,7 +4,7 @@ from tkinter import ttk
 from thonny import get_workbench
 from thonny.ui_utils import select_sequence
 
-def load_plugin():
+def load_plugin() -> None:
     def create_edit_command_handler(virtual_event_sequence):
         def handler(event=None):
             widget = get_workbench().focus_get()

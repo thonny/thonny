@@ -390,7 +390,7 @@ def clean(frame_background,
     return settings
     
     
-def load_plugin():
+def load_plugin() -> None:
     dark_images = {"tab-close-active" : "tab-close-active-clam-dark"}
     
     get_workbench().add_ui_theme("Clean Dark", "Enhanced Clam", 

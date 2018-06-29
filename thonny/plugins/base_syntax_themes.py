@@ -272,7 +272,7 @@ def zenburn():
     }
     
     
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_syntax_theme("Default Light", None, default_light)
     get_workbench().add_syntax_theme("Default Dark", None, default_dark)
     get_workbench().add_syntax_theme("Default Dark Green", "Default Dark", default_dark_green)

@@ -174,7 +174,7 @@ def _open_shell_in_macos(cwd, env, interpreter, explainer, exec_prefix):
     
     Popen(cmd_line, env=env, shell=True)
 
-def load_plugin():
+def load_plugin() -> None:
     def open_system_shell_for_selected_interpreter(): 
         open_system_shell()
     

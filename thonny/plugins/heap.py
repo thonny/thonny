@@ -52,5 +52,5 @@ class HeapView(MemoryFrame):
             if hasattr(msg, "heap"):
                 self._update_data(msg.heap)
                 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_view(HeapView, "Heap", "e")

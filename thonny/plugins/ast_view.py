@@ -150,7 +150,7 @@ def _find_closest_containing_node(tree, text_range):
         return None
 
             
-def load_plugin(): 
+def load_plugin() -> None: 
     get_workbench().add_view(AstView, "AST", "s")
         
     

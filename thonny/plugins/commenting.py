@@ -98,7 +98,7 @@ def _cmd_uncomment_selection():
 
 
 
-def load_plugin():
+def load_plugin() -> None:
     
     get_workbench().add_command("toggle_comment", "edit", "Toggle comment",
         _cmd_toggle_selection_comment,

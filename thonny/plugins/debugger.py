@@ -696,7 +696,7 @@ def _start_debug(debugger_class):
     _current_debugger = debugger_class()
     _current_debugger.debug_current_script()
 
-def load_plugin():
+def load_plugin() -> None:
     
     get_workbench().add_command("debug", "run", "Debug current script",
         lambda: _start_debug(FancyDebugger),

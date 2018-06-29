@@ -1,5 +1,6 @@
 import os.path
 import sys
+from typing import TYPE_CHECKING, cast
 
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))
@@ -140,14 +141,22 @@ def get_version():
             return fp.read().strip()
     except:
         return "0.0.0"
-      
+
+if TYPE_CHECKING:
+    # Following imports are required for MyPy
+    # http://mypy.readthedocs.io/en/stable/common_issues.html#import-cycles
+    import thonny.workbench
+    from thonny.workbench import Workbench
+    from thonny.running import Runner
+    from thonny.shell import ShellView
+          
 _workbench = None    
-def get_workbench():    
-    return _workbench
+def get_workbench() -> 'Workbench':
+    return cast('Workbench', _workbench)
 
 _runner = None
-def get_runner():    
-    return _runner
+def get_runner() -> 'Runner':    
+    return cast('Runner', _runner)
 
-def get_shell():
-    return get_workbench().get_view("ShellView")
+def get_shell() -> 'ShellView':
+    return cast('ShellView', get_workbench().get_view("ShellView"))

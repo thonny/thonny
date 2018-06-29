@@ -31,6 +31,7 @@ from thonny import THONNY_USER_DIR
 from warnings import warn
 import collections
 from thonny.shell import ShellView
+from typing import Optional, Type, Union, Callable, Dict
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -627,9 +628,9 @@ class Workbench(tk.Tk):
                 toolbar_group)
         
     
-    def add_view(self, class_, label, default_location,
-                visible_by_default=False,
-                default_position_key=None):
+    def add_view(self, class_: Type[tk.Widget], label: str, default_location: str,
+                visible_by_default: bool = False,
+                default_position_key: Optional[str] = None) -> None:
         """Adds item to "View" menu for showing/hiding given view. 
         
         Args:
@@ -692,7 +693,9 @@ class Workbench(tk.Tk):
             if not getattr(config_page_constructor, "backend_name", None):
                 config_page_constructor.backend_name = name
     
-    def add_ui_theme(self, name, parent, settings, images={}):
+    def add_ui_theme(self, name: str, parent: Union[str, None], 
+                     settings: Union[Dict, Callable[[], Dict]], 
+                     images={}):
         if name in self._ui_themes:
             warn("Overwriting theme '%s'" % name)
         

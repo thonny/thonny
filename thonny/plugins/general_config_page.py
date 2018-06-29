@@ -51,5 +51,5 @@ class GeneralConfigurationPage(ConfigurationPage):
         self.columnconfigure(1, weight=1)
     
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_configuration_page("General", GeneralConfigurationPage)

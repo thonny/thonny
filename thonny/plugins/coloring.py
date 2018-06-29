@@ -232,7 +232,7 @@ def update_coloring(event):
     
     text.syntax_colorer.schedule_update(event, get_workbench().get_option("view.syntax_coloring"))
 
-def load_plugin():
+def load_plugin() -> None:
     wb = get_workbench() 
 
     wb.set_default("view.syntax_coloring", True)

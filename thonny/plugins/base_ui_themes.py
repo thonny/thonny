@@ -1,3 +1,4 @@
+from typing import Union, Dict, Callable  # @UnusedImport
 from thonny import get_workbench
 from thonny.misc_utils import running_on_linux, running_on_windows
 
@@ -749,20 +750,19 @@ def enhanced_aqua():
 
 
 
-def load_plugin():
+def load_plugin() -> None:
     from tkinter import ttk
     original_themes = ttk.Style().theme_names() 
     
     # load all base themes
     for name in original_themes:
+        settings = {} # type: Union[Dict, Callable[[], Dict]]
         if name == "clam":
             settings = clam
         elif name == "xpnative":
             settings = xpnative
         elif name == "aqua":
             settings = aqua
-        else:
-            settings = {}
              
         get_workbench().add_ui_theme(name, None, settings)
     

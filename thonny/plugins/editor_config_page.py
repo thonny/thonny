@@ -50,5 +50,5 @@ class EditorConfigurationPage(ConfigurationPage):
         get_workbench().get_editor_notebook().update_appearance()
     
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_configuration_page("Editor", EditorConfigurationPage)

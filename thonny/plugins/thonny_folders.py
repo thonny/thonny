@@ -6,7 +6,7 @@ from thonny import THONNY_USER_DIR
 from thonny.ui_utils import open_path_in_system_file_manager
 
 
-def load_plugin():
+def load_plugin() -> None:
     def cmd_open_data_dir():
         open_path_in_system_file_manager(THONNY_USER_DIR)
         

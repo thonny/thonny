@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk 
 from thonny import get_workbench, ui_utils
 
 class StackView(ui_utils.TreeFrame):
@@ -29,5 +28,5 @@ class StackView(ui_utils.TreeFrame):
             self.tree.set(node_id, "location", 
                           "%s, line %s" % (frame.filename, lineno))
 
-def load_plugin():
+def load_plugin() -> None:
     get_workbench().add_view(StackView, "Stack", "s")

@@ -202,7 +202,7 @@ def _generate_timestamp_file_name(extension):
     
     raise RuntimeError()
 
-def load_plugin():
+def load_plugin() -> None:
     filename = _generate_timestamp_file_name("txt")
     # create logger
     EventLogger(filename)

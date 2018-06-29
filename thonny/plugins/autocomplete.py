@@ -294,7 +294,7 @@ def patched_perform_midline_tab(text, event):
         return text.perform_smart_tab(event)
     
 
-def load_plugin():
+def load_plugin() -> None:
     
     get_workbench().add_command("autocomplete", "edit", "Auto-complete",
         handle_autocomplete_request,
@@ -305,5 +305,5 @@ def load_plugin():
     get_workbench().set_default("edit.tab_complete_in_editor", True)
     get_workbench().set_default("edit.tab_complete_in_shell", True)
     
-    CodeViewText.perform_midline_tab = patched_perform_midline_tab
-    ShellText.perform_midline_tab = patched_perform_midline_tab
+    CodeViewText.perform_midline_tab = patched_perform_midline_tab # type: ignore
+    ShellText.perform_midline_tab = patched_perform_midline_tab # type: ignore

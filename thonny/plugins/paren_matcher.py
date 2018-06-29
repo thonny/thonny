@@ -128,7 +128,7 @@ def update_highlighting(event=None):
     
     text.paren_matcher.schedule_update()
 
-def load_plugin():
+def load_plugin() -> None:
     wb = get_workbench()  
     
     wb.set_default("view.paren_highlighting", True)
