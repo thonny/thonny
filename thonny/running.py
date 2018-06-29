@@ -909,7 +909,7 @@ def create_frontend_python_process(args, stdin=None, stdout=subprocess.PIPE, std
     return _create_python_process(python_exe, args, stdin, stdout, stderr)
     
 def _create_python_process(python_exe, args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                           shell=False, env=None, universal_newlines=True, encoding="utf-8"):
+                           shell=False, env=None, universal_newlines=True):
     
     cmd = [python_exe] + args
     
@@ -929,8 +929,7 @@ def _create_python_process(python_exe, args, stdin=None, stdout=subprocess.PIPE,
                             env=env,
                             universal_newlines=universal_newlines,
                             startupinfo=startupinfo,
-                            creationflags=creationflags,
-                            encoding=encoding)
+                            creationflags=creationflags)
     
     proc.cmd = cmd
     return proc
