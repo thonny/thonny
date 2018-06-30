@@ -8,9 +8,10 @@ import time
 import subprocess
 from tkinter.messagebox import askyesno
 from tkinter.filedialog import askdirectory
+from typing import Tuple, Sequence, Optional
 
 
-def delete_dir_try_hard(path, hardness=5):
+def delete_dir_try_hard(path: str, hardness: int=5) -> None:
     # Deleting the folder on Windows is not so easy task
     # http://bugs.python.org/issue15496
     for i in range(hardness):
@@ -24,16 +25,16 @@ def delete_dir_try_hard(path, hardness=5):
         # try once more but now without ignoring errors
         shutil.rmtree(path, False)
 
-def running_on_windows():
+def running_on_windows() -> bool:
     return platform.system() == "Windows"
     
-def running_on_mac_os():
+def running_on_mac_os() -> bool:
     return platform.system() == "Darwin"
     
-def running_on_linux():
+def running_on_linux() -> bool:
     return platform.system() == "Linux"
 
-def is_hidden_or_system_file(path):
+def is_hidden_or_system_file(path: str) -> bool:
     if os.path.basename(path).startswith("."):
         return True
     elif running_on_windows():
@@ -45,7 +46,7 @@ def is_hidden_or_system_file(path):
     else:
         return False 
     
-def get_win_drives():
+def get_win_drives() -> Sequence[str]:
     # http://stackoverflow.com/a/2288225/261181
     # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
     import string
@@ -74,7 +75,7 @@ def get_win_drives():
 
     return drives
 
-def list_volumes():
+def list_volumes() -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
     if os.name == 'posix':
         # 'posix' means we're on Linux or OSX (Mac).
@@ -107,7 +108,7 @@ def list_volumes():
         # No support for unknown operating systems.
         raise NotImplementedError('OS "{}" not supported.'.format(os.name))
 
-def get_win_volume_name(path):
+def get_win_volume_name(path: str) -> str:
     """
     Each disk or external device connected to windows has an attribute
     called "volume name". This function returns the volume name for
@@ -119,10 +120,11 @@ def get_win_volume_name(path):
     ctypes.windll.kernel32.GetVolumeInformationW(  # @UndefinedVariable
         ctypes.c_wchar_p(path), vol_name_buf,
         ctypes.sizeof(vol_name_buf), None, None, None, None, 0)
+    assert isinstance(vol_name_buf.value, str)
     return vol_name_buf.value
 
 
-def find_volumes_by_name(volume_name):
+def find_volumes_by_name(volume_name: str) -> Sequence[str]:
     volumes = list_volumes()
     if os.name == "nt":
         return [volume for volume in volumes 
@@ -131,9 +133,9 @@ def find_volumes_by_name(volume_name):
         return [volume for volume in volumes 
                 if volume.endswith(volume_name)]
 
-def find_volume_by_name(volume_name,
-                        not_found_msg="Could not find disk '%s'. Do you want to locate it yourself?",
-                        found_several_msg="Found several '%s' disks. Do you want to choose one yourself?"):
+def find_volume_by_name(volume_name: str,
+                        not_found_msg: str="Could not find disk '%s'. Do you want to locate it yourself?",
+                        found_several_msg: str="Found several '%s' disks. Do you want to choose one yourself?") -> Optional[str]:
     
     volumes = find_volumes_by_name(volume_name)
     if len(volumes) == 1:
@@ -154,7 +156,7 @@ def find_volume_by_name(volume_name,
             
             
 
-def shorten_repr(original_repr, max_len=1000):
+def shorten_repr(original_repr: str, max_len: int=1000) -> str:
     if len(original_repr) > max_len:
         return original_repr[:max_len] + " ... [{} chars truncated]".format(len(original_repr) - max_len)
     else:
@@ -185,8 +187,8 @@ def __maybe_later_get_windows_special_folder(code):
     ctypes.windll.shell32.SHGetFolderPathW(0, code, 0, SHGFP_TYPE_CURRENT, buf)
     return buf.value
 
-def get_python_version_string(version_info=None):
-    if version_info == None:
+def get_python_version_string(version_info: Optional[Tuple] = None) -> str:
+    if version_info is None:
         version_info = sys.version_info
          
     result = ".".join(map(str, version_info[:3]))

@@ -1,6 +1,7 @@
 from thonny import get_workbench
+from thonny.workbench import SyntaxThemeSettings
 
-def default_light():
+def default_light() -> SyntaxThemeSettings:
     default_fg = "black"
     default_bg = "#fdfdfd"
     light_fg = "DarkGray"
@@ -51,7 +52,7 @@ def default_light():
         "expression_box"  : {"background" : "#DCEDF2", "foreground" : default_fg},
     }
 
-def default_dark():
+def default_dark() -> SyntaxThemeSettings:
     default_fg = "#B3B3B3" 
     string_fg = "#8DC76F"
     open_string_bg = "#224533"
@@ -105,7 +106,7 @@ def default_dark():
         "expression_box"  : {"background" : "#506E67", "foreground" : default_fg},
     }
 
-def default_dark_green():
+def default_dark_green() -> SyntaxThemeSettings:
     open_string_bg = "#453B22"
     
     return {
@@ -129,7 +130,7 @@ def default_dark_green():
     }
     
 
-def default_dark_blue():
+def default_dark_blue() -> SyntaxThemeSettings:
     open_string_bg = "#224533"
     return {
         "TEXT"          : {"background" : "#272936"},
@@ -151,7 +152,7 @@ def default_dark_blue():
     }
     
 
-def idle_classic():
+def idle_classic() -> SyntaxThemeSettings:
     string_fg = "#00aa00"
     return {
         "TEXT"          : {"foreground" : "black", "insertbackground" : "black", "background" : "white"},
@@ -179,7 +180,7 @@ def idle_classic():
     }
         
 
-def idle_dark():
+def idle_dark() -> SyntaxThemeSettings:
     normal_fg = "white"
     string_fg = "#02ff02"
     
@@ -207,7 +208,7 @@ def idle_dark():
         "current_found"         : {"foreground" : "#002240", "background" : "#fbfbfb"},
     }
 
-def desert_sunset():
+def desert_sunset() -> SyntaxThemeSettings:
     normal_fg = "#f0e68c"
     string_fg = "#ffa0a0"
     
@@ -237,7 +238,7 @@ def desert_sunset():
         "current_found"         : {"foreground" : "#ffffff", "background" : "#333333"},
     }
     
-def zenburn():
+def zenburn() -> SyntaxThemeSettings:
     # https://github.com/mig/gedit-themes/blob/master/zenburn.xml
     # https://github.com/trusktr/gedit-color-schemes/blob/master/gtksourceview-3.0/styles/zenburn.xml
     normal_fg = "#dcdccc"

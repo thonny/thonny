@@ -1,12 +1,13 @@
 from typing import Union, Dict, Callable  # @UnusedImport
 from thonny import get_workbench
 from thonny.misc_utils import running_on_linux, running_on_windows
+from thonny.workbench import CompoundUiThemeSettings, BasicUiThemeSettings
 
-def scale(value):
+def scale(value) -> float:
     # dimensions in this module were designed with a 1.67 scale
     return get_workbench().scale(value / 1.67)
 
-def _treeview_settings():
+def _treeview_settings() -> BasicUiThemeSettings:
     light_blue = "#ADD8E6" 
     light_grey = "#D3D3D3"
     
@@ -39,7 +40,7 @@ def _treeview_settings():
         }
     }
 
-def _menubutton_settings():
+def _menubutton_settings() -> BasicUiThemeSettings:
     return {
         "TMenubutton" : {
             "configure" : {
@@ -56,7 +57,7 @@ def _menubutton_settings():
         }
     }
 
-def _paned_window_settings():
+def _paned_window_settings() -> BasicUiThemeSettings:
     return {
         "Sash" : {
             "configure" : {
@@ -66,7 +67,7 @@ def _paned_window_settings():
     }
 
 
-def _menu_settings():
+def _menu_settings() -> BasicUiThemeSettings:
     return {
         "Menubar" : {
             "configure" : {
@@ -77,7 +78,7 @@ def _menu_settings():
     }
 
 
-def _text_settings():
+def _text_settings() -> BasicUiThemeSettings:
     return {
         "Text" : {
             "configure" : {
@@ -99,7 +100,7 @@ def _text_settings():
     }
 
 
-def _label_settings():
+def _label_settings() -> BasicUiThemeSettings:
     return {
         "Url.TLabel" : {
             "configure" : {
@@ -109,7 +110,7 @@ def _label_settings():
     }
 
 
-def _button_notebook_settings():
+def _button_notebook_settings() -> BasicUiThemeSettings:
     # Adapted from https://github.com/python/cpython/blob/2.7/Demo/tkinter/ttk/notebook_closebtn.py
     return {
         "closebutton" : {
@@ -134,7 +135,7 @@ def _button_notebook_settings():
         },
     }
 
-def clam():
+def clam() -> BasicUiThemeSettings:
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
     defaultfg =      "#000000"
     disabledfg =     "#999999"
@@ -350,7 +351,7 @@ def clam():
     }
     
 
-def xpnative():
+def xpnative() -> BasicUiThemeSettings:
     # Transcribed from https://github.com/tcltk/tk/blob/master/library/ttk/xpTheme.tcl
     return {
         "." : {
@@ -481,7 +482,7 @@ def xpnative():
         },
     }
 
-def aqua():
+def aqua() -> BasicUiThemeSettings:
     # https://github.com/tcltk/tk/blob/master/library/ttk/aquaTheme.tcl
     return {
         "." : {
@@ -566,7 +567,7 @@ def aqua():
         },
     }
 
-def windows():
+def windows() -> CompoundUiThemeSettings:
     return [
         xpnative(),
         _treeview_settings(),
@@ -662,7 +663,7 @@ def windows():
         }
     ]
 
-def enhanced_clam():
+def enhanced_clam() -> CompoundUiThemeSettings:
     return [
         clam(),
         _treeview_settings(),
@@ -723,7 +724,7 @@ def enhanced_clam():
         }
     ]
 
-def enhanced_aqua():
+def enhanced_aqua() -> CompoundUiThemeSettings:
     return [
         _treeview_settings(),
         _menubutton_settings(),

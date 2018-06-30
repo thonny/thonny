@@ -122,11 +122,15 @@ class AboutDialog(tk.Toplevel):
 def load_plugin() -> None:
     def open_about(*args):
         AboutDialog(get_workbench())
+    
+    def open_url(url):
+        # webbrowser.open returns bool, but add_command expects None
+        webbrowser.open(url)
         
     get_workbench().add_command("changelog", "help", "Version history",
-                                lambda: webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CHANGELOG.rst"), group=60)
+                                lambda: open_url("https://bitbucket.org/plas/thonny/src/master/CHANGELOG.rst"), group=60)
     get_workbench().add_command("issues", "help", "Report problems",
-                                lambda: webbrowser.open("https://bitbucket.org/plas/thonny/issues/new"), group=60)
+                                lambda: open_url("https://bitbucket.org/plas/thonny/issues/new"), group=60)
     get_workbench().add_command("about", "help", "About Thonny", open_about, group=61)
     
     # For Mac

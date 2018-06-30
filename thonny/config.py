@@ -82,7 +82,7 @@ class ConfigurationManager:
         name = section + "." + option
         self._defaults[name] = primary_default_value
 
-    def get_variable(self, name):
+    def get_variable(self, name: str) -> tk.Variable:
         section, option = self._parse_name(name)
         name = section + "." + option
         
@@ -91,13 +91,13 @@ class ConfigurationManager:
         else:
             value = self.get_option(name)
             if isinstance(value, bool):
-                var = tk.BooleanVar(value=value)
+                var = tk.BooleanVar(value=value) # type: tk.Variable
             elif isinstance(value, int):
-                var = tk.IntVar(value=value)
+                var = tk.IntVar(value=value)    
             elif isinstance(value, str):
-                var = tk.StringVar(value=value)
+                var = tk.StringVar(value=value) 
             elif isinstance(value, float):
-                var = tk.StringVar(value=value)
+                var = tk.StringVar(value=value) 
             else:
                 raise KeyError("Can't create Tk Variable for " + name
                                + ". Type is " + str(type(value)))

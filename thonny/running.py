@@ -183,7 +183,7 @@ class Runner:
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
-        editor = get_workbench().get_current_editor()
+        editor = get_workbench().get_editor_notebook().get_current_editor()
         if not editor:
             return
 

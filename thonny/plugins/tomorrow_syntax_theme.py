@@ -1,7 +1,7 @@
 from thonny import get_workbench
-
+from thonny.workbench import SyntaxThemeSettings
     
-def tomorrow():
+def tomorrow() -> SyntaxThemeSettings:
     # https://github.com/chriskempson/tomorrow-theme/blob/master/GEdit/Tomorrow.xml
     normal_fg = "#4D4D4C"
     string_fg = "#718C00"
@@ -24,7 +24,7 @@ def tomorrow():
         "comment"       : {"foreground" : "#8E908C"},
     }
 
-def tomorrow_night():
+def tomorrow_night() -> SyntaxThemeSettings:
     # https://github.com/chriskempson/tomorrow-theme/blob/master/GEdit/Tomorrow-Night.xml
     normal_fg = "#c5c8c6"
     string_fg = "#b5bd68"
@@ -52,7 +52,7 @@ def tomorrow_night():
                                  "font" : "BoldEditorFont"},
     }
 
-def tomorrow_night_blue():
+def tomorrow_night_blue() -> SyntaxThemeSettings:
     # https://github.com/chriskempson/tomorrow-theme/blob/master/GEdit/Tomorrow-Night-Blue.xml
     normal_fg = "#ffffff"
     string_fg = "#d1f1a9"
@@ -80,7 +80,7 @@ def tomorrow_night_blue():
                                  "font" : "BoldEditorFont"},
     }
 
-def tomorrow_night_bright():
+def tomorrow_night_bright() -> SyntaxThemeSettings:
     # https://github.com/chriskempson/tomorrow-theme/blob/master/GEdit/Tomorrow-Night-Bright.xml
     normal_fg = "#dedede"
     string_fg = "#b9ca4a"
@@ -108,7 +108,7 @@ def tomorrow_night_bright():
                                  "font" : "BoldEditorFont"},
     }
 
-def tomorrow_night_eighties():
+def tomorrow_night_eighties() -> SyntaxThemeSettings:
     # https://github.com/chriskempson/tomorrow-theme/blob/master/GEdit/Tomorrow-Night-Eighties.xml
     normal_fg = "#cccccc"
     string_fg = "#99cc99"

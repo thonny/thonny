@@ -1,18 +1,20 @@
 from thonny import get_workbench
 from thonny.misc_utils import running_on_windows
 from thonny.ui_utils import scale
+from thonny.workbench import UiThemeSettings
+from typing import Optional
 
 
-def clean(frame_background,
-          text_background,
-          normal_detail,
-          high_detail,
-          low_detail,
-          normal_foreground,
-          high_foreground,
-          low_foreground,
-          custom_menubar=None,
-          ):
+def clean(frame_background: str,
+          text_background: str,
+          normal_detail: str,
+          high_detail: str,
+          low_detail: str,
+          normal_foreground: str,
+          high_foreground: str,
+          low_foreground: str,
+          custom_menubar: Optional[int]=None, # NB! Should be 1 or 0, not True or False (Tk would convert False to "False")
+          ) -> UiThemeSettings:
     
     # https://wiki.tcl.tk/37973 (Changing colors)
     # https://github.com/tcltk/tk/blob/master/library/ttk/clamTheme.tcl
@@ -20,7 +22,7 @@ def clean(frame_background,
     
     
     
-    settings = {
+    return {
         "." : {
             "configure" : {
                 "foreground" : normal_foreground,
@@ -385,9 +387,6 @@ def clean(frame_background,
             }
         }
     }
-    
-    
-    return settings
     
     
 def load_plugin() -> None:

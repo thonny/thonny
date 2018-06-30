@@ -1,6 +1,6 @@
 import os.path
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Optional
 
 THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
                                  os.path.expanduser(os.path.join("~", ".thonny")))
@@ -150,11 +150,11 @@ if TYPE_CHECKING:
     from thonny.running import Runner
     from thonny.shell import ShellView
           
-_workbench = None    
+_workbench = None # type: Optional[Workbench]
 def get_workbench() -> 'Workbench':
     return cast('Workbench', _workbench)
 
-_runner = None
+_runner = None # type: Optional[Runner]
 def get_runner() -> 'Runner':    
     return cast('Runner', _runner)
 
