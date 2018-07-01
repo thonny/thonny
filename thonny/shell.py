@@ -273,7 +273,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
             EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
             
-            if get_runner().is_waiting_toplevel_command():
+            if not get_runner().is_waiting_toplevel_command():
                 if self._before_io:
                     # tag first char of io differently
                     self.tag_add("vertically_spaced", index)
