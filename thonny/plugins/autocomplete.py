@@ -45,7 +45,7 @@ class Completer(tk.Listbox):
     def handle_autocomplete_request(self):
         row, column = self._get_position()
         source = self.text.get("1.0", "end-1c")
-        get_runner().send_command(InlineCommand(command="editor_autocomplete",
+        get_runner().send_command(InlineCommand("editor_autocomplete",
                                                 source=source,
                                                 row=row,
                                                 column=column,
@@ -243,7 +243,7 @@ class ShellCompleter(Completer):
     def handle_autocomplete_request(self):
         source=self._get_prefix()
         
-        get_runner().send_command(InlineCommand(command="shell_autocomplete",
+        get_runner().send_command(InlineCommand("shell_autocomplete",
                                                 source=source))
     
     def _handle_backend_response(self, msg):

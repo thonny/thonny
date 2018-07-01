@@ -498,19 +498,17 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     else:
                         args_str = ""
                     argv = parse_cmd_line(cmd_line[1:])
-                    command = argv[0]
+                    command_name = argv[0]
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
-                    get_runner().send_command(ToplevelCommand(command=command,
+                    get_runner().send_command(ToplevelCommand(command_name,
                                                               args=argv[1:], args_str=args_str, cmd_line=cmd_line))
                 elif cmd_line.startswith("!"):
                     argv = parse_cmd_line(cmd_line[1:])
                     get_workbench().event_generate("SystemCommand", cmd_line=text_to_be_submitted)
-                    get_runner().send_command(ToplevelCommand(command="execute_system_command",
+                    get_runner().send_command(ToplevelCommand("execute_system_command",
                                                               argv=argv, cmd_line=cmd_line))
                 else:
-                    get_runner().send_command(
-                        ToplevelCommand(command="execute_source",
-                                        source=text_to_be_submitted))
+                    get_runner().send_command(ToplevelCommand("execute_source", source=text_to_be_submitted))
                 
                 # remember the place where the output of this command started 
                 self.mark_set("command_io_start", "output_insert")

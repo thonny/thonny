@@ -29,7 +29,7 @@ class Debugger:
         raise NotImplementedError()
 
     def check_issue_command(self, command, **kwargs):
-        cmd = DebuggerCommand(command=command, **kwargs)
+        cmd = DebuggerCommand(command, **kwargs)
         self._last_debugger_command = cmd
 
         state = get_runner().get_state() 

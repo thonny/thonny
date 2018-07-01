@@ -141,13 +141,13 @@ class VM:
 
         error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
 
-        if cmd.command in self._command_handlers:
-            handler = self._command_handlers[cmd.command]
+        if cmd.name in self._command_handlers:
+            handler = self._command_handlers[cmd.name]
         else:
-            handler = getattr(self, "_cmd_" + cmd.command, None)
+            handler = getattr(self, "_cmd_" + cmd.name, None)
 
         if handler is None:
-            response = self.create_message(error_response_type, error="Unknown command: " + cmd.command)
+            response = self.create_message(error_response_type, error="Unknown command: " + cmd.name)
         else:
             try:
                 response = handler(cmd)
@@ -180,7 +180,7 @@ class VM:
         if isinstance(cmd, ToplevelCommand) and "message_type" not in response:
             response["message_type"] = "ToplevelResult"
 
-        response["command"] = cmd.command
+        response["command_name"] = cmd.name
         if hasattr(cmd, "request_id"):
             response["request_id"] = cmd.request_id
         if response["message_type"] == "ToplevelResult":
@@ -580,7 +580,7 @@ class VM:
                                                      cmd=cmd)
             return self.create_message("ToplevelResult", **result_attributes)
         else:
-            raise UserCommandError("Command '%s' takes at least one argument", cmd.command)
+            raise UserCommandError("Command '%s' takes at least one argument", cmd.name)
 
     def _execute_source(self, source, filename, execution_mode, executor_class, 
                         global_vars=None, cmd=None):
@@ -811,13 +811,13 @@ class Tracer(Executor):
         
     def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
         if cmd and getattr(cmd, "breakpoints", None):
-            command = "resume"
+            command_name = "resume"
             breakpoints = cmd.breakpoints
         else:
-            command = "step_into"
+            command_name = "step_into"
             breakpoints = {}
             
-        self._current_command = DebuggerCommand(command=command, 
+        self._current_command = DebuggerCommand(command_name, 
                                                 state=None,
                                                 focus=None,
                                                 frame_id=None,
@@ -908,7 +908,7 @@ class SimpleTracer(Tracer):
         if event == "call": 
             self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
             # can we skip this frame?
-            if (self._current_command.command == "step_over"
+            if (self._current_command.nanme == "step_over"
                 and not self._current_command.breakpoints):
                 return None
             else:
@@ -928,7 +928,7 @@ class SimpleTracer(Tracer):
         elif event == "line":
             self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
             
-            handler = getattr(self, "_cmd_%s_completed" % self._current_command.command)
+            handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
             if handler(frame, self._current_command):
                 self._report_current_state(frame)
                 self._current_command = self._fetch_command()
@@ -1204,7 +1204,7 @@ class FancyTracer(Tracer):
             exc = self._past_messages[self._current_state][0]["exception"]
 
             # Has the command completed?
-            tester = getattr(self, "_cmd_" + cmd.command + "_completed")
+            tester = getattr(self, "_cmd_" + cmd.name + "_completed")
             cmd_complete = tester(frame, event, args, focus, cmd)
 
             if cmd_complete or exc is not None:
@@ -1212,7 +1212,7 @@ class FancyTracer(Tracer):
                 self._past_messages[self._current_state][1] = True  # Add "shown to user" flag
                 self._send_and_fetch_next_debugger_progress_message(self._past_messages[self._current_state][0])
 
-            if self._current_command.command == "back":
+            if self._current_command.name == "back":
                 # Step back has been chosen, move the pointer backwards
                 if self._current_state > 0:  # Don't let the pointer have negative values
                     self._past_messages[self._current_state][1] = False  # Remove "shown to user" flag

@@ -10,7 +10,7 @@ class Record:
     def __init__(self, **kw):
         self.__dict__.update(kw)
     
-    def update(self, **kw):
+    def _update(self, **kw):
         self.__dict__.update(kw)
     
     def setdefault(self, **kw):
@@ -18,6 +18,12 @@ class Record:
         for key in kw:
             if not hasattr(self, key):
                 setattr(self, key, kw[key])
+    
+    def __getitem__(self, key):
+        return self.__dict__[key]
+    
+    def __setitem__(self, key, value):
+        self.__dict__[key] = value
     
     def __repr__(self):
         keys = self.__dict__.keys()
@@ -106,28 +112,30 @@ class FrameInfo(Record):
             + ", focus=" + str(self.focus)
         )
 
-class Command(Record):
+class BackendCommand(Record):
+    """Command meant for the back-end"""
+    
+    def __init__(self, name, **kw):
+        super().__init__(**kw)
+        self.name = name
+
+class ToplevelCommand(BackendCommand):
     pass
 
-class ToplevelCommand(Command):
+class DebuggerCommand(BackendCommand):
     pass
 
-class DebuggerCommand(Command):
-    def __init__(self, command, **kw):
-        Record.__init__(self, **kw)
-        self.command = command
+class InputSubmission(Record):
+    def __init__(self, data, **kw):
+        super().__init__(**kw)
+        self.data = data
 
-class InputSubmission(Command):
-    pass
-
-class InlineCommand(Command):
+class InlineCommand(BackendCommand):
     """
-    Can be used both during debugging and between debugging.
-    Initially meant for sending variable and heap info requests
+    Can be used both during debugging and in waiting_toplevel_command state
+    (eg. for sending variable and heap info requests)
     """
-    def __init__(self, command, **kw):
-        Record.__init__(self, **kw)
-        self.command = command
+    pass
 
 
 class UserCommandError(Exception):
@@ -140,8 +148,7 @@ def parse_cmd_line(s):
     return shlex.split(s, posix=True)
 
 def serialize_message(msg):
-    # I want to transfer only ASCII chars because 
-    # encodings are not reliable 
+    # I want to transfer only ASCII chars because encodings are not reliable 
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 
     return repr(msg).encode("UTF-7").decode("ASCII") 
 

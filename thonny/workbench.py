@@ -1159,7 +1159,7 @@ class Workbench(tk.Tk):
                 for handler in self._event_handlers[sequence].copy():
                     try:
                         # Yes, I'm creating separate event object for each handler
-                        # so that they can't misuse the mutabilty
+                        # so that they can't misuse the mutability
                         event = WorkbenchEvent(sequence, **kwargs)
                         handler(event)
                     except:

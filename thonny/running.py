@@ -17,7 +17,7 @@ import sys
 
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
-    UserError, construct_cmd_line, actual_path, path_startswith, Command
+    UserError, construct_cmd_line, actual_path, path_startswith, BackendCommand
 from thonny import get_workbench, get_runner, get_shell
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os
@@ -43,7 +43,7 @@ class Runner:
         self._state = "starting"
         self._proxy = None # type: Any
         self._polling_after_id = None
-        self._postponed_commands = []
+        self._postponed_commands = [] # type: List[Command]
         
     
     def _remove_obsolete_jedi_copies(self) -> None:
@@ -97,28 +97,28 @@ class Runner:
     def get_sys_path(self) -> List[str]:
         return self._proxy.get_sys_path()
     
-    def send_command(self, cmd: Command):
+    def send_command(self, cmd: BackendCommand) -> None:
         if self._proxy is None:
             return
 
         # First sanity check
         if (isinstance(cmd, ToplevelCommand)
             and self.get_state() != "waiting_toplevel_command"
-            and cmd.command not in ["Reset", "Run", "Debug"]
+            and cmd.name not in ["Reset", "Run", "Debug"]
             or 
             isinstance(cmd, DebuggerCommand)
             and self.get_state() != "waiting_debugger_command"
             ):
             get_workbench().bell()
-            logging.info("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
+            logging.warning("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
             return
         
         # Attach extra info
-        if "debug" in cmd.command.lower():
-            cmd.breakpoints = get_current_breakpoints()
+        if "debug" in cmd.name.lower():
+            cmd["breakpoints"] = get_current_breakpoints()
             
         # Offer the command
-        logging.debug("RUNNER Sending: %s, %s", cmd.command, cmd)
+        logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)
         
         if response == "discard":
@@ -133,14 +133,14 @@ class Runner:
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
     
-        if cmd.command in ("Run", "Debug", "LineDebug", "Reset"):
+        if cmd.name in ("Run", "Debug", "LineDebug", "Reset"):
             get_workbench().event_generate("BackendRestart")
                 
     def _postpone_command(self, cmd):
         # in case of InlineCommands, discard older same type command
         if isinstance(cmd, InlineCommand):
             for older_cmd in self._postponed_commands:
-                if older_cmd.command == cmd.command:
+                if older_cmd.name == cmd.name:
                     self._postponed_commands.remove(older_cmd)
         
         if len(self._postponed_commands) > 10: 
@@ -412,7 +412,7 @@ class BackendProxy:
     
     def send_command(self, cmd):
         """Send the command to backend. Return None, 'discard' or 'postpone'"""
-        method_name = "_cmd_" + cmd.command
+        method_name = "_cmd_" + cmd.name
         if hasattr(self, method_name):
             return getattr(self, method_name)(cmd)
         else:
@@ -512,7 +512,7 @@ class CPythonProxy(BackendProxy):
             return msg
     
     def send_command(self, cmd):
-        if isinstance(cmd, ToplevelCommand) and cmd.command in ("Run", "Debug", "LineDebug", "Reset"):
+        if isinstance(cmd, ToplevelCommand) and cmd.name in ("Run", "Debug", "LineDebug", "Reset"):
             self._close_backend()
             self._start_new_process(cmd)
         
@@ -523,7 +523,7 @@ class CPythonProxy(BackendProxy):
         self._proc.stdin.flush()
     
     def send_program_input(self, data):
-        self.send_command(InputSubmission(data=data))
+        self._send_msg(InputSubmission(data))
         
     def get_sys_path(self):
         return self._sys_path
