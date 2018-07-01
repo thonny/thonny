@@ -106,19 +106,21 @@ class FrameInfo(Record):
             + ", focus=" + str(self.focus)
         )
 
-
-class ToplevelCommand(Record):
+class Command(Record):
     pass
 
-class DebuggerCommand(Record):
+class ToplevelCommand(Command):
+    pass
+
+class DebuggerCommand(Command):
     def __init__(self, command, **kw):
         Record.__init__(self, **kw)
         self.command = command
 
-class InputSubmission(Record):
+class InputSubmission(Command):
     pass
 
-class InlineCommand(Record):
+class InlineCommand(Command):
     """
     Can be used both during debugging and between debugging.
     Initially meant for sending variable and heap info requests

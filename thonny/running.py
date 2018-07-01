@@ -17,7 +17,7 @@ import sys
 
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
-    UserError, construct_cmd_line, actual_path, path_startswith
+    UserError, construct_cmd_line, actual_path, path_startswith, Command
 from thonny import get_workbench, get_runner, get_shell
 from thonny import THONNY_USER_DIR
 from thonny.misc_utils import running_on_windows, running_on_mac_os
@@ -30,35 +30,36 @@ import traceback
 from time import sleep
 import shlex
 from thonny.code import get_current_breakpoints
+from typing import List, Any  # @UnusedImport
 
 
 WINDOWS_EXE = "python.exe"
 
 class Runner:
-    def __init__(self):
+    def __init__(self) -> None:
         get_workbench().set_default("run.auto_cd", True)
         
         self._init_commands()
-        self._state = None
-        self._proxy = None
+        self._state = "starting"
+        self._proxy = None # type: Any
         self._polling_after_id = None
         self._postponed_commands = []
         
     
-    def _remove_obsolete_jedi_copies(self):
-        """Thonny 2.1 used to copy jedi in order to make it available
-        for the backend"""
+    def _remove_obsolete_jedi_copies(self) -> None:
+        # Thonny 2.1 used to copy jedi in order to make it available
+        # for the backend. Get rid of it now
         for item in os.listdir(THONNY_USER_DIR):
             if item.startswith("jedi_0."):
                 shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
     
-    def start(self):
+    def start(self) -> None:
         self._check_alloc_console()
         self.restart_backend(False, True)
         # temporary
         self._remove_obsolete_jedi_copies()
     
-    def _init_commands(self):
+    def _init_commands(self) -> None:
         get_workbench().add_command('run_current_script', "run", 'Run current script',
             caption="Run",
             handler=self._cmd_run_current_script,
@@ -83,21 +84,20 @@ class Runner:
             group=70,
             bell_when_denied=False)
     
-    def get_state(self):
-        """State is one of "running", "waiting_debugger_command",
-            "waiting_toplevel_command"
+    def get_state(self) -> str:
+        """State is one of "running", "waiting_debugger_command", "waiting_toplevel_command"
         """
         return self._state
     
-    def _set_state(self, state):
+    def _set_state(self, state: str) -> None:
         if self._state != state:
             logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
     
-    def get_sys_path(self):
+    def get_sys_path(self) -> List[str]:
         return self._proxy.get_sys_path()
     
-    def send_command(self, cmd):
+    def send_command(self, cmd: Command):
         if self._proxy is None:
             return
 

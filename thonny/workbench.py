@@ -32,6 +32,7 @@ from warnings import warn
 import collections
 from thonny.shell import ShellView
 from typing import Optional, Type, Union, Callable, Dict, Sequence, List, Any, cast
+from typing import Set, Tuple  # @UnusedImport
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -84,7 +85,7 @@ class Workbench(tk.Tk):
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception # type: ignore
         self._event_handlers = {} # type: Dict[str, Set[Callable]]
-        self._images = set() # type: Set[tk.PhotoImage] # to avoid Python garbage collecting them, 
+        self._images = set() # type: Set[tk.PhotoImage] # keep images here to avoid Python garbage collecting them, 
         self._default_image_mapping = {} # type: Dict[str, str] # to allow specify default alternative images
         self._image_mapping_by_theme = {} # type: Dict[str, Dict[str, str]] # theme-based alternative images
         self._current_theme_name = "clam" # will be overwritten later
