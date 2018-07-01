@@ -32,8 +32,7 @@ class Debugger:
         cmd = DebuggerCommand(command, **kwargs)
         self._last_debugger_command = cmd
 
-        state = get_runner().get_state() 
-        if (state == "waiting_debugger_command"):
+        if get_runner().is_waiting_debugger_command():
             logging.debug("_check_issue_debugger_command: %s", cmd)
             
             # tell VM the state we are seeing
@@ -68,7 +67,7 @@ class Debugger:
         return None
 
     def command_enabled(self, command):
-        if get_runner().get_state() != "waiting_debugger_command":
+        if not get_runner().is_waiting_debugger_command():
             return False
         
         if command == "run_to_cursor":
@@ -688,7 +687,7 @@ def _issue_debugger_command(command):
 def _start_debug_enabled():
     return (_current_debugger is None
             and get_workbench().get_editor_notebook().get_current_editor() is not None
-            and get_runner().get_state() == "waiting_toplevel_command"
+            and get_runner().is_waiting_toplevel_command()
             and "debug" in get_runner().supported_features())
 
 def _start_debug(debugger_class):

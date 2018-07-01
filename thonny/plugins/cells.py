@@ -152,7 +152,7 @@ def run_selection(event=None):
 def run_enabled():
     widget = get_workbench().focus_get()
     return (isinstance(widget, CodeViewText)
-            and get_runner().get_state() == "waiting_toplevel_command")
+            and get_runner().is_waiting_toplevel_command())
 
 def _load_plugin():
     wb = get_workbench() 

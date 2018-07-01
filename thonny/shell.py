@@ -157,7 +157,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._menu.add_command(label="Clear shell", command=self._clear_shell)
     
     def submit_command(self, cmd_line, tags):
-        assert get_runner().get_state() == "waiting_toplevel_command"
+        assert get_runner().is_waiting_toplevel_command()
         self.delete("input_start", "end")
         self.insert("input_start", cmd_line, tags)
         self.see("end")
@@ -266,14 +266,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.mark_gravity("input_start", tk.LEFT)
             self.mark_gravity("output_insert", tk.LEFT)
             
-            if get_runner().get_state() == "waiting_toplevel_command":
+            if get_runner().is_waiting_toplevel_command():
                 tags = tags + ("toplevel", "command")
             else:
                 tags = tags + ("io", "stdin")
             
             EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
             
-            if get_runner().get_state() != "waiting_toplevel_command":
+            if get_runner().is_waiting_toplevel_command():
                 if self._before_io:
                     # tag first char of io differently
                     self.tag_add("vertically_spaced", index)
@@ -297,7 +297,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.bell()
     
     def perform_return(self, event):
-        if get_runner().get_state() == "running":
+        if get_runner().is_running():
             # if we are fixing the middle of the input string and pressing ENTER
             # then we expect the whole line to be submitted not linebreak to be inserted
             # (at least that's how IDLE works)
@@ -308,7 +308,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
              
             self._try_submit_input()
             
-        elif get_runner().get_state() == "waiting_toplevel_command":
+        elif get_runner().is_waiting_toplevel_command():
             # Same with editin middle of command, but only if it's a single line command
             whole_input = self.get("input_start", "end-1c") # asking the whole input
             if ("\n" not in whole_input
@@ -379,7 +379,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         submittable_text = self._extract_submittable_input(input_text, tail)
         
         if submittable_text is not None:
-            if get_runner().get_state() == "waiting_toplevel_command":
+            if get_runner().is_waiting_toplevel_command():
                 # clean up the tail
                 if len(tail) > 0:
                     assert tail.strip() == ""
@@ -391,7 +391,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             end_index = self.index("input_start+{0}c".format(len(submittable_text)))
             
             # apply correct tags (if it's leftover then it doesn't have them yet)
-            if get_runner().get_state() == "running":
+            if get_runner().is_running():
                 self.tag_add("io", start_index, end_index)
                 self.tag_add("stdin", start_index, end_index)
             else:
@@ -422,7 +422,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _extract_submittable_input(self, input_text, tail):
         
-        if get_runner().get_state() == "waiting_toplevel_command":
+        if get_runner().is_waiting_toplevel_command():
             if input_text.endswith("\n"):
                 if input_text.strip().startswith("%") or input_text.strip().startswith("!"):
                     # if several magic command are submitted, then take only first
@@ -434,7 +434,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             else:
                 return None
             
-        elif get_runner().get_state() == "running":
+        elif get_runner().is_running():
                 i = 0
                 limit = None # TODO: simplify
                 while True:
@@ -482,7 +482,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _submit_input(self, text_to_be_submitted):
         logging.debug("SHELL: submitting %r in state %s", text_to_be_submitted, get_runner().get_state())
-        if get_runner().get_state() == "waiting_toplevel_command":
+        if get_runner().is_waiting_toplevel_command():
             # register in history and count
             if text_to_be_submitted in self._command_history:
                 self._command_history.remove(text_to_be_submitted)
@@ -519,7 +519,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 
             get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)
         else:
-            assert get_runner().get_state() == "running"
+            assert get_runner().is_running()
             get_runner().send_program_input(text_to_be_submitted)
             get_workbench().event_generate("ShellInput", input_text=text_to_be_submitted)
     

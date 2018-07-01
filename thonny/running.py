@@ -88,12 +88,24 @@ class Runner:
         """State is one of "running", "waiting_debugger_command", "waiting_toplevel_command"
         """
         return self._state
-    
+        
     def _set_state(self, state: str) -> None:
         if self._state != state:
             logging.debug("Runner state changed: %s ==> %s" % (self._state, state))
             self._state = state
     
+    def is_running(self):
+        return self._state == "running"
+    
+    def is_waiting(self):
+        return self._state.startswith("waiting")
+    
+    def is_waiting_toplevel_command(self):
+        return self._state == "waiting_toplevel_command"
+    
+    def is_waiting_debugger_command(self):
+        return self._state == "waiting_debugger_command"
+
     def get_sys_path(self) -> List[str]:
         return self._proxy.get_sys_path()
     
@@ -103,11 +115,11 @@ class Runner:
 
         # First sanity check
         if (isinstance(cmd, ToplevelCommand)
-            and self.get_state() != "waiting_toplevel_command"
+            and not self.is_waiting_toplevel_command()
             and cmd.name not in ["Reset", "Run", "Debug"]
             or 
             isinstance(cmd, DebuggerCommand)
-            and self.get_state() != "waiting_debugger_command"
+            and not self.is_waiting_debugger_command()
             ):
             get_workbench().bell()
             logging.warning("RUNNER: Command %s was attempted at state %s" % (cmd, self.get_state()))
@@ -157,7 +169,7 @@ class Runner:
             self.send_command(cmd)
     
     def send_program_input(self, data):
-        assert self.get_state() == "running"
+        assert self.is_running()
         self._proxy.send_program_input(data)
         
     def execute_script(self, script_path, args, working_directory=None, command_name="Run"):
@@ -214,7 +226,7 @@ class Runner:
         
     def _cmd_run_current_script_enabled(self):
         return (get_workbench().get_editor_notebook().get_current_editor() is not None
-                and get_runner().get_state() == "waiting_toplevel_command"
+                and get_runner().is_waiting_toplevel_command()
                 and "run" in get_runner().supported_features())
     
     def _cmd_run_current_script(self):
@@ -244,7 +256,7 @@ class Runner:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
 
-        # TODO: should it be get_runner().get_state() != "waiting_toplevel_command" ??
+        # TODO: should it be get_runner().is_waiting_toplevel_command() ??
         return True
     
     def cmd_stop_restart(self):
@@ -707,7 +719,7 @@ class CPythonProxy(BackendProxy):
             self._cancel_gui_update_loop()
     
     def _loop_gui_update(self, force=False):
-        if force or get_runner().get_state() == "waiting_toplevel_command":
+        if force or get_runner().is_waiting_toplevel_command():
             self.send_command(InlineCommand("process_gui_events"))
             
         self._gui_update_loop_id = get_workbench().after(50, self._loop_gui_update)

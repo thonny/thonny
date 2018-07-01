@@ -80,7 +80,7 @@ def show_dialog():
     dlg.wait_window()
 
 def execute_macro():
-    if get_runner().get_state() == "waiting_toplevel_command":
+    if get_runner().is_waiting_toplevel_command():
         source = get_workbench().get_option("run.shell_macro_main")
         if source is not None:
             shell = get_workbench().show_view("ShellView")
