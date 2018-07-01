@@ -6,8 +6,8 @@ from tkinter import ttk
 import traceback
 
 from thonny import memory, roughparse
-from thonny.common import ToplevelCommand, parse_cmd_line, construct_cmd_line
-from thonny.misc_utils import running_on_mac_os, shorten_repr
+from thonny.common import ToplevelCommand
+from thonny.misc_utils import running_on_mac_os, shorten_repr, parse_cmd_line, construct_cmd_line
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration,\
     scrollbar_style
 import tkinter as tk

@@ -6,9 +6,8 @@ import sys
 import shutil
 import time
 import subprocess
-from tkinter.messagebox import askyesno
-from tkinter.filedialog import askdirectory
 from typing import Tuple, Sequence, Optional
+import shlex
 
 
 def delete_dir_try_hard(path: str, hardness: int=5) -> None:
@@ -146,6 +145,8 @@ def find_volume_by_name(volume_name: str,
         else:
             msg = found_several_msg % volume_name
         
+        from tkinter.messagebox import askyesno
+        from tkinter.filedialog import askdirectory
         if askyesno("Can't find suitable disk", msg):
             path = askdirectory()
             if path:
@@ -198,4 +199,10 @@ def get_python_version_string(version_info: Optional[Tuple] = None) -> str:
     result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
     
     return result    
+
+def construct_cmd_line(parts):
+    return " ".join(map(shlex.quote, parts))
+
+def parse_cmd_line(s):
+    return shlex.split(s, posix=True)
 

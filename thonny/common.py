@@ -4,7 +4,6 @@
 Classes used both by front-end and back-end
 """
 import os.path
-import shlex
 
 class Record:
     def __init__(self, **kw):
@@ -137,16 +136,6 @@ class InlineCommand(BackendCommand):
     """
     pass
 
-
-class UserCommandError(Exception):
-    pass
-
-def construct_cmd_line(parts):
-    return " ".join(map(shlex.quote, parts))
-
-def parse_cmd_line(s):
-    return shlex.split(s, posix=True)
-
 def serialize_message(msg):
     # I want to transfer only ASCII chars because encodings are not reliable 
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 
@@ -156,23 +145,6 @@ def parse_message(msg_string):
     # DataFrames may have nan 
     nan = float("nan")  # @UnusedVariable
     return eval(msg_string.encode("ASCII").decode("UTF-7"))
-
-
-
-def quote_path_for_shell(path):
-    for c in path:
-        if (not c.isalpha() 
-            and not c.isnumeric()
-            and c not in "-_./\\"):
-            return '"' + path.replace('"', '\\"') + '"'
-    else:
-        return path
-
-
-def print_structure(o):
-    print(o.__class__.__name__)
-    for attr in dir(o):
-        print(attr, "=", getattr(o, attr))
 
 def actual_path(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
@@ -207,6 +179,7 @@ def path_startswith(child_name, dir_name):
     
 
 class UserError(RuntimeError):
+    """Errors of this class are meant to be presented without stacktrace"""
     pass
 
 if __name__ == "__main__":

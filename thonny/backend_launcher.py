@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This file is run by VMProxy
+This file is run by CPythonProxy
 
 (Why separate file for launching? I want to have clean global scope 
 in toplevel __main__ module (because that's where user scripts run), but backend's global scope 
@@ -10,7 +10,7 @@ gives relative __file__-s on imported modules.)
 """
 
 if __name__ == "__main__":
-    # imports required by backend itself
+    # imports required by the backend itself
     import sys
     import logging
     import os.path

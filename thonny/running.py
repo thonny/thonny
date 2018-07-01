@@ -17,10 +17,10 @@ import sys
 
 from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
-    UserError, construct_cmd_line, actual_path, path_startswith, BackendCommand
+    UserError, actual_path, path_startswith, BackendCommand
 from thonny import get_workbench, get_runner, get_shell
 from thonny import THONNY_USER_DIR
-from thonny.misc_utils import running_on_windows, running_on_mac_os
+from thonny.misc_utils import running_on_windows, running_on_mac_os, construct_cmd_line
 from thonny.common import is_same_path
 import shutil
 import collections

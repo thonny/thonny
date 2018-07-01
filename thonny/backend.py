@@ -16,9 +16,8 @@ import site
 import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
-from thonny.common import TextRange, parse_message, serialize_message, \
-    DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission, \
-    UserCommandError
+from thonny.common import TextRange, parse_message, serialize_message, UserError, \
+    DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
 
 import signal
 import warnings
@@ -156,7 +155,7 @@ class VM:
                 if isinstance(cmd, ToplevelCommand):
                     traceback.print_exc()
                 response = self.create_message(error_response_type, SystemExit=True)
-            except UserCommandError as e:
+            except UserError as e:
                 sys.stderr.write(str(e) + "\n")
                 response = self.create_message(error_response_type)
             except KeyboardInterrupt:
@@ -242,9 +241,9 @@ class VM:
                 os.chdir(path)
                 return self.create_message("ToplevelResult")
             except FileNotFoundError:
-                raise UserCommandError("No such folder: " + path)
+                raise UserError("No such folder: " + path)
         else:
-            raise UserCommandError("cd takes one parameter")
+            raise UserError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
@@ -352,7 +351,7 @@ class VM:
             if id(frame) == cmd.frame_id:
                 return self.create_message("Locals", locals=self.export_variables(frame.f_locals))
         else:
-            raise ThonnyClientError("Frame '{0}' not found".format(cmd.frame_id))
+            raise RuntimeError("Frame '{0}' not found".format(cmd.frame_id))
 
 
     def _cmd_get_heap(self, cmd):
@@ -421,7 +420,7 @@ class VM:
                                        welcome_text="Python " + _get_python_version_string(),
                                        executable=sys.executable)
         else:
-            raise UserCommandError("Command 'Reset' doesn't take arguments")
+            raise UserError("Command 'Reset' doesn't take arguments")
 
     def export_latest_globals(self, module_name):
         if module_name in sys.modules:
@@ -580,7 +579,7 @@ class VM:
                                                      cmd=cmd)
             return self.create_message("ToplevelResult", **result_attributes)
         else:
-            raise UserCommandError("Command '%s' takes at least one argument", cmd.name)
+            raise UserError("Command '%s' takes at least one argument", cmd.name)
 
     def _execute_source(self, source, filename, execution_mode, executor_class, 
                         global_vars=None, cmd=None):
@@ -733,7 +732,7 @@ class VM:
                     elif isinstance(cmd, InlineCommand):
                         self._vm.handle_command(cmd)
                     else:
-                        raise ThonnyClientError("Wrong type of command when waiting for input")
+                        raise RuntimeError("Wrong type of command when waiting for input")
             finally:
                 self._vm._exit_io_function()
 
@@ -1705,10 +1704,6 @@ class CustomStackFrame:
         self.focus = None
         self.current_statement = None
         self.current_root_expression = None
-
-class ThonnyClientError(Exception):
-    pass
-
 
 def fdebug(frame, msg, *args):
     if logger.isEnabledFor(logging.DEBUG):
