@@ -6,7 +6,7 @@ from tkinter import ttk
 import traceback
 
 from thonny import memory, roughparse
-from thonny.common import ToplevelCommand
+from thonny.common import ToplevelCommand, ToplevelResponse
 from thonny.misc_utils import running_on_mac_os, shorten_repr, parse_cmd_line, construct_cmd_line
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration,\
     scrollbar_style
@@ -146,8 +146,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
-        get_workbench().bind("ToplevelResult", self._handle_toplevel_result, True)
-        get_workbench().bind("FancyDebuggerProgress", self._handle_fancy_debugger_progress, True)
+        get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
+        get_workbench().bind("FancyDebuggerResponse", self._handle_fancy_debugger_progress, True)
         
         self._init_menu()
     
@@ -183,7 +183,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.mark_set("output_end", self.index("end-1c"))
         self.see("end")
             
-    def _handle_toplevel_result(self, msg):
+    def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         self._before_io = True
         if hasattr(msg, "error"):
             self._insert_text_directly(msg.error + "\n", ("toplevel", "stderr"))

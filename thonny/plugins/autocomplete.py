@@ -40,7 +40,7 @@ class Completer(tk.Listbox):
     
     def _bind_result_event(self):    
         # TODO: remove binding when editor gets closed
-        get_workbench().bind("EditorCompletions", self._handle_backend_response, True)
+        get_workbench().bind("editor_autocomplete_response", self._handle_backend_response, True)
     
     def handle_autocomplete_request(self):
         row, column = self._get_position()
@@ -238,7 +238,7 @@ class Completer(tk.Listbox):
 class ShellCompleter(Completer):
     def _bind_result_event(self):    
         # TODO: remove binding when editor gets closed
-        get_workbench().bind("ShellCompletions", self._handle_backend_response, True)
+        get_workbench().bind("shell_autocomplete_response", self._handle_backend_response, True)
         
     def handle_autocomplete_request(self):
         source=self._get_prefix()

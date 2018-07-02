@@ -14,7 +14,7 @@ from thonny.tktextext import rebind_control_a
 import tokenize
 from tkinter.messagebox import askyesno
 import traceback
-from thonny.common import is_same_path, actual_path
+from thonny.common import is_same_path, actual_path, ToplevelResponse
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -49,9 +49,9 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
         
-        get_workbench().bind("FancyDebuggerProgress", self._listen_debugger_progress, True)
-        get_workbench().bind("SimpleDebuggerProgress", self._listen_debugger_progress, True)
-        get_workbench().bind("ToplevelResult", self._listen_for_toplevel_result, True)
+        get_workbench().bind("FancyDebuggerResponse", self._listen_debugger_progress, True)
+        get_workbench().bind("SimpleDebuggerResponse", self._listen_debugger_progress, True)
+        get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
         
         self.update_appearance()
 
@@ -177,7 +177,7 @@ class Editor(ttk.Frame):
         # TODO: check whether this module is active?
         self._code_view.text.set_read_only(True)
     
-    def _listen_for_toplevel_result(self, event):
+    def _listen_for_toplevel_response(self, event: ToplevelResponse) -> None:
         self._code_view.text.set_read_only(False)
     
     def _control_tab(self, event):
@@ -218,7 +218,7 @@ class Editor(ttk.Frame):
     def destroy(self):
         get_workbench().unbind("FancyDebuggerProgress", self._listen_debugger_progress)
         get_workbench().unbind("SimpleDebuggerProgress", self._listen_debugger_progress)
-        get_workbench().unbind("ToplevelResult", self._listen_for_toplevel_result)
+        get_workbench().unbind("ToplevelResponse", self._listen_for_toplevel_response)
         ttk.Frame.destroy(self)
     
 class EditorNotebook(ui_utils.ClosableNotebook):

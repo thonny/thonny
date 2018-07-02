@@ -9,8 +9,8 @@ class Record:
     def __init__(self, **kw):
         self.__dict__.update(kw)
     
-    def _update(self, **kw):
-        self.__dict__.update(kw)
+    def update(self, e, **kw):
+        self.__dict__.update(e, **kw)
     
     def setdefault(self, **kw):
         "updates those fields that are not yet present (similar to dict.setdefault)"
@@ -18,11 +18,20 @@ class Record:
             if not hasattr(self, key):
                 setattr(self, key, kw[key])
     
+    def get(self, key, default=None):
+        return self.__dict__.get(key, default)
+    
     def __getitem__(self, key):
         return self.__dict__[key]
     
+    def __delitem__(self, key):
+        self.__dict__.__delitem__(key)
+    
     def __setitem__(self, key, value):
         self.__dict__[key] = value
+    
+    def __contains__(self, key):
+        return key in self.__dict__
     
     def __repr__(self):
         keys = self.__dict__.keys()
@@ -111,31 +120,61 @@ class FrameInfo(Record):
             + ", focus=" + str(self.focus)
         )
 
-class BackendCommand(Record):
+class InputSubmission(Record):
+    """For sending data to backend's stdin"""
+    def __init__(self, data, **kw):
+        super().__init__(**kw)
+        self.data = data
+
+class CommandToBackend(Record):
     """Command meant for the back-end"""
     
     def __init__(self, name, **kw):
         super().__init__(**kw)
         self.name = name
 
-class ToplevelCommand(BackendCommand):
+class ToplevelCommand(CommandToBackend):
     pass
 
-class DebuggerCommand(BackendCommand):
+class DebuggerCommand(CommandToBackend):
     pass
 
-class InputSubmission(Record):
-    def __init__(self, data, **kw):
-        super().__init__(**kw)
-        self.data = data
-
-class InlineCommand(BackendCommand):
+class InlineCommand(CommandToBackend):
     """
     Can be used both during debugging and in waiting_toplevel_command state
     (eg. for sending variable and heap info requests)
     """
     pass
 
+
+class MessageFromBackend(Record):
+    def __init__(self, **kw):
+        self.event_type = type(self).__name__ # allow event_type to be overridden by kw
+        super().__init__(**kw)
+
+class ToplevelResponse(MessageFromBackend):
+    pass
+
+class DebuggerResponse(MessageFromBackend):
+    pass
+
+class SimpleDebuggerResponse(DebuggerResponse): # TODO: get rid of this
+    pass
+
+class FancyDebuggerResponse(DebuggerResponse): # TODO: get rid of this
+    pass
+
+class BackendEvent(MessageFromBackend):
+    def __init__(self, event_type: str, **kw) -> None:
+        event_type = event_type
+        super().__init__(**kw)
+
+class InlineResponse(MessageFromBackend):
+    def __init__(self, command_name: str, **kw) -> None:
+        super().__init__(**kw)
+        self.command_name = command_name
+        self.event_type = self.command_name + "_response"
+        
 def serialize_message(msg):
     # I want to transfer only ASCII chars because encodings are not reliable 
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 

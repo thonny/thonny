@@ -6,7 +6,7 @@ Adds debugging commands and features.
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerCommand
+from thonny.common import DebuggerCommand, ToplevelResponse
 from thonny.memory import VariablesFrame
 from thonny import ast_utils, memory, misc_utils, ui_utils, code
 from thonny.misc_utils import shorten_repr
@@ -23,7 +23,7 @@ _current_debugger = None
 class Debugger:
     def __init__(self):
         self._last_progress_message = None
-        get_workbench().bind("ToplevelResult", self.handle_toplevel_result, True)
+        get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
     
     def debug_current_script(self):
         raise NotImplementedError()
@@ -75,16 +75,16 @@ class Debugger:
         
         return True
     
-    def handle_toplevel_result(self, msg):
+    def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         global _current_debugger
         _current_debugger = None
-        get_workbench().unbind("ToplevelResult", self.handle_toplevel_result)
+        get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
             
             
 class SimpleDebugger(Debugger):
     def __init__(self):
         super().__init__()
-        get_workbench().bind("SimpleDebuggerProgress", self._handle_debugger_progress, True)
+        get_workbench().bind("SimpleDebuggerResponse", self._handle_debugger_progress, True)
     
     def debug_current_script(self):
         get_runner().execute_current("LineDebug")
@@ -104,8 +104,8 @@ class SimpleDebugger(Debugger):
         self._last_progress_message = msg
         self.highlight_a_frame(-1)
     
-    def handle_toplevel_result(self, msg):
-        super().handle_toplevel_result(msg)
+    def handle_toplevel_response(self, msg):
+        super().handle_toplevel_response(msg)
         get_workbench().unbind("SimpleDebuggerProgress", self._handle_debugger_progress)
         self._remove_focus_tags()
     
@@ -148,7 +148,7 @@ class FancyDebugger(Debugger):
     def __init__(self):
         super().__init__()
         self._main_frame_visualizer = None
-        get_workbench().bind("FancyDebuggerProgress", self._handle_debugger_progress, True)
+        get_workbench().bind("FancyDebuggerResponse", self._handle_debugger_progress, True)
     
     def debug_current_script(self):
         get_runner().execute_current("Debug")
@@ -187,8 +187,8 @@ class FancyDebugger(Debugger):
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
     
-    def handle_toplevel_result(self, msg):
-        super().handle_toplevel_result(msg)
+    def handle_toplevel_response(self, msg):
+        super().handle_toplevel_response(msg)
         get_workbench().unbind("FancyDebuggerProgress", self._handle_debugger_progress)    
         if self._main_frame_visualizer is not None:
             self._main_frame_visualizer.close()

@@ -610,7 +610,7 @@ class Workbench(tk.Tk):
                 if bell_when_denied:
                     self.bell()
                 
-            self.event_generate("Command", command_id=command_id, denied=denied)
+            self.event_generate("UICommandDispatched", command_id=command_id, denied=denied)
         
         sequence_option_name = "shortcuts." + command_id
         self.set_default(sequence_option_name, default_sequence)
@@ -1147,20 +1147,24 @@ class Workbench(tk.Tk):
 
         
 
-    def event_generate(self, sequence: str, **kwargs) -> None:
+    def event_generate(self, sequence: str, event: Optional[Record]=None, **kwargs) -> None:
         """Uses custom event handling when sequence doesn't start with <.
         In this case arbitrary attributes can be added to the event.
         Otherwise forwards the call to Tk's event_generate"""
         if sequence.startswith("<"):
+            assert event is None
             tk.Tk.event_generate(self, sequence, **kwargs)
         else:
             if sequence in self._event_handlers:
-                # copy, so that event handler can remove itself during iteration
+                if event is None:
+                    event = WorkbenchEvent(sequence, **kwargs)
+                else:
+                    event.update(kwargs)
+                
+                # make a copy of handlers, so that event handler can remove itself
+                # from the registry during iteration
                 for handler in self._event_handlers[sequence].copy():
                     try:
-                        # Yes, I'm creating separate event object for each handler
-                        # so that they can't misuse the mutability
-                        event = WorkbenchEvent(sequence, **kwargs)
                         handler(event)
                     except:
                         self.report_exception("Problem when handling '" + sequence + "'")
@@ -1638,7 +1642,7 @@ class Workbench(tk.Tk):
             self.iconify()
             self.deiconify()
         
-        editor = self.get_current_editor()
+        editor = self.get_editor_notebook().get_current_editor()
         if editor is not None:
             # This method is meant to be called when new file is opened, so it's safe to 
             # send the focus to the editor

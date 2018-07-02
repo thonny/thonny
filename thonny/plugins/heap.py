@@ -18,13 +18,13 @@ class HeapView(MemoryFrame):
         self.tree.heading('id', text='ID', anchor=tk.W)
         self.tree.heading('value', text='Value', anchor=tk.W) 
         
-        get_workbench().bind("Heap", self._handle_heap_event, True)
+        get_workbench().bind("get_heap_response", self._handle_heap_event, True)
         
-        get_workbench().bind("FancyDebuggerProgress", self._request_heap_data, True)
-        get_workbench().bind("SimpleDebuggerProgress", self._request_heap_data, True)
-        get_workbench().bind("ToplevelResult", self._request_heap_data, True)
+        get_workbench().bind("FancyDebuggerResponse", self._request_heap_data, True)
+        get_workbench().bind("SimpleDebuggerResponse", self._request_heap_data, True)
+        get_workbench().bind("ToplevelResponse", self._request_heap_data, True)
         # Showing new globals may introduce new interesting objects
-        get_workbench().bind("Globals", self._request_heap_data, True) 
+        get_workbench().bind("get_globals_response", self._request_heap_data, True) 
 
     def _update_data(self, data):
         self._clear_tree()

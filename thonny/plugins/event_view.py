@@ -10,9 +10,9 @@ class EventsView(TextFrame):
         #self.text.config(wrap=tk.WORD)
         get_workbench().bind("ShowView", self._log_event, True)
         get_workbench().bind("HideView", self._log_event, True)
-        get_workbench().bind("ToplevelResult", self._log_event, True)
-        get_workbench().bind("FancyDebuggerProgress", self._log_event, True)
-        get_workbench().bind("SimpleDebuggerProgress", self._log_event, True)
+        get_workbench().bind("ToplevelReponse", self._log_event, True)
+        get_workbench().bind("FancyDebuggerResponse", self._log_event, True)
+        get_workbench().bind("SimpleDebuggerResponse", self._log_event, True)
         get_workbench().bind("ProgramOutput", self._log_event, True)
         get_workbench().bind("InputRequest", self._log_event, True)
     

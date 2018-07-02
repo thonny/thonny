@@ -35,11 +35,11 @@ class GlobalsView(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         
-        get_workbench().bind("Globals", self._handle_globals_event, True)
+        get_workbench().bind("get_globals_response", self._handle_globals_event, True)
         get_workbench().bind("BackendRestart", self._backend_restart, True)
-        get_workbench().bind("FancyDebuggerProgress", self._handle_progress, True)
-        get_workbench().bind("SimpleDebuggerProgress", self._handle_progress, True)
-        get_workbench().bind("ToplevelResult", self._handle_progress, True)
+        get_workbench().bind("FancyDebuggerResponse", self._handle_progress, True)
+        get_workbench().bind("SimpleDebuggerResponse", self._handle_progress, True)
+        get_workbench().bind("ToplevelResponse", self._handle_progress, True)
         get_workbench().bind("InputRequest", self._handle_progress, True)
     
     def before_show(self):

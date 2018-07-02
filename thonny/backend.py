@@ -17,7 +17,9 @@ import __main__  # @UnresolvedImport
 
 from thonny import ast_utils
 from thonny.common import TextRange, parse_message, serialize_message, UserError, \
-    DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission
+    DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
+    ToplevelResponse, InlineResponse, SimpleDebuggerResponse,\
+    FancyDebuggerResponse, BackendEvent
 
 import signal
 import warnings
@@ -83,7 +85,7 @@ class VM:
         self._load_shared_modules(init_msg["frontend_sys_path"])
         self._load_plugins()
 
-        self.send_message(self.create_message("ToplevelResult",
+        self.send_message(ToplevelResponse(
                           main_dir=self._main_dir,
                           original_argv=original_argv,
                           original_path=original_path,
@@ -111,7 +113,7 @@ class VM:
                     # Don't show error messages, as the interrupted command may have been InlineCommand
                     # (handlers of ToplevelCommands in normal cases catch the interrupt and provide
                     # relevant message)  
-                    self.send_message(self.create_message("ToplevelResult"))
+                    self.send_message(ToplevelResponse())
         except:
             logger.exception("Crash in mainloop")
             traceback.print_exc()
@@ -120,7 +122,7 @@ class VM:
         """Handler should be 1-argument function taking command object.
         
         Handler may return None (in this case no response is sent to frontend)
-        or a response created with create_message
+        or a BackendResponse
         """
         self._command_handlers[command_name] = handler
 
@@ -137,16 +139,20 @@ class VM:
 
     def handle_command(self, cmd):
         assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
-
-        error_response_type = "ToplevelResult" if isinstance(cmd, ToplevelCommand) else "InlineError"
-
+        
+        def create_error_response(**kw):
+            if isinstance(cmd, ToplevelCommand):
+                return ToplevelResponse(command_name=cmd.name, **kw)
+            else:
+                return InlineResponse(command_name=cmd.name, **kw)
+        
         if cmd.name in self._command_handlers:
             handler = self._command_handlers[cmd.name]
         else:
             handler = getattr(self, "_cmd_" + cmd.name, None)
 
         if handler is None:
-            response = self.create_message(error_response_type, error="Unknown command: " + cmd.name)
+            response = create_error_response(error="Unknown command: " + cmd.name) 
         else:
             try:
                 response = handler(cmd)
@@ -154,18 +160,17 @@ class VM:
                 # Must be caused by Thonny or plugins code
                 if isinstance(cmd, ToplevelCommand):
                     traceback.print_exc()
-                response = self.create_message(error_response_type, SystemExit=True)
+                response = create_error_response(SystemExit=True)
             except UserError as e:
                 sys.stderr.write(str(e) + "\n")
-                response = self.create_message(error_response_type)
+                response = create_error_response()
             except KeyboardInterrupt:
                 e_type, e_value, e_traceback = sys.exc_info()
                 self._print_user_exception(e_type, e_value, e_traceback)
-                response = self.create_message(error_response_type)
+                response = create_error_response()
             except:
                 error="Internal backend error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
-                response = self.create_message(error_response_type,
-                                               context_info="other unhandled exception",
+                response = create_error_response(context_info="other unhandled exception",
                                                error=error)
 
         if response is False:
@@ -174,20 +179,16 @@ class VM:
 
         if response is None and isinstance(cmd, ToplevelCommand):
             # create simple default response
-            response = self.create_message("ToplevelResult")
+            response = ToplevelResponse(command_name=cmd.name)
 
-        if isinstance(cmd, ToplevelCommand) and "message_type" not in response:
-            response["message_type"] = "ToplevelResult"
-
-        response["command_name"] = cmd.name
-        if hasattr(cmd, "request_id"):
-            response["request_id"] = cmd.request_id
-        if response["message_type"] == "ToplevelResult":
+        # TODO: add these in response creation time in a helper function
+        if isinstance(response, ToplevelResponse):
             response["loaded_modules"] = list(sys.modules.keys())
             response["gui_is_active"] = (
                 self._get_tkinter_default_root() is not None
                 or self._get_qt_app() is not None
             )
+            
         self.send_message(response)
 
     def _load_shared_modules(self, frontend_sys_path):
@@ -239,7 +240,7 @@ class VM:
             path = cmd.args[0]
             try:
                 os.chdir(path)
-                return self.create_message("ToplevelResult")
+                return ToplevelResponse()
             except FileNotFoundError:
                 raise UserError("No such folder: " + path)
         else:
@@ -274,7 +275,7 @@ class VM:
         except SyntaxError as e:
             error = "".join(traceback.format_exception_only(type(e), e))
             sys.stderr.write(error)
-            return self.create_message("ToplevelResult")
+            return ToplevelResponse()
 
         assert isinstance(root, ast.Module)
 
@@ -291,7 +292,7 @@ class VM:
 
         result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
 
-        return self.create_message("ToplevelResult", **result_attributes)
+        return ToplevelResponse(command_name="execute_source", **result_attributes)
 
     def _cmd_execute_system_command(self, cmd):
         # TODO: how to publish stdout as it arrives?
@@ -339,17 +340,15 @@ class VM:
             else:
                 result = self._current_executor.export_globals(cmd.module_name)
 
-            return self.create_message("Globals", module_name=cmd.module_name,
-                              globals=result)
+            return InlineResponse("get_globals", module_name=cmd.module_name, globals=result)
         except Exception as e:
-            return self.create_message("Globals", module_name=cmd.module_name,
-                                       error=str(e))
+            return InlineResponse("get_globals", module_name=cmd.module_name, error=str(e))
 
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
             if id(frame) == cmd.frame_id:
-                return self.create_message("Locals", locals=self.export_variables(frame.f_locals))
+                return InlineResponse("get_locals", locals=self.export_variables(frame.f_locals))
         else:
             raise RuntimeError("Frame '{0}' not found".format(cmd.frame_id))
 
@@ -359,7 +358,7 @@ class VM:
         for key in self._heap:
             result[key] = self.export_value(self._heap[key])
 
-        return self.create_message("Heap", heap=result)
+        return InlineResponse("get_heap", heap=result)
 
     def _cmd_shell_autocomplete(self, cmd):
         error = None
@@ -380,7 +379,7 @@ class VM:
                 completions = []
                 error = "Autocomplete error"
 
-        return self.create_message("ShellCompletions",
+        return InlineResponse("shell_autocomplete",
             source=cmd.source,
             completions=completions,
             error=error
@@ -405,7 +404,7 @@ class VM:
             completions = []
             error = "Autocomplete error"
 
-        return self.create_message("EditorCompletions",
+        return InlineResponse("editor_autocomplete",
                           source=cmd.source,
                           row=cmd.row,
                           column=cmd.column,
@@ -416,9 +415,9 @@ class VM:
     def _cmd_Reset(self, cmd):
         if len(cmd.args) == 0:
             # nothing to do, because Reset always happens in fresh process
-            return self.create_message("ToplevelResult",
-                                       welcome_text="Python " + _get_python_version_string(),
-                                       executable=sys.executable)
+            return ToplevelResponse(command_name="Reset",
+                                    welcome_text="Python " + _get_python_version_string(),
+                                    executable=sys.executable)
         else:
             raise UserError("Command 'Reset' doesn't take arguments")
 
@@ -496,7 +495,7 @@ class VM:
             info = {'id' : cmd.object_id,
                     "error": "object info not available"}
 
-        return self.create_message("ObjectInfo", id=cmd.object_id, info=info)
+        return InlineResponse("get_object_info", id=cmd.object_id, info=info)
 
     def _get_tkinter_default_root(self):
         # tkinter._default_root is not None,
@@ -577,7 +576,7 @@ class VM:
 
             result_attributes = self._execute_source(source, full_filename, "exec", executor_class,
                                                      cmd=cmd)
-            return self.create_message("ToplevelResult", **result_attributes)
+            return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
             raise UserError("Command '%s' takes at least one argument", cmd.name)
 
@@ -630,14 +629,10 @@ class VM:
         cmd = parse_message(line)
         return cmd
 
-    def create_message(self, message_type, **kwargs):
-        kwargs["message_type"] = message_type
-        if "cwd" not in kwargs:
-            kwargs["cwd"] = os.getcwd()
-
-        return kwargs
-
     def send_message(self, msg):
+        if "cwd" not in msg:
+            msg["cwd"] = os.getcwd()
+            
         self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
 
@@ -705,7 +700,7 @@ class VM:
             try:
                 self._vm._enter_io_function()
                 if data != "":
-                    self._vm.send_message(self._vm.create_message("ProgramOutput", stream_name=self._stream_name, data=data))
+                    self._vm.send_message(BackendEvent("ProgramOutput", stream_name=self._stream_name, data=data))
                     self._processed_symbol_count += len(data)
             finally:
                 self._vm._exit_io_function()
@@ -722,7 +717,7 @@ class VM:
         def _generic_read(self, method, limit=-1):
             try:
                 self._vm._enter_io_function()
-                self._vm.send_message(self._vm.create_message("InputRequest", method=method, limit=limit))
+                self._vm.send_message(BackendEvent("InputRequest", method=method, limit=limit))
 
                 while True:
                     cmd = self._vm._fetch_command()
@@ -936,13 +931,13 @@ class SimpleTracer(Tracer):
         return self._trace
     
     def _report_current_state(self, frame):
-        msg = self._vm.create_message("SimpleDebuggerProgress",
-                                stack=self._export_stack(frame),
-                                is_new=True,
-                                loaded_modules=list(sys.modules.keys()),
-                                stream_symbol_counts=None,
-                                **self._export_exception_info(frame)
-                                )
+        msg = SimpleDebuggerResponse(
+                               stack=self._export_stack(frame),
+                               is_new=True,
+                               loaded_modules=list(sys.modules.keys()),
+                               stream_symbol_counts=None,
+                               **self._export_exception_info(frame)
+                               )
         
         self._vm.send_message(msg)
     
@@ -1257,7 +1252,7 @@ class FancyTracer(Tracer):
         if current_module_globals["__name__"] != "__main__":
             self._past_globals[-1][current_module_globals["__name__"]] = self._vm.export_variables(current_module_globals)
 
-        msg = self._vm.create_message("FancyDebuggerProgress",
+        msg = FancyDebuggerResponse(
                                     stack=self._export_stack(),
                                     is_new=True,
                                     loaded_modules=list(sys.modules.keys()),

@@ -11,9 +11,9 @@ class StackView(ui_utils.TreeFrame):
         self.tree.heading('function', text='Function', anchor=tk.W) 
         self.tree.heading('location', text='Location', anchor=tk.W)
         
-        get_workbench().bind("FancyDebuggerProgress", self._update_stack, True)
-        get_workbench().bind("SimpleDebuggerProgress", self._update_stack, True)
-        get_workbench().bind("ToplevelResult", lambda e=None: self._clear_tree(), True)
+        get_workbench().bind("FancyDebuggerResponse", self._update_stack, True)
+        get_workbench().bind("SimpleDebuggerResponse", self._update_stack, True)
+        get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
     
     def _update_stack(self, msg):
         self._clear_tree()
