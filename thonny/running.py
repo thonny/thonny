@@ -598,6 +598,11 @@ class CPythonProxy(BackendProxy):
         # Let back-end know about plug-ins
         my_env["THONNY_USER_DIR"] = THONNY_USER_DIR
         
+        if get_workbench().in_debug_mode():
+            my_env["THONNY_DEBUG"] = "1"
+        elif "THONNY_DEBUG" in my_env:
+            del my_env["THONNY_DEBUG"]
+        
         # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
         if self._executable == get_private_venv_executable():
             try:

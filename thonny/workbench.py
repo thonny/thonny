@@ -161,7 +161,7 @@ class Workbench(tk.Tk):
         
 
     def _get_logging_level(self) -> int:
-        if self.get_option("general.debug_mode"):
+        if self.in_debug_mode():
             return logging.DEBUG
         else:
             return logging.INFO
@@ -437,7 +437,7 @@ class Workbench(tk.Tk):
                     default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
                     group=80)
         
-        if self.get_option("general.debug_mode"):
+        if self.in_debug_mode():
             self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
     
     def _print_state_for_debugging(self, event) -> None:
@@ -1199,6 +1199,10 @@ class Workbench(tk.Tk):
         
         return (self._configuration_manager.has_option("view.HeapView.visible")
             and self.get_option("view.HeapView.visible"))
+    
+    def in_debug_mode(self) -> bool:
+        return (os.environ.get("THONNY_DEBUG", False) in ["1", 1, "True", True, "true"]
+                or self.get_option("general.debug_mode", False))
     
     def _init_scaling(self) -> None:
         self._default_scaling_factor = self.tk.call("tk", "scaling")

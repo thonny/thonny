@@ -34,7 +34,6 @@ AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
 AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 EXCEPTION_TRACEBACK_LIMIT = 100
-DEBUG = True
 
 logger = logging.getLogger()
 info = logger.info
@@ -598,7 +597,8 @@ class VM:
 
         for line in lines:
             # skip lines denoting thonny execution frame
-            if ("thonny/backend" in line
+            if not in_debug_mode() and (
+                "thonny/backend" in line
                 or "thonny\\backend" in line
                 or "remove this line from stacktrace" in line):
                 continue
@@ -1748,3 +1748,6 @@ def load_module_from_alternative_path(module_name, path, force=False):
     sys.modules[module_name] = module
     if spec.loader is not None:
         spec.loader.exec_module(module)
+
+def in_debug_mode():
+    return os.environ.get("THONNY_DEBUG", False) in [1, "1", True, "True", "true"]
