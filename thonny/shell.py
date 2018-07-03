@@ -122,6 +122,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
+        self.tag_raise("hyperlink")
         
         self.tag_configure("vertically_spaced", spacing1=vert_spacing)
         
