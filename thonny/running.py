@@ -45,7 +45,7 @@ class Runner:
         self._state = "starting"
         self._proxy = None # type: Any
         self._polling_after_id = None
-        self._postponed_commands = [] # type: List[BackendCommand]
+        self._postponed_commands = [] # type: List[CommandToBackend]
         
     
     def _remove_obsolete_jedi_copies(self) -> None:

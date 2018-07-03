@@ -902,7 +902,7 @@ class SimpleTracer(Tracer):
         if event == "call": 
             self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
             # can we skip this frame?
-            if (self._current_command.nanme == "step_over"
+            if (self._current_command.name == "step_over"
                 and not self._current_command.breakpoints):
                 return None
             else:

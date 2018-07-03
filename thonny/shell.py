@@ -185,26 +185,27 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         self._before_io = True
-        if hasattr(msg, "error"):
-            self._insert_text_directly(msg.error + "\n", ("toplevel", "stderr"))
+        if msg.get("error"):
+            self._insert_text_directly(msg["error"] + "\n", ("toplevel", "stderr"))
         
-        if hasattr(msg, "welcome_text") and msg.welcome_text != self._last_welcome_text:
-            self._insert_text_directly(msg.welcome_text, ("comment",))
-            self._last_welcome_text = get_workbench().get_option("run.backend_configuration")
+        welcome_text = msg.get("welcome_text")
+        if welcome_text and welcome_text != self._last_welcome_text:
+            self._insert_text_directly(welcome_text, ("comment",))
+            self._last_welcome_text = welcome_text
             
-        if hasattr(msg, "value_info"):
+        if "value_info" in msg:
             num_stripped_question_marks = getattr(msg, "num_stripped_question_marks", 0)
             if num_stripped_question_marks > 0:
                 # show the value in object inspector
                 get_workbench().event_generate(
-                    "ObjectSelect", object_id=msg.value_info["id"])
+                    "ObjectSelect", object_id=msg["value_info"]["id"])
             else:
                 # show the value in shell
-                value_repr = shorten_repr(msg.value_info["repr"], 10000)
+                value_repr = shorten_repr(msg["value_info"]["repr"], 10000)
                 if value_repr != "None":
                     if get_workbench().in_heap_mode():
-                        value_repr = memory.format_object_id(msg.value_info["id"])
-                    object_tag = "object_" + str(msg.value_info["id"])
+                        value_repr = memory.format_object_id(msg["value_info"]["id"])
+                    object_tag = "object_" + str(msg["value_info"]["id"])
                     self._insert_text_directly(value_repr + "\n", ("toplevel",
                                                                    "value",
                                                                    object_tag))
@@ -214,7 +215,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         sequence = "<Control-Button-1>"
                     self.tag_bind(object_tag, sequence,
                                        lambda _: get_workbench().event_generate(
-                                            "ObjectSelect", object_id=msg.value_info["id"]))
+                                            "ObjectSelect", object_id=msg["value_info"]["id"]))
                     
                     self.active_object_tags.add(object_tag)
         

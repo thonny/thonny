@@ -4,6 +4,7 @@
 Classes used both by front-end and back-end
 """
 import os.path
+from typing import Optional
 
 class Record:
     def __init__(self, **kw):
@@ -69,13 +70,13 @@ class Record:
 
 
 class TextRange(Record):
-    def __init__(self, lineno, col_offset, end_lineno, end_col_offset):
+    def __init__(self, lineno: int, col_offset: int, end_lineno: int, end_col_offset: int) -> None:
         self.lineno = lineno
         self.col_offset = col_offset
         self.end_lineno = end_lineno
         self.end_col_offset = end_col_offset
     
-    def contains_smaller(self, other):
+    def contains_smaller(self, other: "TextRange") -> bool:
         this_start = (self.lineno, self.col_offset)
         this_end = (self.end_lineno, self.end_col_offset)
         other_start = (other.lineno, other.col_offset)
@@ -85,35 +86,46 @@ class TextRange(Record):
                 or this_start == other_start and this_end > other_end
                 or this_start < other_start and this_end == other_end)
     
-    def contains_smaller_eq(self, other):
+    def contains_smaller_eq(self, other: "TextRange") -> bool:
         return self.contains_smaller(other) or self == other
     
-    def not_smaller_in(self, other):
+    def not_smaller_in(self, other: "TextRange") -> bool:
         return not other.contains_smaller(self)
 
-    def is_smaller_in(self, other):
+    def is_smaller_in(self, other: "TextRange") -> bool:
         return other.contains_smaller(self)
     
-    def not_smaller_eq_in(self, other):
+    def not_smaller_eq_in(self, other: "TextRange") -> bool:
         return not other.contains_smaller_eq(self)
 
-    def is_smaller_eq_in(self, other):
+    def is_smaller_eq_in(self, other: "TextRange") -> bool:
         return other.contains_smaller_eq(self)
     
-    def get_start_index(self):
+    def get_start_index(self) -> str:
         return str(self.lineno) + "." + str(self.col_offset)
     
-    def get_end_index(self):
+    def get_end_index(self) -> str:
         return str(self.end_lineno) + "." + str(self.end_col_offset)
     
-    def __str__(self):
+    def __str__(self) -> str:
         return "TR(" + str(self.lineno) + "." + str(self.col_offset) + ", " \
                      + str(self.end_lineno) + "." + str(self.end_col_offset) + ")"
     
     
                  
 class FrameInfo(Record):
-    def get_description(self):
+    def __init__(self, 
+                 id: int,  # @ReservedAssignment
+                 code_name: str,
+                 filename: str, 
+                 focus:Optional[TextRange]=None, **kw) -> None:
+        super().__init__(**kw)
+        self.id = id
+        self.code_name = code_name
+        self.filename = filename
+        self.focus = focus
+    
+    def get_description(self) -> str:
         return (
             "[" + str(self.id) + "] "
             + self.code_name + " in " + self.filename
@@ -122,14 +134,14 @@ class FrameInfo(Record):
 
 class InputSubmission(Record):
     """For sending data to backend's stdin"""
-    def __init__(self, data, **kw):
+    def __init__(self, data: str, **kw) -> None:
         super().__init__(**kw)
         self.data = data
 
 class CommandToBackend(Record):
     """Command meant for the back-end"""
     
-    def __init__(self, name, **kw):
+    def __init__(self, name: str, **kw) -> None:
         super().__init__(**kw)
         self.name = name
 
@@ -148,7 +160,7 @@ class InlineCommand(CommandToBackend):
 
 
 class MessageFromBackend(Record):
-    def __init__(self, **kw):
+    def __init__(self, **kw) -> None:
         self.event_type = type(self).__name__ # allow event_type to be overridden by kw
         super().__init__(**kw)
 
@@ -166,8 +178,8 @@ class FancyDebuggerResponse(DebuggerResponse): # TODO: get rid of this
 
 class BackendEvent(MessageFromBackend):
     def __init__(self, event_type: str, **kw) -> None:
-        event_type = event_type
         super().__init__(**kw)
+        self.event_type = event_type
 
 class InlineResponse(MessageFromBackend):
     def __init__(self, command_name: str, **kw) -> None:
@@ -175,12 +187,12 @@ class InlineResponse(MessageFromBackend):
         self.command_name = command_name
         self.event_type = self.command_name + "_response"
         
-def serialize_message(msg):
+def serialize_message(msg: Record) -> str:
     # I want to transfer only ASCII chars because encodings are not reliable 
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 
     return repr(msg).encode("UTF-7").decode("ASCII") 
 
-def parse_message(msg_string):
+def parse_message(msg_string: str) -> Record:
     # DataFrames may have nan 
     nan = float("nan")  # @UnusedVariable
     return eval(msg_string.encode("ASCII").decode("UTF-7"))
@@ -208,10 +220,10 @@ def actual_path(name: str) -> str:
     else:
         return os.path.realpath(name)
 
-def is_same_path(name1, name2):
+def is_same_path(name1: str, name2: str) -> bool:
     return os.path.realpath(os.path.normcase(name1)) == os.path.realpath(os.path.normcase(name2))
 
-def path_startswith(child_name, dir_name):
+def path_startswith(child_name: str, dir_name: str) -> bool:
     normchild = os.path.realpath(os.path.normcase(child_name))
     normdir = os.path.realpath(os.path.normcase(dir_name))
     return normdir == normchild or normchild.startswith(normdir.rstrip(os.path.sep) + os.path.sep)
