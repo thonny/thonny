@@ -300,12 +300,26 @@ class FrameVisualizer:
         
     
     def _tag_range(self, text_range, tag):
-        first_line, first_col, last_line = self._get_text_range_block(text_range)
+        # For most statements I want to highlight block of whole lines
+        # but for pseudo-statements (like header in for-loop) I want to highlight only the indicated range
         
-        for lineno in range(first_line, last_line+1):
-            self._text.tag_add(tag,
-                              "%d.%d" % (lineno, first_col),
-                              "%d.0" % (lineno+1))
+        line_prefix = self._text.get("%d.0" % text_range.lineno,
+                                     "%d.%d" % (text_range.lineno, text_range.col_offset))
+        if line_prefix.strip():
+            # pseudo-statement
+            first_line = text_range.lineno
+            last_line = text_range.end_lineno
+            self._text.tag_add(tag, 
+                               "%d.%d" % (text_range.lineno, text_range.col_offset),
+                               "%d.%d" % (text_range.end_lineno, text_range.end_col_offset))
+        else:
+            # normal statement
+            first_line, first_col, last_line = self._get_text_range_block(text_range)
+            
+            for lineno in range(first_line, last_line+1):
+                self._text.tag_add(tag,
+                                  "%d.%d" % (lineno, first_col),
+                                  "%d.0" % (lineno+1))
             
         self._text.update_idletasks()
         self._text.see("%d.0" % (first_line))

@@ -750,6 +750,7 @@ class Executor:
         if global_vars is None:
             global_vars = __main__.__dict__
 
+        # TODO: separate preparation and user code exceptions
         try:
             if mode == "exec+eval":
                 root = ast.parse(source, filename=filename, mode="exec")
@@ -1041,6 +1042,7 @@ class FancyTracer(Tracer):
         self._tag_nodes(root)
         self._insert_expression_markers(root)
         self._insert_statement_markers(root)
+        self._insert_for_target_markers(root)
         self._instrumented_files.add(filename)
 
         return compile(root, filename, mode)
@@ -1593,12 +1595,30 @@ class FancyTracer(Tracer):
                     setattr(root, name, new_list)
 
 
-    def _create_statement_marker(self, node, function_name):
-        call = self._create_simple_marker_call(node, function_name)
+    def _create_statement_marker(self, node, function_name, end_node=None):
+        call = self._create_simple_marker_call(node, function_name, end_node)
         stmt = ast.Expr(value=call)
         ast.copy_location(stmt, node)
         ast.fix_missing_locations(stmt)
         return stmt
+
+    def _insert_for_target_markers(self, root):
+        """inserts markers which notify assignment to for-loop variables"""
+        for node in ast.walk(root):
+            if isinstance(node, ast.For):
+                old_target = node.target
+                #print(vars(old_target))
+                temp_name = '__for_loop_var'
+                node.target = ast.Name(temp_name, ast.Store())
+                name_load = ast.Name(temp_name, ast.Load())
+                name_load.dont_trace = True
+                before_marker = self._create_statement_marker(old_target, BEFORE_STATEMENT_MARKER,
+                                                              end_node=node.iter)
+                node.body.insert(0, before_marker)
+                node.body.insert(1, ast.Assign([old_target], name_load))
+                node.body.insert(2, self._create_statement_marker(old_target, AFTER_STATEMENT_MARKER,
+                                                                  end_node=node.iter))
+                ast.fix_missing_locations(node)
 
 
     def _insert_expression_markers(self, node):
@@ -1639,6 +1659,11 @@ class FancyTracer(Tracer):
                         )
                         ast.copy_location(after_marker, node)
                         ast.fix_missing_locations(after_marker)
+                        # further transformations may query original node location from after marker
+                        if hasattr(node, "end_lineno"):
+                            after_marker.end_lineno = node.end_lineno
+                            after_marker.end_col_offset = node.end_col_offset
+                        
 
                         return after_marker
                     else:
@@ -1651,15 +1676,18 @@ class FancyTracer(Tracer):
         return ExpressionVisitor().visit(node)
 
 
-    def _create_location_literal(self, node):
+    def _create_location_literal(self, node, end_node=None):
         if node is None:
             return ast_utils.value_to_literal(None)
+        
+        if end_node is None:
+            end_node = node
 
-        assert hasattr(node, "end_lineno")
-        assert hasattr(node, "end_col_offset")
+        assert hasattr(end_node, "end_lineno")
+        assert hasattr(end_node, "end_col_offset")
 
         nums = []
-        for value in node.lineno, node.col_offset, node.end_lineno, node.end_col_offset:
+        for value in node.lineno, node.col_offset, end_node.end_lineno, end_node.end_col_offset:
             nums.append(ast.Num(n=value))
         return ast.Tuple(elts=nums, ctx=ast.Load())
 
@@ -1672,12 +1700,9 @@ class FancyTracer(Tracer):
             #self._debug("NOTAGS " + str(node))
             return ast_utils.value_to_literal("")
 
-    def _create_simple_marker_call(self, node, fun_name):
-        assert hasattr(node, "end_lineno")
-        assert hasattr(node, "end_col_offset")
-
+    def _create_simple_marker_call(self, node, fun_name, end_node=None):
         args = [
-            self._create_location_literal(node),
+            self._create_location_literal(node, end_node),
             self._create_tags_literal(node),
         ]
 
