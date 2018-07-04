@@ -749,15 +749,25 @@ class Executor:
 
         if global_vars is None:
             global_vars = __main__.__dict__
-
-        # TODO: separate preparation and user code exceptions
+        
+        def handle_user_exception():
+            # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
+            # for VM mainloop they are not exceptions
+            e_type, e_value, e_traceback = sys.exc_info()
+            self._vm._print_user_exception(e_type, e_value, e_traceback)
+            return {"context_info" : "other unhandled exception"}
+        
         try:
             if mode == "exec+eval":
                 root = ast.parse(source, filename=filename, mode="exec")
                 statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
                 expression = compile(ast.Expression(root.body[-1].value), filename, "eval")
-                exec(statements, global_vars)
-                value = eval(expression, global_vars)
+                try:
+                    exec(statements, global_vars)
+                    value = eval(expression, global_vars)
+                except Exception:
+                    return handle_user_exception()
+                
                 if value is not None:
                     builtins._ = value
                 return {"value_info" : self._vm.export_value(value)}
@@ -766,24 +776,26 @@ class Executor:
                 if hasattr(self, "_trace"):
                     sys.settrace(self._trace)
                 if mode == "eval":
-                    value = eval(bytecode, global_vars)
+                    try:
+                        value = eval(bytecode, global_vars)
+                    except Exception:
+                        return handle_user_exception()
+                    
                     if value is not None:
                         builtins._ = value
                     return {"value_info" : self._vm.export_value(value)}
                 else:
                     assert mode == "exec"
-                    exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
+                    try:
+                        exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
+                    except:
+                        return handle_user_exception()
+                        
                     return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
         except SystemExit:
-            # Show withot Thonny frames
-            e_type, e_value, e_traceback = sys.exc_info()
-            #self._vm._print_user_exception(e_type, e_value, e_traceback)
             return {"SystemExit" : True}
-        except:
-            # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
-            # for VM mainloop they are not exceptions
-            e_type, e_value, e_traceback = sys.exc_info()
-            self._vm._print_user_exception(e_type, e_value, e_traceback)
+        except Exception:
+            traceback.print_exc()
             return {"context_info" : "other unhandled exception"}
         finally:
             sys.settrace(None)
@@ -1623,6 +1635,7 @@ class FancyTracer(Tracer):
 
     def _insert_expression_markers(self, node):
         """
+        TODO: this docstring is outdated
         each expression e gets wrapped like this:
             _after(_before(_loc, _node_is_zoomable), e, _node_role, _parent_range)
         where
