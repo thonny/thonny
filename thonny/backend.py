@@ -133,6 +133,11 @@ class VM:
         """Tweaker should be 2-argument function taking value and export record"""
         self._object_info_tweakers.append(tweaker)
 
+    def add_module_patcher(self, module_name, patcher):
+        if module_name not in self._module_patchers:
+            self._module_patchers[module_name] = []
+        #self.
+
     def get_main_module(self):
         return __main__
 
@@ -194,11 +199,10 @@ class VM:
         for name in ["parso", "jedi", "thonnycontrib"]:
             load_module_from_alternative_path(name, frontend_sys_path)
 
-    def _load_plugins(self, load_function_name="load_plugin"):
+    def _load_plugins(self):
         # built-in plugins 
         import thonny.plugins.backend
-        self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend",
-                                     load_function_name=load_function_name)
+        self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 
         # 3rd party plugins from namespace package
         try:
@@ -207,10 +211,10 @@ class VM:
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(thonnycontrib.backend.__path__, "thonnycontrib.backend",
-                                     load_function_name=load_function_name)
+            self._load_plugins_from_path(thonnycontrib.backend.__path__, "thonnycontrib.backend.")
 
-    def _load_plugins_from_path(self, path, prefix="", load_function_name="load_plugin"):
+    def _load_plugins_from_path(self, path, prefix):
+        load_function_name="load_plugin"
         for _, module_name, _ in pkgutil.iter_modules(path, prefix):
             try:
                 m = importlib.import_module(module_name)

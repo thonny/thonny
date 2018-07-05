@@ -34,7 +34,7 @@ def default_light() -> SyntaxThemeSettings:
         "hyperlink"     : {"foreground" : "#3A66DD", "underline" : True},
         
         # paren matcher
-        "surrounding_parens"  : {"foreground" : "Blue", "background" : default_bg, "font" : "BoldEditorFont"},
+        "surrounding_parens"  : {"foreground" : "Blue", "font" : "BoldEditorFont"},
         "unclosed_expression"  : {"background" : "LightGray"},
         
         # find/replace
@@ -268,8 +268,7 @@ def zenburn() -> SyntaxThemeSettings:
         "stderr"        : {"foreground" : "#ff3e40"},
         
         # paren matcher
-        "surrounding_parens"  : {"background" : "#709080", "foreground" : "white",
-                                 "font" : "BoldEditorFont"},
+        "surrounding_parens"  : {"foreground" : "white", "font" : "BoldEditorFont"},
     }
     
     
