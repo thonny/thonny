@@ -27,6 +27,7 @@ import pkgutil
 import importlib
 import tokenize
 import subprocess
+from importlib.machinery import PathFinder, ModuleSpec, SourceFileLoader
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -762,6 +763,7 @@ class Executor:
             return {"context_info" : "other unhandled exception"}
         
         try:
+            
             if mode == "exec+eval":
                 root = ast.parse(source, filename=filename, mode="exec")
                 statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
@@ -806,6 +808,9 @@ class Executor:
 
     def export_globals(self, module_name):
         return self._vm.export_latest_globals(module_name)
+
+    def module_needs_custom_loader(self, fullname, path):
+        return False
 
     def _compile_source(self, source, filename, mode):
         return compile(source, filename, mode)
@@ -1741,6 +1746,31 @@ class CustomStackFrame:
         self.focus = None
         self.current_statement = None
         self.current_root_expression = None
+
+class CustomFinder(PathFinder):
+    # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
+    def __init__(self, vm):
+        self._vm = vm
+
+    def find_spec(self, fullname, path=None, target=None):
+        if fullname == self.module_name:
+            spec = super().find_spec(fullname, path, target)
+            loader = CustomLoader(fullname, spec.origin)
+            return ModuleSpec(fullname, loader)
+
+class CustomLoader(SourceFileLoader):
+    # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
+    def exec_module(self, module):
+        super().exec_module(module)
+        # TODO: patch module
+        module.function = patcher(module.function)
+        return module
+    
+    def source_to_code(self, data, path, *, _optimize=-1):
+        # TODO: parse and/or instrument data
+        parse
+        return SourceFileLoader.source_to_code(self, data, path)
+
 
 def fdebug(frame, msg, *args):
     if logger.isEnabledFor(logging.DEBUG):
