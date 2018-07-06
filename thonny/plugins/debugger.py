@@ -683,7 +683,7 @@ class FunctionCallDialog(FrameDialog):
         
 class ModuleLoadDialog(FrameDialog):
     def __init__(self, text_frame, frame_info):
-        FrameDialog.__init__(self, text_frame)
+        FrameDialog.__init__(self, text_frame, frame_info)
     
 
 def _debugger_command_enabled(command):

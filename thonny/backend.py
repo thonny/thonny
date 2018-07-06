@@ -34,8 +34,6 @@ BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
 AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
 AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
-EXCEPTION_TRACEBACK_LIMIT = 100
-
 logger = logging.getLogger()
 info = logger.info
 
@@ -170,13 +168,11 @@ class VM:
                 sys.stderr.write(str(e) + "\n")
                 response = create_error_response()
             except KeyboardInterrupt:
-                e_type, e_value, e_traceback = sys.exc_info()
-                self._print_user_exception(e_type, e_value, e_traceback)
+                self._report_user_exception()
                 response = create_error_response()
             except:
-                error="Internal backend error: {0}".format(traceback.format_exc(EXCEPTION_TRACEBACK_LIMIT))
-                response = create_error_response(context_info="other unhandled exception",
-                                               error=error)
+                _report_internal_error()
+                response = create_error_response(context_info="other unhandled exception")
 
         if response is False:
             # Command doesn't want to send any response
@@ -292,7 +288,7 @@ class VM:
 
         result_attributes = self._execute_source(source, filename, mode,
             FancyTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
-            global_vars=getattr(cmd, "global_vars", None))
+            cmd)
 
         result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
 
@@ -578,37 +574,20 @@ class VM:
             with tokenize.open(full_filename) as fp:
                 source = fp.read()
 
-            result_attributes = self._execute_source(source, full_filename, "exec", executor_class,
-                                                     cmd=cmd)
+            result_attributes = self._execute_source(source, full_filename, "exec", executor_class, cmd)
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
             raise UserError("Command '%s' takes at least one argument", cmd.name)
 
-    def _execute_source(self, source, filename, execution_mode, executor_class, 
-                        global_vars=None, cmd=None):
-        self._current_executor = executor_class(self)
+    def _execute_source(self, source, filename, execution_mode, executor_class, cmd):
+        self._current_executor = executor_class(self, cmd)
 
         try:
             return self._current_executor.execute_source(source,
                                                          filename,
-                                                         execution_mode,
-                                                         global_vars,
-                                                         cmd)
+                                                         execution_mode)
         finally:
             self._current_executor = None
-
-    def _print_user_exception(self, e_type, e_value, e_traceback):
-        lines = traceback.format_exception(e_type, e_value, e_traceback)
-
-        for line in lines:
-            # skip lines denoting thonny execution frame
-            if not in_debug_mode() and (
-                "thonny/backend" in line
-                or "thonny\\backend" in line
-                or "remove this line from stacktrace" in line):
-                continue
-            else:
-                sys.stderr.write(line)
 
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
@@ -681,6 +660,23 @@ class VM:
     def is_doing_io(self):
         return self._io_level > 0
 
+    def _report_user_exception(self):
+        e_type, e_value, e_traceback = sys.exc_info()
+        lines = traceback.format_exception(e_type, e_value, e_traceback)
+        
+        have_seen_in_module = False
+        for line in lines:
+            # skip lines denoting thonny execution frame
+            if (("thonny/backend" in line or "thonny\\backend" in line)
+                and not in_debug_mode()
+                and not have_seen_in_module):
+                continue
+            else:
+                sys.stderr.write(line)
+                if "in <module>" in line:
+                    have_seen_in_module = True
+        
+        # TODO: add error interpretation
 
     class FakeStream:
         def __init__(self, vm, target_stream):
@@ -747,91 +743,89 @@ class VM:
 
 
 class Executor:
-    def __init__(self, vm):
+    def __init__(self, vm, original_cmd):
         self._vm = vm
+        self._original_cmd = original_cmd
 
-    def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
+    def execute_source(self, source, filename, mode):
+        if isinstance(source, str):
+            source = source.encode("utf-8")
 
-        if global_vars is None:
-            global_vars = __main__.__dict__
-        
-        def handle_user_exception():
-            # other unhandled exceptions (supposedly client program errors) are printed to stderr, as usual
-            # for VM mainloop they are not exceptions
-            e_type, e_value, e_traceback = sys.exc_info()
-            self._vm._print_user_exception(e_type, e_value, e_traceback)
-            return {"context_info" : "other unhandled exception"}
+        global_vars = __main__.__dict__
         
         try:
-            
             if mode == "exec+eval":
-                root = ast.parse(source, filename=filename, mode="exec")
+                # Useful in shell to get last expression value in multi-statement block
+                root = self._prepare_ast(source, filename, "exec")
                 statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
                 expression = compile(ast.Expression(root.body[-1].value), filename, "eval")
-                try:
-                    exec(statements, global_vars)
-                    value = eval(expression, global_vars)
-                except Exception:
-                    return handle_user_exception()
-                
-                if value is not None:
-                    builtins._ = value
-                return {"value_info" : self._vm.export_value(value)}
+                return self._prepare_hooks_and_execute(statements, expression, global_vars)
             else:
-                bytecode = self._compile_source(source, filename, mode)
-                if hasattr(self, "_trace"):
-                    sys.settrace(self._trace)
+                root = self._prepare_ast(source, filename, mode)
+                bytecode = compile(root, filename, mode)
                 if mode == "eval":
-                    try:
-                        value = eval(bytecode, global_vars)
-                    except Exception:
-                        return handle_user_exception()
-                    
-                    if value is not None:
-                        builtins._ = value
-                    return {"value_info" : self._vm.export_value(value)}
+                    return self._prepare_hooks_and_execute(None, bytecode, global_vars)
+                elif mode == "exec":
+                    return self._prepare_hooks_and_execute(bytecode, None, global_vars)
                 else:
-                    assert mode == "exec"
-                    try:
-                        exec(bytecode, global_vars) # <Marker: remove this line from stacktrace>
-                    except:
-                        return handle_user_exception()
-                        
-                    return {"context_info" : "after normal execution", "source" : source, "filename" : filename, "mode" : mode}
+                    raise ValueError("Unknown mode")
         except SystemExit:
             return {"SystemExit" : True}
         except Exception:
-            traceback.print_exc()
+            _report_internal_error()
             return {"context_info" : "other unhandled exception"}
+    
+    def _prepare_hooks_and_execute(self, statements, expression, global_vars):
+        try:
+            sys.meta_path.insert(0, self)
+            return self._execute_prepared_user_code(statements, expression, global_vars)
         finally:
-            sys.settrace(None)
-
+            del sys.meta_path[0]
+    
+    def _execute_prepared_user_code(self, statements, expression, global_vars):
+        try:
+            if statements:
+                exec(statements, global_vars)
+            if expression:
+                value = eval(expression, global_vars)
+                if value is not None:
+                    builtins._ = value
+                return {"value_info" : self._vm.export_value(value)}
+            
+            return {"context_info" : "after normal execution"}
+        except Exception:
+            self._vm._report_user_exception()
+            return {"context_info" : "user exception"}
+    
+    def find_spec(self, fullname, path=None, target=None):
+        # override in subclasses if custom loader is needed
+        return None
+        
     def export_globals(self, module_name):
         return self._vm.export_latest_globals(module_name)
 
     def module_needs_custom_loader(self, fullname, path):
         return False
 
-    def _compile_source(self, source, filename, mode):
-        return compile(source, filename, mode)
+    def _prepare_ast(self, source, filename, mode):
+        return ast.parse(source, filename, mode)
 
 class SimpleRunner(Executor):
     pass
 
 class Tracer(Executor):
-    def __init__(self, vm):
-        self._vm = vm
+    def __init__(self, vm, original_cmd):
+        super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
-        self._current_command = None
         self._unhandled_exception = None
         
-    def execute_source(self, source, filename, mode, global_vars=None, cmd=None):
-        if cmd and getattr(cmd, "breakpoints", None):
+        # first (automatic) stepping command depends on whether any breakpoints were set or not
+        breakpoints = self._original_cmd.breakpoints
+        assert isinstance(breakpoints, dict)
+        if breakpoints:
             command_name = "resume"
-            breakpoints = cmd.breakpoints
         else:
             command_name = "step_into"
-            breakpoints = {}
             
         self._current_command = DebuggerCommand(command_name, 
                                                 state=None,
@@ -839,9 +833,14 @@ class Tracer(Executor):
                                                 frame_id=None,
                                                 exception=None,
                                                 breakpoints=breakpoints)
-
-        return Executor.execute_source(self, source, filename, mode, global_vars, cmd)
-        #assert len(self._custom_stack) == 0
+        
+    def _execute_prepared_user_code(self, statements, expression, global_vars):
+        try:
+            sys.settrace(self._trace)
+            return super()._execute_prepared_user_code(statements, expression, global_vars)
+        finally:
+            sys.settrace(None)
+        
     def _should_skip_frame(self, frame):
         code = frame.f_code
 
@@ -910,8 +909,8 @@ class Tracer(Executor):
 
 
 class SimpleTracer(Tracer):
-    def __init__(self, vm):
-        super().__init__(vm)
+    def __init__(self, vm, original_cmd):
+        super().__init__(vm, original_cmd)
         
         self._alive_frame_ids = set()
     
@@ -1024,8 +1023,8 @@ class SimpleTracer(Tracer):
     
 class FancyTracer(Tracer):
 
-    def __init__(self, vm):
-        super().__init__(vm)
+    def __init__(self, vm, original_cmd):
+        super().__init__(vm, original_cmd)
         self._instrumented_files = set()
         self._install_marker_functions()
         self._custom_stack = []
@@ -1056,7 +1055,7 @@ class FancyTracer(Tracer):
             if not hasattr(builtins, name):
                 setattr(builtins, name, getattr(self, name))
 
-    def _compile_source(self, source, filename, mode):
+    def _prepare_ast(self, source, filename, mode):
         root = ast.parse(source, filename, mode)
 
         ast_utils.mark_text_ranges(root, source)
@@ -1065,8 +1064,8 @@ class FancyTracer(Tracer):
         self._insert_statement_markers(root)
         self._insert_for_target_markers(root)
         self._instrumented_files.add(filename)
-
-        return compile(root, filename, mode)
+        
+        return root
 
     def _should_skip_frame(self, frame):
         code = frame.f_code
@@ -1076,6 +1075,18 @@ class FancyTracer(Tracer):
                 or code.co_filename.startswith(self._thonny_src_dir)
                     and code.co_name not in self.marker_function_names
                 )
+    
+    def find_spec(self, fullname, path=None, target=None):
+        """required for custom-loading user modules"""
+        # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
+        spec = PathFinder.find_spec(fullname, path, target)
+        origin = getattr(spec, "origin", None)
+        if (origin is not None
+            and "Desktop" in origin): # TODO: fix this
+            loader = FancyUserModuleLoader(fullname, spec.origin, self)
+            return ModuleSpec(fullname, loader)
+        else:
+            return None
 
     def is_in_past(self):
         return self._current_state < len(self._past_messages)-1
@@ -1747,29 +1758,16 @@ class CustomStackFrame:
         self.current_statement = None
         self.current_root_expression = None
 
-class CustomFinder(PathFinder):
-    # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
-    def __init__(self, vm):
-        self._vm = vm
-
-    def find_spec(self, fullname, path=None, target=None):
-        if fullname == self.module_name:
-            spec = super().find_spec(fullname, path, target)
-            loader = CustomLoader(fullname, spec.origin)
-            return ModuleSpec(fullname, loader)
-
-class CustomLoader(SourceFileLoader):
-    # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
-    def exec_module(self, module):
-        super().exec_module(module)
-        # TODO: patch module
-        module.function = patcher(module.function)
-        return module
+class FancyUserModuleLoader(SourceFileLoader):
+    """Used for loading and instrumenting user modules during fancy tracing"""
+    
+    def __init__(self, fullname, path, fancy_tracer):
+        super().__init__(fullname, path)
+        self._fancy_tracer = fancy_tracer
     
     def source_to_code(self, data, path, *, _optimize=-1):
-        # TODO: parse and/or instrument data
-        parse
-        return SourceFileLoader.source_to_code(self, data, path)
+        root = self._fancy_tracer._prepare_ast(data, path, "exec")
+        return super().source_to_code(root, path)
 
 
 def fdebug(frame, msg, *args):
@@ -1804,12 +1802,22 @@ def _get_frame_source_info(frame):
     )
 
     # lineno returned by getsourcelines is not consistent between modules vs functions
-    lines, _ = inspect.getsourcelines(obj)
-    return "".join(lines), lineno
+    try:
+        lines, _ = inspect.getsourcelines(frame)
+        return "".join(lines), lineno
+    except:
+        # Fallback
+        with tokenize.open(frame.f_code.co_filename) as fp:
+            whole_source = fp.read()
+        
+        if frame.f_code.co_name == "<module>":
+            return whole_source, lineno
+        else:
+            # TODO: 
+            raise
 
 
 def load_module_from_alternative_path(module_name, path, force=False):
-    from importlib.machinery import PathFinder
     spec = PathFinder.find_spec(module_name, path)
 
     if spec is None and not force:
@@ -1823,3 +1831,7 @@ def load_module_from_alternative_path(module_name, path, force=False):
 
 def in_debug_mode():
     return os.environ.get("THONNY_DEBUG", False) in [1, "1", True, "True", "true"]
+
+def _report_internal_error():
+    print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
+    traceback.print_exc()

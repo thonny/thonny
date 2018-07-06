@@ -9,6 +9,10 @@ import tokenize
 import traceback
 
 def extract_text_range(source, text_range):
+    if isinstance(source, bytes):
+        # TODO: may be wrong encoding
+        source = source.decode("utf-8")
+        
     lines = source.splitlines(True)
     # get relevant lines
     lines = lines[text_range.lineno-1:text_range.end_lineno]
