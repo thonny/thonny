@@ -19,7 +19,7 @@ from thonny import ast_utils
 from thonny.common import TextRange, parse_message, serialize_message, UserError, \
     DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
     ToplevelResponse, InlineResponse, SimpleDebuggerResponse,\
-    FancyDebuggerResponse, BackendEvent
+    FancyDebuggerResponse, BackendEvent, path_startswith
 
 import signal
 import warnings
@@ -746,11 +746,16 @@ class Executor:
     def __init__(self, vm, original_cmd):
         self._vm = vm
         self._original_cmd = original_cmd
+        self._main_module_path = None
 
     def execute_source(self, source, filename, mode):
         if isinstance(source, str):
+            # TODO: simplify this or make sure encoding is correct
             source = source.encode("utf-8")
-
+        
+        if os.path.exists(filename):
+            self._main_module_path = filename
+        
         global_vars = __main__.__dict__
         
         try:
@@ -847,12 +852,24 @@ class Tracer(Executor):
         return (
             code is None
             or code.co_filename is None
+            or not self._is_interesting_module_file(code.co_filename)
             or code.co_flags & inspect.CO_GENERATOR  # @UndefinedVariable
             or sys.version_info >= (3,5) and code.co_flags & inspect.CO_COROUTINE  # @UndefinedVariable
             or sys.version_info >= (3,5) and code.co_flags & inspect.CO_ITERABLE_COROUTINE  # @UndefinedVariable
             or sys.version_info >= (3,6) and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
             or "importlib._bootstrap" in code.co_filename
             or self._vm.is_doing_io()
+        )
+    
+    def _is_interesting_module_file(self, path):
+        # interesting files are files directly in current directory 
+        # or under the same directory as main module 
+        # or the ones with breakpoints
+        return (
+            path_startswith(path, os.getcwd())
+            or self._main_module_path is not None 
+                and path_startswith(path, os.path.dirname(self._main_module_path))
+            or path in self._current_command.breakpoints
         )
 
     def _is_interesting_exception(self, frame):
@@ -1000,7 +1017,11 @@ class SimpleTracer(Tracer):
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
             
-            source, firstlineno = _get_frame_source_info(system_frame)
+            try:
+                source, firstlineno = _get_frame_source_info(system_frame)
+            except:
+                source = None
+                firstlineno = None
 
             result.insert(0, FrameInfo(
                 id=id(system_frame),
@@ -1069,20 +1090,21 @@ class FancyTracer(Tracer):
 
     def _should_skip_frame(self, frame):
         code = frame.f_code
-        return (super()._should_skip_frame(frame)
+        return (
+            code.co_name not in self.marker_function_names # never skip marker functions
+            and (
+                super()._should_skip_frame(frame)
                 or code.co_filename not in self._instrumented_files
-                    and code.co_name not in self.marker_function_names
-                or code.co_filename.startswith(self._thonny_src_dir)
-                    and code.co_name not in self.marker_function_names
-                )
+                or path_startswith(code.co_filename, self._thonny_src_dir)
+            )
+        )
     
     def find_spec(self, fullname, path=None, target=None):
         """required for custom-loading user modules"""
         # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
         spec = PathFinder.find_spec(fullname, path, target)
         origin = getattr(spec, "origin", None)
-        if (origin is not None
-            and "Desktop" in origin): # TODO: fix this
+        if origin is not None and self._is_interesting_module_file(origin):
             loader = FancyUserModuleLoader(fullname, spec.origin, self)
             return ModuleSpec(fullname, loader)
         else:
@@ -1807,6 +1829,8 @@ def _get_frame_source_info(frame):
         return "".join(lines), lineno
     except:
         # Fallback
+        logging.exception("Failed getting source for frame %s, %s", frame.f_code.co_filename, 
+                          frame.f_code.co_name)
         with tokenize.open(frame.f_code.co_filename) as fp:
             whole_source = fp.read()
         

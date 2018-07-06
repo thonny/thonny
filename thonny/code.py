@@ -387,7 +387,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             filetypes = _dialog_filetypes, 
             initialdir = get_workbench().get_cwd()
         )
-        print(filename)
         if filename: # Note that missing filename may be "" or () depending on tkinter version
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
