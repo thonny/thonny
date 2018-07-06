@@ -1106,7 +1106,7 @@ class FancyTracer(Tracer):
         origin = getattr(spec, "origin", None)
         if origin is not None and self._is_interesting_module_file(origin):
             loader = FancyUserModuleLoader(fullname, spec.origin, self)
-            return ModuleSpec(fullname, loader)
+            return ModuleSpec(fullname, loader, origin=origin)
         else:
             return None
 
@@ -1786,6 +1786,10 @@ class FancyUserModuleLoader(SourceFileLoader):
     def __init__(self, fullname, path, fancy_tracer):
         super().__init__(fullname, path)
         self._fancy_tracer = fancy_tracer
+    
+    def exec_module(self, module):
+        super().exec_module(module)
+        module.__file__ = self.path
     
     def source_to_code(self, data, path, *, _optimize=-1):
         root = self._fancy_tracer._prepare_ast(data, path, "exec")
