@@ -50,7 +50,7 @@ def has_parent_with_class(target_node, parent_class, tree):
     return False
 
 
-def parse_source(source, filename='<unknown>', mode="exec"):
+def parse_source(source: bytes, filename='<unknown>', mode="exec"):
     root = ast.parse(source, filename, mode)
     mark_text_ranges(root, source)
     return root
@@ -147,7 +147,7 @@ def get_last_child(node):
 
 
 
-def mark_text_ranges(node, source):
+def mark_text_ranges(node, source: bytes):
     """
     Node is an AST, source is corresponding source as string.
     Function adds recursively attributes end_lineno and end_col_offset to each node
@@ -294,7 +294,7 @@ def mark_text_ranges(node, source):
 
         return tokens
 
-    all_tokens = list(tokenize.tokenize(io.BytesIO(source.encode('utf-8')).readline))
+    all_tokens = list(tokenize.tokenize(io.BytesIO(source).readline))
     source_lines = source.splitlines(True)
     fix_ast_problems(node, source_lines, all_tokens)
     prelim_end_lineno = len(source_lines)
@@ -322,7 +322,9 @@ def fix_ast_problems(tree, source_lines, tokens):
     # Problem 1:
     # Python parser gives col_offset as offset to its internal UTF-8 byte array
     # I need offsets to chars
-    utf8_byte_lines = list(map(lambda line: line.encode("UTF-8"), source_lines))
+    
+    # TODO: what if source_lines are in a different encoding???
+    utf8_byte_lines = source_lines
 
     # Problem 2:
     # triple-quoted strings have just plain wrong positions: http://bugs.python.org/issue18370
@@ -334,6 +336,7 @@ def fix_ast_problems(tree, source_lines, tokens):
 
     # Problem 4:
     # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
+    # TODO: Python 3.4 is not supported anymore
     # similar problem is with Attributes and Subscripts
 
     def fix_node(node):

@@ -207,6 +207,10 @@ class CodeView(tktextext.TextFrame):
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
     
+    def get_content_as_bytes(self):
+        # TODO:
+        return self.get_content().encode("utf-8")
+    
     def set_content(self, content):
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)

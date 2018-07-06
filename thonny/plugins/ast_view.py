@@ -47,7 +47,7 @@ class AstView(ui_utils.TreeFrame):
             return
         
         self._current_code_view = editor.get_code_view()
-        self._current_source = self._current_code_view.get_content()
+        self._current_source = self._current_code_view.get_content_as_bytes()
         selection = self._current_code_view.get_selected_range()
 
         self._clear_tree()

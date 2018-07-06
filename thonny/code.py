@@ -138,11 +138,10 @@ class Editor(ttk.Frame):
             get_workbench().event_generate("SaveAs", editor=self, filename=filename)
                 
         
-        content = self._code_view.get_content()
-        encoding = "UTF-8" # TODO: check for marker in the head of the code
+        content = self._code_view.get_content_as_bytes()
         try: 
             f = open(filename, mode="wb", )
-            f.write(content.encode(encoding))
+            f.write(content)
             f.flush()
             os.fsync(f) # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             f.close()

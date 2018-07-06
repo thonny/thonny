@@ -439,10 +439,10 @@ def check_marked_ast(source, expected_pretty_ast
     #if (sys.version_info[:2] == (3,4) 
     #    and expected_for_py_34 is not None):
     #    expected_pretty_ast = expected_for_py_34
-        
+    
     source = dedent(source)
     root = ast.parse(source)
-    ast_utils.mark_text_ranges(root, source)
+    ast_utils.mark_text_ranges(root, source.encode("utf-8"))
     actual_pretty_ast = pretty(root)
     #print("ACTUAL", actual_pretty_ast)
     #print("EXPECTED", expected_pretty_ast)

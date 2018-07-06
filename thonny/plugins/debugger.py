@@ -494,7 +494,7 @@ class ExpressionBox(tk.Text):
         #print("AFTER 9", repr(self.get("1.0", "end")))
     
     def _load_expression(self, filename, text_range):
-        with tokenize.open(filename) as fp:
+        with open(filename, "rb") as fp:
             whole_source = fp.read()
             
         root = ast_utils.parse_source(whole_source, filename)
