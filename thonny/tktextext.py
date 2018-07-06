@@ -657,7 +657,7 @@ class EnhancedText(TweakableText):
 
 class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
-    def __init__(self, master, line_numbers=False, extra_gutter=False,
+    def __init__(self, master, line_numbers=False,
                  line_length_margin=0,
                  first_line_number=1, text_class=EnhancedText,
                  horizontal_scrollbar=True, vertical_scrollbar=True,
@@ -781,7 +781,6 @@ class TextFrame(ttk.Frame):
     def _vertical_scroll(self,*args):
         self.text.yview(*args)
         self._gutter.yview(*args)
-        self._extra_gutter.yview(*args)
         
     def _horizontal_scroll(self,*args):
         self.text.xview(*args)
