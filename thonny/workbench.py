@@ -283,7 +283,7 @@ class Workbench(tk.Tk):
     def _load_plugins_from_path(self, path: List[str], prefix: str) -> None:
         load_function_name="load_plugin"
         
-        for _, module_name, _ in pkgutil.iter_modules(path, prefix):
+        for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[2]):
             try:
                 m = importlib.import_module(module_name)
                 if hasattr(m, load_function_name):
