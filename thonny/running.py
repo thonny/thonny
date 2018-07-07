@@ -333,7 +333,7 @@ class Runner:
                                        stream_name="stderr",
                                        data=err)
         
-        get_workbench().become_topmost_window()
+        get_workbench().become_active_window()
         
     
     def restart_backend(self, clean: bool, first: bool=False) -> None:
@@ -814,7 +814,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
             # if using --without-pip the dialog may close very quickly 
             # and for some reason wait_window would give error then
             logging.exception("Problem with waiting for venv creation dialog")
-        get_workbench().become_topmost_window() # Otherwise focus may get stuck somewhere
+        get_workbench().become_active_window() # Otherwise focus may get stuck somewhere
         
         bindir = os.path.dirname(get_private_venv_executable())
         # create private env marker

@@ -13,7 +13,8 @@ from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, select_sequence, get_style_configuration, lookup_style_option
+    create_tooltip, select_sequence, get_style_configuration, lookup_style_option,\
+    get_tk_version_info
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -1517,7 +1518,7 @@ class Workbench(tk.Tk):
                     if os.path.exists(filename):
                         self.get_editor_notebook().show_file(filename)
                         
-                self.become_topmost_window()
+                self.become_active_window()
         finally:
             self.after(50, self._poll_socket_requests)
 
@@ -1633,7 +1634,7 @@ class Workbench(tk.Tk):
             
         self.title(title_text)
     
-    def become_topmost_window(self) -> None:
+    def become_active_window(self, force=True) -> None:
         # Looks like at least on Windows all following is required for the window to get focus
         # (deiconify, ..., iconify, deiconify)
         self.deiconify()
@@ -1641,7 +1642,7 @@ class Workbench(tk.Tk):
         self.after_idle(self.attributes, '-topmost', False)
         self.lift()
         
-        if not running_on_linux():
+        if force and not running_on_linux():
             # http://stackoverflow.com/a/13867710/261181
             self.iconify()
             self.deiconify()

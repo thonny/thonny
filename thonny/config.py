@@ -6,12 +6,12 @@ import ast
 from configparser import ConfigParser
 import configparser
 from logging import exception
-from tkinter import messagebox
 
 def try_load_configuration(filename):
     try: 
         return ConfigurationManager(filename)
     except configparser.Error:
+        from tkinter import messagebox
         if (os.path.exists(filename) 
             and messagebox.askyesno("Problem", 
                 "Thonny's configuration file can't be read. It may be corrupt.\n\n"

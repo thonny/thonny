@@ -456,7 +456,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         for arg in args:
             if isinstance(arg, str) and os.path.exists(arg):
                 self.show_file(arg)
-        get_workbench().become_topmost_window()
+        get_workbench().become_active_window()
         
     def get_current_editor(self):
         return self.get_current_child()
