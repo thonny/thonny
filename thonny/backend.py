@@ -15,6 +15,7 @@ import site
 
 import __main__  # @UnresolvedImport
 
+import thonny
 from thonny import ast_utils
 from thonny.common import TextRange, parse_message, serialize_message, UserError, \
     DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
@@ -27,7 +28,8 @@ import pkgutil
 import importlib
 import tokenize
 import subprocess
-from importlib.machinery import PathFinder, ModuleSpec, SourceFileLoader
+from importlib.machinery import PathFinder, SourceFileLoader, ExtensionFileLoader, \
+    SourcelessFileLoader
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -37,11 +39,22 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 logger = logging.getLogger()
 info = logger.info
 
+_module_patchers = {} # type: Dict[str, List[Callable]]
+
+_CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
+
+_vm = None
+
 class VM:
     def __init__(self):
+        global _vm
+        _vm = self
+        
+        self._ini = None
         self._command_handlers = {}
         self._value_tweakers = []
         self._object_info_tweakers = []
+        self._import_handlers = {}
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
         site.sethelper() # otherwise help function is not available
@@ -133,9 +146,14 @@ class VM:
         self._object_info_tweakers.append(tweaker)
 
     def add_module_patcher(self, module_name, patcher):
-        if module_name not in self._module_patchers:
-            self._module_patchers[module_name] = []
-        #self.
+        if module_name not in _module_patchers:
+            _module_patchers[module_name] = []
+        _module_patchers[module_name].append(patcher)
+
+    def add_import_handler(self, module_name, handler):
+        if module_name not in self._import_handlers:
+            self._import_handlers[module_name] = []
+        self._import_handlers[module_name].append(handler)
 
     def get_main_module(self):
         return __main__
@@ -191,6 +209,64 @@ class VM:
             )
             
         self.send_message(response)
+    
+    def get_option(self, name, default=None):
+        section, subname = self._parse_option_name(name) 
+        val = self._get_ini().get(section, subname, fallback=default)
+        try:
+            return ast.literal_eval(val)
+        except:
+            return val        
+    
+    def set_option(self, name, value):
+        ini = self._get_ini() 
+        section, subname = self._parse_option_name(name)
+        if not ini.has_section(section):
+            ini.add_section(section)
+        if not isinstance(value, str):
+            value = repr(value) 
+        ini.set(section, subname, value)
+        self.save_settings()
+    
+    def _parse_option_name(self, name):
+        if "." in name:
+            return name.split(".", 1)
+        else:
+            return "general", name 
+    
+    def _get_ini(self):
+        if self._ini is None:
+            import configparser
+            self._ini = configparser.ConfigParser(interpolation=None)
+            self._ini.read(_CONFIG_FILENAME)
+        
+        return self._ini
+    
+    def save_settings(self):
+        if self._ini is None:
+            return
+        
+        with open(_CONFIG_FILENAME, "w") as fp:
+            self._ini.write(fp)
+    
+    def _custom_import(self, *args, **kw):
+        module = self._original_import(*args, **kw)
+        
+        # module specific handlers
+        for handler in self._import_handlers.get(module.__name__, []):
+            try:
+                handler(module)
+            except:
+                _report_internal_error()
+        
+        # general handlers
+        for handler in self._import_handlers.get("*", []):
+            try:
+                handler(module)
+            except:
+                _report_internal_error()
+            
+        return module
 
     def _load_shared_modules(self, frontend_sys_path):
         for name in ["parso", "jedi", "thonnycontrib"]:
@@ -604,6 +680,13 @@ class VM:
         sys.__stdin__ = sys.stdin
         sys.__stdout__ = sys.stdout
         sys.__stderr__ = sys.stderr
+    
+    def _install_custom_import(self):
+        self._original_import = builtins.__import__
+        builtins.__import__ = self._custom_import
+    
+    def _restore_original_import(self):
+        builtins.__import__ = self._original_import
 
     def _fetch_command(self):
         line = self._original_stdin.readline()
@@ -669,7 +752,8 @@ class VM:
             # skip lines denoting thonny execution frame
             if (("thonny/backend" in line or "thonny\\backend" in line)
                 and not in_debug_mode()
-                and not have_seen_in_module):
+                and not have_seen_in_module
+                and False):
                 continue
             else:
                 sys.stderr.write(line)
@@ -783,9 +867,11 @@ class Executor:
     def _prepare_hooks_and_execute(self, statements, expression, global_vars):
         try:
             sys.meta_path.insert(0, self)
+            self._vm._install_custom_import()
             return self._execute_prepared_user_code(statements, expression, global_vars)
         finally:
             del sys.meta_path[0]
+            self._vm._restore_original_import()
     
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
@@ -803,8 +889,20 @@ class Executor:
             return {"context_info" : "user exception"}
     
     def find_spec(self, fullname, path=None, target=None):
-        # override in subclasses if custom loader is needed
-        return None
+        """required for custom-loading or patching user modules"""
+        spec = PathFinder.find_spec(fullname, path, target)
+        # Replace default loaders with suitable custom loaders
+        if isinstance(spec.loader, SourceFileLoader):
+            spec.loader = CustomSourceFileLoader(spec.loader.name, spec.loader.path)
+        elif isinstance(spec.loader, ExtensionFileLoader):
+            spec.loader = CustomExtensionFileLoader(spec.loader.name, spec.loader.path)
+        elif isinstance(spec.loader, SourceFileLoader):
+            spec.loader = CustomSourcelessFileLoader(spec.loader.name, spec.loader.path)
+        else:
+            spec = None
+            
+        return spec
+    
         
     def export_globals(self, module_name):
         return self._vm.export_latest_globals(module_name)
@@ -1100,15 +1198,12 @@ class FancyTracer(Tracer):
         )
     
     def find_spec(self, fullname, path=None, target=None):
-        """required for custom-loading user modules"""
-        # https://blog.sqreen.io/dynamic-instrumentation-agent-for-python/
         spec = PathFinder.find_spec(fullname, path, target)
-        origin = getattr(spec, "origin", None)
-        if origin is not None and self._is_interesting_module_file(origin):
-            loader = FancyUserModuleLoader(fullname, spec.origin, self)
-            return ModuleSpec(fullname, loader, origin=origin)
+        if isinstance(spec.loader, SourceFileLoader):
+            spec.loader = FancyCustomSourceFileLoader(spec.name, spec.path)
+            return spec
         else:
-            return None
+            return super().find_spec(fullname, path, target)
 
     def is_in_past(self):
         return self._current_state < len(self._past_messages)-1
@@ -1780,20 +1875,35 @@ class CustomStackFrame:
         self.current_statement = None
         self.current_root_expression = None
 
-class FancyUserModuleLoader(SourceFileLoader):
-    """Used for loading and instrumenting user modules during fancy tracing"""
-    
-    def __init__(self, fullname, path, fancy_tracer):
-        super().__init__(fullname, path)
-        self._fancy_tracer = fancy_tracer
-    
+class CustomLoader:
     def exec_module(self, module):
         super().exec_module(module)
-        module.__file__ = self.path
+        #module.__file__ = self.path
+        
+        # module specific patchers
+        for patcher in _module_patchers.get(module.__name__, []):
+            patcher(module)
+        
+        # generic patchers
+        for patcher in _module_patchers.get("*", []):
+            patcher(module)
+
+class CustomSourceFileLoader(CustomLoader, SourceFileLoader):
+    pass
+
+class CustomExtensionFileLoader(CustomLoader, ExtensionFileLoader):
+    pass
+
+class CustomSourcelessFileLoader(CustomLoader, SourcelessFileLoader):
+    pass
+
+class FancyCustomSourceFileLoader(CustomSourceFileLoader):
+    """Used for loading and instrumenting user modules during fancy tracing"""
     
     def source_to_code(self, data, path, *, _optimize=-1):
         root = self._fancy_tracer._prepare_ast(data, path, "exec")
         return super().source_to_code(root, path)
+    
 
 
 def fdebug(frame, msg, *args):
@@ -1863,3 +1973,6 @@ def in_debug_mode():
 def _report_internal_error():
     print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
     traceback.print_exc()
+
+def get_vm():
+    return _vm
