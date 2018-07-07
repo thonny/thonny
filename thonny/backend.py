@@ -28,8 +28,7 @@ import pkgutil
 import importlib
 import tokenize
 import subprocess
-from importlib.machinery import PathFinder, SourceFileLoader, ExtensionFileLoader, \
-    SourcelessFileLoader
+from importlib.machinery import PathFinder, SourceFileLoader
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -38,8 +37,6 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 logger = logging.getLogger()
 info = logger.info
-
-_module_patchers = {} # type: Dict[str, List[Callable]]
 
 _CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
 
@@ -144,11 +141,6 @@ class VM:
     def add_object_info_tweaker(self, tweaker):
         """Tweaker should be 2-argument function taking value and export record"""
         self._object_info_tweakers.append(tweaker)
-
-    def add_module_patcher(self, module_name, patcher):
-        if module_name not in _module_patchers:
-            _module_patchers[module_name] = []
-        _module_patchers[module_name].append(patcher)
 
     def add_import_handler(self, module_name, handler):
         if module_name not in self._import_handlers:
@@ -889,26 +881,12 @@ class Executor:
             return {"context_info" : "user exception"}
     
     def find_spec(self, fullname, path=None, target=None):
-        """required for custom-loading or patching user modules"""
-        spec = PathFinder.find_spec(fullname, path, target)
-        # Replace default loaders with suitable custom loaders
-        if isinstance(spec.loader, SourceFileLoader):
-            spec.loader = CustomSourceFileLoader(spec.loader.name, spec.loader.path)
-        elif isinstance(spec.loader, ExtensionFileLoader):
-            spec.loader = CustomExtensionFileLoader(spec.loader.name, spec.loader.path)
-        elif isinstance(spec.loader, SourceFileLoader):
-            spec.loader = CustomSourcelessFileLoader(spec.loader.name, spec.loader.path)
-        else:
-            spec = None
-            
-        return spec
+        """override in subclass for custom-loading user modules"""
+        return None
     
         
     def export_globals(self, module_name):
         return self._vm.export_latest_globals(module_name)
-
-    def module_needs_custom_loader(self, fullname, path):
-        return False
 
     def _prepare_ast(self, source, filename, mode):
         return ast.parse(source, filename, mode)
@@ -1199,8 +1177,12 @@ class FancyTracer(Tracer):
     
     def find_spec(self, fullname, path=None, target=None):
         spec = PathFinder.find_spec(fullname, path, target)
-        if isinstance(spec.loader, SourceFileLoader):
-            spec.loader = FancyCustomSourceFileLoader(spec.name, spec.path)
+        
+        if (isinstance(spec.loader, SourceFileLoader)
+            and getattr(spec, "origin", None)
+            and self._is_interesting_module_file(spec.origin)):
+            print(vars(spec))
+            spec.loader = FancySourceFileLoader(fullname, spec.origin, self)
             return spec
         else:
             return super().find_spec(fullname, path, target)
@@ -1875,33 +1857,15 @@ class CustomStackFrame:
         self.current_statement = None
         self.current_root_expression = None
 
-class CustomLoader:
-    def exec_module(self, module):
-        super().exec_module(module)
-        #module.__file__ = self.path
-        
-        # module specific patchers
-        for patcher in _module_patchers.get(module.__name__, []):
-            patcher(module)
-        
-        # generic patchers
-        for patcher in _module_patchers.get("*", []):
-            patcher(module)
-
-class CustomSourceFileLoader(CustomLoader, SourceFileLoader):
-    pass
-
-class CustomExtensionFileLoader(CustomLoader, ExtensionFileLoader):
-    pass
-
-class CustomSourcelessFileLoader(CustomLoader, SourcelessFileLoader):
-    pass
-
-class FancyCustomSourceFileLoader(CustomSourceFileLoader):
+class FancySourceFileLoader(SourceFileLoader):
     """Used for loading and instrumenting user modules during fancy tracing"""
     
+    def __init__(self, fullname, path, tracer):
+        super().__init__(fullname, path)
+        self._tracer = tracer
+    
     def source_to_code(self, data, path, *, _optimize=-1):
-        root = self._fancy_tracer._prepare_ast(data, path, "exec")
+        root = self._tracer._prepare_ast(data, path, "exec")
         return super().source_to_code(root, path)
     
 
