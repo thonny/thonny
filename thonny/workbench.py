@@ -122,7 +122,6 @@ class Workbench(tk.Tk):
         
         self._init_commands()
         self._init_icon()
-        self._update_toolbar()
         try:
             self._editor_notebook.load_startup_files()
         except Exception:
@@ -363,6 +362,7 @@ class Workbench(tk.Tk):
             self.update_idletasks() # allow UI to complete
             thonny._runner = self._runner
             self._runner.start()
+            self._update_toolbar()
         except:
             self.report_exception("Error when initializing backend")
     
@@ -1169,6 +1169,8 @@ class Workbench(tk.Tk):
                         handler(event)
                     except:
                         self.report_exception("Problem when handling '" + sequence + "'")
+                        
+        self._update_toolbar()
                 
     def bind(self, sequence: str, func: Callable, add: bool=None) -> None: # type: ignore
         """Uses custom event handling when sequence doesn't start with <.
@@ -1319,14 +1321,15 @@ class Workbench(tk.Tk):
             create_tooltip(button, tooltip_text)
         
     def _update_toolbar(self) -> None:
+        if not hasattr(self, "_toolbar"):
+            return
+        
         for group_frame in self._toolbar.grid_slaves(0):
             for button in group_frame.pack_slaves():
                 if thonny._runner is None or button.tester and not button.tester():
                     button["state"] = tk.DISABLED
                 else:
                     button["state"] = tk.NORMAL
-        
-        self.after(300, self._update_toolbar)
             
     
     def _cmd_zoom_with_mouse(self, event) -> None:
