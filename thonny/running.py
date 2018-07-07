@@ -33,6 +33,7 @@ import shlex
 from thonny.code import get_current_breakpoints
 from typing import List, Any  # @UnusedImport
 from typing import Sequence, Optional, Set  # @UnusedImport
+import time
 
 
 WINDOWS_EXE = "python.exe"
@@ -199,6 +200,10 @@ class Runner:
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
         """
+        
+        if not self.is_waiting_toplevel_command():
+            self.restart_backend(False, False, 2)
+        
         editor = get_workbench().get_editor_notebook().get_current_editor()
         if not editor:
             return
@@ -230,7 +235,6 @@ class Runner:
         
     def _cmd_run_current_script_enabled(self) -> bool:
         return (get_workbench().get_editor_notebook().get_current_editor() is not None
-                and get_runner().is_waiting_toplevel_command()
                 and "run" in get_runner().supported_features())
     
     def _cmd_run_current_script(self) -> None:
@@ -272,7 +276,10 @@ class Runner:
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
         self._polling_after_id = None
-        
+        self._pull_vm_messages()            
+        self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
+    
+    def _pull_vm_messages(self):
         while self._proxy is not None:
             try:
                 msg = self._proxy.fetch_next_message()
@@ -313,8 +320,7 @@ class Runner:
             #get_workbench().update() 
             
         self._send_postponed_commands()
-            
-        self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
+        
     
     def _report_backend_crash(self, exc: Exception) -> None:
         err = "Backend terminated (returncode: %s)\n" % getattr(exc, "returncode", "?")
@@ -336,7 +342,7 @@ class Runner:
         get_workbench().become_active_window()
         
     
-    def restart_backend(self, clean: bool, first: bool=False) -> None:
+    def restart_backend(self, clean: bool, first: bool=False, wait: float=0) -> None:
         """Recreate (or replace) backend proxy / backend process."""
         
         if not first:
@@ -355,6 +361,16 @@ class Runner:
         self._proxy = backend_class(clean)
         
         self._poll_vm_messages()
+        
+        if wait:
+            start_time = time.time()
+            while (not self.is_waiting_toplevel_command()
+                   and time.time() - start_time <= wait):
+                #self._pull_vm_messages()
+                get_workbench().update()
+                sleep(0.01)
+        
+        
         
     def destroy_backend(self) -> None:
         if self._polling_after_id is not None:

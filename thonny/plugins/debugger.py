@@ -700,13 +700,18 @@ def _issue_debugger_command(command):
 def _start_debug_enabled():
     return (_current_debugger is None
             and get_workbench().get_editor_notebook().get_current_editor() is not None
-            and get_runner().is_waiting_toplevel_command()
             and "debug" in get_runner().supported_features())
 
 def _start_debug(debugger_class):
+    current_debugger = debugger_class()
+     
     global _current_debugger
-    _current_debugger = debugger_class()
+    _current_debugger = current_debugger
     _current_debugger.debug_current_script()
+    
+    # Need to assign again, because there may be a ToplevelResponse 
+    # before debugger actually runs 
+    _current_debugger = current_debugger
 
 def load_plugin() -> None:
     
