@@ -1638,17 +1638,20 @@ class Workbench(tk.Tk):
         self.title(title_text)
     
     def become_active_window(self, force=True) -> None:
-        # Looks like at least on Windows all following is required for the window to get focus
+        # Looks like at least on Windows all following is required 
+        # for ensuring the window gets focus
         # (deiconify, ..., iconify, deiconify)
         self.deiconify()
-        self.attributes('-topmost', True)
-        self.after_idle(self.attributes, '-topmost', False)
-        self.lift()
         
-        if force and not running_on_linux():
-            # http://stackoverflow.com/a/13867710/261181
-            self.iconify()
-            self.deiconify()
+        if force:
+            self.attributes('-topmost', True)
+            self.after_idle(self.attributes, '-topmost', False)
+            self.lift()
+        
+            if not running_on_linux():
+                # http://stackoverflow.com/a/13867710/261181
+                self.iconify()
+                self.deiconify()
         
         editor = self.get_editor_notebook().get_current_editor()
         if editor is not None:
