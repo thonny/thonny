@@ -4,7 +4,7 @@
 Classes used both by front-end and back-end
 """
 import os.path
-from typing import Optional
+from typing import Optional, List
 
 class Record:
     def __init__(self, **kw):
@@ -146,7 +146,8 @@ class CommandToBackend(Record):
         self.name = name
 
 class ToplevelCommand(CommandToBackend):
-    pass
+    def __init__(self, name: str, argv: List[str]=[], **kw)->None:
+        super().__init__(name, **kw)
 
 class DebuggerCommand(CommandToBackend):
     pass

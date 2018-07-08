@@ -13,8 +13,7 @@ from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, select_sequence, get_style_configuration, lookup_style_option,\
-    get_tk_version_info
+    create_tooltip, select_sequence, get_style_configuration, lookup_style_option
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
