@@ -736,23 +736,36 @@ class VM:
         return self._io_level > 0
 
     def _report_user_exception(self):
+        """Need to suppress thonny frames to avoid confusion"""
         e_type, e_value, e_traceback = sys.exc_info()
+        
         lines = traceback.format_exception(e_type, e_value, e_traceback)
         
-        have_seen_in_module = False
-        for line in lines:
-            # skip lines denoting thonny execution frame
-            if (("thonny/backend" in line or "thonny\\backend" in line)
-                and not in_debug_mode()
-                and not have_seen_in_module
-                and False):
-                continue
-            else:
-                sys.stderr.write(line)
+        if in_debug_mode():
+            relevant_lines = lines
+        elif (e_type is SyntaxError and "in <module>" not in "\n".join(lines)):
+            relevant_lines = traceback.format_exception(e_type, e_value, e_traceback, limit=0)
+        else:
+            have_seen_in_module = False
+            relevant_lines = []
+            for line in lines:
+                if "Traceback (most recent call last)" in line:
+                    # we're starting with next block in the chain
+                    have_seen_in_module = False
+                    
+                if (("thonny/backend" in line or "thonny\\backend" in line) 
+                    and (not have_seen_in_module or "self._original_import" in line)):
+                    continue
+                else:
+                    relevant_lines.append(line)
+                    
                 if "in <module>" in line:
                     have_seen_in_module = True
         
-        # TODO: add error interpretation
+        # TODO: send string as separate message 
+        sys.stderr.write("".join(relevant_lines))
+        
+        return {}
 
     class FakeStream:
         def __init__(self, vm, target_stream):
@@ -850,6 +863,8 @@ class Executor:
                     return self._prepare_hooks_and_execute(bytecode, None, global_vars)
                 else:
                     raise ValueError("Unknown mode")
+        except SyntaxError:
+            return self._vm._report_user_exception()
         except SystemExit:
             return {"SystemExit" : True}
         except Exception:
