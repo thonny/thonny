@@ -72,16 +72,17 @@ def get_level_bitmap(width, height, top_bump, bottom_bump):
     return filename
     
 
-
-text_font = font.nametofont(text["font"])
 root.update()
-h = 16
 c = "gray"
-print(text_font.measure("    "), text_font.measure("linespace"))
-text.tag_configure("top", bgstipple="@"+get_level_bitmap(32,h, True, False), background=c)
-text.tag_configure("middle", bgstipple="@"+get_level_bitmap(32,h, False, False), background=c)
-text.tag_configure("bottom", bgstipple="@"+get_level_bitmap(32,h, False, True), background=c)
-text.tag_configure("both", bgstipple="@"+get_level_bitmap(32,h, True, True), background=c)
+_, _, _, h = text.bbox("2.7")
+text_font = font.nametofont(text["font"])
+w = text_font.measure("    ")
+print(w, h)
+
+text.tag_configure("top", bgstipple="@"+get_level_bitmap(w,h, True, False), background=c)
+text.tag_configure("middle", bgstipple="@"+get_level_bitmap(w,h, False, False), background=c)
+text.tag_configure("bottom", bgstipple="@"+get_level_bitmap(w,h, False, True), background=c)
+text.tag_configure("both", bgstipple="@"+get_level_bitmap(w,h, True, True), background=c)
 
 text.tag_configure("shift", lmargin1=8)
 
@@ -109,11 +110,5 @@ text.tag_add("bottom", "9.3", "9.5")
 
 text.tag_raise("sel")
 
-
-def onconf(e):
-    print(text.bbox("2.7"))
-    print(text_font.measure("    "), text_font.measure("linespace"))
-
-root.bind("<Configure>", onconf, True)
 
 root.mainloop()
