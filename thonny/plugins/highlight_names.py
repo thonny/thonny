@@ -1,7 +1,7 @@
 from jedi import Script
 import thonny.jedi_utils as jedi_utils
 import traceback
-tree = jedi_utils.import_tree()
+tree = jedi_utils.import_python_tree()
     
 from thonny import get_workbench
 import tkinter as tk

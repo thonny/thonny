@@ -1,20 +1,20 @@
 # Utils to handle different jedi versions
 
-def import_tree():
+def import_python_tree():
     try:
-        # jedi 0.11
+        # jedi 0.11+
         from parso.python import tree
     except ImportError:
         try:
             # jedi 0.10
             from jedi.parser.python import tree
         except ImportError:
-            # jedi 0.9
             try:
+                # jedi 0.9
                 from jedi.parser import tree
             except:
                 # older versions
-                tree = None
+                raise ImportError("Can't import jedi tree")
     
     return tree
 

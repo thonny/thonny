@@ -32,7 +32,7 @@ class LocalsHighlighter:
     def _get_positions_correct_but_using_private_parts(self):
         from jedi import Script
         
-        tree = jedi_utils.import_tree()
+        tree = jedi_utils.import_python_tree()
 
         locs = []
 
