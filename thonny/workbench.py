@@ -81,6 +81,7 @@ class Workbench(tk.Tk):
         thonny._workbench = self
         
         self._destroying = False
+        self._destroyed = False
         self.initializing = True
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception # type: ignore
@@ -1320,15 +1321,16 @@ class Workbench(tk.Tk):
             create_tooltip(button, tooltip_text)
         
     def _update_toolbar(self) -> None:
-        if not hasattr(self, "_toolbar"):
+        if self._destroyed or not hasattr(self, "_toolbar"):
             return
         
-        for group_frame in self._toolbar.grid_slaves(0):
-            for button in group_frame.pack_slaves():
-                if thonny._runner is None or button.tester and not button.tester():
-                    button["state"] = tk.DISABLED
-                else:
-                    button["state"] = tk.NORMAL
+        if self._toolbar.winfo_ismapped():
+            for group_frame in self._toolbar.grid_slaves(0):
+                for button in group_frame.pack_slaves():
+                    if thonny._runner is None or button.tester and not button.tester():
+                        button["state"] = tk.DISABLED
+                    else:
+                        button["state"] = tk.NORMAL
             
     
     def _cmd_zoom_with_mouse(self, event) -> None:
@@ -1536,6 +1538,7 @@ class Workbench(tk.Tk):
             self.report_exception()
 
         self.destroy()
+        self._destroyed = True
     
     def focus_get(self) -> Optional[tk.Widget]:
         try:
