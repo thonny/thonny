@@ -71,6 +71,11 @@ def get_name_of_position(obj, position):
         # older jedi
         return obj.name_for_position(position)
 
+def parse_source(source):
+    import jedi
+    script = jedi.Script(source)
+    return get_module_node(script)
+
 def get_version_tuple():
     import jedi
     nums = []

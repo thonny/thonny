@@ -2,16 +2,18 @@ import os.path
 import tkinter as tk
 from tkinter import font
 
-spacing1 = 5
-spacing3 = 5
+spacing1 = 6
+spacing3 = 6
 root = tk.Tk()
-text = tk.Text(root, spacing1=spacing1, spacing3=spacing3)
+text = tk.Text(root, spacing1=spacing1, spacing3=spacing3,
+               highlightthickness=0,
+               borderwidth=0, relief="flat")
 text.grid(row=0, column=0, sticky="nsew")
 
 root.columnconfigure(0, weight=1)
 root.rowconfigure(0, weight=1)
 
-text.insert("1.0", """
+text.insert("1.0", """print('hello')
 while True:
     a = int(input("kalapala: "))
     b = int(input("kalapala: "))
@@ -20,7 +22,8 @@ while True:
     elif a == b:
         print("Done")
         break
-print("Done")""")
+print("Done")
+""")
 
 def brackets(x, y, height, top_bump, bottom_bump):
     offset = 5
@@ -38,8 +41,8 @@ def brackets(x, y, height, top_bump, bottom_bump):
 
 
 def lines(x, y, height, top, bottom):
-    offset = 8
-    stripe_width = 1
+    offset = w-7
+    stripe_width = 3
     gap = 0
     return (offset <= x < offset+stripe_width 
             and (
@@ -49,8 +52,21 @@ def lines(x, y, height, top, bottom):
             )
     )
 
-def topline(x, y, height, top, bottom):
-    return y == 0
+def lines2(x, y, height, top, bottom):
+    offset = w-5
+    stripe_width = 4
+    gap = 0
+    return (offset <= x < offset+stripe_width 
+            or top and (x >= offset or x <= 2) and y == 0
+            or bottom and (x >= offset or x <= 2) and y == height-1
+    )
+
+def horline(x, y, height, top, bottom):
+    return (y == 0
+            or bottom and y == height-1)
+
+def full(x, y, height, top, bottom):
+    return True
 
 def get_level_bitmap(width, height, top_bump, bottom_bump,
                      predicate):
@@ -104,16 +120,18 @@ text_font = font.nametofont(text["font"])
 w = text_font.measure("    ")
 print(w, h)
 
-predi = lines
+predi = lines2
 text.tag_configure("top", bgstipple="@"+get_level_bitmap(w,h, True, False, predi), background=c)
 text.tag_configure("middle", bgstipple="@"+get_level_bitmap(w,h, False, False, predi), background=c)
 text.tag_configure("bottom", bgstipple="@"+get_level_bitmap(w,h, False, True, predi), background=c)
 text.tag_configure("both", bgstipple="@"+get_level_bitmap(w,h, True, True, predi), background=c)
-text.tag_configure("topline", bgstipple="@"+get_level_bitmap(w,h, True, True, topline), background=c)
+text.tag_configure("horline", bgstipple="@"+get_level_bitmap(w,h, True, False, horline), background=c)
+text.tag_configure("horline_both", bgstipple="@"+get_level_bitmap(w,h, True, True, horline), background=c)
 
-text.tag_configure("sel", bgstipple="", background="blue")
+text.tag_configure("sel", bgstipple="@"+get_level_bitmap(w,h, True, True, full),
+                   background="blue")
 
-text.tag_configure("shift", lmargin1=15)
+text.tag_configure("shift", lmargin1=2)
 
 text.tag_add("shift", "1.0", "end")
 ##############
@@ -128,23 +146,32 @@ text.tag_add("shift", "1.0", "end")
 
 
 #############
-text.tag_add("both", "3.2", "3.3")
-text.tag_add("both", "4.2", "4.3")
-text.tag_add("top", "5.2", "5.3")
-text.tag_add("middle", "6.2", "6.3")
-text.tag_add("middle", "7.2", "7.3")
-text.tag_add("middle", "8.2", "8.3")
-#text.tag_add("middle", "9.3", "9.4")
-text.tag_add("bottom", "9.2", "9.3")
+text.tag_add("top", "3.3", "3.4")
+text.tag_add("top", "4.3", "4.4")
+text.tag_add("top", "5.3", "5.4")
+text.tag_add("middle", "6.3", "6.4")
+text.tag_add("middle", "7.3", "7.4")
+text.tag_add("middle", "8.3", "8.4")
+text.tag_add("middle", "9.3", "9.4")
+
+text.tag_add("both", "6.7", "6.8")
+text.tag_add("top", "8.7", "8.8")
+text.tag_add("top", "9.7", "9.8")
 
 ########
-text.tag_add("topline", "10.0", "11.0")
-text.tag_add("topline", "11.0", "12.0")
-text.tag_add("topline", "2.0", "3.0")
-text.tag_add("topline", "3.4", "4.0")
-text.tag_add("topline", "4.4", "5.0")
-text.tag_add("topline", "5.4", "6.0")
+text.tag_add("horline", "10.0", "11.0")
+text.tag_add("horline", "11.0", "12.0")
+text.tag_add("horline", "2.0", "3.0")
+text.tag_add("horline", "3.4", "4.0")
+text.tag_add("horline", "4.4", "5.0")
+text.tag_add("horline", "5.4", "6.0")
 
+text.tag_add("horline_both", "6.8", "7.0")
+#text.tag_add("horline", "7.8", "8.0")
+text.tag_add("horline", "8.8", "9.0")
+text.tag_add("horline", "9.8", "10.0")
+
+#text.tag_configure("horline", background="red")
 
 text.tag_raise("sel")
 
