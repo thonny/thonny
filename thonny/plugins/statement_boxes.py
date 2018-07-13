@@ -16,7 +16,7 @@ def create_bitmap_file(width, height, predicate, name):
     #if os.path.exists(filename):
     #    return filename
     
-    byte_hexes = []
+    hex_lines = []
     
     if width % 8 == 0:
         row_size = width
@@ -25,6 +25,7 @@ def create_bitmap_file(width, height, predicate, name):
         row_size = width + 8 - (width % 8)
     
     for y in range(height):
+        byte_hexes = []
         for byte_index in range(row_size // 8):
             byte = 0
             for bit_index in range(7,-1,-1):
@@ -35,12 +36,13 @@ def create_bitmap_file(width, height, predicate, name):
                     byte |= 1
                     
             byte_hexes.append(format(byte, "#04x"))
+        hex_lines.append(",".join(byte_hexes))
                 
     data = (
         "#define im_width %d\n" % width
         + "#define im_height %d\n" % height
         + "static char im_bits[] = {\n"
-        + "%s\n" % ",".join(byte_hexes)
+        + "%s\n" % ",\n".join(hex_lines)
         + "};"
     )
     
@@ -78,7 +80,7 @@ def configure_text(text):
         # In order to make computation easier, I'm offsetting x as well
         x = (x-5) % indent_width
         
-        stripe_width = 4
+        stripe_width = 8
         gap = 3
         left = indent_width-stripe_width - gap
         
@@ -95,9 +97,9 @@ def configure_text(text):
         )
     
     color = get_syntax_options_for_tag("GUTTER").get("background", "gray")
-    for orient, base_predicate in [("ver", ver), ("hor", hor)]:
-        for top in [True, False]:
-            for bottom in [True, False]:
+    for orient, base_predicate in [("hor", hor), ("ver", ver)]:
+        for top in [False, True]:
+            for bottom in [False, True]:
                 def predicate(x, y, 
                               # need to make base_predicate, top and bottom local
                               base_predicate=base_predicate,
@@ -110,7 +112,6 @@ def configure_text(text):
                                                  predicate, tag_name)
                 text.tag_configure(tag_name, background=color,
                                    bgstipple="@" + bitmap_path)
-    
     
     return True
 
@@ -131,40 +132,69 @@ def add_tags(text):
     tree = jedi_utils.parse_source(source)
     
     print_tree(tree)
+    last_line = 0
+    last_col = 0
     
     def tag_tree(node):
+        nonlocal last_line, last_col
+        
         if (node.type == "simple_stmt"
-            or isinstance(node, (python_tree.Flow,
-                                 python_tree.Scope))):
-            #print(indent, node.type, node.start_pos, node.end_pos)
-            first_line_start = "%d.%d" % node.start_pos
-            first_line_end = "%d.%d" % (node.start_pos[0]+1, 0)
+            or isinstance(node, (python_tree.Flow, python_tree.Scope))):
+            
+            start_line, start_col = node.start_pos
+            end_line, end_col = node.end_pos
+            
+            # Before dealing with this node,
+            # handle the case, where last vertical tag was meant for 
+            # same column, but there were empty or comment lines between
+            if start_col == last_col:
+                for i in range(last_line+1, start_line):
+                    # NB! tag not visible when logically empty line
+                    # doesn't have indent prefix
+                    text.tag_add("ver_False_False",
+                                "%d.%d" % (i, last_col-1),
+                                "%d.%d" % (i, last_col))
+                    print("ver_False_False",
+                                "%d.%d" % (i, last_col-1),
+                                "%d.%d" % (i, last_col))
+                    
+            
             print(node)
             
-            # create horizontal lines
-            if node.start_pos[0] > 1: # skip for first line
-                tag_name = "hor_%s_False" % True # Todo  
-                text.tag_add(tag_name, first_line_start, first_line_end)
-                print(tag_name, first_line_start, first_line_end)
+            # usually end_col is 0
+            # exceptions: several statements on the same line (semicoloned statements)
+            # also unclosed parens in if-header  
+            for lineno in range(start_line, 
+                                end_line + (1 if end_col > 0 else 0)):
             
-            if node.start_pos[1] > 0:
-                # tag line beginnings
-                # TODO: handle unprocessed empty and comment lines
-                # between last tag and this one
+                top = (lineno == start_line and lineno > 1)
+                bottom = False # start_line == end_line-1
+            
+                # horizontal line (only for first or last line)
+                if top or bottom:
+                    text.tag_add("hor_%s_%s" % (top, bottom), 
+                                 "%d.%d" % (lineno, start_col), 
+                                 "%d.%d" % (lineno+1, 0))
+                    
+                    print("hor_%s_%s" % (top, bottom), 
+                                 "%d.%d" % (lineno, start_col), 
+                                 "%d.%d" % (lineno+1, 0))
                 
-                assert node.end_pos[1] == 0 
-                for lineno in range(node.start_pos[0], node.end_pos[0]):
-                    top = lineno == node.start_pos[0]
-                    bottom = False
+                # vertical line (only for indented statements)
+                # Note that I'm using start col for all lines
+                # (statement's indent shouldn't decrease in continuation lines)
+                if start_col > 0:
                     text.tag_add("ver_%s_%s" % (top, bottom),
-                                 "%d.%d" % (lineno, node.start_pos[1]-2),
-                                 "%d.%d" % (lineno, node.start_pos[1]),
-                                 )
+                                 "%d.%d" % (lineno, start_col-1),
+                                 "%d.%d" % (lineno, start_col))
                     print("ver_%s_%s" % (top, bottom),
-                                 "%d.%d" % (lineno, node.start_pos[1]-2),
-                                 "%d.%d" % (lineno, node.start_pos[1]),
-                                 )
-            
+                                 "%d.%d" % (lineno, start_col-1),
+                                 "%d.%d" % (lineno, start_col))
+                    
+                    last_line = lineno
+                    last_col = start_col
+        
+        # Recurse
         if node.type != "simple_stmt" and hasattr(node, "children"):
             for child in node.children:
                 tag_tree(child)
