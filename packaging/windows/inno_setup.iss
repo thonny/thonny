@@ -1,7 +1,7 @@
-﻿; Give AppVer from command line, eg:
-; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
-#define AppVer "9.9.9"
-#define SourceFolder "C:\workspaces\python_stuff\thonny\packaging\windows\dummy"
+﻿; Give AppVer and SourceFolder from command line, eg:
+; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 /dSourceFolder=build inno_setup.iss 
+;#define AppVer "9.9.9"
+;#define SourceFolder "C:\workspaces\python_stuff\thonny\packaging\windows\dummy"
 #define AppUserModelID "Thonny.Thonny"
 #define ThonnyPyProgID "Thonny.py"
 
@@ -18,32 +18,37 @@ AppPublisherURL=http://thonny.org
 AppSupportURL=http://thonny.org
 AppUpdatesURL=http://thonny.org
 
+; Actual privileges depend on how user started the installer
+PrivilegesRequired=lowest
 MinVersion=6.0
 
+; Will show important info on welcome page
 DisableWelcomePage=no
+
 DisableProgramGroupPage=yes
 DefaultGroupName=Thonny
 
-AlwaysShowDirOnReadyPage=yes
-; TODO: always show for admin install?
+; Note that DefaultDirName can be overridden with installer's /DIR=... parameter
+DefaultDirName={code:ProposedDir}
 DisableDirPage=auto
 DirExistsWarning=auto
 UsePreviousAppDir=yes
 
-PrivilegesRequired=lowest
-OutputBaseFilename=thonny-{#AppVer}
-; Note that DefaultDirName can be overridden with installer's /DIR=... parameter
-DefaultDirName={code:ProposedDir}
-
 DisableReadyPage=no
-LicenseFile=license-for-win-installer.txt
-OutputDir=dist
-Compression=lzma2/ultra
-SolidCompression=yes
-WizardImageFile=screenshot_with_logo.bmp
-ChangesAssociations=yes
+AlwaysShowDirOnReadyPage=yes
+
+
 ; Request extra space for precompiling libraries
 ExtraDiskSpaceRequired=25000000
+OutputDir=dist
+OutputBaseFilename=thonny-{#AppVer}
+Compression=lzma2/ultra
+SolidCompression=yes
+
+LicenseFile=license-for-win-installer.txt
+WizardImageFile=screenshot_with_logo.bmp
+WizardSmallImageFile=small_logo.bmp 
+ChangesAssociations=yes
 
 ; Signing
 ; Certum Unizeto provides free certs for open source
@@ -52,15 +57,24 @@ ExtraDiskSpaceRequired=25000000
 ; http://blog.ksoftware.net/2011/07/exporting-your-code-signing-certificate-to-a-pfx-file-from-firefox/
 ; http://certhelp.ksoftware.net/support/solutions/articles/17157-how-do-i-export-my-code-signing-certificate-from-internet-explorer-or-chrome-
 ; http://blog.ksoftware.net/2011/07/how-to-automate-code-signing-with-innosetup-and-ksign/
-;SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttp://thonny.org$q $f
+SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttp://thonny.org$q $f
 
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [InstallDelete]
-; TODO: dangerous, when user specified a bad directory
-Type: filesandordirs; Name: "{app}\*"
+; Clean old installation before copying new files
+; (list specific subdirectories to avoid disaster when user selects a wrong directory for installation)
+Type: filesandordirs; Name: "{app}\DLLs"
+Type: filesandordirs; Name: "{app}\Doc"
+Type: filesandordirs; Name: "{app}\include"
+Type: filesandordirs; Name: "{app}\Lib"
+Type: filesandordirs; Name: "{app}\libs"
+Type: filesandordirs; Name: "{app}\Scripts"
+Type: filesandordirs; Name: "{app}\tcl"
+Type: filesandordirs; Name: "{app}\Tools"
+Type: filesandordirs; Name: "{app}\python*"
 
 ; Delete old shortcut
 Type: filesandordirs; Name: "{userstartmenu}\Thonny"
@@ -82,12 +96,15 @@ Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Py36"
 Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
-Name: "{userprograms}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
-Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{userprograms}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{code:GetActualCommonPrograms}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+
+Name: "{userdesktop}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{code:GetActualCommonDesktop}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 
 
 [Registry]
-;Python.File
+; Check is used to select HKCU or HKLM based on how the installer was started.
 
 ; Register the application
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
@@ -177,6 +194,18 @@ ClickFinish=
 
 [Code]
 
+function GetActualCommonPrograms(Param: String): String;
+begin
+    // Can't use {commonprograms} because I have PrivilegesRequired=lowest
+    Result := GetShellFolderByCSIDL($17, True);
+end;
+
+function GetActualCommonDesktop(Param: String): String;
+begin
+    // Can't use {commondesktop} because I have PrivilegesRequired=lowest
+    Result := GetShellFolderByCSIDL($19, True);
+end;
+
 function StartedForAllUsers(): Boolean;
 begin
     Result := IsAdminLoggedOn();
@@ -234,7 +263,7 @@ begin
       WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.'
     end;
   end
-  else
+  else  // single user
   begin
     WizardForm.WelcomeLabel2.Caption := 'This wizard will install Thonny {#AppVer} for your account.';
     if InstalledForAllUsers() then
