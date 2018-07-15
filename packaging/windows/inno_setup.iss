@@ -1,17 +1,9 @@
 ﻿; Give AppVer from command line, eg:
 ; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
-; #define AppVer "0.0.0"
-; #define SourceFolder "set source folder from command line"
-#define Scope "user"
+#define AppVer "9.9.9"
+#define SourceFolder "C:\workspaces\python_stuff\thonny\packaging\windows\dummy"
 #define AppUserModelID "Thonny.Thonny"
 #define ThonnyPyProgID "Thonny.py"
-#define PrivReq "lowest"
-
-#if Scope == "system"
-#define RegistryRoot "HKLM"
-#else
-#define RegistryRoot "HKCU"
-#endif
 
 
 [Setup]
@@ -38,6 +30,11 @@ DisableDirPage=auto
 DirExistsWarning=auto
 UsePreviousAppDir=yes
 
+PrivilegesRequired=lowest
+OutputBaseFilename=thonny-{#AppVer}
+; Note that DefaultDirName can be overridden with installer's /DIR=... parameter
+DefaultDirName={code:ProposedDir}
+
 DisableReadyPage=no
 LicenseFile=license-for-win-installer.txt
 OutputDir=dist
@@ -47,19 +44,6 @@ WizardImageFile=screenshot_with_logo.bmp
 ChangesAssociations=yes
 ; Request extra space for precompiling libraries
 ExtraDiskSpaceRequired=25000000
-
-; Note that DefaultDirName can be overridden with installer's /DIR=... parameter
-DefaultDirName={code:ProposedDir}
-; conditional part
-#if Scope == "system"
-PrivilegesRequired=admin
-OutputBaseFilename=thonny-{#AppVer}-all-users
-#else
-PrivilegesRequired=lowest
-OutputBaseFilename=thonny-{#AppVer}-single-user
-#endif
-
-
 
 ; Signing
 ; Certum Unizeto provides free certs for open source
@@ -109,36 +93,68 @@ Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
 ; https://docs.microsoft.com/en-us/windows/desktop/shell/app-registration
 ; TODO: investigate also SupportedProtocols subkey of this key
-Root: {#RegistryRoot}; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny.exe"; Flags: uninsdeletekey
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny.exe"; Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny.exe"; Flags: uninsdeletekey
 
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
 
 ; Add link to Thonny under existing Python.File ProgID
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny"; ValueType: none; Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny"; ValueType: none; Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny"; ValueType: none; Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 ; Create separate ProgID (Thonny.py) which represents Thonny's ability to handle Python files
 ; These settings will be used when user chooses Thonny as default program for opening *.py files
-Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
-Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-;Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "EditFlags"; TODO: https://docs.microsoft.com/en-us/windows/desktop/api/Shlwapi/ne-shlwapi-filetypeattributeflags
-Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+
+;Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "EditFlags"; TODO: https://docs.microsoft.com/en-us/windows/desktop/api/Shlwapi/ne-shlwapi-filetypeattributeflags
+;Root: HKCU; Check: StartedForAllUsers; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "EditFlags"; TODO: https://docs.microsoft.com/en-us/windows/desktop/api/Shlwapi/ne-shlwapi-filetypeattributeflags
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 ; Relate this ProgID with *.py and *.pyw extensions
 ; https://docs.microsoft.com/en-us/windows/desktop/shell/how-to-include-an-application-on-the-open-with-dialog-box
-Root: {#RegistryRoot}; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
-Root: {#RegistryRoot}; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
 
 ; Add "Python file" to Explorer's "New" context menu (don't remove on uninstallation)
-Root: {#RegistryRoot}; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueData: "Python.File";  
-Root: {#RegistryRoot}; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueName: "NullFile"; ValueData: "";  
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueData: "Python.File";  
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueData: "Python.File";  
+
+Root: HKCU; Check: StartedForThisUser; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueName: "NullFile"; ValueData: "";  
+Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueName: "NullFile"; ValueData: "";  
 
 ; Cleaning up old stuff
 ; Was: Restore "Edit with IDLE" when selecting Thonny as default opener
@@ -153,7 +169,6 @@ Type: filesandordirs; Name: "{app}\*"
 Type: filesandordirs; Name: "{app}"
 
 [Messages]
-ClickNext=Kliki nekst
 FinishedHeadingLabel=Great success!
 FinishedLabel=[name] is now installed. Run it via shortcut or right-click a *.py file and select "Edit with Thonny".%n%n%n/ \ / \ / \ / / / / \ / / / \ \ / / / / \ / / \ \ / / / / / \ \ \ \ \ \ / \ / / / / \ \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / / / / / / / / / \ / \ / \ \ \ / / / \ \ \ / \ \ \ \ / \ / \ \ / / \ \ \ / / / \ \ \ / \ / \ / / \ / \ / \ \ / \ \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / \ / 
 
@@ -162,21 +177,32 @@ ClickFinish=
 
 [Code]
 
-function ForAllUsers(): Boolean;
+function StartedForAllUsers(): Boolean;
 begin
     Result := IsAdminLoggedOn();
 end;
 
-function ForThisUser(): Boolean;
+function StartedForThisUser(): Boolean;
 begin
     Result := not IsAdminLoggedOn();
 end;
+
+function InstalledForAllUsers(): Boolean;
+begin
+    Result := RegKeyExists(HKEY_LOCAL_MACHINE, 'Software\Classes\Applications\thonny.exe');
+end;
+
+function InstalledForThisUser(): Boolean;
+begin
+    Result := RegKeyExists(HKEY_CURRENT_USER, 'Software\Classes\Applications\thonny.exe');
+end;
+
 
 function ProposedDir(Param: String): String;
 begin
     if ExpandConstant('{param:DIR|-}') <> '-' then
       Result := ExpandConstant('{param:DIR}')
-    else if ForAllUsers() then
+    else if StartedForAllUsers() then
       Result := ExpandConstant('{pf}\Thonny')
     else
       Result := ExpandConstant('{userpf}\Thonny');
@@ -185,32 +211,71 @@ end;
 procedure InitializeWizard;
 var
 MoreInfoLabel: TLabel;
+DualWarningLabel: TLabel;
 begin
   WizardForm.WelcomeLabel1.Caption := 'Welcome to using Thonny!';
 
-  if ForAllUsers() then
+  MoreInfoLabel := TLabel.Create(WizardForm);
+  DualWarningLabel := TLabel.Create(WizardForm);
+
+  if StartedForAllUsers() then
   begin
     WizardForm.WelcomeLabel2.Caption := 'This wizard will install Thonny {#AppVer} for all users.';
+    MoreInfoLabel.Caption := '';
+    if InstalledForThisUser() then
+    begin    
+      DualWarningLabel.Caption := 'Warning!'
+          + ''#13#10''
+          + ''#13#10''
+          + 'Looks like you have already installed Thonny for your account. In order to avoid confusion, it is recommended you cancel this wizard and uninstall single-user Thonny first.';
+    end
+    else if InstalledForAllUsers() then
+    begin
+      WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.'
+    end;
   end
   else
   begin
     WizardForm.WelcomeLabel2.Caption := 'This wizard will install Thonny {#AppVer} for your account.';
+    if InstalledForAllUsers() then
+    begin    
+      DualWarningLabel.Caption := 'Warning!'
+        + ''#13#10''
+        + ''#13#10''
+        + 'Looks like Thonny is already installed for all users. In order to avoid confusion, it is recommended you cancel this wizard and uninstall all-users Thonny first.';
+    end
+    else if InstalledForThisUser() then
+    begin
+      WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.'
+      MoreInfoLabel.Caption := 'If you want to install Thonny for all users, cancel the installer, uninstall Thonny from your account and run the installer again as administrator '
+          + '(right-click the installer executable and select "Run as administrator").';
+    end
+    else
+    begin
+      MoreInfoLabel.Caption := 'If you want to install Thonny for all users, cancel the installer and run it as administrator '
+          + '(right-click the installer executable and select "Run as administrator").';
+    end;
+
   end;
 
   WizardForm.WelcomeLabel2.AutoSize := True;
 
-  MoreInfoLabel := TLabel.Create(WizardForm);
   MoreInfoLabel.Parent := WizardForm.WelcomePage;
   MoreInfoLabel.AutoSize := True;
   MoreInfoLabel.WordWrap := True;
   MoreInfoLabel.Left := WizardForm.WelcomeLabel2.Left;
   MoreInfoLabel.Width := WizardForm.WelcomeLabel2.Width;
-  MoreInfoLabel.Top := WizardForm.WelcomeLabel2.Top + WizardForm.WelcomeLabel2.Height + ScaleY(20);
-  MoreInfoLabel.Caption := 'If you want to install Thonny for all users, cancel the installer and run it as administrator '
-      + '(right-click the installer executable and select "Run as administrator").';
   MoreInfoLabel.Font.Style := [fsItalic];
+  MoreInfoLabel.Top := WizardForm.WelcomeLabel2.Top + WizardForm.WelcomeLabel2.Height + ScaleY(20);
 
-  //MoreInfoLabel.Align := alClient;
+  DualWarningLabel.Parent := WizardForm.WelcomePage;
+  DualWarningLabel.AutoSize := True;
+  DualWarningLabel.WordWrap := True;
+  DualWarningLabel.Left := WizardForm.WelcomeLabel2.Left;
+  DualWarningLabel.Width := WizardForm.WelcomeLabel2.Width;
+  DualWarningLabel.Font.Style := [fsBold];
+  //DualWarningLabel.Color := clRed;
+  DualWarningLabel.Top := WizardForm.WelcomePage.Height - DualWarningLabel.Height - ScaleY(20);
 
   
   // make accepting license the default
