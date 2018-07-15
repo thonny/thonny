@@ -51,6 +51,10 @@ setup(
         "Topic :: Text Editors",
       ],
       keywords="IDE education debugger",
+      project_urls={
+          'Source code': 'https://bitbucket.org/plas/thonny',
+          'Bug tracker': 'https://bitbucket.org/plas/thonny/issues',
+      },
       platforms=["Windows", "macOS", "Linux"],
       install_requires=requirements,
       python_requires=">=3.5",
