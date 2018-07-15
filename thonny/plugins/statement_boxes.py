@@ -127,8 +127,15 @@ def print_tree(node, level=0):
         for child in node.children:
             print_tree(child, level+1)
 
+def clear_tags(text):
+    for pos in ["ver", "hor"]:
+        for top in [True, False]:
+            for bottom in [True, False]:
+                text.tag_remove("%s_%s_%s" % (pos, top, bottom), "1.0", "end")
+
 def add_tags(text):
     source = text.get("1.0", "end")
+    clear_tags(text)
     tree = jedi_utils.parse_source(source)
     
     print_tree(tree)
@@ -165,7 +172,7 @@ def add_tags(text):
             # exceptions: several statements on the same line (semicoloned statements)
             # also unclosed parens in if-header  
             for lineno in range(start_line, 
-                                end_line + (1 if end_col > 0 else 0)):
+                                end_line if end_col == 0 else end_line+1):
             
                 top = (lineno == start_line and lineno > 1)
                 bottom = False # start_line == end_line-1
@@ -174,7 +181,8 @@ def add_tags(text):
                 if top or bottom:
                     text.tag_add("hor_%s_%s" % (top, bottom), 
                                  "%d.%d" % (lineno, start_col), 
-                                 "%d.%d" % (lineno+1, 0))
+                                 "%d.%d" % (lineno+1 if end_col == 0 else lineno,
+                                            0))
                     
                     print("hor_%s_%s" % (top, bottom), 
                                  "%d.%d" % (lineno, start_col), 
@@ -227,9 +235,10 @@ def configure_and_add_tags(text):
     add_tags(text)
         
 
-def load_plugin() -> None:
+def _load_plugin() -> None:
     wb = get_workbench() 
 
     wb.set_default("view.program_structure", False)
     wb.bind("Save", handle_editor_event, True)
     wb.bind("Open", handle_editor_event, True)
+    wb.bind_class("CodeViewText", "<<TextChange>>", handle_events, True)
