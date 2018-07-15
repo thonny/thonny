@@ -8,6 +8,7 @@
 .idea
 .cache
 .pytest_cache
+.mypy_cache
 .DS_Store
 __pycache__
 dist
