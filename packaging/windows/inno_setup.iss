@@ -1,10 +1,18 @@
 ﻿; Give AppVer from command line, eg:
 ; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 inno_setup.iss 
 ; #define AppVer "0.0.0"
-; #define SourceFolder "set_source_folder_from_command_line"
-
+; #define SourceFolder "set source folder from command line"
+#define Scope "user"
 #define AppUserModelID "Thonny.Thonny"
 #define ThonnyPyProgID "Thonny.py"
+#define PrivReq "lowest"
+
+#if Scope == "system"
+#define RegistryRoot "HKLM"
+#else
+#define RegistryRoot "HKCU"
+#endif
+
 
 [Setup]
 AppId=Thonny
@@ -27,21 +35,31 @@ DefaultGroupName=Thonny
 AlwaysShowDirOnReadyPage=yes
 ; TODO: always show for admin install?
 DisableDirPage=auto
-DefaultDirName={param:Path|{userpf}\Thonny}
 DirExistsWarning=auto
 UsePreviousAppDir=yes
 
-DisableReadyPage=yes
+DisableReadyPage=no
 LicenseFile=license-for-win-installer.txt
 OutputDir=dist
-OutputBaseFilename=thonny-{#AppVer}
 Compression=lzma2/ultra
 SolidCompression=yes
-WizardImageFile=inno_setup.bmp
-PrivilegesRequired=lowest
+WizardImageFile=screenshot_with_logo.bmp
 ChangesAssociations=yes
 ; Request extra space for precompiling libraries
 ExtraDiskSpaceRequired=25000000
+
+; Note that DefaultDirName can be overridden with installer's /DIR=... parameter
+DefaultDirName={code:ProposedDir}
+; conditional part
+#if Scope == "system"
+PrivilegesRequired=admin
+OutputBaseFilename=thonny-{#AppVer}-all-users
+#else
+PrivilegesRequired=lowest
+OutputBaseFilename=thonny-{#AppVer}-single-user
+#endif
+
+
 
 ; Signing
 ; Certum Unizeto provides free certs for open source
@@ -56,14 +74,16 @@ ExtraDiskSpaceRequired=25000000
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
-[Files]
-Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
-
 [InstallDelete]
-; TODO: dangerous, when user specifies a bad app
+; TODO: dangerous, when user specified a bad directory
 Type: filesandordirs; Name: "{app}\*"
 
+; Delete old shortcut
+Type: filesandordirs; Name: "{userstartmenu}\Thonny"
+Type: filesandordirs; Name: "{userstartmenu}\Thonny.lnk"
 
+
+; LEFTOVERS FROM OBSOLETE VERSIONS
 ; Delete old format settings. New filename is configuration.ini
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
 ; Delete backend directory (Thonny occasionally fails to delete it at runtime)
@@ -73,9 +93,9 @@ Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Python35"
 ; TEMP
 ;Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\BundledPython36"
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Py36"
-; Delete old shortcut
-Type: filesandordirs; Name: "{userstartmenu}\Thonny"
-Type: filesandordirs; Name: "{userstartmenu}\Thonny.lnk"
+
+[Files]
+Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
 [Icons]
 Name: "{userprograms}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
@@ -89,51 +109,40 @@ Name: "{userdesktop}\Thonny"; Filename: "{app}\thonny.exe"; IconFilename: "{app}
 ; http://msdn.microsoft.com/en-us/library/windows/desktop/ee872121%28v=vs.85%29.aspx
 ; https://docs.microsoft.com/en-us/windows/desktop/shell/app-registration
 ; TODO: investigate also SupportedProtocols subkey of this key
-Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny.exe"; Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Microsoft\Windows\CurrentVersion\App Paths\thonny.exe"; ValueType: string; ValueName: "";                 ValueData: "{app}\thonny.exe"; Flags: uninsdeletekey
 
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "";                 ValueData: "Thonny";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "FriendlyAppName";  ValueData: "Thonny";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe";                       ValueType: string; ValueName: "AppUserModelID";   ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".py";              ValueData: "";        Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\SupportedTypes";        ValueType: string; ValueName: ".pyw";             ValueData: "";        Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\shell\open\command";    ValueType: string; ValueName: "";                 ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Applications\thonny.exe\shell\Edit with Thonny\command";   ValueType: string; ValueName: "";      ValueData: """{app}\thonny.exe"" ""%1"""; Flags: uninsdeletekey
 
 ; Add link to Thonny under existing Python.File ProgID
-Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny"; ValueType: none; Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny"; ValueType: none; Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\Python.File\shell\Edit with Thonny\command"; ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 ; Create separate ProgID (Thonny.py) which represents Thonny's ability to handle Python files
 ; These settings will be used when user chooses Thonny as default program for opening *.py files
-Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
-Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
-;Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "EditFlags"; TODO: https://docs.microsoft.com/en-us/windows/desktop/api/Shlwapi/ne-shlwapi-filetypeattributeflags
-Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "";                 ValueData: "Python file";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "FriendlyTypeName"; ValueData: "Python file";  Flags: uninsdeletekey
+Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "AppUserModelID"; ValueData: "{#AppUserModelID}";  Flags: uninsdeletekey
+;Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}"; ValueType: string; ValueName: "EditFlags"; TODO: https://docs.microsoft.com/en-us/windows/desktop/api/Shlwapi/ne-shlwapi-filetypeattributeflags
+Root: {#RegistryRoot}; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\open\command";     ValueType: string; ValueName: ""; ValueData: """{app}\thonny.exe"" ""%1""";  Flags: uninsdeletekey
 
 ; Relate this ProgID with *.py and *.pyw extensions
 ; https://docs.microsoft.com/en-us/windows/desktop/shell/how-to-include-an-application-on-the-open-with-dialog-box
-Root: HKCU; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
-Root: HKCU; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: {#RegistryRoot}; Subkey: "Software\Classes\.py\OpenWithProgIds";  ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
+Root: {#RegistryRoot}; Subkey: "Software\Classes\.pyw\OpenWithProgIds"; ValueType: string; ValueName: "{#ThonnyPyProgID}";   Flags: uninsdeletevalue
 
 ; Add "Python file" to Explorer's "New" context menu (don't remove on uninstallation)
-Root: HKCU; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueData: "Python.File";  
-Root: HKCU; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueName: "NullFile"; ValueData: "";  
+Root: {#RegistryRoot}; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueData: "Python.File";  
+Root: {#RegistryRoot}; Subkey: "Software\Classes\.py\ShellNew";  ValueType: string; ValueName: "NullFile"; ValueData: "";  
 
 ; Cleaning up old stuff
 ; Was: Restore "Edit with IDLE" when selecting Thonny as default opener
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\Edit with IDLE"; ValueType: none; Flags: deletekey dontcreatekey uninsdeletekey
-
-; Register Thonny under Default Programs
-; http://superuser.com/questions/51264/how-do-i-add-new-applications-to-the-set-default-programs-list-in-windows-vist
-; http://msdn.microsoft.com/en-us/library/windows/desktop/cc144154%28v=vs.85%29.aspx
-; Unfortunately HKLM can't be written without elevating permissions. I chose user-install over Default Programs
-; Root: HKLM; Subkey: "Software\RegisteredApplications"; ValueType: string; ValueName: "Thonny"; ValueData: "Software\Thonny\Capabilities"; Flags: uninsdeletevalue
-; Root: HKLM; Subkey: "Software\Thonny"; ValueType: none;  Flags: uninsdeletekey
-; Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationName"; ValueData: "Thonny";  Flags: uninsdeletekey
-; Root: HKLM; Subkey: "Software\Thonny\Capabilities"; ValueType: string; ValueName: "ApplicationDescription"; ValueData: "Thonny is Python IDE for beginners";  Flags: uninsdeletekey
-; Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".py";  ValueData: "Thonny.py";  Flags: uninsdeletekey
-; Root: HKLM; Subkey: "Software\Thonny\Capabilities\FileAssociations"; ValueType: string; ValueName: ".pyw"; ValueData: "Thonny.py";  Flags: uninsdeletekey
 
 [Run]
 Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."; StatusMsg: "Compiling standard library..."
@@ -141,12 +150,10 @@ Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."; StatusMsg: "Compil
 
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}\*"
-Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\backend"
+Type: filesandordirs; Name: "{app}"
 
 [Messages]
-ClickNext=
-WelcomeLabel1=Installer for Thonny {#AppVer}
-WelcomeLabel2=Click "Next"! %n%n-.-- . .- .... --..--   .- ... -.-. .. ..   .- .-. -   .-- --- ..- .-.. -..   .... .- ...- .   -... . . -.   -... . - - . .-. --..--   -... ..- -   .-- .. - ....   ...- .- .-. .. .- -... .-.. . -....- .-- .. -.. - ....   ..-. --- -. -   .. - .----. ...   -. ---   --. --- --- -.. .-.-.-  %n%n..-. .. .-. ... -   ..   .-- .- ...   -- . ... ... .. -. --.   .-- .. - ....   -.. .. ... - ..- - .. .-.. ...   .. -. ... - .- .-.. .-.. . .-. --..--   -... ..- -   .-.. --- --- -.- ...   .-.. .. -.- .   .-- .. -. .. -. ... -   .. -. ... - .- .-.. .-.. . .-.   -.. --- . ... -. .----. -   .-. ..- -.   - .... .   .--. --- ... -   .. -. ... - .- .-.. .-.. .- - .. --- -.   ... -.-. .-. .. .--. -   .-- .... . -.   ..- -. .. -. ... - .- .-.. .-.. .. -. --.   - .... .   .- .--. .--. .-.-.-   ... ---   ..   .-- . -. -   ..-. --- .-.   .. -. -. ---   ... . - ..- .--.   .- -. -..   .. .----. --   .-. . .- .-.. .-.. -.--   .... .- .--. .--. -.--   .-- .. - ....   .. - .-.-.-   - .... .- -. -.-   -.-- --- ..- --..--   .--- --- .-. -.. .- -.   .-. ..- ... ... . .-.. .-.. 
+ClickNext=Kliki nekst
 FinishedHeadingLabel=Great success!
 FinishedLabel=[name] is now installed. Run it via shortcut or right-click a *.py file and select "Edit with Thonny".%n%n%n/ \ / \ / \ / / / / \ / / / \ \ / / / / \ / / \ \ / / / / / \ \ \ \ \ \ / \ / / / / \ \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / / / / / / / / / \ / \ / \ \ \ / / / \ \ \ / \ \ \ \ / \ / \ \ / / \ \ \ / / / \ \ \ / \ / \ / / \ / \ / \ \ / \ \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / \ / 
 
@@ -155,17 +162,58 @@ ClickFinish=
 
 [Code]
 
+function ForAllUsers(): Boolean;
+begin
+    Result := IsAdminLoggedOn();
+end;
 
-//procedure CurPageChanged(CurPageID: Integer);
-//;begin
-//  if CurPageID = wpLicense then
-//    WizardForm.NextButton.Caption := SetupMessage(msgButtonInstall)
-//  else if CurPageID <> wpFinished then
-//    WizardForm.NextButton.Caption := SetupMessage(msgButtonNext);
-//end;
+function ForThisUser(): Boolean;
+begin
+    Result := not IsAdminLoggedOn();
+end;
+
+function ProposedDir(Param: String): String;
+begin
+    if ExpandConstant('{param:DIR|-}') <> '-' then
+      Result := ExpandConstant('{param:DIR}')
+    else if ForAllUsers() then
+      Result := ExpandConstant('{pf}\Thonny')
+    else
+      Result := ExpandConstant('{userpf}\Thonny');
+end;
 
 procedure InitializeWizard;
+var
+MoreInfoLabel: TLabel;
 begin
+  WizardForm.WelcomeLabel1.Caption := 'Welcome to using Thonny!';
+
+  if ForAllUsers() then
+  begin
+    WizardForm.WelcomeLabel2.Caption := 'This wizard will install Thonny {#AppVer} for all users.';
+  end
+  else
+  begin
+    WizardForm.WelcomeLabel2.Caption := 'This wizard will install Thonny {#AppVer} for your account.';
+  end;
+
+  WizardForm.WelcomeLabel2.AutoSize := True;
+
+  MoreInfoLabel := TLabel.Create(WizardForm);
+  MoreInfoLabel.Parent := WizardForm.WelcomePage;
+  MoreInfoLabel.AutoSize := True;
+  MoreInfoLabel.WordWrap := True;
+  MoreInfoLabel.Left := WizardForm.WelcomeLabel2.Left;
+  MoreInfoLabel.Width := WizardForm.WelcomeLabel2.Width;
+  MoreInfoLabel.Top := WizardForm.WelcomeLabel2.Top + WizardForm.WelcomeLabel2.Height + ScaleY(20);
+  MoreInfoLabel.Caption := 'If you want to install Thonny for all users, cancel the installer and run it as administrator '
+      + '(right-click the installer executable and select "Run as administrator").';
+  MoreInfoLabel.Font.Style := [fsItalic];
+
+  //MoreInfoLabel.Align := alClient;
+
+  
+  // make accepting license the default
   WizardForm.LicenseAcceptedRadio.Checked := True;
 end;
 
