@@ -114,13 +114,16 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         return sorted(result)
     
     def _get_interpreters_from_windows_registry(self):
+        # https://github.com/python/cpython/blob/master/Tools/msi/README.txt
         import winreg
         result = set()
         for key in [winreg.HKEY_LOCAL_MACHINE,
                     winreg.HKEY_CURRENT_USER]:
-            for version in ["3.4",
-                            "3.5", "3.5-32", "3.5-64",
-                            "3.6", "3.6-32", "3.6-64"]:
+            for version in ["3.5", "3.5-32", "3.5-64",
+                            "3.6", "3.6-32", "3.6-64",
+                            "3.7", "3.7-32", "3.7-64",
+                            "3.8", "3.8-32", "3.8-64",
+                            ]:
                 try:
                     for subkey in [
                         'SOFTWARE\\Python\\PythonCore\\' + version + '\\InstallPath',
