@@ -92,6 +92,9 @@ Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Python35"
 ;Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\BundledPython36"
 Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Py36"
 
+[Tasks]
+Name: CreateDesktopIcon; Description: "Create desktop icon"; Flags: unchecked;
+
 [Files]
 Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs
 
@@ -100,7 +103,7 @@ Name: "{userprograms}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonn
 Name: "{code:GetActualCommonPrograms}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 
 Name: "{userdesktop}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
-Name: "{code:GetActualCommonDesktop}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{code:GetActualCommonDesktop}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"; Tasks: CreateDesktopIcon
 
 
 [Registry]
@@ -178,7 +181,7 @@ Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\.py\ShellNew"; 
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\Edit with IDLE"; ValueType: none; Flags: deletekey dontcreatekey uninsdeletekey
 
 [Run]
-Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."; StatusMsg: "Compiling standard library..."
+;Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."; StatusMsg: "Compiling standard library..."
 
 
 [UninstallDelete]
@@ -187,12 +190,14 @@ Type: filesandordirs; Name: "{app}"
 
 [Messages]
 FinishedHeadingLabel=Great success!
-FinishedLabel=[name] is now installed. Run it via shortcut or right-click a *.py file and select "Edit with Thonny".%n%n%n/ \ / \ / \ / / / / \ / / / \ \ / / / / \ / / \ \ / / / / / \ \ \ \ \ \ / \ / / / / \ \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / / / / / / / / / \ / \ / \ \ \ / / / \ \ \ / \ \ \ \ / \ / \ \ / / \ \ \ / / / \ \ \ / \ / \ / / \ / \ / \ \ / \ \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / / / / \ \ \ \ \ \ / \ / / \ / \ \ \ \ / / \ / \ / \ / / / / / \ \ \ \ / / \ / / / / \ / \ \ \ / / \ / / \ / / \ / / \ / / / \ \ \ \ \ \ / / \ \ / \ / / \ / / / \ / / / \ / / / / \ / / \ / / / \ \ \ \ / \ \ / \ \ \ / \ \ \ / \ \ / / \ / \ \ \ / \ / / \ / \ \ / \ / \ \ / \ / / \ \ / / / \ \ \ / \ / / \ / / / / \ \ \ / / \ / / \ / / / / \ / / / / / \ \ \ / \ / \ / \ / / \ / / \ / 
 
-ClickFinish=
 
 
 [Code]
+
+var
+  QuoteLabel: TLabel;
+  Upgraded : Boolean;
 
 function GetActualCommonPrograms(Param: String): String;
 begin
@@ -237,11 +242,30 @@ begin
       Result := ExpandConstant('{userpf}\Thonny');
 end;
 
+function GetRandomQuote(): String;
+var
+    Quotes: array[0..9] of string;
+begin
+    Quotes[0] := 'Ninety-ninety rule: The first 90 percent of the code accounts for the first 90 percent of the development time. The remaining 10 percent of the code accounts for the other 90 percent of the development time.'#13#10'– Tom Cargill ';
+    Quotes[1] := 'The Zen of Python, by Tim Peters:'#13#10'[...]'#13#10'Now is better than never.'#13#10'[...]';
+    Quotes[2] := 'Give someone a program, frustrate them for a day; teach them how to program, frustrate them for a lifetime.'#13#10#13#10'– David Leinweber ';
+    Quotes[3] := 'Talk is cheap. Show me the code.'#13#10#13#10'– Linus Torvalds ';
+    Quotes[4] := 'Every great developer you know got there by solving problems they were unqualified to solve until they actually did it.'#13#10#13#10'– Patrick McKenzie ';
+    Quotes[5] := 'Formal education will make you a living. Self-education will make you a fortune.'#13#10#13#10'– Jim Rohn ';
+    Quotes[6] := 'First do it, then do it right, then do it better.'#13#10#13#10'– Addy Osmani ';
+    Quotes[7] := 'If you want to set off and go develop some grand new thing, you don''t need millions of dollars of capitalization. You need enough pizza and Diet Coke to stick in your refrigerator, a cheap PC to work on and the dedication to go through with it.'#13#10'– John Carmack ';
+    Quotes[8] := 'Computers are useless. They can only give you answers.'#13#10#13#10'– Pablo Picasso ';
+    Quotes[9] := 'The best way to predict the future is to invent it.'#13#10#13#10'– Alan Kay ';
+
+    Result := Quotes[StrToInt(GetDateTimeString('ss', #0, #0)) mod Length(Quotes)];
+end;
+
 procedure InitializeWizard;
 var
-MoreInfoLabel: TLabel;
-DualWarningLabel: TLabel;
+  MoreInfoLabel: TLabel;
+  DualWarningLabel: TLabel;
 begin
+  Upgraded := False;
   WizardForm.WelcomeLabel1.Caption := 'Welcome to using Thonny!';
 
   MoreInfoLabel := TLabel.Create(WizardForm);
@@ -260,7 +284,8 @@ begin
     end
     else if InstalledForAllUsers() then
     begin
-      WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.'
+      WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.';
+      Upgraded := True;
     end;
   end
   else  // single user
@@ -275,9 +300,10 @@ begin
     end
     else if InstalledForThisUser() then
     begin
-      WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.'
+      WizardForm.WelcomeLabel2.Caption := 'This wizard will upgrade Thonny to version {#AppVer}.';
       MoreInfoLabel.Caption := 'If you want to install Thonny for all users, cancel the installer, uninstall Thonny from your account and run the installer again as administrator '
           + '(right-click the installer executable and select "Run as administrator").';
+      Upgraded := True;
     end
     else
     begin
@@ -286,6 +312,7 @@ begin
     end;
 
   end;
+
 
   WizardForm.WelcomeLabel2.AutoSize := True;
 
@@ -305,9 +332,46 @@ begin
   DualWarningLabel.Font.Style := [fsBold];
   //DualWarningLabel.Color := clRed;
   DualWarningLabel.Top := WizardForm.WelcomePage.Height - DualWarningLabel.Height - ScaleY(20);
-
   
+  // Quotes
+  QuoteLabel := TLabel.Create(WizardForm);
+  QuoteLabel.Caption := GetRandomQuote();
+
+  QuoteLabel.Parent := WizardForm.FinishedPage;
+
   // make accepting license the default
   WizardForm.LicenseAcceptedRadio.Checked := True;
+
 end;
 
+procedure CurPageChanged(CurPageID: Integer);
+begin
+    if CurPageID = wpFinished then
+    begin
+      if Upgraded then
+        WizardForm.FinishedLabel.Caption := 'Thonny is now upgraded.'
+      else
+        WizardForm.FinishedLabel.Caption := 'Thonny is now installed.'
+      end;
+      WizardForm.FinishedLabel.Caption := WizardForm.FinishedLabel.Caption 
+        + ' Run it via shortcut or right-click a *.py file and select "Edit with Thonny".';
+
+      WizardForm.FinishedLabel.AutoSize := True;
+
+      QuoteLabel.WordWrap := True;
+      QuoteLabel.Width := round(WizardForm.FinishedLabel.Width * 0.8);
+      QuoteLabel.AutoSize := True;
+      
+      // for some reason AutoSize doesn't work for longer quotes -- they are cropped from the bottom
+      QuoteLabel.Height := ScaleY(60);
+      if Length(QuoteLabel.Caption) > 100 then
+      begin
+        QuoteLabel.Height := ScaleY(80);
+      end;
+      QuoteLabel.Left := WizardForm.FinishedLabel.Left + (WizardForm.FinishedLabel.Width - QuoteLabel.Width);
+      QuoteLabel.Alignment := taRightJustify;
+      //QuoteLabel.Font.Style := [fsItalic]; // causes cropping in leftmost letters
+      
+      QuoteLabel.Top := WizardForm.FinishedPage.Height - QuoteLabel.Height - ScaleY(20);
+    end;
+end.
