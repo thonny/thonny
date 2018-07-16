@@ -1,20 +1,17 @@
-# Utils to handle different jedi versions
+"""Utils to handle different jedi versions
+
+Because of Debian Stretch, Thonny needs to support jedi 0.10,
+which doesn't use separate parso
+"""
+
 
 def import_tree():
-    try:
-        # jedi 0.11
-        from parso.python import tree
-    except ImportError:
-        try:
-            # jedi 0.10
-            from jedi.parser.python import tree
-        except ImportError:
-            # jedi 0.9
-            try:
-                from jedi.parser import tree
-            except:
-                # older versions
-                tree = None
+    if get_version_tuple() < (0,11):
+        # make sure not to import parso in this case, even if it exits
+        from jedi.parser.python import tree  # @UnresolvedImport @UnusedImport
+    else:
+        # assume older versions, which use parso
+        from parso.python import tree  # @UnresolvedImport @UnusedImport @Reimport
     
     return tree
 
@@ -56,7 +53,7 @@ def get_module_node(script):
 
 def is_scope(node):
     try:
-        # jedi 0.11
+        # jedi 0.11 and older
         from jedi import parser_utils
         return parser_utils.is_scope(node)
     except ImportError:
