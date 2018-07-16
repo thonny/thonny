@@ -2,6 +2,11 @@
 Version history
 ===============
 
+2.1.19 (2018-07-16)
+===================
+* FIXED #467: Error when running Thonny with pythonw (regression from 2.1.18)
+* ENHANCEMENT: New Windows installer (run as administrator for all-users install)
+
 2.1.18 (2018-06-22)
 ===================
 * FIXED #450: Locals marker doesn't work with jedi 0.12
