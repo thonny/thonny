@@ -247,7 +247,7 @@ var
     Quotes: array[0..9] of string;
 begin
     Quotes[0] := 'Ninety-ninety rule: The first 90 percent of the code accounts for the first 90 percent of the development time. The remaining 10 percent of the code accounts for the other 90 percent of the development time.'#13#10'– Tom Cargill ';
-    Quotes[1] := 'The Zen of Python, by Tim Peters:'#13#10'[...]'#13#10'Now is better than never.'#13#10'[...]';
+    Quotes[1] := 'Now is better than never.'#13#10'– Tim Peters ';
     Quotes[2] := 'Give someone a program, frustrate them for a day; teach them how to program, frustrate them for a lifetime.'#13#10#13#10'– David Leinweber ';
     Quotes[3] := 'Talk is cheap. Show me the code.'#13#10#13#10'– Linus Torvalds ';
     Quotes[4] := 'Every great developer you know got there by solving problems they were unqualified to solve until they actually did it.'#13#10#13#10'– Patrick McKenzie ';
