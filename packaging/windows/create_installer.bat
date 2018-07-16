@@ -6,11 +6,12 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy pythonny\* %BUILDDIR% /S /E /K>NUL
+xcopy .\Python36\* %BUILDDIR% /S /E /K>NUL
+@echo ............... COPYING OTHER STUFF ...................................
+copy ThonnyRunner36\Release\thonny.exe %BUILDDIR% /Y
+xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
+xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
-
-@echo ............... UPDATING PIP ...................................
-@rem %BUILDDIR%\python -m pip install --upgrade pip
 
 @echo ............... INSTALLING JEDI ...................................
 %BUILDDIR%\python -m pip install jedi==0.12.*
