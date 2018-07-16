@@ -102,7 +102,7 @@ Source: "{#SourceFolder}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 Name: "{userprograms}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 Name: "{code:GetActualCommonPrograms}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
 
-Name: "{userdesktop}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"
+Name: "{userdesktop}\Thonny"; Check: StartedForThisUser; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"; Tasks: CreateDesktopIcon
 Name: "{code:GetActualCommonDesktop}\Thonny"; Check: StartedForAllUsers; Filename: "{app}\thonny.exe"; IconFilename: "{app}\thonny.exe"; Tasks: CreateDesktopIcon
 
 
