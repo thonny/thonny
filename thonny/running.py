@@ -461,7 +461,7 @@ class Runner:
                       .replace("thonny.exe", "python.exe") 
                       .replace("pythonw.exe", "python.exe"))
             
-            cmd = [exe + "ee", "-c", "print('Hi!'); input()"]
+            cmd = [exe, "-c", "print('Hi!'); input()"]
             child = subprocess.Popen(cmd,
                                      stdin=subprocess.PIPE,
                                      stdout=subprocess.PIPE,
