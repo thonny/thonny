@@ -2,7 +2,7 @@
 
 set -e
 
-OPENSSL_VERSION="1.1.0g"
+OPENSSL_VERSION="1.1.0h"
 
 wget http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz
 tar -xvzf openssl-$OPENSSL_VERSION.tar.gz
