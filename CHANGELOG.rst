@@ -6,6 +6,7 @@ Version history
 ===================
 * FIXED #467: Error when running Thonny with pythonw (regression from 2.1.18)
 * ENHANCEMENT: New Windows installer (run as administrator for all-users install)
+* ENHANCEMENT: Bundled Python upgraded to version 3.6.6
 
 2.1.18 (2018-06-22)
 ===================
