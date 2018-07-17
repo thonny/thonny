@@ -23,13 +23,13 @@ FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.6/
 
 # install jedi #####################################################
-$PYTHON_CURRENT/bin/python3.6 -m pip install jedi==0.10.2
+$PYTHON_CURRENT/bin/python3.6 -m pip install jedi==0.12.*
 
 # install certifi #####################################################
 $PYTHON_CURRENT/bin/python3.6 -m pip install certifi
 
 # install thonny #####################################################
-$PYTHON_CURRENT/bin/python3.6 -m pip install --pre --no-cache-dir thonny
+$PYTHON_CURRENT/bin/python3.6 -m pip install --no-cache-dir thonny
 rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
 
 # clean unnecessary stuff ###################################################
@@ -83,6 +83,8 @@ sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
 
 # sign frameworks and app ##############################
+# NB! Check that framework has Current link set (https://developer.apple.com/library/archive/technotes/tn2206/_index.html#//apple_ref/doc/uid/DTS40007919-CH1-TNTAG13)
+# TODO: Consider signing with —deep
 codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain build/Thonny.app/Contents/Frameworks/Tcl.framework
 codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain build/Thonny.app/Contents/Frameworks/Tk.framework
 codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain build/Thonny.app/Contents/Frameworks/Python.framework
