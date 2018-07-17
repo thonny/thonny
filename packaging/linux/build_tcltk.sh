@@ -12,7 +12,7 @@ cd tcl$VERSION/unix
 make install
 cd ../..
 
-# wget http://prdownloads.sourceforge.net/tcl/tk8.6.7-src.tar.gz
+# wget http://prdownloads.sourceforge.net/tcl/tk8.6.8-src.tar.gz
 wget ftp://ftp.tcl.tk/pub/tcl/tcl8_6/tk$VERSION-src.tar.gz
 tar -xzf tk$VERSION-src.tar.gz
 cd tk$VERSION/unix

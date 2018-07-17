@@ -55,6 +55,18 @@ Version history
 * TECHNICAL: Saving an editor now forces writing to disk (see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it)
 
 
+=======
+2.1.20 (2018-07-16)
+===================
+* FIXED: Problem when jedi 0.10 and parso are both installed
+
+2.1.19 (2018-07-16)
+===================
+Updates in this version are relevant only on Windows
+
+* FIXED #467: Error when running Thonny with pythonw on Windows (regression from 2.1.18)
+* ENHANCEMENT: New Windows installer (run as administrator for all-users install)
+* ENHANCEMENT: Upgraded Python to version 3.6.6 in Thonny+Python bundles 
 
 2.1.18 (2018-06-22)
 ===================
