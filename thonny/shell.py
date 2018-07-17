@@ -5,14 +5,14 @@ import re
 from tkinter import ttk
 import traceback
 
-from thonny import memory, roughparse
+from thonny import memory, roughparse, ui_utils
 from thonny.common import ToplevelCommand, ToplevelResponse
 from thonny.misc_utils import running_on_mac_os, shorten_repr, parse_cmd_line, construct_cmd_line
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration,\
     scrollbar_style
 import tkinter as tk
 from thonny import get_workbench, get_runner
-from thonny.codeview import PythonText
+from thonny.codeview import PythonText, get_syntax_options_for_tag
 from thonny.tktextext import index2line
 import logging
 
@@ -119,6 +119,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
                                 font="IOFont")
+        if ui_utils.get_tk_version_info() >= (8,6,0):
+            self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
+
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
