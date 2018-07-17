@@ -55,7 +55,10 @@ Version history
 * TECHNICAL: Saving an editor now forces writing to disk (see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it)
 
 
-=======
+2.1.21 (2018-07-17)
+===================
+* FIXED #471: Another problem when Thonny uses jedi 0.11 or newer
+
 2.1.20 (2018-07-16)
 ===================
 * FIXED: Problem when jedi 0.10 and parso are both installed
