@@ -6,7 +6,7 @@ which doesn't use separate parso
 
 
 def import_tree():
-    if get_version_tuple() < (0,11):
+    if get_version_tuple() < (0,11,0):
         # make sure not to import parso in this case, even if it exits
         from jedi.parser.python import tree  # @UnresolvedImport @UnusedImport
     else:

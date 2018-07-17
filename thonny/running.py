@@ -698,14 +698,24 @@ class CPythonProxy(BackendProxy):
         self._message_queue = None
     
     def _prepare_jedi(self):
-        """Make jedi available for the backend"""
+        """Make jedi (and parso) available for the backend"""
         
-        # Copy jedi
         import jedi
-        dirname = os.path.join(THONNY_USER_DIR, "jedi_" + str(jedi.__version__))
-        if not os.path.exists(dirname):
-            shutil.copytree(jedi.__path__[0], os.path.join(dirname, "jedi"))
-        return dirname
+        from thonny import jedi_utils 
+        target_dir = os.path.join(THONNY_USER_DIR, "jedi_" + str(jedi.__version__))
+        target_jedi_dir = os.path.join(target_dir, "jedi")
+        target_parso_dir = os.path.join(target_dir, "parso")
+        
+        if (not os.path.exists(target_jedi_dir)):
+            shutil.copytree(jedi.__path__[0], target_jedi_dir)
+        
+        # Newer jedis require also parso
+        if (not os.path.exists(target_parso_dir)
+            and jedi_utils.get_version_tuple() >= (0,11,0)):
+            import parso
+            shutil.copytree(parso.__path__[0], target_parso_dir)
+                
+        return target_dir
     
         # TODO: clean up old versions
     
