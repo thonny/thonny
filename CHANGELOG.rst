@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.21 (2018-07-17)
+===================
+* FIXED #471: Another problem when Thonny uses jedi 0.11 or newer
+
 2.1.20 (2018-07-16)
 ===================
 * FIXED: Problem when jedi 0.10 and parso are both installed
