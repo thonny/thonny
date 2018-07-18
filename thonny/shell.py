@@ -119,7 +119,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure("io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent,
                                 font="IOFont")
-        if ui_utils.get_tk_version_info() >= (8,6,0):
+        if ui_utils.get_tk_version_info() >= (8,6,6):
             self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
 
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
