@@ -1199,6 +1199,7 @@ class SubprocessDialog(tk.Toplevel):
     
     def __init__(self, master, proc, title, long_description=None, autoclose=True,
                  conclusion="Done."):
+        self._closed = False
         self._proc = proc
         self.stdout = ""
         self.stderr = ""
@@ -1275,6 +1276,9 @@ class SubprocessDialog(tk.Toplevel):
             self._stderr_thread.start()
         
         def poll_output_events():
+            if self._closed:
+                return
+            
             while len(self._event_queue) > 0:
                 stream_name, data = self._event_queue.popleft()
                 self.text.direct_insert("end", data, tags=(stream_name, ))
@@ -1292,7 +1296,7 @@ class SubprocessDialog(tk.Toplevel):
                     self._close()
                 else:
                     self.text.direct_insert("end", "\n\n" + self._conclusion)
-                self.text.see("end")
+                    self.text.see("end")
         
         poll_output_events()
         
@@ -1336,6 +1340,7 @@ class SubprocessDialog(tk.Toplevel):
             else:
                 return
         else:
+            self._closed = True
             self.destroy()
 
 def get_busy_cursor():
