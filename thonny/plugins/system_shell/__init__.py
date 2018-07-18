@@ -34,7 +34,7 @@ def open_system_shell():
     """Main task is to modify path and open terminal window.
     Bonus (and most difficult) part is executing a script in this window
     for recommending commands for running given python and related pip"""
-    python_interpreter = get_runner().get_interpreter_command()
+    python_interpreter = get_runner().get_executable()
     if python_interpreter is None:
         return
     

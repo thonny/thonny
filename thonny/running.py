@@ -385,8 +385,8 @@ class Runner:
             self._proxy.destroy()
             self._proxy = None
 
-    def get_interpreter_command(self) -> str:
-        return self._proxy.get_interpreter_command()
+    def get_executable(self) -> str:
+        return self._proxy.get_executable()
     
     def get_backend_proxy(self) -> "BackendProxy":
         return self._proxy
@@ -484,7 +484,7 @@ class BackendProxy:
         """Used in MicroPython proxies"""
         return True
     
-    def get_interpreter_command(self):
+    def get_executable(self):
         """Return system command for invoking current interpreter"""
         raise NotImplementedError()
     
@@ -721,7 +721,7 @@ class CPythonProxy(BackendProxy):
             else:
                 logging.debug("BACKEND: %s", data.strip())
         
-    def get_interpreter_command(self):
+    def get_executable(self):
         return self._executable
     
     def get_site_packages(self):
@@ -940,7 +940,7 @@ def create_backend_python_process(args, stdin=None, stdout=subprocess.PIPE, stde
     
     # TODO: if backend == frontend, then delegate to create_frontend_python_process
     
-    python_exe = get_runner().get_interpreter_command()
+    python_exe = get_runner().get_executable()
     
     env = create_pythonless_environment()
     env["PYTHONIOENCODING"] = "utf-8"

@@ -5,8 +5,8 @@ import webbrowser
 import tkinter as tk
 from tkinter import ttk, messagebox
 
-from thonny import misc_utils, tktextext, ui_utils, running
-from thonny import get_workbench, get_runner
+from thonny import misc_utils, tktextext, ui_utils, running, get_runner
+from thonny import get_workbench
 import subprocess
 from urllib.request import urlopen, urlretrieve
 import urllib.error
@@ -26,7 +26,8 @@ import thonny
 from distutils.version import StrictVersion, LooseVersion
 from tkinter.messagebox import showerror
 from os import makedirs
-from thonny.common import path_startswith, actual_path, InlineCommand
+from thonny.common import path_startswith, actual_path, InlineCommand,\
+    is_same_path
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
@@ -173,7 +174,7 @@ class PipDialog(tk.Toplevel):
     def _on_click_install(self):
         self._perform_action("install")
 
-    def _set_state(self, state, normal_cursor=False):
+    def _set_state(self, state, force_normal_cursor=False):
         self._state = state
         widgets = [self.listbox, 
                            # self.search_box, # looks funny when disabled 
@@ -185,12 +186,14 @@ class PipDialog(tk.Toplevel):
             for widget in widgets:
                 widget["state"] = tk.NORMAL
         else:
-            self.config(cursor=get_busy_cursor())
+            if force_normal_cursor:
+                self.config(cursor="")
+            else:
+                self.config(cursor=get_busy_cursor())
+                
             for widget in widgets:
                 widget["state"] = tk.DISABLED
         
-        if normal_cursor:
-            self.config(cursor="")
     
     def _get_state(self):
         return self._state
@@ -651,7 +654,7 @@ class BackendPipDialog(PipDialog):
         self._update_list(self._last_name_to_show)
          
     def _get_interpreter(self):
-        return get_runner().get_interpreter_command()
+        return get_runner().get_executable()
     
     def _create_python_process(self, args, stderr):
         proc = running.create_backend_python_process(args, stderr=stderr)
@@ -773,11 +776,16 @@ class PluginsPipDialog(PipDialog):
         banner = tk.Label(parent, background=bg)
         banner.grid(row=0, column=0, sticky="nsew")
         
-        banner_text = tk.Label(banner, text="NB! This dialog is for managing Thonny plug-ins and their dependencies.\n"
-                                + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n"
-                                + "\n"
-                                + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.",
-                                background=bg, justify="left")
+        banner_msg = ("This dialog is for managing Thonny plug-ins and their dependencies.\n"
+                     + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n")
+        
+        if is_same_path(self._get_interpreter(), get_runner().get_executable()):
+            banner_msg += "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n"
+        
+        banner_msg += ("\n"
+                     + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.")
+        
+        banner_text = tk.Label(banner, text=banner_msg, background=bg, justify="left")
         banner_text.grid(pady=10, padx=10)
         
         PipDialog._create_widgets(self, parent)
