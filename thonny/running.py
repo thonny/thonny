@@ -603,8 +603,7 @@ class CPythonProxy(BackendProxy):
         if self._executable not in [
             this_python,
             this_python.replace("python.exe", "pythonw.exe"),
-            this_python.replace("pythonw.exe", "python.exe"),
-            get_private_venv_executable()]:
+            this_python.replace("pythonw.exe", "python.exe")]:
             
             # Keep only the variables, that are not related to Python
             my_env = {name : my_env[name] for name in my_env 
