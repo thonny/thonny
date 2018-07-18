@@ -432,6 +432,8 @@ class PipDialog(tk.Toplevel):
         
         if self._get_active_version(name) != latest_stable_version:
             self.install_button["state"] = "normal"
+        else:
+            self.install_button["state"] = "disabled"
     
     def _is_read_only_package(self, name):
         dist = self._get_active_dist(name)
