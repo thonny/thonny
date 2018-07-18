@@ -99,6 +99,7 @@ class VM:
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
+                          usersitepackages=site.getusersitepackages(),
                           prefix=sys.prefix,
                           welcome_text="Python " + _get_python_version_string(),
                           executable=sys.executable,

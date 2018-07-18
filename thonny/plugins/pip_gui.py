@@ -26,7 +26,7 @@ import thonny
 from distutils.version import StrictVersion, LooseVersion
 from tkinter.messagebox import showerror
 from os import makedirs
-from thonny.common import path_startswith
+from thonny.common import path_startswith, actual_path
 import pkg_resources
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
@@ -35,7 +35,7 @@ class PipDialog(tk.Toplevel):
     def __init__(self, master):
         self._state = None # possible values: "listing", "fetching", "idle"
         self._process = None
-        self._installed_versions = {}
+        self._working_set_by_key = {}
         self.current_package_data = None
         
         tk.Toplevel.__init__(self, master)
@@ -93,7 +93,7 @@ class PipDialog(tk.Toplevel):
         listframe.columnconfigure(0, weight=1)
         
         self.listbox = ui_utils.ThemedListbox(listframe, activestyle="dotbox", 
-                                  width=20, height=15,
+                                  width=20, height=20,
                                   selectborderwidth=0, relief="flat",
                                   #highlightthickness=4,
                                   #highlightbackground="red",
@@ -138,10 +138,6 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("install_file", "<ButtonRelease-1>", self._handle_install_file_click)
         self.info_text.tag_bind("install_file", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("install_file", "<Leave>", lambda e: self.info_text.config(cursor=""))
-        self.info_text.tag_configure("target_directory", foreground=link_color, underline=True)
-        self.info_text.tag_bind("target_directory", "<ButtonRelease-1>", self._handle_target_directory_click)
-        self.info_text.tag_bind("target_directory", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
-        self.info_text.tag_bind("target_directory", "<Leave>", lambda e: self.info_text.config(cursor=""))
         
         default_font = tk.font.nametofont("TkDefaultFont")
         self.info_text.configure(font=default_font,
@@ -160,20 +156,17 @@ class PipDialog(tk.Toplevel):
         self.install_button = ttk.Button(self.command_frame, text=" Upgrade ",
                                          command=self._on_click_install)
         
-        if not self._read_only():
-            self.install_button.grid(row=0, column=0, sticky="w", padx=0)
+        self.install_button.grid(row=0, column=0, sticky="w", padx=0)
         
         self.uninstall_button = ttk.Button(self.command_frame, text="Uninstall",
                                            command=lambda: self._perform_action("uninstall"))
         
-        if not self._read_only():
-            self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5,0))
+        self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5,0))
         
         self.advanced_button = ttk.Button(self.command_frame, text="...", width=3,
                                           command=lambda: self._perform_action("advanced"))
         
-        if not self._read_only():
-            self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5,0))
+        self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5,0))
         
         self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
@@ -255,15 +248,12 @@ class PipDialog(tk.Toplevel):
     
     def _update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
+        pkg_resources._initialize_master_working_set()
         
-        data = []
-        
-        for dist in pkg_resources.working_set:
-            data.append({"name" : dist.project_name, "version" : dist.version})
+        self._working_set_by_key = {dist.key : dist for dist in pkg_resources.working_set} 
         
         self.listbox.delete(1, "end")
-        self._installed_versions = {entry["name"] : entry["version"] for entry in data}
-        for name in sorted(self._installed_versions.keys(), key=str.lower):
+        for name in sorted(self._working_set_by_key.keys()):
             self.listbox.insert("end", " " + name)
         
         if name_to_show is None:
@@ -307,7 +297,7 @@ class PipDialog(tk.Toplevel):
                                        + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n\n")
             
             if self._get_target_directory():
-                self.info_text.direct_insert("end", "Inspect packages' directory\n", ("caption",))
+                self.info_text.direct_insert("end", "Packages' directory\n", ("caption",))
                 self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
         else:            
             self.info_text.direct_insert("end", "Install from PyPI\n", ("caption",))
@@ -324,39 +314,74 @@ class PipDialog(tk.Toplevel):
             self.info_text.direct_insert("end", 'Start by selecting the package from the left.\n\n')
             
             if self._get_target_directory():
-                self.info_text.direct_insert("end", "Inspect target directory\n", ("caption",))
-                self.info_text.direct_insert("end", self._get_target_directory(), ("target_directory"))
+                self.info_text.direct_insert("end", "Target:  ", ("caption",))
+                if self._targets_virtual_environment():
+                    self.info_text.direct_insert("end", "virtual environment\n", ("caption",))
+                else:
+                    self.info_text.direct_insert("end", "user site packages\n", ("caption",))
+                    
+                self.info_text.direct_insert("end", "This dialog lists all available packages,"
+                                             + " but allows upgrading and uninstalling only packages from ")
+                self.info_text.direct_insert("end", self._get_target_directory(), ("url"))
+                self.info_text.direct_insert("end", ". New packages will be also installed into this directory."
+                                             + " Other locations must be managed by alternative means."
+                                             )
                 
         self._select_list_item(0)
     
     def _start_show_package_info(self, name):
         self.current_package_data = None
-        self.info_text.direct_delete("1.0", "end")
-        self.name_label["text"] = ""
-        self.name_label.grid()
-        self.command_frame.grid()
-        
-        installed_version = self._get_installed_version(name) 
-        if installed_version is not None:
-            self.name_label["text"] = name
-            self.info_text.direct_insert("end", "Installed version: ", ('caption',))
-            self.info_text.direct_insert("end", installed_version + "\n")
-        
-        
         # Fetch info from PyPI  
         self._set_state("fetching")
         # Follwing fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
         _start_fetching_package_info(name, None, self._show_package_info)
-    
-    def _generate_minimal_data(self, name):
-        return {
-            "info" : {'name' : name},
-            "releases" : {}
-            }
+        
+        self.info_text.direct_delete("1.0", "end")
+        self.name_label["text"] = ""
+        self.name_label.grid()
+        self.command_frame.grid()
+        
+        active_dist = self._get_active_dist(name) 
+        if active_dist is not None:
+            self.name_label["text"] = active_dist.project_name
+            self.info_text.direct_insert("end", "Installed version: ", ('caption',))
+            self.info_text.direct_insert("end", active_dist.version + "\n")
+            self.info_text.direct_insert("end", "Installed to: ", ('caption',))
+            self.info_text.direct_insert("end", actual_path(active_dist.location), ('url',))
+            self.info_text.direct_insert("end", "\n\n")
+            self._select_list_item(name)
+        else:
+            self._select_list_item(0)
 
+        # update gui
+        if self._is_read_only_package(name):
+            self.install_button.grid_remove()
+            self.uninstall_button.grid_remove()
+            self.advanced_button.grid_remove()
+            self._select_list_item(name)
+        else:
+            self.install_button.grid()
+            self.advanced_button.grid()
+            active_dist = self._get_active_dist(name)
+            
+            if active_dist is not None:
+                # existing package in target directory
+                self._select_list_item(name)
+                self.install_button["text"] = "Upgrade"
+                self.install_button["state"] = "disabled"
+                self.uninstall_button.grid()
+            else:
+                # new package
+                self._select_list_item(0)
+                self.install_button["text"] = "Install"
+                self.uninstall_button.grid_forget()
+
+    
     def _show_package_info(self, name, data, error_code=None):
+        self._set_state("idle")
+         
         self.current_package_data = data
         
         def write(s, tag=None):
@@ -374,7 +399,7 @@ class PipDialog(tk.Toplevel):
         if error_code is not None:
             if error_code == 404:
                 write("Could not find the package from PyPI.")
-                if not self._get_installed_version(name):
+                if not self._get_active_version(name):
                     # new package
                     write("\nPlease check your spelling!"
                           + "\nYou need to enter ")
@@ -383,6 +408,7 @@ class PipDialog(tk.Toplevel):
                     
             else:
                 write("Could not find the package info from PyPI. Error code: " + str(error_code))
+                
             return
         
         info = data["info"]
@@ -406,22 +432,16 @@ class PipDialog(tk.Toplevel):
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
             write_att("Requires", ", ".join(info["requires_dist"]))
         
-        if self._get_installed_version(info["name"]) is not None:
-            self.install_button["text"] = "Upgrade"
-            if not self._read_only():
-                self.uninstall_button.grid(row=0, column=1)
-            
-            self._select_list_item(info["name"])
-            if self._get_installed_version(info["name"]) == latest_stable_version:
-                self.install_button["state"] = "disabled"
-            else: 
-                self.install_button["state"] = "normal"
+        if self._get_active_version(name) != latest_stable_version:
+            self.install_button["state"] = "normal"
+    
+    def _is_read_only_package(self, name):
+        dist = self._get_active_dist(name)
+        if dist is None:
+            return False
         else:
-            self.install_button["text"] = "Install"
-            self.uninstall_button.grid_forget()
-            self._select_list_item(0)
-
-        self._set_state("idle")            
+            return actual_path(dist.location) != self._get_target_directory()
+        
     
     def _normalize_name(self, name):
         # looks like (in some cases?) pip list gives the name as it was used during install
@@ -463,7 +483,7 @@ class PipDialog(tk.Toplevel):
                 return
             
             args = install_args
-            if self._get_installed_version(name) is not None:
+            if self._get_active_version(name) is not None:
                 args.append("--upgrade")
             
             args.append(name)
@@ -546,15 +566,28 @@ class PipDialog(tk.Toplevel):
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
         if url is not None:
-            webbrowser.open(url)
+            if (url.startswith("http:") 
+                or url.startswith("https:")):
+                webbrowser.open(url)
+            elif os.path.isdir(url):
+                open_path_in_system_file_manager(url)                
     
     def _on_close(self, event=None):
         self.destroy()
         
-    def _get_installed_version(self, name):
-        for list_name in self._installed_versions:
-            if self._normalize_name(name) == self._normalize_name(list_name):
-                return self._installed_versions[list_name]
+    def _get_active_version(self, name):
+        dist = self._get_active_dist(name)
+        if dist is None:
+            return None
+        else:
+            return dist.version
+        
+    def _get_active_dist(self, name):
+        normname = self._normalize_name(name)
+        for key in self._working_set_by_key:
+            
+            if self._normalize_name(key) == normname:
+                return self._working_set_by_key[key]
         
         return None
 
@@ -569,8 +602,11 @@ class PipDialog(tk.Toplevel):
     def _get_interpreter(self):
         pass
     
-    def _use_user_install(self):
+    def _targets_virtual_environment(self):
         raise NotImplementedError()
+    
+    def _use_user_install(self):
+        return not self._targets_virtual_environment()
     
     def _get_target_directory(self):
         raise NotImplementedError()
@@ -582,7 +618,13 @@ class PipDialog(tk.Toplevel):
         return True
     
     def _read_only(self):
-        return False
+        if self._targets_virtual_environment():
+            return False
+        else:
+            # readonly if not in a virtual environment
+            # and user site packages is disabled
+            import site
+            return not site.ENABLE_USER_SITE
 
 class BackendPipDialog(PipDialog):
     def __init__(self, master):
@@ -616,15 +658,15 @@ class BackendPipDialog(PipDialog):
         else:
             self._provide_pip_install_instructions()
         
-    def _use_user_install(self):
-        return False
-    
     def _get_target_directory(self):
-        return self._backend_proxy.get_site_packages()
+        if self._targets_virtual_environment():
+            return self._backend_proxy.get_site_packages()
+        else:
+            return self._backend_proxy.get_user_site_packages()
     
-    def _read_only(self):
-        return not get_runner().using_venv()
-
+    def _targets_virtual_environment(self):
+        return get_runner().using_venv()
+    
 class PluginsPipDialog(PipDialog):
     def __init__(self, master):
         PipDialog.__init__(self, master)
@@ -649,6 +691,10 @@ class PluginsPipDialog(PipDialog):
     
     def _get_interpreter(self):
         return sys.executable.replace("thonny.exe", "python.exe")
+    
+    def _targets_virtual_environment(self):
+        # https://stackoverflow.com/a/42580137/261181
+        return hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
     
     def _create_python_process(self, args, stderr):
         proc = running.create_frontend_python_process(args, stderr=stderr)
@@ -675,20 +721,16 @@ class PluginsPipDialog(PipDialog):
             
         return True
     
-    def _use_user_install(self):
-        # True, unless we're in a virtualenv or venv
-        return not (hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix)
-    
     def _get_target_directory(self):
         if self._use_user_install():
             import site
             assert hasattr(site, "getusersitepackages")
-            return site.getusersitepackages()
+            return actual_path(site.getusersitepackages())
         else:
             for d in sys.path:
                 if (("site-packages" in d or "dist-packages" in d) 
                     and path_startswith(d, sys.prefix)):
-                    return d
+                    return actual_path(d)
             else:
                 return None
     

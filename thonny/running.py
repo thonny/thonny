@@ -502,6 +502,7 @@ class CPythonProxy(BackendProxy):
         self._proc = None
         self._message_queue = None
         self._sys_path = []
+        self._usersitepackages = None
         self._gui_update_loop_id = None
         self.in_venv = None
         self._start_new_process()
@@ -523,6 +524,9 @@ class CPythonProxy(BackendProxy):
         
         if "path" in msg:
             self._sys_path = msg["path"]
+        
+        if "usersitepackages" in msg:
+            self._usersitepackages = msg["usersitepackages"]
         
         if "prefix" in msg:
             self._sys_prefix = msg["prefix"]
@@ -728,6 +732,9 @@ class CPythonProxy(BackendProxy):
                 return d
         else:
             return None
+    
+    def get_user_site_packages(self):
+        return self._usersitepackages
     
     
     def _update_gui_updating(self, msg):
