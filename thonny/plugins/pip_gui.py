@@ -26,8 +26,7 @@ import thonny
 from distutils.version import StrictVersion, LooseVersion
 from tkinter.messagebox import showerror
 from os import makedirs
-from thonny.common import path_startswith, actual_path
-import pkg_resources
+from thonny.common import path_startswith, actual_path, InlineCommand
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
@@ -35,7 +34,7 @@ class PipDialog(tk.Toplevel):
     def __init__(self, master):
         self._state = None # possible values: "listing", "fetching", "idle"
         self._process = None
-        self._working_set_by_key = {}
+        self._active_distributions = {}
         self.current_package_data = None
         
         tk.Toplevel.__init__(self, master)
@@ -61,7 +60,7 @@ class PipDialog(tk.Toplevel):
         self._show_instructions()
         ui_utils.center_window(self, master)
         
-        self._update_list()
+        self._start_update_list()
     
     
     def _create_widgets(self, parent):
@@ -225,7 +224,7 @@ class PipDialog(tk.Toplevel):
         self.update_idletasks()
         
         # update list
-        self._update_list()
+        self._start_update_list()
         
         
     def _provide_pip_install_instructions(self):
@@ -246,21 +245,18 @@ class PipDialog(tk.Toplevel):
         return ("Alternatively, if you have an older pip installed, then you can install packages "
                                      + "on the command line (Tools → Open system shell...)")
     
-    def _update_list(self, name_to_show=None):
-        assert self._get_state() in [None, "idle"]
-        pkg_resources._initialize_master_working_set()
-        
-        self._working_set_by_key = {dist.key : dist for dist in pkg_resources.working_set} 
-        
+    def _start_update_list(self, name_to_show=None):
+        raise NotImplementedError()
+    
+    def _update_list(self, name_to_show):
         self.listbox.delete(1, "end")
-        for name in sorted(self._working_set_by_key.keys()):
+        for name in sorted(self._active_distributions.keys()):
             self.listbox.insert("end", " " + name)
         
         if name_to_show is None:
             self._show_instructions()
         else:
             self._start_show_package_info(name_to_show)
-    
         
     
     def _on_listbox_select(self, event):
@@ -345,11 +341,11 @@ class PipDialog(tk.Toplevel):
         
         active_dist = self._get_active_dist(name) 
         if active_dist is not None:
-            self.name_label["text"] = active_dist.project_name
+            self.name_label["text"] = active_dist["project_name"]
             self.info_text.direct_insert("end", "Installed version: ", ('caption',))
-            self.info_text.direct_insert("end", active_dist.version + "\n")
+            self.info_text.direct_insert("end", active_dist["version"] + "\n")
             self.info_text.direct_insert("end", "Installed to: ", ('caption',))
-            self.info_text.direct_insert("end", actual_path(active_dist.location), ('url',))
+            self.info_text.direct_insert("end", actual_path(active_dist["location"]), ('url',))
             self.info_text.direct_insert("end", "\n\n")
             self._select_list_item(name)
         else:
@@ -364,7 +360,6 @@ class PipDialog(tk.Toplevel):
         else:
             self.install_button.grid()
             self.advanced_button.grid()
-            active_dist = self._get_active_dist(name)
             
             if active_dist is not None:
                 # existing package in target directory
@@ -440,7 +435,7 @@ class PipDialog(tk.Toplevel):
         if dist is None:
             return False
         else:
-            return actual_path(dist.location) != self._get_target_directory()
+            return actual_path(dist["location"]) != self._get_target_directory()
         
     
     def _normalize_name(self, name):
@@ -518,7 +513,7 @@ class PipDialog(tk.Toplevel):
         _show_subprocess_dialog(self, proc, title)
         if action == "uninstall":
             self._show_instructions() # Make the old package go away as fast as possible
-        self._update_list(None if action == "uninstall" else name)
+        self._start_update_list(None if action == "uninstall" else name)
         
         
     
@@ -561,7 +556,7 @@ class PipDialog(tk.Toplevel):
             elements = re.split(",|:", inst_lines[0])
             name = elements[-1].strip()
         
-        self._update_list(name)
+        self._start_update_list(name)
     
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
@@ -580,14 +575,14 @@ class PipDialog(tk.Toplevel):
         if dist is None:
             return None
         else:
-            return dist.version
+            return dist["version"]
         
     def _get_active_dist(self, name):
         normname = self._normalize_name(name)
-        for key in self._working_set_by_key:
+        for key in self._active_distributions:
             
             if self._normalize_name(key) == normname:
-                return self._working_set_by_key[key]
+                return self._active_distributions[key]
         
         return None
 
@@ -631,7 +626,30 @@ class BackendPipDialog(PipDialog):
         self._backend_proxy = get_runner().get_backend_proxy()
         super().__init__(master)
         assert isinstance(self._backend_proxy, running.CPythonProxy)
+        
+        self._last_name_to_show = None
+        
     
+    def _start_update_list(self, name_to_show=None):
+        assert self._get_state() in [None, "idle"]
+        self._set_state("listing")
+        
+        get_workbench().bind("get_active_distributions_response",
+                            self._complete_update_list, True)
+        self._last_name_to_show = name_to_show
+        get_runner().send_command(InlineCommand("get_active_distributions"))
+    
+    def _complete_update_list(self, msg):
+        get_workbench().unbind("get_active_distributions", self._complete_update_list)
+        if "error" in msg:
+            self.info_text.delete("1.0", "end")
+            self.info_text.insert("1.0", msg["error"])
+            return
+        
+        self._active_distributions = msg.distributions
+        self._set_state("idle", True)
+        self._update_list(self._last_name_to_show)
+         
     def _get_interpreter(self):
         return get_runner().get_interpreter_command()
     
@@ -675,6 +693,22 @@ class PluginsPipDialog(PipDialog):
         d = self._get_target_directory()
         makedirs(d, exist_ok=True)
     
+    def _start_update_list(self, name_to_show=None):
+        assert self._get_state() in [None, "idle"]
+        import pkg_resources
+        pkg_resources._initialize_master_working_set()
+        
+        self._active_distributions = {
+            dist.key : {
+                "project_name" : dist.project_name,
+                "key" : dist.key,
+                "location" : dist.location,
+                "version" : dist.version
+            } for dist in pkg_resources.working_set
+        }
+        
+        self._update_list(name_to_show)
+         
     def _conflicts_with_thonny_version(self, req_strings):
         try:
             conflicts = []

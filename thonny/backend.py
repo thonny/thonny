@@ -413,6 +413,23 @@ class VM:
         except Exception as e:
             return InlineResponse("get_globals", module_name=cmd.module_name, error=str(e))
 
+    def _cmd_get_active_distributions(self, cmd):
+        try:
+            import pkg_resources
+            pkg_resources._initialize_master_working_set()
+            dists = {dist.key : {"project_name" : dist.project_name,
+                                 "key" : dist.key,
+                                 "location" : dist.location,
+                                 "version" : dist.version}
+                                 for dist in pkg_resources.working_set}
+            
+            return InlineResponse("get_active_distributions",
+                                  distributions=dists,
+                                  usersitepackages=site.getusersitepackages(),
+                                  sitepackages=site.getsitepackages())
+        except Exception as e:
+            return InlineResponse("get_active_distributions",
+                                  error=str(e))
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
