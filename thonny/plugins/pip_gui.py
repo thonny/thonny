@@ -643,7 +643,7 @@ class BackendPipDialog(PipDialog):
         get_runner().send_command(InlineCommand("get_active_distributions"))
     
     def _complete_update_list(self, msg):
-        get_workbench().unbind("get_active_distributions", self._complete_update_list)
+        get_workbench().unbind("get_active_distributions_response", self._complete_update_list)
         if "error" in msg:
             self.info_text.delete("1.0", "end")
             self.info_text.insert("1.0", msg["error"])
