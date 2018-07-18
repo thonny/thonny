@@ -27,6 +27,7 @@ from distutils.version import StrictVersion, LooseVersion
 from tkinter.messagebox import showerror
 from os import makedirs
 from thonny.common import path_startswith
+import pkg_resources
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
@@ -60,7 +61,7 @@ class PipDialog(tk.Toplevel):
         self._show_instructions()
         ui_utils.center_window(self, master)
         
-        self._start_update_list()
+        self._update_list()
     
     
     def _create_widgets(self, parent):
@@ -231,7 +232,7 @@ class PipDialog(tk.Toplevel):
         self.update_idletasks()
         
         # update list
-        self._start_update_list()
+        self._update_list()
         
         
     def _provide_pip_install_instructions(self):
@@ -252,51 +253,24 @@ class PipDialog(tk.Toplevel):
         return ("Alternatively, if you have an older pip installed, then you can install packages "
                                      + "on the command line (Tools → Open system shell...)")
     
-    def _start_update_list(self, name_to_show=None):
+    def _update_list(self, name_to_show=None):
         assert self._get_state() in [None, "idle"]
-        self._set_state("listing")
-        args = ["list"]
-        if self._use_user_install():
-            args.append("--user")
-        args.extend(["--pre", "--format", "json"])
-        self._process, _ = self._create_pip_process(args)
         
-        def poll_completion():
-            if self._process == None:
-                return
-            else:
-                returncode = self._process.poll()
-                if returncode is None:
-                    # not done yet
-                    self.after(200, poll_completion)
-                else:
-                    self._set_state("idle")
-                    if returncode == 0:
-                        raw_data = self._process.stdout.read()
-                        self._update_list(json.loads(raw_data))
-                        if name_to_show is None:
-                            self._show_instructions()
-                        else:
-                            self._start_show_package_info(name_to_show)
-                    else:   
-                        error = self._process.stdout.read()
-                        if ("no module named pip" in error.lower() # pip not installed
-                            or "no such option" in error.lower()): # too old pip
-                            self._handle_outdated_or_missing_pip()
-                            return
-                        else:
-                            messagebox.showerror("pip list error", error)
-                    
-                    self._process = None
+        data = []
         
-        poll_completion()
-    
-    def _update_list(self, data):
+        for dist in pkg_resources.working_set:
+            data.append({"name" : dist.project_name, "version" : dist.version})
+        
         self.listbox.delete(1, "end")
         self._installed_versions = {entry["name"] : entry["version"] for entry in data}
         for name in sorted(self._installed_versions.keys(), key=str.lower):
             self.listbox.insert("end", " " + name)
         
+        if name_to_show is None:
+            self._show_instructions()
+        else:
+            self._start_show_package_info(name_to_show)
+    
         
     
     def _on_listbox_select(self, event):
@@ -524,7 +498,7 @@ class PipDialog(tk.Toplevel):
         _show_subprocess_dialog(self, proc, title)
         if action == "uninstall":
             self._show_instructions() # Make the old package go away as fast as possible
-        self._start_update_list(None if action == "uninstall" else name)
+        self._update_list(None if action == "uninstall" else name)
         
         
     
@@ -567,7 +541,7 @@ class PipDialog(tk.Toplevel):
             elements = re.split(",|:", inst_lines[0])
             name = elements[-1].strip()
         
-        self._start_update_list(name)
+        self._update_list(name)
     
     def _handle_url_click(self, event):
         url = _extract_click_text(self.info_text, event, "url")
