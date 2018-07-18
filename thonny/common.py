@@ -204,10 +204,12 @@ def actual_path(name: str) -> str:
     
     if os.name == "nt":
         name = os.path.realpath(name)
+        
         from ctypes import create_unicode_buffer, windll
 
         buf = create_unicode_buffer(512)
-        windll.kernel32.GetLongPathNameW(name, buf, 512)  # @UndefinedVariable
+        windll.kernel32.GetShortPathNameW(name, buf, 512)  # @UndefinedVariable
+        windll.kernel32.GetLongPathNameW(buf.value, buf, 512)  # @UndefinedVariable
         assert len(buf.value) >= 2
         
         result = buf.value
