@@ -1,11 +1,11 @@
 import tkinter as tk
+import subprocess
 import os.path
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 from tkinter import ttk
 
-from thonny.config_ui import ConfigurationPage
-from thonny import get_workbench
-from thonny.ui_utils import create_string_var
+from thonny import get_workbench, running
+from thonny.ui_utils import create_string_var, SubprocessDialog
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from shutil import which
 from thonny.running import WINDOWS_EXE
@@ -32,20 +32,29 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         
         another_label = ttk.Label(self, text="Your interpreter isn't in the list?")
         another_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(10,0))
-        self._select_button = ttk.Button(self,
-                                         text="Locate another executable "
-                                         + ("(python.exe) ..." if running_on_windows() else "(python3) ...")
+        
+        ttk.Style().configure("Centered.TButton", justify="center")
+        self._select_button = ttk.Button(self, style="Centered.TButton",
+                                         text="Locate another "
+                                         + ("python.exe ..." if running_on_windows() else "python executable ...")
                                          + "\nNB! Thonny only supports Python 3.5 and later",
                                          command=self._select_executable)
         
         self._select_button.grid(row=3, column=0, columnspan=2, sticky=tk.NSEW)
+        
+        self._venv_button = ttk.Button(self, style="Centered.TButton",
+                                         text="Create new virtual environment ...\n"
+                                         + "(Select or create an empty directory)", 
+                                         command=self._create_venv)
+        
+        self._venv_button.grid(row=4, column=0, columnspan=2, sticky=tk.NSEW, pady=(5,0))
         
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
     
     def _select_executable(self):
         if running_on_windows():
-            options = {"filetypes" : [('Exe-files', '.exe'), ('all files', '.*')]}
+            options = {"filetypes" : [('Python interpreters', 'python.exe'), ('all files', '.*')]}
         else:
             options = {}
 
@@ -56,6 +65,36 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         if filename:
             self._configuration_variable.set(filename)
     
+    def _create_venv(self):
+        path = None
+        while True:
+            path = filedialog.askdirectory(master=self,
+                                           initialdir=path, 
+                                           title="Select empty directory for new virtual environment")
+            if not path:
+                return
+            
+            if os.listdir(path):
+                messagebox.showerror("Bad directory", "Selected directory is not empty.\nSelect another or cancel.")
+            else:
+                break
+        assert os.path.isdir(path)
+        path = actual_path(path)
+        
+        proc = subprocess.Popen([running.get_frontend_python(), "-m", "venv", path],
+                                stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                universal_newlines=True)
+        dlg = SubprocessDialog(self, proc, "Creating virtual environment")
+        dlg.wait_window()
+        
+        if running_on_windows():
+            exe_path = actual_path(os.path.join(path, "Scripts", "python.exe"))
+        else:
+            exe_path = os.path.join(path, "bin", "python3")
+        
+        if os.path.exists(exe_path):
+            self._configuration_variable.set(exe_path)
+        
     
     def _get_interpreters(self):
         result = set()
@@ -64,15 +103,23 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             # registry
             result.update(self._get_interpreters_from_windows_registry())
             
-            # Common locations
-            for dir_ in ["C:\\Python34",
-                         "C:\\Python35",
-                         "C:\\Program Files\\Python 3.5",
-                         "C:\\Program Files (x86)\\Python 3.5",
-                         "C:\\Python36",
-                         "C:\\Program Files\\Python 3.6",
-                         "C:\\Program Files (x86)\\Python 3.6",
-                         ]:
+            for minor in [5,6,7,8]:
+                for dir_ in [
+                            "C:\\Python3%d" % minor,
+                            "C:\\Python3%d-32" % minor,
+                            "C:\\Python3%d-64" % minor,
+                            "C:\\Program Files\\Python 3.%d" % minor,
+                            "C:\\Program Files\\Python 3.%d-64" % minor,
+                            "C:\\Program Files (x86)\\Python 3.%d" % minor,
+                            "C:\\Program Files (x86)\\Python 3.%d-32" % minor,
+                            ]:
+                    path = os.path.join(dir_, WINDOWS_EXE)
+                    if os.path.exists(path):
+                        result.add(actual_path(path))  
+                
+            # other locations
+            for dir_ in ["C:\\Anaconda3",
+                         os.path.expanduser("~/Anaconda3")]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
                     result.add(actual_path(path))  
@@ -88,13 +135,13 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 apath = actual_path(dir_)
                 if apath != dir_ and apath in dirs:
                     continue
-                for name in ["python3", "python3.4", "python3.5", "python3.6"]:
+                for name in ["python3", "python3.5", "python3.6", "python3.7", "python3.8"]:
                     path = os.path.join(dir_, name)
                     if os.path.exists(path):
                         result.add(path)  
         
         if running_on_mac_os():
-            for version in ["3.4", "3.5", "3.6"]:
+            for version in ["3.5", "3.6", "3.7", "3.8"]:
                 dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions",
                                     version, "bin")
                 path = os.path.join(dir_, "python3")
@@ -102,7 +149,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 if os.path.exists(path):
                     result.add(path)
         
-        for command in ["pythonw", "python3", "python3.4", "python3.5", "python3.6"]:
+        for command in ["python3", "python3.5", "python3.5", "python3.6", "python3.7", "python3.8"]:
             path = which(command)
             if path is not None and os.path.isabs(path):
                 result.add(path)
