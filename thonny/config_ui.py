@@ -10,7 +10,7 @@ class ConfigurationDialog(tk.Toplevel):
         tk.Toplevel.__init__(self, master)
         scale = get_workbench().scale
         width = scale(400) 
-        height = scale(250)
+        height = scale(270)
         left = max(int(get_workbench().winfo_x() + get_workbench().winfo_width()/2 - width/2), 0)
         top = max(int(get_workbench().winfo_y() + get_workbench().winfo_height()/2 - height/2), 0)
         self.geometry("%dx%d+%d+%d" % (width, height, left, top))

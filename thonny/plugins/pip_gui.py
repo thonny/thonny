@@ -76,7 +76,7 @@ class PipDialog(tk.Toplevel):
         self.search_box.grid(row=1, column=0, sticky="nsew")
         self.search_box.bind("<Return>", self._on_search, False)
         
-        self.search_button = ttk.Button(header_frame, text="Search", command=self._on_search)
+        self.search_button = ttk.Button(header_frame, text="Find package from PyPI", command=self._on_search, width=25)
         self.search_button.grid(row=1, column=1, sticky="nse", padx=(10,0))
         
         
