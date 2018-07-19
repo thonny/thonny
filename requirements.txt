@@ -1,2 +1,2 @@
 jedi>=0.10
-packaging
+setuptools>=33.1.1

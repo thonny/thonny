@@ -14,7 +14,6 @@ import urllib.parse
 from concurrent.futures.thread import ThreadPoolExecutor
 import os
 import json
-from packaging.requirements import Requirement
 import logging
 import re
 from tkinter.filedialog import askopenfilename
@@ -33,7 +32,7 @@ PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
 class PipDialog(tk.Toplevel):
     def __init__(self, master):
-        self._state = None # possible values: "listing", "fetching", "idle"
+        self._state = "idle" # possible values: "listing", "fetching", "idle"
         self._process = None
         self._active_distributions = {}
         self.current_package_data = None
@@ -273,7 +272,7 @@ class PipDialog(tk.Toplevel):
                 self._start_show_package_info(self.listbox.get(selection[0]).strip())
     
     def _on_search(self, event=None):
-        if not self._get_state() == "idle":
+        if self._get_state() != "idle":
             # Search box is not made inactive for busy-states
             return
         
@@ -719,12 +718,13 @@ class PluginsPipDialog(PipDialog):
         self._update_list(name_to_show)
          
     def _conflicts_with_thonny_version(self, req_strings):
+        import pkg_resources
         try:
             conflicts = []
             for req_string in req_strings:
-                req = Requirement(req_string)
-                if (req.name == "thonny" 
-                    and not req.specifier.contains(thonny.get_version(), True)):
+                req = pkg_resources.Requirement.parse(req_string)
+                if (req.project_name == "thonny" 
+                    and thonny.get_version() not in req):
                     conflicts.append(req_string)
             
             return conflicts
@@ -821,7 +821,6 @@ class DetailsDialog(tk.Toplevel):
         version_label.grid(row=0, column=0, columnspan=2, padx=20, pady=(15,0), sticky="w")
         
         def version_sort_key(s):
-            # TODO: use packaging module 
             # Trying to massage understandable versions into valid StrictVersions
             if s.replace(".", "").isnumeric(): # stable release
                 s2 = s + "b999" # make it latest beta version
@@ -955,7 +954,6 @@ def _get_latest_stable_version(version_strings):
     versions = []
     for s in version_strings:
         if s.replace(".", "").isnumeric(): # Assuming stable versions have only dots and numbers
-            # TODO: use packaging module? 
             versions.append(LooseVersion(s)) # LooseVersion __str__ doesn't change the version string
     
     if len(versions) == 0:
@@ -1077,6 +1075,3 @@ def load_plugin() -> None:
     get_workbench().add_command("pluginspipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui,
                                 group=180)
 
-
-if __name__ == "__main__":
-    print("2.1.0" in Requirement("thonny (>=2.1.0b2, ==2.1)").specifier)
