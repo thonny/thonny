@@ -415,6 +415,20 @@ class VM:
 
     def _cmd_get_active_distributions(self, cmd):
         try:
+            # if it is called after first installation to user site packages
+            # this dir is not yet in sys.path
+            if (site.ENABLE_USER_SITE
+                and site.getusersitepackages()
+                and os.path.exists(site.getusersitepackages())
+                and site.getusersitepackages() not in sys.path):
+                # insert before first site packages item
+                for i, item in enumerate(sys.path):
+                    if ("site-packages" in item or "dist-packages" in item):
+                        sys.path.insert(i, site.getusersitepackages())
+                        break
+                else:
+                    sys.path.append(site.getusersitepackages())
+                
             import pkg_resources
             pkg_resources._initialize_master_working_set()
             dists = {dist.key : {"project_name" : dist.project_name,
