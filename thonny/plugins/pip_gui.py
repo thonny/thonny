@@ -93,7 +93,7 @@ class PipDialog(tk.Toplevel):
         listframe.columnconfigure(0, weight=1)
         
         self.listbox = ui_utils.ThemedListbox(listframe, activestyle="dotbox", 
-                                  width=20, height=20,
+                                  width=20, height=18,
                                   selectborderwidth=0, relief="flat",
                                   #highlightthickness=4,
                                   #highlightbackground="red",
@@ -127,7 +127,7 @@ class PipDialog(tk.Toplevel):
                                               horizontal_scrollbar_style=scrollbar_style("Horizontal"),
                                               width=60, height=10)
         info_text_frame.configure(borderwidth=0)
-        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,20))
+        info_text_frame.grid(row=1, column=0, columnspan=4, sticky="nsew", pady=(0,10))
         self.info_text = info_text_frame.text
         link_color = lookup_style_option("Url.TLabel", "foreground", "red")
         self.info_text.tag_configure("url", foreground=link_color, underline=True)
@@ -460,10 +460,15 @@ class PipDialog(tk.Toplevel):
                 exception("Can't find package name from the list: " + name_or_index)
                 return
         
-        self.listbox.select_clear(0, "end")
-        self.listbox.select_set(index)
-        self.listbox.activate(index)
-        self.listbox.see(index)
+        old_state = self.listbox["state"]
+        try:
+            self.listbox["state"] = "normal"
+            self.listbox.select_clear(0, "end")
+            self.listbox.select_set(index)
+            self.listbox.activate(index)
+            self.listbox.see(index)
+        finally:
+            self.listbox["state"] = old_state
         
         
     
@@ -567,7 +572,8 @@ class PipDialog(tk.Toplevel):
             if (url.startswith("http:") 
                 or url.startswith("https:")):
                 webbrowser.open(url)
-            elif os.path.isdir(url):
+            else:
+                os.makedirs(url, exist_ok=True)
                 open_path_in_system_file_manager(url)                
     
     def _on_close(self, event=None):
