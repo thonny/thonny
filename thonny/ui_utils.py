@@ -1497,13 +1497,7 @@ class _ZenityDialogProvider:
     
     @classmethod
     def _call(cls, args):
-        """TODO:
-          --modal                                           Set the modal hint
-          --attach=WINDOW                                   Set the parent window to attach to
-        """
-        args = ["zenity", "--name=Thonny", "--class=Thonny",
-                
-                ] + args
+        args = ["zenity", "--name=Thonny", "--class=Thonny"] + args
         print(args)
         result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
         print(result.stderr)

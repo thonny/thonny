@@ -529,6 +529,7 @@ class PipDialog(tk.Toplevel):
             return 
         
         filename = askopenfilename (
+            master = self,
             filetypes = [('Package', '.whl .zip .tar.gz'), ('all files', '.*')], 
             initialdir = get_workbench().get_cwd()
         )

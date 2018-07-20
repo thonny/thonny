@@ -54,12 +54,10 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self.columnconfigure(1, weight=1)
     
     def _select_executable(self):
-        if running_on_windows():
-            options = {"filetypes" : [('Python interpreters', 'python.exe'), ('all files', '.*')]}
-        else:
-            options = {}
-
         # TODO: get dir of current interpreter
+        options = {"master" : self}
+        if running_on_windows():
+            options["filetypes"] = [('Python interpreters', 'python.exe'), ('all files', '.*')]
             
         filename = askopenfilename(**options)
         
@@ -70,8 +68,8 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         path = None
         while True:
             path = askdirectory(master=self,
-                                           initialdir=path, 
-                                           title="Select empty directory for new virtual environment")
+                               initialdir=path, 
+                               title="Select empty directory for new virtual environment")
             if not path:
                 return
             

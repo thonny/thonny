@@ -122,6 +122,7 @@ class Editor(ttk.Frame):
         else:
             # http://tkinter.unpythonic.net/wiki/tkFileDialog
             filename = asksaveasfilename (
+                master=get_workbench(),
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
                 initialdir = get_workbench().get_cwd()
@@ -383,6 +384,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     
     def _cmd_open_file(self):
         filename = askopenfilename (
+            master=get_workbench(),
             filetypes = _dialog_filetypes, 
             initialdir = get_workbench().get_cwd()
         )

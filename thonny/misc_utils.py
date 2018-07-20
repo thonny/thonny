@@ -8,6 +8,7 @@ import time
 import subprocess
 from typing import Tuple, Sequence, Optional
 import shlex
+from thonny import get_workbench
 
 
 def delete_dir_try_hard(path: str, hardness: int=5) -> None:
@@ -148,7 +149,7 @@ def find_volume_by_name(volume_name: str,
         from tkinter.messagebox import askyesno
         from thonny.ui_utils import askdirectory
         if askyesno("Can't find suitable disk", msg):
-            path = askdirectory()
+            path = askdirectory(master=get_workbench())
             if path:
                 return path
     
