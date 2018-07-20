@@ -5,7 +5,7 @@ from thonny import get_workbench
 from thonny.workbench import WorkbenchEvent
 from datetime import datetime
 import zipfile 
-from tkinter.filedialog import asksaveasfilename
+from thonny.ui_utils import asksaveasfilename
 import json
 from thonny.shell import ShellView
 from thonny import THONNY_USER_DIR

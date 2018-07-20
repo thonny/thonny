@@ -3,8 +3,7 @@ import sys
 import os.path
 import tkinter as tk
 from tkinter import ttk, messagebox
-from tkinter.filedialog import asksaveasfilename
-from tkinter.filedialog import askopenfilename
+from thonny.ui_utils import asksaveasfilename, askopenfilename
 
 from thonny.codeview import CodeView
 from thonny import get_workbench, ui_utils

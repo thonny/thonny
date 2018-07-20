@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 from tkinter.dialog import Dialog
 
 from thonny import tktextext, misc_utils
@@ -18,6 +18,8 @@ import signal
 import subprocess
 import os
 import logging
+import shutil
+import platform
 
 
 class CustomMenubar(ttk.Frame):
@@ -1401,6 +1403,125 @@ def open_path_in_system_file_manager(path):
         assert running_on_windows()
         subprocess.Popen(["explorer", path])
 
+
+def _get_dialog_provider():
+    if platform.system() != "Linux":
+        return filedialog
+    
+    if shutil.which("zenity"):
+        return _ZenityDialogProvider
+    
+    # fallback
+    import tkinter.filedialog
+    return tkinter.filedialog
+    
+def asksaveasfilename(**options):
+    # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
+    return _get_dialog_provider().asksaveasfilename(**options)
+
+def askopenfilename(**options):
+    # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
+    return _get_dialog_provider().askopenfilename(**options)
+
+def askopenfilenames(**options):
+    # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
+    return _get_dialog_provider().askopenfilenames(**options)
+
+def askdirectory(**options):
+    # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
+    return _get_dialog_provider().askdirectory(**options)
+
+
+class _ZenityDialogProvider:
+    # https://www.writebash.com/bash-gui/zenity-create-file-selection-dialog-224.html
+    # http://linux.byexamples.com/archives/259/a-complete-zenity-dialog-examples-1/
+    # http://linux.byexamples.com/archives/265/a-complete-zenity-dialog-examples-2/
+    
+    # another possibility is to use PyGobject: https://github.com/poulp/zenipy
+    
+    @classmethod
+    def askopenfilename(cls, **options):
+        args = cls._convert_common_options("Open file", **options)
+        return cls._call(args)
+        
+    @classmethod
+    def askopenfilenames(cls, **options):
+        args = cls._convert_common_options("Open files", **options)
+        return cls._call(args + ["--multiple"]).split("|")
+        
+    @classmethod
+    def asksaveasfilename(cls, **options):
+        args = cls._convert_common_options("Save as", **options)
+        args.append("--save")
+        if options.get("confirmoverwrite", True):
+            args.append("--confirm-overwrite")
+        
+        filename = cls._call(args)
+        if ("defaultextension" in options
+            and "." not in os.path.basename(filename)):
+            filename += options["defaultextension"]
+            
+        return filename
+        
+    @classmethod
+    def askdirectory(cls, **options):
+        args = cls._convert_common_options("Select directory", **options)
+        args.append("--directory")
+        return cls._call(args)
+    
+    @classmethod
+    def _convert_common_options(cls, default_title, **options):
+        args = ["--file-selection",
+                "--title=%s" % options.get("title", default_title),
+                ]
+        
+        filename = _options_to_zenity_filename(options)
+        if filename:                
+            args.append("--filename=%s" % filename)
+        
+        parent = options.get("parent", options.get("master", None))
+        if parent is not None:
+            args.append("--modal")
+            args.append("--attach=%s" % parent.winfo_id())
+                
+        for desc, pattern in options.get("filetypes", ()):
+            # zenity requires star before extension
+            pattern = pattern.replace(" .", " *.")
+            if pattern.startswith("."):
+                pattern = "*" + pattern
+                
+            args.append("--file-filter=%s | %s" % (desc, pattern))
+            
+        return args
+        
+    
+    @classmethod
+    def _call(cls, args):
+        """TODO:
+          --modal                                           Set the modal hint
+          --attach=WINDOW                                   Set the parent window to attach to
+        """
+        args = ["zenity", "--name=Thonny", "--class=Thonny",
+                
+                ] + args
+        print(args)
+        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+        print(result.stderr)
+        if result.returncode == 0:
+            return result.stdout.strip()
+        else:
+            # could check stderr, but it may contain irrelevant warnings
+            return None
+
+
+def _options_to_zenity_filename(options):
+    if "initialdir" in options:
+        if "initialfile" in options:
+            return os.path.join(options["initialdir"], options["initialfile"])
+        else:
+            return options["initialdir"] + os.path.sep
+            
+    return None
 
         
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ import os
 import json
 import logging
 import re
-from tkinter.filedialog import askopenfilename
+from thonny.ui_utils import askopenfilename
 from logging import exception
 from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
     lookup_style_option, scrollbar_style, open_path_in_system_file_manager

@@ -1,11 +1,12 @@
 import tkinter as tk
 import subprocess
 import os.path
-from tkinter import filedialog, messagebox
+from tkinter import messagebox
 from tkinter import ttk
 
 from thonny import get_workbench, running
-from thonny.ui_utils import create_string_var, SubprocessDialog
+from thonny.ui_utils import create_string_var, SubprocessDialog, \
+    askopenfilename, askdirectory
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from shutil import which
 from thonny.running import WINDOWS_EXE
@@ -60,7 +61,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
 
         # TODO: get dir of current interpreter
             
-        filename = filedialog.askopenfilename(**options)
+        filename = askopenfilename(**options)
         
         if filename:
             self._configuration_variable.set(filename)
@@ -68,7 +69,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def _create_venv(self):
         path = None
         while True:
-            path = filedialog.askdirectory(master=self,
+            path = askdirectory(master=self,
                                            initialdir=path, 
                                            title="Select empty directory for new virtual environment")
             if not path:
