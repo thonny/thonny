@@ -192,5 +192,6 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         if not self.should_restart():
             return
         
-        configuration = self._configuration_variable.get()
-        get_workbench().set_option("CustomInterpreter.path", configuration)
+        path = self._configuration_variable.get()
+        if os.path.isfile(path):
+            get_workbench().set_option("CustomInterpreter.path", path)
