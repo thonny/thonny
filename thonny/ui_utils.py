@@ -1498,9 +1498,7 @@ class _ZenityDialogProvider:
     @classmethod
     def _call(cls, args):
         args = ["zenity", "--name=Thonny", "--class=Thonny"] + args
-        print(args)
         result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-        print(result.stderr)
         if result.returncode == 0:
             return result.stdout.strip()
         else:
