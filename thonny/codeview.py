@@ -8,6 +8,8 @@ from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 from thonny.tktextext import EnhancedText
 
 from typing import Dict, Union  # @UnusedImport
+import io
+import tokenize
 
 _syntax_options = {} # type: Dict[str, Union[str, int]]
 #BREAKPOINT_SYMBOL = "•" # Bullet
@@ -207,9 +209,14 @@ class CodeView(tktextext.TextFrame):
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself
     
+    def detect_encoding(self):
+        encoding, _ = tokenize.detect_encoding(
+            io.BytesIO(self.get_content().encode("ascii", errors="replace")).readline
+        )
+        return encoding
+    
     def get_content_as_bytes(self):
-        # TODO:
-        return self.get_content().encode("utf-8")
+        return self.get_content().encode(self.detect_encoding())
     
     def set_content(self, content):
         self.text.direct_delete("1.0", tk.END)
