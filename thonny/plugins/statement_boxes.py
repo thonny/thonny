@@ -2,7 +2,7 @@
 NB! Stippling doesn't work on mac: 
 http://wiki.tcl.tk/44444
 http://rkeene.org/projects/tcl/tk.fossil/tkthistory/2954673
-
+"""
 import os.path
 from thonny import get_workbench, jedi_utils
 from tkinter import font
