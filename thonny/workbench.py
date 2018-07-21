@@ -430,6 +430,7 @@ class Workbench(tk.Tk):
             
             if running_on_mac_os():
                 # Doesn't work as it should and only confuses
+                # TODO: http://wiki.tcl.tk/44444
                 pass
             else:
                 self.add_command("toggle_maximize_view", "view", "Full screen",
@@ -1232,6 +1233,7 @@ class Workbench(tk.Tk):
                         (self._scaling_factor / self._default_scaling_factor)
                     ))
         elif running_on_mac_os() and scaling not in ["default", "auto"]:
+            # TODO: see http://wiki.tcl.tk/44444
             # update system fonts
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
@@ -1429,6 +1431,32 @@ class Workbench(tk.Tk):
         self.show_view("ShellView", True)
     
     def _cmd_toggle_full_screen(self) -> None:
+        """
+        TODO: For mac 
+        http://wiki.tcl.tk/44444
+        
+        Switching a window to fullscreen mode
+        (Normal Difference)
+        To switch a window to fullscreen mode, the window must first be withdrawn.
+              # For Linux/Mac OS X:
+        
+              set cfs [wm attributes $w -fullscreen]
+              if { $::tcl_platform(os) eq "Darwin" } {
+                if { $cfs == 0 } {
+                  # optional: save the window geometry
+                  set savevar [wm geometry $w]
+                }
+                wm withdraw $w
+              }
+              wm attributes $w -fullscreen [expr {1-$cfs}]
+              if { $::tcl_platform(os) eq "Darwin" } {
+                wm deiconify $w
+                if { $cfs == 1 } {
+                  after idle [list wm geometry $w $savevar]
+                }
+              }
+        
+        """
         var = self.get_variable("view.full_screen")
         var.set(not var.get())
         self.attributes("-fullscreen", var.get())
