@@ -1566,7 +1566,7 @@ def register_latin_shortcut(registry, sequence: str, handler: Callable, tester: 
     if res is not None:
         if res not in registry:
             registry[res] = []
-        
+        print("REG", sequence, res)
         registry[res].append((handler, tester))
 
 
@@ -1576,14 +1576,16 @@ def handle_mistreated_latin_shortcuts(registry, event):
     # See: https://bitbucket.org/plas/thonny/issues/422/edit-keyboard-shortcuts-ctrl-c-ctrl-v-etc
     
     # only consider events with Control held
+    print("MIS", event.state, event.keycode, event.char)
     if not event.state & 0x04:
         return
     
     if running_on_mac_os():
         return
     
+    
     # consider only part of the state,
-    # becayse at least on Windows, Ctrl-shortcuts' state 
+    # because at least on Windows, Ctrl-shortcuts' state 
     # has something extra
     simplified_state = 0x04
     if shift_is_pressed(event.state):
