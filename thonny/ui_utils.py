@@ -20,7 +20,7 @@ import os
 import logging
 import shutil
 import platform
-
+from typing import Callable, Optional
 
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):
@@ -987,6 +987,49 @@ def control_is_pressed(event_state):
     # http://stackoverflow.com/q/32426250/261181
     return event_state & 0x0004
 
+def sequence_to_event_state_and_keycode(sequence):
+    # remember handlers for certain shortcuts which require
+    # different treatment on non-latin keyboards
+    if sequence[0] != "<":
+        return None
+    
+    parts = sequence.strip("<").strip(">").split("-")
+    # support only latin letters for now
+    if parts[-1].lower() not in list("abcdefghijklmnopqrstuvwxyz"):
+        return
+    
+    letter = parts.pop(-1)
+    if "Key" in parts:
+        parts.remove("Key")
+    if "key" in parts:
+        parts.remove("key")
+    
+    
+    modifiers = {part.lower() for part in parts}
+    
+    if letter.isupper():
+        modifiers.add("shift")
+    
+    if modifiers not in [{"control"}, {"control", "shift"}]:
+        # don't support others for now
+        return
+    
+    event_state = 0
+    # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
+    # https://stackoverflow.com/questions/32426250/python-documentation-and-or-lack-thereof-e-g-keyboard-event-state
+    for modifier in modifiers:
+        if modifier == "shift":
+            event_state |= 0x0001
+        elif modifier == "control":
+            event_state |= 0x0004
+        else:
+            # unsupported modifier
+            return None
+    
+    # for latin letters keycode is same as its ascii code
+    return (event_state, ord(letter.upper()))
+    
+
 def select_sequence(win_version, mac_version, linux_version=None):
     if running_on_windows():
         return win_version
@@ -1514,6 +1557,43 @@ def _options_to_zenity_filename(options):
             return options["initialdir"] + os.path.sep
             
     return None
+
+def register_latin_shortcut(registry, sequence: str, handler: Callable, tester: Optional[Callable]) -> None:
+    res = sequence_to_event_state_and_keycode(sequence)
+    if res is not None:
+        if res not in registry:
+            registry[res] = []
+        
+        registry[res].append((handler, tester))
+
+
+def handle_mistreated_latin_shortcuts(registry, event):
+    # tries to handle Ctrl+LatinLetter shortcuts 
+    # given from non-Latin keyboards
+    # See: https://bitbucket.org/plas/thonny/issues/422/edit-keyboard-shortcuts-ctrl-c-ctrl-v-etc
+    
+    # only consider events with Control held
+    if not event.state & 0x04:
+        return
+    
+    if running_on_mac_os():
+        return
+    
+    # consider only part of the state,
+    # becayse at least on Windows, Ctrl-shortcuts' state 
+    # has something extra
+    simplified_state = 0x04
+    if shift_is_pressed(event.state):
+        simplified_state |= 0x01
+        
+    #print(simplified_state, event.keycode)
+    if (simplified_state, event.keycode) in registry:
+        if event.keycode != ord(event.char):
+            # keycode and char doesn't match,
+            # this means non-latin keyboard
+            for handler, tester in registry[(simplified_state, event.keycode)]:
+                if tester is None or tester():
+                    handler()
 
         
 if __name__ == "__main__":

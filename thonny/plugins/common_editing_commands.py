@@ -34,13 +34,9 @@ def load_plugin() -> None:
         create_edit_command_handler("<<Redo>>"),
         tester=None, # TODO:
         default_sequence=select_sequence("<Control-y>", "<Command-y>"),
+        extra_sequences=[select_sequence("<Control-Shift-Z>", "<Command-Shift-Z>")],
         skip_sequence_binding=True,
         group=10)
-    
-    # Ctrl+Shift+Z as alternative shortcut for redo
-    get_workbench().bind_class("Text", select_sequence("<Control-Shift-Z>", "<Command-Shift-Z>"),
-                               create_edit_command_handler("<<Redo>>"), True)
-    
     
     get_workbench().add_command("Cut", "edit", "Cut",
         create_edit_command_handler("<<Cut>>"),

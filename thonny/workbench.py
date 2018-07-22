@@ -13,7 +13,8 @@ from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
     running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, select_sequence, get_style_configuration, lookup_style_option
+    create_tooltip, select_sequence, get_style_configuration, lookup_style_option,\
+    register_latin_shortcut
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
@@ -94,6 +95,7 @@ class Workbench(tk.Tk):
         self._commands = [] # type: List[Dict[str, Any]]
         self._view_records = {} # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = [] # type: List[Type]
+        self._latin_shortcuts = {}
         
         self._init_configuration()
         self._init_diagnostic_logging()
@@ -137,6 +139,7 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
+        self.bind_all("<KeyPress>", self._on_all_key_presses, True)
         
         self._publish_commands()
         self.initializing = False
@@ -618,11 +621,15 @@ class Workbench(tk.Tk):
         self.set_default(sequence_option_name, default_sequence)
         sequence = self.get_option(sequence_option_name) 
         
-        if sequence and not skip_sequence_binding:
-            self.bind_all(sequence, dispatch, True)
+        if sequence:
+            if not skip_sequence_binding:
+                self.bind_all(sequence, dispatch, True)
+            # register shortcut even without binding
+            register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
         
         for extra_sequence in extra_sequences:
             self.bind_all(extra_sequence, dispatch, True)
+            register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
         
         
         def dispatch_from_menu():
@@ -789,6 +796,7 @@ class Workbench(tk.Tk):
                 return result
         else:
             raise NotImplementedError("Only numeric dimensions supported at the moment")
+    
     
     def _register_ui_theme_as_tk_theme(self, name: str) -> None:
         # collect settings from all ancestors
@@ -1567,6 +1575,9 @@ class Workbench(tk.Tk):
 
         self.destroy()
         self._destroyed = True
+    
+    def _on_all_key_presses(self, event):
+        ui_utils.handle_mistreated_latin_shortcuts(self._latin_shortcuts, event)
     
     def focus_get(self) -> Optional[tk.Widget]:
         try:
