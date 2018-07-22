@@ -1500,6 +1500,9 @@ class _ZenityDialogProvider:
             args.append("--confirm-overwrite")
         
         filename = cls._call(args)
+        if not filename:
+            return None
+			
         if ("defaultextension" in options
             and "." not in os.path.basename(filename)):
             filename += options["defaultextension"]
