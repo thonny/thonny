@@ -629,7 +629,12 @@ class Workbench(tk.Tk):
         
         for extra_sequence in extra_sequences:
             self.bind_all(extra_sequence, dispatch, True)
-            register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
+            if ("greek_" not in extra_sequence.lower()
+                or running_on_linux()):
+                # Use greek alternatives only on Linux
+                # (they are not required on Mac 
+                # and cause double events on Windows)
+                register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
         
         
         def dispatch_from_menu():
@@ -1577,7 +1582,8 @@ class Workbench(tk.Tk):
         self._destroyed = True
     
     def _on_all_key_presses(self, event):
-        ui_utils.handle_mistreated_latin_shortcuts(self._latin_shortcuts, event)
+        if running_on_windows():
+            ui_utils.handle_mistreated_latin_shortcuts(self._latin_shortcuts, event)
     
     def focus_get(self) -> Optional[tk.Widget]:
         try:
