@@ -1502,7 +1502,7 @@ class _ZenityDialogProvider:
         filename = cls._call(args)
         if not filename:
             return None
-			
+            
         if ("defaultextension" in options
             and "." not in os.path.basename(filename)):
             filename += options["defaultextension"]
