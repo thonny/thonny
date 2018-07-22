@@ -262,6 +262,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self._cmd_new_file,
             caption="New",
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
+            extra_sequences=["<Control-Greek_nu>"],
             group=10,
             image="new-file",
             include_in_toolbar=True)
@@ -270,17 +271,20 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self._cmd_open_file,
             caption="Load",
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
+            extra_sequences=["<Control-Greek_omicron>"],
             group=10,
             image="open-file",
             include_in_toolbar=True)
         
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
         get_workbench().bind_class("Text", "<Control-o>", self._control_o)
+        get_workbench().bind_class("Text", "<Control-Greek_omicron>", self._control_o)
         rebind_control_a(get_workbench())
         
         get_workbench().add_command("close_file", "file", "Close", 
             self._cmd_close_file,
             default_sequence=select_sequence("<Control-w>", "<Command-w>"),
+            extra_sequences=["<Control-Greek_finalsmallsigma>"],
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
@@ -293,6 +297,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self._cmd_save_file,
             caption="Save",
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
+            extra_sequences=["<Control-Greek_sigma>"],
             tester=self._cmd_save_file_enabled,
             group=10,
             image="save-file",
@@ -301,6 +306,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command("save_file_as", "file", "Save as...",
             self._cmd_save_file_as,
             default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-S>"),
+            extra_sequences=["<Control-Greek_SIGMA>"],
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
