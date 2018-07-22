@@ -9,6 +9,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font as tkfont
 from tkinter import TclError
+import platform
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""
@@ -228,6 +229,9 @@ class EnhancedText(TweakableText):
             self.bind("<ISO_Left_Tab>", if_not_readonly(self.perform_tab), True)
         except:
             pass
+        
+        if platform.system() == "Windows":
+            self.bind("<KeyPress>", self._insert_untypable_characters_on_windows, True)
     
     def _bind_movement_aids(self):
         self.bind("<Home>", self.perform_smart_home, True)
@@ -648,7 +652,15 @@ class EnhancedText(TweakableText):
         if foreground:
             self.configure(foreground=foreground)
             self.configure(insertbackground=foreground) 
-        
+    
+    def _insert_untypable_characters_on_windows(self, event):
+        if event.state == 131084: # AltGr or Ctrl+Alt
+            lang_id = get_keyboard_language()
+            char = _windows_altgr_chars_by_lang_id_and_keycode.get(
+                lang_id, {}).get(event.keycode, None)
+            if char is not None:
+                self.insert("insert", char)
+    
     def destroy(self):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
         super().destroy()
@@ -948,3 +960,27 @@ def rebind_control_a(root):
 
 def _running_on_mac():
     return tk._default_root.call('tk', 'windowingsystem') == "aqua"
+
+def get_keyboard_language():
+    # https://stackoverflow.com/a/42047820/261181
+    if platform.system() != "Windows":
+        raise NotImplementedError("Can provide keyboard language only on Windows")
+    
+    import ctypes
+    user32 = ctypes.WinDLL('user32', use_last_error=True)
+    curr_window = user32.GetForegroundWindow()
+    thread_id = user32.GetWindowThreadProcessId(curr_window, 0)
+    # Made up of 0xAAABBBB, AAA = HKL (handle object) & BBBB = language ID
+    klid = user32.GetKeyboardLayout(thread_id)
+    # Language ID -> low 10 bits, Sub-language ID -> high 6 bits
+    # Extract language ID from KLID
+    lid = klid & (2**16 - 1)
+    
+    return lid
+
+_windows_altgr_chars_by_lang_id_and_keycode = {
+    # https://docs.microsoft.com/en-us/windows/desktop/intl/language-identifier-constants-and-strings
+    0x0425 : {
+        191 : '^', # AltGr+Ä
+    }
+}
