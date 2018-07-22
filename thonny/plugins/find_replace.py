@@ -341,7 +341,9 @@ def load_plugin() -> None:
          
     get_workbench().add_command("OpenFindDialog", "edit", 'Find & Replace',
         cmd_open_find_dialog,
-        default_sequence=select_sequence("<Control-f>", "<Command-f>"))
+        default_sequence=select_sequence("<Control-f>", "<Command-f>"),
+        extra_sequences=["<Control-Greek_phi>"],
+        )
     
     get_workbench().bind("<F3>", find_f3, True)
     

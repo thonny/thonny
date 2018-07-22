@@ -1566,7 +1566,6 @@ def register_latin_shortcut(registry, sequence: str, handler: Callable, tester: 
     if res is not None:
         if res not in registry:
             registry[res] = []
-        print("REG", sequence, res)
         registry[res].append((handler, tester))
 
 
@@ -1576,7 +1575,6 @@ def handle_mistreated_latin_shortcuts(registry, event):
     # See: https://bitbucket.org/plas/thonny/issues/422/edit-keyboard-shortcuts-ctrl-c-ctrl-v-etc
     
     # only consider events with Control held
-    print("MIS", event.state, event.keycode, event.char)
     if not event.state & 0x04:
         return
     
