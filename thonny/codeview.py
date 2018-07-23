@@ -10,6 +10,7 @@ from thonny.tktextext import EnhancedText
 from typing import Dict, Union  # @UnusedImport
 import io
 import tokenize
+from build.lib.thonny.misc_utils import running_on_windows
 
 _syntax_options = {} # type: Dict[str, Union[str, int]]
 #BREAKPOINT_SYMBOL = "•" # Bullet
@@ -216,13 +217,19 @@ class CodeView(tktextext.TextFrame):
         return encoding
     
     def get_content_as_bytes(self):
-        return self.get_content().encode(self.detect_encoding())
+        chars = self.get_content().replace("\r", "")
+        if running_on_windows():
+            chars = chars.replace("\n", "\r\n")
+            
+        return chars.encode(self.detect_encoding())
     
-    def set_content(self, content):
+    def set_content(self, content, keep_undo=False):
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)
         self.update_gutter()
-        self.text.edit_reset();
+        
+        if not keep_undo:
+            self.text.edit_reset();
 
         self.text.event_generate("<<TextChange>>")
     

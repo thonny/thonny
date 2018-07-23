@@ -140,6 +140,7 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
         self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title ,True)
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
+        self.bind("<FocusIn>", self._on_focus_in, True)
         
         self._publish_commands()
         self.initializing = False
@@ -1584,6 +1585,10 @@ class Workbench(tk.Tk):
     def _on_all_key_presses(self, event):
         if running_on_windows():
             ui_utils.handle_mistreated_latin_shortcuts(self._latin_shortcuts, event)
+    
+    def _on_focus_in(self, event):
+        for editor in self.get_editor_notebook().get_all_editors():
+            editor.check_for_external_changes()
     
     def focus_get(self) -> Optional[tk.Widget]:
         try:

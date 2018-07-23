@@ -39,8 +39,8 @@ class Editor(ttk.Frame):
         self.rowconfigure(0, weight=1)
         
         self._filename = None
-        self._last_save_mtime = None
-        self._last_save_hash = None
+        self._last_known_mtime = None
+        self._asking_about_external_change = False
         
         if filename is not None:
             self._load_file(filename)
@@ -82,22 +82,29 @@ class Editor(ttk.Frame):
         return result
     
     def check_for_external_changes(self):
+        if self._asking_about_external_change:
+            # otherwise method will be re-entered when focus
+            # changes because of message box
+            return
+        
         if self._filename is None:
             return
         
-        assert self._last_save_mtime is not None
+        assert self._last_known_mtime is not None
         
-        if os.path.getmtime(self._filename) == self._last_save_mtime:
-            return
-        
-        assert self._last_save_hash is not None
-        with open(self._filename, "b") as fp:
-            current_hash_on_disk = hash(fp.read())
-        
-        if self._last_save_hash == current_hash_on_disk:
-            # just timestamp has changed (or file attributes?)
-            return
-        
+        if os.path.getmtime(self._filename) != self._last_known_mtime:
+            try:
+                self._asking_about_external_change = True
+                if messagebox.askyesno(
+                    "External modification", 
+                    "Looks like '%s' was modified outside Thonny.\n\n" % self._filename
+                    + "Do you want to discard current editor content and reload the file from disk?"
+                    ):
+                    self._load_file(self._filename, keep_undo=True)
+                else:
+                    self._last_known_mtime = os.path.getmtime(self._filename)
+            finally:
+                self._asking_about_external_change = False
         
     
     def get_long_description(self):
@@ -117,15 +124,17 @@ class Editor(ttk.Frame):
         
         return result
     
-    def _load_file(self, filename):
+    def _load_file(self, filename, keep_undo=False):
         with tokenize.open(filename) as fp: # TODO: support also text files
             source = fp.read() 
         
         filename = actual_path(filename) # Make sure Windows filenames have proper format
         self._filename = filename
+        self._last_known_mtime = os.path.getmtime(self._filename)
         
         get_workbench().event_generate("Open", editor=self, filename=filename)
-        self._code_view.set_content(source)
+        self._code_view.set_content(source, keep_undo)
+        self.get_text_widget().edit_modified(False)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
         
@@ -166,8 +175,7 @@ class Editor(ttk.Frame):
             f.flush()
             os.fsync(f) # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             f.close()
-            self._last_save_hash = hash(content)
-            self._last_save_mtime = os.path.getmtime(filename)
+            self._last_known_mtime = os.path.getmtime(filename)
         except PermissionError:
             if askyesno("Permission Error",
                      "Looks like this file or folder is not writable.\n\n"
