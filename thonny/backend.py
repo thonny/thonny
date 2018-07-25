@@ -797,6 +797,8 @@ class VM:
         # TODO: send string as separate message 
         sys.stderr.write("".join(relevant_lines))
         
+        sys.last_type, sys.last_value, sys.last_traceback = sys.exc_info()
+        
         return {}
 
     class FakeStream:
