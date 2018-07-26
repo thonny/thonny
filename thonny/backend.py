@@ -771,30 +771,65 @@ class VM:
         """Need to suppress thonny frames to avoid confusion"""
         e_type, e_value, e_traceback = sys.exc_info()
         
-        lines = traceback.format_exception(e_type, e_value, e_traceback)
+        _traceback_message = 'Traceback (most recent call last):\n'
         
-        if in_debug_mode():
-            relevant_lines = lines
-        elif (e_type is SyntaxError and "in <module>" not in "\n".join(lines)):
-            relevant_lines = traceback.format_exception(e_type, e_value, e_traceback, limit=0)
-        else:
-            have_seen_in_module = False
-            relevant_lines = []
-            for line in lines:
-                if "Traceback (most recent call last)" in line:
-                    # we're starting with next block in the chain
-                    have_seen_in_module = False
-                    
-                if (("thonny/backend" in line or "thonny\\backend" in line) 
-                    and (not have_seen_in_module or "self._original_import" in line)):
-                    continue
-                else:
-                    relevant_lines.append(line)
-                    
-                if "in <module>" in line:
-                    have_seen_in_module = True
+        _cause_message = getattr(traceback, "_cause_message", (
+            "\nThe above exception was the direct cause "
+            + "of the following exception:\n\n"))
+
+        _context_message = getattr(traceback, "_context_message", (
+            "\nDuring handling of the above exception, "
+            + "another exception occurred:\n\n"))
+
+        
+        def format_exception_with_frame_ids(etype, value, tb, chain=True):
+            # Based on
+            # https://www.python.org/dev/peps/pep-3134/#enhanced-reporting
+            # and traceback.format_exception
+            if chain:
+                if value.__cause__ is not None:
+                    yield from format_exception_with_frame_ids(value.__cause__)
+                    yield (_cause_message, None)
+                elif (value.__context__ is not None
+                      and not value.__suppress_context__):
+                    yield from format_exception_with_frame_ids(value.__context__)
+                    yield (_context_message, None)
+            
+            if tb is not None:
+                yield (_traceback_message, None)
+                have_seen_first_relevant_frame = False
+                
+                tb_temp = tb
+                for entry in traceback.extract_tb(tb):
+                    assert tb_temp is not None # actual tb doesn't end before extract_tb
+                    if ("thonny/backend" not in entry.filename and "thonny\\backend" not in entry.filename
+                        or have_seen_first_relevant_frame
+                        or in_debug_mode()):
+                        
+                        have_seen_first_relevant_frame = True
+                        
+                        fmt = '  File "{}", line {}, in {}\n'.format(
+                            entry.filename, entry.lineno, entry.name)
+                        
+                        if entry.line:
+                            fmt += '    {}\n'.format(entry.line.strip())
+                                   
+                        yield (fmt, id(tb_temp.tb_frame))
+                        
+                    tb_temp = tb_temp.tb_next
+                
+                assert tb_temp is None # tb was exhausted
+            
+            for line in traceback.format_exception_only(etype, value): 
+                yield (line, None)
+        
+        items = format_exception_with_frame_ids(e_type, e_value, e_traceback)
+        #from pprint import pprint
+        #pprint(list(items))
+        # _lines = traceback.format_exception(e_type, e_value, e_traceback)
         
         # TODO: send string as separate message 
+        relevant_lines = list(map(lambda x: x[0], items))
         sys.stderr.write("".join(relevant_lines))
         
         sys.last_type, sys.last_value, sys.last_traceback = sys.exc_info()
