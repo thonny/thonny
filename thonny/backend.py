@@ -179,8 +179,7 @@ class VM:
                 sys.stderr.write(str(e) + "\n")
                 response = create_error_response()
             except KeyboardInterrupt:
-                self._report_user_exception()
-                response = create_error_response()
+                response = create_error_response(user_exception=self._prepare_user_exception())
             except:
                 _report_internal_error()
                 response = create_error_response(context_info="other unhandled exception")
@@ -412,6 +411,21 @@ class VM:
             return InlineResponse("get_globals", module_name=cmd.module_name, globals=result)
         except Exception as e:
             return InlineResponse("get_globals", module_name=cmd.module_name, error=str(e))
+
+    def _cmd_get_frame_info(self, cmd):
+        atts = {} 
+        try:
+            # TODO: make it work also in past states
+            frame = self._lookup_frame_by_id(cmd["frame_id"])
+            if frame is None:
+                atts["error"] = "Frame not found"
+            else:
+                atts["locals"] = self.export_variables(frame.f_locals)
+                atts["globals"] = self.export_variables(frame.f_globals)
+        except Exception as e:
+            atts["error"] = str(e)
+        
+        return InlineResponse("get_frame_info", frame_id=cmd.frame_id, **atts)
 
     def _cmd_get_active_distributions(self, cmd):
         try:
@@ -766,9 +780,40 @@ class VM:
 
     def is_doing_io(self):
         return self._io_level > 0
-
-    def _report_user_exception(self):
+    
+    def _lookup_frame_by_id(self, frame_id):
+        def lookup_from_stack(frame):
+            if frame is None:
+                return None
+            elif id(frame) == frame_id:
+                return frame
+            else:
+                return lookup_from_stack(frame.f_back)
+        
+        def lookup_from_tb(entry):
+            if entry is None:
+                return None
+            elif id(entry.tb_frame) == frame_id:
+                return entry.tb_frame
+            else:
+                return lookup_from_tb(entry.tb_next)
+        
+        result = lookup_from_stack(inspect.currentframe())
+        if result is not None:
+            return result
+        
+        if getattr(sys, "last_traceback"):
+            result = lookup_from_tb(getattr(sys, "last_traceback"))
+            if result:
+                return result
+        
+        _, _, tb = sys.exc_info()
+        return lookup_from_tb(tb)
+    
+    def _prepare_user_exception(self):
         """Need to suppress thonny frames to avoid confusion"""
+        
+        sys.last_type, sys.last_value, sys.last_traceback = sys.exc_info()
         e_type, e_value, e_traceback = sys.exc_info()
         
         _traceback_message = 'Traceback (most recent call last):\n'
@@ -824,17 +869,8 @@ class VM:
                 yield (line, None)
         
         items = format_exception_with_frame_ids(e_type, e_value, e_traceback)
-        #from pprint import pprint
-        #pprint(list(items))
-        # _lines = traceback.format_exception(e_type, e_value, e_traceback)
         
-        # TODO: send string as separate message 
-        relevant_lines = list(map(lambda x: x[0], items))
-        sys.stderr.write("".join(relevant_lines))
-        
-        sys.last_type, sys.last_value, sys.last_traceback = sys.exc_info()
-        
-        return {}
+        return list(items)
 
     class FakeStream:
         def __init__(self, vm, target_stream):
@@ -933,12 +969,12 @@ class Executor:
                 else:
                     raise ValueError("Unknown mode")
         except SyntaxError:
-            return self._vm._report_user_exception()
+            return {"user_exception" : self._vm._prepare_user_exception()}
         except SystemExit:
             return {"SystemExit" : True}
         except Exception:
             _report_internal_error()
-            return {"context_info" : "other unhandled exception"}
+            return {}
     
     def _prepare_hooks_and_execute(self, statements, expression, global_vars):
         try:
@@ -961,8 +997,7 @@ class Executor:
             
             return {"context_info" : "after normal execution"}
         except Exception:
-            self._vm._report_user_exception()
-            return {"context_info" : "user exception"}
+            return {"user_exception" : self._vm._prepare_user_exception()}
     
     def find_spec(self, fullname, path=None, target=None):
         """override in subclass for custom-loading user modules"""

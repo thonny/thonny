@@ -36,6 +36,7 @@ class GlobalsView(ttk.Frame):
         self.rowconfigure(1, weight=1)
         
         get_workbench().bind("get_globals_response", self._handle_globals_event, True)
+        get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         get_workbench().bind("BackendRestart", self._backend_restart, True)
         get_workbench().bind("FancyDebuggerResponse", self._handle_progress, True)
         get_workbench().bind("SimpleDebuggerResponse", self._handle_progress, True)
@@ -47,6 +48,10 @@ class GlobalsView(ttk.Frame):
     
     def _backend_restart(self, event):
         self.variables_frame._clear_tree()
+
+    def _handle_frame_info_event(self, event):
+        #print("FRAI", event)
+        self.variables_frame.update_variables(event["locals"])
         
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well

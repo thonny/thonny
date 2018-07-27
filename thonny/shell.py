@@ -6,7 +6,7 @@ from tkinter import ttk
 import traceback
 
 from thonny import memory, roughparse, ui_utils
-from thonny.common import ToplevelCommand, ToplevelResponse
+from thonny.common import ToplevelCommand, ToplevelResponse, InlineCommand
 from thonny.misc_utils import running_on_mac_os, shorten_repr, parse_cmd_line, construct_cmd_line
 from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration,\
     scrollbar_style
@@ -122,6 +122,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if ui_utils.get_tk_version_info() >= (8,6,6):
             self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
 
+        self.tag_configure("selected_frame", 
+                           background="lightgreen",
+                           lmargincolor="lightgreen")
+        
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
@@ -191,6 +195,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._before_io = True
         if msg.get("error"):
             self._insert_text_directly(msg["error"] + "\n", ("toplevel", "stderr"))
+        if "user_exception" in msg:
+            self._format_user_exception(msg["user_exception"])
         
         welcome_text = msg.get("welcome_text")
         if welcome_text and welcome_text != self._last_welcome_text:
@@ -634,6 +640,28 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         except:
             traceback.print_exc()
     
+    def _format_user_exception(self, items):
+        
+        for line, frame_id in items:
+                
+            tags = ("io", "stderr")
+            if frame_id is not None:
+                frame_tag = "frame_%d" % frame_id
+                 
+                def handle_frame_click(event, 
+                                       frame_id=frame_id,
+                                       frame_tag=frame_tag):
+                    print("frame id", frame_id)
+                    start, end = self.tag_ranges(frame_tag)
+                    self.tag_remove("selected_frame", "1.0", "end")
+                    self.tag_add("selected_frame", start, end)
+                    get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
+                        
+                    
+                tags += (frame_tag,)
+                self.tag_bind(frame_tag, "<1>", handle_frame_click, True)
+                
+            self._insert_text_directly(line, tags)
     
     def _invalidate_current_data(self):
         """
