@@ -90,11 +90,28 @@ class Editor(ttk.Frame):
         if self._filename is None:
             return
         
-        assert self._last_known_mtime is not None
-        
-        if os.path.getmtime(self._filename) != self._last_known_mtime:
-            try:
-                self._asking_about_external_change = True
+        try:
+            self._asking_about_external_change = True
+            
+            if self._last_known_mtime is None:
+                return
+            
+            elif not os.path.exists(self._filename):
+                self.master.select(self)
+                
+                if messagebox.askyesno(
+                    "File is gone",
+                    "Looks like '%s' was deleted or moved outside Thonny.\n\n" % self._filename
+                    + "Do you want to also close this editor?"
+                    ):
+                    self.master.close_editor(self)
+                else:
+                    self.get_text_widget().edit_modified(True)
+                    self._last_known_mtime = None
+            
+            elif os.path.getmtime(self._filename) != self._last_known_mtime:
+                self.master.select(self)
+                
                 if messagebox.askyesno(
                     "External modification", 
                     "Looks like '%s' was modified outside Thonny.\n\n" % self._filename
@@ -103,8 +120,8 @@ class Editor(ttk.Frame):
                     self._load_file(self._filename, keep_undo=True)
                 else:
                     self._last_known_mtime = os.path.getmtime(self._filename)
-            finally:
-                self._asking_about_external_change = False
+        finally:
+            self._asking_about_external_change = False
         
     
     def get_long_description(self):
@@ -456,11 +473,15 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         editor = self.get_child_by_index(index)
             
         if editor:
-            if not self.check_allow_closing(editor):
-                return
-            self.forget(editor)
-            editor.destroy()
-            self._remember_open_files()
+            self.close_editor(editor)
+    
+    def close_editor(self, editor, force=False):
+        if not force and not self.check_allow_closing(editor):
+            return
+        self.forget(editor)
+        editor.destroy()
+        self._remember_open_files()
+        
     
     def _cmd_save_file(self):
         if self.get_current_editor():
