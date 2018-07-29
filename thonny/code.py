@@ -526,13 +526,14 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         next_index = (cur_index + direction) % len(self.tabs())
         self.select(self.get_child_by_index(next_index))
     
-    def show_file(self, filename, text_range=None):
+    def show_file(self, filename, text_range=None, set_focus=True):
         #self.close_single_untitled_unmodified_editor()
         editor = self.get_editor(filename, True)
         assert editor is not None
         
         self.select(editor)
-        editor.focus_set()
+        if set_focus:
+            editor.focus_set()
         
         if text_range is not None:
             editor.select_range(text_range)

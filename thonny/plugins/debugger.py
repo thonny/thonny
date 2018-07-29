@@ -25,7 +25,7 @@ class Debugger:
         self._last_progress_message = None
         get_workbench().bind("DebuggerResponse", self.handle_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
-    
+        
     def debug_current_script(self):
         get_runner().execute_current(self._command_name)
 
@@ -87,7 +87,7 @@ class Debugger:
         get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
         get_workbench().unbind("DebuggerProgress", self.handle_debugger_progress)
             
-    def highlight_a_frame(self, frame_index):
+    def show_frame(self, frame_id):
         # called by StackView
         raise NotImplementedError()
             
@@ -109,7 +109,7 @@ class TraditionalDebugger(Debugger):
         
     def handle_debugger_progress(self, msg):
         self._last_progress_message = msg
-        self.highlight_a_frame(-1)
+        self.show_frame(self._last_progress_message.stack[-1]["id"])
     
     def close(self):
         super().close()
@@ -117,9 +117,13 @@ class TraditionalDebugger(Debugger):
             self._last_frame_visualizer.close()
             self._last_frame_visualizer = None
             
-    def highlight_a_frame(self, frame_index):
+    def show_frame(self, frame_id):
         # called by StackView
-        frame_info = self._last_progress_message.stack[frame_index]
+        for frame_info in self._last_progress_message.stack:
+            if frame_info["id"] == frame_id:
+                break
+        else:
+            return 
         
         if (self._last_frame_visualizer is not None
             and self._last_frame_visualizer._frame_id != frame_info["id"]):
@@ -130,27 +134,6 @@ class TraditionalDebugger(Debugger):
             self._last_frame_visualizer = EditorVisualizer(frame_info)
             
         self._last_frame_visualizer._update_this_frame(self._last_progress_message, frame_info)
-        """
-        # show the location
-        enb = get_workbench().get_editor_notebook()
-        target_editor = enb.show_file(frame_info.filename)
-        target_editor.see_line(frame_info.last_event_focus.end_lineno)
-        target_editor.see_line(frame_info.last_event_focus.lineno)
-        
-        self._remove_focus_tags()
-        # add highlight
-        
-        if (self._last_progress_message.exception is not None
-            and (frame_index == -1 or frame_index == len(self._last_progress_message.stack)-1)):
-            tag = "exception_focus"
-        else:
-            tag = "active_focus"
-            
-        
-        target_editor.get_code_view().text.tag_add(tag,
-                                            "%d.0" % frame_info.last_event_focus.lineno,
-                                            "%d.0" % (frame_info.last_event_focus.end_lineno))
-        """
 
 class StackedWindowsDebugger(Debugger):
     def __init__(self, command_name):
@@ -215,7 +198,7 @@ class StackedWindowsDebugger(Debugger):
         else:
             return None
         
-    def highlight_a_frame(self, frame_index):
+    def show_frame(self, frame_id):
         # called by StackView
         "TODO:"
 
@@ -232,14 +215,27 @@ class FrameVisualizer:
         self._firstlineno = None 
         self._expression_box = ExpressionBox(text_frame)
         self._next_frame_visualizer = None
+        self._text_old_read_only = self._text.is_read_only()
         self._text.set_read_only(True)
+        self._line_debug = frame_info["current_statement"] is None
+    
+        self._reconfigure_tags()
+        
+    def _reconfigure_tags(self):
+        for tag in ["active_focus", "exception_focus"]:
+            conf = get_syntax_options_for_tag(tag).copy()
+            if self._line_debug:
+                # meaning data comes from line-debug
+                conf["borderwidth"] = 0
+                
+            self._text.tag_configure(tag, **conf)
     
     def close(self):
         if self._next_frame_visualizer:
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
             
-        self._text.set_read_only(False)
+        self._text.set_read_only(self._text_old_read_only)
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
     
@@ -380,7 +376,7 @@ class EditorVisualizer(FrameVisualizer):
     (main module in case of StackedWindowsDebugger) 
     """
     def __init__(self, frame_info):
-        self.editor = get_workbench().get_editor_notebook().show_file(frame_info.filename)
+        self.editor = get_workbench().get_editor_notebook().show_file(frame_info.filename, set_focus=False)
         FrameVisualizer.__init__(self, self.editor.get_code_view(), frame_info)
         self._firstlineno = 1        
     
@@ -696,7 +692,8 @@ class ModuleLoadDialog(DialogVisualizer):
 
 class StackView(ui_utils.TreeFrame):
     def __init__(self, master):
-        super().__init__(master, ("function", "location"))
+        super().__init__(master, ("function", "location", "id"),
+                         displaycolumns=("function", "location"))
 
         self.tree.column('function', width=120, anchor=tk.W, stretch=False)
         self.tree.column('location', width=450, anchor=tk.W, stretch=True)
@@ -715,7 +712,18 @@ class StackView(ui_utils.TreeFrame):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "function", frame.code_name)
             self.tree.set(node_id, "location", 
-                          "%s, line %s" % (frame.filename, lineno))    
+                          "%s, line %s" % (frame.filename, lineno))
+            self.tree.set(node_id, "id", frame.id)
+    
+    def on_select(self, event):
+        iid = self.tree.focus()
+        if iid != '':
+            # assuming id is in the last column
+            frame_id = self.tree.item(iid)['values'][-1]
+            if _current_debugger is not None:
+                _current_debugger.show_frame(frame_id)
+        
+            
 
 def _debugger_command_enabled(command):
     if _current_debugger is None:

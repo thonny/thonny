@@ -512,6 +512,9 @@ class EnhancedText(TweakableText):
         self.tag_add('sel', '1.0', tk.END)
     
     def set_read_only(self, value):
+        if value == self.is_read_only():
+            return
+        
         TweakableText.set_read_only(self, value)
         self._reload_theme_options()
         if self._should_tag_current_line:
