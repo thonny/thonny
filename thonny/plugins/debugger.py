@@ -20,12 +20,14 @@ import logging
 _current_debugger = None
 
 class Debugger:
-    def __init__(self):
+    def __init__(self, command_name):
+        self._command_name = command_name
         self._last_progress_message = None
+        get_workbench().bind("DebuggerResponse", self.handle_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
     
     def debug_current_script(self):
-        raise NotImplementedError()
+        get_runner().execute_current(self._command_name)
 
     def check_issue_command(self, command, **kwargs):
         cmd = DebuggerCommand(command, **kwargs)
@@ -71,23 +73,29 @@ class Debugger:
         
         if command == "run_to_cursor":
             return self.get_run_to_cursor_breakpoint() is not None
-        
-        return True
+        elif command == "step_back":
+            return self._command_name == "Debug"
+        else:
+            return True
     
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
+        self.close()
+        
+    def close(self) -> None:
         global _current_debugger
         _current_debugger = None
         get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
+        get_workbench().unbind("DebuggerProgress", self.handle_debugger_progress)
             
+    def highlight_a_frame(self, frame_index):
+        # called by StackView
+        raise NotImplementedError()
             
-class SimpleDebugger(Debugger):
-    def __init__(self):
-        super().__init__()
-        get_workbench().bind("DebuggerResponse", self._handle_debugger_progress, True)
-    
-    def debug_current_script(self):
-        get_runner().execute_current("LineDebug")
-    
+class TraditionalDebugger(Debugger):
+    def __init__(self, command_name):
+        super().__init__(command_name)
+        self._last_frame_visualizer = None
+        
     def get_run_to_cursor_breakpoint(self):
         editor = get_workbench().get_editor_notebook().get_current_editor()
         if editor:
@@ -99,32 +107,32 @@ class SimpleDebugger(Debugger):
             
         return None
         
-    def _handle_debugger_progress(self, msg):
+    def handle_debugger_progress(self, msg):
         self._last_progress_message = msg
         self.highlight_a_frame(-1)
     
-    def handle_toplevel_response(self, msg):
-        super().handle_toplevel_response(msg)
-        get_workbench().unbind("DebuggerProgress", self._handle_debugger_progress)
-        self._remove_focus_tags()
-    
-    def _remove_focus_tags(self):
-        for editor in get_workbench().get_editor_notebook().get_all_editors():    
-            for name in ["exception_focus", "active_focus", 
-                         "completed_focus", "suspended_focus"]:
-                editor.get_code_view().text.tag_remove(name, "1.0", "end")
+    def close(self):
+        super().close()
+        if self._last_frame_visualizer is not None:
+            self._last_frame_visualizer.close()
+            self._last_frame_visualizer = None
             
-    def command_enabled(self, command):
-        if command == "step_back":
-            return False
-        else:
-            return super().command_enabled(command)
-    
     def highlight_a_frame(self, frame_index):
+        # called by StackView
         frame_info = self._last_progress_message.stack[frame_index]
-        enb = get_workbench().get_editor_notebook()
         
+        if (self._last_frame_visualizer is not None
+            and self._last_frame_visualizer._frame_id != frame_info["id"]):
+            self._last_frame_visualizer.close()
+            self._last_frame_visualizer = None
+        
+        if self._last_frame_visualizer is None:
+            self._last_frame_visualizer = EditorVisualizer(frame_info)
+            
+        self._last_frame_visualizer._update_this_frame(self._last_progress_message, frame_info)
+        """
         # show the location
+        enb = get_workbench().get_editor_notebook()
         target_editor = enb.show_file(frame_info.filename)
         target_editor.see_line(frame_info.last_event_focus.end_lineno)
         target_editor.see_line(frame_info.last_event_focus.lineno)
@@ -142,16 +150,12 @@ class SimpleDebugger(Debugger):
         target_editor.get_code_view().text.tag_add(tag,
                                             "%d.0" % frame_info.last_event_focus.lineno,
                                             "%d.0" % (frame_info.last_event_focus.end_lineno))
+        """
 
-
-class FancyDebugger(Debugger):
-    def __init__(self):
-        super().__init__()
+class StackedWindowsDebugger(Debugger):
+    def __init__(self, command_name):
+        super().__init__(command_name)
         self._main_frame_visualizer = None
-        get_workbench().bind("DebuggerResponse", self._handle_debugger_progress, True)
-    
-    def debug_current_script(self):
-        get_runner().execute_current("Debug")
     
     def get_run_to_cursor_breakpoint(self):
         visualizer = self._get_topmost_selected_visualizer()
@@ -165,7 +169,7 @@ class FancyDebugger(Debugger):
         else:
             return None
         
-    def _handle_debugger_progress(self, msg):
+    def handle_debugger_progress(self, msg):
         self._last_progress_message = msg
         
         main_frame_id = msg.stack[0].id
@@ -177,7 +181,7 @@ class FancyDebugger(Debugger):
             self._main_frame_visualizer = None
             
         if not self._main_frame_visualizer:
-            self._main_frame_visualizer = MainFrameVisualizer(msg.stack[0])
+            self._main_frame_visualizer = EditorVisualizer(msg.stack[0])
             
         self._main_frame_visualizer.update_this_and_next_frames(msg)
         
@@ -187,9 +191,8 @@ class FancyDebugger(Debugger):
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
     
-    def handle_toplevel_response(self, msg):
-        super().handle_toplevel_response(msg)
-        get_workbench().unbind("DebuggerProgress", self._handle_debugger_progress)    
+    def close(self):
+        super().close()
         if self._main_frame_visualizer is not None:
             self._main_frame_visualizer.close()
             self._main_frame_visualizer = None
@@ -212,6 +215,9 @@ class FancyDebugger(Debugger):
         else:
             return None
         
+    def highlight_a_frame(self, frame_index):
+        # called by StackView
+        "TODO:"
 
 class FrameVisualizer:
     """
@@ -223,8 +229,7 @@ class FrameVisualizer:
         self._text = text_frame.text
         self._frame_id = frame_info.id
         self._filename = frame_info.filename
-        self._firstlineno = frame_info.firstlineno
-        self._source = frame_info.source
+        self._firstlineno = None 
         self._expression_box = ExpressionBox(text_frame)
         self._next_frame_visualizer = None
         self._text.set_read_only(True)
@@ -279,6 +284,7 @@ class FrameVisualizer:
                             )
         else:    
             if "statement" in frame_info.last_event:
+                # TODO: exception info should be frame-based
                 if msg.exception is not None:
                     stmt_tag = "exception_focus"
                 elif frame_info.last_event.startswith("before"):
@@ -339,9 +345,9 @@ class FrameVisualizer:
             self._text.see("%d.0" % (first_line+3))
             
     def _get_text_range_block(self, text_range):
-        first_line = text_range.lineno - self._frame_info.firstlineno + 1
+        first_line = text_range.lineno - self._firstlineno + 1
         last_line = (text_range.end_lineno 
-                     - self._frame_info.firstlineno 
+                     - self._firstlineno 
                      + (1 if text_range.end_col_offset > 0 else 0))
         first_line_content = self._text.get("%d.0" % first_line, "%d.end" % first_line)
         if first_line_content.strip().startswith("elif "):
@@ -368,13 +374,15 @@ class FrameVisualizer:
      
 
 
-class MainFrameVisualizer(FrameVisualizer):
+class EditorVisualizer(FrameVisualizer):
     """
-    Takes care of stepping in the main module
+    Takes care of stepping in the editor 
+    (main module in case of StackedWindowsDebugger) 
     """
     def __init__(self, frame_info):
         self.editor = get_workbench().get_editor_notebook().show_file(frame_info.filename)
         FrameVisualizer.__init__(self, self.editor.get_code_view(), frame_info)
+        self._firstlineno = 1        
     
     def _update_this_frame(self, msg, frame_info):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
@@ -392,15 +400,6 @@ class MainFrameVisualizer(FrameVisualizer):
         self._decorate_editor_title("")
         
         
-
-class CallFrameVisualizer(FrameVisualizer):
-    def __init__(self, text_frame, frame_id):
-        self._dialog = FunctionCallDialog(text_frame)
-        FrameVisualizer.__init__(self, self._dialog.get_code_view(), frame_id)
-        
-    def close(self):
-        super().close()
-        self._dialog.destroy()
 
 class ExpressionBox(tk.Text):
     def __init__(self, codeview):
@@ -602,7 +601,7 @@ class ExpressionBox(tk.Text):
         self["width"] = max(map(len, lines))
     
 
-class FrameDialog(tk.Toplevel, FrameVisualizer):
+class DialogVisualizer(tk.Toplevel, FrameVisualizer):
     def __init__(self, master, frame_info):
         tk.Toplevel.__init__(self, master)
         
@@ -627,6 +626,7 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         
         self._init_layout_widgets(master, frame_info)
         FrameVisualizer.__init__(self, self._text_frame, frame_info)
+        self._firstlineno = frame_info.firstlineno        
         
         self._load_code(frame_info)
         self._text_frame.text.focus()
@@ -663,19 +663,19 @@ class FrameDialog(tk.Toplevel, FrameVisualizer):
         FrameVisualizer.close(self)
         self.destroy()
 
-class FunctionCallDialog(FrameDialog):
+class FunctionCallDialog(DialogVisualizer):
     def __init__(self, master, frame_info):
-        FrameDialog.__init__(self, master, frame_info)
+        DialogVisualizer.__init__(self, master, frame_info)
     
     def _init_layout_widgets(self, master, frame_info):
-        FrameDialog._init_layout_widgets(self, master, frame_info)
+        DialogVisualizer._init_layout_widgets(self, master, frame_info)
         self._locals_book = ttk.Notebook(self.main_pw)
         self._locals_frame = VariablesFrame(self._locals_book)
         self._locals_book.add(self._locals_frame, text="Local variables")
         self.main_pw.add(self._locals_book, minsize=100)
 
     def _load_code(self, frame_info):
-        FrameDialog._load_code(self, frame_info)
+        DialogVisualizer._load_code(self, frame_info)
         
         if hasattr(frame_info, "function"):
             function_label = frame_info.function["repr"]
@@ -686,13 +686,13 @@ class FunctionCallDialog(FrameDialog):
         self._code_book.tab(self._text_frame, text=function_label)
     
     def _update_this_frame(self, msg, frame_info):
-        FrameDialog._update_this_frame(self, msg, frame_info)
+        DialogVisualizer._update_this_frame(self, msg, frame_info)
         self._locals_frame.update_variables(frame_info.locals)
 
         
-class ModuleLoadDialog(FrameDialog):
+class ModuleLoadDialog(DialogVisualizer):
     def __init__(self, text_frame, frame_info):
-        FrameDialog.__init__(self, text_frame, frame_info)
+        DialogVisualizer.__init__(self, text_frame, frame_info)
     
 
 def _debugger_command_enabled(command):
@@ -712,8 +712,10 @@ def _start_debug_enabled():
             and get_workbench().get_editor_notebook().get_current_editor() is not None
             and "debug" in get_runner().supported_features())
 
-def _start_debug(debugger_class):
-    current_debugger = debugger_class()
+def _start_debug(command_name):
+    # TODO: select debugger based on configuration
+    #current_debugger = StackedWindowsDebugger(command_name)
+    current_debugger = TraditionalDebugger(command_name)
      
     global _current_debugger
     _current_debugger = current_debugger
@@ -726,7 +728,7 @@ def _start_debug(debugger_class):
 def load_plugin() -> None:
     
     get_workbench().add_command("debug", "run", "Debug current script",
-        lambda: _start_debug(FancyDebugger),
+        lambda: _start_debug("Debug"),
         caption="Debug",
         tester=_start_debug_enabled,
         default_sequence="<Control-F5>",
@@ -734,9 +736,9 @@ def load_plugin() -> None:
         image="debug-current-script",
         include_in_toolbar=True)
     
-    get_workbench().add_command("debuglite", "run", "DebugLite current script",
-        lambda: _start_debug(SimpleDebugger),
-        caption="DebugLite",
+    get_workbench().add_command("debuglite", "run", "Debug current script (line-based)",
+        lambda: _start_debug("LineDebug"),
+        caption="Line-debug",
         tester=_start_debug_enabled,
         default_sequence="<Shift-F5>",
         group=10)
