@@ -83,7 +83,7 @@ class Debugger:
 class SimpleDebugger(Debugger):
     def __init__(self):
         super().__init__()
-        get_workbench().bind("SimpleDebuggerResponse", self._handle_debugger_progress, True)
+        get_workbench().bind("DebuggerResponse", self._handle_debugger_progress, True)
     
     def debug_current_script(self):
         get_runner().execute_current("LineDebug")
@@ -126,7 +126,8 @@ class SimpleDebugger(Debugger):
         
         # show the location
         target_editor = enb.show_file(frame_info.filename)
-        target_editor.see_line(frame_info.lineno)
+        target_editor.see_line(frame_info.last_event_focus.end_lineno)
+        target_editor.see_line(frame_info.last_event_focus.lineno)
         
         self._remove_focus_tags()
         # add highlight
@@ -139,15 +140,15 @@ class SimpleDebugger(Debugger):
             
         
         target_editor.get_code_view().text.tag_add(tag,
-                                            "%d.0" % frame_info.lineno,
-                                            "%d.0" % (frame_info.lineno+1))
+                                            "%d.0" % frame_info.last_event_focus.lineno,
+                                            "%d.0" % (frame_info.last_event_focus.end_lineno))
 
 
 class FancyDebugger(Debugger):
     def __init__(self):
         super().__init__()
         self._main_frame_visualizer = None
-        get_workbench().bind("FancyDebuggerResponse", self._handle_debugger_progress, True)
+        get_workbench().bind("DebuggerResponse", self._handle_debugger_progress, True)
     
     def debug_current_script(self):
         get_runner().execute_current("Debug")

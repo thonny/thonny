@@ -19,8 +19,8 @@ import thonny
 from thonny import ast_utils
 from thonny.common import TextRange, parse_message, serialize_message, UserError, \
     DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
-    ToplevelResponse, InlineResponse, SimpleDebuggerResponse,\
-    FancyDebuggerResponse, BackendEvent, path_startswith
+    ToplevelResponse, InlineResponse, DebuggerResponse,\
+    BackendEvent, path_startswith
 
 import signal
 import warnings
@@ -1165,7 +1165,7 @@ class SimpleTracer(Tracer):
         return self._trace
     
     def _report_current_state(self, frame):
-        msg = SimpleDebuggerResponse(
+        msg = DebuggerResponse(
                                stack=self._export_stack(frame),
                                is_new=True,
                                loaded_modules=list(sys.modules.keys()),
@@ -1224,10 +1224,15 @@ class SimpleTracer(Tracer):
                 filename=system_frame.f_code.co_filename,
                 module_name=module_name,
                 code_name=code_name,
-                lineno=system_frame.f_lineno,
-                #locals=self._vm.export_variables(system_frame.f_locals),
+                locals=self._vm.export_variables(system_frame.f_locals),
                 source=source,
                 firstlineno=firstlineno,
+                last_event="line",
+                last_event_focus=TextRange(system_frame.f_lineno, 0,
+                                           system_frame.f_lineno+1, 0),
+                current_evaluations=None,
+                current_statement=None,
+                current_root_expression=None,
             ))
             
             if module_name == "__main__" and code_name == "<module>":
@@ -1505,7 +1510,7 @@ class FancyTracer(Tracer):
         if current_module_globals["__name__"] != "__main__":
             self._past_globals[-1][current_module_globals["__name__"]] = self._vm.export_variables(current_module_globals)
 
-        msg = FancyDebuggerResponse(
+        msg = DebuggerResponse(
                                     stack=self._export_stack(),
                                     is_new=True,
                                     loaded_modules=list(sys.modules.keys()),
@@ -1686,7 +1691,7 @@ class FancyTracer(Tracer):
                 source=source,
                 firstlineno=firstlineno,
                 last_event=custom_frame.last_event,
-                last_event_args=last_event_args,
+                last_event_args=custom_frame.last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
                 current_evaluations=custom_frame.current_evaluations.copy(),
                 current_statement=custom_frame.current_statement,

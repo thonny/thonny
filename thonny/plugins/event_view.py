@@ -11,8 +11,7 @@ class EventsView(TextFrame):
         get_workbench().bind("ShowView", self._log_event, True)
         get_workbench().bind("HideView", self._log_event, True)
         get_workbench().bind("ToplevelReponse", self._log_event, True)
-        get_workbench().bind("FancyDebuggerResponse", self._log_event, True)
-        get_workbench().bind("SimpleDebuggerResponse", self._log_event, True)
+        get_workbench().bind("DebuggerResponse", self._log_event, True)
         get_workbench().bind("ProgramOutput", self._log_event, True)
         get_workbench().bind("InputRequest", self._log_event, True)
     
@@ -27,7 +26,6 @@ class EventsView(TextFrame):
             frame = event.stack[-1]
             self.text.insert("end", "    " + "event" + ": " + frame.last_event + "\n") 
             self.text.insert("end", "    " + "focus" + ": " + str(frame.last_event_focus) + "\n") 
-            self.text.insert("end", "    " + "args" + ": " + str(frame.last_event_args) + "\n") 
 
         self.text.see("end")
 

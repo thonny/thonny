@@ -20,8 +20,7 @@ class HeapView(MemoryFrame):
         
         get_workbench().bind("get_heap_response", self._handle_heap_event, True)
         
-        get_workbench().bind("FancyDebuggerResponse", self._request_heap_data, True)
-        get_workbench().bind("SimpleDebuggerResponse", self._request_heap_data, True)
+        get_workbench().bind("DebuggerResponse", self._request_heap_data, True)
         get_workbench().bind("ToplevelResponse", self._request_heap_data, True)
         # Showing new globals may introduce new interesting objects
         get_workbench().bind("get_globals_response", self._request_heap_data, True) 

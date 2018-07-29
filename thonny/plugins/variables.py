@@ -44,8 +44,7 @@ class GlobalsView(ttk.Frame):
         get_workbench().bind("get_globals_response", self._handle_globals_event, True)
         get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         get_workbench().bind("BackendRestart", self._backend_restart, True)
-        get_workbench().bind("FancyDebuggerResponse", self._handle_progress, True)
-        get_workbench().bind("SimpleDebuggerResponse", self._handle_progress, True)
+        get_workbench().bind("DebuggerResponse", self._handle_progress, True)
         get_workbench().bind("ToplevelResponse", self._handle_progress, True)
         get_workbench().bind("InputRequest", self._handle_progress, True)
     

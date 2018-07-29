@@ -171,12 +171,6 @@ class ToplevelResponse(MessageFromBackend):
 class DebuggerResponse(MessageFromBackend):
     pass
 
-class SimpleDebuggerResponse(DebuggerResponse): # TODO: get rid of this
-    pass
-
-class FancyDebuggerResponse(DebuggerResponse): # TODO: get rid of this
-    pass
-
 class BackendEvent(MessageFromBackend):
     def __init__(self, event_type: str, **kw) -> None:
         super().__init__(**kw)

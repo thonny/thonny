@@ -50,8 +50,7 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
         
-        get_workbench().bind("FancyDebuggerResponse", self._listen_debugger_progress, True)
-        get_workbench().bind("SimpleDebuggerResponse", self._listen_debugger_progress, True)
+        get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
         
         self.update_appearance()

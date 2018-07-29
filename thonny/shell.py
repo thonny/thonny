@@ -155,7 +155,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
-        get_workbench().bind("FancyDebuggerResponse", self._handle_fancy_debugger_progress, True)
+        get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
         get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         
         self._init_menu()
@@ -237,10 +237,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
     
     def _handle_fancy_debugger_progress(self, msg):
-        if msg.is_new:
+        if msg.is_new or msg.stream_symbol_counts is None:
             self._update_visible_io(None)
         else:
             self._update_visible_io(sum(msg.stream_symbol_counts.values()))
+            
     
     def _update_visible_io(self, num_visible_chars):
         self.tag_remove("suppressed_io", "1.0", "end")
@@ -651,7 +652,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                  
                 def handle_frame_click(event, 
                                        frame_id=frame_id):
-                    print("frame id", frame_id)
                     get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
                     return "break"
                     
