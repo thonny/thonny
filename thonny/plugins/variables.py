@@ -32,6 +32,12 @@ class GlobalsView(ttk.Frame):
         
         self.error_label = ttk.Label(self, text="Error", anchor="center", wraplength="5cm")
         
+        ttk.Style().configure("Centered.TButton", justify="center")
+        self.home_button = ttk.Button(self.variables_frame.tree, style="Centered.TButton", 
+                                      text="Back to\ncurrent frame",
+                                      width=15)
+        self.home_button.place(relx=1, x=-5, y=5, anchor="ne")
+        
         self.columnconfigure(0, weight=1)
         self.rowconfigure(1, weight=1)
         
@@ -49,9 +55,24 @@ class GlobalsView(ttk.Frame):
     def _backend_restart(self, event):
         self.variables_frame._clear_tree()
 
-    def _handle_frame_info_event(self, event):
+    def _handle_frame_info_event(self, frame_info):
         #print("FRAI", event)
-        self.variables_frame.update_variables(event["locals"])
+        if frame_info.get("error"):
+            self.variables_frame.update_variables(None)
+            # TODO: show error
+        else:
+            self.variables_frame.update_variables([
+                ("LOCALS", frame_info["locals"]),
+                ("GLOBALS", frame_info["globals"])
+            ])
+        
+        name = frame_info.get("name", "") 
+        if name and name != "<module>":
+            view_caption = "Variables (%s)" % name
+        else:
+            view_caption = "Variables"
+            
+        self.home_widget.master.tab(self.home_widget, text=view_caption)
         
     def _handle_globals_event(self, event):
         # TODO: handle other modules as well
@@ -89,4 +110,4 @@ class GlobalsView(ttk.Frame):
     
 
 def load_plugin() -> None:
-    get_workbench().add_view(GlobalsView, "Variables", "ne", default_position_key="AAA")
+    get_workbench().add_view(GlobalsView, "Variables", "e", default_position_key="AAA")

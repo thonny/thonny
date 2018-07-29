@@ -5,7 +5,7 @@ import tkinter.font as tk_font
 
 from thonny.ui_utils import TreeFrame
 from thonny.misc_utils import shorten_repr
-from thonny import get_workbench
+from thonny import get_workbench, ui_utils
 
 MAX_REPR_LENGTH_IN_GRID = 100
 
@@ -58,7 +58,8 @@ class VariablesFrame(MemoryFrame):
         get_workbench().bind("ShowView", self._update_memory_model, True)
         get_workbench().bind("HideView", self._update_memory_model, True)
         self._update_memory_model()
-        #self.tree.tag_configure("item", font=ui_utils.TREE_FONT)
+        self.tree.tag_configure("group_title", font="BoldTkDefaultFont",
+                                background=ui_utils.lookup_style_option(".", "background"))
         
     def destroy(self):
         MemoryFrame.destroy(self)
@@ -78,7 +79,19 @@ class VariablesFrame(MemoryFrame):
     def update_variables(self, variables):
         self._clear_tree()
         
-        if variables:
+        if not variables:
+            return
+        
+        if isinstance(variables, list):
+            groups = variables
+        else:
+            groups = [("", variables)]
+        
+        for group_title, variables in groups:
+            if group_title:
+                node_id = self.tree.insert("", "end", tags=("group_title",))
+                self.tree.set(node_id, "name", group_title)
+                
             for name in sorted(variables.keys()):
                 
                 if not name.startswith("__"):

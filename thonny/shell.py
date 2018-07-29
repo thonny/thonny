@@ -156,6 +156,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("FancyDebuggerResponse", self._handle_fancy_debugger_progress, True)
+        get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         
         self._init_menu()
     
@@ -649,20 +650,26 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 frame_tag = "frame_%d" % frame_id
                  
                 def handle_frame_click(event, 
-                                       frame_id=frame_id,
-                                       frame_tag=frame_tag):
+                                       frame_id=frame_id):
                     print("frame id", frame_id)
-                    start, end = self.tag_ranges(frame_tag)
-                    self.tag_remove("selected_frame", "1.0", "end")
-                    self.tag_add("selected_frame", start, end)
                     get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
-                        
+                    return "break"
                     
                 tags += (frame_tag,)
-                self.tag_bind(frame_tag, "<1>", handle_frame_click, True)
+                self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
                 
             self._insert_text_directly(line, tags)
     
+    def _handle_frame_info_event(self, event):
+        # New frame was (or will be) presented in Variables view
+        self.tag_remove("sel", "1.0", "end")
+        
+        if event.get("frame_id"):
+            frame_tag = "frame_%d" % event.frame_id
+            start, end = self.tag_ranges(frame_tag)
+            self.tag_add("sel", start, end)
+        
+        
     def _invalidate_current_data(self):
         """
         Grayes out input & output displayed so far

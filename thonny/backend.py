@@ -420,6 +420,7 @@ class VM:
             if frame is None:
                 atts["error"] = "Frame not found"
             else:
+                atts["name"] = frame.f_code.co_name
                 atts["locals"] = self.export_variables(frame.f_locals)
                 atts["globals"] = self.export_variables(frame.f_globals)
         except Exception as e:

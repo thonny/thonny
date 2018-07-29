@@ -29,4 +29,4 @@ class StackView(ui_utils.TreeFrame):
                           "%s, line %s" % (frame.filename, lineno))
 
 def load_plugin() -> None:
-    get_workbench().add_view(StackView, "Stack", "s")
+    get_workbench().add_view(StackView, "Stack", "ne")
