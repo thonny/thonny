@@ -1019,6 +1019,7 @@ class Tracer(Executor):
         super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._unhandled_exception = None
+        self._source_info_by_frame = {}
         
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1120,6 +1121,13 @@ class Tracer(Executor):
         
         return result
 
+    def _get_frame_source_info(self, frame):
+        fid = id(frame)
+        if fid not in self._source_info_by_frame:
+            self._source_info_by_frame[fid] = _fetch_frame_source_info(frame)
+            
+        return self._source_info_by_frame[fid]
+
 
 class SimpleTracer(Tracer):
     def __init__(self, vm, original_cmd):
@@ -1214,7 +1222,7 @@ class SimpleTracer(Tracer):
             code_name = system_frame.f_code.co_name
             
             try:
-                source, firstlineno = _get_frame_source_info(system_frame)
+                source, firstlineno = self._get_frame_source_info(system_frame)
             except:
                 source = None
                 firstlineno = None
@@ -1680,7 +1688,7 @@ class FancyTracer(Tracer):
                 last_event_args["value"] = self._vm.export_value(last_event_args["value"])
 
             system_frame = custom_frame.system_frame
-            source, firstlineno = _get_frame_source_info(system_frame)
+            source, firstlineno = self._get_frame_source_info(system_frame)
 
             result.append(FrameInfo(
                 id=id(system_frame),
@@ -1968,7 +1976,7 @@ class FancyTracer(Tracer):
             args=args,
             keywords=[]
         )
-
+    
     def _debug(self, *args):
         print("TRACER:", *args, file=self._vm._original_stderr)
 
@@ -2013,7 +2021,7 @@ def _get_python_version_string(add_word_size=False):
 
     return result
 
-def _get_frame_source_info(frame):
+def _fetch_frame_source_info(frame):
     if frame.f_code.co_name == "<module>":
         obj = frame.f_code
         lineno = 1
@@ -2022,7 +2030,7 @@ def _get_frame_source_info(frame):
         lineno = obj.co_firstlineno
 
     assert obj is not None, (
-        "Failed to get source in backend _get_frame_source_info for frame " + str(frame)
+        "Failed to get source in backend _fetch_frame_source_info for frame " + str(frame)
         + " with f_code.co_name == " + frame.f_code.co_name
     )
 
