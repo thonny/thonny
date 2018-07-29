@@ -1642,6 +1642,10 @@ class Workbench(tk.Tk):
         for nb_name in self._view_notebooks:
             view_name = self.get_option("layout.notebook_" + nb_name + "_visible_view")
             if view_name != None:
+                if view_name == "GlobalsView":
+                    # was renamed in 2.2b5
+                    view_name = "VariablesView"
+                    
                 self.show_view(view_name)
                 
         

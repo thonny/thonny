@@ -24,11 +24,6 @@ class GeneralConfigurationPage(ConfigurationPage):
         self._debug_checkbox = ttk.Checkbutton(self, text="Debug mode (provides more detailed logs)", variable=self._debug_var)
         self._debug_checkbox.grid(row=3, column=0, sticky=tk.W, columnspan=2)
         
-        get_workbench().set_default("view.globals_module_selector", False) # in case variables view is not open yet
-        self._modules_var = get_workbench().get_variable("view.globals_module_selector")
-        self._modules_checkbox = ttk.Checkbutton(self, text="Show module selector in Variables view", variable=self._modules_var)
-        self._modules_checkbox.grid(row=4, column=0, sticky=tk.W, columnspan=2)
-        
         self._scaling_var = get_workbench().get_variable("general.scaling")
         self._scaling_label = ttk.Label(self, text="UI scaling factor")
         self._scaling_label.grid(row=5, column=0, sticky=tk.W, padx=(0, 10), pady=(10,0))

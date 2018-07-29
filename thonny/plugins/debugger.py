@@ -12,7 +12,7 @@ from thonny import ast_utils, memory, misc_utils, ui_utils, code
 from thonny.misc_utils import shorten_repr
 import ast
 from thonny.codeview import CodeView, get_syntax_options_for_tag
-from tkinter.messagebox import showinfo, showerror
+from tkinter.messagebox import showinfo
 from thonny import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import logging
@@ -87,7 +87,14 @@ class Debugger:
         get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
         get_workbench().unbind("DebuggerProgress", self.handle_debugger_progress)
             
-    def show_frame(self, frame_id):
+    def get_frame_by_id(self, frame_id):
+        for frame_info in self._last_progress_message.stack:
+            if frame_info["id"] == frame_id:
+                return frame_info
+        
+        raise ValueError("Could not find frame %d" % frame_id) 
+    
+    def bring_out_frame(self, frame_id):
         # called by StackView
         raise NotImplementedError()
             
@@ -109,7 +116,7 @@ class TraditionalDebugger(Debugger):
         
     def handle_debugger_progress(self, msg):
         self._last_progress_message = msg
-        self.show_frame(self._last_progress_message.stack[-1]["id"])
+        self.bring_out_frame(self._last_progress_message.stack[-1]["id"])
     
     def close(self):
         super().close()
@@ -117,13 +124,8 @@ class TraditionalDebugger(Debugger):
             self._last_frame_visualizer.close()
             self._last_frame_visualizer = None
             
-    def show_frame(self, frame_id):
-        # called by StackView
-        for frame_info in self._last_progress_message.stack:
-            if frame_info["id"] == frame_id:
-                break
-        else:
-            return 
+    def bring_out_frame(self, frame_id):
+        frame_info = self.get_frame_by_id(frame_id)
         
         if (self._last_frame_visualizer is not None
             and self._last_frame_visualizer._frame_id != frame_info["id"]):
@@ -134,6 +136,18 @@ class TraditionalDebugger(Debugger):
             self._last_frame_visualizer = EditorVisualizer(frame_info)
             
         self._last_frame_visualizer._update_this_frame(self._last_progress_message, frame_info)
+        
+        # show variables
+        var_view = get_workbench().get_view("VariablesView")
+        if frame_info["code_name"] == "<module>":
+            var_view.show_globals(frame_info["globals"], frame_info["module_name"])
+        else:
+            var_view.show_frame_variables(
+                frame_info["locals"],
+                frame_info["globals"],
+                frame_info["freevars"],
+                frame_info["module_name"] if frame_info["code_name"] == "<module>" else frame_info["code_name"]
+            )
 
 class StackedWindowsDebugger(Debugger):
     def __init__(self, command_name):
@@ -168,11 +182,14 @@ class StackedWindowsDebugger(Debugger):
             
         self._main_frame_visualizer.update_this_and_next_frames(msg)
         
+        self.bring_out_frame(msg.stack[-1].id)
+        """
         if msg.exception:
             showerror("Exception",
                       msg.exception_lower_stack_description.lstrip() + 
                       msg.exception["type_name"] 
                       + ": " + msg.exception_msg)
+        """
     
     def close(self):
         super().close()
@@ -198,9 +215,11 @@ class StackedWindowsDebugger(Debugger):
         else:
             return None
         
-    def show_frame(self, frame_id):
+    def bring_out_frame(self, frame_id):
         # called by StackView
-        "TODO:"
+        self._main_frame_visualizer.bring_out_frame(frame_id)
+        
+        
 
 class FrameVisualizer:
     """
@@ -210,6 +229,7 @@ class FrameVisualizer:
     def __init__(self, text_frame, frame_info):
         self._text_frame = text_frame
         self._text = text_frame.text
+        self._frame_info = frame_info
         self._frame_id = frame_info.id
         self._filename = frame_info.filename
         self._firstlineno = None 
@@ -276,7 +296,8 @@ class FrameVisualizer:
         self._remove_focus_tags()
         if frame_info.last_event == "line":
             self._tag_range(frame_info.last_event_focus, 
-                            "active_focus" # or "sel" ?
+                            #"active_focus" 
+                            "sel"
                             )
         else:    
             if "statement" in frame_info.last_event:
@@ -331,6 +352,7 @@ class FrameVisualizer:
                                   "%d.0" % (lineno+1))
             
         self._text.update_idletasks()
+        self._text.see("%d.0" % (last_line))
         self._text.see("%d.0" % (first_line))
 
         if last_line - first_line < 3:
@@ -367,8 +389,16 @@ class FrameVisualizer:
                 dialog.title("Function call at " + hex(self._frame_id))
                  
             return dialog
-     
-
+    
+    def bring_out_frame(self, frame_id):
+        if self._frame_id == frame_id:
+            self.bring_out_this_frame()
+        elif self._next_frame_visualizer is not None:
+            self._next_frame_visualizer.bring_out_frame(frame_id)
+    
+    def bring_out_this_frame(self):
+        pass
+            
 
 class EditorVisualizer(FrameVisualizer):
     """
@@ -390,6 +420,9 @@ class EditorVisualizer(FrameVisualizer):
     def _decorate_editor_title(self, suffix):
         self.editor.master.update_editor_title(self.editor, 
                                                self.editor.get_title() + suffix)
+    
+    def bring_out_this_frame(self):
+        get_workbench().focus_set()
     
     def close(self):
         FrameVisualizer.close(self)
@@ -619,6 +652,7 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
                                            position_reference.winfo_rootx(),
                                            position_reference.winfo_rooty()))
         self.protocol("WM_DELETE_WINDOW", self._on_close)
+        self.bind("<FocusIn>", self._on_focus, True)
         
         self._init_layout_widgets(master, frame_info)
         FrameVisualizer.__init__(self, self._text_frame, frame_info)
@@ -650,6 +684,16 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
     
     def _update_this_frame(self, msg, frame_info):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
+    
+    def bring_out_this_frame(self):
+        self.focus_set() # no effect when clicking on stack view
+        var_view = get_workbench().get_view("VariablesView")
+        var_view.show_globals(self._frame_info["globals"],
+                              self._frame_info["module_name"])
+    
+    def _on_focus(self, event):
+        # TODO: bring out main frame when main window gets focus
+        self.bring_out_this_frame()
     
     def _on_close(self):
         showinfo("Can't close yet", 'Use "Stop" command if you want to cancel debugging')
@@ -703,8 +747,10 @@ class StackView(ui_utils.TreeFrame):
         
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
-    
+        
     def _update_stack(self, msg):
+        self._dont_react = True
+        
         self._clear_tree()
         for frame in msg.stack:
             lineno = frame.last_event_focus.lineno
@@ -714,14 +760,19 @@ class StackView(ui_utils.TreeFrame):
             self.tree.set(node_id, "location", 
                           "%s, line %s" % (frame.filename, lineno))
             self.tree.set(node_id, "id", frame.id)
-    
+            
+        # select last frame
+        self.tree.see(node_id)
+        self.tree.selection_add(node_id)
+        self.tree.focus(node_id)
+            
     def on_select(self, event):
         iid = self.tree.focus()
         if iid != '':
             # assuming id is in the last column
             frame_id = self.tree.item(iid)['values'][-1]
             if _current_debugger is not None:
-                _current_debugger.show_frame(frame_id)
+                _current_debugger.bring_out_frame(frame_id)
         
             
 
@@ -744,8 +795,8 @@ def _start_debug_enabled():
 
 def _start_debug(command_name):
     # TODO: select debugger based on configuration
-    #current_debugger = StackedWindowsDebugger(command_name)
-    current_debugger = TraditionalDebugger(command_name)
+    current_debugger = StackedWindowsDebugger(command_name)
+    #current_debugger = TraditionalDebugger(command_name)
      
     global _current_debugger
     _current_debugger = current_debugger

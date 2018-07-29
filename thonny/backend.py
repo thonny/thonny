@@ -105,7 +105,6 @@ class VM:
                           executable=sys.executable,
                           in_venv=hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix,
                           python_version=_get_python_version_string(),
-                          loaded_modules=list(sys.modules.keys()),
                           cwd=os.getcwd()))
 
         self._install_signal_handler()
@@ -194,7 +193,6 @@ class VM:
 
         # TODO: add these in response creation time in a helper function
         if isinstance(response, ToplevelResponse):
-            response["loaded_modules"] = list(sys.modules.keys())
             response["gui_is_active"] = (
                 self._get_tkinter_default_root() is not None
                 or self._get_qt_app() is not None
@@ -402,13 +400,11 @@ class VM:
 
 
     def _cmd_get_globals(self, cmd):
+        warnings.warn("_cmd_get_globals is deprecated")
         try:
-            if self._current_executor is None:
-                result = self.export_latest_globals(cmd.module_name)
-            else:
-                result = self._current_executor.export_globals(cmd.module_name)
-
-            return InlineResponse("get_globals", module_name=cmd.module_name, globals=result)
+            return InlineResponse("get_globals",
+                                  module_name=cmd.module_name,
+                                  globals=self.export_globals(cmd.module_name))
         except Exception as e:
             return InlineResponse("get_globals", module_name=cmd.module_name, error=str(e))
 
@@ -423,6 +419,7 @@ class VM:
                 atts["name"] = frame.f_code.co_name
                 atts["locals"] = self.export_variables(frame.f_locals)
                 atts["globals"] = self.export_variables(frame.f_globals)
+                atts["freevars"] = frame.f_code.co_freevars
         except Exception as e:
             atts["error"] = str(e)
         
@@ -535,12 +532,6 @@ class VM:
                                     executable=sys.executable)
         else:
             raise UserError("Command 'Reset' doesn't take arguments")
-
-    def export_latest_globals(self, module_name):
-        if module_name in sys.modules:
-            return self.export_variables(sys.modules[module_name].__dict__)
-        else:
-            raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _export_completions(self, jedi_completions):
         result = []
@@ -738,7 +729,11 @@ class VM:
     def send_message(self, msg):
         if "cwd" not in msg:
             msg["cwd"] = os.getcwd()
-            
+        
+        if (isinstance(msg, ToplevelResponse)
+            and "globals" not in msg):
+            msg["globals"] = self.export_globals()
+        
         self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
 
@@ -768,10 +763,16 @@ class VM:
                 result[name] = self.export_value(variables[name])
 
         return result
+    
+    def export_globals(self, module_name="__main__"):
+        if module_name in sys.modules:
+            return self.export_variables(sys.modules[module_name].__dict__)
+        else:
+            raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _debug(self, *args):
         print("VM:", *args, file=self._original_stderr)
-
+    
 
     def _enter_io_function(self):
         self._io_level += 1
@@ -1004,10 +1005,6 @@ class Executor:
         """override in subclass for custom-loading user modules"""
         return None
     
-        
-    def export_globals(self, module_name):
-        return self._vm.export_latest_globals(module_name)
-
     def _prepare_ast(self, source, filename, mode):
         return ast.parse(source, filename, mode)
 
@@ -1176,7 +1173,6 @@ class SimpleTracer(Tracer):
         msg = DebuggerResponse(
                                stack=self._export_stack(frame),
                                is_new=True,
-                               loaded_modules=list(sys.modules.keys()),
                                stream_symbol_counts=None,
                                **self._export_exception_info(frame)
                                )
@@ -1233,6 +1229,8 @@ class SimpleTracer(Tracer):
                 module_name=module_name,
                 code_name=code_name,
                 locals=self._vm.export_variables(system_frame.f_locals),
+                globals=self._vm.export_variables(system_frame.f_globals),
+                freevars=system_frame.f_code.co_freevars,
                 source=source,
                 firstlineno=firstlineno,
                 last_event="line",
@@ -1259,17 +1257,8 @@ class FancyTracer(Tracer):
         self._install_marker_functions()
         self._custom_stack = []
         self._past_messages = []
-        self._past_globals = []
         self._current_state = 0
 
-
-    def export_globals(self, module_name):
-        if not self.is_in_past():
-            return self._vm.export_latest_globals(module_name)
-        elif module_name in self._past_globals[self._current_state]:
-            return self._past_globals[self._current_state][module_name]
-        else:
-            raise RuntimeError("Past state not available for this module")
 
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
@@ -1510,21 +1499,11 @@ class FancyTracer(Tracer):
             "stderr": sys.stderr._processed_symbol_count
         }
 
-        # Save the __main__ module's variables
-        self._past_globals.append({"__main__":self._vm.export_variables(vars(sys.modules["__main__"]))})
-
-        # If the current module is not __main__, save the current module's variables
-        current_module_globals = self._custom_stack[-1].system_frame.f_globals
-        if current_module_globals["__name__"] != "__main__":
-            self._past_globals[-1][current_module_globals["__name__"]] = self._vm.export_variables(current_module_globals)
-
-        msg = DebuggerResponse(
-                                    stack=self._export_stack(),
-                                    is_new=True,
-                                    loaded_modules=list(sys.modules.keys()),
-                                    stream_symbol_counts=symbols_by_streams,
-                                    **self._export_exception_info(frame)
-                                    )
+        msg = DebuggerResponse( stack=self._export_stack(),
+                                is_new=True,
+                                stream_symbol_counts=symbols_by_streams,
+                                **self._export_exception_info(frame)
+                                )
         
         self._past_messages.append([msg, False])  # 2nd lement is a flag for identifying if the message has been sent to front-end
 
@@ -1696,10 +1675,13 @@ class FancyTracer(Tracer):
                 module_name=system_frame.f_globals["__name__"],
                 code_name=system_frame.f_code.co_name,
                 locals=self._vm.export_variables(system_frame.f_locals),
+                globals=self._vm.export_variables(system_frame.f_globals),
+                freevars=system_frame.f_code.co_freevars,
+                cellvars=system_frame.f_code.co_cellvars,
                 source=source,
                 firstlineno=firstlineno,
                 last_event=custom_frame.last_event,
-                last_event_args=custom_frame.last_event_args,
+                last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
                 current_evaluations=custom_frame.current_evaluations.copy(),
                 current_statement=custom_frame.current_statement,
