@@ -265,25 +265,32 @@ class FrameVisualizer:
     
     def _remove_focus_tags(self):
         for name in ["exception_focus", "active_focus", 
-                     "completed_focus", "suspended_focus"]:
+                     "completed_focus", "suspended_focus", 
+                     "sel"]:
             self._text.tag_remove(name, "0.0", "end")
      
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
         
-        if "statement" in frame_info.last_event:
-            if msg.exception is not None:
-                stmt_tag = "exception_focus"
-            elif frame_info.last_event.startswith("before"):
-                stmt_tag = "active_focus"
-            else:
-                stmt_tag = "completed_focus"
-        else:
-            assert "expression" in frame_info.last_event
-            stmt_tag = "suspended_focus"
-            
         self._remove_focus_tags()
-        self._tag_range(frame_info.current_statement, stmt_tag)
+        if frame_info.last_event == "line":
+            self._tag_range(frame_info.last_event_focus, 
+                            "active_focus" # or "sel" ?
+                            )
+        else:    
+            if "statement" in frame_info.last_event:
+                if msg.exception is not None:
+                    stmt_tag = "exception_focus"
+                elif frame_info.last_event.startswith("before"):
+                    stmt_tag = "active_focus"
+                else:
+                    stmt_tag = "completed_focus"
+            else:
+                assert "expression" in frame_info.last_event
+                stmt_tag = "suspended_focus"
+                
+            self._tag_range(frame_info.current_statement, stmt_tag)
+            
         
         self._expression_box.update_expression(msg, frame_info)
 
@@ -333,7 +340,9 @@ class FrameVisualizer:
             
     def _get_text_range_block(self, text_range):
         first_line = text_range.lineno - self._frame_info.firstlineno + 1
-        last_line = text_range.end_lineno - self._frame_info.firstlineno + 1
+        last_line = (text_range.end_lineno 
+                     - self._frame_info.firstlineno 
+                     + (1 if text_range.end_col_offset > 0 else 0))
         first_line_content = self._text.get("%d.0" % first_line, "%d.end" % first_line)
         if first_line_content.strip().startswith("elif "):
             first_col = first_line_content.find("elif ")
