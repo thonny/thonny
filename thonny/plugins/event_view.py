@@ -22,7 +22,7 @@ class EventsView(TextFrame):
             if name not in ["sequence", "setdefault", "update"] and not name.startswith("_"):
                 self.text.insert("end", "    " + name + ": " + repr(getattr(event, name))[:100] + "\n")
         
-        if event.sequence == "FancyDebuggerProgress":
+        if event.sequence == "DebuggerProgress":
             frame = event.stack[-1]
             self.text.insert("end", "    " + "event" + ": " + frame.last_event + "\n") 
             self.text.insert("end", "    " + "focus" + ": " + str(frame.last_event_focus) + "\n") 

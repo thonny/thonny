@@ -105,7 +105,7 @@ class SimpleDebugger(Debugger):
     
     def handle_toplevel_response(self, msg):
         super().handle_toplevel_response(msg)
-        get_workbench().unbind("SimpleDebuggerProgress", self._handle_debugger_progress)
+        get_workbench().unbind("DebuggerProgress", self._handle_debugger_progress)
         self._remove_focus_tags()
     
     def _remove_focus_tags(self):
@@ -189,7 +189,7 @@ class FancyDebugger(Debugger):
     
     def handle_toplevel_response(self, msg):
         super().handle_toplevel_response(msg)
-        get_workbench().unbind("FancyDebuggerProgress", self._handle_debugger_progress)    
+        get_workbench().unbind("DebuggerProgress", self._handle_debugger_progress)    
         if self._main_frame_visualizer is not None:
             self._main_frame_visualizer.close()
             self._main_frame_visualizer = None
