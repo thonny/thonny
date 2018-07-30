@@ -44,7 +44,8 @@ class HeapView(MemoryFrame):
     def _request_heap_data(self, msg=None, even_when_hidden=False):
         if self.winfo_ismapped() or even_when_hidden:
             # TODO: update itself also when it becomes visible
-            get_runner().send_command(InlineCommand("get_heap"))
+            if get_runner() is not None:
+                get_runner().send_command(InlineCommand("get_heap"))
             
     def _handle_heap_event(self, msg):
         if self.winfo_ismapped():
