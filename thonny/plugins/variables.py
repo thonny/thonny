@@ -4,7 +4,6 @@ from tkinter import ttk
 
 from thonny.memory import VariablesFrame
 from thonny import get_workbench
-import warnings
 
 class VariablesView(VariablesFrame):
     # TODO: Indicate invalid state when program or debug command is running more than a second
@@ -12,14 +11,33 @@ class VariablesView(VariablesFrame):
         super().__init__(master)
         
         ttk.Style().configure("Centered.TButton", justify="center")
-        self.home_button = ttk.Button(self.tree, style="Centered.TButton", 
+        self.back_button = ttk.Button(self.tree, style="Centered.TButton", 
                                       text="Back to\ncurrent frame",
+                                      command=self._handle_back_button,
                                       width=15)
-        #self.home_button.place(relx=1, x=-5, y=5, anchor="ne")
         
         get_workbench().bind("BackendRestart", self._handle_backend_restart, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
+        
+        self._last_active_info = None
+    
+    def _update_back_button(self, visible):
+        if visible:
+            assert self._last_active_info is not None
+            self.back_button.configure(text="Back to\n"
+                                       + self._last_active_info[-1])
+            self.back_button.place(relx=1, x=-5, y=5, anchor="ne")
+        else:
+            self.back_button.place_forget()
+    
+    def _handle_back_button(self):
+        assert self._last_active_info is not None
+        if len(self._last_active_info) == 2:
+            self.show_globals(*self._last_active_info)
+        else:
+            assert len(self._last_active_info) == 4
+            self.show_frame_variables(*self._last_active_info)
     
     def _handle_backend_restart(self, event):
         self._clear_tree()
@@ -27,15 +45,20 @@ class VariablesView(VariablesFrame):
     def _handle_toplevel_response(self, event):
         self.show_globals(event["globals"], "__main__")
     
-    def show_globals(self, globals_, module_name):
+    def show_globals(self, globals_, module_name, is_active=True):
         # TODO: update only if something has changed
         self.update_variables(globals_)
         if module_name == "__main__":
             self._set_tab_caption("Variables")
         else:
             self._set_tab_caption("Variables (%s)" % module_name)
+        
+        if is_active:
+            self._last_active_info = (globals_, module_name)
+            
+        self._update_back_button(not is_active)
     
-    def show_frame_variables(self, locals_, globals_, freevars, frame_name):
+    def show_frame_variables(self, locals_, globals_, freevars, frame_name, is_active=True):
         # TODO: update only if something has changed
         actual_locals = {}
         nonlocals = {}
@@ -53,20 +76,34 @@ class VariablesView(VariablesFrame):
         self.update_variables(groups)
         self._set_tab_caption("Variables (%s)" % frame_name)
         
+        if is_active:
+            self._last_active_info = (locals_, globals_, freevars, frame_name)
+            
+        self._update_back_button(not is_active)
+        
     def _handle_frame_info_event(self, frame_info):
-        # caused by clicking on a stacktrace
-        warnings.warn("What to do with non-existent frames?")
-        #print("FRAI", event)
         if frame_info.get("error"):
-            self.update_variables(None)
-            # TODO: show error
-            self._set_tab_caption("Variables")
+            "probably non-existent frame"
+            return
         else:
-            frame_name = "TODO:"
-            self.show_frame_variables(frame_info["locals"],
-                                      frame_info["globals"],
-                                      frame_info["freevars"],
-                                      frame_name) 
+            is_active = (frame_info["location"] == "stack"
+                         or # same __main__ globals can be in different frames
+                             (frame_info["code_name"] == "<module>"
+                             and frame_info["module_name"] == "__main__"
+                             and self._last_active_info[-1] == "__main__"
+                             and self._last_active_info[0] == frame_info["globals"]))
+            
+            if frame_info["code_name"] == "<module>":
+                self.show_globals(frame_info["globals"], 
+                                  frame_info["module_name"],
+                                  is_active)
+            else:
+                self.show_frame_variables(frame_info["locals"],
+                                          frame_info["globals"],
+                                          frame_info["freevars"],
+                                          frame_info["code_name"],
+                                          is_active)
+                  
     
     def _set_tab_caption(self, text):    
         self.home_widget.master.tab(self.home_widget, text=text)

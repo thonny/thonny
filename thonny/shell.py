@@ -668,6 +668,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             frame_tag = "frame_%d" % event.frame_id
             start, end = self.tag_ranges(frame_tag)
             self.tag_add("sel", start, end)
+        else:
+            "probably was error (eg. non-existent frame)"
         
         
     def _invalidate_current_data(self):

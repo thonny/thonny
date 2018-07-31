@@ -795,8 +795,8 @@ def _start_debug_enabled():
 
 def _start_debug(command_name):
     # TODO: select debugger based on configuration
-    current_debugger = StackedWindowsDebugger(command_name)
-    #current_debugger = TraditionalDebugger(command_name)
+    #current_debugger = StackedWindowsDebugger(command_name)
+    current_debugger = TraditionalDebugger(command_name)
      
     global _current_debugger
     _current_debugger = current_debugger

@@ -412,14 +412,16 @@ class VM:
         atts = {} 
         try:
             # TODO: make it work also in past states
-            frame = self._lookup_frame_by_id(cmd["frame_id"])
+            frame, location = self._lookup_frame_by_id(cmd["frame_id"])
             if frame is None:
                 atts["error"] = "Frame not found"
             else:
-                atts["name"] = frame.f_code.co_name
+                atts["code_name"] = frame.f_code.co_name
+                atts["module_name"] = frame.f_globals["__name__"]
                 atts["locals"] = self.export_variables(frame.f_locals)
                 atts["globals"] = self.export_variables(frame.f_globals)
                 atts["freevars"] = frame.f_code.co_freevars
+                atts["location"] = location
         except Exception as e:
             atts["error"] = str(e)
         
@@ -802,15 +804,15 @@ class VM:
         
         result = lookup_from_stack(inspect.currentframe())
         if result is not None:
-            return result
+            return result, "stack"
         
         if getattr(sys, "last_traceback"):
             result = lookup_from_tb(getattr(sys, "last_traceback"))
             if result:
-                return result
+                return result, "last_traceback"
         
         _, _, tb = sys.exc_info()
-        return lookup_from_tb(tb)
+        return lookup_from_tb(tb), "current_exception"
     
     def _prepare_user_exception(self):
         """Need to suppress thonny frames to avoid confusion"""
