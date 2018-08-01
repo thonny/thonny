@@ -11,6 +11,7 @@ from thonny.memory import VariablesFrame
 from thonny import ast_utils, memory, misc_utils, ui_utils, code
 from thonny.misc_utils import shorten_repr
 import ast
+import os.path
 from thonny.codeview import CodeView, get_syntax_options_for_tag
 from tkinter.messagebox import showinfo
 from thonny import get_workbench, get_runner
@@ -739,6 +740,8 @@ class StackView(ui_utils.TreeFrame):
         super().__init__(master, ("function", "location", "id"),
                          displaycolumns=("function", "location"))
 
+        #self.tree.configure(show="tree")
+        self.tree.column('#0', width=0, anchor=tk.W, stretch=False)
         self.tree.column('function', width=120, anchor=tk.W, stretch=False)
         self.tree.column('location', width=450, anchor=tk.W, stretch=True)
         
@@ -758,7 +761,7 @@ class StackView(ui_utils.TreeFrame):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "function", frame.code_name)
             self.tree.set(node_id, "location", 
-                          "%s, line %s" % (frame.filename, lineno))
+                          "%s, line %s" % (os.path.basename(frame.filename), lineno))
             self.tree.set(node_id, "id", frame.id)
             
         # select last frame
