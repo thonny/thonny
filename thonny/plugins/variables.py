@@ -20,6 +20,7 @@ class VariablesView(VariablesFrame):
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         
+        # records last info from progress messages 
         self._last_active_info = None
     
     def _update_back_button(self, visible):

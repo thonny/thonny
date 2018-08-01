@@ -156,7 +156,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
-        get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         
         self._init_menu()
     
@@ -638,7 +637,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 lineno = int(lineno)
                 if os.path.exists(filename) and os.path.isfile(filename):
                     # TODO: better use events instead direct referencing
-                    get_workbench().get_editor_notebook().show_file(filename, lineno)
+                    get_workbench().get_editor_notebook().show_file(filename, lineno, set_focus=False)
         except:
             traceback.print_exc()
     
@@ -654,24 +653,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                                        frame_id=frame_id):
                     get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
                     return "break"
-                    
+                
+                # TODO: put first line with frame tag and rest without
                 tags += (frame_tag,)
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
                 
             self._insert_text_directly(line, tags)
     
-    def _handle_frame_info_event(self, event):
-        # New frame was (or will be) presented in Variables view
-        self.tag_remove("sel", "1.0", "end")
-        
-        if event.get("frame_id"):
-            frame_tag = "frame_%d" % event.frame_id
-            start, end = self.tag_ranges(frame_tag)
-            self.tag_add("sel", start, end)
-        else:
-            "probably was error (eg. non-existent frame)"
-        
-        
     def _invalidate_current_data(self):
         """
         Grayes out input & output displayed so far
