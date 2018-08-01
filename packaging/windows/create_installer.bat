@@ -70,4 +70,5 @@ set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
 
+rmdir %BUILDDIR% /S /Q
 pause
