@@ -31,6 +31,7 @@ class Debugger:
         get_runner().execute_current(self._command_name)
 
     def check_issue_command(self, command, **kwargs):
+        get_workbench().close_note()
         cmd = DebuggerCommand(command, **kwargs)
         self._last_debugger_command = cmd
 
@@ -184,13 +185,6 @@ class StackedWindowsDebugger(Debugger):
         self._main_frame_visualizer.update_this_and_next_frames(msg)
         
         self.bring_out_frame(msg.stack[-1].id)
-        """
-        if msg.exception:
-            showerror("Exception",
-                      msg.exception_lower_stack_description.lstrip() + 
-                      msg.exception["type_name"] 
-                      + ": " + msg.exception_msg)
-        """
     
     def close(self):
         super().close()
@@ -297,14 +291,19 @@ class FrameVisualizer:
         self._remove_focus_tags()
         if frame_info.last_event == "line":
             self._tag_range(frame_info.last_event_focus, 
-                            #"active_focus" 
-                            "sel"
+                            "active_focus" 
+                            #"sel"
                             )
+        elif frame_info.last_event == "exception":
+            self._tag_range(frame_info.last_event_focus, 
+                            "exception_focus")
+            self._display_exception(msg, frame_info)
         else:    
             if "statement" in frame_info.last_event:
                 # TODO: exception info should be frame-based
                 if msg.exception is not None:
                     stmt_tag = "exception_focus"
+                    self._display_exception(msg, frame_info)
                 elif frame_info.last_event.startswith("before"):
                     stmt_tag = "active_focus"
                 else:
@@ -317,6 +316,13 @@ class FrameVisualizer:
             
         
         self._expression_box.update_expression(msg, frame_info)
+    
+    def _display_exception(self, msg, frame_info):
+        last_line = msg["exception_lines_with_frame_ids"][-1][0]
+        get_workbench().show_note(last_line,
+                                  target=self._text,
+                                  focus=frame_info.last_event_focus)
+        
 
     def _find_this_and_next_frame(self, stack):
         for i in range(len(stack)):

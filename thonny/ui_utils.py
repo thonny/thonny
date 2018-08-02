@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from tkinter import ttk, messagebox, filedialog
 from tkinter.dialog import Dialog
 
@@ -21,6 +20,8 @@ import logging
 import shutil
 import platform
 from typing import Callable, Optional
+from thonny.tktextext import TweakableText
+from thonny.common import TextRange
 
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):
@@ -924,6 +925,163 @@ def create_tooltip(widget, text, **kw):
         toolTip.hidetip()
     widget.bind('<Enter>', enter)
     widget.bind('<Leave>', leave)
+
+class NoteBox(tk.Toplevel):
+    def __init__(self, master=None, 
+                 max_default_width=30,
+                 **kw):
+        super().__init__(master=master,
+                         highlightthickness=0, 
+                         **kw)
+        
+        self._max_default_width = max_default_width
+        
+        self.wm_overrideredirect(True)
+        if running_on_mac_os():
+            # TODO: maybe it's because of Tk 8.5, not because of Mac
+            self.wm_transient(self.widget)
+        try:
+            # For Mac OS
+            self.tk.call("::tk::unsupported::MacWindowStyle",
+                       "style", self._w,
+                       "help", "noActivates")
+        except tk.TclError:
+            pass
+        
+        self._current_chars = ""
+        self._click_bindings = {}
+        
+        self.text = TweakableText(self,
+                            background="#ffffe0",
+                            borderwidth=1,
+                            relief="solid",
+                            undo=False,
+                            read_only=True,
+                            font="TkDefaultFont",
+                            highlightthickness=0,
+                            padx=5,
+                            pady=5,
+                            wrap="word")
+        self.text.grid(row=0, column=0, sticky="nsew")
+        
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.text.bind("<Escape>", self.close, True)
+        
+        tk._default_root.bind_all("<1>", self._close_maybe, True)
+        tk._default_root.bind_all("<Key>", self.close, True)
+        
+        self.withdraw()
+    
+    def clear(self):
+        for tag in self._click_bindings:
+            self.text.tag_unbind(tag, "<1>", self._click_bindings[tag])
+            self.text.tag_remove(tag, "1.0", "end")
+            
+        self.text.direct_delete("1.0", "end")
+        self._current_chars = ""
+        self._click_bindings.clear()
+    
+    def set_content(self, *items):
+        self.clear()
+        
+        for item in items:
+            if isinstance(item, str):
+                self.text.direct_insert("1.0", item)
+                self._current_chars = item
+            else:
+                assert isinstance(item, list)
+                for chars, *props in item:
+                    if len(props) > 0 and callable(props[-1]):
+                        tags = tuple(props[:-1])
+                        click_handler = props[-1]
+                    else:
+                        tags = tuple(props)
+                        click_handler = None
+                    
+                    self.append_text(chars, tags, click_handler)
+                    
+            self.text.see("1.0")
+    
+    def append_text(self, chars, tags=(), click_handler=None):
+        tags = tuple(tags)
+        
+        if click_handler is not None:
+            click_tag = "click_%d" % len(self._click_bindings)
+            tags = tags + (click_tag,)
+            binding = self.text.tag_bind(click_tag, "<1>", click_handler, True)
+            self._click_bindings[click_tag] = binding
+        
+        self.text.direct_insert("end", chars, tags)
+        self._current_chars += chars
+        
+    def place(self, target, focus=None):
+        
+        # Compute the area that will be described by this Note
+        focus_x = target.winfo_rootx()
+        focus_y = target.winfo_rooty()
+        focus_height = target.winfo_height()
+
+        if isinstance(focus, TextRange):
+            assert isinstance(target, tk.Text)
+            topleft = target.bbox("%d.%d" % (focus.lineno, focus.col_offset))
+            if focus.end_col_offset == 0:
+                botright = target.bbox("%d.%d lineend" % (focus.end_lineno-1, focus.end_lineno-1))
+            else:
+                botright = target.bbox("%d.%d" % (focus.end_lineno, focus.end_col_offset))
+            
+            if topleft and botright:
+                focus_x += topleft[0]
+                focus_y += topleft[1]
+                focus_height = botright[1] - topleft[1] + botright[3]
+                
+        elif isinstance(focus, (list, tuple)):
+            focus_x += focus[0] 
+            focus_y += focus[1]
+            focus_height = focus[3] 
+        
+        elif focus is None:
+            pass
+        
+        else:
+            raise TypeError("Unsupported focus")
+        
+        # Compute dimensions of the note
+        lines = self._current_chars.splitlines()
+        width = 0
+        for line in lines:
+            width = max(width, len(line))
+        
+        width = min(width, self._max_default_width)
+        height = len(lines)
+        
+        # TODO: detect the situation when note doesn't fit under
+        # the focus box and should be placed above
+            
+        self.text.configure(width=width, height=height)        
+        self.wm_geometry("+%d+%d" % (focus_x,
+                                     focus_y + focus_height))
+        
+        self.deiconify()
+    
+    def _close_maybe(self, event):
+        if event.widget not in [self, self.text]:
+            self.close(event)
+    
+    def close(self, event=None):
+        self.withdraw()
+        
+
+def get_widget_offset_from_toplevel(widget):
+    x = 0
+    y = 0
+    print("roo", widget.winfo_rootx(), widget.winfo_rooty())
+    toplevel = widget.winfo_toplevel()
+    while widget != toplevel:
+        x += widget.winfo_x()
+        y += widget.winfo_y()
+        widget = widget.master
+    return x, y
 
 def askstring(title, prompt, **kw):
     '''get a string from the user

@@ -116,6 +116,7 @@ class Workbench(tk.Tk):
         self._init_menu()
         
         self._init_containers()
+        self._note_box = ui_utils.NoteBox(self)
         assert self._editor_notebook is not None
         
         self._init_program_arguments_frame()
@@ -1716,7 +1717,14 @@ class Workbench(tk.Tk):
             editor.focus_set()
         else:
             self.focus_set()
-        
+    
+    def show_note(self, *content_items: Union[str, List],
+                  target, focus=None) -> None:
+        self._note_box.set_content(*content_items)
+        self._note_box.place(target, focus)
+    
+    def close_note(self):
+        self._note_box.close()
 
 class WorkbenchEvent(Record):
     def __init__(self, sequence: str, **kwargs) -> None:

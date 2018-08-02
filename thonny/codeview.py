@@ -10,7 +10,7 @@ from thonny.tktextext import EnhancedText
 from typing import Dict, Union  # @UnusedImport
 import io
 import tokenize
-from build.lib.thonny.misc_utils import running_on_windows
+from thonny.misc_utils import running_on_windows
 
 _syntax_options = {} # type: Dict[str, Union[str, int]]
 #BREAKPOINT_SYMBOL = "•" # Bullet
