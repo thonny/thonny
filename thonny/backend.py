@@ -815,66 +815,12 @@ class VM:
         return lookup_from_tb(tb), "current_exception"
     
     def _prepare_user_exception(self):
-        """Need to suppress thonny frames to avoid confusion"""
-        
-        sys.last_type, sys.last_value, sys.last_traceback = sys.exc_info()
         e_type, e_value, e_traceback = sys.exc_info()
-        
-        _traceback_message = 'Traceback (most recent call last):\n'
-        
-        _cause_message = getattr(traceback, "_cause_message", (
-            "\nThe above exception was the direct cause "
-            + "of the following exception:\n\n"))
-
-        _context_message = getattr(traceback, "_context_message", (
-            "\nDuring handling of the above exception, "
-            + "another exception occurred:\n\n"))
-
-        
-        def format_exception_with_frame_ids(etype, value, tb, chain=True):
-            # Based on
-            # https://www.python.org/dev/peps/pep-3134/#enhanced-reporting
-            # and traceback.format_exception
-            if chain:
-                if value.__cause__ is not None:
-                    yield from format_exception_with_frame_ids(value.__cause__)
-                    yield (_cause_message, None)
-                elif (value.__context__ is not None
-                      and not value.__suppress_context__):
-                    yield from format_exception_with_frame_ids(value.__context__)
-                    yield (_context_message, None)
-            
-            if tb is not None:
-                yield (_traceback_message, None)
-                have_seen_first_relevant_frame = False
-                
-                tb_temp = tb
-                for entry in traceback.extract_tb(tb):
-                    assert tb_temp is not None # actual tb doesn't end before extract_tb
-                    if ("thonny/backend" not in entry.filename and "thonny\\backend" not in entry.filename
-                        or have_seen_first_relevant_frame
-                        or in_debug_mode()):
-                        
-                        have_seen_first_relevant_frame = True
-                        
-                        fmt = '  File "{}", line {}, in {}\n'.format(
-                            entry.filename, entry.lineno, entry.name)
-                        
-                        if entry.line:
-                            fmt += '    {}\n'.format(entry.line.strip())
-                                   
-                        yield (fmt, id(tb_temp.tb_frame))
-                        
-                    tb_temp = tb_temp.tb_next
-                
-                assert tb_temp is None # tb was exhausted
-            
-            for line in traceback.format_exception_only(etype, value): 
-                yield (line, None)
-        
-        items = format_exception_with_frame_ids(e_type, e_value, e_traceback)
-        
-        return list(items)
+        sys.last_type, sys.last_value, sys.last_traceback = (
+            e_type, e_value, e_traceback
+        )
+        return format_exception_with_frame_ids(e_type, e_value, e_traceback)
+    
 
     class FakeStream:
         def __init__(self, vm, target_stream):
@@ -1017,7 +963,7 @@ class Tracer(Executor):
     def __init__(self, vm, original_cmd):
         super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
-        self._unhandled_exception = None
+        self._fresh_exception = None
         self._source_info_by_frame = {}
         
         # first (automatic) stepping command depends on whether any breakpoints were set or not
@@ -1069,7 +1015,7 @@ class Tracer(Executor):
         )
 
     def _is_interesting_exception(self, frame):
-        # interested only in exceptions in command frame or it's parent frames
+        # interested only in exceptions in command frame or its parent frames
         return (id(frame) == self._current_command.frame_id
                 or not self._frame_is_alive(self._current_command.frame_id))
 
@@ -1078,47 +1024,33 @@ class Tracer(Executor):
             self._vm.handle_command(self._current_command)
             self._current_command = self._fetch_command()
     
-    def _fetch_command(self):
-        return self._vm._fetch_command()
-    
-    def _save_exception_info(self, frame, arg):
-        exc = arg[1]
-        if self._unhandled_exception is None:
-            # this means it's the first time we see this exception
-            exc.causing_frame = frame
-        else:
-            # this means the exception is propagating to older frames
-            # get the causing_frame from previous occurrence
-            exc.causing_frame = self._unhandled_exception.causing_frame
-
-        self._unhandled_exception = exc
-        
-    def _export_exception_info(self, frame):
-        result = {
-            "exception" : self._vm.export_value(self._unhandled_exception, True)
-        }
-        if self._unhandled_exception is not None:
-            frame_infos = traceback.format_stack(self._unhandled_exception.causing_frame)
-            # I want to show frames from current frame to causing_frame
-            if frame == self._unhandled_exception.causing_frame:
-                interesting_frame_infos = []
+    def _fetch_next_debugger_command(self):
+        while True:
+            cmd = self._vm._fetch_command()
+            if isinstance(cmd, InlineCommand):
+                self._vm.handle_command(cmd)
             else:
-                # c how far is current frame from causing_frame?
-                _distance = 0
-                _f = self._unhandled_exception.causing_frame
-                while _f != frame:
-                    _distance += 1
-                    _f = _f.f_back
-                    if _f == None:
-                        break
-                interesting_frame_infos = frame_infos[-_distance:]
-            result["exception_lower_stack_description"] = "".join(interesting_frame_infos)
-            result["exception_msg"] = str(self._unhandled_exception)
+                assert isinstance(cmd, DebuggerCommand)
+                return cmd
+    
+    def _export_exception_info(self):
+        if self._fresh_exception is not None:
+            exc = self._fresh_exception
         else:
-            result["exception_lower_stack_description"] = None
-            result["exception_msg"] = None
+            exc = sys.exc_info()
         
-        return result
+        if exc[0] is None:
+            return {
+                "exception_msg" : None,
+                "exception_type_name" : None,
+                "exception_lines_with_frame_ids" : None
+            }
+        else:
+            return {
+                "exception_msg" : str(exc[1]),
+                "exception_type_name" : exc[0].__name__,
+                "exception_lines_with_frame_ids" : format_exception_with_frame_ids(*exc)
+            }
 
     def _get_frame_source_info(self, frame):
         fid = id(frame)
@@ -1141,7 +1073,7 @@ class SimpleTracer(Tracer):
             return None
         
         if event == "call": 
-            self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
+            self._fresh_exception = None # some code is running, therefore exception is not fresh anymore
             # can we skip this frame?
             if (self._current_command.name == "step_over"
                 and not self._current_command.breakpoints):
@@ -1153,30 +1085,29 @@ class SimpleTracer(Tracer):
             self._alive_frame_ids.remove(id(frame)) 
           
         elif event == "exception":
-            self._save_exception_info(frame, arg)
-            
+            self._fresh_exception = arg
             if self._is_interesting_exception(frame):
-                self._report_current_state(frame)
-                self._current_command = self._fetch_command()
-                self._respond_to_inline_commands()
+                self._report_current_state(frame, event)
+                self._current_command = self._fetch_next_debugger_command()
             
         elif event == "line":
-            self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
+            self._fresh_exception = None # some code is running, therefore exception is not propagating anymore
             
             handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
             if handler(frame, self._current_command):
-                self._report_current_state(frame)
-                self._current_command = self._fetch_command()
-                self._respond_to_inline_commands()
+                self._report_current_state(frame, event)
+                self._current_command = self._fetch_next_debugger_command()
 
         return self._trace
     
-    def _report_current_state(self, frame):
+    def _report_current_state(self, frame, event):
+        stack=self._export_stack(frame) # gives event=line for all frames
+        stack[-1].last_event = event
         msg = DebuggerResponse(
-                               stack=self._export_stack(frame),
-                               is_new=True,
+                               stack=stack,
+                               is_newest=True,
                                stream_symbol_counts=None,
-                               **self._export_exception_info(frame)
+                               **self._export_exception_info()
                                )
         
         self._vm.send_message(msg)
@@ -1258,8 +1189,8 @@ class FancyTracer(Tracer):
         self._instrumented_files = set()
         self._install_marker_functions()
         self._custom_stack = []
-        self._past_messages = []
-        self._current_state = 0
+        self._saved_states = []
+        self._current_state_index = 0
 
 
     def _install_marker_functions(self):
@@ -1312,7 +1243,7 @@ class FancyTracer(Tracer):
             return super().find_spec(fullname, path, target)
 
     def is_in_past(self):
-        return self._current_state < len(self._past_messages)-1
+        return self._current_state_index < len(self._saved_states)-1
 
     def _trace(self, frame, event, arg):
         """
@@ -1325,7 +1256,7 @@ class FancyTracer(Tracer):
         code_name = frame.f_code.co_name
 
         if event == "call":
-            self._unhandled_exception = None # some code is running, therefore exception is not propagating anymore
+            self._fresh_exception = None # some code is running, therefore exception is not fresh anymore
 
             if code_name in self.marker_function_names:
                 # the main thing
@@ -1354,6 +1285,23 @@ class FancyTracer(Tracer):
                 # it cares about "before_statement" events in the first statement of the body
                 self._custom_stack.append(CustomStackFrame(frame, "call"))
 
+        elif event == "exception":
+            self._fresh_exception = arg
+            
+            # use the state prepared by previous event
+            last_custom_frame = self._custom_stack[-1] 
+            assert last_custom_frame.system_frame == frame
+             
+            pseudo_args = last_custom_frame.last_event_args.copy()
+            pseudo_args["exception"] = arg
+            
+            assert last_custom_frame.last_event.startswith("before_")
+            pseudo_event = (last_custom_frame.last_event
+                            .replace("before_", "after_")
+                            .replace("_again", ""))
+            
+            self._handle_progress_event(frame, pseudo_event, pseudo_args)
+
         elif event == "return":
             if code_name not in self.marker_function_names:
                 self._custom_stack.pop()
@@ -1365,59 +1313,41 @@ class FancyTracer(Tracer):
             else:
                 pass
 
-        elif event == "exception":
-            exc = arg[1]
-            if self._unhandled_exception is None:
-                # this means it's the first time we see this exception
-                exc.causing_frame = frame
-            else:
-                # this means the exception is propagating to older frames
-                # get the causing_frame from previous occurrence
-                exc.causing_frame = self._unhandled_exception.causing_frame
-
-            self._unhandled_exception = exc
-            if self._is_interesting_exception(frame):
-                self._save_debugger_progress_message(frame)
-                self._handle_message_selection()
-
-        # TODO: support line event in non-instrumented files
         elif event == "line":
-            self._unhandled_exception = None
+            self._fresh_exception = None
 
         return self._trace
 
 
     def _handle_progress_event(self, frame, event, args):
+        self._save_current_state(frame, event, args)
+        self._respond_to_commands()
+        
+    def _save_current_state(self, frame, event, args):
         """
-        Tries to respond to current command in this state. 
-        If it can't, then it returns, program resumes
-        and _trace will call it again in another state.
-        Otherwise sends response and fetches next command.  
+        Updates custom stack and stores the state as message
         """
-        #self._debug("Progress event:", event, self._current_command)
-
         focus = TextRange(*args["text_range"])
-
-        self._custom_stack[-1].last_event = event
-        self._custom_stack[-1].last_event_focus = focus
-        self._custom_stack[-1].last_event_args = args
+        
+        custom_frame = self._custom_stack[-1] 
+        custom_frame.last_event = event
+        custom_frame.last_event_focus = focus
+        custom_frame.last_event_args = args
 
         # store information about current statement / expression
         if "statement" in event:
-            self._custom_stack[-1].current_statement = focus
+            custom_frame.current_statement = focus
 
             if event == "before_statement_again":
                 # keep the expression information from last event
-                self._custom_stack[-1].current_root_expression = self._custom_stack[-1].current_root_expression
-                self._custom_stack[-1].current_evaluations = self._custom_stack[-1].current_evaluations
-
+                pass
             else:
-                self._custom_stack[-1].current_root_expression = None
-                self._custom_stack[-1].current_evaluations = []
+                custom_frame.current_root_expression = None
+                custom_frame.current_evaluations = []
         else:
             # see whether current_root_expression needs to be updated
-            assert len(self._past_messages) > 0
-            prev_msg_frame = self._past_messages[-1][0]["stack"][-1]
+            assert len(self._saved_states) > 0
+            prev_msg_frame = self._saved_states[-1]["stack"][-1]
             prev_event = prev_msg_frame.last_event
             prev_root_expression = prev_msg_frame.current_root_expression
 
@@ -1425,106 +1355,77 @@ class FancyTracer(Tracer):
                 and (id(frame) != prev_msg_frame.id
                      or "statement" in prev_event
                      or focus.not_smaller_eq_in(prev_root_expression))):
-                self._custom_stack[-1].current_root_expression = focus
-                self._custom_stack[-1].current_evaluations = []
+                custom_frame.current_root_expression = focus
+                custom_frame.current_evaluations = []
 
-        if event == "after_expression":
-            self._custom_stack[-1].current_evaluations.append((focus, self._vm.export_value(args["value"])))
+        if (event == "after_expression" 
+            and "value" in args): # value is missing in case of exception
+            custom_frame.current_evaluations.append((focus, self._vm.export_value(args["value"])))
 
-        # Save the current command and frame data
-        self._save_debugger_progress_message(frame)
-
-        # Select the correct method according to the command
-        self._handle_message_selection()
-
-
-    def _handle_message_selection(self):
-        """
-        Selects the correct message according to current command for both past and present states
-        :return: Let Python run to the next progress event
-        """
-
-        while self._current_state < len(self._past_messages):
-            # Get the message data
-            current_frame = self._get_frame_from_history()
-            frame = current_frame
-            event = current_frame.last_event
-            args = current_frame.last_event_args
-            focus = current_frame.last_event_focus
-            cmd = self._current_command
-            exc = self._past_messages[self._current_state][0]["exception"]
-
-            # Has the command completed?
-            tester = getattr(self, "_cmd_" + cmd.name + "_completed")
-            cmd_complete = tester(frame, event, args, focus, cmd)
-
-            if cmd_complete or exc is not None:
-                # Last command has completed or a state caused an exception, send message and fetch the next command
-                self._past_messages[self._current_state][1] = True  # Add "shown to user" flag
-                self._send_and_fetch_next_debugger_progress_message(self._past_messages[self._current_state][0])
-
-            if self._current_command.name == "back":
-                # Step back has been chosen, move the pointer backwards
-                if self._current_state > 0:  # Don't let the pointer have negative values
-                    self._past_messages[self._current_state][1] = False  # Remove "shown to user" flag
-                    self._current_state -= 1
-            elif exc is None or self._current_state != len(self._past_messages) - 1:
-                # Other progress events move the pointer forward,
-                # unless we are displaying the last state and an exception occurred
-                self._current_state += 1
-
-        # Saved messages are no longer enough, let Python run to the next progress event
-
-
-    def _get_frame_from_history(self):
-        """
-        :return: Returns the last frame from the stack of the current state
-        """
-        return self._past_messages[self._current_state][0]["stack"][-1]
-
-
-    def _save_debugger_progress_message(self, frame):
-        """
-        Creates and saves the debugger progress message for possible reporting to the front-end
-        :param frame: Current frame, for checking if an exception occurred
-        :param value: The returned value of the statement/expression
-        :return:
-        """
-
-        if len(self._past_messages) > 0:
-            self._past_messages[-1][0]["is_new"] = False
+        # Save the snapshot
+        # last message is no longer newest
+        if len(self._saved_states) > 0:
+            self._saved_states[-1]["is_newest"] = False
 
         # Count the symbols that have been sent by each stream by now.
         symbols_by_streams = {
-            "stdin": sys.stdin._processed_symbol_count,
+            "stdin" : sys.stdin._processed_symbol_count,
             "stdout": sys.stdout._processed_symbol_count,
             "stderr": sys.stderr._processed_symbol_count
         }
 
-        msg = DebuggerResponse( stack=self._export_stack(),
-                                is_new=True,
-                                stream_symbol_counts=symbols_by_streams,
-                                **self._export_exception_info(frame)
-                                )
+        msg = {
+            "stack" : self._export_stack(),
+            "is_newest" : True,
+            "in_client_log" : False,
+            "stream_symbol_counts" : symbols_by_streams,
+            **self._export_exception_info(),
+        }
         
-        self._past_messages.append([msg, False])  # 2nd lement is a flag for identifying if the message has been sent to front-end
+        self._saved_states.append(msg)
+        
+
+    def _respond_to_commands(self):
+        """Tries to respond to client commands with states collected so far.
+        Returns if these states don't suffice anymore and Python needs
+        to advance the program"""
+
+        while self._current_state_index < len(self._saved_states):
+            state = self._saved_states[self._current_state_index]
+            
+            # Get current state's most recent frame
+            frame = state["stack"][-1]
+
+            # Has the command completed?
+            tester = getattr(self, "_cmd_" + self._current_command.name + "_completed")
+            cmd_complete = tester(frame, 
+                                  frame.last_event, 
+                                  frame.last_event_focus,
+                                  self._current_command)
+
+            if cmd_complete:
+                state["in_client_log"] = True
+                self._report_current_state(state)
+                self._current_command = self._fetch_next_debugger_command()
+
+            if self._current_command.name == "step_back":
+                if self._current_state_index == 0:
+                    # Already in first state. Remain in this loop  
+                    pass 
+                else:
+                    assert self._current_state_index > 0
+                    # Current event is no longer present in GUI "undo log"
+                    self._saved_states[self._current_state_index]["in_client_log"] = False  
+                    self._current_state_index -= 1
+            else:
+                # Other progress events move the pointer forward
+                self._current_state_index += 1
+        
 
 
-    def _send_and_fetch_next_debugger_progress_message(self, message):
-        """
-        Sends a message to the front-end and fetches the next message
-        :param message: The message to be sent
-        :return:
-        """
-        self._vm.send_message(message)
-
-        self._debug("Waiting for command")
-        # Fetch next debugger command
-        self._current_command = self._fetch_command()
-        self._debug("Got command:", self._current_command)
-        # get non-progress commands out our way
-        self._respond_to_inline_commands()
-        assert isinstance(self._current_command, DebuggerCommand)
+    def _report_current_state(self, state):
+        # TODO: turn state into a message
+        self._vm.send_message(DebuggerResponse(**state))
 
 
     def _try_interpret_as_again_event(self, frame, original_event, original_args):
@@ -1554,7 +1455,7 @@ class FancyTracer(Tracer):
                 self._handle_progress_event(frame, again_event, again_args)
 
 
-    def _cmd_step_over_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_over_completed(self, frame, event, focus, cmd):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
@@ -1597,15 +1498,15 @@ class FancyTracer(Tracer):
                 # We're done
                 return True
 
-    def _cmd_step_into_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_into_completed(self, frame, event, focus, cmd):
         return event != "after_statement"
 
-    def _cmd_step_back_completed(self, frame, event, args, focus, cmd):
+    def _cmd_step_back_completed(self, frame, event, focus, cmd):
         # Check if the selected message has been previously sent to front-end
-        return self._past_messages[self._current_state][1]
+        return self._saved_states[self._current_state_index]["in_client_log"]
 
-    def _cmd_step_out_completed(self, frame, event, args, focus, cmd):
-        if self._current_state == 0:
+    def _cmd_step_out_completed(self, frame, event, focus, cmd):
+        if self._current_state_index == 0:
             return False
 
         if event == "after_statement":
@@ -1614,7 +1515,7 @@ class FancyTracer(Tracer):
         if self._at_a_breakpoint(frame, event, focus, cmd):
             return True
         
-        prev_state_frame = self._past_messages[self._current_state-1][0]["stack"][-1]
+        prev_state_frame = self._saved_states[self._current_state_index-1]["stack"][-1]
 
         """Complete current frame"""
         if type(frame) == FrameInfo:
@@ -1631,7 +1532,7 @@ class FancyTracer(Tracer):
             or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
         )
 
-    def _cmd_resume_completed(self, frame, event, args, focus, cmd):
+    def _cmd_resume_completed(self, frame, event, focus, cmd):
         return self._at_a_breakpoint(frame, event, focus, cmd)
     
     def _at_a_breakpoint(self, frame, event, focus, cmd):
@@ -1663,11 +1564,7 @@ class FancyTracer(Tracer):
         result = []
 
         for custom_frame in self._custom_stack:
-
-            last_event_args = custom_frame.last_event_args.copy()
-            if "value" in last_event_args:
-                last_event_args["value"] = self._vm.export_value(last_event_args["value"])
-
+            
             system_frame = custom_frame.system_frame
             source, firstlineno = self._get_frame_source_info(system_frame)
 
@@ -1683,7 +1580,6 @@ class FancyTracer(Tracer):
                 source=source,
                 firstlineno=firstlineno,
                 last_event=custom_frame.last_event,
-                last_event_args=last_event_args,
                 last_event_focus=custom_frame.last_event_focus,
                 current_evaluations=custom_frame.current_evaluations.copy(),
                 current_statement=custom_frame.current_statement,
@@ -1969,8 +1865,9 @@ class CustomStackFrame:
         self.id = id(frame)
         self.system_frame = frame
         self.last_event = last_event
+        self.last_event_args = None
+        self.last_event_focus = focus
         self.current_evaluations = []
-        self.focus = None
         self.current_statement = None
         self.current_root_expression = None
 
@@ -2034,6 +1931,65 @@ def _fetch_frame_source_info(frame):
         else:
             # TODO: 
             raise
+
+def format_exception_with_frame_ids(e_type, e_value, e_traceback):
+    """Need to suppress thonny frames to avoid confusion"""
+    
+    _traceback_message = 'Traceback (most recent call last):\n'
+    
+    _cause_message = getattr(traceback, "_cause_message", (
+        "\nThe above exception was the direct cause "
+        + "of the following exception:\n\n"))
+
+    _context_message = getattr(traceback, "_context_message", (
+        "\nDuring handling of the above exception, "
+        + "another exception occurred:\n\n"))
+
+    
+    def rec_format_exception_with_frame_ids(etype, value, tb, chain=True):
+        # Based on
+        # https://www.python.org/dev/peps/pep-3134/#enhanced-reporting
+        # and traceback.format_exception
+        if chain:
+            if value.__cause__ is not None:
+                yield from rec_format_exception_with_frame_ids(value.__cause__)
+                yield (_cause_message, None)
+            elif (value.__context__ is not None
+                  and not value.__suppress_context__):
+                yield from rec_format_exception_with_frame_ids(value.__context__)
+                yield (_context_message, None)
+        
+        if tb is not None:
+            yield (_traceback_message, None)
+            have_seen_first_relevant_frame = False
+            
+            tb_temp = tb
+            for entry in traceback.extract_tb(tb):
+                assert tb_temp is not None # actual tb doesn't end before extract_tb
+                if ("thonny/backend" not in entry.filename and "thonny\\backend" not in entry.filename
+                    or have_seen_first_relevant_frame
+                    or in_debug_mode()):
+                    
+                    have_seen_first_relevant_frame = True
+                    
+                    fmt = '  File "{}", line {}, in {}\n'.format(
+                        entry.filename, entry.lineno, entry.name)
+                    
+                    if entry.line:
+                        fmt += '    {}\n'.format(entry.line.strip())
+                               
+                    yield (fmt, id(tb_temp.tb_frame))
+                    
+                tb_temp = tb_temp.tb_next
+            
+            assert tb_temp is None # tb was exhausted
+        
+        for line in traceback.format_exception_only(etype, value): 
+            yield (line, None)
+    
+    items = rec_format_exception_with_frame_ids(e_type, e_value, e_traceback)
+    
+    return list(items)
 
 
 def load_module_from_alternative_path(module_name, path, force=False):

@@ -287,7 +287,6 @@ class FrameVisualizer:
      
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
-        
         self._remove_focus_tags()
         if frame_info.last_event == "line":
             self._tag_range(frame_info.last_event_focus, 
@@ -301,7 +300,7 @@ class FrameVisualizer:
         else:    
             if "statement" in frame_info.last_event:
                 # TODO: exception info should be frame-based
-                if msg.exception is not None:
+                if msg["exception_msg"] is not None:
                     stmt_tag = "exception_focus"
                     self._display_exception(msg, frame_info)
                 elif frame_info.last_event.startswith("before"):
@@ -419,7 +418,7 @@ class EditorVisualizer(FrameVisualizer):
     
     def _update_this_frame(self, msg, frame_info):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
-        if msg.is_new:
+        if msg.is_newest:
             self._decorate_editor_title("")
         else:
             self._decorate_editor_title("   <<< REPLAYING >>> ")
@@ -432,7 +431,7 @@ class EditorVisualizer(FrameVisualizer):
         get_workbench().focus_set()
     
     def close(self):
-        FrameVisualizer.close(self)
+        super().close()
         self._decorate_editor_title("")
         
         
@@ -476,10 +475,9 @@ class ExpressionBox(tk.Text):
             
             for subrange, value in frame_info.current_evaluations:
                 self._replace(subrange, value)
-            
             if "expression" in event:
                 # Event may be also after_statement_again
-                self._highlight_range(focus, event, msg.exception)
+                self._highlight_range(focus, event, msg["exception_msg"])
                 
             self._update_position(frame_info.current_root_expression)
             self._update_size()
@@ -535,7 +533,6 @@ class ExpressionBox(tk.Text):
         self.tag_bind(object_tag, sequence,
                       lambda _: get_workbench().event_generate("ObjectSelect", object_id=value["id"]))
         
-        #print("AFTER 9", repr(self.get("1.0", "end")))
     
     def _load_expression(self, filename, text_range):
         with open(filename, "rb") as fp:
@@ -745,7 +742,7 @@ class StackView(ui_utils.TreeFrame):
     def __init__(self, master):
         super().__init__(master, ("function", "location", "id"),
                          displaycolumns=("function", "location"))
-
+        
         #self.tree.configure(show="tree")
         self.tree.column('#0', width=0, anchor=tk.W, stretch=False)
         self.tree.column('function', width=120, anchor=tk.W, stretch=False)
@@ -757,9 +754,12 @@ class StackView(ui_utils.TreeFrame):
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
         
-    def _update_stack(self, msg):
-        self._dont_react = True
+        # can't turn off events from programmatic selection changes
+        # therefore I'm using separate handlers for user interactions
+        self.tree.bind("<1>", self._on_select_kbd_mouse, True)
+        self.tree.bind("<Key>", self._on_select_kbd_mouse, True)
         
+    def _update_stack(self, msg):
         self._clear_tree()
         for frame in msg.stack:
             lineno = frame.last_event_focus.lineno
@@ -774,8 +774,8 @@ class StackView(ui_utils.TreeFrame):
         self.tree.see(node_id)
         self.tree.selection_add(node_id)
         self.tree.focus(node_id)
-            
-    def on_select(self, event):
+        
+    def _on_select_kbd_mouse(self, event):
         iid = self.tree.focus()
         if iid != '':
             # assuming id is in the last column
