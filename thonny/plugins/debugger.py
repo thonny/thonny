@@ -130,7 +130,6 @@ class SingleWindowDebugger(Debugger):
                              force=True)
     
         if get_workbench().get_option("debugger.automatic_stack_view"):
-            print(len(msg.stack))
             if len(msg.stack) > 1:
                 get_workbench().show_view("StackView")
             
@@ -810,7 +809,6 @@ class StackView(ui_utils.TreeFrame):
             if _current_debugger is not None:
                 _current_debugger.bring_out_frame(frame_id)
         
-            
 
 def _debugger_command_enabled(command):
     if _current_debugger is None:
