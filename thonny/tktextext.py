@@ -651,10 +651,11 @@ class EnhancedText(TweakableText):
             if background:
                 self.configure(background=background)
         
-        foreground = style.lookup(self._style, "foreground", states)
-        if foreground:
-            self.configure(foreground=foreground)
-            self.configure(insertbackground=foreground) 
+        if "foreground" not in self._initial_configuration:
+            foreground = style.lookup(self._style, "foreground", states)
+            if foreground:
+                self.configure(foreground=foreground)
+                self.configure(insertbackground=foreground) 
     
     def _insert_untypable_characters_on_windows(self, event):
         if event.state == 131084: # AltGr or Ctrl+Alt

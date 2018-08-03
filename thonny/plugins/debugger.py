@@ -6,7 +6,7 @@ Adds debugging commands and features.
 
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerCommand, ToplevelResponse
+from thonny.common import DebuggerCommand, ToplevelResponse, InlineCommand
 from thonny.memory import VariablesFrame
 from thonny import ast_utils, memory, misc_utils, ui_utils, code
 from thonny.misc_utils import shorten_repr
@@ -20,6 +20,7 @@ import logging
 
 from typing import Union, List  # @UnusedImport
 from thonny.config_ui import ConfigurationPage
+from thonny.tktextext import TextFrame
 
 _current_debugger = None
 
@@ -132,6 +133,10 @@ class SingleWindowDebugger(Debugger):
         if get_workbench().get_option("debugger.automatic_stack_view"):
             if len(msg.stack) > 1:
                 get_workbench().show_view("StackView")
+        
+        get_workbench().get_view("ExceptionView").set_exception(
+            msg["exception_lines_with_frame_info"]
+        )
             
     def close(self):
         super().close()
@@ -202,6 +207,10 @@ class StackedWindowsDebugger(Debugger):
         self._main_frame_visualizer.update_this_and_next_frames(msg)
         
         self.bring_out_frame(msg.stack[-1].id, force=True)
+        
+        get_workbench().get_view("ExceptionView").set_exception(
+            msg["exception_lines_with_frame_info"]
+        )
     
     def close(self):
         super().close()
@@ -334,7 +343,7 @@ class FrameVisualizer:
         self._expression_box.update_expression(msg, frame_info)
         
         if frame_info["id"] in msg["exception_affected_frame_ids"]:
-            last_line = msg["exception_lines_with_frame_ids"][-1][0]
+            last_line = msg["exception_lines_with_frame_info"][-1][0]
             self.show_note(last_line, focus=frame_info.last_event_focus)
             
 
@@ -810,6 +819,85 @@ class StackView(ui_utils.TreeFrame):
                 _current_debugger.bring_out_frame(frame_id)
         
 
+class ExceptionView(TextFrame):
+    def __init__(self, master):
+        super().__init__(master,
+                        borderwidth=0,
+                        relief="solid",
+                        undo=False,
+                        read_only=True,
+                        font="TkDefaultFont",
+                        foreground=get_syntax_options_for_tag("stderr")["foreground"],
+                        highlightthickness=0,
+                        padx=5,
+                        pady=5,
+                        wrap="char",
+                        horizontal_scrollbar=False)
+        
+        self.text.tag_configure("hyperlink", **get_syntax_options_for_tag("hyperlink"))
+        self.text.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
+        self.text.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
+        get_workbench().bind("ToplevelResponse", self._on_toplevel_response, True)
+        
+        self._prev_exception = None
+        
+        self._show_description()
+    
+    def _show_description(self):
+        self.text.configure(foreground=get_syntax_options_for_tag("TEXT")["foreground"])
+        self.text.direct_insert("end", "If last command raised an exception then this view will show the stacktrace.")
+    
+    def set_exception(self, exception_lines_with_frame_info):
+        if exception_lines_with_frame_info == self._prev_exception:
+            return
+        
+        self.text.direct_delete("1.0", "end")
+        
+        if exception_lines_with_frame_info is None:
+            self._show_description()
+            return
+        
+        self.text.configure(foreground=get_syntax_options_for_tag("stderr")["foreground"])
+        for line, frame_id, filename, lineno in exception_lines_with_frame_info:
+            
+            if frame_id is not None:
+                frame_tag = "frame_%d" % frame_id
+                 
+                def handle_frame_click(event, 
+                                       frame_id=frame_id,
+                                       filename=filename,
+                                       lineno=lineno):
+                    get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
+                    if os.path.exists(filename):
+                        get_workbench().get_editor_notebook().show_file(filename, lineno, set_focus=False)
+                
+                self.text.tag_bind(frame_tag, "<1>", handle_frame_click, True)
+                
+                start = max(line.find("File"), 0)
+                end = line.replace("\r", "").find("\n")
+                if end < 10:
+                    end = len(line)
+                
+                self.text.direct_insert("end", line[:start])
+                self.text.direct_insert("end", line[start:end], ("hyperlink", frame_tag))
+                self.text.direct_insert("end", line[end:])
+            
+            else:
+                self.text.direct_insert("end", line)
+        
+        self._prev_exception = exception_lines_with_frame_info
+
+    def _on_toplevel_response(self, msg):
+        self.set_exception(msg.get("user_exception", None))
+
+    def _hyperlink_enter(self, event):
+        self.text.config(cursor="hand2")
+        
+    def _hyperlink_leave(self, event):
+        self.text.config(cursor="")
+        
+        
+
 def _debugger_command_enabled(command):
     if _current_debugger is None:
         return False
@@ -925,4 +1013,5 @@ def load_plugin() -> None:
         include_in_toolbar=False)
 
     get_workbench().add_view(StackView, "Stack", "ne")    
+    get_workbench().add_view(ExceptionView, "Exception", "s")    
     get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)    

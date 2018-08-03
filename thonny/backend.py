@@ -818,7 +818,7 @@ class VM:
         sys.last_type, sys.last_value, sys.last_traceback = (
             e_type, e_value, e_traceback
         )
-        return format_exception_with_frame_ids(e_type, e_value, e_traceback)
+        return format_exception_with_frame_info(e_type, e_value, e_traceback)
     
 
     class FakeStream:
@@ -1047,14 +1047,14 @@ class Tracer(Executor):
             return {
                 "exception_msg" : None,
                 "exception_type_name" : None,
-                "exception_lines_with_frame_ids" : None,
+                "exception_lines_with_frame_info" : None,
                 "exception_affected_frame_ids" : set(),
             }
         else:
             return {
                 "exception_msg" : str(exc[1]),
                 "exception_type_name" : exc[0].__name__,
-                "exception_lines_with_frame_ids" : format_exception_with_frame_ids(*exc),
+                "exception_lines_with_frame_info" : format_exception_with_frame_info(*exc),
                 "exception_affected_frame_ids" : exc[1]._affected_frame_ids_,
             }
 
@@ -1941,7 +1941,8 @@ def _fetch_frame_source_info(frame):
             # TODO: 
             raise
 
-def format_exception_with_frame_ids(e_type, e_value, e_traceback):
+def format_exception_with_frame_info(e_type, e_value, e_traceback,
+                                     shorten_filenames=False):
     """Need to suppress thonny frames to avoid confusion"""
     
     _traceback_message = 'Traceback (most recent call last):\n'
@@ -1955,21 +1956,21 @@ def format_exception_with_frame_ids(e_type, e_value, e_traceback):
         + "another exception occurred:\n\n"))
 
     
-    def rec_format_exception_with_frame_ids(etype, value, tb, chain=True):
+    def rec_format_exception_with_frame_info(etype, value, tb, chain=True):
         # Based on
         # https://www.python.org/dev/peps/pep-3134/#enhanced-reporting
         # and traceback.format_exception
         if chain:
             if value.__cause__ is not None:
-                yield from rec_format_exception_with_frame_ids(value.__cause__)
-                yield (_cause_message, None)
+                yield from rec_format_exception_with_frame_info(value.__cause__)
+                yield (_cause_message, None, None, None)
             elif (value.__context__ is not None
                   and not value.__suppress_context__):
-                yield from rec_format_exception_with_frame_ids(value.__context__)
-                yield (_context_message, None)
+                yield from rec_format_exception_with_frame_info(value.__context__)
+                yield (_context_message, None, None, None)
         
         if tb is not None:
-            yield (_traceback_message, None)
+            yield (_traceback_message, None, None, None)
             have_seen_first_relevant_frame = False
             
             tb_temp = tb
@@ -1982,21 +1983,25 @@ def format_exception_with_frame_ids(e_type, e_value, e_traceback):
                     have_seen_first_relevant_frame = True
                     
                     fmt = '  File "{}", line {}, in {}\n'.format(
-                        entry.filename, entry.lineno, entry.name)
+                        entry.filename,
+                        entry.lineno, entry.name)
                     
                     if entry.line:
                         fmt += '    {}\n'.format(entry.line.strip())
                                
-                    yield (fmt, id(tb_temp.tb_frame))
+                    yield (fmt, 
+                           id(tb_temp.tb_frame), 
+                           entry.filename,
+                           entry.lineno)
                     
                 tb_temp = tb_temp.tb_next
             
             assert tb_temp is None # tb was exhausted
         
         for line in traceback.format_exception_only(etype, value): 
-            yield (line, None)
+            yield (line, None, None, None)
     
-    items = rec_format_exception_with_frame_ids(e_type, e_value, e_traceback)
+    items = rec_format_exception_with_frame_info(e_type, e_value, e_traceback)
     
     return list(items)
 

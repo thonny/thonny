@@ -965,6 +965,7 @@ class NoteBox(tk.Toplevel):
                             padx=5,
                             pady=5,
                             wrap="word")
+        
         self.text.grid(row=0, column=0, sticky="nsew")
         
         self.columnconfigure(0, weight=1)

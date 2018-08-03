@@ -640,7 +640,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _format_user_exception(self, items):
         
-        for line, frame_id in items:
+        for line, frame_id, *_ in items:
                 
             tags = ("io", "stderr")
             if frame_id is not None:
