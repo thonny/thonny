@@ -87,7 +87,7 @@ class Debugger:
         global _current_debugger
         _current_debugger = None
         get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
-        get_workbench().unbind("DebuggerProgress", self.handle_debugger_progress)
+        get_workbench().unbind("DebuggerResponse", self.handle_debugger_progress)
             
     def get_frame_by_id(self, frame_id):
         for frame_info in self._last_progress_message.stack:

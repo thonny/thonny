@@ -262,7 +262,7 @@ class Editor(ttk.Frame):
         self.master.update_editor_title(self)
         
     def destroy(self):
-        get_workbench().unbind("DebuggerProgress", self._listen_debugger_progress)
+        get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
         get_workbench().unbind("ToplevelResponse", self._listen_for_toplevel_response)
         ttk.Frame.destroy(self)
     
