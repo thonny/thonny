@@ -38,7 +38,7 @@ def launch():
     except SystemExit as e:
         from tkinter import messagebox
         messagebox.showerror("System exit", str(e))
-    except:
+    except Exception:
         from logging import exception
         exception("Internal launch or mainloop error")
         import tkinter.messagebox
@@ -106,7 +106,7 @@ def _try_delegate_to_existing_instance(args):
         # Try to connect and send arguments
         try:
             return _delegate_to_existing_instance(args)
-        except:
+        except Exception:
             import traceback
             traceback.print_exc()
             return False
@@ -139,7 +139,7 @@ def get_version():
         package_dir = os.path.dirname(sys.modules["thonny"].__file__)
         with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
             return fp.read().strip()
-    except:
+    except Exception:
         return "0.0.0"
 
 if TYPE_CHECKING:

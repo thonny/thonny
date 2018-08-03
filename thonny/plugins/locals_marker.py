@@ -115,7 +115,7 @@ class LocalsHighlighter:
             try:
                 highlight_positions = self.get_positions()
                 self._highlight(highlight_positions)
-            except:
+            except Exception:
                 logging.exception("Problem when updating local variable tags")
 
 

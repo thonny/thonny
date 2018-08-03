@@ -79,7 +79,7 @@ def get_version_tuple():
     for item in jedi.__version__.split("."):
         try:
             nums.append(int(item))
-        except:
+        except Exception:
             nums.append(0)
             
     return tuple(nums)

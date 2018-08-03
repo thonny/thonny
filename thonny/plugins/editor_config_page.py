@@ -13,13 +13,13 @@ class EditorConfigurationPage(ConfigurationPage):
         
         try:
             self.add_checkbox("view.name_highlighting", "Highlight matching names")
-        except:
+        except Exception:
             # name matcher may have been disabled
             logging.warning("Couldn't create name matcher checkbox")
             
         try:
             self.add_checkbox("view.locals_highlighting", "Highlight local variables")
-        except:
+        except Exception:
             # locals highlighter may have been disabled
             logging.warning("Couldn't create name locals highlighter checkbox")
             

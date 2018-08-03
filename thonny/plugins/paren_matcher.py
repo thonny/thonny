@@ -61,7 +61,7 @@ class ParenMatcher:
             for token in tokens:
                 if token.string != "" and token.string in "()[]{}":
                     result.append(token)
-        except:
+        except Exception:
             # happens eg when parens are unbalanced or there is indentation error or ...
             pass
         

@@ -122,7 +122,7 @@ class VM:
                     # (handlers of ToplevelCommands in normal cases catch the interrupt and provide
                     # relevant message)  
                     self.send_message(ToplevelResponse())
-        except:
+        except Exception:
             logger.exception("Crash in mainloop")
             traceback.print_exc()
 
@@ -179,7 +179,7 @@ class VM:
                 response = create_error_response()
             except KeyboardInterrupt:
                 response = create_error_response(user_exception=self._prepare_user_exception())
-            except:
+            except Exception:
                 _report_internal_error()
                 response = create_error_response(context_info="other unhandled exception")
 
@@ -205,7 +205,7 @@ class VM:
         val = self._get_ini().get(section, subname, fallback=default)
         try:
             return ast.literal_eval(val)
-        except:
+        except Exception:
             return val        
     
     def set_option(self, name, value):
@@ -246,14 +246,14 @@ class VM:
         for handler in self._import_handlers.get(module.__name__, []):
             try:
                 handler(module)
-            except:
+            except Exception:
                 _report_internal_error()
         
         # general handlers
         for handler in self._import_handlers.get("*", []):
             try:
                 handler(module)
-            except:
+            except Exception:
                 _report_internal_error()
             
         return module
@@ -288,7 +288,7 @@ class VM:
                         f()
                     else:
                         f(self)
-            except:
+            except Exception:
                 logging.exception("Failed loading plugin '" + module_name + "'")
 
     def _install_signal_handler(self):
@@ -393,7 +393,7 @@ class VM:
                 if app is not None:
                     app.processEvents()
 
-        except:
+        except Exception:
             pass
 
         return False
@@ -489,7 +489,7 @@ class VM:
             except Exception as e:
                 completions = []
                 error = "Autocomplete error: " + str(e)
-            except:
+            except Exception:
                 completions = []
                 error = "Autocomplete error"
 
@@ -514,7 +514,7 @@ class VM:
         except Exception as e:
             completions = []
             error = "Autocomplete error: " + str(e)
-        except:
+        except Exception:
             completions = []
             error = "Autocomplete error"
 
@@ -548,7 +548,7 @@ class VM:
                             record["docstring"] = c.docstring()
                         else:
                             record["docstring"] = c.description + "\n" + c.docstring()
-                except:
+                except Exception:
                     pass
                 """
                 result.append(record)
@@ -570,7 +570,7 @@ class VM:
                         #attributes[name] = inspect.getattr_static(value, name)
                         try:
                             attributes[name] = getattr(value, name)
-                        except:
+                        except Exception:
                             pass
 
             self._heap[id(type(value))] = type(value)
@@ -596,7 +596,7 @@ class VM:
             for tweaker in self._object_info_tweakers:
                 try:
                     tweaker(value, info, cmd)
-                except:
+                except Exception:
                     logger.exception("Failed object info tweaker: " + str(tweaker))
 
         else:
@@ -627,7 +627,7 @@ class VM:
         if app_class is not None:
             try:
                 return app_class.instance()
-            except:
+            except Exception:
                 return None
         else:
             return None
@@ -651,7 +651,7 @@ class VM:
     def _add_function_info(self, value, info):
         try:
             info["source"] = inspect.getsource(value)
-        except:
+        except Exception:
             pass
 
     def _add_elements_info(self, value, info):
@@ -745,7 +745,7 @@ class VM:
         self._heap[id(value)] = value
         try:
             type_name = value.__class__.__name__
-        except:
+        except Exception:
             type_name = type(value).__name__
 
         result = {'id' : id(value),
@@ -1160,7 +1160,7 @@ class SimpleTracer(Tracer):
             
             try:
                 source, firstlineno = self._get_frame_source_info(system_frame)
-            except:
+            except Exception:
                 source = None
                 firstlineno = None
 
@@ -1928,7 +1928,7 @@ def _fetch_frame_source_info(frame):
     try:
         lines, _ = inspect.getsourcelines(frame)
         return "".join(lines), lineno
-    except:
+    except Exception:
         # Fallback
         logging.exception("Failed getting source for frame %s, %s", frame.f_code.co_filename, 
                           frame.f_code.co_name)

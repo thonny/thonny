@@ -135,7 +135,7 @@ class Editor(ttk.Frame):
             if index and "." in index:
                 line, col = index.split(".")
                 result += "  @  {} : {}".format(line, int(col)+1)
-        except:
+        except Exception:
             exception("Finding cursor location")
         
         return result
@@ -255,7 +255,7 @@ class Editor(ttk.Frame):
     def _on_text_modified(self, event):
         try:
             self.master.update_editor_title(self)
-        except:
+        except Exception:
             traceback.print_exc()
 
     def _on_text_change(self, event):

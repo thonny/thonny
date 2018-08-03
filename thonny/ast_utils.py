@@ -177,7 +177,7 @@ def mark_text_ranges(node, source: bytes):
             tokens = _extract_tokens(tokens, node.lineno, node.col_offset, prelim_end_lineno, prelim_end_col_offset)
             try:
                 tokens = _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset)
-            except:
+            except Exception:
                 traceback.print_exc() # TODO: log it somewhere
                 # fallback to incorrect marking instead of exception
                 node.end_lineno = node.lineno

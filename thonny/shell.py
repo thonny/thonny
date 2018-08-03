@@ -351,7 +351,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _in_current_input_range(self, index):
         try:
             return self.compare(index, ">=", "input_start")
-        except:
+        except Exception:
             return False
     
     def _insert_text_directly(self, txt, tags=()):
@@ -522,7 +522,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 # remember the place where the output of this command started 
                 self.mark_set("command_io_start", "output_insert")
                 self.mark_gravity("command_io_start", "left")
-            except:
+            except Exception:
                 get_workbench().report_exception()
                 self._insert_prompt()
                 
@@ -635,7 +635,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 if os.path.exists(filename) and os.path.isfile(filename):
                     # TODO: better use events instead direct referencing
                     get_workbench().get_editor_notebook().show_file(filename, lineno, set_focus=False)
-        except:
+        except Exception:
             traceback.print_exc()
     
     def _format_user_exception(self, items):

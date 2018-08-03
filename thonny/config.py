@@ -50,9 +50,9 @@ class ConfigurationManager:
                 return val                
             try:
                 return ast.literal_eval(val)
-            except:
+            except Exception:
                 return val
-        except:
+        except Exception:
             if name in self._defaults:
                 return self._defaults[name]
             else:
@@ -127,7 +127,7 @@ class ConfigurationManager:
             os.chmod(temp_filename, 0o600)
             os.replace(temp_filename, self._filename)
             os.chmod(self._filename, 0o600)
-        except:
+        except Exception:
             exception("Could not save configuration file. Reverting to previous file.")
         
 

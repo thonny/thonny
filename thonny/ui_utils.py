@@ -305,7 +305,7 @@ class ClosableNotebook(ttk.Notebook):
             if "closebutton" in elem:
                 self.state(['pressed'])
                 self.pressed_index = index
-        except:
+        except Exception:
             # may fail, if clicked outside of tab
             return
     
@@ -316,7 +316,7 @@ class ClosableNotebook(ttk.Notebook):
         try:
             elem =  self.identify(event.x, event.y)
             index = self.index("@%d,%d" % (event.x, event.y))
-        except:
+        except Exception:
             # may fail, when mouse is dragged
             return
         else:
@@ -332,7 +332,7 @@ class ClosableNotebook(ttk.Notebook):
             index = self.index("@%d,%d" % (event.x, event.y))
             self._popup_index = index
             self.tab_menu.tk_popup(*self.winfo_toplevel().winfo_pointerxy())
-        except:
+        except Exception:
             logging.exception("Opening tab menu")
     
     def _close_tab_from_menu(self):
@@ -605,7 +605,7 @@ class SafeScrollbar(ttk.Scrollbar):
     def set(self, first, last):
         try:
             ttk.Scrollbar.set(self, first, last)
-        except:
+        except Exception:
             traceback.print_exc()
 
 class AutoScrollbar(SafeScrollbar):
@@ -1134,7 +1134,7 @@ def _create_var(class_, value, modification_listener):
         if modification_listener:
             try:
                 modification_listener()
-            except:
+            except Exception:
                 # Otherwise whole process will be brought down
                 # because for some reason Tk tries to call non-existing method
                 # on variable
@@ -1217,7 +1217,7 @@ def try_remove_linenumbers(text, master):
             return remove_line_numbers(text)
         else:
             return text
-    except:
+    except Exception:
         traceback.print_exc()
         return text
 
@@ -1571,7 +1571,7 @@ def get_tk_version_info():
     for part in get_tk_version_str().split("."):
         try:
             result.append(int(part))
-        except:
+        except Exception:
             result.append(0)
     return tuple(result) 
 

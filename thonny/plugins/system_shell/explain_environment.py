@@ -33,7 +33,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
                 actual = actual.lower()
                 
             return expected == actual
-        except:
+        except Exception:
             return False
     
     correct_commands = set()

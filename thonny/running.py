@@ -263,7 +263,7 @@ class Runner:
                         # assuming user meant to copy, not interrupt
                         # (IDLE seems to follow same logic)
                         return False
-                except:
+                except Exception:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
 
@@ -333,7 +333,7 @@ class Runner:
             if os.path.exists(faults_file):
                 with open(faults_file, encoding="ASCII") as fp:
                     err += fp.read()
-        except:
+        except Exception:
             logging.exception("Failed retrieving backend faults")
                 
         err = err.strip() + "\nUse 'Stop/Restart' to restart the backend ...\n"
@@ -575,7 +575,7 @@ class CPythonProxy(BackendProxy):
             if running_on_windows():
                 try:
                     os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
-                except:
+                except Exception:
                     logging.exception("Could not interrupt backend process")
             else:
                 self._proc.send_signal(signal.SIGINT)
@@ -631,7 +631,7 @@ class CPythonProxy(BackendProxy):
             try:
                 my_env["TCL_LIBRARY"] = get_workbench().tk.exprstring('$tcl_library')
                 my_env["TK_LIBRARY"] = get_workbench().tk.exprstring('$tk_library')
-            except:
+            except Exception:
                 logging.exception("Can't find Tcl/Tk library")
         
         
@@ -706,7 +706,7 @@ class CPythonProxy(BackendProxy):
                         # Probably backend runs an infinite/long print loop.
                         # Throttle message throughput in order to keep GUI thread responsive.
                         sleep(0.1)
-                except:
+                except Exception:
                     logging.exception("\nError when handling message from the backend: " + str(data))
                     self._message_queue.append(BackendEvent(event_type="ProgramOutput",
                                                 data="Error parsing message: " + traceback.format_exc(),
@@ -836,7 +836,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         dlg = SubprocessDialog(get_workbench(), proc, "Preparing the backend", long_description=description)
         try:
             get_workbench().wait_window(dlg)
-        except:
+        except Exception:
             # if using --without-pip the dialog may close very quickly 
             # and for some reason wait_window would give error then
             logging.exception("Problem with waiting for venv creation dialog")

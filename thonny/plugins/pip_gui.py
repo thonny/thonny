@@ -455,7 +455,7 @@ class PipDialog(tk.Toplevel):
             normalized_items = list(map(self._normalize_name, self.listbox.get(0, "end")))
             try:
                 index = normalized_items.index(self._normalize_name(name_or_index))
-            except:
+            except Exception:
                 exception("Can't find package name from the list: " + name_or_index)
                 return
         
@@ -729,7 +729,7 @@ class PluginsPipDialog(PipDialog):
                     conflicts.append(req_string)
             
             return conflicts
-        except:
+        except Exception:
             logging.exception("Problem computing conflicts")
             return None
     
@@ -831,7 +831,7 @@ class DetailsDialog(tk.Toplevel):
                 s2 = s
             try:
                 return StrictVersion(s2)
-            except:
+            except Exception:
                 # use only numbers
                 nums = re.findall(r"\d+", s)
                 while len(nums) < 2:
@@ -1013,7 +1013,7 @@ def _extract_click_text(widget, event, tag):
             # check if the tag matches the mouse click index
             if widget.compare(start, '<=', index) and widget.compare(index, '<', end):
                 return widget.get(start, end)
-    except:
+    except Exception:
         logging.exception("extracting click text")
         return None
 

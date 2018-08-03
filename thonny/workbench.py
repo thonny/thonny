@@ -150,7 +150,7 @@ class Workbench(tk.Tk):
     def _try_action(self, action: Callable) -> None:
         try:
             action()
-        except:
+        except Exception:
             self.report_exception()
         
     def _init_configuration(self) -> None:
@@ -235,11 +235,11 @@ class Workbench(tk.Tk):
             icon_file = os.path.join(self.get_package_dir(), "res", "thonny.ico")
             try:
                 self.iconbitmap(icon_file, default=icon_file)
-            except:
+            except Exception:
                 try:
                     # seems to work in mac
                     self.iconbitmap(icon_file)
-                except:
+                except Exception:
                     pass   
         
         
@@ -292,7 +292,7 @@ class Workbench(tk.Tk):
                 m = importlib.import_module(module_name)
                 if hasattr(m, load_function_name):
                     getattr(m, load_function_name)()
-            except:
+            except Exception:
                 logging.exception("Failed loading plugin '" + module_name + "'")
     
     def _init_fonts(self) -> None:
@@ -367,7 +367,7 @@ class Workbench(tk.Tk):
             thonny._runner = self._runner
             self._runner.start()
             self._update_toolbar()
-        except:
+        except Exception:
             self.report_exception("Error when initializing backend")
     
     def _init_server_loop(self, server_socket) -> None:
@@ -381,7 +381,7 @@ class Workbench(tk.Tk):
                 (client_socket, _) = server_socket.accept()
                 try:
                     self._handle_socket_request(client_socket)
-                except:
+                except Exception:
                     traceback.print_exc()
         
         Thread(target=server_loop, daemon=True).start()
@@ -1181,7 +1181,7 @@ class Workbench(tk.Tk):
                 for handler in sorted(self._event_handlers[sequence].copy(), key=str):
                     try:
                         handler(event)
-                    except:
+                    except Exception:
                         self.report_exception("Problem when handling '" + sequence + "'")
                         
         self._update_toolbar()
@@ -1575,7 +1575,7 @@ class Workbench(tk.Tk):
             self._save_layout()
             #ui_utils.delete_images()
             self.event_generate("WorkbenchClose")
-        except:
+        except Exception:
             self.report_exception()
 
         self.destroy()
@@ -1592,7 +1592,7 @@ class Workbench(tk.Tk):
     def focus_get(self) -> Optional[tk.Widget]:
         try:
             return tk.Tk.focus_get(self)
-        except:
+        except Exception:
             # This may give error in Ubuntu
             return None
     

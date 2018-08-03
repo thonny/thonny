@@ -233,7 +233,7 @@ def configure_and_add_tags(text):
             else:
                 text.after(500, lambda: configure_and_add_tags(text))
                 return
-        except:
+        except Exception:
             logging.exception("Problem with defining structure tags")
             return
     

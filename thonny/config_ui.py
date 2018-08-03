@@ -54,7 +54,7 @@ class ConfigurationDialog(tk.Toplevel):
                 page = self._pages[title]
                 if page.apply() == False:
                     return
-            except:
+            except Exception:
                 get_workbench().report_exception("Error when applying options in " + title)
              
         self.destroy()
@@ -64,7 +64,7 @@ class ConfigurationDialog(tk.Toplevel):
             try:
                 page = self._pages[title]
                 page.cancel()
-            except:
+            except Exception:
                 get_workbench().report_exception("Error when cancelling options in " + title)
                 
         self.destroy()

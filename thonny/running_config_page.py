@@ -180,7 +180,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                             path = os.path.join(dir_, WINDOWS_EXE)
                             if os.path.exists(path):
                                 result.add(path)
-                except:
+                except Exception:
                     pass
         
         return result

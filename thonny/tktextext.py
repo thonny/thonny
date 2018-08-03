@@ -227,7 +227,7 @@ class EnhancedText(TweakableText):
         try:
             # Is needed on eg. Ubuntu with Estonian keyboard
             self.bind("<ISO_Left_Tab>", if_not_readonly(self.perform_tab), True)
-        except:
+        except Exception:
             pass
         
         if platform.system() == "Windows":
@@ -388,7 +388,7 @@ class EnhancedText(TweakableText):
             if (row == line_count 
                 or row == line_count-1): # otherwise tk doesn't show last line
                 self.mark_set("insert", "end")
-        except:
+        except Exception:
             traceback.print_exc() 
     
     def perform_page_up(self, event):
@@ -399,7 +399,7 @@ class EnhancedText(TweakableText):
             row, _ = map(int, first_visible_idx.split("."))
             if row == 1:
                 self.mark_set("insert", "1.0")
-        except:
+        except Exception:
             traceback.print_exc() 
     
     def compute_smart_home_destination_index(self):
@@ -857,7 +857,7 @@ class TextFrame(ttk.Frame):
                 
                 margin_line_visible_col = self._recommended_line_length - first_visible_col
                 delta = first_visible_col_x
-            except:
+            except Exception:
                 # fall back to ignoring scroll position
                 margin_line_visible_col = self._recommended_line_length
                 delta = 0

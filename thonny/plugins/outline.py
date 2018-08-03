@@ -20,7 +20,7 @@ class OutlineView(ttk.Frame):
         try:
             # Not sure if editor notebook is still living
             get_workbench().get_editor_notebook().unbind("<<NotebookTabChanged>>", self._tab_changed_binding)
-        except:
+        except Exception:
             pass
         self.vert_scrollbar["command"] = None
         ttk.Frame.destroy(self)
