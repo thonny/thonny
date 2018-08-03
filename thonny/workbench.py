@@ -1180,7 +1180,7 @@ class Workbench(tk.Tk):
                 
                 # make a copy of handlers, so that event handler can remove itself
                 # from the registry during iteration
-                for handler in self._event_handlers[sequence].copy():
+                for handler in sorted(self._event_handlers[sequence].copy(), key=str):
                     try:
                         handler(event)
                     except:
