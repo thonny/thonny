@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from thonny import get_workbench
+from thonny import get_workbench, ui_utils
 
 
 class ConfigurationDialog(tk.Toplevel):
@@ -82,10 +82,14 @@ class ConfigurationPage(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master)
     
-    def add_checkbox(self, flag_name, description, row=None, pady=0, columnspan=1):
+    def add_checkbox(self, flag_name, description, row=None, pady=0, columnspan=1,
+                     tooltip=None):
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
         checkbox.grid(row=row, column=0, sticky=tk.W, pady=pady, columnspan=columnspan)
+        
+        if tooltip is not None:
+            ui_utils.create_tooltip(checkbox, tooltip)
                 
     def apply(self):
         """Apply method should return False, when page contains invalid

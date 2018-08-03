@@ -5,6 +5,7 @@ from tkinter.dialog import Dialog
 from thonny import tktextext, misc_utils
 from thonny import get_workbench
 from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
+from typing import Union, List  # @UnusedImport
 import tkinter as tk
 import tkinter.messagebox as tkMessageBox
 import traceback
@@ -446,7 +447,9 @@ class AutomaticNotebook(ClosableNotebook):
         self._update_visibility()
     
     def forget(self, tab_id):
-        super().forget(tab_id)
+        if (tab_id in self.tabs()
+            or tab_id in self.winfo_children()):
+            super().forget(tab_id)
         self._update_visibility()
     
     def is_visible(self):
@@ -968,8 +971,8 @@ class NoteBox(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.text.bind("<Escape>", self.close, True)
         
-        tk._default_root.bind_all("<1>", self._close_maybe, True)
-        tk._default_root.bind_all("<Key>", self.close, True)
+        #tk._default_root.bind_all("<1>", self._close_maybe, True)
+        #tk._default_root.bind_all("<Key>", self.close, True)
         
         self.withdraw()
     
@@ -1064,6 +1067,12 @@ class NoteBox(tk.Toplevel):
         
         self.deiconify()
     
+    def show_note(self, *content_items: Union[str, List],
+                  target=None, focus=None) -> None:
+    
+        self.set_content(*content_items)
+        self.place(target, focus)
+        
     def _close_maybe(self, event):
         if event.widget not in [self, self.text]:
             self.close(event)

@@ -18,6 +18,9 @@ from thonny import get_workbench, get_runner
 from thonny.ui_utils import select_sequence
 import logging
 
+from typing import Union, List  # @UnusedImport
+from thonny.config_ui import ConfigurationPage
+
 _current_debugger = None
 
 class Debugger:
@@ -32,7 +35,6 @@ class Debugger:
         get_runner().execute_current(self._command_name)
 
     def check_issue_command(self, command, **kwargs):
-        get_workbench().close_note()
         cmd = DebuggerCommand(command, **kwargs)
         self._last_debugger_command = cmd
 
@@ -89,6 +91,9 @@ class Debugger:
         _current_debugger = None
         get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
         get_workbench().unbind("DebuggerResponse", self.handle_debugger_progress)
+        
+        if get_workbench().get_option("debugger.automatic_stack_view"):
+            get_workbench().hide_view("StackView")
             
     def get_frame_by_id(self, frame_id):
         for frame_info in self._last_progress_message.stack:
@@ -105,6 +110,8 @@ class SingleWindowDebugger(Debugger):
     def __init__(self, command_name):
         super().__init__(command_name)
         self._last_frame_visualizer = None
+        # Make sure StackView is created
+        get_workbench().get_view("StackView")
         
     def get_run_to_cursor_breakpoint(self):
         editor = get_workbench().get_editor_notebook().get_current_editor()
@@ -122,6 +129,11 @@ class SingleWindowDebugger(Debugger):
         self.bring_out_frame(self._last_progress_message.stack[-1]["id"],
                              force=True)
     
+        if get_workbench().get_option("debugger.automatic_stack_view"):
+            print(len(msg.stack))
+            if len(msg.stack) > 1:
+                get_workbench().show_view("StackView")
+            
     def close(self):
         super().close()
         if self._last_frame_visualizer is not None:
@@ -239,6 +251,7 @@ class FrameVisualizer:
         self._filename = frame_info.filename
         self._firstlineno = None 
         self._expression_box = ExpressionBox(text_frame)
+        self._note_box = ui_utils.NoteBox(text_frame.winfo_toplevel())
         self._next_frame_visualizer = None
         self._text_old_read_only = self._text.is_read_only()
         self._text.set_read_only(True)
@@ -263,6 +276,7 @@ class FrameVisualizer:
         self._text.set_read_only(self._text_old_read_only)
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
+        self.close_note()
     
     def get_frame_id(self):
         return self._frame_id
@@ -321,15 +335,9 @@ class FrameVisualizer:
         self._expression_box.update_expression(msg, frame_info)
         
         if frame_info["id"] in msg["exception_affected_frame_ids"]:
-            self._display_exception(msg, frame_info)
+            last_line = msg["exception_lines_with_frame_ids"][-1][0]
+            self.show_note(last_line, focus=frame_info.last_event_focus)
             
-    
-    def _display_exception(self, msg, frame_info):
-        last_line = msg["exception_lines_with_frame_ids"][-1][0]
-        get_workbench().show_note(last_line,
-                                  target=self._text,
-                                  focus=frame_info.last_event_focus)
-        
 
     def _find_this_and_next_frame(self, stack):
         for i in range(len(stack)):
@@ -413,6 +421,15 @@ class FrameVisualizer:
     def bring_out_this_frame(self):
         pass
             
+    def show_note(self, *content_items: Union[str, List],
+                  target=None, focus=None) -> None:
+        if target is None:
+            target = self._text
+            
+        self._note_box.show_note(*content_items, target=target, focus=focus)
+    
+    def close_note(self):
+        self._note_box.close()
 
 class EditorVisualizer(FrameVisualizer):
     """
@@ -762,7 +779,12 @@ class StackView(ui_utils.TreeFrame):
         
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
-        
+    
+    def before_show(self):
+        if (get_workbench().get_option("debugger.automatic_stack_view")
+            and _current_debugger is None):
+            return False
+
         
     def _update_stack(self, msg):
         self._clear_tree()
@@ -808,9 +830,10 @@ def _start_debug_enabled():
             and "debug" in get_runner().supported_features())
 
 def _start_debug(command_name):
-    # TODO: select debugger based on configuration
-    #current_debugger = StackedWindowsDebugger(command_name)
-    current_debugger = SingleWindowDebugger(command_name)
+    if get_workbench().get_option("debugger.single_window"):
+        current_debugger = SingleWindowDebugger(command_name)
+    else:
+        current_debugger = StackedWindowsDebugger(command_name)
      
     global _current_debugger
     _current_debugger = current_debugger
@@ -820,7 +843,22 @@ def _start_debug(command_name):
     # before debugger actually runs 
     _current_debugger = current_debugger
 
+class DebuggerConfigurationPage(ConfigurationPage):
+    def __init__(self, master):
+        super().__init__(master)
+        self.add_checkbox("debugger.single_window", 
+                          "Use editors and Stack view for presenting call frames",
+                          tooltip="Presents the concept of stack like most professional IDE-s")
+        self.add_checkbox("debugger.automatic_stack_view", 
+                          "Open and close Stack view automatically",
+                          tooltip="Opens the Stack view on first call and "
+                          + "closes it when program returns to main frame.")
+    
+
 def load_plugin() -> None:
+    
+    get_workbench().set_default("debugger.single_window", False)
+    get_workbench().set_default("debugger.automatic_stack_view", True)
     
     get_workbench().add_command("debug", "run", "Debug current script",
         lambda: _start_debug("Debug"),
@@ -889,3 +927,4 @@ def load_plugin() -> None:
         include_in_toolbar=False)
 
     get_workbench().add_view(StackView, "Stack", "ne")    
+    get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)    
