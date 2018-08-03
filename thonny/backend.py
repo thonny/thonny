@@ -1033,6 +1033,11 @@ class Tracer(Executor):
                 assert isinstance(cmd, DebuggerCommand)
                 return cmd
     
+    def _register_affected_frame(self, exception_obj, frame):
+        if not hasattr(exception_obj, "_affected_frame_ids_"):
+            exception_obj._affected_frame_ids_ = set()
+        exception_obj._affected_frame_ids_.add(id(frame))
+    
     def _export_exception_info(self):
         if self._fresh_exception is not None:
             exc = self._fresh_exception
@@ -1043,13 +1048,15 @@ class Tracer(Executor):
             return {
                 "exception_msg" : None,
                 "exception_type_name" : None,
-                "exception_lines_with_frame_ids" : None
+                "exception_lines_with_frame_ids" : None,
+                "exception_affected_frame_ids" : set(),
             }
         else:
             return {
                 "exception_msg" : str(exc[1]),
                 "exception_type_name" : exc[0].__name__,
-                "exception_lines_with_frame_ids" : format_exception_with_frame_ids(*exc)
+                "exception_lines_with_frame_ids" : format_exception_with_frame_ids(*exc),
+                "exception_affected_frame_ids" : exc[1]._affected_frame_ids_,
             }
 
     def _get_frame_source_info(self, frame):
@@ -1086,8 +1093,10 @@ class SimpleTracer(Tracer):
           
         elif event == "exception":
             self._fresh_exception = arg
+            self._register_affected_frame(arg[1], frame)
             if self._is_interesting_exception(frame):
-                self._report_current_state(frame, event)
+                # UI doesn't know about separate exception events
+                self._report_current_state(frame, "line")
                 self._current_command = self._fetch_next_debugger_command()
             
         elif event == "line":
@@ -1287,6 +1296,7 @@ class FancyTracer(Tracer):
 
         elif event == "exception":
             self._fresh_exception = arg
+            self._register_affected_frame(arg[1], frame)
             
             # use the state prepared by previous event
             last_custom_frame = self._custom_stack[-1] 

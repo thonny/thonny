@@ -298,21 +298,16 @@ class FrameVisualizer:
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
         self._remove_focus_tags()
+        
         if frame_info.last_event == "line":
-            self._tag_range(frame_info.last_event_focus, 
-                            "active_focus" 
-                            #"sel"
-                            )
-        elif frame_info.last_event == "exception":
-            self._tag_range(frame_info.last_event_focus, 
-                            "exception_focus")
-            self._display_exception(msg, frame_info)
+            if frame_info["id"] in msg["exception_affected_frame_ids"]:
+                self._tag_range(frame_info.last_event_focus, "exception_focus")
+            else:
+                self._tag_range(frame_info.last_event_focus, "active_focus")
         else:    
             if "statement" in frame_info.last_event:
-                # TODO: exception info should be frame-based
                 if msg["exception_msg"] is not None:
                     stmt_tag = "exception_focus"
-                    self._display_exception(msg, frame_info)
                 elif frame_info.last_event.startswith("before"):
                     stmt_tag = "active_focus"
                 else:
@@ -323,8 +318,11 @@ class FrameVisualizer:
                 
             self._tag_range(frame_info.current_statement, stmt_tag)
             
-        
         self._expression_box.update_expression(msg, frame_info)
+        
+        if frame_info["id"] in msg["exception_affected_frame_ids"]:
+            self._display_exception(msg, frame_info)
+            
     
     def _display_exception(self, msg, frame_info):
         last_line = msg["exception_lines_with_frame_ids"][-1][0]
@@ -487,7 +485,8 @@ class ExpressionBox(tk.Text):
                 self._replace(subrange, value)
             if "expression" in event:
                 # Event may be also after_statement_again
-                self._highlight_range(focus, event, msg["exception_msg"])
+                self._highlight_range(focus, event, 
+                                      frame_info["id"] in msg["exception_affected_frame_ids"])
                 
             self._update_position(frame_info.current_root_expression)
             self._update_size()
@@ -595,7 +594,7 @@ class ExpressionBox(tk.Text):
                 + "_" + str(node_or_text_range.end_lineno)
                 + "_" + str(node_or_text_range.end_col_offset))
     
-    def _highlight_range(self, text_range, state, exception):
+    def _highlight_range(self, text_range, state, has_exception):
         logging.debug("EV._highlight_range: %s", text_range)
         self.tag_remove("after", "1.0", "end")
         self.tag_remove("before", "1.0", "end")
@@ -612,7 +611,7 @@ class ExpressionBox(tk.Text):
         end_index = self._get_mark_name(text_range.end_lineno, text_range.end_col_offset) 
         self.tag_add(tag, start_index, end_index)
         
-        if exception:
+        if has_exception:
             self.tag_add("exception", start_index, end_index)
             
     def _update_position(self, text_range):
