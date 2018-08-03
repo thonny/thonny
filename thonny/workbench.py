@@ -1207,9 +1207,9 @@ class Workbench(tk.Tk):
         if sequence.startswith("<"):
             tk.Tk.unbind(self, sequence, funcid=funcid)
         else:
-            if (sequence in self._event_handlers 
-                and funcid in self._event_handlers[sequence]):
-                self._event_handlers[sequence].remove(funcid)
+            assert sequence in self._event_handlers
+            assert funcid in self._event_handlers[sequence]
+            self._event_handlers[sequence].remove(funcid)
                 
 
     def in_heap_mode(self) -> bool:
