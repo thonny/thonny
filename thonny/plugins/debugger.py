@@ -24,6 +24,7 @@ class Debugger:
     def __init__(self, command_name):
         self._command_name = command_name
         self._last_progress_message = None
+        self._last_brought_out_frame_id=None
         get_workbench().bind("DebuggerResponse", self.handle_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
         
@@ -96,7 +97,7 @@ class Debugger:
         
         raise ValueError("Could not find frame %d" % frame_id) 
     
-    def bring_out_frame(self, frame_id):
+    def bring_out_frame(self, frame_id, force=False):
         # called by StackView
         raise NotImplementedError()
             
@@ -118,7 +119,8 @@ class SingleWindowDebugger(Debugger):
         
     def handle_debugger_progress(self, msg):
         self._last_progress_message = msg
-        self.bring_out_frame(self._last_progress_message.stack[-1]["id"])
+        self.bring_out_frame(self._last_progress_message.stack[-1]["id"],
+                             force=True)
     
     def close(self):
         super().close()
@@ -126,7 +128,11 @@ class SingleWindowDebugger(Debugger):
             self._last_frame_visualizer.close()
             self._last_frame_visualizer = None
             
-    def bring_out_frame(self, frame_id):
+    def bring_out_frame(self, frame_id, force=False):
+        if not force and frame_id == self._last_brought_out_frame_id:
+            return
+        self._last_brought_out_frame_id = frame_id
+        
         frame_info = self.get_frame_by_id(frame_id)
         
         if (self._last_frame_visualizer is not None
@@ -184,7 +190,7 @@ class StackedWindowsDebugger(Debugger):
             
         self._main_frame_visualizer.update_this_and_next_frames(msg)
         
-        self.bring_out_frame(msg.stack[-1].id)
+        self.bring_out_frame(msg.stack[-1].id, force=True)
     
     def close(self):
         super().close()
@@ -210,7 +216,11 @@ class StackedWindowsDebugger(Debugger):
         else:
             return None
         
-    def bring_out_frame(self, frame_id):
+    def bring_out_frame(self, frame_id, force=False):
+        if not force and frame_id == self._last_brought_out_frame_id:
+            return
+        self._last_brought_out_frame_id = frame_id
+        
         # called by StackView
         self._main_frame_visualizer.bring_out_frame(frame_id)
         
@@ -754,10 +764,6 @@ class StackView(ui_utils.TreeFrame):
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
         
-        # can't turn off events from programmatic selection changes
-        # therefore I'm using separate handlers for user interactions
-        self.tree.bind("<1>", self._on_select_kbd_mouse, True)
-        self.tree.bind("<Key>", self._on_select_kbd_mouse, True)
         
     def _update_stack(self, msg):
         self._clear_tree()
@@ -775,7 +781,7 @@ class StackView(ui_utils.TreeFrame):
         self.tree.selection_add(node_id)
         self.tree.focus(node_id)
         
-    def _on_select_kbd_mouse(self, event):
+    def on_select(self, event):
         iid = self.tree.focus()
         if iid != '':
             # assuming id is in the last column
