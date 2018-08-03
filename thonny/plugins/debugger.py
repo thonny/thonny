@@ -100,7 +100,7 @@ class Debugger:
         # called by StackView
         raise NotImplementedError()
             
-class TraditionalDebugger(Debugger):
+class SingleWindowDebugger(Debugger):
     def __init__(self, command_name):
         super().__init__(command_name)
         self._last_frame_visualizer = None
@@ -805,7 +805,7 @@ def _start_debug_enabled():
 def _start_debug(command_name):
     # TODO: select debugger based on configuration
     #current_debugger = StackedWindowsDebugger(command_name)
-    current_debugger = TraditionalDebugger(command_name)
+    current_debugger = SingleWindowDebugger(command_name)
      
     global _current_debugger
     _current_debugger = current_debugger
