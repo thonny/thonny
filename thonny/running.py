@@ -497,6 +497,7 @@ class CPythonProxy(BackendProxy):
     "abstract class"
     
     def __init__(self, executable):
+        super.__init__(True)
         self._executable = executable
         
         self._proc = None

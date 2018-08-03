@@ -248,9 +248,6 @@ class ReplayerEditorProper(ReplayerEditor):
         self.set_colorer()
     
     def set_colorer(self):
-        # TODO: some problem when doing fast rewind
-        return
-    
         self.colorer = SyntaxColorer(self.code_view.text)
 
     def replay_event(self, event):
@@ -328,6 +325,7 @@ class ShellFrame(ReplayerEditor):
 
 class ReplayerPanedWindow(tk.PanedWindow):
     def __init__(self, master=None, cnf={}, **kw):
+        cnf = cnf.copy()
         cnf.update(kw)
         cnf["background"] = lookup_style_option("TFrame", "background")
         super().__init__(master=master, cnf=cnf)

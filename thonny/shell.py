@@ -447,17 +447,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 return None
             
         elif get_runner().is_running():
-                i = 0
-                limit = None # TODO: simplify
-                while True:
-                    if i >= len(input_text):
-                        return None
-                    elif limit is not None and i+1 == limit:
-                        return input_text[:i+1]
-                    elif input_text[i] == "\n":
-                        return input_text[:i+1]
-                    else:
-                        i += 1
+            i = 0
+            while True:
+                if i >= len(input_text):
+                    return None
+                elif input_text[i] == "\n":
+                    return input_text[:i+1]
+                else:
+                    i += 1
     
     def _code_is_ready_for_submission(self, source, tail=""):
         # Ready to submit if ends with empty line 

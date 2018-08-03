@@ -880,7 +880,7 @@ class TextFrame(ttk.Frame):
             if event.type == "4": # In Python 3.6 you can use tk.EventType.ButtonPress instead of "4" 
                 self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
-            exception()
+            exception("on_gutter_click")
 
     def on_gutter_motion(self, event=None):
         try:
@@ -889,7 +889,7 @@ class TextFrame(ttk.Frame):
             self.select_lines(min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1))
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
-            exception()
+            exception("on_gutter_motion")
 
     def _reload_theme_options(self, event=None):
         

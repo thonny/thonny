@@ -138,15 +138,12 @@ def get_last_child(node):
         return None
 
     # TODO: pick more cases from here:
-    """
-    (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
-            or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
-            # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0
-                and (node.dest is not None or len(node.values) > 0))
-
-            #"TODO: Import ja ImportFrom"
-            # TODO: what about ClassDef ???
-    """
+    #(isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
+    #        or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
+    #        # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0
+    #            and (node.dest is not None or len(node.values) > 0))
+    #        #"TODO: Import ja ImportFrom"
+    #        # TODO: what about ClassDef ???
 
 
 
@@ -406,7 +403,7 @@ def compare_node_positions(n1, n2):
         return -1
     elif n1.col_offset > n2.col_offset:
         return 1
-    elif n2.col_offset < n2.col_offset:
+    elif n1.col_offset < n2.col_offset:
         return -1
     else:
         return 0

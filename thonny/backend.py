@@ -541,16 +541,16 @@ class VM:
             if not c.name.startswith("__"):
                 record = {"name":c.name, "complete":c.complete,
                           "type":c.type, "description":c.description}
+                """ TODO: 
                 try:
-                    """ TODO: 
                     if c.type in ["class", "module", "function"]:
                         if c.type == "function":
                             record["docstring"] = c.docstring()
                         else:
                             record["docstring"] = c.description + "\n" + c.docstring()
-                    """
                 except:
                     pass
+                """
                 result.append(record)
         return result
 
@@ -647,7 +647,6 @@ class VM:
                 info["file_tell"] = value.tell()
         except Exception as e:
             info["file_error"] = "Could not get file content, error:" + str(e)
-            pass
 
     def _add_function_info(self, value, info):
         try:

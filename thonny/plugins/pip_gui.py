@@ -595,7 +595,7 @@ class PipDialog(tk.Toplevel):
         
         return None
 
-    def _create_python_process(self, args):
+    def _create_python_process(self, args, stderr):
         raise NotImplementedError()
 
     def _create_pip_process(self, args):

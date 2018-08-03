@@ -5,7 +5,6 @@ Mostly copied/adapted from idlelib.HyperParser and idlelib.PyParse
 
 
 import re
-import sys
 from collections import Mapping
 import string
 from keyword import iskeyword
@@ -16,10 +15,6 @@ NUM_CONTEXT_LINES = (50, 500, 5000000)
 # Reason last stmt is continued (or C_NONE if it's not).
 (C_NONE, C_BACKSLASH, C_STRING_FIRST_LINE,
  C_STRING_NEXT_LINES, C_BRACKET) = range(5)
-
-if 0:   # for throwaway debugging output
-    def dump(*stuff):
-        sys.__stdout__.write(" ".join(map(str, stuff)) + "\n")
 
 # Find what looks like the start of a popular stmt.
 
@@ -773,7 +768,7 @@ class HyperParser:
     _ID_KEYWORDS = frozenset({"True", "False", "None"})
 
     @classmethod
-    def _eat_identifier(cls, str, limit, pos):
+    def _eat_identifier(cls, s, limit, pos):
         """Given a string and pos, return the number of chars in the
         identifier which ends at pos, or 0 if there is no such one.
 
@@ -789,8 +784,8 @@ class HyperParser:
         # is faster in the common case where most of the characters
         # are ASCII.
         while i > limit and (
-                ord(str[i - 1]) < 128 and
-                is_ascii_id_char[ord(str[i - 1])]
+                ord(s[i - 1]) < 128 and
+                is_ascii_id_char[ord(s[i - 1])]
         ):
             i -= 1
 
@@ -798,32 +793,32 @@ class HyperParser:
         # character, continue going backwards using the most generic
         # test for whether a string contains only valid identifier
         # characters.
-        if i > limit and ord(str[i - 1]) >= 128:
-            while i - 4 >= limit and ('a' + str[i - 4:pos]).isidentifier():
+        if i > limit and ord(s[i - 1]) >= 128:
+            while i - 4 >= limit and ('a' + s[i - 4:pos]).isidentifier():
                 i -= 4
-            if i - 2 >= limit and ('a' + str[i - 2:pos]).isidentifier():
+            if i - 2 >= limit and ('a' + s[i - 2:pos]).isidentifier():
                 i -= 2
-            if i - 1 >= limit and ('a' + str[i - 1:pos]).isidentifier():
+            if i - 1 >= limit and ('a' + s[i - 1:pos]).isidentifier():
                 i -= 1
 
             # The identifier candidate starts here. If it isn't a valid
             # identifier, don't eat anything. At this point that is only
             # possible if the first character isn't a valid first
             # character for an identifier.
-            if not str[i:pos].isidentifier():
+            if not s[i:pos].isidentifier():
                 return 0
         elif i < pos:
             # All characters in str[i:pos] are valid ASCII identifier
             # characters, so it is enough to check that the first is
             # valid as the first character of an identifier.
-            if not _IS_ASCII_ID_FIRST_CHAR[ord(str[i])]:
+            if not _IS_ASCII_ID_FIRST_CHAR[ord(s[i])]:
                 return 0
 
         # All keywords are valid identifiers, but should not be
         # considered identifiers here, except for True, False and None.
         if i < pos and (
-                iskeyword(str[i:pos]) and
-                str[i:pos] not in cls._ID_KEYWORDS
+                iskeyword(s[i:pos]) and
+                s[i:pos] not in cls._ID_KEYWORDS
         ):
             return 0
 

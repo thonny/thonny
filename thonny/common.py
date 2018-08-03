@@ -71,6 +71,7 @@ class Record:
 
 class TextRange(Record):
     def __init__(self, lineno: int, col_offset: int, end_lineno: int, end_col_offset: int) -> None:
+        super().__init__()
         self.lineno = lineno
         self.col_offset = col_offset
         self.end_lineno = end_lineno

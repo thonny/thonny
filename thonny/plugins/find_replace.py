@@ -18,6 +18,9 @@ from thonny.ui_utils import select_sequence
 _active_find_dialog = None
 
 class FindDialog(tk.Toplevel): 
+    
+    last_searched_word = None
+    
     def __init__(self, master):
         padx=15
         pady=15
@@ -33,14 +36,6 @@ class FindDialog(tk.Toplevel):
         #references to the current set of passive found tags e.g. all words that match the searched term but are not the active string
         self.passive_found_tags = set()
         self.active_found_tag = None    #reference to the currently active (centered) found string
-
-        #if find dialog was used earlier then put the previous search word to the Find entry field
-        #TODO - refactor this, there must be a better way
-        try:
-            #if find dialog was used earlier then this is present
-            FindDialog.last_searched_word = FindDialog.last_searched_word
-        except:
-            FindDialog.last_searched_word = None #if this variable does not exist then this is the first time find dialog has been launched
 
         #a tuple containing the start and indexes of the last processed string
         #if the last action was find, then the end index is start index + 1

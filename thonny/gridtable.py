@@ -145,11 +145,6 @@ class GridTable(tk.Frame):
         
         self.update_screen_data()
 
-class BackendGridTable(GridTable):
-    def __init__(self, master):
-        super().__init__(master)
-
-            
 
 class ScrollableGridTable(ttk.Frame):
     def __init__(self, master, header_rows, data_row_count, footer_row_count,

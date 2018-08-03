@@ -46,7 +46,7 @@ def get_log_file_time(filename):
     chars = list(filename[:19])
     try:
         assert chars[10] == "_" and chars[13] == "-" and chars[16] == "-"
-    except:
+    except Exception:
         print(filename)
     chars[10] = "T"
     chars[13] = ":"
