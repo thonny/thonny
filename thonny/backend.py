@@ -1037,25 +1037,30 @@ class Tracer(Executor):
             exception_obj._affected_frame_ids_ = set()
         exception_obj._affected_frame_ids_.add(id(frame))
     
-    def _export_exception_info(self):
+    def _get_current_exception(self):
         if self._fresh_exception is not None:
-            exc = self._fresh_exception
+            return self._fresh_exception
         else:
-            exc = sys.exc_info()
+            return sys.exc_info()
+    
+    def _export_exception_info(self):
+        exc = self._get_current_exception()
         
         if exc[0] is None:
             return {
-                "exception_msg" : None,
-                "exception_type_name" : None,
-                "exception_lines_with_frame_info" : None,
-                "exception_affected_frame_ids" : set(),
+                "id" : None,
+                "msg" : None,
+                "type_name" : None,
+                "lines_with_frame_info" : None,
+                "affected_frame_ids" : set(),
             }
         else:
             return {
-                "exception_msg" : str(exc[1]),
-                "exception_type_name" : exc[0].__name__,
-                "exception_lines_with_frame_info" : format_exception_with_frame_info(*exc),
-                "exception_affected_frame_ids" : exc[1]._affected_frame_ids_,
+                "id" : id(exc[1]),
+                "msg" : str(exc[1]),
+                "type_name" : exc[0].__name__,
+                "lines_with_frame_info" : format_exception_with_frame_info(*exc),
+                "affected_frame_ids" : exc[1]._affected_frame_ids_,
             }
 
     def _get_frame_source_info(self, frame):
@@ -1079,7 +1084,7 @@ class SimpleTracer(Tracer):
             return None
         
         if event == "call": 
-            self._fresh_exception = None # some code is running, therefore exception is not fresh anymore
+            self._fresh_exception = None 
             # can we skip this frame?
             if (self._current_command.name == "step_over"
                 and not self._current_command.breakpoints):
@@ -1088,6 +1093,7 @@ class SimpleTracer(Tracer):
                 self._alive_frame_ids.add(id(frame))
         
         elif event == "return":
+            self._fresh_exception = None 
             self._alive_frame_ids.remove(id(frame)) 
           
         elif event == "exception":
@@ -1099,13 +1105,16 @@ class SimpleTracer(Tracer):
                 self._current_command = self._fetch_next_debugger_command()
             
         elif event == "line":
-            self._fresh_exception = None # some code is running, therefore exception is not propagating anymore
+            self._fresh_exception = None 
             
             handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
             if handler(frame, self._current_command):
                 self._report_current_state(frame, event)
                 self._current_command = self._fetch_next_debugger_command()
-
+        
+        else:
+            self._fresh_exception = None
+            
         return self._trace
     
     def _report_current_state(self, frame, event):
@@ -1115,7 +1124,7 @@ class SimpleTracer(Tracer):
                                stack=stack,
                                is_newest=True,
                                stream_symbol_counts=None,
-                               **self._export_exception_info()
+                               exception_info=self._export_exception_info()
                                )
         
         self._vm.send_message(msg)
@@ -1312,6 +1321,8 @@ class FancyTracer(Tracer):
             self._handle_progress_event(frame, pseudo_event, pseudo_args)
 
         elif event == "return":
+            self._fresh_exception = None
+             
             if code_name not in self.marker_function_names:
                 self._custom_stack.pop()
                 if len(self._custom_stack) == 0:
@@ -1322,7 +1333,7 @@ class FancyTracer(Tracer):
             else:
                 pass
 
-        elif event == "line":
+        else:
             self._fresh_exception = None
 
         return self._trace
@@ -1342,7 +1353,14 @@ class FancyTracer(Tracer):
         custom_frame.last_event = event
         custom_frame.last_event_focus = focus
         custom_frame.last_event_args = args
-
+        
+        if self._saved_states:
+            prev_state = self._saved_states[-1]
+            prev_state_frame = prev_state["stack"][-1]
+        else:
+            prev_state = None
+            prev_state_frame = None
+        
         # store information about current statement / expression
         if "statement" in event:
             custom_frame.current_statement = focus
@@ -1354,41 +1372,67 @@ class FancyTracer(Tracer):
                 custom_frame.current_root_expression = None
                 custom_frame.current_evaluations = []
         else:
+            assert "expression" in event
+            assert prev_state_frame is not None
+            
             # see whether current_root_expression needs to be updated
-            assert len(self._saved_states) > 0
-            prev_msg_frame = self._saved_states[-1]["stack"][-1]
-            prev_event = prev_msg_frame.last_event
-            prev_root_expression = prev_msg_frame.current_root_expression
-
+            prev_root_expression = prev_state_frame.current_root_expression
             if (event == "before_expression"
-                and (id(frame) != prev_msg_frame.id
-                     or "statement" in prev_event
+                and (id(frame) != prev_state_frame.id
+                     or "statement" in prev_state_frame.last_event
                      or focus.not_smaller_eq_in(prev_root_expression))):
                 custom_frame.current_root_expression = focus
                 custom_frame.current_evaluations = []
 
-        if (event == "after_expression" 
-            and "value" in args): # value is missing in case of exception
-            custom_frame.current_evaluations.append((focus, self._vm.export_value(args["value"])))
+            if event == "after_expression" and "value" in args: 
+                # value is missing in case of exception
+                custom_frame.current_evaluations.append((focus, self._vm.export_value(args["value"])))
 
         # Save the snapshot
-        # last message is no longer newest
-        if len(self._saved_states) > 0:
+        if self._saved_states:
+            # last state is no longer newest
             self._saved_states[-1]["is_newest"] = False
 
-        # Count the symbols that have been sent by each stream by now.
-        symbols_by_streams = {
-            "stdin" : sys.stdin._processed_symbol_count,
-            "stdout": sys.stdout._processed_symbol_count,
-            "stderr": sys.stderr._processed_symbol_count
-        }
-
+        
+        # check if we can share something with previous state
+        if (False
+            and prev_state is not None 
+            and prev_state_frame.id == id(frame)
+            and prev_state["exception_value"] is self._get_current_exception()[1]
+            and ("pure" in args["node_tags"] or "before" in event)):
+            
+            symbols_by_streams = self._saved_states[-1]["symbols_by_streams"]
+            exception_info = prev_state["exception_info"]
+            
+            # share the stack ...
+            stack = prev_state["stack"]
+            # ... but override certain things
+            active_frame_overrides = {
+                "last_event" : custom_frame.last_event,
+                "last_event_focus" : custom_frame.last_event_focus,
+                "current_root_expression" : custom_frame.current_root_expression,
+                "current_evaluations" : custom_frame.current_evaluations.copy(),
+                "current_statement" : custom_frame.current_statement,
+            }
+        else:
+            # make full export
+            stack = self._export_stack()
+            exception_info = self._export_exception_info()
+            symbols_by_streams = {
+                "stdin" : sys.stdin._processed_symbol_count,
+                "stdout": sys.stdout._processed_symbol_count,
+                "stderr": sys.stderr._processed_symbol_count
+            }
+            active_frame_overrides = {}
+            
         msg = {
-            "stack" : self._export_stack(),
+            "stack" : stack,
+            "active_frame_overrides" : active_frame_overrides, 
             "is_newest" : True,
             "in_client_log" : False,
             "stream_symbol_counts" : symbols_by_streams,
-            **self._export_exception_info(),
+            "exception_value" : self._get_current_exception()[1],  
+            "exception_info" : exception_info,
         }
         
         self._saved_states.append(msg)
