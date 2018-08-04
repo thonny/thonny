@@ -343,8 +343,13 @@ class FrameVisualizer:
         self._expression_box.update_expression(msg, frame_info)
         
         if frame_info["id"] in msg["exception_affected_frame_ids"]:
-            last_line = msg["exception_lines_with_frame_info"][-1][0]
-            self.show_note(last_line, focus=frame_info.last_event_focus)
+            self._show_exception(msg["exception_lines_with_frame_info"], frame_info)
+    
+    def _show_exception(self, lines, frame_info):
+            last_line_text = lines[-1][0]
+            self.show_note(last_line_text.strip() + " ",
+                           ("...", lambda _: get_workbench().show_view("ExceptionView")), 
+                           focus=frame_info.last_event_focus)
             
 
     def _find_this_and_next_frame(self, stack):

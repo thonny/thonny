@@ -931,7 +931,7 @@ def create_tooltip(widget, text, **kw):
 
 class NoteBox(tk.Toplevel):
     def __init__(self, master=None, 
-                 max_default_width=30,
+                 max_default_width=300,
                  **kw):
         super().__init__(master=master,
                          highlightthickness=0, 
@@ -954,6 +954,8 @@ class NoteBox(tk.Toplevel):
         self._current_chars = ""
         self._click_bindings = {}
         
+        self.padx = 5
+        self.pady = 5
         self.text = TweakableText(self,
                             background="#ffffe0",
                             borderwidth=1,
@@ -962,8 +964,8 @@ class NoteBox(tk.Toplevel):
                             read_only=True,
                             font="TkDefaultFont",
                             highlightthickness=0,
-                            padx=5,
-                            pady=5,
+                            padx=self.padx,
+                            pady=self.pady,
                             wrap="word")
         
         self.text.grid(row=0, column=0, sticky="nsew")
@@ -994,16 +996,16 @@ class NoteBox(tk.Toplevel):
                 self.text.direct_insert("1.0", item)
                 self._current_chars = item
             else:
-                assert isinstance(item, list)
-                for chars, *props in item:
-                    if len(props) > 0 and callable(props[-1]):
-                        tags = tuple(props[:-1])
-                        click_handler = props[-1]
-                    else:
-                        tags = tuple(props)
-                        click_handler = None
-                    
-                    self.append_text(chars, tags, click_handler)
+                assert isinstance(item, (list, tuple))
+                chars, *props = item
+                if len(props) > 0 and callable(props[-1]):
+                    tags = tuple(props[:-1])
+                    click_handler = props[-1]
+                else:
+                    tags = tuple(props)
+                    click_handler = None
+                
+                self.append_text(chars, tags, click_handler)
                     
             self.text.see("1.0")
     
@@ -1051,20 +1053,35 @@ class NoteBox(tk.Toplevel):
             raise TypeError("Unsupported focus")
         
         # Compute dimensions of the note
+        font = self.text["font"]
+        if isinstance(font, str):
+            font = tk.font.nametofont(font)
+            
         lines = self._current_chars.splitlines()
-        width = 0
+        max_line_width = 0
         for line in lines:
-            width = max(width, len(line))
+            
+            max_line_width = max(max_line_width, 
+                                  font.measure(line))
         
-        width = min(width, self._max_default_width)
-        height = len(lines)
+        width = min(max_line_width, self._max_default_width) + self.padx*2 + 2
+        self.wm_geometry("%dx%d+%d+%d" % (
+            width, 100,
+            focus_x, focus_y + focus_height
+        ))
+        
+        self.update_idletasks()
+        line_count = int(float(self.text.index("end")))
+        line_height = font.metrics()["linespace"]
+        
+        self.wm_geometry("%dx%d+%d+%d" % (
+            width, line_count * line_height,
+            focus_x, focus_y + focus_height
+        ))
         
         # TODO: detect the situation when note doesn't fit under
         # the focus box and should be placed above
             
-        self.text.configure(width=width, height=height)        
-        self.wm_geometry("+%d+%d" % (focus_x,
-                                     focus_y + focus_height))
         
         self.deiconify()
     
