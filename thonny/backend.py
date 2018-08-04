@@ -1357,7 +1357,7 @@ class FancyTracer(Tracer):
         
         if self._saved_states:
             prev_state = self._saved_states[-1]
-            prev_state_frame = prev_state["stack"][-1]
+            prev_state_frame = self._create_actual_active_frame(prev_state)
         else:
             prev_state = None
             prev_state_frame = None
