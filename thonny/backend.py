@@ -414,7 +414,7 @@ class VM:
             else:
                 atts["code_name"] = frame.f_code.co_name
                 atts["module_name"] = frame.f_globals["__name__"]
-                atts["locals"] = self.export_variables(frame.f_locals)
+                atts["locals"] = None if frame.f_locals is frame.f_globals else self.export_variables(frame.f_locals)
                 atts["globals"] = self.export_variables(frame.f_globals)
                 atts["freevars"] = frame.f_code.co_freevars
                 atts["location"] = location
@@ -1338,6 +1338,7 @@ class FancyTracer(Tracer):
         
         if self._saved_states:
             prev_state = self._saved_states[-1]
+            #prev_state_frame = prev_state["stack"][-1]
             prev_state_frame = self._create_actual_active_frame(prev_state)
         else:
             prev_state = None
@@ -1558,7 +1559,7 @@ class FancyTracer(Tracer):
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
             # TODO: expression inside statement expression has same range as its parent
-            or frame.id == cmd.frame_id and frame.last_focus.contains_smaller(cmd.focus)
+            or frame.id == cmd.frame_id and frame.last_event_focus.contains_smaller(cmd.focus)
             # or we were there in prev state
             or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
         )
@@ -1569,12 +1570,12 @@ class FancyTracer(Tracer):
     def _at_a_breakpoint(self, frame, cmd):
         return (frame.last_event in ["before_statement", "before_expression"]
                 and frame.filename in cmd.breakpoints
-                and frame.last_focus.lineno in cmd.breakpoints[frame.filename]
+                and frame.last_event_focus.lineno in cmd.breakpoints[frame.filename]
                 # consider only first event on a line
                 # (but take into account that same line may be reentered)
                 and (cmd.focus is None 
-                     or (cmd.focus.lineno != frame.last_focus.lineno)
-                     or (cmd.focus == frame.last_focus and cmd.state == frame.last_event) 
+                     or (cmd.focus.lineno != frame.last_event_focus.lineno)
+                     or (cmd.focus == frame.last_event_focus and cmd.state == frame.last_event) 
                      or frame.id != cmd.frame_id
                      )
                 )
@@ -1588,21 +1589,30 @@ class FancyTracer(Tracer):
 
     def _export_stack(self):
         result = []
+        
+        exported_globals_per_module = {}
+        def export_globals(module_name, frame):
+            if module_name not in exported_globals_per_module:
+                exported_globals_per_module[module_name] = (
+                    self._vm.export_variables(frame.f_globals)
+                )
+            return exported_globals_per_module[module_name]
 
         for custom_frame in self._custom_stack:
             
             system_frame = custom_frame.system_frame
             source, firstlineno = self._get_frame_source_info(system_frame)
+            module_name = system_frame.f_globals["__name__"]
+            code_name=system_frame.f_code.co_name
 
             result.append(FrameInfo(
                 id=id(system_frame),
                 filename=system_frame.f_code.co_filename,
-                module_name=system_frame.f_globals["__name__"],
-                code_name=system_frame.f_code.co_name,
-                locals=self._vm.export_variables(system_frame.f_locals),
-                globals=self._vm.export_variables(system_frame.f_globals),
+                module_name=module_name,
+                code_name=code_name,
+                locals=None if system_frame.f_locals is system_frame.f_globals else self._vm.export_variables(system_frame.f_locals),
+                globals=export_globals(module_name, system_frame),
                 freevars=system_frame.f_code.co_freevars,
-                cellvars=system_frame.f_code.co_cellvars,
                 source=source,
                 firstlineno=firstlineno,
                 last_event=custom_frame.last_event,
