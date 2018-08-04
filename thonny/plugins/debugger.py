@@ -510,7 +510,7 @@ class ExpressionBox(tk.Text):
         
         if frame_info.current_root_expression is not None:
             self._load_expression(frame_info.filename, frame_info.current_root_expression)
-            
+            print(frame_info.current_evaluations)
             for subrange, value in frame_info.current_evaluations:
                 self._replace(subrange, value)
             if "expression" in event:

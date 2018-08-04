@@ -29,7 +29,7 @@ import importlib
 import tokenize
 import subprocess
 from importlib.machinery import PathFinder, SourceFileLoader
-from copy import deepcopy
+import copy
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -1403,7 +1403,6 @@ class FancyTracer(Tracer):
             
             stream_symbol_counts = self._saved_states[-1]["stream_symbol_counts"]
             exception_info = prev_state["exception_info"]
-            
             # share the stack ...
             stack = prev_state["stack"]
             # ... but override certain things
@@ -1437,7 +1436,7 @@ class FancyTracer(Tracer):
         
         self._saved_states.append(msg)
         
-
+    
     def _respond_to_commands(self):
         """Tries to respond to client commands with states collected so far.
         Returns if these states don't suffice anymore and Python needs
@@ -1446,19 +1445,16 @@ class FancyTracer(Tracer):
         while self._current_state_index < len(self._saved_states):
             state = self._saved_states[self._current_state_index]
             
-            # Get current state's most recent frame
-            frame = state["stack"][-1]
+            # Get current state's most recent frame (together with overrides
+            frame = self._create_actual_active_frame(state)
 
             # Has the command completed?
             tester = getattr(self, "_cmd_" + self._current_command.name + "_completed")
-            cmd_complete = tester(frame, 
-                                  frame.last_event, 
-                                  frame.last_event_focus,
-                                  self._current_command)
+            cmd_complete = tester(frame, self._current_command)
 
             if cmd_complete:
                 state["in_client_log"] = True
-                self._report_current_state(state)
+                self._report_state(state)
                 self._current_command = self._fetch_next_debugger_command()
 
             if self._current_command.name == "step_back":
@@ -1475,16 +1471,17 @@ class FancyTracer(Tracer):
                 self._current_state_index += 1
         
 
-
-    def _report_current_state(self, state):
+    def _create_actual_active_frame(self, state):
+        frame = copy.copy(state["stack"][-1])
+        overrides = state["active_frame_overrides"]
+        for key in overrides:
+            frame[key] = overrides[key]
+        return frame
+    
+    def _report_state(self, state):
         # need to make a copy for applying overrides without modifying original 
-        state = deepcopy(state)
-        
-        active_frame = state["stack"][-1]
-        active_frame_overrides = state["active_frame_overrides"]
-        for key in active_frame_overrides:
-            active_frame[key] = active_frame_overrides[key]
-         
+        state = copy.deepcopy(state)
+        state["stack"][-1] = self._create_actual_active_frame(state)
         del state["exception_value"]
         del state["active_frame_overrides"]
         
@@ -1518,29 +1515,29 @@ class FancyTracer(Tracer):
                 self._handle_progress_event(frame, again_event, again_args)
 
 
-    def _cmd_step_over_completed(self, frame, event, focus, cmd):
+    def _cmd_step_over_completed(self, frame, cmd):
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
         """
         
-        if self._at_a_breakpoint(frame, event, focus, cmd):
+        if self._at_a_breakpoint(frame, cmd):
             return True
 
         # Make sure the correct frame_id is selected
         if frame.id == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
-                if focus.not_smaller_eq_in(cmd.focus):
+                if frame.last_event_focus.not_smaller_eq_in(cmd.focus):
                     # Focus has changed, command has completed
                     return True
                 else:
                     # Keep running
                     return False
             elif "after_" in cmd.state:
-                if focus != cmd.focus or "before_" in event \
-                        or "_expression" in cmd.state and "_statement" in event \
-                        or "_statement" in cmd.state and "_expression" in event:
+                if frame.last_event_focus != cmd.focus or "before_" in frame.last_event \
+                        or "_expression" in cmd.state and "_statement" in frame.last_event \
+                        or "_statement" in cmd.state and "_expression" in frame.last_event:
                     # The state has changed, command has completed
                     return True
                 else:
@@ -1556,21 +1553,21 @@ class FancyTracer(Tracer):
                 # We're done
                 return True
 
-    def _cmd_step_into_completed(self, frame, event, focus, cmd):
-        return event != "after_statement"
+    def _cmd_step_into_completed(self, frame, cmd):
+        return frame.last_event != "after_statement"
 
-    def _cmd_step_back_completed(self, frame, event, focus, cmd):
+    def _cmd_step_back_completed(self, frame, cmd):
         # Check if the selected message has been previously sent to front-end
         return self._saved_states[self._current_state_index]["in_client_log"]
 
-    def _cmd_step_out_completed(self, frame, event, focus, cmd):
+    def _cmd_step_out_completed(self, frame, cmd):
         if self._current_state_index == 0:
             return False
 
-        if event == "after_statement":
+        if frame.last_event == "after_statement":
             return False
 
-        if self._at_a_breakpoint(frame, event, focus, cmd):
+        if self._at_a_breakpoint(frame, cmd):
             return True
         
         prev_state_frame = self._saved_states[self._current_state_index-1]["stack"][-1]
@@ -1580,23 +1577,23 @@ class FancyTracer(Tracer):
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
             # TODO: expression inside statement expression has same range as its parent
-            or frame.id == cmd.frame_id and focus.contains_smaller(cmd.focus)
+            or frame.id == cmd.frame_id and frame.last_focus.contains_smaller(cmd.focus)
             # or we were there in prev state
             or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
         )
 
-    def _cmd_resume_completed(self, frame, event, focus, cmd):
-        return self._at_a_breakpoint(frame, event, focus, cmd)
+    def _cmd_resume_completed(self, frame, cmd):
+        return self._at_a_breakpoint(frame, cmd)
     
-    def _at_a_breakpoint(self, frame, event, focus, cmd):
-        return (event in ["before_statement", "before_expression"]
+    def _at_a_breakpoint(self, frame, cmd):
+        return (frame.last_event in ["before_statement", "before_expression"]
                 and frame.filename in cmd.breakpoints
-                and focus.lineno in cmd.breakpoints[frame.filename]
+                and frame.last_focus.lineno in cmd.breakpoints[frame.filename]
                 # consider only first event on a line
                 # (but take into account that same line may be reentered)
                 and (cmd.focus is None 
-                     or (cmd.focus.lineno != focus.lineno)
-                     or (cmd.focus == focus and cmd.state == event) 
+                     or (cmd.focus.lineno != frame.last_focus.lineno)
+                     or (cmd.focus == frame.last_focus and cmd.state == frame.last_event) 
                      or frame.id != cmd.frame_id
                      )
                 )
@@ -1717,20 +1714,68 @@ class FancyTracer(Tracer):
 
             if isinstance(node, ast.Str):
                 add_tag(node, "StringLiteral")
+                add_tag(node, "realpure")
 
-            if isinstance(node, ast.Num):
+            elif isinstance(node, ast.Num):
                 add_tag(node, "NumberLiteral")
-
-            if isinstance(node, ast.ListComp):
+                add_tag(node, "realpure")
+            
+            elif isinstance(node, ast.List):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Tuple):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Set):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Dict):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Name):
+                add_tag(node, "excpure")
+            
+            elif isinstance(node, ast.NameConstant):
+                add_tag(node, "realpure")
+            
+            elif isinstance(node, ast.Expr):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.If):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Return):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.While):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Continue):
+                add_tag(node, "realpure")
+            
+            elif isinstance(node, ast.Break):
+                add_tag(node, "realpure")
+            
+            elif isinstance(node, ast.Pass):
+                add_tag(node, "realpure")
+            
+            elif isinstance(node, ast.For):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.Try):
+                add_tag(node, "outerpure")
+            
+            elif isinstance(node, ast.ListComp):
                 add_tag(node.elt, "ListComp.elt")
 
-            if isinstance(node, ast.SetComp):
+            elif isinstance(node, ast.SetComp):
                 add_tag(node.elt, "SetComp.elt")
 
-            if isinstance(node, ast.DictComp):
+            elif isinstance(node, ast.DictComp):
                 add_tag(node.key, "DictComp.key")
                 add_tag(node.value, "DictComp.value")
 
+            
             if isinstance(node, ast.comprehension):
                 for expr in node.ifs:
                     add_tag(expr, "comprehension.if")
