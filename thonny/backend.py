@@ -29,6 +29,7 @@ import importlib
 import tokenize
 import subprocess
 from importlib.machinery import PathFinder, SourceFileLoader
+from copy import deepcopy
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -1345,7 +1346,7 @@ class FancyTracer(Tracer):
         
     def _save_current_state(self, frame, event, args):
         """
-        Updates custom stack and stores the state as message
+        Updates custom stack and stores the state
         """
         focus = TextRange(*args["text_range"])
         
@@ -1395,13 +1396,12 @@ class FancyTracer(Tracer):
 
         
         # check if we can share something with previous state
-        if (False
-            and prev_state is not None 
+        if (prev_state is not None 
             and prev_state_frame.id == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
             and ("pure" in args["node_tags"] or "before" in event)):
             
-            symbols_by_streams = self._saved_states[-1]["symbols_by_streams"]
+            stream_symbol_counts = self._saved_states[-1]["stream_symbol_counts"]
             exception_info = prev_state["exception_info"]
             
             # share the stack ...
@@ -1418,7 +1418,7 @@ class FancyTracer(Tracer):
             # make full export
             stack = self._export_stack()
             exception_info = self._export_exception_info()
-            symbols_by_streams = {
+            stream_symbol_counts = {
                 "stdin" : sys.stdin._processed_symbol_count,
                 "stdout": sys.stdout._processed_symbol_count,
                 "stderr": sys.stderr._processed_symbol_count
@@ -1430,7 +1430,7 @@ class FancyTracer(Tracer):
             "active_frame_overrides" : active_frame_overrides, 
             "is_newest" : True,
             "in_client_log" : False,
-            "stream_symbol_counts" : symbols_by_streams,
+            "stream_symbol_counts" : stream_symbol_counts,
             "exception_value" : self._get_current_exception()[1],  
             "exception_info" : exception_info,
         }
@@ -1477,7 +1477,17 @@ class FancyTracer(Tracer):
 
 
     def _report_current_state(self, state):
-        # TODO: turn state into a message
+        # need to make a copy for applying overrides without modifying original 
+        state = deepcopy(state)
+        
+        active_frame = state["stack"][-1]
+        active_frame_overrides = state["active_frame_overrides"]
+        for key in active_frame_overrides:
+            active_frame[key] = active_frame_overrides[key]
+         
+        del state["exception_value"]
+        del state["active_frame_overrides"]
+        
         self._vm.send_message(DebuggerResponse(**state))
 
 
@@ -1518,12 +1528,7 @@ class FancyTracer(Tracer):
             return True
 
         # Make sure the correct frame_id is selected
-        if type(frame) == FrameInfo:
-            frame_id = frame.id
-        else:
-            frame_id = id(frame)
-
-        if frame_id == cmd.frame_id:
+        if frame.id == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
                 if focus.not_smaller_eq_in(cmd.focus):
@@ -1570,17 +1575,12 @@ class FancyTracer(Tracer):
         
         prev_state_frame = self._saved_states[self._current_state_index-1]["stack"][-1]
 
-        """Complete current frame"""
-        if type(frame) == FrameInfo:
-            frame_id = frame.id
-        else:
-            frame_id = id(frame)
         return (
             # the frame has completed
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
             # TODO: expression inside statement expression has same range as its parent
-            or frame_id == cmd.frame_id and focus.contains_smaller(cmd.focus)
+            or frame.id == cmd.frame_id and focus.contains_smaller(cmd.focus)
             # or we were there in prev state
             or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
         )
@@ -1589,11 +1589,6 @@ class FancyTracer(Tracer):
         return self._at_a_breakpoint(frame, event, focus, cmd)
     
     def _at_a_breakpoint(self, frame, event, focus, cmd):
-        if type(frame) == FrameInfo:
-            frame_id = frame.id
-        else:
-            frame_id = id(frame)
-        
         return (event in ["before_statement", "before_expression"]
                 and frame.filename in cmd.breakpoints
                 and focus.lineno in cmd.breakpoints[frame.filename]
@@ -1602,7 +1597,7 @@ class FancyTracer(Tracer):
                 and (cmd.focus is None 
                      or (cmd.focus.lineno != focus.lineno)
                      or (cmd.focus == focus and cmd.state == event) 
-                     or frame_id != cmd.frame_id
+                     or frame.id != cmd.frame_id
                      )
                 )
 
