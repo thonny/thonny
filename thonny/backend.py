@@ -50,7 +50,6 @@ class VM:
         
         self._ini = None
         self._command_handlers = {}
-        self._value_tweakers = []
         self._object_info_tweakers = []
         self._import_handlers = {}
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
@@ -134,10 +133,6 @@ class VM:
         or a BackendResponse
         """
         self._command_handlers[command_name] = handler
-
-    def add_value_tweaker(self, tweaker):
-        """Tweaker should be 2-argument function taking value and export record"""
-        self._value_tweakers.append(tweaker)
 
     def add_object_info_tweaker(self, tweaker):
         """Tweaker should be 2-argument function taking value and export record"""
@@ -739,29 +734,15 @@ class VM:
         self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
 
-    def export_value(self, value, skip_None=False):
-        if value is None and skip_None:
-            return None
-
+    def export_value(self, value):
         self._heap[id(value)] = value
-        try:
-            type_name = value.__class__.__name__
-        except Exception:
-            type_name = type(value).__name__
-
-        result = {'id' : id(value),
-                  'repr' : repr(value),
-                  'type_name'  : type_name}
-
-        for tweaker in self._value_tweakers:
-            tweaker(value, result)
-
-        return result
+        return {'id' : id(value), 'repr' : repr(value)}
 
     def export_variables(self, variables):
         result = {}
         for name in variables:
-            if not name.startswith("_thonny_hidden_"):
+            if (not name.startswith("_thonny_hidden_")
+                and not name.startswith("__")):
                 result[name] = self.export_value(variables[name])
 
         return result
