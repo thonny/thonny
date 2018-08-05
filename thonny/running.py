@@ -279,7 +279,9 @@ class Runner:
         http://www.thecodingforums.com/threads/more-on-tk-event_generate-and-threads.359615/
         """
         self._polling_after_id = None
-        self._pull_vm_messages()            
+        if self._pull_vm_messages() is False:
+            return
+                    
         self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
     
     def _pull_vm_messages(self):
@@ -292,11 +294,11 @@ class Runner:
                 
             except BackendTerminatedError as exc:
                 self._report_backend_crash(exc)
-                return
+                return False
             
             if msg.get("SystemExit", False):
                 self.restart_backend(True)
-                return
+                return False
             
             
             # change state
