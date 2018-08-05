@@ -1954,6 +1954,15 @@ class FancyTracer(Tracer):
     
     def _debug(self, *args):
         print("TRACER:", *args, file=self._vm._original_stderr)
+    
+    def _execute_prepared_user_code(self, statements, expression, global_vars):
+        try:
+            return Tracer._execute_prepared_user_code(self, statements, expression, global_vars)
+        finally:
+            from thonny.misc_utils import _win_get_used_memory
+            print("Memory:", _win_get_used_memory() / 1024 / 1024)
+            print("States:", len(self._saved_states))
+
 
 class CustomStackFrame:
     def __init__(self, frame, last_event, focus=None):
