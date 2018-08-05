@@ -98,7 +98,7 @@ class Debugger:
             
     def get_frame_by_id(self, frame_id):
         for frame_info in self._last_progress_message.stack:
-            if frame_info["id"] == frame_id:
+            if frame_info.id == frame_id:
                 return frame_info
         
         raise ValueError("Could not find frame %d" % frame_id) 
@@ -127,7 +127,7 @@ class SingleWindowDebugger(Debugger):
         
     def handle_debugger_progress(self, msg):
         self._last_progress_message = msg
-        self.bring_out_frame(self._last_progress_message.stack[-1]["id"],
+        self.bring_out_frame(self._last_progress_message.stack[-1].id,
                              force=True)
     
         if get_workbench().get_option("debugger.automatic_stack_view"):
@@ -152,7 +152,7 @@ class SingleWindowDebugger(Debugger):
         frame_info = self.get_frame_by_id(frame_id)
         
         if (self._last_frame_visualizer is not None
-            and self._last_frame_visualizer._frame_id != frame_info["id"]):
+            and self._last_frame_visualizer._frame_id != frame_info.id):
             self._last_frame_visualizer.close()
             self._last_frame_visualizer = None
         
@@ -163,14 +163,14 @@ class SingleWindowDebugger(Debugger):
         
         # show variables
         var_view = get_workbench().get_view("VariablesView")
-        if frame_info["code_name"] == "<module>":
-            var_view.show_globals(frame_info["globals"], frame_info["module_name"])
+        if frame_info.code_name == "<module>":
+            var_view.show_globals(frame_info.globals, frame_info.module_name)
         else:
             var_view.show_frame_variables(
-                frame_info["locals"],
-                frame_info["globals"],
-                frame_info["freevars"],
-                frame_info["module_name"] if frame_info["code_name"] == "<module>" else frame_info["code_name"]
+                frame_info.locals,
+                frame_info.globals,
+                frame_info.freevars,
+                frame_info.module_name if frame_info.code_name == "<module>" else frame_info.code_name
             )
 
 class StackedWindowsDebugger(Debugger):
@@ -263,7 +263,7 @@ class FrameVisualizer:
         self._next_frame_visualizer = None
         self._text_old_read_only = self._text.is_read_only()
         self._text.set_read_only(True)
-        self._line_debug = frame_info["current_statement"] is None
+        self._line_debug = frame_info.current_statement is None
     
         self._reconfigure_tags()
         
@@ -322,7 +322,7 @@ class FrameVisualizer:
         self._remove_focus_tags()
         
         if frame_info.last_event == "line":
-            if frame_info["id"] in msg["exception_info"]["affected_frame_ids"]:
+            if frame_info.id in msg["exception_info"]["affected_frame_ids"]:
                 self._tag_range(frame_info.last_event_focus, "exception_focus")
             else:
                 self._tag_range(frame_info.last_event_focus, "active_focus")
@@ -342,7 +342,7 @@ class FrameVisualizer:
             
         self._expression_box.update_expression(msg, frame_info)
         
-        if frame_info["id"] in msg["exception_info"]["affected_frame_ids"]:
+        if frame_info.id in msg["exception_info"]["affected_frame_ids"]:
             self._show_exception(msg["exception_info"]["lines_with_frame_info"], frame_info)
     
     def _show_exception(self, lines, frame_info):
@@ -515,7 +515,7 @@ class ExpressionBox(tk.Text):
             if "expression" in event:
                 # Event may be also after_statement_again
                 self._highlight_range(focus, event, 
-                                      frame_info["id"] in msg["exception_info"]["affected_frame_ids"])
+                                      frame_info.id in msg["exception_info"]["affected_frame_ids"])
                 
             self._update_position(frame_info.current_root_expression)
             self._update_size()
@@ -730,8 +730,8 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
     def bring_out_this_frame(self):
         self.focus_set() # no effect when clicking on stack view
         var_view = get_workbench().get_view("VariablesView")
-        var_view.show_globals(self._frame_info["globals"],
-                              self._frame_info["module_name"])
+        var_view.show_globals(self._frame_info.globals,
+                              self._frame_info.module_name)
     
     def _on_focus(self, event):
         # TODO: bring out main frame when main window gets focus

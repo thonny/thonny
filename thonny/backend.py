@@ -20,7 +20,8 @@ from thonny import ast_utils
 from thonny.common import TextRange, parse_message, serialize_message, UserError, \
     DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
     ToplevelResponse, InlineResponse, DebuggerResponse,\
-    BackendEvent, path_startswith, ValueInfo
+    BackendEvent, path_startswith, ValueInfo, \
+    range_contains_smaller_or_equal
 
 import signal
 import warnings
@@ -1174,8 +1175,8 @@ class SimpleTracer(Tracer):
                 last_event="line",
                 last_event_focus=TextRange(system_frame.f_lineno, 0,
                                            system_frame.f_lineno+1, 0),
-                current_evaluations=None,
                 current_statement=None,
+                current_evaluations=None,
                 current_root_expression=None,
             ))
             
@@ -1369,7 +1370,7 @@ class FancyTracer(Tracer):
             if (event == "before_expression"
                 and (id(frame) != prev_state_frame.id
                      or "statement" in prev_state_frame.last_event
-                     or focus.not_smaller_eq_in(prev_root_expression))):
+                     or not range_contains_smaller_or_equal(focus, prev_root_expression))):
                 custom_frame.current_root_expression = focus
                 custom_frame.current_evaluations = []
 
@@ -1460,11 +1461,7 @@ class FancyTracer(Tracer):
         
 
     def _create_actual_active_frame(self, state):
-        frame = copy.copy(state["stack"][-1])
-        overrides = state["active_frame_overrides"]
-        for key in overrides:
-            frame[key] = overrides[key]
-        return frame
+        return state["stack"][-1]._replace(**state["active_frame_overrides"])
     
     def _report_state(self, state):
         # need to make a copy for applying overrides without modifying original 
@@ -1516,7 +1513,7 @@ class FancyTracer(Tracer):
         if frame.id == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
-                if frame.last_event_focus.not_smaller_eq_in(cmd.focus):
+                if not range_contains_smaller_or_equal(frame.last_event_focus, cmd.focus):
                     # Focus has changed, command has completed
                     return True
                 else:

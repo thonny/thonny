@@ -6,7 +6,7 @@ import tkinter as tk
 
 from thonny import ast_utils
 from thonny import ui_utils
-from thonny.common import TextRange
+from thonny.common import TextRange, range_contains_smaller
 from thonny import get_workbench
 
 class AstView(ui_utils.TreeFrame):
@@ -142,8 +142,10 @@ def _find_closest_containing_node(tree, text_range):
 
     # no suitable child was found
     if (hasattr(tree, "lineno")
-        and TextRange(tree.lineno, tree.col_offset, tree.end_lineno, tree.end_col_offset)
-            .contains_smaller_eq(text_range)):
+        and range_contains_smaller( 
+            TextRange(tree.lineno, tree.col_offset, tree.end_lineno, tree.end_col_offset),
+            text_range
+        )):
         return tree
     # nope
     else:

@@ -4,11 +4,19 @@
 Classes used both by front-end and back-end
 """
 import os.path
-from typing import Optional, List
+from typing import Optional, List  
 from collections import namedtuple
 
 ValueInfo = namedtuple('ValueInfo', ['id', 'repr'])
+FrameInfo = namedtuple("FrameInfo", ["id", "filename", "module_name", "code_name",
+                                     "source", "firstlineno",
+                                     "locals", "globals", "freevars", 
+                                     "last_event", "last_event_focus",
+                                     "current_statement", 
+                                     "current_root_expression", "current_evaluations"]) 
 
+TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_col_offset"])
+    
 class Record:
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -72,70 +80,19 @@ class Record:
         return hash(repr(self))
 
 
-class TextRange(Record):
-    def __init__(self, lineno: int, col_offset: int, end_lineno: int, end_col_offset: int) -> None:
-        super().__init__()
-        self.lineno = lineno
-        self.col_offset = col_offset
-        self.end_lineno = end_lineno
-        self.end_col_offset = end_col_offset
+def range_contains_smaller(one: TextRange, other: TextRange) -> bool:
+    this_start = (one.lineno, one.col_offset)
+    this_end = (one.end_lineno, one.end_col_offset)
+    other_start = (other.lineno, other.col_offset)
+    other_end = (other.end_lineno, other.end_col_offset)
     
-    def contains_smaller(self, other: "TextRange") -> bool:
-        this_start = (self.lineno, self.col_offset)
-        this_end = (self.end_lineno, self.end_col_offset)
-        other_start = (other.lineno, other.col_offset)
-        other_end = (other.end_lineno, other.end_col_offset)
-        
-        return (this_start < other_start and this_end > other_end
-                or this_start == other_start and this_end > other_end
-                or this_start < other_start and this_end == other_end)
-    
-    def contains_smaller_eq(self, other: "TextRange") -> bool:
-        return self.contains_smaller(other) or self == other
-    
-    def not_smaller_in(self, other: "TextRange") -> bool:
-        return not other.contains_smaller(self)
+    return (this_start < other_start and this_end > other_end
+            or this_start == other_start and this_end > other_end
+            or this_start < other_start and this_end == other_end)
 
-    def is_smaller_in(self, other: "TextRange") -> bool:
-        return other.contains_smaller(self)
+def range_contains_smaller_or_equal(one: TextRange, other: TextRange) -> bool:
+    return range_contains_smaller(one, other) or one == other
     
-    def not_smaller_eq_in(self, other: "TextRange") -> bool:
-        return not other.contains_smaller_eq(self)
-
-    def is_smaller_eq_in(self, other: "TextRange") -> bool:
-        return other.contains_smaller_eq(self)
-    
-    def get_start_index(self) -> str:
-        return str(self.lineno) + "." + str(self.col_offset)
-    
-    def get_end_index(self) -> str:
-        return str(self.end_lineno) + "." + str(self.end_col_offset)
-    
-    def __str__(self) -> str:
-        return "TR(" + str(self.lineno) + "." + str(self.col_offset) + ", " \
-                     + str(self.end_lineno) + "." + str(self.end_col_offset) + ")"
-    
-    
-                 
-class FrameInfo(Record):
-    def __init__(self, 
-                 id: int,  # @ReservedAssignment
-                 code_name: str,
-                 filename: str, 
-                 focus:Optional[TextRange]=None, **kw) -> None:
-        super().__init__(**kw)
-        self.id = id
-        self.code_name = code_name
-        self.filename = filename
-        self.focus = focus
-    
-    def get_description(self) -> str:
-        return (
-            "[" + str(self.id) + "] "
-            + self.code_name + " in " + self.filename
-            + ", focus=" + str(self.focus)
-        )
-
 class InputSubmission(Record):
     """For sending data to backend's stdin"""
     def __init__(self, data: str, **kw) -> None:

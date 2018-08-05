@@ -492,27 +492,4 @@ def _get_ordered_child_nodes(node):
 
 def _tokens_text(tokens):
     return "".join([t.string for t in tokens])
-
-def _range_contains_smaller(self_lineno, self_col_offset, self_end_lineno, self_end_col_offset, 
-                      other_lineno, other_col_offset, other_end_lineno, other_end_col_offset):
-    this_start = (self_lineno, self_col_offset)
-    this_end = (self_end_lineno, self_end_col_offset)
-    other_start = (other_lineno, other_col_offset)
-    other_end = (other_end_lineno, other_end_col_offset)
-    
-    return (this_start < other_start and this_end > other_end
-            or this_start == other_start and this_end > other_end
-            or this_start < other_start and this_end == other_end)
-
-def _range_contains_smaller_eq(self_lineno, self_col_offset, self_end_lineno, self_end_col_offset, 
-                      other_lineno, other_col_offset, other_end_lineno, other_end_col_offset):
-    return (_range_eq(self_lineno, self_col_offset, self_end_lineno, self_end_col_offset, other_lineno, other_col_offset, other_end_lineno, other_end_col_offset)
-            or _range_contains_smaller(self_lineno, self_col_offset, self_end_lineno, self_end_col_offset, other_lineno, other_col_offset, other_end_lineno, other_end_col_offset))
-
-def _range_eq(self_lineno, self_col_offset, self_end_lineno, self_end_col_offset, 
-                      other_lineno, other_col_offset, other_end_lineno, other_end_col_offset):
-    return (self_lineno == other_lineno
-            and self_col_offset == other_col_offset
-            and self_end_lineno == other_end_lineno
-            and self_end_col_offset == other_end_col_offset)
             
