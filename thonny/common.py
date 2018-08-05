@@ -5,6 +5,9 @@ Classes used both by front-end and back-end
 """
 import os.path
 from typing import Optional, List
+from collections import namedtuple
+
+ValueInfo = namedtuple('ValueInfo', ['id', 'repr'])
 
 class Record:
     def __init__(self, **kw):

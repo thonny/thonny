@@ -6,6 +6,7 @@ import tkinter.font as tk_font
 from thonny.ui_utils import TreeFrame
 from thonny.misc_utils import shorten_repr
 from thonny import get_workbench, ui_utils
+from thonny.common import ValueInfo
 
 MAX_REPR_LENGTH_IN_GRID = 100
 
@@ -97,12 +98,9 @@ class VariablesFrame(MemoryFrame):
                 if not name.startswith("__"):
                     node_id = self.tree.insert("", "end", tags="item")
                     self.tree.set(node_id, "name", name)
-                    if isinstance(variables[name], dict):
-                        if "description" in variables[name]:
-                            description = variables[name]["description"]
-                        else:
-                            description = variables[name]["repr"]
-                        id_str = variables[name]["id"]
+                    if isinstance(variables[name], ValueInfo):
+                        description = variables[name].repr
+                        id_str = variables[name].id
                     else:
                         description = variables[name]
                         id_str = None

@@ -20,7 +20,7 @@ from thonny import ast_utils
 from thonny.common import TextRange, parse_message, serialize_message, UserError, \
     DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
     ToplevelResponse, InlineResponse, DebuggerResponse,\
-    BackendEvent, path_startswith
+    BackendEvent, path_startswith, ValueInfo
 
 import signal
 import warnings
@@ -736,7 +736,13 @@ class VM:
 
     def export_value(self, value):
         self._heap[id(value)] = value
-        return {'id' : id(value), 'repr' : repr(value)}
+        rep = repr(value)
+        if len(rep) > 100:
+            rep = rep[:99] + "…" 
+        
+        return ValueInfo(id(value), rep)
+        #return (id(value), rep)
+        #return {'id' : id(value), 'repr' : rep}
 
     def export_variables(self, variables):
         result = {}
@@ -1827,7 +1833,10 @@ class FancyTracer(Tracer):
                             self._insert_statement_markers(node)
                         new_list.append(node)
 
-                        if isinstance(node, _ast.stmt):
+                        if (isinstance(node, _ast.stmt)
+                            and "outerpure" not in node.tags
+                            and "realpure" not in node.tags
+                            and "excpure" not in node.tags):
                             # add after marker
                             new_list.append(self._create_statement_marker(node,
                                                                           AFTER_STATEMENT_MARKER))

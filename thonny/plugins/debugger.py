@@ -510,7 +510,6 @@ class ExpressionBox(tk.Text):
         
         if frame_info.current_root_expression is not None:
             self._load_expression(frame_info.filename, frame_info.current_root_expression)
-            print(frame_info.current_evaluations)
             for subrange, value in frame_info.current_evaluations:
                 self._replace(subrange, value)
             if "expression" in event:
@@ -557,20 +556,20 @@ class ExpressionBox(tk.Text):
         
         self.delete(start_mark, end_mark)
         
-        id_str = memory.format_object_id(value["id"])
+        id_str = memory.format_object_id(value.id)
         if get_workbench().in_heap_mode():
             value_str = id_str
         else:
-            value_str = shorten_repr(value["repr"], 100)
+            value_str = shorten_repr(value.repr, 100)
         
-        object_tag = "object_" + str(value["id"])
+        object_tag = "object_" + str(value.id)
         self.insert(start_mark, value_str, ('value', object_tag))
         if misc_utils.running_on_mac_os():
             sequence = "<Command-Button-1>"
         else:
             sequence = "<Control-Button-1>"
         self.tag_bind(object_tag, sequence,
-                      lambda _: get_workbench().event_generate("ObjectSelect", object_id=value["id"]))
+                      lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id))
         
     
     def _load_expression(self, filename, text_range):
@@ -760,10 +759,7 @@ class FunctionCallDialog(DialogVisualizer):
     def _load_code(self, frame_info):
         DialogVisualizer._load_code(self, frame_info)
         
-        if hasattr(frame_info, "function"):
-            function_label = frame_info.function["repr"]
-        else:
-            function_label = frame_info.code_name
+        function_label = frame_info.code_name
         
         # change tab label
         self._code_book.tab(self._text_frame, text=function_label)

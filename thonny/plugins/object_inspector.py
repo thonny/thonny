@@ -475,7 +475,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
                 self.tree.set(node_id, "index", "")
                 
             self.tree.set(node_id, "id", thonny.memory.format_object_id(element["id"]))
-            self.tree.set(node_id, "value", shorten_repr(element["repr"], thonny.memory.MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "value", shorten_repr(element.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID))
             index += 1
 
         count = len(object_info["elements"])
@@ -529,10 +529,10 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
         # TODO: don't show too big number of elements
         for key, value in object_info["entries"]:
             node_id = self.tree.insert("", "end")
-            self.tree.set(node_id, "key_id", thonny.memory.format_object_id(key["id"]))
-            self.tree.set(node_id, "key", shorten_repr(key["repr"], thonny.memory.MAX_REPR_LENGTH_IN_GRID))
-            self.tree.set(node_id, "id", thonny.memory.format_object_id(value["id"]))
-            self.tree.set(node_id, "value", shorten_repr(value["repr"], thonny.memory.MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "key_id", thonny.memory.format_object_id(key.id))
+            self.tree.set(node_id, "key", shorten_repr(key.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID))
+            self.tree.set(node_id, "id", thonny.memory.format_object_id(value.id))
+            self.tree.set(node_id, "value", shorten_repr(value.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID))
 
         count = len(object_info["entries"])
         self.tree.config(height=min(count,10))
