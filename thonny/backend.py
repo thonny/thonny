@@ -1767,6 +1767,17 @@ class FancyTracer(Tracer):
                 add_tag(node.value, "DictComp.value")
 
             
+            if (isinstance(node, ast.BinOp)
+                and isinstance(node.left, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict))):
+                # TODO: use static analysis to detect type of left child
+                add_tag(node, "outerpure")
+            
+            if (isinstance(node, ast.Attribute)
+                and isinstance(node.value, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict))):
+                # operations with these nodes are side-effect free
+                # TODO: use static analysis to detect type of left child
+                add_tag(node, "outerpure")
+            
             if isinstance(node, ast.comprehension):
                 for expr in node.ifs:
                     add_tag(expr, "comprehension.if")
