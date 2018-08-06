@@ -21,7 +21,7 @@ from thonny.common import TextRange, parse_message, serialize_message, UserError
     DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
     ToplevelResponse, InlineResponse, DebuggerResponse,\
     BackendEvent, path_startswith, ValueInfo, \
-    range_contains_smaller_or_equal
+    range_contains_smaller_or_equal, range_contains_smaller
 
 import signal
 import warnings
@@ -1304,11 +1304,15 @@ class FancyTracer(Tracer):
                     raise AssertionError("Unknown marker function")
 
                 marker_function_args = frame.f_locals.copy()
+                node = self._nodes[marker_function_args["node_id"]]
+                
                 del marker_function_args["self"]
 
-                if "call_function" not in marker_function_args["node_tags"]:
-                    self._handle_progress_event(frame.f_back, event, marker_function_args)
-                self._try_interpret_as_again_event(frame.f_back, event, marker_function_args)
+                if "call_function" not in node.tags:
+                    self._handle_progress_event(frame.f_back, event, 
+                                                marker_function_args, node)
+                self._try_interpret_as_again_event(frame.f_back, event, 
+                                                   marker_function_args, node)
 
 
             else:
@@ -1325,15 +1329,13 @@ class FancyTracer(Tracer):
             last_custom_frame = self._custom_stack[-1] 
             assert last_custom_frame.system_frame == frame
              
-            pseudo_args = last_custom_frame.last_event_args.copy()
-            pseudo_args["exception"] = arg
-            
             assert last_custom_frame.last_event.startswith("before_")
             pseudo_event = (last_custom_frame.last_event
                             .replace("before_", "after_")
                             .replace("_again", ""))
             
-            self._handle_progress_event(frame, pseudo_event, pseudo_args)
+            self._handle_progress_event(frame, pseudo_event, {}, 
+                                        last_custom_frame.last_event_node)
 
         elif event == "return":
             self._fresh_exception = None
@@ -1354,23 +1356,24 @@ class FancyTracer(Tracer):
         return self._trace
 
 
-    def _handle_progress_event(self, frame, event, args):
-        self._save_current_state(frame, event, args)
+    def _handle_progress_event(self, frame, event, args, node):
+        self._save_current_state(frame, event, args, node)
         self._respond_to_commands()
         
-    def _save_current_state(self, frame, event, args):
+    def _save_current_state(self, frame, event, args, node):
         """
         Updates custom stack and stores the state
         
         self._custom_stack always keeps last info,
         which gets exported as FrameInfos to _saved_states["stack"]
         """
-        focus = TextRange(*args["text_range"])
+        focus = TextRange(node.lineno, node.col_offset,
+                          node.end_lineno, node.end_col_offset)
         
         custom_frame = self._custom_stack[-1] 
         custom_frame.last_event = event
         custom_frame.last_event_focus = focus
-        custom_frame.last_event_args = args
+        custom_frame.last_event_node = node
         
         if self._saved_states:
             prev_state = self._saved_states[-1]
@@ -1409,10 +1412,10 @@ class FancyTracer(Tracer):
 
         # Save the snapshot.
         # Check if we can share something with previous state
-        if (prev_state is not None 
+        if False and (prev_state is not None 
             and prev_state_frame.id == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
-            and ("pure" in args["node_tags"] or "before" in event)):
+            and ("before" in event or "skipexport" in node.tags)):
             
             exception_info = prev_state["exception_info"]
             # share the stack ...
@@ -1427,7 +1430,6 @@ class FancyTracer(Tracer):
             }
         else:
             # make full export
-            #self._fulltags[args["node_tags"]] += 1
             stack = self._export_stack()
             exception_info = self._export_exception_info()
             active_frame_overrides = {}
@@ -1509,7 +1511,8 @@ class FancyTracer(Tracer):
         self._vm.send_message(DebuggerResponse(**state))
 
 
-    def _try_interpret_as_again_event(self, frame, original_event, original_args):
+    def _try_interpret_as_again_event(self, frame, original_event, 
+                                      original_args, original_node):
         """
         Some after_* events can be interpreted also as 
         "before_*_again" events (eg. when last argument of a call was 
@@ -1517,23 +1520,22 @@ class FancyTracer(Tracer):
         """
 
         if original_event == "after_expression":
-            node_tags = original_args.get("node_tags")
             value = original_args.get("value")
 
-            if (node_tags is not None
-                and ("last_child" in node_tags
-                     or "or_arg" in node_tags and value
-                     or "and_arg" in node_tags and not value)):
+            if (original_node.tags is not None
+                and ("last_child" in original_node.tags
+                     or "or_arg" in original_node.tags and value
+                     or "and_arg" in original_node.tags and not value)):
 
                 # next step will be finalizing evaluation of parent of current expr
                 # so let's say we're before that parent expression
-                again_args = {"text_range" : original_args.get("parent_range"),
-                              "node_tags" : ""}
+                again_args = {"node_id" : id(original_node.parent_node)}
                 again_event = ("before_expression_again"
-                               if "child_of_expression" in node_tags
+                               if "child_of_expression" in original_node.tags
                                else "before_statement_again")
 
-                self._handle_progress_event(frame, again_event, again_args)
+                self._handle_progress_event(frame, again_event,
+                                            again_args, original_node.parent_node)
 
 
     def _cmd_step_over_completed(self, frame, cmd):
@@ -1598,9 +1600,9 @@ class FancyTracer(Tracer):
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
             # TODO: expression inside statement expression has same range as its parent
-            or frame.id == cmd.frame_id and frame.last_event_focus.contains_smaller(cmd.focus)
+            or frame.id == cmd.frame_id and range_contains_smaller(frame.last_event_focus, cmd.focus)
             # or we were there in prev state
-            or prev_state_frame.id == cmd.frame_id and prev_state_frame.last_event_focus.contains_smaller(cmd.focus)
+            or prev_state_frame.id == cmd.frame_id and range_contains_smaller(prev_state_frame.last_event_focus, cmd.focus)
         )
 
     def _cmd_resume_completed(self, frame, cmd):
@@ -1673,26 +1675,26 @@ class FancyTracer(Tracer):
 
         return result
 
-    def _thonny_hidden_before_stmt(self, text_range, node_tags):
+    def _thonny_hidden_before_stmt(self, node_id):
         # The code to be debugged will be instrumented with this function
         # inserted before each statement. 
         # Entry into this function indicates that statement as given
         # by the code range is about to be evaluated next.
         return None
 
-    def _thonny_hidden_after_stmt(self, text_range, node_tags):
+    def _thonny_hidden_after_stmt(self, node_id):
         # The code to be debugged will be instrumented with this function
         # inserted after each statement. 
         # Entry into this function indicates that statement as given
         # by the code range was just executed successfully.
         return None
 
-    def _thonny_hidden_before_expr(self, text_range, node_tags):
+    def _thonny_hidden_before_expr(self, node_id):
         # Entry into this function indicates that expression as given
         # by the code range is about to be evaluated next
-        return text_range
+        return node_id
 
-    def _thonny_hidden_after_expr(self, text_range, node_tags, value, parent_range):
+    def _thonny_hidden_after_expr(self, node_id, value):
         # The code to be debugged will be instrumented with this function
         # wrapped around each expression (given as 2nd argument). 
         # Entry into this function indicates that expression as given
@@ -1746,57 +1748,57 @@ class FancyTracer(Tracer):
 
             if isinstance(node, ast.Str):
                 add_tag(node, "StringLiteral")
-                add_tag(node, "realpure")
+                add_tag(node, "skipexport")
 
             elif isinstance(node, ast.Num):
                 add_tag(node, "NumberLiteral")
-                add_tag(node, "realpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.List):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Tuple):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Set):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Dict):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Name):
-                add_tag(node, "excpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.NameConstant):
-                add_tag(node, "realpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Expr):
                 if not isinstance(node.value, (ast.Yield, ast.YieldFrom)):
-                    add_tag(node, "outerpure")
+                    add_tag(node, "skipexport")
             
             elif isinstance(node, ast.If):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Return):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.While):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Continue):
-                add_tag(node, "realpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Break):
-                add_tag(node, "realpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Pass):
-                add_tag(node, "realpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.For):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Try):
-                add_tag(node, "outerpure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.ListComp):
                 add_tag(node.elt, "ListComp.elt")
@@ -1811,28 +1813,19 @@ class FancyTracer(Tracer):
             
             elif isinstance(node, ast.BinOp):
                 # TODO: use static analysis to detect type of left child
-                if isinstance(node.left, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict)):
-                    add_tag(node, "outerpure")
-                else:
-                    add_tag(node, "probablypure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Attribute):
                 # TODO: use static analysis to detect type of left child
-                if isinstance(node.value, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict)):
-                    add_tag(node, "outerpure")
-                else:
-                    add_tag(node, "probablypure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Subscript):
                 # TODO: use static analysis to detect type of left child
-                if isinstance(node.value, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict)):
-                    add_tag(node, "outerpure")
-                else:
-                    add_tag(node, "probablypure")
+                add_tag(node, "skipexport")
             
             elif isinstance(node, ast.Compare):
                 # TODO: use static analysis to detect type of left child
-                add_tag(node, "probablypure")
+                add_tag(node, "skipexport")
             
             if isinstance(node, ast.comprehension):
                 for expr in node.ifs:
@@ -1884,17 +1877,15 @@ class FancyTracer(Tracer):
                         new_list.append(node)
 
                         if (isinstance(node, _ast.stmt)
-                            and "outerpure" not in node.tags
-                            and "realpure" not in node.tags
-                            and "excpure" not in node.tags):
+                            and "skipexport" not in node.tags):
                             # add after marker
                             new_list.append(self._create_statement_marker(node,
                                                                           AFTER_STATEMENT_MARKER))
                     setattr(root, name, new_list)
 
 
-    def _create_statement_marker(self, node, function_name, end_node=None):
-        call = self._create_simple_marker_call(node, function_name, end_node)
+    def _create_statement_marker(self, node, function_name):
+        call = self._create_simple_marker_call(node, function_name)
         stmt = ast.Expr(value=call)
         ast.copy_location(stmt, node)
         ast.fix_missing_locations(stmt)
@@ -1910,12 +1901,16 @@ class FancyTracer(Tracer):
                 node.target = ast.Name(temp_name, ast.Store())
                 name_load = ast.Name(temp_name, ast.Load())
                 name_load.dont_trace = True
-                before_marker = self._create_statement_marker(old_target, BEFORE_STATEMENT_MARKER,
-                                                              end_node=node.iter)
+                
+                ass = ast.Assign([old_target], name_load)
+                ass.lineno, ass.col_offset = old_target.lineno, old_target.col_offset
+                ass.end_lineno, ass.end_col_offset = node.iter.end_lineno, node.iter.end_col_offset
+                ass.tags = set()
+                
+                before_marker = self._create_statement_marker(ass, BEFORE_STATEMENT_MARKER)
                 node.body.insert(0, before_marker)
-                node.body.insert(1, ast.Assign([old_target], name_load))
-                node.body.insert(2, self._create_statement_marker(old_target, AFTER_STATEMENT_MARKER,
-                                                                  end_node=node.iter))
+                node.body.insert(1, ass)
+                node.body.insert(2, self._create_statement_marker(ass, AFTER_STATEMENT_MARKER))
                 ast.fix_missing_locations(node)
 
 
@@ -1950,9 +1945,7 @@ class FancyTracer(Tracer):
                             func=ast.Name(id=AFTER_EXPRESSION_MARKER, ctx=ast.Load()),
                             args=[
                                 before_marker,
-                                tracer._create_tags_literal(node),
                                 ast.NodeTransformer.generic_visit(self, node),
-                                tracer._create_location_literal(node.parent_node if hasattr(node, "parent_node") else None)
                             ],
                             keywords=[]
                         )
@@ -1975,34 +1968,9 @@ class FancyTracer(Tracer):
         return ExpressionVisitor().visit(node)
 
 
-    def _create_location_literal(self, node, end_node=None):
-        if node is None:
-            return ast_utils.value_to_literal(None)
-        
-        if end_node is None:
-            end_node = node
-
-        assert hasattr(end_node, "end_lineno")
-        assert hasattr(end_node, "end_col_offset")
-
-        nums = []
-        for value in node.lineno, node.col_offset, end_node.end_lineno, end_node.end_col_offset:
-            nums.append(ast.Num(n=value))
-        return ast.Tuple(elts=nums, ctx=ast.Load())
-
-    def _create_tags_literal(self, node):
-        if hasattr(node, "tags"):
-            # maybe set would perform as well, but I think string is faster
-            return ast_utils.value_to_literal(",".join(node.tags))
-            #self._debug("YESTAGS")
-        else:
-            #self._debug("NOTAGS " + str(node))
-            return ast_utils.value_to_literal("")
-
-    def _create_simple_marker_call(self, node, fun_name, end_node=None):
+    def _create_simple_marker_call(self, node, fun_name):
         args = [
-            self._create_location_literal(node, end_node),
-            self._create_tags_literal(node),
+            self._export_node(node),
         ]
 
         return ast.Call (
@@ -2010,6 +1978,11 @@ class FancyTracer(Tracer):
             args=args,
             keywords=[]
         )
+    
+    def _export_node(self, node):
+        node_id = id(node)
+        self._nodes[node_id] = node
+        return ast.Num(node_id)
     
     def _debug(self, *args):
         print("TRACER:", *args, file=self._vm._original_stderr)
@@ -2029,7 +2002,6 @@ class CustomStackFrame:
         self.id = id(frame)
         self.system_frame = frame
         self.last_event = last_event
-        self.last_event_args = None
         self.last_event_focus = focus
         self.current_evaluations = []
         self.current_statement = None

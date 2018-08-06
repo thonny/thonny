@@ -303,22 +303,6 @@ def mark_text_ranges(node, source: bytes):
     _mark_text_ranges_rec(node, all_tokens, prelim_end_lineno, prelim_end_col_offset)
 
 
-
-def value_to_literal(value):
-    if value is None:
-        return ast.Name(id="None", ctx=ast.Load())
-    elif isinstance(value, bool):
-        if value:
-            return ast.Name(id="True", ctx=ast.Load())
-        else:
-            return ast.Name(id="False", ctx=ast.Load())
-    elif isinstance(value, str):
-        return ast.Str(s=value)
-    else:
-        raise NotImplementedError("only None, bool and str supported at the moment, not " + str(type(value)))
-
-
-
 def fix_ast_problems(tree, source_lines, tokens):
     # Problem 1:
     # Python parser gives col_offset as offset to its internal UTF-8 byte array
