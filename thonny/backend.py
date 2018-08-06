@@ -1122,7 +1122,7 @@ class SimpleTracer(Tracer):
         msg = DebuggerResponse(
             stack=self._export_stack(frame),
             in_present=True,
-            stream_symbol_counts=None,
+            io_symbol_count=None,
             exception_info=self._export_exception_info()
         )
         
@@ -1410,7 +1410,6 @@ class FancyTracer(Tracer):
             and prev_state["exception_value"] is self._get_current_exception()[1]
             and ("pure" in args["node_tags"] or "before" in event)):
             
-            stream_symbol_counts = self._saved_states[-1]["stream_symbol_counts"]
             exception_info = prev_state["exception_info"]
             # share the stack ...
             stack = prev_state["stack"]
@@ -1426,18 +1425,15 @@ class FancyTracer(Tracer):
             # make full export
             stack = self._export_stack()
             exception_info = self._export_exception_info()
-            stream_symbol_counts = {
-                "stdin" : sys.stdin._processed_symbol_count,
-                "stdout": sys.stdout._processed_symbol_count,
-                "stderr": sys.stderr._processed_symbol_count
-            }
             active_frame_overrides = {}
             
         msg = {
             "stack" : stack,
             "active_frame_overrides" : active_frame_overrides, 
             "in_client_log" : False,
-            "stream_symbol_counts" : stream_symbol_counts,
+            "io_symbol_count" : (sys.stdin._processed_symbol_count
+                                 + sys.stdout._processed_symbol_count
+                                 + sys.stderr._processed_symbol_count),
             "exception_value" : self._get_current_exception()[1],  
             "exception_info" : exception_info,
         }
