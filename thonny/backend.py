@@ -1377,7 +1377,6 @@ class FancyTracer(Tracer):
         
         if self._saved_states:
             prev_state = self._saved_states[-1]
-            #prev_state_frame = prev_state["stack"][-1]
             prev_state_frame = self._create_actual_active_frame(prev_state)
         else:
             prev_state = None
@@ -1402,7 +1401,7 @@ class FancyTracer(Tracer):
             if (event == "before_expression"
                 and (id(frame) != prev_state_frame.id
                      or "statement" in prev_state_frame.last_event
-                     or not range_contains_smaller_or_equal(focus, prev_root_expression))):
+                     or not range_contains_smaller_or_equal(prev_root_expression, focus))):
                 custom_frame.current_root_expression = focus
                 custom_frame.current_evaluations = []
 
@@ -1412,7 +1411,7 @@ class FancyTracer(Tracer):
 
         # Save the snapshot.
         # Check if we can share something with previous state
-        if False and (prev_state is not None 
+        if (prev_state is not None 
             and prev_state_frame.id == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
             and ("before" in event or "skipexport" in node.tags)):
@@ -1551,7 +1550,7 @@ class FancyTracer(Tracer):
         if frame.id == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
-                if not range_contains_smaller_or_equal(frame.last_event_focus, cmd.focus):
+                if not range_contains_smaller_or_equal(cmd.focus, frame.last_event_focus):
                     # Focus has changed, command has completed
                     return True
                 else:
