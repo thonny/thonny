@@ -969,6 +969,7 @@ class Tracer(Executor):
                                                 exception=None,
                                                 breakpoints=breakpoints)
         
+        
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
             sys.settrace(self._trace)
@@ -1058,7 +1059,18 @@ class Tracer(Executor):
             self._source_info_by_frame[fid] = _fetch_frame_source_info(frame)
             
         return self._source_info_by_frame[fid]
-
+    
+    def _get_breakpoints_with_cursor_position(self, cmd):
+        if cmd["cursor_position"] is None:
+            return cmd["breakpoints"]
+        else:
+            result = copy.copy(cmd["breakpoints"])
+            path, line = cmd["cursor_position"]
+            if path not in result:
+                result[path] = set()
+            result[path].add(line)
+            return result
+  
 
 class SimpleTracer(Tracer):
     def __init__(self, vm, original_cmd):
@@ -1090,7 +1102,7 @@ class SimpleTracer(Tracer):
             self._register_affected_frame(arg[1], frame)
             if self._is_interesting_exception(frame):
                 # UI doesn't know about separate exception events
-                self._report_current_state(frame, "line")
+                self._report_current_state(frame)
                 self._current_command = self._fetch_next_debugger_command()
             
         elif event == "line":
@@ -1098,7 +1110,7 @@ class SimpleTracer(Tracer):
             
             handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
             if handler(frame, self._current_command):
-                self._report_current_state(frame, event)
+                self._report_current_state(frame)
                 self._current_command = self._fetch_next_debugger_command()
         
         else:
@@ -1106,15 +1118,13 @@ class SimpleTracer(Tracer):
             
         return self._trace
     
-    def _report_current_state(self, frame, event):
-        stack=self._export_stack(frame) # gives event=line for all frames
-        stack[-1].last_event = event
+    def _report_current_state(self, frame):
         msg = DebuggerResponse(
-                               stack=stack,
-                               is_newest=True,
-                               stream_symbol_counts=None,
-                               exception_info=self._export_exception_info()
-                               )
+            stack=self._export_stack(frame),
+            is_newest=True,
+            stream_symbol_counts=None,
+            exception_info=self._export_exception_info()
+        )
         
         self._vm.send_message(msg)
     
@@ -1134,10 +1144,21 @@ class SimpleTracer(Tracer):
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
     
-    def _at_a_breakpoint(self, frame, cmd):
+    def _cmd_run_to_cursor_completed(self, frame, cmd):
+        return self._at_a_breakpoint(
+            frame, 
+            cmd, 
+            self._get_breakpoints_with_cursor_position(cmd)
+        )
+    
+    def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
+        # TODO: try re-entering same line in loop
+        if breakpoints is None:
+            breakpoints = cmd.breakpoints
+            
         filename = frame.f_code.co_filename
-        return (filename in cmd.breakpoints
-                and frame.f_lineno in cmd.breakpoints[filename])
+        return (filename in breakpoints
+                and frame.f_lineno in breakpoints[filename])
 
     def _should_skip_frame(self, frame):
         code = frame.f_code
@@ -1570,10 +1591,20 @@ class FancyTracer(Tracer):
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
     
-    def _at_a_breakpoint(self, frame, cmd):
+    def _cmd_run_to_cursor_completed(self, frame, cmd):
+        return self._at_a_breakpoint(
+            frame, 
+            cmd, 
+            self._get_breakpoints_with_cursor_position(cmd)
+        )
+    
+    def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
+        if breakpoints is None:
+            breakpoints = cmd["breakpoints"]
+            
         return (frame.last_event in ["before_statement", "before_expression"]
-                and frame.filename in cmd.breakpoints
-                and frame.last_event_focus.lineno in cmd.breakpoints[frame.filename]
+                and frame.filename in breakpoints
+                and frame.last_event_focus.lineno in breakpoints[frame.filename]
                 # consider only first event on a line
                 # (but take into account that same line may be reentered)
                 and (cmd.focus is None 

@@ -45,7 +45,8 @@ class Debugger:
             # tell VM the state we are seeing
             cmd.setdefault (
                 frame_id=self._last_progress_message.stack[-1].id,
-                breakpoints=self.get_command_breakpoints(command)
+                breakpoints=code.get_current_breakpoints(),
+                cursor_position=self.get_run_to_cursor_breakpoint()
             )
             
             if hasattr(self._last_progress_message.stack[-1], "last_event"):
@@ -59,17 +60,6 @@ class Debugger:
         else:
             logging.debug("Bad state for sending debugger command " + str(command))
 
-    def get_command_breakpoints(self, command):
-        breakpoints = code.get_current_breakpoints()
-        if command == "run_to_cursor":
-            bp = self.get_run_to_cursor_breakpoint()
-            if bp is not None:
-                path, line = bp
-                if path not in breakpoints:
-                    breakpoints[path] = set()
-                breakpoints[path].add(line)
-        return breakpoints
-    
     def get_run_to_cursor_breakpoint(self):
         return None
 
