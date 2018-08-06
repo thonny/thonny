@@ -1221,6 +1221,7 @@ class FancyTracer(Tracer):
         
         from collections import Counter
         self._fulltags = Counter()
+        self._nodes = {}
 
 
     def _install_marker_functions(self):
@@ -1426,7 +1427,7 @@ class FancyTracer(Tracer):
             }
         else:
             # make full export
-            self._fulltags[args["node_tags"]] += 1
+            #self._fulltags[args["node_tags"]] += 1
             stack = self._export_stack()
             exception_info = self._export_exception_info()
             active_frame_overrides = {}
@@ -1673,37 +1674,29 @@ class FancyTracer(Tracer):
         return result
 
     def _thonny_hidden_before_stmt(self, text_range, node_tags):
-        """
-        The code to be debugged will be instrumented with this function
-        inserted before each statement. 
-        Entry into this function indicates that statement as given
-        by the code range is about to be evaluated next.
-        """
+        # The code to be debugged will be instrumented with this function
+        # inserted before each statement. 
+        # Entry into this function indicates that statement as given
+        # by the code range is about to be evaluated next.
         return None
 
     def _thonny_hidden_after_stmt(self, text_range, node_tags):
-        """
-        The code to be debugged will be instrumented with this function
-        inserted after each statement. 
-        Entry into this function indicates that statement as given
-        by the code range was just executed successfully.
-        """
+        # The code to be debugged will be instrumented with this function
+        # inserted after each statement. 
+        # Entry into this function indicates that statement as given
+        # by the code range was just executed successfully.
         return None
 
     def _thonny_hidden_before_expr(self, text_range, node_tags):
-        """
-        Entry into this function indicates that expression as given
-        by the code range is about to be evaluated next
-        """
+        # Entry into this function indicates that expression as given
+        # by the code range is about to be evaluated next
         return text_range
 
     def _thonny_hidden_after_expr(self, text_range, node_tags, value, parent_range):
-        """
-        The code to be debugged will be instrumented with this function
-        wrapped around each expression (given as 2nd argument). 
-        Entry into this function indicates that expression as given
-        by the code range was just evaluated to given value
-        """
+        # The code to be debugged will be instrumented with this function
+        # wrapped around each expression (given as 2nd argument). 
+        # Entry into this function indicates that expression as given
+        # by the code range was just evaluated to given value
         return value
 
 
