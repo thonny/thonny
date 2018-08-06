@@ -4,7 +4,7 @@
 Classes used both by front-end and back-end
 """
 import os.path
-from typing import Optional, List  
+from typing import Optional, List  # @UnusedImport
 from collections import namedtuple
 
 ValueInfo = namedtuple('ValueInfo', ['id', 'repr'])

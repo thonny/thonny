@@ -1069,7 +1069,7 @@ class SimpleTracer(Tracer):
     def _trace(self, frame, event, arg):
         
         # is this frame interesting at all?
-        if self._should_skip_frame(frame):
+        if event == "call" and self._should_skip_frame(frame):
             return None
         
         if event == "call": 
@@ -1256,7 +1256,8 @@ class FancyTracer(Tracer):
         1) Detects marker calls and responds to client queries in these spots
         2) Maintains a customized view of stack
         """
-        if self._should_skip_frame(frame):
+        # frame skipping test should be done only in new frames
+        if event == "call" and self._should_skip_frame(frame):
             return None
 
         code_name = frame.f_code.co_name
@@ -1335,6 +1336,9 @@ class FancyTracer(Tracer):
     def _save_current_state(self, frame, event, args):
         """
         Updates custom stack and stores the state
+        
+        self._custom_stack always keeps last info,
+        which gets exported as FrameInfos to _saved_states["stack"]
         """
         focus = TextRange(*args["text_range"])
         
@@ -1378,13 +1382,8 @@ class FancyTracer(Tracer):
                 # value is missing in case of exception
                 custom_frame.current_evaluations.append((focus, self._vm.export_value(args["value"])))
 
-        # Save the snapshot
-        if self._saved_states:
-            # last state is no longer newest
-            self._saved_states[-1]["is_newest"] = False
-
-        
-        # check if we can share something with previous state
+        # Save the snapshot.
+        # Check if we can share something with previous state
         if (prev_state is not None 
             and prev_state_frame.id == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
@@ -1416,7 +1415,6 @@ class FancyTracer(Tracer):
         msg = {
             "stack" : stack,
             "active_frame_overrides" : active_frame_overrides, 
-            "is_newest" : True,
             "in_client_log" : False,
             "stream_symbol_counts" : stream_symbol_counts,
             "exception_value" : self._get_current_exception()[1],  
@@ -1430,7 +1428,8 @@ class FancyTracer(Tracer):
         """Tries to respond to client commands with states collected so far.
         Returns if these states don't suffice anymore and Python needs
         to advance the program"""
-
+        
+        # while the state for current index is already saved: 
         while self._current_state_index < len(self._saved_states):
             state = self._saved_states[self._current_state_index]
             
@@ -1443,7 +1442,7 @@ class FancyTracer(Tracer):
 
             if cmd_complete:
                 state["in_client_log"] = True
-                self._report_state(state)
+                self._report_state(self._current_state_index)
                 self._current_command = self._fetch_next_debugger_command()
 
             if self._current_command.name == "step_back":
@@ -1456,17 +1455,18 @@ class FancyTracer(Tracer):
                     self._saved_states[self._current_state_index]["in_client_log"] = False  
                     self._current_state_index -= 1
             else:
-                # Other progress events move the pointer forward
+                # Other commands move the pointer forward
                 self._current_state_index += 1
         
 
     def _create_actual_active_frame(self, state):
         return state["stack"][-1]._replace(**state["active_frame_overrides"])
     
-    def _report_state(self, state):
+    def _report_state(self, state_index):
         # need to make a copy for applying overrides without modifying original 
-        state = copy.deepcopy(state)
+        state = copy.deepcopy(self._saved_states[state_index])
         state["stack"][-1] = self._create_actual_active_frame(state)
+        state["is_newest"] = state_index == len(self._saved_states)-1
         del state["exception_value"]
         del state["active_frame_overrides"]
         
