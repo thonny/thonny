@@ -1218,6 +1218,9 @@ class FancyTracer(Tracer):
         self._custom_stack = []
         self._saved_states = []
         self._current_state_index = 0
+        
+        from collections import Counter
+        self._fulltags = Counter()
 
 
     def _install_marker_functions(self):
@@ -1423,6 +1426,7 @@ class FancyTracer(Tracer):
             }
         else:
             # make full export
+            self._fulltags[args["node_tags"]] += 1
             stack = self._export_stack()
             exception_info = self._export_exception_info()
             active_frame_overrides = {}
@@ -1774,7 +1778,8 @@ class FancyTracer(Tracer):
                 add_tag(node, "realpure")
             
             elif isinstance(node, ast.Expr):
-                add_tag(node, "outerpure")
+                if not isinstance(node.value, (ast.Yield, ast.YieldFrom)):
+                    add_tag(node, "outerpure")
             
             elif isinstance(node, ast.If):
                 add_tag(node, "outerpure")
@@ -1811,16 +1816,30 @@ class FancyTracer(Tracer):
                 add_tag(node.value, "DictComp.value")
 
             
-            if (isinstance(node, ast.BinOp)
-                and isinstance(node.left, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict))):
+            elif isinstance(node, ast.BinOp):
                 # TODO: use static analysis to detect type of left child
-                add_tag(node, "outerpure")
+                if isinstance(node.left, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict)):
+                    add_tag(node, "outerpure")
+                else:
+                    add_tag(node, "probablypure")
             
-            if (isinstance(node, ast.Attribute)
-                and isinstance(node.value, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict))):
-                # operations with these nodes are side-effect free
+            elif isinstance(node, ast.Attribute):
                 # TODO: use static analysis to detect type of left child
-                add_tag(node, "outerpure")
+                if isinstance(node.value, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict)):
+                    add_tag(node, "outerpure")
+                else:
+                    add_tag(node, "probablypure")
+            
+            elif isinstance(node, ast.Subscript):
+                # TODO: use static analysis to detect type of left child
+                if isinstance(node.value, (ast.Num, ast.Str, ast.List, ast.Tuple, ast.Dict)):
+                    add_tag(node, "outerpure")
+                else:
+                    add_tag(node, "probablypure")
+            
+            elif isinstance(node, ast.Compare):
+                # TODO: use static analysis to detect type of left child
+                add_tag(node, "probablypure")
             
             if isinstance(node, ast.comprehension):
                 for expr in node.ifs:
@@ -2009,6 +2028,7 @@ class FancyTracer(Tracer):
             from thonny.misc_utils import _win_get_used_memory
             print("Memory:", _win_get_used_memory() / 1024 / 1024)
             print("States:", len(self._saved_states))
+            print(self._fulltags.most_common())
 
 
 class CustomStackFrame:
