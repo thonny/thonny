@@ -1121,7 +1121,7 @@ class SimpleTracer(Tracer):
     def _report_current_state(self, frame):
         msg = DebuggerResponse(
             stack=self._export_stack(frame),
-            is_newest=True,
+            in_present=True,
             stream_symbol_counts=None,
             exception_info=self._export_exception_info()
         )
@@ -1484,10 +1484,24 @@ class FancyTracer(Tracer):
         return state["stack"][-1]._replace(**state["active_frame_overrides"])
     
     def _report_state(self, state_index):
-        # need to make a copy for applying overrides without modifying original 
+        in_present = state_index == len(self._saved_states)-1
+        if in_present:
+            # For reported new events re-export stack to make sure it is not shared.
+            # (There is tiny chance that sharing previous state 
+            # after executing BinOp, Attribute, Compare or Subscript
+            # was not the right choice. See tag_nodes for more.)
+            # Re-exporting reduces the harm by showing correct data at least
+            # for present states.
+            self._saved_states[state_index]["stack"] = self._export_stack()
+
+        # need to make a copy for applying overrides 
+        # and removing helper fields without modifying original
         state = copy.deepcopy(self._saved_states[state_index])
-        state["stack"][-1] = self._create_actual_active_frame(state)
-        state["is_newest"] = state_index == len(self._saved_states)-1
+        state["in_present"] = in_present 
+        if not in_present:
+            # for past states fix the newest frame
+            state["stack"][-1] = self._create_actual_active_frame(state)
+            
         del state["exception_value"]
         del state["active_frame_overrides"]
         

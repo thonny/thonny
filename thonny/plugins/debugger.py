@@ -446,7 +446,7 @@ class EditorVisualizer(FrameVisualizer):
     
     def _update_this_frame(self, msg, frame_info):
         FrameVisualizer._update_this_frame(self, msg, frame_info)
-        if msg.is_newest:
+        if msg.in_present:
             self._decorate_editor_title("")
         else:
             self._decorate_editor_title("   <<< REPLAYING >>> ")

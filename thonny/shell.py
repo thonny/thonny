@@ -236,7 +236,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
     
     def _handle_fancy_debugger_progress(self, msg):
-        if msg.is_newest or msg.stream_symbol_counts is None:
+        if msg.in_present or msg.stream_symbol_counts is None:
             self._update_visible_io(None)
         else:
             self._update_visible_io(sum(msg.stream_symbol_counts.values()))
