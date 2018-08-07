@@ -1586,7 +1586,8 @@ class FancyTracer(Tracer):
 
     def _cmd_step_back_completed(self, frame, cmd):
         # Check if the selected message has been previously sent to front-end
-        return self._saved_states[self._current_state_index]["in_client_log"]
+        return (self._saved_states[self._current_state_index]["in_client_log"]
+                or self._current_state_index == 0)
 
     def _cmd_step_out_completed(self, frame, cmd):
         if self._current_state_index == 0:
