@@ -1523,11 +1523,15 @@ class FancyTracer(Tracer):
         if original_event == "after_expression":
             value = original_args.get("value")
 
-            if (original_node.tags is not None
-                and ("last_child" in original_node.tags
-                     or "or_arg" in original_node.tags and value
-                     or "and_arg" in original_node.tags and not value)):
-
+            if ("last_child" in original_node.tags
+                or "or_arg" in original_node.tags and value
+                or "and_arg" in original_node.tags and not value):
+                
+                # there may be explicit exceptions
+                if ("skip_after_statement_again" in original_node.parent_node.tags
+                    or "skip_after_expression_again" in original_node.parent_node.tags):
+                    return
+                
                 # next step will be finalizing evaluation of parent of current expr
                 # so let's say we're before that parent expression
                 again_args = {"node_id" : id(original_node.parent_node)}
@@ -1717,7 +1721,7 @@ class FancyTracer(Tracer):
 
             # tag last children 
             last_child = ast_utils.get_last_child(node)
-            if last_child is not None and last_child:
+            if last_child is not None:
                 add_tag(node, "has_children")
 
                 if isinstance(last_child, ast.AST):
@@ -1812,7 +1816,6 @@ class FancyTracer(Tracer):
                 add_tag(node.key, "DictComp.key")
                 add_tag(node.value, "DictComp.value")
 
-            
             elif isinstance(node, ast.BinOp):
                 # TODO: use static analysis to detect type of left child
                 add_tag(node, "skipexport")
@@ -1832,7 +1835,18 @@ class FancyTracer(Tracer):
             if isinstance(node, ast.comprehension):
                 for expr in node.ifs:
                     add_tag(expr, "comprehension.if")
+            
+            if isinstance(node, (ast.Assign)):
+                # value will be presented in assignment's before_statement_again
+                add_tag(node.value, "skip_after_expression")
 
+            if isinstance(node, (ast.Expr,
+                                 ast.While,
+                                 ast.For,
+                                 ast.If,
+                                 ast.Try,
+                                 ast.With)):
+                add_tag(node, "skip_after_statement_again")
 
             # make sure every node has this field
             if not hasattr(node, "tags"):
