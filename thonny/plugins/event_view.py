@@ -24,8 +24,8 @@ class EventsView(TextFrame):
         
         if event.sequence == "DebuggerResponse":
             frame = event.stack[-1]
-            self.text.insert("end", "    " + "event" + ": " + frame.last_event + "\n") 
-            self.text.insert("end", "    " + "focus" + ": " + str(frame.last_event_focus) + "\n") 
+            self.text.insert("end", "    " + "event" + ": " + frame.event + "\n") 
+            self.text.insert("end", "    " + "focus" + ": " + str(frame.focus) + "\n") 
 
         self.text.see("end")
 

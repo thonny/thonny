@@ -1190,9 +1190,9 @@ class SimpleTracer(Tracer):
                 freevars=system_frame.f_code.co_freevars,
                 source=source,
                 firstlineno=firstlineno,
-                last_event="line",
-                last_event_focus=TextRange(system_frame.f_lineno, 0,
-                                           system_frame.f_lineno+1, 0),
+                event="line",
+                focus=TextRange(system_frame.f_lineno, 0, system_frame.f_lineno+1, 0),
+                node_tags=None,
                 current_statement=None,
                 current_evaluations=None,
                 current_root_expression=None,
@@ -1326,13 +1326,13 @@ class FancyTracer(Tracer):
             last_custom_frame = self._custom_stack[-1] 
             assert last_custom_frame.system_frame == frame
              
-            assert last_custom_frame.last_event.startswith("before_")
-            pseudo_event = (last_custom_frame.last_event
+            assert last_custom_frame.event.startswith("before_")
+            pseudo_event = (last_custom_frame.event
                             .replace("before_", "after_")
                             .replace("_again", ""))
             
             self._handle_progress_event(frame, pseudo_event, {}, 
-                                        last_custom_frame.last_event_node)
+                                        last_custom_frame.node)
 
         elif event == "return":
             self._fresh_exception = None
@@ -1368,10 +1368,10 @@ class FancyTracer(Tracer):
                           node.end_lineno, node.end_col_offset)
         
         custom_frame = self._custom_stack[-1] 
-        custom_frame.last_event = event
-        custom_frame.last_event_focus = focus
-        custom_frame.last_event_node = node
-        custom_frame.last_event_node_tags = node.tags
+        custom_frame.event = event
+        custom_frame.focus = focus
+        custom_frame.node = node
+        custom_frame.node_tags = node.tags
         
         if self._saved_states:
             prev_state = self._saved_states[-1]
@@ -1398,7 +1398,7 @@ class FancyTracer(Tracer):
             prev_root_expression = prev_state_frame.current_root_expression
             if (event == "before_expression"
                 and (id(frame) != prev_state_frame.id
-                     or "statement" in prev_state_frame.last_event
+                     or "statement" in prev_state_frame.event
                      or not range_contains_smaller_or_equal(prev_root_expression, focus))):
                 custom_frame.current_root_expression = focus
                 custom_frame.current_evaluations = []
@@ -1419,9 +1419,9 @@ class FancyTracer(Tracer):
             stack = prev_state["stack"]
             # ... but override certain things
             active_frame_overrides = {
-                "last_event" : custom_frame.last_event,
-                "last_event_focus" : custom_frame.last_event_focus,
-                "last_event_node_tags" : custom_frame.last_event_node_tags,
+                "event" : custom_frame.event,
+                "focus" : custom_frame.focus,
+                "node_tags" : custom_frame.node_tags,
                 "current_root_expression" : custom_frame.current_root_expression,
                 "current_evaluations" : custom_frame.current_evaluations.copy(),
                 "current_statement" : custom_frame.current_statement,
@@ -1459,7 +1459,7 @@ class FancyTracer(Tracer):
             frame = self._create_actual_active_frame(state)
 
             # Is this state meant to be seen?
-            if "skip_" + frame.last_event not in frame.last_event_node_tags:
+            if "skip_" + frame.event not in frame.node_tags:
             #if True:
                 # Has the command completed?
                 tester = getattr(self, "_cmd_" + self._current_command.name + "_completed")
@@ -1556,16 +1556,16 @@ class FancyTracer(Tracer):
         if frame.id == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
-                if not range_contains_smaller_or_equal(cmd.focus, frame.last_event_focus):
+                if not range_contains_smaller_or_equal(cmd.focus, frame.focus):
                     # Focus has changed, command has completed
                     return True
                 else:
                     # Keep running
                     return False
             elif "after_" in cmd.state:
-                if frame.last_event_focus != cmd.focus or "before_" in frame.last_event \
-                        or "_expression" in cmd.state and "_statement" in frame.last_event \
-                        or "_statement" in cmd.state and "_expression" in frame.last_event:
+                if frame.focus != cmd.focus or "before_" in frame.event \
+                        or "_expression" in cmd.state and "_statement" in frame.event \
+                        or "_statement" in cmd.state and "_expression" in frame.event:
                     # The state has changed, command has completed
                     return True
                 else:
@@ -1582,7 +1582,7 @@ class FancyTracer(Tracer):
                 return True
 
     def _cmd_step_into_completed(self, frame, cmd):
-        return frame.last_event != "after_statement"
+        return frame.event != "after_statement"
 
     def _cmd_step_back_completed(self, frame, cmd):
         # Check if the selected message has been previously sent to front-end
@@ -1593,7 +1593,7 @@ class FancyTracer(Tracer):
         if self._current_state_index == 0:
             return False
 
-        if frame.last_event == "after_statement":
+        if frame.event == "after_statement":
             return False
 
         if self._at_a_breakpoint(frame, cmd):
@@ -1606,9 +1606,9 @@ class FancyTracer(Tracer):
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
             # TODO: expression inside statement expression has same range as its parent
-            or frame.id == cmd.frame_id and range_contains_smaller(frame.last_event_focus, cmd.focus)
+            or frame.id == cmd.frame_id and range_contains_smaller(frame.focus, cmd.focus)
             # or we were there in prev state
-            or prev_state_frame.id == cmd.frame_id and range_contains_smaller(prev_state_frame.last_event_focus, cmd.focus)
+            or prev_state_frame.id == cmd.frame_id and range_contains_smaller(prev_state_frame.focus, cmd.focus)
         )
 
     def _cmd_resume_completed(self, frame, cmd):
@@ -1625,14 +1625,14 @@ class FancyTracer(Tracer):
         if breakpoints is None:
             breakpoints = cmd["breakpoints"]
             
-        return (frame.last_event in ["before_statement", "before_expression"]
+        return (frame.event in ["before_statement", "before_expression"]
                 and frame.filename in breakpoints
-                and frame.last_event_focus.lineno in breakpoints[frame.filename]
+                and frame.focus.lineno in breakpoints[frame.filename]
                 # consider only first event on a line
                 # (but take into account that same line may be reentered)
                 and (cmd.focus is None 
-                     or (cmd.focus.lineno != frame.last_event_focus.lineno)
-                     or (cmd.focus == frame.last_event_focus and cmd.state == frame.last_event) 
+                     or (cmd.focus.lineno != frame.focus.lineno)
+                     or (cmd.focus == frame.focus and cmd.state == frame.event) 
                      or frame.id != cmd.frame_id
                      )
                 )
@@ -1672,9 +1672,9 @@ class FancyTracer(Tracer):
                 freevars=system_frame.f_code.co_freevars,
                 source=source,
                 firstlineno=firstlineno,
-                last_event=custom_frame.last_event,
-                last_event_focus=custom_frame.last_event_focus,
-                last_event_node_tags=custom_frame.last_event_node_tags,
+                event=custom_frame.event,
+                focus=custom_frame.focus,
+                node_tags=custom_frame.node_tags,
                 current_evaluations=custom_frame.current_evaluations.copy(),
                 current_statement=custom_frame.current_statement,
                 current_root_expression=custom_frame.current_root_expression,
@@ -2032,11 +2032,11 @@ class FancyTracer(Tracer):
 
 
 class CustomStackFrame:
-    def __init__(self, frame, last_event, focus=None):
+    def __init__(self, frame, event, focus=None):
         self.id = id(frame)
         self.system_frame = frame
-        self.last_event = last_event
-        self.last_event_focus = focus
+        self.event = event
+        self.focus = focus
         self.current_evaluations = []
         self.current_statement = None
         self.current_root_expression = None

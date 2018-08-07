@@ -49,11 +49,10 @@ class Debugger:
                 cursor_position=self.get_run_to_cursor_breakpoint()
             )
             
-            if hasattr(self._last_progress_message.stack[-1], "last_event"):
-                cmd.setdefault (
-                    state=self._last_progress_message.stack[-1].last_event,
-                    focus=self._last_progress_message.stack[-1].last_event_focus,
-                )
+            cmd.setdefault (
+                state=self._last_progress_message.stack[-1].event,
+                focus=self._last_progress_message.stack[-1].focus,
+            )
 
             
             get_runner().send_command(cmd)
@@ -311,21 +310,21 @@ class FrameVisualizer:
         self._frame_info = frame_info
         self._remove_focus_tags()
         
-        if frame_info.last_event == "line":
+        if frame_info.event == "line":
             if frame_info.id in msg["exception_info"]["affected_frame_ids"]:
-                self._tag_range(frame_info.last_event_focus, "exception_focus")
+                self._tag_range(frame_info.focus, "exception_focus")
             else:
-                self._tag_range(frame_info.last_event_focus, "active_focus")
+                self._tag_range(frame_info.focus, "active_focus")
         else:    
-            if "statement" in frame_info.last_event:
+            if "statement" in frame_info.event:
                 if msg["exception_info"]["msg"] is not None:
                     stmt_tag = "exception_focus"
-                elif frame_info.last_event.startswith("before"):
+                elif frame_info.event.startswith("before"):
                     stmt_tag = "active_focus"
                 else:
                     stmt_tag = "completed_focus"
             else:
-                assert "expression" in frame_info.last_event
+                assert "expression" in frame_info.event
                 stmt_tag = "suspended_focus"
                 
             self._tag_range(frame_info.current_statement, stmt_tag)
@@ -339,7 +338,7 @@ class FrameVisualizer:
             last_line_text = lines[-1][0]
             self.show_note(last_line_text.strip() + " ",
                            ("...", lambda _: get_workbench().show_view("ExceptionView")), 
-                           focus=frame_info.last_event_focus)
+                           focus=frame_info.focus)
             
 
     def _find_this_and_next_frame(self, stack):
@@ -495,8 +494,8 @@ class ExpressionBox(tk.Text):
         
         
     def update_expression(self, msg, frame_info):
-        focus = frame_info.last_event_focus
-        event = frame_info.last_event
+        focus = frame_info.focus
+        event = frame_info.event
         
         if frame_info.current_root_expression is not None:
             self._load_expression(frame_info.filename, frame_info.current_root_expression)
@@ -788,7 +787,7 @@ class StackView(ui_utils.TreeFrame):
     def _update_stack(self, msg):
         self._clear_tree()
         for frame in msg.stack:
-            lineno = frame.last_event_focus.lineno
+            lineno = frame.focus.lineno
                 
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "function", frame.code_name)
