@@ -742,14 +742,11 @@ class VM:
             rep = rep[:99] + "…" 
         
         return ValueInfo(id(value), rep)
-        #return (id(value), rep)
-        #return {'id' : id(value), 'repr' : rep}
 
     def export_variables(self, variables):
         result = {}
         for name in variables:
-            if (not name.startswith("_thonny_hidden_")
-                and not name.startswith("__")):
+            if not name.startswith("__"):
                 result[name] = self.export_value(variables[name])
 
         return result
@@ -1374,6 +1371,7 @@ class FancyTracer(Tracer):
         custom_frame.last_event = event
         custom_frame.last_event_focus = focus
         custom_frame.last_event_node = node
+        custom_frame.last_event_node_tags = node.tags
         
         if self._saved_states:
             prev_state = self._saved_states[-1]
@@ -1423,6 +1421,7 @@ class FancyTracer(Tracer):
             active_frame_overrides = {
                 "last_event" : custom_frame.last_event,
                 "last_event_focus" : custom_frame.last_event_focus,
+                "last_event_node_tags" : custom_frame.last_event_node_tags,
                 "current_root_expression" : custom_frame.current_root_expression,
                 "current_evaluations" : custom_frame.current_evaluations.copy(),
                 "current_statement" : custom_frame.current_statement,
@@ -1459,14 +1458,17 @@ class FancyTracer(Tracer):
             # Get current state's most recent frame (together with overrides
             frame = self._create_actual_active_frame(state)
 
-            # Has the command completed?
-            tester = getattr(self, "_cmd_" + self._current_command.name + "_completed")
-            cmd_complete = tester(frame, self._current_command)
-
-            if cmd_complete:
-                state["in_client_log"] = True
-                self._report_state(self._current_state_index)
-                self._current_command = self._fetch_next_debugger_command()
+            # Is this state meant to be seen?
+            if "skip_" + frame.last_event not in frame.last_event_node_tags:
+            #if True:
+                # Has the command completed?
+                tester = getattr(self, "_cmd_" + self._current_command.name + "_completed")
+                cmd_complete = tester(frame, self._current_command)
+    
+                if cmd_complete:
+                    state["in_client_log"] = True
+                    self._report_state(self._current_state_index)
+                    self._current_command = self._fetch_next_debugger_command()
 
             if self._current_command.name == "step_back":
                 if self._current_state_index == 0:
@@ -1667,6 +1669,7 @@ class FancyTracer(Tracer):
                 firstlineno=firstlineno,
                 last_event=custom_frame.last_event,
                 last_event_focus=custom_frame.last_event_focus,
+                last_event_node_tags=custom_frame.last_event_node_tags,
                 current_evaluations=custom_frame.current_evaluations.copy(),
                 current_statement=custom_frame.current_statement,
                 current_root_expression=custom_frame.current_root_expression,
@@ -1898,18 +1901,35 @@ class FancyTracer(Tracer):
                 #print(vars(old_target))
                 temp_name = '__for_loop_var'
                 node.target = ast.Name(temp_name, ast.Store())
-                name_load = ast.Name(temp_name, ast.Load())
-                name_load.dont_trace = True
                 
-                ass = ast.Assign([old_target], name_load)
+                name_load = ast.Name(temp_name, ast.Load())
+                # value will be visible in parent's before_statement_again event
+                name_load.tags = {"skip_before_expression", "skip_after_expression", "last_child"}
+                name_load.lineno, name_load.col_offset = node.iter.lineno, node.iter.col_offset
+                name_load.end_lineno, name_load.end_col_offset = node.iter.end_lineno, node.iter.end_col_offset
+                
+                before_name_load = self._create_simple_marker_call(name_load, BEFORE_EXPRESSION_MARKER)
+                after_name_load = ast.Call (
+                    func=ast.Name(id=AFTER_EXPRESSION_MARKER, ctx=ast.Load()),
+                    args=[
+                        before_name_load,
+                        name_load,
+                    ],
+                    keywords=[]
+                )
+                
+                ass = ast.Assign([old_target], after_name_load)
                 ass.lineno, ass.col_offset = old_target.lineno, old_target.col_offset
                 ass.end_lineno, ass.end_col_offset = node.iter.end_lineno, node.iter.end_col_offset
-                ass.tags = set()
+                ass.tags = {"skip_before_statement"} # before_statement_again will be shown
+
+                name_load.parent_node = ass 
                 
-                before_marker = self._create_statement_marker(ass, BEFORE_STATEMENT_MARKER)
-                node.body.insert(0, before_marker)
+                ass_before = self._create_statement_marker(ass, BEFORE_STATEMENT_MARKER)
+                node.body.insert(0, ass_before)
                 node.body.insert(1, ass)
                 node.body.insert(2, self._create_statement_marker(ass, AFTER_STATEMENT_MARKER))
+                
                 ast.fix_missing_locations(node)
 
 
@@ -1967,10 +1987,10 @@ class FancyTracer(Tracer):
         return ExpressionVisitor().visit(node)
 
 
-    def _create_simple_marker_call(self, node, fun_name):
+    def _create_simple_marker_call(self, node, fun_name, extra_args=[]):
         args = [
             self._export_node(node),
-        ]
+        ] + extra_args
 
         return ast.Call (
             func=ast.Name(id=fun_name, ctx=ast.Load()),

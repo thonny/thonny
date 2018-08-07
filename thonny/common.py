@@ -11,7 +11,7 @@ ValueInfo = namedtuple('ValueInfo', ['id', 'repr'])
 FrameInfo = namedtuple("FrameInfo", ["id", "filename", "module_name", "code_name",
                                      "source", "firstlineno",
                                      "locals", "globals", "freevars", 
-                                     "last_event", "last_event_focus",
+                                     "last_event", "last_event_focus", "last_event_node_tags",
                                      "current_statement", 
                                      "current_root_expression", "current_evaluations"]) 
 
