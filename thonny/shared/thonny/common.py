@@ -5,6 +5,8 @@ Classes used both by front-end and back-end
 """
 import shlex
 
+MESSAGE_MARKER = "\x02"
+
 class Record:
     def __init__(self, **kw):
         self.__dict__.update(kw)
@@ -153,10 +155,11 @@ def serialize_message(msg):
     # I want to transfer only ASCII chars because 
     # encodings are not reliable 
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 
-    return repr(msg).encode("UTF-7").decode("ASCII") 
+    return MESSAGE_MARKER + repr(msg).encode("UTF-7").decode("ASCII") 
 
 def parse_message(msg_string):
-    return eval(msg_string.encode("ASCII").decode("UTF-7"))
+    assert msg_string[0] == MESSAGE_MARKER
+    return eval(msg_string[1:].encode("ASCII").decode("UTF-7"))
 
 
 

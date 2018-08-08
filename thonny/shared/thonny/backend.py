@@ -489,7 +489,7 @@ class VM:
         return result
            
     def _debug(self, *args):
-        print("VM:", *args, file=self._original_stderr)
+        logger.debug("VM: " + str(args))
     
     
     def _enter_io_function(self):
@@ -1245,7 +1245,7 @@ class FancyTracer(Executor):
         )
     
     def _debug(self, *args):
-        print("TRACER:", *args, file=self._vm._original_stderr)
+        logger.debug("TRACER: " + str(args))
 
 class CustomStackFrame:
     def __init__(self, frame, last_event, focus=None):

@@ -2,6 +2,10 @@
 Version history
 ===============
 
+2.1.22 (2018-??-??)
+===================
+* FIXED #363: subprocess.run causes Thonny backend to hang
+
 2.1.21 (2018-07-17)
 ===================
 * FIXED #471: Another problem when Thonny uses jedi 0.11 or newer

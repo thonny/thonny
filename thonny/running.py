@@ -21,7 +21,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     UserError
 from thonny.globals import get_workbench, get_runner
 import shlex
-from thonny import THONNY_USER_DIR
+from thonny import THONNY_USER_DIR, common
 from thonny.misc_utils import running_on_windows, running_on_mac_os, eqfn
 from shutil import which
 import shutil
@@ -821,24 +821,48 @@ class CPythonProxy(BackendProxy):
     def _listen_stdout(self):
         #debug("... started listening to stdout")
         # will be called from separate thread
+        def publish_as_msg(data):
+            msg = parse_message(data)
+            if "cwd" in msg:
+                self.cwd = msg["cwd"]
+            self._message_queue.append(msg)
+            
+            if len(self._message_queue) > 100:
+                # Probably backend runs an infinite/long print loop.
+                # Throttle message thougput in order to keep GUI thread responsive.
+                sleep(0.1)
+        
         while True:
             data = self._proc.stdout.readline()
             #debug("... read some stdout data", repr(data))
             if data == '':
                 break
             else:
-                msg = parse_message(data)
-                if "cwd" in msg:
-                    self.cwd = msg["cwd"]
+                try:
+                    publish_as_msg(data)
+                except Exception:
+                    # Can mean the line was from subprocess, 
+                    # which can't be captured by stream faking.
+                    # NB! If subprocess printed it without linebreak,
+                    # then the suffix can be thonny message
                     
-                # TODO: it was "with self._state_lock:". Is it necessary?
-                self._message_queue.append(msg)
+                    parts = data.rsplit(common.MESSAGE_MARKER, maxsplit=1)
+                    
+                    # print first part as it is
+                    self._message_queue.append(dict(message_type="ProgramOutput",
+                                                data=parts[0],
+                                                stream_name="stdout"))
+                    
+                    if len(parts) == 2:
+                        second_part = common.MESSAGE_MARKER + parts[1]
+                        try:
+                            publish_as_msg(second_part)
+                        except Exception:
+                            # just print ...
+                            self._message_queue.append(dict(message_type="ProgramOutput",
+                                                        data=second_part,
+                                                        stream_name="stdout"))
                 
-                if len(self._message_queue) > 100:
-                    # Probably backend runs an infinite/long print loop.
-                    # Throttle message thougput in order to keep GUI thread responsive.
-                    sleep(0.1)
-
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
         while True:
@@ -846,6 +870,11 @@ class CPythonProxy(BackendProxy):
             if data == '':
                 break
             else:
+                self._message_queue.append({
+                    "message_type" : "ProgramOutput",
+                    "stream_name" : "stderr",
+                    "data" : data,
+                })
                 debug("### BACKEND ###: %s", data.strip())
         
 
