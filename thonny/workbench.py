@@ -168,10 +168,12 @@ class Workbench(tk.Tk):
         self.set_option("view.maximize_view", False)
         
         
-        self.geometry("{0}x{1}+{2}+{3}".format(self.get_option("layout.width"),
-                                            self.get_option("layout.height"),
-                                            self.get_option("layout.left"),
-                                            self.get_option("layout.top")))
+        self.geometry("{0}x{1}+{2}+{3}".format(
+            max(self.get_option("layout.width"), 320),
+            max(self.get_option("layout.height"), 240),
+            min(max(self.get_option("layout.left"), 0), self.winfo_screenwidth() - 200),
+            min(max(self.get_option("layout.top"), 0), self.winfo_screenheight() - 200)
+        ))
         
         if self.get_option("layout.zoomed"):
             ui_utils.set_zoomed(self, True)
