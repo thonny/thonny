@@ -600,6 +600,12 @@ class EnhancedText(TweakableText):
         self.edit_separator()        
         
     def _on_paste(self, e):
+        try:
+            if self.has_selection():
+                self.direct_delete("sel.first", "sel.last")
+        except:
+            pass
+        
         self._last_event_kind = "paste"
         self.edit_separator()    
         self.see("insert")  

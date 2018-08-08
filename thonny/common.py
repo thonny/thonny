@@ -7,6 +7,8 @@ import os.path
 from typing import Optional, List  # @UnusedImport
 from collections import namedtuple
 
+MESSAGE_MARKER = "\x02"
+
 ValueInfo = namedtuple('ValueInfo', ['id', 'repr'])
 FrameInfo = namedtuple("FrameInfo", ["id", "filename", "module_name", "code_name",
                                      "source", "firstlineno",
@@ -146,12 +148,13 @@ class InlineResponse(MessageFromBackend):
 def serialize_message(msg: Record) -> str:
     # I want to transfer only ASCII chars because encodings are not reliable 
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program) 
-    return repr(msg).encode("UTF-7").decode("ASCII") 
+    return MESSAGE_MARKER + repr(msg).encode("UTF-7").decode("ASCII") 
 
 def parse_message(msg_string: str) -> Record:
     # DataFrames may have nan 
     nan = float("nan")  # @UnusedVariable
-    return eval(msg_string.encode("ASCII").decode("UTF-7"))
+    assert msg_string[0] == MESSAGE_MARKER
+    return eval(msg_string[1:].encode("ASCII").decode("UTF-7"))
 
 def actual_path(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""

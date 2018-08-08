@@ -20,14 +20,13 @@ from thonny.common import serialize_message, ToplevelCommand, \
     UserError, actual_path, path_startswith, CommandToBackend, ToplevelResponse,\
     DebuggerResponse, BackendEvent
 from thonny import get_workbench, get_runner, get_shell
-from thonny import THONNY_USER_DIR
+from thonny import THONNY_USER_DIR, common
 from thonny.misc_utils import running_on_windows, running_on_mac_os, construct_cmd_line
 from thonny.common import is_same_path
 import shutil
 import collections
 import signal
 import logging
-import traceback
 from time import sleep
 import shlex
 from thonny.code import get_current_breakpoints
@@ -694,6 +693,17 @@ class CPythonProxy(BackendProxy):
     def _listen_stdout(self):
         #debug("... started listening to stdout")
         # will be called from separate thread
+        def publish_as_msg(data):
+            msg = parse_message(data)
+            if "cwd" in msg:
+                self.cwd = msg["cwd"]
+            self._message_queue.append(msg)
+            
+            if len(self._message_queue) > 100:
+                # Probably backend runs an infinite/long print loop.
+                # Throttle message thougput in order to keep GUI thread responsive.
+                sleep(0.1)
+        
         while True:
             data = self._proc.stdout.readline()
             #debug("... read some stdout data", repr(data))
@@ -701,20 +711,30 @@ class CPythonProxy(BackendProxy):
                 break
             else:
                 try:
-                    msg = parse_message(data)
-                    self._message_queue.append(msg)
-                
-                    if len(self._message_queue) > 100:
-                        # Probably backend runs an infinite/long print loop.
-                        # Throttle message throughput in order to keep GUI thread responsive.
-                        sleep(0.1)
+                    publish_as_msg(data)
                 except Exception:
-                    logging.exception("\nError when handling message from the backend: " + str(data))
-                    self._message_queue.append(BackendEvent(event_type="ProgramOutput",
-                                                data="Error parsing message: " + traceback.format_exc(),
-                                                stream_name="stderr"))
-                    raise
-
+                    # Can mean the line was from subprocess, 
+                    # which can't be captured by stream faking.
+                    # NB! If subprocess printed it without linebreak,
+                    # then the suffix can be thonny message
+                    
+                    parts = data.rsplit(common.MESSAGE_MARKER, maxsplit=1)
+                    
+                    # print first part as it is
+                    self._message_queue.append(BackendEvent("ProgramOutput",
+                                                data=parts[0],
+                                                stream_name="stdout"))
+                    
+                    if len(parts) == 2:
+                        second_part = common.MESSAGE_MARKER + parts[1]
+                        try:
+                            publish_as_msg(second_part)
+                        except Exception:
+                            # just print ...
+                            self._message_queue.append(BackendEvent("ProgramOutput",
+                                                        data=second_part,
+                                                        stream_name="stdout"))
+                
     def _listen_stderr(self):
         # stderr is used only for debugger debugging
         while True:
@@ -722,7 +742,11 @@ class CPythonProxy(BackendProxy):
             if data == '':
                 break
             else:
-                logging.debug("BACKEND: %s", data.strip())
+                self._message_queue.append(BackendEvent("ProgramOutput",
+                    stream_name="stderr",
+                    data=data,
+                ))
+        
         
     def get_executable(self):
         return self._executable

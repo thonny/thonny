@@ -758,7 +758,7 @@ class VM:
             raise RuntimeError("Module '{0}' is not loaded".format(module_name))
 
     def _debug(self, *args):
-        print("VM:", *args, file=self._original_stderr)
+        logger.debug("VM: " + str(args))
     
 
     def _enter_io_function(self):
@@ -2039,7 +2039,7 @@ class FancyTracer(Tracer):
         return ast.Num(node_id)
     
     def _debug(self, *args):
-        print("TRACER:", *args, file=self._vm._original_stderr)
+        logger.debug("TRACER: " + str(args))
     
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
