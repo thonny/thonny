@@ -28,7 +28,8 @@ class Debugger:
     def __init__(self, command_name):
         self._command_name = command_name
         self._last_progress_message = None
-        self._last_brought_out_frame_id=None
+        self._last_brought_out_frame_id = None
+        self._editor_context_menu = None
         get_workbench().bind("DebuggerResponse", self.handle_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
         
@@ -95,6 +96,32 @@ class Debugger:
     def bring_out_frame(self, frame_id, force=False):
         # called by StackView
         raise NotImplementedError()
+
+    def get_editor_context_menu(self):
+        def create_edit_command_handler(virtual_event_sequence):
+            def handler(event=None):
+                widget = get_workbench().focus_get()
+                if widget:
+                    return widget.event_generate(virtual_event_sequence)
+            
+            return handler
+                
+        if self._editor_context_menu is None:
+            menu = tk.Menu(get_workbench())
+            menu.add("command", 
+                     label="Run to cursor",
+                     command=lambda:self.check_issue_command("run_to_cursor"))
+            menu.add("separator")
+            menu.add("command",
+                     label="Copy",
+                     command=create_edit_command_handler("<<Copy>>"))
+            menu.add("command",
+                     label="Select all",
+                     command=create_edit_command_handler("<<SelectAll>>"))
+            self._editor_context_menu = menu 
+        
+        return self._editor_context_menu
+    
             
 class SingleWindowDebugger(Debugger):
     def __init__(self, command_name):
@@ -930,6 +957,8 @@ class DebuggerConfigurationPage(ConfigurationPage):
                           tooltip="Opens the Stack view on first call and "
                           + "closes it when program returns to main frame.")
     
+def get_current_debugger():
+    return _current_debugger
 
 def load_plugin() -> None:
     

@@ -181,7 +181,17 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
         self.mark_set("insert", "@%d,%d" % (event.x, event.y))
-        get_workbench().get_menu("edit").tk_popup(event.x_root, event.y_root)
+        
+        menu = get_workbench().get_menu("edit")
+        try:
+            from thonny.plugins.debugger import get_current_debugger
+            debugger = get_current_debugger() 
+            if debugger is not None:
+                menu = debugger.get_editor_context_menu()
+        except ImportError:
+            pass
+             
+        menu.tk_popup(event.x_root, event.y_root)
     
     
 class CodeView(tktextext.TextFrame):
