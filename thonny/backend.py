@@ -37,7 +37,7 @@ BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
 AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
 AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
-logger = logging.getLogger()
+logger = logging.getLogger("thonny.backend")
 info = logger.info
 
 _CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
@@ -286,7 +286,7 @@ class VM:
                     else:
                         f(self)
             except Exception:
-                logging.exception("Failed loading plugin '" + module_name + "'")
+                logger.exception("Failed loading plugin '" + module_name + "'")
 
     def _install_signal_handler(self):
         def signal_handler(signal, frame):
@@ -310,7 +310,11 @@ class VM:
             raise UserError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        return self._execute_file(cmd, SimpleRunner)
+        try:
+            return self._execute_file(cmd, SimpleRunner)
+        finally:
+            logger.warning("kanaliha")
+            
 
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
@@ -327,7 +331,6 @@ class VM:
     def _cmd_execute_source(self, cmd):
         """Executes Python source entered into shell"""
         filename = "<pyshell>"
-
         ws_stripped_source = cmd.source.strip()
         source = ws_stripped_source.strip("?")
         num_stripped_question_marks = len(ws_stripped_source) - len(source)
@@ -2052,13 +2055,6 @@ class FancySourceFileLoader(SourceFileLoader):
         root = self._tracer._prepare_ast(data, path, "exec")
         return super().source_to_code(root, path)
     
-
-
-def fdebug(frame, msg, *args):
-    if logger.isEnabledFor(logging.DEBUG):
-        logger.debug(_get_frame_prefix(frame) + msg, *args)
-
-
 def _get_frame_prefix(frame):
     return str(id(frame)) + " " + ">" * len(inspect.getouterframes(frame, 0)) + " "
 
@@ -2091,7 +2087,7 @@ def _fetch_frame_source_info(frame):
         return "".join(lines), lineno
     except Exception:
         # Fallback
-        logging.exception("Failed getting source for frame %s, %s", frame.f_code.co_filename, 
+        logger.exception("Failed getting source for frame %s, %s", frame.f_code.co_filename, 
                           frame.f_code.co_name)
         with tokenize.open(frame.f_code.co_filename) as fp:
             whole_source = fp.read()

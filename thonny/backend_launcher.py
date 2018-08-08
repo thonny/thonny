@@ -31,7 +31,8 @@ if __name__ == "__main__":
     
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
-    logger = logging.getLogger()
+    logger = logging.getLogger("thonny.backend")
+    logger.propagate = False
     logFormatter = logging.Formatter('%(levelname)s: %(message)s')
     file_handler = logging.FileHandler(os.path.join(THONNY_USER_DIR,"backend.log"), 
                                        encoding="UTF-8",
