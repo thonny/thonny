@@ -310,10 +310,7 @@ class VM:
             raise UserError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        try:
-            return self._execute_file(cmd, SimpleRunner)
-        finally:
-            logger.warning("kanaliha")
+        return self._execute_file(cmd, SimpleRunner)
             
 
     def _cmd_run(self, cmd):
@@ -973,9 +970,15 @@ class Tracer(Executor):
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
             sys.settrace(self._trace)
+            if hasattr(sys, "breakpointhook"):
+                old_breakpointhook = sys.breakpointhook
+                sys.breakpointhook = self._breakpointhook
+        
             return super()._execute_prepared_user_code(statements, expression, global_vars)
         finally:
             sys.settrace(None)
+            if hasattr(sys, "breakpointhook"):
+                sys.breakpointhook = old_breakpointhook
         
     def _should_skip_frame(self, frame):
         code = frame.f_code
@@ -1070,6 +1073,9 @@ class Tracer(Executor):
                 result[path] = set()
             result[path].add(line)
             return result
+    
+    def _breakpointhook(self, *args, **kw):
+        pass
   
 
 class SimpleTracer(Tracer):
@@ -1077,6 +1083,14 @@ class SimpleTracer(Tracer):
         super().__init__(vm, original_cmd)
         
         self._alive_frame_ids = set()
+    
+    def _breakpointhook(self, *args, **kw):
+        frame = inspect.currentframe()
+        while self._should_skip_frame(frame):
+            frame = frame.f_back
+        self._report_current_state(frame)
+        self._current_command = self._fetch_next_debugger_command()
+
     
     def _trace(self, frame, event, arg):
         
@@ -1223,6 +1237,9 @@ class FancyTracer(Tracer):
         self._fulltags = Counter()
         self._nodes = {}
 
+    def _breakpointhook(self, *args, **kw):
+        self._report_state(len(self._saved_states)-1)
+        self._current_command = self._fetch_next_debugger_command()
 
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
