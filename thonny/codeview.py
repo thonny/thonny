@@ -208,6 +208,8 @@ class CodeView(tktextext.TextFrame):
         spacer_font = editor_font.copy()
         spacer_font.configure(size=editor_font.cget("size") // 4)
         self._gutter.tag_configure("spacer", font=spacer_font)
+        self._gutter.tag_configure("active", font="BoldEditorFont")
+        self._gutter.tag_raise("spacer")
         
     def get_content(self):
         return self.text.get("1.0", "end-1c") # -1c because Text always adds a newline itself

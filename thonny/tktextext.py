@@ -745,6 +745,7 @@ class TextFrame(ttk.Frame):
         self.update_margin_line()
         
         self.text.bind("<<TextChange>>", self._text_changed, True)
+        self.text.bind("<<CursorMove>>", self._cursor_moved, True)
         
         self._ui_theme_change_binding = self.bind("<<ThemeChanged>>", self._reload_theme_options, True)
         self._reload_theme_options()
@@ -777,6 +778,9 @@ class TextFrame(ttk.Frame):
         "# TODO: make more efficient"
         self.update_gutter()
         self.update_margin_line()
+    
+    def _cursor_moved(self, event):
+        self._update_gutter_active_line()
     
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
@@ -840,6 +844,12 @@ class TextFrame(ttk.Frame):
         # https://mail.python.org/pipermail/tkinter-discuss/2010-March/002197.html
         first, _ = self.text.yview()
         self._gutter.yview_moveto(first)
+        self._update_gutter_active_line()
+    
+    def _update_gutter_active_line(self):
+        self._gutter.tag_remove("active", "1.0", "end")
+        insert = self.text.index("insert")
+        self._gutter.tag_add("active", insert + " linestart", insert + " lineend")
     
     def compute_gutter_line(self, lineno):
         yield str(lineno), ("line_number",)
