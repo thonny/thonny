@@ -7,6 +7,7 @@ Version history
 * FIXED #340: Validate geometry before loading
 * FIXED #363: subprocess.run causes Thonny backend to hang
 * FIXED #419: logging doesn't work in user programs
+* FIXED #440: In Linux paste over selection doesn't remove the selection
 
 2.1.21 (2018-07-17)
 ===================
