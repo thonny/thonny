@@ -519,7 +519,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         return self.get_current_child()
     
     def get_all_editors(self):
-        return self.winfo_children()
+        # When workspace is closing, self.winfo_children() 
+        # may return an unexplainable tkinter.Frame
+        return [child for child in self.winfo_children() if isinstance(child, Editor)]
     
     def select_next_prev_editor(self, direction):
         cur_index = self.index(self.select())

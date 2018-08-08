@@ -617,10 +617,10 @@ class AutoScrollbar(SafeScrollbar):
         super().__init__(master=master, **kw)
     
     def set(self, lo, hi):
-        # TODO: this can make GUI hang or max out CPU when scrollbar wobbles back and forth
         if float(lo) <= 0.0 and float(hi) >= 1.0:
             self.grid_remove()
-        else:
+        elif float(lo) > 0.001 or float(hi) < 0.009:
+            # with >0 and <1 it occasionally made scrollbar wobble back and forth
             self.grid()
         ttk.Scrollbar.set(self, lo, hi)
     def pack(self, **kw):

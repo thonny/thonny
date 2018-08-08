@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from thonny.common import TextRange
-from thonny import get_workbench
+from thonny import get_workbench, ui_utils
 from thonny import tktextext, roughparse
 from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 from thonny.tktextext import EnhancedText
@@ -180,6 +180,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     
     def on_secondary_click(self, event):
         super().on_secondary_click(event)
+        self.mark_set("insert", "@%d,%d" % (event.x, event.y))
         get_workbench().get_menu("edit").tk_popup(event.x_root, event.y_root)
     
     
@@ -189,7 +190,8 @@ class CodeView(tktextext.TextFrame):
         tktextext.TextFrame.__init__(self, master, text_class=CodeViewText,
                                      undo=True, wrap=tk.NONE,
                                      vertical_scrollbar_style=scrollbar_style("Vertical"), 
-                                     horizontal_scrollbar_style=scrollbar_style("Horizontal"), 
+                                     horizontal_scrollbar_style=scrollbar_style("Horizontal"),
+                                     horizontal_scrollbar_class=ui_utils.AutoScrollbar,
                                      **text_frame_args)
         
         # TODO: propose_remove_line_numbers on paste??
