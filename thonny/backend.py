@@ -316,14 +316,14 @@ class VM:
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
 
-    def _cmd_LineDebug(self, cmd):
-        return self._execute_file(cmd, SimpleTracer)
+    def _cmd_FastDebug(self, cmd):
+        return self._execute_file(cmd, FastTracer)
 
     def _cmd_Debug(self, cmd):
-        return self._execute_file(cmd, FancyTracer)
+        return self._execute_file(cmd, NiceTracer)
 
     def _cmd_debug(self, cmd):
-        return self._execute_file(cmd, FancyTracer)
+        return self._execute_file(cmd, NiceTracer)
 
     def _cmd_execute_source(self, cmd):
         """Executes Python source entered into shell"""
@@ -350,7 +350,7 @@ class VM:
             mode = "exec"
 
         result_attributes = self._execute_source(source, filename, mode,
-            FancyTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
+            NiceTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
             cmd)
 
         result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
@@ -553,7 +553,7 @@ class VM:
 
 
     def _cmd_get_object_info(self, cmd):
-        if (isinstance(self._current_executor, FancyTracer)
+        if (isinstance(self._current_executor, NiceTracer)
             and self._current_executor.is_in_past()):
             info = {'id' : cmd.object_id,
                     "error": "past info not available"}
@@ -1078,7 +1078,7 @@ class Tracer(Executor):
         pass
   
 
-class SimpleTracer(Tracer):
+class FastTracer(Tracer):
     def __init__(self, vm, original_cmd):
         super().__init__(vm, original_cmd)
         
@@ -1223,7 +1223,7 @@ class SimpleTracer(Tracer):
 
         return result
     
-class FancyTracer(Tracer):
+class NiceTracer(Tracer):
 
     def __init__(self, vm, original_cmd):
         super().__init__(vm, original_cmd)

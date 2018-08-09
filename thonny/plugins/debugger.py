@@ -965,7 +965,7 @@ def load_plugin() -> None:
     get_workbench().set_default("debugger.single_window", False)
     get_workbench().set_default("debugger.automatic_stack_view", True)
     
-    get_workbench().add_command("debug", "run", "Debug current script",
+    get_workbench().add_command("debug", "run", "Debug current script (nicer)",
         lambda: _start_debug("Debug"),
         caption="Debug",
         tester=_start_debug_enabled,
@@ -974,9 +974,9 @@ def load_plugin() -> None:
         image="debug-current-script",
         include_in_toolbar=True)
     
-    get_workbench().add_command("debuglite", "run", "Debug current script (line-based)",
-        lambda: _start_debug("LineDebug"),
-        caption="Line-debug",
+    get_workbench().add_command("debuglite", "run", "Debug current script (faster)",
+        lambda: _start_debug("FastDebug"),
+        caption="Fast-debug",
         tester=_start_debug_enabled,
         default_sequence="<Shift-F5>",
         group=10)
