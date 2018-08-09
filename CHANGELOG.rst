@@ -2,6 +2,51 @@
 Version history
 ===============
 
+3.0.0b1 (2018-08-09)
+====================
+* NEW: Thonny has now two debug modes: beside original AST based debug mode (the "nicer" one, Ctrl+F5) there is now also line-based mode (the "faster" one, Shift+F5), which is not so intuitive but much more efficient. 
+* NEW: Both debug modes now support breakpoints (switch on line numbers and double-click on the margin) 
+* NEW: Alternative presentation for call stack (in single window, just like in most debuggers; see Tools => Options => Debugger) 
+* NEW: Clicking on the links in stacktrace now shows the variables of those frames.
+* NEW: You can re-run your changed program without closing it first (relevant for graphical programs).   
+* NEW: Checking "Run => Dock user windows" makes your Tkinter windows stay on top and appear always on the same location. This allows tweaking your turtle programs while looking at current output.
+* NEW: "View => Program arguments" opens a box where you can write the argument string for your program   
+* NEW: "Tools => Options => Backend => Custom Python interpreter" now allows creating virtual environments   
+* NEW: "Tools => Manage packages" now allows installing new packages with all CPython backends, not only virtual environments. If the backend is not a virtual environment it installs to user site packages (with `pip install --user`)
+* CHANGED: Upgraded Python to version 3.7.0 in Thonny+Python bundles 
+* CHANGED: Dropped support for Python 3.4 (both for front-end and back-end)
+* CHANGED: Dropped support for Tk 8.5. All bundles (including Mac's) now come with Tk 8.6.8
+* CHANGED: Default back-end is now "Same as front-end" (was "A special virtual environment"). This makes deployment easier in classroom setting and it is simpler scheme in general. "Special virtual environment" backend may be removed in future versions.
+* CHANGED: Plug-ins will be now installed to regular user site packages directory (was ~/.thonny/plugins)
+* ENHANCEMENT: Better Windows installer (run as administrator for all-users install)
+* ENHANCEMENT: thonny.exe is now digitally signed
+* ENHANCEMENT: On Linux Thonny now uses native file dialogs (via zenity)   
+* ENHANCEMENT: Nicer debugger can now step into your functions defined in other modules   
+* ENHANCEMENT: Nicer debugger can now stop before the assignement of loop variable in for-loops   
+* ENHANCEMENT: "Run to cursor" can be called by right-clicking desired line in the editor and selecting the command from context menu   
+* ENHANCEMENT: Great time and memory optimizations in nicer debug mode. The ability to step back in time is not so expensive anymore.  
+* ENHANCEMENT: Thonny now detects external file modifications and proposes to reload 
+* ENHANCEMENT: New Windows installer (run as administrator for all-users install)
+* FIXED #163: Uninstaller now correctly removes "Open with Thonny" context menu entry
+* FIXED #340: Validate geometry before loading
+* FIXED #358: sys.exit() in user programs doesn't show stacktrace anymore
+* FIXED #363: subprocess.run causes Thonny backend to hang
+* FIXED #375: Files are now saved with linebreaks suitable for current platform
+* FIXED #419: logging doesn't work in user programs
+* FIXED #422: Make Ctrl+C, Ctrl+V etc. work on Greek keyboard
+* FIXED #440: In Linux paste over selection doesn't remove the selection
+* FIXED #450: Locals marker doesn't work with jedi 0.12
+* FIXED #468: Problem with changing backend interpreter
+* FIXED #471: Problem when Thonny uses jedi 0.11 or newer
+* FIXED #475: Heap view misbehaving on startup
+* FIXED: "Run => Run to cursor" works again 
+* FIXED: Thonny now honors PEP 263 style encoding markers when saving files. (UTF-8 is still the default) 
+* FIXED: Problem when jedi 0.10 and parso are both installed
+* TECHNICAL: Plug-in writers can now control each import in user programs (thonny.backend.VM.add_import_handler)
+* TECHNICAL: Communication messages between back-end and front-end were changed
+* TECHNICAL: Thonny doesn't tweak PYTHONUSERBASE anymore to put plugins under ~/.thonny. Regular user site packages is used instead 
+* TECHNICAL: Dependency to "packaging" introduced in 2.2 betas is now replaced with "setuptools" 
+
 2.2.0b4 (2018-06-05)
 ====================
 * FIXED: Couldn't open menus with None backend
