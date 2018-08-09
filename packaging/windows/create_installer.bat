@@ -6,9 +6,9 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy .\Python36\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Pythonny37\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
-copy ThonnyRunner36\Release\thonny.exe %BUILDDIR% /Y
+copy ThonnyRunner37\Release\thonny.exe %BUILDDIR% /Y
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
 xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
@@ -17,7 +17,7 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -m pip install jedi==0.12.*
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python -m pip install --no-cache-dir thonny
+%BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
 
 @echo ............... CLEANING PYTHON ............................
 @rem delete following 3 files to avoid confusion (user may think they're Thonny license etc.)
@@ -50,9 +50,6 @@ rmdir %BUILDDIR%\tcl\tcl8.6\opt0.4 /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\msgs /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 
-
-@echo ............... ENABLE DPI AWARNESS ..............................
-@REM call EnableDPIAwareness %PREFIX%\pythonw.exe
 
 @echo ............... ADDING LICENSES ...................................
 copy ..\..\LICENSE.txt %BUILDDIR% /Y>NUL

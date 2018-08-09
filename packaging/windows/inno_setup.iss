@@ -46,7 +46,7 @@ Compression=lzma2/ultra
 SolidCompression=yes
 
 LicenseFile=license-for-win-installer.txt
-WizardImageFile=screenshot_with_logo.bmp
+WizardImageFile=screenshot_with_logo_semidark.bmp
 WizardSmallImageFile=small_logo.bmp 
 ChangesAssociations=yes
 
@@ -57,7 +57,7 @@ ChangesAssociations=yes
 ; http://blog.ksoftware.net/2011/07/exporting-your-code-signing-certificate-to-a-pfx-file-from-firefox/
 ; http://certhelp.ksoftware.net/support/solutions/articles/17157-how-do-i-export-my-code-signing-certificate-from-internet-explorer-or-chrome-
 ; http://blog.ksoftware.net/2011/07/how-to-automate-code-signing-with-innosetup-and-ksign/
-SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttp://thonny.org$q $f
+SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttps://thonny.org$q $f
 
 
 [Languages]
