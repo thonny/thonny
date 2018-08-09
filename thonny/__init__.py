@@ -2,9 +2,16 @@ import os.path
 import sys
 from typing import TYPE_CHECKING, cast, Optional
 
-THONNY_USER_DIR = os.environ.get("THONNY_USER_DIR", 
-                                 os.path.expanduser(os.path.join("~", ".thonny")))
 
+if os.environ.get("THONNY_USER_DIR", ""):
+    THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
+elif hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix:
+    # we're in a virtualenv or venv
+    THONNY_USER_DIR = os.path.join(sys.prefix, ".thonny")
+else:
+    THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
+    
+    
 def launch():
     _prepare_thonny_user_dir()
     _misc_prepare()

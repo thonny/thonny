@@ -4,6 +4,10 @@ Version history
 
 3.0.0b1 (2018-08-09)
 ====================
+
+Note: This version is successor of 2.2.0b4 and 2.1.21. Stable release of 2.2.0 was skipped. 
+(Incrementing the major version felt more appropriate considering the amount of new and changed features.)
+
 * NEW: Thonny has now two debug modes: beside original AST based debug mode (the "nicer" one, Ctrl+F5) there is now also line-based mode (the "faster" one, Shift+F5), which is not so intuitive but much more efficient. 
 * NEW: Both debug modes now support breakpoints (switch on line numbers and double-click on the margin) 
 * NEW: Alternative presentation for call stack (in single window, just like in most debuggers; see Tools => Options => Debugger) 
@@ -18,6 +22,7 @@ Version history
 * CHANGED: Dropped support for Tk 8.5. All bundles (including Mac's) now come with Tk 8.6.8
 * CHANGED: Default back-end is now "Same as front-end" (was "A special virtual environment"). This makes deployment easier in classroom setting and it is simpler scheme in general. "Special virtual environment" backend may be removed in future versions.
 * CHANGED: Plug-ins will be now installed to regular user site packages directory (was ~/.thonny/plugins)
+* CHANGED: If Thonny (front-end) is run from a virtual environment, user directory (with configuration.ini and logs) will be .thonny under virtual environment's root directory (instead of usual ~/.thonny).  
 * ENHANCEMENT: Better Windows installer (run as administrator for all-users install)
 * ENHANCEMENT: thonny.exe is now digitally signed
 * ENHANCEMENT: On Linux Thonny now uses native file dialogs (via zenity)   
