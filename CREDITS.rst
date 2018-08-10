@@ -10,7 +10,7 @@ Thonny was born in University of Tartu (https://www.ut.ee), Institute of Compute
 
 Supporters
 ----------
-Several features in Thonny were proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
+Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
 
 Python
 ------
