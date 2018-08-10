@@ -43,7 +43,7 @@ class AboutDialog(tk.Toplevel):
         heading_label.grid()
         
         
-        url = "http://thonny.org"
+        url = "https://thonny.org"
         url_font = font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
         url_label = ttk.Label(main_frame, text=url, style="Url.TLabel",
@@ -72,12 +72,17 @@ class AboutDialog(tk.Toplevel):
                                         + "Tk " + ui_utils.get_tk_version_str())
         platform_label.grid(pady=20)
         
-        credits_label = ttk.Label(main_frame, text="Made in\nUniversity of Tartu, Estonia\n"
-                                + "with the help from\nopen-source community",
+        credits_label = ttk.Label(main_frame, 
+                                  text="Made in\n"
+                                  + "University of Tartu, Estonia,\n"
+                                  + "with the help from\n"
+                                  + "open-source community\n"
+                                  + "and "
+                                  + "Raspberry Pi Foundation",
                               style="Url.TLabel",
                               cursor="hand2",
                               font=url_font,
-                              justify=tk.CENTER)
+                              justify="center")
         credits_label.grid()
         credits_label.bind("<Button-1>", lambda _:webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CREDITS.rst"))
         

@@ -8,7 +8,7 @@ Version history
 Note: This version is successor of 2.2.0b4 and 2.1.21. Stable release of 2.2.0 was skipped. 
 (Incrementing the major version felt more appropriate considering the amount of new and changed features.)
 
-* NEW: Thonny has now two debug modes: beside original AST based debug mode (the "nicer" one, Ctrl+F5) there is now also line-based mode (the "faster" one, Shift+F5), which is not so intuitive but much more efficient. 
+* NEW: Thonny now has two debug modes: beside original AST based debug mode (the "nicer" one, Ctrl+F5) there is now also line-based mode (the "faster" one, Shift+F5), which is not so intuitive but much more efficient. 
 * NEW: Both debug modes now support breakpoints (switch on line numbers and double-click on the margin) 
 * NEW: Alternative presentation for call stack (in single window, just like in most debuggers; see Tools => Options => Debugger) 
 * NEW: Clicking on the links in stacktrace now shows the variables of those frames.
