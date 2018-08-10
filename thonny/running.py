@@ -374,6 +374,7 @@ class Runner:
                 get_workbench().update()
                 sleep(0.01)
         
+        get_workbench().event_generate("BackendRestart")        
         
         
     def destroy_backend(self) -> None:

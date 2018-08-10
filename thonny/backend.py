@@ -397,7 +397,7 @@ class VM:
 
 
     def _cmd_get_globals(self, cmd):
-        warnings.warn("_cmd_get_globals is deprecated")
+        warnings.warn("_cmd_get_globals is deprecated for CPython")
         try:
             return InlineResponse("get_globals",
                                   module_name=cmd.module_name,
