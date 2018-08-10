@@ -266,6 +266,7 @@ class Workbench(tk.Tk):
         self.get_menu("edit", "Edit")
         self.get_menu("view", "View")
         self.get_menu("run", "Run")
+        self.get_menu("device", "Device")
         self.get_menu("tools", "Tools")
         self.get_menu("help", "Help")
     
@@ -1513,7 +1514,7 @@ class Workbench(tk.Tk):
                 if tester and not tester():
                     menu.entryconfigure(i, state=tk.DISABLED)
                 else:
-                    menu.entryconfigure(i, state=tk.ACTIVE)   
+                    menu.entryconfigure(i, state=tk.NORMAL)
     
     def _find_location_for_menu_item(self, menu_name: str, command_label: str) -> Union[str, int]:        
         
