@@ -40,10 +40,13 @@ class BackendConfigurationPage(ConfigurationPage):
         label = ttk.Label(self, text="What should Thonny use for running your code?")
         label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
         
+        sorted_backend_specs = sorted(self._backend_specs_by_desc.values(),
+                                      key=lambda x: x.sort_key)
+        
         self._combo = ttk.Combobox(self,
                               exportselection=False,
                               textvariable=self._combo_variable,
-                              values=sorted(self._backend_specs_by_desc.keys()))
+                              values=[spec.description for spec in sorted_backend_specs])
         
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0,10))
         self._combo.state(['!disabled', 'readonly'])

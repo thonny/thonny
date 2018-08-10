@@ -42,7 +42,8 @@ CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 SINGLE_INSTANCE_DEFAULT = True
 
 MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"]) 
-BackendSpec = collections.namedtuple("BackendSpec", ["name", "proxy_class", "description", "config_page_constructor"])
+BackendSpec = collections.namedtuple("BackendSpec", ["name", "proxy_class", "description", 
+                                                     "config_page_constructor", "sort_key"])
 
 BasicUiThemeSettings = Dict[str, Dict[str, Union[Dict, Sequence]]] 
 CompoundUiThemeSettings = List[BasicUiThemeSettings]
@@ -348,19 +349,23 @@ class Workbench(tk.Tk):
         self.set_default("CustomInterpreter.used_paths", [])
         self.set_default("CustomInterpreter.path", "")
         
-        self.add_backend("PrivateVenv", running.PrivateVenvCPythonProxy, 
-                         "A special virtual environment (deprecated)", 
-                         "This virtual environment is automatically maintained by Thonny.\n"
-                         "Location: "+ running.get_private_venv_path()
-                        )
         self.add_backend("SameAsFrontend", running.SameAsFrontendCPythonProxy, 
                          "The same interpreter which runs Thonny (default)",
-                         running.get_frontend_python())
+                         running.get_frontend_python(),
+                         "1")
     
         from thonny import running_config_page
         self.add_backend("CustomCPython", running.CustomCPythonProxy,
-                         "Custom Python 3 interpreter",
-                         running_config_page.CustomCPythonConfigurationPage)
+                         "Alternative Python 3 interpreter or virtual environment",
+                         running_config_page.CustomCPythonConfigurationPage,
+                         "2")
+        
+        self.add_backend("PrivateVenv", running.PrivateVenvCPythonProxy, 
+                         "A special virtual environment (deprecated)", 
+                         "This virtual environment is automatically maintained by Thonny.\n"
+                         "Location: "+ running.get_private_venv_path(),
+                         "z"
+                        )
         
     def _start_runner(self) -> None:
         try:
@@ -751,8 +756,11 @@ class Workbench(tk.Tk):
                     name: str, 
                     proxy_class: Type[BackendProxy], 
                     description: str, 
-                    config_page_constructor) -> None:
-        self._backends[name] = BackendSpec(name, proxy_class, description, config_page_constructor)
+                    config_page_constructor,
+                    sort_key=None) -> None:
+        self._backends[name] = BackendSpec(name, proxy_class, description,
+                                           config_page_constructor,
+                                           sort_key if sort_key is not None else description)
         
         # assing names to related classes
         assert proxy_class.backend_name is None

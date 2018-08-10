@@ -45,7 +45,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         
         self._venv_button = ttk.Button(self, style="Centered.TButton",
                                          text="Create new virtual environment ...\n"
-                                         + "(Select or create an empty directory)", 
+                                         + "(Select existing or create a new empty directory)", 
                                          command=self._create_venv)
         
         self._venv_button.grid(row=4, column=0, columnspan=2, sticky=tk.NSEW, pady=(5,0))
