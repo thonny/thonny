@@ -34,6 +34,7 @@ import collections
 from thonny.shell import ShellView
 from typing import Optional, Type, Union, Callable, Dict, Sequence, List, Any, cast
 from typing import Set, Tuple  # @UnusedImport
+import platform
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -1091,22 +1092,33 @@ class Workbench(tk.Tk):
         # if path is relative then interpret it as living in res folder
         if not os.path.isabs(filename):
             filename = os.path.join(self.get_package_dir(), "res", filename)
-            if (not os.path.exists(filename)
-                and os.path.exists(filename + ".gif")):
-                filename = filename + ".gif"
-            
+            if not os.path.exists(filename):
+                if os.path.exists(filename + ".png"):
+                    filename = filename + ".png"
+                elif os.path.exists(filename + ".gif"):
+                    filename = filename + ".gif"
+        
+        # are there platform-specific variants?
+        plat_filename = filename[:-4] + "_" + platform.system() + ".png"
+        if os.path.exists(plat_filename):
+            filename = plat_filename
+        
         if self._scaling_factor >= 2.0:
-            img = tk.PhotoImage(file=filename)
-            # can't use zoom method, because this doesn't allow name
-            img2 = tk.PhotoImage(tk_name)
-            self.tk.call(img2, 'copy', img.name, '-zoom',
-                         int(self._scaling_factor), int(self._scaling_factor))
-            self._images.add(img2)
-            return img2
-        else:
-            img = tk.PhotoImage(tk_name, file=filename)
-            self._images.add(img)
-            return img
+            scaled_filename = filename[:-4] + "_2x.png"
+            if os.path.exists(scaled_filename):
+                filename = scaled_filename
+            else:
+                img = tk.PhotoImage(file=filename)
+                # can't use zoom method, because this doesn't allow name
+                img2 = tk.PhotoImage(tk_name)
+                self.tk.call(img2, 'copy', img.name, '-zoom',
+                             int(self._scaling_factor), int(self._scaling_factor))
+                self._images.add(img2)
+                return img2
+        
+        img = tk.PhotoImage(tk_name, file=filename)
+        self._images.add(img)
+        return img
                       
     def show_view(self, view_id: str, set_focus: bool=True) -> Union[bool, tk.Widget]:
         """View must be already registered.
@@ -1228,7 +1240,7 @@ class Workbench(tk.Tk):
         if scaling in ["default", "auto"]: # auto was used in 2.2b3
             self._scaling_factor = self._default_scaling_factor
         else:
-            self._scaling_factor = scaling
+            self._scaling_factor = float(scaling)
         
         if running_on_mac_os():
             self._scaling_factor *= 1.7

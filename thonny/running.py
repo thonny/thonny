@@ -71,7 +71,7 @@ class Runner:
             image="run-current-script",
             include_in_toolbar=True)
         
-        get_workbench().add_command('restart', "run", 'Stop/Restart',
+        get_workbench().add_command('restart', "run", 'Stop/Restart backend',
             caption="Stop",
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
