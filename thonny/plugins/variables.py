@@ -3,7 +3,8 @@
 from tkinter import ttk
 
 from thonny.memory import VariablesFrame
-from thonny import get_workbench
+from thonny import get_workbench, get_runner
+from thonny.common import InlineCommand
 
 class VariablesView(VariablesFrame):
     # TODO: Indicate invalid state when program or debug command is running more than a second
@@ -19,6 +20,7 @@ class VariablesView(VariablesFrame):
         get_workbench().bind("BackendRestart", self._handle_backend_restart, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
+        get_workbench().bind("get_globals_response", self._handle_get_globals_response, True)
         
         # records last info from progress messages 
         self._last_active_info = None
@@ -42,9 +44,16 @@ class VariablesView(VariablesFrame):
     
     def _handle_backend_restart(self, event):
         self._clear_tree()
+
+    def _handle_get_globals_response(self, event):
+        self.show_globals(event["globals"], event["module_name"])
     
     def _handle_toplevel_response(self, event):
-        self.show_globals(event["globals"], "__main__")
+        if "globals" in event:
+            self.show_globals(event["globals"], "__main__")
+        else:
+            # MicroPython
+            get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
     def show_globals(self, globals_, module_name, is_active=True):
         # TODO: update only if something has changed
