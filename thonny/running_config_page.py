@@ -4,7 +4,7 @@ import os.path
 from tkinter import messagebox
 from tkinter import ttk
 
-from thonny import get_workbench, running
+from thonny import get_workbench, running, ui_utils
 from thonny.ui_utils import create_string_var, SubprocessDialog, \
     askopenfilename, askdirectory
 from thonny.misc_utils import running_on_windows, running_on_mac_os
@@ -84,7 +84,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                                 stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                 universal_newlines=True)
         dlg = SubprocessDialog(self, proc, "Creating virtual environment")
-        dlg.wait_window()
+        ui_utils.show_dialog(dlg)
         
         if running_on_windows():
             exe_path = actual_path(os.path.join(path, "Scripts", "python.exe"))

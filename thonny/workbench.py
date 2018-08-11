@@ -1453,10 +1453,7 @@ class Workbench(tk.Tk):
     
     def _cmd_show_options(self) -> None:
         dlg = ConfigurationDialog(self, self._configuration_pages)
-        dlg.focus_set()
-        dlg.transient(self)
-        dlg.grab_set()
-        self.wait_window(dlg)
+        ui_utils.show_dialog(dlg)
     
     def _cmd_focus_editor(self) -> None:
         self.get_editor_notebook().focus_set()

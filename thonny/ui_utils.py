@@ -1366,17 +1366,13 @@ class FileCopyDialog(tk.Toplevel):
         main_frame.columnconfigure(0, weight=1)
         
         self._update_progress()
-
-        if not running_on_mac_os():
-            # occasionally following causes dialog to stay behind main win on mac
-            self.transient(master)
-            self.grab_set() # to make it active and modal
             
         self.bind('<Escape>', self._cancel, True) # escape-close only if process has completed 
         self.protocol("WM_DELETE_WINDOW", self._cancel)
         center_window(self, master)
+        self._start()
     
-    def start_and_wait(self):
+    def _start(self):
         def work():
             self._copy_progess = 0
             
@@ -1397,8 +1393,6 @@ class FileCopyDialog(tk.Toplevel):
             self._done = True
         
         threading.Thread(target=work, daemon=True).start()
-        
-        self.wait_window()
     
     def _update_progress(self):
         if self._done:
@@ -1473,10 +1467,6 @@ class SubprocessDialog(tk.Toplevel):
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         #self.resizable(height=tk.FALSE, width=tk.FALSE)
-        if not running_on_mac_os():
-            # occasionally following causes dialog to stay behind main win on mac
-            self.transient(master)
-            self.grab_set() # to make it active and modal
         self.text.focus_set()
         
         
@@ -1782,6 +1772,22 @@ def handle_mistreated_latin_shortcuts(registry, event):
             for handler, tester in registry[(simplified_state, event.keycode)]:
                 if tester is None or tester():
                     handler()
+
+
+def show_dialog(dlg, master=None):
+    if master is None:
+        master = tk._default_root
+        
+    focused_widget = master.focus_get()
+    center_window(dlg, master)        
+    dlg.transient(master)
+    dlg.grab_set()
+    master.wait_window(dlg)
+    dlg.grab_release()
+    master.lift()
+    master.focus_force()
+    if focused_widget is not None:
+        focused_widget.focus_set()
 
         
 if __name__ == "__main__":

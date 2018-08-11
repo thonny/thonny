@@ -47,9 +47,6 @@ class PipDialog(tk.Toplevel):
         self.title(self._get_title())
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
-        self.transient(master)
-        self.grab_set() # to make it active
-        #self.grab_release() # to allow eg. copy something from the editor 
         
         self._create_widgets(main_frame)
         
@@ -807,6 +804,7 @@ class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):
         tk.Toplevel.__init__(self, master)
         self.result = None
+        self._closed = False
         self._version_data = None
         self._package_name = package_metadata["info"]["name"]
         self.title("Advanced install / upgrade / downgrade")
@@ -872,8 +870,6 @@ class DetailsDialog(tk.Toplevel):
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         #self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.transient(master)
-        self.grab_set() # to make it active and modal
         self.version_combo.focus_set()
         
         
@@ -914,6 +910,9 @@ class DetailsDialog(tk.Toplevel):
                                      self._show_version_info)
     
     def _show_version_info(self, name, info, error_code=None):
+        if self._closed:
+            return
+        
         self._version_data = info
         if (not error_code
             and "requires_dist" in info["info"] 
@@ -935,10 +934,12 @@ class DetailsDialog(tk.Toplevel):
             self._version_data,
             bool(self.update_deps_var.get())
         )
+        self._closed = True
         self.destroy()
     
     def _cancel(self, event=None):
         self.result = None
+        self._closed = True
         self.destroy()
         
 def _fetch_url_future(url, timeout=10):
@@ -965,13 +966,13 @@ def _get_latest_stable_version(version_strings):
 
 def _show_subprocess_dialog(master, proc, title):
     dlg = SubprocessDialog(master, proc, title)
-    dlg.wait_window()
+    ui_utils.show_dialog(dlg, master)
     return dlg.returncode, dlg.stdout, dlg.stderr
 
 
 def _ask_installation_details(master, data, selected_version):
     dlg = DetailsDialog(master, data, selected_version)
-    dlg.wait_window()
+    ui_utils.show_dialog(dlg, master)
     return dlg.result
 
 def _start_fetching_package_info(name, version_str, completion_handler):
@@ -1061,14 +1062,14 @@ def version_satisfies_constraint(ver, cop, cver):
 def load_plugin() -> None:
     def open_backend_pip_gui(*args):
         pg = BackendPipDialog(get_workbench())
-        pg.wait_window()
+        ui_utils.show_dialog(pg)
     
     def open_backend_pip_gui_enabled():
         return "pip_gui" in get_runner().supported_features()
 
     def open_frontend_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())
-        pg.wait_window()
+        ui_utils.show_dialog(pg)
 
     get_workbench().add_command("backendpipgui", "tools", "Manage packages...", open_backend_pip_gui,
                                 tester=open_backend_pip_gui_enabled,

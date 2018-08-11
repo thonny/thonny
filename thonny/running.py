@@ -19,7 +19,7 @@ from thonny.common import serialize_message, ToplevelCommand, \
     InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
     UserError, actual_path, path_startswith, CommandToBackend, ToplevelResponse,\
     DebuggerResponse, BackendEvent
-from thonny import get_workbench, get_runner, get_shell
+from thonny import get_workbench, get_runner, get_shell, ui_utils
 from thonny import THONNY_USER_DIR, common
 from thonny.misc_utils import running_on_windows, running_on_mac_os, construct_cmd_line
 from thonny.common import is_same_path
@@ -862,7 +862,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         from thonny.ui_utils import SubprocessDialog
         dlg = SubprocessDialog(get_workbench(), proc, "Preparing the backend", long_description=description)
         try:
-            get_workbench().wait_window(dlg)
+            ui_utils.show_dialog(dlg)
         except Exception:
             # if using --without-pip the dialog may close very quickly 
             # and for some reason wait_window would give error then

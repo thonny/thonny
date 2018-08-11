@@ -27,8 +27,6 @@ class AboutDialog(tk.Toplevel):
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
-        self.transient(master)
-        self.grab_set()
         self.protocol("WM_DELETE_WINDOW", self._ok)
         
         
@@ -109,8 +107,6 @@ class AboutDialog(tk.Toplevel):
         self.bind('<Return>', self._ok, True) 
         self.bind('<Escape>', self._ok, True)
         
-        ui_utils.center_window(self, master)        
-        self.wait_window()
         
     def _ok(self, event=None):
         self.destroy()
@@ -126,7 +122,7 @@ class AboutDialog(tk.Toplevel):
 
 def load_plugin() -> None:
     def open_about(*args):
-        AboutDialog(get_workbench())
+        ui_utils.show_dialog(AboutDialog(get_workbench()))
     
     def open_url(url):
         # webbrowser.open returns bool, but add_command expects None

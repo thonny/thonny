@@ -333,9 +333,7 @@ class ReplayerPanedWindow(tk.PanedWindow):
 def load_plugin() -> None:
     def open_replayer():
         win = ReplayWindow()
-        win.focus_set()
-        win.grab_set()
-        get_workbench().wait_window(win)
+        ui_utils.show_dialog(win)
     
     get_workbench().set_default("tools.replayer_last_browser_folder", None)
     if (get_workbench().get_option("debug_mode")

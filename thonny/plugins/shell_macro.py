@@ -77,7 +77,7 @@ class ShellMacroDialog(tk.Toplevel):
 
 def show_dialog():
     dlg = ShellMacroDialog(get_workbench())
-    dlg.wait_window()
+    ui_utils.show_dialog(dlg)
 
 def execute_macro():
     if get_runner().is_waiting_toplevel_command():
