@@ -1664,6 +1664,11 @@ class Workbench(tk.Tk):
                     view_name = "VariablesView"
                     
                 self.show_view(view_name)
+        
+        # make sure VariablesView is at least loaded
+        # otherwise it may miss globals events
+        # and will show empty table on open
+        self.get_view("VariablesView")
                 
         
         

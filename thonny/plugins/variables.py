@@ -115,7 +115,10 @@ class VariablesView(VariablesFrame):
                                           is_active)
                   
     
-    def _set_tab_caption(self, text):    
+    def _set_tab_caption(self, text):
+        if self.hidden:
+            return
+        
         self.home_widget.master.tab(self.home_widget, text=text)
     
     
