@@ -488,7 +488,7 @@ class BackendProxy:
     
     def get_executable(self):
         """Return system command for invoking current interpreter"""
-        raise NotImplementedError()
+        return None
     
     def supported_features(self):
         return {"run"}

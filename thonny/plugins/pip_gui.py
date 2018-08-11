@@ -785,7 +785,8 @@ class PluginsPipDialog(PipDialog):
         banner_msg = ("This dialog is for managing Thonny plug-ins and their dependencies.\n"
                      + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n")
         
-        if is_same_path(self._get_interpreter(), get_runner().get_executable()):
+        if (get_runner().get_executable() is not None
+            and is_same_path(self._get_interpreter(), get_runner().get_executable())):
             banner_msg += "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n"
         
         banner_msg += ("\n"
