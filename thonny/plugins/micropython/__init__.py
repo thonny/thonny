@@ -1467,7 +1467,7 @@ def load_plugin():
     
     def soft_reboot_enabled():
         proxy = get_runner().get_backend_proxy()
-        return proxy.is_functional() and hasattr(proxy, "_soft_reboot_and_run_main")
+        return proxy and proxy.is_functional() and hasattr(proxy, "_soft_reboot_and_run_main")
         
     def disconnect():
         proxy = get_runner().get_backend_proxy()
