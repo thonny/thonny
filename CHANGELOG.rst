@@ -2,6 +2,13 @@
 Version history
 ===============
 
+3.0.0b3 (2018-08-11)
+====================
+* FIXED: Various problems with pip GUI
+* FIXED: Variables view misses events 
+* FIXED: Error when last back-end was not available anymore
+* TECHNICAL: Implemented ChoiceDialog 
+
 3.0.0b2 (2018-08-11)
 ====================
 * FIXED: problems with pip GUI in virtualenv
