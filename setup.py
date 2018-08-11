@@ -20,7 +20,7 @@ setup(
       version=version,
       description="Python IDE for beginners",
       long_description="Thonny is a simple Python IDE with features useful for learning programming. See http://thonny.org for more info.",
-      url="http://thonny.org",
+      url="https://thonny.org",
       author="Aivar Annamaa and others",
       author_email="thonny@googlegroups.com",
       license="MIT",
