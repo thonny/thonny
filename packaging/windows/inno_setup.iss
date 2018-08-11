@@ -293,10 +293,12 @@ begin
     WizardForm.WelcomeLabel2.Caption := 'This wizard will install Thonny {#AppVer} for your account.';
     if InstalledForAllUsers() then
     begin    
+      MoreInfoLabel.Caption := 'If you want to install Thonny for all users, cancel the installer, uninstall Thonny from your account and run the installer again as administrator '
+          + '(right-click the installer executable and select "Run as administrator").';
       DualWarningLabel.Caption := 'Warning!'
         + ''#13#10''
         + ''#13#10''
-        + 'Looks like Thonny is already installed for all users. In order to avoid confusion, it is recommended you cancel this wizard and uninstall all-users Thonny first.';
+        + 'Looks like Thonny is already installed for all users. In order to avoid confusion, it is recommended you cancel this wizard and run it as administrator or uninstall all-users Thonny first.';
     end
     else if InstalledForThisUser() then
     begin
