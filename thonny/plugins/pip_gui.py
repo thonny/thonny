@@ -687,7 +687,9 @@ class BackendPipDialog(PipDialog):
         if self._targets_virtual_environment():
             return actual_path(self._backend_proxy.get_site_packages())
         else:
-            return actual_path(self._backend_proxy.get_user_site_packages())
+            usp = self._backend_proxy.get_user_site_packages()
+            os.makedirs(usp, exist_ok=True)
+            return actual_path(usp)
     
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
@@ -768,6 +770,7 @@ class PluginsPipDialog(PipDialog):
         if self._use_user_install():
             import site
             assert hasattr(site, "getusersitepackages")
+            os.makedirs(site.getusersitepackages(), exist_ok=True)
             return actual_path(site.getusersitepackages())
         else:
             for d in sys.path:
@@ -785,7 +788,8 @@ class PluginsPipDialog(PipDialog):
         banner_msg = ("This dialog is for managing Thonny plug-ins and their dependencies.\n"
                      + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n")
         
-        if (get_runner().get_executable() is not None
+        runner = get_runner()
+        if (runner is not None and runner.get_executable() is not None
             and is_same_path(self._get_interpreter(), get_runner().get_executable())):
             banner_msg += "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n"
         

@@ -159,6 +159,7 @@ def parse_message(msg_string: str) -> Record:
 def actual_path(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
     assert os.path.isabs(name)
+    assert os.path.exists(name)
     
     if os.name == "nt":
         name = os.path.realpath(name)

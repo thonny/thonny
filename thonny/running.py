@@ -388,7 +388,10 @@ class Runner:
             self._proxy = None
 
     def get_executable(self) -> str:
-        return self._proxy.get_executable()
+        if self._proxy is None:
+            return None
+        else:
+            return self._proxy.get_executable()
     
     def get_backend_proxy(self) -> "BackendProxy":
         return self._proxy
