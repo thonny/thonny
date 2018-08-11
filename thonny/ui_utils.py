@@ -1447,6 +1447,9 @@ class ChoiceDialog(tk.Toplevel):
         self.bind('<Escape>', self._cancel, True) 
         self.bind('<Return>', self._ok, True) 
         self.protocol("WM_DELETE_WINDOW", self._cancel)
+
+        if misc_utils.running_on_mac_os():
+            self.configure(background="systemSheetBackground")
         
         center_window(self, master)
         
