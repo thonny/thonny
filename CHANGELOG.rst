@@ -2,7 +2,11 @@
 Version history
 ===============
 
-3.0.0b1 (2018-08-09)
+3.0.0b2 (2018-08-11)
+====================
+* FIXED: problems with pip GUI in virtualenv
+
+3.0.0b1 (2018-08-11)
 ====================
 
 Note: This version is successor of 2.2.0b4 and 2.1.21. Stable release of 2.2.0 was skipped. 
@@ -17,6 +21,7 @@ Note: This version is successor of 2.2.0b4 and 2.1.21. Stable release of 2.2.0 w
 * NEW: "View => Program arguments" opens a box where you can write the argument string for your program   
 * NEW: "Tools => Options => Backend => Custom Python interpreter" now allows creating virtual environments   
 * NEW: "Tools => Manage packages" now allows installing new packages with all CPython backends, not only virtual environments. If the backend is not a virtual environment it installs to user site packages (with `pip install --user`)
+* NEW: Thonny now includes basic support for MicroPython (former `thonny_microbit` plug-in). See https://bitbucket.org/plas/thonny/wiki/MicroPython for more info.
 * CHANGED: Upgraded Python to version 3.7.0 in Thonny+Python bundles 
 * CHANGED: Dropped support for Python 3.4 (both for front-end and back-end)
 * CHANGED: Dropped support for Tk 8.5. All bundles (including Mac's) now come with Tk 8.6.8
