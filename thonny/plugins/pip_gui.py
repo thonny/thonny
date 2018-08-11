@@ -423,7 +423,8 @@ class PipDialog(tk.Toplevel):
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
             write_att("Requires", ", ".join(info["requires_dist"]))
         
-        if self._get_active_version(name) != latest_stable_version:
+        if (self._get_active_version(name) != latest_stable_version
+            or not self._get_active_version(name)):
             self.install_button["state"] = "normal"
         else:
             self.install_button["state"] = "disabled"
