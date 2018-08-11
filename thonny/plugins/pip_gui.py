@@ -648,8 +648,9 @@ class BackendPipDialog(PipDialog):
     def _complete_update_list(self, msg):
         get_workbench().unbind("get_active_distributions_response", self._complete_update_list)
         if "error" in msg:
-            self.info_text.delete("1.0", "end")
-            self.info_text.insert("1.0", msg["error"])
+            self.info_text.direct_delete("1.0", "end")
+            self.info_text.direct_insert("1.0", msg["error"])
+            self._set_state("idle", True)
             return
         
         self._active_distributions = msg.distributions
@@ -684,9 +685,9 @@ class BackendPipDialog(PipDialog):
         
     def _get_target_directory(self):
         if self._targets_virtual_environment():
-            return self._backend_proxy.get_site_packages()
+            return actual_path(self._backend_proxy.get_site_packages())
         else:
-            return self._backend_proxy.get_user_site_packages()
+            return actual_path(self._backend_proxy.get_user_site_packages())
     
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
@@ -735,7 +736,8 @@ class PluginsPipDialog(PipDialog):
     
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
-        return hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
+        return (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
+                or hasattr(sys, 'real_prefix') and sys.real_prefix != sys.prefix)
     
     def _create_python_process(self, args, stderr):
         proc = running.create_frontend_python_process(args, stderr=stderr)

@@ -753,6 +753,7 @@ class CPythonProxy(BackendProxy):
         return self._executable
     
     def get_site_packages(self):
+        # NB! site.sitepackages may not be present in virtualenv
         for d in self._sys_path:
             if (("site-packages" in d or "dist-packages" in d) 
                 and path_startswith(d, self._sys_prefix)):

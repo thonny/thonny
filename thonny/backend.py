@@ -100,11 +100,12 @@ class VM:
                           original_path=original_path,
                           argv=sys.argv,
                           path=sys.path,
-                          usersitepackages=site.getusersitepackages(),
+                          usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
                           prefix=sys.prefix,
                           welcome_text="Python " + _get_python_version_string(),
                           executable=sys.executable,
-                          in_venv=hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix,
+                          in_venv=(hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
+                                   or hasattr(sys, 'real_prefix') and sys.real_prefix != sys.prefix),
                           python_version=_get_python_version_string(),
                           cwd=os.getcwd()))
 
@@ -450,11 +451,10 @@ class VM:
             
             return InlineResponse("get_active_distributions",
                                   distributions=dists,
-                                  usersitepackages=site.getusersitepackages(),
-                                  sitepackages=site.getsitepackages())
-        except Exception as e:
+                                  usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None)
+        except Exception:
             return InlineResponse("get_active_distributions",
-                                  error=str(e))
+                                  error=traceback.format_exc())
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():

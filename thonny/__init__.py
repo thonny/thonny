@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, cast, Optional
 
 if os.environ.get("THONNY_USER_DIR", ""):
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
-elif hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix:
+elif (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
+      or hasattr(sys, 'real_prefix') and sys.real_prefix != sys.prefix):
     # we're in a virtualenv or venv
     THONNY_USER_DIR = os.path.join(sys.prefix, ".thonny")
 else:
