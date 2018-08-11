@@ -31,7 +31,7 @@ $TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir distro
 $TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir thonny
+$TARGET_DIR/bin/python3.7 -m pip install --pre --no-cache-dir thonny
 
 VERSION=$(<$TARGET_DIR/lib/python3.7/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"

@@ -35,4 +35,4 @@ $MAIN_DIR/build_python.sh
 cd ..
 
 # check it out ...
-$PREFIX/bin/python3.6 -m idlelib
+$PREFIX/bin/python3.7 -m idlelib

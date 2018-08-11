@@ -162,7 +162,7 @@ try:
     print("Done!")
     
     print_task("Compiling Python files")
-    return_code = subprocess.call([target_dir + "/bin/python3.6",
+    return_code = subprocess.call([target_dir + "/bin/python3.7",
                            "-m", "compileall", target_dir + "/lib"])
     # TODO: why is return code 1 (eg. in 64-bit Fedora 22) even when everything seemed to succeed?
     print("Done!")

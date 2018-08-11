@@ -4,10 +4,9 @@ Name=Thonny
 GenericName=Python IDE
 Exec=$target_dir/bin/thonny %F
 Comment=Python IDE for beginners
-Icon=$target_dir/lib/python3.6/site-packages/thonny/res/thonny.png
+Icon=$target_dir/lib/python3.7/site-packages/thonny/res/thonny.png
 StartupWMClass=Thonny
 Terminal=false
-Categories=Education;Development;Debugger;IDE;
 MimeType=text/x-python;
 Actions=Edit;
 
