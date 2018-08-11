@@ -1,2 +1,3 @@
 jedi>=0.10
 setuptools>=33.1.1
+pyserial>=3.2.1
