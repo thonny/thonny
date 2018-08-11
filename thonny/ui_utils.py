@@ -1414,8 +1414,57 @@ class FileCopyDialog(tk.Toplevel):
         self._cancelled = True
         self._close()
          
+
+class ChoiceDialog(tk.Toplevel):
+    def __init__(self, master=None, title="Choose one", question:str="Choose one:", choices=[]):
+        super().__init__(master=master)
         
+        self.title(title)
+        self.resizable(False, False)
         
+        self.columnconfigure(0, weight=1)
+        
+        row = 0
+        question_label = ttk.Label(self, text=question)
+        question_label.grid(row=row, column=0, columnspan=2,
+                            sticky="w", 
+                            padx=20, pady=20)
+        row += 1
+        
+        self.var = tk.StringVar()
+        for choice in choices:
+            rb = ttk.Radiobutton(self, text=choice, variable=self.var, value=choice)
+            rb.grid(row=row, column=0, columnspan=2, 
+                    sticky="w", padx=20)
+            row += 1
+        
+        ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
+        ok_button.grid(row=row, column=0, sticky="e", pady=20)
+        
+        cancel_button = ttk.Button(self, text="Cancel", command=self._cancel)
+        cancel_button.grid(row=row, column=1, sticky="e", padx=20, pady=20)
+        
+        self.bind('<Escape>', self._cancel, True) 
+        self.bind('<Return>', self._ok, True) 
+        self.protocol("WM_DELETE_WINDOW", self._cancel)
+        
+        center_window(self, master)
+        
+    def _ok(self):
+        self.result = self.var.get()
+        if not self.result:
+            self.result = None
+            
+        self.destroy()
+    
+    def _cancel(self):
+        self.result = None
+        self.destroy()
+
+def ask_one_from_choices(master=None, title="Choose one", question:str="Choose one:", choices=[]):
+    dlg = ChoiceDialog(master, title, question, choices)
+    show_dialog(dlg, master)
+    return dlg.result
 
 class SubprocessDialog(tk.Toplevel):
     """Shows incrementally the output of given subprocess.
