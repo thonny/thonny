@@ -4,7 +4,7 @@ set -e
 
 # COMPILE PYTHON ###############################################
 
-PYTHON_VERSION=3.6.6
+PYTHON_VERSION=3.7.0
 RELEASE_NAME=Python-${PYTHON_VERSION}
 
 wget https://www.python.org/ftp/python/$PYTHON_VERSION/$RELEASE_NAME.tar.xz
@@ -25,5 +25,5 @@ export CPPFLAGS="-I$PREFIX/include"
 make altinstall
 
 # check that the newly built Python uses Tk 8.6 for Tkinter
-#$PREFIX/bin/python3.6 -m idlelib
+#$PREFIX/bin/python3.7 -m idlelib
 

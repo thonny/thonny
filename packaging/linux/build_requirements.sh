@@ -3,7 +3,7 @@
 set -e
 
 # START BUILDING ####################################################
-export PREFIX=$HOME/pythonny
+export PREFIX=$HOME/pythonny37
 
 export SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt 
 export LD_LIBRARY_PATH=$PREFIX/lib
