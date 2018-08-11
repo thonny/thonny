@@ -60,7 +60,9 @@ setup(
       python_requires=">=3.5",
       packages=find_packages(),
       package_data={'': ['VERSION',  'res/*'],
-                    'thonny.plugins.help' : ['*.rst']},
+                    'thonny.plugins.help' : ['*.rst'],
+                    'thonny.plugins.micropython' : ['api_stubs/*.*'],
+                    },
       entry_points={
         'gui_scripts': [
             'thonny = thonny:launch',
