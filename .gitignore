@@ -5,6 +5,7 @@
 *.tlog
 *.ipdb
 *.dmg
+.vs
 .idea
 .cache
 .pytest_cache
@@ -26,6 +27,9 @@ packaging/windows/ThonnyRunner35/Release/ThonnyRunner.ipdb
 packaging/windows/ThonnyRunner36/ThonnyRunner.sdf
 packaging/windows/ThonnyRunner36/ThonnyRunner/Release/ThonnyRunner.res
 packaging/windows/ThonnyRunner36/Release/ThonnyRunner.ipdb
+packaging/windows/ThonnyRunner37/ThonnyRunner.sdf
+packaging/windows/ThonnyRunner37/ThonnyRunner/Release/ThonnyRunner.res
+packaging/windows/ThonnyRunner37/Release/ThonnyRunner.ipdb
 packaging/windows/Python35
 packaging/windows/build
 packaging/windows/Python36

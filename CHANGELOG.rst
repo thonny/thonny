@@ -2,12 +2,17 @@
 Version history
 ===============
 
-2.1.22 (2018-??-??)
+2.1.22 (2018-08-??)
 ===================
+* ENHANCEMENT: Less intrusive logging for ast marking problems
 * FIXED #340: Validate geometry before loading
 * FIXED #363: subprocess.run causes Thonny backend to hang
 * FIXED #419: logging doesn't work in user programs
 * FIXED #440: In Linux paste over selection doesn't remove the selection
+* FIXED #487: Use PyPI.org and turn off pip warnings in package manager
+* FIXED #490: Debugger gets confused with f-strings
+* FIXED: In case of back-end problems, kill backend instead of resetting
+* FIXED: Colorize f-string prefixes
 
 2.1.21 (2018-07-17)
 ===================
