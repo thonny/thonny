@@ -334,17 +334,35 @@ def fix_ast_problems(tree, source_lines, tokens):
     # Problem 4:
     # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
     # similar problem is with Attributes and Subscripts
+    
+    # Problem 5: FormattedValue nodes have location of corresponding 
+    # JoinedStr, but I'd prefer being more precise 
 
-    def fix_node(node):
+    JoinedStr = getattr(ast, "JoinedStr", type(None))
+    FormattedValue = getattr(ast, "FormattedValue", type(None))
+
+    def fix_node(node, inside_joined_str=False):
+        
+        # first fix the children
         for child in _get_ordered_child_nodes(node):
-        #for child in ast.iter_child_nodes(node):
-            fix_node(child)
+            fix_node(child, isinstance(node, JoinedStr) or inside_joined_str)
 
-        if isinstance(node, ast.Str):
+        # now the node itself
+        if isinstance(node, (ast.Str, JoinedStr)) and not inside_joined_str:
             # fix triple-quote problem
-            # get position from tokens
+            # get position from tokens.
+            
+            # (Child Str positions are wrong in 3.7, but I don't know how to fix them) 
+            # Don't recurse inside JoinedStr as it may have several child Str nodes 
+            # but only one string token. 
             token = string_tokens.pop(0)
             node.lineno, node.col_offset = token.start
+        
+        elif isinstance(node, FormattedValue):
+            # Node has wrong position in 3.7, probably taken from string token.
+            # Use the position of value instead
+            node.lineno = node.value.lineno
+            node.col_offset = node.value.col_offset
 
         elif ((isinstance(node, ast.Expr) or isinstance(node, ast.Attribute))
             and isinstance(node.value, ast.Str)):
