@@ -87,7 +87,7 @@ def get_last_child(node, skip_incorrect=True):
             return node.kwargs
         elif hasattr(node, "starargs") and ok_node(node.starargs):
             return node.starargs
-        elif len(node.keywords) > 0 and last_ok(node.keywords):
+        elif last_ok(node.keywords):
             return last_ok(node.keywords)
         elif last_ok(node.args):
             return last_ok(node.args)
@@ -113,6 +113,7 @@ def get_last_child(node, skip_incorrect=True):
         return last_ok(node.elts)
 
     elif isinstance(node, ast.Dict):
+        # TODO: actually should pairwise check last value, then last key, etc.
         return last_ok(node.values)
 
     elif isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)):
