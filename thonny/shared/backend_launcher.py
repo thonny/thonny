@@ -16,7 +16,7 @@ if __name__ == "__main__":
     import os.path
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
-    logger = logging.getLogger("thonny.backend")
+    logger = logging.getLogger("thonny")
     logger.propagate = False
     logFormatter = logging.Formatter('%(levelname)s: %(message)s')
     file_handler = logging.FileHandler(os.path.join(THONNY_USER_DIR,"backend.log"), 
@@ -26,11 +26,14 @@ if __name__ == "__main__":
     file_handler.setLevel(logging.INFO);
     logger.addHandler(file_handler)
     
-    # TODO: sending log records to original stdout could be better (reading from stderr may introduce sync problems)
+    # Don't litter user stderr with thonny logging
+    # TODO: Can I somehow send the log to front-end's stderr?
+    """
     stream_handler = logging.StreamHandler(stream=sys.stderr)
     stream_handler.setLevel(logging.INFO);
     stream_handler.setFormatter(logFormatter)
     logger.addHandler(stream_handler)
+    """
     
     logger.setLevel(logging.INFO)
     
