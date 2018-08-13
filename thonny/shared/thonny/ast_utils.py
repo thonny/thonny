@@ -6,7 +6,6 @@ import io
 import sys
 import token
 import tokenize
-import traceback
 import logging
 
 def extract_text_range(source, text_range):
@@ -57,82 +56,99 @@ def parse_source(source, filename='<unknown>', mode="exec"):
     return root
 
 
-def get_last_child(node):
+def get_last_child(node, skip_incorrect=True):
+    
+    def ok_node(node):
+        if node is None:
+            return None
+        
+        if skip_incorrect and getattr(node, "incorrect_range", False):
+                return None
+        
+        return node
+    
+    def last_ok(nodes):
+        for i in range(len(nodes)-1, -1, -1):
+            if ok_node(nodes[i]):
+                node = nodes[i]
+                if isinstance(node, ast.Starred):
+                    if ok_node(node.value):
+                        return node.value
+                    else:
+                        return None
+                else:
+                    return nodes[i]
+            
+        return None
+    
     if isinstance(node, ast.Call):
         # TODO: take care of Python 3.5 updates (Starred etc.)
-        if hasattr(node, "kwargs") and node.kwargs is not None:
+        if hasattr(node, "kwargs") and ok_node(node.kwargs):
             return node.kwargs
-        elif hasattr(node, "starargs") and node.starargs is not None:
+        elif hasattr(node, "starargs") and ok_node(node.starargs):
             return node.starargs
-        elif len(node.keywords) > 0:
-            return node.keywords[-1]
-        elif len(node.args) > 0:
-            # TODO: ast.Starred doesn't exist in Python 3.4  ?? 
-            if isinstance(node.args[-1], ast.Starred):
-                # return the thing under Starred
-                return node.args[-1].value
-            else:
-                return node.args[-1]
+        elif len(node.keywords) > 0 and last_ok(node.keywords):
+            return last_ok(node.keywords)
+        elif last_ok(node.args):
+            return last_ok(node.args)
         else:
-            return node.func
+            return ok_node(node.func)
 
     elif isinstance(node, ast.BoolOp):
-        return node.values[-1]
+        return last_ok(node.values)
 
     elif isinstance(node, ast.BinOp):
-        return node.right
+        if ok_node(node.right):
+            return node.right
+        else:
+            return ok_node(node.left)
 
     elif isinstance(node, ast.Compare):
-        return node.comparators[-1]
+        return last_ok(node.comparators)
 
     elif isinstance(node, ast.UnaryOp):
-        return node.operand
+        return ok_node(node.operand)
 
-    elif (isinstance(node, (ast.Tuple, ast.List, ast.Set))
-          and len(node.elts)) > 0:
-        return node.elts[-1]
+    elif isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+        return last_ok(node.elts)
 
-    elif (isinstance(node, ast.Dict)
-          and len(node.values)) > 0:
-        return node.values[-1]
+    elif isinstance(node, ast.Dict):
+        return last_ok(node.values)
 
-    elif (isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom))
-          and node.value is not None):
-        return node.value
+    elif isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)):
+        return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):
-        return node.targets[-1]
+        return last_ok(node.targets)
 
     elif isinstance(node, ast.Expr):
-        return node.value
+        return ok_node(node.value)
 
     elif isinstance(node, ast.Assert):
-        if node.msg is not None:
+        if ok_node(node.msg):
             return node.msg
         else:
-            return node.test
+            return ok_node(node.test)
 
     elif isinstance(node, ast.Subscript):
-        if hasattr(node.slice, "value"):
+        if hasattr(node.slice, "value") and ok_node(node.slice.value):
             return node.slice.value
         else:
             assert (hasattr(node.slice, "lower")
                     and hasattr(node.slice, "upper")
                     and hasattr(node.slice, "step"))
 
-            if node.slice.step is not None:
+            if ok_node(node.slice.step):
                 return node.slice.step
-            elif node.slice.upper is not None:
+            elif ok_node(node.slice.upper):
                 return node.slice.upper
             else:
-                return node.slice.lower
+                return ok_node(node.slice.lower)
 
 
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True # There is last child, but I don't know which it will be
 
-    else:
-        return None
 
     # TODO: pick more cases from here:
     """
@@ -144,6 +160,8 @@ def get_last_child(node):
             #"TODO: Import ja ImportFrom"
             # TODO: what about ClassDef ???
     """
+
+    return None
 
 
 
@@ -261,7 +279,7 @@ def mark_text_ranges(node, source):
                 del tokens[-1]
 
         else:
-            _strip_trailing_extra_closers(tokens, not (isinstance(node, ast.Tuple) or isinstance(node, ast.Lambda)))
+            _strip_trailing_extra_closers(tokens, not isinstance(node, (ast.Tuple, ast.Lambda)))
             _strip_trailing_junk_from_expressions(tokens)
             _strip_unclosed_brackets(tokens)
 
@@ -380,6 +398,9 @@ def fix_ast_problems(tree, source_lines, tokens):
             # get position from an already fixed child
             node.lineno = node.left.lineno
             node.col_offset = node.left.col_offset
+            
+            # Note that this doesn't fix
+            # (3)+3
 
         elif (isinstance(node, ast.Call)
             and compare_node_positions(node, node.func) > 0):
@@ -387,6 +408,10 @@ def fix_ast_problems(tree, source_lines, tokens):
             # get position from an already fixed child
             node.lineno = node.func.lineno
             node.col_offset = node.func.col_offset
+            
+            # Note that there remains problem with
+            # (f)()
+            # but this can't be fixed without knowing child end position
 
         elif (isinstance(node, ast.Attribute)
             and compare_node_positions(node, node.value) > 0):
