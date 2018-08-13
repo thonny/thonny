@@ -194,7 +194,7 @@ class PipDialog(tk.Toplevel):
     def _get_state(self):
         return self._state
     
-    def _handle_outdated_or_missing_pip(self):
+    def _handle_outdated_or_missing_pip(self, error):
         raise NotImplementedError()
         
     def _install_pip(self):
@@ -226,9 +226,10 @@ class PipDialog(tk.Toplevel):
         self._start_update_list()
         
         
-    def _provide_pip_install_instructions(self):
+    def _provide_pip_install_instructions(self, error):
         self._clear()
-        self.info_text.direct_insert("end", "Outdated or missing pip\n\n", ("caption", ))
+        self.info_text.direct_insert("end", error)
+        self.info_text.direct_insert("end", "You seem to have problems with pip\n\n", ("caption", ))
         self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
                                 + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
                                 + "then you can install newest version by downloading ")
@@ -596,10 +597,10 @@ class PipDialog(tk.Toplevel):
     def _create_python_process(self, args, stderr):
         raise NotImplementedError()
 
-    def _create_pip_process(self, args):
+    def _create_pip_process(self, args, stderr=subprocess.STDOUT):
         if "--disable-pip-version-check" not in args:
             args.append("--disable-pip-version-check")
-        return self._create_python_process(["-m", "pip"] + args, stderr=subprocess.STDOUT)
+        return self._create_python_process(["-m", "pip"] + args, stderr=stderr)
     
     def _get_interpreter(self):
         pass
@@ -678,11 +679,11 @@ class BackendPipDialog(PipDialog):
         else:
             return True
 
-    def _handle_outdated_or_missing_pip(self):
+    def _handle_outdated_or_missing_pip(self, error):
         if get_runner().using_venv():
             self._install_pip()
         else:
-            self._provide_pip_install_instructions()
+            self._provide_pip_install_instructions(error)
         
     def _get_target_directory(self):
         if self._targets_virtual_environment():
@@ -805,8 +806,8 @@ class PluginsPipDialog(PipDialog):
     def _get_title(self):
         return "Thonny plug-ins"
 
-    def _handle_outdated_or_missing_pip(self):
-        return self._provide_pip_install_instructions()
+    def _handle_outdated_or_missing_pip(self, error):
+        return self._provide_pip_install_instructions(error)
     
 class DetailsDialog(tk.Toplevel):
     def __init__(self, master, package_metadata, selected_version):

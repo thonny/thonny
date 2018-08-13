@@ -6,7 +6,7 @@ import io
 import sys
 import token
 import tokenize
-import traceback
+import logging
 
 def extract_text_range(source, text_range):
     if isinstance(source, bytes):
@@ -60,90 +60,114 @@ def parse_source(source: bytes, filename='<unknown>', mode="exec"):
     return root
 
 
-def get_last_child(node):
+def get_last_child(node, skip_incorrect=True):
+    
+    def ok_node(node):
+        if node is None:
+            return None
+        
+        if skip_incorrect and getattr(node, "incorrect_range", False):
+                return None
+        
+        return node
+    
+    def last_ok(nodes):
+        for i in range(len(nodes)-1, -1, -1):
+            if ok_node(nodes[i]):
+                node = nodes[i]
+                if isinstance(node, ast.Starred):
+                    if ok_node(node.value):
+                        return node.value
+                    else:
+                        return None
+                else:
+                    return nodes[i]
+            
+        return None
+    
     if isinstance(node, ast.Call):
         # TODO: take care of Python 3.5 updates (Starred etc.)
-        if hasattr(node, "kwargs") and node.kwargs is not None:
+        if hasattr(node, "kwargs") and ok_node(node.kwargs):
             return node.kwargs
-        elif hasattr(node, "starargs") and node.starargs is not None:
+        elif hasattr(node, "starargs") and ok_node(node.starargs):
             return node.starargs
-        elif len(node.keywords) > 0:
-            return node.keywords[-1]
-        elif len(node.args) > 0:
-            # TODO: ast.Starred doesn't exist in Python 3.4  ?? 
-            if isinstance(node.args[-1], ast.Starred):
-                # return the thing under Starred
-                return node.args[-1].value
-            else:
-                return node.args[-1]
+        elif last_ok(node.keywords):
+            return last_ok(node.keywords)
+        elif last_ok(node.args):
+            return last_ok(node.args)
         else:
-            return node.func
+            return ok_node(node.func)
 
     elif isinstance(node, ast.BoolOp):
-        return node.values[-1]
+        return last_ok(node.values)
 
     elif isinstance(node, ast.BinOp):
-        return node.right
+        if ok_node(node.right):
+            return node.right
+        else:
+            return ok_node(node.left)
 
     elif isinstance(node, ast.Compare):
-        return node.comparators[-1]
+        return last_ok(node.comparators)
 
     elif isinstance(node, ast.UnaryOp):
-        return node.operand
+        return ok_node(node.operand)
 
-    elif (isinstance(node, (ast.Tuple, ast.List, ast.Set))
-          and len(node.elts)) > 0:
-        return node.elts[-1]
+    elif isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+        return last_ok(node.elts)
 
-    elif (isinstance(node, ast.Dict)
-          and len(node.values)) > 0:
-        return node.values[-1]
+    elif isinstance(node, ast.Dict):
+        # TODO: actually should pairwise check last value, then last key, etc.
+        return last_ok(node.values)
 
-    elif (isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom))
-          and node.value is not None):
-        return node.value
+    elif isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)):
+        return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):
-        return node.targets[-1]
+        return last_ok(node.targets)
 
     elif isinstance(node, ast.Expr):
-        return node.value
+        return ok_node(node.value)
 
     elif isinstance(node, ast.Assert):
-        if node.msg is not None:
+        if ok_node(node.msg):
             return node.msg
         else:
-            return node.test
+            return ok_node(node.test)
 
     elif isinstance(node, ast.Subscript):
-        if hasattr(node.slice, "value"):
+        if hasattr(node.slice, "value") and ok_node(node.slice.value):
             return node.slice.value
         else:
             assert (hasattr(node.slice, "lower")
                     and hasattr(node.slice, "upper")
                     and hasattr(node.slice, "step"))
 
-            if node.slice.step is not None:
+            if ok_node(node.slice.step):
                 return node.slice.step
-            elif node.slice.upper is not None:
+            elif ok_node(node.slice.upper):
                 return node.slice.upper
             else:
-                return node.slice.lower
+                return ok_node(node.slice.lower)
 
 
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True # There is last child, but I don't know which it will be
 
-    else:
-        return None
 
     # TODO: pick more cases from here:
-    #(isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
-    #        or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
-    #        # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0
-    #            and (node.dest is not None or len(node.values) > 0))
-    #        #"TODO: Import ja ImportFrom"
-    #        # TODO: what about ClassDef ???
+    """
+    (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
+            or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
+            # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0
+                and (node.dest is not None or len(node.values) > 0))
+
+            #"TODO: Import ja ImportFrom"
+            # TODO: what about ClassDef ???
+    """
+
+    return None
+
 
 
 
@@ -178,8 +202,9 @@ def mark_text_ranges(node, source: bytes):
             try:
                 tokens = _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset)
             except Exception:
-                traceback.print_exc() # TODO: log it somewhere
+                logging.getLogger("thonny").exception("Problem with marking %s", node)
                 # fallback to incorrect marking instead of exception
+                node.incorrect_range = True
                 node.end_lineno = node.lineno
                 node.end_col_offset = node.col_offset + 1
 
@@ -323,17 +348,35 @@ def fix_ast_problems(tree, source_lines, tokens):
     # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
     # TODO: Python 3.4 is not supported anymore
     # similar problem is with Attributes and Subscripts
+    
+    # Problem 5: FormattedValue nodes have location of corresponding 
+    # JoinedStr, but I'd prefer being more precise 
 
-    def fix_node(node):
+    JoinedStr = getattr(ast, "JoinedStr", type(None))
+    FormattedValue = getattr(ast, "FormattedValue", type(None))
+
+    def fix_node(node, inside_joined_str=False):
+        
+        # first fix the children
         for child in _get_ordered_child_nodes(node):
-        #for child in ast.iter_child_nodes(node):
-            fix_node(child)
+            fix_node(child, isinstance(node, JoinedStr) or inside_joined_str)
 
-        if isinstance(node, ast.Str):
+        # now the node itself
+        if isinstance(node, (ast.Str, JoinedStr)) and not inside_joined_str:
             # fix triple-quote problem
-            # get position from tokens
+            # get position from tokens.
+            
+            # (Child Str positions are wrong in 3.7, but I don't know how to fix them) 
+            # Don't recurse inside JoinedStr as it may have several child Str nodes 
+            # but only one string token. 
             token = string_tokens.pop(0)
             node.lineno, node.col_offset = token.start
+        
+        elif isinstance(node, FormattedValue):
+            # Node has wrong position in 3.7, probably taken from string token.
+            # Use the position of value instead
+            node.lineno = node.value.lineno
+            node.col_offset = node.value.col_offset
 
         elif ((isinstance(node, ast.Expr) or isinstance(node, ast.Attribute))
             and isinstance(node.value, ast.Str)):
@@ -349,6 +392,9 @@ def fix_ast_problems(tree, source_lines, tokens):
             # get position from an already fixed child
             node.lineno = node.left.lineno
             node.col_offset = node.left.col_offset
+            
+            # Note that this doesn't fix
+            # (3)+3
 
         elif (isinstance(node, ast.Call)
             and compare_node_positions(node, node.func) > 0):
@@ -356,6 +402,10 @@ def fix_ast_problems(tree, source_lines, tokens):
             # get position from an already fixed child
             node.lineno = node.func.lineno
             node.col_offset = node.func.col_offset
+            
+            # Note that there remains problem with
+            # (f)()
+            # but this can't be fixed without knowing child end position
 
         elif (isinstance(node, ast.Attribute)
             and compare_node_positions(node, node.value) > 0):
