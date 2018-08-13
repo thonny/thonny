@@ -1089,7 +1089,12 @@ class FancyTracer(Executor):
             
             if isinstance(node, ast.Str):
                 add_tag(node, "StringLiteral")
-                
+            
+            if hasattr(ast, "JoinedStr") and isinstance(node, ast.JoinedStr):
+                # can't present children normally without
+                # ast giving correct locations for them
+                add_tag(node, "ignore_children")
+            
             if isinstance(node, ast.Num):
                 add_tag(node, "NumberLiteral")
             
@@ -1198,13 +1203,18 @@ class FancyTracer(Executor):
                         before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
                         ast.copy_location(before_marker, node)
                         
+                        if "ignore_children" in node.tags:
+                            transformed_node = node 
+                        else:
+                            transformed_node = ast.NodeTransformer.generic_visit(self, node)
+                        
                         # after marker
                         after_marker = ast.Call (
                             func=ast.Name(id=AFTER_EXPRESSION_MARKER, ctx=ast.Load()),
                             args=[
                                 before_marker,
                                 tracer._create_tags_literal(node),
-                                ast.NodeTransformer.generic_visit(self, node),
+                                transformed_node,
                                 tracer._create_location_literal(node.parent_node if hasattr(node, "parent_node") else None)
                             ],
                             keywords=[]
