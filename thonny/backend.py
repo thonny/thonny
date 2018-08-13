@@ -1788,6 +1788,11 @@ class NiceTracer(Tracer):
                 add_tag(node, "StringLiteral")
                 add_tag(node, "skipexport")
 
+            if hasattr(ast, "JoinedStr") and isinstance(node, ast.JoinedStr):
+                # can't present children normally without
+                # ast giving correct locations for them
+                add_tag(node, "ignore_children")
+
             elif isinstance(node, ast.Num):
                 add_tag(node, "NumberLiteral")
                 add_tag(node, "skipexport")
@@ -2008,13 +2013,18 @@ class NiceTracer(Tracer):
                         # before marker 
                         before_marker = tracer._create_simple_marker_call(node, BEFORE_EXPRESSION_MARKER)
                         ast.copy_location(before_marker, node)
+                        
+                        if "ignore_children" in node.tags:
+                            transformed_node = node 
+                        else:
+                            transformed_node = ast.NodeTransformer.generic_visit(self, node)
 
                         # after marker
                         after_marker = ast.Call (
                             func=ast.Name(id=AFTER_EXPRESSION_MARKER, ctx=ast.Load()),
                             args=[
                                 before_marker,
-                                ast.NodeTransformer.generic_visit(self, node),
+                                transformed_node,
                             ],
                             keywords=[]
                         )
