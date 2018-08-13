@@ -1281,10 +1281,10 @@ class NiceTracer(Tracer):
     def find_spec(self, fullname, path=None, target=None):
         spec = PathFinder.find_spec(fullname, path, target)
         
-        if (isinstance(spec.loader, SourceFileLoader)
+        if (spec is not None
+            and isinstance(spec.loader, SourceFileLoader)
             and getattr(spec, "origin", None)
             and self._is_interesting_module_file(spec.origin)):
-            print(vars(spec))
             spec.loader = FancySourceFileLoader(fullname, spec.origin, self)
             return spec
         else:

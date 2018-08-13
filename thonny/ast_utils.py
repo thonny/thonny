@@ -202,7 +202,7 @@ def mark_text_ranges(node, source: bytes):
             try:
                 tokens = _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset)
             except Exception:
-                logging.getLogger("thonny").error("Problem with marking %s", node)
+                logging.getLogger("thonny").warning("Problem with marking %s", node)
                 # fallback to incorrect marking instead of exception
                 node.incorrect_range = True
                 node.end_lineno = node.lineno
