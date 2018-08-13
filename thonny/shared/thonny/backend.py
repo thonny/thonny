@@ -1104,6 +1104,7 @@ class FancyTracer(Executor):
     
     def _should_instrument_as_expression(self, node):
         return (isinstance(node, _ast.expr)
+                and not getattr(node, "incorrect_range", False)
                 and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))
                 # TODO: repeatedly evaluated subexpressions of comprehensions
                 # can be supported (but it requires some redesign both in backend and GUI)
@@ -1117,6 +1118,7 @@ class FancyTracer(Executor):
     
     def _should_instrument_as_statement(self, node):
         return (isinstance(node, _ast.stmt)
+                and not getattr(node, "incorrect_range", False)
                 # Shouldn't insert anything before from __future__ import
                 # as this is not a normal statement
                 # https://bitbucket.org/plas/thonny/issues/183/thonny-throws-false-positive-syntaxerror
