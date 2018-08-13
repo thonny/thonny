@@ -192,7 +192,7 @@ class PipDialog(tk.Toplevel):
     def _get_state(self):
         return self._state
     
-    def _handle_outdated_or_missing_pip(self):
+    def _handle_outdated_or_missing_pip(self, error):
         raise NotImplementedError()
         
     def _install_pip(self):
@@ -224,9 +224,10 @@ class PipDialog(tk.Toplevel):
         self._start_update_list()
         
         
-    def _provide_pip_install_instructions(self):
+    def _provide_pip_install_instructions(self, error):
         self._clear()
-        self.info_text.direct_insert("end", "Outdated or missing pip\n\n", ("caption", ))
+        self.info_text.direct_insert("end", error)
+        self.info_text.direct_insert("end", "You seem to have problems with pip\n\n", ("caption", ))
         self.info_text.direct_insert("end", "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
                                 + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
                                 + "then you can install newest version by downloading ")
@@ -249,7 +250,7 @@ class PipDialog(tk.Toplevel):
         if self._only_user:
             args.append("--user")
         args.extend(["--pre", "--format", "json"])
-        self._process, _ = self._create_pip_process(args)
+        self._process, _ = self._create_pip_process(args, stderr=subprocess.PIPE)
         
         def poll_completion():
             if self._process == None:
@@ -269,10 +270,10 @@ class PipDialog(tk.Toplevel):
                         else:
                             self._start_show_package_info(name_to_show)
                     else:   
-                        error = self._process.stdout.read()
+                        error = self._process.stderr.read()
                         if ("no module named pip" in error.lower() # pip not installed
                             or "no such option" in error.lower()): # too old pip
-                            self._handle_outdated_or_missing_pip()
+                            self._handle_outdated_or_missing_pip(error)
                             return
                         else:
                             messagebox.showerror("pip list error", error)
@@ -352,7 +353,7 @@ class PipDialog(tk.Toplevel):
         # Follwing url fetches info about latest version.
         # This is OK even when we're looking an installed older version
         # because new version may have more relevant and complete info.
-        url = "https://pypi.python.org/pypi/{}/json".format(urllib.parse.quote(name))
+        url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
         url_future = _fetch_url_future(url)
             
         def poll_fetch_complete():
@@ -594,10 +595,11 @@ class PipDialog(tk.Toplevel):
                                 startupinfo=startupinfo),
                 cmd)
 
-    def _create_pip_process(self, args):
+    def _create_pip_process(self, args, stderr=subprocess.STDOUT):
         if "--disable-pip-version-check" not in args:
             args.append("--disable-pip-version-check")
-        return self._create_backend_process(["-m", "pip"] + args)
+        return self._create_backend_process(["-m", "pip"] + args, 
+                                            stderr=stderr)
     
     def _get_interpreter(self):
         pass
@@ -626,11 +628,11 @@ class BackendPipDialog(PipDialog):
         else:
             return True
 
-    def _handle_outdated_or_missing_pip(self):
+    def _handle_outdated_or_missing_pip(self, error):
         if get_runner().using_venv():
             self._install_pip()
         else:
-            self._provide_pip_install_instructions()
+            self._provide_pip_install_instructions(error)
         
     def _read_only(self):
         return not get_runner().using_venv()
@@ -667,8 +669,8 @@ class PluginsPipDialog(PipDialog):
     def _get_title(self):
         return "Thonny plug-ins"
 
-    def _handle_outdated_or_missing_pip(self):
-        return self._provide_pip_install_instructions()
+    def _handle_outdated_or_missing_pip(self, error):
+        return self._provide_pip_install_instructions(error)
     
     def _instructions_for_command_line_install(self):
         # System shell is not suitable without correct PYTHONUSERBASE 
