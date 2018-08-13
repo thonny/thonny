@@ -7,6 +7,7 @@ import sys
 import token
 import tokenize
 import traceback
+import logging
 
 def extract_text_range(source, text_range):
     lines = source.splitlines(True)
@@ -177,8 +178,9 @@ def mark_text_ranges(node, source):
             try:
                 tokens = _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset)
             except:
-                traceback.print_exc() # TODO: log it somewhere
+                logging.getLogger("thonny").exception("Problem with marking %s", node)
                 # fallback to incorrect marking instead of exception
+                node.incorrect_range = True
                 node.end_lineno = node.lineno
                 node.end_col_offset = node.col_offset + 1
 
