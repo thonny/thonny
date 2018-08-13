@@ -354,7 +354,7 @@ class Runner:
                         break
                 except BackendTerminatedError as exc:
                     self._report_backend_crash(exc)
-                    self.reset_backend()
+                    self.kill_backend()
                     return
                 
                 if msg.get("SystemExit", False):
