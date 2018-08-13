@@ -1041,6 +1041,17 @@ class FancyTracer(Executor):
                 node.tags.add("class=" + node.__class__.__name__)
             node.tags.add(tag)
         
+        # ignore module docstring if it is before from __future__ import
+        if (isinstance(root.body[0], ast.Expr)
+            and isinstance(root.body[0].value, ast.Str)
+            and len(root.body) > 1
+            and isinstance(root.body[1], ast.ImportFrom)
+            and root.body[1].module == "__future__"):
+            
+            add_tag(root.body[0], "ignore")
+            add_tag(root.body[0].value, "ignore")
+            add_tag(root.body[1], "ignore")
+        
         for node in ast.walk(root):
             
             # tag last children 
@@ -1105,6 +1116,7 @@ class FancyTracer(Executor):
     def _should_instrument_as_expression(self, node):
         return (isinstance(node, _ast.expr)
                 and not getattr(node, "incorrect_range", False)
+                and "ignore" not in node.tags
                 and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))
                 # TODO: repeatedly evaluated subexpressions of comprehensions
                 # can be supported (but it requires some redesign both in backend and GUI)
@@ -1119,10 +1131,11 @@ class FancyTracer(Executor):
     def _should_instrument_as_statement(self, node):
         return (isinstance(node, _ast.stmt)
                 and not getattr(node, "incorrect_range", False)
+                and "ignore" not in node.tags
                 # Shouldn't insert anything before from __future__ import
                 # as this is not a normal statement
                 # https://bitbucket.org/plas/thonny/issues/183/thonny-throws-false-positive-syntaxerror
-                and (not isinstance(node, _ast.ImportFrom)
+                and (not isinstance(node, ast.ImportFrom)
                      or node.module != "__future__"))
     
     def _insert_statement_markers(self, root):
@@ -1145,7 +1158,7 @@ class FancyTracer(Executor):
                             self._insert_statement_markers(node)
                         new_list.append(node)
                         
-                        if isinstance(node, _ast.stmt):
+                        if self._should_instrument_as_statement(node):
                             # add after marker
                             new_list.append(self._create_statement_marker(node,
                                                                           AFTER_STATEMENT_MARKER))
