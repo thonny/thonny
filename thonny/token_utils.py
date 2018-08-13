@@ -15,7 +15,7 @@ _builtinlist = [str(name) for name in dir(builtins)
 BUILTIN = r"([^.'\"\\#]\b|^)" + matches_any("BUILTIN", _builtinlist) + r"\b"
 COMMENT = matches_any("COMMENT", [r"#[^\n]*"])
 MAGIC_COMMAND = matches_any("MAGIC_COMMAND", [r"^%[^\n]*"]) # used only in shell
-STRINGPREFIX = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB)?"
+STRINGPREFIX = r"(\br|u|ur|R|U|UR|Ur|uR|b|B|br|Br|bR|BR|rb|rB|Rb|RB|f|F|fr|Fr|fR|FR|rf|rF|Rf|RF)?"
 
 SQSTRING_OPEN = STRINGPREFIX + r"'[^'\\\n]*(\\.[^'\\\n]*)*\n?"
 SQSTRING_CLOSED = STRINGPREFIX + r"'[^'\\\n]*(\\.[^'\\\n]*)*'"
