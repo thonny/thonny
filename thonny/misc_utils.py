@@ -160,7 +160,7 @@ def find_volume_by_name(volume_name: str,
 
 def shorten_repr(original_repr: str, max_len: int=1000) -> str:
     if len(original_repr) > max_len:
-        return original_repr[:max_len] + " ... [{} chars truncated]".format(len(original_repr) - max_len)
+        return original_repr[:max_len-1] + "…"
     else:
         return original_repr
         

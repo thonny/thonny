@@ -735,11 +735,11 @@ class VM:
         self._original_stdout.write(serialize_message(msg) + "\n")
         self._original_stdout.flush()
 
-    def export_value(self, value):
+    def export_value(self, value, max_repr_length=5000):
         self._heap[id(value)] = value
         rep = repr(value)
-        if len(rep) > 100:
-            rep = rep[:99] + "…" 
+        if len(rep) > max_repr_length:
+            rep = rep[:max_repr_length] + "…" 
         
         return ValueInfo(id(value), rep)
 
@@ -747,7 +747,7 @@ class VM:
         result = {}
         for name in variables:
             if not name.startswith("__"):
-                result[name] = self.export_value(variables[name])
+                result[name] = self.export_value(variables[name], 100)
 
         return result
     

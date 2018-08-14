@@ -106,7 +106,7 @@ class VariablesFrame(MemoryFrame):
                         id_str = None
                         
                     self.tree.set(node_id, "id", format_object_id(id_str))
-                    self.tree.set(node_id, "value", shorten_repr(description, MAX_REPR_LENGTH_IN_GRID))
+                    self.tree.set(node_id, "value", description)
     
     
     def on_select(self, event):
