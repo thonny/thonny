@@ -905,8 +905,11 @@ class ExceptionView(TextFrame):
         self._prev_exception = exception_lines_with_frame_info
 
     def _on_toplevel_response(self, msg):
-        self.set_exception(msg.get("user_exception", None))
-
+        if "user_exception" in msg:
+            self.set_exception(msg["user_exception"]["items"])
+        else:
+            self.set_exception(None)
+            
     def _hyperlink_enter(self, event):
         self.text.config(cursor="hand2")
         

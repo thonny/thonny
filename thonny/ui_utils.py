@@ -350,7 +350,6 @@ class ClosableNotebook(ttk.Notebook):
                     
     def close_tab(self, index):
         child = self.get_child_by_index(index)
-        print(type(child), vars(child))
         if hasattr(child, "close"):
             child.close()
         else:

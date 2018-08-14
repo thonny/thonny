@@ -804,7 +804,20 @@ class VM:
         sys.last_type, sys.last_value, sys.last_traceback = (
             e_type, e_value, e_traceback
         )
-        return format_exception_with_frame_info(e_type, e_value, e_traceback)
+        
+        tb = e_traceback
+        # TODO: go to last frame in user code
+        while tb.tb_next is not None:
+            tb = tb.tb_next
+        last_frame = tb.tb_frame
+        
+        return {
+            "error_type_name" : e_type.__name__,
+            "error_message" : str(e_value),
+            "last_frame_globals" : self.export_variables(last_frame.f_globals),
+            "last_frame_locals" : self.export_variables(last_frame.f_locals),
+            "items": format_exception_with_frame_info(e_type, e_value, e_traceback)
+        }
     
 
     class FakeStream:

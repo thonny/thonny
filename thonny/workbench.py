@@ -35,6 +35,7 @@ from thonny.shell import ShellView
 from typing import Optional, Type, Union, Callable, Dict, Sequence, List, Any, cast
 from typing import Set, Tuple  # @UnusedImport
 import platform
+from thonny.assistance import AssistantView
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -108,6 +109,7 @@ class Workbench(tk.Tk):
         self._init_theming()
         self._init_window()
         self.add_view(ShellView, "Shell", "s", visible_by_default=True, default_position_key='A')
+        self.add_view(AssistantView, "Assistant", "ne", visible_by_default=False)
         self._runner = Runner()
         self._load_plugins()
         
@@ -335,6 +337,11 @@ class Workbench(tk.Tk):
                         family=default_font.cget("family"),
                         size=default_font.cget("size"),
                         weight="bold"),            
+                      
+            tk_font.Font(name="ItalicTkDefaultFont", 
+                        family=default_font.cget("family"),
+                        size=default_font.cget("size"),
+                        slant="italic"),            
                       
             tk_font.Font(name="UnderlineTkDefaultFont", 
                         family=default_font.cget("family"),

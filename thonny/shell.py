@@ -196,7 +196,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if msg.get("error"):
             self._insert_text_directly(msg["error"] + "\n", ("toplevel", "stderr"))
         if "user_exception" in msg:
-            self._format_user_exception(msg["user_exception"])
+            self._show_user_exception(msg["user_exception"])
         
         welcome_text = msg.get("welcome_text")
         if welcome_text and welcome_text != self._last_welcome_text:
@@ -638,9 +638,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         except Exception:
             traceback.print_exc()
     
-    def _format_user_exception(self, items):
+    def _show_user_exception(self, user_exception):
         
-        for line, frame_id, *_ in items:
+        for line, frame_id, *_ in user_exception["items"]:
                 
             tags = ("io", "stderr")
             if frame_id is not None:
@@ -654,8 +654,20 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 # TODO: put first line with frame tag and rest without
                 tags += (frame_tag,)
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
-                
+            
             self._insert_text_directly(line, tags)
+        
+        btn = ttk.Button(self, image=get_workbench().get_image("help"),
+                         text=" Help!", compound="left")
+        #self.window_create("end-2c lineend", window=btn, padx=5)
+        self.image_create("end-2c lineend", image=get_workbench().get_image("help"), padx=15)
+        
+        get_workbench().get_view("AssistantView").explain_exception(
+            user_exception["error_type_name"],
+            user_exception["error_message"],
+            user_exception["last_frame_globals"],
+            user_exception["last_frame_locals"],
+            )
     
     def _invalidate_current_data(self):
         """
