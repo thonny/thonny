@@ -295,7 +295,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
             self.see("insert")
         else:
-            self.bell()
+            get_workbench().bell()
             
     def intercept_delete(self, index1, index2=None, **kw):
         if index1 == "sel.first" and index2 == "sel.last" and not self.has_selection():
@@ -306,7 +306,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             and (index2 is None or self._in_current_input_range(index2))):
             self.direct_delete(index1, index2, **kw)
         else:
-            self.bell()
+            get_workbench().bell()
     
     def perform_return(self, event):
         if get_runner().is_running():
@@ -355,6 +355,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             return False
     
     def _insert_text_directly(self, txt, tags=()):
+        if "\a" in txt:
+            get_workbench().bell()
+            # TODO: elide bell character 
+            
         def _insert(txt, tags):
             if txt != "":
                 self.direct_insert("output_insert", txt, tags)
