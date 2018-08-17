@@ -55,6 +55,7 @@ class VM:
         self._import_handlers = {}
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = {} # WeakValueDictionary would be better, but can't store reference to None
+        self._source_info_by_frame = {}
         site.sethelper() # otherwise help function is not available
         pydoc.pager = pydoc.plainpager # otherwise help command plays tricks
         self._install_fake_streams()
@@ -770,6 +771,50 @@ class VM:
     def is_doing_io(self):
         return self._io_level > 0
     
+    def _export_stack(self, newest_frame):
+        result = []
+        
+        system_frame = newest_frame
+        
+        while system_frame is not None:
+            module_name = system_frame.f_globals["__name__"]
+            code_name = system_frame.f_code.co_name
+            
+            try:
+                source, firstlineno, in_library = self._get_frame_source_info(system_frame)
+            except Exception:
+                source = None
+                firstlineno = None
+                in_library = True
+
+            result.insert(0, FrameInfo(
+                id=id(system_frame),
+                filename=system_frame.f_code.co_filename,
+                module_name=module_name,
+                code_name=code_name,
+                locals=self.export_variables(system_frame.f_locals),
+                globals=self.export_variables(system_frame.f_globals),
+                freevars=system_frame.f_code.co_freevars,
+                source=source,
+                lineno=system_frame.f_lineno,
+                firstlineno=firstlineno,
+                in_library=in_library,
+                event="line",
+                focus=TextRange(system_frame.f_lineno, 0, system_frame.f_lineno+1, 0),
+                node_tags=None,
+                current_statement=None,
+                current_evaluations=None,
+                current_root_expression=None,
+            ))
+            
+            if module_name == "__main__" and code_name == "<module>":
+                # this was last frame relevant to the user
+                break
+            
+            system_frame = system_frame.f_back
+
+        return result
+    
     def _lookup_frame_by_id(self, frame_id):
         def lookup_from_stack(frame):
             if frame is None:
@@ -799,6 +844,13 @@ class VM:
         _, _, tb = sys.exc_info()
         return lookup_from_tb(tb), "current_exception"
     
+    def _get_frame_source_info(self, frame):
+        fid = id(frame)
+        if fid not in self._source_info_by_frame:
+            self._source_info_by_frame[fid] = _fetch_frame_source_info(frame)
+            
+        return self._source_info_by_frame[fid]
+    
     def _prepare_user_exception(self):
         e_type, e_value, e_traceback = sys.exc_info()
         sys.last_type, sys.last_value, sys.last_traceback = (
@@ -806,7 +858,6 @@ class VM:
         )
         
         tb = e_traceback
-        # TODO: go to last frame in user code
         while tb.tb_next is not None:
             tb = tb.tb_next
         last_frame = tb.tb_frame
@@ -814,8 +865,7 @@ class VM:
         return {
             "error_type_name" : e_type.__name__,
             "error_message" : str(e_value),
-            "last_frame_globals" : self.export_variables(last_frame.f_globals),
-            "last_frame_locals" : self.export_variables(last_frame.f_locals),
+            "stack" : self._export_stack(last_frame),
             "items": format_exception_with_frame_info(e_type, e_value, e_traceback)
         }
     
@@ -962,7 +1012,6 @@ class Tracer(Executor):
         super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
-        self._source_info_by_frame = {}
         
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1069,13 +1118,6 @@ class Tracer(Executor):
                 "affected_frame_ids" : exc[1]._affected_frame_ids_,
             }
 
-    def _get_frame_source_info(self, frame):
-        fid = id(frame)
-        if fid not in self._source_info_by_frame:
-            self._source_info_by_frame[fid] = _fetch_frame_source_info(frame)
-            
-        return self._source_info_by_frame[fid]
-    
     def _get_breakpoints_with_cursor_position(self, cmd):
         if cmd["cursor_position"] is None:
             return cmd["breakpoints"]
@@ -1147,7 +1189,7 @@ class FastTracer(Tracer):
     
     def _report_current_state(self, frame):
         msg = DebuggerResponse(
-            stack=self._export_stack(frame),
+            stack=self._vm._export_stack(frame),
             in_present=True,
             io_symbol_count=None,
             exception_info=self._export_exception_info()
@@ -1195,46 +1237,6 @@ class FastTracer(Tracer):
     def _frame_is_alive(self, frame_id):
         return frame_id in self._alive_frame_ids
 
-    def _export_stack(self, newest_frame):
-        result = []
-        
-        system_frame = newest_frame
-        
-        while system_frame is not None:
-            module_name = system_frame.f_globals["__name__"]
-            code_name = system_frame.f_code.co_name
-            
-            try:
-                source, firstlineno = self._get_frame_source_info(system_frame)
-            except Exception:
-                source = None
-                firstlineno = None
-
-            result.insert(0, FrameInfo(
-                id=id(system_frame),
-                filename=system_frame.f_code.co_filename,
-                module_name=module_name,
-                code_name=code_name,
-                locals=self._vm.export_variables(system_frame.f_locals),
-                globals=self._vm.export_variables(system_frame.f_globals),
-                freevars=system_frame.f_code.co_freevars,
-                source=source,
-                firstlineno=firstlineno,
-                event="line",
-                focus=TextRange(system_frame.f_lineno, 0, system_frame.f_lineno+1, 0),
-                node_tags=None,
-                current_statement=None,
-                current_evaluations=None,
-                current_root_expression=None,
-            ))
-            
-            if module_name == "__main__" and code_name == "<module>":
-                # this was last frame relevant to the user
-                break
-            
-            system_frame = system_frame.f_back
-
-        return result
     
 class NiceTracer(Tracer):
 
@@ -1691,7 +1693,7 @@ class NiceTracer(Tracer):
         for custom_frame in self._custom_stack:
             
             system_frame = custom_frame.system_frame
-            source, firstlineno = self._get_frame_source_info(system_frame)
+            source, firstlineno, in_library = self._vm._get_frame_source_info(system_frame)
             module_name = system_frame.f_globals["__name__"]
             code_name=system_frame.f_code.co_name
 
@@ -1704,7 +1706,9 @@ class NiceTracer(Tracer):
                 globals=export_globals(module_name, system_frame),
                 freevars=system_frame.f_code.co_freevars,
                 source=source,
+                lineno=system_frame.f_lineno,
                 firstlineno=firstlineno,
+                in_library=in_library,
                 event=custom_frame.event,
                 focus=custom_frame.focus,
                 node_tags=custom_frame.node_tags,
@@ -2126,34 +2130,17 @@ def _get_python_version_string(add_word_size=False):
     return result
 
 def _fetch_frame_source_info(frame):
+    if frame.f_code.co_filename is None:
+        return None, None, True
+    
     if frame.f_code.co_name == "<module>":
-        obj = frame.f_code
-        lineno = 1
-    else:
-        obj = frame.f_code
-        lineno = obj.co_firstlineno
-
-    assert obj is not None, (
-        "Failed to get source in backend _fetch_frame_source_info for frame " + str(frame)
-        + " with f_code.co_name == " + frame.f_code.co_name
-    )
-
-    # lineno returned by getsourcelines is not consistent between modules vs functions
-    try:
-        lines, _ = inspect.getsourcelines(frame)
-        return "".join(lines), lineno
-    except Exception:
-        # Fallback
-        logger.exception("Failed getting source for frame %s, %s", frame.f_code.co_filename, 
-                          frame.f_code.co_name)
+        # inspect.getsource and getsourcelines don't help here
         with tokenize.open(frame.f_code.co_filename) as fp:
-            whole_source = fp.read()
-        
-        if frame.f_code.co_name == "<module>":
-            return whole_source, lineno
-        else:
-            # TODO: 
-            raise
+            return fp.read(), 1, _is_library_file(frame.f_code.co_filename)
+    else:
+        return (inspect.getsource(frame), 
+                frame.f_code.co_firstlineno,
+                _is_library_file(frame.f_code.co_filename))
 
 def format_exception_with_frame_info(e_type, e_value, e_traceback,
                                      shorten_filenames=False):
@@ -2234,6 +2221,13 @@ def load_module_from_alternative_path(module_name, path, force=False):
 
 def in_debug_mode():
     return os.environ.get("THONNY_DEBUG", False) in [1, "1", True, "True", "true"]
+
+def _is_library_file(filename):
+    return (filename is None
+            or path_startswith(filename, sys.prefix)
+            or hasattr(sys, "base_prefix") and path_startswith(filename, sys.base_prefix)
+            or hasattr(sys, "real_prefix") and path_startswith(filename, sys.real_prefix)
+            or site.ENABLE_USER_SITE and path_startswith(filename, site.getusersitepackages()))
 
 def _report_internal_error():
     print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)

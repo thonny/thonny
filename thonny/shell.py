@@ -122,10 +122,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if ui_utils.get_tk_version_info() >= (8,6,6):
             self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
 
-        self.tag_configure("selected_frame", 
-                           background="lightgreen",
-                           lmargincolor="lightgreen")
-        
         self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
@@ -381,7 +377,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     _insert(line, tags)
         else:
             _insert(txt, tags)
-            
+        
         #self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
     
@@ -660,18 +656,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
             
             self._insert_text_directly(line, tags)
-        
-        btn = ttk.Button(self, image=get_workbench().get_image("help"),
-                         text=" Help!", compound="left")
-        #self.window_create("end-2c lineend", window=btn, padx=5)
-        self.image_create("end-2c lineend", image=get_workbench().get_image("help"), padx=15)
-        
-        get_workbench().get_view("AssistantView").explain_exception(
-            user_exception["error_type_name"],
-            user_exception["error_message"],
-            user_exception["last_frame_globals"],
-            user_exception["last_frame_locals"],
-            )
     
     def _invalidate_current_data(self):
         """

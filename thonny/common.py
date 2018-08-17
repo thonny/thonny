@@ -11,7 +11,7 @@ MESSAGE_MARKER = "\x02"
 
 ValueInfo = namedtuple('ValueInfo', ['id', 'repr'])
 FrameInfo = namedtuple("FrameInfo", ["id", "filename", "module_name", "code_name",
-                                     "source", "firstlineno",
+                                     "source", "lineno", "firstlineno", "in_library",
                                      "locals", "globals", "freevars", 
                                      "event", "focus", "node_tags",
                                      "current_statement", 
