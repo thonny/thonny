@@ -31,6 +31,7 @@ import tokenize
 import subprocess
 from importlib.machinery import PathFinder, SourceFileLoader
 import copy
+from collections import namedtuple
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -41,6 +42,10 @@ logger = logging.getLogger("thonny.backend")
 info = logger.info
 
 _CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
+
+TempFrameInfo = namedtuple("TempFrameInfo", ["system_frame", "locals", "globals","event", "focus", "node_tags",
+                                     "current_statement", "current_root_expression", "current_evaluations"]) 
+
 
 _vm = None
 
@@ -117,6 +122,7 @@ class VM:
             while True:
                 try:
                     cmd = self._fetch_command()
+                    self._source_info_by_frame = {}
                     self.handle_command(cmd)
                 except KeyboardInterrupt:
                     logger.exception("Interrupt in mainloop")
@@ -780,14 +786,15 @@ class VM:
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
             
-            try:
-                source, firstlineno, in_library = self._get_frame_source_info(system_frame)
-            except Exception:
-                source = None
-                firstlineno = None
-                in_library = True
+            source, firstlineno, in_library = self._get_frame_source_info(system_frame)
 
             result.insert(0, FrameInfo(
+                # TODO: can this id be reused by a later frame?
+                # Need to store the refernce to avoid GC?
+                # I guess it is not required, as id will be required
+                # only for stacktrace inspection, and sys.last_exception
+                # will have the reference anyway
+                # (NiceTracer has its own reference keeping)
                 id=id(system_frame),
                 filename=system_frame.f_code.co_filename,
                 module_name=module_name,
@@ -848,7 +855,7 @@ class VM:
         fid = id(frame)
         if fid not in self._source_info_by_frame:
             self._source_info_by_frame[fid] = _fetch_frame_source_info(frame)
-            
+        
         return self._source_info_by_frame[fid]
     
     def _prepare_user_exception(self):
@@ -1432,7 +1439,7 @@ class NiceTracer(Tracer):
             # see whether current_root_expression needs to be updated
             prev_root_expression = prev_state_frame.current_root_expression
             if (event == "before_expression"
-                and (id(frame) != prev_state_frame.id
+                and (id(frame) != id(prev_state_frame.system_frame)
                      or "statement" in prev_state_frame.event
                      or not range_contains_smaller_or_equal(prev_root_expression, focus))):
                 custom_frame.current_root_expression = focus
@@ -1445,7 +1452,7 @@ class NiceTracer(Tracer):
         # Save the snapshot.
         # Check if we can share something with previous state
         if (prev_state is not None 
-            and prev_state_frame.id == id(frame)
+            and id(prev_state_frame.system_frame) == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
             and ("before" in event or "skipexport" in node.tags)):
             
@@ -1535,7 +1542,9 @@ class NiceTracer(Tracer):
 
         # need to make a copy for applying overrides 
         # and removing helper fields without modifying original
-        state = copy.deepcopy(self._saved_states[state_index])
+        state = self._saved_states[state_index].copy()
+        state["stack"] = state["stack"].copy()
+        
         state["in_present"] = in_present 
         if not in_present:
             # for past states fix the newest frame
@@ -1543,6 +1552,39 @@ class NiceTracer(Tracer):
             
         del state["exception_value"]
         del state["active_frame_overrides"]
+        
+        # Convert stack of TempFrameInfos to stack of FrameInfos
+        new_stack = []
+        for tframe in state["stack"]:
+            system_frame = tframe.system_frame
+            module_name = system_frame.f_globals["__name__"]
+            code_name = system_frame.f_code.co_name
+            
+            source, firstlineno, in_library = self._vm._get_frame_source_info(system_frame)
+            
+            assert firstlineno is not None, "nofir " + str(system_frame)
+            
+            new_stack.append(FrameInfo(
+                id=id(system_frame),
+                filename=system_frame.f_code.co_filename,
+                module_name=module_name,
+                code_name=code_name,
+                locals=tframe.locals,
+                globals=tframe.globals,
+                freevars=system_frame.f_code.co_freevars,
+                source=source,
+                lineno=system_frame.f_lineno,
+                firstlineno=firstlineno,
+                in_library=in_library,
+                event=tframe.event,
+                focus=tframe.focus,
+                node_tags=tframe.node_tags,
+                current_statement=tframe.current_statement,
+                current_evaluations=tframe.current_evaluations,
+                current_root_expression=tframe.current_root_expression,
+            ))
+        
+        state["stack"] = new_stack
         
         self._vm.send_message(DebuggerResponse(**state))
 
@@ -1588,7 +1630,7 @@ class NiceTracer(Tracer):
             return True
 
         # Make sure the correct frame_id is selected
-        if frame.id == cmd.frame_id:
+        if id(frame.system_frame) == cmd.frame_id:
             # We're in the same frame
             if "before_" in cmd.state:
                 if not range_contains_smaller_or_equal(cmd.focus, frame.focus):
@@ -1641,9 +1683,9 @@ class NiceTracer(Tracer):
             not self._frame_is_alive(cmd.frame_id)
             # we're in the same frame but on higher level
             # TODO: expression inside statement expression has same range as its parent
-            or frame.id == cmd.frame_id and range_contains_smaller(frame.focus, cmd.focus)
+            or id(frame.system_frame) == cmd.frame_id and range_contains_smaller(frame.focus, cmd.focus)
             # or we were there in prev state
-            or prev_state_frame.id == cmd.frame_id and range_contains_smaller(prev_state_frame.focus, cmd.focus)
+            or id(prev_state_frame.system_frame) == cmd.frame_id and range_contains_smaller(prev_state_frame.focus, cmd.focus)
         )
 
     def _cmd_resume_completed(self, frame, cmd):
@@ -1661,20 +1703,20 @@ class NiceTracer(Tracer):
             breakpoints = cmd["breakpoints"]
             
         return (frame.event in ["before_statement", "before_expression"]
-                and frame.filename in breakpoints
-                and frame.focus.lineno in breakpoints[frame.filename]
+                and frame.system_frame.f_code.co_filename in breakpoints
+                and frame.focus.lineno in breakpoints[frame.system_frame.f_code.co_filename]
                 # consider only first event on a line
                 # (but take into account that same line may be reentered)
                 and (cmd.focus is None 
                      or (cmd.focus.lineno != frame.focus.lineno)
                      or (cmd.focus == frame.focus and cmd.state == frame.event) 
-                     or frame.id != cmd.frame_id
+                     or id(frame.system_frame) != cmd.frame_id
                      )
                 )
 
     def _frame_is_alive(self, frame_id):
         for frame in self._custom_stack:
-            if frame.id == frame_id:
+            if id(frame.system_frame) == frame_id:
                 return True
         else:
             return False
@@ -1693,22 +1735,15 @@ class NiceTracer(Tracer):
         for custom_frame in self._custom_stack:
             
             system_frame = custom_frame.system_frame
-            source, firstlineno, in_library = self._vm._get_frame_source_info(system_frame)
             module_name = system_frame.f_globals["__name__"]
-            code_name=system_frame.f_code.co_name
 
-            result.append(FrameInfo(
-                id=id(system_frame),
-                filename=system_frame.f_code.co_filename,
-                module_name=module_name,
-                code_name=code_name,
+            result.append(TempFrameInfo(
+                # need to store the reference to the frame to avoid it being GC-d
+                # otherwise frame id-s would be reused and this would
+                # mess up communication with the frontend.
+                system_frame=system_frame,
                 locals=None if system_frame.f_locals is system_frame.f_globals else self._vm.export_variables(system_frame.f_locals),
                 globals=export_globals(module_name, system_frame),
-                freevars=system_frame.f_code.co_freevars,
-                source=source,
-                lineno=system_frame.f_lineno,
-                firstlineno=firstlineno,
-                in_library=in_library,
                 event=custom_frame.event,
                 focus=custom_frame.focus,
                 node_tags=custom_frame.node_tags,
@@ -2087,17 +2122,16 @@ class NiceTracer(Tracer):
         try:
             return Tracer._execute_prepared_user_code(self, statements, expression, global_vars)
         finally:
-            """
+            #"""
             from thonny.misc_utils import _win_get_used_memory
             print("Memory:", _win_get_used_memory() / 1024 / 1024)
             print("States:", len(self._saved_states))
             print(self._fulltags.most_common())
-            """
+            #"""
 
 
 class CustomStackFrame:
     def __init__(self, frame, event, focus=None):
-        self.id = id(frame)
         self.system_frame = frame
         self.event = event
         self.focus = focus
@@ -2130,6 +2164,11 @@ def _get_python_version_string(add_word_size=False):
     return result
 
 def _fetch_frame_source_info(frame):
+    if (frame.f_code.co_filename is None
+        or frame.f_code.co_firstlineno is None):
+        raise RuntimeError("NONONON")
+    
+    
     if frame.f_code.co_filename is None:
         return None, None, True
     

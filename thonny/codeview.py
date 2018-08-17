@@ -206,6 +206,8 @@ class CodeView(tktextext.TextFrame):
         
         # TODO: propose_remove_line_numbers on paste??
         
+        assert self._first_line_number is not None
+        
         self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", 
                                                            self._reload_theme_options, True)
         

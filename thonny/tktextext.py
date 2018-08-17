@@ -725,6 +725,7 @@ class TextFrame(ttk.Frame):
         self._gutter.tag_configure("content", justify="right", rmargin=3)
         
         # gutter will be gridded later
+        assert first_line_number is not None
         self._first_line_number = first_line_number
         self.set_gutter_visibility(line_numbers)
         
