@@ -8,7 +8,8 @@ import re
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.common import ToplevelResponse
 import ast
-from thonny.misc_utils import levenshtein_distance
+from thonny.misc_utils import levenshtein_damerau_distance
+import tokenize
 
 Suggestion = namedtuple("Suggestion", ["title", "general", "specific", "relevance"])
 
@@ -71,7 +72,8 @@ class AssistantView(tktextext.TextFrame):
                        for suggestion in helper.get_suggestions()]
         
         for suggestion in sorted(suggestions, key=lambda s: s.relevance, reverse=True):
-            self._append_suggestion(suggestion)
+            if suggestion.relevance > 0:
+                self._append_suggestion(suggestion)
     
     def add_error_helper(self, error_type_name, helper_class):
         if error_type_name not in self._error_helper_classes:
@@ -162,6 +164,7 @@ class DebugHelper(Helper):
 class ErrorHelper(Helper):
     def __init__(self, error_type_name, error_message, stack=None):
         
+        # TODO: don't repeat all this for all error helpers
         self.error_type_name = error_type_name
         self.error_message = error_message
         self.stack=stack
@@ -171,12 +174,20 @@ class ErrorHelper(Helper):
             self.last_frame_ast = ast.parse(self.last_frame.source,
                                             self.last_frame.filename)
             self.last_frame_lines = self.last_frame.source.splitlines()
-            print(self.last_frame.code_name, self.last_frame.lineno)
             self.last_frame_line = self.last_frame_lines[self.last_frame.lineno-1]
         else:
             self.last_frame_ast = None
             self.last_frame_lines = None
             self.last_frame_line = None
+        
+        if self.last_frame.code_name == "<module>":
+            self.last_frame_module_source = self.last_frame.source
+            self.last_frame_module_ast = self.last_frame_ast
+        elif self.last_frame.filename is not None:
+            with tokenize.open(self.last_frame.filename) as fp:
+                self.last_frame_module_source = fp.read() 
+            
+            self.last_frame_module_ast = ast.parse(self.last_frame_module_source)
         
         
 
@@ -205,13 +216,11 @@ class NameErrorHelper(ErrorHelper):
     def get_suggestions(self):
         
         return [
-            self._bad_spelling(),
-            self._missing_quotes(),
-            Suggestion("Should this variable be imported?",
-                       "Some functions/variables need to be imported before they can be used.",
-                       # TODO: compare with names in popular modules
-                       None,
-                       2),
+            self._sug_bad_spelling(),
+            self._sug_missing_quotes(),
+            self._sug_missing_import(),
+            self._sug_local_from_global(),
+            
             Suggestion("Is the variable definition given before the usage?",
                        "...",
                        None,
@@ -220,23 +229,28 @@ class NameErrorHelper(ErrorHelper):
                        "If your variable's definition is inside a if-statement or loop, then it may have been skipped.",
                        None,
                        2),
-            Suggestion("Are you trying to acces a local variable outside of the function?",
-                       "...",
-                       None,
-                       2),
         ]
     
-    def _missing_quotes(self):
+    def _sug_missing_quotes(self):
         # TODO: only when in suitable context for string
+        if self._is_attribute_value() or self._is_call_function():
+            relevance = 0
+        else:
+            relevance = 7
+            
         return Suggestion(
-            "Did you really mean a variable or you just forgot the quotes?",
-            'If you meant literal text "%s", then surround it with quotes.' % self.name,
+            "Did you really mean a variable or just forgot the quotes?",
             None,
-            7
+            'If you meant literal text "%s", then surround it with quotes.' % self.name,
+            relevance
         )
     
-    def _bad_spelling(self):
-        all_names = set()
+    def _sug_bad_spelling(self):
+        
+        # Yes, it would be more proper to consult builtins from the backend,
+        # but it's easier this way...
+        all_names = {name for name in dir(builtins) if not name.startswith("_")}
+        
         if self.last_frame.globals is not None:
             all_names |= set(self.last_frame.globals.keys())
         if self.last_frame.locals is not None:
@@ -261,7 +275,7 @@ class NameErrorHelper(ErrorHelper):
                 specific += "* `%s`\n" % name
             specific += "?"
         else:
-            general = "Double-check all occurrences of this name!" 
+            general = "Double-check corresponding definition / assignment / documentation!" 
             specific = None
         
         return Suggestion(
@@ -270,8 +284,124 @@ class NameErrorHelper(ErrorHelper):
             specific,
             relevance
         )
+    
+    def _sug_missing_import(self):
+        likely_importable_functions = {
+            "math" : {"ceil", "floor", "sqrt", "sin", "cos", "degrees"},  
+            "random" : {"randint"},
+            "turtle" : {"left", "right", "forward", "fd", 
+                        "goto", "setpos", "Turtle",
+                        "penup", "up", "pendown", "down",
+                        "color", "pencolor", "fillcolor",
+                        "begin_fill", "end_fill", "pensize", "width"},
+            "re" : {"search", "match", "findall"},
+            "datetime" : {"date", "time", "datetime", "today"},
+            "statistics" : {"mean", "median", "median_low", "median_high", "mode", 
+                            "pstdev", "pvariance", "stdev", "variance"},
+            "os" : {"listdir"},
+            "time" : {"time", "sleep"},
+        }
+        
+        specific = None
          
+        if self._is_call_function():
+            relevance = 6
+            for mod in likely_importable_functions:
+                if self.name in likely_importable_functions[mod]:
+                    relevance += 2
+                    specific = ("If you meant `%s` from module `%s`, then add `from %s import %s` to the beginning of your script."
+                                % (self.name, mod, mod, self.name))
+                    break
+                
+        elif self._is_attribute_value():
+            relevance = 6
+            specific = ("If you meant module `%s`, then add `import %s` to the beginning of your script"
+                        % (self.name, self.name))
             
+            if self.name in likely_importable_functions:
+                relevance += 2
+                
+                
+        elif self._is_subscript_value() and self.name != "argv":
+            relevance = 0
+        elif self.name == "pi":
+            specific = "If you meant constant π, then add `from math import pi` to the beginning of your script."
+            relevance = 8
+        elif self.name == "argv":
+            specific = "If you meant the list with program arguments, then add `from sys import argv` to the beginning of your script."
+            relevance = 8
+        else:
+            relevance = 3
+            
+        
+        if specific is None:
+            general = "Some functions/variables need to be imported before they can be used."
+        else:
+            general = None
+            
+        return Suggestion("Did you forget to import?",
+                           general,
+                           specific,
+                           relevance)
+    
+    def _sug_local_from_global(self):
+        relevance = 0
+        specific = None
+        
+        if self.last_frame.code_name == "<module>":
+            function_names = set()
+            for node in ast.walk(self.last_frame_module_ast):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if self.name in map(lambda x: x.arg, node.args.args):
+                        function_names.add(node.name)
+                    # TODO: varargs, kw, ...
+                    declared_global = False
+                    for localnode in ast.walk(node):
+                        #print(node.name, localnode)
+                        if (isinstance(localnode, ast.Name)
+                            and localnode.id == self.name
+                            and isinstance(localnode.ctx, ast.Store)
+                            ):
+                            function_names.add(node.name)
+                        elif (isinstance(localnode, ast.Global)
+                              and self.name in localnode.names):
+                            declared_global = True
+                    
+                    if node.name in function_names and declared_global:
+                        function_names.remove(node.name)
+            
+            if function_names:
+                relevance = 9
+                specific = (
+                    ("Name `%s` defined in `%s` is not accessible in the global/module level."
+                     % (self.name, " and ".join(function_names)))
+                    + "\n\nIf you need that data at the global level, then consider changing the function so that it `return`-s the value.")
+            
+        return Suggestion("Are you trying to acces a local variable outside of the function?",
+                          None,
+                          specific,
+                          relevance)
+    
+    def _sug_not_defined_yet(self):
+        ...
+    
+    def _is_call_function(self):
+        return self.name + "(" in (self.last_frame_line
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
+                                   
+    def _is_subscript_value(self):
+        return self.name + "[" in (self.last_frame_line
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
+                                   
+    def _is_attribute_value(self):
+        return self.name + "." in (self.last_frame_line
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
         
     
 def _name_similarity(a, b):
@@ -306,7 +436,7 @@ def _name_similarity(a, b):
     if a[-2] == "_" and b[-2] == "_":
         return 0
     
-    distance = levenshtein_distance(a, b)
+    distance = levenshtein_damerau_distance(a, b, 5)
     
     if minlen <= 5:
         return max(8 - distance*2, 0)
@@ -315,5 +445,4 @@ def _name_similarity(a, b):
     else:
         return max(10 - distance*2, 0)
         
-        
-        
+                        

@@ -2122,12 +2122,12 @@ class NiceTracer(Tracer):
         try:
             return Tracer._execute_prepared_user_code(self, statements, expression, global_vars)
         finally:
-            #"""
+            """
             from thonny.misc_utils import _win_get_used_memory
             print("Memory:", _win_get_used_memory() / 1024 / 1024)
             print("States:", len(self._saved_states))
             print(self._fulltags.most_common())
-            #"""
+            """
 
 
 class CustomStackFrame:
