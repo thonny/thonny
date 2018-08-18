@@ -2216,7 +2216,11 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback,
             tb_temp = tb
             for entry in traceback.extract_tb(tb):
                 assert tb_temp is not None # actual tb doesn't end before extract_tb
-                if ("thonny/backend" not in entry.filename and "thonny\\backend" not in entry.filename
+                if ("thonny/backend" not in entry.filename 
+                    and "thonny\\backend" not in entry.filename
+                    and (not entry.filename.endswith(os.sep + "ast.py")
+                         or entry.name != "parse" 
+                         or etype is not SyntaxError) 
                     or have_seen_first_relevant_frame
                     or in_debug_mode()):
                     
