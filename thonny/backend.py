@@ -869,11 +869,26 @@ class VM:
             tb = tb.tb_next
         last_frame = tb.tb_frame
         
+        if e_type is SyntaxError:
+            # Don't show ast frame
+            while (last_frame.f_code.co_filename
+                and last_frame.f_code.co_filename == ast.__file__):
+                last_frame = last_frame.f_back
+        
+        if e_type is SyntaxError:
+            msg = (traceback.format_exception_only(e_type, e_value)[-1]
+                   .replace(e_type.__name__ + ":", "")
+                   .strip())
+        else:
+            msg = str(e_value)
+            
         return {
-            "error_type_name" : e_type.__name__,
-            "error_message" : str(e_value),
+            "type_name" : e_type.__name__,
+            "message" : msg,
             "stack" : self._export_stack(last_frame),
-            "items": format_exception_with_frame_info(e_type, e_value, e_traceback)
+            "items": format_exception_with_frame_info(e_type, e_value, e_traceback),
+            "filename" : getattr(e_value, "filename", None),
+            "lineno" : getattr(e_value, "lineno", None),
         }
     
 
@@ -2242,7 +2257,14 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback,
             
             assert tb_temp is None # tb was exhausted
         
-        for line in traceback.format_exception_only(etype, value): 
+        for line in traceback.format_exception_only(etype, value):
+            if etype is SyntaxError and line.endswith("^\n"):
+                # for some reason it may add several empty lines before ^-line
+                partlines = line.splitlines()
+                while (len(partlines) >= 2 and partlines[-2].strip() == ""):
+                    del partlines[-2]
+                line = "\n".join(partlines) + "\n"
+                        
             yield (line, None, None, None)
     
     items = rec_format_exception_with_frame_info(e_type, e_value, e_traceback)

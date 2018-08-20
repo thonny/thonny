@@ -9,7 +9,14 @@ from thonny.codeview import get_syntax_options_for_tag
 from thonny.common import ToplevelResponse
 import ast
 from thonny.misc_utils import levenshtein_damerau_distance
+import token
 import tokenize
+import io
+
+from pylint import lint
+import subprocess
+from thonny.running import get_frontend_python
+
 
 Suggestion = namedtuple("Suggestion", ["title", "general", "specific", "relevance"])
 
@@ -24,8 +31,11 @@ class AssistantView(tktextext.TextFrame):
                                      cursor="arrow",
                                      insertwidth=0)
         self._error_helper_classes = {
-            "NameError" : {NameErrorHelper}
+            "NameError" : {NameErrorHelper},
+            "SyntaxError" : {SyntaxErrorHelper},
         }
+        
+        self._warning_providers = set()
         
         self.text.tag_configure("error_title",
                                 spacing3=5,
@@ -44,25 +54,22 @@ class AssistantView(tktextext.TextFrame):
     
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         if "user_exception" in msg:
-            self.explain_exception(msg["user_exception"]["error_type_name"],
-                                   msg["user_exception"]["error_message"],
-                                   msg["user_exception"]["stack"])
+            self.explain_exception(msg["user_exception"])
+        
+        #self._append_pylint_messages()
     
-    def explain_exception(self, error_type_name, error_message, stack):
+    def explain_exception(self, error_info):
         "►▸˃✶ ▼▸▾"
         self._clear()
-        self._append_text("%s: %s\n" % (error_type_name, error_message),
+        self._append_text("%s: %s\n" % (error_info["type_name"], error_info["message"]),
                           ("error_title",))
         
-        #if stack[-1].in_library:
-        #    helpers = [LibraryErrorHelper(error_type_name, error_message, stack)]
-        #else:
-        if error_type_name not in self._error_helper_classes:
+        if error_info["type_name"] not in self._error_helper_classes:
             self._append_text("No helpers for this error type")
             return
         else:
-            helpers =[helper_class(error_type_name, error_message, stack)
-                  for helper_class in self._error_helper_classes[error_type_name]]
+            helpers =[helper_class(error_info)
+                  for helper_class in self._error_helper_classes[error_info["type_name"]]]
             
         # TODO: how to select the intro text?
         self._append_text(helpers[0].get_intro() + "\n", ("intro",))
@@ -74,6 +81,7 @@ class AssistantView(tktextext.TextFrame):
         for suggestion in sorted(suggestions, key=lambda s: s.relevance, reverse=True):
             if suggestion.relevance > 0:
                 self._append_suggestion(suggestion)
+        
     
     def add_error_helper(self, error_type_name, helper_class):
         if error_type_name not in self._error_helper_classes:
@@ -123,7 +131,9 @@ class AssistantView(tktextext.TextFrame):
             title_tags += ("relevant_suggestion_title",)
         self._append_window(label, title_tags)
         #self._append_image("boxplus", ("suggestion_title", title_tag))
-        self._append_text("" + suggestion.title + "\n", title_tags)
+        self._append_text("" + suggestion.title
+                          + " (%d)" % suggestion.relevance 
+                          + "\n", title_tags)
         
         if suggestion.general is not None:
             self._append_text(suggestion.general.strip() + "\n",
@@ -150,6 +160,17 @@ class AssistantView(tktextext.TextFrame):
     
     def _clear(self):
         self.text.direct_delete("1.0", "end")
+    
+    def _append_pylint_messages(self):
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if editor is None:
+            return
+        filename = editor.get_filename()
+        if filename is None:
+            return
+        
+        
+        lint.Run([filename], exit=False)
 
 class Helper:
     def get_intro(self):
@@ -161,20 +182,44 @@ class Helper:
 class DebugHelper(Helper):
     pass
 
+class AsyncWarningProvider:
+    def start_analysis(self, on_warning):
+        pass
+    
+    def cancel(self):
+        pass
+        
+        
+
+class PyLintWarningProvider(AsyncWarningProvider):
+    def _get_pylint_codes(self):
+        subprocess.run([get_frontend_python(), "-m", "pylint"], 
+                       stdout=subprocess.PIPE,
+                       stderr=subprocess.PIPE,
+                       universal_newlines=True)
+
+    def cancel(self):
+        self._proc.kill()
+        
 class ErrorHelper(Helper):
-    def __init__(self, error_type_name, error_message, stack=None):
+    def __init__(self, error_info):
         
         # TODO: don't repeat all this for all error helpers
-        self.error_type_name = error_type_name
-        self.error_message = error_message
-        self.stack=stack
+        self.intro_is_enough = False
+        self.error_info = error_info
         
-        self.last_frame = stack[-1]
+        self.last_frame = error_info["stack"][-1]
         if self.last_frame.source:
-            self.last_frame_ast = ast.parse(self.last_frame.source,
-                                            self.last_frame.filename)
+            try:
+                self.last_frame_ast = ast.parse(self.last_frame.source,
+                                                self.last_frame.filename)
+            except SyntaxError:
+                pass
             self.last_frame_lines = self.last_frame.source.splitlines()
-            self.last_frame_line = self.last_frame_lines[self.last_frame.lineno-1]
+            if self.last_frame.lineno <= len(self.last_frame_lines):
+                self.last_frame_line = self.last_frame_lines[self.last_frame.lineno-1]
+            else:
+                self.last_frame_line = None
         else:
             self.last_frame_ast = None
             self.last_frame_lines = None
@@ -186,8 +231,10 @@ class ErrorHelper(Helper):
         elif self.last_frame.filename is not None:
             with tokenize.open(self.last_frame.filename) as fp:
                 self.last_frame_module_source = fp.read() 
-            
-            self.last_frame_module_ast = ast.parse(self.last_frame_module_source)
+            try:
+                self.last_frame_module_ast = ast.parse(self.last_frame_module_source)
+            except SyntaxError:
+                pass
         
         
 
@@ -200,12 +247,151 @@ class LibraryErrorHelper(ErrorHelper):
     def get_suggestions(self):
         return []
 
+class SyntaxErrorHelper(ErrorHelper):
+    def __init__(self, error_info):
+        ErrorHelper.__init__(self, error_info)
+        
+        # NB! Stack info is not relevant with SyntaxErrors,
+        # use special fields instead
+
+        self.tokens = []
+        self.token_error = None
+        
+        
+        if self.error_info["filename"]:
+            with open(self.error_info["filename"], mode="rb") as fp:
+                try:
+                    for t in tokenize.tokenize(fp.readline):
+                        self.tokens.append(t)
+                except tokenize.TokenError as e:
+                    self.token_error = e
+            
+            assert self.tokens[-1].type == token.ENDMARKER
+        else:
+            self.tokens = None
+            
+            
+    def get_intro(self):
+        if self.error_info["message"] == "EOL while scanning string literal":
+            self.intro_is_enough = True
+            return ("You haven't properly closed the string on line %s." % self.error_info["lineno"]
+                    + "\n(If you want a multi-line string, then surround it with"
+                    + " `'''` or `\"\"\"` at both ends.)")
+            
+        elif self.error_info["message"] == "EOF while scanning triple-quoted string literal":
+            # lineno is not useful, as it is at the end of the file and user probably
+            # didn't want the string to end there
+            return "You haven't properly closed a triple-quoted string"
+            self.intro_is_enough = True
+        else:
+            msg = "Python doesn't know how to read your program."
+            
+            if True: # TODO: check the presence of ^
+                msg += "\nSmall `^` in the original error message shows where it gave up,"
+                + " but the actual mistake is usually before this." 
+            
+            return msg
+    
+    def get_more_info(self):
+        return "Even single wrong, misplaced or missing character can cause syntax errors."
+    
+    def get_suggestions(self) -> Iterable[Suggestion]:
+        return [self._sug_missing_colon()]
+    
+    def _sug_missing_colon(self):
+        i = 0
+        specific = None
+        relevance = 0
+        while i < len(self.tokens):
+            t = self.tokens[i]
+            if (t.string in ["else", "try", "finally"]
+                and self.tokens[i+1].string != ":"):
+                specific = "Keyword `%s` must be followed by a colon." % t.string
+                relevance = 9
+                if (self.tokens[i+1].type not in (token.NEWLINE, tokenize.COMMENT)
+                    and t.string == "else"):
+                    specific += " (If you want to specify a conditon, then use `elif` or nested `if`)"
+                break
+                    
+            elif t.string in ["if", "elif", "while", "for", "with",
+                            "except", "class", "def"]:
+                
+                while (self.tokens[i].type not in [token.NEWLINE, token.ENDMARKER, 
+                                     token.COLON, # colon may be OP 
+                                     token.RBRACE]
+                        and self.tokens[i].string != ":"):
+                    if self.tokens[i].string in "([{":
+                        i = self._skip_braced_part(i)
+                    else:
+                        i += 1
+                
+                if self.tokens[i].string != ":":
+                    relevance = 9
+                    specific = "`%s` header must end with a colon." % t.string
+                    break
+            
+            i += 1
+                
+        return Suggestion("Did you forget the colon?", None, specific, relevance)
+    
+    def _sug_wrong_increment_op(self):
+        pass
+    
+    def _sug_wrong_decrement_op(self):
+        pass
+    
+    def _sug_wrong_comparison_op(self):
+        pass
+    
+    def _sug_switched_assignment_sides(self):
+        pass
+    
+    def _skip_braced_part(self, token_index):
+        assert self.tokens[token_index].string in "([{"
+        level = 1
+        while token_index < len(self.tokens):
+            token_index += 1
+            
+            if self.tokens[token_index].string in "([{":
+                level += 1
+            elif self.tokens[token_index].string in ")]}":
+                level -= 1
+            
+            if level <= 0:
+                token_index += 1
+                return token_index
+        
+        assert token_index == len(self.tokens)
+        return token_index-1
+    
+    def _find_first_braces_problem(self):
+        #closers = {'(':')', '{':'}', '[':']'}
+        openers = {')':'(', '}':'{', ']':'['}
+        
+        brace_stack = []
+        for t in self.tokens:
+            if t.string in "([{":
+                brace_stack.append(token)
+            elif t.string in ")]}":
+                if not brace_stack:
+                    return (t, "`%s` without preceding matching `%s`" % (t.string, openers[t.string]))
+                elif brace_stack[-1].string != openers[t.string]:     
+                    return (t, "`%s` when last unmatched opener was `%s`" % (t.string, brace_stack[-1].string))
+                else:
+                    brace_stack.pop()
+        
+        if brace_stack:
+            return (brace_stack[-1], "`%s` was not closed by the end of the program" % brace_stack[-1].string)
+        
+        return None
+        
+
 class NameErrorHelper(ErrorHelper):
-    def __init__(self, error_type_name, error_message, stack=None):
+    def __init__(self, error_info):
         
-        super().__init__(error_type_name, error_message, stack)
+        super().__init__(error_info)
         
-        names = re.findall(r"\'.*\'", error_message)
+        names = re.findall(r"\'.*\'", error_info["message"])
         assert len(names) == 1
         self.name = names[0].strip("'")
     
@@ -236,7 +422,7 @@ class NameErrorHelper(ErrorHelper):
         if self._is_attribute_value() or self._is_call_function():
             relevance = 0
         else:
-            relevance = 7
+            relevance = 5
             
         return Suggestion(
             "Did you really mean a variable or just forgot the quotes?",
@@ -250,6 +436,7 @@ class NameErrorHelper(ErrorHelper):
         # Yes, it would be more proper to consult builtins from the backend,
         # but it's easier this way...
         all_names = {name for name in dir(builtins) if not name.startswith("_")}
+        all_names |= {"pass", "break", "continue", "return", "yield"}
         
         if self.last_frame.globals is not None:
             all_names |= set(self.last_frame.globals.keys())
@@ -409,17 +596,24 @@ def _name_similarity(a, b):
     a = a.replace("_", "")
     b = b.replace("_", "")
     
+    minlen = min(len(a), len(b))
+    
     if (a.replace("0", "O").replace("1", "l")
           == b.replace("0", "O").replace("1", "l")):
-        return 6
+        if minlen >= 4: 
+            return 7
+        else:
+            return 6
     
     a = a.lower()
     b = b.lower()
     
     if a == b:
-        return 6
+        if minlen >= 4: 
+            return 7
+        else:
+            return 6
     
-    minlen = min(len(a), len(b))
     
     if minlen <= 2:
         return 0
@@ -445,4 +639,5 @@ def _name_similarity(a, b):
     else:
         return max(10 - distance*2, 0)
         
-                        
+
+

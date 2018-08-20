@@ -1840,6 +1840,25 @@ def show_dialog(dlg, master=None):
     if focused_widget is not None:
         focused_widget.focus_set()
 
+
+def popen_with_ui_thread_callback(*Popen_args,
+                                   on_completion, 
+                                   poll_delay=0.1,
+                                   **Popen_kwargs):
+    proc = subprocess.Popen(*Popen_args, **Popen_kwargs)
+    
+    def poll():
+        if proc.poll():
+            on_completion(proc)
+            return
+        
+        tk._default_root.after(poll_delay*1000, poll)
+    
+    poll()
+    
+    return proc
+    
+    
         
 if __name__ == "__main__":
     root = tk.Tk()
