@@ -6,7 +6,7 @@ rmdir %BUILDDIR% /S /Q
 mkdir %BUILDDIR%
 
 @echo ............... COPYING PYTHON ...................................
-xcopy .\Python36\* %BUILDDIR% /S /E /K>NUL
+xcopy C:\Pythonny36\* %BUILDDIR% /S /E /K>NUL
 @echo ............... COPYING OTHER STUFF ...................................
 copy ThonnyRunner36\Release\thonny.exe %BUILDDIR% /Y
 xcopy ucrt_redist\*.dll %BUILDDIR% /S /E /K>NUL
