@@ -43,7 +43,7 @@ class AboutDialog(tk.Toplevel):
         heading_label.grid()
         
         
-        url = "http://thonny.org"
+        url = "https://thonny.org"
         url_font = font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
         url_label = ttk.Label(main_frame, text=url,
