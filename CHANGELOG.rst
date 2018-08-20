@@ -116,9 +116,11 @@ Note: This version is successor of 2.2.0b4 and 2.1.21. Stable release of 2.2.0 w
 * TECHNICAL: Several changes in Runner and BackendProxy interface
 * TECHNICAL: Saving an editor now forces writing to disk (see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it)
 
-2.1.22 (2018-08-??)
+2.1.22 (2018-08-20)
 ===================
-* ENHANCEMENT: Less intrusive logging for ast marking problems
+Happy re-independence day to Estonia!
+
+* ENHANCEMENT: Less intrusive logging for AST marking problems
 * FIXED #340: Validate geometry before loading
 * FIXED #363: subprocess.run causes Thonny backend to hang
 * FIXED #419: logging doesn't work in user programs
