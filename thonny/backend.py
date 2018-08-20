@@ -686,6 +686,7 @@ class VM:
                 source = fp.read()
 
             result_attributes = self._execute_source(source, full_filename, "exec", executor_class, cmd)
+            result_attributes["filename"] = full_filename
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
             raise UserError("Command '%s' takes at least one argument", cmd.name)
@@ -864,10 +865,13 @@ class VM:
             e_type, e_value, e_traceback
         )
         
+        processed_tb = traceback.extract_tb(e_traceback)
+        
         tb = e_traceback
         while tb.tb_next is not None:
             tb = tb.tb_next
         last_frame = tb.tb_frame
+        
         
         if e_type is SyntaxError:
             # Don't show ast frame
@@ -881,14 +885,15 @@ class VM:
                    .strip())
         else:
             msg = str(e_value)
-            
+        
         return {
             "type_name" : e_type.__name__,
             "message" : msg,
             "stack" : self._export_stack(last_frame),
             "items": format_exception_with_frame_info(e_type, e_value, e_traceback),
-            "filename" : getattr(e_value, "filename", None),
-            "lineno" : getattr(e_value, "lineno", None),
+            "filename" : getattr(e_value, "filename", processed_tb[-1].filename),
+            "lineno" : getattr(e_value, "lineno", processed_tb[-1].lineno),
+            "line" : getattr(e_value, "text", processed_tb[-1].line),
         }
     
 

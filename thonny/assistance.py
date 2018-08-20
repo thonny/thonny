@@ -16,6 +16,8 @@ import io
 from pylint import lint
 import subprocess
 from thonny.running import get_frontend_python
+import sys
+import logging
 
 
 Suggestion = namedtuple("Suggestion", ["title", "general", "specific", "relevance"])
@@ -35,7 +37,9 @@ class AssistantView(tktextext.TextFrame):
             "SyntaxError" : {SyntaxErrorHelper},
         }
         
-        self._warning_providers = set()
+        self._warning_providers = {
+            PyLintWarningProvider(self._append_warning)
+        }
         
         self.text.tag_configure("error_title",
                                 spacing3=5,
@@ -53,14 +57,16 @@ class AssistantView(tktextext.TextFrame):
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
     
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
+        self._clear()
+        
         if "user_exception" in msg:
             self.explain_exception(msg["user_exception"])
         
-        #self._append_pylint_messages()
+        if "filename" in msg:
+            self._present_warnings(msg["filename"])
     
     def explain_exception(self, error_info):
         "►▸˃✶ ▼▸▾"
-        self._clear()
         self._append_text("%s: %s\n" % (error_info["type_name"], error_info["message"]),
                           ("error_title",))
         
@@ -159,18 +165,16 @@ class AssistantView(tktextext.TextFrame):
             
     
     def _clear(self):
+        for wp in self._warning_providers:
+            wp.cancel_analysis()
         self.text.direct_delete("1.0", "end")
     
-    def _append_pylint_messages(self):
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if editor is None:
-            return
-        filename = editor.get_filename()
-        if filename is None:
-            return
-        
-        
-        lint.Run([filename], exit=False)
+    def _present_warnings(self, filename):
+        for wp in self._warning_providers:
+            wp.start_analysis(filename)
+    
+    def _append_warning(self, data):
+        self.text.insert("end", data)
 
 class Helper:
     def get_intro(self):
@@ -183,23 +187,75 @@ class DebugHelper(Helper):
     pass
 
 class AsyncWarningProvider:
-    def start_analysis(self, on_warning):
+    def __init__(self, on_warning):
+        self.warning_handler = on_warning
+        
+    def start_analysis(self, filename):
         pass
     
-    def cancel(self):
+    def cancel_analysis(self):
         pass
         
         
 
 class PyLintWarningProvider(AsyncWarningProvider):
-    def _get_pylint_codes(self):
-        subprocess.run([get_frontend_python(), "-m", "pylint"], 
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE,
-                       universal_newlines=True)
+    
+    def __init__(self, on_warning):
+        self.warning_handler = on_warning
+        self._proc = None
+    
+    def start_analysis(self, filename):
+        
+        relevant_symbols = {
+            "trailing-comma-tuple",
+            "inconsistent-return-statements"
+        }
+        
+        self._proc = ui_utils.popen_with_ui_thread_callback(
+            [get_frontend_python(), "-m", 
+                "pylint", 
+                "--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
+                "--persistent=n", 
+                "--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
+                "--disable=all",
+                "--enable=" + ",".join(relevant_symbols),
+                #"--output-format=text",
+                "--reports=n",
+                "--msg-template={{'file':{abspath!r}, 'line':{line}, 'column':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
+                filename],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            on_completion=self._parse_and_output_warnings
+        )
+        
+        
+    def _parse_and_output_warnings(self, pylint_proc):
+        out = pylint_proc.stdout.read()
+        err = pylint_proc.stderr.read()
+        #print("COMPL", out, err)
+        # get rid of non-error
+        err = err.replace("No config file found, using default configuration", "").strip()
+        if err:
+            print(err, file=sys.stderr)
+            #logging.getLogger("thonny").warning("Pylint: " + err)
+            
+        for line in out.splitlines():
+            if line.startswith("{"):
+                try:
+                    atts = ast.literal_eval(line.strip())
+                except SyntaxError:
+                    print(line)
+                    continue
+                else:
+                    self._output_warning(atts)
+    
+    def _output_warning(self, atts):
+        print(atts)
 
-    def cancel(self):
-        self._proc.kill()
+    def cancel_analysis(self):
+        if self._proc is not None:
+            self._proc.kill()
         
 class ErrorHelper(Helper):
     def __init__(self, error_info):
@@ -209,22 +265,17 @@ class ErrorHelper(Helper):
         self.error_info = error_info
         
         self.last_frame = error_info["stack"][-1]
+        self.last_frame_ast = None
         if self.last_frame.source:
             try:
                 self.last_frame_ast = ast.parse(self.last_frame.source,
                                                 self.last_frame.filename)
             except SyntaxError:
                 pass
-            self.last_frame_lines = self.last_frame.source.splitlines()
-            if self.last_frame.lineno <= len(self.last_frame_lines):
-                self.last_frame_line = self.last_frame_lines[self.last_frame.lineno-1]
-            else:
-                self.last_frame_line = None
-        else:
-            self.last_frame_ast = None
-            self.last_frame_lines = None
-            self.last_frame_line = None
+            
         
+        self.last_frame_module_source = None 
+        self.last_frame_module_ast = None
         if self.last_frame.code_name == "<module>":
             self.last_frame_module_source = self.last_frame.source
             self.last_frame_module_ast = self.last_frame_ast
@@ -287,8 +338,8 @@ class SyntaxErrorHelper(ErrorHelper):
             msg = "Python doesn't know how to read your program."
             
             if True: # TODO: check the presence of ^
-                msg += "\nSmall `^` in the original error message shows where it gave up,"
-                + " but the actual mistake is usually before this." 
+                msg += (" Small `^` in the original error message shows where it gave up,"
+                        + " but the actual mistake can be before this.") 
             
             return msg
     
@@ -296,43 +347,52 @@ class SyntaxErrorHelper(ErrorHelper):
         return "Even single wrong, misplaced or missing character can cause syntax errors."
     
     def get_suggestions(self) -> Iterable[Suggestion]:
-        return [self._sug_missing_colon()]
+        return [self._sug_missing_or_misplaced_colon()]
     
-    def _sug_missing_colon(self):
+    def _sug_missing_or_misplaced_colon(self):
         i = 0
+        title = "Did you forget the colon?"
+        general = None
         specific = None
         relevance = 0
-        while i < len(self.tokens):
+        while i < len(self.tokens) and self.tokens[i].type != token.ENDMARKER:
             t = self.tokens[i]
-            if (t.string in ["else", "try", "finally"]
-                and self.tokens[i+1].string != ":"):
-                specific = "Keyword `%s` must be followed by a colon." % t.string
-                relevance = 9
-                if (self.tokens[i+1].type not in (token.NEWLINE, tokenize.COMMENT)
-                    and t.string == "else"):
-                    specific += " (If you want to specify a conditon, then use `elif` or nested `if`)"
-                break
-                    
-            elif t.string in ["if", "elif", "while", "for", "with",
-                            "except", "class", "def"]:
-                
+            if t.string in ["if", "elif", "else", "while", "for", "with",
+                            "try", "except", "finally", 
+                            "class", "def"]:
+                keyword_pos = i
                 while (self.tokens[i].type not in [token.NEWLINE, token.ENDMARKER, 
                                      token.COLON, # colon may be OP 
                                      token.RBRACE]
                         and self.tokens[i].string != ":"):
+                    
+                    old_i = i
                     if self.tokens[i].string in "([{":
                         i = self._skip_braced_part(i)
+                        assert i > old_i
                     else:
                         i += 1
                 
                 if self.tokens[i].string != ":":
                     relevance = 9
-                    specific = "`%s` header must end with a colon." % t.string
+                    general = "`%s` header must end with a colon." % t.string
                     break
             
+                # Colon was present, but maybe it should have been right
+                # after the keyword.
+                if (t.string in ["else", "try", "finally"]
+                    and self.tokens[keyword_pos+1].string != ":"):
+                    title = "Incorrect use of `%s`" % t.string
+                    general = "Nothing is allowed between `%s` and colon." % t.string
+                    relevance = 9
+                    if (self.tokens[keyword_pos+1].type not in (token.NEWLINE, tokenize.COMMENT)
+                        and t.string == "else"):
+                        specific = "If you want to specify a conditon, then use `elif` or nested `if`."
+                    break
+                
             i += 1
                 
-        return Suggestion("Did you forget the colon?", None, specific, relevance)
+        return Suggestion(title, general, specific, relevance)
     
     def _sug_wrong_increment_op(self):
         pass
@@ -573,19 +633,19 @@ class NameErrorHelper(ErrorHelper):
         ...
     
     def _is_call_function(self):
-        return self.name + "(" in (self.last_frame_line
+        return self.name + "(" in (self.error_info["line"]
                                    .replace(" ", "")
                                    .replace("\n", "")
                                    .replace("\r", ""))
                                    
     def _is_subscript_value(self):
-        return self.name + "[" in (self.last_frame_line
+        return self.name + "[" in (self.error_info["line"]
                                    .replace(" ", "")
                                    .replace("\n", "")
                                    .replace("\r", ""))
                                    
     def _is_attribute_value(self):
-        return self.name + "." in (self.last_frame_line
+        return self.name + "." in (self.error_info["line"]
                                    .replace(" ", "")
                                    .replace("\n", "")
                                    .replace("\r", ""))

@@ -1848,11 +1848,11 @@ def popen_with_ui_thread_callback(*Popen_args,
     proc = subprocess.Popen(*Popen_args, **Popen_kwargs)
     
     def poll():
-        if proc.poll():
+        if proc.poll() is not None:
             on_completion(proc)
             return
         
-        tk._default_root.after(poll_delay*1000, poll)
+        tk._default_root.after(int(poll_delay*1000), poll)
     
     poll()
     
