@@ -1,0 +1,110 @@
+BETTER EXPLAINED THAN PYTHON
+:nonexistent-operator (E0107): *Use of the non-existent %s operator*
+  Used when you attempt to use the C-style pre-increment or pre-decrement
+  operator -- and ++, which doesn't exist in Python.
+
+:print-statement (E1601): *print statement used*
+  Used when a print statement is used (`print` is a function in Python 3)
+
+
+NOT DETECTED BY PYTHON ??
+:function-redefined (E0102): *%s already defined line %s*
+  Used when a function / class / method is redefined.
+
+:bad-except-order (E0701): *Bad except clauses order (%s)*
+  Used when except clauses are not in the correct order (from the more specific
+  to the more generic). If you don't fix the order, some exceptions may not be
+  caught by the most specific handler.
+
+:assignment-from-no-return (E1111): *Assigning to function call which doesn't return*
+  Used when an assignment is done on a function call but the inferred function
+  doesn't return anything.
+
+:assignment-from-none (E1128): *Assigning to function call which only returns None*
+  Used when an assignment is done on a function call but the inferred function
+  returns nothing but None.
+
+
+
+:comparison-with-itself (R0124): *Redundant comparison - %s*
+  Used when something is compared against itself.
+
+:duplicate-code (R0801): *Similar lines in %s files*
+  Indicates that a set of similar lines has been detected among multiple file.
+  This usually means that the code should be refactored to avoid this
+  duplication.
+
+:simplifiable-if-statement (R1703): *The if statement can be replaced with %s*
+  Used when an if statement can be replaced with 'bool(test)'.
+
+:trailing-comma-tuple (R1707): *Disallow trailing comma tuple*
+  In Python, a tuple is actually created by the comma symbol, not by the
+  parentheses. Unfortunately, one can actually create a tuple by misplacing a
+  trailing comma, which can lead to potential weird bugs in your code. You
+  should always use parentheses explicitly for creating a tuple.
+
+:inconsistent-return-statements (R1710): *Either all return statements in a function should return an expression, or none of them should.*
+  According to PEP8, if any return statement returns an expression, any return
+  statements where no value is returned should explicitly state this as return
+  None, and an explicit return statement should be present at the end of the
+  function (if reachable)
+
+:useless-return (R1711): *Useless return at end of function or method*
+  Emitted when a single "return" or "return None" statement is found at the end
+  of function or method definition. This statement can safely be removed because
+  Python will implicitly return None
+
+:unreachable (W0101): *Unreachable code*
+  Used when there is some code behind a "return" or "raise" statement, which
+  will never be accessed.
+
+:pointless-statement (W0104): *Statement seems to have no effect*
+  Used when a statement doesn't have (or at least seems to) any effect.
+
+:expression-not-assigned (W0106): *Expression "%s" is assigned to nothing*
+  Used when an expression that is not a function call is assigned to nothing.
+  Probably something else was intended.
+
+:using-constant-test (W0125): *Using a conditional statement with a constant value*
+  Emitted when a conditional statement (If or ternary if) uses a constant value
+  for its test. This might not be what the user intended to do.
+
+:comparison-with-callable (W0143): *Comparing against a callable, did you omit the parenthesis?*
+  This message is emitted when pylint detects that a comparison with a callable
+  was made, which might suggest that some parenthesis were omitted, resulting in
+  potential unwanted behaviour.
+
+:reimported (W0404): *Reimport %r (imported line %s)*
+  Used when a module is reimported multiple times.
+
+:import-self (W0406): *Module import itself*
+  Used when a module is importing itself.
+
+:global-variable-undefined (W0601): *Global variable %r undefined at the module level*
+  Used when a variable is defined through the "global" statement but the
+  variable is not defined in the module scope.
+:global-variable-not-assigned (W0602): *Using global for %r but no assignment is done*
+  Used when a variable is defined through the "global" statement but no
+  assignment to this variable is done.
+
+:global-at-module-level (W0604): *Using the global statement at the module level*
+  Used when you use the "global" statement at the module level since it has no
+  effect
+
+:possibly-unused-variable (W0641): *Possibly unused variable %r*
+  Used when a variable is defined but might not be used. The possibility comes
+  from the fact that locals() might be used, which could consume or not the said
+  variable
+
+:anomalous-backslash-in-string (W1401): *Anomalous backslash in string: '%s'. String constant might be missing an r prefix.*
+  Used when a backslash is in a literal string but not as an escape.
+
+:dict-items-not-iterating (W1654): *dict.items referenced when not iterating*
+  Used when dict.items is referenced in a non-iterating context (returns an
+  iterator in Python 3)
+:dict-keys-not-iterating (W1655): *dict.keys referenced when not iterating*
+  Used when dict.keys is referenced in a non-iterating context (returns an
+  iterator in Python 3)
+:dict-values-not-iterating (W1656): *dict.values referenced when not iterating*
+  Used when dict.values is referenced in a non-iterating context (returns an
+  iterator in Python 3)

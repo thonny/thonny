@@ -38,10 +38,10 @@ class AssistantView(tktextext.TextFrame):
         }
         
         self._warning_providers = {
-            PyLintWarningProvider(self._append_warning)
+            PyLintWarningProvider(self._append_warnings)
         }
         
-        self.text.tag_configure("error_title",
+        self.text.tag_configure("section_title",
                                 spacing3=5,
                                 font="BoldTkDefaultFont",
                                 #foreground=get_syntax_options_for_tag("stderr")["foreground"]
@@ -63,12 +63,12 @@ class AssistantView(tktextext.TextFrame):
             self.explain_exception(msg["user_exception"])
         
         if "filename" in msg:
-            self._present_warnings(msg["filename"])
+            self._start_warning_analysis(msg["filename"])
     
     def explain_exception(self, error_info):
         "►▸˃✶ ▼▸▾"
         self._append_text("%s: %s\n" % (error_info["type_name"], error_info["message"]),
-                          ("error_title",))
+                          ("section_title",))
         
         if error_info["type_name"] not in self._error_helper_classes:
             self._append_text("No helpers for this error type")
@@ -169,12 +169,22 @@ class AssistantView(tktextext.TextFrame):
             wp.cancel_analysis()
         self.text.direct_delete("1.0", "end")
     
-    def _present_warnings(self, filename):
+    def _start_warning_analysis(self, filename):
         for wp in self._warning_providers:
             wp.start_analysis(filename)
     
-    def _append_warning(self, data):
-        self.text.insert("end", data)
+    def _append_warnings(self, title, warnings):
+        # TODO: group by file
+        self._append_text("\n")
+        self._append_text(title + "\n", ("section_title",))
+        
+        for warning in sorted(warnings, key=lambda x: x["line"]):
+            self._append_warning(warning)
+    
+    def _append_warning(self, warning):
+        if warning["line"]:
+            self._append_text("Line %d: " % warning["line"])
+        self._append_text(warning["msg"] + "\n")
 
 class Helper:
     def get_intro(self):
@@ -186,29 +196,99 @@ class Helper:
 class DebugHelper(Helper):
     pass
 
-class AsyncWarningProvider:
-    def __init__(self, on_warning):
-        self.warning_handler = on_warning
+class SubprocessWarningProvider:
+    def __init__(self, on_completion):
+        super().__init__(on_completion)
+        self._proc = None
         
     def start_analysis(self, filename):
         pass
     
     def cancel_analysis(self):
-        pass
+        if self._proc is not None:
+            self._proc.kill()
         
         
 
-class PyLintWarningProvider(AsyncWarningProvider):
-    
-    def __init__(self, on_warning):
-        self.warning_handler = on_warning
-        self._proc = None
+class PyLintWarningProvider(SubprocessWarningProvider):
     
     def start_analysis(self, filename):
         
         relevant_symbols = {
+            "function-redefined",
+            "method-hidden",
+            "no-method-argument",
+            "no-self-argument",
+            "inherit-non-class",
+            "used-before-assignment",
+            "undefined-variable",
+            "no-name-in-module",
+            "unbalanced-tuple-unpacking",
+            "unpacking-non-sequence",
+            "bad-except-order",
+            "raising-bad-type",
+            "misplaced-bare-raise", # TODO: "did you forgot exception to raise"
+            "raising-non-exception",
+            "notimplemented-raised",
+            "no-member",
+            "not-callable",
+            "assignment-from-no-return",
+            "assignment-from-none",
+            "no-value-for-parameter",
+            "unsupported-membership-test",
+            "unsubscriptable-object",
+            "unsupported-assignment-operation",
+            "unsupported-delete-operation",
+            "too-many-function-args",
+            "unexpected-keyword-arg",
+            "redundant-keyword-arg",
+            "missing-kwoa",
+            "invalid-sequence-index",
+            "invalid-slice-index",
+            "invalid-unary-operand-type",
+            "unsupported-binary-operation",
+            "not-an-iterable",
+            "not-a-mapping",
             "trailing-comma-tuple",
-            "inconsistent-return-statements"
+            "inconsistent-return-statements",
+            #"missing-docstring",
+            "access-member-before-definition",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+        }
+        
+        style_symbols = {
+            # issues that affect readability and may hide bugs
+            "invalid-name", # TODO: check only naming styles, not length
+            "bad-classmethod-argument", # cls
+            "line-too-long", # Remind \ and (), # TODO: use line-margin setting
+            "superfluous-parens", # if (...): 
+            #"bad-whitespace", # ??? 
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
+            "",
         }
         
         self._proc = ui_utils.popen_with_ui_thread_callback(
@@ -216,10 +296,11 @@ class PyLintWarningProvider(AsyncWarningProvider):
                 "pylint", 
                 "--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
                 "--persistent=n", 
-                "--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
-                "--disable=all",
-                "--enable=" + ",".join(relevant_symbols),
-                #"--output-format=text",
+                #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
+                #"--disable=all",
+                "--enable=all",
+                #"--enable=" + ",".join(relevant_symbols),
+                "--output-format=text",
                 "--reports=n",
                 "--msg-template={{'file':{abspath!r}, 'line':{line}, 'column':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
                 filename],
@@ -239,7 +320,8 @@ class PyLintWarningProvider(AsyncWarningProvider):
         if err:
             print(err, file=sys.stderr)
             #logging.getLogger("thonny").warning("Pylint: " + err)
-            
+        
+        warnings = []
         for line in out.splitlines():
             if line.startswith("{"):
                 try:
@@ -248,14 +330,10 @@ class PyLintWarningProvider(AsyncWarningProvider):
                     print(line)
                     continue
                 else:
-                    self._output_warning(atts)
-    
-    def _output_warning(self, atts):
-        print(atts)
+                    warnings.append(atts)
+        
+        self.completion_handler("Pylint warnings", warnings)
 
-    def cancel_analysis(self):
-        if self._proc is not None:
-            self._proc.kill()
         
 class ErrorHelper(Helper):
     def __init__(self, error_info):

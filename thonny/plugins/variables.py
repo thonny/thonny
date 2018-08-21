@@ -19,6 +19,7 @@ class VariablesView(VariablesFrame):
         
         get_workbench().bind("BackendRestart", self._handle_backend_restart, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
+        #get_workbench().bind("DebuggerResponse", self._debugger_response, True)
         get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
         get_workbench().bind("get_globals_response", self._handle_get_globals_response, True)
         
@@ -49,6 +50,22 @@ class VariablesView(VariablesFrame):
         self.show_globals(event["globals"], event["module_name"])
     
     def _handle_toplevel_response(self, event):
+        if "globals" in event:
+            self.show_globals(event["globals"], "__main__")
+        else:
+            # MicroPython
+            get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
+    
+    def _handle_debugger_response(self, event):
+        from thonny.plugins import debugger
+        
+        frame = event["stack"][-1]
+        if isinstance(debugger.get_current_debugger(),
+                      debugger.SingleWindowDebugger):
+            
+            self.show_frame_variables(frame.locals, frame.globals,
+                                      frame.freevars, frame_name, is_active)
+        
         if "globals" in event:
             self.show_globals(event["globals"], "__main__")
         else:

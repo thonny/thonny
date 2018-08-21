@@ -257,8 +257,12 @@ class StackedWindowsDebugger(Debugger):
             return
         self._last_brought_out_frame_id = frame_id
         
-        # called by StackView
         self._main_frame_visualizer.bring_out_frame(frame_id)
+
+        # show variables
+        var_view = get_workbench().get_view("VariablesView")
+        frame_info = self.get_frame_by_id(frame_id)
+        var_view.show_globals(frame_info.globals, frame_info.module_name)
         
         
 
