@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import builtins
 from typing import List, Optional, Union, Iterable, Tuple
-from thonny import ui_utils, tktextext, get_workbench
+from thonny import ui_utils, tktextext, get_workbench, running, get_runner
 from collections import namedtuple
 import re
 from thonny.codeview import get_syntax_options_for_tag
@@ -38,7 +38,8 @@ class AssistantView(tktextext.TextFrame):
         }
         
         self._warning_providers = {
-            PyLintWarningProvider(self._append_warnings)
+            PylintWarningProvider(self._append_warnings),
+            MyPyWarningProvider(self._append_warnings),
         }
         
         self.text.tag_configure("section_title",
@@ -178,13 +179,16 @@ class AssistantView(tktextext.TextFrame):
         self._append_text("\n")
         self._append_text(title + "\n", ("section_title",))
         
-        for warning in sorted(warnings, key=lambda x: x["line"]):
+        for warning in sorted(warnings, key=lambda x: x["lineno"]):
             self._append_warning(warning)
     
     def _append_warning(self, warning):
-        if warning["line"]:
-            self._append_text("Line %d: " % warning["line"])
-        self._append_text(warning["msg"] + "\n")
+        if warning.get("lineno", False):
+            self._append_text("Line %d: " % warning["lineno"])
+        self._append_text(warning["msg"])
+        if "symbol" in warning:
+            self._append_text(" (%s)" % warning["symbol"])
+        self._append_text("\n")
 
 class Helper:
     def get_intro(self):
@@ -198,8 +202,8 @@ class DebugHelper(Helper):
 
 class SubprocessWarningProvider:
     def __init__(self, on_completion):
-        super().__init__(on_completion)
         self._proc = None
+        self.completion_handler = on_completion
         
     def start_analysis(self, filename):
         pass
@@ -210,7 +214,7 @@ class SubprocessWarningProvider:
         
         
 
-class PyLintWarningProvider(SubprocessWarningProvider):
+class PylintWarningProvider(SubprocessWarningProvider):
     
     def start_analysis(self, filename):
         
@@ -294,7 +298,7 @@ class PyLintWarningProvider(SubprocessWarningProvider):
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", 
                 "pylint", 
-                "--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
+                #"--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
                 "--persistent=n", 
                 #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
                 #"--disable=all",
@@ -302,7 +306,7 @@ class PyLintWarningProvider(SubprocessWarningProvider):
                 #"--enable=" + ",".join(relevant_symbols),
                 "--output-format=text",
                 "--reports=n",
-                "--msg-template={{'file':{abspath!r}, 'line':{line}, 'column':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
+                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
                 filename],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -319,7 +323,7 @@ class PyLintWarningProvider(SubprocessWarningProvider):
         err = err.replace("No config file found, using default configuration", "").strip()
         if err:
             print(err, file=sys.stderr)
-            #logging.getLogger("thonny").warning("Pylint: " + err)
+            #logging.getLogger("thonny").error("Pylint: " + err)
         
         warnings = []
         for line in out.splitlines():
@@ -334,6 +338,62 @@ class PyLintWarningProvider(SubprocessWarningProvider):
         
         self.completion_handler("Pylint warnings", warnings)
 
+class MyPyWarningProvider(SubprocessWarningProvider):
+    
+    def start_analysis(self, filename):
+        args = [get_frontend_python(), "-m", 
+                "mypy", 
+                "--ignore-missing-imports",
+                "--check-untyped-defs",
+                "--warn-redundant-casts",
+                "--show-column-numbers",
+                filename]
+        
+        from mypy.version import __version__
+        try:
+            ver = tuple(map(int, __version__.split(".")))
+        except:
+            ver = (0, 470) # minimum required version
+        
+        if ver >= (0, 520):
+            args.insert(3, "--no-implicit-optional")
+             
+        if ver >= (0, 590):
+            args.insert(3, "--python-executable")
+            args.insert(4, get_runner().get_executable()) 
+                
+        self._proc = ui_utils.popen_with_ui_thread_callback(
+            args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            on_completion=self._parse_and_output_warnings
+        )
+        
+        
+    def _parse_and_output_warnings(self, pylint_proc):
+        out = pylint_proc.stdout.read()
+        err = pylint_proc.stderr.read()
+        if err:
+            print(err, file=sys.stderr)
+            #logging.getLogger("thonny").warning("MyPy: " + err)
+        #print(out)
+        warnings = []
+        for line in out.splitlines():
+            m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
+            if m is not None:
+                warnings.append({
+                    "filename" : m.group(1),
+                    "lineno" : int(m.group(2)),
+                    "col_offset" : int(m.group(3)),
+                    "kind" : m.group(4).strip(),
+                    "msg" : m.group(5).strip(),
+                })
+            else:
+                print("Bad MyPy line", line)
+
+        
+        self.completion_handler("MyPy warnings", warnings)
         
 class ErrorHelper(Helper):
     def __init__(self, error_info):
