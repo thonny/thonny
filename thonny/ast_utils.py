@@ -369,6 +369,7 @@ def fix_ast_problems(tree, source_lines, tokens):
             # (Child Str positions are wrong in 3.7, but I don't know how to fix them) 
             # Don't recurse inside JoinedStr as it may have several child Str nodes 
             # but only one string token. 
+            # TODO: implicit concatenation messes up token-node correspondence?
             token = string_tokens.pop(0)
             node.lineno, node.col_offset = token.start
         

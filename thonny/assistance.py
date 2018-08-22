@@ -38,9 +38,13 @@ class AssistantView(tktextext.TextFrame):
         }
         
         self._warning_providers = {
-            PylintWarningProvider(self._append_warnings),
-            MyPyWarningProvider(self._append_warnings),
+            PylintWarningProvider(self._accept_warnings),
+            MyPyWarningProvider(self._accept_warnings),
         }
+        
+        self._accepted_warning_sets = []
+        
+        self._suggestions = set()
         
         self.text.tag_configure("section_title",
                                 spacing3=5,
@@ -124,9 +128,11 @@ class AssistantView(tktextext.TextFrame):
                 label.configure(image=get_workbench().get_image("boxplus"))
             else:
                 label.configure(image=get_workbench().get_image("boxminus"))
-                
-        title_id_tag = "stitle_%d" % id(suggestion)
-        body_id_tag = "sbody_%d" % id(suggestion)
+        
+        self._suggestions.add(suggestion)
+        sug_id = len(self._suggestions)
+        title_id_tag = "stitle_%d" % sug_id
+        body_id_tag = "sbody_%d" % sug_id
         self.text.tag_configure(body_id_tag, elide=True)
         
         self.text.tag_bind(title_id_tag, "<1>", toggle_body, True)
@@ -166,6 +172,8 @@ class AssistantView(tktextext.TextFrame):
             
     
     def _clear(self):
+        self._suggestions.clear()
+        self._accepted_warning_sets.clear()
         for wp in self._warning_providers:
             wp.cancel_analysis()
         self.text.direct_delete("1.0", "end")
@@ -174,21 +182,36 @@ class AssistantView(tktextext.TextFrame):
         for wp in self._warning_providers:
             wp.start_analysis(filename)
     
-    def _append_warnings(self, title, warnings):
-        # TODO: group by file
+    def _accept_warnings(self, title, warnings):
+        self._accepted_warning_sets.append(warnings)
+        if len(self._accepted_warning_sets) == len(self._warning_providers):
+            # all providers have reported
+            all_warnings = [w for ws in self._accepted_warning_sets for w in ws]
+            self._present_warnings(all_warnings)
+    
+    def _present_warnings(self, warnings):
+        # TODO: group by file and confidence
         self._append_text("\n")
-        self._append_text(title + "\n", ("section_title",))
+        # TODO: show filename when more than one file was analyzed
+        # Put main file first
+        self._append_text("Possible mistakes in fstrings.py\n", ("section_title",))
+        #self._append_text("fstrings.py\n")
         
         for warning in sorted(warnings, key=lambda x: x["lineno"]):
             self._append_warning(warning)
     
     def _append_warning(self, warning):
+        title = ""
         if warning.get("lineno", False):
-            self._append_text("Line %d: " % warning["lineno"])
-        self._append_text(warning["msg"])
+            title += "Line %d: " % warning["lineno"]
+        title += warning["msg"]
+        
         if "symbol" in warning:
-            self._append_text(" (%s)" % warning["symbol"])
-        self._append_text("\n")
+            general = warning["symbol"]
+        else:
+            general = "blaa"
+            
+        self._append_suggestion(Suggestion(title, general, None, 1))
 
 class Helper:
     def get_intro(self):
@@ -303,6 +326,7 @@ class PylintWarningProvider(SubprocessWarningProvider):
                 #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
                 #"--disable=all",
                 "--enable=all",
+                "--disable=missing-docstring,invalid-name,trailing-whitespace",
                 #"--enable=" + ",".join(relevant_symbols),
                 "--output-format=text",
                 "--reports=n",
