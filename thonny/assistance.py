@@ -2,7 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import builtins
 from typing import List, Optional, Union, Iterable, Tuple
-from thonny import ui_utils, tktextext, get_workbench, running, get_runner
+from thonny import ui_utils, tktextext, get_workbench, running, get_runner,\
+    rst_utils
 from collections import namedtuple
 import re
 from thonny.codeview import get_syntax_options_for_tag
@@ -18,20 +19,27 @@ import subprocess
 from thonny.running import get_frontend_python
 import sys
 import logging
+import textwrap
+from thonny.ui_utils import scrollbar_style
 
 
-Suggestion = namedtuple("Suggestion", ["title", "general", "specific", "relevance"])
+Suggestion = namedtuple("Suggestion", ["title", "body", "relevance"])
 
 class AssistantView(tktextext.TextFrame):
     def __init__(self, master):
         tktextext.TextFrame.__init__(self, master, 
-                                     horizontal_scrollbar=False,
-                                     vertical_scrollbar=True,
+                                     text_class=rst_utils.RstText, 
+                                     vertical_scrollbar_style=scrollbar_style("Vertical"), 
+                                     horizontal_scrollbar_style=scrollbar_style("Horizontal"),
+                                     horizontal_scrollbar_class=ui_utils.AutoScrollbar,
                                      read_only=True,
                                      wrap="word",
                                      font="TkDefaultFont",
-                                     cursor="arrow",
+                                     #cursor="arrow",
+                                     padx=10,
+                                     pady=0,
                                      insertwidth=0)
+        
         self._error_helper_classes = {
             "NameError" : {NameErrorHelper},
             "SyntaxError" : {SyntaxErrorHelper},
@@ -57,9 +65,14 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_configure("relevant_suggestion_title", font="BoldTkDefaultFont")
         self.text.tag_configure("suggestion_title", lmargin2=16, spacing1=5, spacing3=5)
         self.text.tag_configure("suggestion_body", lmargin1=16, lmargin2=16)
-        self.text.tag_configure("specific", font="ItalicTkDefaultFont")
+        self.text.tag_configure("body", font="ItalicTkDefaultFont")
         
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
+    
+    def add_error_helper(self, error_type_name, helper_class):
+        if error_type_name not in self._error_helper_classes:
+            self._error_helper_classes[error_type_name] = []
+        self._error_helper_classes[error_type_name].append(helper_class)
     
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         self._clear()
@@ -72,111 +85,51 @@ class AssistantView(tktextext.TextFrame):
     
     def explain_exception(self, error_info):
         "►▸˃✶ ▼▸▾"
-        self._append_text("%s: %s\n" % (error_info["type_name"], error_info["message"]),
-                          ("section_title",))
+        rst = "**%s: %s**\n\n" % (error_info["type_name"], 
+                              rst_utils.escape(error_info["message"]))
         
         if error_info["type_name"] not in self._error_helper_classes:
-            self._append_text("No helpers for this error type")
-            return
+            rst += "No helpers for this error type\n"
         else:
             helpers =[helper_class(error_info)
                   for helper_class in self._error_helper_classes[error_info["type_name"]]]
             
-        # TODO: how to select the intro text?
-        self._append_text(helpers[0].get_intro() + "\n", ("intro",))
+            # TODO: how to select the intro text if there are several helpers?
+            rst += helpers[0].get_intro() + "\n\n"
+            
+            suggestions = [suggestion 
+                           for helper in helpers
+                           for suggestion in helper.get_suggestions()]
+            
+            for i, suggestion in enumerate(
+                sorted(suggestions, key=lambda s: s.relevance, reverse=True)
+                ):
+                if suggestion.relevance > 0:
+                    rst += self._format_suggestion(suggestion, i==0)
         
-        suggestions = [suggestion 
-                       for helper in helpers
-                       for suggestion in helper.get_suggestions()]
-        
-        for suggestion in sorted(suggestions, key=lambda s: s.relevance, reverse=True):
-            if suggestion.relevance > 0:
-                self._append_suggestion(suggestion)
+        self.text.append_rst(rst)
+        #self._append_text(rst)
         
     
-    def add_error_helper(self, error_type_name, helper_class):
-        if error_type_name not in self._error_helper_classes:
-            self._error_helper_classes[error_type_name] = []
-        self._error_helper_classes[error_type_name].append(helper_class)
+    def _format_suggestion(self, suggestion, initially_open):
+        return (
+            ".. topic:: " + rst_utils.escape(suggestion.title) + "\n"
+          + "    :class: toggle%s\n" % (" open" if initially_open else "")
+          + "    \n"
+          + textwrap.indent(suggestion.body, "    ") + "\n\n"
+        )
+        
     
     def _append_text(self, chars, tags=()):
         self.text.direct_insert("end", chars, tags=tags)
     
-    
-    def _append_suggestion(self, suggestion):
-        label = tk.Label(self.text,
-                         image=get_workbench().get_image("boxplus"),
-                         borderwidth=0,
-                         background="white")
-        
-        def toggle_body(event=None):
-            elide = self.text.tag_cget(body_id_tag, "elide")
-            if elide == '1':
-                elide = True
-            elif elide == '0':
-                elide = False
-            else:
-                elide = bool(elide)
-            
-            elide = not elide
-            
-            self.text.tag_configure(body_id_tag, elide=elide)
-            if self.text.has_selection():
-                self.text.tag_remove("sel", "1.0", "end")
-            
-            if elide:
-                label.configure(image=get_workbench().get_image("boxplus"))
-            else:
-                label.configure(image=get_workbench().get_image("boxminus"))
-        
-        self._suggestions.add(suggestion)
-        sug_id = len(self._suggestions)
-        title_id_tag = "stitle_%d" % sug_id
-        body_id_tag = "sbody_%d" % sug_id
-        self.text.tag_configure(body_id_tag, elide=True)
-        
-        self.text.tag_bind(title_id_tag, "<1>", toggle_body, True)
-        
-        label.bind("<1>", toggle_body, True)
-        
-        title_tags = ("suggestion_title", title_id_tag)
-        if suggestion.relevance > 0:
-            title_tags += ("relevant_suggestion_title",)
-        self._append_window(label, title_tags)
-        #self._append_image("boxplus", ("suggestion_title", title_tag))
-        self._append_text("" + suggestion.title
-                          + " (%d)" % suggestion.relevance 
-                          + "\n", title_tags)
-        
-        if suggestion.general is not None:
-            self._append_text(suggestion.general.strip() + "\n",
-                              ("suggestion_body", body_id_tag))
-        if suggestion.specific is not None:
-            self._append_text(suggestion.specific.strip() + "\n",
-                              ("specific", "suggestion_body", body_id_tag))
-        # Spacer
-        self._append_text("\n", ("suggestion_body", body_id_tag))
-            
-    
-    def _append_window(self, window, tags=()):
-        index = self.text.index("end-1c")
-        self.text.window_create(index, window=window)
-        for tag in tags:
-            self.text.tag_add(tag, index)
-            
-    def _append_image(self, name, tags=()):
-        index = self.text.index("end-1c")
-        self.text.image_create(index, image=get_workbench().get_image(name))
-        for tag in tags:
-            self.text.tag_add(tag, index)
-            
     
     def _clear(self):
         self._suggestions.clear()
         self._accepted_warning_sets.clear()
         for wp in self._warning_providers:
             wp.cancel_analysis()
-        self.text.direct_delete("1.0", "end")
+        self.text.clear()
     
     def _start_warning_analysis(self, filename):
         for wp in self._warning_providers:
@@ -190,28 +143,40 @@ class AssistantView(tktextext.TextFrame):
             self._present_warnings(all_warnings)
     
     def _present_warnings(self, warnings):
-        # TODO: group by file and confidence
         self._append_text("\n")
         # TODO: show filename when more than one file was analyzed
         # Put main file first
-        self._append_text("Possible mistakes in fstrings.py\n", ("section_title",))
-        #self._append_text("fstrings.py\n")
+        # TODO: group by file and confidence
+        rst = "**Possible mistakes in fstrings.py**\n\n"
         
         for warning in sorted(warnings, key=lambda x: x["lineno"]):
-            self._append_warning(warning)
-    
-    def _append_warning(self, warning):
-        title = ""
-        if warning.get("lineno", False):
-            title += "Line %d: " % warning["lineno"]
-        title += warning["msg"]
+            rst += self._format_warning(warning) + "\n"
         
-        if "symbol" in warning:
-            general = warning["symbol"]
-        else:
-            general = "blaa"
-            
-        self._append_suggestion(Suggestion(title, general, None, 1))
+        self.text.append_rst(rst)
+    
+    def _format_warning(self, warning):
+        title = rst_utils.escape(warning["msg"])
+        if warning.get("lineno", False):
+            if "col_offset" in warning:
+                url = "thonny://%s#%d:%d" % (
+                    rst_utils.escape(warning["filename"]),
+                    warning["lineno"],
+                    warning["col_offset"]
+                )
+            else:
+                url = "thonny://%s#%d" % (
+                    rst_utils.escape(warning["filename"]),
+                    warning["lineno"]
+                )
+            title = "`Line %d <%s>`__: %s" % (warning["lineno"], url, title)
+        
+        return (
+            ".. topic:: %s\n" % title
+            + "    :class: toggle\n"
+            + "    \n"
+            + textwrap.indent(warning.get("symbol", "blaa"), "    ") + "\n\n"
+        )
+    
 
 class Helper:
     def get_intro(self):
@@ -409,9 +374,9 @@ class MyPyWarningProvider(SubprocessWarningProvider):
                 warnings.append({
                     "filename" : m.group(1),
                     "lineno" : int(m.group(2)),
-                    "col_offset" : int(m.group(3)),
+                    "col_offset" : int(m.group(3))-1,
                     "kind" : m.group(4).strip(),
-                    "msg" : m.group(5).strip(),
+                    "msg" : m.group(5).strip() + " (MP)",
                 })
             else:
                 print("Bad MyPy line", line)
@@ -514,8 +479,6 @@ class SyntaxErrorHelper(ErrorHelper):
     def _sug_missing_or_misplaced_colon(self):
         i = 0
         title = "Did you forget the colon?"
-        general = None
-        specific = None
         relevance = 0
         while i < len(self.tokens) and self.tokens[i].type != token.ENDMARKER:
             t = self.tokens[i]
@@ -537,7 +500,7 @@ class SyntaxErrorHelper(ErrorHelper):
                 
                 if self.tokens[i].string != ":":
                     relevance = 9
-                    general = "`%s` header must end with a colon." % t.string
+                    body = "`%s` header must end with a colon." % t.string
                     break
             
                 # Colon was present, but maybe it should have been right
@@ -545,16 +508,16 @@ class SyntaxErrorHelper(ErrorHelper):
                 if (t.string in ["else", "try", "finally"]
                     and self.tokens[keyword_pos+1].string != ":"):
                     title = "Incorrect use of `%s`" % t.string
-                    general = "Nothing is allowed between `%s` and colon." % t.string
+                    body = "Nothing is allowed between `%s` and colon." % t.string
                     relevance = 9
                     if (self.tokens[keyword_pos+1].type not in (token.NEWLINE, tokenize.COMMENT)
                         and t.string == "else"):
-                        specific = "If you want to specify a conditon, then use `elif` or nested `if`."
+                        body = "If you want to specify a conditon, then use `elif` or nested `if`."
                     break
                 
             i += 1
                 
-        return Suggestion(title, general, specific, relevance)
+        return Suggestion(title, body, relevance)
     
     def _sug_wrong_increment_op(self):
         pass
@@ -630,12 +593,10 @@ class NameErrorHelper(ErrorHelper):
             self._sug_local_from_global(),
             
             Suggestion("Is the variable definition given before the usage?",
-                       "...",
-                       None,
+                       "TODO:",
                        2),
             Suggestion("Maybe Python skipped the definition part?",
                        "If your variable's definition is inside a if-statement or loop, then it may have been skipped.",
-                       None,
                        2),
         ]
     
@@ -648,7 +609,6 @@ class NameErrorHelper(ErrorHelper):
             
         return Suggestion(
             "Did you really mean a variable or just forgot the quotes?",
-            None,
             'If you meant literal text "%s", then surround it with quotes.' % self.name,
             relevance
         )
@@ -677,20 +637,17 @@ class NameErrorHelper(ErrorHelper):
             relevance = 3
         
         if len(similar_names) > 1:
-            general = None
-            specific = "Are following names meant to be different:\n"
+            body = "Are following names meant to be different:\n"
             for name in sorted(similar_names, key=lambda x: x.lower()):
                 # TODO: add links to source
-                specific += "* `%s`\n" % name
-            specific += "?"
+                body += "* `%s`\n" % name
+            body += "?"
         else:
-            general = "Double-check corresponding definition / assignment / documentation!" 
-            specific = None
+            body = "Double-check corresponding definition / assignment / documentation!" 
         
         return Suggestion(
             "Did you spell it correctly? Everywhere?",
-            general,
-            specific,
+            body,
             relevance
         )
     
@@ -711,51 +668,48 @@ class NameErrorHelper(ErrorHelper):
             "time" : {"time", "sleep"},
         }
         
-        specific = None
+        body = None
          
         if self._is_call_function():
-            relevance = 6
+            relevance = 5
             for mod in likely_importable_functions:
                 if self.name in likely_importable_functions[mod]:
-                    relevance += 2
-                    specific = ("If you meant `%s` from module `%s`, then add `from %s import %s` to the beginning of your script."
+                    relevance += 3
+                    body = ("If you meant `%s` from module `%s`, then add `from %s import %s` to the beginning of your script."
                                 % (self.name, mod, mod, self.name))
                     break
                 
         elif self._is_attribute_value():
-            relevance = 6
-            specific = ("If you meant module `%s`, then add `import %s` to the beginning of your script"
+            relevance = 5
+            body = ("If you meant module `%s`, then add `import %s` to the beginning of your script"
                         % (self.name, self.name))
             
             if self.name in likely_importable_functions:
-                relevance += 2
+                relevance += 3
                 
                 
         elif self._is_subscript_value() and self.name != "argv":
             relevance = 0
         elif self.name == "pi":
-            specific = "If you meant constant π, then add `from math import pi` to the beginning of your script."
+            body = "If you meant constant π, then add `from math import pi` to the beginning of your script."
             relevance = 8
         elif self.name == "argv":
-            specific = "If you meant the list with program arguments, then add `from sys import argv` to the beginning of your script."
+            body = "If you meant the list with program arguments, then add `from sys import argv` to the beginning of your script."
             relevance = 8
         else:
             relevance = 3
             
         
-        if specific is None:
-            general = "Some functions/variables need to be imported before they can be used."
-        else:
-            general = None
+        if body is None:
+            body = "Some functions/variables need to be imported before they can be used."
             
         return Suggestion("Did you forget to import?",
-                           general,
-                           specific,
+                           body,
                            relevance)
     
     def _sug_local_from_global(self):
         relevance = 0
-        specific = None
+        body = None
         
         if self.last_frame.code_name == "<module>":
             function_names = set()
@@ -781,14 +735,13 @@ class NameErrorHelper(ErrorHelper):
             
             if function_names:
                 relevance = 9
-                specific = (
+                body = (
                     ("Name `%s` defined in `%s` is not accessible in the global/module level."
                      % (self.name, " and ".join(function_names)))
                     + "\n\nIf you need that data at the global level, then consider changing the function so that it `return`-s the value.")
             
         return Suggestion("Are you trying to acces a local variable outside of the function?",
-                          None,
-                          specific,
+                          body,
                           relevance)
     
     def _sug_not_defined_yet(self):

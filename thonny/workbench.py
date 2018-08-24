@@ -36,6 +36,8 @@ from typing import Optional, Type, Union, Callable, Dict, Sequence, List, Any, c
 from typing import Set, Tuple  # @UnusedImport
 import platform
 from thonny.assistance import AssistantView
+import webbrowser
+import re
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -1234,9 +1236,10 @@ class Workbench(tk.Tk):
         if sequence.startswith("<"):
             tk.Tk.unbind(self, sequence, funcid=funcid)
         else:
-            assert sequence in self._event_handlers
-            assert funcid in self._event_handlers[sequence]
-            self._event_handlers[sequence].remove(funcid)
+            try:
+                self._event_handlers[sequence].remove(funcid)
+            except Exception:
+                logging.getLogger("thonny").exception("Can't remove binding for '%s' and '%s'", sequence, funcid)
                 
 
     def in_heap_mode(self) -> bool:
@@ -1746,6 +1749,20 @@ class Workbench(tk.Tk):
             editor.focus_set()
         else:
             self.focus_set()
+    
+    def open_url(self, url):
+        m = re.match(r"^thonny://(.*?)(#(\d+)(:(\d+))?)?$", url)
+        if m is None:
+            webbrowser.open(url, False, True)
+        else:
+            filename = m.group(1)
+            lineno = None if m.group(3) is None else int(m.group(3))
+            col_offset = None if m.group(5) is None else int(m.group(5))
+            if lineno is None:
+                self.get_editor_notebook().show_file(filename)
+            else:
+                self.get_editor_notebook().show_file_at_line(filename, lineno, col_offset)
+                
     
     def bell(self, displayof=0):
         if self.get_option("general.audible_bell"):

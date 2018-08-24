@@ -1,11 +1,11 @@
 import docutils.core
-import docutils.frontend
-import docutils.utils
-import docutils.parsers.rst
+import docutils.nodes
 import tkinter as tk
 
 from thonny.tktextext import TweakableText
 from thonny import get_workbench
+from thonny.codeview import get_syntax_options_for_tag
+import logging
 
 class RstText(TweakableText):
     
@@ -13,15 +13,19 @@ class RstText(TweakableText):
         
         super().__init__(master=master, cnf=cnf, read_only=read_only, 
                          **{"font" : "TkDefaultFont",
-                            "cursor" : "xterm",
+                            "cursor" : "",
                             **kw})
         self.configure_tags()
+        self._visitor = None
     
     def configure_tags(self):
         main_font = tk.font.nametofont("TkDefaultFont")
         
         bold_font = main_font.copy()
         bold_font.configure(weight="bold", size=main_font.cget("size"))
+        
+        italic_font = main_font.copy()
+        italic_font.configure(slant="italic", size=main_font.cget("size"))
         
         h1_font = main_font.copy()
         h1_font.configure(size=main_font.cget("size") * 2, weight="bold")
@@ -35,14 +39,23 @@ class RstText(TweakableText):
         self.tag_configure("h1", font=h1_font)
         self.tag_configure("h2", font=h2_font)
         self.tag_configure("h3", font=h3_font)
-        self.tag_configure("p", spacing1=10, spacing3=10)
-        self.tag_configure("a", foreground="blue", underline=True)
+        self.tag_configure("p", spacing1=10, spacing3=10, spacing2=0)
+        self.tag_configure("em", font=italic_font)
+        self.tag_configure("strong", font=bold_font)
+        self.tag_configure("a", **get_syntax_options_for_tag("hyperlink"))
+        self.tag_bind("a", "<Enter>", self._hyperlink_enter)
+        self.tag_bind("a", "<Leave>", self._hyperlink_leave)
         
-        self.tag_configure("topic_title", font=bold_font)
+        self.tag_configure("topic_title", font=bold_font, lmargin2=16)
+        self.tag_configure("topic_body", lmargin1=16, lmargin2=16)
         self.tag_configure("code", font="TkFixedFont")
         
+        for i in range(1,6):
+            self.tag_configure("list%d" % i, lmargin1=i*10, lmargin2=i*10+10)
+        
         toti_code_font = bold_font.copy()
-        toti_code_font.configure(family=tk.font.nametofont("TkFixedFont").cget("family"))
+        toti_code_font.configure(family=tk.font.nametofont("TkFixedFont").cget("family"),
+                                 size=bold_font.cget("size"))
         self.tag_configure("topic_title_code", font=toti_code_font)
         self.tag_raise("topic_title_code", "code")
         self.tag_raise("topic_title_code", "topic_title")
@@ -54,17 +67,30 @@ class RstText(TweakableText):
         self.clear()
         self.append_rst(rst_source)
     
-    def render_node(self, section_level=0):
-        pass
-    
     def append_rst(self, rst_source):
         doc = docutils.core.publish_doctree(rst_source)
+        doc.walkabout(self.get_visitor(doc))
+    
+        # For debugging:
+        #self.direct_insert("end", doc.pformat())
+    
+    def get_visitor(self, doc):
+        # Reuse existing visitor if text is being composed 
+        # from multiple documents. Otherwise tags won't be unique
+        # (Yes, this means second doc won't be attached to the visitor,
+        # but it doesn't matter)
         
-        visitor = TkTextRenderingVisitor(doc, self)
-        doc.walkabout(visitor)
+        if self._visitor is None:
+            self._visitor = TkTextRenderingVisitor(doc, self)
+        
+        return self._visitor
+        
     
-        self.direct_insert("end", doc.pformat())
-    
+    def _hyperlink_enter(self, event):
+        self.config(cursor="hand2")
+        
+    def _hyperlink_leave(self, event):
+        self.config(cursor="")
 
 class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     
@@ -79,6 +105,8 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         self.in_title = False
         
         self.active_lists = []
+        
+        self.unique_tag_count = 0
     
     def visit_document(self, node):
         pass
@@ -107,16 +135,77 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     
     def visit_paragraph(self, node):
         self.in_paragraph = True
-        self._add_tag("p")
+        if not self.active_lists:
+            self._add_tag("p")
     def depart_paragraph(self, node):
         self.in_paragraph = False
         self._append_text("\n")
-        self._pop_tag("p")
+        if not self.active_lists:
+            self._pop_tag("p")
     
     def visit_topic(self, node):
         self.in_topic = True
+        
         if "toggle" in node.attributes["classes"]:
-            print("TO", node.children)
+            return self._visit_toggle_topic(node)
+        else:
+            return self.default_visit(node)
+    
+    def _visit_toggle_topic(self, node):
+        tag = self._create_unique_tag()
+        title_id_tag = tag + "_title"
+        body_id_tag = tag + "_body"
+        
+        if "open" in node.attributes["classes"]:
+            initial_image = "boxminus"
+            initial_elide = False
+        else:
+            initial_image = "boxplus"
+            initial_elide = True
+            
+        label = tk.Label(self.text,
+                         image=get_workbench().get_image(initial_image),
+                         borderwidth=0,
+                         background="white")
+        
+        def toggle_body(event=None):
+            elide = self.text.tag_cget(body_id_tag, "elide")
+            if elide == '1':
+                elide = True
+            elif elide == '0':
+                elide = False
+            else:
+                elide = bool(elide)
+            
+            elide = not elide
+            
+            self.text.tag_configure(body_id_tag, elide=elide)
+            if self.text.has_selection():
+                self.text.tag_remove("sel", "1.0", "end")
+            
+            if elide:
+                label.configure(image=get_workbench().get_image("boxplus"))
+            else:
+                label.configure(image=get_workbench().get_image("boxminus"))
+        
+        assert isinstance(node.children[0], docutils.nodes.title)
+        
+        self.text.tag_bind(title_id_tag, "<1>", toggle_body, True)
+        self._add_tag(title_id_tag)
+        self._append_window(label)
+        label.bind("<1>", toggle_body, True)
+        node.children[0].walkabout(self)
+        self._pop_tag(title_id_tag)
+        
+        self.text.tag_configure(body_id_tag, elide=initial_elide)
+        self._add_tag(body_id_tag)
+        self._add_tag("topic_body")
+        for child in list(node.children)[1:]:
+            child.walkabout(self)
+        self._pop_tag("topic_body")
+        self._pop_tag(body_id_tag)
+        
+        raise docutils.nodes.SkipNode()
             
     def depart_topic(self, node):
         self.in_topic = False
@@ -128,9 +217,19 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
             self._append_text("\n")
     
     def visit_reference(self, node):
+        tag = self._create_unique_tag()
+        node.unique_tag = tag
         self._add_tag("a")
+        self._add_tag(tag)
+        
+        def handle_click(event):
+            get_workbench().open_url(node.attributes["refuri"])
+            
+        self.text.tag_bind(tag, "<ButtonRelease-1>", handle_click)
+        
     def depart_reference(self, node):
         self._pop_tag("a")
+        self._pop_tag(node.unique_tag)
     
     def visit_literal(self, node):
         self._add_tag("code")
@@ -141,16 +240,42 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         self.active_lists.append(node.attributes["bullet"])
         
     def depart_bullet_list(self, node):
+        self._append_text("\n")
+        self.active_lists.pop()
+    
+    def visit_enumerated_list(self, node):
+        self.active_lists.append(node.attributes["enumtype"])
+        
+    def depart_enumerated_list(self, node):
+        self._append_text("\n")
         self.active_lists.pop()
     
     def visit_list_item(self, node):
         if self.active_lists[-1] == "*":
             self._append_text("• ")
-        pass
+        elif self.active_lists[-1] == "arabic":
+            for i, sib in enumerate(node.parent.children):
+                if sib is node:
+                    self._append_text("%d. " % (i+1))
+                    break
     
     def visit_substitution_definition(self, node):
         raise docutils.nodes.SkipNode()
-        
+    
+    def visit_system_message(self, node):
+        logging.getLogger("thonny").warning("docutils message: '%s'. Context: %s" 
+                                            % (node.astext(), node.parent))
+        raise docutils.nodes.SkipNode
+    
+    def visit_emphasis(self, node):
+        self._add_tag("em")    
+    def depart_emphasis(self, node):
+        self._pop_tag("em")    
+    
+    def visit_strong(self, node):
+        self._add_tag("strong")    
+    def depart_strong(self, node):
+        self._pop_tag("strong")    
     
     def default_visit(self, node):
         self._append_text(self._node_to_text(node))
@@ -160,6 +285,10 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     def default_departure(self, node):
         # Pass all other nodes through.
         pass        
+    
+    def _create_unique_tag(self):
+        self.unique_tag_count += 1
+        return "_UT_%s" % self.unique_tag_count 
     
     def _node_to_text(self, node):
         return (node.astext()
@@ -182,8 +311,18 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         for tag in self._get_effective_tags(extra_tags):
             self.text.tag_add(tag, index)
             
+    def _append_window(self, window, extra_tags=()):
+        index = self.text.index("end-1c")
+        self.text.window_create(index, window=window)
+        for tag in self._get_effective_tags(extra_tags):
+            self.text.tag_add(tag, index)
+            
     def _get_effective_tags(self, extra_tags):
         tags = set(extra_tags) | set(self._context_tags)
+        
+        if self.active_lists:
+            tags.add("list%d" % min(len(self.active_lists), 5))
+        
         # combine tags
         if "code" in tags and "topic_title" in tags:
             tags.remove("code")
@@ -192,4 +331,12 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         
         return tuple(sorted(tags))
         
-        
+
+def escape(s):
+    return (s
+            .replace("\\", "\\\\")
+            .replace("*", "\\*")
+            .replace("`", "\\`")
+            .replace("_", "\\_")
+            .replace("..", "\\.."))
+

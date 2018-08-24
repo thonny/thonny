@@ -25,9 +25,6 @@ With pip-GUI
 -------------
 From "Tools" menu select "Manage packages..." and follow the instructions.
 
-.. image:: https://bitbucket.org/repo/gXnbod/images/2226680569-pipgui_big.png
-   :alt: pipgui_big.png
-
 With pip on command line
 ------------------------
 #. From "Tools" menu select "Open system shell...". You should get a new terminal window stating the correct name of *pip* command (usually ``pip`` or ``pip3``). In the following I've assumed the command name is ``pip``.
@@ -36,9 +33,6 @@ With pip on command line
 #. Return to Thonny
 #. Reset interpreter by selecting "Stop/Reset" from "Run menu" (this is required only first time you do pip install)
 #. Start using the package
-
-.. image:: https://bitbucket.org/repo/gXnbod/images/1183520217-pipinstall_cmdline.png
-   :alt: pipinstall_cmdline.png
 
 
 Using scientific Python packages

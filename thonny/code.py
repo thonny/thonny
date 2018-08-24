@@ -13,7 +13,7 @@ from thonny.tktextext import rebind_control_a
 import tokenize
 from tkinter.messagebox import askyesno
 import traceback
-from thonny.common import is_same_path, actual_path, ToplevelResponse
+from thonny.common import is_same_path, actual_path, ToplevelResponse, TextRange
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -240,6 +240,15 @@ class Editor(ttk.Frame):
     
     def select_range(self, text_range):
         self._code_view.select_range(text_range)
+    
+    def select_line(self, lineno, col_offset=None):
+        self._code_view.select_range(TextRange(lineno, 0, lineno+1, 0))
+        self.see_line(lineno)
+        
+        if col_offset is None:
+            col_offset = 0
+        
+        self.get_text_widget().mark_set("insert", "%d.%d" % (lineno, col_offset))
     
     def see_line(self, lineno):
         # first see an earlier line in order to push target line downwards
@@ -541,6 +550,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             editor.select_range(text_range)
             
         return editor
+    
+    def show_file_at_line(self, filename, lineno, col_offset=None):
+        editor = self.show_file(filename)
+        editor.select_line(lineno, col_offset)
     
     def update_appearance(self):
         for editor in self.winfo_children():
