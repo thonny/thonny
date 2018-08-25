@@ -6,6 +6,7 @@ from thonny import ui_utils, tktextext, get_workbench, running, get_runner,\
     rst_utils
 from collections import namedtuple
 import re
+import os.path
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.common import ToplevelResponse
 import ast
@@ -28,7 +29,7 @@ Suggestion = namedtuple("Suggestion", ["title", "body", "relevance"])
 class AssistantView(tktextext.TextFrame):
     def __init__(self, master):
         tktextext.TextFrame.__init__(self, master, 
-                                     text_class=rst_utils.RstText, 
+                                     text_class=AssistantRstText, 
                                      vertical_scrollbar_style=scrollbar_style("Vertical"), 
                                      horizontal_scrollbar_style=scrollbar_style("Horizontal"),
                                      horizontal_scrollbar_class=ui_utils.AutoScrollbar,
@@ -78,15 +79,28 @@ class AssistantView(tktextext.TextFrame):
         self._clear()
         
         if "user_exception" in msg:
-            self.explain_exception(msg["user_exception"])
+            self._explain_exception(msg["user_exception"])
         
         if "filename" in msg:
             self._start_warning_analysis(msg["filename"])
     
-    def explain_exception(self, error_info):
+    def _explain_exception(self, error_info):
         "►▸˃✶ ▼▸▾"
-        rst = "**%s: %s**\n\n" % (error_info["type_name"], 
-                              rst_utils.escape(error_info["message"]))
+        
+        rst = (".. default-role:: code\n\n"
+               + rst_utils.create_title(error_info["type_name"]
+                                        + ": " 
+                                        + rst_utils.escape(error_info["message"]))
+               + "\n")
+        
+        if error_info.get("lineno") is not None:
+            rst += (
+                "`%s, line %d <%s>`__\n\n" % (
+                    os.path.basename(error_info["filename"]),
+                    error_info["lineno"],
+                    self._format_file_url(error_info)
+                )
+            )
         
         if error_info["type_name"] not in self._error_helper_classes:
             rst += "No helpers for this error type\n"
@@ -95,7 +109,9 @@ class AssistantView(tktextext.TextFrame):
                   for helper_class in self._error_helper_classes[error_info["type_name"]]]
             
             # TODO: how to select the intro text if there are several helpers?
-            rst += helpers[0].get_intro() + "\n\n"
+            rst += ("*" 
+                    + helpers[0].get_intro().replace("\n\n", "*\n\n*")
+                    + "*\n\n")
             
             suggestions = [suggestion 
                            for helper in helpers
@@ -113,7 +129,8 @@ class AssistantView(tktextext.TextFrame):
     
     def _format_suggestion(self, suggestion, initially_open):
         return (
-            ".. topic:: " + rst_utils.escape(suggestion.title) + "\n"
+            # assuming that title is already in rst format
+            ".. topic:: " + suggestion.title + "\n"
           + "    :class: toggle%s\n" % (" open" if initially_open else "")
           + "    \n"
           + textwrap.indent(suggestion.body, "    ") + "\n\n"
@@ -147,7 +164,11 @@ class AssistantView(tktextext.TextFrame):
         # TODO: show filename when more than one file was analyzed
         # Put main file first
         # TODO: group by file and confidence
-        rst = "**Possible mistakes in fstrings.py**\n\n"
+        rst = (
+            ".. default-role:: code\n"
+            + "\n"
+            + rst_utils.create_title("Possible mistakes")
+        )
         
         for warning in sorted(warnings, key=lambda x: x["lineno"]):
             rst += self._format_warning(warning) + "\n"
@@ -156,18 +177,8 @@ class AssistantView(tktextext.TextFrame):
     
     def _format_warning(self, warning):
         title = rst_utils.escape(warning["msg"])
-        if warning.get("lineno", False):
-            if "col_offset" in warning:
-                url = "thonny://%s#%d:%d" % (
-                    rst_utils.escape(warning["filename"]),
-                    warning["lineno"],
-                    warning["col_offset"]
-                )
-            else:
-                url = "thonny://%s#%d" % (
-                    rst_utils.escape(warning["filename"]),
-                    warning["lineno"]
-                )
+        if warning.get("lineno") is not None:
+            url = self._format_file_url(warning)
             title = "`Line %d <%s>`__: %s" % (warning["lineno"], url, title)
         
         return (
@@ -177,6 +188,35 @@ class AssistantView(tktextext.TextFrame):
             + textwrap.indent(warning.get("symbol", "blaa"), "    ") + "\n\n"
         )
     
+    def _format_file_url(self, atts):
+        assert atts["filename"]
+        s = "thonny://" + rst_utils.escape(atts["filename"])
+        if atts.get("lineno") is not None:
+            s += "#" + str(atts["lineno"])
+            if atts.get("col_offset") is not None:
+                s += ":" + str(atts["col_offset"])
+        
+        return s
+    
+class AssistantRstText(rst_utils.RstText):
+    def configure_tags(self):
+        rst_utils.RstText.configure_tags(self)
+        
+        main_font = tk.font.nametofont("TkDefaultFont")
+        
+        italic_font = main_font.copy()
+        italic_font.configure(slant="italic", size=main_font.cget("size"))
+        
+        h1_font = main_font.copy()
+        h1_font.configure(weight="bold", 
+                          size=main_font.cget("size"))
+        
+        self.tag_configure("h1", font=h1_font, spacing3=0, spacing1=10)
+        self.tag_configure("topic_title", font="TkDefaultFont")
+        
+        self.tag_configure("topic_body", font=italic_font)
+
+        self.tag_raise("sel")
 
 class Helper:
     def get_intro(self):
@@ -591,25 +631,21 @@ class NameErrorHelper(ErrorHelper):
             self._sug_missing_quotes(),
             self._sug_missing_import(),
             self._sug_local_from_global(),
-            
-            Suggestion("Is the variable definition given before the usage?",
-                       "TODO:",
-                       2),
-            Suggestion("Maybe Python skipped the definition part?",
-                       "If your variable's definition is inside a if-statement or loop, then it may have been skipped.",
-                       2),
+            self._sug_not_defined_yet(),
         ]
     
     def _sug_missing_quotes(self):
         # TODO: only when in suitable context for string
-        if self._is_attribute_value() or self._is_call_function():
+        if (self._is_attribute_value() 
+            or self._is_call_function()
+            or self._is_subscript_value()):
             relevance = 0
         else:
             relevance = 5
             
         return Suggestion(
-            "Did you really mean a variable or just forgot the quotes?",
-            'If you meant literal text "%s", then surround it with quotes.' % self.name,
+            "Did you actually mean string (text)?",
+            'If you didn\'t mean a variable but literal text "%s", then surround it with quotes.' % self.name,
             relevance
         )
     
@@ -637,16 +673,18 @@ class NameErrorHelper(ErrorHelper):
             relevance = 3
         
         if len(similar_names) > 1:
-            body = "Are following names meant to be different:\n"
+            body = "Are following names meant to be different?\n\n"
             for name in sorted(similar_names, key=lambda x: x.lower()):
                 # TODO: add links to source
-                body += "* `%s`\n" % name
-            body += "?"
+                body += "* `%s`\n\n" % name
         else:
-            body = "Double-check corresponding definition / assignment / documentation!" 
+            body = (
+                "Compare the name with corresponding definition / assignment / documentation."
+                + " Don't forget that case of the letters matters."
+            ) 
         
         return Suggestion(
-            "Did you spell it correctly? Everywhere?",
+            "Did you misspell it (somewhere)?",
             body,
             relevance
         )
@@ -675,7 +713,7 @@ class NameErrorHelper(ErrorHelper):
             for mod in likely_importable_functions:
                 if self.name in likely_importable_functions[mod]:
                     relevance += 3
-                    body = ("If you meant `%s` from module `%s`, then add `from %s import %s` to the beginning of your script."
+                    body = ("If you meant `%s` from module `%s`, then add\n\n`from %s import %s`\n\nto the beginning of your script."
                                 % (self.name, mod, mod, self.name))
                     break
                 
@@ -691,7 +729,7 @@ class NameErrorHelper(ErrorHelper):
         elif self._is_subscript_value() and self.name != "argv":
             relevance = 0
         elif self.name == "pi":
-            body = "If you meant constant π, then add `from math import pi` to the beginning of your script."
+            body = "If you meant the constant π, then add `from math import pi` to the beginning of your script."
             relevance = 8
         elif self.name == "argv":
             body = "If you meant the list with program arguments, then add `from sys import argv` to the beginning of your script."
@@ -703,7 +741,7 @@ class NameErrorHelper(ErrorHelper):
         if body is None:
             body = "Some functions/variables need to be imported before they can be used."
             
-        return Suggestion("Did you forget to import?",
+        return Suggestion("Did you forget to import it?",
                            body,
                            relevance)
     
@@ -745,7 +783,12 @@ class NameErrorHelper(ErrorHelper):
                           relevance)
     
     def _sug_not_defined_yet(self):
-        ...
+        return Suggestion("Has Python executed the definition?",
+                          ("Don't forget that name becomes defined when corresponding definition ('=', 'def' or 'import') gets executed."
+                          + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
+                          + "\n\n"
+                          + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, use the debugger."),
+                          1)
     
     def _is_call_function(self):
         return self.name + "(" in (self.error_info["line"]
@@ -815,4 +858,35 @@ def _name_similarity(a, b):
         return max(10 - distance*2, 0)
         
 
-
+def get_imported_user_files(main_file):
+    assert os.path.isabs(main_file)
+    
+    with tokenize.open(main_file) as fp:
+        source = fp.read()
+    
+    try:
+        root = ast.parse(source, main_file)
+    except SyntaxError:
+        return set()
+    
+    main_dir = os.path.dirname(main_file)
+    module_names = set()
+    # TODO: at the moment only considers non-package modules
+    for node in ast.walk(root):
+        if isinstance(node, ast.Import):
+            for item in node.names:
+                module_names.add(item.name)
+        elif isinstance(node, ast.ImportFrom):
+            module_names.add(node.name)
+    
+    imported_files = set()
+    
+    for file in {name + ext for ext in [".py", ".pyw"] for name in module_names}:
+        possible_path = os.path.join(main_dir, file)
+        if os.path.exists(possible_path):
+            imported_files.add(possible_path)
+    
+    # TODO: add recursion
+    
+    return imported_files
+    

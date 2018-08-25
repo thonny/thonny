@@ -23,7 +23,7 @@ class HelpView(TextFrame):
             pady=0,
         )
         
-        self.load_rst_file("demo.rst")
+        self.load_rst_file("help.rst")
 
     def load_rst_file(self, filename):
         if not os.path.isabs(filename):

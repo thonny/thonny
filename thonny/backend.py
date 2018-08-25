@@ -893,6 +893,7 @@ class VM:
             "items": format_exception_with_frame_info(e_type, e_value, e_traceback),
             "filename" : getattr(e_value, "filename", processed_tb[-1].filename),
             "lineno" : getattr(e_value, "lineno", processed_tb[-1].lineno),
+            "col_offset" : getattr(e_value, "offset", None),
             "line" : getattr(e_value, "text", processed_tb[-1].line),
         }
     

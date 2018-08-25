@@ -3,7 +3,7 @@ import docutils.nodes
 import tkinter as tk
 
 from thonny.tktextext import TweakableText
-from thonny import get_workbench
+from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
 import logging
 
@@ -36,10 +36,11 @@ class RstText(TweakableText):
         h3_font = main_font.copy()
         h3_font.configure(size=main_font.cget("size"), weight="bold")
         
-        self.tag_configure("h1", font=h1_font)
-        self.tag_configure("h2", font=h2_font)
-        self.tag_configure("h3", font=h3_font)
-        self.tag_configure("p", spacing1=10, spacing3=10, spacing2=0)
+        self.tag_configure("h1", font=h1_font, spacing3=5)
+        self.tag_configure("h2", font=h2_font, spacing3=5)
+        self.tag_configure("h3", font=h3_font, spacing3=5)
+        self.tag_configure("p", spacing1=0, spacing3=10, spacing2=0)
+        self.tag_configure("line_block", spacing1=0, spacing3=10, spacing2=0)
         self.tag_configure("em", font=italic_font)
         self.tag_configure("strong", font=bold_font)
         self.tag_configure("a", **get_syntax_options_for_tag("hyperlink"))
@@ -48,7 +49,11 @@ class RstText(TweakableText):
         
         self.tag_configure("topic_title", font=bold_font, lmargin2=16)
         self.tag_configure("topic_body", lmargin1=16, lmargin2=16)
-        self.tag_configure("code", font="TkFixedFont")
+        self.tag_configure("code", font="TkFixedFont", 
+                           #background="#eeeeee"
+                           )
+        #if ui_utils.get_tk_version_info() >= (8,6,6):
+        #    self.tag_configure("code", lmargincolor=self["background"])
         
         for i in range(1,6):
             self.tag_configure("list%d" % i, lmargin1=i*10, lmargin2=i*10+10)
@@ -59,6 +64,13 @@ class RstText(TweakableText):
         self.tag_configure("topic_title_code", font=toti_code_font)
         self.tag_raise("topic_title_code", "code")
         self.tag_raise("topic_title_code", "topic_title")
+        
+        # TODO: topic_title + em
+        self.tag_raise("em", "topic_title")
+        
+        if ui_utils.get_tk_version_info() >= (8,6,6):
+            self.tag_configure("sel", lmargincolor=self["background"])
+        self.tag_raise("sel")
     
     def clear(self):
         self.direct_delete("1.0", "end")
@@ -69,19 +81,22 @@ class RstText(TweakableText):
     
     def append_rst(self, rst_source):
         doc = docutils.core.publish_doctree(rst_source)
-        doc.walkabout(self.get_visitor(doc))
+        doc.walkabout(self.create_visitor(doc))
     
         # For debugging:
         #self.direct_insert("end", doc.pformat())
+        #self.direct_insert("end", rst_source)
     
-    def get_visitor(self, doc):
-        # Reuse existing visitor if text is being composed 
-        # from multiple documents. Otherwise tags won't be unique
-        # (Yes, this means second doc won't be attached to the visitor,
-        # but it doesn't matter)
+    def create_visitor(self, doc):
+        # Pass unique tag count from previous visitor
+        # to keep uniqueness
         
         if self._visitor is None:
-            self._visitor = TkTextRenderingVisitor(doc, self)
+            unique_tag_count = 0
+        else:
+            unique_tag_count = self._visitor.unique_tag_count
+            
+        self._visitor = TkTextRenderingVisitor(doc, self, unique_tag_count)
         
         return self._visitor
         
@@ -94,7 +109,7 @@ class RstText(TweakableText):
 
 class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     
-    def __init__(self, document, text):
+    def __init__(self, document, text, unique_tag_count=0):
         super().__init__(document)
         
         self._context_tags = []
@@ -106,7 +121,7 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         
         self.active_lists = []
         
-        self.unique_tag_count = 0
+        self.unique_tag_count = unique_tag_count
     
     def visit_document(self, node):
         pass
@@ -143,6 +158,16 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         if not self.active_lists:
             self._pop_tag("p")
     
+    def visit_line_block(self, node):
+        self._add_tag("line_block")
+    def depart_line_block(self, node):
+        self._pop_tag("line_block")
+
+    def visit_line(self, node):
+        pass
+    def depart_line(self, node):
+        self._append_text("\n")
+    
     def visit_topic(self, node):
         self.in_topic = True
         
@@ -156,17 +181,23 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         title_id_tag = tag + "_title"
         body_id_tag = tag + "_body"
         
+        def get_toggler_image_name(kind):
+            if get_workbench().uses_dark_ui_theme():
+                return kind + "_light"
+            else:
+                return kind
+        
         if "open" in node.attributes["classes"]:
-            initial_image = "boxminus"
+            initial_image = get_toggler_image_name("boxminus")
             initial_elide = False
         else:
-            initial_image = "boxplus"
+            initial_image = get_toggler_image_name("boxplus")
             initial_elide = True
-            
+        
         label = tk.Label(self.text,
                          image=get_workbench().get_image(initial_image),
                          borderwidth=0,
-                         background="white")
+                         background=self.text["background"])
         
         def toggle_body(event=None):
             elide = self.text.tag_cget(body_id_tag, "elide")
@@ -184,9 +215,11 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
                 self.text.tag_remove("sel", "1.0", "end")
             
             if elide:
-                label.configure(image=get_workbench().get_image("boxplus"))
+                label.configure(image=get_workbench()
+                                .get_image(get_toggler_image_name("boxplus")))
             else:
-                label.configure(image=get_workbench().get_image("boxminus"))
+                label.configure(image=get_workbench()
+                                .get_image(get_toggler_image_name("boxminus")))
         
         assert isinstance(node.children[0], docutils.nodes.title)
         
@@ -340,3 +373,6 @@ def escape(s):
             .replace("_", "\\_")
             .replace("..", "\\.."))
 
+def create_title(text, line_symbol="="):
+    return (text + "\n" 
+            + line_symbol * len(text) + "\n") 
