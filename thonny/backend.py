@@ -2185,11 +2185,6 @@ def _get_python_version_string(add_word_size=False):
     return result
 
 def _fetch_frame_source_info(frame):
-    if (frame.f_code.co_filename is None
-        or frame.f_code.co_firstlineno is None):
-        raise RuntimeError("NONONON")
-    
-    
     if frame.f_code.co_filename is None:
         return None, None, True
     
@@ -2198,9 +2193,13 @@ def _fetch_frame_source_info(frame):
         with tokenize.open(frame.f_code.co_filename) as fp:
             return fp.read(), 1, _is_library_file(frame.f_code.co_filename)
     else:
-        return (inspect.getsource(frame), 
-                frame.f_code.co_firstlineno,
-                _is_library_file(frame.f_code.co_filename))
+        try:
+            return (inspect.getsource(frame), 
+                    frame.f_code.co_firstlineno,
+                    _is_library_file(frame.f_code.co_filename))
+        except OSError:
+            logger.exception("Problem getting source")
+            return None, None, True
 
 def format_exception_with_frame_info(e_type, e_value, e_traceback,
                                      shorten_filenames=False):
