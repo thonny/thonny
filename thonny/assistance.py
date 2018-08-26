@@ -2,29 +2,27 @@ import tkinter as tk
 from tkinter import ttk
 import builtins
 from typing import List, Optional, Union, Iterable, Tuple
-from thonny import ui_utils, tktextext, get_workbench, running, get_runner,\
+from thonny import ui_utils, tktextext, get_workbench, get_runner,\
     rst_utils
 from collections import namedtuple
 import re
 import os.path
-from thonny.codeview import get_syntax_options_for_tag
 from thonny.common import ToplevelResponse
 import ast
 from thonny.misc_utils import levenshtein_damerau_distance
 import token
 import tokenize
-import io
 
-from pylint import lint
 import subprocess
 from thonny.running import get_frontend_python
 import sys
-import logging
 import textwrap
 from thonny.ui_utils import scrollbar_style
 
 
 Suggestion = namedtuple("Suggestion", ["title", "body", "relevance"])
+
+_program_analyzer_classes = []
 
 class AssistantView(tktextext.TextFrame):
     def __init__(self, master):
@@ -46,10 +44,9 @@ class AssistantView(tktextext.TextFrame):
             "SyntaxError" : {SyntaxErrorHelper},
         }
         
-        self._warning_providers = {
-            PylintWarningProvider(self._accept_warnings),
-            MyPyWarningProvider(self._accept_warnings),
-        }
+        self._analyzer_instances = [
+            cls(self._accept_warnings) for cls in _program_analyzer_classes
+        ]
         
         self._accepted_warning_sets = []
         
@@ -82,7 +79,7 @@ class AssistantView(tktextext.TextFrame):
             self._explain_exception(msg["user_exception"])
         
         if "filename" in msg:
-            self._start_warning_analysis(msg["filename"])
+            self._start_program_analyses(msg["filename"])
     
     def _explain_exception(self, error_info):
         "►▸˃✶ ▼▸▾"
@@ -144,19 +141,19 @@ class AssistantView(tktextext.TextFrame):
     def _clear(self):
         self._suggestions.clear()
         self._accepted_warning_sets.clear()
-        for wp in self._warning_providers:
+        for wp in self._analyzer_instances:
             wp.cancel_analysis()
         self.text.clear()
     
-    def _start_warning_analysis(self, filename):
-        for wp in self._warning_providers:
+    def _start_program_analyses(self, filename):
+        for wp in self._analyzer_instances:
             wp.start_analysis(filename)
         
         self._append_text("\nAnalyzing your code ...", ("em",))
     
     def _accept_warnings(self, title, warnings):
         self._accepted_warning_sets.append(warnings)
-        if len(self._accepted_warning_sets) == len(self._warning_providers):
+        if len(self._accepted_warning_sets) == len(self._analyzer_instances):
             # all providers have reported
             all_warnings = [w for ws in self._accepted_warning_sets for w in ws]
             self._present_warnings(all_warnings)
@@ -175,7 +172,7 @@ class AssistantView(tktextext.TextFrame):
             ".. default-role:: code\n"
             + "\n"
             + rst_utils.create_title("Warnings")
-            + "*Potential problems found by inspecting your code. May be ignored if you are happy with the program.*\n\n"
+            + "*May be ignored if you are happy with your program.*\n\n"
         )
         
         by_file = {}
@@ -198,11 +195,25 @@ class AssistantView(tktextext.TextFrame):
             url = self._format_file_url(warning)
             title = "`Line %d <%s>`__: %s" % (warning["lineno"], url, title)
         
+        if warning.get("explanation_rst"):
+            explanation_rst = warning["explanation_rst"]
+        elif warning.get("explanation"):
+            explanation_rst = rst_utils.escape(warning["explanation"])
+        else:
+            explanation_rst = ""
+        
+        if warning.get("more_info_url"):
+            explanation_rst += "\n\n`More info online <%s>`__" % warning["more_info_url"]
+        
+        explanation_rst = explanation_rst.strip()
+        if not explanation_rst:
+            explanation_rst = "Perform a web search with 'Python' and the above message for more info."
+        
         return (
             ".. topic:: %s\n" % title
             + "    :class: toggle\n"
             + "    \n"
-            + textwrap.indent(warning.get("symbol", "blaa"), "    ") + "\n\n"
+            + textwrap.indent(explanation_rst, "    ") + "\n\n"
         )
     
     def _format_file_url(self, atts):
@@ -245,7 +256,7 @@ class Helper:
 class DebugHelper(Helper):
     pass
 
-class SubprocessWarningProvider:
+class SubprocessProgramAnalyzer:
     def __init__(self, on_completion):
         self._proc = None
         self.completion_handler = on_completion
@@ -256,116 +267,7 @@ class SubprocessWarningProvider:
     def cancel_analysis(self):
         if self._proc is not None:
             self._proc.kill()
-        
-        
 
-class PylintWarningProvider(SubprocessWarningProvider):
-    
-    def start_analysis(self, filename):
-        
-        self._proc = ui_utils.popen_with_ui_thread_callback(
-            [get_frontend_python(), "-m", 
-                "pylint", 
-                #"--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
-                "--persistent=n", 
-                #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
-                #"--disable=all",
-                "--enable=all",
-                "--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
-                #"--enable=" + ",".join(relevant_symbols),
-                "--output-format=text",
-                "--reports=n",
-                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
-                filename],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            on_completion=self._parse_and_output_warnings
-        )
-        
-        
-    def _parse_and_output_warnings(self, pylint_proc):
-        out = pylint_proc.stdout.read()
-        err = pylint_proc.stderr.read()
-        #print("COMPL", out, err)
-        # get rid of non-error
-        err = err.replace("No config file found, using default configuration", "").strip()
-        if err:
-            print(err, file=sys.stderr)
-            #logging.getLogger("thonny").error("Pylint: " + err)
-        
-        warnings = []
-        for line in out.splitlines():
-            if line.startswith("{"):
-                try:
-                    atts = ast.literal_eval(line.strip())
-                except SyntaxError:
-                    print(line)
-                    continue
-                else:
-                    warnings.append(atts)
-        
-        self.completion_handler("Pylint warnings", warnings)
-
-class MyPyWarningProvider(SubprocessWarningProvider):
-    
-    def start_analysis(self, filename):
-        
-        args = [get_frontend_python(), "-m", 
-                "mypy", 
-                "--ignore-missing-imports",
-                "--check-untyped-defs",
-                "--warn-redundant-casts",
-                "--show-column-numbers",
-                filename]
-        
-        # TODO: ignore "... need type annotation" messages
-        
-        from mypy.version import __version__
-        try:
-            ver = tuple(map(int, __version__.split(".")))
-        except:
-            ver = (0, 470) # minimum required version
-        
-        if ver >= (0, 520):
-            args.insert(3, "--no-implicit-optional")
-             
-        if ver >= (0, 590):
-            args.insert(3, "--python-executable")
-            args.insert(4, get_runner().get_executable()) 
-                
-        self._proc = ui_utils.popen_with_ui_thread_callback(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
-            on_completion=self._parse_and_output_warnings
-        )
-        
-        
-    def _parse_and_output_warnings(self, pylint_proc):
-        out = pylint_proc.stdout.read()
-        err = pylint_proc.stderr.read()
-        if err:
-            print(err, file=sys.stderr)
-            #logging.getLogger("thonny").warning("MyPy: " + err)
-        #print(out)
-        warnings = []
-        for line in out.splitlines():
-            m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
-            if m is not None:
-                warnings.append({
-                    "filename" : m.group(1),
-                    "lineno" : int(m.group(2)),
-                    "col_offset" : int(m.group(3))-1,
-                    "kind" : m.group(4).strip(),
-                    "msg" : m.group(5).strip() + " (MP)",
-                })
-            else:
-                print("Bad MyPy line", line)
-
-        
-        self.completion_handler("MyPy warnings", warnings)
         
 class ErrorHelper(Helper):
     def __init__(self, error_info):
@@ -802,7 +704,7 @@ def _name_similarity(a, b):
         return max(10 - distance*2, 0)
         
 
-def get_imported_user_files(main_file):
+def _get_imported_user_files(main_file):
     assert os.path.isabs(main_file)
     
     with tokenize.open(main_file) as fp:
@@ -834,3 +736,5 @@ def get_imported_user_files(main_file):
     
     return imported_files
     
+def add_program_analyzer(cls):
+    _program_analyzer_classes.append(cls)

@@ -1,4 +1,84 @@
-messages = [
+from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
+from thonny import ui_utils
+from thonny.running import get_frontend_python
+import subprocess
+import sys
+import ast
+
+class PylintChecker(SubprocessProgramAnalyzer):
+    
+    def start_analysis(self, filename):
+        
+        self._proc = ui_utils.popen_with_ui_thread_callback(
+            [get_frontend_python(), "-m", 
+                "pylint", 
+                #"--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
+                "--persistent=n", 
+                #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
+                #"--disable=all",
+                "--enable=all",
+                "--max-line-length=120",
+                "--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
+                #"--enable=" + ",".join(relevant_symbols),
+                "--output-format=text",
+                "--reports=n",
+                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
+                filename],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+            on_completion=self._parse_and_output_warnings
+        )
+        
+        
+    def _parse_and_output_warnings(self, pylint_proc):
+        out = pylint_proc.stdout.read()
+        err = pylint_proc.stderr.read()
+        #print("COMPL", out, err)
+        # get rid of non-error
+        err = err.replace("No config file found, using default configuration", "").strip()
+        if err:
+            print(err, file=sys.stderr)
+            #logging.getLogger("thonny").error("Pylint: " + err)
+        
+        warnings = []
+        for line in out.splitlines():
+            if line.startswith("{"):
+                try:
+                    atts = ast.literal_eval(line.strip())
+                except SyntaxError:
+                    print(line)
+                    continue
+                else:
+                    check = all_checks_by_symbol[atts["symbol"]]
+                    if check["tho_xpln"]:
+                        explanation = check["tho_xpln"]
+                    else:
+                        explanation = check["msg_xpln"]
+                    
+                    if explanation.startswith("Used when an "):
+                        explanation = "It looks like the " + explanation[(len("Used when an ")):]
+                    elif explanation.startswith("Emitted when an "):
+                        explanation = "It looks like the " + explanation[(len("Emitted when an ")):]
+                    elif explanation.startswith("Used when a "):
+                        explanation = "It looks like the " + explanation[(len("Used when a ")):]
+                    elif explanation.startswith("Emitted when a "):
+                        explanation = "It looks like the " + explanation[(len("Emitted when a ")):]
+                    elif explanation.startswith("Used when "):
+                        explanation = "It looks like " + explanation[(len("Used when ")):]
+                    elif explanation.startswith("Emitted when "):
+                        explanation = "It looks like " + explanation[(len("Emitted when ")):]
+                     
+                    atts["explanation"] = explanation
+                    atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
+                    warnings.append(atts)
+        
+        self.completion_handler("Pylint warnings", warnings)
+
+
+
+# according to version 2.1.1
+all_checks = [  
  {'msg_id': 'C0102',
   'msg_sym': 'blacklisted-name',
   'msg_text': 'Black listed name "%s"',
@@ -13,7 +93,7 @@ messages = [
   'msg_xpln': "Used when the name doesn't conform to naming rules associated "
               'to its type (constant, variable, class...).',
   'tho_xpln': '',
-  'usage': 'skip'},
+  'usage': 'enhancement'},
   
  {'msg_id': 'C0111',
   'msg_sym': 'missing-docstring',
@@ -184,7 +264,7 @@ messages = [
   'msg_xpln': 'Used when a wrong number of spaces is used around an operator, '
               'bracket or block opener.',
   'tho_xpln': '',
-  'usage': 'enhancement'},
+  'usage': 'style'},
   
  {'msg_id': 'C0327',
   'msg_sym': 'mixed-line-endings',
@@ -1842,7 +1922,13 @@ messages = [
   'msg_text': 'Redefining name %r from outer scope (line %s)',
   'msg_xpln': "Used when a variable's name hides a name defined in the outer "
               'scope.',
-  'tho_xpln': '',
+  'tho_xpln': 'It looks like the local variable is '
+              'hiding a global variable with the same name.\n\n'
+              "Most likely there is nothing wrong with this. "
+              "I just wanted to remind you that you can't change the global variable like this. "
+              "If you knew it then please ignore the warning.\n\n"
+              "If you don't want to see this reminder in the future, then add"
+              '"redefined-outer-name" (without quotes) into "Tools → Options → Assistant → Ignored Pylint checks".',
   'usage': 'warning'},
   
  {'msg_id': 'W0622',
@@ -1850,7 +1936,8 @@ messages = [
   'msg_text': 'Redefining built-in %r',
   'msg_xpln': 'Used when a variable or function override a built-in.',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'enhancement'}, # warning about "list", "min" and "max" would cause too much confusion
+  
  {'msg_id': 'W0623',
   'msg_sym': 'redefine-in-handler',
   'msg_text': 'Redefining name %r from %s in exception handler',
@@ -1858,6 +1945,7 @@ messages = [
               'existing name',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0631',
   'msg_sym': 'undefined-loop-variable',
   'msg_text': 'Using possibly undefined loop variable %r',
@@ -1866,6 +1954,7 @@ messages = [
               'loop.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0640',
   'msg_sym': 'cell-var-from-loop',
   'msg_text': 'Cell variable %s defined in loop',
@@ -1874,6 +1963,7 @@ messages = [
               'variable.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0641',
   'msg_sym': 'possibly-unused-variable',
   'msg_text': 'Possibly unused variable %r',
@@ -1882,6 +1972,7 @@ messages = [
               'which could consume or not the said variable',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0642',
   'msg_sym': 'self-cls-assignment',
   'msg_text': 'Invalid assignment to %s in method',
@@ -1889,20 +1980,26 @@ messages = [
               'respectively.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0702',
   'msg_sym': 'bare-except',
   'msg_text': 'No exception type(s) specified',
   'msg_xpln': "Used when an except clause doesn't specify exceptions type to "
               'catch.',
-  'tho_xpln': '',
-  'usage': 'warning'},
+  'tho_xpln': "Used when an except clause doesn't specify exceptions type to catch. "
+              'Did you mean to catch also SystemExit and KeyboardInterrupt? '
+              'If not then prefer "except Exception:".',
+  'usage': 'enhancement'},
+  
  {'msg_id': 'W0703',
   'msg_sym': 'broad-except',
   'msg_text': 'Catching too general exception %s',
   'msg_xpln': 'Used when an except catches a too general exception, possibly '
               'burying unrelated errors.',
-  'tho_xpln': '',
-  'usage': 'warning'},
+  'tho_xpln': 'This may silence unrelated errors. Consider using more narrow '
+              ' type or several types, eg. "except (ZeroDivisionError, IndexError):".',
+  'usage': 'enhancement'},
+  
  {'msg_id': 'W0705',
   'msg_sym': 'duplicate-except',
   'msg_text': 'Catching previously caught exception type %s',
@@ -1910,6 +2007,7 @@ messages = [
               'previous handler.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0706',
   'msg_sym': 'try-except-raise',
   'msg_text': 'The except handler raises immediately',
@@ -1919,6 +2017,7 @@ messages = [
               'try-except-raise block!',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0711',
   'msg_sym': 'binary-op-exception',
   'msg_text': 'Exception to catch is the result of a binary "%s" operation',
@@ -1927,6 +2026,7 @@ messages = [
               'B):"',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W0715',
   'msg_sym': 'raising-format-tuple',
   'msg_text': 'Exception arguments suggest string formatting might be intended',
@@ -1935,6 +2035,7 @@ messages = [
               'appears to be placeholders intended for formatting',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1113',
   'msg_sym': 'keyword-arg-before-vararg',
   'msg_text': 'Keyword argument before variable positional arguments list in '
@@ -1945,6 +2046,7 @@ messages = [
               'keyword arguments.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1201',
   'msg_sym': 'logging-not-lazy',
   'msg_text': 'Specify string format arguments as logging function parameters',
@@ -1957,7 +2059,8 @@ messages = [
               'which no message will be logged. For more, see '
               'http://www.python.org/dev/peps/pep-0282/.',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'enhancement'},
+  
  {'msg_id': 'W1202',
   'msg_sym': 'logging-format-interpolation',
   'msg_text': 'Use % formatting in logging functions and pass the % parameters '
@@ -1968,7 +2071,8 @@ messages = [
               'should use % formatting instead, but leave interpolation to the '
               'logging function by passing the parameters as arguments.',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'skip'}, # Don't want to force this
+  
  {'msg_id': 'W1203',
   'msg_sym': 'logging-fstring-interpolation',
   'msg_text': 'Use % formatting in logging functions and pass the % parameters '
@@ -1978,7 +2082,8 @@ messages = [
               'instead, but leave interpolation to the logging function by '
               'passing the parameters as arguments.',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'skip'},
+  
  {'msg_id': 'W1300',
   'msg_sym': 'bad-format-string-key',
   'msg_text': 'Format string dictionary key should be a string, not %s',
@@ -1986,6 +2091,7 @@ messages = [
               'is used with a dictionary whose keys are not all strings.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1301',
   'msg_sym': 'unused-format-string-key',
   'msg_text': 'Unused key %r in format string dictionary',
@@ -1994,21 +2100,25 @@ messages = [
               'the format string.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1302',
   'msg_sym': 'bad-format-string',
   'msg_text': 'Invalid format string',
   'msg_xpln': 'Used when a PEP 3101 format string is invalid. This message '
               "can't be emitted when using Python < 2.7.",
-  'tho_xpln': '',
+  'tho_xpln': 'Used when a PEP 3101 format string is invalid.',
   'usage': 'warning'},
+  
  {'msg_id': 'W1303',
   'msg_sym': 'missing-format-argument-key',
   'msg_text': 'Missing keyword argument %r for format string',
   'msg_xpln': 'Used when a PEP 3101 format string that uses named fields '
               "doesn't receive one or more required keywords. This message "
               "can't be emitted when using Python < 2.7.",
-  'tho_xpln': '',
+  'tho_xpln': 'Used when a PEP 3101 format string that uses named fields '
+              "doesn't receive one or more required keywords.",
   'usage': 'warning'},
+  
  {'msg_id': 'W1304',
   'msg_sym': 'unused-format-string-argument',
   'msg_text': 'Unused format argument %r',
@@ -2017,6 +2127,7 @@ messages = [
               "string. This message can't be emitted when using Python < 2.7.",
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1305',
   'msg_sym': 'format-combined-specification',
   'msg_text': 'Format string contains both automatic field numbering and '
@@ -2025,8 +2136,11 @@ messages = [
               "field numbering (e.g. '{}') and manual field specification "
               "(e.g. '{0}'). This message can't be emitted when using Python < "
               '2.7.',
-  'tho_xpln': '',
+  'tho_xpln': 'Used when a PEP 3101 format string contains both automatic '
+              "field numbering (e.g. '{}') and manual field specification "
+              "(e.g. '{0}').",
   'usage': 'warning'},
+  
  {'msg_id': 'W1306',
   'msg_sym': 'missing-format-attribute',
   'msg_text': 'Missing format attribute %r in format specifier %r',
@@ -2034,8 +2148,11 @@ messages = [
               "({0.length}), but the argument passed for formatting doesn't "
               "have that attribute. This message can't be emitted when using "
               'Python < 2.7.',
-  'tho_xpln': '',
+  'tho_xpln': 'Used when a PEP 3101 format string uses an attribute specifier '
+              "({0.length}), but the argument passed for formatting doesn't "
+              "have that attribute.",
   'usage': 'warning'},
+  
  {'msg_id': 'W1307',
   'msg_sym': 'invalid-format-index',
   'msg_text': 'Using invalid lookup key %r in format specifier %r',
@@ -2043,16 +2160,22 @@ messages = [
               "({a[1]}), but the argument passed for formatting doesn't "
               "contain or doesn't have that key as an attribute. This message "
               "can't be emitted when using Python < 2.7.",
-  'tho_xpln': '',
+  'tho_xpln': 'Used when a PEP 3101 format string uses a lookup specifier '
+              "({a[1]}), but the argument passed for formatting doesn't "
+              "contain or doesn't have that key as an attribute.",
   'usage': 'warning'},
+  
  {'msg_id': 'W1401',
   'msg_sym': 'anomalous-backslash-in-string',
   'msg_text': "Anomalous backslash in string: '%s'. String constant might be "
               'missing an r prefix.',
   'msg_xpln': 'Used when a backslash is in a literal string but not as an '
               'escape.',
-  'tho_xpln': '',
+  'tho_xpln': 'Backslash is special character in Python strings. If you meant to '
+              r"""represent backslash itself, then you need to double it (eg. 'file = "C:\\Users\\Tim\\notes.txt"')"""
+              r"""or use raw-string literal (eg. "file = r'C:\Users\Tim\notes.txt'").""",
   'usage': 'warning'},
+  
  {'msg_id': 'W1402',
   'msg_sym': 'anomalous-unicode-escape-in-string',
   'msg_text': "Anomalous Unicode escape in byte string: '%s'. String constant "
@@ -2061,14 +2184,16 @@ messages = [
               'where it has no effect.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1501',
   'msg_sym': 'bad-open-mode',
   'msg_text': '"%s" is not a valid mode for open.',
   'msg_xpln': 'Python supports: r, w, a[, x] modes with b, +, and U (only with '
               'r) options. See '
-              'http://docs.python.org/2/library/functions.html#open',
+              'http://docs.python.org/3/library/functions.html#open',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1503',
   'msg_sym': 'redundant-unittest-assert',
   'msg_text': 'Redundant use of %s with constant value %r',
@@ -2077,6 +2202,7 @@ messages = [
               'will be always true. In this case a warning should be emitted.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1505',
   'msg_sym': 'deprecated-method',
   'msg_text': 'Using deprecated method %s()',
@@ -2085,6 +2211,7 @@ messages = [
               'in the documentation.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1506',
   'msg_sym': 'bad-thread-instantiation',
   'msg_text': 'threading.Thread needs the target function',
@@ -2094,6 +2221,7 @@ messages = [
               'param.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1507',
   'msg_sym': 'shallow-copy-environ',
   'msg_text': 'Using copy.copy(os.environ). Use os.environ.copy() instead.',
@@ -2102,6 +2230,7 @@ messages = [
               'https://bugs.python.org/issue15373 for reference.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1508',
   'msg_sym': 'invalid-envvar-default',
   'msg_text': '%s default type is %s. Expected str or None.',
@@ -2110,6 +2239,7 @@ messages = [
               'https://docs.python.org/3/library/os.html#os.getenv.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1509',
   'msg_sym': 'subprocess-popen-preexec-fn',
   'msg_text': 'Using preexec_fn keyword which may be unsafe in the presence of '
@@ -2121,6 +2251,7 @@ messages = [
               'into.https://docs.python.org/3/library/subprocess.html#popen-constructor',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1601',
   'msg_sym': 'apply-builtin',
   'msg_text': 'apply built-in referenced',
@@ -2128,6 +2259,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1602',
   'msg_sym': 'basestring-builtin',
   'msg_text': 'basestring built-in referenced',
@@ -2135,6 +2267,7 @@ messages = [
               '(missing from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1603',
   'msg_sym': 'buffer-builtin',
   'msg_text': 'buffer built-in referenced',
@@ -2142,6 +2275,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1604',
   'msg_sym': 'cmp-builtin',
   'msg_text': 'cmp built-in referenced',
@@ -2149,6 +2283,7 @@ messages = [
               'Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1605',
   'msg_sym': 'coerce-builtin',
   'msg_text': 'coerce built-in referenced',
@@ -2156,6 +2291,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1606',
   'msg_sym': 'execfile-builtin',
   'msg_text': 'execfile built-in referenced',
@@ -2163,6 +2299,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1607',
   'msg_sym': 'file-builtin',
   'msg_text': 'file built-in referenced',
@@ -2170,6 +2307,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1608',
   'msg_sym': 'long-builtin',
   'msg_text': 'long built-in referenced',
@@ -2177,6 +2315,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1609',
   'msg_sym': 'raw_input-builtin',
   'msg_text': 'raw_input built-in referenced',
@@ -2184,6 +2323,7 @@ messages = [
               '(missing from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1610',
   'msg_sym': 'reduce-builtin',
   'msg_text': 'reduce built-in referenced',
@@ -2191,6 +2331,7 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1611',
   'msg_sym': 'standarderror-builtin',
   'msg_text': 'StandardError built-in referenced',
@@ -2198,6 +2339,7 @@ messages = [
               '(missing from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1612',
   'msg_sym': 'unicode-builtin',
   'msg_text': 'unicode built-in referenced',
@@ -2205,13 +2347,16 @@ messages = [
               'from Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1613',
   'msg_sym': 'xrange-builtin',
   'msg_text': 'xrange built-in referenced',
   'msg_xpln': 'Used when the xrange built-in function is referenced (missing '
               'from Python 3)',
-  'tho_xpln': '',
+  'tho_xpln': 'Used when the xrange built-in function is referenced (missing '
+              'from Python 3). Use range instead.',
   'usage': 'warning'},
+  
  {'msg_id': 'W1614',
   'msg_sym': 'coerce-method',
   'msg_text': '__coerce__ method defined',
@@ -2219,6 +2364,7 @@ messages = [
               'Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1615',
   'msg_sym': 'delslice-method',
   'msg_text': '__delslice__ method defined',
@@ -2226,6 +2372,7 @@ messages = [
               'by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1616',
   'msg_sym': 'getslice-method',
   'msg_text': '__getslice__ method defined',
@@ -2233,6 +2380,7 @@ messages = [
               'by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1617',
   'msg_sym': 'setslice-method',
   'msg_text': '__setslice__ method defined',
@@ -2240,13 +2388,15 @@ messages = [
               'by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1618',
   'msg_sym': 'no-absolute-import',
   'msg_text': 'import missing `from __future__ import absolute_import`',
   'msg_xpln': 'Used when an import is not accompanied by ``from __future__ '
               'import absolute_import`` (default behaviour in Python 3)',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'skip'}, # Not relevant anymore 
+  
  {'msg_id': 'W1619',
   'msg_sym': 'old-division',
   'msg_text': 'division w/o __future__ statement',
@@ -2254,21 +2404,26 @@ messages = [
               '__future__ import division`` (Python 3 returns a float for int '
               'division unconditionally)',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'skip'},
+  
  {'msg_id': 'W1620',
   'msg_sym': 'dict-iter-method',
   'msg_text': 'Calling a dict.iter*() method',
   'msg_xpln': 'Used for calls to dict.iterkeys(), itervalues() or iteritems() '
               '(Python 3 lacks these methods)',
-  'tho_xpln': '',
+  'tho_xpln': 'Used for calls to dict.iterkeys(), itervalues() or iteritems(). '
+              'Python 3 lacks these methods, use dict.keys(), values() or items().',
   'usage': 'warning'},
+  
  {'msg_id': 'W1621',
   'msg_sym': 'dict-view-method',
   'msg_text': 'Calling a dict.view*() method',
   'msg_xpln': 'Used for calls to dict.viewkeys(), viewvalues() or viewitems() '
               '(Python 3 lacks these methods)',
-  'tho_xpln': '',
+  'tho_xpln': 'Used for calls to dict.viewkeys(), viewvalues() or viewitems(). '
+              'Python 3 lacks these methods,  use dict.keys(), values() or items().',
   'usage': 'warning'},
+  
  {'msg_id': 'W1622',
   'msg_sym': 'next-method-called',
   'msg_text': 'Called a next() method on an object',
@@ -2276,6 +2431,7 @@ messages = [
               'the next() built- in function)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1623',
   'msg_sym': 'metaclass-assignment',
   'msg_text': "Assigning to a class's __metaclass__ attribute",
@@ -2284,6 +2440,7 @@ messages = [
               'statement argument)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1624',
   'msg_sym': 'indexing-exception',
   'msg_text': 'Indexing exceptions will not work on Python 3',
@@ -2291,6 +2448,7 @@ messages = [
               '`exception.args[index]` instead.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1625',
   'msg_sym': 'raising-string',
   'msg_text': 'Raising a string exception',
@@ -2298,6 +2456,7 @@ messages = [
               'Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1626',
   'msg_sym': 'reload-builtin',
   'msg_text': 'reload built-in referenced',
@@ -2306,6 +2465,7 @@ messages = [
               'importlib.reload.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1627',
   'msg_sym': 'oct-method',
   'msg_text': '__oct__ method defined',
@@ -2313,6 +2473,7 @@ messages = [
               'Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1628',
   'msg_sym': 'hex-method',
   'msg_text': '__hex__ method defined',
@@ -2320,6 +2481,7 @@ messages = [
               'Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1629',
   'msg_sym': 'nonzero-method',
   'msg_text': '__nonzero__ method defined',
@@ -2327,6 +2489,7 @@ messages = [
               'by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1630',
   'msg_sym': 'cmp-method',
   'msg_text': '__cmp__ method defined',
@@ -2334,20 +2497,23 @@ messages = [
               'Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1632',
   'msg_sym': 'input-builtin',
   'msg_text': 'input built-in referenced',
   'msg_xpln': 'Used when the input built-in is referenced '
               '(backwards-incompatible semantics in Python 3)',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'skip'},
+  
  {'msg_id': 'W1633',
   'msg_sym': 'round-builtin',
   'msg_text': 'round built-in referenced',
   'msg_xpln': 'Used when the round built-in is referenced '
               '(backwards-incompatible semantics in Python 3)',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'skip'},
+  
  {'msg_id': 'W1634',
   'msg_sym': 'intern-builtin',
   'msg_text': 'intern built-in referenced',
@@ -2355,6 +2521,7 @@ messages = [
               'sys.intern in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1635',
   'msg_sym': 'unichr-builtin',
   'msg_text': 'unichr built-in referenced',
@@ -2362,6 +2529,7 @@ messages = [
               '3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1636',
   'msg_sym': 'map-builtin-not-iterating',
   'msg_text': 'map built-in referenced when not iterating',
@@ -2369,6 +2537,7 @@ messages = [
               'context (returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1637',
   'msg_sym': 'zip-builtin-not-iterating',
   'msg_text': 'zip built-in referenced when not iterating',
@@ -2376,6 +2545,7 @@ messages = [
               'context (returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1638',
   'msg_sym': 'range-builtin-not-iterating',
   'msg_text': 'range built-in referenced when not iterating',
@@ -2383,6 +2553,7 @@ messages = [
               'context (returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1639',
   'msg_sym': 'filter-builtin-not-iterating',
   'msg_text': 'filter built-in referenced when not iterating',
@@ -2390,6 +2561,7 @@ messages = [
               'context (returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1640',
   'msg_sym': 'using-cmp-argument',
   'msg_text': 'Using the cmp argument for list.sort / sorted',
@@ -2398,6 +2570,7 @@ messages = [
               'either `key` or `functools.cmp_to_key` should be preferred.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1641',
   'msg_sym': 'eq-without-hash',
   'msg_text': 'Implementing __eq__ without also implementing __hash__',
@@ -2407,6 +2580,7 @@ messages = [
               'implementation if they also implement __eq__.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1642',
   'msg_sym': 'div-method',
   'msg_text': '__div__ method defined',
@@ -2415,6 +2589,7 @@ messages = [
               'used by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1643',
   'msg_sym': 'idiv-method',
   'msg_text': '__idiv__ method defined',
@@ -2423,6 +2598,7 @@ messages = [
               'is not used by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1644',
   'msg_sym': 'rdiv-method',
   'msg_text': '__rdiv__ method defined',
@@ -2431,6 +2607,7 @@ messages = [
               'is not used by Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1645',
   'msg_sym': 'exception-message-attribute',
   'msg_text': 'Exception.message removed in Python 3',
@@ -2438,6 +2615,7 @@ messages = [
               'Use str(exception) instead.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1646',
   'msg_sym': 'invalid-str-codec',
   'msg_text': 'non-text encoding used in str.decode',
@@ -2445,18 +2623,21 @@ messages = [
               'encoding. Use codecs module to handle arbitrary codecs.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1647',
   'msg_sym': 'sys-max-int',
   'msg_text': 'sys.maxint removed in Python 3',
   'msg_xpln': 'Used when accessing sys.maxint. Use sys.maxsize instead.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1648',
   'msg_sym': 'bad-python3-import',
   'msg_text': 'Module moved in Python 3',
   'msg_xpln': 'Used when importing a module that no longer exists in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1649',
   'msg_sym': 'deprecated-string-function',
   'msg_text': 'Accessing a deprecated function on the string module',
@@ -2464,6 +2645,7 @@ messages = [
               'in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1650',
   'msg_sym': 'deprecated-str-translate-call',
   'msg_text': 'Using str.translate with deprecated deletechars parameters',
@@ -2471,6 +2653,7 @@ messages = [
               'str.translate. Use re.sub to remove the desired characters',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1651',
   'msg_sym': 'deprecated-itertools-function',
   'msg_text': 'Accessing a deprecated function on the itertools module',
@@ -2478,6 +2661,7 @@ messages = [
               'removed in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1652',
   'msg_sym': 'deprecated-types-field',
   'msg_text': 'Accessing a deprecated fields on the types module',
@@ -2485,13 +2669,15 @@ messages = [
               'Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1653',
   'msg_sym': 'next-method-defined',
   'msg_text': 'next method defined',
   'msg_xpln': 'Used when a next method is defined that would be an iterator in '
               'Python 2 but is treated as a normal function in Python 3.',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'enhancement'},
+  
  {'msg_id': 'W1654',
   'msg_sym': 'dict-items-not-iterating',
   'msg_text': 'dict.items referenced when not iterating',
@@ -2499,6 +2685,7 @@ messages = [
               '(returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1655',
   'msg_sym': 'dict-keys-not-iterating',
   'msg_text': 'dict.keys referenced when not iterating',
@@ -2506,6 +2693,7 @@ messages = [
               '(returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1656',
   'msg_sym': 'dict-values-not-iterating',
   'msg_text': 'dict.values referenced when not iterating',
@@ -2513,6 +2701,7 @@ messages = [
               '(returns an iterator in Python 3)',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1657',
   'msg_sym': 'deprecated-operator-function',
   'msg_text': 'Accessing a removed attribute on the operator module',
@@ -2520,6 +2709,7 @@ messages = [
               'removed in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1658',
   'msg_sym': 'deprecated-urllib-function',
   'msg_text': 'Accessing a removed attribute on the urllib module',
@@ -2527,6 +2717,7 @@ messages = [
               'removed or moved in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1659',
   'msg_sym': 'xreadlines-attribute',
   'msg_text': 'Accessing a removed xreadlines attribute',
@@ -2534,6 +2725,7 @@ messages = [
               'removed in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1660',
   'msg_sym': 'deprecated-sys-function',
   'msg_text': 'Accessing a removed attribute on the sys module',
@@ -2541,6 +2733,7 @@ messages = [
               'in Python 3.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1661',
   'msg_sym': 'exception-escape',
   'msg_text': 'Using an exception object that was bound by an except handler',
@@ -2550,6 +2743,7 @@ messages = [
               'handler.',
   'tho_xpln': '',
   'usage': 'warning'},
+  
  {'msg_id': 'W1662',
   'msg_sym': 'comprehension-escape',
   'msg_text': 'Using a variable that was bound inside a comprehension',
@@ -2561,35 +2755,8 @@ messages = [
   'usage': 'warning'}
 ]
 
-options = [
-    "--max-line-length" "120"
-    ]
+all_checks_by_symbol = {c["msg_sym"] : c for c in all_checks}
 
-
-print({m["th_desc"] for m in messages})
-print({m["usage"] for m in messages})
-
-
-"""
-messages = source.strip().split("\n:")
-print(len(messages))
-all = []
-for msg in messages:
-    if ": " not in msg:
-        print(msg)
-    codes, rest = msg.strip(":").split(": ", maxsplit=1)
-    symbol, msg_id = codes.split(" ")
-    msg_id = msg_id.strip("()")
-    msg, explanation = rest.split("\n", maxsplit=1)
-    msg = msg[1:-1]
-    c = msg_id[0]
-    explanation = explanation.strip().replace("\n", " ").replace("  ", " ").replace("  ", " ").replace("  ", " ")
+def load_plugin():
+    add_program_analyzer(PylintChecker)
     
-    parsed = {"msg_sym" : symbol, 
-              "msg_id" : msg_id, "msg_text" : msg, "msg_xpln": explanation,
-              "usage" : "pylint" if c == "W" else "warnings" if "c" in "WE" else "skip",
-              "th_desc" : ""}
-    
-    all.append(parsed)
-pprint.pprint(all) 
-"""

@@ -13,7 +13,7 @@ class RstText(TweakableText):
         
         super().__init__(master=master, cnf=cnf, read_only=read_only, 
                          **{"font" : "TkDefaultFont",
-                            "cursor" : "",
+                            #"cursor" : "",
                             **kw})
         self.configure_tags()
         self._visitor = None
@@ -105,7 +105,7 @@ class RstText(TweakableText):
         self.config(cursor="hand2")
         
     def _hyperlink_leave(self, event):
-        self.config(cursor="")
+        self.config(cursor="xterm")
 
 class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     
@@ -197,7 +197,8 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         label = tk.Label(self.text,
                          image=get_workbench().get_image(initial_image),
                          borderwidth=0,
-                         background=self.text["background"])
+                         background=self.text["background"],
+                         cursor="arrow")
         
         def toggle_body(event=None):
             elide = self.text.tag_cget(body_id_tag, "elide")
@@ -223,7 +224,7 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         
         assert isinstance(node.children[0], docutils.nodes.title)
         
-        self.text.tag_bind(title_id_tag, "<1>", toggle_body, True)
+        #self.text.tag_bind(title_id_tag, "<1>", toggle_body, True)
         self._add_tag(title_id_tag)
         self._append_window(label)
         label.bind("<1>", toggle_body, True)
