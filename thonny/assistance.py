@@ -124,7 +124,7 @@ class AssistantView(tktextext.TextFrame):
                     rst += self._format_suggestion(suggestion, i==0)
         
         self.text.append_rst(rst)
-        #self._append_text(rst)
+        self._append_text("\n")
         
     
     def _format_suggestion(self, suggestion, initially_open):
@@ -151,6 +151,8 @@ class AssistantView(tktextext.TextFrame):
     def _start_warning_analysis(self, filename):
         for wp in self._warning_providers:
             wp.start_analysis(filename)
+        
+        self._append_text("\nAnalyzing your code ...", ("em",))
     
     def _accept_warnings(self, title, warnings):
         self._accepted_warning_sets.append(warnings)
@@ -160,23 +162,38 @@ class AssistantView(tktextext.TextFrame):
             self._present_warnings(all_warnings)
     
     def _present_warnings(self, warnings):
-        self._append_text("\n")
+        self.text.direct_delete("end-2l linestart", "end-1c lineend")
+        
+        if not warnings:
+            return
+        
+        #self._append_text("\n")
         # TODO: show filename when more than one file was analyzed
         # Put main file first
         # TODO: group by file and confidence
         rst = (
             ".. default-role:: code\n"
             + "\n"
-            + rst_utils.create_title("Possible mistakes")
+            + rst_utils.create_title("Warnings")
+            + "*Potential problems found by inspecting your code. May be ignored if you are happy with the program.*\n\n"
         )
         
-        for warning in sorted(warnings, key=lambda x: x["lineno"]):
-            rst += self._format_warning(warning) + "\n"
+        by_file = {}
+        for warning in warnings:
+            if warning["filename"] not in by_file:
+                by_file[warning["filename"]] = []
+            by_file[warning["filename"]].append(warning)
+        
+        for filename in by_file:
+            rst += "`%s <%s>`__\n\n" % (os.path.basename(filename),
+                                            self._format_file_url(dict(filename=filename)))
+            for warning in sorted(by_file[filename], key=lambda x: x["lineno"]):
+                rst += self._format_warning(warning) + "\n"
         
         self.text.append_rst(rst)
     
     def _format_warning(self, warning):
-        title = rst_utils.escape(warning["msg"])
+        title = rst_utils.escape(warning["msg"].splitlines()[0])
         if warning.get("lineno") is not None:
             url = self._format_file_url(warning)
             title = "`Line %d <%s>`__: %s" % (warning["lineno"], url, title)
@@ -246,83 +263,6 @@ class PylintWarningProvider(SubprocessWarningProvider):
     
     def start_analysis(self, filename):
         
-        relevant_symbols = {
-            "function-redefined",
-            "method-hidden",
-            "no-method-argument",
-            "no-self-argument",
-            "inherit-non-class",
-            "used-before-assignment",
-            "undefined-variable",
-            "no-name-in-module",
-            "unbalanced-tuple-unpacking",
-            "unpacking-non-sequence",
-            "bad-except-order",
-            "raising-bad-type",
-            "misplaced-bare-raise", # TODO: "did you forgot exception to raise"
-            "raising-non-exception",
-            "notimplemented-raised",
-            "no-member",
-            "not-callable",
-            "assignment-from-no-return",
-            "assignment-from-none",
-            "no-value-for-parameter",
-            "unsupported-membership-test",
-            "unsubscriptable-object",
-            "unsupported-assignment-operation",
-            "unsupported-delete-operation",
-            "too-many-function-args",
-            "unexpected-keyword-arg",
-            "redundant-keyword-arg",
-            "missing-kwoa",
-            "invalid-sequence-index",
-            "invalid-slice-index",
-            "invalid-unary-operand-type",
-            "unsupported-binary-operation",
-            "not-an-iterable",
-            "not-a-mapping",
-            "trailing-comma-tuple",
-            "inconsistent-return-statements",
-            #"missing-docstring",
-            "access-member-before-definition",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        }
-        
-        style_symbols = {
-            # issues that affect readability and may hide bugs
-            "invalid-name", # TODO: check only naming styles, not length
-            "bad-classmethod-argument", # cls
-            "line-too-long", # Remind \ and (), # TODO: use line-margin setting
-            "superfluous-parens", # if (...): 
-            #"bad-whitespace", # ??? 
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-            "",
-        }
-        
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", 
                 "pylint", 
@@ -331,7 +271,7 @@ class PylintWarningProvider(SubprocessWarningProvider):
                 #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
                 #"--disable=all",
                 "--enable=all",
-                "--disable=missing-docstring,invalid-name,trailing-whitespace",
+                "--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
                 #"--enable=" + ",".join(relevant_symbols),
                 "--output-format=text",
                 "--reports=n",
@@ -370,6 +310,7 @@ class PylintWarningProvider(SubprocessWarningProvider):
 class MyPyWarningProvider(SubprocessWarningProvider):
     
     def start_analysis(self, filename):
+        
         args = [get_frontend_python(), "-m", 
                 "mypy", 
                 "--ignore-missing-imports",
@@ -377,6 +318,8 @@ class MyPyWarningProvider(SubprocessWarningProvider):
                 "--warn-redundant-casts",
                 "--show-column-numbers",
                 filename]
+        
+        # TODO: ignore "... need type annotation" messages
         
         from mypy.version import __version__
         try:
@@ -520,6 +463,7 @@ class SyntaxErrorHelper(ErrorHelper):
         i = 0
         title = "Did you forget the colon?"
         relevance = 0
+        body = ""
         while i < len(self.tokens) and self.tokens[i].type != token.ENDMARKER:
             t = self.tokens[i]
             if t.string in ["if", "elif", "else", "while", "for", "with",
