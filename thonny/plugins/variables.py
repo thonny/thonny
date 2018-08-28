@@ -56,21 +56,6 @@ class VariablesView(VariablesFrame):
             # MicroPython
             get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
-    def _handle_debugger_response(self, event):
-        from thonny.plugins import debugger
-        
-        frame = event["stack"][-1]
-        if isinstance(debugger.get_current_debugger(),
-                      debugger.SingleWindowDebugger):
-            
-            self.show_frame_variables(frame.locals, frame.globals,
-                                      frame.freevars, frame_name, is_active)
-        
-        if "globals" in event:
-            self.show_globals(event["globals"], "__main__")
-        else:
-            # MicroPython
-            get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
     
     def show_globals(self, globals_, module_name, is_active=True):
         # TODO: update only if something has changed

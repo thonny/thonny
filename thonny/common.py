@@ -6,6 +6,7 @@ Classes used both by front-end and back-end
 import os.path
 from typing import Optional, List  # @UnusedImport
 from collections import namedtuple
+import tokenize
 
 MESSAGE_MARKER = "\x02"
 
@@ -189,6 +190,10 @@ def path_startswith(child_name: str, dir_name: str) -> bool:
     normchild = os.path.realpath(os.path.normcase(child_name))
     normdir = os.path.realpath(os.path.normcase(dir_name))
     return normdir == normchild or normchild.startswith(normdir.rstrip(os.path.sep) + os.path.sep)
+
+def read_source(filename):
+    with tokenize.open(filename) as fp:
+        return fp.read()
     
 
 class UserError(RuntimeError):

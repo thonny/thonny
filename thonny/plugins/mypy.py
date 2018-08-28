@@ -1,21 +1,22 @@
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
 from thonny import get_runner, ui_utils
+from typing import Iterable
 import subprocess
 import sys
 import re
 
 class MyPyChecker(SubprocessProgramAnalyzer):
     
-    def start_analysis(self, filename):
+    def start_analysis(self, filenames: Iterable[str]) -> None:
         
         args = [get_frontend_python(), "-m", 
                 "mypy", 
                 "--ignore-missing-imports",
                 "--check-untyped-defs",
                 "--warn-redundant-casts",
-                "--show-column-numbers",
-                filename]
+                "--show-column-numbers"
+                ] + list(filenames)
         
         # TODO: ignore "... need type annotation" messages
         
@@ -52,14 +53,17 @@ class MyPyChecker(SubprocessProgramAnalyzer):
         for line in out.splitlines():
             m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
             if m is not None:
-                warnings.append({
+                atts = {
                     "filename" : m.group(1),
                     "lineno" : int(m.group(2)),
                     "col_offset" : int(m.group(3))-1,
                     "kind" : m.group(4).strip(),
                     "msg" : m.group(5).strip() + " (MP)",
                     "group" : "warnings",
-                })
+                }
+                # TODO: add better categorization and explanation
+                atts["symbol"] = "mypy-" + atts["kind"]
+                warnings.append(atts)
             else:
                 print("Bad MyPy line", line)
 

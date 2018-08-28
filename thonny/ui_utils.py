@@ -473,8 +473,14 @@ class AutomaticNotebook(ClosableNotebook):
         
 
 class TreeFrame(ttk.Frame):
-    def __init__(self, master, columns, displaycolumns='#all', show_scrollbar=True):
-        ttk.Frame.__init__(self, master)
+    def __init__(self, master, columns, displaycolumns='#all', 
+                 show_scrollbar=True,
+                 borderwidth=0,
+                 relief="flat",
+                 **tree_kw):
+        ttk.Frame.__init__(self, master,
+                           borderwidth=borderwidth,
+                           relief=relief)
         # http://wiki.tcl.tk/44444#pagetoc50f90d9a
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, style=scrollbar_style("Vertical"))
         if show_scrollbar:
@@ -482,7 +488,8 @@ class TreeFrame(ttk.Frame):
         
         self.tree = ttk.Treeview(self, columns=columns, 
                                  displaycolumns=displaycolumns, 
-                                 yscrollcommand=self.vert_scrollbar.set)
+                                 yscrollcommand=self.vert_scrollbar.set,
+                                 **tree_kw)
         self.tree['show'] = 'headings'
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
         self.vert_scrollbar['command'] = self.tree.yview

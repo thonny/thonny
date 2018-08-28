@@ -104,7 +104,7 @@ def _label_settings() -> BasicUiThemeSettings:
     return {
         "Url.TLabel" : {
             "configure" : {
-                "foreground" : "blue"
+                "foreground" : "#3A66DD",
             },
         },
     }

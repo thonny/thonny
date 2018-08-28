@@ -7,23 +7,22 @@ import ast
 
 class PylintChecker(SubprocessProgramAnalyzer):
     
-    def start_analysis(self, filename):
-        
+    def start_analysis(self, filenames):
+        relevant_symbols = {key for key in all_checks_by_symbol if all_checks_by_symbol[key]["usage"] == "warning"}
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", 
                 "pylint", 
                 #"--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
                 "--persistent=n", 
                 #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
-                #"--disable=all",
-                "--enable=all",
+                #"--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
+                "--disable=all",
+                "--enable=" + ",".join(relevant_symbols),
                 "--max-line-length=120",
-                "--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
-                #"--enable=" + ",".join(relevant_symbols),
                 "--output-format=text",
                 "--reports=n",
-                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
-                filename],
+                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}"
+                ] + list(filenames),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -51,7 +50,7 @@ class PylintChecker(SubprocessProgramAnalyzer):
                     continue
                 else:
                     check = all_checks_by_symbol[atts["symbol"]]
-                    if check["tho_xpln"]:
+                    if check.get("tho_xpln"):
                         explanation = check["tho_xpln"]
                     else:
                         explanation = check["msg_xpln"]
@@ -70,7 +69,12 @@ class PylintChecker(SubprocessProgramAnalyzer):
                         explanation = "It looks like " + explanation[(len("Emitted when ")):]
                      
                     atts["explanation"] = explanation
-                    atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
+
+                    if check.get("tho_xpln_rst"):
+                        atts["explanation_rst"] = check["tho_xpln_rst"]
+                    
+                    
+                    #atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
                     warnings.append(atts)
         
         self.completion_handler("Pylint warnings", warnings)
@@ -656,7 +660,7 @@ all_checks = [
   'msg_text': 'Undefined variable %r',
   'msg_xpln': 'Used when an undefined variable is accessed.',
   'tho_xpln': '',
-  'usage': 'warning'},
+  'usage': 'typing'},
   
  {'msg_id': 'E0603',
   'msg_sym': 'undefined-all-variable',
@@ -2171,9 +2175,10 @@ all_checks = [
               'missing an r prefix.',
   'msg_xpln': 'Used when a backslash is in a literal string but not as an '
               'escape.',
-  'tho_xpln': 'Backslash is special character in Python strings. If you meant to '
-              r"""represent backslash itself, then you need to double it (eg. 'file = "C:\\Users\\Tim\\notes.txt"')"""
-              r"""or use raw-string literal (eg. "file = r'C:\Users\Tim\notes.txt'").""",
+  'tho_xpln_rst': 'In regular string literals backslash is treated as a special character. '
+              'If you meant to represent backslash itself, '
+              """then you should double it, eg:\n\n``'C:\\\\Users\\\\Tim'``\n\n"""
+              """or use raw-string literal, eg:\n\n``r'C:\\Users\\Tim'``""",
   'usage': 'warning'},
   
  {'msg_id': 'W1402',

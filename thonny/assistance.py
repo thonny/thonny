@@ -3,11 +3,11 @@ from tkinter import ttk
 import builtins
 from typing import List, Optional, Union, Iterable, Tuple
 from thonny import ui_utils, tktextext, get_workbench, get_runner,\
-    rst_utils
+    rst_utils, misc_utils
 from collections import namedtuple
 import re
 import os.path
-from thonny.common import ToplevelResponse
+from thonny.common import ToplevelResponse, read_source
 import ast
 from thonny.misc_utils import levenshtein_damerau_distance
 import token
@@ -18,9 +18,14 @@ from thonny.running import get_frontend_python
 import sys
 import textwrap
 from thonny.ui_utils import scrollbar_style
+from thonny.codeview import get_syntax_options_for_tag
+import datetime
+import pprint
+import thonny
+import logging
 
 
-Suggestion = namedtuple("Suggestion", ["title", "body", "relevance"])
+Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
 _program_analyzer_classes = []
 
@@ -48,9 +53,12 @@ class AssistantView(tktextext.TextFrame):
             cls(self._accept_warnings) for cls in _program_analyzer_classes
         ]
         
-        self._accepted_warning_sets = []
+        self._snapshots_per_main_file = {}
+        self._current_snapshot = None
         
-        self._suggestions = set()
+        self._accepted_warning_sets = []
+        self._presented_suggestions = []
+        self._presented_warnings = []
         
         self.text.tag_configure("section_title",
                                 spacing3=5,
@@ -65,6 +73,17 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_configure("suggestion_body", lmargin1=16, lmargin2=16)
         self.text.tag_configure("body", font="ItalicTkDefaultFont")
         
+        main_font = tk.font.nametofont("TkDefaultFont")
+        italic_font = main_font.copy()
+        italic_font.configure(slant="italic", size=main_font.cget("size"))
+        self.text.tag_configure("feedback_link",
+                                #underline=True,
+                                justify="right",
+                                font=italic_font,
+                                #foreground=get_syntax_options_for_tag("hyperlink")["foreground"]
+                                )
+        self.text.tag_bind("feedback_link", "<1>", self._ask_feedback, True)
+        
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
     
     def add_error_helper(self, error_type_name, helper_class):
@@ -75,14 +94,27 @@ class AssistantView(tktextext.TextFrame):
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         self._clear()
         
-        if "user_exception" in msg:
+        # prepare for snapshot
+        key = msg.get("filename", "<shell>")
+        self._current_snapshot = {
+            "timestamp" : datetime.datetime.now().isoformat()[:19],
+            "main_file_path" : key, 
+        }
+        if not key in self._snapshots_per_main_file:
+            self._snapshots_per_main_file[key] = []
+        self._snapshots_per_main_file[key].append(self._current_snapshot)
+        
+        if msg.get("user_exception"):
             self._explain_exception(msg["user_exception"])
         
-        if "filename" in msg:
-            self._start_program_analyses(msg["filename"])
+        if msg.get("filename"):
+            source = read_source(msg["filename"])
+            self._start_program_analyses(msg["filename"],
+                                         source,
+                                         _get_imported_user_files(msg["filename"], source))
+        
     
     def _explain_exception(self, error_info):
-        "►▸˃✶ ▼▸▾"
         
         rst = (".. default-role:: code\n\n"
                + rst_utils.create_title(error_info["type_name"]
@@ -113,22 +145,37 @@ class AssistantView(tktextext.TextFrame):
             suggestions = [suggestion 
                            for helper in helpers
                            for suggestion in helper.get_suggestions()]
+            suggestions = sorted(suggestions, key=lambda s: s.relevance, reverse=True) 
             
-            for i, suggestion in enumerate(
-                sorted(suggestions, key=lambda s: s.relevance, reverse=True)
-                ):
+            for i, suggestion in enumerate(suggestions):
                 if suggestion.relevance > 0:
-                    rst += self._format_suggestion(suggestion, i==0)
+                    rst += self._format_suggestion(suggestion, 
+                                                   i==len(suggestions)-1,
+                                                   False#i==0
+                                                   )
+                    self._presented_suggestions.append(suggestion)
         
         self.text.append_rst(rst)
         self._append_text("\n")
         
+        self._current_snapshot["exception_type_name"] = error_info["type_name"]
+        self._current_snapshot["exception_message"] = error_info["message"]
+        self._current_snapshot["exception_file_path"] = error_info["filename"]
+        self._current_snapshot["exception_lineno"] = error_info["lineno"]
+        self._current_snapshot["exception_rst"] = rst # for debugging purposes
+        self._current_snapshot["exception_suggestions"] = [
+            dict(sug._asdict()) for sug in suggestions
+        ]
+        
     
-    def _format_suggestion(self, suggestion, initially_open):
+    def _format_suggestion(self, suggestion, last, initially_open):
         return (
             # assuming that title is already in rst format
             ".. topic:: " + suggestion.title + "\n"
-          + "    :class: toggle%s\n" % (" open" if initially_open else "")
+          + "    :class: toggle%s%s\n" % (
+                ", open" if initially_open else "",
+                ", tight" if not last else "",
+              )
           + "    \n"
           + textwrap.indent(suggestion.body, "    ") + "\n\n"
         )
@@ -139,17 +186,26 @@ class AssistantView(tktextext.TextFrame):
     
     
     def _clear(self):
-        self._suggestions.clear()
+        self._presented_suggestions.clear()
+        self._presented_warnings.clear()
         self._accepted_warning_sets.clear()
         for wp in self._analyzer_instances:
             wp.cancel_analysis()
         self.text.clear()
     
-    def _start_program_analyses(self, filename):
+    def _start_program_analyses(self, main_file_path, main_file_source,
+                                imported_file_paths):
         for wp in self._analyzer_instances:
-            wp.start_analysis(filename)
+            wp.start_analysis({main_file_path} | set(imported_file_paths))
         
         self._append_text("\nAnalyzing your code ...", ("em",))
+        
+        # save snapshot of current source
+        self._current_snapshot["main_file_path"] = main_file_path
+        self._current_snapshot["main_file_source"] = main_file_source
+        self._current_snapshot["imported_files"] = {
+            name : read_source(name) for name in imported_file_paths
+        }
     
     def _accept_warnings(self, title, warnings):
         self._accepted_warning_sets.append(warnings)
@@ -157,6 +213,7 @@ class AssistantView(tktextext.TextFrame):
             # all providers have reported
             all_warnings = [w for ws in self._accepted_warning_sets for w in ws]
             self._present_warnings(all_warnings)
+            self._append_feedback_link()
     
     def _present_warnings(self, warnings):
         self.text.direct_delete("end-2l linestart", "end-1c lineend")
@@ -184,16 +241,27 @@ class AssistantView(tktextext.TextFrame):
         for filename in by_file:
             rst += "`%s <%s>`__\n\n" % (os.path.basename(filename),
                                             self._format_file_url(dict(filename=filename)))
-            for warning in sorted(by_file[filename], key=lambda x: x["lineno"]):
-                rst += self._format_warning(warning) + "\n"
+            file_warnings = sorted(by_file[filename], key=lambda x: x["lineno"]) 
+            for i, warning in enumerate(file_warnings):
+                rst += (
+                    self._format_warning(warning, i == len(file_warnings)-1) 
+                    + "\n"
+                )
+            
+            rst += "\n"
         
         self.text.append_rst(rst)
+        
+        # save snapshot
+        self._current_snapshot["warnings_rst"] = rst
+        self._current_snapshot["warnings"] = warnings
+                
     
-    def _format_warning(self, warning):
+    def _format_warning(self, warning, last):
         title = rst_utils.escape(warning["msg"].splitlines()[0])
         if warning.get("lineno") is not None:
             url = self._format_file_url(warning)
-            title = "`Line %d <%s>`__: %s" % (warning["lineno"], url, title)
+            title = "`Line %d <%s>`__ : %s" % (warning["lineno"], url, title)
         
         if warning.get("explanation_rst"):
             explanation_rst = warning["explanation_rst"]
@@ -211,10 +279,13 @@ class AssistantView(tktextext.TextFrame):
         
         return (
             ".. topic:: %s\n" % title
-            + "    :class: toggle\n"
+            + "    :class: toggle" + ("" if last else ", tight") + "\n"
             + "    \n"
             + textwrap.indent(explanation_rst, "    ") + "\n\n"
         )
+    
+    def _append_feedback_link(self):
+        self._append_text("Was it helpful or confusing?\n", ("a", "feedback_link"))
     
     def _format_file_url(self, atts):
         assert atts["filename"]
@@ -225,6 +296,25 @@ class AssistantView(tktextext.TextFrame):
                 s += ":" + str(atts["col_offset"])
         
         return s
+    
+    def before_show(self, event=None):
+        return
+        if not getattr(self, "_shown", False):
+            self.after(1000, self._ask_feedback)
+        self._shown = True
+    
+    def _ask_feedback(self, event=None):
+        
+        all_snapshots = self._snapshots_per_main_file[self._current_snapshot["main_file_path"]]
+        
+        # TODO: select only snapshots which are not sent yet
+        snapshots = all_snapshots
+        
+        ui_utils.show_dialog(FeedbackDialog(get_workbench(),
+                                            self._current_snapshot["main_file_path"], 
+                                            snapshots))
+        
+        print("juhu")
     
 class AssistantRstText(rst_utils.RstText):
     def configure_tags(self):
@@ -253,17 +343,21 @@ class Helper:
     def get_suggestions(self) -> Iterable[Suggestion]:
         raise NotImplementedError()
 
-class DebugHelper(Helper):
-    pass
-
-class SubprocessProgramAnalyzer:
+class ProgramAnalyzer:
     def __init__(self, on_completion):
-        self._proc = None
         self.completion_handler = on_completion
         
-    def start_analysis(self, filename):
-        pass
+    def start_analysis(self, filenames):
+        raise NotImplementedError()
     
+    def cancel_analysis(self):
+        pass
+
+class SubprocessProgramAnalyzer(ProgramAnalyzer):
+    def __init__(self, on_completion):
+        super().__init__(on_completion)
+        self._proc = None
+        
     def cancel_analysis(self):
         if self._proc is not None:
             self._proc.kill()
@@ -292,8 +386,7 @@ class ErrorHelper(Helper):
             self.last_frame_module_source = self.last_frame.source
             self.last_frame_module_ast = self.last_frame_ast
         elif self.last_frame.filename is not None:
-            with tokenize.open(self.last_frame.filename) as fp:
-                self.last_frame_module_source = fp.read() 
+            self.last_frame_module_source = read_source(self.last_frame.filename) 
             try:
                 self.last_frame_module_ast = ast.parse(self.last_frame_module_source)
             except SyntaxError:
@@ -403,7 +496,7 @@ class SyntaxErrorHelper(ErrorHelper):
                 
             i += 1
                 
-        return Suggestion(title, body, relevance)
+        return Suggestion("missing-or-misplaced-colon", title, body, relevance)
     
     def _sug_wrong_increment_op(self):
         pass
@@ -490,6 +583,7 @@ class NameErrorHelper(ErrorHelper):
             relevance = 5
             
         return Suggestion(
+            "missing-quotes",
             "Did you actually mean string (text)?",
             'If you didn\'t mean a variable but literal text "%s", then surround it with quotes.' % self.name,
             relevance
@@ -530,6 +624,7 @@ class NameErrorHelper(ErrorHelper):
             ) 
         
         return Suggestion(
+            "bad-spelling",
             "Did you misspell it (somewhere)?",
             body,
             relevance
@@ -587,9 +682,10 @@ class NameErrorHelper(ErrorHelper):
         if body is None:
             body = "Some functions/variables need to be imported before they can be used."
             
-        return Suggestion("Did you forget to import it?",
-                           body,
-                           relevance)
+        return Suggestion("missing-import",
+                          "Did you forget to import it?",
+                          body,
+                          relevance)
     
     def _sug_local_from_global(self):
         relevance = 0
@@ -624,17 +720,21 @@ class NameErrorHelper(ErrorHelper):
                      % (self.name, " and ".join(function_names)))
                     + "\n\nIf you need that data at the global level, then consider changing the function so that it `return`-s the value.")
             
-        return Suggestion("Are you trying to acces a local variable outside of the function?",
-                          body,
-                          relevance)
+        return Suggestion(
+            "local-from-global",
+            "Are you trying to acces a local variable outside of the function?",
+            body,
+            relevance)
     
     def _sug_not_defined_yet(self):
-        return Suggestion("Has Python executed the definition?",
-                          ("Don't forget that name becomes defined when corresponding definition ('=', 'def' or 'import') gets executed."
-                          + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
-                          + "\n\n"
-                          + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, use the debugger."),
-                          1)
+        return Suggestion(
+            "not-defined-yet",
+            "Has Python executed the definition?",
+            ("Don't forget that name becomes defined when corresponding definition ('=', 'def' or 'import') gets executed."
+            + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
+            + "\n\n"
+            + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, use the debugger."),
+            1)
     
     def _is_call_function(self):
         return self.name + "(" in (self.error_info["line"]
@@ -654,7 +754,224 @@ class NameErrorHelper(ErrorHelper):
                                    .replace("\n", "")
                                    .replace("\r", ""))
         
+
+class FeedbackDialog(tk.Toplevel):
+    def __init__(self, master, main_file_path, snapshots):
+        super().__init__(master=master)
+        
+        self.snapshots = snapshots
+        
+        if misc_utils.running_on_mac_os():
+            self.configure(background="systemSheetBackground")
+        
+        self.title("Send feedback for Assistant")
+        
+        padx = 15
+        
+        intro_label = ttk.Label(self,
+                                text="Below are the messages Assistant gave you in response to "
+                                   + ("using the shell" if main_file_path == "<shell>" 
+                                      else "testing '" + os.path.basename(main_file_path)) + "'"
+                                   + " since " + self._get_since_str()
+                                   + ".\n\n"
+                                   + "In order to improve this feature, Thonny developers would love to know how "
+                                   + "useful or confusing these messages were. We will only collect version information "
+                                   + "and the data you enter or approve on this form.",
+                                wraplength=550
+                                )
+        intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,15))
+        
+        tree_label = ttk.Label(self, text="Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!")
+        tree_label.grid(row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,0))
+        tree_frame = ui_utils.TreeFrame(self,
+                                        columns=["helpful", "confusing", "title", "group", "symbol"],
+                                        displaycolumns=["helpful", "confusing", "title"], 
+                                        height=10,
+                                        borderwidth=1,
+                                        relief="groove")
+        tree_frame.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=padx)
+        self.tree = tree_frame.tree
+        self.tree.column('helpful', width=30, anchor=tk.CENTER, stretch=False)
+        self.tree.column('confusing', width=30, anchor=tk.CENTER, stretch=False)
+        self.tree.column('title', width=350, anchor=tk.W, stretch=True)
+        
+        self.tree.heading('helpful', text='H', anchor=tk.CENTER)
+        self.tree.heading('confusing', text='C', anchor=tk.CENTER)
+        self.tree.heading('title', text='Group / Message', anchor=tk.W) 
+        self.tree['show'] = ('headings',)
+        self.tree.bind("<1>", self._on_tree_click, True)
+        main_font = tk.font.nametofont("TkDefaultFont")
+        bold_font = main_font.copy()
+        bold_font.configure(weight="bold", size=main_font.cget("size"))
+        self.tree.tag_configure("group", font=bold_font)
+        
+        self.include_thonny_id_var = tk.IntVar(value=1)
+        include_thonny_id_check = ttk.Checkbutton(self, variable=self.include_thonny_id_var,
+                                          onvalue=1, offvalue=0,
+                                          text="Include Thonny installation ID (allows us to connect your submissions)")
+        include_thonny_id_check.grid(row=4, column=0, columnspan=3, sticky="nw", padx=padx, pady=(5,0))
+        
+        self.include_snapshots_var = tk.IntVar(value=1)
+        include_snapshots_check = ttk.Checkbutton(self, variable=self.include_snapshots_var,
+                                          onvalue=1, offvalue=0,
+                                          text="Include snapshots of the code and Assistant responses at each run")
+        include_snapshots_check.grid(row=5, column=0, columnspan=3, sticky="nw", padx=padx, pady=(0,0))
+        
+        comments_label = ttk.Label(self, text="Any comments? Enhancement ideas?")
+        comments_label.grid(row=6, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,0))
+        self.comments_text_frame = tktextext.TextFrame(self,vertical_scrollbar_style=scrollbar_style("Vertical"), 
+                                            horizontal_scrollbar_style=scrollbar_style("Horizontal"),
+                                            horizontal_scrollbar_class=ui_utils.AutoScrollbar,
+                                            wrap="word",
+                                            font="TkDefaultFont",
+                                            #cursor="arrow",
+                                            padx=10,
+                                            pady=5,
+                                            height=4,
+                                            borderwidth=1,
+                                            relief="groove"
+                                            )
+        self.comments_text_frame.grid(row=7, column=0, columnspan=3, sticky="nsew", padx=padx)
+        
+        url_font = tk.font.nametofont("TkDefaultFont").copy()
+        url_font.configure(underline=1, size=url_font.cget("size"))
+        preview_link = ttk.Label(self, text="Preview the data to be sent",
+                                 style="Url.TLabel",
+                                 cursor="hand2",
+                                 font=url_font)
+        preview_link.bind("<1>", self._preview_submission_data, True)
+        preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
+        
+        submit_button = ttk.Button(self, text="Submit", width=10)
+        submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
+        
+        cancel_button = ttk.Button(self, text="Cancel", width=7)
+        cancel_button.grid(row=8, column=1, sticky="ne", padx=(10,15), pady=15)
+        
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(3, weight=3)
+        self.rowconfigure(6, weight=2)
+
+        self._empty_box = "[  ]"
+        self._checked_box = "[X]"
+        self._populate_tree()
     
+    def _populate_tree(self):
+        groups = {}
+        
+        for snap in self.snapshots:
+            if snap.get("exception_message"):
+                group = snap["exception_type_name"]
+                groups.setdefault(group, set())
+                for sug in snap["exception_suggestions"]:
+                    groups[group].add((sug["symbol"], sug["title"]))
+            
+            # warnings group
+            if snap["warnings"]:
+                group = "Warnings"
+                groups[group] = set()
+                for w in snap["warnings"]:
+                    groups[group].add((w["symbol"], w["msg"]))
+        pprint.pprint(groups)
+        
+        for group in sorted(groups.keys(), key=lambda x: x.replace("Warnings", "z")):
+            group_id = self.tree.insert("", "end", open=True, tags=("group",))
+            self.tree.set(group_id, "title", group)
+            
+            for symbol, title in groups[group]:
+                item_id = self.tree.insert("", "end")
+                self.tree.set(item_id, "helpful", self._empty_box)
+                self.tree.set(item_id, "confusing", self._empty_box)
+                self.tree.set(item_id, "title", title)
+                self.tree.set(item_id, "symbol", symbol)
+                self.tree.set(item_id, "group", group)
+        
+        self.tree.see("")
+    
+    def _on_tree_click(self, event):
+        item_id = self.tree.identify("item", event.x, event.y)
+        column = self.tree.identify_column(event.x)
+        
+        if not item_id or not column:
+            return
+        
+        value_index = int(column[1:])-1
+        values = list(self.tree.item(item_id, "values"))
+        
+        if values[value_index] == self._empty_box:
+            values[value_index] = self._checked_box
+        elif values[value_index] == self._checked_box:
+            values[value_index] = self._empty_box
+        else:
+            return
+        
+        # update values
+        self.tree.item(item_id, values=tuple(values))
+    
+    def _preview_submission_data(self, event=None):
+        self._collect_submission_data()
+    
+    def _collect_submission_data(self):
+        tree_data = []
+        
+        for iid in self.tree.get_children():
+            values = self.tree.item(iid, "values")
+            tree_data.append({
+                "helpful" : values[0] == self._checked_box,
+                "confusing" : values[1] == self._checked_box,
+                "message" : values[2],
+                "group" : values[3],
+                "symbol" : values[4] 
+            })
+        
+        submission = {
+            "thonny_version" : thonny.get_version(), 
+            "python_version" : ".".join(map(str, sys.version_info[:3])),
+            "message_feedback" : tree_data,
+            "comments" : self.comments_text_frame.text.get("1.0", "end")
+        }
+        
+        try:
+            import mypy.version 
+            submission["mypy_version"] = str(mypy.version.__version__)
+        except ImportError:
+            logging.exception("Could not get MyPy version")
+        
+        try:
+            import pylint 
+            submission["pylint_version"] = str(pylint.__version__)
+        except ImportError:
+            logging.exception("Could not get Pylint version")
+        
+        if self.include_thonny_id_var:
+            submission["thonny_id"] = get_workbench().get_installation_id()
+            
+        if self.include_snapshots_var:
+            submission["snapshots"] = self.snapshots
+        
+        pprint.pprint(submission)
+    
+    def _get_since_str(self):
+        since = datetime.datetime.strptime(self.snapshots[0]["timestamp"], '%Y-%m-%dT%H:%M:%S')
+        
+        if (since.date() == datetime.date.today()
+            or (datetime.datetime.now()-since) <= datetime.timedelta(hours=5)):
+            since_str = since.strftime("%X")
+        else:
+            # date and time without yer
+            since_str = since.strftime("%c").replace(str(datetime.date.today().year), "")
+        
+        # remove seconds
+        if since_str.count(":") == 2:
+            i = since_str.rfind(":")
+            print(i, 
+                  i > 0,
+                  repr(since_str[i+1:i+3]))
+            if i > 0 and len(since_str[i+1:i+3]) == 2 and since_str[i+1:i+3].isnumeric():
+                since_str = since_str[:i] + since_str[i+3:] 
+        
+        return since_str.strip()
+
 def _name_similarity(a, b):
     # TODO: tweak the result values
     a = a.replace("_", "")
@@ -704,11 +1021,11 @@ def _name_similarity(a, b):
         return max(10 - distance*2, 0)
         
 
-def _get_imported_user_files(main_file):
+def _get_imported_user_files(main_file, source=None):
     assert os.path.isabs(main_file)
     
-    with tokenize.open(main_file) as fp:
-        source = fp.read()
+    if source is None:
+        source = read_source(main_file)
     
     try:
         root = ast.parse(source, main_file)
@@ -732,9 +1049,8 @@ def _get_imported_user_files(main_file):
         if os.path.exists(possible_path):
             imported_files.add(possible_path)
     
-    # TODO: add recursion
-    
     return imported_files
-    
+    # TODO: add recursion
+
 def add_program_analyzer(cls):
     _program_analyzer_classes.append(cls)

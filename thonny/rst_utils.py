@@ -239,10 +239,15 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         self._pop_tag("topic_body")
         self._pop_tag(body_id_tag)
         
+        if "tight" not in node.attributes["classes"]:
+            self._append_text("\n")
+        
         raise docutils.nodes.SkipNode()
             
     def depart_topic(self, node):
+        # only for non-toggle topics
         self.in_topic = False
+        self._append_text("\n")
     
     def visit_image(self, node):
         self._append_image(node.attributes["uri"])
