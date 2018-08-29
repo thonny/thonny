@@ -4,7 +4,6 @@ import tkinter as tk
 import tkinter.font as tk_font
 
 from thonny.ui_utils import TreeFrame
-from thonny.misc_utils import shorten_repr
 from thonny import get_workbench, ui_utils
 from thonny.common import ValueInfo
 

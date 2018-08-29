@@ -11,7 +11,7 @@ from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, actual_path
 from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
-    running_on_windows, get_file_creation_date
+    running_on_windows
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, select_sequence, get_style_configuration, lookup_style_option,\
     register_latin_shortcut
