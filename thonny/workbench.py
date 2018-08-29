@@ -11,7 +11,7 @@ from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, actual_path
 from thonny.config import try_load_configuration
 from thonny.misc_utils import running_on_mac_os, running_on_linux,\
-    running_on_windows
+    running_on_windows, get_file_creation_date
 from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
     create_tooltip, select_sequence, get_style_configuration, lookup_style_option,\
     register_latin_shortcut
@@ -1762,16 +1762,6 @@ class Workbench(tk.Tk):
                 self.get_editor_notebook().show_file(filename)
             else:
                 self.get_editor_notebook().show_file_at_line(filename, lineno, col_offset)
-    
-    def get_installation_id(self):
-        option_name = "general.installation_id"
-        if not self.get_option(option_name):
-            from time import time
-            # Use simple ID to avoid the impression that it encodes something personal
-            self.set_option(option_name, str(time()).replace(".", "")[-10:])
-            
-        return self.get_option(option_name) 
-    
     
     def bell(self, displayof=0):
         if self.get_option("general.audible_bell"):

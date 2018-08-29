@@ -6,6 +6,7 @@ import ast
 from configparser import ConfigParser
 import configparser
 from logging import exception
+import datetime
 
 def try_load_configuration(filename):
     try: 
@@ -33,6 +34,10 @@ class ConfigurationManager:
         if os.path.exists(self._filename):
             with open(self._filename, 'r', encoding="UTF-8") as fp: 
                 self._ini.read_file(fp)
+        
+        if not self.get_option("general.configuration_creation_timestamp"):
+            self.set_option("general.configuration_creation_timestamp",
+                            datetime.datetime.now().isoformat())
 
         #print(prefs_filename, self.sections())
     

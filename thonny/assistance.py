@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import builtins
 from typing import List, Optional, Union, Iterable, Tuple
 from thonny import ui_utils, tktextext, get_workbench, get_runner,\
@@ -23,11 +23,19 @@ import datetime
 import pprint
 import thonny
 import logging
+import json
+import tempfile
+import webbrowser
+import urllib.request
+import zlib
+import gzip
+import threading
 
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
 _program_analyzer_classes = []
+_last_feedback_timestamps = {}
 
 class AssistantView(tktextext.TextFrame):
     def __init__(self, master):
@@ -82,7 +90,7 @@ class AssistantView(tktextext.TextFrame):
                                 font=italic_font,
                                 #foreground=get_syntax_options_for_tag("hyperlink")["foreground"]
                                 )
-        self.text.tag_bind("feedback_link", "<1>", self._ask_feedback, True)
+        self.text.tag_bind("feedback_link", "<ButtonRelease-1>", self._ask_feedback, True)
         
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
     
@@ -100,8 +108,7 @@ class AssistantView(tktextext.TextFrame):
             "timestamp" : datetime.datetime.now().isoformat()[:19],
             "main_file_path" : key, 
         }
-        if not key in self._snapshots_per_main_file:
-            self._snapshots_per_main_file[key] = []
+        self._snapshots_per_main_file.setdefault(key, [])
         self._snapshots_per_main_file[key].append(self._current_snapshot)
         
         if msg.get("user_exception"):
@@ -313,8 +320,6 @@ class AssistantView(tktextext.TextFrame):
         ui_utils.show_dialog(FeedbackDialog(get_workbench(),
                                             self._current_snapshot["main_file_path"], 
                                             snapshots))
-        
-        print("juhu")
     
 class AssistantRstText(rst_utils.RstText):
     def configure_tags(self):
@@ -756,10 +761,11 @@ class NameErrorHelper(ErrorHelper):
         
 
 class FeedbackDialog(tk.Toplevel):
-    def __init__(self, master, main_file_path, snapshots):
+    def __init__(self, master, main_file_path, all_snapshots):
         super().__init__(master=master)
         
-        self.snapshots = snapshots
+        self.main_file_path = main_file_path
+        self.snapshots = self._select_unsent_snapshots(all_snapshots)
         
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
@@ -775,8 +781,8 @@ class FeedbackDialog(tk.Toplevel):
                                    + " since " + self._get_since_str()
                                    + ".\n\n"
                                    + "In order to improve this feature, Thonny developers would love to know how "
-                                   + "useful or confusing these messages were. We will only collect version information "
-                                   + "and the data you enter or approve on this form.",
+                                   + "useful or confusing these messages were. We will only collect version "
+                                   + "information and the data you enter or approve on this form.",
                                 wraplength=550
                                 )
         intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,15))
@@ -808,7 +814,7 @@ class FeedbackDialog(tk.Toplevel):
         self.include_thonny_id_var = tk.IntVar(value=1)
         include_thonny_id_check = ttk.Checkbutton(self, variable=self.include_thonny_id_var,
                                           onvalue=1, offvalue=0,
-                                          text="Include Thonny installation ID (allows us to connect your submissions)")
+                                          text="Include Thonny's installation time (allows us to group your submissions)")
         include_thonny_id_check.grid(row=4, column=0, columnspan=3, sticky="nw", padx=padx, pady=(5,0))
         
         self.include_snapshots_var = tk.IntVar(value=1)
@@ -835,18 +841,22 @@ class FeedbackDialog(tk.Toplevel):
         
         url_font = tk.font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1, size=url_font.cget("size"))
-        preview_link = ttk.Label(self, text="Preview the data to be sent",
+        preview_link = ttk.Label(self, text="(Preview the data to be sent)",
                                  style="Url.TLabel",
                                  cursor="hand2",
                                  font=url_font)
         preview_link.bind("<1>", self._preview_submission_data, True)
         preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
         
-        submit_button = ttk.Button(self, text="Submit", width=10)
+        submit_button = ttk.Button(self, text="Submit", width=10, command=self._submit_data)
         submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
         
-        cancel_button = ttk.Button(self, text="Cancel", width=7)
+        cancel_button = ttk.Button(self, text="Cancel", width=7, command=self._close)
         cancel_button.grid(row=8, column=1, sticky="ne", padx=(10,15), pady=15)
+
+        self.protocol("WM_DELETE_WINDOW", self._close)
+        self.bind("<Escape>", self._close, True)
+
         
         self.columnconfigure(0, weight=1)
         self.rowconfigure(3, weight=3)
@@ -867,18 +877,17 @@ class FeedbackDialog(tk.Toplevel):
                     groups[group].add((sug["symbol"], sug["title"]))
             
             # warnings group
-            if snap["warnings"]:
+            if snap.get("warnings"):
                 group = "Warnings"
-                groups[group] = set()
+                groups.setdefault(group, set())
                 for w in snap["warnings"]:
                     groups[group].add((w["symbol"], w["msg"]))
-        pprint.pprint(groups)
         
         for group in sorted(groups.keys(), key=lambda x: x.replace("Warnings", "z")):
             group_id = self.tree.insert("", "end", open=True, tags=("group",))
             self.tree.set(group_id, "title", group)
             
-            for symbol, title in groups[group]:
+            for symbol, title in sorted(groups[group], key=lambda m:m[1]):
                 item_id = self.tree.insert("", "end")
                 self.tree.set(item_id, "helpful", self._empty_box)
                 self.tree.set(item_id, "confusing", self._empty_box)
@@ -909,7 +918,15 @@ class FeedbackDialog(tk.Toplevel):
         self.tree.item(item_id, values=tuple(values))
     
     def _preview_submission_data(self, event=None):
-        self._collect_submission_data()
+        temp_path = os.path.join(
+            tempfile.mkdtemp(), 
+            'ThonnyAssistantFeedback_' + datetime.datetime.now().isoformat().replace(":",".")[:19] + ".txt"
+        )
+        data = self._collect_submission_data()
+        with open(temp_path, "w", encoding="ascii") as fp:
+            fp.write(data)
+        
+        webbrowser.open(temp_path)
     
     def _collect_submission_data(self):
         tree_data = []
@@ -925,6 +942,7 @@ class FeedbackDialog(tk.Toplevel):
             })
         
         submission = {
+            "feedback_format_version" : 1,
             "thonny_version" : thonny.get_version(), 
             "python_version" : ".".join(map(str, sys.version_info[:3])),
             "message_feedback" : tree_data,
@@ -943,16 +961,62 @@ class FeedbackDialog(tk.Toplevel):
         except ImportError:
             logging.exception("Could not get Pylint version")
         
-        if self.include_thonny_id_var:
-            submission["thonny_id"] = get_workbench().get_installation_id()
-            
-        if self.include_snapshots_var:
+        if self.include_snapshots_var.get():
             submission["snapshots"] = self.snapshots
         
-        pprint.pprint(submission)
+        if self.include_thonny_id_var.get():
+            submission["thonny_timestamp"] = get_workbench().get_option("general.configuration_creation_timestamp")
+        
+        return json.dumps(submission, indent=2)
+    
+    def _submit_data(self):
+        json_data = self._collect_submission_data()
+        compressed_data = gzip.compress(json_data.encode("ascii"))
+        
+        def do_work():
+            try:
+                handle = urllib.request.urlopen(
+                    "https://thonny.org/store_assistant_feedback.php", 
+                    data=compressed_data,
+                    timeout=20
+                )
+                return handle.read()
+            except Exception as e:
+                return str(e)
+                
+        
+        result = ui_utils.run_with_waiting_dialog(self, do_work, description="Uploading")
+        if result == b"OK":
+            if self.snapshots:
+                last_timestamp = self.snapshots[-1]["timestamp"]
+                _last_feedback_timestamps[self.main_file_path] = last_timestamp
+            messagebox.showinfo("Done!", "Thank you for the feedback!\n\nLet us know again when Assistant\nhelps or confuses you!")
+            self._close()
+        else:
+            messagebox.showerror("Problem", "Something went wrong:\n%s\n\nIf you don't mind, then try again later!" % result[:1000])
+    
+    def _select_unsent_snapshots(self, all_snapshots):
+        if self.main_file_path not in _last_feedback_timestamps:
+            return all_snapshots
+        else:
+            return [s for s in all_snapshots 
+                    if s["timestamp"] > _last_feedback_timestamps[self.main_file_path]]
+    
+    def _close(self, event=None):
+        self.destroy()
     
     def _get_since_str(self):
-        since = datetime.datetime.strptime(self.snapshots[0]["timestamp"], '%Y-%m-%dT%H:%M:%S')
+        if not self.snapshots:
+            assert self.main_file_path in _last_feedback_timestamps
+            since = datetime.datetime.strptime(
+                _last_feedback_timestamps[self.main_file_path],
+                '%Y-%m-%dT%H:%M:%S'
+            )
+        else:
+            since = datetime.datetime.strptime(
+                self.snapshots[0]["timestamp"], 
+                '%Y-%m-%dT%H:%M:%S'
+            )
         
         if (since.date() == datetime.date.today()
             or (datetime.datetime.now()-since) <= datetime.timedelta(hours=5)):
@@ -964,9 +1028,6 @@ class FeedbackDialog(tk.Toplevel):
         # remove seconds
         if since_str.count(":") == 2:
             i = since_str.rfind(":")
-            print(i, 
-                  i > 0,
-                  repr(since_str[i+1:i+3]))
             if i > 0 and len(since_str[i+1:i+3]) == 2 and since_str[i+1:i+3].isnumeric():
                 since_str = since_str[:i] + since_str[i+3:] 
         
