@@ -98,7 +98,7 @@ def list_volumes() -> Sequence[str]:
             volumes = []
             for disk in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
                 path = '{}:\\'.format(disk)
-                if (os.path.exists(path)):
+                if os.path.exists(path):
                     volumes.append(path)
             
             return volumes

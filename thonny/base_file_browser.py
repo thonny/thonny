@@ -129,10 +129,6 @@ class BaseFileBrowser(TreeFrame):
                 self.tree.see(current_node_id)    
                 
     
-    def populate_tree(self):
-        for path in self.get_toplevel_items():
-            self.show_item(path, path, "", 2)
-    
     def refresh_tree(self, node_id="", opening=None):
         path = self.tree.set(node_id, "path")
         #print("REFRESH", path)

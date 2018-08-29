@@ -26,8 +26,10 @@ def extract_text_range(source, text_range):
 
 def find_expression(node, text_range):
     if (hasattr(node, "lineno")
-        and node.lineno == text_range.lineno and node.col_offset == text_range.col_offset
-        and node.end_lineno == text_range.end_lineno and node.end_col_offset == text_range.end_col_offset
+        and node.lineno == text_range.lineno 
+        and node.col_offset == text_range.col_offset
+        and node.end_lineno == text_range.end_lineno 
+        and node.end_col_offset == text_range.end_col_offset
         # expression and Expr statement can have same range
         and isinstance(node, _ast.expr)):
         return node
@@ -67,7 +69,7 @@ def get_last_child(node, skip_incorrect=True):
             return None
         
         if skip_incorrect and getattr(node, "incorrect_range", False):
-                return None
+            return None
         
         return node
     
@@ -286,7 +288,7 @@ def mark_text_ranges(node, source: bytes):
                 del tokens[-1]
 
         else:
-            _strip_trailing_extra_closers(tokens, not (isinstance(node, ast.Tuple) or isinstance(node, ast.Lambda)))
+            _strip_trailing_extra_closers(tokens, not isinstance(node, (ast.Tuple, ast.Lambda)))
             _strip_trailing_junk_from_expressions(tokens)
             _strip_unclosed_brackets(tokens)
 
@@ -370,8 +372,8 @@ def fix_ast_problems(tree, source_lines, tokens):
             # Don't recurse inside JoinedStr as it may have several child Str nodes 
             # but only one string token. 
             # TODO: implicit concatenation messes up token-node correspondence?
-            token = string_tokens.pop(0)
-            node.lineno, node.col_offset = token.start
+            tok = string_tokens.pop(0)
+            node.lineno, node.col_offset = tok.start
         
         elif isinstance(node, FormattedValue):
             # Node has wrong position in 3.7, probably taken from string token.
@@ -379,7 +381,7 @@ def fix_ast_problems(tree, source_lines, tokens):
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif ((isinstance(node, ast.Expr) or isinstance(node, ast.Attribute))
+        elif (isinstance(node, (ast.Expr, ast.Attribute))
             and isinstance(node.value, ast.Str)):
             # they share the wrong offset of their triple-quoted child
             # get position from already fixed child

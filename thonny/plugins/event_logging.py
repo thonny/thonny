@@ -119,11 +119,11 @@ class EventLogger:
             
             value = attributes[name]
             
-            if isinstance(value, tk.BaseWidget) or isinstance(value, tk.Tk):
+            if isinstance(value, (tk.BaseWidget, tk.Tk)):
                 data[name + "_id"] = id(value)
                 data[name + "_class"] = value.__class__.__name__
                 
-            elif type(value) in [str, int, float]:
+            elif isinstance(value, (str, int, float)):
                 data[name] = value
             
             else:
@@ -196,7 +196,7 @@ def _generate_timestamp_file_name(extension):
         os.makedirs(folder)
         
     for i in range(100): 
-        filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.{}".format(i, extension)));
+        filename = os.path.join(folder, time.strftime("%Y-%m-%d_%H-%M-%S_{}.{}".format(i, extension)))
         if not os.path.exists(filename):
             return filename
     

@@ -62,6 +62,7 @@ class PythonText(SyntaxText):
     def perform_return(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified
+        # pylint: disable=lost-exception
         
         text = event.widget
         assert text is self
@@ -178,7 +179,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
         tktextext.fixwordbreaks(tk._default_root)
         
     
-    def on_secondary_click(self, event):
+    def on_secondary_click(self, event=None):
         super().on_secondary_click(event)
         self.mark_set("insert", "@%d,%d" % (event.x, event.y))
         
@@ -245,7 +246,7 @@ class CodeView(tktextext.TextFrame):
         self.update_gutter()
         
         if not keep_undo:
-            self.text.edit_reset();
+            self.text.edit_reset()
 
         self.text.event_generate("<<TextChange>>")
     
@@ -275,10 +276,6 @@ class CodeView(tktextext.TextFrame):
         else:
             yield " ", ()
     
-    
-    def select_lines(self, first_line, last_line):
-        self.text.tag_remove("sel", "1.0", tk.END)
-        self.text.tag_add("sel", "%s.0" % first_line, "%s.end" % last_line)
     
     def select_range(self, text_range):
         self.text.tag_remove("sel", "1.0", tk.END)

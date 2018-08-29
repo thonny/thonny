@@ -92,16 +92,16 @@ class TweakableText(tk.Text):
     def intercept_mark(self, *args):
         self.direct_mark(*args)
     
-    def intercept_insert(self, index, chars, tags=None):
+    def intercept_insert(self, index, chars, tags=None, **kw):
         assert isinstance(chars, str)
         if chars >= "\uf704" and chars <= "\uf70d": # Function keys F1..F10 in Mac cause these
             pass
         elif self.is_read_only():
             self.bell()
         else:
-            self.direct_insert(index, chars, tags)
+            self.direct_insert(index, chars, tags, **kw)
     
-    def intercept_delete(self, index1, index2=None):
+    def intercept_delete(self, index1, index2=None, **kw):
         if index1 == "sel.first" and index2 == "sel.last" and not self.has_selection():
             return
         
@@ -110,7 +110,7 @@ class TweakableText(tk.Text):
         elif self._is_erroneous_delete(index1, index2):
             pass
         else:
-            self.direct_delete(index1, index2)
+            self.direct_delete(index1, index2, **kw)
     
     def _is_erroneous_delete(self, index1, index2):
         """Paste can cause deletes where index1 is sel.start but text has no selection. This would cause errors"""
@@ -146,13 +146,13 @@ class TweakableText(tk.Text):
         else:
             return None, None
         
-    def direct_insert(self, index, chars, tags=None):
-        self._original_insert(index, chars, tags)
+    def direct_insert(self, index, chars, tags=None, **kw):
+        self._original_insert(index, chars, tags, **kw)
         if not self._suppress_events:
             self.event_generate("<<TextChange>>")
     
-    def direct_delete(self, index1, index2=None):
-        self._original_delete(index1, index2)
+    def direct_delete(self, index1, index2=None, **kw):
+        self._original_delete(index1, index2, **kw)
         if not self._suppress_events:
             self.event_generate("<<TextChange>>")
     
@@ -267,6 +267,10 @@ class EnhancedText(TweakableText):
     def tag_reset(self, tag_name):
         empty_conf = {key : "" for key in self.tag_configure(tag_name)}
         self.tag_configure(empty_conf)                 
+    
+    def select_lines(self, first_line, last_line):
+        self.tag_remove("sel", "1.0", tk.END)
+        self.tag_add("sel", "%s.0" % first_line, "%s.end" % last_line)
     
     def delete_word_left(self, event):
         self.event_generate('<Meta-Delete>')
@@ -420,7 +424,7 @@ class EnhancedText(TweakableText):
     def perform_smart_home(self, event):
         if (event.state & 4) != 0 and event.keysym == "Home":
             # state&4==Control. If <Control-Home>, use the Tk binding.
-            return
+            return None
         
         dest = self.compute_smart_home_destination_index()
         
@@ -561,12 +565,12 @@ class EnhancedText(TweakableText):
         if (event_kind != self._last_event_kind
             or e.char in ("\r", "\n", " ", "\t")
             or e.keysym in ["Return", "KP_Enter"]
-            or time.time() - self.last_key_time > 2
+            or time.time() - self._last_key_time > 2
             ):
             self.edit_separator()
             
         self._last_event_kind = event_kind
-        self.last_key_time = time.time()
+        self._last_key_time = time.time()
 
     def _get_event_kind(self, event):
         if event.keysym in ("BackSpace", "Delete"):
@@ -603,7 +607,7 @@ class EnhancedText(TweakableText):
         try:
             if self.has_selection():
                 self.direct_delete("sel.first", "sel.last")
-        except:
+        except Exception:
             pass
         
         self._last_event_kind = "paste"
@@ -904,7 +908,7 @@ class TextFrame(ttk.Frame):
         try:
             linepos = int(self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0])
             gutter_selection_start = int(self._gutter.index("gutter_selection_start").split(".")[0])
-            self.select_lines(min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1))
+            self.text.select_lines(min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1))
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:
             exception("on_gutter_motion")
@@ -958,14 +962,12 @@ def fixwordbreaks(root):
     
     # Make sure that Tk's double-click and next/previous word
     # operations use our definition of a word (i.e. an identifier)
-    tk = root.tk
-    tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
-    """ TODO: Idle updated following to 
-    tk.call('set', 'tcl_wordchars', r'\w')
-    tk.call('set', 'tcl_nonwordchars', r'\W')
-    """
-    tk.call('set', 'tcl_wordchars',     u'[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
-    tk.call('set', 'tcl_nonwordchars', u'[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+    root.tk.call('tcl_wordBreakAfter', 'a b', 0) # make sure word.tcl is loaded
+    # TODO: IDLE updated following to 
+    #root.tk.call('set', 'tcl_wordchars', r'\w')
+    #root.tk.call('set', 'tcl_nonwordchars', r'\W')
+    root.tk.call('set', 'tcl_wordchars',     u'[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
+    root.tk.call('set', 'tcl_nonwordchars', u'[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]')
 
 def rebind_control_a(root):
     # Tk 8.6 has <<SelectAll>> event but 8.5 doesn't

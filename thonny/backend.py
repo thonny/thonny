@@ -39,7 +39,6 @@ AFTER_STATEMENT_MARKER = "_thonny_hidden_after_stmt"
 AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 
 logger = logging.getLogger("thonny.backend")
-info = logger.info
 
 _CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
 
@@ -111,7 +110,7 @@ class VM:
                           welcome_text="Python " + _get_python_version_string(),
                           executable=sys.executable,
                           in_venv=(hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
-                                   or hasattr(sys, 'real_prefix') and sys.real_prefix != sys.prefix),
+                                   or hasattr(sys, 'real_prefix') and getattr(sys, "real_prefix") != sys.prefix),
                           python_version=_get_python_version_string(),
                           cwd=os.getcwd()))
 
@@ -156,7 +155,7 @@ class VM:
         return __main__
 
     def handle_command(self, cmd):
-        assert isinstance(cmd, ToplevelCommand) or isinstance(cmd, InlineCommand)
+        assert isinstance(cmd, (ToplevelCommand, InlineCommand))
         
         def create_error_response(**kw):
             if isinstance(cmd, ToplevelCommand):
@@ -269,7 +268,7 @@ class VM:
 
     def _load_plugins(self):
         # built-in plugins 
-        import thonny.plugins.backend
+        import thonny.plugins.backend # pylint: disable=redefined-outer-name
         self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 
         # 3rd party plugins from namespace package
@@ -297,7 +296,7 @@ class VM:
                 logger.exception("Failed loading plugin '" + module_name + "'")
 
     def _install_signal_handler(self):
-        def signal_handler(signal, frame):
+        def signal_handler(signal_, frame):
             raise KeyboardInterrupt("Execution interrupted")
 
         if os.name == 'nt':
@@ -454,7 +453,7 @@ class VM:
                                  "key" : dist.key,
                                  "location" : dist.location,
                                  "version" : dist.version}
-                                 for dist in pkg_resources.working_set}
+                                 for dist in pkg_resources.working_set} # pylint: disable=not-an-iterable
             
             return InlineResponse("get_active_distributions",
                                   distributions=dists,
@@ -467,8 +466,8 @@ class VM:
         for frame in inspect.stack():
             if id(frame) == cmd.frame_id:
                 return InlineResponse("get_locals", locals=self.export_variables(frame.f_locals))
-        else:
-            raise RuntimeError("Frame '{0}' not found".format(cmd.frame_id))
+            
+        raise RuntimeError("Frame '{0}' not found".format(cmd.frame_id))
 
 
     def _cmd_get_heap(self, cmd):
@@ -493,9 +492,6 @@ class VM:
             except Exception as e:
                 completions = []
                 error = "Autocomplete error: " + str(e)
-            except Exception:
-                completions = []
-                error = "Autocomplete error"
 
         return InlineResponse("shell_autocomplete",
             source=cmd.source,
@@ -518,9 +514,6 @@ class VM:
         except Exception as e:
             completions = []
             error = "Autocomplete error: " + str(e)
-        except Exception:
-            completions = []
-            error = "Autocomplete error"
 
         return InlineResponse("editor_autocomplete",
                           source=cmd.source,
@@ -587,14 +580,12 @@ class VM:
 
             if isinstance(value, io.TextIOWrapper):
                 self._add_file_handler_info(value, info)
-            elif (type(value) in (types.BuiltinFunctionType, types.BuiltinMethodType,
+            elif isinstance(value, (types.BuiltinFunctionType, types.BuiltinMethodType,
                                  types.FunctionType, types.LambdaType, types.MethodType)):
                 self._add_function_info(value, info)
-            elif (isinstance(value, list)
-                  or isinstance(value, tuple)
-                  or isinstance(value, set)):
+            elif isinstance(value, (list, tuple, set)):
                 self._add_elements_info(value, info)
-            elif (isinstance(value, dict)):
+            elif isinstance(value, dict):
                 self._add_entries_info(value, info)
 
             for tweaker in self._object_info_tweakers:
@@ -689,7 +680,7 @@ class VM:
             result_attributes["filename"] = full_filename
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
-            raise UserError("Command '%s' takes at least one argument", cmd.name)
+            raise UserError("Command '%s' takes at least one argument" % cmd.name)
 
     def _execute_source(self, source, filename, execution_mode, executor_class, cmd):
         self._current_executor = executor_class(self, cmd)
@@ -1056,7 +1047,12 @@ class Tracer(Executor):
                                                 exception=None,
                                                 breakpoints=breakpoints)
         
-        
+    def _trace(self, frame, event, arg):
+        raise NotImplementedError()
+    
+    def _frame_is_alive(self, frame_id):
+        raise NotImplementedError()
+    
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
             sys.settrace(self._trace)
@@ -1071,6 +1067,8 @@ class Tracer(Executor):
                 sys.breakpointhook = old_breakpointhook
         
     def _should_skip_frame(self, frame):
+        # For some reason Pylint doesn't see inspect.CO_GENERATOR and such
+        # pylint: disable=no-member
         code = frame.f_code
 
         return (
@@ -1093,19 +1091,14 @@ class Tracer(Executor):
             path_startswith(path, os.getcwd())
             or self._main_module_path is not None 
                 and path_startswith(path, os.path.dirname(self._main_module_path))
-            or path in self._current_command.breakpoints
+            or path in self._current_command["breakpoints"]
         )
 
     def _is_interesting_exception(self, frame):
         # interested only in exceptions in command frame or its parent frames
-        return (id(frame) == self._current_command.frame_id
-                or not self._frame_is_alive(self._current_command.frame_id))
+        return (id(frame) == self._current_command["frame_id"]
+                or not self._frame_is_alive(self._current_command["frame_id"]))
 
-    def _respond_to_inline_commands(self):
-        while isinstance(self._current_command, InlineCommand):
-            self._vm.handle_command(self._current_command)
-            self._current_command = self._fetch_command()
-    
     def _fetch_next_debugger_command(self):
         while True:
             cmd = self._vm._fetch_command()
@@ -1642,6 +1635,7 @@ class NiceTracer(Tracer):
 
 
     def _cmd_step_over_completed(self, frame, cmd):
+        # pylint: disable=inconsistent-return-statements
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
@@ -1739,8 +1733,8 @@ class NiceTracer(Tracer):
         for frame in self._custom_stack:
             if id(frame.system_frame) == frame_id:
                 return True
-        else:
-            return False
+            
+        return False
 
     def _export_stack(self):
         result = []
@@ -2303,7 +2297,7 @@ def _is_library_file(filename):
     return (filename is None
             or path_startswith(filename, sys.prefix)
             or hasattr(sys, "base_prefix") and path_startswith(filename, sys.base_prefix)
-            or hasattr(sys, "real_prefix") and path_startswith(filename, sys.real_prefix)
+            or hasattr(sys, "real_prefix") and path_startswith(filename, getattr(sys, "real_prefix"))
             or site.ENABLE_USER_SITE and path_startswith(filename, site.getusersitepackages()))
 
 def _report_internal_error():

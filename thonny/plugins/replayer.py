@@ -1,5 +1,5 @@
 import tkinter as tk
-import tkinter.ttk as ttk
+from tkinter import ttk
 from datetime import datetime
 from thonny import ui_utils, codeview
 from thonny import get_workbench

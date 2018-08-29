@@ -12,7 +12,7 @@ class BackendDetailsConfigPage(ConfigurationPage):
 
 class OnlyTextConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master, text):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
         label = ttk.Label(self, text=text)
         label.grid()
 
@@ -94,7 +94,7 @@ class BackendConfigurationPage(ConfigurationPage):
     
     def apply(self):
         if self._current_page is None:
-            return
+            return None
         
         result = self._current_page.apply()
         
@@ -104,10 +104,12 @@ class BackendConfigurationPage(ConfigurationPage):
         backend_desc = self._combo_variable.get()
         backend_name = self._backend_specs_by_desc[backend_desc].name
         get_workbench().set_option("run.backend_name", backend_name)
-            
-        if self._combo_variable.modified or self._current_page.should_restart():
+        
+        if (getattr(self._combo_variable, "modified") 
+            or self._current_page.should_restart()):
             get_runner().restart_backend(False)
         
+        return None
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page("Back-end", BackendConfigurationPage)

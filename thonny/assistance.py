@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import builtins
-from typing import List, Optional, Union, Iterable, Tuple
+from typing import List, Optional, Union, Iterable, Tuple, Type
 from thonny import ui_utils, tktextext, get_workbench,\
     rst_utils, misc_utils
 from collections import namedtuple
@@ -28,7 +28,7 @@ import gzip
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
-_program_analyzer_classes = []
+_program_analyzer_classes = [] # type: List[Type[ProgramAnalyzer]]
 _last_feedback_timestamps = {}
 
 class AssistantView(tktextext.TextFrame):
@@ -151,6 +151,10 @@ class AssistantView(tktextext.TextFrame):
                                                    False#i==0
                                                    )
         
+            self._current_snapshot["exception_suggestions"] = [
+                dict(sug._asdict()) for sug in suggestions
+            ]
+            
         self.text.append_rst(rst)
         self._append_text("\n")
         
@@ -159,9 +163,6 @@ class AssistantView(tktextext.TextFrame):
         self._current_snapshot["exception_file_path"] = error_info["filename"]
         self._current_snapshot["exception_lineno"] = error_info["lineno"]
         self._current_snapshot["exception_rst"] = rst # for debugging purposes
-        self._current_snapshot["exception_suggestions"] = [
-            dict(sug._asdict()) for sug in suggestions
-        ]
         
     
     def _format_suggestion(self, suggestion, last, initially_open):
@@ -298,12 +299,6 @@ class AssistantView(tktextext.TextFrame):
         
         return s
     
-    def before_show(self, event=None):
-        return
-        if not getattr(self, "_shown", False):
-            self.after(1000, self._ask_feedback)
-        self._shown = True
-    
     def _ask_feedback(self, event=None):
         
         all_snapshots = self._snapshots_per_main_file[self._current_snapshot["main_file_path"]]
@@ -438,12 +433,12 @@ class SyntaxErrorHelper(ErrorHelper):
         elif self.error_info["message"] == "EOF while scanning triple-quoted string literal":
             # lineno is not useful, as it is at the end of the file and user probably
             # didn't want the string to end there
-            return "You haven't properly closed a triple-quoted string"
             self.intro_is_enough = True
+            return "You haven't properly closed a triple-quoted string"
         else:
             msg = "Python doesn't know how to read your program."
             
-            if True: # TODO: check the presence of ^
+            if "^" in self.error_info["message"]:
                 msg += (" Small `^` in the original error message shows where it gave up,"
                         + " but the actual mistake can be before this.") 
             

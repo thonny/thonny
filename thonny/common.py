@@ -59,6 +59,8 @@ class Record:
         return "{}({})".format(self.__class__.__name__, ", ".join(items))
     
     def __eq__(self, other):
+        # pylint: disable=unidiomatic-typecheck
+        
         if type(self) != type(other):
             return False
         
@@ -153,6 +155,7 @@ def serialize_message(msg: Record) -> str:
 
 def parse_message(msg_string: str) -> Record:
     # DataFrames may have nan 
+    # pylint: dummy-variables-rgx=nan
     nan = float("nan")  # @UnusedVariable
     assert msg_string[0] == MESSAGE_MARKER
     return eval(msg_string[1:].encode("ASCII").decode("UTF-7"))

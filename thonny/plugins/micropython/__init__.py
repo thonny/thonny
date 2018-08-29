@@ -50,6 +50,7 @@ _AUTOMATIC_INTERRUPT = True
 
 class MicroPythonProxy(BackendProxy):
     def __init__(self, clean):
+        super().__init__(clean)
         self._non_serial_msg_queue = Queue()
         self._last_toplevel_command = None
         self._has_been_idle = False
@@ -70,7 +71,6 @@ class MicroPythonProxy(BackendProxy):
         
         if self._serial is not None and (clean or _AUTOMATIC_INTERRUPT):
             try:
-                pass
                 self._interrupt_to_prompt(clean)
                 self._builtin_modules = self._fetch_builtin_modules()
             except TimeoutError:
@@ -110,14 +110,14 @@ class MicroPythonProxy(BackendProxy):
         else:
             return "postpone"
     
-    def send_program_input(self, input_str):
+    def send_program_input(self, data: str) -> None:
         
         # TODO: what if there is a previous unused data waiting
         assert self._serial.outgoing_is_empty()
         
-        assert input_str.endswith("\n")
-        if not input_str.endswith("\r\n"):
-            input_str = input_str[:-1] + "\r\n"
+        assert data.endswith("\n")
+        if not data.endswith("\r\n"):
+            input_str = data[:-1] + "\r\n"
         
         data = input_str.encode("utf-8")
         
@@ -194,7 +194,7 @@ class MicroPythonProxy(BackendProxy):
             except Exception as e:
                 logging.exception("Problem when closing serial")
                 self._send_error_to_shell("Problem when closing serial connection: " + str(e))
-                pass
+                
             self._serial = None
     
     def is_connected(self):
@@ -413,7 +413,7 @@ class MicroPythonProxy(BackendProxy):
         self.idle = False
         try:
             self._serial.close()
-        except:
+        except Exception:
             logging.exception("Closing serial")
         finally:
             self._serial = None
@@ -510,6 +510,8 @@ class MicroPythonProxy(BackendProxy):
                                             module_name=cmd.module_name, 
                                             globals={}, 
                                             error='Error requesting globals:\\n' + traceback.format_exc()))
+        
+        return None
     
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -575,7 +577,7 @@ class MicroPythonProxy(BackendProxy):
             self._non_serial_msg_queue.put(msg)
         else:
             # use live data
-            regex = re.search('(\w+\.)*(\w+)?$', source) #https://github.com/takluyver/ubit_kernel/blob/master/ubit_kernel/kernel.py
+            regex = re.search(r'(\w+\.)*(\w+)?$', source) #https://github.com/takluyver/ubit_kernel/blob/master/ubit_kernel/kernel.py
             if regex:
                 n = regex.group()
                 # the response format is not the same as expected by the gui
@@ -585,8 +587,6 @@ class MicroPythonProxy(BackendProxy):
                     self._execute_async("print('\\x04\\x02', {'message_class' : 'InlineResponse', 'command_name': 'shell_autocomplete', 'match':"+repr(n)+", 'source':"+repr(source)+", 'names':dir("+obj+")})")
                 else:
                     self._execute_async("print('\\x04\\x02', {'message_class' : 'InlineResponse', 'command_name': 'shell_autocomplete', 'match':"+repr(n)+", 'source':"+repr(source)+", 'names':dir()})")
-            else:
-                return None
     
     def _cmd_dump_api_info(self, cmd):
         "For use during development of the plug-in"
@@ -751,7 +751,7 @@ class MicroPythonProxy(BackendProxy):
                     return
         try:
             self._upload(source, target)
-        except:
+        except Exception:
             self._send_error_to_shell(traceback.format_exc())
     
     def _upload(self, source, target):
@@ -954,6 +954,8 @@ class MicroPythonProxy(BackendProxy):
                         )
                     else:
                         return None
+        
+        return None
     
     def _parse_message(self, msg_bytes):
         msg_str = msg_bytes.decode("utf-8", 'replace').strip()
@@ -1134,7 +1136,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None # Will be overwritten on Workbench.add_backend
     
     def __init__(self, master):
-        ConfigurationPage.__init__(self, master)
+        super().__init__(master)
         label = ttk.Label(self, text='Port (look for your device name, "USB Serial" or "UART")')
         label.grid(row=0, column=0, sticky="nw")
         
@@ -1178,9 +1180,11 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         return ""
     
     def should_restart(self):
+        # pylint: generated-members=modified
         return self._port_desc_variable.modified
     
     def apply(self):
+        # pylint: generated-members=modified
         if not self._port_desc_variable.modified:
             return
         
@@ -1246,16 +1250,15 @@ class SerialHelper:
         finally:
             del self._read_buffer[:size]
     
-    def read_until(self, terminator, timeout=2):
+    def read_until(self, terminators, timeout=2):
         if timeout == 0:
             raise TimeoutError()
         
         timer = TimeHelper(timeout)
-        if isinstance(terminator, (set, list, tuple)):
-            terminators = terminator
-        else:
-            terminators = [terminator]
-            
+        if not isinstance(terminators, (set, list, tuple)):
+            terminators = [terminators]
+        
+        terminator = None
         while True:
             self._check_for_error()
             
@@ -1273,7 +1276,8 @@ class SerialHelper:
                 self._read_buffer.extend(data)
             except queue.Empty:
                 raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
-            
+        
+        assert terminator is not None
         size = self._read_buffer.index(terminator) + len(terminator)
         
         try:
@@ -1364,8 +1368,8 @@ class SerialHelper:
                 try:
                     self._serial.close()
                     self._serial = None
-                except:
-                    raise
+                except Exception:
+                    logging.exception("Couldn't close serial")
 
 
 class TimeHelper:
@@ -1464,6 +1468,7 @@ def load_plugin():
         proxy = get_runner().get_backend_proxy()
         if hasattr(proxy, "_soft_reboot_and_run_main"):
             return proxy._soft_reboot_and_run_main()
+        return None
     
     def soft_reboot_enabled():
         proxy = get_runner().get_backend_proxy()

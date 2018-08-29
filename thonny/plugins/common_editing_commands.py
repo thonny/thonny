@@ -10,6 +10,8 @@ def load_plugin() -> None:
             widget = get_workbench().focus_get()
             if widget:
                 return widget.event_generate(virtual_event_sequence)
+            
+            return None
         
         return handler
     
@@ -19,7 +21,7 @@ def load_plugin() -> None:
         if isinstance(widget, tk.Text):
             widget.tag_remove("sel","1.0","end")
             widget.tag_add("sel","1.0","end")
-        elif isinstance(widget, ttk.Entry) or isinstance(widget, tk.Entry):
+        elif isinstance(widget, (ttk.Entry, tk.Entry)):
             widget.select_range(0, tk.END)
         
     

@@ -1,7 +1,7 @@
 import tkinter as tk
 from thonny import get_workbench
 import logging
-import thonny.jedi_utils as jedi_utils
+from thonny import jedi_utils
 
 class LocalsHighlighter:
 

@@ -389,7 +389,7 @@ class Runner:
             self._proxy.destroy()
             self._proxy = None
 
-    def get_executable(self) -> str:
+    def get_executable(self) -> Optional[str]:
         if self._proxy is None:
             return None
         else:
@@ -764,8 +764,8 @@ class CPythonProxy(BackendProxy):
             if (("site-packages" in d or "dist-packages" in d) 
                 and path_startswith(d, self._sys_prefix)):
                 return d
-        else:
-            return None
+            
+        return None
     
     def get_user_site_packages(self):
         return self._usersitepackages
@@ -858,6 +858,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
             args.append("--upgrade")
         
         try:
+            # pylint: disable=unused-variable
             import ensurepip  # @UnusedImport
         except ImportError:
             args.append("--without-pip")
@@ -946,7 +947,7 @@ def _get_venv_info(venv_path):
                 key, val = line.split("=", maxsplit=1)
                 result[key.strip()] = val.strip()
     
-    return result;
+    return result
 
 
 def using_bundled_python():

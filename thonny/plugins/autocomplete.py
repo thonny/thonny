@@ -99,7 +99,7 @@ class Completer(tk.Listbox):
             #_, _, _, list_box_height = self.bbox(0)
             height = 100 #min(150, list_box_height * len(completions) * 1.15)
             typed_name_length = len(completions[0]["name"]) - len(completions[0]["complete"])
-            text_box_x, text_box_y, _, text_box_height = self.text.bbox('insert-%dc' % typed_name_length);
+            text_box_x, text_box_y, _, text_box_height = self.text.bbox('insert-%dc' % typed_name_length)
             
             # should the box appear below or above cursor?
             space_below = self.master.winfo_height() - text_box_y - text_box_height
@@ -195,7 +195,7 @@ class Completer(tk.Listbox):
     
     def _on_text_keypress(self, event=None):
         if not self._is_visible():
-            return
+            return None
         
         if event.keysym == "Escape":
             self._close()
@@ -210,6 +210,8 @@ class Completer(tk.Listbox):
             assert self.size() > 0
             self._insert_current_selection()
             return "break"
+        
+        return None
     
     def _insert_current_selection(self, event=None):
         self._insert_completion(self._get_selected_completion())
@@ -290,8 +292,10 @@ def patched_perform_midline_tab(text, event):
         if not text.has_selection():
             _handle_autocomplete_request_for_text(text)
             return "break"
-    else:
-        return text.perform_smart_tab(event)
+        else:
+            return None
+        
+    return text.perform_smart_tab(event)
     
 
 def load_plugin() -> None:

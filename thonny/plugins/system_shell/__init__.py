@@ -36,7 +36,7 @@ def open_system_shell():
     for recommending commands for running given python and related pip"""
     python_interpreter = get_runner().get_executable()
     if python_interpreter is None:
-        return
+        return None
     
     exec_prefix=_get_exec_prefix(python_interpreter)
     if ".." in exec_prefix:
@@ -65,7 +65,8 @@ def open_system_shell():
     else:
         showerror("Problem", "Don't know how to open system shell on this platform (%s)"
                   % platform.system())
-        return
+    
+    return None
 
 def _open_shell_in_windows(cwd, env, interpreter, explainer, exec_prefix):
     env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))

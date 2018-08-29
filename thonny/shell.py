@@ -63,9 +63,6 @@ class ShellView (ttk.Frame):
     def focus_set(self):
         self.text.focus_set()
     
-    def add_command(self, command, handler):
-        self.text.add_command(command, handler)
-
     def submit_python_code(self, cmd_line):
         self.text.submit_command(cmd_line, ())
 
@@ -261,12 +258,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             #self.tag_add("last_result_line", prev_line)
         
         self._insert_text_directly(">>> ", prompt_tags)
-        self.edit_reset();
+        self.edit_reset()
     
     def restart(self):
         self._insert_text_directly("\n========================= RESTART =========================\n", ("magic",))
     
     def intercept_insert(self, index, txt, tags=()):
+        # pylint: ignore=arguments-differ
         if (self._editing_allowed()
             and self._in_current_input_range(index)):
             #self._print_marks("before insert")
@@ -340,7 +338,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
         return "break"
     
-    def on_secondary_click(self, event):
+    def on_secondary_click(self, event=None):
         super().on_secondary_click(event)
         self._menu.tk_popup(event.x_root, event.y_root)
         
@@ -455,6 +453,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     return input_text[:i+1]
                 else:
                     i += 1
+        
+        return None
     
     def _code_is_ready_for_submission(self, source, tail=""):
         # Ready to submit if ends with empty line 
@@ -535,13 +535,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _arrow_up(self, event):
         if not self._in_current_input_range("insert"):
-            return
+            return None
 
         insert_line = index2line(self.index("insert"))
         input_start_line = index2line(self.index("input_start"))
         if insert_line != input_start_line:
             # we're in the middle of a multiline command
-            return
+            return None
         
         if len(self._command_history) == 0 or self._command_history_current_index == 0:
             # can't take previous command
@@ -560,13 +560,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     
     def _arrow_down(self, event):
         if not self._in_current_input_range("insert"):
-            return
+            return None
         
         insert_line = index2line(self.index("insert"))
         last_line = index2line(self.index("end-1c"))
         if insert_line != last_line:
             # we're in the middle of a multiline command
-            return
+            return None
         
         if (len(self._command_history) == 0 
             or self._command_history_current_index == len(self._command_history)-1):

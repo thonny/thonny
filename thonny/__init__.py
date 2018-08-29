@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, cast, Optional
 if os.environ.get("THONNY_USER_DIR", ""):
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
 elif (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
-      or hasattr(sys, 'real_prefix') and sys.real_prefix != sys.prefix):
+      or hasattr(sys, 'real_prefix') and getattr(sys, "real_prefix") != sys.prefix):
     # we're in a virtualenv or venv
     THONNY_USER_DIR = os.path.join(sys.prefix, ".thonny")
 else:
@@ -23,10 +23,10 @@ def launch():
         if _should_delegate():
             # First check if there is existing Thonny instance to handle the request
             delegation_result = _try_delegate_to_existing_instance(sys.argv[1:])
-            if delegation_result == True:
+            if delegation_result == True: #pylint: disable=singleton-comparison
                 # we're done
                 print("Delegated to an existing Thonny instance. Exiting now.")
-                return
+                return 0
             
             if hasattr(delegation_result, "accept"):
                 # we have server socket to put in use
@@ -46,6 +46,7 @@ def launch():
     except SystemExit as e:
         from tkinter import messagebox
         messagebox.showerror("System exit", str(e))
+        return -1
     except Exception:
         from logging import exception
         exception("Internal launch or mainloop error")
@@ -55,9 +56,10 @@ def launch():
         return -1
     finally:
         runner = get_runner()
-        if runner != None:
+        if runner is not None:
             runner.destroy_backend()
-
+    
+    return 0
 
 def _prepare_thonny_user_dir():
     if not os.path.exists(THONNY_USER_DIR):

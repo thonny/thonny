@@ -10,6 +10,7 @@ import string
 from keyword import iskeyword
 from typing import Dict  # @UnusedImport
 
+
 NUM_CONTEXT_LINES = (50, 500, 5000000)
 
 # Reason last stmt is continued (or C_NONE if it's not).
@@ -165,6 +166,8 @@ class RoughParser:
 
     def find_good_parse_start(self, is_char_in_string=None,
                               _synchre=_synchre):
+        # pylint: disable=redefined-builtin
+        
         str, pos = self.str, None  # @ReservedAssignment
 
         if not is_char_in_string:
@@ -175,7 +178,7 @@ class RoughParser:
         # but don't try too often; pos will be left None, or
         # bumped to a legitimate synch point.
         limit = len(str)
-        for tries in range(5):  # @UnusedVariable
+        for _ in range(5): 
             i = str.rfind(":\n", 0, limit)
             if i < 0:
                 break
@@ -235,6 +238,8 @@ class RoughParser:
     # Creates self.{goodlines, continuation}.
 
     def _study1(self):
+        # pylint: disable=redefined-builtin
+
         if self.study_level >= 1:
             return
         self.study_level = 1
@@ -384,6 +389,8 @@ class RoughParser:
     #         if continuation is C_BRACKET, index of last open bracket
 
     def _study2(self):
+        # pylint: disable=redefined-builtin
+
         if self.study_level >= 2:
             return
         self._study1()
@@ -398,7 +405,7 @@ class RoughParser:
             # p is the index of the stmt at line number goodlines[i].
             # Move p back to the stmt at line number goodlines[i-1].
             q = p
-            for nothing in range(goodlines[i-1], goodlines[i]):  # @UnusedVariable
+            for _ in range(goodlines[i-1], goodlines[i]):  # @UnusedVariable
                 # tricky: sets p to 0 if no preceding newline
                 p = str.rfind('\n', 0, p-1) + 1
             # The stmt str[p:q] isn't a continuation, but may be blank
@@ -493,6 +500,7 @@ class RoughParser:
     # of spaces the next line should be indented.
 
     def compute_bracket_indent(self):
+        # pylint: disable=redefined-builtin
         self._study2()
         assert self.continuation == C_BRACKET
         j = self.lastopenbracketpos
@@ -533,6 +541,7 @@ class RoughParser:
     # the first one following the initial line of the stmt.
 
     def compute_backslash_indent(self):
+        # pylint: disable=redefined-builtin
         self._study2()
         assert self.continuation == C_BACKSLASH
         str = self.str  # @ReservedAssignment

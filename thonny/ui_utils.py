@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from tkinter import ttk, messagebox, filedialog
-from tkinter.dialog import Dialog
 
 from thonny import tktextext, misc_utils
 from thonny import get_workbench
 from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
 from typing import Union, List  # @UnusedImport
 import tkinter as tk
-import tkinter.messagebox as tkMessageBox
 import traceback
 
 import textwrap
@@ -20,7 +18,7 @@ import os
 import logging
 import shutil
 import platform
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 from thonny.tktextext import TweakableText
 from thonny.common import TextRange
 import time
@@ -130,8 +128,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
         self.add(child, **kw)
 
     def add(self, child, **kw):
-        if not "minsize" in kw:
-            kw["minsize"]=60
+        kw.setdefault("minsize", 60)
             
         tk.PanedWindow.add(self, child, **kw)
         self.visible_panes.add(child)
@@ -623,13 +620,13 @@ class AutoScrollbar(SafeScrollbar):
     def __init__(self, master=None, **kw):
         super().__init__(master=master, **kw)
     
-    def set(self, lo, hi):
-        if float(lo) <= 0.0 and float(hi) >= 1.0:
+    def set(self, first, last):
+        if float(first) <= 0.0 and float(last) >= 1.0:
             self.grid_remove()
-        elif float(lo) > 0.001 or float(hi) < 0.009:
+        elif float(first) > 0.001 or float(last) < 0.009:
             # with >0 and <1 it occasionally made scrollbar wobble back and forth
             self.grid()
-        ttk.Scrollbar.set(self, lo, hi)
+        ttk.Scrollbar.set(self, first, last)
     def pack(self, **kw):
         raise tk.TclError("cannot use pack with this widget")
     def place(self, **kw):
@@ -763,123 +760,8 @@ class ThemedListbox(tk.Listbox):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
         super().destroy()
 
-class TtkDialog(Dialog):
-    def buttonbox(self):
-        '''add standard button box.
 
-        override if you do not want the standard buttons
-        '''
-
-        box = ttk.Frame(self)
-
-        w = ttk.Button(box, text="OK", width=10, command=self.ok, default=tk.ACTIVE)
-        w.pack(side=tk.LEFT, padx=5, pady=5)
-        w = ttk.Button(box, text="Cancel", width=10, command=self.cancel)
-        w.pack(side=tk.LEFT, padx=5, pady=5)
-
-        self.bind("<Return>", self.ok, True)
-        self.bind("<Escape>", self.cancel, True)
-
-        box.pack()
-
-    
-
-class _QueryDialog(TtkDialog):
-
-    def __init__(self, title, prompt,
-                 initialvalue=None,
-                 minvalue = None, maxvalue = None,
-                 master = None,
-                 selection_range=None):
-
-        if not master:
-            master = tk._default_root
-
-        self.prompt   = prompt
-        self.minvalue = minvalue
-        self.maxvalue = maxvalue
-
-        self.initialvalue = initialvalue
-        self.selection_range = selection_range
-
-        super().__init__(master, title)
-
-    def destroy(self):
-        self.entry = None
-        Dialog.destroy(self)
-
-    def body(self, master):
-
-        w = ttk.Label(master, text=self.prompt, justify=tk.LEFT)
-        w.grid(row=0, padx=5, sticky=tk.W)
-
-        self.entry = ttk.Entry(master, name="entry")
-        self.entry.grid(row=1, padx=5, sticky="we")
-
-        if self.initialvalue is not None:
-            self.entry.insert(0, self.initialvalue)
-            
-            if self.selection_range:
-                self.entry.icursor(self.selection_range[0])
-                self.entry.select_range(self.selection_range[0], self.selection_range[1])
-            else:
-                self.entry.select_range(0, tk.END)
-
-        return self.entry
-
-    def validate(self):
-        try:
-            result = self.getresult()
-        except ValueError:
-            messagebox.showwarning(
-                "Illegal value",
-                self.errormessage + "\nPlease try again",
-                parent = self
-            )
-            return 0
-
-        if self.minvalue is not None and result < self.minvalue:
-            messagebox.showwarning(
-                "Too small",
-                "The allowed minimum value is %s. "
-                "Please try again." % self.minvalue,
-                parent = self
-            )
-            return 0
-
-        if self.maxvalue is not None and result > self.maxvalue:
-            messagebox.showwarning(
-                "Too large",
-                "The allowed maximum value is %s. "
-                "Please try again." % self.maxvalue,
-                parent = self
-            )
-            return 0
-
-        self.result = result
-
-        return 1
-
-class _QueryString(_QueryDialog):
-    def __init__(self, *args, **kw):
-        if "show" in kw:
-            self.__show = kw["show"]
-            del kw["show"]
-        else:
-            self.__show = None
-        _QueryDialog.__init__(self, *args, **kw)
-
-    def body(self, master):
-        entry = _QueryDialog.body(self, master)
-        if self.__show is not None:
-            entry.configure(show=self.__show)
-        return entry
-
-    def getresult(self):
-        return self.entry.get()
-
-
-class ToolTip(object):
+class ToolTip:
     """Taken from http://www.voidspace.org.uk/python/weblog/arch_d7_2006_07_01.shtml"""
 
     def __init__(self, widget, options):
@@ -949,7 +831,7 @@ class NoteBox(tk.Toplevel):
         self.wm_overrideredirect(True)
         if running_on_mac_os():
             # TODO: maybe it's because of Tk 8.5, not because of Mac
-            self.wm_transient(self.widget)
+            self.wm_transient(master)
         try:
             # For Mac OS
             self.tk.call("::tk::unsupported::MacWindowStyle",
@@ -1117,21 +999,6 @@ def get_widget_offset_from_toplevel(widget):
         widget = widget.master
     return x, y
 
-def askstring(title, prompt, **kw):
-    '''get a string from the user
-
-    Arguments:
-
-        title -- the dialog title
-        prompt -- the label text
-        **kw -- see SimpleDialog class
-
-    Return value is a string
-    '''
-    d = _QueryString(title, prompt, **kw)
-    return d.result
-
-
 
 def create_string_var(value, modification_listener=None):
     """Creates a tk.StringVar with "modified" attribute
@@ -1179,7 +1046,7 @@ def control_is_pressed(event_state):
     # http://stackoverflow.com/q/32426250/261181
     return event_state & 0x0004
 
-def sequence_to_event_state_and_keycode(sequence):
+def sequence_to_event_state_and_keycode(sequence: str) -> Optional[Tuple[int,int]]:
     # remember handlers for certain shortcuts which require
     # different treatment on non-latin keyboards
     if sequence[0] != "<":
@@ -1188,7 +1055,7 @@ def sequence_to_event_state_and_keycode(sequence):
     parts = sequence.strip("<").strip(">").split("-")
     # support only latin letters for now
     if parts[-1].lower() not in list("abcdefghijklmnopqrstuvwxyz"):
-        return
+        return None
     
     letter = parts.pop(-1)
     if "Key" in parts:
@@ -1204,7 +1071,7 @@ def sequence_to_event_state_and_keycode(sequence):
     
     if modifiers not in [{"control"}, {"control", "shift"}]:
         # don't support others for now
-        return
+        return None
     
     event_state = 0
     # http://infohost.nmt.edu/tcc/help/pubs/tkinter/web/event-handlers.html
@@ -1234,10 +1101,10 @@ def select_sequence(win_version, mac_version, linux_version=None):
 
 def try_remove_linenumbers(text, master):
     try:        
-        if has_line_numbers(text) and tkMessageBox.askyesno (
+        if has_line_numbers(text) and messagebox.askyesno (
                   title="Remove linenumbers",
                   message="Do you want to remove linenumbers from pasted text?",
-                  default=tkMessageBox.YES,
+                  default=messagebox.YES,
                   master=master):
             return remove_line_numbers(text)
         else:
@@ -1253,7 +1120,7 @@ def has_line_numbers(text):
             and all([len(split_after_line_number(line)) == 2 for line in lines]))
 
 def split_after_line_number(s): 
-    parts = re.split("(^\s*\d+\.?)", s)
+    parts = re.split(r"(^\s*\d+\.?)", s)
     if len(parts) == 1:
         return parts
     else:
@@ -1418,7 +1285,7 @@ class FileCopyDialog(tk.Toplevel):
          
 
 class ChoiceDialog(tk.Toplevel):
-    def __init__(self, master=None, title="Choose one", question:str="Choose one:", choices=[]):
+    def __init__(self, master=None, title="Choose one", question:str="Choose one:", choices=[]) -> None:
         super().__init__(master=master)
         
         self.title(title)
@@ -1684,8 +1551,7 @@ def _get_dialog_provider():
         return _ZenityDialogProvider
     
     # fallback
-    import tkinter.filedialog
-    return tkinter.filedialog
+    return filedialog
     
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm

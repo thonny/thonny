@@ -40,12 +40,12 @@ def _find_commands(logical_command, reference_output, query_arguments,
     
     # first look for short commands
     for suffix in _get_version_suffixes():
-        command = logical_command + suffix
-        if is_correct_command(command):
-            if " " in command:
-                command = '"' + command + '"'
+        command_ = logical_command + suffix
+        if is_correct_command(command_):
+            if " " in command_:
+                command_ = '"' + command_ + '"'
                 
-            correct_commands.add(command)
+            correct_commands.add(command_)
             if only_best:
                 return list(correct_commands)
     
@@ -69,9 +69,9 @@ def _find_commands(logical_command, reference_output, query_arguments,
                    os.path.join(sys.exec_prefix, "Scripts")]
         
         for suffix in _get_version_suffixes():
-            command = logical_command + suffix
+            command_ = logical_command + suffix
             for folder in folders:
-                full_command = os.path.join(folder, command)
+                full_command = os.path.join(folder, command_)
                 if os.path.exists(full_command + exe_suffix):
                     if " " in full_command:
                         full_command = '"' + full_command + '"'
@@ -80,7 +80,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
                     if only_best:
                         return list(correct_commands)
     
-    return sorted(correct_commands, key=lambda x: len(x))
+    return sorted(correct_commands, key=lambda x:len(x))
 
 def _find_python_commands(only_best=True):
     return _find_commands("python",
@@ -100,7 +100,7 @@ def _find_pip_commands(only_best=True):
         current_exe_dir = os.path.dirname(sys.executable)
         if (pref_cmd_dir == current_exe_dir
             and os.path.isfile(os.path.join(current_exe_dir, "is_private"))):
-            return [pref_cmd];
+            return [pref_cmd]
     
     # Fallback
     current_ver_string = _get_pip_version_string()

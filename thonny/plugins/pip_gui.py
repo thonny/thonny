@@ -715,7 +715,7 @@ class PluginsPipDialog(PipDialog):
                 "key" : dist.key,
                 "location" : dist.location,
                 "version" : dist.version
-            } for dist in pkg_resources.working_set
+            } for dist in pkg_resources.working_set # pylint: disable=not-an-iterable
         }
         
         self._update_list(name_to_show)
@@ -741,7 +741,7 @@ class PluginsPipDialog(PipDialog):
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
         return (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
-                or hasattr(sys, 'real_prefix') and sys.real_prefix != sys.prefix)
+                or hasattr(sys, 'real_prefix') and getattr(sys, "real_prefix") != sys.prefix)
     
     def _create_python_process(self, args, stderr):
         proc = running.create_frontend_python_process(args, stderr=stderr)
@@ -779,8 +779,7 @@ class PluginsPipDialog(PipDialog):
                 if (("site-packages" in d or "dist-packages" in d) 
                     and path_startswith(d, sys.prefix)):
                     return actual_path(d)
-            else:
-                return None
+            return None
     
     def _create_widgets(self, parent):
         bg = "#ffff99"
@@ -1025,48 +1024,9 @@ def _extract_click_text(widget, event, tag):
                 return widget.get(start, end)
     except Exception:
         logging.exception("extracting click text")
-        return None
-
-"""
-def parse_requirement(req_str):
-    req_str = req_str.strip()
-    name = re.split("[(<>=)]", req_str)[0].strip()
-    assert len(name) > 0
-    
-    constraints_strings = [part.strip() 
-                   for part in (
-                       req_str[len(name):]
-                       .replace('(', '')
-                       .replace(')', '')
-                       .split(",")
-                    )]
-    
-    constraints = []
-    for cs in constraints_strings:
-        m = re.search("\d", cs)
-        assert m
-        op = cs[:m.start()]
-        version = cs[m.start():]
-        constraints.append((op, version))
         
-    return name, constraints
+    return None
 
-def version_satisfies_constraints(ver, constraints):
-    for cop, cver in constraints:
-        pass
-
-def version_satisfies_constraint(ver, cop, cver):
-    # https://www.python.org/dev/peps/pep-0440/#version-specifiers
-    if ((cop == "" or "=" in cop)
-        # cver may be shorter
-        and (ver).startswith(cver + ".0")):
-        return True
-    
-    # equality was not allowed or not found
-    if ()
-    
-        
-""" 
 
 def load_plugin() -> None:
     def open_backend_pip_gui(*args):

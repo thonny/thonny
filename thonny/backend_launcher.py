@@ -36,9 +36,9 @@ if __name__ == "__main__":
     logFormatter = logging.Formatter('%(levelname)s: %(message)s')
     file_handler = logging.FileHandler(os.path.join(THONNY_USER_DIR,"backend.log"), 
                                        encoding="UTF-8",
-                                       mode="w");
+                                       mode="w")
     file_handler.setFormatter(logFormatter)
-    file_handler.setLevel(logging.INFO);
+    file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
     
     # Don't litter user stderr with thonny logging

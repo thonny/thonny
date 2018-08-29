@@ -74,6 +74,9 @@ class Debugger:
         else:
             return True
     
+    def handle_debugger_progress(self, msg):
+        pass
+    
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         self.close()
         
@@ -103,6 +106,8 @@ class Debugger:
                 widget = get_workbench().focus_get()
                 if widget:
                     return widget.event_generate(virtual_event_sequence)
+                
+                return None
             
             return handler
                 
@@ -366,10 +371,10 @@ class FrameVisualizer:
             self._show_exception(msg["exception_info"]["lines_with_frame_info"], frame_info)
     
     def _show_exception(self, lines, frame_info):
-            last_line_text = lines[-1][0]
-            self.show_note(last_line_text.strip() + " ",
-                           ("...", lambda _: get_workbench().show_view("ExceptionView")), 
-                           focus=frame_info.focus)
+        last_line_text = lines[-1][0]
+        self.show_note(last_line_text.strip() + " ",
+                       ("...", lambda _: get_workbench().show_view("ExceptionView")), 
+                       focus=frame_info.focus)
             
 
     def _find_this_and_next_frame(self, stack):
@@ -380,8 +385,7 @@ class FrameVisualizer:
                 else:
                     return stack[i], stack[i+1]
                     
-        else:
-            raise AssertionError("Frame doesn't exist anymore")
+        raise AssertionError("Frame doesn't exist anymore")
         
     
     def _tag_range(self, text_range, tag):
@@ -813,6 +817,8 @@ class StackView(ui_utils.TreeFrame):
         if (get_workbench().get_option("debugger.automatic_stack_view")
             and _current_debugger is None):
             return False
+        
+        return None
 
         
     def _update_stack(self, msg):

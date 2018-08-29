@@ -5,7 +5,7 @@ from thonny import get_workbench, get_runner
 from thonny.codeview import CodeViewText
 from thonny import ui_utils
 
-cell_regex = re.compile("(^|\n)(# ?%%|##|# In\[\d+\]:)[^\n]*", re.MULTILINE)  # @UndefinedVariable
+cell_regex = re.compile(r"(^|\n)(# ?%%|##|# In\[\d+\]:)[^\n]*", re.MULTILINE)  # @UndefinedVariable
 
 
 def update_editor_cells(event):

@@ -309,8 +309,8 @@ class FileHandleInspector(TextFrame, ContentInspector):
         assert "file_content" in object_info
         content = object_info["file_content"]
         line_count_sep = len(content.split("\n"))
-        line_count_term = len(content.splitlines())
-        char_count = len(content)
+        #line_count_term = len(content.splitlines())
+        #char_count = len(content)
         self.text.configure(height=min(line_count_sep, 10))
         self.text.set_content(content)
         
@@ -321,8 +321,8 @@ class FileHandleInspector(TextFrame, ContentInspector):
         bytes_read = file_bytes[0:object_info["file_tell"]]
         read_content = bytes_read.decode(encoding=object_info["file_encoding"])
         read_char_count = len(read_content)
-        read_line_count_term = (len(content.splitlines())
-                                - len(content[read_char_count:].splitlines()))
+        #read_line_count_term = (len(content.splitlines())
+        #                        - len(content[read_char_count:].splitlines()))
         
         pos_index = "1.0+" + str(read_char_count) + "c"
         self.text.tag_add("read", "1.0", pos_index)
@@ -374,7 +374,7 @@ class StringInspector(TextFrame, ContentInspector):
         # TODO: don't show too big string
         content = ast.literal_eval(object_info["repr"])
         line_count_sep = len(content.split("\n"))
-        line_count_term = len(content.splitlines())
+        #line_count_term = len(content.splitlines())
         self.text.configure(height=min(line_count_sep, 10))
         self.text.set_content(content)
         """ TODO:
@@ -548,6 +548,7 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
 class ImageInspector(ContentInspector, tk.Frame):
     def __init__(self, master):
         tk.Frame.__init__(self, master)
+        ContentInspector.__init__(self, master)
         self.label = tk.Label(self, anchor="nw")
         self.label.grid(row=0, column=0, sticky="nsew")
         self.rowconfigure(0, weight=1)

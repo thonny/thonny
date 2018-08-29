@@ -6,6 +6,8 @@ which doesn't use separate parso
 
 
 def import_python_tree():
+    #pylint: disable=import-error,no-name-in-module
+    
     if get_version_tuple() < (0,11,0):
         # make sure not to import parso in this case, even if it exits
         from jedi.parser.python import tree  # @UnresolvedImport @UnusedImport
@@ -35,6 +37,7 @@ def get_parent_scope(node):
 def get_statement_of_position(node, pos):    
     try:
         # jedi 0.11
+        #pylint: disable=redefined-outer-name
         from jedi.parser_utils import get_statement_of_position
         return get_statement_of_position(node, pos)
     except ImportError:

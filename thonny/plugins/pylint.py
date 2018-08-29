@@ -3,7 +3,7 @@ from thonny import ui_utils
 from thonny.running import get_frontend_python
 import subprocess
 import sys
-import ast
+import ast 
 
 class PylintChecker(SubprocessProgramAnalyzer):
     
@@ -349,7 +349,9 @@ all_checks = [
   'msg_text': 'Import alias does not rename original package',
   'msg_xpln': 'Used when an import alias is same as original package.e.g using '
               'import numpy as numpy instead of import numpy as np',
-  'tho_xpln': '',
+  'tho_xpln': 'Used when an import alias is same as original package. e.g using '
+              'import numpy as numpy instead of import numpy as np '
+              'or e.g using import os.path as path instead of from os import path.',
   'usage': 'enhancement'},
   
  {'msg_id': 'C1801',

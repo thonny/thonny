@@ -6,7 +6,7 @@ import platform
 
 import tkinter as tk
 from tkinter import ttk
-import tkinter.font as font
+import tkinter.font 
 
 import thonny
 from thonny import misc_utils, ui_utils
@@ -33,7 +33,7 @@ class AboutDialog(tk.Toplevel):
         #bg_frame = ttk.Frame(self) # gives proper color in aqua
         #bg_frame.grid()
         
-        heading_font = font.nametofont("TkHeadingFont").copy()
+        heading_font = tkinter.font.nametofont("TkHeadingFont").copy()
         heading_font.configure(size=19, weight="bold")
         heading_label = ttk.Label(main_frame, 
                                   text="Thonny " + thonny.get_version(),
@@ -42,7 +42,7 @@ class AboutDialog(tk.Toplevel):
         
         
         url = "https://thonny.org"
-        url_font = font.nametofont("TkDefaultFont").copy()
+        url_font = tkinter.font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1)
         url_label = ttk.Label(main_frame, text=url, style="Url.TLabel",
                               cursor="hand2",
@@ -84,7 +84,7 @@ class AboutDialog(tk.Toplevel):
         credits_label.grid()
         credits_label.bind("<Button-1>", lambda _:webbrowser.open("https://bitbucket.org/plas/thonny/src/master/CREDITS.rst"))
         
-        license_font = font.nametofont("TkDefaultFont").copy()
+        license_font = tkinter.font.nametofont("TkDefaultFont").copy()
         license_font.configure(size=7)
         license_label = ttk.Label(main_frame,
                                   text="Copyright (©) "

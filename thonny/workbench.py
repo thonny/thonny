@@ -100,7 +100,7 @@ class Workbench(tk.Tk):
         self._commands = [] # type: List[Dict[str, Any]]
         self._view_records = {} # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = [] # type: List[Type]
-        self._latin_shortcuts = {}
+        self._latin_shortcuts = {} # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]] 
         
         self._init_configuration()
         self._init_diagnostic_logging()
@@ -184,12 +184,12 @@ class Workbench(tk.Tk):
         log_file = os.path.join(THONNY_USER_DIR, "frontend.log")
         file_handler = logging.FileHandler(log_file, encoding="UTF-8", mode="w")
         file_handler.setFormatter(logFormatter)
-        file_handler.setLevel(self._get_logging_level());
+        file_handler.setLevel(self._get_logging_level())
         root_logger.addHandler(file_handler)
         
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setFormatter(logFormatter)
-        console_handler.setLevel(self._get_logging_level());
+        console_handler.setLevel(self._get_logging_level())
         root_logger.addHandler(console_handler)
         
         root_logger.setLevel(self._get_logging_level())
@@ -277,7 +277,7 @@ class Workbench(tk.Tk):
     
     def _load_plugins(self) -> None:
         # built-in plugins
-        import thonny.plugins
+        import thonny.plugins # pylint: ignore=redefined-outer-name
         self._load_plugins_from_path (
             thonny.plugins.__path__, # type: ignore 
             "thonny.plugins."
@@ -1102,7 +1102,7 @@ class Workbench(tk.Tk):
     
     def get_image(self, filename: str, tk_name: Optional[str]=None) -> tk.PhotoImage:
         
-        if (filename in self._image_mapping_by_theme[self._current_theme_name]):
+        if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
             
         if filename in self._default_image_mapping:
@@ -1197,6 +1197,7 @@ class Workbench(tk.Tk):
         """Uses custom event handling when sequence doesn't start with <.
         In this case arbitrary attributes can be added to the event.
         Otherwise forwards the call to Tk's event_generate"""
+        # pylint: disable=arguments-differ
         if sequence.startswith("<"):
             assert event is None
             tk.Tk.event_generate(self, sequence, **kwargs)
@@ -1220,6 +1221,7 @@ class Workbench(tk.Tk):
     def bind(self, sequence: str, func: Callable, add: bool=None) -> None: # type: ignore
         """Uses custom event handling when sequence doesn't start with <.
         Otherwise forwards the call to Tk's bind"""
+        # pylint: disable=signature-differs
         
         if not add:
             logging.warning("Workbench.bind({}, ..., add={}) -- did you really want to replace existing bindings?".format(sequence, add))
@@ -1325,8 +1327,8 @@ class Workbench(tk.Tk):
         for i in range(len(self._menubar.winfo_children())):
             if menu == self._menubar.winfo_children()[i]:
                 return i
-        else:
-            raise RuntimeError("Couldn't find menu")
+            
+        raise RuntimeError("Couldn't find menu")
     
     def _add_toolbar_button(self, 
                             image: Optional[tk.PhotoImage],
@@ -1425,7 +1427,7 @@ class Workbench(tk.Tk):
         
         # find the widget that can be relocated
         widget = self.focus_get()
-        if isinstance(widget, EditorNotebook) or isinstance(widget, AutomaticNotebook):
+        if isinstance(widget, (EditorNotebook, AutomaticNotebook)):
             current_tab = widget.get_current_child()
             if current_tab is None:
                 return
@@ -1556,12 +1558,11 @@ class Workbench(tk.Tk):
                     # it must be the ending separator for this group
                     return i
                 
-        else:
-            # no group was bigger, ie. this should go to the end
-            if not this_group_exists:
-                menu.add_separator()
-                
-            return "end"
+        # no group was bigger, ie. this should go to the end
+        if not this_group_exists:
+            menu.add_separator()
+            
+        return "end"
 
     def _handle_socket_request(self, client_socket: socket.socket) -> None:
         """runs in separate thread"""

@@ -77,16 +77,16 @@ class VariablesFrame(MemoryFrame):
             #self.tree.columnconfigure(1, weight=0)
             #self.tree.columnconfigure(2, weight=1, width=400)
 
-    def update_variables(self, variables):
+    def update_variables(self, all_variables):
         self._clear_tree()
         
-        if not variables:
+        if not all_variables:
             return
         
-        if isinstance(variables, list):
-            groups = variables
+        if isinstance(all_variables, list):
+            groups = all_variables
         else:
-            groups = [("", variables)]
+            groups = [("", all_variables)]
         
         for group_title, variables in groups:
             if group_title:

@@ -1,11 +1,11 @@
 from jedi import Script
-import thonny.jedi_utils as jedi_utils
+from thonny import jedi_utils
 import traceback
-tree = jedi_utils.import_python_tree()
-    
 from thonny import get_workbench
 import tkinter as tk
 import logging
+
+tree = jedi_utils.import_python_tree()
 
 class BaseNameHighlighter:
     def __init__(self, text):
@@ -13,7 +13,7 @@ class BaseNameHighlighter:
         self._update_scheduled = False
     
     def get_positions_for_script(self, script):
-        raise NotImplementedError();
+        raise NotImplementedError()
         
     def get_positions(self):
         index = self.text.index("insert")
@@ -203,7 +203,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                             return None
                     if node.is_definition() and not global_encountered and \
                             (is_function_definition or jedi_utils.get_parent_scope(node) != jedi_utils.get_parent_scope(definition)):
-                            return None
+                        return None
                     if self._is_name_function_definition(definition) and \
                             isinstance(jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition)), tree.Class):
                         return None

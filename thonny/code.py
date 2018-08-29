@@ -604,9 +604,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                   master=self)
         
         if confirm:
-            for editor in modified_editors:
-                if editor.get_filename(True):
-                    editor.save_file()
+            for editor_ in modified_editors:
+                if editor_.get_filename(True):
+                    editor_.save_file()
                 else:
                     return False
             return True

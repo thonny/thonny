@@ -23,7 +23,7 @@ class MyPyChecker(SubprocessProgramAnalyzer):
         from mypy.version import __version__
         try:
             ver = tuple(map(int, __version__.split(".")))
-        except:
+        except Exception:
             ver = (0, 470) # minimum required version
         
         if ver >= (0, 520):

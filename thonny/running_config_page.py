@@ -186,6 +186,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         return result
     
     def should_restart(self):
+        # pylint: generated-members=modified
         return self._configuration_variable.modified
         
     def apply(self):

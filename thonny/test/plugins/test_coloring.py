@@ -26,8 +26,10 @@ def test_open_closed_strings():
     expected_open_ranges = {('3.11', '4.0'), }
     expected_closed_ranges = {('2.11', '2.19'), ('4.11', '6.12'), }
 
-    open_ranges_set = set([(str(open_ranges[i]), str(open_ranges[i+1])) for i in range(0, len(open_ranges), 2)])
-    closed_ranges_set = set([(str(closed_ranges[i]), str(closed_ranges[i+1])) for i in range(0, len(closed_ranges), 2)])
+    open_ranges_set = {(str(open_ranges[i]), str(open_ranges[i+1])) 
+                           for i in range(0, len(open_ranges), 2)}
+    closed_ranges_set = {(str(closed_ranges[i]), str(closed_ranges[i+1])) 
+                             for i in range(0, len(closed_ranges), 2)}
 
     assert open_ranges_set == expected_open_ranges
     assert closed_ranges_set == expected_closed_ranges

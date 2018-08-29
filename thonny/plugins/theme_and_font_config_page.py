@@ -102,10 +102,10 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         return
     
     def cancel(self):
-        if (self._family_variable.modified
-            or self._size_variable.modified
-            or self._ui_theme_variable.modified
-            or self._syntax_theme_variable.modified):
+        if (getattr(self._family_variable, "modified")
+            or getattr(self._size_variable, "modified")
+            or getattr(self._ui_theme_variable, "modified")
+            or getattr(self._syntax_theme_variable, "modified")):
             get_workbench().set_option("view.ui_theme", self._original_ui_theme)
             get_workbench().set_option("view.syntax_theme", self._original_syntax_theme)
             get_workbench().set_option("view.editor_font_size", self._original_size)
@@ -131,3 +131,4 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)
+    
