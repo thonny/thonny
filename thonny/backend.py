@@ -1635,7 +1635,6 @@ class NiceTracer(Tracer):
 
 
     def _cmd_step_over_completed(self, frame, cmd):
-        # pylint: disable=inconsistent-return-statements
         """
         Identifies the moment when piece of code indicated by cmd.frame_id and cmd.focus
         has completed execution (either successfully or not).
@@ -1672,6 +1671,8 @@ class NiceTracer(Tracer):
                 # Original frame has completed, assumedly because of an exception
                 # We're done
                 return True
+        
+        return True # not actually required, just to make Pylint happy
 
     def _cmd_step_into_completed(self, frame, cmd):
         return frame.event != "after_statement"

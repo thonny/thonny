@@ -573,7 +573,7 @@ def set_zoomed(toplevel, value):
             toplevel.wm_state("normal")
 
 class EnhancedTextWithLogging(tktextext.EnhancedText):
-    def direct_insert(self, index, chars, tags=()):
+    def direct_insert(self, index, chars, tags=None, **kw):
         try:
             # try removing line numbers
             # TODO: shouldn't it take place only on paste?
@@ -581,13 +581,13 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             #if self._propose_remove_line_numbers and isinstance(chars, str):
             #    chars = try_remove_linenumbers(chars, self)
             concrete_index = self.index(index)
-            return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags)
+            return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
         finally:
             get_workbench().event_generate("TextInsert", index=concrete_index, 
                                            text=chars, tags=tags, text_widget=self)
 
     
-    def direct_delete(self, index1, index2=None):
+    def direct_delete(self, index1, index2=None, **kw):
         try:
             # index1 may be eg "sel.first" and it doesn't make sense *after* deletion
             concrete_index1 = self.index(index1)
@@ -596,7 +596,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             else:
                 concrete_index2 = None
                 
-            return tktextext.EnhancedText.direct_delete(self, index1, index2=index2)
+            return tktextext.EnhancedText.direct_delete(self, index1, index2=index2, **kw)
         finally:
             get_workbench().event_generate("TextDelete", index1=concrete_index1,
                                            index2=concrete_index2, text_widget=self)

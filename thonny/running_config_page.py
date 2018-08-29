@@ -186,8 +186,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         return result
     
     def should_restart(self):
-        # pylint: generated-members=modified
-        return self._configuration_variable.modified
+        return self._configuration_variable.modified  # pylint: disable=no-member
         
     def apply(self):
         if not self.should_restart():

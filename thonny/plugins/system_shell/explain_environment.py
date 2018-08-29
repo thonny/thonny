@@ -80,7 +80,7 @@ def _find_commands(logical_command, reference_output, query_arguments,
                     if only_best:
                         return list(correct_commands)
     
-    return sorted(correct_commands, key=lambda x:len(x))
+    return sorted(correct_commands, key=len)
 
 def _find_python_commands(only_best=True):
     return _find_commands("python",
@@ -159,8 +159,8 @@ if __name__ == "__main__":
     print(" ", os.path.realpath(sys.exec_prefix))
     print("")
     print("Command for running the interpreter:")
-    for command in _find_python_commands(True):
-        print(" ", command)
+    for py_command in _find_python_commands(True):
+        print(" ", py_command)
         
     print("")
     print("Command for running pip:")
@@ -169,8 +169,8 @@ if __name__ == "__main__":
     if len(pip_commands) == 0:
         print(" ", "<pip is not installed>")
     else:
-        for command in pip_commands:
-            print(" ", command)
+        for pip_command in pip_commands:
+            print(" ", pip_command)
     
     print("")
     print("*" * 80)

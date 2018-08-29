@@ -118,7 +118,7 @@ class VariablesView(VariablesFrame):
                   
     
     def _set_tab_caption(self, text):
-        # pylint: generated-members=hidden,home_widget
+        # pylint: disable=no-member
         if self.hidden:
             return
         

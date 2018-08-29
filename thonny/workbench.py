@@ -277,7 +277,7 @@ class Workbench(tk.Tk):
     
     def _load_plugins(self) -> None:
         # built-in plugins
-        import thonny.plugins # pylint: ignore=redefined-outer-name
+        import thonny.plugins # pylint: disable=redefined-outer-name
         self._load_plugins_from_path (
             thonny.plugins.__path__, # type: ignore 
             "thonny.plugins."

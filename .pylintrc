@@ -75,6 +75,7 @@ disable=locally-disabled,
        pointless-string-statement,
        dangerous-default-value, # Does it warn when I change the value?
        protected-access, # TODO:
+       duplicate-code, # TODO:
        line-too-long,
        too-few-public-methods,
        too-many-lines,
@@ -95,7 +96,8 @@ disable=locally-disabled,
        logging-not-lazy,
        attribute-defined-outside-init,
        simplifiable-if-statement,
-       unused-import, # typing imports seem to be
+       cyclic-import, # gives many false alarms
+       unused-import, # typing imports seem to cause this
        
 
 

@@ -155,7 +155,7 @@ def serialize_message(msg: Record) -> str:
 
 def parse_message(msg_string: str) -> Record:
     # DataFrames may have nan 
-    # pylint: dummy-variables-rgx=nan
+    # pylint: disable=unused-variable
     nan = float("nan")  # @UnusedVariable
     assert msg_string[0] == MESSAGE_MARKER
     return eval(msg_string[1:].encode("ASCII").decode("UTF-7"))

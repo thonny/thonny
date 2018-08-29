@@ -1180,12 +1180,10 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         return ""
     
     def should_restart(self):
-        # pylint: generated-members=modified
-        return self._port_desc_variable.modified
+        return self._port_desc_variable.modified # pylint: disable=no-member
     
     def apply(self):
-        # pylint: generated-members=modified
-        if not self._port_desc_variable.modified:
+        if not self._port_desc_variable.modified:  # pylint: disable=no-member
             return
         
         else:

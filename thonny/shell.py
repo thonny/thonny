@@ -264,7 +264,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._insert_text_directly("\n========================= RESTART =========================\n", ("magic",))
     
     def intercept_insert(self, index, txt, tags=()):
-        # pylint: ignore=arguments-differ
+        # pylint: disable=arguments-differ
         if (self._editing_allowed()
             and self._in_current_input_range(index)):
             #self._print_marks("before insert")
