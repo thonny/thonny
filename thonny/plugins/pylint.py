@@ -77,7 +77,7 @@ class PylintChecker(SubprocessProgramAnalyzer):
                     #atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
                     warnings.append(atts)
         
-        self.completion_handler("Pylint warnings", warnings)
+        self.completion_handler(self, warnings)
 
 
 

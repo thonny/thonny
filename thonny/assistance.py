@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import builtins
 from typing import List, Optional, Union, Iterable, Tuple
-from thonny import ui_utils, tktextext, get_workbench, get_runner,\
+from thonny import ui_utils, tktextext, get_workbench,\
     rst_utils, misc_utils
 from collections import namedtuple
 import re
@@ -13,23 +13,17 @@ from thonny.misc_utils import levenshtein_damerau_distance
 import token
 import tokenize
 
-import subprocess
-from thonny.running import get_frontend_python
 import sys
 import textwrap
 from thonny.ui_utils import scrollbar_style
-from thonny.codeview import get_syntax_options_for_tag
 import datetime
-import pprint
 import thonny
 import logging
 import json
 import tempfile
 import webbrowser
 import urllib.request
-import zlib
 import gzip
-import threading
 
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
@@ -57,16 +51,12 @@ class AssistantView(tktextext.TextFrame):
             "SyntaxError" : {SyntaxErrorHelper},
         }
         
-        self._analyzer_instances = [
-            cls(self._accept_warnings) for cls in _program_analyzer_classes
-        ]
+        self._analyzer_instances = []
         
         self._snapshots_per_main_file = {}
         self._current_snapshot = None
         
         self._accepted_warning_sets = []
-        self._presented_suggestions = []
-        self._presented_warnings = []
         
         self.text.tag_configure("section_title",
                                 spacing3=5,
@@ -160,7 +150,6 @@ class AssistantView(tktextext.TextFrame):
                                                    i==len(suggestions)-1,
                                                    False#i==0
                                                    )
-                    self._presented_suggestions.append(suggestion)
         
         self.text.append_rst(rst)
         self._append_text("\n")
@@ -193,17 +182,19 @@ class AssistantView(tktextext.TextFrame):
     
     
     def _clear(self):
-        self._presented_suggestions.clear()
-        self._presented_warnings.clear()
         self._accepted_warning_sets.clear()
         for wp in self._analyzer_instances:
             wp.cancel_analysis()
+        self._analyzer_instances = []
         self.text.clear()
     
     def _start_program_analyses(self, main_file_path, main_file_source,
                                 imported_file_paths):
-        for wp in self._analyzer_instances:
-            wp.start_analysis({main_file_path} | set(imported_file_paths))
+
+        for cls in _program_analyzer_classes:
+            analyzer = cls(self._accept_warnings)
+            analyzer.start_analysis({main_file_path} | set(imported_file_paths)) 
+            self._analyzer_instances.append(analyzer)
         
         self._append_text("\nAnalyzing your code ...", ("em",))
         
@@ -214,7 +205,10 @@ class AssistantView(tktextext.TextFrame):
             name : read_source(name) for name in imported_file_paths
         }
     
-    def _accept_warnings(self, title, warnings):
+    def _accept_warnings(self, analyzer, warnings):
+        if analyzer.cancelled:
+            return
+        
         self._accepted_warning_sets.append(warnings)
         if len(self._accepted_warning_sets) == len(self._analyzer_instances):
             # all providers have reported
@@ -362,8 +356,10 @@ class SubprocessProgramAnalyzer(ProgramAnalyzer):
     def __init__(self, on_completion):
         super().__init__(on_completion)
         self._proc = None
+        self.cancelled = False
         
     def cancel_analysis(self):
+        self.cancelled = True
         if self._proc is not None:
             self._proc.kill()
 
@@ -978,7 +974,7 @@ class FeedbackDialog(tk.Toplevel):
                 handle = urllib.request.urlopen(
                     "https://thonny.org/store_assistant_feedback.php", 
                     data=compressed_data,
-                    timeout=20
+                    timeout=10
                 )
                 return handle.read()
             except Exception as e:

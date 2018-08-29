@@ -68,7 +68,7 @@ class MyPyChecker(SubprocessProgramAnalyzer):
                 print("Bad MyPy line", line)
 
         
-        self.completion_handler("MyPy warnings", warnings)
+        self.completion_handler(self, warnings)
 
 def load_plugin():
     add_program_analyzer(MyPyChecker)
