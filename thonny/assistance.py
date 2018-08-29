@@ -859,7 +859,7 @@ class FeedbackDialog(tk.Toplevel):
         groups = {}
         
         for snap in self.snapshots:
-            if snap.get("exception_message"):
+            if snap.get("exception_message") and snap.get("exception_suggestions"):
                 group = snap["exception_type_name"]
                 groups.setdefault(group, set())
                 for sug in snap["exception_suggestions"]:
