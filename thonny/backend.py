@@ -2220,13 +2220,20 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback,
         # Based on
         # https://www.python.org/dev/peps/pep-3134/#enhanced-reporting
         # and traceback.format_exception
+        
+        if etype is None:
+            etype = type(value)
+        
+        if tb is None:
+            tb = value.__traceback__
+        
         if chain:
             if value.__cause__ is not None:
-                yield from rec_format_exception_with_frame_info(value.__cause__)
+                yield from rec_format_exception_with_frame_info(None, value.__cause__, None)
                 yield (_cause_message, None, None, None)
             elif (value.__context__ is not None
                   and not value.__suppress_context__):
-                yield from rec_format_exception_with_frame_info(value.__context__)
+                yield from rec_format_exception_with_frame_info(None, value.__context__, None)
                 yield (_context_message, None, None, None)
         
         if tb is not None:
