@@ -1,36 +1,37 @@
-from thonny.running import BackendProxy
-from thonny import get_workbench, get_runner, get_shell, common
-from tkinter.messagebox import showerror
-from queue import Queue
-from thonny.ui_utils import SubprocessDialog, create_string_var
-from serial import SerialException
-from thonny.common import ToplevelCommand, ToplevelResponse, BackendEvent,\
-    MessageFromBackend, InlineResponse
-from tkinter import ttk
-
-import serial.tools.list_ports
-import time
 import ast
+import logging
+import os
+import platform
+import queue
 import re
 import subprocess
 import sys
-import traceback
-import jedi
-import os
 import textwrap
-from tkinter.filedialog import askopenfilename
-import webbrowser
-from thonny.config_ui import ConfigurationPage
 import threading
+import time
 import tokenize
-import platform
-from time import sleep
+import traceback
+import webbrowser
+from queue import Queue
 from textwrap import dedent
-import logging
-import queue
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage
-from thonny.misc_utils import find_volumes_by_name
+from time import sleep
+from tkinter import ttk
+from tkinter.filedialog import askopenfilename
+from tkinter.messagebox import showerror
 from typing import Optional
+
+import jedi
+import serial.tools.list_ports
+from serial import SerialException
+
+from thonny import common, get_runner, get_shell, get_workbench
+from thonny.common import (BackendEvent, InlineResponse, MessageFromBackend,
+                           ToplevelCommand, ToplevelResponse)
+from thonny.config_ui import ConfigurationPage
+from thonny.misc_utils import find_volumes_by_name
+from thonny.plugins.backend_config_page import BackendDetailsConfigPage
+from thonny.running import BackendProxy
+from thonny.ui_utils import SubprocessDialog, create_string_var
 
 EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
@@ -1521,4 +1522,3 @@ def load_plugin():
                                 disconnect,
                                 disconnect_enabled,
                                 group=100,)
-

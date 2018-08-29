@@ -16,7 +16,8 @@ import urllib.request
 import webbrowser
 from collections import namedtuple
 from tkinter import messagebox, ttk
-from typing import Iterable, List, Optional, Tuple, Type, Union  # @UnusedImport
+from typing import (Iterable, List, Optional, Tuple, Type,  # @UnusedImport
+                    Union)
 
 import thonny
 from thonny import get_workbench, misc_utils, rst_utils, tktextext, ui_utils

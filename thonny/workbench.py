@@ -18,8 +18,8 @@ import traceback
 import webbrowser
 from threading import Thread
 from tkinter import ttk
-from typing import (Any, Callable, Dict, List, Optional,  
-                    Sequence, Set, Tuple, Type, Union, cast) # @UnusedImport
+from typing import (Any, Callable, Dict, List, Optional,  # @UnusedImport
+                    Sequence, Set, Tuple, Type, Union, cast)
 from warnings import warn
 
 import thonny

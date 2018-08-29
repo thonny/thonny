@@ -22,8 +22,6 @@ import traceback
 from logging import debug
 from threading import Thread
 from time import sleep
-from typing import (Any, List, Optional,  # @UnusedImport; @UnusedImport
-                    Sequence, Set)
 
 from thonny import (THONNY_USER_DIR, common, get_runner, get_shell,
                     get_workbench, ui_utils)
@@ -35,6 +33,10 @@ from thonny.common import (BackendEvent, CommandToBackend, DebuggerCommand,
                            path_startswith, serialize_message)
 from thonny.misc_utils import (construct_cmd_line, running_on_mac_os,
                                running_on_windows)
+
+from typing import (Any, List, Optional,  # @UnusedImport; @UnusedImport
+                    Sequence, Set)
+
 
 WINDOWS_EXE = "python.exe"
 

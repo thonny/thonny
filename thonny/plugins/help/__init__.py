@@ -1,9 +1,9 @@
+import os.path
 import tkinter as tk
 import tkinter.font
-import os.path
 from tkinter import ttk
-from thonny import tktextext, rst_utils, ui_utils
-from thonny import get_workbench
+
+from thonny import get_workbench, rst_utils, tktextext, ui_utils
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import scrollbar_style
 
@@ -41,4 +41,3 @@ def load_plugin() -> None:
     get_workbench().add_command("help_contents", "help", "Help contents",
                                 open_help,
                                 group=30)
-    

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from subprocess import Popen, check_output
 import os.path
-import shlex
 import platform
-from tkinter.messagebox import showerror
+import shlex
 import shutil
-from thonny import get_runner, get_workbench
-from thonny import THONNY_USER_DIR
 import subprocess
+from subprocess import Popen, check_output
 from time import sleep
-from thonny.running import create_pythonless_environment
+from tkinter.messagebox import showerror
+
+from thonny import THONNY_USER_DIR, get_runner, get_workbench
 from thonny.common import actual_path
+from thonny.running import create_pythonless_environment
 
 
 def _get_exec_prefix(python_interpreter):
