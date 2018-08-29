@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import font
+from tkinter import font, ttk
 from tkinter.font import nametofont
 
 root = tk.Tk()

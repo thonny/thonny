@@ -15,4 +15,3 @@ def writebit():
 
 def writebyte():
     pass
-

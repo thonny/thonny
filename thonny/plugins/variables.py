@@ -2,9 +2,10 @@
 
 from tkinter import ttk
 
-from thonny.memory import VariablesFrame
-from thonny import get_workbench, get_runner
+from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
+from thonny.memory import VariablesFrame
+
 
 class VariablesView(VariablesFrame):
     # TODO: Indicate invalid state when program or debug command is running more than a second

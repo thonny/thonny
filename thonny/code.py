@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
-import sys
 import os.path
+import sys
 import tkinter as tk
-from tkinter import ttk, messagebox
-from thonny.ui_utils import asksaveasfilename, askopenfilename
-
-from thonny.codeview import CodeView
-from thonny import get_workbench, ui_utils
-from logging import exception
-from thonny.ui_utils import select_sequence
-from thonny.tktextext import rebind_control_a
 import tokenize
-from tkinter.messagebox import askyesno
 import traceback
-from thonny.common import is_same_path, actual_path, ToplevelResponse, TextRange
+from logging import exception
+from tkinter import messagebox, ttk
+from tkinter.messagebox import askyesno
+
+from thonny import get_workbench, ui_utils
+from thonny.codeview import CodeView
+from thonny.common import (TextRange, ToplevelResponse, actual_path,
+                           is_same_path)
+from thonny.tktextext import rebind_control_a
+from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 

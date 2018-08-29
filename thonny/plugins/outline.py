@@ -1,8 +1,10 @@
 import re
 import tkinter as tk
 from tkinter import ttk
+
 from thonny import get_workbench
 from thonny.ui_utils import SafeScrollbar
+
 
 class OutlineView(ttk.Frame):
     def __init__(self, master):

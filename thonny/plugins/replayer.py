@@ -1,12 +1,12 @@
-import tkinter as tk
-from tkinter import ttk
-from datetime import datetime
-from thonny import ui_utils, codeview
-from thonny import get_workbench
-import json
-from thonny.base_file_browser import BaseFileBrowser
 import ast
+import json
 import os.path
+import tkinter as tk
+from datetime import datetime
+from tkinter import ttk
+
+from thonny import codeview, get_workbench, ui_utils
+from thonny.base_file_browser import BaseFileBrowser
 from thonny.plugins.coloring import SyntaxColorer
 from thonny.ui_utils import lookup_style_option
 

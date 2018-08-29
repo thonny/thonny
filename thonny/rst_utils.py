@@ -1,11 +1,13 @@
-import docutils.core
-import docutils.nodes
+import logging
 import tkinter as tk
 
-from thonny.tktextext import TweakableText
+import docutils.core
+import docutils.nodes
+
 from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
-import logging
+from thonny.tktextext import TweakableText
+
 
 class RstText(TweakableText):
     

@@ -1,4 +1,5 @@
 import tkinter as tk
+
 from thonny.tktextext import TextFrame, TweakableText
 
 root = tk.Tk()

@@ -88,4 +88,3 @@ def uname():
 
 def unlink():
     pass
-

@@ -252,4 +252,3 @@ def time_pulse_us():
 
 def unique_id():
     pass
-

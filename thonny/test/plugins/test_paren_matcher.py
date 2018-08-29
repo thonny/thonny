@@ -32,5 +32,3 @@ def test_regular_closed():
 
             assert actual == expected, "\nExpected: %s\nGot: %s" % (expected, actual)
         print("\rPassed %d of %d" % (i+1, len(insert_pos_groups)), end="")
-
-

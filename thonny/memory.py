@@ -3,9 +3,9 @@
 import tkinter as tk
 import tkinter.font as tk_font
 
-from thonny.ui_utils import TreeFrame
 from thonny import get_workbench, ui_utils
 from thonny.common import ValueInfo
+from thonny.ui_utils import TreeFrame
 
 MAX_REPR_LENGTH_IN_GRID = 100
 
@@ -110,5 +110,3 @@ class VariablesFrame(MemoryFrame):
     
     def on_select(self, event):
         self.show_selected_object_info()
-        
-

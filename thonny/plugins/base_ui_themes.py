@@ -1,7 +1,9 @@
-from typing import Union, Dict, Callable  # @UnusedImport
+from typing import Callable, Dict, Union  # @UnusedImport
+
 from thonny import get_workbench
 from thonny.misc_utils import running_on_linux, running_on_windows
-from thonny.workbench import CompoundUiThemeSettings, BasicUiThemeSettings
+from thonny.workbench import BasicUiThemeSettings, CompoundUiThemeSettings
+
 
 def scale(value) -> float:
     # dimensions in this module were designed with a 1.67 scale
@@ -783,6 +785,3 @@ def load_plugin() -> None:
         
     elif "Enhanced Clam" in get_workbench().get_usable_ui_theme_names():
         get_workbench().set_default("view.ui_theme", "Enhanced Clam")
-        
-    
-    

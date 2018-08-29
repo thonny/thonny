@@ -9,32 +9,32 @@ shell becomes kind of title for the execution.
 """ 
 
 
-from threading import Thread
-from logging import debug
+import collections
+import logging
 import os.path
+import shlex
+import shutil
+import signal
 import subprocess
 import sys
-
-from thonny.common import serialize_message, ToplevelCommand, \
-    InlineCommand, parse_message, DebuggerCommand, InputSubmission,\
-    UserError, actual_path, path_startswith, CommandToBackend, ToplevelResponse,\
-    DebuggerResponse, BackendEvent
-from thonny import get_workbench, get_runner, get_shell, ui_utils
-from thonny import THONNY_USER_DIR, common
-from thonny.misc_utils import running_on_windows, running_on_mac_os, construct_cmd_line
-from thonny.common import is_same_path
-import shutil
-import collections
-import signal
-import logging
-from time import sleep
-import shlex
-from thonny.code import get_current_breakpoints
-from typing import List, Any  # @UnusedImport
-from typing import Sequence, Optional, Set  # @UnusedImport
 import time
 import traceback
+from logging import debug
+from threading import Thread
+from time import sleep
+from typing import (Any, List, Optional,  # @UnusedImport; @UnusedImport
+                    Sequence, Set)
 
+from thonny import (THONNY_USER_DIR, common, get_runner, get_shell,
+                    get_workbench, ui_utils)
+from thonny.code import get_current_breakpoints
+from thonny.common import (BackendEvent, CommandToBackend, DebuggerCommand,
+                           DebuggerResponse, InlineCommand, InputSubmission,
+                           ToplevelCommand, ToplevelResponse, UserError,
+                           actual_path, is_same_path, parse_message,
+                           path_startswith, serialize_message)
+from thonny.misc_utils import (construct_cmd_line, running_on_mac_os,
+                               running_on_windows)
 
 WINDOWS_EXE = "python.exe"
 

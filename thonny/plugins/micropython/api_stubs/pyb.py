@@ -574,4 +574,3 @@ def usb_mode():
 
 def wfi():
     pass
-

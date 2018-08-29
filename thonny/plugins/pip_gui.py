@@ -1,32 +1,31 @@
 # -*- coding: utf-8 -*-
 
-import webbrowser
-
-import tkinter as tk
-from tkinter import ttk, messagebox
-
-from thonny import misc_utils, tktextext, ui_utils, running, get_runner
-from thonny import get_workbench
-import subprocess
-from urllib.request import urlopen, urlretrieve
-import urllib.error
-import urllib.parse
-from concurrent.futures.thread import ThreadPoolExecutor
-import os
 import json
 import logging
+import os
 import re
-from thonny.ui_utils import askopenfilename
-from logging import exception
-from thonny.ui_utils import SubprocessDialog, AutoScrollbar, get_busy_cursor,\
-    lookup_style_option, scrollbar_style, open_path_in_system_file_manager
+import subprocess
 import sys
-import thonny
-from distutils.version import StrictVersion, LooseVersion
-from tkinter.messagebox import showerror
+import tkinter as tk
+import urllib.error
+import urllib.parse
+import webbrowser
+from concurrent.futures.thread import ThreadPoolExecutor
+from distutils.version import LooseVersion, StrictVersion
+from logging import exception
 from os import makedirs
-from thonny.common import path_startswith, actual_path, InlineCommand,\
-    is_same_path
+from tkinter import messagebox, ttk
+from tkinter.messagebox import showerror
+from urllib.request import urlopen, urlretrieve
+
+import thonny
+from thonny import (get_runner, get_workbench, misc_utils, running, tktextext,
+                    ui_utils)
+from thonny.common import (InlineCommand, actual_path, is_same_path,
+                           path_startswith)
+from thonny.ui_utils import (AutoScrollbar, SubprocessDialog, askopenfilename,
+                             get_busy_cursor, lookup_style_option,
+                             open_path_in_system_file_manager, scrollbar_style)
 
 PIP_INSTALLER_URL="https://bootstrap.pypa.io/get-pip.py"
 
@@ -1045,4 +1044,3 @@ def load_plugin() -> None:
                                 group=80)
     get_workbench().add_command("pluginspipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui,
                                 group=180)
-

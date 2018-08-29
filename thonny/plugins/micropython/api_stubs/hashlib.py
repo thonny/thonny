@@ -6,4 +6,3 @@ class sha256:
 
     def update():
         pass
-

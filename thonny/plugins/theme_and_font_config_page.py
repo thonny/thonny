@@ -1,12 +1,12 @@
+import textwrap
 import tkinter as tk
-from tkinter import font as tk_font 
+from tkinter import font as tk_font
 from tkinter import ttk
 
-from thonny.config_ui import ConfigurationPage
 from thonny import get_workbench
-from thonny.ui_utils import create_string_var
-import textwrap
 from thonny.codeview import CodeView
+from thonny.config_ui import ConfigurationPage
+from thonny.ui_utils import create_string_var
 
 
 class ThemeAndFontConfigurationPage(ConfigurationPage):
@@ -131,4 +131,3 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)
-    

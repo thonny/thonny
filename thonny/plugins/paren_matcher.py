@@ -1,9 +1,9 @@
-from thonny import get_workbench
-import tokenize
 import io
+import tokenize
+
+from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
-
 
 _OPENERS = {')': '(', ']': '[', '}': '{'}
 

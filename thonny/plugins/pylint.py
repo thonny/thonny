@@ -1,9 +1,11 @@
-from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
-from thonny import ui_utils
-from thonny.running import get_frontend_python
+import ast
 import subprocess
 import sys
-import ast 
+
+from thonny import ui_utils
+from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
+from thonny.running import get_frontend_python
+
 
 class PylintChecker(SubprocessProgramAnalyzer):
     
@@ -2766,4 +2768,3 @@ all_checks_by_symbol = {c["msg_sym"] : c for c in all_checks}
 
 def load_plugin():
     add_program_analyzer(PylintChecker)
-    

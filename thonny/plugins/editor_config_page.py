@@ -1,9 +1,9 @@
+import logging
 import tkinter as tk
 from tkinter import ttk
 
-from thonny.config_ui import ConfigurationPage
 from thonny import get_workbench
-import logging
+from thonny.config_ui import ConfigurationPage
 
 
 class EditorConfigurationPage(ConfigurationPage):

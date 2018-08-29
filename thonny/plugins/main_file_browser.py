@@ -3,15 +3,13 @@
 import os
 import tkinter as tk
 from tkinter.messagebox import showerror
-
 #from thonny.ui_utils import askstring TODO: doesn't work
 from tkinter.simpledialog import askstring
 
-from thonny import misc_utils
-from thonny import get_workbench
+from thonny import get_workbench, misc_utils
 from thonny.base_file_browser import BaseFileBrowser
 
-        
+
 class MainFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         BaseFileBrowser.__init__(self, master, show_hidden_files, "file.last_browser_folder")

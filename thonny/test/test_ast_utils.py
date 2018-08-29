@@ -1,6 +1,8 @@
 import ast
-from thonny.ast_utils import pretty 
 from textwrap import dedent
+
+from thonny.ast_utils import pretty
+
 
 def test_pretty_without_end_markers():
     p = pretty(ast.parse(dedent("""
@@ -76,4 +78,3 @@ def test_pretty_without_end_markers():
                             0=Str @ 6.10
                                 s="What's your name?"
                         keywords=[]"""
-

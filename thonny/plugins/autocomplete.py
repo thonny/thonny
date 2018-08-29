@@ -1,10 +1,10 @@
 import tkinter as tk
-from thonny import get_workbench, get_runner
-from thonny.codeview import CodeViewText
-from thonny.shell import ShellText
-from thonny.common import InlineCommand
 from tkinter import messagebox
 
+from thonny import get_runner, get_workbench
+from thonny.codeview import CodeViewText
+from thonny.common import InlineCommand
+from thonny.shell import ShellText
 
 
 # TODO: adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown

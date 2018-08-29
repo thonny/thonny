@@ -63,4 +63,3 @@ if __name__ == "__main__":
 
     from thonny.backend import VM  # @UnresolvedImport
     VM().mainloop()
-    

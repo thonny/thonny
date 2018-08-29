@@ -1,14 +1,14 @@
-import os.path
-import tkinter as tk
-import time
-from thonny import get_workbench
-from thonny.workbench import WorkbenchEvent
-from datetime import datetime
-import zipfile 
-from thonny.ui_utils import asksaveasfilename
 import json
+import os.path
+import time
+import tkinter as tk
+import zipfile
+from datetime import datetime
+
+from thonny import THONNY_USER_DIR, get_workbench
 from thonny.shell import ShellView
-from thonny import THONNY_USER_DIR
+from thonny.ui_utils import asksaveasfilename
+from thonny.workbench import WorkbenchEvent
 
 
 class EventLogger:
@@ -206,4 +206,3 @@ def load_plugin() -> None:
     filename = _generate_timestamp_file_name("txt")
     # create logger
     EventLogger(filename)
-    

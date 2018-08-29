@@ -1,6 +1,7 @@
 from thonny import get_workbench
 from thonny.workbench import SyntaxThemeSettings
 
+
 def default_light() -> SyntaxThemeSettings:
     default_fg = "black"
     default_bg = "#fdfdfd"
@@ -285,4 +286,3 @@ def load_plugin() -> None:
     #get_workbench().add_syntax_theme("IDLE Dark", "Default Dark", idle_dark)
     
     get_workbench().set_default("view.syntax_theme", "Default Light")
-    

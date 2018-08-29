@@ -1,10 +1,12 @@
-from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
-from thonny.running import get_frontend_python
-from thonny import get_runner, ui_utils
-from typing import Iterable
+import re
 import subprocess
 import sys
-import re
+from typing import Iterable
+
+from thonny import get_runner, ui_utils
+from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
+from thonny.running import get_frontend_python
+
 
 class MyPyChecker(SubprocessProgramAnalyzer):
     
@@ -72,4 +74,3 @@ class MyPyChecker(SubprocessProgramAnalyzer):
 
 def load_plugin():
     add_program_analyzer(MyPyChecker)
-    

@@ -2,12 +2,13 @@
 
 import os.path
 import platform
-import sys
-import shutil
-import time
-import subprocess
-from typing import Tuple, Sequence, Optional
 import shlex
+import shutil
+import subprocess
+import sys
+import time
+from typing import Optional, Sequence, Tuple
+
 from thonny import get_workbench
 
 
@@ -376,4 +377,3 @@ def get_file_creation_date(path_to_file):
             # We're probably on Linux. No easy way to get creation dates here,
             # so we'll settle for when its content was last modified.
             return stat.st_mtime
-        

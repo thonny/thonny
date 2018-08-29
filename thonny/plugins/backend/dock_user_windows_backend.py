@@ -1,4 +1,5 @@
 import os
+
 from thonny.backend import get_vm
 from thonny.common import BackendEvent
 
@@ -55,4 +56,3 @@ def load_plugin():
         vm = get_vm()
         vm.add_import_handler("tkinter", patch_tkinter)
         vm.add_import_handler("turtle", patch_turtle)
-    

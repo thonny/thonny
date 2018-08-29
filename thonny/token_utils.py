@@ -1,5 +1,5 @@
-import keyword
 import builtins
+import keyword
 
 
 def matches_any(name, alternates):

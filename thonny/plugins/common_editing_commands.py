@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import tkinter as tk
 from tkinter import ttk
+
 from thonny import get_workbench
 from thonny.ui_utils import select_sequence
+
 
 def load_plugin() -> None:
     def create_edit_command_handler(virtual_event_sequence):
@@ -73,4 +75,3 @@ def load_plugin() -> None:
         extra_sequences=["<Control-Greek_alpha>"],
         skip_sequence_binding=True,
         group=20)
-    

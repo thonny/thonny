@@ -1,4 +1,5 @@
 import ast
+
 prog = """
 try:
     3

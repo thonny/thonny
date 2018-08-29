@@ -1,37 +1,37 @@
 # -*- coding: utf-8 -*-
 
-import sys
-import os.path
-import inspect
 import ast
-import _ast
+import builtins
+import copy
+import importlib
+import inspect
 import io
+import logging
+import os.path
+import pkgutil
+import pydoc
+import signal
+import site
+import subprocess
+import sys
+import tokenize
 import traceback
 import types
-import logging
-import pydoc
-import builtins
-import site
+import warnings
+from collections import namedtuple
+from importlib.machinery import PathFinder, SourceFileLoader
 
 import __main__  # @UnresolvedImport
-
+import _ast
 import thonny
 from thonny import ast_utils
-from thonny.common import TextRange, parse_message, serialize_message, UserError, \
-    DebuggerCommand, ToplevelCommand, FrameInfo, InlineCommand, InputSubmission,\
-    ToplevelResponse, InlineResponse, DebuggerResponse,\
-    BackendEvent, path_startswith, ValueInfo, \
-    range_contains_smaller_or_equal, range_contains_smaller
-
-import signal
-import warnings
-import pkgutil
-import importlib
-import tokenize
-import subprocess
-from importlib.machinery import PathFinder, SourceFileLoader
-import copy
-from collections import namedtuple
+from thonny.common import (BackendEvent, DebuggerCommand, DebuggerResponse,
+                           FrameInfo, InlineCommand, InlineResponse,
+                           InputSubmission, TextRange, ToplevelCommand,
+                           ToplevelResponse, UserError, ValueInfo,
+                           parse_message, path_startswith,
+                           range_contains_smaller,
+                           range_contains_smaller_or_equal, serialize_message)
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"

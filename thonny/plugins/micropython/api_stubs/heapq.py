@@ -6,4 +6,3 @@ def heappop():
 
 def heappush():
     pass
-

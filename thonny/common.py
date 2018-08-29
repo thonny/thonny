@@ -4,9 +4,9 @@
 Classes used both by front-end and back-end
 """
 import os.path
-from typing import Optional, List  # @UnusedImport
-from collections import namedtuple
 import tokenize
+from collections import namedtuple
+from typing import List, Optional  # @UnusedImport
 
 MESSAGE_MARKER = "\x02"
 

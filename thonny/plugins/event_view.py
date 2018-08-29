@@ -1,8 +1,9 @@
 """ Helper view for Thonny developers
 """
 
-from thonny.tktextext import TextFrame
 from thonny import get_workbench
+from thonny.tktextext import TextFrame
+
 
 class EventsView(TextFrame):
     def __init__(self, master):

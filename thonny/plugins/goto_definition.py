@@ -1,5 +1,7 @@
 import tkinter as tk
+
 from jedi import Script
+
 from thonny import get_workbench
 from thonny.ui_utils import control_is_pressed
 

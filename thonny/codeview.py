@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import tkinter as tk
-from thonny.common import TextRange
-from thonny import get_workbench, ui_utils
-from thonny import tktextext, roughparse
-from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
-from thonny.tktextext import EnhancedText
-
-from typing import Dict, Union  # @UnusedImport
 import io
+import tkinter as tk
 import tokenize
+from typing import Dict, Union  # @UnusedImport
+
+from thonny import get_workbench, roughparse, tktextext, ui_utils
+from thonny.common import TextRange
 from thonny.misc_utils import running_on_windows
+from thonny.tktextext import EnhancedText
+from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 
 _syntax_options = {} # type: Dict[str, Union[str, int]]
 #BREAKPOINT_SYMBOL = "•" # Bullet
@@ -348,4 +347,3 @@ def get_syntax_options_for_tag(tag, **base_options):
     if tag in _syntax_options:
         base_options.update(_syntax_options[tag])
     return base_options
-

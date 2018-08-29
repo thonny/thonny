@@ -1,5 +1,8 @@
-from mmm import momo
+import time
 from math import *
+
+from mmm import momo
+
 # from math import sqrt
 # Algne: 130 sek, 480 mb
 # Peale source'i eemaldamist: 11 sek, 434 mb
@@ -19,7 +22,6 @@ from math import *
 # Peale probablypure'i 2 sek, 48 mb
 # Peale system_frame'ide meeldejätmist: 2.2 se, 57 mb
 True, None
-import time
 t = time.time()
 def arvuta(punktid):
     momo()

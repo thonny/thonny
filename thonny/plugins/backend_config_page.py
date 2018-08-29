@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+from thonny import get_runner, get_workbench
 from thonny.config_ui import ConfigurationPage
-from thonny import get_workbench, get_runner
 from thonny.ui_utils import create_string_var
 
 

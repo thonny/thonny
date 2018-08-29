@@ -1,9 +1,10 @@
-from jedi import Script
-from thonny import jedi_utils
-import traceback
-from thonny import get_workbench
-import tkinter as tk
 import logging
+import tkinter as tk
+import traceback
+
+from jedi import Script
+
+from thonny import get_workbench, jedi_utils
 
 tree = jedi_utils.import_python_tree()
 
@@ -287,4 +288,3 @@ def load_plugin() -> None:
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind("<<UpdateAppearance>>", update_highlighting, True)
-    

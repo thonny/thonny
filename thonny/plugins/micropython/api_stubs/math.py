@@ -113,4 +113,3 @@ def tanh():
 
 def trunc():
     pass
-

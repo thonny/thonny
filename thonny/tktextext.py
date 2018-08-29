@@ -1,15 +1,15 @@
 # coding=utf-8
 """Extensions for tk.Text"""
 
+import platform
 import time
+import tkinter as tk
 import traceback
 from logging import exception
-
-import tkinter as tk
-from tkinter import ttk
-from tkinter import font as tkfont
 from tkinter import TclError
-import platform
+from tkinter import font as tkfont
+from tkinter import ttk
+
 
 class TweakableText(tk.Text):
     """Allows intercepting Text commands at Tcl-level"""

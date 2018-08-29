@@ -3,8 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from thonny import misc_utils
-from thonny import get_workbench
+from thonny import get_workbench, misc_utils
 from thonny.ui_utils import select_sequence
 
 #TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
@@ -341,4 +340,3 @@ def load_plugin() -> None:
         )
     
     get_workbench().bind("<F3>", find_f3, True)
-    

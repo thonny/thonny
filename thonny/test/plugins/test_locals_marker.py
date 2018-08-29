@@ -30,5 +30,3 @@ def test_regular_closed():
 
     assert actual_local == expected_local
     print("Passed.")
-
-

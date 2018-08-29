@@ -1,7 +1,9 @@
 import ast
-from thonny.ast_utils import pretty 
 from textwrap import dedent
+
 from thonny import ast_utils
+from thonny.ast_utils import pretty
+
 
 def test_single_assignment():
     check_marked_ast("x=1", """/=Module
@@ -447,4 +449,3 @@ def check_marked_ast(source, expected_pretty_ast
     #print("ACTUAL", actual_pretty_ast)
     #print("EXPECTED", expected_pretty_ast)
     assert actual_pretty_ast.strip() == expected_pretty_ast.strip() 
-    

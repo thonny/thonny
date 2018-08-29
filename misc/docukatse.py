@@ -1,9 +1,10 @@
-import docutils.parsers
 import docutils.frontend
-import docutils.utils
+import docutils.parsers
 import docutils.parsers.rst
 import docutils.parsers.rst.roles as roles
+import docutils.utils
 from docutils import nodes
+
 # ... here 'fileobj' is a file-like object holding the contents of the input
 # reST file.
 

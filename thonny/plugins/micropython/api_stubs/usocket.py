@@ -44,4 +44,3 @@ class socket:
 
     def settimeout():
         pass
-

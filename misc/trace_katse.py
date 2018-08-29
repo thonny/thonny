@@ -30,8 +30,3 @@ try:
     f1()
 except:
     pass
-
-
-
-
-

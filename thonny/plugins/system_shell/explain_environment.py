@@ -2,9 +2,9 @@
 affect same Python installation that is used for running this script"""
 
 import os.path
-import sys
 import platform
 import subprocess
+import sys
 from shutil import which
 
 
@@ -174,4 +174,3 @@ if __name__ == "__main__":
     
     print("")
     print("*" * 80)
-    

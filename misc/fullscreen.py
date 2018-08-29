@@ -1,4 +1,5 @@
 import sys
+
 if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
     from Tkinter import *
 else:

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+
 from thonny import get_workbench, ui_utils
 
 

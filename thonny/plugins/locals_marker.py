@@ -1,7 +1,8 @@
-import tkinter as tk
-from thonny import get_workbench
 import logging
-from thonny import jedi_utils
+import tkinter as tk
+
+from thonny import get_workbench, jedi_utils
+
 
 class LocalsHighlighter:
 
@@ -138,4 +139,3 @@ def load_plugin() -> None:
     wb.set_default("view.locals_highlighting", False)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
     wb.bind("<<UpdateAppearance>>", update_highlighting, True)
-    

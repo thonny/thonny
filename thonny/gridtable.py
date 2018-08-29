@@ -1,7 +1,9 @@
+import math
 import tkinter as tk
 from tkinter import ttk
-import math
+
 from thonny import get_workbench
+
 
 class GridTable(tk.Frame):
     def __init__(self, master, header_rows, data_row_count, footer_row_count,
@@ -234,4 +236,3 @@ class ScrollableGridTable(ttk.Frame):
                                       height=self.canvas.winfo_height())
         
         self._update_vertical_scrollbar()
-        

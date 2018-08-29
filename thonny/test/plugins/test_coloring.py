@@ -2,7 +2,6 @@ import tkinter
 
 from thonny.plugins.coloring import SyntaxColorer
 
-
 TEST_STR1 = """def my_function():
     str1 = "aslas'"
     str2 = 'asdasd"asda
@@ -34,4 +33,3 @@ def test_open_closed_strings():
     assert open_ranges_set == expected_open_ranges
     assert closed_ranges_set == expected_closed_ranges
     print("test passed")
-

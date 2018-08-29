@@ -4,23 +4,23 @@
 Adds debugging commands and features. 
 """
 
+import ast
+import logging
+import os.path
 import tkinter as tk
 from tkinter import ttk
-from thonny.common import DebuggerCommand, ToplevelResponse, InlineCommand
-from thonny.memory import VariablesFrame
-from thonny import ast_utils, memory, misc_utils, ui_utils, code
-from thonny.misc_utils import shorten_repr
-import ast
-import os.path
-from thonny.codeview import CodeView, get_syntax_options_for_tag
 from tkinter.messagebox import showinfo
-from thonny import get_workbench, get_runner
-from thonny.ui_utils import select_sequence
-import logging
+from typing import List, Union  # @UnusedImport
 
-from typing import Union, List  # @UnusedImport
+from thonny import (ast_utils, code, get_runner, get_workbench, memory,
+                    misc_utils, ui_utils)
+from thonny.codeview import CodeView, get_syntax_options_for_tag
+from thonny.common import DebuggerCommand, InlineCommand, ToplevelResponse
 from thonny.config_ui import ConfigurationPage
+from thonny.memory import VariablesFrame
+from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
+from thonny.ui_utils import select_sequence
 
 _current_debugger = None
 

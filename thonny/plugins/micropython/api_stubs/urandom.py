@@ -18,4 +18,3 @@ def seed():
 
 def uniform():
     pass
-

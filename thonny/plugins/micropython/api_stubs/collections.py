@@ -45,4 +45,3 @@ class deque:
 
 def namedtuple():
     pass
-

@@ -3,11 +3,12 @@ NB! Stippling doesn't work on mac:
 http://wiki.tcl.tk/44444
 http://rkeene.org/projects/tcl/tk.fossil/tkthistory/2954673
 """
-import os.path
-from thonny import get_workbench, jedi_utils
-from tkinter import font
-import thonny
 import logging
+import os.path
+from tkinter import font
+
+import thonny
+from thonny import get_workbench, jedi_utils
 from thonny.codeview import get_syntax_options_for_tag
 
 python_tree = jedi_utils.import_python_tree()

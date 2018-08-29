@@ -6,10 +6,10 @@ and some only Python 3 (eg latest Fedoras)
 
 from __future__ import print_function
 
-import sys
 import os.path
 import shutil
 import subprocess
+import sys
 
 if sys.version_info[0] == 2:
     input = raw_input  # @UndefinedVariable @ReservedAssignment
@@ -181,4 +181,3 @@ except OSError as e:
     print()
     print(e, file=sys.stderr)
     exit(1)
-    

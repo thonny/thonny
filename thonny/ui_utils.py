@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
-from tkinter import ttk, messagebox, filedialog
-
-from thonny import tktextext, misc_utils
-from thonny import get_workbench
-from thonny.misc_utils import running_on_mac_os, running_on_windows, running_on_linux
-from typing import Union, List  # @UnusedImport
-import tkinter as tk
-import traceback
-
-import textwrap
-import re
 import collections
-import threading
+import logging
+import os
+import platform
+import re
+import shutil
 import signal
 import subprocess
-import os
-import logging
-import shutil
-import platform
-from typing import Callable, Optional, Tuple
-from thonny.tktextext import TweakableText
-from thonny.common import TextRange
+import textwrap
+import threading
 import time
+import tkinter as tk
+import traceback
+from tkinter import filedialog, messagebox, ttk
+from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
+
+from thonny import get_workbench, misc_utils, tktextext
+from thonny.common import TextRange
+from thonny.misc_utils import (running_on_linux, running_on_mac_os,
+                               running_on_windows)
+from thonny.tktextext import TweakableText
+
 
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):

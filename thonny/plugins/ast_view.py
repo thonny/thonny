@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
  
 import ast
-import traceback
 import tkinter as tk
+import traceback
 
-from thonny import ast_utils
-from thonny import ui_utils
+from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller
-from thonny import get_workbench
+
 
 class AstView(ui_utils.TreeFrame):
     def __init__(self, master):
@@ -154,6 +153,3 @@ def _find_closest_containing_node(tree, text_range):
             
 def load_plugin() -> None: 
     get_workbench().add_view(AstView, "AST", "s")
-        
-    
-        

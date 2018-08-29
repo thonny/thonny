@@ -5,6 +5,7 @@ For parsing user action logs
 import ast
 from time import strptime
 
+
 def parse_log_file(filename):
     f = open(filename, encoding="UTF-8")
     events = []
@@ -52,4 +53,3 @@ def get_log_file_time(filename):
     chars[13] = ":"
     chars[16] = ":"
     return "".join(chars)
-    

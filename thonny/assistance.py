@@ -1,30 +1,28 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
-import builtins
-from typing import List, Optional, Union, Iterable, Tuple, Type
-from thonny import ui_utils, tktextext, get_workbench,\
-    rst_utils, misc_utils
-from collections import namedtuple
-import re
-import os.path
-from thonny.common import ToplevelResponse, read_source
 import ast
-from thonny.misc_utils import levenshtein_damerau_distance
+import builtins
+import datetime
+import gzip
+import json
+import logging
+import os.path
+import re
+import sys
+import tempfile
+import textwrap
+import tkinter as tk
 import token
 import tokenize
-
-import sys
-import textwrap
-from thonny.ui_utils import scrollbar_style
-import datetime
-import thonny
-import logging
-import json
-import tempfile
-import webbrowser
 import urllib.request
-import gzip
+import webbrowser
+from collections import namedtuple
+from tkinter import messagebox, ttk
+from typing import Iterable, List, Optional, Tuple, Type, Union  # @UnusedImport
 
+import thonny
+from thonny import get_workbench, misc_utils, rst_utils, tktextext, ui_utils
+from thonny.common import ToplevelResponse, read_source
+from thonny.misc_utils import levenshtein_damerau_distance
+from thonny.ui_utils import scrollbar_style
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 

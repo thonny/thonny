@@ -1,5 +1,7 @@
 import os
+
 from thonny.common import path_startswith
+
 
 def test_path_startswith():
     assert path_startswith("/kala/pala", "/kala")
@@ -30,4 +32,3 @@ def test_path_startswith():
         assert path_startswith("c:\\foo\\bar.txt/kala\\pala", 'C:\\')
 
         assert not path_startswith("C:\\kalapala\\pala", "C:\\kala")
-        

@@ -1,8 +1,9 @@
+from typing import Optional
+
 from thonny import get_workbench
 from thonny.misc_utils import running_on_windows
 from thonny.ui_utils import scale
 from thonny.workbench import UiThemeSettings
-from typing import Optional
 
 
 def clean(frame_background: str,
@@ -443,4 +444,3 @@ def load_plugin() -> None:
               custom_menubar=0,
         )
     )
-

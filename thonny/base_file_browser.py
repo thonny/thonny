@@ -2,10 +2,8 @@ import os.path
 import tkinter as tk
 from tkinter import ttk
 
+from thonny import get_workbench, misc_utils
 from thonny.ui_utils import TreeFrame
-from thonny import misc_utils
-from thonny import get_workbench
-
 
 _dummy_node_text = "..."
     

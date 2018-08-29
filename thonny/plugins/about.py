@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import datetime
-import webbrowser
 import platform
-
 import tkinter as tk
+import tkinter.font
+import webbrowser
 from tkinter import ttk
-import tkinter.font 
 
 import thonny
-from thonny import misc_utils, ui_utils
+from thonny import get_workbench, misc_utils, ui_utils
 from thonny.misc_utils import get_python_version_string
-from thonny import get_workbench
+
 
 class AboutDialog(tk.Toplevel):
     def __init__(self, master):
@@ -136,6 +135,3 @@ def load_plugin() -> None:
     
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)
-
-
-    

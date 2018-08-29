@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """Adds commands for opening certain Thonny folders"""
 
-from thonny import get_workbench
-from thonny import THONNY_USER_DIR
+from thonny import THONNY_USER_DIR, get_workbench
 from thonny.ui_utils import open_path_in_system_file_manager
 
 
@@ -17,4 +16,3 @@ def load_plugin() -> None:
                                 cmd_open_program_dir, group=110)
     get_workbench().add_command("open_data_dir", "tools", "Open Thonny data folder...",
                                 cmd_open_data_dir, group=110)
-    

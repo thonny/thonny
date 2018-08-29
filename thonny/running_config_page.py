@@ -1,17 +1,17 @@
-import tkinter as tk
-import subprocess
 import os.path
-from tkinter import messagebox
-from tkinter import ttk
+import subprocess
+import tkinter as tk
+from shutil import which
+from tkinter import messagebox, ttk
 
 from thonny import get_workbench, running, ui_utils
-from thonny.ui_utils import create_string_var, SubprocessDialog, \
-    askopenfilename, askdirectory
-from thonny.misc_utils import running_on_windows, running_on_mac_os
-from shutil import which
-from thonny.running import WINDOWS_EXE
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.common import actual_path
+from thonny.misc_utils import running_on_mac_os, running_on_windows
+from thonny.plugins.backend_config_page import BackendDetailsConfigPage
+from thonny.running import WINDOWS_EXE
+from thonny.ui_utils import (SubprocessDialog, askdirectory, askopenfilename,
+                             create_string_var)
+
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):

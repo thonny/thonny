@@ -7,4 +7,3 @@ def poll():
 
 def select():
     pass
-

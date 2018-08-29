@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
+import logging
 import os.path
 import re
-from tkinter import ttk
-import traceback
-
-from thonny import memory, roughparse, ui_utils
-from thonny.common import ToplevelCommand, ToplevelResponse, InlineCommand
-from thonny.misc_utils import running_on_mac_os, shorten_repr, parse_cmd_line, construct_cmd_line
-from thonny.ui_utils import EnhancedTextWithLogging, get_style_configuration,\
-    scrollbar_style
 import tkinter as tk
-from thonny import get_workbench, get_runner
+import traceback
+from tkinter import ttk
+
+from thonny import get_runner, get_workbench, memory, roughparse, ui_utils
 from thonny.codeview import PythonText, get_syntax_options_for_tag
+from thonny.common import InlineCommand, ToplevelCommand, ToplevelResponse
+from thonny.misc_utils import (construct_cmd_line, parse_cmd_line,
+                               running_on_mac_os, shorten_repr)
 from thonny.tktextext import index2line
-import logging
+from thonny.ui_utils import (EnhancedTextWithLogging, get_style_configuration,
+                             scrollbar_style)
 
 
 class ShellView (ttk.Frame):
@@ -668,10 +668,3 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         while len(self.active_object_tags) > 0:
             self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
-        
-        
-
-    
-
-    
-    

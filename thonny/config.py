@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import tkinter as tk
-import os.path
 import ast
-from configparser import ConfigParser
 import configparser
-from logging import exception
 import datetime
+import os.path
+import tkinter as tk
+from configparser import ConfigParser
+from logging import exception
+
 
 def try_load_configuration(filename):
     try: 

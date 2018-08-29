@@ -1,43 +1,42 @@
 # -*- coding: utf-8 -*-
 
+import ast
+import collections
 import importlib
+import logging
 import os.path
+import pkgutil
+import platform
+import queue
+import re
+import socket
 import sys
-from tkinter import ttk
-import traceback
-
-from thonny import ui_utils, running
-from thonny.code import EditorNotebook
-from thonny.common import Record, UserError, actual_path
-from thonny.config import try_load_configuration
-from thonny.misc_utils import running_on_mac_os, running_on_linux,\
-    running_on_windows
-from thonny.ui_utils import sequence_to_accelerator, AutomaticPanedWindow, AutomaticNotebook,\
-    create_tooltip, select_sequence, get_style_configuration, lookup_style_option,\
-    register_latin_shortcut
 import tkinter as tk
 import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
-from thonny.running import Runner, BackendProxy
-import thonny
-import logging
-from thonny import get_runner
-from thonny.config_ui import ConfigurationDialog
-import pkgutil
-import socket
-import queue
-from threading import Thread
-import ast
-from thonny import THONNY_USER_DIR
-from warnings import warn
-import collections
-from thonny.shell import ShellView
-from typing import Optional, Type, Union, Callable, Dict, Sequence, List, Any, cast
-from typing import Set, Tuple  # @UnusedImport
-import platform
-from thonny.assistance import AssistantView
+import traceback
 import webbrowser
-import re
+from threading import Thread
+from tkinter import ttk
+from typing import (Any, Callable, Dict, List, Optional,  
+                    Sequence, Set, Tuple, Type, Union, cast) # @UnusedImport
+from warnings import warn
+
+import thonny
+from thonny import THONNY_USER_DIR, get_runner, running, ui_utils
+from thonny.assistance import AssistantView
+from thonny.code import EditorNotebook
+from thonny.common import Record, UserError, actual_path
+from thonny.config import try_load_configuration
+from thonny.config_ui import ConfigurationDialog
+from thonny.misc_utils import (running_on_linux, running_on_mac_os,
+                               running_on_windows)
+from thonny.running import BackendProxy, Runner
+from thonny.shell import ShellView
+from thonny.ui_utils import (AutomaticNotebook, AutomaticPanedWindow,
+                             create_tooltip, get_style_configuration,
+                             lookup_style_option, register_latin_shortcut,
+                             select_sequence, sequence_to_accelerator)
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -1772,4 +1771,3 @@ class WorkbenchEvent(Record):
     def __init__(self, sequence: str, **kwargs) -> None:
         Record.__init__(self, **kwargs)
         self.sequence = sequence
-

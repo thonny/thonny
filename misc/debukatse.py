@@ -11,5 +11,3 @@ kala(x,
      x,1)
 kala(4,2,1)
 print("valma")
-
-    

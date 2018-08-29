@@ -1,13 +1,14 @@
+import ast
+import logging
 import tkinter as tk
 from tkinter import ttk
-from thonny import get_workbench, get_runner
-from thonny import ui_utils
-from thonny.common import InlineCommand
-from thonny.tktextext import TextFrame
-import logging
+
 import thonny.memory
-import ast
+from thonny import get_runner, get_workbench, ui_utils
+from thonny.common import InlineCommand
 from thonny.misc_utils import shorten_repr
+from thonny.tktextext import TextFrame
+
 
 class ObjectInspector(ttk.Frame):
     def __init__(self, master):

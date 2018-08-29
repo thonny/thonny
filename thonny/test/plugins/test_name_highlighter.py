@@ -1,7 +1,7 @@
 import tkinter
 from typing import Sequence, Set  # @UnusedImport
-from thonny.plugins.highlight_names import VariablesHighlighter
 
+from thonny.plugins.highlight_names import VariablesHighlighter
 
 TEST_STR1 = """def foo():
     foo()
@@ -99,4 +99,3 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
                                        "\nGot: %s" % (insert_pos, expected, actual)
         print("\rPassed %d of %d" % (i+1, len(insert_pos_groups)), end="")
     print()
-

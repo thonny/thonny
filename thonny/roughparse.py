@@ -5,11 +5,10 @@ Mostly copied/adapted from idlelib.HyperParser and idlelib.PyParse
 
 
 import re
-from collections import Mapping
 import string
+from collections import Mapping
 from keyword import iskeyword
 from typing import Dict  # @UnusedImport
-
 
 NUM_CONTEXT_LINES = (50, 500, 5000000)
 
@@ -942,4 +941,3 @@ def _build_char_in_string_func(startindex):
               _icis=_is_char_in_string):
         return _icis(_startindex + "+%dc" % offset)
     return inner
-

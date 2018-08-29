@@ -1,6 +1,7 @@
 from thonny import get_workbench
 from thonny.workbench import SyntaxThemeSettings
-    
+
+
 def tomorrow() -> SyntaxThemeSettings:
     # https://github.com/chriskempson/tomorrow-theme/blob/master/GEdit/Tomorrow.xml
     normal_fg = "#4D4D4C"
@@ -144,4 +145,3 @@ def load_plugin() -> None:
     get_workbench().add_syntax_theme("Tomorrow Night Eighties", "Tomorrow Night", tomorrow_night_eighties())
     
     get_workbench().set_default("view.syntax_theme", "Default Light")
-    

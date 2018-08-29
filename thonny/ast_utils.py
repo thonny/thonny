@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import _ast
 import io
+import logging
 import sys
 import token
 import tokenize
-import logging
+
+import _ast
+
 
 def extract_text_range(source, text_range):
     if isinstance(source, bytes):
@@ -529,4 +531,3 @@ def _get_ordered_child_nodes(node):
 
 def _tokens_text(tokens):
     return "".join([t.string for t in tokens])
-            

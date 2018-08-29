@@ -1,7 +1,8 @@
 import tkinter as tk
+
 from thonny import get_workbench
-from thonny.ui_utils import select_sequence
 from thonny.common import TextRange
+from thonny.ui_utils import select_sequence
 
 BLOCK_COMMENT_PREFIX = "#"
 

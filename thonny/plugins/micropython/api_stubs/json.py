@@ -9,4 +9,3 @@ def load():
 
 def loads():
     pass
-

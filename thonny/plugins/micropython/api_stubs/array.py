@@ -6,4 +6,3 @@ class array:
 
     def extend():
         pass
-

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 import re
-from thonny import get_workbench, get_runner
+
+from thonny import get_runner, get_workbench, ui_utils
 from thonny.codeview import CodeViewText
-from thonny import ui_utils
 
 cell_regex = re.compile(r"(^|\n)(# ?%%|##|# In\[\d+\]:)[^\n]*", re.MULTILINE)  # @UndefinedVariable
 
