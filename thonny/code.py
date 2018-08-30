@@ -171,7 +171,7 @@ class Editor(ttk.Frame):
                 master=get_workbench(),
                 filetypes = _dialog_filetypes, 
                 defaultextension = ".py",
-                initialdir = get_workbench().get_cwd()
+                initialdir = get_workbench().get_cwd(),
             )
             if filename in ["", (), None]: # Different tkinter versions may return different values
                 return None
@@ -365,6 +365,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             tester=lambda: self.get_current_editor() is not None,
             group=10)
         
+        get_workbench().add_command("rename_file", "file", "Rename...",
+            self._cmd_rename_file,
+            tester=self._cmd_rename_file_enabled,
+            group=10)
+        
 
         get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
     
@@ -502,14 +507,30 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             and self.get_current_editor().save_file_enabled())
     
     def _cmd_save_file_as(self):
-        if self.get_current_editor():
-            self.get_current_editor().save_file(ask_filename=True)
-            self.update_editor_title(self.get_current_editor())
-            
+        if not self.get_current_editor():
+            return
+        
+        self.get_current_editor().save_file(ask_filename=True)
+        self.update_editor_title(self.get_current_editor())
+        get_workbench().update_title()
         self._remember_open_files()
     
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None
+    
+    def _cmd_rename_file(self):
+        editor = self.get_current_editor()
+        old_filename = editor.get_filename()
+        assert old_filename is not None
+        
+        self._cmd_save_file_as()
+        
+        if editor.get_filename() != old_filename:
+            os.remove(old_filename)
+    
+    def _cmd_rename_file_enabled(self):
+        return (self.get_current_editor() 
+            and self.get_current_editor().get_filename() is not None)
     
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
