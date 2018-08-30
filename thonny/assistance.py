@@ -268,7 +268,9 @@ class AssistantView(tktextext.TextFrame):
         for filename in by_file:
             rst += "`%s <%s>`__\n\n" % (os.path.basename(filename),
                                             self._format_file_url(dict(filename=filename)))
-            file_warnings = sorted(by_file[filename], key=lambda x: x.get("lineno", 0)) 
+            file_warnings = sorted(by_file[filename], key=lambda x: (x.get("lineno", 0),
+                                                                     -x.get("relevance", 1)))
+             
             for i, warning in enumerate(file_warnings):
                 rst += (
                     self._format_warning(warning, i == len(file_warnings)-1) 

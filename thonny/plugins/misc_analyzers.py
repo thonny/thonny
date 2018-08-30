@@ -72,6 +72,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
                         + "Rename '%s' to make the library module visible again."
                             % item,
                     "group" : "warnings",
+                    "relevance" : 5
                 }
     
     def _get_3rd_party_modules(self):
