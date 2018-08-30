@@ -18,8 +18,8 @@ import traceback
 import webbrowser
 from threading import Thread
 from tkinter import ttk
-from typing import (Any, Callable, Dict, List, Optional,  # @UnusedImport
-                    Sequence, Set, Tuple, Type, Union, cast)
+from typing import (Any, Callable, Dict, List, Optional,     # pylint: disable=unused-import
+                    Sequence, Set, Tuple, Type, Union, cast) # pylint: disable=unused-import
 from warnings import warn
 
 import thonny
@@ -1751,10 +1751,8 @@ class Workbench(tk.Tk):
             self.focus_set()
     
     def open_url(self, url):
-        m = re.match(r"^thonny://(.*?)(#(\d+)(:(\d+))?)?$", url)
-        if m is None:
-            webbrowser.open(url, False, True)
-        else:
+        m = re.match(r"^thonny-editor://(.*?)(#(\d+)(:(\d+))?)?$", url)
+        if m is not None:
             filename = m.group(1)
             lineno = None if m.group(3) is None else int(m.group(3))
             col_offset = None if m.group(5) is None else int(m.group(5))
@@ -1762,6 +1760,18 @@ class Workbench(tk.Tk):
                 self.get_editor_notebook().show_file(filename)
             else:
                 self.get_editor_notebook().show_file_at_line(filename, lineno, col_offset)
+            
+            return
+                
+        m = re.match(r"^thonny-help://(.*?)(#(.+))?$", url)
+        if m is not None:
+            topic = m.group(1)
+            fragment = m.group(3)
+            self.show_view("HelpView").load_topic(topic, fragment)
+            return
+        
+        # Fallback
+        webbrowser.open(url, False, True)
     
     def bell(self, displayof=0):
         if self.get_option("general.audible_bell"):

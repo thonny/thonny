@@ -87,7 +87,7 @@ class AssistantView(tktextext.TextFrame):
         self._clear()
         
         # prepare for snapshot
-        key = msg.get("filename", "<shell>")
+        key = msg.get("filename", "<pyshell>")
         self._current_snapshot = {
             "timestamp" : datetime.datetime.now().isoformat()[:19],
             "main_file_path" : key, 
@@ -98,11 +98,15 @@ class AssistantView(tktextext.TextFrame):
         if msg.get("user_exception"):
             self._explain_exception(msg["user_exception"])
         
-        if msg.get("filename"):
+        if msg.get("filename") and os.path.exists(msg["filename"]):
+            self.main_file_path = msg["filename"]
             source = read_source(msg["filename"])
             self._start_program_analyses(msg["filename"],
                                          source,
                                          _get_imported_user_files(msg["filename"], source))
+        else:
+            self.main_file_path = None
+            self._present_conclusion()
         
     
     def _explain_exception(self, error_info):
@@ -113,7 +117,8 @@ class AssistantView(tktextext.TextFrame):
                                         + rst_utils.escape(error_info["message"]))
                + "\n")
         
-        if error_info.get("lineno") is not None:
+        if (error_info.get("lineno") is not None
+            and os.path.exists(error_info["filename"])):
             rst += (
                 "`%s, line %d <%s>`__\n\n" % (
                     os.path.basename(error_info["filename"]),
@@ -148,14 +153,15 @@ class AssistantView(tktextext.TextFrame):
             # use relevance 1 only when there is nothing better
             relevance_threshold = 1
         
+        suggestions = [s for s in suggestions if s.relevance >= relevance_threshold]
+        
         for i, suggestion in enumerate(suggestions):
-            if suggestion.relevance >= relevance_threshold  :
-                rst += self._format_suggestion(suggestion, 
-                                               i==len(suggestions)-1,
-                                               # TODO: is it good if first is preopened?
-                                               # It looks cleaner if it is not.
-                                               False #i==0 
-                                               )
+            rst += self._format_suggestion(suggestion, 
+                                           i==len(suggestions)-1,
+                                           # TODO: is it good if first is preopened?
+                                           # It looks cleaner if it is not.
+                                           False #i==0 
+                                           )
     
         self._current_snapshot["exception_suggestions"] = [
             dict(sug._asdict()) for sug in suggestions
@@ -200,7 +206,7 @@ class AssistantView(tktextext.TextFrame):
 
         for cls in _program_analyzer_classes:
             analyzer = cls(self._accept_warnings)
-            analyzer.start_analysis({main_file_path} | set(imported_file_paths)) 
+            analyzer.start_analysis(main_file_path, imported_file_paths) 
             self._analyzer_instances.append(analyzer)
         
         self._append_text("\nAnalyzing your code ...", ("em",))
@@ -218,21 +224,34 @@ class AssistantView(tktextext.TextFrame):
         
         self._accepted_warning_sets.append(warnings)
         if len(self._accepted_warning_sets) == len(self._analyzer_instances):
-            # all providers have reported
-            all_warnings = [w for ws in self._accepted_warning_sets for w in ws]
-            self._present_warnings(all_warnings)
+            self._present_warnings()
+            self._present_conclusion()
+    
+    def _present_conclusion(self):
+        
+        if not self.text.get("1.0", "end").strip():
+            if (self.main_file_path is not None
+                and os.path.exists(self.main_file_path)):
+                self._append_text("\n")
+                self.text.append_rst("The code in `%s <%s>`__ looks good.\n\n" 
+                                  % (os.path.basename(self.main_file_path), 
+                                     self._format_file_url({"filename" : self.main_file_path})))
+                self.text.append_rst("If it is not working as it should, "
+                                  + "then consider using some general "
+                                  + "`debugging techniques <thonny-help://debugging#sss>`__.\n\n",
+                                  ("em",))
+            
+        
+        if self.text.get("1.0", "end").strip():
             self._append_feedback_link()
     
-    def _present_warnings(self, warnings):
+    def _present_warnings(self):
+        warnings = [w for ws in self._accepted_warning_sets for w in ws]
         self.text.direct_delete("end-2l linestart", "end-1c lineend")
         
         if not warnings:
             return
         
-        #self._append_text("\n")
-        # TODO: show filename when more than one file was analyzed
-        # Put main file first
-        # TODO: group by file and confidence
         rst = (
             ".. default-role:: code\n"
             + "\n"
@@ -249,7 +268,7 @@ class AssistantView(tktextext.TextFrame):
         for filename in by_file:
             rst += "`%s <%s>`__\n\n" % (os.path.basename(filename),
                                             self._format_file_url(dict(filename=filename)))
-            file_warnings = sorted(by_file[filename], key=lambda x: x["lineno"]) 
+            file_warnings = sorted(by_file[filename], key=lambda x: x.get("lineno", 0)) 
             for i, warning in enumerate(file_warnings):
                 rst += (
                     self._format_warning(warning, i == len(file_warnings)-1) 
@@ -269,7 +288,8 @@ class AssistantView(tktextext.TextFrame):
         title = rst_utils.escape(warning["msg"].splitlines()[0])
         if warning.get("lineno") is not None:
             url = self._format_file_url(warning)
-            title = "`Line %d <%s>`__ : %s" % (warning["lineno"], url, title)
+            if warning.get("lineno"):
+                title = "`Line %d <%s>`__ : %s" % (warning["lineno"], url, title)
         
         if warning.get("explanation_rst"):
             explanation_rst = warning["explanation_rst"]
@@ -297,7 +317,7 @@ class AssistantView(tktextext.TextFrame):
     
     def _format_file_url(self, atts):
         assert atts["filename"]
-        s = "thonny://" + rst_utils.escape(atts["filename"])
+        s = "thonny-editor://" + rst_utils.escape(atts["filename"])
         if atts.get("lineno") is not None:
             s += "#" + str(atts["lineno"])
             if atts.get("col_offset") is not None:
@@ -313,7 +333,7 @@ class AssistantView(tktextext.TextFrame):
         snapshots = all_snapshots
         
         ui_utils.show_dialog(FeedbackDialog(get_workbench(),
-                                            self._current_snapshot["main_file_path"], 
+                                            self.main_file_path,
                                             snapshots))
     
 class AssistantRstText(rst_utils.RstText):
@@ -392,8 +412,9 @@ class GenericErrorHelper(ErrorHelper):
 class ProgramAnalyzer:
     def __init__(self, on_completion):
         self.completion_handler = on_completion
+        self.cancelled = False
         
-    def start_analysis(self, filenames):
+    def start_analysis(self, main_file_path, imported_file_paths):
         raise NotImplementedError()
     
     def cancel_analysis(self):
@@ -403,7 +424,6 @@ class SubprocessProgramAnalyzer(ProgramAnalyzer):
     def __init__(self, on_completion):
         super().__init__(on_completion)
         self._proc = None
-        self.cancelled = False
         
     def cancel_analysis(self):
         self.cancelled = True
@@ -438,8 +458,8 @@ class FeedbackDialog(tk.Toplevel):
         
         intro_label = ttk.Label(self,
                                 text="Below are the messages Assistant gave you in response to "
-                                   + ("using the shell" if main_file_path == "<shell>" 
-                                      else "testing '" + os.path.basename(main_file_path)) + "'"
+                                   + ("using the shell" if self._happened_in_shell() 
+                                      else "testing '" + os.path.basename(main_file_path) + "'")
                                    + " since " + self._get_since_str()
                                    + ".\n\n"
                                    + "In order to improve this feature, Thonny developers would love to know how "
@@ -527,6 +547,12 @@ class FeedbackDialog(tk.Toplevel):
         self._empty_box = "[  ]"
         self._checked_box = "[X]"
         self._populate_tree()
+    
+    def _happened_in_shell(self):
+        return (
+            self.main_file_path is None
+            or self.main_file_path.lower() == "<pyshell>"
+        )
     
     def _populate_tree(self):
         groups = {}
@@ -763,7 +789,7 @@ def _get_imported_user_files(main_file, source=None):
             for item in node.names:
                 module_names.add(item.name)
         elif isinstance(node, ast.ImportFrom):
-            module_names.add(node.name)
+            module_names.add(node.module)
     
     imported_files = set()
     

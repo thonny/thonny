@@ -7,10 +7,21 @@ from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
 
 
-class PylintChecker(SubprocessProgramAnalyzer):
+class PylintAnalyzer(SubprocessProgramAnalyzer):
     
-    def start_analysis(self, filenames):
+    def start_analysis(self, main_file_path, imported_file_paths):
         relevant_symbols = {key for key in all_checks_by_symbol if all_checks_by_symbol[key]["usage"] == "warning"}
+        
+        if 'bad-python3-import' in relevant_symbols:
+            # https://github.com/PyCQA/pylint/issues/2453
+            # TODO: allow if this is fixed in current version
+            relevant_symbols.remove('bad-python3-import')
+            
+        ignored_modules = {
+            "turtle" # has dynamically generated attributes
+        }
+        
+        
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", 
                 "pylint", 
@@ -20,11 +31,13 @@ class PylintChecker(SubprocessProgramAnalyzer):
                 #"--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
                 "--disable=all",
                 "--enable=" + ",".join(relevant_symbols),
+                "--ignored-modules=" + ",".join(ignored_modules),
                 "--max-line-length=120",
                 "--output-format=text",
                 "--reports=n",
-                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}"
-                ] + list(filenames),
+                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
+                main_file_path
+                ] + list(imported_file_paths),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -2767,4 +2780,4 @@ all_checks = [
 all_checks_by_symbol = {c["msg_sym"] : c for c in all_checks}
 
 def load_plugin():
-    add_program_analyzer(PylintChecker)
+    add_program_analyzer(PylintAnalyzer)

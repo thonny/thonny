@@ -77,19 +77,19 @@ class RstText(TweakableText):
     def clear(self):
         self.direct_delete("1.0", "end")
     
-    def load_rst(self, rst_source):
+    def load_rst(self, rst_source, global_tags=()):
         self.clear()
-        self.append_rst(rst_source)
+        self.append_rst(rst_source, global_tags)
     
-    def append_rst(self, rst_source):
+    def append_rst(self, rst_source, global_tags=()):
         doc = docutils.core.publish_doctree(rst_source)
-        doc.walkabout(self.create_visitor(doc))
+        doc.walkabout(self.create_visitor(doc, global_tags))
     
         # For debugging:
         #self.direct_insert("end", doc.pformat())
         #self.direct_insert("end", rst_source)
     
-    def create_visitor(self, doc):
+    def create_visitor(self, doc, global_tags=()):
         # Pass unique tag count from previous visitor
         # to keep uniqueness
         
@@ -98,7 +98,7 @@ class RstText(TweakableText):
         else:
             unique_tag_count = self._visitor.unique_tag_count
             
-        self._visitor = TkTextRenderingVisitor(doc, self, unique_tag_count)
+        self._visitor = TkTextRenderingVisitor(doc, self, global_tags, unique_tag_count)
         
         return self._visitor
         
@@ -111,10 +111,10 @@ class RstText(TweakableText):
 
 class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     
-    def __init__(self, document, text, unique_tag_count=0):
+    def __init__(self, document, text, global_tags=(), unique_tag_count=0):
         super().__init__(document)
         
-        self._context_tags = []
+        self._context_tags = list(global_tags)
         self.text = text
         self.section_level = 0
         self.in_topic = False

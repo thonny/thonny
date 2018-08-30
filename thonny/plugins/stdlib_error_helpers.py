@@ -278,7 +278,8 @@ class NameErrorHelper(ErrorHelper):
         relevance = 0
         body = None
         
-        if self.last_frame.code_name == "<module>":
+        if (self.last_frame.code_name == "<module>"
+            and self.last_frame_module_ast is not None):
             function_names = set()
             for node in ast.walk(self.last_frame_module_ast):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):

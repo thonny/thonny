@@ -24,8 +24,14 @@ class HelpView(TextFrame):
         )
         
         self.load_rst_file("help.rst")
-
+    
+    def load_topic(self, topic, fragment=None):
+        self.load_rst_file(topic + ".rst")
+        # TODO: scroll to fragment
+    
     def load_rst_file(self, filename):
+        self.text.clear()
+        
         if not os.path.isabs(filename):
             filename = os.path.join(os.path.dirname(__file__), filename) 
             

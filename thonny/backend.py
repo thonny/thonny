@@ -2180,7 +2180,8 @@ def _get_python_version_string(add_word_size=False):
     return result
 
 def _fetch_frame_source_info(frame):
-    if frame.f_code.co_filename is None:
+    if (frame.f_code.co_filename is None
+        or not os.path.exists(frame.f_code.co_filename)):
         return None, None, True
     
     if frame.f_code.co_name == "<module>":

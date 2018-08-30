@@ -8,17 +8,18 @@ from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
 
 
-class MyPyChecker(SubprocessProgramAnalyzer):
+class MyPyAnalyzer(SubprocessProgramAnalyzer):
     
-    def start_analysis(self, filenames: Iterable[str]) -> None:
+    def start_analysis(self, main_file_path, imported_file_paths: Iterable[str]) -> None:
         
         args = [get_frontend_python(), "-m", 
                 "mypy", 
                 "--ignore-missing-imports",
                 "--check-untyped-defs",
                 "--warn-redundant-casts",
-                "--show-column-numbers"
-                ] + list(filenames)
+                "--show-column-numbers",
+                main_file_path
+                ] + list(imported_file_paths)
         
         # TODO: ignore "... need type annotation" messages
         
@@ -77,4 +78,4 @@ class MyPyChecker(SubprocessProgramAnalyzer):
         self.completion_handler(self, warnings)
 
 def load_plugin():
-    add_program_analyzer(MyPyChecker)
+    add_program_analyzer(MyPyAnalyzer)
