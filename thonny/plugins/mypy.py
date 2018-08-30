@@ -55,12 +55,16 @@ class MyPyChecker(SubprocessProgramAnalyzer):
         for line in out.splitlines():
             m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
             if m is not None:
+                message = m.group(5).strip()
+                if message == "invalid syntax":
+                    continue # user will see this as Python error
+                
                 atts = {
                     "filename" : m.group(1),
                     "lineno" : int(m.group(2)),
                     "col_offset" : int(m.group(3))-1,
-                    "kind" : m.group(4).strip(),
-                    "msg" : m.group(5).strip() + " (MP)",
+                    "kind" : m.group(4).strip(), # always "error" ?
+                    "msg" : message,
                     "group" : "warnings",
                 }
                 # TODO: add better categorization and explanation

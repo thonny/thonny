@@ -1,0 +1,349 @@
+import ast
+import builtins
+import re
+import token
+import tokenize
+
+from thonny.assistance import ErrorHelper, Suggestion, name_similarity,\
+    add_error_helper
+
+
+class SyntaxErrorHelper(ErrorHelper):
+    def __init__(self, error_info):
+        super().__init__(error_info)
+        
+        self.tokens = []
+        self.token_error = None
+
+        if self.error_info["message"] == "EOL while scanning string literal":
+            self.intro_text = ("You haven't properly closed the string on line %s." % self.error_info["lineno"]
+                    + "\n(If you want a multi-line string, then surround it with"
+                    + " `'''` or `\"\"\"` at both ends.)")
+        
+        elif self.error_info["message"] == "EOF while scanning triple-quoted string literal":
+            # lineno is not useful, as it is at the end of the file and user probably
+            # didn't want the string to end there
+            self.intro_text = "You haven't properly closed a triple-quoted string"
+        
+        else:
+            self.intro_text = "Python doesn't know how to read your program."
+            
+            if "^" in self.error_info["message"]:
+                self.intro_text += (" Small `^` in the original error message shows where it gave up,"
+                        + " but the actual mistake can be before this.") 
+            
+            if self.error_info["filename"]:
+                with open(self.error_info["filename"], mode="rb") as fp:
+                    try:
+                        for t in tokenize.tokenize(fp.readline):
+                            self.tokens.append(t)
+                    except tokenize.TokenError as e:
+                        self.token_error = e
+                
+                assert self.tokens[-1].type == token.ENDMARKER
+            else:
+                self.tokens = None
+                
+            self.suggestions = [
+                self._sug_missing_or_misplaced_colon()
+            ]
+            
+    def _sug_missing_or_misplaced_colon(self):
+        i = 0
+        title = "Did you forget the colon?"
+        relevance = 0
+        body = ""
+        while i < len(self.tokens) and self.tokens[i].type != token.ENDMARKER:
+            t = self.tokens[i]
+            if t.string in ["if", "elif", "else", "while", "for", "with",
+                            "try", "except", "finally", 
+                            "class", "def"]:
+                keyword_pos = i
+                while (self.tokens[i].type not in [token.NEWLINE, token.ENDMARKER, 
+                                     token.COLON, # colon may be OP 
+                                     token.RBRACE]
+                        and self.tokens[i].string != ":"):
+                    
+                    old_i = i
+                    if self.tokens[i].string in "([{":
+                        i = self._skip_braced_part(i)
+                        assert i > old_i
+                    else:
+                        i += 1
+                
+                if self.tokens[i].string != ":":
+                    relevance = 9
+                    body = "`%s` header must end with a colon." % t.string
+                    break
+            
+                # Colon was present, but maybe it should have been right
+                # after the keyword.
+                if (t.string in ["else", "try", "finally"]
+                    and self.tokens[keyword_pos+1].string != ":"):
+                    title = "Incorrect use of `%s`" % t.string
+                    body = "Nothing is allowed between `%s` and colon." % t.string
+                    relevance = 9
+                    if (self.tokens[keyword_pos+1].type not in (token.NEWLINE, tokenize.COMMENT)
+                        and t.string == "else"):
+                        body = "If you want to specify a conditon, then use `elif` or nested `if`."
+                    break
+                
+            i += 1
+                
+        return Suggestion("missing-or-misplaced-colon", title, body, relevance)
+    
+    def _sug_wrong_increment_op(self):
+        pass
+    
+    def _sug_wrong_decrement_op(self):
+        pass
+    
+    def _sug_wrong_comparison_op(self):
+        pass
+    
+    def _sug_switched_assignment_sides(self):
+        pass
+    
+    def _skip_braced_part(self, token_index):
+        assert self.tokens[token_index].string in "([{"
+        level = 1
+        while token_index < len(self.tokens):
+            token_index += 1
+            
+            if self.tokens[token_index].string in "([{":
+                level += 1
+            elif self.tokens[token_index].string in ")]}":
+                level -= 1
+            
+            if level <= 0:
+                token_index += 1
+                return token_index
+        
+        assert token_index == len(self.tokens)
+        return token_index-1
+    
+    def _find_first_braces_problem(self):
+        #closers = {'(':')', '{':'}', '[':']'}
+        openers = {')':'(', '}':'{', ']':'['}
+        
+        brace_stack = []
+        for t in self.tokens:
+            if t.string in "([{":
+                brace_stack.append(token)
+            elif t.string in ")]}":
+                if not brace_stack:
+                    return (t, "`%s` without preceding matching `%s`" % (t.string, openers[t.string]))
+                elif brace_stack[-1].string != openers[t.string]:     
+                    return (t, "`%s` when last unmatched opener was `%s`" % (t.string, brace_stack[-1].string))
+                else:
+                    brace_stack.pop()
+        
+        if brace_stack:
+            return (brace_stack[-1], "`%s` was not closed by the end of the program" % brace_stack[-1].string)
+        
+        return None
+        
+
+class NameErrorHelper(ErrorHelper):
+    def __init__(self, error_info):
+        super().__init__(error_info)
+        
+        names = re.findall(r"\'.*\'", error_info["message"])
+        assert len(names) == 1
+        self.name = names[0].strip("'")
+        
+        self.intro_text = "Python doesn't know what `%s` stands for." % self.name
+        self.suggestions = [
+            self._sug_bad_spelling(),
+            self._sug_missing_quotes(),
+            self._sug_missing_import(),
+            self._sug_local_from_global(),
+            self._sug_not_defined_yet(),
+        ]  
+    
+    def _sug_missing_quotes(self):
+        if (self._is_attribute_value() 
+            or self._is_call_function()
+            or self._is_subscript_value()):
+            relevance = 0
+        else:
+            relevance = 5
+            
+        return Suggestion(
+            "missing-quotes",
+            "Did you actually mean string (text)?",
+            'If you didn\'t mean a variable but literal text "%s", then surround it with quotes.' % self.name,
+            relevance
+        )
+    
+    def _sug_bad_spelling(self):
+        
+        # Yes, it would be more proper to consult builtins from the backend,
+        # but it's easier this way...
+        all_names = {name for name in dir(builtins) if not name.startswith("_")}
+        all_names |= {"pass", "break", "continue", "return", "yield"}
+        
+        if self.last_frame.globals is not None:
+            all_names |= set(self.last_frame.globals.keys())
+        if self.last_frame.locals is not None:
+            all_names |= set(self.last_frame.locals.keys())
+        
+        similar_names = {self.name}
+        if all_names:
+            relevance = 0
+            for name in all_names:
+                sim = name_similarity(name, self.name)
+                if sim > 4:
+                    similar_names.add(name)
+                relevance = max(sim, relevance)
+        else:
+            relevance = 3
+        
+        if len(similar_names) > 1:
+            body = "I found similar names. Are all of them spelled correctly?\n\n"
+            for name in sorted(similar_names, key=lambda x: x.lower()):
+                # TODO: add location info
+                body += "* `%s`\n\n" % name
+        else:
+            body = (
+                "Compare the name with corresponding definition / assignment / documentation."
+                + " Don't forget that case of the letters matters!"
+            ) 
+        
+        return Suggestion(
+            "bad-spelling",
+            "Did you misspell it (somewhere)?",
+            body,
+            relevance
+        )
+    
+    def _sug_missing_import(self):
+        likely_importable_functions = {
+            "math" : {"ceil", "floor", "sqrt", "sin", "cos", "degrees"},  
+            "random" : {"randint"},
+            "turtle" : {"left", "right", "forward", "fd", 
+                        "goto", "setpos", "Turtle",
+                        "penup", "up", "pendown", "down",
+                        "color", "pencolor", "fillcolor",
+                        "begin_fill", "end_fill", "pensize", "width"},
+            "re" : {"search", "match", "findall"},
+            "datetime" : {"date", "time", "datetime", "today"},
+            "statistics" : {"mean", "median", "median_low", "median_high", "mode", 
+                            "pstdev", "pvariance", "stdev", "variance"},
+            "os" : {"listdir"},
+            "time" : {"time", "sleep"},
+        }
+        
+        body = None
+         
+        if self._is_call_function():
+            relevance = 5
+            for mod in likely_importable_functions:
+                if self.name in likely_importable_functions[mod]:
+                    relevance += 3
+                    body = ("If you meant `%s` from module `%s`, then add\n\n`from %s import %s`\n\nto the beginning of your script."
+                                % (self.name, mod, mod, self.name))
+                    break
+                
+        elif self._is_attribute_value():
+            relevance = 5
+            body = ("If you meant module `%s`, then add `import %s` to the beginning of your script"
+                        % (self.name, self.name))
+            
+            if self.name in likely_importable_functions:
+                relevance += 3
+                
+                
+        elif self._is_subscript_value() and self.name != "argv":
+            relevance = 0
+        elif self.name == "pi":
+            body = "If you meant the constant π, then add `from math import pi` to the beginning of your script."
+            relevance = 8
+        elif self.name == "argv":
+            body = "If you meant the list with program arguments, then add `from sys import argv` to the beginning of your script."
+            relevance = 8
+        else:
+            relevance = 3
+            
+        
+        if body is None:
+            body = "Some functions/variables need to be imported before they can be used."
+            
+        return Suggestion("missing-import",
+                          "Did you forget to import it?",
+                          body,
+                          relevance)
+    
+    def _sug_local_from_global(self):
+        relevance = 0
+        body = None
+        
+        if self.last_frame.code_name == "<module>":
+            function_names = set()
+            for node in ast.walk(self.last_frame_module_ast):
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    if self.name in map(lambda x: x.arg, node.args.args):
+                        function_names.add(node.name)
+                    # TODO: varargs, kw, ...
+                    declared_global = False
+                    for localnode in ast.walk(node):
+                        #print(node.name, localnode)
+                        if (isinstance(localnode, ast.Name)
+                            and localnode.id == self.name
+                            and isinstance(localnode.ctx, ast.Store)
+                            ):
+                            function_names.add(node.name)
+                        elif (isinstance(localnode, ast.Global)
+                              and self.name in localnode.names):
+                            declared_global = True
+                    
+                    if node.name in function_names and declared_global:
+                        function_names.remove(node.name)
+            
+            if function_names:
+                relevance = 9
+                body = (
+                    ("Name `%s` defined in `%s` is not accessible in the global/module level."
+                     % (self.name, " and ".join(function_names)))
+                    + "\n\nIf you need that data at the global level, then consider changing the function so that it `return`-s the value.")
+            
+        return Suggestion(
+            "local-from-global",
+            "Are you trying to acces a local variable outside of the function?",
+            body,
+            relevance)
+    
+    def _sug_not_defined_yet(self):
+        return Suggestion(
+            "not-defined-yet",
+            "Has Python executed the definition?",
+            ("Don't forget that name becomes defined when corresponding definition ('=', 'def' or 'import') gets executed."
+            + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
+            + "\n\n"
+            + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, use the debugger."),
+            1)
+    
+    def _is_call_function(self):
+        return self.name + "(" in (self.error_info["line"]
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
+                                   
+    def _is_subscript_value(self):
+        return self.name + "[" in (self.error_info["line"]
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
+                                   
+    def _is_attribute_value(self):
+        return self.name + "." in (self.error_info["line"]
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
+
+def load_plugin():
+    for name in globals():
+        if name.endswith("ErrorHelper") and not name.startswith("_"):
+            type_name = name[:-len("Helper")]
+            add_error_helper(type_name, globals()[name])
+            
