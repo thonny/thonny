@@ -69,7 +69,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
                                item))
                         + "When you try to import library module ``%s``, this file will be imported instead.\n\n"
                             % item[:-3]
-                        + "Rename '%s' (*Run → Rename…* ) to make the library module visible again."
+                        + "Rename '%s' (*Run → Rename…* ) or save your work to a different directory to make the library module visible again."
                             % item,
                     "group" : "warnings",
                     "relevance" : 5

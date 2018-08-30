@@ -1856,7 +1856,9 @@ all_checks = [
  {'msg_id': 'W0406',
   'msg_sym': 'import-self',
   'msg_text': 'Module import itself',
-  'msg_xpln': 'Used when a module is importing itself.',
+  'msg_xpln': 'This usually happens when you give your script the same '
+              'as name a library module you are trying to import. '
+              'This won\'t work, because your module will shadow the library module.',
   'tho_xpln': '',
   'usage': 'warning'},
   
