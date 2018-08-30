@@ -6,6 +6,7 @@ from typing import Iterable
 from thonny import get_runner, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
+import logging
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):
@@ -56,7 +57,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
         for line in out.splitlines():
             m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
             if m is not None:
-                message = m.group(5).strip()
+                message = m.group(5).strip() + " (MP)"
                 if message == "invalid syntax":
                     continue # user will see this as Python error
                 
@@ -72,7 +73,23 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                 atts["symbol"] = "mypy-" + atts["kind"]
                 warnings.append(atts)
             else:
-                print("Bad MyPy line", line)
+                # Without line number?
+                m = re.match(r"(.*?): (.*?):(.*)", line.strip())
+                if m is not None:
+                    message = m.group(3).strip() + " (MP)"
+                    if message == "invalid syntax":
+                        continue # user will see this as Python error
+                    
+                    atts = {
+                        "filename" : m.group(1),
+                        "kind" : m.group(2).strip(), 
+                        "msg" : message,
+                        "group" : "warnings",
+                    }
+                    atts["symbol"] = "mypy-" + atts["kind"]
+                    warnings.append(atts)
+                else:
+                    logging.warning("Confusing MyPy line: " + line)
 
         
         self.completion_handler(self, warnings)
