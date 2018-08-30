@@ -51,7 +51,7 @@ class AstView(ui_utils.TreeFrame):
 
         self._clear_tree()
         
-        if self._current_source.strip() == "":
+        if not self._current_source.strip():
             return
         
         try:
