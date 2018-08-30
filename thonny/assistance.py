@@ -263,7 +263,9 @@ class AssistantView(tktextext.TextFrame):
         for warning in warnings:
             if warning["filename"] not in by_file:
                 by_file[warning["filename"]] = []
-            by_file[warning["filename"]].append(warning)
+            if warning not in by_file[warning["filename"]]:
+                # Pylint may give double warnings (eg. when module imports itself) 
+                by_file[warning["filename"]].append(warning)
         
         for filename in by_file:
             rst += "`%s <%s>`__\n\n" % (os.path.basename(filename),

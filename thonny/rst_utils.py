@@ -300,6 +300,9 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
                     self._append_text("%d. " % (i+1))
                     break
     
+    def visit_target(self, node):
+        pass
+    
     def visit_substitution_definition(self, node):
         raise docutils.nodes.SkipNode()
     
