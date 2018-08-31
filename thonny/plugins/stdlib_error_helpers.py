@@ -363,7 +363,7 @@ class AttributeErrorHelper(ErrorHelper):
                if self._is_call_function() 
                else "access attribute ") 
             + "`%s` of " % self.att_name
-            + self._get_phrase_for_object(self.type_name)
+            + _get_phrase_for_object(self.type_name)
             + ", but this type doesn't have such "
             + ("method." 
                if self._is_call_function() 
