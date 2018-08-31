@@ -301,6 +301,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         """
         
         self.update_appearance()
+        
+        # should be in the end, so that it can be detected when 
+        # constructor hasn't completed yet
+        self.preferred_size_in_pw = None
+        
     
     def _list_recent_files(self):
         pass

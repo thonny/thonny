@@ -89,28 +89,31 @@ class AutomaticPanedWindow(tk.PanedWindow):
 
     
     def __init__(self, master, position_key=None,
-                first_pane_size=1/3, last_pane_size=1/3, **kwargs):
+            preferred_size_in_pw=None, **kwargs):
         
         tk.PanedWindow.__init__(self, master, **kwargs)
-        
+        self._pane_minsize = 100
         self.position_key = position_key
-        self.visible_panes = set()
-        self.first_pane_size = first_pane_size
-        self.last_pane_size = last_pane_size
         self._restoring_pane_sizes = False
         
         self._last_window_size = (0,0)
         self._full_size_not_final = True
-        self._configure_binding = self.winfo_toplevel().bind("<Configure>", self._on_window_resize, True)
+        self._configure_binding = self.bind("<Configure>", self._on_window_resize, True)
         self._update_appearance_binding = self.bind("<<ThemeChanged>>", self._update_appearance, True)
         self.bind("<B1-Motion>", self._on_mouse_dragged, True)
         self._update_appearance()
+        
+        # should be in the end, so that it can be detected when 
+        # constructor hasn't completed yet
+        self.preferred_size_in_pw = preferred_size_in_pw
     
     def insert(self, pos, child, **kw):
+        kw.setdefault("minsize", self._pane_minsize)
+                
         if pos == "auto":
             # According to documentation I should use self.panes()
             # but this doesn't return expected widgets
-            for sibling in sorted(self.visible_panes, 
+            for sibling in sorted(self.pane_widgets(), 
                                   key=lambda p:p.position_key 
                                         if hasattr(p, "position_key")
                                         else 0):
@@ -124,40 +127,44 @@ class AutomaticPanedWindow(tk.PanedWindow):
             
         if isinstance(pos, tk.Widget):
             kw["before"] = pos
+        
         self.add(child, **kw)
 
     def add(self, child, **kw):
-        kw.setdefault("minsize", 60)
-            
+        kw.setdefault("minsize", self._pane_minsize)
+        
         tk.PanedWindow.add(self, child, **kw)
-        self.visible_panes.add(child)
         self._update_visibility()
-        self._check_restore_pane_sizes()
+        self._check_restore_preferred_sizes()
     
     def remove(self, child):
         tk.PanedWindow.remove(self, child)
-        self.visible_panes.remove(child)
         self._update_visibility()
-        self._check_restore_pane_sizes()
+        self._check_restore_preferred_sizes()
     
     def forget(self, child):
         tk.PanedWindow.forget(self, child)
-        self.visible_panes.remove(child)
         self._update_visibility()
-        self._check_restore_pane_sizes()
+        self._check_restore_preferred_sizes()
     
     def destroy(self):
-        self.winfo_toplevel().unbind("<Configure>", self._configure_binding)
+        self.unbind("<Configure>", self._configure_binding)
         self.unbind("<<ThemeChanged>>", self._update_appearance_binding)
         tk.PanedWindow.destroy(self)
-        
-    
     
     def is_visible(self):
         if not isinstance(self.master, AutomaticPanedWindow):
             return self.winfo_ismapped()
         else:
-            return self in self.master.visible_panes
+            return self in self.master.pane_widgets()
+    
+    def pane_widgets(self):
+        result = []
+        for pane in self.panes():
+            # pane is not the widget but some kind of reference object 
+            assert not isinstance(pane, tk.Widget)
+            result.append(self.nametowidget(str(pane)))
+        return result
     
     def _on_window_resize(self, event):
         if event.width < 10 or event.height < 10:
@@ -169,95 +176,113 @@ class AutomaticPanedWindow(tk.PanedWindow):
         if (not initializing
             and not self._restoring_pane_sizes 
             and (window_size != self._last_window_size or self._full_size_not_final)):
-            self._check_restore_pane_sizes()
+            self._check_restore_preferred_sizes()
             self._last_window_size = window_size
     
     def _on_mouse_dragged(self, event):
         if event.widget == self and not self._restoring_pane_sizes:
-            self._store_pane_sizes()
+            self._update_preferred_sizes()
             
     
-    def _store_pane_sizes(self):
-        if len(self.panes()) > 1:
-            self.last_pane_size = self._get_pane_size("last")
-            if len(self.panes()) > 2:
-                self.first_pane_size = self._get_pane_size("first")
-    
-    def _check_restore_pane_sizes(self):
-        """last (and maybe first) pane sizes are stored, first (or middle)
-        pane changes its size when window is resized"""
-        
+    def _update_preferred_sizes(self):
+        for pane in self.pane_widgets():
+            if pane.preferred_size_in_pw is not None:
+                if self.cget("orient") == "horizontal":
+                    current_size = pane.winfo_width()
+                else:
+                    current_size = pane.winfo_height()
+                
+                if current_size > 20:
+                    pane.preferred_size_in_pw = current_size
+                    
+                    # paneconfig width/height effectively puts
+                    # unexplainable maxsize to some panes 
+                    #if self.cget("orient") == "horizontal":
+                    #    self.paneconfig(pane, width=current_size)
+                    #else:
+                    #    self.paneconfig(pane, height=current_size)
+                    #
+            #else:
+            #    self.paneconfig(pane, width=1000, height=1000)
+                        
+    def _check_restore_preferred_sizes(self):
         window = self.winfo_toplevel()
-        if hasattr(window, "initializing") and window.initializing:
+        if getattr(window, "initializing", False):
             return
         
         try:
             self._restoring_pane_sizes = True
-            if len(self.panes()) > 1:
-                self._set_pane_size("last", self.last_pane_size)
-                if len(self.panes()) > 2:
-                    self._set_pane_size("first", self.first_pane_size)
+            self._restore_preferred_sizes()
         finally:
             self._restoring_pane_sizes = False
     
-    def _get_pane_size(self, which):
-        self.update_idletasks()
+    def _restore_preferred_sizes(self):
+        total_preferred_size = 0
+        panes_without_preferred_size = []
         
-        if which == "first":
-            coord = self.sash_coord(0)
-        else:
-            coord = self.sash_coord(len(self.panes())-2)
+        
+        panes = self.pane_widgets()
+        for pane in panes:
+            if not hasattr(pane, "preferred_size_in_pw"):
+                # child isn't fully constructed yet
+                return
             
-        if self.cget("orient") == tk.HORIZONTAL:
-            full_size = self.winfo_width()
-            sash_distance = coord[0]
-        else:
-            full_size = self.winfo_height()
-            sash_distance = coord[1]
+            if pane.preferred_size_in_pw is None:
+                panes_without_preferred_size.append(pane)
+                #self.paneconfig(pane, width=1000, height=1000)
+            else:
+                total_preferred_size += pane.preferred_size_in_pw
+                
+                
+                # Without updating pane width/height attribute
+                # the preferred size may lose effect when squeezing
+                # non-preferred panes too small. Also zooming/unzooming
+                # changes the supposedly fixed panes ...
+                # 
+                # but 
+                # paneconfig width/height effectively puts
+                # unexplainable maxsize to some panes
+                #if self.cget("orient") == "horizontal":
+                #    self.paneconfig(pane, width=pane.preferred_size_in_pw)
+                #else:
+                #    self.paneconfig(pane, height=pane.preferred_size_in_pw)
         
-        if which == "first":
-            return sash_distance
-        else:
-            return full_size - sash_distance 
+        assert len(panes_without_preferred_size) <= 1
         
-    
-    def _set_pane_size(self, which, size):
-        
-        if self.cget("orient") == tk.HORIZONTAL:
-            full_size = self.winfo_width()
-        else:
-            full_size = self.winfo_height()
-        
-        self._full_size_not_final = full_size == 1
-        
-        if self._full_size_not_final:
+        size = self._get_size()
+        if size is None:
             return
         
-        if isinstance(size, float):
-            size = int(full_size * size)
+        leftover_size = self._get_size() - total_preferred_size
+        used_size = 0
+        for i, pane in enumerate(panes[:-1]):
+            used_size += pane.preferred_size_in_pw or leftover_size
+            self._place_sash(i, used_size)
+            used_size += int(str(self.cget("sashwidth")))
         
-        #print("full vs size", full_size, size)
-        
-        if which == "first":
-            sash_index = 0
-            sash_distance = size 
-        else:
-            sash_index = len(self.panes())-2
-            sash_distance = full_size - size 
-        
+    def _get_size(self):
         if self.cget("orient") == tk.HORIZONTAL:
-            self.sash_place(sash_index, sash_distance, 0)
-            #print("PLACE", sash_index, sash_distance, 0)
+            result = self.winfo_width()
         else:
-            self.sash_place(sash_index, 0, sash_distance)
-            #print("PLACE", sash_index, 0, sash_distance)
-      
+            result = self.winfo_height()
+        
+        if result < 20:
+            # Not ready yet
+            return None
+        else:
+            return result
     
+    def _place_sash(self, i, distance):
+        if self.cget("orient") == tk.HORIZONTAL:
+            self.sash_place(i, distance, 0)
+        else:
+            self.sash_place(i, 0, distance)
+        
     def _update_visibility(self):
         if not isinstance(self.master, AutomaticPanedWindow):
             return
         
-        if len(self.visible_panes) == 0 and self.is_visible():
+        if len(self.panes()) == 0 and self.is_visible():
             self.master.forget(self)
             
         if len(self.panes()) > 0 and not self.is_visible():
@@ -412,13 +437,18 @@ class AutomaticNotebook(ClosableNotebook):
     Enables inserting views according to their position keys.
     Remember its own position key. Automatically updates its visibility.
     """
-    def __init__(self, master, position_key):
+    def __init__(self, master, position_key,
+                 preferred_size_in_pw=None):
         if get_workbench().get_mode() == "simple":
             style="TNotebook"
         else:
             style="ButtonNotebook.TNotebook"
         super().__init__(master, style=style, padding=0)
         self.position_key = position_key
+        
+        # should be in the end, so that it can be detected when 
+        # constructor hasn't completed yet
+        self.preferred_size_in_pw = preferred_size_in_pw
     
     def add(self, child, **kw):
         super().add(child, **kw)
@@ -449,7 +479,7 @@ class AutomaticNotebook(ClosableNotebook):
         self._update_visibility()
     
     def is_visible(self):
-        return self in self.master.visible_panes
+        return self in self.master.pane_widgets()
     
     def get_visible_child(self):
         for child in self.winfo_children():
@@ -990,7 +1020,6 @@ class NoteBox(tk.Toplevel):
 def get_widget_offset_from_toplevel(widget):
     x = 0
     y = 0
-    print("roo", widget.winfo_rootx(), widget.winfo_rooty())
     toplevel = widget.winfo_toplevel()
     while widget != toplevel:
         x += widget.winfo_x()

@@ -480,47 +480,45 @@ class Workbench(tk.Tk):
         self._toolbar = ttk.Frame(main_frame, padding=0) 
         self._toolbar.grid(column=0, row=0, sticky=tk.NSEW, padx=10, pady=(5,0))
         
-        self.set_default("layout.main_pw_first_pane_size", 1/3)
-        self.set_default("layout.main_pw_last_pane_size", 1/3)
-        self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL,
-            first_pane_size=self.get_option("layout.main_pw_first_pane_size"),
-            last_pane_size=self.get_option("layout.main_pw_last_pane_size")
-        )
+        self.set_default("layout.west_pw_width", self.scale(150))
+        self.set_default("layout.east_pw_width", self.scale(150))
+        
+        self.set_default("layout.s_nb_height", self.scale(150))
+        self.set_default("layout.nw_nb_height", self.scale(150))
+        self.set_default("layout.sw_nb_height", self.scale(150))
+        self.set_default("layout.ne_nb_height", self.scale(150))
+        self.set_default("layout.se_nb_height", self.scale(150))
+        
+        self._main_pw = AutomaticPanedWindow(main_frame, orient=tk.HORIZONTAL)
         
         self._main_pw.grid(column=0, row=1, sticky=tk.NSEW, padx=10, pady=10)
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
         
-        self.set_default("layout.west_pw_first_pane_size", 1/3)
-        self.set_default("layout.west_pw_last_pane_size", 1/3)
-        self.set_default("layout.center_pw_first_pane_size", 1/3)
-        self.set_default("layout.center_pw_last_pane_size", 1/3)
-        self.set_default("layout.east_pw_first_pane_size", 1/3)
-        self.set_default("layout.east_pw_last_pane_size", 1/3)
         
         self._west_pw = AutomaticPanedWindow(self._main_pw, 1, orient=tk.VERTICAL,
-            first_pane_size=self.get_option("layout.west_pw_first_pane_size"),
-            last_pane_size=self.get_option("layout.west_pw_last_pane_size")
+            preferred_size_in_pw=self.get_option("layout.west_pw_width")
         )
-        self._center_pw = AutomaticPanedWindow(self._main_pw, 2, orient=tk.VERTICAL,
-            first_pane_size=self.get_option("layout.center_pw_first_pane_size"),
-            last_pane_size=self.get_option("layout.center_pw_last_pane_size")
-        )
+        self._center_pw = AutomaticPanedWindow(self._main_pw, 2, orient=tk.VERTICAL)
         self._east_pw = AutomaticPanedWindow(self._main_pw, 3, orient=tk.VERTICAL,
-            first_pane_size=self.get_option("layout.east_pw_first_pane_size"),
-            last_pane_size=self.get_option("layout.east_pw_last_pane_size")
+            preferred_size_in_pw=self.get_option("layout.east_pw_width")
         )
         
         self._view_notebooks = {
-            'nw' : AutomaticNotebook(self._west_pw, 1),
+            'nw' : AutomaticNotebook(self._west_pw, 1,
+                    preferred_size_in_pw=self.get_option("layout.nw_nb_height")),
             'w'  : AutomaticNotebook(self._west_pw, 2),
-            'sw' : AutomaticNotebook(self._west_pw, 3),
+            'sw' : AutomaticNotebook(self._west_pw, 3,
+                    preferred_size_in_pw=self.get_option("layout.sw_nb_height")),
             
-            's'  : AutomaticNotebook(self._center_pw, 3),
+            's'  : AutomaticNotebook(self._center_pw, 3,
+                    preferred_size_in_pw=self.get_option("layout.s_nb_height")),
             
-            'ne' : AutomaticNotebook(self._east_pw, 1),
+            'ne' : AutomaticNotebook(self._east_pw, 1,
+                    preferred_size_in_pw=self.get_option("layout.ne_nb_height")),
             'e'  : AutomaticNotebook(self._east_pw, 2),
-            'se' : AutomaticNotebook(self._east_pw, 3),
+            'se' : AutomaticNotebook(self._east_pw, 3,
+                    preferred_size_in_pw=self.get_option("layout.se_nb_height")),
         }
         
         for nb_name in self._view_notebooks:
@@ -1688,15 +1686,6 @@ class Workbench(tk.Tk):
         
         self.set_option("layout.zoomed", ui_utils.get_zoomed(self))
         
-        # each AutomaticPanedWindow remember it's splits for both 2 and 3 panes
-        self.set_option("layout.main_pw_first_pane_size", self._main_pw.first_pane_size)
-        self.set_option("layout.main_pw_last_pane_size", self._main_pw.last_pane_size)
-        self.set_option("layout.east_pw_first_pane_size", self._east_pw.first_pane_size)
-        self.set_option("layout.east_pw_last_pane_size", self._east_pw.last_pane_size)
-        self.set_option("layout.center_pw_last_pane_size", self._center_pw.last_pane_size)
-        self.set_option("layout.west_pw_first_pane_size", self._west_pw.first_pane_size)
-        self.set_option("layout.west_pw_last_pane_size", self._west_pw.last_pane_size)
-        
         for nb_name in self._view_notebooks:
             widget = self._view_notebooks[nb_name].get_visible_child()
             if hasattr(widget, "maximizable_widget"):
@@ -1712,11 +1701,14 @@ class Workbench(tk.Tk):
             self.set_option("layout.width", self.winfo_width())
             self.set_option("layout.height", self.winfo_height())
         
+        
+        self.set_option("layout.west_pw_width", self._west_pw.preferred_size_in_pw)
+        self.set_option("layout.east_pw_width", self._east_pw.preferred_size_in_pw)
+        for key in ["nw", "sw", "s", "se", "ne"]:
+            self.set_option("layout.%s_nb_height" % key,
+                            self._view_notebooks[key].preferred_size_in_pw)
+        
         self._configuration_manager.save()
-    
-    #def focus_set(self):
-    #    tk.Tk.focus_set(self)
-    #    self._editor_notebook.focus_set()
     
     def update_title(self, event=None) -> None:
         editor = self.get_editor_notebook().get_current_editor()
