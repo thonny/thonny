@@ -2,6 +2,17 @@
 Version history
 ===============
 
+3.0.0b4 (2018-08-31)
+====================
+* NEW: When program has syntax error or crashes with an exception, Assistant pane opens and tries to help diagnose the problem. Uses Pylint, MyPy and custom dynamic analysis under the hood. (Big "Thank you!" to Raspberry Pi Foundation for the support!) 
+
+* ENHANCEMENT: Resizing the main window doesn't mess up views' layout anymore.
+* ENHANCEMENT: Better support for debugging f-strings.
+* ENHANCEMENT: Nice debugger now recovers better when it is not able to understand a program.
+* FIXED #496: Regression which caused Variables view to skip variables updates during "nicer debugging".
+* FIXED #440: Copy&paste over a selection will now delete the text selection first (was problem for some Linuxes)
+* FIXED: Removed a nasty debugging statement left into b3, which may cause a crash in the end of debugging.
+
 3.0.0b3 (2018-08-11)
 ====================
 * FIXED: Various problems with pip GUI
@@ -20,7 +31,7 @@ Note: This version is successor of 2.2.0b4 and 2.1.21. Stable release of 2.2.0 w
 (Incrementing the major version felt more appropriate considering the amount of new and changed features.)
 
 * NEW: Thonny now has two debug modes: beside original AST based debug mode (the "nicer" one, Ctrl+F5) there is now also line-based mode (the "faster" one, Shift+F5), which is not so intuitive but much more efficient. 
-* NEW: Both debug modes now support breakpoints (switch on line numbers and double-click on the margin) 
+* NEW: Both debug modes now support breakpoints (switch on line numbers and double-click on the margin). Big thanks to Raspberry Pi Foundation for the support! 
 * NEW: Alternative presentation for call stack (in single window, just like in most debuggers; see Tools => Options => Debugger) 
 * NEW: Clicking on the links in stacktrace now shows the variables of those frames.
 * NEW: You can re-run your changed program without closing it first (relevant for graphical programs).   
