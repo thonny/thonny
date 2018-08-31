@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.0.0b5 (2018-09-01)
+====================
+* FIXED: requirements.txt was missing mypy 
+
 3.0.0b4 (2018-08-31)
 ====================
 * NEW: When program has syntax error or crashes with an exception, Assistant pane opens and tries to help diagnose the problem. Uses Pylint, MyPy and custom dynamic analysis under the hood. (Big "Thank you!" to Raspberry Pi Foundation for the support!) 
