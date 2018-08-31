@@ -75,7 +75,7 @@ class Debugger:
             return True
     
     def handle_debugger_progress(self, msg):
-        pass
+        self._last_brought_out_frame_id = None
     
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         self.close()
@@ -85,6 +85,8 @@ class Debugger:
         _current_debugger = None
         get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
         get_workbench().unbind("DebuggerResponse", self.handle_debugger_progress)
+        
+        self._last_brought_out_frame_id = None
         
         if get_workbench().get_option("debugger.automatic_stack_view"):
             get_workbench().hide_view("StackView")
@@ -147,6 +149,7 @@ class SingleWindowDebugger(Debugger):
         return None
         
     def handle_debugger_progress(self, msg):
+        super().handle_debugger_progress(msg)
         self._last_progress_message = msg
         self.bring_out_frame(self._last_progress_message.stack[-1].id,
                              force=True)
@@ -168,6 +171,7 @@ class SingleWindowDebugger(Debugger):
     def bring_out_frame(self, frame_id, force=False):
         if not force and frame_id == self._last_brought_out_frame_id:
             return
+        
         self._last_brought_out_frame_id = frame_id
         
         frame_info = self.get_frame_by_id(frame_id)
@@ -212,6 +216,8 @@ class StackedWindowsDebugger(Debugger):
             return None
         
     def handle_debugger_progress(self, msg):
+        super().handle_debugger_progress(msg)
+        
         self._last_progress_message = msg
         
         main_frame_id = msg.stack[0].id
@@ -260,6 +266,7 @@ class StackedWindowsDebugger(Debugger):
     def bring_out_frame(self, frame_id, force=False):
         if not force and frame_id == self._last_brought_out_frame_id:
             return
+        
         self._last_brought_out_frame_id = frame_id
         
         self._main_frame_visualizer.bring_out_frame(frame_id)
