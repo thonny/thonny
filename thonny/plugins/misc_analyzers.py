@@ -3,6 +3,7 @@ from thonny import get_runner, rst_utils
 from thonny.running import CPythonProxy
 import logging
 import os
+from thonny.common import is_same_path
 
 
 known_stdlib_modules = {
@@ -57,20 +58,30 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
             if (item.endswith(".py")
                 and item[:-3] in library_modules):
                 
+                if is_same_path(full_path, main_file_path):
+                    prelude = "Your program file is named '%s'." % item
+                    rename_hint = " (*Run → Rename…* )"
+                else:
+                    prelude = (
+                        "Your working directory `%s <%s>`__ contains a file named '%s'.\n\n"
+                        % (rst_utils.escape(main_file_dir),
+                               rst_utils.escape(main_file_dir),
+                               item)
+                    )
+                    rename_hint = ""
+                
                 yield {
                     "filename" : full_path,
                     "lineno" : 0,
                     "symbol" : "file-shadows-library-module",
-                    "msg" : "File may shadow a library module",
-                    "explanation_rst" : (
-                        "Your working directory `%s <%s>`__ contains a file named '%s'.\n\n"
-                            % (rst_utils.escape(main_file_dir),
-                               rst_utils.escape(main_file_dir),
-                               item))
-                        + "When you try to import library module ``%s``, this file will be imported instead.\n\n"
+                    "msg" : "Bad file name",
+                    "explanation_rst" : 
+                        prelude
+                        + "\n\n"                            
+                        + "When you try to import library module ``%s``, your file will be imported instead.\n\n"
                             % item[:-3]
-                        + "Rename '%s' (*Run → Rename…* ) or save your work to a different directory to make the library module visible again."
-                            % item,
+                        + "Rename your '%s'%s to make the library module visible again."
+                            % (item, rename_hint),
                     "group" : "warnings",
                     "relevance" : 5
                 }

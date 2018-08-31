@@ -57,7 +57,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
         for line in out.splitlines():
             m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
             if m is not None:
-                message = m.group(5).strip() + " (MP)"
+                message = m.group(5).strip()
                 if message == "invalid syntax":
                     continue # user will see this as Python error
                 
@@ -89,7 +89,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                     atts["symbol"] = "mypy-" + atts["kind"]
                     warnings.append(atts)
                 else:
-                    logging.warning("Confusing MyPy line: " + line)
+                    logging.error("Can't parse MyPy line: " + line)
 
         
         self.completion_handler(self, warnings)

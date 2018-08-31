@@ -96,7 +96,10 @@ class AssistantView(tktextext.TextFrame):
         self._snapshots_per_main_file[key].append(self._current_snapshot)
         
         if msg.get("user_exception"):
+            self._exception_info = msg["user_exception"]
             self._explain_exception(msg["user_exception"])
+        else:
+            self._exception_info = None
         
         if msg.get("filename") and os.path.exists(msg["filename"]):
             self.main_file_path = msg["filename"]
@@ -252,11 +255,16 @@ class AssistantView(tktextext.TextFrame):
         if not warnings:
             return
         
+        if self._exception_info is None:
+            intro = "May be ignored if you are happy with your program."
+        else:
+            intro = "May indicate the cause of the error."
+        
         rst = (
             ".. default-role:: code\n"
             + "\n"
             + rst_utils.create_title("Warnings")
-            + "*May be ignored if you are happy with your program.*\n\n"
+            + "*%s*\n\n" % intro
         )
         
         by_file = {}
