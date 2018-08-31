@@ -75,11 +75,14 @@ class AssistantView(tktextext.TextFrame):
                                 )
         self.text.tag_bind("feedback_link", "<ButtonRelease-1>", self._ask_feedback, True)
         
-        get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
+        get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
         
         add_error_helper("*", GenericErrorHelper)
     
-    def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
+    def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
+        # Can be called by event system or by Workbench 
+        # (if Assistant wasn't created yet but an error came)
+         
         self._clear()
         
         # prepare for snapshot
@@ -94,6 +97,8 @@ class AssistantView(tktextext.TextFrame):
         if msg.get("user_exception"):
             self._exception_info = msg["user_exception"]
             self._explain_exception(msg["user_exception"])
+            if get_workbench().get_option("assistance.open_assistant_on_errors"):
+                get_workbench().show_view("AssistantView")
         else:
             self._exception_info = None
         
@@ -254,7 +259,7 @@ class AssistantView(tktextext.TextFrame):
         if self._exception_info is None:
             intro = "May be ignored if you are happy with your program."
         else:
-            intro = "May indicate the cause of the error."
+            intro = "May help you find the cause of the error."
         
         rst = (
             ".. default-role:: code\n"
@@ -290,6 +295,10 @@ class AssistantView(tktextext.TextFrame):
         # save snapshot
         self._current_snapshot["warnings_rst"] = rst
         self._current_snapshot["warnings"] = warnings
+        
+        if get_workbench().get_option("assistance.open_assistant_on_warnings"):
+            get_workbench().show_view("AssistantView")
+        
                 
     
     def _format_warning(self, warning, last):
@@ -815,3 +824,10 @@ def add_program_analyzer(cls):
 def add_error_helper(error_type_name, helper_class):
     _error_helper_classes.setdefault(error_type_name, [])
     _error_helper_classes[error_type_name].append(helper_class)
+
+def init():
+    get_workbench().set_default("assistance.open_assistant_on_errors", True)
+    get_workbench().set_default("assistance.open_assistant_on_warnings", False)
+    get_workbench().add_view(AssistantView, "Assistant", "ne", visible_by_default=False)
+        
+    

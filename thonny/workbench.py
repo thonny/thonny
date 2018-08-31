@@ -23,8 +23,7 @@ from typing import (Any, Callable, Dict, List, Optional,     # pylint: disable=u
 from warnings import warn
 
 import thonny
-from thonny import THONNY_USER_DIR, get_runner, running, ui_utils
-from thonny.assistance import AssistantView
+from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, actual_path
 from thonny.config import try_load_configuration
@@ -110,7 +109,7 @@ class Workbench(tk.Tk):
         self._init_theming()
         self._init_window()
         self.add_view(ShellView, "Shell", "s", visible_by_default=True, default_position_key='A')
-        self.add_view(AssistantView, "Assistant", "ne", visible_by_default=False)
+        assistance.init()
         self._runner = Runner()
         self._load_plugins()
         
@@ -1207,6 +1206,7 @@ class Workbench(tk.Tk):
                 
                 # make a copy of handlers, so that event handler can remove itself
                 # from the registry during iteration
+                # (or new handlers can be added)
                 for handler in sorted(self._event_handlers[sequence].copy(), key=str):
                     try:
                         handler(event)
@@ -1678,6 +1678,7 @@ class Workbench(tk.Tk):
         # otherwise it may miss globals events
         # and will show empty table on open
         self.get_view("VariablesView")
+        self.get_view("AssistantView")
                 
         
         
@@ -1768,6 +1769,7 @@ class Workbench(tk.Tk):
     def bell(self, displayof=0):
         if self.get_option("general.audible_bell"):
             super().bell(displayof=displayof)
+            
     
 class WorkbenchEvent(Record):
     def __init__(self, sequence: str, **kwargs) -> None:
