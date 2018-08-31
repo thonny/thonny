@@ -211,7 +211,7 @@ class NameErrorHelper(ErrorHelper):
             ) 
         
         return Suggestion(
-            "bad-spelling",
+            "bad-spelling-name",
             "Did you misspell it (somewhere)?",
             body,
             relevance
@@ -322,7 +322,13 @@ class NameErrorHelper(ErrorHelper):
             + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
             + "\n\n"
             + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, use the debugger."),
-            1)
+            2)
+    
+    def _sug_maybe_attribute(self):
+        "TODO:"
+    
+    def _sug_synonym(self):
+        "TODO:"
     
     def _is_call_function(self):
         return self.name + "(" in (self.error_info["line"]
@@ -341,6 +347,204 @@ class NameErrorHelper(ErrorHelper):
                                    .replace(" ", "")
                                    .replace("\n", "")
                                    .replace("\r", ""))
+
+class AttributeErrorHelper(ErrorHelper):
+    def __init__(self, error_info):
+        super().__init__(error_info)
+        
+        names = re.findall(r"\'.*?\'", error_info["message"])
+        assert len(names) == 2
+        self.type_name = names[0].strip("'")
+        self.att_name = names[1].strip("'")
+        
+        self.intro_text = (
+            "Your program tries to "
+            + ("call method " 
+               if self._is_call_function() 
+               else "access attribute ") 
+            + "`%s` of " % self.att_name
+            + self._get_phrase_for_object(self.type_name)
+            + ", but this type doesn't have such "
+            + ("method." 
+               if self._is_call_function() 
+               else "attribute.")
+        )
+        
+        self.suggestions = [
+            self._sug_wrong_attribute_instead_of_len(),
+            self._sug_bad_spelling(),
+            self._sug_bad_type()
+        ] 
+    
+    def _sug_wrong_attribute_instead_of_len(self):
+        
+        if self.type_name == "str":
+            goal = "length"
+        elif self.type_name == "bytes":
+            goal = "number of bytes"
+        elif self.type_name == "list":
+            goal = "number of elements"
+        elif self.type_name == "tuple":
+            goal = "number of elements"
+        elif self.type_name == "set":
+            goal = "number of elements"
+        elif self.type_name == "dict":
+            goal = "number of entries"
+        else:
+            return
+         
+        return Suggestion(
+            "wrong-attribute-instead-of-len",
+            "Did you mean to ask the %s?" % goal,
+            "This can be done with function `len`, eg:\n\n`len(%s)`" 
+                % _get_sample_for_type(self.type_name),
+            (9
+             if self.att_name.lower() in ("len", "length", "size")
+             else 0) 
+        )
+    
+    def _sug_bad_spelling(self):
+        # TODO: compare with attributes of known types
+        return Suggestion(
+            "bad-spelling-attribute",
+            "Did you misspell the name?",
+            "Don't forget that case of the letters matters too!",
+            3 
+        )
+    
+    def _sug_bad_type(self):
+        if self._is_call_function():
+            action = "call this function on"
+        else:
+            action = "ask this attribute from"
+             
+        return Suggestion(
+            "wrong-type-attribute",
+            "Did you expect another type?",
+            "If you didn't mean %s %s, " 
+                % (action, _get_phrase_for_object(self.type_name))
+                + "then step through your program to see "
+                + "why this type appears here.",
+            3 
+        )
+    
+        
+    def _is_call_function(self):
+        return "." + self.att_name + "(" in (self.error_info["line"]
+                                   .replace(" ", "")
+                                   .replace("\n", "")
+                                   .replace("\r", ""))
+        
+
+class TypeErrorHelper(ErrorHelper):
+    def __init__(self, error_info):
+        super().__init__(error_info)
+        
+        self.intro_text = (
+            "Python was asked to do an operation with an object which "
+            + "doesn't support it."
+        )
+        
+        self.suggestions = [
+            Suggestion(
+                "step-to-find-type-error",
+                "Did you expect another type?",
+                "Step through your program to see why this type appears here.",
+                3
+            ),
+            Suggestion(
+                "look-documentation-type-error",
+                "Maybe you forgot some details about this operation?",
+                "Look up the documentation or perform a web search with the error message.",
+                2
+            )
+        ]
+        
+        
+        # overwrite / add for special cases
+        # something + str or str + something
+        for r, string_first in [
+            (r"unsupported operand type\(s\) for \+: '(.+?)' and 'str'", False),
+            (r"^Can't convert '(.+?)' object to str implicitly$", True), # Python 3.5
+            (r"^must be str, not (.+)$", True), # Python 3.6
+            (r'^can only concatenate str (not "(.+?)") to str$', True), # Python 3.7
+            ]:
+            m = re.match(r, error_info["message"], re.I)  # @UndefinedVariable
+            if m is not None:
+                self._bad_string_concatenation(m.group(1), string_first)
+                return
+    
+    def _bad_string_concatenation(self, other_type_name, string_first):
+        self.intro_text = (
+            "Your program is trying to put together "
+            + ("a string and %s." if string_first else "%s and a string.")
+                % _get_phrase_for_object(other_type_name)
+        )
+        
+        self.suggestions.append(Suggestion(
+            "convert-other-operand-to-string",
+            "Did you mean to treat both sides as text and produce a string?",
+            "In this case you should apply function `str` to the %s " 
+                % _get_phrase_for_object(other_type_name, False)
+            + "in order to convert it to string first, eg:\n\n"
+            + ("`'abc' + str(%s)`" if string_first else "`str(%s) + 'abc'`")
+                % _get_sample_for_type(other_type_name),
+            
+            8
+        ))
+        
+        if other_type_name in ("float", "int"):
+            self.suggestions.append(Suggestion(
+                "convert-other-operand-to-number",
+                "Did you mean to treat both sides as numbers and produce a sum?",
+                "In this case you should first convert the string to a number "
+                + "using either function `float` or `int`, eg:\n\n"
+                + ("`float('3.14') + 22`" if string_first else "`22 + float('3.14')`"),
+                7
+            ))
+        
+
+def _get_phrase_for_object(type_name, with_article=True):
+    friendly_names = {
+        "str" : "a string",
+        "int" : "an integer",
+        "float" : "a float",
+        "list" : "a list",
+        "tuple" : "a tuple",
+        "dict" : "a dictionary",
+        "set" : "a set",
+        "bool" : "a boolean"
+    }
+    result = friendly_names.get(type_name,
+                              "an object of type '%s'" % type_name)
+    
+    if with_article:
+        return result
+    else:
+        _, rest = result.split(" ", maxsplit=1)
+        return rest
+
+def _get_sample_for_type(type_name):
+    if type_name == "int":
+        return "42"
+    elif type_name == "float":
+        return "3.14"
+    elif type_name == "str":
+        return "'abc'"
+    elif type_name == "bytes":
+        return "b'abc'"
+    elif type_name == "list":
+        return "[1, 2, 3]"
+    elif type_name == "tuple":
+        return "(1, 2, 3)"
+    elif type_name == "set":
+        return "{1, 2, 3}"
+    elif type_name == "dict":
+        return "{1 : 'one', 2 : 'two'}"
+    else:
+        return "..."
+    
+
 
 def load_plugin():
     for name in globals():
