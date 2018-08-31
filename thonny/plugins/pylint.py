@@ -5,6 +5,7 @@ import sys
 from thonny import ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
+import logging
 
 
 class PylintAnalyzer(SubprocessProgramAnalyzer):
@@ -21,23 +22,32 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
             "turtle" # has dynamically generated attributes
         }
         
+        options = [
+            #"--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
+            "--persistent=n", 
+            #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
+            #"--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
+            "--disable=all",
+            "--enable=" + ",".join(relevant_symbols),
+            "--ignored-modules=" + ",".join(ignored_modules),
+            "--max-line-length=120",
+            "--output-format=text",
+            "--reports=n",
+            "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}, 'category' : {C!r} }}",
+        ]
+        
+        # disallow unused globals only in main script
+        from pylint.__pkginfo__ import numversion
+        if not imported_file_paths and numversion >= (1, 7):
+            # (unfortunately can't separate main script when user modules are present)
+            options.append("--allow-global-unused-variables=no")
+        
         
         self._proc = ui_utils.popen_with_ui_thread_callback(
-            [get_frontend_python(), "-m", 
-                "pylint", 
-                #"--rcfile=None", # TODO: make it ignore any rcfiles that can be somewhere 
-                "--persistent=n", 
-                #"--confidence=HIGH", # Leave empty to show all. Valid levels: HIGH, INFERENCE, INFERENCE_FAILURE, UNDEFINED
-                #"--disable=missing-docstring,invalid-name,trailing-whitespace,trailing-newlines,missing-final-newline,locally-disabled,suppressed-message",
-                "--disable=all",
-                "--enable=" + ",".join(relevant_symbols),
-                "--ignored-modules=" + ",".join(ignored_modules),
-                "--max-line-length=120",
-                "--output-format=text",
-                "--reports=n",
-                "--msg-template={{'filename':{abspath!r}, 'lineno':{line}, 'col_offset':{column}, 'symbol':{symbol!r}, 'msg':{msg!r}, 'msg_id':{msg_id!r}}}",
-                main_file_path
-                ] + list(imported_file_paths),
+            [get_frontend_python(), "-m", "pylint"]
+                + options 
+                + [main_file_path]
+                + list(imported_file_paths),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
@@ -61,7 +71,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
                 try:
                     atts = ast.literal_eval(line.strip())
                 except SyntaxError:
-                    print(line)
+                    logging.error("Can't parse Pylint line: " + line)
                     continue
                 else:
                     check = all_checks_by_symbol[atts["symbol"]]
@@ -88,6 +98,8 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
                     if check.get("tho_xpln_rst"):
                         atts["explanation_rst"] = check["tho_xpln_rst"]
                     
+                    if atts["category"] in ("I", "F"):
+                        atts["msg"] = "INTERNAL ERROR when analyzing the code: " + atts["msg"]
                     
                     #atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
                     warnings.append(atts)
