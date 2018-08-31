@@ -812,13 +812,6 @@ class StackView(ui_utils.TreeFrame):
         
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
-    
-    def before_show(self):
-        if (get_workbench().get_option("debugger.automatic_stack_view")
-            and _current_debugger is None):
-            return False
-        
-        return None
 
         
     def _update_stack(self, msg):

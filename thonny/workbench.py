@@ -1175,6 +1175,8 @@ class Workbench(tk.Tk):
         if "instance" in self._view_records[view_id]:
             # TODO: handle the case, when view is maximized
             view = self._view_records[view_id]["instance"]
+            if view.hidden:
+                return
             
             if hasattr(view, "before_hide") and view.before_hide() == False:
                 return False
