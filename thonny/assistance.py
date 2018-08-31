@@ -1,17 +1,13 @@
 import ast
-import builtins
 import datetime
 import gzip
 import json
 import logging
 import os.path
-import re
 import sys
 import tempfile
 import textwrap
 import tkinter as tk
-import token
-import tokenize
 import urllib.request
 import webbrowser
 from collections import namedtuple
