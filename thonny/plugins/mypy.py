@@ -76,7 +76,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                 # Without line number?
                 m = re.match(r"(.*?): (.*?):(.*)", line.strip())
                 if m is not None:
-                    message = m.group(3).strip() + " (MP)"
+                    message = m.group(3).strip()
                     if message == "invalid syntax":
                         continue # user will see this as Python error
                     
