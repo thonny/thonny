@@ -2,7 +2,7 @@ import ast
 import subprocess
 import sys
 
-from thonny import ui_utils
+from thonny import ui_utils, get_workbench
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
 import logging
@@ -17,6 +17,10 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
             # https://github.com/PyCQA/pylint/issues/2453
             # TODO: allow if this is fixed in current version
             relevant_symbols.remove('bad-python3-import')
+        
+        # remove user-disabled checks
+        relevant_symbols = (relevant_symbols -
+                            set(get_workbench().get_option("assistance.disabled_checks")))       
             
         ignored_modules = {
             "turtle" # has dynamically generated attributes
@@ -1960,10 +1964,10 @@ all_checks = [
   'tho_xpln': 'It looks like the local variable is '
               'hiding a global variable with the same name.\n\n'
               "Most likely there is nothing wrong with this. "
-              "I just wanted to remind you that you can't change the global variable like this. "
+              "I just wanted to remind you that you can't access the global variable like this. "
               "If you knew it then please ignore the warning.\n\n"
-              "If you don't want to see this reminder in the future, then add"
-              '"redefined-outer-name" (without quotes) into "Tools → Options → Assistant → Ignored Pylint checks".',
+              "If you don't want to see this reminder in the future, then add "
+              '"redefined-outer-name" (without quotes) into "Tools → Options → Assistant → Disabled checks".',
   'usage': 'warning'},
   
  {'msg_id': 'W0622',

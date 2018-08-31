@@ -536,7 +536,7 @@ class FeedbackDialog(tk.Toplevel):
                                             wrap="word",
                                             font="TkDefaultFont",
                                             #cursor="arrow",
-                                            padx=10,
+                                            padx=5,
                                             pady=5,
                                             height=4,
                                             borderwidth=1,
@@ -834,6 +834,7 @@ def add_error_helper(error_type_name, helper_class):
 def init():
     get_workbench().set_default("assistance.open_assistant_on_errors", True)
     get_workbench().set_default("assistance.open_assistant_on_warnings", False)
+    get_workbench().set_default("assistance.disabled_checks", [])
     get_workbench().add_view(AssistantView, "Assistant", "ne", visible_by_default=False)
         
     
