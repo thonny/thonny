@@ -17,10 +17,12 @@ from typing import (Dict, Iterable, List, Optional, Tuple, # pylint disable=unus
                     
 
 import thonny
-from thonny import get_workbench, misc_utils, rst_utils, tktextext, ui_utils
+from thonny import get_workbench, misc_utils, rst_utils, tktextext, ui_utils,\
+    get_runner
 from thonny.common import ToplevelResponse, read_source
 from thonny.misc_utils import levenshtein_damerau_distance
 from thonny.ui_utils import scrollbar_style
+from thonny.running import CPythonProxy
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
@@ -84,6 +86,10 @@ class AssistantView(tktextext.TextFrame):
         # (if Assistant wasn't created yet but an error came)
          
         self._clear()
+        
+        if not isinstance(get_runner().get_backend_proxy(), CPythonProxy):
+            # TODO: add some support for MicroPython as well
+            return
         
         # prepare for snapshot
         key = msg.get("filename", "<pyshell>")
