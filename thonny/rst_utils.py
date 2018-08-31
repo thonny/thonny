@@ -299,7 +299,13 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
                 if sib is node:
                     self._append_text("%d. " % (i+1))
                     break
-    
+
+    def visit_note(self, node):
+        self._add_tag("em")
+        
+    def depart_note(self, node):
+        self._pop_tag("em")
+        
     def visit_target(self, node):
         pass
     

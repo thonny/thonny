@@ -147,17 +147,22 @@ class AssistantView(tktextext.TextFrame):
             if helper.intro_confidence > best_intro.intro_confidence:
                 best_intro = helper
         
-        # intro in italic
-        rst += ("*" 
-                + best_intro.intro_text.replace("\n\n", "*\n\n*")
-                + "*\n\n")
+        # intro
+        if best_intro.intro_text:
+            rst += (
+                ".. note::\n"
+                + "    " + best_intro.intro_text.strip().replace("\n\n", "\n\n    ")
+                + "\n\n"  
+            )
         
         suggestions = [suggestion 
                        for helper in helpers
-                       for suggestion in helper.suggestions]
+                       for suggestion in helper.suggestions
+                       if suggestion is not None]
         suggestions = sorted(suggestions, key=lambda s: s.relevance, reverse=True)
         
-        if suggestions[0].relevance > 1:
+        if (suggestions[0].relevance > 1
+            or best_intro.intro_confidence > 1):
             relevance_threshold = 2
         else:
             # use relevance 1 only when there is nothing better
@@ -414,7 +419,7 @@ class ErrorHelper(Helper):
             except SyntaxError:
                 pass
         
-        self.intro_confidence = 5
+        self.intro_confidence = 1
         self.intro_text = ""
         self.suggestions = []
         
@@ -423,14 +428,21 @@ class GenericErrorHelper(ErrorHelper):
     def __init__(self, error_info):
         super().__init__(error_info)
         
-        self.intro_text = "No specific suggestions for this error."
+        self.intro_text = "No specific suggestions for this error (yet)."
         self.intro_confidence = 1
         self.suggestions = [
-            Suggestion("search-the-web", 
+            Suggestion("search-the-web-generic", 
                        "Search the web",
                        "Try performing a web search for\n\n``Python %s: %s``" 
                          % (self.error_info["type_name"], self.error_info["message"]),
-                       1)] 
+                       1),
+            Suggestion("ask-for-specific-support", 
+                       "Let Thonny developers know",
+                       "Click on the feedback link at the bottom of this panel to let Thonny developers know "
+                        + "about your problem. They may add support for "
+                        + "such cases in future Thonny versions.",
+                       1),
+        ] 
     
 class ProgramAnalyzer:
     def __init__(self, on_completion):
