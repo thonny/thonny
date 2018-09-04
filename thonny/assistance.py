@@ -434,7 +434,9 @@ class GenericErrorHelper(ErrorHelper):
             Suggestion("search-the-web-generic", 
                        "Search the web",
                        "Try performing a web search for\n\n``Python %s: %s``" 
-                         % (self.error_info["type_name"], self.error_info["message"]),
+                         % (self.error_info["type_name"], 
+                            rst_utils.escape(self.error_info["message"])
+                            ),
                        1),
             Suggestion("ask-for-specific-support", 
                        "Let Thonny developers know",

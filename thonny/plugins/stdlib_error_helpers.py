@@ -473,6 +473,8 @@ class TypeErrorHelper(ErrorHelper):
             if m is not None:
                 self._bad_string_concatenation(m.group(1), string_first)
                 return
+        
+        # TODO: other operations, when one side is string
     
     def _bad_string_concatenation(self, other_type_name, string_first):
         self.intro_text = (
