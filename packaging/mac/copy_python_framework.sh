@@ -52,6 +52,16 @@ install_name_tool -change \
 	@rpath/Python.framework/Versions/3.7/lib/libtk8.6.dylib \
     $LOCAL_FRAMEWORKS/Python.framework/Versions/3.7/lib/libtk8.6.dylib 
 
+install_name_tool -change \
+    /Library/Frameworks/Python.framework/Versions/3.7/lib/libtcl8.6.dylib \
+	@rpath/Python.framework/Versions/3.7/lib/libtcl8.6.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.7/lib/python3.7/lib-dynload/_tkinter.cpython-37m-darwin.so 
+
+install_name_tool -change \
+    /Library/Frameworks/Python.framework/Versions/3.7/lib/libtk8.6.dylib \
+	@rpath/Python.framework/Versions/3.7/lib/libtk8.6.dylib \
+    $LOCAL_FRAMEWORKS/Python.framework/Versions/3.7/lib/python3.7/lib-dynload/_tkinter.cpython-37m-darwin.so 
+
 # update libcrypto and libssl links
 install_name_tool -id \
 	@rpath/Python.framework/Versions/3.7/lib/libcrypto.1.1.dylib \
