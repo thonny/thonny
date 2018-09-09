@@ -142,6 +142,8 @@ def _delegate_to_existing_instance(args):
 def _misc_prepare():
     if os.name == "nt":
         import ctypes
+        # TODO: see also SetProcessDPIAwareness (Win 8.1+)
+        # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
         ctypes.windll.user32.SetProcessDPIAware()    
     
 def get_version():

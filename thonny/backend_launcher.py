@@ -59,6 +59,8 @@ if __name__ == "__main__":
     # Disable blurry scaling in Windows
     if os.name == "nt":
         import ctypes
+        # TODO: see also SetProcessDPIAwareness (Win 8.1+)
+        # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
         ctypes.windll.user32.SetProcessDPIAware()    
 
     from thonny.backend import VM  # @UnresolvedImport
