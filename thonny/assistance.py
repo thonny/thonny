@@ -84,7 +84,6 @@ class AssistantView(tktextext.TextFrame):
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         # Can be called by event system or by Workbench 
         # (if Assistant wasn't created yet but an error came)
-         
         self._clear()
         
         if not isinstance(get_runner().get_backend_proxy(), CPythonProxy):
@@ -104,7 +103,7 @@ class AssistantView(tktextext.TextFrame):
             self._exception_info = msg["user_exception"]
             self._explain_exception(msg["user_exception"])
             if get_workbench().get_option("assistance.open_assistant_on_errors"):
-                get_workbench().show_view("AssistantView")
+                get_workbench().show_view("AssistantView", set_focus=False)
         else:
             self._exception_info = None
         
@@ -120,7 +119,6 @@ class AssistantView(tktextext.TextFrame):
         
     
     def _explain_exception(self, error_info):
-        
         rst = (".. default-role:: code\n\n"
                + rst_utils.create_title(error_info["type_name"]
                                         + ": " 
