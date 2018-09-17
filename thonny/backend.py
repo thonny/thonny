@@ -587,6 +587,8 @@ class VM:
                 self._add_elements_info(value, info)
             elif isinstance(value, dict):
                 self._add_entries_info(value, info)
+            elif hasattr(value, "image_data"):
+                info["image_data"] = value.image_data 
 
             for tweaker in self._object_info_tweakers:
                 try:

@@ -8,6 +8,7 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.common import InlineCommand
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
+import base64
 
 
 class ObjectInspector(ttk.Frame):
@@ -557,8 +558,20 @@ class ImageInspector(ContentInspector, tk.Frame):
 
     def set_object_info(self, object_info):
         #print(object_info["image_data"])
-        self.image = tk.PhotoImage(data=object_info["image_data"])
-        self.label.configure(image=self.image)
+        if isinstance(object_info["image_data"], bytes):
+            data = base64.b64encode(object_info["image_data"])
+        elif isinstance(object_info["image_data"], str):
+            data = object_info["image_data"]
+        else:
+            self.label.configure(image=None, text="Unsupported image data (%s)" 
+                                 % type(object_info["image_data"]))
+            return
+        
+        try:
+            self.image = tk.PhotoImage(data=data)
+            self.label.configure(image=self.image)
+        except Exception as e:
+            self.label.configure(image=None, text="Unsupported image data (%s)" % e)
     
     def applies_to(self, object_info):
         return "image_data" in object_info
