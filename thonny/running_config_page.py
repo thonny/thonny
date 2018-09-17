@@ -131,6 +131,9 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 # if the dir_ is just a link to another dir_, skip it
                 # (not to show items twice)
                 # for example on Fedora /bin -> usr/bin
+                if not os.path.exists(dir_):
+                    continue
+                
                 apath = actual_path(dir_)
                 if apath != dir_ and apath in dirs:
                     continue
