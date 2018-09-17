@@ -475,7 +475,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
             else:
                 self.tree.set(node_id, "index", "")
                 
-            self.tree.set(node_id, "id", thonny.memory.format_object_id(element["id"]))
+            self.tree.set(node_id, "id", thonny.memory.format_object_id(element.id))
             self.tree.set(node_id, "value", shorten_repr(element.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID))
             index += 1
 
