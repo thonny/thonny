@@ -68,9 +68,6 @@ class Editor(ttk.Frame):
         if self._filename is None and try_hard:
             self.save_file()
         
-        if running_on_windows():
-            assert "/" not in self._filename
-            
         return self._filename
     
     def get_title(self):
