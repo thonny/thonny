@@ -1688,7 +1688,10 @@ class Workbench(tk.Tk):
         # otherwise it may miss globals events
         # and will show empty table on open
         self.get_view("VariablesView")
-        self.get_view("AssistantView")
+        
+        if (self.get_option("assistance.open_assistant_on_errors") 
+            or self.get_option("assistance.open_assistant_on_warnings")):
+            self.get_view("AssistantView")
                 
         
         

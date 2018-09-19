@@ -14,7 +14,6 @@ from thonny.common import (TextRange, ToplevelResponse, normpath_with_actual_cas
                            is_same_path)
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
-from thonny.misc_utils import running_on_windows
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
