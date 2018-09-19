@@ -160,7 +160,7 @@ def parse_message(msg_string: str) -> Record:
     assert msg_string[0] == MESSAGE_MARKER
     return eval(msg_string[1:].encode("ASCII").decode("UTF-7"))
 
-def actual_path(name: str) -> str:
+def normpath_with_actual_case(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
     assert os.path.isabs(name)
     assert os.path.exists(name)
@@ -184,14 +184,14 @@ def actual_path(name: str) -> str:
         else:
             return result
     else:
-        return os.path.realpath(name)
+        return os.path.normpath(name)
 
 def is_same_path(name1: str, name2: str) -> bool:
-    return os.path.realpath(os.path.normcase(name1)) == os.path.realpath(os.path.normcase(name2))
+    return os.path.normpath(os.path.normcase(name1)) == os.path.normpath(os.path.normcase(name2))
 
 def path_startswith(child_name: str, dir_name: str) -> bool:
-    normchild = os.path.realpath(os.path.normcase(child_name))
-    normdir = os.path.realpath(os.path.normcase(dir_name))
+    normchild = os.path.normpath(os.path.normcase(child_name))
+    normdir = os.path.normpath(os.path.normcase(dir_name))
     return normdir == normchild or normchild.startswith(normdir.rstrip(os.path.sep) + os.path.sep)
 
 def read_source(filename):
@@ -204,4 +204,4 @@ class UserError(RuntimeError):
     pass
 
 if __name__ == "__main__":
-    print(repr(actual_path("c:\\users/aivar/DesKTOp")))
+    print(repr(normpath_with_actual_case("c:\\users/aivar/DesKTOp")))

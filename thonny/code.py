@@ -10,10 +10,11 @@ from tkinter.messagebox import askyesno
 
 from thonny import get_workbench, ui_utils
 from thonny.codeview import CodeView
-from thonny.common import (TextRange, ToplevelResponse, actual_path,
+from thonny.common import (TextRange, ToplevelResponse, normpath_with_actual_case,
                            is_same_path)
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
+from thonny.misc_utils import running_on_windows
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -66,6 +67,9 @@ class Editor(ttk.Frame):
     def get_filename(self, try_hard=False):
         if self._filename is None and try_hard:
             self.save_file()
+        
+        if running_on_windows():
+            assert "/" not in self._filename
             
         return self._filename
     
@@ -144,7 +148,7 @@ class Editor(ttk.Frame):
         with tokenize.open(filename) as fp: # TODO: support also text files
             source = fp.read() 
         
-        filename = actual_path(filename) # Make sure Windows filenames have proper format
+        filename = normpath_with_actual_case(filename) # Make sure Windows filenames have proper format
         self._filename = filename
         self._last_known_mtime = os.path.getmtime(self._filename)
         
@@ -201,7 +205,7 @@ class Editor(ttk.Frame):
                 return None
             
 
-        self._filename = actual_path(filename)
+        self._filename = normpath_with_actual_case(filename)
         self.master.remember_recent_file(filename)
         
         self._code_view.text.edit_modified(False)
@@ -290,6 +294,8 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_default("view.show_line_numbers", False)
         get_workbench().set_default("view.recommended_line_length", 0)
         
+        self._recent_menu = tk.Menu(get_workbench().get_menu("file"),
+                                    postcommand=self._update_recent_menu)
         self._init_commands()
         self.enable_traversal()
         
@@ -305,18 +311,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         # should be in the end, so that it can be detected when 
         # constructor hasn't completed yet
         self.preferred_size_in_pw = None
-        
-    
-    def _list_recent_files(self):
-        pass
-        # TODO:
-        
     
     def _init_commands(self):    
         # TODO: do these commands have to be in EditorNotebook ??
         # Create a module level function install_editor_notebook ??
         # Maybe add them separately, when notebook has been installed ??
-        
         
         get_workbench().add_command("new_file", "file", "New", 
             self._cmd_new_file,
@@ -335,6 +334,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             group=10,
             image="open-file",
             include_in_toolbar=True)
+
+        get_workbench().add_command("recents", "file", "Recent files", 
+            group=10,
+            submenu=self._recent_menu)        
+
         
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
         get_workbench().bind_class("Text", "<Control-o>", self._control_o)
@@ -428,8 +432,20 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if filename in recents:
             recents.remove(filename)
         recents.insert(0, filename)
-        existing_recents = [name for name in recents if os.path.exists(name)]
-        get_workbench().set_option("file.recent_files", existing_recents[:10])
+        relevant_recents = [name for name in recents if os.path.exists(name)][:15]
+        get_workbench().set_option("file.recent_files", relevant_recents)
+        self._update_recent_menu()
+    
+    def _update_recent_menu(self):
+        recents = get_workbench().get_option("file.recent_files")
+        relevant_recents = [path for path in recents if os.path.exists(path)
+                            and not self.file_is_opened(path)]
+        self._recent_menu.delete(0, "end")
+        for path in relevant_recents:
+            def load(path=path):
+                self.show_file(path)
+                
+            self._recent_menu.insert_command("end", label=path, command=load)
             
     def _remember_open_files(self):
         if (self.get_current_editor() is not None 
@@ -562,6 +578,13 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         cur_index = self.index(self.select())
         next_index = (cur_index + direction) % len(self.tabs())
         self.select(self.get_child_by_index(next_index))
+    
+    def file_is_opened(self, path):
+        for editor in self.get_all_editors():
+            if editor.get_filename() and is_same_path(path, editor.get_filename()):
+                return True
+        
+        return False
     
     def show_file(self, filename, text_range=None, set_focus=True):
         #self.close_single_untitled_unmodified_editor()

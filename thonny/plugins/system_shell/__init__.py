@@ -9,7 +9,7 @@ from time import sleep
 from tkinter.messagebox import showerror
 
 from thonny import THONNY_USER_DIR, get_runner, get_workbench
-from thonny.common import actual_path
+from thonny.common import normpath_with_actual_case
 from thonny.running import create_pythonless_environment
 
 
@@ -40,7 +40,7 @@ def open_system_shell():
     
     exec_prefix=_get_exec_prefix(python_interpreter)
     if ".." in exec_prefix:
-        exec_prefix = actual_path(exec_prefix)
+        exec_prefix = normpath_with_actual_case(exec_prefix)
     env = create_pythonless_environment()
     
     # TODO: take care of SSL_CERT_FILE (unset when running external python and set for builtin)

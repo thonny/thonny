@@ -29,7 +29,7 @@ from thonny.code import get_current_breakpoints
 from thonny.common import (BackendEvent, CommandToBackend, DebuggerCommand,
                            DebuggerResponse, InlineCommand, InputSubmission,
                            ToplevelCommand, ToplevelResponse, UserError,
-                           actual_path, is_same_path, parse_message,
+                           normpath_with_actual_case, is_same_path, parse_message,
                            path_startswith, serialize_message)
 from thonny.misc_utils import (construct_cmd_line, running_on_mac_os,
                                running_on_windows)
@@ -221,7 +221,7 @@ class Runner:
             
         
         # changing dir may be required
-        script_dir = actual_path(os.path.dirname(filename))
+        script_dir = normpath_with_actual_case(os.path.dirname(filename))
         
         if (get_workbench().get_option("run.auto_cd") 
             and command_name[0].isupper() or always_change_to_script_dir):

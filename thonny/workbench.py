@@ -25,7 +25,7 @@ from warnings import warn
 import thonny
 from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance
 from thonny.code import EditorNotebook
-from thonny.common import Record, UserError, actual_path
+from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
 from thonny.misc_utils import (running_on_linux, running_on_mac_os,
@@ -543,7 +543,7 @@ class Workbench(tk.Tk):
                     command_id: str,
                     menu_name: str,
                     command_label: str,
-                    handler: Callable[[], None],
+                    handler: Optional[Callable[[], None]]=None,
                     tester: Optional[Callable[[], bool]]=None,
                     default_sequence: Optional[str]=None,
                     extra_sequences: Sequence[str]=[],
@@ -555,6 +555,7 @@ class Workbench(tk.Tk):
                     image: Optional[str]=None,
                     caption: Optional[str]=None,
                     include_in_toolbar: bool=False,
+                    submenu: Optional[tk.Menu]=None,
                     bell_when_denied: bool=True) -> None:
         """Registers an item to be shown in specified menu.
         
@@ -595,6 +596,7 @@ class Workbench(tk.Tk):
                                    image=image,
                                    caption=caption,
                                    include_in_toolbar=include_in_toolbar,
+                                   submenu=submenu,
                                    bell_when_denied=bell_when_denied))
     
     def _publish_commands(self) -> None:
@@ -605,7 +607,7 @@ class Workbench(tk.Tk):
                          command_id: str,
                          menu_name: str,
                          command_label: str,
-                         handler: Callable[[], None],
+                         handler: Optional[Callable[[], None]],
                          tester: Optional[Callable[[], bool]]=None,
                          default_sequence: Optional[str]=None,
                          extra_sequences: Sequence[str]=[],
@@ -617,6 +619,7 @@ class Workbench(tk.Tk):
                          image: Optional[str]=None,
                          caption: Optional[str]=None,
                          include_in_toolbar: bool=False,
+                         submenu: Optional[tk.Menu]=None,
                          bell_when_denied: bool=True) -> None:
         
         def dispatch(event=None):
@@ -686,13 +689,16 @@ class Workbench(tk.Tk):
         menu = self.get_menu(menu_name)
         menu.insert(
             self._find_location_for_menu_item(menu_name, command_label),
-            "checkbutton" if flag_name else "command",
+            "checkbutton" if flag_name 
+                else "cascade" if submenu
+                else "command",
             label=command_label,
             accelerator=accelerator,
             image=menu_image, 
             compound=tk.LEFT,
             variable=self.get_variable(flag_name) if flag_name else None,
-            command=dispatch_from_menu)
+            command=dispatch_from_menu if handler else None,
+            menu=submenu)
         
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
@@ -1020,9 +1026,9 @@ class Workbench(tk.Tk):
     def get_cwd(self) -> str:
         cwd = self.get_option("run.working_directory")
         if os.path.exists(cwd):
-            return actual_path(cwd)
+            return normpath_with_actual_case(cwd)
         else:
-            return actual_path(os.path.expanduser("~"))
+            return normpath_with_actual_case(os.path.expanduser("~"))
     
     def set_cwd(self, value: str) -> None:
         self.set_option("run.working_directory", value)
@@ -1518,6 +1524,8 @@ class Workbench(tk.Tk):
             item_data = menu.entryconfigure(i)
             if "label" in item_data:
                 command_label = menu.entrycget(i, "label")
+                if (menu_name, command_label) not in self._menu_item_specs:
+                    continue
                 tester = self._menu_item_specs[(menu_name, command_label)].tester
 
                 if tester and not tester():

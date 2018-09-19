@@ -21,7 +21,7 @@ from urllib.request import urlopen, urlretrieve
 import thonny
 from thonny import (get_runner, get_workbench, misc_utils, running, tktextext,
                     ui_utils)
-from thonny.common import (InlineCommand, actual_path, is_same_path,
+from thonny.common import (InlineCommand, normpath_with_actual_case, is_same_path,
                            path_startswith)
 from thonny.ui_utils import (AutoScrollbar, SubprocessDialog, askopenfilename,
                              get_busy_cursor, lookup_style_option,
@@ -344,7 +344,7 @@ class PipDialog(tk.Toplevel):
             self.info_text.direct_insert("end", "Installed version: ", ('caption',))
             self.info_text.direct_insert("end", active_dist["version"] + "\n")
             self.info_text.direct_insert("end", "Installed to: ", ('caption',))
-            self.info_text.direct_insert("end", actual_path(active_dist["location"]), ('url',))
+            self.info_text.direct_insert("end", normpath_with_actual_case(active_dist["location"]), ('url',))
             self.info_text.direct_insert("end", "\n\n")
             self._select_list_item(name)
         else:
@@ -434,7 +434,7 @@ class PipDialog(tk.Toplevel):
         if dist is None:
             return False
         else:
-            return actual_path(dist["location"]) != self._get_target_directory()
+            return normpath_with_actual_case(dist["location"]) != self._get_target_directory()
         
     
     def _normalize_name(self, name):
@@ -686,11 +686,11 @@ class BackendPipDialog(PipDialog):
         
     def _get_target_directory(self):
         if self._targets_virtual_environment():
-            return actual_path(self._backend_proxy.get_site_packages())
+            return normpath_with_actual_case(self._backend_proxy.get_site_packages())
         else:
             usp = self._backend_proxy.get_user_site_packages()
             os.makedirs(usp, exist_ok=True)
-            return actual_path(usp)
+            return normpath_with_actual_case(usp)
     
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
@@ -772,12 +772,12 @@ class PluginsPipDialog(PipDialog):
             import site
             assert hasattr(site, "getusersitepackages")
             os.makedirs(site.getusersitepackages(), exist_ok=True)
-            return actual_path(site.getusersitepackages())
+            return normpath_with_actual_case(site.getusersitepackages())
         else:
             for d in sys.path:
                 if (("site-packages" in d or "dist-packages" in d) 
                     and path_startswith(d, sys.prefix)):
-                    return actual_path(d)
+                    return normpath_with_actual_case(d)
             return None
     
     def _create_widgets(self, parent):

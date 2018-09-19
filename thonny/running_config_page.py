@@ -5,7 +5,7 @@ from shutil import which
 from tkinter import messagebox, ttk
 
 from thonny import get_workbench, running, ui_utils
-from thonny.common import actual_path
+from thonny.common import normpath_with_actual_case
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import WINDOWS_EXE
@@ -78,7 +78,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             else:
                 break
         assert os.path.isdir(path)
-        path = actual_path(path)
+        path = normpath_with_actual_case(path)
         
         proc = subprocess.Popen([running.get_frontend_python(), "-m", "venv", path],
                                 stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -87,7 +87,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         ui_utils.show_dialog(dlg)
         
         if running_on_windows():
-            exe_path = actual_path(os.path.join(path, "Scripts", "python.exe"))
+            exe_path = normpath_with_actual_case(os.path.join(path, "Scripts", "python.exe"))
         else:
             exe_path = os.path.join(path, "bin", "python3")
         
@@ -114,14 +114,14 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                             ]:
                     path = os.path.join(dir_, WINDOWS_EXE)
                     if os.path.exists(path):
-                        result.add(actual_path(path))  
+                        result.add(normpath_with_actual_case(path))  
                 
             # other locations
             for dir_ in ["C:\\Anaconda3",
                          os.path.expanduser("~/Anaconda3")]:
                 path = os.path.join(dir_, WINDOWS_EXE)
                 if os.path.exists(path):
-                    result.add(actual_path(path))  
+                    result.add(normpath_with_actual_case(path))  
         
         else:
             # Common unix locations
@@ -134,7 +134,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 if not os.path.exists(dir_):
                     continue
                 
-                apath = actual_path(dir_)
+                apath = normpath_with_actual_case(dir_)
                 if apath != dir_ and apath in dirs:
                     continue
                 for name in ["python3", "python3.5", "python3.6", "python3.7", "python3.8"]:
@@ -158,7 +158,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         
         for path in get_workbench().get_option("CustomInterpreter.used_paths"):
             if os.path.exists(path):
-                result.add(actual_path(path))
+                result.add(normpath_with_actual_case(path))
         
         return sorted(result)
     
