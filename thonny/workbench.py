@@ -1693,7 +1693,6 @@ class Workbench(tk.Tk):
         
     def _save_layout(self) -> None:
         self.update_idletasks()
-        
         self.set_option("layout.zoomed", ui_utils.get_zoomed(self))
         
         for nb_name in self._view_notebooks:
@@ -1705,7 +1704,8 @@ class Workbench(tk.Tk):
             else:
                 self.set_option("layout.notebook_" + nb_name + "_visible_view", None)
         
-        if not ui_utils.get_zoomed(self):
+        if not ui_utils.get_zoomed(self) or running_on_mac_os():
+            # can't restore zoom on mac without setting actual dimensions
             self.set_option("layout.top", self.winfo_y())
             self.set_option("layout.left", self.winfo_x())
             self.set_option("layout.width", self.winfo_width())
