@@ -411,6 +411,7 @@ class Workbench(tk.Tk):
         
         self.add_command("show_options", "tools", "Options...", self._cmd_show_options, group=180)
         self.createcommand("::tk::mac::ShowPreferences", self._cmd_show_options)
+        self.createcommand("::tk::mac::Quit", self._mac_quit)
         
         self.add_command("increase_font_size", "view", "Increase font size",
             lambda: self._change_font_size(1),
@@ -1782,7 +1783,9 @@ class Workbench(tk.Tk):
     def bell(self, displayof=0):
         if self.get_option("general.audible_bell"):
             super().bell(displayof=displayof)
-            
+    
+    def _mac_quit(self, *args):
+        self._on_close()
     
 class WorkbenchEvent(Record):
     def __init__(self, sequence: str, **kwargs) -> None:
