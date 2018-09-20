@@ -1,6 +1,24 @@
 import os.path
 import sys
+import platform
 from typing import TYPE_CHECKING, cast, Optional
+
+def _get_default_thonny_data_folder():
+    if platform.system() == "Windows":
+        # http://stackoverflow.com/a/3859336/261181
+        # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
+        import ctypes.wintypes
+        CSIDL_APPDATA = 26 
+        SHGFP_TYPE_CURRENT= 0
+        buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+        ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_APPDATA, 0, SHGFP_TYPE_CURRENT, buf)
+        return os.path.join(buf.value, "Thonny")
+    elif platform.system() == "Darwin":
+        return os.path.expanduser("~/Library/Thonny")
+    else:
+        # https://specifications.freedesktop.org/basedir-spec/latest/ar01s02.html
+        data_home = os.environ.get("XDG_CONFIG_HOME", os.path.join("~", ".config"))
+        return os.path.join(data_home, "Thonny") 
 
 
 if os.environ.get("THONNY_USER_DIR", ""):
@@ -10,7 +28,7 @@ elif (hasattr(sys, 'base_prefix') and sys.base_prefix != sys.prefix
     # we're in a virtualenv or venv
     THONNY_USER_DIR = os.path.join(sys.prefix, ".thonny")
 else:
-    THONNY_USER_DIR = os.path.expanduser(os.path.join("~", ".thonny"))
+    THONNY_USER_DIR = _get_default_thonny_data_folder()
     
     
 def launch():
@@ -154,6 +172,9 @@ def get_version():
     except Exception:
         return "0.0.0"
 
+
+
+
 if TYPE_CHECKING:
     # Following imports are required for MyPy
     # http://mypy.readthedocs.io/en/stable/common_issues.html#import-cycles
@@ -172,3 +193,4 @@ def get_runner() -> 'Runner':
 
 def get_shell() -> 'ShellView':
     return cast('ShellView', get_workbench().get_view("ShellView"))
+

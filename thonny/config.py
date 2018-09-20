@@ -35,6 +35,14 @@ class ConfigurationManager:
         if os.path.exists(self._filename):
             with open(self._filename, 'r', encoding="UTF-8") as fp: 
                 self._ini.read_file(fp)
+        else:
+            # For migration to new conf directory
+            old_config_file = os.path.join(os.path.expanduser("~"), 
+                                           ".thonny", "configuration.ini")
+            if os.path.exists(old_config_file):
+                with open(old_config_file, 'r', encoding="UTF-8") as fp: 
+                    self._ini.read_file(fp)
+                    self.set_option("run.backend_name", "SameAsFrontend")
         
         if not self.get_option("general.configuration_creation_timestamp"):
             self.set_option("general.configuration_creation_timestamp",

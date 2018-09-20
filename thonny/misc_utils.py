@@ -165,30 +165,6 @@ def shorten_repr(original_repr: str, max_len: int=1000) -> str:
     else:
         return original_repr
         
-def __maybe_later_get_thonny_data_folder():
-    if running_on_windows():
-        # CSIDL_LOCAL_APPDATA 
-        # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
-        return os.path.join(__maybe_later_get_windows_special_folder(28), "Thonny")
-    elif running_on_linux():
-        # https://specifications.freedesktop.org/basedir-spec/latest/ar01s02.html
-        # $XDG_DATA_HOME or $HOME/.local/share
-        data_home = os.environ.get("XDG_DATA_HOME", 
-                                   os.path.expanduser("~/.local/share"))
-        return os.path.join(data_home, "Thonny") 
-    elif running_on_mac_os():
-        return os.path.expanduser("~/Library/Thonny")
-    else:
-        return os.path.expanduser("~/.thonny")
-
-def __maybe_later_get_windows_special_folder(code):
-    # http://stackoverflow.com/a/3859336/261181
-    # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
-    import ctypes.wintypes
-    SHGFP_TYPE_CURRENT= 0
-    buf= ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-    ctypes.windll.shell32.SHGetFolderPathW(0, code, 0, SHGFP_TYPE_CURRENT, buf)
-    return buf.value
 
 def get_python_version_string(version_info: Optional[Tuple] = None) -> str:
     if version_info is None:
