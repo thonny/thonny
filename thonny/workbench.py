@@ -448,16 +448,11 @@ class Workbench(tk.Tk):
             self.bind_class("TNotebook", "<Double-Button-1>", self._maximize_view, True)
             self.bind("<Escape>", self._unmaximize_view, True)
             
-            if running_on_mac_os():
-                # Doesn't work as it should and only confuses
-                # TODO: http://wiki.tcl.tk/44444
-                pass
-            else:
-                self.add_command("toggle_maximize_view", "view", "Full screen",
-                    self._cmd_toggle_full_screen,
-                    flag_name="view.full_screen",
-                    default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
-                    group=80)
+            self.add_command("toggle_maximize_view", "view", "Full screen",
+                self._cmd_toggle_full_screen,
+                flag_name="view.full_screen",
+                default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
+                group=80)
         
         if self.in_debug_mode():
             self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
