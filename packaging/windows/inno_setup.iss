@@ -346,6 +346,21 @@ begin
 
 end;
 
+function NextButtonClick(CurPageID: Integer): Boolean;
+begin
+  if (CurPageID = wpSelectDir) and (pos(WizardDirValue, '&') > 1) then
+  begin
+    MsgBox('Directory paths containing "&" are known to cause problems in Thonny'
+          + ''#13#10''
+          + 'Please choose another directory!', mbError, MB_OK);
+    Result := False
+  end
+  else
+  begin
+    Result := True
+  end;
+end;
+
 procedure CurPageChanged(CurPageID: Integer);
 begin
     if CurPageID = wpFinished then
