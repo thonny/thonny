@@ -454,7 +454,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             for editor in self.winfo_children() 
             if editor.get_filename()
         ]
-        print(open_files)
         get_workbench().set_option("file.open_files", open_files)
         
     
