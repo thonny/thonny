@@ -410,9 +410,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 self._cmd_new_file()
         else:
             self._cmd_new_file()
-            
-        
-        self._remember_open_files()
     
     def save_all_named_editors(self):
         all_saved = True
@@ -443,20 +440,23 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 
             self._recent_menu.insert_command("end", label=path, command=load)
             
-    def _remember_open_files(self):
+    def remember_open_files(self):
         if (self.get_current_editor() is not None 
             and self.get_current_editor().get_filename() is not None):
-            get_workbench().set_option("file.current_file", 
-                                       self.get_current_editor().get_filename())
+            current_file = self.get_current_editor().get_filename()
+        else:
+            current_file = None
             
-        open_files = [editor.get_filename() 
-                          for editor in self.winfo_children() 
-                          if editor.get_filename()]
+        get_workbench().set_option("file.current_file", current_file)
         
+        open_files = [
+            editor.get_filename()
+            for editor in self.winfo_children() 
+            if editor.get_filename()
+        ]
+        print(open_files)
         get_workbench().set_option("file.open_files", open_files)
         
-        if len(open_files) == 0:
-            get_workbench().set_option("file.current_file", None)
     
     def _cmd_new_file(self):
         new_editor = Editor(self)
@@ -474,7 +474,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if filename: # Note that missing filename may be "" or () depending on tkinter version
             #self.close_single_untitled_unmodified_editor()
             self.show_file(filename)
-            self._remember_open_files()
     
     def _control_o(self, event):
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -491,8 +490,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
                 if self.check_allow_closing(editor):
                     self.forget(editor)
                     editor.destroy()
-                
-        self._remember_open_files()
         
     
     def _cmd_close_file(self):
@@ -509,15 +506,12 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return
         self.forget(editor)
         editor.destroy()
-        self._remember_open_files()
         
     
     def _cmd_save_file(self):
         if self.get_current_editor():
             self.get_current_editor().save_file()
             self.update_editor_title(self.get_current_editor())
-        
-        self._remember_open_files()
     
     def _cmd_save_file_enabled(self):
         return (self.get_current_editor() 
@@ -530,7 +524,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         self.get_current_editor().save_file(ask_filename=True)
         self.update_editor_title(self.get_current_editor())
         get_workbench().update_title()
-        self._remember_open_files()
     
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None
@@ -593,7 +586,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         
         if text_range is not None:
             editor.select_range(text_range)
-            
+        
         return editor
     
     def show_file_at_line(self, filename, lineno, col_offset=None):

@@ -1606,7 +1606,8 @@ class Workbench(tk.Tk):
         
         try:
             self._save_layout()
-            #ui_utils.delete_images()
+            self._editor_notebook.remember_open_files()
+            self._configuration_manager.save()
             self.event_generate("WorkbenchClose")
         except Exception:
             self.report_exception()
@@ -1718,8 +1719,6 @@ class Workbench(tk.Tk):
             self.set_option("layout.%s_nb_height" % key,
                             self._view_notebooks[key].preferred_size_in_pw)
         
-        self._configuration_manager.save()
-    
     def update_title(self, event=None) -> None:
         editor = self.get_editor_notebook().get_current_editor()
         title_text = "Thonny"
