@@ -427,8 +427,14 @@ class Runner:
                 err = ctypes.get_last_error()
                 logging.info("Could not allocate console. Error code: " +str(err))
             child.stdin.write(b"\n")
-            child.stdin.flush()
-
+            try:
+                child.stdin.flush()
+            except Exception:
+                # May happen eg. when installation path has "&" in it
+                # See https://bitbucket.org/plas/thonny/issues/508/cant-allocate-windows-console-when
+                # Without flush the console window becomes visible, but Thonny can be still used
+                logging.getLogger("thonny").exception("Problem with finalizing console allocation")
+    
     def supported_features(self) -> Set[str]:
         if self._proxy is None:
             return set()
