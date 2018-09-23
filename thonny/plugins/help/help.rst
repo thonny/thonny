@@ -8,7 +8,7 @@ Running programs step-wise
 ==========================
 If you want to see how Python executes your program step-by-step then you should run it in *debug-mode*.
 
-Start by selecting *Debug current script* from the *Run* menu or by pressing Ctrl+F5. You'll see that first statement of the program gets highlighted and nothing more happens. In this mode you need to notify Thonny that you're ready to let Python make the next step. For this you have two main options:
+Start by selecting *Debug current script* from the *Run* menu or by pressing Ctrl+F5 (`in XFCE you need to use Shift+Ctrl+F5 <https://askubuntu.com/questions/92759/ctrlf5-in-google-chrome-in-xfce>`__). You'll see that first statement of the program gets highlighted and nothing more happens. In this mode you need to notify Thonny that you're ready to let Python make the next step. For this you have two main options:
 
 * *Run → Step over* (or F6) makes big steps, ie. it executes the highlighted code and highlights the next part of the code.
 * *Run → Step into* (or F7) tries to make smaller steps. If the highlighted code is made of smaller parts (statements or expressions), then first of these gets highlighted and Thonny waits for next command. If you have reached to a program component which doesn't have any sub-parts (eg. variable name) then *Step into* works like *Step over*, ie. executes (or evaluates) the code.
