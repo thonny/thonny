@@ -17,7 +17,7 @@ from typing import (Dict, Iterable, List, Optional, Tuple, # pylint disable=unus
                     
 
 import thonny
-from thonny import get_workbench, misc_utils, rst_utils, tktextext, ui_utils,\
+from thonny import get_workbench, rst_utils, tktextext, ui_utils,\
     get_runner
 from thonny.common import ToplevelResponse, read_source
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
@@ -344,7 +344,7 @@ class AssistantView(tktextext.TextFrame):
     
     def _format_file_url(self, atts):
         assert atts["filename"]
-        s = "thonny-editor://" + rst_utils.escape(atts["filename"])
+        s = "thonny-editor://" + rst_utils.escape(atts["filename"]).replace(" ", "%20")
         if atts.get("lineno") is not None:
             s += "#" + str(atts["lineno"])
             if atts.get("col_offset") is not None:

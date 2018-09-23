@@ -1754,7 +1754,7 @@ class Workbench(tk.Tk):
     def open_url(self, url):
         m = re.match(r"^thonny-editor://(.*?)(#(\d+)(:(\d+))?)?$", url)
         if m is not None:
-            filename = m.group(1)
+            filename = m.group(1).replace("%20", " ")
             lineno = None if m.group(3) is None else int(m.group(3))
             col_offset = None if m.group(5) is None else int(m.group(5))
             if lineno is None:
