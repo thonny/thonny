@@ -360,6 +360,7 @@ def fix_ast_problems(tree, source_lines, tokens):
     FormattedValue = getattr(ast, "FormattedValue", type(None))
 
     def fix_node(node, inside_joined_str=False):
+        assert node is not None
         
         # first fix the children
         for child in _get_ordered_child_nodes(node):
@@ -496,7 +497,8 @@ def _get_ordered_child_nodes(node):
     if isinstance(node, ast.Dict):
         children = []
         for i in range(len(node.keys)):
-            children.append(node.keys[i])
+            if node.keys[i] is not None:
+                children.append(node.keys[i])
             children.append(node.values[i])
         return children
     elif isinstance(node, ast.Call):
