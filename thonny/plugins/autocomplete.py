@@ -206,7 +206,7 @@ class Completer(tk.Listbox):
         elif event.keysym in ["Down", "KP_Down"]:
             self._move_selection(1)
             return "break"
-        elif event.keysym in ["Return", "KP_Enter"]:
+        elif event.keysym in ["Return", "KP_Enter", "Tab"]:
             assert self.size() > 0
             self._insert_current_selection()
             return "break"
