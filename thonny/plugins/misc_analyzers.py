@@ -74,7 +74,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
                     "filename" : full_path,
                     "lineno" : 0,
                     "symbol" : "file-shadows-library-module",
-                    "msg" : "Bad file name",
+                    "msg" : "Possibly bad file name",
                     "explanation_rst" : 
                         prelude
                         + "\n\n"                            
