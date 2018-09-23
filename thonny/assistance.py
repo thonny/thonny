@@ -20,9 +20,10 @@ import thonny
 from thonny import get_workbench, misc_utils, rst_utils, tktextext, ui_utils,\
     get_runner
 from thonny.common import ToplevelResponse, read_source
-from thonny.misc_utils import levenshtein_damerau_distance
+from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
 from thonny.ui_utils import scrollbar_style
 from thonny.running import CPythonProxy
+import subprocess
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
@@ -650,7 +651,10 @@ class FeedbackDialog(tk.Toplevel):
         with open(temp_path, "w", encoding="ascii") as fp:
             fp.write(data)
         
-        webbrowser.open(temp_path)
+        if running_on_mac_os():
+            subprocess.Popen(["open", "-e", temp_path])
+        else:
+            webbrowser.open(temp_path)
     
     def _collect_submission_data(self):
         tree_data = []
