@@ -360,8 +360,8 @@ def xpnative() -> BasicUiThemeSettings:
             "configure" : {
                 "background"        : "SystemButtonFace",
                 "foreground"        : "SystemWindowText",
-                "selectbackground"  : "SystemHighlightText",
-                "selectforeground"  : "SystemHighlight",
+                "selectbackground"  : "SystemHighlight",
+                "selectforeground"  : "SystemHighlightText",
                 "font" : "TkDefaultFont",
             },
             
