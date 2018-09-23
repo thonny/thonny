@@ -14,6 +14,7 @@ from thonny.common import (TextRange, ToplevelResponse, normpath_with_actual_cas
                            is_same_path)
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
+from thonny.misc_utils import running_on_windows
 
 _dialog_filetypes = [('Python files', '.py .pyw'), ('text files', '.txt'), ('all files', '.*')]
 
@@ -173,6 +174,7 @@ class Editor(ttk.Frame):
                 defaultextension = ".py",
                 initialdir = get_workbench().get_cwd(),
             )
+            
             if filename in ["", (), None]: # Different tkinter versions may return different values
                 return None
             
@@ -180,6 +182,23 @@ class Editor(ttk.Frame):
             # acts funny
             if filename.lower().endswith(".py.py"):
                 filename = filename[:-3]
+            
+            if filename.endswith(".py"):
+                base = os.path.basename(filename)
+                mod_name = base[:-3].lower()
+                if running_on_windows():
+                    mod_name = mod_name.lower()
+                    
+                if mod_name in ["math", "turtle", "random", "statistics", 
+                                "pygame", "matplotlib", "numpy"]:
+                    
+                    # More proper name analysis will be performed by ProgramNamingAnalyzer
+                    if not tk.messagebox.askyesno("Potential problem", 
+                                                  "If you name your script '%s', " % base
+                                                  + "you won't be able to import the library module named '%s'" % mod_name 
+                                                  + ".\n\n"
+                                                  + "Do you still want to use this name for your script?"):
+                        return self.save_file(ask_filename)
             
             get_workbench().event_generate("SaveAs", editor=self, filename=filename)
                 
