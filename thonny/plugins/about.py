@@ -8,7 +8,7 @@ import webbrowser
 from tkinter import ttk
 
 import thonny
-from thonny import get_workbench, misc_utils, ui_utils
+from thonny import get_workbench, ui_utils
 from thonny.misc_utils import get_python_version_string
 
 
@@ -23,8 +23,6 @@ class AboutDialog(tk.Toplevel):
         main_frame.columnconfigure(0, weight=1)
 
         self.title("About Thonny")
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.protocol("WM_DELETE_WINDOW", self._ok)
         

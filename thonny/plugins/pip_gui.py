@@ -44,8 +44,6 @@ class PipDialog(tk.Toplevel):
         self.columnconfigure(0, weight=1)
 
         self.title(self._get_title())
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
         
         self._create_widgets(main_frame)
         
@@ -872,10 +870,6 @@ class DetailsDialog(tk.Toplevel):
         self.cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
         self.cancel_button.grid(row=4, column=1, pady=15, padx=(5,20), sticky="se")
         
-        
-
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
         #self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.version_combo.focus_set()
         

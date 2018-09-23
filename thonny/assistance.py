@@ -480,18 +480,20 @@ class LibraryErrorHelper(ErrorHelper):
 class FeedbackDialog(tk.Toplevel):
     def __init__(self, master, main_file_path, all_snapshots):
         super().__init__(master=master)
+        main_frame = ttk.Frame(self)
+        main_frame.grid(row=0, column=0, sticky="nsew")        
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
         
         self.main_file_path = main_file_path
         self.snapshots = self._select_unsent_snapshots(all_snapshots)
-        
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
         
         self.title("Send feedback for Assistant")
         
         padx = 15
         
-        intro_label = ttk.Label(self,
+        intro_label = ttk.Label(main_frame,
                                 text="Below are the messages Assistant gave you in response to "
                                    + ("using the shell" if self._happened_in_shell() 
                                       else "testing '" + os.path.basename(main_file_path) + "'")
@@ -504,9 +506,9 @@ class FeedbackDialog(tk.Toplevel):
                                 )
         intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,15))
         
-        tree_label = ttk.Label(self, text="Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!")
+        tree_label = ttk.Label(main_frame, text="Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!")
         tree_label.grid(row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,0))
-        tree_frame = ui_utils.TreeFrame(self,
+        tree_frame = ui_utils.TreeFrame(main_frame,
                                         columns=["helpful", "confusing", "title", "group", "symbol"],
                                         displaycolumns=["helpful", "confusing", "title"], 
                                         height=10,
@@ -529,20 +531,20 @@ class FeedbackDialog(tk.Toplevel):
         self.tree.tag_configure("group", font=bold_font)
         
         self.include_thonny_id_var = tk.IntVar(value=1)
-        include_thonny_id_check = ttk.Checkbutton(self, variable=self.include_thonny_id_var,
+        include_thonny_id_check = ttk.Checkbutton(main_frame, variable=self.include_thonny_id_var,
                                           onvalue=1, offvalue=0,
                                           text="Include Thonny's installation time (allows us to group your submissions)")
         include_thonny_id_check.grid(row=4, column=0, columnspan=3, sticky="nw", padx=padx, pady=(5,0))
         
         self.include_snapshots_var = tk.IntVar(value=1)
-        include_snapshots_check = ttk.Checkbutton(self, variable=self.include_snapshots_var,
+        include_snapshots_check = ttk.Checkbutton(main_frame, variable=self.include_snapshots_var,
                                           onvalue=1, offvalue=0,
                                           text="Include snapshots of the code and Assistant responses at each run")
         include_snapshots_check.grid(row=5, column=0, columnspan=3, sticky="nw", padx=padx, pady=(0,0))
         
-        comments_label = ttk.Label(self, text="Any comments? Enhancement ideas?")
+        comments_label = ttk.Label(main_frame, text="Any comments? Enhancement ideas?")
         comments_label.grid(row=6, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15,0))
-        self.comments_text_frame = tktextext.TextFrame(self,vertical_scrollbar_style=scrollbar_style("Vertical"), 
+        self.comments_text_frame = tktextext.TextFrame(main_frame,vertical_scrollbar_style=scrollbar_style("Vertical"), 
                                             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
                                             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
                                             wrap="word",
@@ -558,26 +560,25 @@ class FeedbackDialog(tk.Toplevel):
         
         url_font = tk.font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1, size=url_font.cget("size"))
-        preview_link = ttk.Label(self, text="(Preview the data to be sent)",
+        preview_link = ttk.Label(main_frame, text="(Preview the data to be sent)",
                                  style="Url.TLabel",
                                  cursor="hand2",
                                  font=url_font)
         preview_link.bind("<1>", self._preview_submission_data, True)
         preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
         
-        submit_button = ttk.Button(self, text="Submit", width=10, command=self._submit_data)
+        submit_button = ttk.Button(main_frame, text="Submit", width=10, command=self._submit_data)
         submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
         
-        cancel_button = ttk.Button(self, text="Cancel", width=7, command=self._close)
+        cancel_button = ttk.Button(main_frame, text="Cancel", width=7, command=self._close)
         cancel_button.grid(row=8, column=1, sticky="ne", padx=(10,15), pady=15)
 
         self.protocol("WM_DELETE_WINDOW", self._close)
         self.bind("<Escape>", self._close, True)
 
-        
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(3, weight=3)
-        self.rowconfigure(6, weight=2)
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(3, weight=3)
+        main_frame.rowconfigure(6, weight=2)
 
         self._empty_box = "[  ]"
         self._checked_box = "[X]"

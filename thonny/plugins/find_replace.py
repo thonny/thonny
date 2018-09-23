@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from thonny import get_workbench, misc_utils
+from thonny import get_workbench
 from thonny.ui_utils import select_sequence
 
 #TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
@@ -48,8 +48,6 @@ class FindDialog(tk.Toplevel):
                                   master.winfo_rooty() + master.winfo_height() // 2 - 150))
 
         self.title("Find & Replace")
-        if misc_utils.running_on_mac_os():
-            self.configure(background="systemSheetBackground")
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(master) 
         self.protocol("WM_DELETE_WINDOW", self._ok)
