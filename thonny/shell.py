@@ -14,8 +14,9 @@ from thonny.misc_utils import (construct_cmd_line, parse_cmd_line,
                                running_on_mac_os, shorten_repr)
 from thonny.tktextext import index2line
 from thonny.ui_utils import (EnhancedTextWithLogging, get_style_configuration,
-                             scrollbar_style)
+                             scrollbar_style, sequence_to_accelerator)
 
+_CLEAR_SHELL_DEFAULT_SEQ = "<Control-l>"
 
 class ShellView (ttk.Frame):
     def __init__(self, master, **kw):
@@ -24,6 +25,11 @@ class ShellView (ttk.Frame):
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL, 
                                             style=scrollbar_style("Vertical"))
         self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
+        get_workbench().add_command("clear_shell", "edit", "Clear shell",
+                                    self.clear_shell,
+                                    default_sequence=_CLEAR_SHELL_DEFAULT_SEQ,
+                                    group=200)
+        
         self.text = ShellText(self,
                             font="EditorFont",
                             #foreground="white",
@@ -38,9 +44,6 @@ class ShellView (ttk.Frame):
                             undo=True)
         
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
-        get_workbench().add_command("clear_shell", "edit", "Clear shell",
-                                    self.clear_shell,
-                                    group=200)
         
         self.text.grid(row=1, column=1, sticky=tk.NSEW)
         self.vert_scrollbar['command'] = self.text.yview
@@ -155,7 +158,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _init_menu(self):
         self._menu = tk.Menu(self, tearoff=False,
                              **get_style_configuration("Menu"))
-        self._menu.add_command(label="Clear shell", command=self._clear_shell)
+        clear_seq = get_workbench().get_option("shortcuts.clear_shell", _CLEAR_SHELL_DEFAULT_SEQ)
+        self._menu.add_command(
+            label="Clear shell",
+            command=self._clear_shell,
+            accelerator=sequence_to_accelerator(clear_seq)
+        )
     
     def submit_command(self, cmd_line, tags):
         assert get_runner().is_waiting_toplevel_command()
