@@ -95,12 +95,15 @@ def get_last_child(node, skip_incorrect=True):
             return node.kwargs
         elif hasattr(node, "starargs") and ok_node(node.starargs):
             return node.starargs
-        elif last_ok(node.keywords):
-            return last_ok(node.keywords)
-        elif last_ok(node.args):
-            return last_ok(node.args)
         else:
-            return ok_node(node.func)
+            kw_values = list(map(lambda x: x.value, node.keywords))
+            last_ok_kw = last_ok(kw_values)
+            if last_ok_kw:
+                return last_ok_kw
+            elif last_ok(node.args):
+                return last_ok(node.args)
+            else:
+                return ok_node(node.func)
 
     elif isinstance(node, ast.BoolOp):
         return last_ok(node.values)
