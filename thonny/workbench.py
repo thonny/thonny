@@ -164,7 +164,7 @@ class Workbench(tk.Tk):
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.expert_mode", False)
         self.set_default("general.debug_mode", False)
-        self.set_default("general.audible_bell", True)
+        self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
         
@@ -1775,7 +1775,7 @@ class Workbench(tk.Tk):
         webbrowser.open(url, False, True)
     
     def bell(self, displayof=0):
-        if self.get_option("general.audible_bell"):
+        if not self.get_option("general.disable_notification_sound"):
             super().bell(displayof=displayof)
     
     def _mac_quit(self, *args):

@@ -22,6 +22,9 @@ class GeneralConfigurationPage(ConfigurationPage):
         self.add_checkbox("file.reopen_all_files", 
                           "Reopen all files from previous session",
                           row=4, columnspan=2)
+        self.add_checkbox("general.disable_notification_sound", 
+                          "Disable notification sound",
+                          row=5, columnspan=2)
         
         self._scaling_var = get_workbench().get_variable("general.scaling")
         self._scaling_label = ttk.Label(self, text="UI scaling factor")
