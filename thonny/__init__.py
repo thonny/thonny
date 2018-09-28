@@ -17,7 +17,8 @@ def _get_default_thonny_data_folder():
         return os.path.expanduser("~/Library/Thonny")
     else:
         # https://specifications.freedesktop.org/basedir-spec/latest/ar01s02.html
-        data_home = os.environ.get("XDG_CONFIG_HOME", os.path.join("~", ".config"))
+        data_home = os.environ.get("XDG_CONFIG_HOME", 
+                                   os.path.expanduser(os.path.join("~", ".config")))
         return os.path.join(data_home, "Thonny") 
 
 
