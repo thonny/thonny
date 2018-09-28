@@ -1,5 +1,6 @@
 import ast
 import logging
+import io
 import os
 import platform
 import queue
@@ -625,7 +626,7 @@ class MicroPythonProxy(BackendProxy):
             return
         
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
-        with open(file_name, "w", encoding="utf-8") as fp:
+        with io.open(file_name, "w", encoding="utf-8", newline='\n') as fp:
             if module_name not in ["webrepl", "_webrepl", 
                                    "gc", 
                                    "http_client", 
