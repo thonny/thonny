@@ -10,11 +10,12 @@ from docutils import nodes
 
 # Parse the file into a document with the rst parser.
 default_settings = docutils.frontend.OptionParser(
-    components=(docutils.parsers.rst.Parser,)).get_default_values()
+    components=(docutils.parsers.rst.Parser,)
+).get_default_values()
 parser = docutils.parsers.rst.Parser()
 
-def reet_role(role, rawtext, text, lineno, inliner,
-                        options={}, content=[]):
+
+def reet_role(role, rawtext, text, lineno, inliner, options={}, content=[]):
     """"""
     # Once nested inline markup is implemented, this and other methods should
     # recursively call inliner.nested_parse().
@@ -22,7 +23,7 @@ def reet_role(role, rawtext, text, lineno, inliner,
     return [nodes.inline(rawtext, docutils.utils.unescape(text), **options)], []
 
 
-#register_generic_role('reet', nodes.literal)
+# register_generic_role('reet', nodes.literal)
 roles.register_local_role("reet", reet_role)
 
 document = docutils.utils.new_document("katse", default_settings)

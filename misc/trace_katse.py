@@ -20,7 +20,7 @@ def f1():
 
 
 def f2():
-    #pass
+    # pass
     1 / 0
 
 

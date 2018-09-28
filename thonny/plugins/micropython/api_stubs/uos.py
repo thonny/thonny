@@ -1,6 +1,6 @@
-
 class VfsFat:
-    ''
+    ""
+
     def chdir():
         pass
 
@@ -40,51 +40,69 @@ class VfsFat:
     def umount():
         pass
 
+
 def chdir():
     pass
+
 
 def dupterm():
     pass
 
+
 def getcwd():
     pass
+
 
 def ilistdir():
     pass
 
+
 def listdir():
     pass
+
 
 def mkdir():
     pass
 
+
 def mount():
     pass
+
 
 def remove():
     pass
 
+
 def rename():
     pass
+
 
 def rmdir():
     pass
 
-sep = '/'
+
+sep = "/"
+
+
 def stat():
     pass
+
 
 def statvfs():
     pass
 
+
 def sync():
     pass
+
 
 def umount():
     pass
 
+
 def uname():
     pass
+
 
 def unlink():
     pass

@@ -29,25 +29,27 @@ def blarg():
 #
 # Second tuple is a group of one index, where we would expect output with the locations for "boo"
 # And if the insert location is at "pass", we would expect an empty set for output
-CURSOR_POSITIONS1 = (("1.4", "1.5", "1.7", "2.5"),
-                     ("4.6",),
-                     ("3.4",),
-                     ("5.7", "6.12"),
-                     ("4.10", "7.11"),
-                     ("10.2",),
-                     ("12.5", "12.9",),
-                     ("14.5",),
-                     ) 
+CURSOR_POSITIONS1 = (
+    ("1.4", "1.5", "1.7", "2.5"),
+    ("4.6",),
+    ("3.4",),
+    ("5.7", "6.12"),
+    ("4.10", "7.11"),
+    ("10.2",),
+    ("12.5", "12.9"),
+    ("14.5",),
+)
 
-EXPECTED_INDICES1 = [{("1.4", "1.7"), ("2.4", "2.7")},
-                     {("4.4", "4.7"), ("9.4", "9.7")},
-                     set(),
-                     {("5.4", "5.7"), ("6.10", "6.13")},
-                     {("4.8", "4.12"), ("7.10", "7.14")},
-                     {("10.0", "10.4")},
-                     {("12.4", "12.5"), ("12.8", "12.9")},
-                     {("14.4", "14.5")},
-                     ] # type: Sequence[Set[Sequence[str]]]
+EXPECTED_INDICES1 = [
+    {("1.4", "1.7"), ("2.4", "2.7")},
+    {("4.4", "4.7"), ("9.4", "9.7")},
+    set(),
+    {("5.4", "5.7"), ("6.10", "6.13")},
+    {("4.8", "4.12"), ("7.10", "7.14")},
+    {("10.0", "10.4")},
+    {("12.4", "12.5"), ("12.8", "12.9")},
+    {("14.4", "14.5")},
+]  # type: Sequence[Set[Sequence[str]]]
 
 TEST_STR2 = """import too
 def foo():
@@ -61,14 +63,12 @@ class TestClass:
         self.foo()  # 10
         foo()
 """
-CURSOR_POSITIONS2 = (("1.8", "3.10"),
-                     ("2.4", "2.5", "11.10"),
-                     ("3.5", "4.9"),
-                     )
-EXPECTED_INDICES2 = ({("1.7", "1.10"), ("3.10", "3.13"), },
-                     {("2.4", "2.7"), ("11.8", "11.11"), },
-                     {("3.4", "3.7"), ("4.8", "4.11"), },
-                     )
+CURSOR_POSITIONS2 = (("1.8", "3.10"), ("2.4", "2.5", "11.10"), ("3.5", "4.9"))
+EXPECTED_INDICES2 = (
+    {("1.7", "1.10"), ("3.10", "3.13")},
+    {("2.4", "2.7"), ("11.8", "11.11")},
+    {("3.4", "3.7"), ("4.8", "4.11")},
+)
 
 TEST_GROUPS = (
     (CURSOR_POSITIONS1, EXPECTED_INDICES1, TEST_STR1),
@@ -94,8 +94,10 @@ def _assert_returns_correct_indices(insert_pos_groups, expected_indices, input_s
             actual = nh.get_positions()
             expected = expected_indices[i]
 
-            assert actual == expected, "\nInsert position: %s" \
-                                       "\nExpected: %s" \
-                                       "\nGot: %s" % (insert_pos, expected, actual)
-        print("\rPassed %d of %d" % (i+1, len(insert_pos_groups)), end="")
+            assert actual == expected, (
+                "\nInsert position: %s"
+                "\nExpected: %s"
+                "\nGot: %s" % (insert_pos, expected, actual)
+            )
+        print("\rPassed %d of %d" % (i + 1, len(insert_pos_groups)), end="")
     print()

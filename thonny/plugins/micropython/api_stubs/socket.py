@@ -3,12 +3,15 @@ AF_INET6 = 10
 SOCK_DGRAM = 2
 SOCK_RAW = 3
 SOCK_STREAM = 1
+
+
 def getaddrinfo():
     pass
 
 
 class socket:
-    ''
+    ""
+
     def accept():
         pass
 

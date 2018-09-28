@@ -1,6 +1,6 @@
-
 class array:
-    ''
+    ""
+
     def append():
         pass
 

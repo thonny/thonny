@@ -1,6 +1,6 @@
-
 class DHT11:
-    ''
+    ""
+
     def humidity():
         pass
 
@@ -12,7 +12,8 @@ class DHT11:
 
 
 class DHT22:
-    ''
+    ""
+
     def humidity():
         pass
 
@@ -24,9 +25,11 @@ class DHT22:
 
 
 class DHTBase:
-    ''
+    ""
+
     def measure():
         pass
+
 
 def dht_readinto():
     pass

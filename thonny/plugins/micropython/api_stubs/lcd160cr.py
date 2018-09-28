@@ -1,8 +1,10 @@
 LANDSCAPE = 1
 LANDSCAPE_UPSIDEDOWN = 3
 
+
 class LCD160CR:
-    ''
+    ""
+
     def _fcmd2():
         pass
 
@@ -162,23 +164,32 @@ class LCD160CR:
     def write():
         pass
 
+
 PORTRAIT = 0
 PORTRAIT_UPSIDEDOWN = 2
 STARTUP_DECO_INFO = 2
 STARTUP_DECO_MLOGO = 1
 STARTUP_DECO_NONE = 0
 _uart_baud_table = None
+
+
 def calcsize():
     pass
+
 
 def const():
     pass
 
+
 machine = None
+
+
 def pack_into():
     pass
 
+
 def sleep_ms():
     pass
+
 
 uerrno = None

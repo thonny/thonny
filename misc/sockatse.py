@@ -3,8 +3,10 @@ from time import sleep
 
 port = 4957
 
+
 def become_client():
     s = socket.create_connection(("localhost", port), 0.1)
+
 
 def become_server():
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -16,9 +18,9 @@ def become_server():
 
 
 become_server()
-#become_server()
+# become_server()
 
-#try:
+# try:
 #    become_server()
-#except OSError:
+# except OSError:
 #    become_client()

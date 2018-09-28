@@ -1,6 +1,6 @@
-
 class sha256:
-    ''
+    ""
+
     def digest():
         pass
 

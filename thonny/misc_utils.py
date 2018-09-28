@@ -12,7 +12,7 @@ from typing import Optional, Sequence, Tuple
 from thonny import get_workbench
 
 
-def delete_dir_try_hard(path: str, hardness: int=5) -> None:
+def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
     # Deleting the folder on Windows is not so easy task
     # http://bugs.python.org/issue15496
     for i in range(hardness):
@@ -26,65 +26,80 @@ def delete_dir_try_hard(path: str, hardness: int=5) -> None:
         # try once more but now without ignoring errors
         shutil.rmtree(path, False)
 
+
 def running_on_windows() -> bool:
     return platform.system() == "Windows"
-    
+
+
 def running_on_mac_os() -> bool:
     return platform.system() == "Darwin"
-    
+
+
 def running_on_linux() -> bool:
     return platform.system() == "Linux"
+
 
 def is_hidden_or_system_file(path: str) -> bool:
     if os.path.basename(path).startswith("."):
         return True
     elif running_on_windows():
         from ctypes import windll
+
         FILE_ATTRIBUTE_HIDDEN = 0x2
         FILE_ATTRIBUTE_SYSTEM = 0x4
-        return bool(windll.kernel32.GetFileAttributesW(path)  # @UndefinedVariable
-                & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM))
+        return bool(
+            windll.kernel32.GetFileAttributesW(path)  # @UndefinedVariable
+            & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)
+        )
     else:
-        return False 
-    
+        return False
+
+
 def get_win_drives() -> Sequence[str]:
     # http://stackoverflow.com/a/2288225/261181
     # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
     import string
     from ctypes import windll
-    
-    all_drive_types = ['DRIVE_UNKNOWN', 
-                       'DRIVE_NO_ROOT_DIR',
-                       'DRIVE_REMOVABLE',
-                       'DRIVE_FIXED',
-                       'DRIVE_REMOTE',
-                       'DRIVE_CDROM',
-                       'DRIVE_RAMDISK']
-    
-    required_drive_types = ['DRIVE_REMOVABLE',
-                            'DRIVE_FIXED',
-                            'DRIVE_REMOTE',
-                            'DRIVE_RAMDISK']
+
+    all_drive_types = [
+        "DRIVE_UNKNOWN",
+        "DRIVE_NO_ROOT_DIR",
+        "DRIVE_REMOVABLE",
+        "DRIVE_FIXED",
+        "DRIVE_REMOTE",
+        "DRIVE_CDROM",
+        "DRIVE_RAMDISK",
+    ]
+
+    required_drive_types = [
+        "DRIVE_REMOVABLE",
+        "DRIVE_FIXED",
+        "DRIVE_REMOTE",
+        "DRIVE_RAMDISK",
+    ]
 
     drives = []
     bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
     for letter in string.ascii_uppercase:
-        drive_type = all_drive_types[windll.kernel32.GetDriveTypeW("%s:\\" % letter)]  # @UndefinedVariable
+        drive_type = all_drive_types[
+            windll.kernel32.GetDriveTypeW("%s:\\" % letter)
+        ]  # @UndefinedVariable
         if bitmask & 1 and drive_type in required_drive_types:
             drives.append(letter + ":\\")
         bitmask >>= 1
 
     return drives
 
+
 def list_volumes() -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
-    if os.name == 'posix':
+    if os.name == "posix":
         # 'posix' means we're on Linux or OSX (Mac).
         # Call the unix "mount" command to list the mounted volumes.
-        mount_output = subprocess.check_output('mount').splitlines()
+        mount_output = subprocess.check_output("mount").splitlines()
         return [x.split()[2].decode("utf-8") for x in mount_output]
-    
-    elif os.name == 'nt':
+
+    elif os.name == "nt":
         # 'nt' means we're on Windows.
         import ctypes
 
@@ -97,17 +112,18 @@ def list_volumes() -> Sequence[str]:
         old_mode = ctypes.windll.kernel32.SetErrorMode(1)  # @UndefinedVariable
         try:
             volumes = []
-            for disk in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ':
-                path = '{}:\\'.format(disk)
+            for disk in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                path = "{}:\\".format(disk)
                 if os.path.exists(path):
                     volumes.append(path)
-            
+
             return volumes
         finally:
             ctypes.windll.kernel32.SetErrorMode(old_mode)  # @UndefinedVariable
     else:
         # No support for unknown operating systems.
         raise NotImplementedError('OS "{}" not supported.'.format(os.name))
+
 
 def get_win_volume_name(path: str) -> str:
     """
@@ -117,10 +133,18 @@ def get_win_volume_name(path: str) -> str:
     Code from http://stackoverflow.com/a/12056414
     """
     import ctypes
+
     vol_name_buf = ctypes.create_unicode_buffer(1024)
     ctypes.windll.kernel32.GetVolumeInformationW(  # @UndefinedVariable
-        ctypes.c_wchar_p(path), vol_name_buf,
-        ctypes.sizeof(vol_name_buf), None, None, None, None, 0)
+        ctypes.c_wchar_p(path),
+        vol_name_buf,
+        ctypes.sizeof(vol_name_buf),
+        None,
+        None,
+        None,
+        None,
+        0,
+    )
     assert isinstance(vol_name_buf.value, str)
     return vol_name_buf.value
 
@@ -128,16 +152,21 @@ def get_win_volume_name(path: str) -> str:
 def find_volumes_by_name(volume_name: str) -> Sequence[str]:
     volumes = list_volumes()
     if os.name == "nt":
-        return [volume for volume in volumes 
-                if get_win_volume_name(volume).upper() == volume_name.upper()]
+        return [
+            volume
+            for volume in volumes
+            if get_win_volume_name(volume).upper() == volume_name.upper()
+        ]
     else:
-        return [volume for volume in volumes 
-                if volume.endswith(volume_name)]
+        return [volume for volume in volumes if volume.endswith(volume_name)]
 
-def find_volume_by_name(volume_name: str,
-                        not_found_msg: str="Could not find disk '%s'. Do you want to locate it yourself?",
-                        found_several_msg: str="Found several '%s' disks. Do you want to choose one yourself?") -> Optional[str]:
-    
+
+def find_volume_by_name(
+    volume_name: str,
+    not_found_msg: str = "Could not find disk '%s'. Do you want to locate it yourself?",
+    found_several_msg: str = "Found several '%s' disks. Do you want to choose one yourself?",
+) -> Optional[str]:
+
     volumes = find_volumes_by_name(volume_name)
     if len(volumes) == 1:
         return volumes[0]
@@ -146,64 +175,64 @@ def find_volume_by_name(volume_name: str,
             msg = not_found_msg % volume_name
         else:
             msg = found_several_msg % volume_name
-        
+
         from tkinter.messagebox import askyesno
         from thonny.ui_utils import askdirectory
+
         if askyesno("Can't find suitable disk", msg):
             path = askdirectory(master=get_workbench())
             if path:
                 return path
-    
-    return None
-            
-            
-            
 
-def shorten_repr(original_repr: str, max_len: int=1000) -> str:
+    return None
+
+
+def shorten_repr(original_repr: str, max_len: int = 1000) -> str:
     if len(original_repr) > max_len:
-        return original_repr[:max_len-1] + "…"
+        return original_repr[: max_len - 1] + "…"
     else:
         return original_repr
-        
+
 
 def get_python_version_string(version_info: Optional[Tuple] = None) -> str:
     if version_info is None:
         version_info = sys.version_info
-         
+
     result = ".".join(map(str, version_info[:3]))
     if version_info[3] != "final":
         result += "-" + version_info[3]
-    
-    result += " (" + ("64" if sys.maxsize > 2**32 else "32")+ " bit)\n"
-    
-    return result    
+
+    result += " (" + ("64" if sys.maxsize > 2 ** 32 else "32") + " bit)\n"
+
+    return result
+
 
 def _win_get_used_memory():
     # http://code.activestate.com/recipes/578513-get-memory-usage-of-windows-processes-using-getpro/
     import ctypes
     from ctypes import wintypes
-    
+
     GetCurrentProcess = ctypes.windll.kernel32.GetCurrentProcess
     GetCurrentProcess.argtypes = []
     GetCurrentProcess.restype = wintypes.HANDLE
-    
+
     SIZE_T = ctypes.c_size_t
-    
+
     class PROCESS_MEMORY_COUNTERS_EX(ctypes.Structure):
         _fields_ = [
-            ('cb', wintypes.DWORD),
-            ('PageFaultCount', wintypes.DWORD),
-            ('PeakWorkingSetSize', SIZE_T),
-            ('WorkingSetSize', SIZE_T),
-            ('QuotaPeakPagedPoolUsage', SIZE_T),
-            ('QuotaPagedPoolUsage', SIZE_T),
-            ('QuotaPeakNonPagedPoolUsage', SIZE_T),
-            ('QuotaNonPagedPoolUsage', SIZE_T),
-            ('PagefileUsage', SIZE_T),
-            ('PeakPagefileUsage', SIZE_T),
-            ('PrivateUsage', SIZE_T),
+            ("cb", wintypes.DWORD),
+            ("PageFaultCount", wintypes.DWORD),
+            ("PeakWorkingSetSize", SIZE_T),
+            ("WorkingSetSize", SIZE_T),
+            ("QuotaPeakPagedPoolUsage", SIZE_T),
+            ("QuotaPagedPoolUsage", SIZE_T),
+            ("QuotaPeakNonPagedPoolUsage", SIZE_T),
+            ("QuotaNonPagedPoolUsage", SIZE_T),
+            ("PagefileUsage", SIZE_T),
+            ("PeakPagefileUsage", SIZE_T),
+            ("PrivateUsage", SIZE_T),
         ]
-    
+
     GetProcessMemoryInfo = ctypes.windll.psapi.GetProcessMemoryInfo
     GetProcessMemoryInfo.argtypes = [
         wintypes.HANDLE,
@@ -211,35 +240,39 @@ def _win_get_used_memory():
         wintypes.DWORD,
     ]
     GetProcessMemoryInfo.restype = wintypes.BOOL
-    
+
     def get_current_process():
         """Return handle to current process."""
         return GetCurrentProcess()
-    
+
     def get_memory_info(process=None):
         """Return Win32 process memory counters structure as a dict."""
         if process is None:
             process = get_current_process()
         counters = PROCESS_MEMORY_COUNTERS_EX()
-        ret = GetProcessMemoryInfo(process, ctypes.byref(counters),
-                                   ctypes.sizeof(counters))
+        ret = GetProcessMemoryInfo(
+            process, ctypes.byref(counters), ctypes.sizeof(counters)
+        )
         if not ret:
             raise ctypes.WinError()
-        info = dict((name, getattr(counters, name))
-                    for name, _ in counters._fields_)
+        info = dict((name, getattr(counters, name)) for name, _ in counters._fields_)
         return info
-    
-    return get_memory_info()['PrivateUsage']
+
+    return get_memory_info()["PrivateUsage"]
+
 
 def _unix_get_used_memory():
     # http://fa.bianp.net/blog/2013/different-ways-to-get-memory-consumption-or-lessons-learned-from-memory_profiler/
     "TODO:"
 
+
 def construct_cmd_line(parts):
     return " ".join(map(shlex.quote, parts))
 
+
 def parse_cmd_line(s):
     return shlex.split(s, posix=True)
+
 
 def levenshtein_distance(s1, s2):
     # https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#Python
@@ -254,13 +287,16 @@ def levenshtein_distance(s1, s2):
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
         for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
-            deletions = current_row[j] + 1       # than s2
+            insertions = (
+                previous_row[j + 1] + 1
+            )  # j+1 instead of j since previous_row and current_row are one character longer
+            deletions = current_row[j] + 1  # than s2
             substitutions = previous_row[j] + (c1 != c2)
             current_row.append(min(insertions, deletions, substitutions))
         previous_row = current_row
-    
+
     return previous_row[-1]
+
 
 def levenshtein_damerau_distance(s1, s2, maxDistance):
     # https://gist.github.com/giststhebearbear/4145811
@@ -322,7 +358,9 @@ def levenshtein_damerau_distance(s1, s2, maxDistance):
         for colNum in range(1, l1 + 1):
             insertionCost = curRow[colNum - 1] + 1
             deletionCost = prevRow[colNum] + 1
-            changeCost = prevRow[colNum - 1] + (0 if s1[colNum - 1] == s2[rowNum - 1] else 1)
+            changeCost = prevRow[colNum - 1] + (
+                0 if s1[colNum - 1] == s2[rowNum - 1] else 1
+            )
             #  set the cell value - min distance to reach this
             #  position
             curRow[colNum] = min(insertionCost, deletionCost, changeCost)
@@ -331,11 +369,17 @@ def levenshtein_damerau_distance(s1, s2, maxDistance):
             #  check to see if we have at least 2 characters
             if 1 < rowNum <= colNum:
                 #  test for possible transposition
-                if s1[colNum - 1] == s2[colNum - 2] and s2[colNum - 1] == s1[colNum - 2]:
-                    curRow[colNum] = min(curRow[colNum], transpositionRow[colNum - 2] + 1)
+                if (
+                    s1[colNum - 1] == s2[colNum - 2]
+                    and s2[colNum - 1] == s1[colNum - 2]
+                ):
+                    curRow[colNum] = min(
+                        curRow[colNum], transpositionRow[colNum - 2] + 1
+                    )
 
     #  the last cell of the matrix is ALWAYS the shortest distance between the two strings
     return curRow[-1]
+
 
 def get_file_creation_date(path_to_file):
     """
@@ -343,7 +387,7 @@ def get_file_creation_date(path_to_file):
     last modified if that isn't possible.
     See http://stackoverflow.com/a/39501288/1709587 for explanation.
     """
-    if platform.system() == 'Windows':
+    if platform.system() == "Windows":
         return os.path.getctime(path_to_file)
     else:
         stat = os.stat(path_to_file)

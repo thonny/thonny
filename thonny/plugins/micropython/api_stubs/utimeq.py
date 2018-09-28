@@ -1,6 +1,6 @@
-
 class utimeq:
-    ''
+    ""
+
     def peektime():
         pass
 

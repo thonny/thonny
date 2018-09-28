@@ -1,9 +1,9 @@
-
 class OneWire:
-    ''
+    ""
     MATCH_ROM = 85
     SEARCH_ROM = 240
     SKIP_ROM = 204
+
     def _search_rom():
         pass
 
@@ -39,7 +39,11 @@ class OneWire:
 
 
 class OneWireError:
-    ''
+    ""
+
+
 _ow = None
+
+
 def const():
     pass

@@ -8,7 +8,7 @@ def do_stuff(e=None):
     pass
 
 
-root.option_add('*tearOff', tk.FALSE)
+root.option_add("*tearOff", tk.FALSE)
 menubar = tk.Menu(root)
 root["menu"] = menubar
 

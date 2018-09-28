@@ -11,30 +11,29 @@ def parse_log_file(filename):
     events = []
     for line in f:
         events.append(parse_log_line(line))
-    
+
     f.close()
     return events
-
 
 
 def parse_log_line(line):
     split_pos = line.rfind(" at ")
     assert split_pos > 0
     left = line[0:split_pos]
-    right = line[split_pos + 4:].strip()
-    
-    tree = ast.parse(left, mode='eval')
+    right = line[split_pos + 4 :].strip()
+
+    tree = ast.parse(left, mode="eval")
     assert isinstance(tree, ast.Expression)
     assert isinstance(tree.body, ast.Call)
-    
+
     attributes = {
-        'event_kind' : tree.body.func.id,
-        'event_time' : strptime(right, "%Y-%m-%dT%H:%M:%S.%f")
+        "event_kind": tree.body.func.id,
+        "event_time": strptime(right, "%Y-%m-%dT%H:%M:%S.%f"),
     }
-    
+
     for kw in tree.body.keywords:
         attributes[kw.arg] = ast.literal_eval(kw.value)
-        
+
     return attributes
 
 

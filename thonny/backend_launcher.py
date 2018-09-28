@@ -14,33 +14,33 @@ if __name__ == "__main__":
     import sys
     import logging
     import os.path
-    
+
     # remove script dir from path
     sys.path.pop(0)
-    
+
     # import thonny relative to this script (not from current interpreter path)
     import importlib.util
-    spec = importlib.util.spec_from_file_location (
-        "thonny", 
-        os.path.join(os.path.dirname(__file__), "__init__.py")
+
+    spec = importlib.util.spec_from_file_location(
+        "thonny", os.path.join(os.path.dirname(__file__), "__init__.py")
     )
     module = importlib.util.module_from_spec(spec)
     sys.modules["thonny"] = module
     assert spec.loader is not None
     spec.loader.exec_module(module)
-    
+
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
     logger = logging.getLogger("thonny")
     logger.propagate = False
-    logFormatter = logging.Formatter('%(levelname)s: %(message)s')
-    file_handler = logging.FileHandler(os.path.join(THONNY_USER_DIR,"backend.log"), 
-                                       encoding="UTF-8",
-                                       mode="w")
+    logFormatter = logging.Formatter("%(levelname)s: %(message)s")
+    file_handler = logging.FileHandler(
+        os.path.join(THONNY_USER_DIR, "backend.log"), encoding="UTF-8", mode="w"
+    )
     file_handler.setFormatter(logFormatter)
     file_handler.setLevel(logging.INFO)
     logger.addHandler(file_handler)
-    
+
     # Don't litter user stderr with thonny logging
     # TODO: Can I somehow send the log to front-end's stderr?
     """
@@ -49,19 +49,22 @@ if __name__ == "__main__":
     stream_handler.setFormatter(logFormatter)
     logger.addHandler(stream_handler)
     """
-    
+
     logger.setLevel(logging.INFO)
-    
+
     import faulthandler
+
     fault_out = open(os.path.join(THONNY_USER_DIR, "backend_faults.log"), mode="w")
-    faulthandler.enable(fault_out)    
-    
+    faulthandler.enable(fault_out)
+
     # Disable blurry scaling in Windows
     if os.name == "nt":
         import ctypes
+
         # TODO: see also SetProcessDPIAwareness (Win 8.1+)
         # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
-        ctypes.windll.user32.SetProcessDPIAware()    
+        ctypes.windll.user32.SetProcessDPIAware()
 
     from thonny.backend import VM  # @UnresolvedImport
+
     VM().mainloop()

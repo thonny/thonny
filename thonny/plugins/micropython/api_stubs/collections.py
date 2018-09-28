@@ -1,6 +1,6 @@
-
 class OrderedDict:
-    ''
+    ""
+
     def clear():
         pass
 
@@ -36,12 +36,14 @@ class OrderedDict:
 
 
 class deque:
-    ''
+    ""
+
     def append():
         pass
 
     def popleft():
         pass
+
 
 def namedtuple():
     pass

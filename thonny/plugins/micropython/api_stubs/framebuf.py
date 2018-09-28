@@ -1,6 +1,6 @@
-
 class FrameBuffer:
-    ''
+    ""
+
     def blit():
         pass
 
@@ -31,8 +31,10 @@ class FrameBuffer:
     def vline():
         pass
 
+
 def FrameBuffer1():
     pass
+
 
 GS2_HMSB = 5
 GS4_HMSB = 2
