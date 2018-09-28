@@ -366,6 +366,12 @@ class Workbench(tk.Tk):
         self.set_default("view.editor_font_size", 14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
+        
+        if running_on_linux():
+            heading_font = tk_font.nametofont("TkHeadingFont")
+            heading_font.configure(weight="normal")
+            caption_font = tk_font.nametofont("TkCaptionFont")
+            caption_font.configure(weight="normal", size=default_font.cget("size"))
 
         self._fonts = [
             tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
