@@ -154,6 +154,7 @@ class Workbench(tk.Tk):
         assert self._editor_notebook is not None
 
         self._init_program_arguments_frame()
+        self._init_regular_mode_link()
 
         self._show_views()
 
@@ -1154,8 +1155,35 @@ class Workbench(tk.Tk):
             flag_name="view.show_program_arguments",
             group=11,
         )
-
+        
         update_visibility()
+    
+    def _init_regular_mode_link(self):
+        if self.get_ui_mode() != "simple":
+            return
+        
+        default_font = tk_font.nametofont("TkDefaultFont") 
+        small_font = default_font.copy()
+        small_font.configure(size=int(default_font.cget("size") * 0.7), underline=True) 
+        label = ttk.Label(
+            self._toolbar, 
+            text="Switch to regular mode", 
+            font=small_font,
+            style="Url.TLabel",
+            cursor="hand2",
+        )
+        label.grid(row=0, column=1001, sticky="ne")
+        
+        def on_click(_):
+            self.set_option("general.ui_mode", "regular")
+            tk_messagebox.showinfo(
+                "Regular mode",
+                "Configuration has been updated. "
+                + "Restart Thonny to start working in regular mode.\n\n"
+                + "(See 'Tools → Options → General' if you change your mind later.)")
+        
+        label.bind("<1>", on_click, True)
+        
 
     def log_program_arguments_string(self, arg_str: str) -> None:
         arg_str = arg_str.strip()
