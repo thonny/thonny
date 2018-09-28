@@ -12,6 +12,7 @@ import time
 import tokenize
 import traceback
 import webbrowser
+from pathlib import Path
 from queue import Queue
 from textwrap import dedent
 from time import sleep
@@ -1025,6 +1026,18 @@ class MicroPythonProxy(BackendProxy):
         else:
             return "boot.py"
         
+    def _get_script_path(self):
+        script_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
+        script_path = Path(script_path)
+        assert script_path.is_file(), "File not found: %s" % script_path
+
+        filename = script_path.name
+
+        if self._supports_directories():
+            return "/%s" % filename
+        else:
+            return filename
+
     def transform_message(self, msg):
         if msg is None:
             return None
@@ -1444,6 +1457,20 @@ def load_plugin():
         target = getattr(proxy, target_provider_method)()
         get_shell().submit_magic_command(["%upload", source_path, target])
 
+    def _upload(target_provider_method):
+        source_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
+        if source_path is None:
+            return
+
+        proxy = get_runner().get_backend_proxy()
+        assert isinstance(proxy, MicroPythonProxy)
+
+        if os.path.isabs(source_path):
+            source_path = os.path.relpath(source_path, get_workbench().get_cwd())
+
+        target = getattr(proxy, target_provider_method)()
+        get_shell().submit_magic_command(["%upload", source_path, target])
+
     def _cat(source_provider_method):
         proxy = get_runner().get_backend_proxy()
         assert isinstance(proxy, MicroPythonProxy)
@@ -1457,6 +1484,9 @@ def load_plugin():
     def _upload_as_boot_script():
         _upload_as("_get_boot_script_path")
     
+    def _upload_script():
+        _upload("_get_script_path")
+
     def _cat_main_script():
         _cat("_get_main_script_path")
     
@@ -1505,6 +1535,11 @@ def load_plugin():
 
     get_workbench().add_command("uploadbootscript", "device", "Upload current script as boot script",
                                 _upload_as_boot_script,
+                                tester=file_commands_enabled,
+                                group=20)
+
+    get_workbench().add_command("uploadscript", "device", "Upload current script",
+                                _upload_script,
                                 tester=file_commands_enabled,
                                 group=20)
 
