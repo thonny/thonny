@@ -487,7 +487,7 @@ class AutomaticNotebook(ClosableNotebook):
     """
 
     def __init__(self, master, position_key, preferred_size_in_pw=None):
-        if get_workbench().get_mode() == "simple":
+        if get_workbench().get_ui_mode() == "simple":
             style = "TNotebook"
         else:
             style = "ButtonNotebook.TNotebook"

@@ -116,14 +116,27 @@ class ConfigurationPage(ttk.Frame):
         ttk.Frame.__init__(self, master)
 
     def add_checkbox(
-        self, flag_name, description, row=None, pady=0, columnspan=1, tooltip=None
+        self, flag_name, description, row=None, column=0, pady=0, columnspan=1, tooltip=None
     ):
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
-        checkbox.grid(row=row, column=0, sticky=tk.W, pady=pady, columnspan=columnspan)
+        checkbox.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan)
 
         if tooltip is not None:
             ui_utils.create_tooltip(checkbox, tooltip)
+    
+    def add_combobox(self, option_name, values, row=None, column=0, pady=0, columnspan=1):
+        variable = get_workbench().get_variable(option_name)
+        print(type(variable))
+        combobox = ttk.Combobox(
+            self,
+            exportselection=False,
+            textvariable=variable,
+            state="readonly",
+            height=15,
+            values=values,
+        )
+        combobox.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan)
 
     def apply(self):
         """Apply method should return False, when page contains invalid

@@ -25,8 +25,8 @@ from typing import (
     List,
     Optional,  # pylint: disable=unused-import
     Sequence,
-    Set,
-    Tuple,
+    Set,       # pylint: disable=unused-import 
+    Tuple,     # pylint: disable=unused-import
     Type,
     Union,
     cast,
@@ -57,6 +57,7 @@ THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
 CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 SINGLE_INSTANCE_DEFAULT = True
+SIMPLE_MODE_VIEWS = ["ShellView", "VariablesView"]
 
 MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"])
 BackendSpec = collections.namedtuple(
@@ -196,7 +197,7 @@ class Workbench(tk.Tk):
         self._configuration_pages = {}  # type: Dict[str, Type[tk.Widget]]
 
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
-        self.set_default("general.expert_mode", False)
+        self.set_default("general.ui_mode", "regular")
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
@@ -294,14 +295,14 @@ class Workbench(tk.Tk):
             self._menubar = ui_utils.CustomMenubar(
                 self
             )  # type: Union[tk.Menu, ui_utils.CustomMenubar]
-            if self.get_mode() != "simple":
+            if self.get_ui_mode() != "simple":
                 self._menubar.grid(row=0, sticky="nsew")
         else:
             opts = get_style_configuration("Menubar")
             if "custom" in opts:
                 del opts["custom"]
             self._menubar = tk.Menu(self, **opts)
-            if self.get_mode() != "simple":
+            if self.get_ui_mode() != "simple":
                 self["menu"] = self._menubar
         self._menus = {}  # type: Dict[str, tk.Menu]
         self._menu_item_specs = (
@@ -532,7 +533,7 @@ class Workbench(tk.Tk):
             group=70,
         )
 
-        if self.get_option("general.expert_mode"):
+        if self.get_ui_mode() == "expert":
 
             self.add_command(
                 "toggle_maximize_view",
@@ -871,9 +872,9 @@ class Workbench(tk.Tk):
         self.set_default("view." + view_id + ".location", default_location)
         self.set_default("view." + view_id + ".position_key", default_position_key)
 
-        if self.get_mode() == "simple":
+        if self.get_ui_mode() == "simple":
             visibility_flag = tk.BooleanVar(
-                value=view_id in ["ShellView", "GlobalsView"]
+                value=view_id in SIMPLE_MODE_VIEWS
             )
         else:
             visibility_flag = cast(
@@ -962,8 +963,8 @@ class Workbench(tk.Tk):
     def get_syntax_theme_names(self) -> Sequence[str]:
         return sorted(self._syntax_themes.keys())
 
-    def get_mode(self) -> str:
-        return os.environ.get("THONNY_MODE", "regular")
+    def get_ui_mode(self) -> str:
+        return os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
 
     def scale(self, value: Union[int, float]) -> int:
         if isinstance(value, (int, float)):
@@ -1549,7 +1550,7 @@ class Workbench(tk.Tk):
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:
             group_frame = ttk.Frame(self._toolbar)
-            if self.get_mode() == "simple":
+            if self.get_ui_mode() == "simple":
                 padx = 0  # type: Union[int, Tuple[int, int]]
             else:
                 padx = (0, 10)
@@ -1564,13 +1565,13 @@ class Workbench(tk.Tk):
             style="Toolbutton",
             state=tk.NORMAL,
             text=caption,
-            compound="top" if self.get_mode() == "simple" else None,
-            pad=(15, 0) if self.get_mode() == "simple" else None,
+            compound="top" if self.get_ui_mode() == "simple" else None,
+            pad=(15, 0) if self.get_ui_mode() == "simple" else None,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore
         tooltip_text = command_label
-        if self.get_mode() != "simple":
+        if self.get_ui_mode() != "simple":
             if accelerator and lookup_style_option(
                 "OPTIONS", "shortcuts_in_tooltips", default=True
             ):
@@ -1901,17 +1902,19 @@ class Workbench(tk.Tk):
                 if view_name == "GlobalsView":
                     # was renamed in 2.2b5
                     view_name = "VariablesView"
-
-                self.show_view(view_name)
+                
+                if self.get_ui_mode() != "simple" or view_name in SIMPLE_MODE_VIEWS:
+                    self.show_view(view_name)
 
         # make sure VariablesView is at least loaded
         # otherwise it may miss globals events
         # and will show empty table on open
         self.get_view("VariablesView")
 
-        if self.get_option("assistance.open_assistant_on_errors") or self.get_option(
-            "assistance.open_assistant_on_warnings"
-        ):
+        if ((self.get_option("assistance.open_assistant_on_errors") 
+            or self.get_option("assistance.open_assistant_on_warnings"))
+            and 
+            (self.get_ui_mode() != "simple" or "AssistantView" in SIMPLE_MODE_VIEWS)):
             self.get_view("AssistantView")
 
     def _save_layout(self) -> None:

@@ -40,10 +40,19 @@ class GeneralConfigurationPage(ConfigurationPage):
             columnspan=2,
         )
 
+        ttk.Label(self, text="UI mode").grid(row=6, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.add_combobox(
+            "general.ui_mode",
+            ["simple", "regular", "expert"],
+            row=6,
+            column=1,
+            pady=(10, 0)
+        )
+
         self._scaling_var = get_workbench().get_variable("general.scaling")
         self._scaling_label = ttk.Label(self, text="UI scaling factor")
         self._scaling_label.grid(
-            row=6, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
+            row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
         scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0})
         self._scaling_combo = ttk.Combobox(
@@ -55,7 +64,7 @@ class GeneralConfigurationPage(ConfigurationPage):
             height=15,
             values=["default"] + scalings,
         )
-        self._scaling_combo.grid(row=6, column=1, sticky=tk.W, pady=(10, 0))
+        self._scaling_combo.grid(row=7, column=1, sticky=tk.W, pady=(10, 0))
 
         reopen_label = ttk.Label(
             self,

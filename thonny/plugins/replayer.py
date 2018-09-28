@@ -362,9 +362,7 @@ def load_plugin() -> None:
         ui_utils.show_dialog(win)
 
     get_workbench().set_default("tools.replayer_last_browser_folder", None)
-    if get_workbench().get_option("debug_mode") or get_workbench().get_option(
-        "expert_mode"
-    ):
+    if get_workbench().get_ui_mode() == "expert":
         get_workbench().add_command(
             "open_replayer", "tools", "Open replayer...", open_replayer, group=110
         )
