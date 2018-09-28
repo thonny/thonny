@@ -71,9 +71,9 @@ class AboutDialog(tk.Toplevel):
                                   text="Made in\n"
                                   + "University of Tartu, Estonia,\n"
                                   + "with the help from\n"
-                                  + "open-source community\n"
-                                  + "and "
-                                  + "Raspberry Pi Foundation",
+                                  + "open-source community,\n"
+                                  + "Raspberry Pi Foundation\n"
+                                  + "and Cybernetica AS",
                               style="Url.TLabel",
                               cursor="hand2",
                               font=url_font,
