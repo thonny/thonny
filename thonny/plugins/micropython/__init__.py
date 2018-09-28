@@ -1457,20 +1457,6 @@ def load_plugin():
         target = getattr(proxy, target_provider_method)()
         get_shell().submit_magic_command(["%upload", source_path, target])
 
-    def _upload(target_provider_method):
-        source_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        if source_path is None:
-            return
-
-        proxy = get_runner().get_backend_proxy()
-        assert isinstance(proxy, MicroPythonProxy)
-
-        if os.path.isabs(source_path):
-            source_path = os.path.relpath(source_path, get_workbench().get_cwd())
-
-        target = getattr(proxy, target_provider_method)()
-        get_shell().submit_magic_command(["%upload", source_path, target])
-
     def _cat(source_provider_method):
         proxy = get_runner().get_backend_proxy()
         assert isinstance(proxy, MicroPythonProxy)
@@ -1485,7 +1471,7 @@ def load_plugin():
         _upload_as("_get_boot_script_path")
     
     def _upload_script():
-        _upload("_get_script_path")
+        _upload_as("_get_script_path")
 
     def _cat_main_script():
         _cat("_get_main_script_path")
@@ -1538,7 +1524,7 @@ def load_plugin():
                                 tester=file_commands_enabled,
                                 group=20)
 
-    get_workbench().add_command("uploadscript", "device", "Upload current script",
+    get_workbench().add_command("uploadscript", "device", "Upload current script with current name",
                                 _upload_script,
                                 tester=file_commands_enabled,
                                 group=20)
