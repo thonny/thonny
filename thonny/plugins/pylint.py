@@ -43,11 +43,14 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         ]
 
         # disallow unused globals only in main script
+        """
+        Not good idea, because unused * imports also count as unused global vars
         from pylint.__pkginfo__ import numversion
 
         if not imported_file_paths and numversion >= (1, 7):
             # (unfortunately can't separate main script when user modules are present)
             options.append("--allow-global-unused-variables=no")
+        """
         
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", "pylint"]
