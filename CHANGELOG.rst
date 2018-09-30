@@ -2,6 +2,30 @@
 Version history
 ===============
 
+3.0.0b6 (2018-09-30)
+====================
+* CHANGED: In order to avoid pollution of user home directory, the configuration file and logs are now stored in directories recommended by platform style guides (%APPDATA%/Thonny on Windows, ~/Library/Thonny on Mac and ~/.config/Thonny on Linux). Old configuration and user logs will be imported on first run. 
+* CHANGED: "Back end" configuration page was renamed to "Interpreter" (as it was in Thonny 2.1)
+* CHANGED: Python version in Thonny+Python bundles upgraded to 3.7.1rc1
+* NEW: File menu received a submenu for easy opening of recent files. 
+* ENHANCEMENT: Add shortcut for clearing shell (Ctrl+L)
+* ENHANCEMENT: Warn when script is saved with a common library module name (eg. turtle.py)
+* ENHANCEMENT: Allow switching between regular and simple mode (Tools => Options => General)
+* FIXED #72: "View => Full screen" (in Expert mode) is now also available on Mac
+* FIXED #262: Add ability to select an autocomplete suggestion with TAB
+* FIXED #316: Nice debugger doesn't handle named arguments properly
+* FIXED #339: Allow disabling sound Tools => Options => General
+* FIXED #389: AST marker fails with dict merge
+* FIXED #478: Add option to reopen all files on start-up
+* FIXED #479: Make Thonny save configuration when "Quit"-ed on Mac
+* FIXED #480: Thonny now properly remembers opened files
+* FIXED #498: Open System Shell doesn't work on Raspberry
+* FIXED #501: Assistant feedback preview link doesn't work on mac
+* FIXED #510: Error when listing available interpreters in config page
+* FIXED #518: add menu item: "device" / "Upload current script" for MicroPython (by Jens Diemer) 
+* FIXED: Object inspector can show images (again)
+* FIXED: Pylint and MyPy processes don't hang anymore with large output. 
+
 3.0.0b5 (2018-09-01)
 ====================
 * FIXED: requirements.txt was missing mypy 
