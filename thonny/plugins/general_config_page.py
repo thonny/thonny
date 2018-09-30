@@ -16,12 +16,6 @@ class GeneralConfigurationPage(ConfigurationPage):
             columnspan=2,
         )
         self.add_checkbox(
-            "general.expert_mode",
-            "Expert mode (enables replayer, full-screen, maximizing views)",
-            row=2,
-            columnspan=2,
-        )
-        self.add_checkbox(
             "general.debug_mode",
             "Debug mode (provides more detailed logs)",
             row=3,
