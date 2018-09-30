@@ -125,4 +125,4 @@ class BackendConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page("Back-end", BackendConfigurationPage)
+    get_workbench().add_configuration_page("Interpreter", BackendConfigurationPage)
