@@ -1,16 +1,19 @@
 import sys
 
-if sys.version_info[0] == 2:  # Just checking your Python version to import Tkinter properly.
+if (
+    sys.version_info[0] == 2
+):  # Just checking your Python version to import Tkinter properly.
     from Tkinter import *
 else:
     from tkinter import *
 
 
 class Fullscreen_Window:
-
     def __init__(self):
         self.tk = Tk()
-        self.tk.wm_state("zoomed")  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
+        self.tk.wm_state(
+            "zoomed"
+        )  # This just maximizes it so we can see the window. It's nothing to do with fullscreen.
         self.frame = Frame(self.tk)
         self.frame.pack()
         self.state = False
@@ -27,6 +30,7 @@ class Fullscreen_Window:
         self.tk.attributes("-fullscreen", False)
         return "break"
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     w = Fullscreen_Window()
     w.tk.mainloop()

@@ -1,6 +1,6 @@
-
 class ADC:
-    ''
+    ""
+
     def read():
         pass
 
@@ -12,7 +12,8 @@ class ADC:
 
 
 class ADCAll:
-    ''
+    ""
+
     def read_channel():
         pass
 
@@ -30,7 +31,8 @@ class ADCAll:
 
 
 class Accel:
-    ''
+    ""
+
     def filtered_xyz():
         pass
 
@@ -54,13 +56,14 @@ class Accel:
 
 
 class ExtInt:
-    ''
+    ""
     EVT_FALLING = 270663680
     EVT_RISING = 269615104
     EVT_RISING_FALLING = 271712256
     IRQ_FALLING = 270598144
     IRQ_RISING = 269549568
     IRQ_RISING_FALLING = 271646720
+
     def disable():
         pass
 
@@ -78,7 +81,8 @@ class ExtInt:
 
 
 class Flash:
-    ''
+    ""
+
     def ioctl():
         pass
 
@@ -90,9 +94,10 @@ class Flash:
 
 
 class I2C:
-    ''
+    ""
     MASTER = 0
     SLAVE = 1
+
     def deinit():
         pass
 
@@ -119,7 +124,8 @@ class I2C:
 
 
 class LCD:
-    ''
+    ""
+
     def command():
         pass
 
@@ -149,7 +155,8 @@ class LCD:
 
 
 class LED:
-    ''
+    ""
+
     def intensity():
         pass
 
@@ -164,7 +171,7 @@ class LED:
 
 
 class Pin:
-    ''
+    ""
     AF1_TIM1 = 1
     AF1_TIM2 = 1
     AF2_TIM3 = 2
@@ -196,6 +203,7 @@ class Pin:
     PULL_DOWN = 2
     PULL_NONE = 0
     PULL_UP = 1
+
     def af():
         pass
 
@@ -204,6 +212,7 @@ class Pin:
 
     board = None
     cpu = None
+
     def debug():
         pass
 
@@ -257,7 +266,8 @@ class Pin:
 
 
 class RTC:
-    ''
+    ""
+
     def calibration():
         pass
 
@@ -273,10 +283,13 @@ class RTC:
     def wakeup():
         pass
 
+
 SD = None
 
+
 class SDCard:
-    ''
+    ""
+
     def info():
         pass
 
@@ -303,11 +316,12 @@ class SDCard:
 
 
 class SPI:
-    ''
+    ""
     LSB = 128
     MASTER = 260
     MSB = 0
     SLAVE = 0
+
     def deinit():
         pass
 
@@ -337,7 +351,8 @@ class SPI:
 
 
 class Servo:
-    ''
+    ""
+
     def angle():
         pass
 
@@ -352,7 +367,8 @@ class Servo:
 
 
 class Switch:
-    ''
+    ""
+
     def callback():
         pass
 
@@ -361,7 +377,7 @@ class Switch:
 
 
 class Timer:
-    ''
+    ""
     BOTH = 10
     CENTER = 32
     DOWN = 16
@@ -382,6 +398,7 @@ class Timer:
     PWM_INVERTED = 1
     RISING = 0
     UP = 0
+
     def callback():
         pass
 
@@ -411,9 +428,10 @@ class Timer:
 
 
 class UART:
-    ''
+    ""
     CTS = 512
     RTS = 256
+
     def any():
         pass
 
@@ -446,7 +464,8 @@ class UART:
 
 
 class USB_HID:
-    ''
+    ""
+
     def recv():
         pass
 
@@ -455,7 +474,8 @@ class USB_HID:
 
 
 class USB_VCP:
-    ''
+    ""
+
     def any():
         pass
 
@@ -489,88 +509,118 @@ class USB_VCP:
     def write():
         pass
 
+
 def bootloader():
     pass
+
 
 def delay():
     pass
 
+
 def dht_readinto():
     pass
+
 
 def disable_irq():
     pass
 
+
 def elapsed_micros():
     pass
+
 
 def elapsed_millis():
     pass
 
+
 def enable_irq():
     pass
+
 
 def fault_debug():
     pass
 
+
 def freq():
     pass
+
 
 def hard_reset():
     pass
 
+
 def have_cdc():
     pass
+
 
 def hid():
     pass
 
+
 hid_keyboard = None
 hid_mouse = None
+
+
 def info():
     pass
+
 
 def main():
     pass
 
+
 def micros():
     pass
+
 
 def millis():
     pass
 
+
 def mount():
     pass
+
 
 def pwm():
     pass
 
+
 def repl_info():
     pass
+
 
 def repl_uart():
     pass
 
+
 def servo():
     pass
+
 
 def standby():
     pass
 
+
 def stop():
     pass
+
 
 def sync():
     pass
 
+
 def udelay():
     pass
+
 
 def unique_id():
     pass
 
+
 def usb_mode():
     pass
+
 
 def wfi():
     pass

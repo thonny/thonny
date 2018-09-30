@@ -1,6 +1,6 @@
-
 class BytesIO:
-    ''
+    ""
+
     def close():
         pass
 
@@ -27,7 +27,8 @@ class BytesIO:
 
 
 class FileIO:
-    ''
+    ""
+
     def close():
         pass
 
@@ -57,7 +58,8 @@ class FileIO:
 
 
 class StringIO:
-    ''
+    ""
+
     def close():
         pass
 
@@ -84,7 +86,8 @@ class StringIO:
 
 
 class TextIOWrapper:
-    ''
+    ""
+
     def close():
         pass
 
@@ -111,6 +114,7 @@ class TextIOWrapper:
 
     def write():
         pass
+
 
 def open():
     pass

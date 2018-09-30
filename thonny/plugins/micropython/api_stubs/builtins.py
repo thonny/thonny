@@ -1,106 +1,141 @@
-
 class ArithmeticError:
-    ''
+    ""
+
 
 class AssertionError:
-    ''
+    ""
+
 
 class AttributeError:
-    ''
+    ""
+
 
 class BaseException:
-    ''
+    ""
+
 
 class EOFError:
-    ''
+    ""
+
+
 Ellipsis = None
 
+
 class Exception:
-    ''
+    ""
+
 
 class GeneratorExit:
-    ''
+    ""
+
 
 class ImportError:
-    ''
+    ""
+
 
 class IndentationError:
-    ''
+    ""
+
 
 class IndexError:
-    ''
+    ""
+
 
 class KeyError:
-    ''
+    ""
+
 
 class KeyboardInterrupt:
-    ''
+    ""
+
 
 class LookupError:
-    ''
+    ""
+
 
 class MemoryError:
-    ''
+    ""
+
 
 class NameError:
-    ''
+    ""
+
 
 class NotImplementedError:
-    ''
+    ""
+
 
 class OSError:
-    ''
+    ""
+
 
 class OverflowError:
-    ''
+    ""
+
 
 class RuntimeError:
-    ''
+    ""
+
 
 class StopAsyncIteration:
-    ''
+    ""
+
 
 class StopIteration:
-    ''
+    ""
+
 
 class SyntaxError:
-    ''
+    ""
+
 
 class SystemExit:
-    ''
+    ""
+
 
 class TypeError:
-    ''
+    ""
+
 
 class UnicodeError:
-    ''
+    ""
+
 
 class ValueError:
-    ''
+    ""
+
 
 class ViperTypeError:
-    ''
+    ""
+
 
 class ZeroDivisionError:
-    ''
+    ""
+
+
 def abs():
     pass
+
 
 def all():
     pass
 
+
 def any():
     pass
+
 
 def bin():
     pass
 
 
 class bool:
-    ''
+    ""
+
 
 class bytearray:
-    ''
+    ""
+
     def append():
         pass
 
@@ -109,7 +144,8 @@ class bytearray:
 
 
 class bytes:
-    ''
+    ""
+
     def center():
         pass
 
@@ -191,27 +227,34 @@ class bytes:
     def upper():
         pass
 
+
 def callable():
     pass
+
 
 def chr():
     pass
 
 
 class classmethod:
-    ''
+    ""
+
+
 def compile():
     pass
 
 
 class complex:
-    ''
+    ""
+
+
 def delattr():
     pass
 
 
 class dict:
-    ''
+    ""
+
     def clear():
         pass
 
@@ -245,33 +288,42 @@ class dict:
     def values():
         pass
 
+
 def dir():
     pass
+
 
 def divmod():
     pass
 
 
 class enumerate:
-    ''
+    ""
+
+
 def eval():
     pass
 
+
 def exec():
     pass
+
 
 def execfile():
     pass
 
 
 class filter:
-    ''
+    ""
+
 
 class float:
-    ''
+    ""
+
 
 class frozenset:
-    ''
+    ""
+
     def copy():
         pass
 
@@ -296,54 +348,68 @@ class frozenset:
     def union():
         pass
 
+
 def getattr():
     pass
+
 
 def globals():
     pass
 
+
 def hasattr():
     pass
+
 
 def hash():
     pass
 
+
 def help():
     pass
+
 
 def hex():
     pass
 
+
 def id():
     pass
+
 
 def input():
     pass
 
 
 class int:
-    ''
+    ""
+
     def from_bytes():
         pass
 
     def to_bytes():
         pass
 
+
 def isinstance():
     pass
+
 
 def issubclass():
     pass
 
+
 def iter():
     pass
+
 
 def len():
     pass
 
 
 class list:
-    ''
+    ""
+
     def append():
         pass
 
@@ -377,45 +443,58 @@ class list:
     def sort():
         pass
 
+
 def locals():
     pass
 
 
 class map:
-    ''
+    ""
+
+
 def max():
     pass
 
 
 class memoryview:
-    ''
+    ""
+
+
 def min():
     pass
+
 
 def next():
     pass
 
 
 class object:
-    ''
+    ""
+
+
 def oct():
     pass
+
 
 def open():
     pass
 
+
 def ord():
     pass
 
+
 def pow():
     pass
+
 
 def print():
     pass
 
 
 class property:
-    ''
+    ""
+
     def deleter():
         pass
 
@@ -427,19 +506,24 @@ class property:
 
 
 class range:
-    ''
+    ""
+
+
 def repr():
     pass
 
 
 class reversed:
-    ''
+    ""
+
+
 def round():
     pass
 
 
 class set:
-    ''
+    ""
+
     def add():
         pass
 
@@ -491,21 +575,26 @@ class set:
     def update():
         pass
 
+
 def setattr():
     pass
 
 
 class slice:
-    ''
+    ""
+
+
 def sorted():
     pass
 
 
 class staticmethod:
-    ''
+    ""
+
 
 class str:
-    ''
+    ""
+
     def center():
         pass
 
@@ -587,15 +676,18 @@ class str:
     def upper():
         pass
 
+
 def sum():
     pass
 
 
 class super:
-    ''
+    ""
+
 
 class tuple:
-    ''
+    ""
+
     def count():
         pass
 
@@ -604,7 +696,8 @@ class tuple:
 
 
 class type:
-    ''
+    ""
+
 
 class zip:
-    ''
+    ""

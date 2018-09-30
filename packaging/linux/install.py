@@ -29,8 +29,7 @@ def which(cmd, mode=os.F_OK | os.X_OK, path=None):
     # Additionally check that `file` is not a directory, as on Windows
     # directories pass the os.access check.
     def _access_check(fn, mode):
-        return (os.path.exists(fn) and os.access(fn, mode)
-                and not os.path.isdir(fn))
+        return os.path.exists(fn) and os.access(fn, mode) and not os.path.isdir(fn)
 
     # If we're given a path with a directory part, look it up directly rather
     # than referring to PATH directories. This includes checking relative to the
@@ -61,10 +60,10 @@ def which(cmd, mode=os.F_OK | os.X_OK, path=None):
 
 
 def create_launcher(source_filename, target_filename, replacements={}):
-    target_dir = os.path.dirname(target_filename) 
+    target_dir = os.path.dirname(target_filename)
     if not os.path.exists(target_dir):
         os.makedirs(target_dir)
-        
+
     with open(source_filename) as f:
         content = f.read()
 
@@ -73,22 +72,23 @@ def create_launcher(source_filename, target_filename, replacements={}):
             to_str = replacements[from_str]
             content = content.replace(from_str, to_str)
         f.write(content)
-    
-    # Seems that even desktop files have to be executable 
+
+    # Seems that even desktop files have to be executable
     # https://help.ubuntu.com/community/UnityLaunchersAndDesktopFiles
     os.chmod(target_filename, 0o755)
-    
+
+
 def try_to_refresh_desktop_and_menus(menu_dir):
     """In KDE, the .destop files are not taken into account immediately"""
     for cmd in ["kbuildsycoca5", "kbuildsycoca4", "kbuildsycoca"]:
         if which(cmd):
             subprocess.call([cmd])
             break
-    
+
     udd = "update-desktop-database"
     if which(udd):
         subprocess.call([udd, menu_dir])
-        
+
 
 if len(sys.argv) == 1:
     parent_dir = os.path.expanduser("~/apps")
@@ -102,81 +102,90 @@ if parent_dir.startswith(os.path.dirname(__file__)):
     print("Can't install into installer directory", file=sys.stderr)
     exit(1)
 
+
 def print_task(desc):
     print((desc + " ").ljust(70, ".") + " ", end="")
 
+
 def get_desktop_path():
     try:
-        return subprocess.check_output(['xdg-user-dir', 'DESKTOP']).strip().decode()
+        return subprocess.check_output(["xdg-user-dir", "DESKTOP"]).strip().decode()
     except:
         return os.path.expanduser("~/Desktop")
 
-# define directories    
+
+# define directories
 source_dir = os.path.dirname(os.path.realpath(__file__))
 target_dir = parent_dir + "/thonny"
 if target_dir.startswith("/home"):
     menu_dir = os.path.expanduser("~/.local/share/applications")
 else:
-    menu_dir = "/usr/share/applications" 
+    menu_dir = "/usr/share/applications"
 
 try:
     # handle reinstalling newer version
     print_task("Copying files to " + target_dir)
-    
+
     if os.path.exists(target_dir):
         print()
-        answer = input(target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: ").strip()
+        answer = input(
+            target_dir + " already exists. I need to clear it. Is it OK? [Y/n]: "
+        ).strip()
         if not answer or answer.lower() in ["y", "yes"]:
             shutil.rmtree(target_dir)
         else:
             print("Installation is cancelled", file=sys.stderr)
             exit(1)
-    
+
     shutil.copytree(source_dir, target_dir)  # Copy everything
-    shutil.rmtree(target_dir + "/templates") # ... except templates
-    os.remove(target_dir + "/install")       # ... and installer
+    shutil.rmtree(target_dir + "/templates")  # ... except templates
+    os.remove(target_dir + "/install")  # ... and installer
     print("Done!")
-    
-    
+
     menu_item_path = menu_dir + "/Thonny.desktop"
     print_task("Creating start menu item (%s)" % menu_item_path)
-    create_launcher(source_dir + "/templates/Thonny.desktop",
-                    menu_item_path,
-                    {"$target_dir" : target_dir})
+    create_launcher(
+        source_dir + "/templates/Thonny.desktop",
+        menu_item_path,
+        {"$target_dir": target_dir},
+    )
     print("Done!")
-    
+
     print_task("Creating Desktop shortcut")
     desktop_path = get_desktop_path()
-    
-    create_launcher(source_dir + "/templates/Thonny.desktop",
-                    desktop_path + "/Thonny.desktop",
-                    {"$target_dir" : target_dir})
+
+    create_launcher(
+        source_dir + "/templates/Thonny.desktop",
+        desktop_path + "/Thonny.desktop",
+        {"$target_dir": target_dir},
+    )
     print("Done!")
-    
-    
+
     uninstaller_path = target_dir + "/bin/uninstall"
     print_task("Creating uninstaller (%s)" % uninstaller_path)
-    create_launcher(source_dir + "/templates/uninstall.sh",
-                    uninstaller_path,
-                    {"$target_dir" : target_dir, "$menu_dir" : menu_dir})
+    create_launcher(
+        source_dir + "/templates/uninstall.sh",
+        uninstaller_path,
+        {"$target_dir": target_dir, "$menu_dir": menu_dir},
+    )
     print("Done!")
-    
+
     print_task("Compiling Python files")
-    return_code = subprocess.call([target_dir + "/bin/python3.7",
-                           "-m", "compileall", target_dir + "/lib"])
+    return_code = subprocess.call(
+        [target_dir + "/bin/python3.7", "-m", "compileall", target_dir + "/lib"]
+    )
     # TODO: why is return code 1 (eg. in 64-bit Fedora 22) even when everything seemed to succeed?
     print("Done!")
-    
+
     print_task("Refreshing system menu")
     try_to_refresh_desktop_and_menus(menu_dir)
     print("Done!")
-    
-    
+
     print()
     print("Installation was successful, you can start Thonny from start menu under")
     print("Education or Programming, or by calling " + target_dir + "/bin/thonny")
     print("For uninstalling Thonny call " + target_dir + "/bin/uninstall")
-    
+
 except OSError as e:
     print()
     print(e, file=sys.stderr)

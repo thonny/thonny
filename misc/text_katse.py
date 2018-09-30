@@ -18,5 +18,4 @@ text.tag_configure("see", foreground="green", background="")
 text.tag_configure("see", foreground="", background="")
 
 
-
 root.mainloop()

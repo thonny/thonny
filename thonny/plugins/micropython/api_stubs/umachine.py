@@ -1,8 +1,10 @@
 DEEPSLEEP_RESET = 4
 HARD_RESET = 2
 
+
 class I2C:
-    ''
+    ""
+
     def init():
         pass
 
@@ -39,10 +41,12 @@ class I2C:
     def writeto_mem():
         pass
 
+
 PWRON_RESET = 1
 
+
 class Pin:
-    ''
+    ""
     AF1_TIM1 = 1
     AF1_TIM2 = 1
     AF2_TIM3 = 2
@@ -74,6 +78,7 @@ class Pin:
     PULL_DOWN = 2
     PULL_NONE = 0
     PULL_UP = 1
+
     def af():
         pass
 
@@ -82,6 +87,7 @@ class Pin:
 
     board = None
     cpu = None
+
     def debug():
         pass
 
@@ -133,12 +139,15 @@ class Pin:
     def value():
         pass
 
+
 SOFT_RESET = 0
 
+
 class SPI:
-    ''
+    ""
     LSB = 128
     MSB = 0
+
     def deinit():
         pass
 
@@ -159,7 +168,8 @@ class SPI:
 
 
 class Signal:
-    ''
+    ""
+
     def off():
         pass
 
@@ -171,9 +181,10 @@ class Signal:
 
 
 class UART:
-    ''
+    ""
     CTS = 512
     RTS = 256
+
     def any():
         pass
 
@@ -206,49 +217,67 @@ class UART:
 
 
 class WDT:
-    ''
+    ""
+
     def feed():
         pass
 
+
 WDT_RESET = 3
+
+
 def bootloader():
     pass
+
 
 def deepsleep():
     pass
 
+
 def disable_irq():
     pass
+
 
 def enable_irq():
     pass
 
+
 def freq():
     pass
+
 
 def idle():
     pass
 
+
 def info():
     pass
+
 
 mem16 = None
 mem32 = None
 mem8 = None
+
+
 def reset():
     pass
+
 
 def reset_cause():
     pass
 
+
 def sleep():
     pass
+
 
 def soft_reset():
     pass
 
+
 def time_pulse_us():
     pass
+
 
 def unique_id():
     pass

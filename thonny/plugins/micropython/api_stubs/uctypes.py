@@ -22,18 +22,23 @@ UINT32 = 536870912
 UINT64 = 805306368
 UINT8 = 0
 VOID = 0
+
+
 def addressof():
     pass
+
 
 def bytearray_at():
     pass
 
+
 def bytes_at():
     pass
+
 
 def sizeof():
     pass
 
 
 class struct:
-    ''
+    ""

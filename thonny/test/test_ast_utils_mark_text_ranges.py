@@ -6,7 +6,9 @@ from thonny.ast_utils import pretty
 
 
 def test_single_assignment():
-    check_marked_ast("x=1", """/=Module
+    check_marked_ast(
+        "x=1",
+        """/=Module
     body=[...]
         0=Assign @ 1.0  -  1.3
             targets=[...]
@@ -14,18 +16,20 @@ def test_single_assignment():
                     id='x'
                     ctx=Store
             value=Num @ 1.2  -  1.3
-                n=1""")
+                n=1""",
+    )
 
 
 def test_simple_io_program():
-    check_marked_ast("""age = int(input("Enter age: "))
+    check_marked_ast(
+        """age = int(input("Enter age: "))
 if age > 18:
     print("Hi")
 else:
     print("Hello!", end='')
     print("What's your name?")
-""", 
-"""/=Module
+""",
+        """/=Module
     body=[...]
         0=Assign @ 1.0  -  1.31
             targets=[...]
@@ -88,13 +92,17 @@ else:
                         args=[...]
                             0=Str @ 6.10  -  6.29
                                 s="What's your name?"
-                        keywords=[]""")
+                        keywords=[]""",
+    )
+
 
 def test_two_trivial_defs():
-    check_marked_ast("""def f():
+    check_marked_ast(
+        """def f():
     pass
 def f():
-    pass""", """/=Module
+    pass""",
+        """/=Module
     body=[...]
         0=FunctionDef @ 1.0  -  2.8
             name='f'
@@ -121,12 +129,16 @@ def f():
             body=[...]
                 0=Pass @ 4.4  -  4.8
             decorator_list=[]
-            returns=None""")
+            returns=None""",
+    )
+
 
 def test_id_def():
-    check_marked_ast("""def f(x):
+    check_marked_ast(
+        """def f(x):
     return x
-""", """/=Module
+""",
+        """/=Module
     body=[...]
         0=FunctionDef @ 1.0  -  2.12
             name='f'
@@ -146,15 +158,19 @@ def test_id_def():
                         id='x'
                         ctx=Load
             decorator_list=[]
-            returns=None""")
+            returns=None""",
+    )
+
 
 def test_simple_while_program():
-    check_marked_ast("""x = int(input("Enter number: "))
+    check_marked_ast(
+        """x = int(input("Enter number: "))
 
 while x > 0:
     print(x)
     x -= 1
-""", """/=Module
+""",
+        """/=Module
     body=[...]
         0=Assign @ 1.0  -  1.32
             targets=[...]
@@ -203,11 +219,15 @@ while x > 0:
                     op=Sub
                     value=Num @ 5.9  -  5.10
                         n=1
-            orelse=[]""")
+            orelse=[]""",
+    )
+
 
 def test_call_with_pos_and_kw_arg():
-    check_marked_ast("""f(3, t=45)
-""", """/=Module
+    check_marked_ast(
+        """f(3, t=45)
+""",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.10
             value=Call @ 1.0  -  1.10
@@ -221,12 +241,15 @@ def test_call_with_pos_and_kw_arg():
                     0=keyword
                         arg='t'
                         value=Num @ 1.7  -  1.9
-                            n=45""")
+                            n=45""",
+    )
+
 
 def test_call_with_pos_star_kw():
-    check_marked_ast("""f(3, *kala, t=45)
-    """, 
-    """/=Module
+    check_marked_ast(
+        """f(3, *kala, t=45)
+    """,
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.17
             value=Call @ 1.0  -  1.17
@@ -245,11 +268,15 @@ def test_call_with_pos_star_kw():
                     0=keyword
                         arg='t'
                         value=Num @ 1.14  -  1.16
-                            n=45""")
+                            n=45""",
+    )
+
 
 def test_call_with_single_keyword():
-    check_marked_ast("""fff(t=45)
-""", """/=Module
+    check_marked_ast(
+        """fff(t=45)
+""",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.9
             value=Call @ 1.0  -  1.9
@@ -261,11 +288,15 @@ def test_call_with_single_keyword():
                     0=keyword
                         arg='t'
                         value=Num @ 1.6  -  1.8
-                            n=45""")
+                            n=45""",
+    )
+
 
 def test_call_without_arguments():
-    check_marked_ast("""fff()
-""", """/=Module
+    check_marked_ast(
+        """fff()
+""",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.5
             value=Call @ 1.0  -  1.5
@@ -273,11 +304,15 @@ def test_call_without_arguments():
                     id='fff'
                     ctx=Load
                 args=[]
-                keywords=[]""")
+                keywords=[]""",
+    )
+
 
 def test_call_with_attribute_function_and_keyword_arg():
-    check_marked_ast("""rida.strip().split(maxsplit=1)
-""", """/=Module
+    check_marked_ast(
+        """rida.strip().split(maxsplit=1)
+""",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.30
             value=Call @ 1.0  -  1.30
@@ -298,10 +333,14 @@ def test_call_with_attribute_function_and_keyword_arg():
                     0=keyword
                         arg='maxsplit'
                         value=Num @ 1.28  -  1.29
-                            n=1""")
+                            n=1""",
+    )
+
 
 def test_del_from_list_with_integer():
-    check_marked_ast("""del x[0]""", """/=Module
+    check_marked_ast(
+        """del x[0]""",
+        """/=Module
     body=[...]
         0=Delete @ 1.0  -  1.8
             targets=[...]
@@ -312,11 +351,14 @@ def test_del_from_list_with_integer():
                     slice=Index
                         value=Num @ 1.6  -  1.7
                             n=0
-                    ctx=Del""")
+                    ctx=Del""",
+    )
 
 
 def test_del_from_list_with_string():
-    check_marked_ast("""del x["blah"]""", """/=Module
+    check_marked_ast(
+        """del x["blah"]""",
+        """/=Module
     body=[...]
         0=Delete @ 1.0  -  1.13
             targets=[...]
@@ -327,11 +369,15 @@ def test_del_from_list_with_string():
                     slice=Index
                         value=Str @ 1.6  -  1.12
                             s='blah'
-                    ctx=Del""")
+                    ctx=Del""",
+    )
+
 
 def test_full_slice1():
-    check_marked_ast("""blah[:]
-""", """/=Module
+    check_marked_ast(
+        """blah[:]
+""",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.7
             value=Subscript @ 1.0  -  1.7
@@ -342,11 +388,15 @@ def test_full_slice1():
                     lower=None
                     upper=None
                     step=None
-                ctx=Load""")
+                ctx=Load""",
+    )
+
 
 def test_full_slice2():
-    check_marked_ast("""blah[::]
-""", """/=Module
+    check_marked_ast(
+        """blah[::]
+""",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.8
             value=Subscript @ 1.0  -  1.8
@@ -357,13 +407,17 @@ def test_full_slice2():
                     lower=None
                     upper=None
                     step=None
-                ctx=Load""")
+                ctx=Load""",
+    )
+
 
 def test_non_ascii_letters_with_calls_etc():
-    check_marked_ast("""täpitähed = "täpitähed"
+    check_marked_ast(
+        """täpitähed = "täpitähed"
 print(täpitähed["tšahh"])
 pöhh(pöhh=3)
-""", """/=Module
+""",
+        """/=Module
     body=[...]
         0=Assign @ 1.0  -  1.23
             targets=[...]
@@ -397,11 +451,15 @@ pöhh(pöhh=3)
                     0=keyword
                         arg='pöhh'
                         value=Num @ 3.10  -  3.11
-                            n=3""")
+                            n=3""",
+    )
+
 
 def test_nested_binops():
     """http://bugs.python.org/issue18374"""
-    check_marked_ast("1+2-3", """/=Module
+    check_marked_ast(
+        "1+2-3",
+        """/=Module
     body=[...]
         0=Expr @ 1.0  -  1.5
             value=BinOp @ 1.0  -  1.5
@@ -413,16 +471,19 @@ def test_nested_binops():
                         n=2
                 op=Sub
                 right=Num @ 1.4  -  1.5
-                    n=3""")
+                    n=3""",
+    )
+
 
 def test_multiline_string():
     """http://bugs.python.org/issue18370"""
-    check_marked_ast("""pass
+    check_marked_ast(
+        """pass
 blah = \"\"\"first
 second
 third\"\"\"
 pass""",
-    """/=Module
+        """/=Module
     body=[...]
         0=Pass @ 1.0  -  1.4
         1=Assign @ 2.0  -  4.8
@@ -432,20 +493,24 @@ pass""",
                     ctx=Store
             value=Str @ 2.7  -  4.8
                 s='first\\nsecond\\nthird'
-        2=Pass @ 5.0  -  5.4""")
+        2=Pass @ 5.0  -  5.4""",
+    )
 
-def check_marked_ast(source, expected_pretty_ast
-                     #,expected_for_py_34=None
-                     ):
-    
-    #if (sys.version_info[:2] == (3,4) 
+
+def check_marked_ast(
+    source,
+    expected_pretty_ast
+    # ,expected_for_py_34=None
+):
+
+    # if (sys.version_info[:2] == (3,4)
     #    and expected_for_py_34 is not None):
     #    expected_pretty_ast = expected_for_py_34
-    
+
     source = dedent(source)
     root = ast.parse(source)
     ast_utils.mark_text_ranges(root, source.encode("utf-8"))
     actual_pretty_ast = pretty(root)
-    #print("ACTUAL", actual_pretty_ast)
-    #print("EXPECTED", expected_pretty_ast)
-    assert actual_pretty_ast.strip() == expected_pretty_ast.strip() 
+    # print("ACTUAL", actual_pretty_ast)
+    # print("EXPECTED", expected_pretty_ast)
+    assert actual_pretty_ast.strip() == expected_pretty_ast.strip()

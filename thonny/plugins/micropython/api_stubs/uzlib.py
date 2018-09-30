@@ -1,6 +1,6 @@
-
 class DecompIO:
-    ''
+    ""
+
     def read():
         pass
 
@@ -9,6 +9,7 @@ class DecompIO:
 
     def readline():
         pass
+
 
 def decompress():
     pass

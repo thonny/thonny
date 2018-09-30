@@ -14,26 +14,27 @@ def extract_text_range(source, text_range):
     if isinstance(source, bytes):
         # TODO: may be wrong encoding
         source = source.decode("utf-8")
-        
+
     lines = source.splitlines(True)
     # get relevant lines
-    lines = lines[text_range.lineno-1:text_range.end_lineno]
+    lines = lines[text_range.lineno - 1 : text_range.end_lineno]
 
     # trim last and first lines
-    lines[-1] = lines[-1][:text_range.end_col_offset]
-    lines[0] = lines[0][text_range.col_offset:]
+    lines[-1] = lines[-1][: text_range.end_col_offset]
+    lines[0] = lines[0][text_range.col_offset :]
     return "".join(lines)
 
 
-
 def find_expression(node, text_range):
-    if (hasattr(node, "lineno")
-        and node.lineno == text_range.lineno 
+    if (
+        hasattr(node, "lineno")
+        and node.lineno == text_range.lineno
         and node.col_offset == text_range.col_offset
-        and node.end_lineno == text_range.end_lineno 
+        and node.end_lineno == text_range.end_lineno
         and node.end_col_offset == text_range.end_col_offset
         # expression and Expr statement can have same range
-        and isinstance(node, _ast.expr)):
+        and isinstance(node, _ast.expr)
+    ):
         return node
     else:
         for child in ast.iter_child_nodes(node):
@@ -50,6 +51,7 @@ def contains_node(parent_node, child_node):
 
     return False
 
+
 def has_parent_with_class(target_node, parent_class, tree):
     for node in ast.walk(tree):
         if isinstance(node, parent_class) and contains_node(node, target_node):
@@ -58,25 +60,24 @@ def has_parent_with_class(target_node, parent_class, tree):
     return False
 
 
-def parse_source(source: bytes, filename='<unknown>', mode="exec"):
+def parse_source(source: bytes, filename="<unknown>", mode="exec"):
     root = ast.parse(source, filename, mode)
     mark_text_ranges(root, source)
     return root
 
 
 def get_last_child(node, skip_incorrect=True):
-    
     def ok_node(node):
         if node is None:
             return None
-        
+
         if skip_incorrect and getattr(node, "incorrect_range", False):
             return None
-        
+
         return node
-    
+
     def last_ok(nodes):
-        for i in range(len(nodes)-1, -1, -1):
+        for i in range(len(nodes) - 1, -1, -1):
             if ok_node(nodes[i]):
                 node = nodes[i]
                 if isinstance(node, ast.Starred):
@@ -86,9 +87,9 @@ def get_last_child(node, skip_incorrect=True):
                         return None
                 else:
                     return nodes[i]
-            
+
         return None
-    
+
     if isinstance(node, ast.Call):
         # TODO: take care of Python 3.5 updates (Starred etc.)
         if hasattr(node, "kwargs") and ok_node(node.kwargs):
@@ -127,7 +128,9 @@ def get_last_child(node, skip_incorrect=True):
         # TODO: actually should pairwise check last value, then last key, etc.
         return last_ok(node.values)
 
-    elif isinstance(node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)):
+    elif isinstance(
+        node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)
+    ):
         return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):
@@ -146,9 +149,11 @@ def get_last_child(node, skip_incorrect=True):
         if hasattr(node.slice, "value") and ok_node(node.slice.value):
             return node.slice.value
         else:
-            assert (hasattr(node.slice, "lower")
-                    and hasattr(node.slice, "upper")
-                    and hasattr(node.slice, "step"))
+            assert (
+                hasattr(node.slice, "lower")
+                and hasattr(node.slice, "upper")
+                and hasattr(node.slice, "step")
+            )
 
             if ok_node(node.slice.step):
                 return node.slice.step
@@ -157,10 +162,8 @@ def get_last_child(node, skip_incorrect=True):
             else:
                 return ok_node(node.slice.lower)
 
-
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
-        return True # There is last child, but I don't know which it will be
-
+        return True  # There is last child, but I don't know which it will be
 
     # TODO: pick more cases from here:
     """
@@ -176,9 +179,6 @@ def get_last_child(node, skip_incorrect=True):
     return None
 
 
-
-
-
 def mark_text_ranges(node, source: bytes):
     """
     Node is an AST, source is corresponding source as string.
@@ -186,16 +186,19 @@ def mark_text_ranges(node, source: bytes):
     which has attributes lineno and col_offset.
     """
 
-
     def _extract_tokens(tokens, lineno, col_offset, end_lineno, end_col_offset):
-        return list(filter((lambda tok: tok.start[0] >= lineno
-                                   and (tok.start[1] >= col_offset or tok.start[0] > lineno)
-                                   and tok.end[0] <= end_lineno
-                                   and (tok.end[1] <= end_col_offset or tok.end[0] < end_lineno)
-                                   and tok.string != ''),
-                           tokens))
-
-
+        return list(
+            filter(
+                (
+                    lambda tok: tok.start[0] >= lineno
+                    and (tok.start[1] >= col_offset or tok.start[0] > lineno)
+                    and tok.end[0] <= end_lineno
+                    and (tok.end[1] <= end_col_offset or tok.end[0] < end_lineno)
+                    and tok.string != ""
+                ),
+                tokens,
+            )
+        )
 
     def _mark_text_ranges_rec(node, tokens, prelim_end_lineno, prelim_end_col_offset):
         """
@@ -205,9 +208,17 @@ def mark_text_ranges(node, source: bytes):
 
         # set end markers to this node
         if "lineno" in node._attributes and "col_offset" in node._attributes:
-            tokens = _extract_tokens(tokens, node.lineno, node.col_offset, prelim_end_lineno, prelim_end_col_offset)
+            tokens = _extract_tokens(
+                tokens,
+                node.lineno,
+                node.col_offset,
+                prelim_end_lineno,
+                prelim_end_col_offset,
+            )
             try:
-                tokens = _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset)
+                tokens = _mark_end_and_return_child_tokens(
+                    node, tokens, prelim_end_lineno, prelim_end_col_offset
+                )
             except Exception:
                 logging.getLogger("thonny").warning("Problem with marking %s", node)
                 # fallback to incorrect marking instead of exception
@@ -215,13 +226,13 @@ def mark_text_ranges(node, source: bytes):
                 node.end_lineno = node.lineno
                 node.end_col_offset = node.col_offset + 1
 
-
         # mark its children, starting from last one
         # NB! need to sort children because eg. in dict literal all keys come first and then all values
         children = list(_get_ordered_child_nodes(node))
         for child in reversed(children):
-            (prelim_end_lineno, prelim_end_col_offset) = \
-                _mark_text_ranges_rec(child, tokens, prelim_end_lineno, prelim_end_col_offset)
+            (prelim_end_lineno, prelim_end_col_offset) = _mark_text_ranges_rec(
+                child, tokens, prelim_end_lineno, prelim_end_col_offset
+            )
 
         if "lineno" in node._attributes and "col_offset" in node._attributes:
             # new "front" is beginning of this node
@@ -230,18 +241,48 @@ def mark_text_ranges(node, source: bytes):
 
         return (prelim_end_lineno, prelim_end_col_offset)
 
-
     def _strip_trailing_junk_from_expressions(tokens):
-        while (tokens[-1].type not in (token.RBRACE, token.RPAR, token.RSQB,
-                                      token.NAME, token.NUMBER, token.STRING,
-                                      token.ELLIPSIS)
-                    and tokens[-1].string != "..." # See https://bugs.python.org/issue31394
-                    and tokens[-1].string not in ")}]"
-                    or tokens[-1].string in ['and', 'as', 'assert', 'class', 'def', 'del',
-                                              'elif', 'else', 'except', 'finally',
-                                              'for', 'from', 'global', 'if', 'import', 'in',
-                                              'is', 'lambda', 'not', 'or', 'try',
-                                              'while', 'with', 'yield']):
+        while (
+            tokens[-1].type
+            not in (
+                token.RBRACE,
+                token.RPAR,
+                token.RSQB,
+                token.NAME,
+                token.NUMBER,
+                token.STRING,
+                token.ELLIPSIS,
+            )
+            and tokens[-1].string != "..."  # See https://bugs.python.org/issue31394
+            and tokens[-1].string not in ")}]"
+            or tokens[-1].string
+            in [
+                "and",
+                "as",
+                "assert",
+                "class",
+                "def",
+                "del",
+                "elif",
+                "else",
+                "except",
+                "finally",
+                "for",
+                "from",
+                "global",
+                "if",
+                "import",
+                "in",
+                "is",
+                "lambda",
+                "not",
+                "or",
+                "try",
+                "while",
+                "with",
+                "yield",
+            ]
+        ):
             del tokens[-1]
 
     def _strip_trailing_extra_closers(tokens, remove_naked_comma):
@@ -262,7 +303,7 @@ def mark_text_ranges(node, source: bytes):
 
     def _strip_unclosed_brackets(tokens):
         level = 0
-        for i in range(len(tokens)-1, -1, -1):
+        for i in range(len(tokens) - 1, -1, -1):
             if tokens[i].string in "({[":
                 level -= 1
             elif tokens[i].string in ")}]":
@@ -272,7 +313,9 @@ def mark_text_ranges(node, source: bytes):
                 tokens[:] = tokens[0:i]
                 level = 0  # keep going, there may be more unclosed brackets
 
-    def _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset):
+    def _mark_end_and_return_child_tokens(
+        node, tokens, prelim_end_lineno, prelim_end_col_offset
+    ):
         """
         # shortcut
         node.end_lineno = prelim_end_lineno
@@ -285,15 +328,20 @@ def mark_text_ranges(node, source: bytes):
 
         # Function returns the list of tokens which cover all its children
 
-
         if isinstance(node, _ast.stmt):
             # remove empty trailing lines
-            while (tokens[-1].type in (tokenize.NL, tokenize.COMMENT, token.NEWLINE, token.INDENT)
-                   or tokens[-1].string in (":", "else", "elif", "finally", "except")):
+            while tokens[-1].type in (
+                tokenize.NL,
+                tokenize.COMMENT,
+                token.NEWLINE,
+                token.INDENT,
+            ) or tokens[-1].string in (":", "else", "elif", "finally", "except"):
                 del tokens[-1]
 
         else:
-            _strip_trailing_extra_closers(tokens, not isinstance(node, (ast.Tuple, ast.Lambda)))
+            _strip_trailing_extra_closers(
+                tokens, not isinstance(node, (ast.Tuple, ast.Lambda))
+            )
             _strip_trailing_junk_from_expressions(tokens)
             _strip_unclosed_brackets(tokens)
 
@@ -307,13 +355,12 @@ def mark_text_ranges(node, source: bytes):
         # _strip_trailing_junk_from_expressions
 
         # Remove trailing empty parens from no-arg call
-        if (isinstance(node, ast.Call)
-            and _tokens_text(tokens[-2:]) == "()"):
+        if isinstance(node, ast.Call) and _tokens_text(tokens[-2:]) == "()":
             del tokens[-2:]
 
         # Remove trailing full slice
         elif isinstance(node, ast.Subscript):
-            if  _tokens_text(tokens[-3:]) == "[:]":
+            if _tokens_text(tokens[-3:]) == "[:]":
                 del tokens[-3:]
 
             elif _tokens_text(tokens[-4:]) == "[::]":
@@ -331,7 +378,7 @@ def mark_text_ranges(node, source: bytes):
     source_lines = source.splitlines(True)
     fix_ast_problems(node, source_lines, all_tokens)
     prelim_end_lineno = len(source_lines)
-    prelim_end_col_offset = len(source_lines[len(source_lines)-1])
+    prelim_end_col_offset = len(source_lines[len(source_lines) - 1])
     _mark_text_ranges_rec(node, all_tokens, prelim_end_lineno, prelim_end_col_offset)
 
 
@@ -339,7 +386,7 @@ def fix_ast_problems(tree, source_lines, tokens):
     # Problem 1:
     # Python parser gives col_offset as offset to its internal UTF-8 byte array
     # I need offsets to chars
-    
+
     # TODO: what if source_lines are in a different encoding???
     utf8_byte_lines = source_lines
 
@@ -355,16 +402,16 @@ def fix_ast_problems(tree, source_lines, tokens):
     # Function calls have wrong positions in Python 3.4: http://bugs.python.org/issue21295
     # TODO: Python 3.4 is not supported anymore
     # similar problem is with Attributes and Subscripts
-    
-    # Problem 5: FormattedValue nodes have location of corresponding 
-    # JoinedStr, but I'd prefer being more precise 
+
+    # Problem 5: FormattedValue nodes have location of corresponding
+    # JoinedStr, but I'd prefer being more precise
 
     JoinedStr = getattr(ast, "JoinedStr", type(None))
     FormattedValue = getattr(ast, "FormattedValue", type(None))
 
     def fix_node(node, inside_joined_str=False):
         assert node is not None
-        
+
         # first fix the children
         for child in _get_ordered_child_nodes(node):
             fix_node(child, isinstance(node, JoinedStr) or inside_joined_str)
@@ -373,57 +420,62 @@ def fix_ast_problems(tree, source_lines, tokens):
         if isinstance(node, (ast.Str, JoinedStr)) and not inside_joined_str:
             # fix triple-quote problem
             # get position from tokens.
-            
-            # (Child Str positions are wrong in 3.7, but I don't know how to fix them) 
-            # Don't recurse inside JoinedStr as it may have several child Str nodes 
-            # but only one string token. 
+
+            # (Child Str positions are wrong in 3.7, but I don't know how to fix them)
+            # Don't recurse inside JoinedStr as it may have several child Str nodes
+            # but only one string token.
             # TODO: implicit concatenation messes up token-node correspondence?
             tok = string_tokens.pop(0)
             node.lineno, node.col_offset = tok.start
-        
+
         elif isinstance(node, FormattedValue):
             # Node has wrong position in 3.7, probably taken from string token.
             # Use the position of value instead
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif (isinstance(node, (ast.Expr, ast.Attribute))
-            and isinstance(node.value, ast.Str)):
+        elif isinstance(node, (ast.Expr, ast.Attribute)) and isinstance(
+            node.value, ast.Str
+        ):
             # they share the wrong offset of their triple-quoted child
             # get position from already fixed child
             # TODO: try whether this works when child is in parentheses
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif (isinstance(node, ast.BinOp)
-            and compare_node_positions(node, node.left) > 0):
+        elif (
+            isinstance(node, ast.BinOp) and compare_node_positions(node, node.left) > 0
+        ):
             # fix binop problem
             # get position from an already fixed child
             node.lineno = node.left.lineno
             node.col_offset = node.left.col_offset
-            
+
             # Note that this doesn't fix
             # (3)+3
 
-        elif (isinstance(node, ast.Call)
-            and compare_node_positions(node, node.func) > 0):
+        elif isinstance(node, ast.Call) and compare_node_positions(node, node.func) > 0:
             # Python 3.4 call problem
             # get position from an already fixed child
             node.lineno = node.func.lineno
             node.col_offset = node.func.col_offset
-            
+
             # Note that there remains problem with
             # (f)()
             # but this can't be fixed without knowing child end position
 
-        elif (isinstance(node, ast.Attribute)
-            and compare_node_positions(node, node.value) > 0):
+        elif (
+            isinstance(node, ast.Attribute)
+            and compare_node_positions(node, node.value) > 0
+        ):
             # Python 3.4 attribute problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif (isinstance(node, ast.Subscript)
-            and compare_node_positions(node, node.value) > 0):
+        elif (
+            isinstance(node, ast.Subscript)
+            and compare_node_positions(node, node.value) > 0
+        ):
             # Python 3.4 Subscript problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
@@ -432,12 +484,12 @@ def fix_ast_problems(tree, source_lines, tokens):
             # Let's hope this node has correct lineno, and byte-based col_offset
             # Now compute char-based col_offset
             if hasattr(node, "lineno"):
-                byte_line = utf8_byte_lines[node.lineno-1]
-                char_col_offset = len(byte_line[:node.col_offset].decode("UTF-8"))
+                byte_line = utf8_byte_lines[node.lineno - 1]
+                char_col_offset = len(byte_line[: node.col_offset].decode("UTF-8"))
                 node.col_offset = char_col_offset
 
-
     fix_node(tree)
+
 
 def compare_node_positions(n1, n2):
     if n1.lineno > n2.lineno:
@@ -460,7 +512,7 @@ def pretty(node, key="/", level=0):
         value_label = node.__class__.__name__
         if isinstance(node, ast.Call):
             # Try to make 3.4 AST-s more similar to 3.5
-            if sys.version_info[:2] == (3,4):
+            if sys.version_info[:2] == (3, 4):
                 if ("kwargs", None) in fields:
                     fields.remove(("kwargs", None))
                 if ("starargs", None) in fields:
@@ -478,7 +530,7 @@ def pretty(node, key="/", level=0):
         fields = []
         value_label = repr(node)
 
-    item_text = level * '    ' + str(key) + "=" + value_label
+    item_text = level * "    " + str(key) + "=" + value_label
 
     if hasattr(node, "lineno"):
         item_text += " @ " + str(getattr(node, "lineno"))
@@ -490,8 +542,9 @@ def pretty(node, key="/", level=0):
             if hasattr(node, "end_col_offset"):
                 item_text += "." + str(getattr(node, "end_col_offset"))
 
-    lines = [item_text] + [pretty(field_value, field_key, level+1)
-                           for field_key, field_value in fields]
+    lines = [item_text] + [
+        pretty(field_value, field_key, level + 1) for field_key, field_value in fields
+    ]
 
     return "\n".join(lines)
 
@@ -533,6 +586,7 @@ def _get_ordered_child_nodes(node):
 
     else:
         return ast.iter_child_nodes(node)
+
 
 def _tokens_text(tokens):
     return "".join([t.string for t in tokens])

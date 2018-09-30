@@ -6,11 +6,12 @@ Thonny is thankful to:
 
 Its home
 --------
-Thonny was born in University of Tartu (https://www.ut.ee), Institute of Computer Science (https://www.cs.ut.ee) and the main development is being done here.
+Thonny grew up in University of Tartu (https://www.ut.ee), Institute of Computer Science (https://www.cs.ut.ee).
 
 Supporters
 ----------
-Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
+* Development of several features in Thonny 3.0 was proposed and supported by Raspberry Pi Foundation (https://www.raspberrypi.org).
+* Since September 2018, development of Thonny is partially supported by Cybernetica AS (https://cyber.ee).
 
 Python
 ------
@@ -32,6 +33,7 @@ Source contributors and frequent bug-reporters
 * cefn
 * Filip Schouwenaars
 * Fizban
+* Jens Diemer
 * Kauri Raba
 * Miro Hrončok 
 * Rene Lehtma
