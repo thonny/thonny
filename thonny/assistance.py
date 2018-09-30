@@ -13,14 +13,14 @@ import webbrowser
 from collections import namedtuple
 from tkinter import messagebox, ttk
 from typing import (
-    Dict,
+    Dict,# pylint disable=unused-import
     Iterable,
-    List,
-    Optional,
+    List,# pylint disable=unused-import
+    Optional,# pylint disable=unused-import
     Tuple,  # pylint disable=unused-import
-    Type,
-    Union,
-)  # pylint disable=unused-import
+    Type,# pylint disable=unused-import
+    Union, # pylint disable=unused-import
+)  
 
 
 import thonny
@@ -356,12 +356,13 @@ class AssistantView(tktextext.TextFrame):
             )
 
         explanation_rst = explanation_rst.strip()
+        topic_class = "toggle" if explanation_rst else "empty"
         if not explanation_rst:
-            explanation_rst = "Perform a web search with 'Python' and the above message for more info."
+            explanation_rst = "n/a"
 
         return (
             ".. topic:: %s\n" % title
-            + "    :class: toggle"
+            + "    :class: " + topic_class
             + ("" if last else ", tight")
             + "\n"
             + "    \n"

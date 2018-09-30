@@ -188,6 +188,8 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
 
         if "toggle" in node.attributes["classes"]:
             return self._visit_toggle_topic(node)
+        elif "empty" in node.attributes["classes"]:
+            return self._visit_empty_topic(node)
         else:
             return self.default_visit(node)
 
@@ -257,6 +259,24 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
             child.walkabout(self)
         self._pop_tag("topic_body")
         self._pop_tag(body_id_tag)
+
+        if "tight" not in node.attributes["classes"]:
+            self._append_text("\n")
+
+        raise docutils.nodes.SkipNode()
+
+    def _visit_empty_topic(self, node):
+        img = get_workbench().get_image("boxx_light" if get_workbench().uses_dark_ui_theme() else "boxx")
+        label = tk.Label(
+            self.text,
+            image=img,
+            borderwidth=0,
+            background=self.text["background"],
+            cursor="arrow",
+        )
+        self._append_window(label)
+        assert isinstance(node.children[0], docutils.nodes.title)
+        node.children[0].walkabout(self)
 
         if "tight" not in node.attributes["classes"]:
             self._append_text("\n")
