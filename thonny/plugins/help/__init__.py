@@ -20,7 +20,7 @@ class HelpView(TextFrame):
             borderwidth=0,
             wrap="word",
             relief="flat",
-            padx=10,
+            padx=20,
             pady=0,
         )
 
@@ -32,6 +32,7 @@ class HelpView(TextFrame):
 
     def load_rst_file(self, filename):
         self.text.clear()
+        self.text.direct_insert("1.0", "\n")
 
         if not os.path.isabs(filename):
             filename = os.path.join(os.path.dirname(__file__), filename)

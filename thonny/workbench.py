@@ -2034,6 +2034,17 @@ class Workbench(tk.Tk):
             fragment = m.group(3)
             self.show_view("HelpView").load_topic(topic, fragment)
             return
+        
+        if url.endswith(".rst") and not url.startswith("http"):
+            parts = url.split("#", maxsplit=1)
+            topic = parts[0][:-4]
+            if len(parts) == 2:
+                fragment = parts[1]
+            else:
+                fragment = None
+                
+            self.show_view("HelpView").load_topic(topic, fragment)
+            return
 
         # Fallback
         webbrowser.open(url, False, True)

@@ -1117,7 +1117,6 @@ def load_plugin() -> None:
         lambda: _issue_debugger_command("step_back"),
         caption="Back",
         tester=lambda: _debugger_command_enabled("step_back"),
-        default_sequence="<F9>",
         group=30,
     )
 

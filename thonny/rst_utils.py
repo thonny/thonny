@@ -294,6 +294,13 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     def depart_literal(self, node):
         self._pop_tag("code")
 
+    def visit_literal_block(self, node):
+        self._add_tag("code")
+
+    def depart_literal_block(self, node):
+        self._pop_tag("code")
+        self._append_text("\n\n")
+
     def visit_bullet_list(self, node):
         self.active_lists.append(node.attributes["bullet"])
 
@@ -347,6 +354,12 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
     def depart_strong(self, node):
         self._pop_tag("strong")
 
+    def visit_block_quote(self, node):
+        self._add_tag("code")
+
+    def depart_block_quote(self, node):
+        self._pop_tag("code")
+    
     def default_visit(self, node):
         self._append_text(self._node_to_text(node))
         print("skipping children", type(node), node)
