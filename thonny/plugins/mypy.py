@@ -49,15 +49,12 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             on_completion=self._parse_and_output_warnings,
         )
 
-    def _parse_and_output_warnings(self, pylint_proc):
-        out = pylint_proc.stdout.read()
-        err = pylint_proc.stderr.read()
-        if err:
-            print(err, file=sys.stderr)
-            # logging.getLogger("thonny").warning("MyPy: " + err)
-        # print(out)
+    def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
+        if err_lines:
+            logging.getLogger("thonny").warning("MyPy: " + "".join(err_lines))
+            
         warnings = []
-        for line in out.splitlines():
+        for line in out_lines:
             m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
             if m is not None:
                 message = m.group(5).strip()

@@ -1902,16 +1902,37 @@ def popen_with_ui_thread_callback(
     *Popen_args, on_completion, poll_delay=0.1, **Popen_kwargs
 ):
     proc = subprocess.Popen(*Popen_args, **Popen_kwargs)
-
+    
+    # Need to read in thread in order to avoid blocking because
+    # of full pipe buffer (see https://bugs.python.org/issue1256)
+    out_lines = []
+    err_lines = []
+    
+    def read_stream(stream, target_list):
+        while True:
+            line = stream.readline()
+            if line:
+                target_list.append(line)
+            else:
+                break
+            
+    t_out = threading.Thread(target=read_stream, daemon=True,
+                             args=(proc.stdout, out_lines))
+    t_err = threading.Thread(target=read_stream, daemon=True,
+                             args=(proc.stderr, err_lines))
+    t_out.start()
+    t_err.start()
+    
     def poll():
         if proc.poll() is not None:
-            on_completion(proc)
+            t_out.join(3)
+            t_err.join(3)
+            on_completion(proc, out_lines, err_lines)
             return
 
         tk._default_root.after(int(poll_delay * 1000), poll)
 
     poll()
-
     return proc
 
 

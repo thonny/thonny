@@ -48,7 +48,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         if not imported_file_paths and numversion >= (1, 7):
             # (unfortunately can't separate main script when user modules are present)
             options.append("--allow-global-unused-variables=no")
-
+        
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", "pylint"]
             + options
@@ -60,20 +60,19 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
             on_completion=self._parse_and_output_warnings,
         )
 
-    def _parse_and_output_warnings(self, pylint_proc):
-        out = pylint_proc.stdout.read()
-        err = pylint_proc.stderr.read()
+    def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
+        print("pylint completed")
         # print("COMPL", out, err)
         # get rid of non-error
-        err = err.replace(
+        err = "".join(err_lines).replace(
             "No config file found, using default configuration", ""
         ).strip()
+        
         if err:
-            print(err, file=sys.stderr)
-            # logging.getLogger("thonny").error("Pylint: " + err)
+            logging.getLogger("thonny").error("Pylint: " + err)
 
         warnings = []
-        for line in out.splitlines():
+        for line in out_lines:
             if line.startswith("{"):
                 try:
                     atts = ast.literal_eval(line.strip())
@@ -2174,7 +2173,7 @@ all_checks = [
         "msg_sym": "unused-variable",
         "msg_text": "Unused variable %r",
         "msg_xpln": "Used when a variable is defined but not used.",
-        "tho_xpln": "",
+        "tho_xpln": "Looks like the variable is defined (or imported) but not used.",
         "usage": "warning",
     },  # NB! Only applies to local variables
     {
