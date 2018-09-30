@@ -133,7 +133,6 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
     )
     in_term_cmd = "bash -c {core_cmd}".format(core_cmd=_shellquote(core_cmd))
     
-    print(term_cmd)
     if term_cmd == "lxterminal":
         # https://www.raspberrypi.org/forums/viewtopic.php?t=221490
         whole_cmd = "{term_cmd} --command={in_term_cmd}".format(
