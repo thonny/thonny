@@ -100,8 +100,14 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
     # (neither necessary except for colon)
     env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
 
-    if shutil.which("x-terminal-emulator"):
-        term_cmd = "x-terminal-emulator"
+    xte = shutil.which("x-terminal-emulator")
+    if xte:
+        if (os.path.realpath(xte).endswith("/lxterminal")
+            and shutil.which("lxterminal")):
+            # need to know, see below
+            term_cmd = "lxterminal"
+        else:
+            term_cmd = "x-terminal-emulator"
     # Can't use konsole, because it doesn't pass on the environment
     #         elif shutil.which("konsole"):
     #             if (shutil.which("gnome-terminal")
@@ -113,6 +119,8 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
         term_cmd = "gnome-terminal"
     elif shutil.which("xfce4-terminal"):
         term_cmd = "xfce4-terminal"
+    elif shutil.which("lxterminal"):
+        term_cmd = "lxterminal"
     elif shutil.which("xterm"):
         term_cmd = "xterm"
     else:
@@ -124,9 +132,18 @@ def _open_shell_in_linux(cwd, env, interpreter, explainer, exec_prefix):
         interpreter=_shellquote(interpreter), explainer=_shellquote(explainer)
     )
     in_term_cmd = "bash -c {core_cmd}".format(core_cmd=_shellquote(core_cmd))
-    whole_cmd = "{term_cmd} -e {in_term_cmd}".format(
-        term_cmd=term_cmd, in_term_cmd=_shellquote(in_term_cmd)
-    )
+    
+    print(term_cmd)
+    if term_cmd == "lxterminal":
+        # https://www.raspberrypi.org/forums/viewtopic.php?t=221490
+        whole_cmd = "{term_cmd} --command={in_term_cmd}".format(
+            term_cmd=term_cmd, in_term_cmd=_shellquote(in_term_cmd)
+        )
+    else:
+        whole_cmd = "{term_cmd} -e {in_term_cmd}".format(
+            term_cmd=term_cmd, in_term_cmd=_shellquote(in_term_cmd)
+        )
+        
 
     Popen(whole_cmd, env=env, shell=True)
 
