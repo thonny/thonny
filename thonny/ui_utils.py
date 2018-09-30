@@ -19,6 +19,7 @@ from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
 from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
 from thonny.tktextext import TweakableText
+import sys
 
 
 class CustomMenubar(ttk.Frame):
@@ -1901,6 +1902,13 @@ def show_dialog(dlg, master=None):
 def popen_with_ui_thread_callback(
     *Popen_args, on_completion, poll_delay=0.1, **Popen_kwargs
 ):
+    if "encoding" not in Popen_kwargs:
+        if "env" not in Popen_kwargs: 
+            Popen_kwargs["env"] = os.environ.copy()
+        Popen_kwargs["env"]["PYTHONIOENCODING"] = "utf-8"
+        if sys.version_info >= (3,6): 
+            Popen_kwargs["encoding"] = "utf-8"
+    
     proc = subprocess.Popen(*Popen_args, **Popen_kwargs)
     
     # Need to read in thread in order to avoid blocking because

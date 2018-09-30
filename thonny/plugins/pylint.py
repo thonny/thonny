@@ -1,6 +1,5 @@
 import ast
 import subprocess
-import sys
 
 from thonny import ui_utils, get_workbench
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
@@ -64,7 +63,6 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         )
 
     def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
-        print("pylint completed")
         # print("COMPL", out, err)
         # get rid of non-error
         err = "".join(err_lines).replace(
