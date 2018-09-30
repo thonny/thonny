@@ -348,7 +348,7 @@ end;
 
 function NextButtonClick(CurPageID: Integer): Boolean;
 begin
-  if (CurPageID = wpSelectDir) and (pos(WizardDirValue, '&') > 1) then
+  if (CurPageID = wpSelectDir) and (pos('&', WizardDirValue) > 1) then
   begin
     MsgBox('Directory paths containing "&" are known to cause problems in Thonny'
           + ''#13#10''
