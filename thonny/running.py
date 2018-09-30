@@ -628,12 +628,7 @@ class CPythonProxy(BackendProxy):
             return msg
 
     def send_command(self, cmd):
-        if isinstance(cmd, ToplevelCommand) and cmd.name in (
-            "Run",
-            "Debug",
-            "FastDebug",
-            "Reset",
-        ):
+        if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
             self._close_backend()
             self._start_new_process(cmd)
 
