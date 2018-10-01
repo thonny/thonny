@@ -20,7 +20,6 @@ class ShellMacroDialog(tk.Toplevel):
 
         self.bind("<Escape>", self._on_close, True)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
-        ui_utils.center_window(self, master)
         self.main_command_text.focus_set()
 
     def _create_widgets(self):

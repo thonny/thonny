@@ -1395,7 +1395,6 @@ class FileCopyDialog(tk.Toplevel):
             "<Escape>", self._cancel, True
         )  # escape-close only if process has completed
         self.protocol("WM_DELETE_WINDOW", self._cancel)
-        center_window(self, master)
         self._start()
 
     def _start(self):
@@ -1475,8 +1474,6 @@ class ChoiceDialog(tk.Toplevel):
 
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
-
-        center_window(self, master)
 
     def _ok(self):
         self.result = self.var.get()
@@ -1564,7 +1561,6 @@ class SubprocessDialog(tk.Toplevel):
             "<Escape>", self._close_if_done, True
         )  # escape-close only if process has completed
         self.protocol("WM_DELETE_WINDOW", self._close)
-        center_window(self, master)
 
         self._start_listening()
 
@@ -1886,11 +1882,11 @@ def show_dialog(dlg, master=None):
         master = tk._default_root
 
     focused_widget = master.focus_get()
-    center_window(dlg, master)
     dlg.transient(master)
     dlg.grab_set()
     dlg.lift()
     dlg.focus_set()
+    center_window(dlg, master)
     master.wait_window(dlg)
     dlg.grab_release()
     master.lift()

@@ -19,7 +19,7 @@ from tkinter.messagebox import showerror
 from urllib.request import urlopen, urlretrieve
 
 import thonny
-from thonny import get_runner, get_workbench, misc_utils, running, tktextext, ui_utils
+from thonny import get_runner, get_workbench, running, tktextext, ui_utils
 from thonny.common import (
     InlineCommand,
     normpath_with_actual_case,
@@ -62,7 +62,6 @@ class PipDialog(tk.Toplevel):
         self.bind("<Escape>", self._on_close, True)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self._show_instructions()
-        ui_utils.center_window(self, master)
 
         self._start_update_list()
 
@@ -1012,8 +1011,6 @@ class DetailsDialog(tk.Toplevel):
 
         self.bind("<Escape>", self._cancel, True)
         self.protocol("WM_DELETE_WINDOW", self._cancel)
-
-        ui_utils.center_window(self, master)
 
         if self.version_var.get().strip():
             self._start_fetching_version_info()

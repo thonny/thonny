@@ -38,7 +38,7 @@ from thonny.config_ui import ConfigurationPage
 from thonny.misc_utils import find_volumes_by_name
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import BackendProxy
-from thonny.ui_utils import SubprocessDialog, create_string_var
+from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
 
 EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
@@ -1283,7 +1283,7 @@ class MicroPythonProxy(BackendProxy):
             autoclose=False,
             conclusion="Done.\nNB! If opening REPL fails on first trial\nthen wait a second and try again.",
         )
-        dlg.wait_window()
+        show_dialog(dlg)
 
     def construct_firmware_upload_command(self, firmware_path):
         raise NotImplementedError()
