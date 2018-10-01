@@ -12,23 +12,7 @@ class ConfigurationDialog(tk.Toplevel):
         scale = get_workbench().scale
         width = scale(500)
         height = scale(350)
-        left = max(
-            int(
-                get_workbench().winfo_x()
-                + get_workbench().winfo_width() / 2
-                - width / 2
-            ),
-            0,
-        )
-        top = max(
-            int(
-                get_workbench().winfo_y()
-                + get_workbench().winfo_height() / 2
-                - height / 2
-            ),
-            0,
-        )
-        self.geometry("%dx%d+%d+%d" % (width, height, left, top))
+        self.geometry("%dx%d" % (width, height))
         self.title("Thonny options")
 
         self.columnconfigure(0, weight=1)
@@ -127,7 +111,6 @@ class ConfigurationPage(ttk.Frame):
     
     def add_combobox(self, option_name, values, row=None, column=0, pady=0, columnspan=1):
         variable = get_workbench().get_variable(option_name)
-        print(type(variable))
         combobox = ttk.Combobox(
             self,
             exportselection=False,

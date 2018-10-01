@@ -250,6 +250,3 @@ class UserError(RuntimeError):
 
     pass
 
-
-if __name__ == "__main__":
-    print(repr(normpath_with_actual_case("c:\\users/aivar/DesKTOp")))
