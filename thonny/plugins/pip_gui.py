@@ -445,18 +445,18 @@ class PipDialog(tk.Toplevel):
             self.uninstall_button.grid_remove()
             self.advanced_button.grid_remove()
         else:
-            self.install_button.grid()
-            self.advanced_button.grid()
+            self.install_button.grid(row=0, column=0)
+            self.advanced_button.grid(row=0, column=2)
 
             if active_dist is not None:
                 # existing package in target directory
                 self.install_button["text"] = "Upgrade"
                 self.install_button["state"] = "disabled"
-                self.uninstall_button.grid()
+                self.uninstall_button.grid(row=0, column=1)
             else:
                 # new package
                 self.install_button["text"] = "Install"
-                self.uninstall_button.grid_forget()
+                self.uninstall_button.grid_remove()
 
     def _show_package_info(self, name, data, error_code=None):
         self._set_state("idle")
