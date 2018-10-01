@@ -30,7 +30,7 @@ def _find_commands(logical_command, reference_output, query_arguments, only_best
                 expected = expected.lower()
                 actual = actual.lower()
 
-            return expected == actual
+            return expected in actual
         except Exception:
             return False
 
@@ -135,24 +135,11 @@ def _get_version_suffixes():
 
 
 def _get_pip_version_string():
-    import io
-
     try:
         import pip
+        return os.path.dirname(pip.__file__)
     except ImportError:
         return None
-
-    # capture output
-    original_stdout = sys.stdout
-    try:
-        sys.stdout = io.StringIO()
-        try:
-            pip.main(["--version"])
-        except SystemExit:
-            pass
-        return sys.stdout.getvalue().strip()
-    finally:
-        sys.stdout = original_stdout
 
 
 def _clear_screen():
