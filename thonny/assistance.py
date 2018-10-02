@@ -137,7 +137,7 @@ class AssistantView(tktextext.TextFrame):
 
     def _explain_exception(self, error_info):
         rst = (
-            ".. default-role:: code\n\n"
+            self._get_rst_prelude()
             + rst_utils.create_title(
                 error_info["type_name"] + ": " + rst_utils.escape(error_info["message"])
             )
@@ -278,7 +278,7 @@ class AssistantView(tktextext.TextFrame):
                 self.text.append_rst(
                     "If it is not working as it should, "
                     + "then consider using some general "
-                    + "`debugging techniques <thonny-help://debugging#sss>`__.\n\n",
+                    + "`debugging techniques <thonny-help://debugging_checklist#sss>`__.\n\n",
                     ("em",),
                 )
 
@@ -298,10 +298,9 @@ class AssistantView(tktextext.TextFrame):
             intro = "May help you find the cause of the error."
 
         rst = (
-            ".. default-role:: code\n"
-            + "\n"
+            self._get_rst_prelude()
             + rst_utils.create_title("Warnings")
-            + "*%s*\n\n" % intro
+            + ":remark:`%s`\n\n" % intro
         )
 
         by_file = {}
@@ -395,11 +394,16 @@ class AssistantView(tktextext.TextFrame):
         ui_utils.show_dialog(
             FeedbackDialog(get_workbench(), self.main_file_path, snapshots)
         )
-
+    
+    def _get_rst_prelude(self):
+        return (".. default-role:: code\n\n"
+                + ".. role:: light\n\n"
+                + ".. role:: remark\n\n"
+                )
 
 class AssistantRstText(rst_utils.RstText):
     def configure_tags(self):
-        rst_utils.RstText.configure_tags(self)
+        super().configure_tags()
 
         main_font = tk.font.nametofont("TkDefaultFont")
 
@@ -412,7 +416,7 @@ class AssistantRstText(rst_utils.RstText):
         self.tag_configure("h1", font=h1_font, spacing3=0, spacing1=10)
         self.tag_configure("topic_title", font="TkDefaultFont")
 
-        self.tag_configure("topic_body", font=italic_font)
+        self.tag_configure("topic_body", font=italic_font, spacing1=10, lmargin1=25, lmargin2=25)
 
         self.tag_raise("sel")
 
@@ -466,7 +470,7 @@ class GenericErrorHelper(ErrorHelper):
         self.intro_confidence = 1
         self.suggestions = [
             Suggestion(
-                "search-the-web-generic",
+                "generic-search-the-web",
                 "Search the web",
                 "Try performing a web search for\n\n``Python %s: %s``"
                 % (
@@ -484,7 +488,9 @@ class GenericErrorHelper(ErrorHelper):
                 1,
             ),
         ]
-
+    
+    def _sug_explore_variables(self):
+        pass
 
 class ProgramAnalyzer:
     def __init__(self, on_completion):
