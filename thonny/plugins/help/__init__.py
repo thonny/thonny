@@ -24,7 +24,7 @@ class HelpView(TextFrame):
             pady=0,
         )
 
-        self.load_rst_file("help.rst")
+        self.load_rst_file("index.rst")
 
     def load_topic(self, topic, fragment=None):
         self.load_rst_file(topic + ".rst")

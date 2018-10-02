@@ -1,4 +1,4 @@
-`Home <help.rst>`_
+`Home <index.rst>`_
 
 Installing 3rd party packages
 ==============================

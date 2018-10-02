@@ -1,3 +1,5 @@
+`Home <index.rst>`_
+
 Different modes
 ===============
 *Tools → Options → General* allows switching Thonny's user interface to one of three different modes.
