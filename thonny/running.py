@@ -669,6 +669,7 @@ class CPythonProxy(BackendProxy):
         self._message_queue = None
 
     def _start_new_process(self, cmd=None):
+        get_workbench().event_generate("StartingCPythonBackend")
         this_python = get_frontend_python()
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()

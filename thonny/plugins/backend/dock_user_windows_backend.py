@@ -27,7 +27,14 @@ def patch_tkinter(module):
     original_constructor = module.Tk.__init__
 
     def patched_Tk_constructor(self, *args, **kw):
+        
+        if ("THONNY_DOCK_ID" in os.environ
+            and "use" not in kw):
+            kw["use"] = os.environ["THONNY_DOCK_ID"]
+        
         original_constructor(self, *args, **kw)
+        self.geometry("+%d+%d" % (0,0))
+        return
 
         # move window to the same place it was previously
         last_pos = get_vm().get_option(_LAST_POS_SETTING)
@@ -48,7 +55,7 @@ def patch_turtle(module):
     # Turtle needs more tweaking because it later overrides the position set in the Tk constructor
     turtle_config = getattr(module, "_CFG", None)
     if isinstance(turtle_config, dict):
-        last_pos = get_vm().get_option(_LAST_POS_SETTING)
+        last_pos = (0,0)#get_vm().get_option(_LAST_POS_SETTING)
         if isinstance(last_pos, tuple):
             turtle_config["leftright"], turtle_config["topbottom"] = last_pos
 
