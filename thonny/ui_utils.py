@@ -1877,7 +1877,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, center=False):
+def show_dialog(dlg, master=None, center=True):
     if master is None:
         master = tk._default_root
 
