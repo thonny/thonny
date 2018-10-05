@@ -397,7 +397,7 @@ class NameErrorHelper(ErrorHelper):
                 + " If the definition comes later in code or is inside an if-statement, Python may not have executed it (yet)."
                 + "\n\n"
                 + "Make sure Python arrives to the definition before it arrives to this line. When in doubt, "
-                + "`use the debugger <stepping.rst>`_."
+                + "`use the debugger <debuggers.rst>`_."
             ),
             2,
         )

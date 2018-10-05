@@ -92,6 +92,18 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_bind(
             "feedback_link", "<ButtonRelease-1>", self._ask_feedback, True
         )
+        self.text.tag_configure(
+            "python_errors_link",
+            # underline=True,
+            justify="right",
+            font=italic_font,
+            # foreground=get_syntax_options_for_tag("hyperlink")["foreground"]
+        )
+        self.text.tag_bind(
+            "python_errors_link", "<ButtonRelease-1>",
+            lambda e: get_workbench().open_url("errors.rst"),
+            True
+        )
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
 
@@ -199,7 +211,7 @@ class AssistantView(tktextext.TextFrame):
                 # It looks cleaner if it is not.
                 False,  # i==0
             )
-
+        
         self._current_snapshot["exception_suggestions"] = [
             dict(sug._asdict()) for sug in suggestions
         ]
@@ -281,9 +293,14 @@ class AssistantView(tktextext.TextFrame):
                     + "`debugging techniques <thonny-help://debugging_checklist#sss>`__.\n\n",
                     ("em",),
                 )
+        
+        
 
         if self.text.get("1.0", "end").strip():
             self._append_feedback_link()
+        
+        if self._exception_info:
+            self._append_text("General advice on dealing with errors.\n", ("a", "python_errors_link"))
 
     def _present_warnings(self):
         warnings = [w for ws in self._accepted_warning_sets for w in ws]
@@ -488,9 +505,6 @@ class GenericErrorHelper(ErrorHelper):
                 1,
             ),
         ]
-    
-    def _sug_explore_variables(self):
-        pass
 
 class ProgramAnalyzer:
     def __init__(self, on_completion):

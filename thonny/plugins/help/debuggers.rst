@@ -1,6 +1,6 @@
 `Home <index.rst>`_
 
-Running programs step-wise
+Using debuggers
 ==========================
 If you want to see how Python executes your program step-by-step then you 
 should run it in "nicer" or "faster" *debug-mode*.
