@@ -410,7 +410,10 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         return "_UT_%s" % self.unique_tag_count
 
     def _node_to_text(self, node):
-        return node.astext().replace("\r", "").replace("\n", " ")
+        if node.parent.attributes.get("xml:space") == "preserve":
+            return node.astext()
+        else:
+            return node.astext().replace("\r", "").replace("\n", " ")
 
     def _add_tag(self, tag):
         self._context_tags.append(tag)
