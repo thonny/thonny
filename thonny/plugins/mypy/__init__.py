@@ -1,4 +1,5 @@
 import re
+import os.path
 import subprocess
 import sys
 from typing import Iterable
@@ -40,12 +41,16 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
         if ver >= (0, 590):
             args.insert(3, "--python-executable")
             args.insert(4, get_runner().get_executable())
-
+        
+        env = os.environ.copy()
+        env["MYPYPATH"] = os.path.join(os.path.dirname(__file__), "typeshed_extras")
+        
         self._proc = ui_utils.popen_with_ui_thread_callback(
             args,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             universal_newlines=True,
+            env=env,
             on_completion=self._parse_and_output_warnings,
         )
 
@@ -55,41 +60,30 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             
         warnings = []
         for line in out_lines:
-            m = re.match(r"(.*?):(\d+):(\d+):(.*?):(.*)", line.strip())
+            m = re.match(r"(.*?):(\d+)(:(\d+))?:(.*?):(.*)", line.strip())
             if m is not None:
-                message = m.group(5).strip()
+                message = m.group(6).strip()
                 if message == "invalid syntax":
                     continue  # user will see this as Python error
-
+                
+                filename = m.group(1)
+                
                 atts = {
-                    "filename": m.group(1),
+                    "filename": filename,
                     "lineno": int(m.group(2)),
-                    "col_offset": int(m.group(3)) - 1,
-                    "kind": m.group(4).strip(),  # always "error" ?
+                    "kind": m.group(5).strip(),  # always "error" ?
                     "msg": message,
                     "group": "warnings",
                 }
+                if m.group(3):
+                    atts["col_offset"] = int(m.group(4))-1
+                    
                 # TODO: add better categorization and explanation
                 atts["symbol"] = "mypy-" + atts["kind"]
                 warnings.append(atts)
             else:
-                # Without line number?
-                m = re.match(r"(.*?): (.*?):(.*)", line.strip())
-                if m is not None:
-                    message = m.group(3).strip()
-                    if message == "invalid syntax":
-                        continue  # user will see this as Python error
-
-                    atts = {
-                        "filename": m.group(1),
-                        "kind": m.group(2).strip(),
-                        "msg": message,
-                        "group": "warnings",
-                    }
-                    atts["symbol"] = "mypy-" + atts["kind"]
-                    warnings.append(atts)
-                else:
-                    logging.error("Can't parse MyPy line: " + line)
+                logging.error("Can't parse MyPy line: " + line.strip())
+                
 
         self.completion_handler(self, warnings)
 

@@ -1809,8 +1809,7 @@ all_checks = [
         "msg_id": "W0104",
         "msg_sym": "pointless-statement",
         "msg_text": "Statement seems to have no effect",
-        "msg_xpln": "Used when a statement doesn't have (or at least doesn't seem to have) "
-        "any effect.",
+        "msg_xpln": "Used when a statement doesn't have any effect.",
         "tho_xpln": "",
         "usage": "warning",
     },
