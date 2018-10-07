@@ -80,24 +80,27 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_configure("body", font="ItalicTkDefaultFont")
 
         main_font = tk.font.nametofont("TkDefaultFont")
-        italic_font = main_font.copy()
-        italic_font.configure(slant="italic", size=main_font.cget("size"))
+        
+        # Underline on font looks better than underline on tag
+        italic_underline_font = main_font.copy()
+        italic_underline_font.configure(slant="italic", 
+                                        size=main_font.cget("size"),
+                                        underline=True)
+        
+        
+        
         self.text.tag_configure(
             "feedback_link",
-            # underline=True,
             justify="right",
-            font=italic_font,
-            # foreground=get_syntax_options_for_tag("hyperlink")["foreground"]
+            font=italic_underline_font,
         )
         self.text.tag_bind(
             "feedback_link", "<ButtonRelease-1>", self._ask_feedback, True
         )
         self.text.tag_configure(
             "python_errors_link",
-            # underline=True,
             justify="right",
-            font=italic_font,
-            # foreground=get_syntax_options_for_tag("hyperlink")["foreground"]
+            font=italic_underline_font,
         )
         self.text.tag_bind(
             "python_errors_link", "<ButtonRelease-1>",

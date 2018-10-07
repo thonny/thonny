@@ -153,6 +153,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_raise("hyperlink")
 
         self.tag_configure("vertically_spaced", spacing1=vert_spacing)
+        
+        # Underline on font looks better than underline on tag
+        io_hyperlink_font = tk.font.nametofont("IOFont").copy()
+        io_hyperlink_font.configure(underline=get_syntax_options_for_tag("hyperlink").get("underline", True))
+        self.tag_configure("io_hyperlink", 
+                           underline=False,
+                           font=io_hyperlink_font)
+        self.tag_raise("io_hyperlink", "hyperlink")
 
         self.tag_configure("suppressed_io", elide=True)
 
@@ -415,7 +423,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 parts = re.split(r"(File .* line \d+.*)$", line, maxsplit=1)
                 if len(parts) == 3 and "<pyshell" not in line:
                     _insert(parts[0], tags)
-                    _insert(parts[1], tags + ("hyperlink",))
+                    _insert(parts[1], tags + ("hyperlink", "io_hyperlink",))
                     _insert(parts[2], tags)
                 else:
                     _insert(line, tags)
