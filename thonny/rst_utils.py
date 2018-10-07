@@ -94,6 +94,9 @@ class RstText(TweakableText):
 
         # TODO: topic_title + em
         self.tag_raise("em", "topic_title")
+        self.tag_raise("a", "em")
+        self.tag_raise("a", "topic_body")
+        self.tag_raise("a", "topic_title")
 
         if ui_utils.get_tk_version_info() >= (8, 6, 6):
             self.tag_configure("sel", lmargincolor=self["background"])

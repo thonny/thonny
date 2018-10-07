@@ -5,6 +5,7 @@ import token
 import tokenize
 
 from thonny.assistance import ErrorHelper, Suggestion, name_similarity, add_error_helper
+from thonny import assistance
 
 
 class SyntaxErrorHelper(ErrorHelper):
@@ -31,14 +32,6 @@ class SyntaxErrorHelper(ErrorHelper):
             self.intro_text = "You haven't properly closed a triple-quoted string"
 
         else:
-            self.intro_text = "Python doesn't know how to read your program."
-
-            if "^" in self.error_info["message"]:
-                self.intro_text += (
-                    " Small `^` in the original error message shows where it gave up,"
-                    + " but the actual mistake can be before this."
-                )
-
             if self.error_info["filename"]:
                 with open(self.error_info["filename"], mode="rb") as fp:
                     try:
@@ -46,12 +39,29 @@ class SyntaxErrorHelper(ErrorHelper):
                             self.tokens.append(t)
                     except tokenize.TokenError as e:
                         self.token_error = e
-
-                assert self.tokens[-1].type == token.ENDMARKER
+                
+                if (not self.tokens 
+                    or self.tokens[-1].type not in [token.ERRORTOKEN, token.ENDMARKER]):
+                    self.tokens.append(tokenize.TokenInfo(token.ERRORTOKEN, "", None, None, ""))
             else:
                 self.tokens = None
 
-            self.suggestions = [self._sug_missing_or_misplaced_colon()]
+            unbalanced = self._sug_unbalanced_parens()
+            if unbalanced:
+                self.intro_text = "Unbalanced parentheses, brackets or braces:\n\n" + unbalanced.body
+                self.intro_confidence = 5
+            else:
+                self.intro_text = "Python doesn't know how to read your program."
+    
+                if "^" in self.error_info["message"]:
+                    self.intro_text += (
+                        " Small `^` in the original error message shows where it gave up,"
+                        + " but the actual mistake can be before this."
+                    )
+    
+                self.suggestions = [
+                    self._sug_missing_or_misplaced_colon(),
+                ]
 
     def _sug_missing_or_misplaced_colon(self):
         i = 0
@@ -89,6 +99,8 @@ class SyntaxErrorHelper(ErrorHelper):
                     if self.tokens[i].string in "([{":
                         i = self._skip_braced_part(i)
                         assert i > old_i
+                        if i == len(self.tokens):
+                            return None
                     else:
                         i += 1
 
@@ -117,6 +129,18 @@ class SyntaxErrorHelper(ErrorHelper):
             i += 1
 
         return Suggestion("missing-or-misplaced-colon", title, body, relevance)
+    
+    def _sug_unbalanced_parens(self):
+        problem = self._find_first_braces_problem()
+        if not problem:
+            return None
+        
+        return Suggestion(
+            "missing-or-misplaced-colon", 
+            "Unbalanced brackets", 
+            problem[1],
+            8
+        )
 
     def _sug_wrong_increment_op(self):
         pass
@@ -131,22 +155,23 @@ class SyntaxErrorHelper(ErrorHelper):
         pass
 
     def _skip_braced_part(self, token_index):
-        assert self.tokens[token_index].string in "([{"
+        assert self.tokens[token_index].string in ["(", "[", "{"]
         level = 1
+        token_index += 1
         while token_index < len(self.tokens):
-            token_index += 1
 
-            if self.tokens[token_index].string in "([{":
+            if self.tokens[token_index].string in ["(", "[", "{"]:
                 level += 1
-            elif self.tokens[token_index].string in ")]}":
+            elif self.tokens[token_index].string in [")", "]", "}"]:
                 level -= 1
 
+            token_index += 1
+            
             if level <= 0:
-                token_index += 1
                 return token_index
 
         assert token_index == len(self.tokens)
-        return token_index - 1
+        return token_index
 
     def _find_first_braces_problem(self):
         # closers = {'(':')', '{':'}', '[':']'}
@@ -154,20 +179,34 @@ class SyntaxErrorHelper(ErrorHelper):
 
         brace_stack = []
         for t in self.tokens:
-            if t.string in "([{":
-                brace_stack.append(token)
-            elif t.string in ")]}":
+            if t.string in ["(", "[", "{"]:
+                brace_stack.append(t)
+            elif t.string in [")", "]", "}"]:
                 if not brace_stack:
                     return (
                         t,
-                        "`%s` without preceding matching `%s`"
-                        % (t.string, openers[t.string]),
+                        "Found '`%s`' at `line %d <%s>`_ without preceding matching '`%s`'"
+                        % (
+                            t.string, 
+                            t.start[0],
+                            assistance.format_file_url(self.error_info["filename"], t.start[0], t.start[1]),
+                            openers[t.string]
+                        ),
                     )
                 elif brace_stack[-1].string != openers[t.string]:
                     return (
                         t,
-                        "`%s` when last unmatched opener was `%s`"
-                        % (t.string, brace_stack[-1].string),
+                        "Found '`%s`' at `line %d <%s>`__ when last unmatched opener was '`%s`' at `line %d <%s>`__"
+                        % (
+                            t.string,
+                            t.start[0],
+                            assistance.format_file_url(self.error_info["filename"], t.start[0], t.start[1]),
+                            brace_stack[-1].string,
+                            brace_stack[-1].start[0],
+                            assistance.format_file_url(self.error_info["filename"], 
+                                                       brace_stack[-1].start[0],
+                                                       brace_stack[-1].start[1]),
+                        ),
                     )
                 else:
                     brace_stack.pop()
@@ -175,8 +214,14 @@ class SyntaxErrorHelper(ErrorHelper):
         if brace_stack:
             return (
                 brace_stack[-1],
-                "`%s` was not closed by the end of the program"
-                % brace_stack[-1].string,
+                "'`%s`' at `line %d <%s>`_ is not closed by the end of the program"
+                % (
+                    brace_stack[-1].string,
+                    brace_stack[-1].start[0],
+                    assistance.format_file_url(self.error_info["filename"], 
+                                               brace_stack[-1].start[0],
+                                               brace_stack[-1].start[1]),
+                )
             )
 
         return None

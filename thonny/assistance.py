@@ -393,14 +393,7 @@ class AssistantView(tktextext.TextFrame):
         self._append_text("Was it helpful or confusing?\n", ("a", "feedback_link"))
 
     def _format_file_url(self, atts):
-        assert atts["filename"]
-        s = "thonny-editor://" + rst_utils.escape(atts["filename"]).replace(" ", "%20")
-        if atts.get("lineno") is not None:
-            s += "#" + str(atts["lineno"])
-            if atts.get("col_offset") is not None:
-                s += ":" + str(atts["col_offset"])
-
-        return s
+        return format_file_url(atts["filename"], atts.get("lineno"), atts.get("col_offset"))
 
     def _ask_feedback(self, event=None):
 
@@ -977,8 +970,19 @@ def add_error_helper(error_type_name, helper_class):
     _error_helper_classes[error_type_name].append(helper_class)
 
 
+def format_file_url(filename, lineno, col_offset):
+    s = "thonny-editor://" + rst_utils.escape(filename).replace(" ", "%20")
+    if lineno is not None:
+        s += "#" + str(lineno)
+        if col_offset is not None:
+            s += ":" + str(col_offset)
+
+    return s
+
+
 def init():
     get_workbench().set_default("assistance.open_assistant_on_errors", True)
     get_workbench().set_default("assistance.open_assistant_on_warnings", False)
     get_workbench().set_default("assistance.disabled_checks", [])
     get_workbench().add_view(AssistantView, "Assistant", "ne", visible_by_default=False)
+
