@@ -282,7 +282,7 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         raise docutils.nodes.SkipNode()
 
     def _visit_empty_topic(self, node):
-        img = get_workbench().get_image("boxx_light" if get_workbench().uses_dark_ui_theme() else "boxx")
+        img = get_workbench().get_image("boxdot_light" if get_workbench().uses_dark_ui_theme() else "boxdot")
         label = tk.Label(
             self.text,
             image=img,
