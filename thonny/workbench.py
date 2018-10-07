@@ -1207,7 +1207,10 @@ class Workbench(tk.Tk):
     def _show_views(self) -> None:
         for view_id in self._view_records:
             if self._view_records[view_id]["visibility_flag"].get():
-                self.show_view(view_id, False)
+                try:
+                    self.show_view(view_id, False)
+                except Exception:
+                    self.report_exception("Problem showing " + view_id)
 
     def update_image_mapping(self, mapping: Dict[str, str]) -> None:
         self._default_image_mapping.update(mapping)
