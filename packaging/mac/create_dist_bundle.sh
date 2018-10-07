@@ -23,7 +23,7 @@ FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
 
 # install jedi #####################################################
-$PYTHON_CURRENT/bin/python3.7 -m pip install jedi==0.12.*
+$PYTHON_CURRENT/bin/python3.7 -m pip install jedi==0.13.*
 
 # install certifi #####################################################
 $PYTHON_CURRENT/bin/python3.7 -m pip install certifi
