@@ -293,7 +293,7 @@ class AssistantView(tktextext.TextFrame):
                 self.text.append_rst(
                     "If it is not working as it should, "
                     + "then consider using some general "
-                    + "`debugging techniques <thonny-help://debugging_checklist#sss>`__.\n\n",
+                    + "`debugging techniques <debugging.rst>`__.\n\n",
                     ("em",),
                 )
         
