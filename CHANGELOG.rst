@@ -2,6 +2,13 @@
 Version history
 ===============
 
+3.0.0rc1 (2018-10-08)
+=====================
+* ENHANCEMENT: Documented several features (see Help => Help contents)
+* FIXED #523: Open system shell doesn't work with pip 10
+* FIXED #534: Add shortcut for step-back
+* FIXED #538: Turtle programs give false warnings
+
 3.0.0b6 (2018-09-30)
 ====================
 * CHANGED: In order to avoid pollution of user home directory, the configuration file and logs are now stored in directories recommended by platform style guides (%APPDATA%/Thonny on Windows, ~/Library/Thonny on Mac and ~/.config/Thonny on Linux). Old configuration and user logs will be imported on first run. 
