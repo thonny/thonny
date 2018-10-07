@@ -483,16 +483,6 @@ class GenericErrorHelper(ErrorHelper):
         self.intro_confidence = 1
         self.suggestions = [
             Suggestion(
-                "generic-search-the-web",
-                "Search the web",
-                "Try performing a web search for\n\n``Python %s: %s``"
-                % (
-                    self.error_info["type_name"],
-                    rst_utils.escape(self.error_info["message"]),
-                ),
-                1,
-            ),
-            Suggestion(
                 "ask-for-specific-support",
                 "Let Thonny developers know",
                 "Click on the feedback link at the bottom of this panel to let Thonny developers know "
@@ -501,6 +491,18 @@ class GenericErrorHelper(ErrorHelper):
                 1,
             ),
         ]
+        
+        if error_info["message"].lower() != "invalid syntax":
+            self.suggestions.append(Suggestion(
+                "generic-search-the-web",
+                "Search the web",
+                "Try performing a web search for\n\n``Python %s: %s``"
+                % (
+                    self.error_info["type_name"],
+                    rst_utils.escape(self.error_info["message"]),
+                ),
+                1,
+            ))
 
 class ProgramAnalyzer:
     def __init__(self, on_completion):

@@ -52,10 +52,10 @@ class SyntaxErrorHelper(ErrorHelper):
                 self.intro_confidence = 5
             else:
                 self.intro_text = "Python doesn't know how to read your program."
-    
-                if "^" in self.error_info["message"]:
+                
+                if "^" in str(self.error_info):
                     self.intro_text += (
-                        " Small `^` in the original error message shows where it gave up,"
+                        "\n\nSmall `^` in the original error message shows where it gave up,"
                         + " but the actual mistake can be before this."
                     )
     
