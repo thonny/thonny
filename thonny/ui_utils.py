@@ -1240,6 +1240,7 @@ def try_remove_linenumbers(text, master):
             message="Do you want to remove linenumbers from pasted text?",
             default=messagebox.YES,
             master=master,
+            parent=master,
         ):
             return remove_line_numbers(text)
         else:
@@ -1620,6 +1621,7 @@ class SubprocessDialog(tk.Toplevel):
             if messagebox.askyesno(
                 "Cancel the process?",
                 "The process is still running.\nAre you sure you want to cancel?",
+                parent=self,
             ):
                 # try gently first
                 try:
@@ -1732,23 +1734,33 @@ def _get_dialog_provider():
 
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
+    _ensure_parent(options)
     return _get_dialog_provider().asksaveasfilename(**options)
 
 
 def askopenfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
+    _ensure_parent(options)
     return _get_dialog_provider().askopenfilename(**options)
 
 
 def askopenfilenames(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
+    _ensure_parent(options)
     return _get_dialog_provider().askopenfilenames(**options)
 
 
 def askdirectory(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
+    _ensure_parent(options)
     return _get_dialog_provider().askdirectory(**options)
 
+def _ensure_parent(options):
+    if "parent" not in options:
+        if "master" in options:
+            options["parent"] = options["master"]
+        else:
+            options["parent"] = tk._default_root
 
 class _ZenityDialogProvider:
     # https://www.writebash.com/bash-gui/zenity-create-file-selection-dialog-224.html
@@ -1800,7 +1812,7 @@ class _ZenityDialogProvider:
         parent = options.get("parent", options.get("master", None))
         if parent is not None:
             args.append("--modal")
-            args.append("--attach=%s" % parent.winfo_id())
+            args.append("--attach=%s" % hex(parent.winfo_id()))
 
         for desc, pattern in options.get("filetypes", ()):
             # zenity requires star before extension
@@ -1809,7 +1821,7 @@ class _ZenityDialogProvider:
                 pattern = "*" + pattern
 
             args.append("--file-filter=%s | %s" % (desc, pattern))
-
+        
         return args
 
     @classmethod

@@ -832,7 +832,9 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
 
     def _on_close(self):
         showinfo(
-            "Can't close yet", 'Use "Stop" command if you want to cancel debugging'
+            "Can't close yet", 
+            'Use "Stop" command if you want to cancel debugging',
+            parent=get_workbench()
         )
 
     def close(self):

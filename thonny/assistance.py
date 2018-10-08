@@ -824,6 +824,7 @@ class FeedbackDialog(tk.Toplevel):
             messagebox.showinfo(
                 "Done!",
                 "Thank you for the feedback!\n\nLet us know again when Assistant\nhelps or confuses you!",
+                parent=get_workbench()
             )
             self._close()
         else:
@@ -831,6 +832,7 @@ class FeedbackDialog(tk.Toplevel):
                 "Problem",
                 "Something went wrong:\n%s\n\nIf you don't mind, then try again later!"
                 % result[:1000],
+                parent=get_workbench()
             )
 
     def _select_unsent_snapshots(self, all_snapshots):

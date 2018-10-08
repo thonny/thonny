@@ -588,6 +588,7 @@ class PipDialog(tk.Toplevel):
                     name
                 )
                 + "Are you sure you want to uninstall it?",
+                parent=get_workbench()
             ):
                 return
             args = ["uninstall", "-y", name]
@@ -780,6 +781,7 @@ class BackendPipDialog(PipDialog):
                 + "Are you sure you want to install '"
                 + name
                 + "' for the back-end?",
+                parent=get_workbench(),
             )
         else:
             return True
@@ -869,6 +871,7 @@ class PluginsPipDialog(PipDialog):
                 "Looks like you are trying to install an outdated Thonny\n"
                 + "plug-in (it doesn't specify required Thonny version).\n\n"
                 + "If you still want it, then please install it from the command line.",
+                parent=get_workbench(),
             )
             return False
         elif reqs:
@@ -879,6 +882,7 @@ class PluginsPipDialog(PipDialog):
                     "This package requires different Thonny version:\n\n  "
                     + "\n  ".join(conflicts)
                     + "\n\nIf you still want it, then please install it from the command line.",
+                    parent=get_workbench(),
                 )
                 return False
 

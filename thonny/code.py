@@ -114,6 +114,7 @@ class Editor(ttk.Frame):
                     "Looks like '%s' was deleted or moved outside Thonny.\n\n"
                     % self._filename
                     + "Do you want to also close this editor?",
+                    parent=get_workbench()
                 ):
                     self.master.close_editor(self)
                 else:
@@ -127,6 +128,7 @@ class Editor(ttk.Frame):
                     "External modification",
                     "Looks like '%s' was modified outside Thonny.\n\n" % self._filename
                     + "Do you want to discard current editor content and reload the file from disk?",
+                    parent=get_workbench(),
                 ):
                     self._load_file(self._filename, keep_undo=True)
                 else:
@@ -222,6 +224,7 @@ class Editor(ttk.Frame):
                         % mod_name
                         + ".\n\n"
                         + "Do you still want to use this name for your script?",
+                        parent=get_workbench(),
                     ):
                         return self.save_file(ask_filename)
 
@@ -242,6 +245,7 @@ class Editor(ttk.Frame):
                 "Permission Error",
                 "Looks like this file or folder is not writable.\n\n"
                 + "Do you want to save under another folder and/or filename?",
+                parent=get_workbench(),
             ):
                 return self.save_file(True)
             else:
@@ -722,7 +726,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             message = "Do you want to save file before closing?"
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close", message=message, default=messagebox.YES, master=self
+            title="Save On Close", message=message, default=messagebox.YES, 
+            master=get_workbench(),
+            parent=get_workbench(),
         )
 
         if confirm:
