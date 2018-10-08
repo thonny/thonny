@@ -9,7 +9,7 @@ import tkinter as tk
 from configparser import ConfigParser
 from logging import exception
 import shutil
-from thonny import THONNY_USER_DIR
+from thonny import THONNY_USER_DIR, get_workbench
 import traceback
 
 
@@ -23,6 +23,7 @@ def try_load_configuration(filename):
             "Problem",
             "Thonny's configuration file can't be read. It may be corrupt.\n\n"
             + "Do you want to discard the file and open Thonny with default settings?",
+            parent=get_workbench()
         ):
             os.replace(filename, filename + "_corrupt")
             # For some reasons Thonny styles are not loaded properly once messagebox has been shown before main window (At least Windows Py 3.5)

@@ -48,6 +48,10 @@ class RstText(TweakableText):
         small_italic_font = italic_font.copy()
         small_italic_font.configure(size=round(main_font.cget("size") * 0.8))
 
+        # Underline on font looks better than underline on tag
+        underline_font = main_font.copy()
+        underline_font.configure(underline=True)
+        
         self.tag_configure("h1", font=h1_font, spacing3=5)
         self.tag_configure("h2", font=h2_font, spacing3=5)
         self.tag_configure("h3", font=h3_font, spacing3=5)
@@ -55,14 +59,17 @@ class RstText(TweakableText):
         self.tag_configure("line_block", spacing1=0, spacing3=10, spacing2=0)
         self.tag_configure("em", font=italic_font)
         self.tag_configure("strong", font=bold_font)
-        self.tag_configure("a", **get_syntax_options_for_tag("hyperlink"))
+        
+        self.tag_configure("a", 
+                           **{**get_syntax_options_for_tag("hyperlink"), 'underline' : False}, 
+                           font=underline_font)
         self.tag_configure("small", font=small_font)
         self.tag_configure("light", foreground="gray")
         self.tag_configure("remark", font=small_italic_font)
         self.tag_bind("a", "<Enter>", self._hyperlink_enter)
         self.tag_bind("a", "<Leave>", self._hyperlink_leave)
 
-        self.tag_configure("topic_title", font=bold_font, lmargin2=16)
+        self.tag_configure("topic_title", lmargin2=16, font=bold_font)
         self.tag_configure("topic_body", lmargin1=16, lmargin2=16)
         self.tag_configure(
             "code",
@@ -83,9 +90,13 @@ class RstText(TweakableText):
         self.tag_configure("topic_title_code", font=toti_code_font)
         self.tag_raise("topic_title_code", "code")
         self.tag_raise("topic_title_code", "topic_title")
+        self.tag_raise("a", "topic_title")
 
         # TODO: topic_title + em
         self.tag_raise("em", "topic_title")
+        self.tag_raise("a", "em")
+        self.tag_raise("a", "topic_body")
+        self.tag_raise("a", "topic_title")
 
         if ui_utils.get_tk_version_info() >= (8, 6, 6):
             self.tag_configure("sel", lmargincolor=self["background"])
@@ -274,7 +285,7 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         raise docutils.nodes.SkipNode()
 
     def _visit_empty_topic(self, node):
-        img = get_workbench().get_image("boxx_light" if get_workbench().uses_dark_ui_theme() else "boxx")
+        img = get_workbench().get_image("boxdot_light" if get_workbench().uses_dark_ui_theme() else "boxdot")
         label = tk.Label(
             self.text,
             image=img,
@@ -410,7 +421,10 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
         return "_UT_%s" % self.unique_tag_count
 
     def _node_to_text(self, node):
-        return node.astext().replace("\r", "").replace("\n", " ")
+        if node.parent.attributes.get("xml:space") == "preserve":
+            return node.astext()
+        else:
+            return node.astext().replace("\r", "").replace("\n", " ")
 
     def _add_tag(self, tag):
         self._context_tags.append(tag)

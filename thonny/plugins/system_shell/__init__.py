@@ -71,8 +71,8 @@ def open_system_shell():
     else:
         showerror(
             "Problem",
-            "Don't know how to open system shell on this platform (%s)"
-            % platform.system(),
+            "Don't know how to open system shell on this platform (%s)" % platform.system(),
+            parent=get_workbench()
         )
 
     return None

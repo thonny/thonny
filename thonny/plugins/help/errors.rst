@@ -4,7 +4,7 @@ Understanding errors
 ====================
 
 If your program gives errors or wrong results then don't try to fix anything before understanding
-the problem. You can read a longer story on `another page <debugging_story.rst>`__,
+the problem. You can read a longer story on `another page <debugging.rst>`__,
 here is a quick checklist for getting your ideas going.
 
 Are you scared?
@@ -31,10 +31,12 @@ some parts of the message with the linked place in code. Sometimes Thonny's Assi
 the error in simpler terms, sometimes you need to make an internet search for the message
 (don't forget to add "Python" to the search). 
 
-**What was inside the variables at the moment of the error?** Open the variables view and see 
+What was inside the variables at the moment of the error?
+---------------------------------------------------------
+Open the variables view and see 
 yourself! If the error happened inside a function then you can see local variables by clicking the 
 links in the stack trace.
 
 How did the program got to this state?
 ---------------------------------------
-See `the page about tracing program behavior <debugging_story.rst>`_.
+See `the page about debugging <debugging.rst>`_ or `the page about using Thonny's debuggers <debuggers.rst>`_.

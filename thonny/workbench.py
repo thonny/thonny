@@ -1180,7 +1180,8 @@ class Workbench(tk.Tk):
                 "Regular mode",
                 "Configuration has been updated. "
                 + "Restart Thonny to start working in regular mode.\n\n"
-                + "(See 'Tools → Options → General' if you change your mind later.)")
+                + "(See 'Tools → Options → General' if you change your mind later.)",
+                self)
         
         label.bind("<1>", on_click, True)
         
@@ -1207,7 +1208,10 @@ class Workbench(tk.Tk):
     def _show_views(self) -> None:
         for view_id in self._view_records:
             if self._view_records[view_id]["visibility_flag"].get():
-                self.show_view(view_id, False)
+                try:
+                    self.show_view(view_id, False)
+                except Exception:
+                    self.report_exception("Problem showing " + view_id)
 
     def update_image_mapping(self, mapping: Dict[str, str]) -> None:
         self._default_image_mapping.update(mapping)
@@ -1927,7 +1931,7 @@ class Workbench(tk.Tk):
                 msg = str(value)
             else:
                 msg = traceback.format_exc()
-            tk_messagebox.showerror(title, msg)
+            tk_messagebox.showerror(title, msg, parent=self)
 
     def _open_views(self) -> None:
         for nb_name in self._view_notebooks:

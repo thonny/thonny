@@ -14,7 +14,7 @@ xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING JEDI ...................................
-%BUILDDIR%\python -m pip install jedi==0.12.*
+%BUILDDIR%\python -m pip install jedi==0.13.*
 
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -m pip install --pre --no-cache-dir thonny

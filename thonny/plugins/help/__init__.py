@@ -22,6 +22,7 @@ class HelpView(TextFrame):
             relief="flat",
             padx=20,
             pady=0,
+            read_only=True,
         )
 
         self.load_rst_file("index.rst")

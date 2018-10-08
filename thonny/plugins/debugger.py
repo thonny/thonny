@@ -832,7 +832,9 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
 
     def _on_close(self):
         showinfo(
-            "Can't close yet", 'Use "Stop" command if you want to cancel debugging'
+            "Can't close yet", 
+            'Use "Stop" command if you want to cancel debugging',
+            parent=get_workbench()
         )
 
     def close(self):
@@ -1111,16 +1113,6 @@ def load_plugin() -> None:
     )
 
     get_workbench().add_command(
-        "step_back",
-        "run",
-        "Step back",
-        lambda: _issue_debugger_command("step_back"),
-        caption="Back",
-        tester=lambda: _debugger_command_enabled("step_back"),
-        group=30,
-    )
-
-    get_workbench().add_command(
         "step_into",
         "run",
         "Step into",
@@ -1168,6 +1160,17 @@ def load_plugin() -> None:
         group=30,
         image="run-to-cursor",
         include_in_toolbar=False,
+    )
+
+    get_workbench().add_command(
+        "step_back",
+        "run",
+        "Step back",
+        lambda: _issue_debugger_command("step_back"),
+        caption="Back",
+        tester=lambda: _debugger_command_enabled("step_back"),
+        default_sequence=select_sequence("<Control-b>", "<Command-b>"),
+        group=30,
     )
 
     get_workbench().add_view(StackView, "Stack", "ne")

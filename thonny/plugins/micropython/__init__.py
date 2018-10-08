@@ -18,8 +18,7 @@ from queue import Queue
 from textwrap import dedent
 from time import sleep
 from tkinter import ttk
-from tkinter.filedialog import askopenfilename
-from tkinter.messagebox import showerror
+from thonny.ui_utils import askopenfilename
 from typing import Optional
 
 import jedi

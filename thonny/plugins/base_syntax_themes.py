@@ -93,7 +93,7 @@ def default_dark() -> SyntaxThemeSettings:
         "stdout": {"foreground": "LightGray"},
         "stderr": {"foreground": "#EB5B83"},
         "value": {"foreground": "#EBEB5B"},
-        "hyperlink": {"foreground": "#DC5BEB", "underline": True},
+        "hyperlink": {"foreground": "#619DC7", "underline": True},
         # paren matcher
         "surrounding_parens": {"foreground": "#F0995B", "font": "BoldEditorFont"},
         "unclosed_expression": {"background": "#000000"},

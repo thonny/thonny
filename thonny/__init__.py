@@ -74,7 +74,7 @@ def launch():
     except SystemExit as e:
         from tkinter import messagebox
 
-        messagebox.showerror("System exit", str(e))
+        messagebox.showerror("System exit", str(e), parent=get_workbench())
         return -1
     except Exception:
         from logging import exception
@@ -83,7 +83,7 @@ def launch():
         import tkinter.messagebox
         import traceback
 
-        tkinter.messagebox.showerror("Internal error", traceback.format_exc())
+        tkinter.messagebox.showerror("Internal error", traceback.format_exc(), parent=get_workbench())
         return -1
     finally:
         runner = get_runner()

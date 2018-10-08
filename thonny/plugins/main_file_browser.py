@@ -50,7 +50,7 @@ class MainFileBrowser(BaseFileBrowser):
         path = os.path.join(parent_path, name)
 
         if os.path.exists(path):
-            showerror("Error", "The file '" + path + "' already exists")
+            showerror("Error", "The file '" + path + "' already exists", parent=get_workbench())
         else:
             open(path, "w").close()
 
