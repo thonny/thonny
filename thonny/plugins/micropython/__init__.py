@@ -491,12 +491,20 @@ class MicroPythonProxy(BackendProxy):
     def _execute_and_parse_value(self, script):
         out, err = self._execute_and_get_response(script)
 
+        if err:
+            # display script on error
+            self._send_text_to_shell(script, "stderr") 
+
         # TODO: report the error to stderr
         assert len(err) == 0, "Error was " + repr(err)
         return ast.literal_eval(out.strip().decode("utf-8"))
 
     def _execute_and_expect_empty_response(self, script):
         out, err = self._execute_and_get_response(script)
+
+        if out or err:
+            # display script on error
+            self._send_text_to_shell(script, "stderr")    
 
         assert len(out) == 0, "Output was " + repr(out)
         assert len(err) == 0, "Error was " + repr(err)
