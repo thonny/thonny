@@ -61,6 +61,11 @@ class SyntaxText(EnhancedText):
 
 
 class PythonText(SyntaxText):
+    def __init__(self, master=None, cnf={}, **kw):
+        if "usetabs" not in kw:
+            kw["usetabs"] = False
+        super().__init__(master=master, cnf=cnf, **kw)
+    
     def perform_return(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified

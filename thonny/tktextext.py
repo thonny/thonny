@@ -6,7 +6,7 @@ import time
 import tkinter as tk
 import traceback
 from logging import exception
-from tkinter import TclError
+from tkinter import TclError, messagebox
 from tkinter import font as tkfont
 from tkinter import ttk
 
@@ -182,7 +182,8 @@ class EnhancedText(TweakableText):
     Most of the code is adapted from idlelib.EditorWindow.
     """
 
-    def __init__(self, master=None, style="Text", tag_current_line=False, cnf={}, **kw):
+    def __init__(self, master=None, style="Text", tag_current_line=False,
+                 usetabs=False, cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
         kw["autoseparators"] = False
@@ -190,9 +191,9 @@ class EnhancedText(TweakableText):
         self._original_options = kw.copy()
 
         super().__init__(master=master, cnf=cnf, **kw)
-        self.tabwidth = 8  # See comments in idlelib.EditorWindow
+        self.tabwidth = 8  # See comments in idlelib.editor.EditorWindow
         self.indentwidth = 4
-        self.usetabs = False
+        self.usetabs = usetabs
 
         self._last_event_kind = None
         self._last_key_time = None
@@ -329,8 +330,7 @@ class EnhancedText(TweakableText):
 
         # Ick.  It may require *inserting* spaces if we back up over a
         # tab character!  This is written to be clear, not fast.
-        tabwidth = self.tabwidth
-        have = len(chars.expandtabs(tabwidth))
+        have = len(chars.expandtabs(self.tabwidth))
         assert have > 0
         want = ((have - 1) // self.indentwidth) * self.indentwidth
         # Debug prompt is multilined....
@@ -344,7 +344,7 @@ class EnhancedText(TweakableText):
                 break
             chars = chars[:-1]
             ncharsdeleted = ncharsdeleted + 1
-            have = len(chars.expandtabs(tabwidth))
+            have = len(chars.expandtabs(self.tabwidth))
             if have <= want or chars[-1] not in " \t":
                 break
         text.delete("insert-%dc" % ncharsdeleted, "insert")
@@ -703,6 +703,25 @@ class EnhancedText(TweakableText):
         self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
         super().destroy()
 
+    def direct_insert(self, index, chars, tags=None, **kw):
+        chars = self.check_convert_tabs_to_spaces(chars)
+        super().direct_insert(index, chars, tags, **kw)
+    
+    def check_convert_tabs_to_spaces(self, chars):
+        tab_count = chars.count("\t")
+        if self.usetabs or tab_count == 0:
+            return chars
+        else:
+            
+            if messagebox.askyesno("Convert tabs to spaces?",
+                                   "Thonny (according to Python recommendation) uses spaces for indentation, "
+                                   + "but the text you are about to insert/open contains %d tab characters. " % tab_count
+                                   + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n" 
+                                   + "Do you want me to replace each tab with %d spaces?\n\n" % self.indentwidth,
+                                   parent=tk._default_root):
+                return chars.expandtabs(self.indentwidth)
+            else:
+                return chars
 
 class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"
