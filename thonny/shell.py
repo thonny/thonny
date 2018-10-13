@@ -22,9 +22,9 @@ from thonny.ui_utils import (
     get_style_configuration,
     scrollbar_style,
     sequence_to_accelerator,
-)
+    select_sequence)
 
-_CLEAR_SHELL_DEFAULT_SEQ = "<Control-l>"
+_CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 
 class ShellView(ttk.Frame):
