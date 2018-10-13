@@ -864,13 +864,20 @@ class PluginsPipDialog(PipDialog):
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]
         reqs = package_data["info"].get("requires_dist", None)
-
+        
+        other_version_text = (
+            "NB! There may be another version available "
+            + "which is compatible with current Thonny version. "
+            + "Click on '...' button to choose the version to install."
+        )
+        
         if name.lower().startswith("thonny-") and not reqs:
             showerror(
                 "Thonny plugin without requirements",
                 "Looks like you are trying to install an outdated Thonny\n"
                 + "plug-in (it doesn't specify required Thonny version).\n\n"
-                + "If you still want it, then please install it from the command line.",
+                + "If you still want it, then please install it from the command line."
+                + "\n\n" + other_version_text,
                 parent=get_workbench(),
             )
             return False
@@ -881,7 +888,8 @@ class PluginsPipDialog(PipDialog):
                     "Unsuitable requirements",
                     "This package requires different Thonny version:\n\n  "
                     + "\n  ".join(conflicts)
-                    + "\n\nIf you still want it, then please install it from the command line.",
+                    + "\n\nIf you still want it, then please install it from the command line."
+                    + "\n\n" + other_version_text,
                     parent=get_workbench(),
                 )
                 return False
