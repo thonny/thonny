@@ -1182,7 +1182,7 @@ class Workbench(tk.Tk):
                 "Configuration has been updated. "
                 + "Restart Thonny to start working in regular mode.\n\n"
                 + "(See 'Tools → Options → General' if you change your mind later.)",
-                self)
+                parent=self)
         
         label.bind("<1>", on_click, True)
         
