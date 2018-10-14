@@ -238,7 +238,7 @@ class Workbench(tk.Tk):
         self.set_default("layout.zoomed", False)
         self.set_default("layout.top", 15)
         self.set_default("layout.left", 150)
-        self.set_default("layout.width", 700)
+        self.set_default("layout.width", 760)
         self.set_default("layout.height", 650)
         self.set_default("layout.w_width", 200)
         self.set_default("layout.e_width", 200)
@@ -1167,7 +1167,7 @@ class Workbench(tk.Tk):
         small_font.configure(size=int(default_font.cget("size") * 0.7), underline=True) 
         label = ttk.Label(
             self._toolbar, 
-            text="Switch to regular mode", 
+            text="Switch to\nregular mode", 
             font=small_font,
             style="Url.TLabel",
             cursor="hand2",
@@ -1591,7 +1591,7 @@ class Workbench(tk.Tk):
             if self.get_ui_mode() == "simple":
                 padx = 0  # type: Union[int, Tuple[int, int]]
             else:
-                padx = (0, 10)
+                padx = (0, 7)
             group_frame.grid(row=0, column=toolbar_group, padx=padx)
         else:
             group_frame = slaves[0]
