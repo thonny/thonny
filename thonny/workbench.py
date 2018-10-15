@@ -1890,6 +1890,20 @@ class Workbench(tk.Tk):
     def destroy(self) -> None:
         try:
             self._destroying = True
+            
+            # Tk clipboard gets cleared on exit and won't end up in system clipboard
+            # https://bugs.python.org/issue1207592
+            # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
+            try:
+                import pyperclip
+                sysclip = pyperclip.paste() 
+                tkclip = self.clipboard_get()
+                # sysclip is empty when a file is copied (outside of Thonny)
+                if sysclip and sysclip != tkclip: 
+                    pyperclip.copy(tkclip)
+            except Exception:
+                pass
+                
             tk.Tk.destroy(self)
         except tk.TclError:
             logging.exception("Error while destroying workbench")

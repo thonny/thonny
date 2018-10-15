@@ -5,3 +5,4 @@ pylint>=1.6.5
 astroid>=1.4.9
 docutils>=0.13.1
 mypy>=0.470
+pyperclip>=1.5.27
