@@ -1896,12 +1896,18 @@ class Workbench(tk.Tk):
             # https://bugs.python.org/issue1207592
             # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
             try:
-                import pyperclip
-                sysclip = pyperclip.paste() 
-                tkclip = self.clipboard_get()
-                # sysclip is empty when a file is copied (outside of Thonny)
-                if sysclip and sysclip != tkclip: 
-                    pyperclip.copy(tkclip)
+                clipboard_data = self.clipboard_get()
+                if all(map(os.path.exists, clipboard_data.splitlines())):
+                    # Looks like the clipboard contains file name(s)
+                    # Most likely this means actual file cut/copy operation
+                    # was made outside of Thonny.
+                    # Don't want to replace this with simple string data of file names.
+                    print("skipping filenames")
+                    pass
+                else:
+                    import pyperclip
+                    print("exporting", repr(clipboard_data))
+                    pyperclip.copy(clipboard_data)
             except Exception:
                 pass
                 
