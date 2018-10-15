@@ -238,7 +238,7 @@ class Workbench(tk.Tk):
         self.set_default("layout.zoomed", False)
         self.set_default("layout.top", 15)
         self.set_default("layout.left", 150)
-        self.set_default("layout.width", 760)
+        self.set_default("layout.width", 800)
         self.set_default("layout.height", 650)
         self.set_default("layout.w_width", 200)
         self.set_default("layout.e_width", 200)
@@ -1168,6 +1168,7 @@ class Workbench(tk.Tk):
         label = ttk.Label(
             self._toolbar, 
             text="Switch to\nregular mode", 
+            justify="right",
             font=small_font,
             style="Url.TLabel",
             cursor="hand2",
@@ -1181,7 +1182,7 @@ class Workbench(tk.Tk):
                 "Configuration has been updated. "
                 + "Restart Thonny to start working in regular mode.\n\n"
                 + "(See 'Tools → Options → General' if you change your mind later.)",
-                self)
+                parent=self)
         
         label.bind("<1>", on_click, True)
         
@@ -1591,7 +1592,7 @@ class Workbench(tk.Tk):
             if self.get_ui_mode() == "simple":
                 padx = 0  # type: Union[int, Tuple[int, int]]
             else:
-                padx = (0, 7)
+                padx = (0, 10)
             group_frame.grid(row=0, column=toolbar_group, padx=padx)
         else:
             group_frame = slaves[0]
@@ -1604,7 +1605,7 @@ class Workbench(tk.Tk):
             state=tk.NORMAL,
             text=caption,
             compound="top" if self.get_ui_mode() == "simple" else None,
-            pad=(15, 0) if self.get_ui_mode() == "simple" else None,
+            pad=(10, 0) if self.get_ui_mode() == "simple" else None,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore
