@@ -80,10 +80,13 @@ def launch():
         from logging import exception
 
         exception("Internal launch or mainloop error")
-        import tkinter.messagebox
+        from thonny import ui_utils
         import traceback
 
-        tkinter.messagebox.showerror("Internal error", traceback.format_exc(), parent=get_workbench())
+        dlg = ui_utils.LongTextDialog("Internal error", 
+                                      traceback.format_exc(), 
+                                      parent=get_workbench())
+        ui_utils.show_dialog(dlg, get_workbench())
         return -1
     finally:
         runner = get_runner()

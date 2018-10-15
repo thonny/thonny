@@ -1950,7 +1950,9 @@ class Workbench(tk.Tk):
                 msg = str(value)
             else:
                 msg = traceback.format_exc()
-            tk_messagebox.showerror(title, msg, parent=self)
+            
+            dlg = ui_utils.LongTextDialog(title, msg, parent=self)
+            ui_utils.show_dialog(dlg, self)
 
     def _open_views(self) -> None:
         for nb_name in self._view_notebooks:

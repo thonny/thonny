@@ -1487,6 +1487,55 @@ class ChoiceDialog(tk.Toplevel):
         self.result = None
         self.destroy()
 
+class LongTextDialog(tk.Toplevel):
+    def __init__(self, title, text_content, parent=None):
+        if parent is None:
+            parent = tk._default_root
+        
+        super().__init__(master=parent)
+        self.title(title)    
+        
+        main_frame = ttk.Frame(self)
+        main_frame.grid(row=0, column=0, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        default_font = tk.font.nametofont("TkDefaultFont")
+        self._text = tktextext.TextFrame(main_frame, read_only=True, 
+                                         wrap="none",
+                                         font=default_font,
+                                         width=80,
+                                         height=10,
+                                         relief="sunken",
+                                         borderwidth=1)
+        self._text.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=20, pady=20)
+        self._text.text.direct_insert("1.0", text_content)
+        self._text.text.see("1.0")
+        
+        copy_button = ttk.Button(main_frame, command=self._copy, 
+                                 text="Copy to clipboard",
+                                 width=20)
+        copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0,20))        
+        
+        close_button = ttk.Button(main_frame, command=self._close, text="Close")
+        close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0,20))
+        
+        main_frame.columnconfigure(0, weight=1)
+        main_frame.rowconfigure(1, weight=1)
+        
+        self.protocol("WM_DELETE_WINDOW", self._close)
+        self.bind("<Escape>", self._close, True)        
+        
+    def _copy(self, event=None):
+        self.clipboard_clear()
+        self.clipboard_append(self._text.text.get("1.0", "end"))
+    
+    def _close(self, event=None):
+        self.destroy()
+    
+    
+        
+        
 
 def ask_one_from_choices(
     master=None, title="Choose one", question: str = "Choose one:", choices=[]
