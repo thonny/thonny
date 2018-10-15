@@ -1902,11 +1902,9 @@ class Workbench(tk.Tk):
                     # Most likely this means actual file cut/copy operation
                     # was made outside of Thonny.
                     # Don't want to replace this with simple string data of file names.
-                    print("skipping filenames")
                     pass
                 else:
                     import pyperclip
-                    print("exporting", repr(clipboard_data))
                     pyperclip.copy(clipboard_data)
             except Exception:
                 pass
