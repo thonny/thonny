@@ -1173,6 +1173,6 @@ def load_plugin() -> None:
         group=30,
     )
 
-    get_workbench().add_view(StackView, "Stack", "ne")
+    get_workbench().add_view(StackView, "Stack", "se")
     get_workbench().add_view(ExceptionView, "Exception", "s")
     get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)

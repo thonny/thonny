@@ -139,5 +139,5 @@ class VariablesView(VariablesFrame):
 
 def load_plugin() -> None:
     get_workbench().add_view(
-        VariablesView, "Variables", "e", default_position_key="AAA"
+        VariablesView, "Variables", "ne", default_position_key="AAA"
     )
