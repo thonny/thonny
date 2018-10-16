@@ -918,9 +918,9 @@ class MicroPythonProxy(BackendProxy):
             out, err = self._execute_and_get_response(
                 dedent(
                     """
-                with open(%r, encoding='utf-8') as fp:
-                    print(fp.read())
-            """
+                    with open(%r, "r") as fp:
+                        print(fp.read())
+                    """
                     % source
                 ).strip()
             )
