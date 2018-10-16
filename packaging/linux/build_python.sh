@@ -5,7 +5,7 @@ set -e
 # COMPILE PYTHON ###############################################
 
 PYTHON_VERSION=3.7.1
-RELEASE_NAME=Python-${PYTHON_VERSION}rc1
+RELEASE_NAME=Python-${PYTHON_VERSION}rc2
 
 wget https://www.python.org/ftp/python/$PYTHON_VERSION/$RELEASE_NAME.tar.xz
 tar xf $RELEASE_NAME.tar.xz
