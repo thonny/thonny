@@ -22,7 +22,7 @@ def load_plugin():
                 + ". "
                 + "Since 3.0 this data is kept in a new location: '%s'.\n\n"
                 % THONNY_USER_DIR
-                + "If you don't indend to use older Thonny versions anymore, "
+                + "If you don't intend to use older Thonny versions anymore, "
                 + "you probably want to delete the old directory and reclaim disk space.\n\n"
                 + "Do you want me to delete this directory now?",
                 parent=get_workbench()
@@ -33,5 +33,5 @@ def load_plugin():
                 showinfo("Done!", "Done!", parent=get_workbench())
 
         get_workbench().add_command(
-            "delolddatadir", "tools", "Clean up old data directory ...", doit, group=999
+            "delolddatadir", "tools", "Clean up Thonny 2.1 data folder ...", doit, group=110
         )
