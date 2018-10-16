@@ -2,6 +2,20 @@
 Version history
 ===============
 
+3.0.0 (2018-10-16)
+==================
+* CHANGED: Line numbers are now visible by default
+* CHANGED: Stack and Assistant views are now in the bottom-right corner
+* CHANGED: Shell doesn't show full path of bundled interpreters anymore
+* ENHANCEMENT #555: Internal errors are now shown with more suitable dialog
+* FIXED #170: Command+k for clearing shell in Mac
+* FIXED #547: Recommend "..." button when plug-ins latest stable isn't suitable for this Thonny version
+* FIXED #548: Prevent inconsistent use of tabs and spaces error (when pasting or opening text containing tabs, Thonny proposes to replace them with spaces)
+* FIXED #557: Default window size too small for simple mode
+* FIXED #559: Make text copied to clipboard available even after closing Thonny
+* FIXED: Implemented workaround for https://bugs.python.org/issue34927
+* TECHNICAL: MicroPython backend now shows the source of failing internal commands 
+
 3.0.0rc1 (2018-10-08)
 =====================
 * ENHANCEMENT: Documented several features (see Help => Help contents)
