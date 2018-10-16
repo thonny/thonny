@@ -1345,6 +1345,7 @@ class FastTracer(Tracer):
             in_present=True,
             io_symbol_count=None,
             exception_info=self._export_exception_info(),
+            tracer_class="FastTracer",
         )
 
         self._vm.send_message(msg)
@@ -1749,6 +1750,7 @@ class NiceTracer(Tracer):
             )
 
         state["stack"] = new_stack
+        state["tracer_class"] = "NiceTracer"
 
         self._vm.send_message(DebuggerResponse(**state))
 

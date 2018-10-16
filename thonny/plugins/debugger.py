@@ -22,7 +22,7 @@ from thonny import (
     ui_utils,
 )
 from thonny.codeview import CodeView, get_syntax_options_for_tag
-from thonny.common import DebuggerCommand, InlineCommand, ToplevelResponse
+from thonny.common import DebuggerCommand, InlineCommand
 from thonny.config_ui import ConfigurationPage
 from thonny.memory import VariablesFrame
 from thonny.misc_utils import shorten_repr
@@ -33,16 +33,10 @@ _current_debugger = None
 
 
 class Debugger:
-    def __init__(self, command_name):
-        self._command_name = command_name
+    def __init__(self):
         self._last_progress_message = None
         self._last_brought_out_frame_id = None
         self._editor_context_menu = None
-        get_workbench().bind("DebuggerResponse", self.handle_debugger_progress, True)
-        get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
-
-    def debug_current_script(self):
-        get_runner().execute_current(self._command_name)
 
     def check_issue_command(self, command, **kwargs):
         cmd = DebuggerCommand(command, **kwargs)
@@ -77,22 +71,15 @@ class Debugger:
         if command == "run_to_cursor":
             return self.get_run_to_cursor_breakpoint() is not None
         elif command == "step_back":
-            return self._command_name == "Debug"
+            return (self._last_progress_message 
+                    and self._last_progress_message["tracer_class"] == "NiceTracer")
         else:
             return True
 
     def handle_debugger_progress(self, msg):
         self._last_brought_out_frame_id = None
 
-    def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
-        self.close()
-
     def close(self) -> None:
-        global _current_debugger
-        _current_debugger = None
-        get_workbench().unbind("ToplevelResponse", self.handle_toplevel_response)
-        get_workbench().unbind("DebuggerResponse", self.handle_debugger_progress)
-
         self._last_brought_out_frame_id = None
 
         if get_workbench().get_option("debugger.automatic_stack_view"):
@@ -142,8 +129,8 @@ class Debugger:
 
 
 class SingleWindowDebugger(Debugger):
-    def __init__(self, command_name):
-        super().__init__(command_name)
+    def __init__(self):
+        super().__init__()
         self._last_frame_visualizer = None
         # Make sure StackView is created
         get_workbench().get_view("StackView")
@@ -216,8 +203,8 @@ class SingleWindowDebugger(Debugger):
 
 
 class StackedWindowsDebugger(Debugger):
-    def __init__(self, command_name):
-        super().__init__(command_name)
+    def __init__(self):
+        super().__init__()
         self._main_frame_visualizer = None
 
     def get_run_to_cursor_breakpoint(self):
@@ -312,7 +299,6 @@ class FrameVisualizer:
         self._expression_box = ExpressionBox(text_frame)
         self._note_box = ui_utils.NoteBox(text_frame.winfo_toplevel())
         self._next_frame_visualizer = None
-        self._text_old_read_only = self._text.is_read_only()
         self._text.set_read_only(True)
         self._line_debug = frame_info.current_statement is None
 
@@ -332,7 +318,7 @@ class FrameVisualizer:
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
 
-        self._text.set_read_only(self._text_old_read_only)
+        self._text.set_read_only(False)
         self._remove_focus_tags()
         self._expression_box.clear_debug_view()
         self.close_note()
@@ -1035,20 +1021,33 @@ def _start_debug_enabled():
     )
 
 
-def _start_debug(command_name):
-    if get_workbench().get_option("debugger.single_window"):
-        current_debugger = SingleWindowDebugger(command_name)
-    else:
-        current_debugger = StackedWindowsDebugger(command_name)
+def _request_debug(command_name):
+    # Don't assume Debug command gets issued after this
+    # This may just call the %cd command
+    # or the user may deny saving current editor 
+    get_runner().execute_current(command_name)
 
+def _debug_accepted(event):
+    # Called when proxy accepted the debug command
     global _current_debugger
-    _current_debugger = current_debugger
-    _current_debugger.debug_current_script()
+    cmd = event.command
+    if cmd.get("name") in ["Debug", "FastDebug"]:
+        assert _current_debugger is None
+        if get_workbench().get_option("debugger.single_window"):
+            _current_debugger = SingleWindowDebugger()
+        else:
+            _current_debugger = StackedWindowsDebugger()
 
-    # Need to assign again, because there may be a ToplevelResponse
-    # before debugger actually runs
-    _current_debugger = current_debugger
+def _handle_debugger_progress(msg):
+    global _current_debugger
+    assert _current_debugger is not None
+    _current_debugger.handle_debugger_progress(msg)
 
+def _handle_toplevel_response(msg):
+    global _current_debugger
+    if _current_debugger is not None:
+        _current_debugger.close()
+        _current_debugger = None    
 
 class DebuggerConfigurationPage(ConfigurationPage):
     def __init__(self, master):
@@ -1079,7 +1078,7 @@ def load_plugin() -> None:
         "debug",
         "run",
         "Debug current script (nicer)",
-        lambda: _start_debug("Debug"),
+        lambda: _request_debug("Debug"),
         caption="Debug",
         tester=_start_debug_enabled,
         default_sequence="<Control-F5>",
@@ -1092,7 +1091,7 @@ def load_plugin() -> None:
         "debuglite",
         "run",
         "Debug current script (faster)",
-        lambda: _start_debug("FastDebug"),
+        lambda: _request_debug("FastDebug"),
         caption="Fast-debug",
         tester=_start_debug_enabled,
         default_sequence="<Shift-F5>",
@@ -1176,3 +1175,7 @@ def load_plugin() -> None:
     get_workbench().add_view(StackView, "Stack", "se")
     get_workbench().add_view(ExceptionView, "Exception", "s")
     get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)
+    get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
+    get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
+    get_workbench().bind("CommandAccepted", _debug_accepted, True)
+    
