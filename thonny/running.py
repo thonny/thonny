@@ -63,6 +63,7 @@ class Runner:
         self._init_commands()
         self._state = "starting"
         self._proxy = None  # type: Any
+        self._publishing_events = False
         self._polling_after_id = None
         self._postponed_commands = []  # type: List[CommandToBackend]
 
@@ -144,7 +145,13 @@ class Runner:
     def send_command(self, cmd: CommandToBackend) -> None:
         if self._proxy is None:
             return
-
+        
+        if self._publishing_events:
+            # allow all event handlers to complete before sending the commands
+            # issued by first event handlers
+            self._postpone_command(cmd)
+            return
+        
         # First sanity check
         if (
             isinstance(cmd, ToplevelCommand)
@@ -174,11 +181,12 @@ class Runner:
             return
         else:
             assert response is None
-
+            get_workbench().event_generate("CommandAccepted", command=cmd)
+            
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
 
-        if cmd.name in ("Run", "Debug", "LineDebug", "Reset"):
+        if cmd.name[0].isupper():
             get_workbench().event_generate("BackendRestart")
 
     def _postpone_command(self, cmd: CommandToBackend) -> None:
@@ -366,13 +374,15 @@ class Runner:
 
             # Publish the event
             # NB! This may cause another command to be sent before we get to postponed commands.
-            class_event_type = type(msg).__name__
-            get_workbench().event_generate(
-                class_event_type, event=msg
-            )  # more general event
-            if msg.event_type != class_event_type:
-                # more specific event
-                get_workbench().event_generate(msg.event_type, event=msg)
+            try:
+                self._publishing_events = True
+                class_event_type = type(msg).__name__
+                get_workbench().event_generate(class_event_type, event=msg)  # more general event
+                if msg.event_type != class_event_type:
+                    # more specific event
+                    get_workbench().event_generate(msg.event_type, event=msg)
+            finally:
+                self._publishing_events = False 
 
             # TODO: is it necessary???
             # https://stackoverflow.com/a/13520271/261181
