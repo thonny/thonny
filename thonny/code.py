@@ -157,9 +157,8 @@ class Editor(ttk.Frame):
         with tokenize.open(filename) as fp:  # TODO: support also text files
             source = fp.read()
 
-        filename = normpath_with_actual_case(
-            filename
-        )  # Make sure Windows filenames have proper format
+        # Make sure Windows filenames have proper format
+        filename = normpath_with_actual_case(filename)  
         self._filename = filename
         self._last_known_mtime = os.path.getmtime(self._filename)
 
@@ -177,31 +176,34 @@ class Editor(ttk.Frame):
 
     def save_file(self, ask_filename=False):
         if self._filename is not None and not ask_filename:
-            filename = self._filename
-            get_workbench().event_generate("Save", editor=self, filename=filename)
+            get_workbench().event_generate("Save", editor=self, filename=self._filename)
         else:
             # http://tkinter.unpythonic.net/wiki/tkFileDialog
-            filename = asksaveasfilename(
+            new_filename = asksaveasfilename(
                 master=get_workbench(),
                 filetypes=_dialog_filetypes,
                 defaultextension=".py",
                 initialdir=get_workbench().get_cwd(),
             )
-
-            if filename in [
-                "",
-                (),
-                None,
-            ]:  # Different tkinter versions may return different values
+            
+            # Different tkinter versions may return different values
+            if new_filename in ["", (), None,]:  
                 return None
 
             # Seems that in some Python versions defaultextension
             # acts funny
-            if filename.lower().endswith(".py.py"):
-                filename = filename[:-3]
+            if new_filename.lower().endswith(".py.py"):
+                new_filename = new_filename[:-3]
+            
+            if running_on_windows():
+                # may have /-s instead of \-s and wrong case
+                new_filename = os.path.join(
+                    normpath_with_actual_case(os.path.dirname(new_filename)),
+                    os.path.basename(new_filename)
+                )
 
-            if filename.endswith(".py"):
-                base = os.path.basename(filename)
+            if new_filename.endswith(".py"):
+                base = os.path.basename(new_filename)
                 mod_name = base[:-3].lower()
                 if running_on_windows():
                     mod_name = mod_name.lower()
@@ -227,19 +229,19 @@ class Editor(ttk.Frame):
                         parent=get_workbench(),
                     ):
                         return self.save_file(ask_filename)
-
-            get_workbench().event_generate("SaveAs", editor=self, filename=filename)
+            
+            self._filename = new_filename
+            get_workbench().event_generate("SaveAs", editor=self, filename=new_filename)
 
         content = self._code_view.get_content_as_bytes()
         try:
-            f = open(filename, mode="wb")
+            f = open(self._filename, mode="wb")
             f.write(content)
             f.flush()
-            os.fsync(
-                f
-            )  # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
+            # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
+            os.fsync(f)  
             f.close()
-            self._last_known_mtime = os.path.getmtime(filename)
+            self._last_known_mtime = os.path.getmtime(self._filename)
         except PermissionError:
             if askyesno(
                 "Permission Error",
@@ -251,8 +253,7 @@ class Editor(ttk.Frame):
             else:
                 return None
 
-        self._filename = normpath_with_actual_case(filename)
-        self.master.remember_recent_file(filename)
+        self.master.remember_recent_file(self._filename)
 
         self._code_view.text.edit_modified(False)
 
