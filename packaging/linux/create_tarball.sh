@@ -26,8 +26,13 @@ cp Thonny.desktop $TARGET_DIR/templates
 export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 # INSTALL DEPS ###################################
-$TARGET_DIR/bin/python3.7 -m pip install jedi==0.13.*
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir distro
+$TARGET_DIR/bin/python3.7 -m pip install jedi==0.13.1
+$TARGET_DIR/bin/python3.7 -m pip install mypy==0.641
+$TARGET_DIR/bin/python3.7 -m pip install pylint==2.1.1
+$TARGET_DIR/bin/python3.7 -m pip install docutils==0.14
+$TARGET_DIR/bin/python3.7 -m pip install pyserial==3.4
+$TARGET_DIR/bin/python3.7 -m pip install pyperclip==1.7.0
+$TARGET_DIR/bin/python3.7 -m pip install distro==1.3.*
 $TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################

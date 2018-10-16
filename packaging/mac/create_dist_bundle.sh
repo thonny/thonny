@@ -22,8 +22,13 @@ cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/thonny \
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
 
-# install jedi #####################################################
-$PYTHON_CURRENT/bin/python3.7 -m pip install jedi==0.13.*
+# install deps #####################################################
+$PYTHON_CURRENT/bin/python3.7 -m pip install jedi==0.13.1
+$PYTHON_CURRENT/bin/python3.7 -m pip install mypy==0.641
+$PYTHON_CURRENT/bin/python3.7 -m pip install pylint==2.1.1
+$PYTHON_CURRENT/bin/python3.7 -m pip install docutils==0.14
+$PYTHON_CURRENT/bin/python3.7 -m pip install pyserial==3.4
+$PYTHON_CURRENT/bin/python3.7 -m pip install pyperclip==1.7.0
 
 # install certifi #####################################################
 $PYTHON_CURRENT/bin/python3.7 -m pip install certifi
