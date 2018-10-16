@@ -998,7 +998,7 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
         msg = super().fetch_next_message()
         if msg and "welcome_text" in msg:
             if using_bundled_python():
-                msg["welcome_text"] += " (built-in)"
+                msg["welcome_text"] += " (bundled)"
             else:
                 msg["welcome_text"] += " (" + self._executable + ")"
         return msg
