@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.0.1 (2018-10-17)
+==================
+* FIXED: Problems with executing "Run" and "Debug" commands together with "cd" command
+* FIXED: Editor file name issues
+* FIXED: MicroPython %cat command failed over serial 
+
 3.0.0 (2018-10-16)
 ==================
 * CHANGED: Line numbers are now visible by default
