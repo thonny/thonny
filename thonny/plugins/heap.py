@@ -38,7 +38,7 @@ class HeapView(MemoryFrame):
             self.tree.set(
                 node_id,
                 "value",
-                shorten_repr(data[value_id]["repr"], MAX_REPR_LENGTH_IN_GRID),
+                shorten_repr(data[value_id].repr, MAX_REPR_LENGTH_IN_GRID),
             )
 
     def before_show(self):

@@ -176,6 +176,7 @@ class BackendEvent(MessageFromBackend):
     def __init__(self, event_type: str, **kw) -> None:
         super().__init__(**kw)
         self.event_type = event_type
+        self.sequence = event_type
 
 
 class InlineResponse(MessageFromBackend):
