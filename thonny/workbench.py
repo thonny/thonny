@@ -1851,7 +1851,7 @@ class Workbench(tk.Tk):
                 args = ast.literal_eval(data.decode("UTF-8"))
                 assert isinstance(args, list)
                 for filename in args:
-                    if os.path.exists(filename):
+                    if os.path.isfile(filename):
                         self.get_editor_notebook().show_file(filename)
 
                 self.become_active_window()
