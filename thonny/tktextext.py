@@ -183,7 +183,7 @@ class EnhancedText(TweakableText):
     """
 
     def __init__(self, master=None, style="Text", tag_current_line=False,
-                 usetabs=False, cnf={}, **kw):
+                 indent_with_tabs=False, replace_tabs=False, cnf={}, **kw):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
         kw["autoseparators"] = False
@@ -192,8 +192,9 @@ class EnhancedText(TweakableText):
 
         super().__init__(master=master, cnf=cnf, **kw)
         self.tabwidth = 8  # See comments in idlelib.editor.EditorWindow
-        self.indentwidth = 4
-        self.usetabs = usetabs
+        self.indent_width = 4
+        self.indent_with_tabs = indent_with_tabs
+        self.replace_tabs = replace_tabs
 
         self._last_event_kind = None
         self._last_key_time = None
@@ -332,7 +333,7 @@ class EnhancedText(TweakableText):
         # tab character!  This is written to be clear, not fast.
         have = len(chars.expandtabs(self.tabwidth))
         assert have > 0
-        want = ((have - 1) // self.indentwidth) * self.indentwidth
+        want = ((have - 1) // self.indent_width) * self.indent_width
         # Debug prompt is multilined....
         # if self.context_use_ps1:
         #    last_line_of_prompt = sys.ps1.split('\n')[-1]
@@ -377,14 +378,14 @@ class EnhancedText(TweakableText):
         raw, effective = classifyws(prefix, self.tabwidth)
         if raw == len(prefix):
             # only whitespace to the left
-            self._reindent_to(effective + self.indentwidth)
+            self._reindent_to(effective + self.indent_width)
         else:
             # tab to the next 'stop' within or to right of line's text:
-            if self.usetabs:
+            if self.indent_with_tabs:
                 pad = "\t"
             else:
                 effective = len(prefix.expandtabs(self.tabwidth))
-                n = self.indentwidth
+                n = self.indent_width
                 pad = " " * (n - effective % n)
             self.insert("insert", pad)
         self.see("insert")
@@ -526,9 +527,9 @@ class EnhancedText(TweakableText):
             if line:
                 raw, effective = classifyws(line, self.tabwidth)
                 if increase:
-                    effective = effective + self.indentwidth
+                    effective = effective + self.indent_width
                 else:
-                    effective = max(effective - self.indentwidth, 0)
+                    effective = max(effective - self.indent_width, 0)
                 lines[pos] = self._make_blanks(effective) + line[raw:]
         self._set_region(head, tail, chars, lines)
         return "break"
@@ -606,7 +607,7 @@ class EnhancedText(TweakableText):
 
     def _make_blanks(self, n):
         # Make string that displays as n leading blanks.
-        if self.usetabs:
+        if self.indent_with_tabs:
             ntabs, nspaces = divmod(n, self.tabwidth)
             return "\t" * ntabs + " " * nspaces
         else:
@@ -709,7 +710,7 @@ class EnhancedText(TweakableText):
     
     def check_convert_tabs_to_spaces(self, chars):
         tab_count = chars.count("\t")
-        if self.usetabs or tab_count == 0:
+        if not self.replace_tabs or tab_count == 0:
             return chars
         else:
             
@@ -717,9 +718,9 @@ class EnhancedText(TweakableText):
                                    "Thonny (according to Python recommendation) uses spaces for indentation, "
                                    + "but the text you are about to insert/open contains %d tab characters. " % tab_count
                                    + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n" 
-                                   + "Do you want me to replace each tab with %d spaces?\n\n" % self.indentwidth,
+                                   + "Do you want me to replace each tab with %d spaces?\n\n" % self.indent_width,
                                    parent=tk._default_root):
-                return chars.expandtabs(self.indentwidth)
+                return chars.expandtabs(self.indent_width)
             else:
                 return chars
 

@@ -62,8 +62,9 @@ class SyntaxText(EnhancedText):
 
 class PythonText(SyntaxText):
     def __init__(self, master=None, cnf={}, **kw):
-        if "usetabs" not in kw:
-            kw["usetabs"] = False
+        if "indent_with_tabs" not in kw:
+            kw["indent_with_tabs"] = False
+            
         super().__init__(master=master, cnf=cnf, **kw)
     
     def perform_return(self, event):
@@ -178,6 +179,8 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
 
     def __init__(self, master=None, cnf={}, **kw):
+        if "replace_tabs" not in kw:
+            kw["replace_tabs"] = True
 
         super().__init__(
             master=master,
