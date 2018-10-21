@@ -162,6 +162,8 @@ class MessageFromBackend(Record):
     def __init__(self, **kw) -> None:
         self.event_type = type(self).__name__  # allow event_type to be overridden by kw
         super().__init__(**kw)
+        if not hasattr(self, "sequence"):
+            self.sequence = self.event_type
 
 
 class ToplevelResponse(MessageFromBackend):
@@ -176,7 +178,6 @@ class BackendEvent(MessageFromBackend):
     def __init__(self, event_type: str, **kw) -> None:
         super().__init__(**kw)
         self.event_type = event_type
-        self.sequence = event_type
 
 
 class InlineResponse(MessageFromBackend):

@@ -3,6 +3,7 @@
 
 from thonny import get_workbench
 from thonny.tktextext import TextFrame
+from thonny.common import DebuggerResponse
 
 
 class EventsView(TextFrame):
@@ -27,7 +28,7 @@ class EventsView(TextFrame):
                     "    " + name + ": " + repr(getattr(event, name))[:100] + "\n",
                 )
 
-        if event.sequence == "DebuggerResponse":
+        if isinstance(event, DebuggerResponse):
             frame = event.stack[-1]
             self.text.insert("end", "    " + "event" + ": " + frame.event + "\n")
             self.text.insert("end", "    " + "focus" + ": " + str(frame.focus) + "\n")
