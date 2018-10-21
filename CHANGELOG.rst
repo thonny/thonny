@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.0.3 (2018-10-21)
+==================
+* FIXED: Regression from 3.0.2 (incomplete code refactoring)
+
 3.0.2 (2018-10-21)
 ==================
 * FIXED #563: Problems with HeapView and EventsView
