@@ -2,6 +2,11 @@
 Version history
 ===============
 
+3.0.2 (2018-10-21)
+==================
+* FIXED #563: Problems with HeapView and EventsView
+* FIXED #565: Don't replace tabs in shell
+
 3.0.1 (2018-10-17)
 ==================
 * FIXED: Problems with executing "Run" and "Debug" commands together with "cd" command
