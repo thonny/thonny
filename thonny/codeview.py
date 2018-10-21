@@ -115,7 +115,7 @@ class PythonText(SyntaxText):
             # adjust indentation for continuations and block
             # open/close first need to find the last stmt
             lno = tktextext.index2line(text.index("insert"))
-            y = roughparse.RoughParser(text.indentwidth, text.tabwidth)
+            y = roughparse.RoughParser(text.indent_width, text.tabwidth)
 
             for context in roughparse.NUM_CONTEXT_LINES:
                 startat = max(lno - context, 1)

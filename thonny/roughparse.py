@@ -160,8 +160,8 @@ class StringTranslatePseudoMapping(Mapping):
 
 
 class RoughParser:
-    def __init__(self, indentwidth, tabwidth):
-        self.indentwidth = indentwidth
+    def __init__(self, indent_width, tabwidth):
+        self.indent_width = indent_width
         self.tabwidth = tabwidth
 
     def set_str(self, s):
@@ -543,7 +543,7 @@ class RoughParser:
             j = i = origi
             while str[j] in " \t":
                 j = j + 1
-            extra = self.indentwidth
+            extra = self.indent_width
         return len(str[i:j].expandtabs(self.tabwidth)) + extra
 
     # Return number of physical lines in last stmt (whether or not
@@ -678,7 +678,7 @@ class HyperParser:
 
         self.text = text
 
-        parser = RoughParser(text.indentwidth, text.tabwidth)
+        parser = RoughParser(text.indent_width, text.tabwidth)
 
         def index2line(index):
             return int(float(index))

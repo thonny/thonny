@@ -516,7 +516,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             return False
 
         # First check if it has unclosed parens, unclosed string or ending with : or \
-        parser = roughparse.RoughParser(self.indentwidth, self.tabwidth)
+        parser = roughparse.RoughParser(self.indent_width, self.tabwidth)
         parser.set_str(source.rstrip() + "\n")
         if (
             parser.get_continuation_type() != roughparse.C_NONE
