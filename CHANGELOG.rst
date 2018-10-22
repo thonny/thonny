@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.0.4 (2018-10-22)
+==================
+* FIXED #564: In Windows "Highlight local variables" and "Higlight matching names" cause Thonny to load Jedi files
+
 3.0.3 (2018-10-21)
 ==================
 * FIXED: Regression from 3.0.2 (incomplete code refactoring)
