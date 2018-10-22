@@ -143,7 +143,7 @@ class OutlineView(ttk.Frame):
             code_view.text.see(
                 index
             )  # make sure that the double-clicked item is visible
-            code_view.select_lines(lineno, lineno)
+            code_view.text.select_lines(lineno, lineno)
 
             get_workbench().event_generate(
                 "OutlineDoubleClick",
