@@ -201,7 +201,7 @@ class AutomaticPanedWindow(tk.PanedWindow):
 
     def _update_preferred_sizes(self):
         for pane in self.pane_widgets():
-            if pane.preferred_size_in_pw is not None:
+            if getattr(pane, "preferred_size_in_pw", None) is not None:
                 if self.cget("orient") == "horizontal":
                     current_size = pane.winfo_width()
                 else:
