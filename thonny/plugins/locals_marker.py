@@ -11,37 +11,6 @@ class LocalsHighlighter:
         self._update_scheduled = False
 
     def get_positions(self):
-        return self._get_positions_correct_but_using_private_parts()
-
-    def _get_positions_simple_but_incorrect(self):
-        # goto_assignments only gives you last assignment to given node
-        import jedi
-
-        defs = jedi.names(
-            self.text.get("1.0", "end"),
-            path="",
-            all_scopes=True,
-            definitions=True,
-            references=True,
-        )
-        result = set()
-        for definition in defs:
-            if definition.parent().type == "function":  # is located in a function
-                ass = definition.goto_assignments()
-                if (
-                    len(ass) > 0 and ass[0].parent().type == "function"
-                ):  # is assigned to in a function
-                    pos = (
-                        "%d.%d" % (definition.line, definition.column),
-                        "%d.%d"
-                        % (definition.line, definition.column + len(definition.name)),
-                    )
-                    result.add(pos)
-        return result
-
-    def _get_positions_correct_but_using_private_parts(self):
-        from jedi import Script
-
         tree = jedi_utils.import_python_tree()
 
         locs = []
@@ -91,8 +60,7 @@ class LocalsHighlighter:
                     process_node(child, local_names, global_names)
 
         source = self.text.get("1.0", "end")
-        script = Script(source + ")")  # https://github.com/davidhalter/jedi/issues/897
-        module = jedi_utils.get_module_node(script)
+        module = jedi_utils.parse_source(source)
         for child in module.children:
             if isinstance(child, tree.BaseNode) and jedi_utils.is_scope(child):
                 process_scope(child)

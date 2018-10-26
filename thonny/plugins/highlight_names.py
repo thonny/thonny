@@ -14,7 +14,7 @@ class BaseNameHighlighter:
         self.text = text
         self._update_scheduled = False
 
-    def get_positions_for_script(self, script):
+    def get_positions_for(self, source, line, column):
         raise NotImplementedError()
 
     def get_positions(self):
@@ -30,11 +30,8 @@ class BaseNameHighlighter:
         source = self.text.get("1.0", "end")
         index_parts = index.split(".")
         line, column = int(index_parts[0]), int(index_parts[1])
-        script = Script(
-            source + ")", line=line, column=column, path=""
-        )  # https://github.com/davidhalter/jedi/issues/897
 
-        return self.get_positions_for_script(script)
+        return self.get_positions_for(source, line, column)
 
     def schedule_update(self):
         def perform_update():
@@ -185,7 +182,7 @@ class VariablesHighlighter(BaseNameHighlighter):
             return ()
         return ()
 
-    def _find_usages(self, name, stmt, module):
+    def _find_usages(self, name, stmt):
         # check if stmt is dot qualified, disregard these
         dot_names = self._get_dot_names(stmt)
         if len(dot_names) > 1 and dot_names[1].value == name.value:
@@ -279,15 +276,16 @@ class VariablesHighlighter(BaseNameHighlighter):
         usages = find_usages_in_node(scope)
         return usages
 
-    def get_positions_for_script(self, script):
-        name = None
-        module_node = jedi_utils.get_module_node(script)
-        stmt = self._get_statement_for_position(module_node, script._pos)
+    def get_positions_for(self, source, line, column):
+        module_node = jedi_utils.parse_source(source)
+        pos = (line, column)
+        stmt = self._get_statement_for_position(module_node, pos)
 
+        name = None
         if isinstance(stmt, tree.Name):
             name = stmt
         elif isinstance(stmt, tree.BaseNode):
-            name = jedi_utils.get_name_of_position(stmt, script._pos)
+            name = jedi_utils.get_name_of_position(stmt, pos)
 
         if not name:
             return set()
@@ -298,7 +296,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1]),
                 "%d.%d" % (usage.start_pos[0], usage.start_pos[1] + len(name.value)),
             )
-            for usage in self._find_usages(name, stmt, module_node)
+            for usage in self._find_usages(name, stmt)
         )
 
 
@@ -308,9 +306,14 @@ class UsagesHighlighter(BaseNameHighlighter):
     assignments to a variable, not really all usages (with Jedi 0.10).
     But it finds attribute usages quite nicely.
     
-    TODO: check if this gets fixed in later versions of Jedi"""
+    TODO: check if this gets fixed in later versions of Jedi
+    
+    NB!!!!!!!!!!!!! newer jedi versions use subprocess and are too slow to run
+    for each keypress"""
 
-    def get_positions_for_script(self, script):
+    def get_positions_for(self, source, line, column):
+        # https://github.com/davidhalter/jedi/issues/897
+        script = Script(source + ")", line=line, column=column, path="")  
         usages = script.usages()
 
         result = {
@@ -326,9 +329,9 @@ class UsagesHighlighter(BaseNameHighlighter):
 
 
 class CombinedHighlighter(VariablesHighlighter, UsagesHighlighter):
-    def get_positions_for_script(self, script):
-        usages = UsagesHighlighter.get_positions_for_script(self, script)
-        variables = VariablesHighlighter.get_positions_for_script(self, script)
+    def get_positions_for(self, source, line, column):
+        usages = UsagesHighlighter.get_positions_for(self, source, line, column)
+        variables = VariablesHighlighter.get_positions_for(self, source, line, column)
         return usages | variables
 
 
