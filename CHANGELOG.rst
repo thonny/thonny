@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.0.5 (2018-10-26)
+==================
+* FIXED #573: "Highlight matching names" and "Highlight local variables" makes editor very slow
+* FIXED #574: Error in outline
+* FIXED #578: resizing local variable pane in debugger causes error
+
 3.0.4 (2018-10-22)
 ==================
 * FIXED #564: In Windows "Highlight local variables" and "Higlight matching names" cause Thonny to load Jedi files
