@@ -288,7 +288,10 @@ class VM:
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
-
+        
+        if not hasattr(module, "__name__"):
+            return module
+        
         # module specific handlers
         for handler in self._import_handlers.get(module.__name__, []):
             try:
