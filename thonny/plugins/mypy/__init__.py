@@ -52,6 +52,11 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             universal_newlines=True,
             env=env,
             on_completion=self._parse_and_output_warnings,
+            # Specify a cwd which is not ancestor of user files. 
+            # This gives absolute filenames in the output. 
+            # Note that mypy doesn't accept when cwd is sys.prefix 
+            # or dirname(sys.executable) 
+            cwd=os.path.dirname(__file__),  
         )
 
     def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
