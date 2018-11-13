@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.0.6 (2018-11-13)
+==================
+* FIXED #538: Turtle programs may give false warnings (Typeshed stubs were not packaged)
+* FIXED #586: Import interception mechanism fails for some modules
+* FIXED #591: Assistant fails when filename is missing from error info
+
 3.0.5 (2018-10-26)
 ==================
 * FIXED #573: "Highlight matching names" and "Highlight local variables" makes editor very slow
