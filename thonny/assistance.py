@@ -158,10 +158,10 @@ class AssistantView(tktextext.TextFrame):
             )
             + "\n"
         )
-
-        if error_info.get("lineno") is not None and os.path.exists(
-            error_info["filename"]
-        ):
+        
+        if (error_info.get("lineno") is not None 
+            and error_info.get("filename")
+            and os.path.exists(error_info["filename"])):
             rst += "`%s, line %d <%s>`__\n\n" % (
                 os.path.basename(error_info["filename"]),
                 error_info["lineno"],
