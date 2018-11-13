@@ -64,6 +64,7 @@ setup(
         "": ["VERSION", "res/*"],
         "thonny.plugins.help": ["*.rst"],
         "thonny.plugins.micropython": ["api_stubs/*.*"],
+        "thonny.plugins.mypy": ["typeshed_extras/*.pyi"],
     },
     entry_points={"gui_scripts": ["thonny = thonny:launch"]},
 )
