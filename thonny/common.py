@@ -143,6 +143,7 @@ class CommandToBackend(Record):
 class ToplevelCommand(CommandToBackend):
     def __init__(self, name: str, argv: List[str] = [], **kw) -> None:
         super().__init__(name, **kw)
+        self.argv = argv
 
 
 class DebuggerCommand(CommandToBackend):
