@@ -8,6 +8,7 @@ import inspect
 import io
 import logging
 import os.path
+import platform
 import pkgutil
 import pydoc
 import signal
@@ -427,7 +428,7 @@ class VM:
             cmd.argv,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=True,
+            shell=platform.system() == "Windows",
             env=env,
             universal_newlines=True,
             encoding="ascii",
