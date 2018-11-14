@@ -2,6 +2,13 @@
 Version history
 ===============
 
+3.0.7 (2018-11-14)
+==================
+* FIXED #592: MyPy doesn't work when cwd == sys.prefix
+* FIXED #593: No-message exceptions crash the Assistant
+* FIXED #595: Running system commands causes an error
+* FIXED #596: Arguments are ignored when running system commands from shell in Posix
+
 3.0.6 (2018-11-13)
 ==================
 * FIXED #538: Turtle programs may give false warnings (Typeshed stubs were not packaged)
