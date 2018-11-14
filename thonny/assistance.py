@@ -131,6 +131,9 @@ class AssistantView(tktextext.TextFrame):
         self._snapshots_per_main_file[key].append(self._current_snapshot)
 
         if msg.get("user_exception"):
+            if not msg["user_exception"].get("message", None):
+                msg["user_exception"]["message"] = "<no message>"
+                
             self._exception_info = msg["user_exception"]
             self._explain_exception(msg["user_exception"])
             if get_workbench().get_option("assistance.open_assistant_on_errors"):
