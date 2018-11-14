@@ -11,10 +11,10 @@ import logging
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):
-    def start_analysis(
-        self, main_file_path, imported_file_paths: Iterable[str]
-    ) -> None:
-
+    def start_analysis(self, main_file_path, imported_file_paths: Iterable[str]) -> None:
+        
+        self.interesting_files = [main_file_path] + list(imported_file_paths)
+        
         args = [
             get_frontend_python(),
             "-m",
@@ -72,6 +72,9 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                     continue  # user will see this as Python error
                 
                 filename = m.group(1)
+                if filename not in self.interesting_files:
+                    logging.getLogger("thonny").warning("MyPy: " + line)
+                    continue
                 
                 atts = {
                     "filename": filename,
