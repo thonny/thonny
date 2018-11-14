@@ -423,17 +423,21 @@ class VM:
     def _cmd_execute_system_command(self, cmd):
         # TODO: how to publish stdout as it arrives?
         env = dict(os.environ).copy()
-        env["PYTHONIOENCODING"] = "ascii"
-        proc = subprocess.Popen(
-            cmd.argv,
+        encoding = "utf-8"
+        env["PYTHONIOENCODING"] = encoding
+        popen_kw = dict(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             shell=platform.system() == "Windows",
             env=env,
             universal_newlines=True,
-            encoding="ascii",
-            errors="backslashreplace",
         )
+        
+        if sys.version_info >= (3,6):
+            popen_kw["errors"] = "backslashreplace"
+            popen_kw["encoding"] = encoding
+            
+        proc = subprocess.Popen(cmd.argv, **popen_kw)
         out, err = proc.communicate(input="")
         print(out, end="")
         print(err, file=sys.stderr, end="")
