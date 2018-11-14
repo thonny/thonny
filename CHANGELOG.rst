@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.0.8 (2018-11-??)
+==================
+* FIXED: Make executing shell commands compatible with Python 3.5
+* FIXED: Make MyPy support compatible with older MyPy versions
+* FIXED: Make turtle.pyi compatible with Python 3.5 and remove Windows linebreaks
+
 3.0.7 (2018-11-14)
 ==================
 * FIXED #592: MyPy doesn't work when cwd == sys.prefix
