@@ -2,11 +2,13 @@
 Version history
 ===============
 
-3.0.8 (2018-11-??)
+3.0.8 (2018-11-15)
 ==================
+* FIXED #597: The directory with Python scripts may not be in path for executing system commands from shell
 * FIXED: Make executing shell commands compatible with Python 3.5
 * FIXED: Make MyPy support compatible with older MyPy versions
 * FIXED: Make turtle.pyi compatible with Python 3.5 and remove Windows linebreaks
+* FIXED: MyPy error col offset
 
 3.0.7 (2018-11-14)
 ==================
