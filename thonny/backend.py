@@ -90,6 +90,7 @@ class VM:
         self._source_info_by_frame = {}
         site.sethelper()  # otherwise help function is not available
         pydoc.pager = pydoc.plainpager  # otherwise help command plays tricks
+        self._tweak_system_path()
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
@@ -286,6 +287,31 @@ class VM:
 
         with open(_CONFIG_FILENAME, "w") as fp:
             self._ini.write(fp)
+    
+    def _tweak_system_path(self):
+        """"allow easy calling of Python scripts """
+        
+        def prepend_if_missing(script_dir):
+            sys_path = os.environ.get("PATH", "")
+            if script_dir not in sys_path.split(os.pathsep):
+                os.environ["PATH"] = script_dir + os.pathsep + sys_path
+                
+        try:
+            if platform.system() == "Windows":
+                base_scripts = sys.prefix + "\\Scripts"
+            else:
+                base_scripts = sys.prefix + "/bin"
+            prepend_if_missing(base_scripts)
+            
+            if platform.system() == "Windows":
+                user_scripts = site.USER_SITE.replace("site-packages", "Scripts")
+            else:
+                user_scripts = site.USER_BASE + "/bin"
+            prepend_if_missing(user_scripts)
+            
+        except Exception:
+            logging.getLogger("thonny").exception("Couldn't tweak system path")
+            pass
 
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
