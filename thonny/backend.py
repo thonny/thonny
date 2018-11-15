@@ -454,7 +454,7 @@ class VM:
         popen_kw = dict(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            shell=platform.system() == "Windows",
+            shell=True,
             env=env,
             universal_newlines=True,
         )
@@ -462,8 +462,10 @@ class VM:
         if sys.version_info >= (3,6):
             popen_kw["errors"] = "backslashreplace"
             popen_kw["encoding"] = encoding
-            
-        proc = subprocess.Popen(cmd.argv, **popen_kw)
+        
+        assert cmd.cmd_line.startswith("!")
+        cmd_line = cmd.cmd_line[1:]
+        proc = subprocess.Popen(cmd_line, **popen_kw)
         out, err = proc.communicate(input="")
         print(out, end="")
         print(err, file=sys.stderr, end="")
