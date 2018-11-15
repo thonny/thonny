@@ -84,7 +84,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                     "group": "warnings",
                 }
                 if m.group(3):
-                    atts["col_offset"] = int(m.group(4))-1
+                    atts["col_offset"] = int(m.group(4))
                     
                 # TODO: add better categorization and explanation
                 atts["symbol"] = "mypy-" + atts["kind"]
