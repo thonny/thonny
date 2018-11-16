@@ -873,7 +873,12 @@ class VM:
 
     def export_value(self, value, max_repr_length=5000):
         self._heap[id(value)] = value
-        rep = repr(value)
+        try:
+            rep = repr(value)
+        except Exception:
+            # See https://bitbucket.org/plas/thonny/issues/584/problem-with-thonnys-back-end-obj-no
+            rep = "??? <repr error>"
+            
         if len(rep) > max_repr_length:
             rep = rep[:max_repr_length] + "…"
 
