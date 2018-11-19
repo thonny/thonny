@@ -1,6 +1,6 @@
 jedi>=0.10
 setuptools>=33.1.1
-pyserial>=3.2.1
+pyserial>=3.1.1
 pylint>=1.6.5
 astroid>=1.4.9
 docutils>=0.13.1
