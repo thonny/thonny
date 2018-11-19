@@ -1489,6 +1489,9 @@ class Workbench(tk.Tk):
 
     def _init_scaling(self) -> None:
         self._default_scaling_factor = self.tk.call("tk", "scaling")
+        if self._default_scaling_factor > 10:
+            # it may be infinity in eg. Fedora
+            self._default_scaling_factor = 1.3
 
         scaling = self.get_option("general.scaling")
         if scaling in ["default", "auto"]:  # auto was used in 2.2b3
