@@ -1505,8 +1505,6 @@ class Workbench(tk.Tk):
 
         self.tk.call("tk", "scaling", self._scaling_factor)
         
-        print("DEFF", self._default_scaling_factor)
-
         if running_on_linux() and scaling not in ["default", "auto"]:
             # update system fonts which are given in pixel sizes
             for name in tk_font.names():
@@ -1516,20 +1514,22 @@ class Workbench(tk.Tk):
                 # should be interpreted as pixel sizes (not affected by "tk scaling")
                 # and positive values are point sizes, which are supposed to scale automatically
                 # http://www.tcl.tk/man/tcl8.6/TkCmd/font.htm#M26
+                
                 # Unfortunately it seems that this cannot be relied on
                 # https://groups.google.com/forum/#!msg/comp.lang.tcl/ZpL6tq77M4M/GXImiV2INRQJ
                 
-                """
-                if orig_size > 0:
-                    # convert point sizes to pixel size
-                    print("converting", f, orig_size) 
-                    orig_size = -orig_size * self._default_scaling_factor
-                """
+                # My experiments show that manually changing negative font sizes 
+                # doesn't have any effect -- fonts keep their default size
+                # (Tested in Raspbian Stretch, Ubuntu 18.04 and Fedora 29)
+                # On the other hand positive sizes scale well (and they don't scale automatically)
+                
+                # convert pixel sizes to point_size
+                if orig_size < 0:
+                    orig_size = -orig_size / self._default_scaling_factor
                 
                 # scale
                 scaled_size = round(orig_size
                         * (self._scaling_factor / self._default_scaling_factor)) 
-                print("SCALING", f, orig_size, scaled_size, f.cget("family"))
                 f.configure(size=scaled_size)
                 
         elif running_on_mac_os() and scaling not in ["default", "auto"]:
