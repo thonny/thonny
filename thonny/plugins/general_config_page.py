@@ -48,7 +48,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         self._scaling_label.grid(
             row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
-        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 2.5, 3.0, 4.0})
+        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
         self._scaling_combo = ttk.Combobox(
             self,
             width=7,

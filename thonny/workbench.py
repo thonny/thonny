@@ -1491,40 +1491,55 @@ class Workbench(tk.Tk):
         self._default_scaling_factor = self.tk.call("tk", "scaling")
         if self._default_scaling_factor > 10:
             # it may be infinity in eg. Fedora
-            self._default_scaling_factor = 1.3
+            self._default_scaling_factor = 1.33
 
         scaling = self.get_option("general.scaling")
         if scaling in ["default", "auto"]:  # auto was used in 2.2b3
             self._scaling_factor = self._default_scaling_factor
         else:
             self._scaling_factor = float(scaling)
-
+        
+        MAC_SCALING_MODIFIER = 1.7
         if running_on_mac_os():
-            self._scaling_factor *= 1.7
+            self._scaling_factor *= MAC_SCALING_MODIFIER
 
         self.tk.call("tk", "scaling", self._scaling_factor)
+        
+        print("DEFF", self._default_scaling_factor)
 
         if running_on_linux() and scaling not in ["default", "auto"]:
             # update system fonts which are given in pixel sizes
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
                 orig_size = f.cget("size")
-                if orig_size < 0:
-                    # meaning its absolute value means height in pixels
-                    f.configure(
-                        size=int(
-                            orig_size
-                            * (self._scaling_factor / self._default_scaling_factor)
-                        )
-                    )
+                # According to do documentation, absolute values of negative font sizes 
+                # should be interpreted as pixel sizes (not affected by "tk scaling")
+                # and positive values are point sizes, which are supposed to scale automatically
+                # http://www.tcl.tk/man/tcl8.6/TkCmd/font.htm#M26
+                # Unfortunately it seems that this cannot be relied on
+                # https://groups.google.com/forum/#!msg/comp.lang.tcl/ZpL6tq77M4M/GXImiV2INRQJ
+                
+                """
+                if orig_size > 0:
+                    # convert point sizes to pixel size
+                    print("converting", f, orig_size) 
+                    orig_size = -orig_size * self._default_scaling_factor
+                """
+                
+                # scale
+                scaled_size = round(orig_size
+                        * (self._scaling_factor / self._default_scaling_factor)) 
+                print("SCALING", f, orig_size, scaled_size, f.cget("family"))
+                f.configure(size=scaled_size)
+                
         elif running_on_mac_os() and scaling not in ["default", "auto"]:
-            # TODO: see http://wiki.tcl.tk/44444
+            # see http://wiki.tcl.tk/44444
             # update system fonts
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
                 orig_size = f.cget("size")
                 assert orig_size > 0
-                f.configure(size=int(orig_size * self._scaling_factor / 1.7))
+                f.configure(size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER))
 
     def update_fonts(self) -> None:
         editor_font_size = self._guard_font_size(

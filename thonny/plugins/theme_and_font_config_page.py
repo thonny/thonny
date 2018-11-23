@@ -155,7 +155,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         get_workbench().update_fonts()
 
     def _get_families_to_show(self):
-        # In Linux, families may contain duplicates
+        # In Linux, families may contain duplicates (actually different fonts get same names)
         return sorted(set(filter(lambda name: name[0].isalpha(), tk_font.families())))
 
 
