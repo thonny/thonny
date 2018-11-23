@@ -202,6 +202,7 @@ class Workbench(tk.Tk):
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
+        self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
 
     def _get_logging_level(self) -> int:
@@ -1505,7 +1506,11 @@ class Workbench(tk.Tk):
 
         self.tk.call("tk", "scaling", self._scaling_factor)
         
-        if running_on_linux() and scaling not in ["default", "auto"]:
+        font_scaling_mode = self.get_option("general.font_scaling_mode")
+        
+        if (running_on_linux() 
+            and font_scaling_mode in ["default", "extra"]
+            and scaling not in ["default", "auto"]):
             # update system fonts which are given in pixel sizes
             for name in tk_font.names():
                 f = tk_font.nametofont(name)

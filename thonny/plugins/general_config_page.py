@@ -60,13 +60,31 @@ class GeneralConfigurationPage(ConfigurationPage):
         )
         self._scaling_combo.grid(row=7, column=1, sticky=tk.W, pady=(10, 0))
 
+
+        self._font_scaling_var = get_workbench().get_variable("general.font_scaling_mode")
+        self._font_scaling_label = ttk.Label(self, text="Font scaling mode")
+        self._font_scaling_label.grid(
+            row=8, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
+        )
+        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
+        self._font_scaling_combo = ttk.Combobox(
+            self,
+            width=10,
+            exportselection=False,
+            textvariable=self._font_scaling_var,
+            state="readonly",
+            height=15,
+            values=["default", "extra", "automatic"],
+        )
+        self._font_scaling_combo.grid(row=8, column=1, sticky=tk.W, pady=(10, 0))
+
         reopen_label = ttk.Label(
             self,
             text="NB! Restart Thonny after changing these options"
             + "\nin order to see the full effect",
             font="BoldTkDefaultFont",
         )
-        reopen_label.grid(row=9, column=0, sticky=tk.W, pady=20, columnspan=2)
+        reopen_label.grid(row=20, column=0, sticky=tk.W, pady=20, columnspan=2)
 
         self.columnconfigure(1, weight=1)
 

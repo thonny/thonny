@@ -4,6 +4,12 @@ Version history
 
 3.0.8 (2018-11-15)
 ==================
+* FIXED #424: Font scaling problems in Linux
+* FIXED #584: Guard against bad repr calls
+* TECHNICAL: Reduced required pyserial version (Fedora only has 3.1) 
+
+3.0.8 (2018-11-15)
+==================
 * FIXED #597: The directory with Python scripts may not be in path for executing system commands from shell
 * FIXED: Make executing shell commands compatible with Python 3.5
 * FIXED: Make MyPy support compatible with older MyPy versions
