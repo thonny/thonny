@@ -289,7 +289,7 @@ class VM:
             self._ini.write(fp)
     
     def _tweak_system_path(self):
-        """"allow easy calling of Python scripts """
+        """Allow easy calling of executables Python script dir """
         
         def prepend_if_missing(script_dir):
             sys_path = os.environ.get("PATH", "")

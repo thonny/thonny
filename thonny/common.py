@@ -3,10 +3,15 @@
 """
 Classes used both by front-end and back-end
 """
+import logging
 import os.path
+import platform
+import site
+import sys
 import tokenize
 from collections import namedtuple
 from typing import List, Optional  # @UnusedImport
+import subprocess
 
 MESSAGE_MARKER = "\x02"
 
@@ -247,6 +252,50 @@ def read_source(filename):
     with tokenize.open(filename) as fp:
         return fp.read()
 
+
+def get_system_path_with_python_dirs(executable):
+            
+    def _add_to_path(directory, path):
+        # Always prepending to path may seem better, but this could mess up other things.
+        # If the directory contains only one Python distribution executables, then
+        # it probably won't be in path yet and therefore will be prepended.
+        if (directory in path.split(os.pathsep)
+            or platform.system() == "Windows"
+            and directory.lower() in path.lower().split(os.pathsep)):
+            return path
+        else:
+            return directory + os.pathsep + path
+    
+    path = os.environ.get("PATH", "")    
+    try:
+        base_scripts = os.path.dirname(executable)
+        if platform.system() == "Windows":
+            base_scripts += "\\Scripts"
+        path = _add_to_path(base_scripts, path)
+        
+        # For user bin directory I'm using sa
+        if platform.system() == "Windows":
+            user_scripts = site.USER_SITE.replace("site-packages", "Scripts")
+        else:
+            user_scripts = site.USER_BASE + "/bin"
+        prepend_if_missing(user_scripts)
+        
+    except Exception:
+        logging.getLogger("thonny").exception("Couldn't tweak system path")
+        pass
+
+def get_site_dir(symbolic_name, executable=None):
+    if not executable or executable == sys.executable:
+        result = getattr(site, symbolic_name, "")
+    else:
+        env = 
+        result = subprocess.check_output(
+            [executable, '-m', 'site', 
+                '--' + symbolic_name.lower().replace("_", "-")],
+            universal_newlines=True
+        ).decode().strip()
+    
+    return result if result else None
 
 class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""
