@@ -23,22 +23,15 @@ def extract_text_range(source, text_range):
 
 
 def find_expression(node, text_range):
-    if (
-        hasattr(node, "lineno")
-        and node.lineno == text_range.lineno
-        and node.col_offset == text_range.col_offset
-        and node.end_lineno == text_range.end_lineno
-        and node.end_col_offset == text_range.end_col_offset
-        # expression and Expr statement can have same range
-        and isinstance(node, _ast.expr)
-    ):
-        return node
-    else:
-        for child in ast.iter_child_nodes(node):
-            result = find_expression(child, text_range)
-            if result is not None:
-                return result
-        return None
+    for node in ast.walk(node):
+        if (
+            isinstance(node, ast.expr)
+            and node.lineno == text_range.lineno
+            and node.col_offset == text_range.col_offset
+            and node.end_lineno == text_range.end_lineno
+            and node.end_col_offset == text_range.end_col_offset
+        ):
+            return node
 
 
 def parse_source(source: bytes, filename="<unknown>", mode="exec"):
