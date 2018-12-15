@@ -2,7 +2,6 @@
 
 import ast
 import sys
-import _ast
 
 from asttokens import ASTTokens
 
