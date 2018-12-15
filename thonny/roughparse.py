@@ -330,8 +330,11 @@ class RoughParser:
                         lno = lno + 1
                         if w == 0:
                             # unterminated single-quoted string
-                            if level == 0:
-                                push_good(lno)
+                            # It doesn't matter if we're in brackets,
+                            # this should lead to
+                            # SyntaxError: EOL while scanning string literal
+                            level = 0
+                            push_good(lno)
                             break
                         continue
 
