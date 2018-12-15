@@ -49,14 +49,6 @@ def contains_node(parent_node, child_node):
     return False
 
 
-def has_parent_with_class(target_node, parent_class, tree):
-    for node in ast.walk(tree):
-        if isinstance(node, parent_class) and contains_node(node, target_node):
-            return True
-
-    return False
-
-
 def parse_source(source: bytes, filename="<unknown>", mode="exec"):
     root = ast.parse(source, filename, mode)
     mark_text_ranges(root, source)
