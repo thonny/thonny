@@ -63,60 +63,40 @@ def parse_source(source: bytes, filename="<unknown>", mode="exec"):
     return root
 
 
-def get_last_child(node, skip_incorrect=True):
-    def ok_node(node):
-        if node is None:
-            return None
-
-        if skip_incorrect and getattr(node, "incorrect_range", False):
-            return None
-
-        return node
-
+def get_last_child(node):
     def last_ok(nodes):
-        for i in range(len(nodes) - 1, -1, -1):
-            if ok_node(nodes[i]):
-                node = nodes[i]
-                if isinstance(node, ast.Starred):
-                    if ok_node(node.value):
-                        return node.value
-                    else:
-                        return None
-                else:
-                    return nodes[i]
-
-        return None
+        if not nodes:
+            return None
+        node = nodes[-1]
+        if isinstance(node, ast.Starred):
+            return node.value
+        else:
+            return node
 
     if isinstance(node, ast.Call):
         # TODO: take care of Python 3.5 updates (Starred etc.)
-        if hasattr(node, "kwargs") and ok_node(node.kwargs):
+        if hasattr(node, "kwargs"):
             return node.kwargs
-        elif hasattr(node, "starargs") and ok_node(node.starargs):
+        elif hasattr(node, "starargs"):
             return node.starargs
+        elif node.keywords:
+            return node.keywords[-1].value
+        elif node.args:
+            return node.args[-1]
         else:
-            kw_values = list(map(lambda x: x.value, node.keywords))
-            last_ok_kw = last_ok(kw_values)
-            if last_ok_kw:
-                return last_ok_kw
-            elif last_ok(node.args):
-                return last_ok(node.args)
-            else:
-                return ok_node(node.func)
+            return node.func
 
     elif isinstance(node, ast.BoolOp):
         return last_ok(node.values)
 
     elif isinstance(node, ast.BinOp):
-        if ok_node(node.right):
-            return node.right
-        else:
-            return ok_node(node.left)
+        return node.right
 
     elif isinstance(node, ast.Compare):
         return last_ok(node.comparators)
 
     elif isinstance(node, ast.UnaryOp):
-        return ok_node(node.operand)
+        return node.operand
 
     elif isinstance(node, (ast.Tuple, ast.List, ast.Set)):
         return last_ok(node.elts)
@@ -126,24 +106,18 @@ def get_last_child(node, skip_incorrect=True):
         return last_ok(node.values)
 
     elif isinstance(
-        node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)
+        node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom, ast.Expr)
     ):
-        return ok_node(node.value)
+        return node.value
 
     elif isinstance(node, ast.Delete):
         return last_ok(node.targets)
 
-    elif isinstance(node, ast.Expr):
-        return ok_node(node.value)
-
     elif isinstance(node, ast.Assert):
-        if ok_node(node.msg):
-            return node.msg
-        else:
-            return ok_node(node.test)
+        return node.msg or node.test
 
     elif isinstance(node, ast.Subscript):
-        if hasattr(node.slice, "value") and ok_node(node.slice.value):
+        if hasattr(node.slice, "value"):
             return node.slice.value
         else:
             assert (
@@ -152,12 +126,7 @@ def get_last_child(node, skip_incorrect=True):
                 and hasattr(node.slice, "step")
             )
 
-            if ok_node(node.slice.step):
-                return node.slice.step
-            elif ok_node(node.slice.upper):
-                return node.slice.upper
-            else:
-                return ok_node(node.slice.lower)
+            return node.slice.step or node.slice.upper or node.slice.lower
 
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True  # There is last child, but I don't know which it will be
