@@ -288,7 +288,6 @@ def get_site_dir(symbolic_name, executable=None):
     if not executable or executable == sys.executable:
         result = getattr(site, symbolic_name, "")
     else:
-        env = 
         result = subprocess.check_output(
             [executable, '-m', 'site', 
                 '--' + symbolic_name.lower().replace("_", "-")],
