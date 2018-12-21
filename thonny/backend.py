@@ -2175,6 +2175,7 @@ class NiceTracer(Tracer):
     def _should_instrument_as_expression(self, node):
         return (
             isinstance(node, _ast.expr)
+            and not getattr(node, "incorrect_range", False)
             and "ignore" not in node.tags
             and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))
             # TODO: repeatedly evaluated subexpressions of comprehensions
@@ -2189,6 +2190,7 @@ class NiceTracer(Tracer):
     def _should_instrument_as_statement(self, node):
         return (
             isinstance(node, _ast.stmt)
+            and not getattr(node, "incorrect_range", False)
             and "ignore" not in node.tags
             # Shouldn't insert anything before from __future__ import
             # as this is not a normal statement
