@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>%title%</title>
+<style>
+
+@page {
+    margin-top: 1cm;
+    margin-bottom: 1cm;
+    margin-left: 0.5cm;
+    margin-right: 0.5cm;
+}
+
+pre {
+    counter-reset: line;
+}
+code {
+    counter-increment: line;
+	padding-left: 1em;    
+}
+code:before {
+	color: gray;
+    content: counter(line);
+    padding-right: 0.5em;
+    margin-right: 0.5em;
+    border-right: solid gray 1px;
+    display: inline-block;
+    text-align: right;
+    width: 1.5em;
+    font-style: italic;
+    -webkit-user-select: none;
+}
+
+.keyword {
+	font-weight: bold;
+	color: #7f0055;
+}
+
+.builtin {
+	color: #7f0055
+}
+
+.number {
+	color: #B04600;
+}
+
+.definition {
+	font-weight: bold;
+	color: darkblue;
+}
+
+.local_name {
+	font-style: italic;
+}
+
+.comment {
+	color: gray;
+}
+
+.string, .string3, .open_string, .open_string3 {
+	color: DarkGreen;
+}
+
+.open_string, .open_string3 {
+	background-color: #c3f9d3;
+}
+
+.unclosed_expression {
+	background-color: LightGray;
+}
+</style>
+</head>
+
+<body>
+<pre>
+%script%
+</pre>
+<script>window.print()</script>
+</body>
+</html>
