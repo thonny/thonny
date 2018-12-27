@@ -103,25 +103,13 @@ class VM:
         # clean up path
         sys.path = [d for d in sys.path if d != ""]
 
-        # script mode
-        if len(sys.argv) > 1:
-            special_names_to_remove = set()
-            sys.argv[:] = sys.argv[1:]  # shift argv[1] to position of script name
-            sys.path.insert(
-                0, os.path.abspath(os.path.dirname(sys.argv[0]))
-            )  # add program's dir
-            __main__.__dict__["__file__"] = sys.argv[0]
-            # TODO: inspect.getdoc
-
-        # shell mode
-        else:
-            special_names_to_remove = {"__file__", "__cached__"}
-            sys.argv[:] = [""]  # empty "script name"
-            sys.path.insert(0, "")  # current dir
-
+        # start in shell mode
+        sys.argv[:] = [""]  # empty "script name"
+        sys.path.insert(0, "")  # current dir
+        
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
-            if not key.startswith("__") or key in special_names_to_remove:
+            if not key.startswith("__") or key in {"__file__", "__cached__"}:
                 del __main__.__dict__[key]
 
         # unset __doc__, then exec dares to write doc of the script there
@@ -265,7 +253,17 @@ class VM:
             value = repr(value)
         ini.set(section, subname, value)
         self.save_settings()
-
+    
+    def _switch_env_to_script_mode(self, cmd):
+        if "" in sys.path:
+            sys.path.remove("") # current directory
+            
+        filename = cmd.args[0]
+        if os.path.isfile(filename):
+            sys.path.insert(0, os.path.abspath(os.path.dirname(filename))) 
+            __main__.__dict__["__file__"] = filename
+        
+    
     def _parse_option_name(self, name):
         if "." in name:
             return name.split(".", 1)
@@ -396,15 +394,18 @@ class VM:
             raise UserError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
+        self._switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, SimpleRunner)
 
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
 
     def _cmd_FastDebug(self, cmd):
+        self._switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, FastTracer)
 
     def _cmd_Debug(self, cmd):
+        self._switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, NiceTracer)
 
     def _cmd_debug(self, cmd):
@@ -802,7 +803,7 @@ class VM:
         # TODO: are they?
 
         if len(cmd.args) >= 1:
-            sys.argv = cmd.args  # TODO: duplicate????????????????????
+            sys.argv = cmd.args  
             filename = cmd.args[0]
             if os.path.isabs(filename):
                 full_filename = filename
