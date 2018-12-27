@@ -3,6 +3,7 @@ encoding//stuff/print_tracer.py=utf-8
 encoding//stuff/simplegui.py=utf-8
 encoding//stuff/stylekatse.py=utf-8
 encoding//thonny/ast_utils.py=utf-8
+encoding//thonny/ast_utils_old_range_marker.py=utf-8
 encoding//thonny/backend.py=utf-8
 encoding//thonny/backend_launcher.py=utf-8
 encoding//thonny/code.py=utf-8

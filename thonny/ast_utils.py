@@ -2,9 +2,7 @@
 
 import ast
 import sys
-
-from asttokens import ASTTokens
-
+import logging
 
 def extract_text_range(source, text_range):
     if isinstance(source, bytes):
@@ -158,7 +156,18 @@ def mark_text_ranges(node, source: bytes):
     Function adds recursively attributes end_lineno and end_col_offset to each node
     which has attributes lineno and col_offset.
     """
+    try:
+        from asttokens import ASTTokens
+    except ImportError:
+        # asttokens may be missing in some configurations
+        from thonny.ast_utils_old_range_marker import old_mark_text_ranges
+        logger = logging.getLogger("thonny")
+        if not getattr(logger, "old_astutils_warned", False):
+            logger.warn("asttokens not found, using deprecated alternative")
+            logger.old_astutils_warned = True
+        return old_mark_text_ranges(node, source)
 
+    
     ASTTokens(source.decode('utf8'), tree=node)
     for child in ast.walk(node):
         if hasattr(child, 'last_token'):
