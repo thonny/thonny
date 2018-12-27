@@ -6,4 +6,4 @@ astroid>=1.4.9
 docutils>=0.13.1
 mypy>=0.470
 pyperclip>=1.5.27
-asttokens>=1.1.13
+asttokens>=1.1.10
