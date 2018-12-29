@@ -1,11 +1,6 @@
 import os
 import ast
-from thonny.backend import VM, get_vm
-
-def patched_execute_file(self, cmd, executor_class):
-    import pgzrun
-    self._original_execute_file(cmd, executor_class)
-    pgzrun.go()
+from thonny.backend import get_vm
 
 def augment_ast(root):
     # prepend "import pgzrun as __pgzrun"
@@ -37,6 +32,4 @@ def augment_ast(root):
 def load_plugin():
     if os.environ.get("PGZERO_MODE", "False").lower() == "true":
         get_vm().add_ast_postprocessor(augment_ast)
-        VM._original_execute_file = VM._execute_file
-        #VM._execute_file = patched_execute_file
         
