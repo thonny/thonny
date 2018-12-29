@@ -83,6 +83,7 @@ class VM:
         self._command_handlers = {}
         self._object_info_tweakers = []
         self._import_handlers = {}
+        self._ast_postprocessors = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = (
             {}
@@ -178,7 +179,10 @@ class VM:
         if module_name not in self._import_handlers:
             self._import_handlers[module_name] = []
         self._import_handlers[module_name].append(handler)
-
+    
+    def add_ast_postprocessor(self, func):
+        self._ast_postprocessors.append(func)
+    
     def get_main_module(self):
         return __main__
 
@@ -814,19 +818,21 @@ class VM:
                 source = fp.read()
 
             result_attributes = self._execute_source(
-                source, full_filename, "exec", executor_class, cmd
+                source, full_filename, "exec", executor_class, cmd,
+                self._ast_postprocessors
             )
             result_attributes["filename"] = full_filename
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
             raise UserError("Command '%s' takes at least one argument" % cmd.name)
 
-    def _execute_source(self, source, filename, execution_mode, executor_class, cmd):
+    def _execute_source(self, source, filename, execution_mode, executor_class,
+                        cmd, ast_postprocessors=[]):
         self._current_executor = executor_class(self, cmd)
 
         try:
             return self._current_executor.execute_source(
-                source, filename, execution_mode
+                source, filename, execution_mode, ast_postprocessors
             )
         finally:
             self._current_executor = None
@@ -1117,7 +1123,7 @@ class Executor:
         self._original_cmd = original_cmd
         self._main_module_path = None
 
-    def execute_source(self, source, filename, mode):
+    def execute_source(self, source, filename, mode, ast_postprocessors):
         if isinstance(source, str):
             # TODO: simplify this or make sure encoding is correct
             source = source.encode("utf-8")
@@ -1129,6 +1135,7 @@ class Executor:
 
         try:
             if mode == "exec+eval":
+                assert not ast_postprocessors 
                 # Useful in shell to get last expression value in multi-statement block
                 root = self._prepare_ast(source, filename, "exec")
                 statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
@@ -1140,10 +1147,14 @@ class Executor:
                 )
             else:
                 root = self._prepare_ast(source, filename, mode)
-                bytecode = compile(root, filename, mode)
                 if mode == "eval":
+                    assert not ast_postprocessors 
+                    bytecode = compile(root, filename, mode)
                     return self._prepare_hooks_and_execute(None, bytecode, global_vars)
                 elif mode == "exec":
+                    for func in ast_postprocessors:
+                        func(root)
+                    bytecode = compile(root, filename, mode)
                     return self._prepare_hooks_and_execute(bytecode, None, global_vars)
                 else:
                     raise ValueError("Unknown mode")
