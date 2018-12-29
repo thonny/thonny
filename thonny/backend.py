@@ -1263,6 +1263,7 @@ class Tracer(Executor):
             and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
             or "importlib._bootstrap" in code.co_filename
             or self._vm.is_doing_io()
+            or path_startswith(code.co_filename, self._thonny_src_dir)
         )
 
     def _is_interesting_module_file(self, path):
@@ -1435,12 +1436,6 @@ class FastTracer(Tracer):
         filename = frame.f_code.co_filename
         return filename in breakpoints and frame.f_lineno in breakpoints[filename]
 
-    def _should_skip_frame(self, frame):
-        code = frame.f_code
-        return super()._should_skip_frame(frame) or code.co_filename.startswith(
-            self._thonny_src_dir
-        )
-
     def _frame_is_alive(self, frame_id):
         return frame_id in self._alive_frame_ids
 
@@ -1497,7 +1492,6 @@ class NiceTracer(Tracer):
             and (
                 super()._should_skip_frame(frame)
                 or code.co_filename not in self._instrumented_files
-                or path_startswith(code.co_filename, self._thonny_src_dir)
             )
         )
 
