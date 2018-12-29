@@ -917,7 +917,7 @@ class VM:
     def is_doing_io(self):
         return self._io_level > 0
 
-    def _export_stack(self, newest_frame):
+    def _export_stack(self, newest_frame, skip_checker=None):
         result = []
 
         system_frame = newest_frame
@@ -925,39 +925,40 @@ class VM:
         while system_frame is not None:
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
-
-            source, firstlineno, in_library = self._get_frame_source_info(system_frame)
-
-            result.insert(
-                0,
-                FrameInfo(
-                    # TODO: can this id be reused by a later frame?
-                    # Need to store the refernce to avoid GC?
-                    # I guess it is not required, as id will be required
-                    # only for stacktrace inspection, and sys.last_exception
-                    # will have the reference anyway
-                    # (NiceTracer has its own reference keeping)
-                    id=id(system_frame),
-                    filename=system_frame.f_code.co_filename,
-                    module_name=module_name,
-                    code_name=code_name,
-                    locals=self.export_variables(system_frame.f_locals),
-                    globals=self.export_variables(system_frame.f_globals),
-                    freevars=system_frame.f_code.co_freevars,
-                    source=source,
-                    lineno=system_frame.f_lineno,
-                    firstlineno=firstlineno,
-                    in_library=in_library,
-                    event="line",
-                    focus=TextRange(
-                        system_frame.f_lineno, 0, system_frame.f_lineno + 1, 0
+            
+            if not skip_checker or not skip_checker(system_frame):
+                source, firstlineno, in_library = self._get_frame_source_info(system_frame)
+    
+                result.insert(
+                    0,
+                    FrameInfo(
+                        # TODO: can this id be reused by a later frame?
+                        # Need to store the refernce to avoid GC?
+                        # I guess it is not required, as id will be required
+                        # only for stacktrace inspection, and sys.last_exception
+                        # will have the reference anyway
+                        # (NiceTracer has its own reference keeping)
+                        id=id(system_frame),
+                        filename=system_frame.f_code.co_filename,
+                        module_name=module_name,
+                        code_name=code_name,
+                        locals=self.export_variables(system_frame.f_locals),
+                        globals=self.export_variables(system_frame.f_globals),
+                        freevars=system_frame.f_code.co_freevars,
+                        source=source,
+                        lineno=system_frame.f_lineno,
+                        firstlineno=firstlineno,
+                        in_library=in_library,
+                        event="line",
+                        focus=TextRange(
+                            system_frame.f_lineno, 0, system_frame.f_lineno + 1, 0
+                        ),
+                        node_tags=None,
+                        current_statement=None,
+                        current_evaluations=None,
+                        current_root_expression=None,
                     ),
-                    node_tags=None,
-                    current_statement=None,
-                    current_evaluations=None,
-                    current_root_expression=None,
-                ),
-            )
+                )
 
             if module_name == "__main__" and code_name == "<module>":
                 # this was last frame relevant to the user
@@ -1395,7 +1396,7 @@ class FastTracer(Tracer):
 
     def _report_current_state(self, frame):
         msg = DebuggerResponse(
-            stack=self._vm._export_stack(frame),
+            stack=self._vm._export_stack(frame, self._should_skip_frame),
             in_present=True,
             io_symbol_count=None,
             exception_info=self._export_exception_info(),
@@ -1487,8 +1488,8 @@ class NiceTracer(Tracer):
     def _should_skip_frame(self, frame):
         code = frame.f_code
         return (
-            code.co_name
-            not in self.marker_function_names  # never skip marker functions
+            # never skip marker functions
+            code.co_name not in self.marker_function_names  
             and (
                 super()._should_skip_frame(frame)
                 or code.co_filename not in self._instrumented_files
