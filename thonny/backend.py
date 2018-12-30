@@ -25,7 +25,6 @@ from importlib.machinery import PathFinder, SourceFileLoader
 import __main__  # @UnresolvedImport
 import _ast
 import thonny
-from thonny import ast_utils
 from thonny.common import (
     BackendEvent,
     DebuggerCommand,
@@ -338,7 +337,7 @@ class VM:
         return module
 
     def _load_shared_modules(self, frontend_sys_path):
-        for name in ["parso", "jedi", "thonnycontrib"]:
+        for name in ["parso", "jedi", "thonnycontrib", "six", "asttokens"]:
             load_module_from_alternative_path(name, frontend_sys_path)
 
     def _load_plugins(self):
@@ -1474,6 +1473,9 @@ class NiceTracer(Tracer):
                 setattr(builtins, name, getattr(self, name))
 
     def _prepare_ast(self, source, filename, mode):
+        # ast_utils need to be imported after asttokens 
+        # is (custom-)imported 
+        from thonny import ast_utils
         root = ast.parse(source, filename, mode)
 
         ast_utils.mark_text_ranges(root, source)
@@ -2022,7 +2024,10 @@ class NiceTracer(Tracer):
 
     def _tag_nodes(self, root):
         """Marks interesting properties of AST nodes"""
-
+        # ast_utils need to be imported after asttokens 
+        # is (custom-)imported 
+        from thonny import ast_utils
+        
         def add_tag(node, tag):
             if not hasattr(node, "tags"):
                 node.tags = set()
