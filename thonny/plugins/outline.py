@@ -50,7 +50,7 @@ class OutlineView(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         # init tree events
-        self.tree.bind("<Double-Button-1>", self._on_double_click, "+")
+        self.tree.bind("<<TreeviewSelect>>", self._on_select, True)
 
         # configure the only tree column
         self.tree.column("#0", anchor=tk.W, stretch=True)
@@ -133,8 +133,7 @@ class OutlineView(ttk.Frame):
         for child_id in self.tree.get_children():
             self.tree.delete(child_id)
 
-    # called when a double-click is performed on any items
-    def _on_double_click(self, event):
+    def _on_select(self, event):
         editor = get_workbench().get_editor_notebook().get_current_editor()
         if editor:
             code_view = editor.get_code_view()
