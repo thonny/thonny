@@ -60,6 +60,10 @@ rm -rf $PYTHON_CURRENT/share
 rm -rf $PYTHON_CURRENT/lib/python3.7/test
 rm -rf $PYTHON_CURRENT/lib/python3.7/idlelib
 
+
+rm -rf $PYTHON_CURRENT/lib/python3.7/site-packages/pylint/test
+rm -rf $PYTHON_CURRENT/lib/python3.7/site-packages/mypy/test
+
 # clear bin because its scripts have absolute paths
 mv $PYTHON_CURRENT/bin/python3.7 $SCRIPT_DIR # save python exe
 rm -rf $PYTHON_CURRENT/bin/*

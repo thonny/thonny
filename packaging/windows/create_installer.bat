@@ -55,6 +55,9 @@ rmdir %BUILDDIR%\tcl\tcl8.6\opt0.4 /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\msgs /S /Q>NUL
 rmdir %BUILDDIR%\tcl\tcl8.6\tzdata /S /Q>NUL
 
+rmdir %BUILDDIR%\lib\site-packages\pylint\test /S /Q>NUL
+rmdir %BUILDDIR%\lib\site-packages\mypy\test /S /Q>NUL
+
 
 @echo ............... ADDING LICENSES ...................................
 copy ..\..\LICENSE.txt %BUILDDIR% /Y>NUL

@@ -63,6 +63,10 @@ rm -rf $TARGET_DIR/lib/python3.7/distutils/command/*.exe
 #rm -rf $TARGET_DIR/lib/python3.7/site-packages/pip*
 #rm -rf $TARGET_DIR/lib/python3.7/site-packages/setuptools*
 
+rm -rf $TARGET_DIR/lib/python3.7/site-packages/pylint/test
+rm -rf $TARGET_DIR/lib/python3.7/site-packages/mypy/test
+
+
 # clear most of the include folder ##################################################
 rm -rf $TARGET_DIR/include/lzma
 rm -rf $TARGET_DIR/include/*.h
