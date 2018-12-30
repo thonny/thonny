@@ -4,13 +4,16 @@ import subprocess
 import sys
 from typing import Iterable
 
-from thonny import get_runner, ui_utils
+from thonny import get_runner, ui_utils, get_workbench
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_frontend_python
 import logging
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):
+    def is_enabled(self):
+        return get_workbench().get_option("assistance.use_mypy")
+    
     def start_analysis(self, main_file_path, imported_file_paths: Iterable[str]) -> None:
         
         self.interesting_files = [main_file_path] + list(imported_file_paths)
@@ -98,3 +101,4 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
 def load_plugin():
     add_program_analyzer(MyPyAnalyzer)
+    get_workbench().set_default("assistance.use_mypy", True)

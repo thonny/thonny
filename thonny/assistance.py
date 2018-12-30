@@ -260,9 +260,12 @@ class AssistantView(tktextext.TextFrame):
 
         for cls in _program_analyzer_classes:
             analyzer = cls(self._accept_warnings)
-            analyzer.start_analysis(main_file_path, imported_file_paths)
-            self._analyzer_instances.append(analyzer)
-
+            if analyzer.is_enabled():
+                self._analyzer_instances.append(analyzer)
+        
+        if not self._analyzer_instances:
+            return
+        
         self._append_text("\nAnalyzing your code ...", ("em",))
 
         # save snapshot of current source
@@ -271,11 +274,16 @@ class AssistantView(tktextext.TextFrame):
         self._current_snapshot["imported_files"] = {
             name: read_source(name) for name in imported_file_paths
         }
+        
+        # start the analysis
+        for analyzer in self._analyzer_instances:
+            analyzer.start_analysis(main_file_path, imported_file_paths)
+
 
     def _accept_warnings(self, analyzer, warnings):
         if analyzer.cancelled:
             return
-
+        
         self._accepted_warning_sets.append(warnings)
         if len(self._accepted_warning_sets) == len(self._analyzer_instances):
             self._present_warnings()
@@ -512,6 +520,9 @@ class ProgramAnalyzer:
         self.completion_handler = on_completion
         self.cancelled = False
 
+    def is_enabled(self):
+        return True
+    
     def start_analysis(self, main_file_path, imported_file_paths):
         raise NotImplementedError()
 

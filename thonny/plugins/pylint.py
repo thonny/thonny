@@ -8,6 +8,9 @@ import logging
 
 
 class PylintAnalyzer(SubprocessProgramAnalyzer):
+    def is_enabled(self):
+        return get_workbench().get_option("assistance.use_pylint")
+    
     def start_analysis(self, main_file_path, imported_file_paths):
         relevant_symbols = {
             key
@@ -3134,3 +3137,4 @@ all_checks_by_symbol = {c["msg_sym"]: c for c in all_checks}
 
 def load_plugin():
     add_program_analyzer(PylintAnalyzer)
+    get_workbench().set_default("assistance.use_pylint", True)

@@ -21,11 +21,25 @@ class AssistantConfigPage(ConfigurationPage):
             "Open Assistant automatically when it has warnings for your code",
             row=2,
         )
+        
+        if get_workbench().get_option("assistance.use_pylint", "missing") != "missing":
+            self.add_checkbox(
+                "assistance.use_pylint",
+                "Perform selected Pylint checks",
+                row=3,
+            )
+
+        if get_workbench().get_option("assistance.use_mypy", "missing") != "missing":
+            self.add_checkbox(
+                "assistance.use_mypy",
+                "Perform MyPy checks",
+                row=4,
+            )
 
         disabled_checks_label = ttk.Label(
             self, text="Disabled checks (one id per line)"
         )
-        disabled_checks_label.grid(row=3, sticky="nw", pady=(10, 0))
+        disabled_checks_label.grid(row=8, sticky="nw", pady=(10, 0))
 
         self.disabled_checks_box = TextFrame(
             self,
@@ -41,13 +55,13 @@ class AssistantConfigPage(ConfigurationPage):
             borderwidth=1,
             relief="groove",
         )
-        self.disabled_checks_box.grid(row=4, sticky="nsew", pady=(0, 10))
+        self.disabled_checks_box.grid(row=9, sticky="nsew", pady=(0, 10))
         self.disabled_checks_box.text.insert(
             "1.0", "\n".join(get_workbench().get_option("assistance.disabled_checks"))
         )
 
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(4, weight=1)
+        self.rowconfigure(9, weight=1)
 
     def apply(self):
         disabled_checks_str = (
