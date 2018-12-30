@@ -628,6 +628,9 @@ class EnhancedText(TweakableText):
         self.edit_separator()
 
     def _on_paste(self, e):
+        if self.is_read_only():
+            return
+        
         try:
             if self.has_selection():
                 self.direct_delete("sel.first", "sel.last")
