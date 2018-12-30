@@ -104,7 +104,8 @@ class Completer(tk.Listbox):
 
     def _show_box(self, completions):
         self.delete(0, self.size())
-        self.insert(0, *[c["name"] for c in completions])
+        self.insert(0, *[c["name"] + ("=" if c["complete"].endswith("=") else "") 
+                         for c in completions])
         self.activate(0)
         self.selection_set(0)
 
@@ -160,7 +161,7 @@ class Completer(tk.Listbox):
         return self.winfo_ismapped()
 
     def _insert_completion(self, completion):
-        typed_len = len(completion["name"]) - len(completion["complete"])
+        typed_len = len(completion["name"]) - len(completion["complete"].strip("="))
         typed_prefix = self.text.get("insert-{}c".format(typed_len), "insert")
         get_workbench().event_generate(
             "AutocompleteInsertion",
