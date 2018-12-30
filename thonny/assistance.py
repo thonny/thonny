@@ -189,7 +189,7 @@ class AssistantView(tktextext.TextFrame):
             rst += (
                 ".. note::\n"
                 + "    "
-                + best_intro.intro_text.strip().replace("\n\n", "\n\n    ")
+                + best_intro.intro_text.strip().replace("\n", "\n\n    ")
                 + "\n\n"
             )
 
