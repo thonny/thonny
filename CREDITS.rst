@@ -30,6 +30,8 @@ Source contributors and frequent bug-reporters
 ----------------------------------------------
 * Aivar Annamaa
 * Alar Leemet
+* Alex Hall
+* Austin Bart
 * cefn
 * Filip Schouwenaars
 * Fizban
