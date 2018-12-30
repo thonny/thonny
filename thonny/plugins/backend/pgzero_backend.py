@@ -1,7 +1,7 @@
 import os
 import ast
 import sys
-from thonny.backend import get_vm
+from thonny.backend import VM, get_vm
 
 def augment_ast(root):
     warning_prelude = "WARNING: Pygame Zero mode is turned on (Run → Pygame Zero mode)"
@@ -48,8 +48,21 @@ def augment_ast(root):
     ast.fix_missing_locations(go)
     go.tags = {"ignore"}
     root.body.append(go)
+
+def patched_editor_autocomplete(self, cmd):
+    # Make extra builtins visible for Jedi
+    prefix = "from pgzero.builtins import *\n"
+    cmd["source"] = prefix + cmd["source"]
+    cmd["row"] = cmd["row"] + 1
     
+    result = get_vm()._original_editor_autocomplete(cmd)
+    result["row"] = result["row"] - 1
+    result["source"] = result["source"][len(prefix):]
+     
+    return result
+
 def load_plugin():
     if os.environ.get("PGZERO_MODE", "False").lower() == "true":
         get_vm().add_ast_postprocessor(augment_ast)
-        
+        VM._original_editor_autocomplete = VM._cmd_editor_autocomplete
+        VM._cmd_editor_autocomplete = patched_editor_autocomplete
