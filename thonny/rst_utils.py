@@ -7,6 +7,7 @@ import docutils.nodes
 from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.tktextext import TweakableText
+import traceback
 
 
 class RstText(TweakableText):
@@ -110,8 +111,12 @@ class RstText(TweakableText):
         self.append_rst(rst_source, global_tags)
 
     def append_rst(self, rst_source, global_tags=()):
-        doc = docutils.core.publish_doctree(rst_source)
-        doc.walkabout(self.create_visitor(doc, global_tags))
+        try:
+            doc = docutils.core.publish_doctree(rst_source)
+            doc.walkabout(self.create_visitor(doc, global_tags))
+        except Exception:
+            self.direct_insert("end", "RST SOURCE:\n" + rst_source + "\n\n")
+            self.direct_insert("end", traceback.format_exc())
 
         # For debugging:
         # self.direct_insert("end", doc.pformat())
