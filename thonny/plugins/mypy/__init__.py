@@ -101,4 +101,4 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
 def load_plugin():
     add_program_analyzer(MyPyAnalyzer)
-    get_workbench().set_default("assistance.use_mypy", True)
+    get_workbench().set_default("assistance.use_mypy", False)
