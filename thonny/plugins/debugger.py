@@ -1019,7 +1019,7 @@ def _start_debug_enabled():
     return (
         _current_debugger is None
         and get_workbench().get_editor_notebook().get_current_editor() is not None
-        and "debug" in get_runner().supported_features()
+        and "debug" in get_runner().get_supported_features()
     )
 
 

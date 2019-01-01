@@ -221,6 +221,7 @@ def load_plugin() -> None:
         "tools",
         "Open system shell...",
         open_system_shell_for_selected_interpreter,
-        tester=lambda: "system_shell" in get_runner().supported_features(),
+        tester=lambda: "system_shell" in get_runner().get_supported_features(),
         group=80,
+        image="terminal"
     )

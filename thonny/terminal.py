@@ -4,9 +4,11 @@ import shlex
 import shutil
 import subprocess
 
-def run_script_in_terminal(script_path, system_path=None, env=None, interactive=True):
-    pass
-
+def run_in_terminal(cmd, system_path=None, cwd, env=None):
+    if platform.system() == "Windows":
+        subprocess.Popen(cmd, 
+                         creationflags=subprocess.CREATE_NEW_CONSOLE,
+                         cwd=cwd)
 
 def _add_to_path(directory, path):
     # Always prepending to path may seem better, but this could mess up other things.

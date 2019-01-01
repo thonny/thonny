@@ -1180,7 +1180,7 @@ def load_plugin() -> None:
         ui_utils.show_dialog(pg)
 
     def open_backend_pip_gui_enabled():
-        return "pip_gui" in get_runner().supported_features()
+        return "pip_gui" in get_runner().get_supported_features()
 
     def open_frontend_pip_gui(*args):
         pg = PluginsPipDialog(get_workbench())

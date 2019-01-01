@@ -27,7 +27,7 @@ def load_plugin():
         "Dock user windows",
         toggle_variable,
         flag_name=_OPTION_NAME,
-        group=35,
+        group=40,
     )
     update_environment()
 

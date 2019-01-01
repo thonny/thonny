@@ -51,6 +51,7 @@ from thonny.common import (
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
+from thonny.terminal import run_in_terminal
 
 
 WINDOWS_EXE = "python.exe"
@@ -81,6 +82,8 @@ class Runner:
         self._remove_obsolete_jedi_copies()
 
     def _init_commands(self) -> None:
+        get_workbench().set_default("run.run_in_terminal_repl", False)
+        
         get_workbench().add_command(
             "run_current_script",
             "run",
@@ -92,6 +95,19 @@ class Runner:
             group=10,
             image="run-current-script",
             include_in_toolbar=True,
+        )
+
+        get_workbench().add_command(
+            "run_current_script_in_terminal",
+            "run",
+            "Run current script in terminal",
+            caption="RunT",
+            handler=self._cmd_run_current_script_in_terminal,
+            default_sequence="<Control-t>",
+            extra_sequences=["<<CtrlTInText>>"],
+            tester=self._cmd_run_current_script_in_terminal_enabled,
+            group=35,
+            image="terminal",
         )
 
         get_workbench().add_command(
@@ -254,19 +270,8 @@ class Runner:
 
         if not self.is_waiting_toplevel_command():
             self.restart_backend(False, False, 2)
-
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if not editor:
-            return
-
-        filename = editor.get_filename(True)
-        if not filename:
-            return
-
-        if editor.is_modified():
-            filename = editor.save_file()
-            if not filename:
-                return
+        
+        filename = self._get_saved_current_script_filename()
 
         # changing dir may be required
         script_dir = normpath_with_actual_case(os.path.dirname(filename))
@@ -279,24 +284,53 @@ class Runner:
             working_directory = script_dir  # type: Optional[str]
         else:
             working_directory = None
-
-        if get_workbench().get_option("view.show_program_arguments"):
-            args_str = get_workbench().get_option("run.program_arguments")
-            get_workbench().log_program_arguments_string(args_str)
-            args = shlex.split(args_str)
-        else:
-            args = []
+        
+        args = self._get_active_arguments()
 
         self.execute_script(filename, args, working_directory, command_name)
 
+    def _get_active_arguments(self):
+        if get_workbench().get_option("view.show_program_arguments"):
+            args_str = get_workbench().get_option("run.program_arguments")
+            get_workbench().log_program_arguments_string(args_str)
+            return shlex.split(args_str)
+        else:
+            return []
+    
+    def _get_saved_current_script_filename(self):
+        editor = get_workbench().get_editor_notebook().get_current_editor()
+        if not editor:
+            return
+
+        filename = editor.get_filename(True)
+        if not filename:
+            return
+
+        if editor.is_modified():
+            filename = editor.save_file()
+        
+        return filename
+    
     def _cmd_run_current_script_enabled(self) -> bool:
         return (
             get_workbench().get_editor_notebook().get_current_editor() is not None
-            and "run" in get_runner().supported_features()
+            and "run" in get_runner().get_supported_features()
         )
+
+    def _cmd_run_current_script_in_terminal_enabled(self) -> bool:
+        return (self._proxy 
+                and "run_in_terminal" in self._proxy.get_supported_features()
+                and self._cmd_run_current_script_enabled())
 
     def _cmd_run_current_script(self) -> None:
         self.execute_current("Run")
+
+    def _cmd_run_current_script_in_terminal(self) -> None:
+        filename = self._get_saved_current_script_filename()
+        self._proxy.run_script_in_terminal(
+            filename,
+            self._get_active_arguments(),
+            get_workbench().get_option("run.run_in_terminal_repl"))
 
     def _cmd_interrupt(self) -> None:
         if self._proxy is not None:
@@ -504,11 +538,11 @@ class Runner:
                     "Problem with finalizing console allocation"
                 )
 
-    def supported_features(self) -> Set[str]:
+    def get_supported_features(self) -> Set[str]:
         if self._proxy is None:
             return set()
         else:
-            return self._proxy.supported_features()
+            return self._proxy.get_supported_features()
 
     def using_venv(self) -> bool:
         return isinstance(self._proxy, CPythonProxy) and self._proxy.in_venv
@@ -547,6 +581,9 @@ class BackendProxy:
         """Read next message from the queue or None if queue is empty"""
         raise NotImplementedError()
 
+    def run_script_in_terminal(self, script_path, interactive):
+        raise NotImplementedError()
+    
     def get_sys_path(self):
         "backend's sys.path"
         return []
@@ -572,8 +609,10 @@ class BackendProxy:
         """Return system command for invoking current interpreter"""
         return None
 
-    def supported_features(self):
+    def get_supported_features(self):
         return {"run"}
+    
+    
 
 
 class CPythonProxy(BackendProxy):
@@ -784,6 +823,7 @@ class CPythonProxy(BackendProxy):
             if ready_line == "":  # There was some problem
                 error_msg = self._proc.stderr.read()
                 raise Exception("Error starting backend process: " + error_msg)
+            self._store_state_info(parse_message(ready_line))
 
         # setup asynchronous output listeners
         Thread(target=self._listen_stdout, daemon=True).start()
@@ -899,8 +939,17 @@ class CPythonProxy(BackendProxy):
             finally:
                 self._gui_update_loop_id = None
 
-    def supported_features(self):
-        return {"run", "debug", "pip_gui", "system_shell"}
+    def run_script_in_terminal(self, script_path, args, interactive):
+        cmd = [self._executable]
+        if interactive:
+            cmd.append("-i")
+        cmd.append(os.path.basename(script_path))
+        cmd.extend(args)
+        
+        run_in_terminal(cmd, os.path.dirname(script_path))
+    
+    def get_supported_features(self):
+        return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):
