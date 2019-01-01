@@ -4,10 +4,11 @@ Thonny
 
 Thonny is a Python IDE meant for learning programming.
 
-The project has been moved!!!
------------------------------
-**NB! This repository and issue tracker are obsolete!!!**
+End users
+---------
+See http://thonny.org for more info.
 
-Since 2019-01-01 Thonny's source code is hosted 
-by `GitHub <https://github.com/thonny/thonny>`_. 
 
+Contributors
+------------
+Contributions are welcome! See `CONTRIBUTING.rst <https://bitbucket.org/plas/thonny/src/master/CONTRIBUTING.rst>`_ for more info.
