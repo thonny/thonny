@@ -600,20 +600,7 @@ class CPythonProxy(BackendProxy):
             return None
 
         msg = self._message_queue.popleft()
-        if "gui_is_active" in msg:
-            self._update_gui_updating(msg)
-
-        if "in_venv" in msg:
-            self.in_venv = msg["in_venv"]
-
-        if "path" in msg:
-            self._sys_path = msg["path"]
-
-        if "usersitepackages" in msg:
-            self._usersitepackages = msg["usersitepackages"]
-
-        if "prefix" in msg:
-            self._sys_prefix = msg["prefix"]
+        self._store_state_info(msg)
 
         if msg.event_type == "ProgramOutput":
             # combine available output messages to one single message,
@@ -636,6 +623,25 @@ class CPythonProxy(BackendProxy):
 
         else:
             return msg
+    
+    def _store_state_info(self, msg):
+        if "gui_is_active" in msg:
+            self._update_gui_updating(msg)
+
+        if "in_venv" in msg:
+            self.in_venv = msg["in_venv"]
+
+        if "path" in msg:
+            self._sys_path = msg["path"]
+
+        if "usersitepackages" in msg:
+            self._usersitepackages = msg["usersitepackages"]
+
+        if "prefix" in msg:
+            self._sys_prefix = msg["prefix"]
+        
+        if "exe_dirs" in msg:
+            self._exe_dirs = msg["exe_dirs"]
 
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():

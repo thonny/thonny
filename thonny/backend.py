@@ -126,11 +126,12 @@ class VM:
                 argv=sys.argv,
                 path=sys.path,
                 usersitepackages=site.getusersitepackages()
-                if site.ENABLE_USER_SITE
-                else None,
+                    if site.ENABLE_USER_SITE
+                    else None,
                 prefix=sys.prefix,
                 welcome_text="Python " + _get_python_version_string(),
                 executable=sys.executable,
+                exe_dirs=self._get_exe_dirs(),
                 in_venv=(
                     hasattr(sys, "base_prefix")
                     and sys.base_prefix != sys.prefix
@@ -288,6 +289,28 @@ class VM:
 
         with open(_CONFIG_FILENAME, "w") as fp:
             self._ini.write(fp)
+    
+    def _get_exe_dirs(self):
+        # return directories containing user scripts, base scripts and executable
+        result = []
+        if site.ENABLE_USER_SITE:
+            if platform.system() == "Windows":
+                if site.getusersitepackages():
+                    result.append(site.getusersitepackages()
+                                  .replace("site-packages", "Scripts"))
+            else:
+                if site.getuserbase():
+                    result.append(site.getuserbase() + "/bin")
+        
+        main_scripts = os.path.join(sys.prefix, "Scripts")
+        if os.path.isdir(main_scripts) and main_scripts not in result:
+            result.append(main_scripts)
+        
+        if os.path.dirname(sys.executable) not in result:
+            result.append(os.path.dirname(sys.executable))
+        
+        return result
+        
     
     def _tweak_system_path(self):
         """Allow easy calling of executables in Python script dir """
