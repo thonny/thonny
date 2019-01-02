@@ -26,13 +26,13 @@
   
   <launchable type="desktop-id">org.thonny.Thonny.desktop</launchable>
 
-  <url type="homepage">http://thonny.org</url>
-  <url type="bugtracker">https://bitbucket.org/plas/thonny/issues/</url>
-  <url type="help">https://bitbucket.org/plas/thonny/wiki/Home</url>
+  <url type="homepage">https://thonny.org</url>
+  <url type="bugtracker">https://github.com/thonny/thonny/issues</url>
+  <url type="help">https://github.com/thonny/thonny/wiki</url>
 
   <screenshots>
     <screenshot type="default">
-      <image>http://thonny.org/img/screenshot.png</image>
+      <image>https://thonny.org/img/screenshot.png</image>
       <caption>Thonny stepping through a recursive function</caption>
     </screenshot>
   </screenshots>

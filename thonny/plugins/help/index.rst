@@ -15,5 +15,5 @@ General topics
 
 Online
 ======
-There is more information available on Thonny wiki: https://bitbucket.org/plas/thonny/wiki/Home.
+There is more information available on Thonny wiki: https://github.com/thonny/thonny/wiki.
 

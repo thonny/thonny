@@ -92,7 +92,7 @@ class AboutDialog(tk.Toplevel):
         credits_label.bind(
             "<Button-1>",
             lambda _: webbrowser.open(
-                "https://bitbucket.org/plas/thonny/src/master/CREDITS.rst"
+                "https://github.com/thonny/thonny/blob/master/CREDITS.rst"
             ),
         )
 
@@ -147,14 +147,14 @@ def load_plugin() -> None:
         "changelog",
         "help",
         "Version history",
-        lambda: open_url("https://bitbucket.org/plas/thonny/src/master/CHANGELOG.rst"),
+        lambda: open_url("https://github.com/thonny/thonny/blob/master/CHANGELOG.rst"),
         group=60,
     )
     get_workbench().add_command(
         "issues",
         "help",
         "Report problems",
-        lambda: open_url("https://bitbucket.org/plas/thonny/issues/new"),
+        lambda: open_url("https://github.com/thonny/thonny/issues/new"),
         group=60,
     )
     get_workbench().add_command("about", "help", "About Thonny", open_about, group=61)

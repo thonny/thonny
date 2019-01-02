@@ -11,4 +11,4 @@ See http://thonny.org for more info.
 
 Contributors
 ------------
-Contributions are welcome! See `CONTRIBUTING.rst <https://bitbucket.org/plas/thonny/src/master/CONTRIBUTING.rst>`_ for more info.
+Contributions are welcome! See `CONTRIBUTING.rst <https://github.com/thonny/thonny/blob/master/CONTRIBUTING.rst>`_ for more info.
