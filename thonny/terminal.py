@@ -4,11 +4,15 @@ import shlex
 import shutil
 import subprocess
 
-def run_in_terminal(cmd, system_path=None, cwd, env=None):
+def run_in_terminal(cmd, cwd, env=None, keep_open=False):
     if platform.system() == "Windows":
-        subprocess.Popen(cmd, 
-                         creationflags=subprocess.CREATE_NEW_CONSOLE,
-                         cwd=cwd)
+        _run_in_terminal_in_windows(cmd, cwd, env, keep_open)
+    elif platform.system() == "Linux":
+        _run_in_terminal_in_linux(cmd, cwd, env, keep_open)
+    elif platform.system() == "Darwin":
+        _run_in_terminal_in_macos(cmd, cwd, env, keep_open)
+    else:
+        raise RuntimeError("Can't launch terminal in " + platform.system())
 
 def _add_to_path(directory, path):
     # Always prepending to path may seem better, but this could mess up other things.
@@ -22,27 +26,22 @@ def _add_to_path(directory, path):
         return directory + os.pathsep + path
 
 
-def _open_terminal_in_windows(cwd, env, interpreter, explainer, exec_prefix):
-    env["PATH"] = _add_to_path(exec_prefix + os.pathsep, env.get("PATH", ""))
-    env["PATH"] = _add_to_path(
-        os.path.join(exec_prefix, "Scripts"), env.get("PATH", "")
-    )
+def _run_in_terminal_in_windows(cmd, cwd, env, keep_open):
+    if keep_open:
+        # Yes, the /K argument has weird quoting. Can't explain this, but it works
+        quoted_args = " ".join(map(lambda s: '"' + s + '"'), cmd)
+        cmd_line = ("""start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{quoted_args}" """
+                    .format(cwd=cwd, quoted_args=quoted_args))
+    
+        subprocess.Popen(cmd_line, cwd=cwd, env=env, shell=True)
+    else:
+        subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE,
+                         cwd=cwd)
 
-    # Yes, the /K argument has weird quoting. Can't explain this, but it works
-    cmd_line = """start "Shell for {interpreter}" /D "{cwd}" /W cmd /K ""{interpreter}" "{explainer}"" """.format(
-        interpreter=interpreter, cwd=cwd, explainer=explainer
-    )
 
-    subprocess.Popen(cmd_line, env=env, shell=True)
-
-
-def _open_terminal_in_linux(cwd, env, interpreter, explainer, exec_prefix):
+def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
     def _shellquote(s):
         return subprocess.list2cmdline([s])
-
-    # No escaping in PATH possible: http://stackoverflow.com/a/29213487/261181
-    # (neither necessary except for colon)
-    env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
 
     xte = shutil.which("x-terminal-emulator")
     if xte:
@@ -69,13 +68,17 @@ def _open_terminal_in_linux(cwd, env, interpreter, explainer, exec_prefix):
         term_cmd = "xterm"
     else:
         raise RuntimeError("Don't know how to open terminal emulator")
-
-    # Need to prevent shell from closing after executing the command:
-    # http://stackoverflow.com/a/4466566/261181
-    core_cmd = "{interpreter} {explainer}; exec bash -i".format(
-        interpreter=_shellquote(interpreter), explainer=_shellquote(explainer)
-    )
-    in_term_cmd = "bash -c {core_cmd}".format(core_cmd=_shellquote(core_cmd))
+    
+    
+    if isinstance(cmd, list):
+        cmd = " ".join(map(_shellquote, cmd))
+        
+    if keep_open:
+        # http://stackoverflow.com/a/4466566/261181
+        core_cmd = "{cmd}; exec bash -i".format(cmd=cmd)
+        in_term_cmd = "bash -c {core_cmd}".format(core_cmd=_shellquote(core_cmd))
+    else:
+        in_term_cmd = cmd
     
     if term_cmd == "lxterminal":
         # https://www.raspberrypi.org/forums/viewtopic.php?t=221490
@@ -91,28 +94,24 @@ def _open_terminal_in_linux(cwd, env, interpreter, explainer, exec_prefix):
     subprocess.Popen(whole_cmd, env=env, shell=True)
 
 
-def _open_terminal_in_macos(cwd, env, interpreter, explainer, exec_prefix):
+def _run_in_terminal_in_macos(cmd, cwd, env, keep_open):
     _shellquote = shlex.quote
 
-    # No quoting inside Linux PATH variable is possible: http://stackoverflow.com/a/29213487/261181
-    # (neither necessary except for colon)
-    # Assuming this applies for OS X as well
-    env["PATH"] = _add_to_path(os.path.join(exec_prefix, "bin"), env["PATH"])
+    if isinstance(cmd, list):
+        cmd = " ".join(_shellquote, cmd)
 
     # osascript "tell application" won't change Terminal's env
     # (at least when Terminal is already active)
     # At the moment I just explicitly set some important variables
     # TODO: Did I miss something?
-    cmd = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(
+    cmds = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(
         _shellquote(env["PATH"])
     )
 
     if "SSL_CERT_FILE" in env:
-        cmd += ";export SSL_CERT_FILE=" + _shellquote(env["SSL_CERT_FILE"])
-
-    cmd += "; {interpreter} {explainer}".format(
-        interpreter=_shellquote(interpreter), explainer=_shellquote(explainer)
-    )
+        cmds += ";export SSL_CERT_FILE=" + _shellquote(env["SSL_CERT_FILE"])
+    
+    cmds += "; " + cmd
 
     # The script will be sent to Terminal with 'do script' command, which takes a string.
     # We'll prepare an AppleScript string literal for this
