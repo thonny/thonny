@@ -4,9 +4,9 @@ import shlex
 import shutil
 import subprocess
 
-def run_in_terminal(cmd, cwd, env=None, keep_open=False):
+def run_in_terminal(cmd, cwd, env=None, keep_open=True, title=None):
     if platform.system() == "Windows":
-        _run_in_terminal_in_windows(cmd, cwd, env, keep_open)
+        _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title)
     elif platform.system() == "Linux":
         _run_in_terminal_in_linux(cmd, cwd, env, keep_open)
     elif platform.system() == "Darwin":
@@ -26,12 +26,14 @@ def _add_to_path(directory, path):
         return directory + os.pathsep + path
 
 
-def _run_in_terminal_in_windows(cmd, cwd, env, keep_open):
+def _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title=None):
     if keep_open:
         # Yes, the /K argument has weird quoting. Can't explain this, but it works
-        quoted_args = " ".join(map(lambda s: '"' + s + '"'), cmd)
-        cmd_line = ("""start "Shell for {interpreter}" /D "{cwd}" /W cmd /K "{quoted_args}" """
-                    .format(cwd=cwd, quoted_args=quoted_args))
+        quoted_args = " ".join(map(lambda s: '"' + s + '"', cmd))
+        cmd_line = ("""start {title} /D "{cwd}" /W cmd /K "{quoted_args}" """
+                    .format(cwd=cwd,
+                            quoted_args=quoted_args,
+                            title='"' + title + '"' if title else ""))
     
         subprocess.Popen(cmd_line, cwd=cwd, env=env, shell=True)
     else:

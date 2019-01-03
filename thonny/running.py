@@ -82,7 +82,8 @@ class Runner:
         self._remove_obsolete_jedi_copies()
 
     def _init_commands(self) -> None:
-        get_workbench().set_default("run.run_in_terminal_repl", False)
+        get_workbench().set_default("run.run_in_terminal_python_repl", False)
+        get_workbench().set_default("run.run_in_terminal_keep_open", True)
         
         get_workbench().add_command(
             "run_current_script",
@@ -330,7 +331,9 @@ class Runner:
         self._proxy.run_script_in_terminal(
             filename,
             self._get_active_arguments(),
-            get_workbench().get_option("run.run_in_terminal_repl"))
+            get_workbench().get_option("run.run_in_terminal_python_repl"),
+            get_workbench().get_option("run.run_in_terminal_keep_open"),
+        )
 
     def _cmd_interrupt(self) -> None:
         if self._proxy is not None:
@@ -581,7 +584,7 @@ class BackendProxy:
         """Read next message from the queue or None if queue is empty"""
         raise NotImplementedError()
 
-    def run_script_in_terminal(self, script_path, interactive):
+    def run_script_in_terminal(self, script_path, interactive, keep_open):
         raise NotImplementedError()
     
     def get_sys_path(self):
@@ -939,14 +942,15 @@ class CPythonProxy(BackendProxy):
             finally:
                 self._gui_update_loop_id = None
 
-    def run_script_in_terminal(self, script_path, args, interactive):
+    def run_script_in_terminal(self, script_path, args, interactive, keep_open):
         cmd = [self._executable]
         if interactive:
             cmd.append("-i")
         cmd.append(os.path.basename(script_path))
         cmd.extend(args)
         
-        run_in_terminal(cmd, os.path.dirname(script_path))
+        run_in_terminal(cmd, os.path.dirname(script_path),
+                        keep_open=keep_open)
     
     def get_supported_features(self):
         return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}

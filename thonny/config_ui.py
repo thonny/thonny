@@ -100,11 +100,13 @@ class ConfigurationPage(ttk.Frame):
         ttk.Frame.__init__(self, master)
 
     def add_checkbox(
-        self, flag_name, description, row=None, column=0, pady=0, columnspan=1, tooltip=None
+        self, flag_name, description, row=None, column=0, 
+        padx=0, pady=0, columnspan=1, tooltip=None
     ):
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
-        checkbox.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan)
+        checkbox.grid(row=row, column=column, sticky=tk.W, 
+                      padx=padx, pady=pady, columnspan=columnspan)
 
         if tooltip is not None:
             ui_utils.create_tooltip(checkbox, tooltip)
