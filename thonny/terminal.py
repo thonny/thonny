@@ -99,27 +99,30 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
 def _run_in_terminal_in_macos(cmd, cwd, env, keep_open):
     _shellquote = shlex.quote
 
-    if isinstance(cmd, list):
-        cmd = " ".join(_shellquote, cmd)
-
+    cmds = "clear; unset TK_LIBRARY; unset TCL_LIBRARY"
+    cmds += "; cd " + _shellquote(cwd)
     # osascript "tell application" won't change Terminal's env
     # (at least when Terminal is already active)
     # At the moment I just explicitly set some important variables
     # TODO: Did I miss something?
-    cmds = "PATH={}; unset TK_LIBRARY; unset TCL_LIBRARY".format(
-        _shellquote(env["PATH"])
-    )
+    if env and env.get("PATH"):
+        cmds += "; export PATH=" + _shellquote(env["PATH"])
 
-    if "SSL_CERT_FILE" in env:
+    if env and "SSL_CERT_FILE" in env:
         cmds += ";export SSL_CERT_FILE=" + _shellquote(env["SSL_CERT_FILE"])
     
+    if isinstance(cmd, list):
+        cmd = " ".join(map(_shellquote, cmd))
     cmds += "; " + cmd
+    
+    if not keep_open:
+        cmds += "; exit"
 
     # The script will be sent to Terminal with 'do script' command, which takes a string.
     # We'll prepare an AppleScript string literal for this
     # (http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string):
     cmd_as_apple_script_string_literal = (
-        '"' + cmd.replace("\\", "\\\\").replace('"', '\\"') + '"'
+        '"' + cmds.replace("\\", "\\\\").replace('"', '\\"') + '"'
     )
 
     # When Terminal is not open, then do script opens two windows.
@@ -154,5 +157,5 @@ def _run_in_terminal_in_macos(cmd, cwd, env, keep_open):
         + """ -e 'end if                                    ' """
     )
 
-    subprocess.Popen(cmd_line, env=env, shell=True)
+    subprocess.Popen(cmd_line, env=env, cwd=cwd, shell=True)
 
