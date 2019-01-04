@@ -419,6 +419,9 @@ class VM:
         else:
             raise UserError("cd takes one parameter")
 
+    def _cmd_Birdseye(self, cmd):
+        return self._execute_file(cmd, BirdsEyeRunner)
+
     def _cmd_Run(self, cmd):
         self._switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, SimpleRunner)
@@ -1222,6 +1225,87 @@ class Executor:
 
 class SimpleRunner(Executor):
     pass
+
+
+class BirdsEyeRunner(Executor):
+    def execute_source(self, source, filename, mode, ast_postprocessors):
+        import socket
+        import webbrowser
+        import inspect
+        import sys
+        from io import StringIO
+        from threading import currentThread, Thread
+
+        from werkzeug.local import LocalProxy
+        from werkzeug.serving import ThreadingMixIn
+
+        from birdseye import server, eye
+
+        thread_proxies = {}
+
+        def stream_proxy(original):
+            def p():
+                frame = inspect.currentframe()
+                while frame:
+                    if frame.f_code == ThreadingMixIn.process_request_thread.__code__:
+                        return StringIO()
+                    frame = frame.f_back
+                return thread_proxies.get(currentThread().ident,
+                                          original)
+
+            return LocalProxy(p)
+
+        sys.stderr = stream_proxy(sys.stderr)
+        sys.stdout = stream_proxy(sys.stdout)
+
+        def run_server():
+            thread_proxies[currentThread().ident] = StringIO()
+            try:
+                server.app.run(
+                    port=7777,
+                    debug=True,
+                    use_reloader=False,
+                )
+            except socket.error:
+                pass
+
+        Thread(target=run_server).start()
+
+        if os.path.exists(filename):
+            self._main_module_path = filename
+
+        global_vars = __main__.__dict__
+
+        try:
+            result = self._execute_prepared_user_code(source, filename, global_vars)
+        except SyntaxError:
+            return {"user_exception": self._vm._prepare_user_exception()}
+        except SystemExit:
+            return {"SystemExit": True}
+        except Exception:
+            _report_internal_error()
+            return {}
+
+        webbrowser.open_new_tab('http://localhost:7777/ipython_call/' + eye._last_call_id)
+        return result
+
+    def _prepare_hooks_and_execute(self, source, filename, global_vars):
+        try:
+            sys.meta_path.insert(0, self)
+            self._vm._install_custom_import()
+            return self._execute_prepared_user_code(source, filename, global_vars)
+        finally:
+            del sys.meta_path[0]
+            self._vm._restore_original_import()
+
+    def _execute_prepared_user_code(self, source, filename, global_vars):
+        try:
+            from birdseye.bird import eye
+            eye.exec_string(source, filename, globs=global_vars, locs=global_vars, deep=True)
+
+            return {"context_info": "after normal execution"}
+        except Exception:
+            return {"user_exception": self._vm._prepare_user_exception()}
 
 
 class Tracer(Executor):

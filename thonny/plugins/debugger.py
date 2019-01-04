@@ -1101,6 +1101,17 @@ def load_plugin() -> None:
     )
 
     get_workbench().add_command(
+        "birdseye",
+        "run",
+        "Debug current script (birdseye)",
+        lambda: _request_debug("Birdseye"),
+        caption="birdseye",
+        tester=_start_debug_enabled,
+        group=10,
+        image="birdseye",
+    )
+
+    get_workbench().add_command(
         "step_over",
         "run",
         "Step over",
