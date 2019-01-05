@@ -727,36 +727,11 @@ class CPythonProxy(BackendProxy):
         self._message_queue = None
 
     def _start_new_process(self, cmd=None):
-        this_python = get_frontend_python()
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
 
-        # prepare the environment
-        my_env = os.environ.copy()
-
-        # Delete some environment variables if the backend is (based on) a different Python instance
-        if self._executable not in [
-            this_python,
-            this_python.replace("python.exe", "pythonw.exe"),
-            this_python.replace("pythonw.exe", "python.exe"),
-        ]:
-
-            # Keep only the variables, that are not related to Python
-            my_env = {
-                name: my_env[name]
-                for name in my_env
-                if "python" not in name.lower()
-                and name not in ["TK_LIBRARY", "TCL_LIBRARY"]
-            }
-
-            # Remove variables used to tweak bundled Thonny-private Python
-            if using_bundled_python():
-                my_env = {
-                    name: my_env[name]
-                    for name in my_env
-                    if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]
-                }
-
+        # prepare environment
+        my_env = get_environment_for_python_subprocess(self._executable)
         # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "utf-8"
 
@@ -1117,8 +1092,11 @@ def _get_venv_info(venv_path):
 
 
 def using_bundled_python():
+    return is_bundled_python(sys.executable)
+
+def is_bundled_python(executable):
     return os.path.exists(
-        os.path.join(os.path.dirname(sys.executable), "thonny_python.ini")
+        os.path.join(os.path.dirname(executable), "thonny_python.ini")
     )
 
 
@@ -1206,3 +1184,89 @@ class BackendTerminatedError(Exception):
 
 def get_frontend_python():
     return sys.executable.replace("thonny.exe", "python.exe")
+
+def is_venv_interpreter_of_current_interpreter(executable):
+    for location in [".", ".."]:
+        cfg_path = os.path.join(location, "pyvenv.cfg")
+        if os.path.isfile(cfg_path):
+            with open(cfg_path) as fp:
+                content = fp.read()
+            for line in content.splitlines():
+                if line.replace(" ", "").startswith("home="):
+                    _, home = line.split("=", maxsplit=1)
+                    home = home.strip()
+                    if os.path.isdir(home) and os.path.samefile(home, sys.prefix):
+                        return True
+    return False
+
+
+    
+def get_environment_for_python_subprocess(target_executable):
+    env = os.environ.copy()
+    overrides = get_environment_overrides_for_python_subprocess(target_executable)
+    for key in overrides:
+        if overrides[key] is None and key in env:
+            del env[key]
+        else:
+            assert isinstance(overrides[key], str)
+            env[key] = overrides[key]
+    return env    
+    
+def get_environment_overrides_for_python_subprocess(target_executable):
+    """Take care of not not confusing different interpreter 
+    with variables meant for bundled interpreter"""
+    
+    # At the moment I'm tweaking the environment only if current 
+    # exe is bundled for Thonny. 
+    # In remaining cases it is user's responsibility to avoid 
+    # calling Thonny with environment which may be confusing for 
+    # different Pythons called in a subprocess.
+    
+    this_executable = sys.executable.replace("pythonw.exe", "python.exe")
+    target_executable = target_executable.replace("pythonw.exe", "python.exe")
+    
+    interpreter_specific_keys = ["TCL_LIBRARY", "TK_LIBRARY",
+                                 "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH",
+                                 "SSL_CERT_DIR", "SSL_CERT_FILE",
+                                 "PYTHONHOME", "PYTHONPATH",
+                                 "PYTHONNOUSERSITE", "PYTHONUSERBASE"]
+    
+    result = {}
+    
+    if (os.path.samefile(target_executable, this_executable)
+        or is_venv_interpreter_of_current_interpreter(target_executable)):
+        # bring out some important variables so that they can 
+        # be explicitly set in macOS Terminal
+        # (If they are set then it's most likely because current exe is in Thonny bundle)
+        for key in interpreter_specific_keys:
+            if key in os.environ:
+                result[key] = os.environ[key]
+        
+        # never pass some variables to different interpreter
+        # (even if it's venv or symlink to current one)
+        if not is_same_path(target_executable, this_executable):
+            for key in ["PYTHONPATH", "PYTHONHOME",
+                        "PYTHONNOUSERSITE", "PYTHONUSERBASE"]:
+                if key in os.environ:
+                    result[key] = None
+    else:
+        # interpreters are not related
+        # interpreter specific keys most likely would confuse other interpreter
+        for key in interpreter_specific_keys:
+            if key in os.environ:
+                result[key] = None
+    
+    
+    # some keys should be never passed
+    for key in ["PYTHONSTARTUP", "PYTHONBREAKPOINT", "PYTHONDEBUG",
+                "PYTHONNOUSERSITE", "PYTHONASYNCIODEBUG"]:
+        if key in os.environ:
+            result[key] = None
+    
+    return result
+    
+    
+    
+    
+    
+    

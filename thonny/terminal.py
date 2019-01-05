@@ -4,7 +4,7 @@ import shlex
 import shutil
 import subprocess
 
-def run_in_terminal(cmd, cwd, env_overrides=None, keep_open=True, title=None):
+def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
     env = os.environ.copy()
     for key in env_overrides:
         if env_overrides[key] is None:
@@ -89,7 +89,7 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
         )
         
 
-    subprocess.Popen(whole_cmd, env=env, shell=True)
+    subprocess.Popen(whole_cmd, cwd=cwd, env=env, shell=True)
 
 
 def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
