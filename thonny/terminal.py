@@ -47,7 +47,7 @@ def _add_to_path(directory, path):
 def _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title=None):
     if keep_open:
         # Yes, the /K argument has weird quoting. Can't explain this, but it works
-        quoted_args = " ".join(map(lambda s: '"' + s + '"', cmd))
+        quoted_args = " ".join(map(lambda s: s if s == "&" else '"' + s + '"', cmd))
         cmd_line = ("""start {title} /D "{cwd}" /W cmd /K "{quoted_args}" """
                     .format(cwd=cwd,
                             quoted_args=quoted_args,

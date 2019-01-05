@@ -35,8 +35,19 @@ def _open_system_shell():
     env_overrides["PATH"] = get_augmented_system_path(exe_dirs) 
     
     explainer = os.path.join(os.path.dirname(__file__), "explain_environment.py")
-    
     cmd = [target_executable, explainer]
+    
+    activate = os.path.join(os.path.dirname(target_executable), 
+                            "activate.bat" if platform.system() == "Windows"
+                            else "activate")
+    
+    if os.path.isfile(activate):
+        del env_overrides["PATH"]
+        if platform.system() == "Windows":
+            cmd = [activate, "&"] + cmd
+        else:
+            cmd = ["source", activate, ";"] + cmd 
+        
     return terminal.run_in_terminal(cmd, cwd, env_overrides, True)
 
 def load_plugin() -> None:
