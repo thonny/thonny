@@ -1890,8 +1890,8 @@ class _ZenityDialogProvider:
 
 
 def _options_to_zenity_filename(options):
-    if "initialdir" in options:
-        if "initialfile" in options:
+    if options.get("initialdir"):
+        if options.get("initialfile"):
             return os.path.join(options["initialdir"], options["initialfile"])
         else:
             return options["initialdir"] + os.path.sep
