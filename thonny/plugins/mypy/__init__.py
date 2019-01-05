@@ -43,7 +43,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
 
         if ver >= (0, 590):
             args.insert(3, "--python-executable")
-            args.insert(4, get_runner().get_executable())
+            args.insert(4, get_runner().get_local_executable())
         
         env = os.environ.copy()
         env["MYPYPATH"] = os.path.join(os.path.dirname(__file__), "typeshed_extras")

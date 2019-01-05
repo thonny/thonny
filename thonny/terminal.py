@@ -5,13 +5,8 @@ import shutil
 import subprocess
 
 def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
-    env = os.environ.copy()
-    for key in env_overrides:
-        if env_overrides[key] is None:
-            if key in env:
-                del env[key]
-        else:
-            env[key] = str(env_overrides[key])
+    from thonny.running import get_environment_with_overrides
+    env = get_environment_with_overrides(env_overrides)
             
     if platform.system() == "Windows":
         _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title)
@@ -22,9 +17,12 @@ def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
     else:
         raise RuntimeError("Can't launch terminal in " + platform.system())
 
-def open_system_shell(cwd, env=None):
+def open_system_shell(cwd, env_overrides={}):
+    from thonny.running import get_environment_with_overrides
+    env = get_environment_with_overrides(env_overrides)
+    
     if platform.system() == "Darwin":
-        _run_in_terminal_in_macos([], cwd, env, True)
+        _run_in_terminal_in_macos([], cwd, env_overrides, True)
     elif platform.system() == "Windows":
         cmd = "start cmd"
         subprocess.Popen(cmd, cwd=cwd, env=env, shell=True)

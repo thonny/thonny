@@ -31,7 +31,8 @@ from thonny import (
     get_workbench,
     ui_utils,
 )
-from thonny.code import get_current_breakpoints
+from thonny.code import get_current_breakpoints,\
+    get_saved_current_script_filename
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -47,7 +48,7 @@ from thonny.common import (
     parse_message,
     path_startswith,
     serialize_message,
-)
+    update_system_path)
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
@@ -298,20 +299,6 @@ class Runner:
         else:
             return []
     
-    def _get_saved_current_script_filename(self):
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if not editor:
-            return
-
-        filename = editor.get_filename(True)
-        if not filename:
-            return
-
-        if editor.is_modified():
-            filename = editor.save_file()
-        
-        return filename
-    
     def _cmd_run_current_script_enabled(self) -> bool:
         return (
             get_workbench().get_editor_notebook().get_current_editor() is not None
@@ -327,7 +314,7 @@ class Runner:
         self.execute_current("Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
-        filename = self._get_saved_current_script_filename()
+        filename = get_saved_current_script_filename()
         self._proxy.run_script_in_terminal(
             filename,
             self._get_active_arguments(),
@@ -491,11 +478,11 @@ class Runner:
             self._proxy.destroy()
             self._proxy = None
 
-    def get_executable(self) -> Optional[str]:
+    def get_local_executable(self) -> Optional[str]:
         if self._proxy is None:
             return None
         else:
-            return self._proxy.get_executable()
+            return self._proxy.get_local_executable()
 
     def get_backend_proxy(self) -> "BackendProxy":
         return self._proxy
@@ -608,7 +595,7 @@ class BackendProxy:
         """Used in MicroPython proxies"""
         return True
 
-    def get_executable(self):
+    def get_local_executable(self):
         """Return system command for invoking current interpreter"""
         return None
 
@@ -743,14 +730,6 @@ class CPythonProxy(BackendProxy):
         elif "THONNY_DEBUG" in my_env:
             del my_env["THONNY_DEBUG"]
 
-        # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
-        if self._executable == get_private_venv_executable():
-            try:
-                my_env["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
-                my_env["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
-            except Exception:
-                logging.exception("Can't find Tcl/Tk library")
-
         if not os.path.exists(self._executable):
             raise UserError(
                 "Interpreter (%s) not found. Please recheck corresponding option!"
@@ -870,7 +849,7 @@ class CPythonProxy(BackendProxy):
                     BackendEvent("ProgramOutput", stream_name="stderr", data=data)
                 )
 
-    def get_executable(self):
+    def get_local_executable(self):
         return self._executable
 
     def get_site_packages(self):
@@ -885,6 +864,9 @@ class CPythonProxy(BackendProxy):
 
     def get_user_site_packages(self):
         return self._usersitepackages
+    
+    def get_exe_dirs(self):
+        return self._exe_dirs
 
     def _update_gui_updating(self, msg):
         """Enables running Tkinter or Qt programs which doesn't call mainloop. 
@@ -1100,18 +1082,6 @@ def is_bundled_python(executable):
     )
 
 
-def create_pythonless_environment():
-    # If I want to call another python version, then
-    # I need to remove from environment the items installed by current interpreter
-    env = {}
-
-    for key in os.environ:
-        if "python" not in key.lower() and key not in ["TK_LIBRARY", "TCL_LIBRARY"]:
-            env[key] = os.environ[key]
-
-    return env
-
-
 def create_backend_python_process(
     args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
 ):
@@ -1120,9 +1090,9 @@ def create_backend_python_process(
 
     # TODO: if backend == frontend, then delegate to create_frontend_python_process
 
-    python_exe = get_runner().get_executable()
+    python_exe = get_runner().get_local_executable()
 
-    env = create_pythonless_environment()
+    env = get_environment_for_python_subprocess(python_exe)
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUNBUFFERED"] = "1"
 
@@ -1199,18 +1169,23 @@ def is_venv_interpreter_of_current_interpreter(executable):
                         return True
     return False
 
-
     
 def get_environment_for_python_subprocess(target_executable):
-    env = os.environ.copy()
     overrides = get_environment_overrides_for_python_subprocess(target_executable)
+    return get_environment_with_overrides(overrides)
+
+def get_environment_with_overrides(overrides):
+    env = os.environ.copy()
     for key in overrides:
         if overrides[key] is None and key in env:
             del env[key]
         else:
             assert isinstance(overrides[key], str)
-            env[key] = overrides[key]
-    return env    
+            if key.upper() == "PATH":
+                update_system_path(env, overrides[key])
+            else:
+                env[key] = overrides[key]
+    return env
     
 def get_environment_overrides_for_python_subprocess(target_executable):
     """Take care of not not confusing different interpreter 
@@ -1262,11 +1237,16 @@ def get_environment_overrides_for_python_subprocess(target_executable):
                 "PYTHONNOUSERSITE", "PYTHONASYNCIODEBUG"]:
         if key in os.environ:
             result[key] = None
+
+    # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
+    if is_venv_interpreter_of_current_interpreter(target_executable):
+        try:
+            if ("TCL_LIBRARY" not in os.environ
+                or "TK_LIBRARY" not in os.environ): 
+                result["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
+                result["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
+        except Exception:
+            logging.exception("Can't compute Tcl/Tk library location")
+
     
     return result
-    
-    
-    
-    
-    
-    

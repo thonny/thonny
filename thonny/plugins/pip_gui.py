@@ -762,7 +762,7 @@ class BackendPipDialog(PipDialog):
         self._update_list(self._last_name_to_show)
 
     def _get_interpreter(self):
-        return get_runner().get_executable()
+        return get_runner().get_local_executable()
 
     def _create_python_process(self, args, stderr):
         proc = running.create_backend_python_process(args, stderr=stderr)
@@ -924,8 +924,8 @@ class PluginsPipDialog(PipDialog):
         runner = get_runner()
         if (
             runner is not None
-            and runner.get_executable() is not None
-            and is_same_path(self._get_interpreter(), get_runner().get_executable())
+            and runner.get_local_executable() is not None
+            and is_same_path(self._get_interpreter(), get_runner().get_local_executable())
         ):
             banner_msg += "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n"
 

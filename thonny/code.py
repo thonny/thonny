@@ -757,3 +757,17 @@ def get_current_breakpoints():
                 result[filename] = linenos
 
     return result
+
+def get_saved_current_script_filename():
+    editor = get_workbench().get_editor_notebook().get_current_editor()
+    if not editor:
+        return
+
+    filename = editor.get_filename(True)
+    if not filename:
+        return
+
+    if editor.is_modified():
+        filename = editor.save_file()
+    
+    return filename

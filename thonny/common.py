@@ -299,7 +299,30 @@ def get_base_executable():
         raise RuntimeError("Can't locate base executable")
     
     return result
+
+def get_augmented_system_path(extra_dirs):
+    path_items = os.environ.get("PATH", "").split(os.pathsep)
+    
+    for d in reversed(extra_dirs):
+        if d not in path_items:
+            path_items.insert(0, d)
+    
+    return os.pathsep.join(path_items)
+
+def update_system_path(env, value):
+    # in Windows, env keys are not case sensitive
+    # this is important if env is a dict (not os.environ)
+    if platform.system() == "Windows":
+        found = False
+        for key in env:
+            if key.upper() == "PATH":
+                found = True
+                env[key] = value
         
+        if not found:
+            env["PATH"] = value
+    else:
+        env["PATH"] = value
 
 class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""
