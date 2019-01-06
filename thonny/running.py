@@ -273,7 +273,7 @@ class Runner:
         if not self.is_waiting_toplevel_command():
             self.restart_backend(False, False, 2)
         
-        filename = self._get_saved_current_script_filename()
+        filename = get_saved_current_script_filename()
 
         # changing dir may be required
         script_dir = normpath_with_actual_case(os.path.dirname(filename))
