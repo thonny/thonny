@@ -90,7 +90,7 @@ def normpath_with_actual_case(name):
 if __name__ == "__main__":
     _clear_screen()
     print("*" * 80)
-    print("Some Python commands in PATH:")
+    print("Some Python commands in the PATH of this session:")
     
     sys_real = normpath_with_actual_case(equivalent_realpath(sys.executable))
     sys_executable = normpath_with_actual_case(sys.executable)
