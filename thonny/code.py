@@ -758,12 +758,12 @@ def get_current_breakpoints():
 
     return result
 
-def get_saved_current_script_filename():
+def get_saved_current_script_filename(force=True):
     editor = get_workbench().get_editor_notebook().get_current_editor()
     if not editor:
         return
 
-    filename = editor.get_filename(True)
+    filename = editor.get_filename(force)
     if not filename:
         return
 
