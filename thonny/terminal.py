@@ -4,13 +4,31 @@ import shlex
 import shutil
 import subprocess
 
-def run_in_terminal(cmd, cwd, env=None, keep_open=True, title=None):
+def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
+    from thonny.running import get_environment_with_overrides
+    env = get_environment_with_overrides(env_overrides)
+            
     if platform.system() == "Windows":
         _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title)
     elif platform.system() == "Linux":
         _run_in_terminal_in_linux(cmd, cwd, env, keep_open)
     elif platform.system() == "Darwin":
-        _run_in_terminal_in_macos(cmd, cwd, env, keep_open)
+        _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open)
+    else:
+        raise RuntimeError("Can't launch terminal in " + platform.system())
+
+def open_system_shell(cwd, env_overrides={}):
+    from thonny.running import get_environment_with_overrides
+    env = get_environment_with_overrides(env_overrides)
+    
+    if platform.system() == "Darwin":
+        _run_in_terminal_in_macos([], cwd, env_overrides, True)
+    elif platform.system() == "Windows":
+        cmd = "start cmd"
+        subprocess.Popen(cmd, cwd=cwd, env=env, shell=True)
+    elif platform.system() == "Linux":
+        cmd = _get_linux_terminal_command()
+        subprocess.Popen(cmd, cwd=cwd, env=env, shell=True)
     else:
         raise RuntimeError("Can't launch terminal in " + platform.system())
 
@@ -29,7 +47,7 @@ def _add_to_path(directory, path):
 def _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title=None):
     if keep_open:
         # Yes, the /K argument has weird quoting. Can't explain this, but it works
-        quoted_args = " ".join(map(lambda s: '"' + s + '"', cmd))
+        quoted_args = " ".join(map(lambda s: s if s == "&" else '"' + s + '"', cmd))
         cmd_line = ("""start {title} /D "{cwd}" /W cmd /K "{quoted_args}" """
                     .format(cwd=cwd,
                             quoted_args=quoted_args,
@@ -38,38 +56,14 @@ def _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title=None):
         subprocess.Popen(cmd_line, cwd=cwd, env=env, shell=True)
     else:
         subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE,
-                         cwd=cwd)
+                         cwd=cwd, env=env)
 
 
 def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
     def _shellquote(s):
         return subprocess.list2cmdline([s])
-
-    xte = shutil.which("x-terminal-emulator")
-    if xte:
-        if (os.path.realpath(xte).endswith("/lxterminal")
-            and shutil.which("lxterminal")):
-            # need to know, see below
-            term_cmd = "lxterminal"
-        else:
-            term_cmd = "x-terminal-emulator"
-    # Can't use konsole, because it doesn't pass on the environment
-    #         elif shutil.which("konsole"):
-    #             if (shutil.which("gnome-terminal")
-    #                 and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
-    #                 term_cmd = "gnome-terminal"
-    #             else:
-    #                 term_cmd = "konsole"
-    elif shutil.which("gnome-terminal"):
-        term_cmd = "gnome-terminal"
-    elif shutil.which("xfce4-terminal"):
-        term_cmd = "xfce4-terminal"
-    elif shutil.which("lxterminal"):
-        term_cmd = "lxterminal"
-    elif shutil.which("xterm"):
-        term_cmd = "xterm"
-    else:
-        raise RuntimeError("Don't know how to open terminal emulator")
+    
+    term_cmd = _get_linux_terminal_command()
     
     
     if isinstance(cmd, list):
@@ -93,27 +87,28 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
         )
         
 
-    subprocess.Popen(whole_cmd, env=env, shell=True)
+    subprocess.Popen(whole_cmd, cwd=cwd, env=env, shell=True)
 
 
-def _run_in_terminal_in_macos(cmd, cwd, env, keep_open):
+def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
     _shellquote = shlex.quote
 
-    cmds = "clear; unset TK_LIBRARY; unset TCL_LIBRARY"
+    cmds = "clear; "
     cmds += "; cd " + _shellquote(cwd)
     # osascript "tell application" won't change Terminal's env
     # (at least when Terminal is already active)
     # At the moment I just explicitly set some important variables
-    # TODO: Did I miss something?
-    if env and env.get("PATH"):
-        cmds += "; export PATH=" + _shellquote(env["PATH"])
-
-    if env and "SSL_CERT_FILE" in env:
-        cmds += ";export SSL_CERT_FILE=" + _shellquote(env["SSL_CERT_FILE"])
+    for key in env_overrides:
+        if env_overrides[key] is None:
+            cmds += "; unset " + key
+        else:
+            cmds += "; export {key}={value}".format(key=key, 
+                                                    value=_shellquote(env_overrides[key]))
     
-    if isinstance(cmd, list):
-        cmd = " ".join(map(_shellquote, cmd))
-    cmds += "; " + cmd
+    if cmd:
+        if isinstance(cmd, list):
+            cmd = " ".join(map(_shellquote, cmd))
+        cmds += "; " + cmd
     
     if not keep_open:
         cmds += "; exit"
@@ -157,5 +152,32 @@ def _run_in_terminal_in_macos(cmd, cwd, env, keep_open):
         + """ -e 'end if                                    ' """
     )
 
-    subprocess.Popen(cmd_line, env=env, cwd=cwd, shell=True)
+    subprocess.Popen(cmd_line, cwd=cwd, shell=True)
 
+def _get_linux_terminal_command():
+    xte = shutil.which("x-terminal-emulator")
+    if xte:
+        if (os.path.realpath(xte).endswith("/lxterminal")
+            and shutil.which("lxterminal")):
+            # need to know exact program, because it needs special treatment
+            return "lxterminal"
+        else:
+            return "x-terminal-emulator"
+    # Can't use konsole, because it doesn't pass on the environment
+    #         elif shutil.which("konsole"):
+    #             if (shutil.which("gnome-terminal")
+    #                 and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
+    #                 term_cmd = "gnome-terminal"
+    #             else:
+    #                 term_cmd = "konsole"
+    elif shutil.which("gnome-terminal"):
+        return "gnome-terminal"
+    elif shutil.which("xfce4-terminal"):
+        return "xfce4-terminal"
+    elif shutil.which("lxterminal"):
+        return "lxterminal"
+    elif shutil.which("xterm"):
+        return "xterm"
+    else:
+        raise RuntimeError("Don't know how to open terminal emulator")
+    
