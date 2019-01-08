@@ -8,7 +8,6 @@ import inspect
 import io
 import logging
 import os.path
-import platform
 import pkgutil
 import pydoc
 import signal
@@ -43,7 +42,7 @@ from thonny.common import (
     range_contains_smaller,
     range_contains_smaller_or_equal,
     serialize_message,
-)
+    get_exe_dirs, get_augmented_system_path, update_system_path)
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -90,7 +89,6 @@ class VM:
         self._source_info_by_frame = {}
         site.sethelper()  # otherwise help function is not available
         pydoc.pager = pydoc.plainpager  # otherwise help command plays tricks
-        self._tweak_system_path()
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
@@ -131,7 +129,7 @@ class VM:
                 prefix=sys.prefix,
                 welcome_text="Python " + _get_python_version_string(),
                 executable=sys.executable,
-                exe_dirs=self._get_exe_dirs(),
+                exe_dirs=get_exe_dirs(),
                 in_venv=(
                     hasattr(sys, "base_prefix")
                     and sys.base_prefix != sys.prefix
@@ -290,53 +288,7 @@ class VM:
         with open(_CONFIG_FILENAME, "w") as fp:
             self._ini.write(fp)
     
-    def _get_exe_dirs(self):
-        # return directories containing user scripts, base scripts and executable
-        result = []
-        if site.ENABLE_USER_SITE:
-            if platform.system() == "Windows":
-                if site.getusersitepackages():
-                    result.append(site.getusersitepackages()
-                                  .replace("site-packages", "Scripts"))
-            else:
-                if site.getuserbase():
-                    result.append(site.getuserbase() + "/bin")
-        
-        main_scripts = os.path.join(sys.prefix, "Scripts")
-        if os.path.isdir(main_scripts) and main_scripts not in result:
-            result.append(main_scripts)
-        
-        if os.path.dirname(sys.executable) not in result:
-            result.append(os.path.dirname(sys.executable))
-        
-        return result
-        
     
-    def _tweak_system_path(self):
-        """Allow easy calling of executables in Python script dir """
-        
-        def prepend_if_missing(script_dir):
-            sys_path = os.environ.get("PATH", "")
-            if script_dir not in sys_path.split(os.pathsep):
-                os.environ["PATH"] = script_dir + os.pathsep + sys_path
-                
-        try:
-            if platform.system() == "Windows":
-                base_scripts = sys.prefix + "\\Scripts"
-            else:
-                base_scripts = sys.prefix + "/bin"
-            prepend_if_missing(base_scripts)
-            
-            if platform.system() == "Windows":
-                user_scripts = site.USER_SITE.replace("site-packages", "Scripts")
-            else:
-                user_scripts = site.USER_BASE + "/bin"
-            prepend_if_missing(user_scripts)
-            
-        except Exception:
-            logging.getLogger("thonny").exception("Couldn't tweak system path")
-            pass
-
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
         
@@ -474,10 +426,12 @@ class VM:
         return ToplevelResponse(command_name="execute_source", **result_attributes)
 
     def _cmd_execute_system_command(self, cmd):
-        # TODO: how to publish stdout as it arrives?
         env = dict(os.environ).copy()
         encoding = "utf-8"
         env["PYTHONIOENCODING"] = encoding
+        # Make sure this python interpreter and its scripts are available
+        # in PATH 
+        update_system_path(env, get_augmented_system_path(get_exe_dirs()))
         popen_kw = dict(
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -493,6 +447,8 @@ class VM:
         assert cmd.cmd_line.startswith("!")
         cmd_line = cmd.cmd_line[1:]
         proc = subprocess.Popen(cmd_line, **popen_kw)
+        
+        # TODO: how to publish stdout as it arrives?
         out, err = proc.communicate(input="")
         print(out, end="")
         print(err, file=sys.stderr, end="")

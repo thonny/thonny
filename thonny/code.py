@@ -158,7 +158,7 @@ class Editor(ttk.Frame):
             source = fp.read()
 
         # Make sure Windows filenames have proper format
-        filename = normpath_with_actual_case(filename)  
+        filename = normpath_with_actual_case(filename)
         self._filename = filename
         self._last_known_mtime = os.path.getmtime(self._filename)
 
@@ -185,16 +185,16 @@ class Editor(ttk.Frame):
                 defaultextension=".py",
                 initialdir=get_workbench().get_cwd(),
             )
-            
+
             # Different tkinter versions may return different values
-            if new_filename in ["", (), None,]:  
+            if new_filename in ["", (), None,]:
                 return None
 
             # Seems that in some Python versions defaultextension
             # acts funny
             if new_filename.lower().endswith(".py.py"):
                 new_filename = new_filename[:-3]
-            
+
             if running_on_windows():
                 # may have /-s instead of \-s and wrong case
                 new_filename = os.path.join(
@@ -229,7 +229,7 @@ class Editor(ttk.Frame):
                         parent=get_workbench(),
                     ):
                         return self.save_file(ask_filename)
-            
+
             self._filename = new_filename
             get_workbench().event_generate("SaveAs", editor=self, filename=new_filename)
 
@@ -239,7 +239,7 @@ class Editor(ttk.Frame):
             f.write(content)
             f.flush()
             # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
-            os.fsync(f)  
+            os.fsync(f)
             f.close()
             self._last_known_mtime = os.path.getmtime(self._filename)
         except PermissionError:
@@ -467,7 +467,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         """If no filename was sent from command line
         then load previous files (if setting allows)"""
 
-        cmd_line_filenames = [name for name in sys.argv[1:] if os.path.exists(name)]
+        cmd_line_filenames = [os.path.abspath(name) for name in sys.argv[1:] if os.path.exists(name)]
 
         if len(cmd_line_filenames) > 0:
             filenames = cmd_line_filenames
@@ -727,7 +727,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             message = "Do you want to save file before closing?"
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close", message=message, default=messagebox.YES, 
+            title="Save On Close", message=message, default=messagebox.YES,
             master=get_workbench(),
             parent=get_workbench(),
         )
@@ -757,3 +757,17 @@ def get_current_breakpoints():
                 result[filename] = linenos
 
     return result
+
+def get_saved_current_script_filename(force=True):
+    editor = get_workbench().get_editor_notebook().get_current_editor()
+    if not editor:
+        return
+
+    filename = editor.get_filename(force)
+    if not filename:
+        return
+
+    if editor.is_modified():
+        filename = editor.save_file()
+    
+    return filename

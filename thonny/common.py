@@ -253,36 +253,25 @@ def read_source(filename):
         return fp.read()
 
 
-def get_system_path_with_python_dirs(executable):
-            
-    def _add_to_path(directory, path):
-        # Always prepending to path may seem better, but this could mess up other things.
-        # If the directory contains only one Python distribution executables, then
-        # it probably won't be in path yet and therefore will be prepended.
-        if (directory in path.split(os.pathsep)
-            or platform.system() == "Windows"
-            and directory.lower() in path.lower().split(os.pathsep)):
-            return path
+def get_exe_dirs():
+    result = []
+    if site.ENABLE_USER_SITE:
+        if platform.system() == "Windows":
+            if site.getusersitepackages():
+                result.append(site.getusersitepackages()
+                              .replace("site-packages", "Scripts"))
         else:
-            return directory + os.pathsep + path
+            if site.getuserbase():
+                result.append(site.getuserbase() + "/bin")
     
-    path = os.environ.get("PATH", "")    
-    try:
-        base_scripts = os.path.dirname(executable)
-        if platform.system() == "Windows":
-            base_scripts += "\\Scripts"
-        path = _add_to_path(base_scripts, path)
-        
-        # For user bin directory I'm using sa
-        if platform.system() == "Windows":
-            user_scripts = site.USER_SITE.replace("site-packages", "Scripts")
-        else:
-            user_scripts = site.USER_BASE + "/bin"
-        prepend_if_missing(user_scripts)
-        
-    except Exception:
-        logging.getLogger("thonny").exception("Couldn't tweak system path")
-        pass
+    main_scripts = os.path.join(sys.prefix, "Scripts")
+    if os.path.isdir(main_scripts) and main_scripts not in result:
+        result.append(main_scripts)
+    
+    if os.path.dirname(sys.executable) not in result:
+        result.append(os.path.dirname(sys.executable))
+    
+    return result
 
 def get_site_dir(symbolic_name, executable=None):
     if not executable or executable == sys.executable:
@@ -295,6 +284,45 @@ def get_site_dir(symbolic_name, executable=None):
         ).decode().strip()
     
     return result if result else None
+
+def get_base_executable():
+    if sys.exec_prefix == sys.base_exec_prefix:
+        return sys.executable
+    
+    if platform.system() == "Windows":
+        result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
+        result = normpath_with_actual_case(result)
+    else:
+        result = sys.executable.replace(sys.exec_prefix, sys.base_exec_prefix)
+    
+    if not os.path.isfile(result):
+        raise RuntimeError("Can't locate base executable")
+    
+    return result
+
+def get_augmented_system_path(extra_dirs):
+    path_items = os.environ.get("PATH", "").split(os.pathsep)
+    
+    for d in reversed(extra_dirs):
+        if d not in path_items:
+            path_items.insert(0, d)
+    
+    return os.pathsep.join(path_items)
+
+def update_system_path(env, value):
+    # in Windows, env keys are not case sensitive
+    # this is important if env is a dict (not os.environ)
+    if platform.system() == "Windows":
+        found = False
+        for key in env:
+            if key.upper() == "PATH":
+                found = True
+                env[key] = value
+        
+        if not found:
+            env["PATH"] = value
+    else:
+        env["PATH"] = value
 
 class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""

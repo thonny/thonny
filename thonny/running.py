@@ -31,7 +31,8 @@ from thonny import (
     get_workbench,
     ui_utils,
 )
-from thonny.code import get_current_breakpoints
+from thonny.code import get_current_breakpoints,\
+    get_saved_current_script_filename
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -47,7 +48,7 @@ from thonny.common import (
     parse_message,
     path_startswith,
     serialize_message,
-)
+    update_system_path)
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
@@ -272,7 +273,7 @@ class Runner:
         if not self.is_waiting_toplevel_command():
             self.restart_backend(False, False, 2)
         
-        filename = self._get_saved_current_script_filename()
+        filename = get_saved_current_script_filename()
 
         # changing dir may be required
         script_dir = normpath_with_actual_case(os.path.dirname(filename))
@@ -298,20 +299,6 @@ class Runner:
         else:
             return []
     
-    def _get_saved_current_script_filename(self):
-        editor = get_workbench().get_editor_notebook().get_current_editor()
-        if not editor:
-            return
-
-        filename = editor.get_filename(True)
-        if not filename:
-            return
-
-        if editor.is_modified():
-            filename = editor.save_file()
-        
-        return filename
-    
     def _cmd_run_current_script_enabled(self) -> bool:
         return (
             get_workbench().get_editor_notebook().get_current_editor() is not None
@@ -327,7 +314,7 @@ class Runner:
         self.execute_current("Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
-        filename = self._get_saved_current_script_filename()
+        filename = get_saved_current_script_filename()
         self._proxy.run_script_in_terminal(
             filename,
             self._get_active_arguments(),
@@ -491,11 +478,11 @@ class Runner:
             self._proxy.destroy()
             self._proxy = None
 
-    def get_executable(self) -> Optional[str]:
+    def get_local_executable(self) -> Optional[str]:
         if self._proxy is None:
             return None
         else:
-            return self._proxy.get_executable()
+            return self._proxy.get_local_executable()
 
     def get_backend_proxy(self) -> "BackendProxy":
         return self._proxy
@@ -608,7 +595,7 @@ class BackendProxy:
         """Used in MicroPython proxies"""
         return True
 
-    def get_executable(self):
+    def get_local_executable(self):
         """Return system command for invoking current interpreter"""
         return None
 
@@ -727,36 +714,11 @@ class CPythonProxy(BackendProxy):
         self._message_queue = None
 
     def _start_new_process(self, cmd=None):
-        this_python = get_frontend_python()
         # deque, because in one occasion I need to put messages back
         self._message_queue = collections.deque()
 
-        # prepare the environment
-        my_env = os.environ.copy()
-
-        # Delete some environment variables if the backend is (based on) a different Python instance
-        if self._executable not in [
-            this_python,
-            this_python.replace("python.exe", "pythonw.exe"),
-            this_python.replace("pythonw.exe", "python.exe"),
-        ]:
-
-            # Keep only the variables, that are not related to Python
-            my_env = {
-                name: my_env[name]
-                for name in my_env
-                if "python" not in name.lower()
-                and name not in ["TK_LIBRARY", "TCL_LIBRARY"]
-            }
-
-            # Remove variables used to tweak bundled Thonny-private Python
-            if using_bundled_python():
-                my_env = {
-                    name: my_env[name]
-                    for name in my_env
-                    if name not in ["SSL_CERT_FILE", "SSL_CERT_DIR", "LD_LIBRARY_PATH"]
-                }
-
+        # prepare environment
+        my_env = get_environment_for_python_subprocess(self._executable)
         # variables controlling communication with the back-end process
         my_env["PYTHONIOENCODING"] = "utf-8"
 
@@ -767,14 +729,6 @@ class CPythonProxy(BackendProxy):
             my_env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in my_env:
             del my_env["THONNY_DEBUG"]
-
-        # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
-        if self._executable == get_private_venv_executable():
-            try:
-                my_env["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
-                my_env["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
-            except Exception:
-                logging.exception("Can't find Tcl/Tk library")
 
         if not os.path.exists(self._executable):
             raise UserError(
@@ -895,7 +849,7 @@ class CPythonProxy(BackendProxy):
                     BackendEvent("ProgramOutput", stream_name="stderr", data=data)
                 )
 
-    def get_executable(self):
+    def get_local_executable(self):
         return self._executable
 
     def get_site_packages(self):
@@ -910,6 +864,9 @@ class CPythonProxy(BackendProxy):
 
     def get_user_site_packages(self):
         return self._usersitepackages
+    
+    def get_exe_dirs(self):
+        return self._exe_dirs
 
     def _update_gui_updating(self, msg):
         """Enables running Tkinter or Qt programs which doesn't call mainloop. 
@@ -1117,21 +1074,12 @@ def _get_venv_info(venv_path):
 
 
 def using_bundled_python():
+    return is_bundled_python(sys.executable)
+
+def is_bundled_python(executable):
     return os.path.exists(
-        os.path.join(os.path.dirname(sys.executable), "thonny_python.ini")
+        os.path.join(os.path.dirname(executable), "thonny_python.ini")
     )
-
-
-def create_pythonless_environment():
-    # If I want to call another python version, then
-    # I need to remove from environment the items installed by current interpreter
-    env = {}
-
-    for key in os.environ:
-        if "python" not in key.lower() and key not in ["TK_LIBRARY", "TCL_LIBRARY"]:
-            env[key] = os.environ[key]
-
-    return env
 
 
 def create_backend_python_process(
@@ -1142,9 +1090,9 @@ def create_backend_python_process(
 
     # TODO: if backend == frontend, then delegate to create_frontend_python_process
 
-    python_exe = get_runner().get_executable()
+    python_exe = get_runner().get_local_executable()
 
-    env = create_pythonless_environment()
+    env = get_environment_for_python_subprocess(python_exe)
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUNBUFFERED"] = "1"
 
@@ -1206,3 +1154,99 @@ class BackendTerminatedError(Exception):
 
 def get_frontend_python():
     return sys.executable.replace("thonny.exe", "python.exe")
+
+def is_venv_interpreter_of_current_interpreter(executable):
+    for location in [".", ".."]:
+        cfg_path = os.path.join(location, "pyvenv.cfg")
+        if os.path.isfile(cfg_path):
+            with open(cfg_path) as fp:
+                content = fp.read()
+            for line in content.splitlines():
+                if line.replace(" ", "").startswith("home="):
+                    _, home = line.split("=", maxsplit=1)
+                    home = home.strip()
+                    if os.path.isdir(home) and os.path.samefile(home, sys.prefix):
+                        return True
+    return False
+
+    
+def get_environment_for_python_subprocess(target_executable):
+    overrides = get_environment_overrides_for_python_subprocess(target_executable)
+    return get_environment_with_overrides(overrides)
+
+def get_environment_with_overrides(overrides):
+    env = os.environ.copy()
+    for key in overrides:
+        if overrides[key] is None and key in env:
+            del env[key]
+        else:
+            assert isinstance(overrides[key], str)
+            if key.upper() == "PATH":
+                update_system_path(env, overrides[key])
+            else:
+                env[key] = overrides[key]
+    return env
+    
+def get_environment_overrides_for_python_subprocess(target_executable):
+    """Take care of not not confusing different interpreter 
+    with variables meant for bundled interpreter"""
+    
+    # At the moment I'm tweaking the environment only if current 
+    # exe is bundled for Thonny. 
+    # In remaining cases it is user's responsibility to avoid 
+    # calling Thonny with environment which may be confusing for 
+    # different Pythons called in a subprocess.
+    
+    this_executable = sys.executable.replace("pythonw.exe", "python.exe")
+    target_executable = target_executable.replace("pythonw.exe", "python.exe")
+    
+    interpreter_specific_keys = ["TCL_LIBRARY", "TK_LIBRARY",
+                                 "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH",
+                                 "SSL_CERT_DIR", "SSL_CERT_FILE",
+                                 "PYTHONHOME", "PYTHONPATH",
+                                 "PYTHONNOUSERSITE", "PYTHONUSERBASE"]
+    
+    result = {}
+    
+    if (os.path.samefile(target_executable, this_executable)
+        or is_venv_interpreter_of_current_interpreter(target_executable)):
+        # bring out some important variables so that they can 
+        # be explicitly set in macOS Terminal
+        # (If they are set then it's most likely because current exe is in Thonny bundle)
+        for key in interpreter_specific_keys:
+            if key in os.environ:
+                result[key] = os.environ[key]
+        
+        # never pass some variables to different interpreter
+        # (even if it's venv or symlink to current one)
+        if not is_same_path(target_executable, this_executable):
+            for key in ["PYTHONPATH", "PYTHONHOME",
+                        "PYTHONNOUSERSITE", "PYTHONUSERBASE"]:
+                if key in os.environ:
+                    result[key] = None
+    else:
+        # interpreters are not related
+        # interpreter specific keys most likely would confuse other interpreter
+        for key in interpreter_specific_keys:
+            if key in os.environ:
+                result[key] = None
+    
+    
+    # some keys should be never passed
+    for key in ["PYTHONSTARTUP", "PYTHONBREAKPOINT", "PYTHONDEBUG",
+                "PYTHONNOUSERSITE", "PYTHONASYNCIODEBUG"]:
+        if key in os.environ:
+            result[key] = None
+
+    # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
+    if is_venv_interpreter_of_current_interpreter(target_executable):
+        try:
+            if ("TCL_LIBRARY" not in os.environ
+                or "TK_LIBRARY" not in os.environ): 
+                result["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
+                result["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
+        except Exception:
+            logging.exception("Can't compute Tcl/Tk library location")
+
+    
+    return result
