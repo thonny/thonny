@@ -1233,7 +1233,7 @@ class BirdsEyeRunner(Executor):
         global_vars = __main__.__dict__
 
         try:
-            result = self._execute_prepared_user_code(source, filename, global_vars)
+            result = self._prepare_hooks_and_execute(source, filename, global_vars)
         except SyntaxError:
             return {"user_exception": self._vm._prepare_user_exception()}
         except SystemExit:
