@@ -1156,7 +1156,8 @@ class Executor:
             return self._execute_prepared_user_code(statements, expression, global_vars)
         finally:
             del sys.meta_path[0]
-            self._vm._restore_original_import()
+            if hasattr(self._vm, "_original_import"):
+                self._vm._restore_original_import()
 
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
