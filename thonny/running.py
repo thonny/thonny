@@ -1106,6 +1106,9 @@ def create_frontend_python_process(
 ):
     """Used for running helper commands (eg. for installing plug-ins on by the plug-ins)"""
     python_exe = get_frontend_python().replace("pythonw.exe", "python.exe")
+    env = get_environment_for_python_subprocess(python_exe)
+    env["PYTHONIOENCODING"] = "utf-8"
+    env["PYTHONUNBUFFERED"] = "1"
     return _create_python_process(python_exe, args, stdin, stdout, stderr)
 
 

@@ -256,7 +256,7 @@ class VM:
         ini.set(section, subname, value)
         self.save_settings()
     
-    def _switch_env_to_script_mode(self, cmd):
+    def switch_env_to_script_mode(self, cmd):
         if "" in sys.path:
             sys.path.remove("") # current directory
             
@@ -372,18 +372,18 @@ class VM:
             raise UserError("cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        self._switch_env_to_script_mode(cmd)
+        self.switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, SimpleRunner)
 
     def _cmd_run(self, cmd):
         return self._execute_file(cmd, SimpleRunner)
 
     def _cmd_FastDebug(self, cmd):
-        self._switch_env_to_script_mode(cmd)
+        self.switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, FastTracer)
 
     def _cmd_Debug(self, cmd):
-        self._switch_env_to_script_mode(cmd)
+        self.switch_env_to_script_mode(cmd)
         return self._execute_file(cmd, NiceTracer)
 
     def _cmd_debug(self, cmd):
