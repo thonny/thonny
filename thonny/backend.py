@@ -112,8 +112,9 @@ class VM:
 
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
-
-        self._load_shared_modules(init_msg["frontend_sys_path"])
+        
+        self._frontend_sys_path = init_msg["frontend_sys_path"]
+        self._load_shared_modules()
         self._load_plugins()
 
         self.send_message(
@@ -168,7 +169,7 @@ class VM:
         or a BackendResponse
         """
         self._command_handlers[command_name] = handler
-
+    
     def add_object_info_tweaker(self, tweaker):
         """Tweaker should be 2-argument function taking value and export record"""
         self._object_info_tweakers.append(tweaker)
@@ -311,9 +312,12 @@ class VM:
 
         return module
 
-    def _load_shared_modules(self, frontend_sys_path):
+    def _load_shared_modules(self):
         for name in ["parso", "jedi", "thonnycontrib", "six", "asttokens"]:
-            load_module_from_alternative_path(name, frontend_sys_path)
+            self.load_module_from_frontend_path(name)
+
+    def load_module_from_frontend_path(self, name):
+        load_module_from_alternative_path(name, self._frontend_sys_path)
 
     def _load_plugins(self):
         # built-in plugins
