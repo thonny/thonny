@@ -216,6 +216,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
 
     def _handle_program_output(self, msg):
+        self._ensure_visible()
         # mark first line of io
         if self._before_io:
             self._insert_text_directly(
@@ -233,8 +234,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._before_io = True
         if msg.get("error"):
             self._insert_text_directly(msg["error"] + "\n", ("toplevel", "stderr"))
+            self._ensure_visible()
+
         if "user_exception" in msg:
             self._show_user_exception(msg["user_exception"])
+            self._ensure_visible()
 
         welcome_text = msg.get("welcome_text")
         if welcome_text and welcome_text != self._last_welcome_text:
@@ -308,6 +312,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         self._insert_text_directly(">>> ", prompt_tags)
         self.edit_reset()
+    
+    def _ensure_visible(self):
+        get_workbench().show_view("ShellView")
 
     def restart(self):
         self._insert_text_directly(

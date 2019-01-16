@@ -157,6 +157,8 @@ class Workbench(tk.Tk):
         self._init_regular_mode_link()
 
         self._show_views()
+        # Make sure ShellView is loaded
+        self.get_view("ShellView")
 
         self._init_commands()
         self._init_icon()
