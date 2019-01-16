@@ -677,6 +677,8 @@ class EnhancedText(TweakableText):
     def on_secondary_click(self, event=None):
         "Use this for invoking context menu"
         self.focus_set()
+        if event:
+            self.mark_set("insert", "@%d,%d" % (event.x, event.y))
 
     def _reload_theme_options(self, event=None):
 

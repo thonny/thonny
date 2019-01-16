@@ -20,6 +20,7 @@ from thonny.common import TextRange
 from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
 from thonny.tktextext import TweakableText
 import sys
+from _tkinter import TclError
 
 
 class CustomMenubar(ttk.Frame):
@@ -2001,7 +2002,92 @@ def popen_with_ui_thread_callback(
     poll()
     return proc
 
+class MenuEx(tk.Menu):
+    def __init__(self, target):
+        self._testers = {}
+        super().__init__(target, tearoff=False,
+                         postcommand=self.on_post, 
+                         **get_style_configuration("Menu"))
+    
+    def on_post(self, *args):
+        self.update_item_availability()
+    
+    def update_item_availability(self):
+        for i in range(self.index("end") + 1):
+            item_data = self.entryconfigure(i)
+            if "label" in item_data:
+                tester = self._testers.get(item_data["label"])
+                if tester and not tester():
+                    self.entryconfigure(i, state=tk.DISABLED)
+                else:
+                    self.entryconfigure(i, state=tk.NORMAL)
+                
+    
+    def add(self, kind, cnf={}, **kw):
+        cnf = cnf or kw
+        tester = cnf.get("tester")
+        if "tester" in cnf:
+            del cnf["tester"]
+        
+        super().add(kind, cnf)
+        
+        itemdata = self.entryconfigure(self.index("end"))
+        labeldata = itemdata.get("label")
+        if labeldata: 
+            self._testers[labeldata] = tester
 
+class TextMenu(MenuEx):
+    def __init__(self, target):
+        self.text = target
+        MenuEx.__init__(self, target)
+        self.add_basic_items()
+        self.add_extra_items()
+    
+    def add_basic_items(self):
+        self.add_command(label="Cut", command=self.on_cut, tester=self.can_cut)
+        self.add_command(label="Copy", command=self.on_copy, tester=self.can_copy)
+        self.add_command(label="Paste", command=self.on_paste, tester=self.can_paste)
+    
+    def add_extra_items(self):
+        self.add_separator()
+        self.add_command(label="Select All", command=self.on_select_all)
+    
+    def on_cut(self):
+        self.text.event_generate("<<Cut>>")
+    
+    def on_copy(self):
+        self.text.event_generate("<<Copy>>")
+    
+    def on_paste(self):
+        self.text.event_generate("<<Paste>>")
+    
+    def on_select_all(self):
+        self.text.event_generate("<<SelectAll>>")
+    
+    def can_cut(self):
+        return (
+            self.get_selected_text()
+            and not self.selection_is_read_only()
+        )
+    
+    def can_copy(self):
+        return self.get_selected_text()
+    
+    def can_paste(self):
+        return not self.selection_is_read_only()
+    
+    def get_selected_text(self):
+        try:
+            return self.text.get("sel.first", "sel.last")
+        except TclError:
+            return ""
+    
+    def selection_is_read_only(self):
+        if hasattr(self.text, "is_read_only"):
+            return self.text.is_read_only()
+        
+        return False
+        
 if __name__ == "__main__":
     root = tk.Tk()
     closa = ClosableNotebook(root)
