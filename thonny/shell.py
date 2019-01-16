@@ -22,7 +22,8 @@ from thonny.ui_utils import (
     get_style_configuration,
     scrollbar_style,
     sequence_to_accelerator,
-    select_sequence)
+    select_sequence, TextMenu)
+from _tkinter import TclError
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
@@ -111,6 +112,13 @@ class ShellView(ttk.Frame):
         if conclusion is not None:
             self.text.direct_insert("end", conclusion + "\n", ("stderr",))
 
+class ShellMenu(TextMenu):
+    def add_extra_items(self):
+        self.add_separator()
+        self.add_command(label="Clear", command=self.text._clear_shell)
+        
+    def selection_is_read_only(self):
+        return not self.text.selection_is_writable()
 
 class ShellText(EnhancedTextWithLogging, PythonText):
     def __init__(self, master, cnf={}, **kw):
@@ -187,18 +195,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             "DebuggerResponse", self._handle_fancy_debugger_progress, True
         )
 
-        self._init_menu()
-
-    def _init_menu(self):
-        self._menu = tk.Menu(self, tearoff=False, **get_style_configuration("Menu"))
-        clear_seq = get_workbench().get_option(
-            "shortcuts.clear_shell", _CLEAR_SHELL_DEFAULT_SEQ
-        )
-        self._menu.add_command(
-            label="Clear shell",
-            command=self._clear_shell,
-            accelerator=sequence_to_accelerator(clear_seq),
-        )
+        self._menu = ShellMenu(self)
 
     def submit_command(self, cmd_line, tags):
         assert get_runner().is_waiting_toplevel_command()
@@ -361,6 +358,18 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.direct_delete(index1, index2, **kw)
         else:
             get_workbench().bell()
+    
+    def selection_is_writable(self):
+        try:
+            if not self.has_selection():
+                return self._in_current_input_range(self.index("insert"))
+            else:
+                return (
+                    self._in_current_input_range(self.index("sel.first"))
+                    and self._in_current_input_range(self.index("sel.last")))
+        except TclError:
+            return True
+        
 
     def perform_return(self, event):
         if get_runner().is_running():
