@@ -3,6 +3,7 @@ import builtins
 import re
 import token
 import tokenize
+import os.path
 
 from thonny.assistance import ErrorHelper, Suggestion, name_similarity, add_error_helper
 from thonny import assistance
@@ -32,7 +33,7 @@ class SyntaxErrorHelper(ErrorHelper):
             self.intro_text = "You haven't properly closed a triple-quoted string"
 
         else:
-            if self.error_info["filename"]:
+            if self.error_info["filename"] and os.path.isfile(self.error_info["filename"]):
                 with open(self.error_info["filename"], mode="rb") as fp:
                     try:
                         for t in tokenize.tokenize(fp.readline):
@@ -44,7 +45,7 @@ class SyntaxErrorHelper(ErrorHelper):
                     or self.tokens[-1].type not in [token.ERRORTOKEN, token.ENDMARKER]):
                     self.tokens.append(tokenize.TokenInfo(token.ERRORTOKEN, "", None, None, ""))
             else:
-                self.tokens = None
+                self.tokens = []
 
             unbalanced = self._sug_unbalanced_parens()
             if unbalanced:
