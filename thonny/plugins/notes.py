@@ -1,15 +1,26 @@
 import os.path
-from thonny.tktextext import TextFrame
+from thonny.tktextext import TextFrame, EnhancedText
 from thonny import get_workbench, ui_utils, THONNY_USER_DIR
+from thonny.ui_utils import TextMenu
+
+class NotesText(EnhancedText):
+    def __init__(self, master, **kw):
+        EnhancedText.__init__(self, master=master, wrap="word", undo=True, **kw)
+        self.context_menu = TextMenu(self)
+    
+    def on_secondary_click(self, event=None):
+        super().on_secondary_click(event=event)
+        self.context_menu.tk_popup(event.x_root, event.y_root)
 
 class NotesView(TextFrame):
     def __init__(self, master):
-        super().__init__(master,
-                         horizontal_scrollbar_class=ui_utils.AutoScrollbar,
-                         wrap="word")
-        
         self.filename = os.path.join(THONNY_USER_DIR, "user_notes.txt") 
+        super().__init__(master,
+                         text_class=NotesText,
+                         horizontal_scrollbar_class=ui_utils.AutoScrollbar)
+        
         self.load_content()
+        self.text.edit_reset()
         
         get_workbench().bind("ToplevelResponse", self.save_content, True)
         
