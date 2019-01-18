@@ -14,3 +14,5 @@ We are welcoming all kinds of contributions:
 * tests
 * refactorings
 * ...
+
+See the `wiki <https://github.com/thonny/thonny/wiki>`_ for more info.
