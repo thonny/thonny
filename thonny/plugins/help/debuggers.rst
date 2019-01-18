@@ -3,7 +3,8 @@
 Using debuggers
 ==========================
 If you want to see how Python executes your program step-by-step then you 
-should run it in "nicer" or "faster" *debug-mode*.
+should run it in "nicer" or "faster" *debug-mode*. You can also run it with `Birdseye <birdseye.rst>`_ and
+explore the execution steps later.
 
 "Nicer" mode
 ------------
@@ -51,6 +52,7 @@ With *Debug current script (faster)* you lose the niceties but you can step thro
 You can use same commands (except "Step back") as with nicer debugger. This is the debugging style most professional
 programmers are accustomed with.
 
+
 Different styles for showing the call stack
 -------------------------------------------
 By default Thonny uses stacked windows for presenting the call stack. This gives good intuition about 
@@ -59,4 +61,7 @@ two different styles for presenting call stack. In “Tools → Options → Debu
 traditional style with a separate view for presenting and switching call frames. Note that both 
 styles can be used with both debugging modes.
 
-
+Birdseye
+--------
+Command *Debug current script (Birdseye)* is explained at a `separate page <birdseye.rst>`_
+ 

@@ -2104,6 +2104,9 @@ class Workbench(tk.Tk):
 
         # Fallback
         webbrowser.open(url, False, True)
+    
+    def open_help_topic(self, topic, fragment=None):
+        self.show_view("HelpView").load_topic(topic, fragment)
 
     def bell(self, displayof=0):
         if not self.get_option("general.disable_notification_sound"):

@@ -2,12 +2,22 @@ import os.path
 from thonny import get_workbench, get_runner
 import subprocess
 import sys
+from tkinter import messagebox
 
 def _start_debug_enabled():
     return (get_workbench().get_editor_notebook().get_current_editor() is not None
         and "debug" in get_runner().get_supported_features())
 
 def _debug_with_birdseye():
+    try:
+        import birdseye
+    except ImportError:
+        if messagebox.askyesno("About Birdseye", 
+                               "Birdseye is a Python debugger which needs to be installed separately.\n\n"
+                             + "Do you want to open the help page and learn more?"):
+            get_workbench().open_help_topic("birdseye")
+            
+        return
     # TODO: can you change birdseye command such that it doesn't 
     # start the server if it is already started?
     subprocess.Popen([sys.executable, "-m", "birdseye"])
