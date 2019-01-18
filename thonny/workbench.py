@@ -341,17 +341,23 @@ class Workbench(tk.Tk):
 
     def _load_plugins_from_path(self, path: List[str], prefix: str) -> None:
         load_function_name = "load_plugin"
-
+        
+        modules = []
         for _, module_name, _ in sorted(
             pkgutil.iter_modules(path, prefix), key=lambda x: x[2]
         ):
             try:
                 m = importlib.import_module(module_name)
                 if hasattr(m, load_function_name):
-                    getattr(m, load_function_name)()
+                    modules.append(m)
             except Exception:
                 logging.exception("Failed loading plugin '" + module_name + "'")
 
+        def module_sort_key(m):
+            return getattr(m, "load_order_key", m.__name__)
+        
+        for m in sorted(modules, key=module_sort_key):
+            getattr(m, load_function_name)()
     def _init_fonts(self) -> None:
         # set up editor and shell fonts
         self.set_default(
