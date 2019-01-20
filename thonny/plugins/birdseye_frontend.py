@@ -1,16 +1,33 @@
 import os.path
-from thonny import get_workbench, get_runner
-import subprocess
-import sys
+from threading import Thread
 from tkinter import messagebox
+
+from thonny import get_workbench, get_runner
+
+
+_server_started = False
 
 def _start_debug_enabled():
     return (get_workbench().get_editor_notebook().get_current_editor() is not None
         and "debug" in get_runner().get_supported_features())
 
+
+def start_server():
+    from birdseye import server
+    server.app.run(
+        port=7777,
+        debug=False,
+        use_reloader=False,
+    )
+    
+    
+
+
 def _debug_with_birdseye():
+    global _server_started
+    
     try:
-        import birdseye
+        import birdseye  # @UnusedImport
     except ImportError:
         if messagebox.askyesno("About Birdseye", 
                                "Birdseye is a Python debugger which needs to be installed separately.\n\n"
@@ -18,9 +35,11 @@ def _debug_with_birdseye():
             get_workbench().open_help_topic("birdseye")
             
         return
-    # TODO: can you change birdseye command such that it doesn't 
-    # start the server if it is already started?
-    subprocess.Popen([sys.executable, "-m", "birdseye"])
+    
+    if not _server_started:
+        _server_started = True
+        Thread(target=start_server, daemon=True).start()
+    
     get_runner().execute_current("Birdseye")
 
 # order_key makes the plugin to be loaded later than other same tier plugins
