@@ -4,12 +4,12 @@ from tkinter import messagebox
 
 from thonny import get_workbench, get_runner
 
-
 _server_started = False
+
 
 def _start_debug_enabled():
     return (get_workbench().get_editor_notebook().get_current_editor() is not None
-        and "debug" in get_runner().get_supported_features())
+            and "debug" in get_runner().get_supported_features())
 
 
 def start_server():
@@ -19,33 +19,33 @@ def start_server():
         debug=False,
         use_reloader=False,
     )
-    
-    
 
 
 def _debug_with_birdseye():
     global _server_started
-    
+
     try:
         import birdseye  # @UnusedImport
     except ImportError:
-        if messagebox.askyesno("About Birdseye", 
+        if messagebox.askyesno("About Birdseye",
                                "Birdseye is a Python debugger which needs to be installed separately.\n\n"
-                             + "Do you want to open the help page and learn more?"):
+                               + "Do you want to open the help page and learn more?"):
             get_workbench().open_help_topic("birdseye")
-            
+
         return
-    
+
     if not _server_started:
         _server_started = True
         Thread(target=start_server, daemon=True).start()
-    
+
     os.environ["BIRDSEYE_PORT"] = str(get_workbench().get_option("run.birdseye_port"))
     get_runner().execute_current("Birdseye")
+
 
 # order_key makes the plugin to be loaded later than other same tier plugins
 # This way it gets positioned after main debug commands in the Run menu
 load_order_key = "zz"
+
 
 def load_plugin():
     get_workbench().set_default("run.birdseye_port", 7777)
