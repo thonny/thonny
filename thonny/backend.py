@@ -3,6 +3,7 @@
 import ast
 import builtins
 import copy
+import functools
 import importlib
 import inspect
 import io
@@ -1100,6 +1101,35 @@ class VM:
             return self._generic_read("readlines", limit)
 
 
+def prepare_hooks(method):
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        try:
+            sys.meta_path.insert(0, self)
+            self._vm._install_custom_import()
+            return method(self, *args, **kwargs)
+        finally:
+            del sys.meta_path[0]
+            if hasattr(self._vm, "_original_import"):
+                self._vm._restore_original_import()
+
+    return wrapper
+
+
+def return_execution_result(method):
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        try:
+            result = method(self, *args, **kwargs)
+            if result is not None:
+                return result
+            return {"context_info": "after normal execution"}
+        except Exception:
+            return {"user_exception": self._vm._prepare_user_exception()}
+
+    return wrapper
+
+
 class Executor:
     def __init__(self, vm, original_cmd):
         self._vm = vm
@@ -1125,7 +1155,7 @@ class Executor:
                 expression = compile(
                     ast.Expression(root.body[-1].value), filename, "eval"
                 )
-                return self._prepare_hooks_and_execute(
+                return self._execute_prepared_user_code(
                     statements, expression, global_vars
                 )
             else:
@@ -1133,12 +1163,12 @@ class Executor:
                 if mode == "eval":
                     assert not ast_postprocessors 
                     bytecode = compile(root, filename, mode)
-                    return self._prepare_hooks_and_execute(None, bytecode, global_vars)
+                    return self._execute_prepared_user_code(None, bytecode, global_vars)
                 elif mode == "exec":
                     for func in ast_postprocessors:
                         func(root)
                     bytecode = compile(root, filename, mode)
-                    return self._prepare_hooks_and_execute(bytecode, None, global_vars)
+                    return self._execute_prepared_user_code(bytecode, None, global_vars)
                 else:
                     raise ValueError("Unknown mode")
         except SyntaxError:
@@ -1149,29 +1179,16 @@ class Executor:
             _report_internal_error()
             return {}
 
-    def _prepare_hooks_and_execute(self, statements, expression, global_vars):
-        try:
-            sys.meta_path.insert(0, self)
-            self._vm._install_custom_import()
-            return self._execute_prepared_user_code(statements, expression, global_vars)
-        finally:
-            del sys.meta_path[0]
-            if hasattr(self._vm, "_original_import"):
-                self._vm._restore_original_import()
-
+    @return_execution_result
+    @prepare_hooks
     def _execute_prepared_user_code(self, statements, expression, global_vars):
-        try:
-            if statements:
-                exec(statements, global_vars)
-            if expression:
-                value = eval(expression, global_vars)
-                if value is not None:
-                    builtins._ = value
-                return {"value_info": self._vm.export_value(value)}
-
-            return {"context_info": "after normal execution"}
-        except Exception:
-            return {"user_exception": self._vm._prepare_user_exception()}
+        if statements:
+            exec(statements, global_vars)
+        if expression:
+            value = eval(expression, global_vars)
+            if value is not None:
+                builtins._ = value
+            return {"value_info": self._vm.export_value(value)}
 
     def find_spec(self, fullname, path=None, target=None):
         """override in subclass for custom-loading user modules"""
