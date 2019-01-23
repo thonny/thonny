@@ -15,7 +15,7 @@ def _start_debug_enabled():
 def start_server():
     from birdseye import server
     server.app.run(
-        port=7777,
+        port=get_workbench().get_option("run.birdseye_port"),
         debug=False,
         use_reloader=False,
     )
@@ -40,6 +40,7 @@ def _debug_with_birdseye():
         _server_started = True
         Thread(target=start_server, daemon=True).start()
     
+    os.environ["BIRDSEYE_PORT"] = str(get_workbench().get_option("run.birdseye_port"))
     get_runner().execute_current("Birdseye")
 
 # order_key makes the plugin to be loaded later than other same tier plugins
@@ -47,6 +48,7 @@ def _debug_with_birdseye():
 load_order_key = "zz"
 
 def load_plugin():
+    get_workbench().set_default("run.birdseye_port", 7777)
     get_workbench().add_command(
         "birdseye",
         "run",

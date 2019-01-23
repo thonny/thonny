@@ -123,6 +123,13 @@ class ConfigurationPage(ttk.Frame):
         )
         combobox.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan)
 
+    
+    def add_entry(self, option_name,  row=None, column=0, pady=0, padx=0, columnspan=1, **kw):
+        variable = get_workbench().get_variable(option_name)
+        entry = ttk.Entry(self, textvariable=variable, **kw)
+        entry.grid(row=row, column=column, sticky=tk.W, pady=pady, 
+                   columnspan=columnspan, padx=padx)
+
     def apply(self):
         """Apply method should return False, when page contains invalid
         input and configuration dialog should not be closed."""

@@ -1,3 +1,4 @@
+import os
 import sys
 from thonny.backend import get_vm, Executor
 import webbrowser
@@ -33,7 +34,9 @@ class BirdsEyeRunner(Executor):
                 sys.path = orig_sys_path   
             
             eye.exec_string(source, filename, globs=global_vars, locs=global_vars, deep=True)
-            webbrowser.open_new_tab('http://localhost:7777/ipython_call/' + eye._last_call_id)
+            port = os.environ.get("BIRDSEYE_PORT", "7777")
+            webbrowser.open_new_tab('http://localhost:%s/ipython_call/' % port 
+                                    + eye._last_call_id)
             return {"context_info": "after normal execution"}
         except Exception:
             return {"user_exception": self._vm._prepare_user_exception()}

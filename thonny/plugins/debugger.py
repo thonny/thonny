@@ -1058,13 +1058,27 @@ class DebuggerConfigurationPage(ConfigurationPage):
             "debugger.single_window",
             "Use editors and Stack view for presenting call frames",
             tooltip="Presents the concept of stack like most professional IDE-s",
+            row=1,
+            columnspan=3
         )
         self.add_checkbox(
             "debugger.automatic_stack_view",
             "Open and close Stack view automatically",
             tooltip="Opens the Stack view on first call and "
             + "closes it when program returns to main frame.",
+            row=2,
+            columnspan=3
         )
+        
+        if get_workbench().get_option("run.birdseye_port", None):
+            port_label = ttk.Label(self, text="Birdseye port", anchor="w")
+            port_label.grid(row=3, column=0, sticky="w", pady=5)
+            self.add_entry("run.birdseye_port", row=3, column=1, width=5, pady=15, padx=5)
+            comment_label = ttk.Label(self, text="(restart Thonny after changing this)", anchor="w")
+            comment_label.grid(row=3, column=2, sticky="w", pady=5)
+            
+        self.columnconfigure(2, weight=1)
+        
 
 
 def get_current_debugger():

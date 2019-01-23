@@ -22,3 +22,5 @@ NB! When using Birdseye in Thonny you don't need to import ``birdseye.eye`` or u
 for decorating your functions. Thonny executes Birdseye such that it records information about all
 functions.
 
+The local server uses port 7777 by default. If this is used by another application, then configure
+another port (Tools → Options → Debugger) and restart Thonny.
