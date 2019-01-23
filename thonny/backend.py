@@ -1145,6 +1145,7 @@ class Executor:
             self._main_module_path = filename
 
         global_vars = __main__.__dict__
+        statements = expression = None
 
         try:
             if mode == "exec+eval":
@@ -1155,22 +1156,19 @@ class Executor:
                 expression = compile(
                     ast.Expression(root.body[-1].value), filename, "eval"
                 )
-                return self._execute_prepared_user_code(
-                    statements, expression, global_vars
-                )
             else:
                 root = self._prepare_ast(source, filename, mode)
                 if mode == "eval":
                     assert not ast_postprocessors 
-                    bytecode = compile(root, filename, mode)
-                    return self._execute_prepared_user_code(None, bytecode, global_vars)
+                    expression = compile(root, filename, mode)
                 elif mode == "exec":
                     for func in ast_postprocessors:
                         func(root)
-                    bytecode = compile(root, filename, mode)
-                    return self._execute_prepared_user_code(bytecode, None, global_vars)
+                    statements = compile(root, filename, mode)
                 else:
                     raise ValueError("Unknown mode")
+
+            return self._execute_prepared_user_code(statements, expression, global_vars)
         except SyntaxError:
             return {"user_exception": self._vm._prepare_user_exception()}
         except SystemExit:
