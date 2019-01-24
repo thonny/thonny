@@ -147,6 +147,10 @@ def run_selection(event=None):
         else:
             code = text.get("insert linestart", "insert lineend")
 
+        # move cursor to next row
+        row, col = map(int, text.index("insert").split("."))
+        text.mark_set("insert", "{}.{}".format(row + 1, col))
+
         _submit_code(code)
 
 
