@@ -314,11 +314,20 @@ class VM:
         return module
 
     def _load_shared_modules(self):
-        for name in ["parso", "jedi", "thonnycontrib", "six", "asttokens"]:
-            self.load_module_from_frontend_path(name)
+        self.load_modules_with_frontend_path(["parso", "jedi", "thonnycontrib", "six", "asttokens"])
 
-    def load_module_from_frontend_path(self, name):
-        load_module_from_alternative_path(name, self._frontend_sys_path)
+    def load_modules_with_frontend_path(self, names):
+        from importlib import import_module
+        original_sys_path = sys.path
+        try:
+            sys.path = sys.path + self._frontend_sys_path
+            for name in names:
+                try:
+                    import_module(name)
+                except ImportError:
+                    pass
+        finally:
+            sys.path = original_sys_path
 
     def _load_plugins(self):
         # built-in plugins
@@ -2545,20 +2554,6 @@ def format_exception_with_frame_info(
     items = rec_format_exception_with_frame_info(e_type, e_value, e_traceback)
 
     return list(items)
-
-
-def load_module_from_alternative_path(module_name, path, force=False):
-    spec = PathFinder.find_spec(module_name, path)
-
-    if spec is None and not force:
-        return
-
-    from importlib.util import module_from_spec
-
-    module = module_from_spec(spec)
-    sys.modules[module_name] = module
-    if spec.loader is not None:
-        spec.loader.exec_module(module)
 
 
 def in_debug_mode():
