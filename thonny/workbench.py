@@ -2114,6 +2114,9 @@ class Workbench(tk.Tk):
 
     def _mac_quit(self, *args):
         self._on_close()
+    
+    def get_toolbar(self):
+        return self._toolbar
 
 
 class WorkbenchEvent(Record):
