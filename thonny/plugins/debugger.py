@@ -303,7 +303,10 @@ class FrameVisualizer:
         self._line_debug = frame_info.current_statement is None
 
         self._reconfigure_tags()
-
+    
+    def _translate_lineno(self, lineno):
+        return lineno - self._firstlineno + 1
+        
     def _reconfigure_tags(self):
         for tag in ["active_focus", "exception_focus"]:
             conf = get_syntax_options_for_tag(tag).copy()
@@ -413,17 +416,17 @@ class FrameVisualizer:
         # but for pseudo-statements (like header in for-loop) I want to highlight only the indicated range
 
         line_prefix = self._text.get(
-            "%d.0" % text_range.lineno,
-            "%d.%d" % (text_range.lineno, text_range.col_offset),
+            "%d.0" % self._translate_lineno(text_range.lineno),
+            "%d.%d" % (self._translate_lineno(text_range.lineno), text_range.col_offset),
         )
         if line_prefix.strip():
             # pseudo-statement
-            first_line = text_range.lineno
-            last_line = text_range.end_lineno
+            first_line = self._translate_lineno(text_range.lineno)
+            last_line = self._translate_lineno(text_range.end_lineno)
             self._text.tag_add(
                 tag,
-                "%d.%d" % (text_range.lineno, text_range.col_offset),
-                "%d.%d" % (text_range.end_lineno, text_range.end_col_offset),
+                "%d.%d" % (first_line, text_range.col_offset),
+                "%d.%d" % (last_line, text_range.end_col_offset),
             )
         else:
             # normal statement
