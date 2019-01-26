@@ -11,6 +11,7 @@ import logging
 import os.path
 import pkgutil
 import pydoc
+import re
 import signal
 import site
 import subprocess
@@ -2442,18 +2443,30 @@ def _get_python_version_string(add_word_size=False):
 def _fetch_frame_source_info(frame):
     if frame.f_code.co_filename is None or not os.path.exists(frame.f_code.co_filename):
         return None, None, True
-
+    
+    is_libra = _is_library_file(frame.f_code.co_filename)
     if frame.f_code.co_name == "<module>":
         # inspect.getsource and getsourcelines don't help here
         with tokenize.open(frame.f_code.co_filename) as fp:
-            return fp.read(), 1, _is_library_file(frame.f_code.co_filename)
+            return fp.read(), 1, is_libra
     else:
+        # function or class
         try:
-            return (
-                inspect.getsource(frame),
-                frame.f_code.co_firstlineno,
-                _is_library_file(frame.f_code.co_filename),
-            )
+            source = inspect.getsource(frame.f_code)
+            
+            # inspect.getsource is not reliable, see eg:
+            # https://bugs.python.org/issue35101
+            # If the code name is not present as definition
+            # in the beginning of the source,
+            # then play safe and return the whole script 
+            first_line = source.splitlines()[0]
+            if re.search(r"\b(class|def)\b\s+\b%s\b" % frame.f_code.co_name,
+                         first_line) is None:
+                with tokenize.open(frame.f_code.co_filename) as fp:
+                    return fp.read(), 1, is_libra
+                
+            else:
+                return source, frame.f_code.co_firstlineno, is_libra 
         except OSError:
             logger.exception("Problem getting source")
             return None, None, True
