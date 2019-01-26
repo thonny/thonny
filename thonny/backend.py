@@ -46,6 +46,7 @@ from thonny.common import (
     range_contains_smaller_or_equal,
     serialize_message,
     get_exe_dirs, get_augmented_system_path, update_system_path)
+import queue
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -84,6 +85,7 @@ class VM:
         self._command_handlers = {}
         self._object_info_tweakers = []
         self._import_handlers = {}
+        self._input_queue = queue.Queue()
         self._ast_postprocessors = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = (
@@ -152,8 +154,14 @@ class VM:
             while True:
                 try:
                     cmd = self._fetch_command()
-                    self._source_info_by_frame = {}
-                    self.handle_command(cmd)
+                    if isinstance(cmd, InputSubmission):
+                        self._input_queue.put(cmd)
+                    elif isinstance(cmd, ToplevelCommand):
+                        self._source_info_by_frame = {}
+                        self._input_queue = queue.Queue()
+                        self.handle_command(cmd)
+                    else:
+                        self.handle_command(cmd)
                 except KeyboardInterrupt:
                     logger.exception("Interrupt in mainloop")
                     # Interrupt must always result in waiting_toplevel_command state
@@ -1098,6 +1106,13 @@ class VM:
 
     class FakeInputStream(FakeStream):
         def _generic_read(self, method, limit=-1):
+            # is there some queued input?
+            if not self._vm._input_queue.empty():
+                cmd = self._vm._input_queue.get()
+                self._processed_symbol_count += len(cmd.data)
+                return cmd.data
+            
+            # new input needs to be requested
             try:
                 self._vm._enter_io_function()
                 self._vm.send_message(
