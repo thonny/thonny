@@ -1141,6 +1141,12 @@ class VM:
 
         def readlines(self, limit=-1):
             return self._generic_read("readlines", limit)
+        
+        def __next__(self):
+            return self.readline()
+        
+        def __iter__(self):
+            return self
 
 
 def prepare_hooks(method):
