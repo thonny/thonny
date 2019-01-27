@@ -2271,7 +2271,11 @@ class NiceTracer(Tracer):
     def _insert_statement_markers(self, root):
         # find lists of statements and insert before/after markers for each statement
         for name, value in ast.iter_fields(root):
-            if isinstance(value, ast.AST):
+            if isinstance(root, ast.Try) and name == "handlers":
+                # contains statements but is not statement itself
+                for handler in value:
+                    self._insert_statement_markers(handler)
+            elif isinstance(value, ast.AST):
                 self._insert_statement_markers(value)
             elif isinstance(value, list):
                 if len(value) > 0:
