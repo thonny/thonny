@@ -1563,6 +1563,14 @@ class NiceTracer(Tracer):
         return self._current_state_index < len(self._saved_states) - 1
 
     def _trace(self, frame, event, arg):
+        try:
+            return self._trace_and_catch(frame, event, arg)
+        except BaseException:
+            traceback.print_exc()
+            sys.settrace(None)
+            return None
+            
+    def _trace_and_catch(self, frame, event, arg):
         """
         1) Detects marker calls and responds to client queries in these spots
         2) Maintains a customized view of stack
