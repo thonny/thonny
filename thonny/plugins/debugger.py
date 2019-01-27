@@ -390,7 +390,8 @@ class FrameVisualizer:
 
         self._expression_box.update_expression(msg, frame_info)
 
-        if msg["exception_info"]["msg"] and msg["exception_info"]["is_fresh"]:
+        if (frame_info.id in msg["exception_info"]["affected_frame_ids"] 
+            and msg["exception_info"]["is_fresh"]):
             self._show_exception(
                 msg["exception_info"]["lines_with_frame_info"], frame_info
             )
