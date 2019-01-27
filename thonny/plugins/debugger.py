@@ -368,13 +368,15 @@ class FrameVisualizer:
         self._remove_focus_tags()
 
         if frame_info.event == "line":
-            if frame_info.id in msg["exception_info"]["affected_frame_ids"]:
+            if (frame_info.id in msg["exception_info"]["affected_frame_ids"]
+                and msg["exception_info"]["is_fresh"]):
                 self._tag_range(frame_info.focus, "exception_focus")
             else:
                 self._tag_range(frame_info.focus, "active_focus")
         else:
             if "statement" in frame_info.event:
-                if msg["exception_info"]["msg"] is not None:
+                if (msg["exception_info"]["msg"] is not None
+                    and msg["exception_info"]["is_fresh"]):
                     stmt_tag = "exception_focus"
                 elif frame_info.event.startswith("before"):
                     stmt_tag = "active_focus"
@@ -388,10 +390,12 @@ class FrameVisualizer:
 
         self._expression_box.update_expression(msg, frame_info)
 
-        if frame_info.id in msg["exception_info"]["affected_frame_ids"]:
+        if msg["exception_info"]["msg"] and msg["exception_info"]["is_fresh"]:
             self._show_exception(
                 msg["exception_info"]["lines_with_frame_info"], frame_info
             )
+        else:
+            self.close_note()
 
     def _show_exception(self, lines, frame_info):
         last_line_text = lines[-1][0]
@@ -578,7 +582,8 @@ class ExpressionBox(tk.Text):
                 self._highlight_range(
                     focus,
                     event,
-                    frame_info.id in msg["exception_info"]["affected_frame_ids"],
+                    (frame_info.id in msg["exception_info"]["affected_frame_ids"]
+                     and msg["exception_info"]["is_fresh"]),
                 )
 
             self._update_position(frame_info.current_root_expression)

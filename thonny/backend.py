@@ -1360,6 +1360,7 @@ class Tracer(Executor):
                 "type_name": None,
                 "lines_with_frame_info": None,
                 "affected_frame_ids": set(),
+                "is_fresh": False, 
             }
         else:
             return {
@@ -1368,6 +1369,7 @@ class Tracer(Executor):
                 "type_name": exc[0].__name__,
                 "lines_with_frame_info": format_exception_with_frame_info(*exc),
                 "affected_frame_ids": exc[1]._affected_frame_ids_,
+                "is_fresh": exc == self._fresh_exception, 
             }
 
     def _get_breakpoints_with_cursor_position(self, cmd):
@@ -1630,7 +1632,6 @@ class NiceTracer(Tracer):
             pseudo_event = last_custom_frame.event.replace("before_", "after_").replace(
                 "_again", ""
             )
-
             self._handle_progress_event(frame, pseudo_event, {}, last_custom_frame.node)
 
         elif event == "return":
@@ -1715,6 +1716,7 @@ class NiceTracer(Tracer):
             prev_state is not None
             and id(prev_state_frame.system_frame) == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
+            and prev_state["fresh_exception_id"] == id(self._fresh_exception)
             and ("before" in event or "skipexport" in node.tags)
         ):
 
@@ -1746,6 +1748,7 @@ class NiceTracer(Tracer):
                 + sys.stderr._processed_symbol_count
             ),
             "exception_value": self._get_current_exception()[1],
+            "fresh_exception_id": id(self._fresh_exception),
             "exception_info": exception_info,
         }
 
