@@ -133,13 +133,18 @@ def get_last_child(node, skip_incorrect=True):
             else:
                 return ok_node(node.slice.lower)
 
+    elif isinstance(node, ast.Raise):
+        if ok_node(node.cause):
+            return node.cause
+        elif ok_node(node.exc):
+            return node.exc
+    
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True  # There is last child, but I don't know which it will be
-
+    
     # TODO: pick more cases from here:
     """
     (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
-            or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
             # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0
                 and (node.dest is not None or len(node.values) > 0))
 
