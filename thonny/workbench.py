@@ -697,6 +697,7 @@ class Workbench(tk.Tk):
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
+        show_extra_sequences = False
     ) -> None:
         """Registers an item to be shown in specified menu.
         
@@ -741,6 +742,7 @@ class Workbench(tk.Tk):
                 include_in_toolbar=include_in_toolbar,
                 submenu=submenu,
                 bell_when_denied=bell_when_denied,
+                show_extra_sequences=show_extra_sequences,
             )
         )
 
@@ -767,6 +769,7 @@ class Workbench(tk.Tk):
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
+        show_extra_sequences: bool = False,
     ) -> None:
         def dispatch(event=None):
             if not tester or tester():
