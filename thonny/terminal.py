@@ -163,13 +163,13 @@ def _get_linux_terminal_command():
             return "lxterminal"
         else:
             return "x-terminal-emulator"
-    # Can't use konsole, because it doesn't pass on the environment
-    #         elif shutil.which("konsole"):
-    #             if (shutil.which("gnome-terminal")
-    #                 and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
-    #                 term_cmd = "gnome-terminal"
-    #             else:
-    #                 term_cmd = "konsole"
+    # Older konsole didn't pass on the environment
+    elif shutil.which("konsole"):
+        if (shutil.which("gnome-terminal")
+            and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
+            return "gnome-terminal"
+        else:
+            return "konsole"
     elif shutil.which("gnome-terminal"):
         return "gnome-terminal"
     elif shutil.which("xfce4-terminal"):
