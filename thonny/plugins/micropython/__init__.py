@@ -815,27 +815,19 @@ class MicroPythonProxy(BackendProxy):
     def _cmd_upload(self, cmd):
         # Target is interpreted relative to the root
         if len(cmd.args) == 1:
-            source = cmd.args[0]
+            source = Path(cmd.args[0])
             # target is at root
-            target = os.path.basename(source)
+            target = source.name
         elif len(cmd.args) == 2:
-            source = cmd.args[0]
-            target = cmd.args[1]
+            source = Path(cmd.args[0])
+            target = Path(cmd.args[1])
         else:
             # TODO: test this case
             raise RuntimeError("Command requires 1 or 2 arguments")
 
-        if not os.path.isabs(source):
-            source = os.path.join(get_workbench().get_cwd(), source)
-
-        if not os.path.isfile(source):
+        source = Path(get_workbench().get_cwd(), source)
+        if not source.is_file():
             raise IOError("No such file: %s" % source)
-
-        target = target.replace("\\", "/")
-        # Only prepend slash if it is known that device supports directories
-        # (it's probably safe to omit slash anyway)
-        if self._supports_directories() and not target.startswith("/"):
-            target = "/" + target
 
         try:
             self._check_and_upload(source, target)
@@ -852,7 +844,7 @@ class MicroPythonProxy(BackendProxy):
         # if current Python version is later than 3.5, then it may
         # accept source which gives syntax errors on MP.
 
-        if target.endswith(".py"):
+        if target.suffix == ".py":
             with tokenize.open(source) as fp:
                 src = fp.read()
                 try:
@@ -882,7 +874,7 @@ class MicroPythonProxy(BackendProxy):
         with open(source, "rb") as local:
             content = local.read()
 
-        self._execute_and_expect_empty_response("__upf = open(%r, 'wb')" % target)
+        self._execute_and_expect_empty_response("__upf = open('%s', 'wb')" % target)
 
         BLOCK_SIZE = 64
         for i in range(0, len(content), BLOCK_SIZE):
@@ -1151,15 +1143,22 @@ class MicroPythonProxy(BackendProxy):
             "Press CTRL-C to enter the REPL. Use CTRL-D to reload.",
         )
 
+    def _get_pathPrefix(self):
+        prefix = get_workbench().get_option(self.backend_name + ".path_prefix")
+        if prefix is None:
+            return ""
+        else:
+            return prefix
+        
     def _get_main_script_path(self):
         if self._supports_directories():
-            return "/main.py"
+            return Path(self._get_pathPrefix(), "main.py")
         else:
             return "main.py"
 
     def _get_boot_script_path(self):
         if self._supports_directories():
-            return "/boot.py"
+            return Path(self._get_pathPrefix(), "boot.py")
         else:
             return "boot.py"
 
@@ -1170,12 +1169,14 @@ class MicroPythonProxy(BackendProxy):
         script_path = Path(script_path)
         assert script_path.is_file(), "File not found: %s" % script_path
 
-        filename = script_path.name
-
         if self._supports_directories():
-            return "/%s" % filename
+            cwd = Path(get_workbench().get_cwd())
+            target = script_path.relative_to(cwd)
+            target = Path(self._get_pathPrefix(), target)
         else:
-            return filename
+            target = script_path.name
+
+        return target
 
     def transform_message(self, msg):
         if msg is None:
@@ -1228,7 +1229,7 @@ class MicroPythonProxy(BackendProxy):
     def _send_error_to_shell(self, message_text):
         self._send_text_to_shell(message_text, "stderr")
 
-    def _send_text_to_shell(self, message_text, stream_name):
+    def _send_text_to_shell(self, message_text, stream_name="stdout"):
         if not message_text.endswith("\n"):
             message_text += "\n"
 
@@ -1638,14 +1639,14 @@ def load_plugin():
             source_path = os.path.relpath(source_path, get_workbench().get_cwd())
 
         target = getattr(proxy, target_provider_method)()
-        get_shell().submit_magic_command(["%upload", source_path, target])
+        get_shell().submit_magic_command(["%upload", str(source_path), str(target)])
 
     def _cat(source_provider_method):
         proxy = get_runner().get_backend_proxy()
         assert isinstance(proxy, MicroPythonProxy)
 
         source = getattr(proxy, source_provider_method)()
-        get_shell().submit_magic_command(["%cat", source])
+        get_shell().submit_magic_command(["%cat", str(source)])
 
     def _upload_as_main_script():
         _upload_as("_get_main_script_path")
