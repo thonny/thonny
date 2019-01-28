@@ -833,7 +833,13 @@ class Workbench(tk.Tk):
 
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
-
+            """
+            # Does not work on Mac
+            if show_extra_sequences:
+                for extra_seq in extra_sequences:
+                    accelerator += " or " + sequence_to_accelerator(extra_seq)
+            """
+            
         # remember the details that can't be stored in Tkinter objects
         self._menu_item_specs[(menu_name, command_label)] = MenuItem(
             group, position_in_group, tester
