@@ -71,7 +71,7 @@ rm -rf $TARGET_DIR/lib/python3.7/site-packages/mypy/test
 rm -rf $TARGET_DIR/include/lzma
 rm -rf $TARGET_DIR/include/*.h
 mv $TARGET_DIR/include/python3.7m/pyconfig.h $SCRIPT_DIR # pip needs this
-rm $TARGET_DIR/include/python3.7m/*
+rm -rf $TARGET_DIR/include/python3.7m/*
 mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.7m # put it back
 
 
