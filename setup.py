@@ -53,8 +53,8 @@ setup(
     ],
     keywords="IDE education debugger",
     project_urls={
-        "Source code": "https://bitbucket.org/plas/thonny",
-        "Bug tracker": "https://bitbucket.org/plas/thonny/issues",
+        "Source code": "https://github.com/thonny/thonny",
+        "Bug tracker": "https://github.com/thonny/thonny/issues",
     },
     platforms=["Windows", "macOS", "Linux"],
     install_requires=requirements,
