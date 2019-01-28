@@ -57,7 +57,13 @@ ChangesAssociations=yes
 ; http://blog.ksoftware.net/2011/07/exporting-your-code-signing-certificate-to-a-pfx-file-from-firefox/
 ; http://certhelp.ksoftware.net/support/solutions/articles/17157-how-do-i-export-my-code-signing-certificate-from-internet-explorer-or-chrome-
 ; http://blog.ksoftware.net/2011/07/how-to-automate-code-signing-with-innosetup-and-ksign/
-SignTool=signtool /d $qInstaller for Thonny {#AppVer}$q /du $qhttps://thonny.org$q $f
+; https://www.digicert.com/code-signing/signcode-signtool-command-line.htm
+; http://www.jrsoftware.org/ishelp/index.php?topic=setup_signtool
+;
+; signtool prefix to be configured in Tools => Configure sign tools:
+; $qC:\Program Files (x86)\kSign\signtool.exe$q sign /f $qcertfile.p12$q /p password $p
+
+SignTool=signtool /tr http://timestamp.digicert.com /td sha256 /fd sha256 /d $qInstaller for Thonny {#AppVer}$q /du $qhttps://thonny.org$q $f
 
 
 [Languages]
