@@ -93,8 +93,7 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
 def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
     _shellquote = shlex.quote
 
-    cmds = "clear; "
-    cmds += "; cd " + _shellquote(cwd)
+    cmds = "clear; cd " + _shellquote(cwd)
     # osascript "tell application" won't change Terminal's env
     # (at least when Terminal is already active)
     # At the moment I just explicitly set some important variables
