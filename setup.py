@@ -63,6 +63,7 @@ setup(
     package_data={
         "": ["VERSION", "res/*"],
         "thonny.plugins.help": ["*.rst"],
+        "thonny.plugins.printing": ["*.html"],
         "thonny.plugins.micropython": ["api_stubs/*.*"],
         "thonny.plugins.mypy": ["typeshed_extras/*.pyi"],
     },
