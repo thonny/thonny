@@ -1,20 +1,15 @@
 import os.path
 import sys
 
+from pip.req import parse_requirements
 from setuptools import find_packages, setup
-
-if sys.version_info < (3, 5):
-    raise RuntimeError("Thonny requires Python 3.5 or later")
 
 setupdir = os.path.dirname(__file__)
 
 with open(os.path.join(setupdir, "thonny", "VERSION"), encoding="ASCII") as f:
     version = f.read().strip()
 
-requirements = []
-for line in open(os.path.join(setupdir, "requirements.txt"), encoding="ASCII"):
-    if line.strip() and not line.startswith("#"):
-        requirements.append(line)
+requirements = [str(ir.req) for ir in parse_requirements(open(os.path.join(setupdir, "requirements.txt"))]
 
 setup(
     name="thonny",
