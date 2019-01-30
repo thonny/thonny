@@ -536,7 +536,7 @@ class Workbench(tk.Tk):
             "view",
             "Focus editor",
             self._cmd_focus_editor,
-            default_sequence="<Alt-e>",
+            default_sequence=select_sequence("<Alt-e>", "<Command-Alt-e>"),
             group=70,
         )
 
@@ -545,7 +545,7 @@ class Workbench(tk.Tk):
             "view",
             "Focus shell",
             self._cmd_focus_shell,
-            default_sequence="<Alt-s>",
+            default_sequence=select_sequence("<Alt-s>", "<Command-Alt-s>"),
             group=70,
         )
 
