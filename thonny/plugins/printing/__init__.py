@@ -1,6 +1,8 @@
 import os.path
 import tempfile
 import webbrowser
+import platform
+import subprocess
 
 from thonny import get_workbench
 from thonny.ui_utils import select_sequence
@@ -23,7 +25,10 @@ def print_current_script():
     with os.fdopen(temp_handle, "w", encoding="utf-8") as f:
         f.write(full_html)
     
-    webbrowser.open(temp_fn)
+    if platform.system() == "Darwin":
+        subprocess.Popen(["open", temp_fn])
+    else:
+        webbrowser.open(temp_fn)
     
 
     
