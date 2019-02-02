@@ -2111,6 +2111,8 @@ class NiceTracer(Tracer):
             
             # tag last children
             last_child = ast_utils.get_last_child(node)
+            assert isinstance(last_child, (ast.expr, ast.stmt, type(None))), \
+                "Bad last child: " + str(last_child)
             if last_child is not None:
                 add_tag(node, "has_children")
 
@@ -2437,6 +2439,7 @@ class NiceTracer(Tracer):
         )
 
     def _export_node(self, node):
+        assert isinstance(node, (ast.expr, ast.stmt))
         node_id = id(node)
         self._nodes[node_id] = node
         return ast.Num(node_id)

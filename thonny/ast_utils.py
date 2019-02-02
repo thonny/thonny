@@ -38,10 +38,13 @@ def parse_source(source: bytes, filename="<unknown>", mode="exec"):
 
 
 def get_last_child(node, skip_incorrect=True):
+    """Returns last focusable child expression or child statement"""
     def ok_node(node):
         if node is None:
             return None
 
+        assert isinstance(node, (ast.expr, ast.stmt))
+         
         if skip_incorrect and getattr(node, "incorrect_range", False):
             return None
 
