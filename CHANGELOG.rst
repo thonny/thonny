@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.1.1 (2019-02-02)
+==================
+* FIXED #674: Print doesn't work on Mac
+* FIXED #675: Make focus editor / shell shortcuts usable on Mac
+* FIXED #677: Debugging fails with extended slice syntax
+
 3.1.0 (2019-01-28)
 ==================
 * NEW: "Run => Pygame Zero mode" allows running Pygame Zero programs with F5 
