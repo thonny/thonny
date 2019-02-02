@@ -2106,7 +2106,9 @@ class NiceTracer(Tracer):
             add_tag(root.body[1], "ignore")
 
         for node in ast.walk(root):
-
+            if not isinstance(node, (ast.expr, ast.stmt)):
+                continue
+            
             # tag last children
             last_child = ast_utils.get_last_child(node)
             if last_child is not None:

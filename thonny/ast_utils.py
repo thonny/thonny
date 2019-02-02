@@ -99,9 +99,8 @@ def get_last_child(node, skip_incorrect=True):
         # TODO: actually should pairwise check last value, then last key, etc.
         return last_ok(node.values)
 
-    elif isinstance(
-        node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)
-    ):
+    elif isinstance(node, (ast.Index, ast.Return, ast.Assign, ast.AugAssign, 
+                           ast.Yield, ast.YieldFrom)):
         return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):
@@ -115,23 +114,31 @@ def get_last_child(node, skip_incorrect=True):
             return node.msg
         else:
             return ok_node(node.test)
-
-    elif isinstance(node, ast.Subscript):
-        if hasattr(node.slice, "value") and ok_node(node.slice.value):
-            return node.slice.value
+    
+    elif isinstance(node, ast.Slice):
+        # [:]
+        if ok_node(node.step):
+            return node.step
+        elif ok_node(node.upper):
+            return node.upper
         else:
-            assert (
-                hasattr(node.slice, "lower")
-                and hasattr(node.slice, "upper")
-                and hasattr(node.slice, "step")
-            )
-
-            if ok_node(node.slice.step):
-                return node.slice.step
-            elif ok_node(node.slice.upper):
-                return node.slice.upper
-            else:
-                return ok_node(node.slice.lower)
+            return ok_node(node.lower)
+    
+    elif isinstance(node, ast.ExtSlice):
+        # [:,:]
+        for dim in reversed(node.dims):
+            result = get_last_child(dim, skip_incorrect)
+            assert result is None or isinstance(result, ast.expr)
+            if result is not None:
+                return result
+        return None
+        
+    elif isinstance(node, ast.Subscript):
+        result = get_last_child(node.slice, skip_incorrect)
+        if result is not None:
+            return result
+        else:
+            return node.value
 
     elif isinstance(node, ast.Raise):
         if ok_node(node.cause):
