@@ -504,9 +504,9 @@ class Workbench(tk.Tk):
         )
 
         self.add_command(
-            "show_options", "tools", "Options...", self._cmd_show_options, group=180
+            "show_options", "tools", "Options...", self.show_options, group=180
         )
-        self.createcommand("::tk::mac::ShowPreferences", self._cmd_show_options)
+        self.createcommand("::tk::mac::ShowPreferences", self.show_options)
         self.createcommand("::tk::mac::Quit", self._mac_quit)
 
         self.add_command(
@@ -1756,8 +1756,11 @@ class Workbench(tk.Tk):
         self._maximized_view = None
         self.get_variable("view.maximize_view").set(False)
 
-    def _cmd_show_options(self) -> None:
+    def show_options(self, page=None):
         dlg = ConfigurationDialog(self, self._configuration_pages)
+        if page:
+            dlg.select_page(page)
+            
         ui_utils.show_dialog(dlg)
 
     def _cmd_focus_editor(self) -> None:
