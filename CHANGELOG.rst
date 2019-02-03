@@ -2,6 +2,42 @@
 Version history
 ===============
 
+3.1.1 (2019-02-02)
+==================
+* FIXED #674: Print doesn't work on Mac
+* FIXED #675: Make focus editor / shell shortcuts usable on Mac
+* FIXED #677: Debugging fails with extended slice syntax
+
+3.1.0 (2019-01-28)
+==================
+* NEW: "Run => Pygame Zero mode" allows running Pygame Zero programs with F5 
+* NEW: Support for Birdseye debugger (Run => Debug current script (Birdseye)) by Alex Hall
+* NEW: Notes view for writing down code snippets, task descriptions, etc.
+* NEW: Allow running current script in system terminal
+* NEW: "File => Print..." allows printing current script (via default web browser)
+* NEW: Shell's context menu now has editing commands
+* ENHANCEMENT: Open the Shell window on Run if it is not open
+* ENHANCEMENT: More robust support for running system commands in Thonny Shell (with ! prefix)
+* ENHANCEMENT: Allow switching off Pylint and/or MyPy checks
+* ENHANCEMENT: Make it clear how to exit Heap mode (with notification box in the upper-right corner of the main window)
+* FIXED #621: Holding Enter in the Shell causes a crash
+* FIXED #623: Parameters code completion error
+* FIXED #627: Debugging stops after raise statement
+* FIXED #628: Wrong line highlighted when stepping in for-loop
+* FIXED #629: Interrupting system command (!) shows ugly traceback
+* FIXED #633: pasting can't affect read-only text anymore
+* FIXED #641: Better font scaling in Linux (see Tools => Options => General for more control)
+* FIXED #646: Simple open file to edit from command line failing
+* FIXED #655: Invalid f-string crashes Assistant
+* FIXED #666: Make stdin iterable
+* FIXED: Solved several problems related to stepping through raising an exception
+* FIXED: Issues with automatic indentation (Thanks to Alex Hall!)
+* CHANGED: Use Konsole as terminal in KDE
+* CHANGED: "Tools => Open system shell" now shows relevant commands differently 
+* CHANGED: Make Assistant's MyPy checks disabled by default
+* CHANGED: Source code now lives at GitHub (https://github.com/thonny/thonny)
+
+
 3.0.8 (2018-11-15)
 ==================
 * FIXED #424: Font scaling problems in Linux

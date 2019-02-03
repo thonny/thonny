@@ -6,7 +6,7 @@ Thonny is a Python IDE meant for learning programming.
 
 End users
 ---------
-See http://thonny.org and `wiki <https://github.com/thonny/thonny/wiki>`_ for more info.
+See https://thonny.org and `wiki <https://github.com/thonny/thonny/wiki>`_ for more info.
 
 
 Contributors

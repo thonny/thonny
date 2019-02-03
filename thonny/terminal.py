@@ -93,8 +93,7 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
 def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
     _shellquote = shlex.quote
 
-    cmds = "clear; "
-    cmds += "; cd " + _shellquote(cwd)
+    cmds = "clear; cd " + _shellquote(cwd)
     # osascript "tell application" won't change Terminal's env
     # (at least when Terminal is already active)
     # At the moment I just explicitly set some important variables
@@ -163,13 +162,13 @@ def _get_linux_terminal_command():
             return "lxterminal"
         else:
             return "x-terminal-emulator"
-    # Can't use konsole, because it doesn't pass on the environment
-    #         elif shutil.which("konsole"):
-    #             if (shutil.which("gnome-terminal")
-    #                 and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
-    #                 term_cmd = "gnome-terminal"
-    #             else:
-    #                 term_cmd = "konsole"
+    # Older konsole didn't pass on the environment
+    elif shutil.which("konsole"):
+        if (shutil.which("gnome-terminal")
+            and "gnome" in os.environ.get("DESKTOP_SESSION", "").lower()):
+            return "gnome-terminal"
+        else:
+            return "konsole"
     elif shutil.which("gnome-terminal"):
         return "gnome-terminal"
     elif shutil.which("xfce4-terminal"):

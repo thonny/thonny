@@ -11,6 +11,7 @@ import logging
 import os.path
 import pkgutil
 import pydoc
+import re
 import signal
 import site
 import subprocess
@@ -21,6 +22,7 @@ import types
 import warnings
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
+from threading import Thread
 
 import __main__  # @UnresolvedImport
 import _ast
@@ -44,6 +46,7 @@ from thonny.common import (
     range_contains_smaller_or_equal,
     serialize_message,
     get_exe_dirs, get_augmented_system_path, update_system_path)
+import queue
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -82,6 +85,7 @@ class VM:
         self._command_handlers = {}
         self._object_info_tweakers = []
         self._import_handlers = {}
+        self._input_queue = queue.Queue()
         self._ast_postprocessors = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = (
@@ -150,8 +154,14 @@ class VM:
             while True:
                 try:
                     cmd = self._fetch_command()
-                    self._source_info_by_frame = {}
-                    self.handle_command(cmd)
+                    if isinstance(cmd, InputSubmission):
+                        self._input_queue.put(cmd)
+                    elif isinstance(cmd, ToplevelCommand):
+                        self._source_info_by_frame = {}
+                        self._input_queue = queue.Queue()
+                        self.handle_command(cmd)
+                    else:
+                        self.handle_command(cmd)
                 except KeyboardInterrupt:
                     logger.exception("Interrupt in mainloop")
                     # Interrupt must always result in waiting_toplevel_command state
@@ -314,11 +324,20 @@ class VM:
         return module
 
     def _load_shared_modules(self):
-        for name in ["parso", "jedi", "thonnycontrib", "six", "asttokens"]:
-            self.load_module_from_frontend_path(name)
+        self.load_modules_with_frontend_path(["parso", "jedi", "thonnycontrib", "six", "asttokens"])
 
-    def load_module_from_frontend_path(self, name):
-        load_module_from_alternative_path(name, self._frontend_sys_path)
+    def load_modules_with_frontend_path(self, names):
+        from importlib import import_module
+        original_sys_path = sys.path
+        try:
+            sys.path = sys.path + self._frontend_sys_path
+            for name in names:
+                try:
+                    import_module(name)
+                except ImportError:
+                    pass
+        finally:
+            sys.path = original_sys_path
 
     def _load_plugins(self):
         # built-in plugins
@@ -446,17 +465,33 @@ class VM:
         )
         
         if sys.version_info >= (3,6):
-            popen_kw["errors"] = "backslashreplace"
+            popen_kw["errors"] = "replace"
             popen_kw["encoding"] = encoding
         
         assert cmd.cmd_line.startswith("!")
         cmd_line = cmd.cmd_line[1:]
         proc = subprocess.Popen(cmd_line, **popen_kw)
         
-        # TODO: how to publish stdout as it arrives?
-        out, err = proc.communicate(input="")
-        print(out, end="")
-        print(err, file=sys.stderr, end="")
+        def copy_stream(source, target):
+            while True:
+                c = source.readline()
+                if c == "":
+                    break
+                else:
+                    target.write(c)
+        
+        copy_out = Thread(target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True)
+        copy_err = Thread(target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True)
+        
+        copy_out.start()
+        copy_err.start()
+        try:
+            proc.wait()
+        except KeyboardInterrupt as e:
+            print(str(e), file=sys.stderr)
+        
+        copy_out.join()
+        copy_err.join()
 
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
@@ -1071,6 +1106,13 @@ class VM:
 
     class FakeInputStream(FakeStream):
         def _generic_read(self, method, limit=-1):
+            # is there some queued input?
+            if not self._vm._input_queue.empty():
+                cmd = self._vm._input_queue.get()
+                self._processed_symbol_count += len(cmd.data)
+                return cmd.data
+            
+            # new input needs to be requested
             try:
                 self._vm._enter_io_function()
                 self._vm.send_message(
@@ -1099,6 +1141,12 @@ class VM:
 
         def readlines(self, limit=-1):
             return self._generic_read("readlines", limit)
+        
+        def __next__(self):
+            return self.readline()
+        
+        def __iter__(self):
+            return self
 
 
 def prepare_hooks(method):
@@ -1312,6 +1360,7 @@ class Tracer(Executor):
                 "type_name": None,
                 "lines_with_frame_info": None,
                 "affected_frame_ids": set(),
+                "is_fresh": False, 
             }
         else:
             return {
@@ -1320,6 +1369,7 @@ class Tracer(Executor):
                 "type_name": exc[0].__name__,
                 "lines_with_frame_info": format_exception_with_frame_info(*exc),
                 "affected_frame_ids": exc[1]._affected_frame_ids_,
+                "is_fresh": exc == self._fresh_exception, 
             }
 
     def _get_breakpoints_with_cursor_position(self, cmd):
@@ -1515,6 +1565,14 @@ class NiceTracer(Tracer):
         return self._current_state_index < len(self._saved_states) - 1
 
     def _trace(self, frame, event, arg):
+        try:
+            return self._trace_and_catch(frame, event, arg)
+        except BaseException:
+            traceback.print_exc()
+            sys.settrace(None)
+            return None
+            
+    def _trace_and_catch(self, frame, event, arg):
         """
         1) Detects marker calls and responds to client queries in these spots
         2) Maintains a customized view of stack
@@ -1574,7 +1632,6 @@ class NiceTracer(Tracer):
             pseudo_event = last_custom_frame.event.replace("before_", "after_").replace(
                 "_again", ""
             )
-
             self._handle_progress_event(frame, pseudo_event, {}, last_custom_frame.node)
 
         elif event == "return":
@@ -1659,6 +1716,7 @@ class NiceTracer(Tracer):
             prev_state is not None
             and id(prev_state_frame.system_frame) == id(frame)
             and prev_state["exception_value"] is self._get_current_exception()[1]
+            and prev_state["fresh_exception_id"] == id(self._fresh_exception)
             and ("before" in event or "skipexport" in node.tags)
         ):
 
@@ -1690,6 +1748,7 @@ class NiceTracer(Tracer):
                 + sys.stderr._processed_symbol_count
             ),
             "exception_value": self._get_current_exception()[1],
+            "fresh_exception_id": id(self._fresh_exception),
             "exception_info": exception_info,
         }
 
@@ -2047,9 +2106,13 @@ class NiceTracer(Tracer):
             add_tag(root.body[1], "ignore")
 
         for node in ast.walk(root):
-
+            if not isinstance(node, (ast.expr, ast.stmt)):
+                continue
+            
             # tag last children
             last_child = ast_utils.get_last_child(node)
+            assert last_child in [True, False, None] or isinstance(last_child, (ast.expr, ast.stmt, type(None))), \
+                "Bad last child " + str(last_child) + " of " + str(node)
             if last_child is not None:
                 add_tag(node, "has_children")
 
@@ -2212,7 +2275,11 @@ class NiceTracer(Tracer):
     def _insert_statement_markers(self, root):
         # find lists of statements and insert before/after markers for each statement
         for name, value in ast.iter_fields(root):
-            if isinstance(value, ast.AST):
+            if isinstance(root, ast.Try) and name == "handlers":
+                # contains statements but is not statement itself
+                for handler in value:
+                    self._insert_statement_markers(handler)
+            elif isinstance(value, ast.AST):
                 self._insert_statement_markers(value)
             elif isinstance(value, list):
                 if len(value) > 0:
@@ -2372,6 +2439,7 @@ class NiceTracer(Tracer):
         )
 
     def _export_node(self, node):
+        assert isinstance(node, (ast.expr, ast.stmt))
         node_id = id(node)
         self._nodes[node_id] = node
         return ast.Num(node_id)
@@ -2433,18 +2501,30 @@ def _get_python_version_string(add_word_size=False):
 def _fetch_frame_source_info(frame):
     if frame.f_code.co_filename is None or not os.path.exists(frame.f_code.co_filename):
         return None, None, True
-
+    
+    is_libra = _is_library_file(frame.f_code.co_filename)
     if frame.f_code.co_name == "<module>":
         # inspect.getsource and getsourcelines don't help here
         with tokenize.open(frame.f_code.co_filename) as fp:
-            return fp.read(), 1, _is_library_file(frame.f_code.co_filename)
+            return fp.read(), 1, is_libra
     else:
+        # function or class
         try:
-            return (
-                inspect.getsource(frame),
-                frame.f_code.co_firstlineno,
-                _is_library_file(frame.f_code.co_filename),
-            )
+            source = inspect.getsource(frame.f_code)
+            
+            # inspect.getsource is not reliable, see eg:
+            # https://bugs.python.org/issue35101
+            # If the code name is not present as definition
+            # in the beginning of the source,
+            # then play safe and return the whole script 
+            first_line = source.splitlines()[0]
+            if re.search(r"\b(class|def)\b\s+\b%s\b" % frame.f_code.co_name,
+                         first_line) is None:
+                with tokenize.open(frame.f_code.co_filename) as fp:
+                    return fp.read(), 1, is_libra
+                
+            else:
+                return source, frame.f_code.co_firstlineno, is_libra 
         except OSError:
             logger.exception("Problem getting source")
             return None, None, True
@@ -2545,20 +2625,6 @@ def format_exception_with_frame_info(
     items = rec_format_exception_with_frame_info(e_type, e_value, e_traceback)
 
     return list(items)
-
-
-def load_module_from_alternative_path(module_name, path, force=False):
-    spec = PathFinder.find_spec(module_name, path)
-
-    if spec is None and not force:
-        return
-
-    from importlib.util import module_from_spec
-
-    module = module_from_spec(spec)
-    sys.modules[module_name] = module
-    if spec.loader is not None:
-        spec.loader.exec_module(module)
 
 
 def in_debug_mode():

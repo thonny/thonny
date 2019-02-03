@@ -18,7 +18,7 @@ from queue import Queue
 from textwrap import dedent
 from time import sleep
 from tkinter import ttk
-from thonny.ui_utils import askopenfilename
+from thonny.ui_utils import askopenfilename, create_url_label
 from typing import Optional
 
 import jedi
@@ -1310,10 +1310,18 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
     def __init__(self, master):
         super().__init__(master)
-        label = ttk.Label(
-            self, text='Port (look for your device name, "USB Serial" or "UART")'
-        )
-        label.grid(row=0, column=0, sticky="nw")
+        
+        intro_label = ttk.Label(self, text="Connect your device to the computer and select corresponding port below (look for your device name, \n"
+                                + "\"USB Serial\" or \"UART\"). If you can't find it, you may need to install proper USB driver first.")
+        intro_label.grid(row=0, column=0, sticky="nw")
+        
+        driver_url = self._get_usb_driver_url()
+        if driver_url:
+            driver_url_label = create_url_label(self, driver_url)
+            driver_url_label.grid(row=1, column=0, sticky="nw")
+        
+        port_label = ttk.Label(self, text='Port')
+        port_label.grid(row=3, column=0, sticky="nw", pady=(10,0))
 
         self._ports_by_desc = {
             p.description
@@ -1348,7 +1356,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         )
         self._port_combo.state(["!disabled", "readonly"])
 
-        self._port_combo.grid(row=1, column=0, sticky="new")
+        self._port_combo.grid(row=4, column=0, sticky="new")
         self.columnconfigure(0, weight=1)
 
     @property
@@ -1371,6 +1379,10 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             port_desc = self._port_desc_variable.get()
             port_name = self._ports_by_desc[port_desc]
             get_workbench().set_option(self.backend_name + ".port", port_name)
+
+    def _get_usb_driver_url(self):
+        return None
+
 
 
 class GenericMicroPythonProxy(MicroPythonProxy):
@@ -1692,14 +1704,25 @@ def load_plugin():
             and get_workbench().get_editor_notebook().get_current_editor() is not None
             and get_runner().is_waiting_toplevel_command()
         )
+    
+    def select_device():
+        get_workbench().show_options("Interpreter")
 
+    get_workbench().add_command(
+        "selectdevice",
+        "device",
+        "Select device",
+        select_device,
+        group=1
+    )
+    
     get_workbench().add_command(
         "softreboot",
         "device",
         "Soft reboot",
         soft_reboot,
         soft_reboot_enabled,
-        group=10,
+        group=100,
         default_sequence="<Control-d>",
         extra_sequences=["<<CtrlDInText>>"],
     )

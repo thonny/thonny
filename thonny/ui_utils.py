@@ -11,6 +11,7 @@ import textwrap
 import threading
 import time
 import tkinter as tk
+import tkinter.font
 import traceback
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
@@ -21,6 +22,7 @@ from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_wi
 from thonny.tktextext import TweakableText
 import sys
 from _tkinter import TclError
+import webbrowser
 
 
 class CustomMenubar(ttk.Frame):
@@ -2087,7 +2089,18 @@ class TextMenu(MenuEx):
             return self.text.is_read_only()
         
         return False
-        
+
+def create_url_label(master, url, text=None):
+    url_font = tkinter.font.nametofont("TkDefaultFont").copy()
+    url_font.configure(underline=1)
+    url_label = ttk.Label(
+        master, text=text if text else url, style="Url.TLabel", cursor="hand2", font=url_font
+    )
+    url_label.grid()
+    url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
+    return url_label
+    
+
 if __name__ == "__main__":
     root = tk.Tk()
     closa = ClosableNotebook(root)

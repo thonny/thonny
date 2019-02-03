@@ -41,7 +41,7 @@ class BackendConfigurationPage(ConfigurationPage):
 
         self._combo_variable = create_string_var(current_backend_desc)
 
-        label = ttk.Label(self, text="What should Thonny use for running your code?")
+        label = ttk.Label(self, text="Which interpreter or device should Thonny use for running your code?")
         label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
         sorted_backend_specs = sorted(

@@ -504,9 +504,9 @@ class Workbench(tk.Tk):
         )
 
         self.add_command(
-            "show_options", "tools", "Options...", self._cmd_show_options, group=180
+            "show_options", "tools", "Options...", self.show_options, group=180
         )
-        self.createcommand("::tk::mac::ShowPreferences", self._cmd_show_options)
+        self.createcommand("::tk::mac::ShowPreferences", self.show_options)
         self.createcommand("::tk::mac::Quit", self._mac_quit)
 
         self.add_command(
@@ -536,7 +536,7 @@ class Workbench(tk.Tk):
             "view",
             "Focus editor",
             self._cmd_focus_editor,
-            default_sequence="<Alt-e>",
+            default_sequence=select_sequence("<Alt-e>", "<Command-Alt-e>"),
             group=70,
         )
 
@@ -545,7 +545,7 @@ class Workbench(tk.Tk):
             "view",
             "Focus shell",
             self._cmd_focus_shell,
-            default_sequence="<Alt-s>",
+            default_sequence=select_sequence("<Alt-s>", "<Command-Alt-s>"),
             group=70,
         )
 
@@ -697,6 +697,7 @@ class Workbench(tk.Tk):
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
+        show_extra_sequences = False
     ) -> None:
         """Registers an item to be shown in specified menu.
         
@@ -741,6 +742,7 @@ class Workbench(tk.Tk):
                 include_in_toolbar=include_in_toolbar,
                 submenu=submenu,
                 bell_when_denied=bell_when_denied,
+                show_extra_sequences=show_extra_sequences,
             )
         )
 
@@ -767,6 +769,7 @@ class Workbench(tk.Tk):
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
+        show_extra_sequences: bool = False,
     ) -> None:
         def dispatch(event=None):
             if not tester or tester():
@@ -830,7 +833,13 @@ class Workbench(tk.Tk):
 
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
-
+            """
+            # Does not work on Mac
+            if show_extra_sequences:
+                for extra_seq in extra_sequences:
+                    accelerator += " or " + sequence_to_accelerator(extra_seq)
+            """
+            
         # remember the details that can't be stored in Tkinter objects
         self._menu_item_specs[(menu_name, command_label)] = MenuItem(
             group, position_in_group, tester
@@ -1747,8 +1756,11 @@ class Workbench(tk.Tk):
         self._maximized_view = None
         self.get_variable("view.maximize_view").set(False)
 
-    def _cmd_show_options(self) -> None:
+    def show_options(self, page=None):
         dlg = ConfigurationDialog(self, self._configuration_pages)
+        if page:
+            dlg.select_page(page)
+            
         ui_utils.show_dialog(dlg)
 
     def _cmd_focus_editor(self) -> None:

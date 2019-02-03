@@ -26,9 +26,9 @@ cp Thonny.desktop $TARGET_DIR/templates
 export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 # INSTALL DEPS ###################################
-$TARGET_DIR/bin/python3.7 -m pip install jedi==0.13.1
-$TARGET_DIR/bin/python3.7 -m pip install mypy==0.641
-$TARGET_DIR/bin/python3.7 -m pip install pylint==2.1.1
+$TARGET_DIR/bin/python3.7 -m pip install jedi==0.13.2
+$TARGET_DIR/bin/python3.7 -m pip install mypy==0.660
+$TARGET_DIR/bin/python3.7 -m pip install pylint==2.2.2
 $TARGET_DIR/bin/python3.7 -m pip install docutils==0.14
 $TARGET_DIR/bin/python3.7 -m pip install pyserial==3.4
 $TARGET_DIR/bin/python3.7 -m pip install pyperclip==1.7.0
@@ -71,7 +71,7 @@ rm -rf $TARGET_DIR/lib/python3.7/site-packages/mypy/test
 rm -rf $TARGET_DIR/include/lzma
 rm -rf $TARGET_DIR/include/*.h
 mv $TARGET_DIR/include/python3.7m/pyconfig.h $SCRIPT_DIR # pip needs this
-rm $TARGET_DIR/include/python3.7m/*
+rm -rf $TARGET_DIR/include/python3.7m/*
 mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.7m # put it back
 
 

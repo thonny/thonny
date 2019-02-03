@@ -38,10 +38,13 @@ def parse_source(source: bytes, filename="<unknown>", mode="exec"):
 
 
 def get_last_child(node, skip_incorrect=True):
+    """Returns last focusable child expression or child statement"""
     def ok_node(node):
         if node is None:
             return None
 
+        assert isinstance(node, (ast.expr, ast.stmt))
+         
         if skip_incorrect and getattr(node, "incorrect_range", False):
             return None
 
@@ -99,9 +102,8 @@ def get_last_child(node, skip_incorrect=True):
         # TODO: actually should pairwise check last value, then last key, etc.
         return last_ok(node.values)
 
-    elif isinstance(
-        node, (ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)
-    ):
+    elif isinstance(node, (ast.Index, ast.Return, ast.Assign, ast.AugAssign, 
+                           ast.Yield, ast.YieldFrom)):
         return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):
@@ -115,31 +117,44 @@ def get_last_child(node, skip_incorrect=True):
             return node.msg
         else:
             return ok_node(node.test)
-
-    elif isinstance(node, ast.Subscript):
-        if hasattr(node.slice, "value") and ok_node(node.slice.value):
-            return node.slice.value
+    
+    elif isinstance(node, ast.Slice):
+        # [:]
+        if ok_node(node.step):
+            return node.step
+        elif ok_node(node.upper):
+            return node.upper
         else:
-            assert (
-                hasattr(node.slice, "lower")
-                and hasattr(node.slice, "upper")
-                and hasattr(node.slice, "step")
-            )
+            return ok_node(node.lower)
+    
+    elif isinstance(node, ast.ExtSlice):
+        # [:,:]
+        for dim in reversed(node.dims):
+            result = get_last_child(dim, skip_incorrect)
+            assert result is None or isinstance(result, ast.expr)
+            if result is not None:
+                return result
+        return None
+        
+    elif isinstance(node, ast.Subscript):
+        result = get_last_child(node.slice, skip_incorrect)
+        if result is not None:
+            return result
+        else:
+            return node.value
 
-            if ok_node(node.slice.step):
-                return node.slice.step
-            elif ok_node(node.slice.upper):
-                return node.slice.upper
-            else:
-                return ok_node(node.slice.lower)
-
+    elif isinstance(node, ast.Raise):
+        if ok_node(node.cause):
+            return node.cause
+        elif ok_node(node.exc):
+            return node.exc
+    
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True  # There is last child, but I don't know which it will be
-
+    
     # TODO: pick more cases from here:
     """
     (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
-            or isinstance(node, ast.Raise) and (node.exc is not None or node.cause is not None)
             # or isinstance(node, ast.FunctionDef, ast.Lambda) and len(node.args.defaults) > 0
                 and (node.dest is not None or len(node.values) > 0))
 

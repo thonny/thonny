@@ -422,6 +422,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             "Close all",
             self.close_tabs,
             tester=lambda: self.get_current_editor() is not None,
+            default_sequence=select_sequence("<Control-W>", "<Command-Alt-w>"),
             group=10,
         )
 

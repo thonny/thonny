@@ -53,6 +53,7 @@ from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
 from thonny.terminal import run_in_terminal
+from thonny.ui_utils import select_sequence
 
 
 WINDOWS_EXE = "python.exe"
@@ -93,10 +94,12 @@ class Runner:
             caption="Run",
             handler=self._cmd_run_current_script,
             default_sequence="<F5>",
+            extra_sequences=[select_sequence("<Control-r>", "<Command-r>")],
             tester=self._cmd_run_current_script_enabled,
             group=10,
             image="run-current-script",
             include_in_toolbar=True,
+            show_extra_sequences=True,
         )
 
         get_workbench().add_command(

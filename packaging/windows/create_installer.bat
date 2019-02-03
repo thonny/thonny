@@ -14,9 +14,9 @@ xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
-%BUILDDIR%\python -m pip install jedi==0.13.1
-%BUILDDIR%\python -m pip install mypy==0.641
-%BUILDDIR%\python -m pip install pylint==2.1.1
+%BUILDDIR%\python -m pip install jedi==0.13.2
+%BUILDDIR%\python -m pip install mypy==0.660
+%BUILDDIR%\python -m pip install pylint==2.2.2
 %BUILDDIR%\python -m pip install docutils==0.14
 %BUILDDIR%\python -m pip install pyserial==3.4
 %BUILDDIR%\python -m pip install pyperclip==1.7.0

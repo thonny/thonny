@@ -56,6 +56,11 @@ class ConfigurationDialog(tk.Toplevel):
         self._notebook.select(
             self._notebook.tabs()[ConfigurationDialog.last_shown_tab_index]
         )
+    
+    def select_page(self, title):
+        for i, tab in enumerate(self._notebook.tabs()):
+            if self._notebook.tab(i)["text"] == title:
+                self._notebook.select(tab)
 
     def _ok(self, event=None):
         for title in sorted(self._pages):

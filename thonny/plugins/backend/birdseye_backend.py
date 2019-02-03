@@ -1,5 +1,4 @@
 import os
-import sys
 from thonny.backend import get_vm, Executor, prepare_hooks, return_execution_result
 import webbrowser
 
@@ -25,12 +24,8 @@ class BirdsEyeRunner(Executor):
 
         # Following is a trick, which allows importing birdseye in the backends,
         # which doesn't have it installed (provided it is installed for frontend Python)
-        orig_sys_path = sys.path
-        try:
-            sys.path = orig_sys_path + self._vm._frontend_sys_path
-            from birdseye.bird import eye
-        finally:
-            sys.path = orig_sys_path
+        self._vm.load_modules_with_frontend_path(["birdseye.bird"])
+        from birdseye.bird import eye
 
         eye.exec_string(source, filename, globs=global_vars, locs=global_vars, deep=True)
         port = os.environ.get("BIRDSEYE_PORT", "7777")

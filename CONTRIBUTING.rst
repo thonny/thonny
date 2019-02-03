@@ -16,3 +16,9 @@ We are welcoming all kinds of contributions:
 * ...
 
 See the `wiki <https://github.com/thonny/thonny/wiki>`_ for more info.
+
+**NB!** If you want to contribute to Thonny but don't want to or can't register a GitHub account 
+(for example because you are younger than 13 years), then 
+`get in touch <mailto:aivar.annamaa@gmail.com>`_ and we'll find a way!
+
+
