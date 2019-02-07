@@ -13,7 +13,6 @@ import time
 import tokenize
 import traceback
 import webbrowser
-from pathlib import Path
 from queue import Queue
 from textwrap import dedent
 from time import sleep
@@ -1150,32 +1149,23 @@ class MicroPythonProxy(BackendProxy):
             "Press any key to enter the REPL. Use CTRL-D to reload.",
             "Press CTRL-C to enter the REPL. Use CTRL-D to reload.",
         )
+        
+    def _get_path_prefix(self):
+        if self._supports_directories():
+            return "/"
+        else:
+            return ""
 
     def _get_main_script_path(self):
-        if self._supports_directories():
-            return "/main.py"
-        else:
-            return "main.py"
+        return self._get_path_prefix() + "main.py"
 
     def _get_boot_script_path(self):
-        if self._supports_directories():
-            return "/boot.py"
-        else:
-            return "boot.py"
+        return self._get_path_prefix() + "boot.py"
 
     def _get_script_path(self):
-        script_path = (
-            get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        )
-        script_path = Path(script_path)
-        assert script_path.is_file(), "File not found: %s" % script_path
-
-        filename = script_path.name
-
-        if self._supports_directories():
-            return "/%s" % filename
-        else:
-            return filename
+        local_path = (get_workbench().get_editor_notebook().get_current_editor().save_file(False))
+        assert os.path.isfile(local_path), "File not found: %s" % local_path
+        return self._get_path_prefix() + os.path.basename(local_path)
 
     def transform_message(self, msg):
         if msg is None:
