@@ -2,6 +2,7 @@
 
 import os
 import tkinter as tk
+from tkinter import ttk
 from tkinter.messagebox import showerror
 
 # from thonny.ui_utils import askstring TODO: doesn't work
@@ -9,7 +10,20 @@ from tkinter.simpledialog import askstring
 
 from thonny import get_workbench, misc_utils
 from thonny.base_file_browser import BaseFileBrowser
+from thonny.ui_utils import lookup_style_option
 
+class FilesView(tk.PanedWindow):
+    def __init__(self, master=None):
+        tk.PanedWindow.__init__(self, master, orient="vertical", borderwidth=0)
+        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 10))
+        self.configure(background=lookup_style_option("TPanedWindow", "background"))
+        
+        self.local_files = MainFileBrowser(self)
+        self.add(self.local_files)
+        
+        self.remote_files = RemoteFileBrowser(self)
+        self.add(self.remote_files)
+        
 
 class MainFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False):
@@ -90,6 +104,18 @@ class MainFileBrowser(BaseFileBrowser):
             self.refresh_tree(self.get_selected_node(), True)
 
 
+
+class RemoteFileBrowser(BaseFileBrowser):
+    def __init__(self, master, show_hidden_files=False):
+        BaseFileBrowser.__init__(
+            self, master, show_hidden_files, "device.last_browser_folder"
+        )
+
+    def get_title(self):
+        return "Connected device"
+    
+
+
 def load_plugin() -> None:
     get_workbench().set_default("file.last_browser_folder", None)
-    get_workbench().add_view(MainFileBrowser, "Files", "nw")
+    get_workbench().add_view(FilesView, "Files", "nw")

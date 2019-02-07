@@ -3,23 +3,39 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench, misc_utils
-from thonny.ui_utils import TreeFrame
+from thonny.ui_utils import scrollbar_style
 
 _dummy_node_text = "..."
 
 
-class BaseFileBrowser(TreeFrame):
+class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None):
-        TreeFrame.__init__(self, master, ["#0", "kind", "path"], displaycolumns=(0,))
-        # print(self.get_toplevel_items())
+        ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
+        self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL,
+                                            style=scrollbar_style("Vertical"))
+        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=3)
+        
+        self.toolbar = ttk.Frame(self, style="ViewToolbar.TFrame")
+        self.toolbar.grid(row=0, sticky="nsew")
+        self.toolbar.grid(row=1, sticky="nsew")
+        self.init_toolbar()
+        
+        self.path_bar = ttk.Frame(self)
+        
+        self.tree = ttk.Treeview(   
+            self,
+            columns=["#0", "kind", "path"],
+            displaycolumns=(0,),
+            yscrollcommand=self.vert_scrollbar.set,
+        )
+        self.tree["show"] = "headings"
+        self.tree.grid(row=2, column=0, sticky=tk.NSEW)
+        self.vert_scrollbar["command"] = self.tree.yview
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(2, weight=1)
 
         self.show_hidden_files = show_hidden_files
         self.tree["show"] = ("tree",)
-
-        self.hor_scrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self.tree.config(xscrollcommand=self.hor_scrollbar.set)
-        self.hor_scrollbar["command"] = self.tree.xview
-        self.hor_scrollbar.grid(row=1, column=0, sticky="nsew")
 
         wb = get_workbench()
         self.folder_icon = wb.get_image("folder")
@@ -39,7 +55,25 @@ class BaseFileBrowser(TreeFrame):
 
         self._last_folder_setting_name = last_folder_setting_name
         self.open_initial_folder()
-
+    
+    def init_toolbar(self):
+        self.title_label = ttk.Label(self.toolbar, text=self.get_title(), anchor="w",
+                                     style="ViewToolbar.TLabel")
+        self.title_label.grid(row=0, column=1, sticky="nw", padx=2, pady=(2,4))
+        
+        self.menu_label = ttk.Button(self.toolbar, text=" ≡ ", 
+                                     style="ViewToolbar.Toolbutton")
+        self.menu_label.grid(row=0, column=2, padx=4, pady=(2,4))
+        
+        self.toolbar.columnconfigure(1, weight=1)
+        
+        
+        #self.star_label = ttk.Label(self.toolbar, image=get_workbench().get_image("031"), text="s")
+        #self.star_label.grid(row=0, column=2)
+    
+    def get_title(self):
+        return "This computer"
+    
     def open_initial_folder(self):
         if self._last_folder_setting_name:
             path = get_workbench().get_option(self._last_folder_setting_name)

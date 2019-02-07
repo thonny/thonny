@@ -954,7 +954,6 @@ class Workbench(tk.Tk):
         )
 
         # assing names to related classes
-        assert proxy_class.backend_name is None
         proxy_class.backend_name = name  # type: ignore
         if not isinstance(config_page_constructor, str):
             if not getattr(config_page_constructor, "backend_name", None):
@@ -1377,6 +1376,10 @@ class Workbench(tk.Tk):
         Args:
             view_id: View class name 
             without package name (eg. 'ShellView') """
+        
+        if view_id == "MainFileBrowser":
+            # Was renamed in 3.1.1
+            view_id = "FilesView"
 
         # NB! Don't forget that view.home_widget is added to notebook, not view directly
         # get or create
