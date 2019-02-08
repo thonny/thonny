@@ -1068,11 +1068,8 @@ def fixwordbreaks(root):
     # Make sure that Tk's double-click and next/previous word
     # operations use our definition of a word (i.e. an identifier)
     root.tk.call("tcl_wordBreakAfter", "a b", 0)  # make sure word.tcl is loaded
-    # TODO: IDLE updated following to
-    # root.tk.call('set', 'tcl_wordchars', r'\w')
-    # root.tk.call('set', 'tcl_nonwordchars', r'\W')
-    root.tk.call("set", "tcl_wordchars", u"[a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]")
-    root.tk.call("set", "tcl_nonwordchars", u"[^a-zA-Z0-9_À-ÖØ-öø-ÿĀ-ſƀ-ɏА-я]")
+    root.tk.call("set", "tcl_wordchars", r"\w")
+    root.tk.call("set", "tcl_nonwordchars", r"\W")
 
 
 def rebind_control_a(root):
