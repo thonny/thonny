@@ -954,7 +954,6 @@ class Workbench(tk.Tk):
         )
 
         # assing names to related classes
-        assert proxy_class.backend_name is None
         proxy_class.backend_name = name  # type: ignore
         if not isinstance(config_page_constructor, str):
             if not getattr(config_page_constructor, "backend_name", None):
