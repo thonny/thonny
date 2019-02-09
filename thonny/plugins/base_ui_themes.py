@@ -85,7 +85,7 @@ def _text_settings() -> BasicUiThemeSettings:
 
 
 def _label_settings() -> BasicUiThemeSettings:
-    return {"Url.TLabel": {"configure": {"foreground": "#3A66DD"}}}
+    return {"Url.TLabel": {"configure": {"foreground": "DarkBlue"}}}
 
 
 def _button_notebook_settings() -> BasicUiThemeSettings:
@@ -522,6 +522,9 @@ def windows() -> CompoundUiThemeSettings:
                 "configure": {"background": "SystemWindow", "padding": [scale(5), 0]}
             },
             "ViewToolbar.TLabel": {
+                "configure": {"background": "SystemWindow", "padding": [scale(5), 0]}
+            },
+            "ViewToolbar.Link.TLabel": {
                 "configure": {"background": "SystemWindow", "padding": [scale(5), 0]}
             },
             "Active.ViewTab.TLabel": {

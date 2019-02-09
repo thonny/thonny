@@ -3,33 +3,31 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench, misc_utils, tktextext
-from thonny.ui_utils import scrollbar_style
+from thonny.ui_utils import scrollbar_style, lookup_style_option
 import re
 
 _dummy_node_text = "..."
 
 
 class BaseFileBrowser(ttk.Frame):
-    def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None):
+    def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None,
+                 breadcrumbs_pady=(5,7)):
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL,
                                             style=scrollbar_style("Vertical"))
-        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=4)
-        
-        self.toolbar = ttk.Frame(self, style="ViewToolbar.TFrame")
-        self.toolbar.grid(row=0, sticky="nsew")
-        self.toolbar.grid(row=1, sticky="nsew")
-        self.init_toolbar()
+        self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW, rowspan=3)
         
         tktextext.fixwordbreaks(tk._default_root)
         self.building_breadcrumbs = False
         self.path_bar = tktextext.TweakableText(self, borderwidth=0, relief="flat", height=1,
-            font="TkDefaultFont", wrap="word", padx=6)
+            font="TkDefaultFont", wrap="word", padx=6,
+            pady=5, insertwidth=0,
+            background=lookup_style_option("ViewToolbar.TFrame", "background"))
         self.init_path_bar()
+        self.path_bar.grid(row=0, sticky="nsew")
         
-        self.set_breadcrumbs("This computer\\C:\\Users\\Aivar\\Documents\\Python\\PyGame\\NikaNaka")
-        
-        self.path_bar.grid(row=2, sticky="nsew")
+        spacer = ttk.Frame(self, height=1)
+        spacer.grid(row=1, sticky="nsew")
         
         self.tree = ttk.Treeview(   
             self,
@@ -38,10 +36,10 @@ class BaseFileBrowser(ttk.Frame):
             yscrollcommand=self.vert_scrollbar.set,
         )
         self.tree["show"] = "headings"
-        self.tree.grid(row=3, column=0, sticky=tk.NSEW)
+        self.tree.grid(row=2, column=0, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
-        self.rowconfigure(3, weight=1)
+        self.rowconfigure(2, weight=1)
 
         self.show_hidden_files = show_hidden_files
         self.tree["show"] = ("tree",)
@@ -66,7 +64,7 @@ class BaseFileBrowser(ttk.Frame):
         self.open_initial_folder()
     
     def init_toolbar(self):
-        self.title_label = ttk.Label(self.toolbar, text=self.get_title(), anchor="w",
+        self.title_label = ttk.Label(self.toolbar, text=self.get_root_text(), anchor="w",
                                      style="ViewToolbar.TLabel")
         self.title_label.grid(row=0, column=1, sticky="nw", padx=0, pady=(2,4))
         
@@ -83,28 +81,42 @@ class BaseFileBrowser(ttk.Frame):
     def init_path_bar(self):
         self.path_bar.set_read_only(True)
         self.path_bar.bind("<Configure>", self.resize_path_bar, True)
-        link_font = tk.font.nametofont("TkDefaultFont").copy()
-        #link_font.configure(underline=True)
-        self.path_bar.tag_configure("dir", foreground="darkblue", font=link_font)
+        self.path_bar.tag_configure("dir", 
+                                    foreground=lookup_style_option("Url.TLabel", "foreground"))
         self.path_bar.tag_configure("underline", underline=True)
         
-        def dir_tag_enter(event):
-            self.path_bar.config(cursor="hand2")
+        def get_dir_range(event):
+            mouse_index = self.path_bar.index("@%d,%d" % (event.x, event.y))
+            return self.path_bar.tag_prevrange("dir", mouse_index + "+1c")
         
         def dir_tag_motion(event):
             self.path_bar.tag_remove("underline", "1.0", "end")
-            mouse_index = self.path_bar.index("@%d,%d" % (event.x, event.y))
-            print(mouse_index)
-            dir_range = self.path_bar.tag_prevrange("dir", mouse_index + "+1c")
+            dir_range = get_dir_range(event)
             if dir_range:
-                print(dir_range)
                 range_start, range_end = dir_range
                 self.path_bar.tag_add("underline", range_start, range_end)
     
+        def dir_tag_enter(event):
+            self.path_bar.config(cursor="hand2")
+        
         def dir_tag_leave(event):
             self.path_bar.config(cursor="")
             self.path_bar.tag_remove("underline", "1.0", "end")
         
+        def dir_tag_click(event):
+            mouse_index = self.path_bar.index("@%d,%d" % (event.x, event.y))
+            print(mouse_index)
+            lineno = int(float(mouse_index))
+            if lineno == 1:
+                print("select root")
+            else:
+                assert lineno == 2
+                dir_range = get_dir_range(event)
+                if dir_range:
+                    _, end_index = dir_range
+                    print("select", self.path_bar.get("2.0", end_index))
+        
+        self.path_bar.tag_bind("dir", "<1>", dir_tag_click)
         self.path_bar.tag_bind("dir", "<Enter>", dir_tag_enter)
         self.path_bar.tag_bind("dir", "<Leave>", dir_tag_leave)
         self.path_bar.tag_bind("dir", "<Motion>", dir_tag_motion)
@@ -112,22 +124,37 @@ class BaseFileBrowser(ttk.Frame):
     def set_breadcrumbs(self, path):
         self.building_breadcrumbs = True
         self.path_bar.direct_delete("1.0", "end")
-        parts = path.split(os.sep)
+        
+        self.path_bar.direct_insert("1.0", self.get_root_text(), ("dir",))
+        
+        if not path:
+            return 
+        
+        self.path_bar.direct_insert("end", "\n")
+        
+        def create_spacer():
+            return ttk.Frame(self.path_bar, height=1, width=4,
+                             style="ViewToolbar.TFrame")
+        
+        if "/" in path:
+            sep = "/"
+        else:
+            sep = "\\"
+        
+        parts = path.split(sep)
         for i, part in enumerate(parts):
-            if i == 1:
-                self.path_bar.direct_insert("end", "\n")
-            elif i > 1:
-                self.path_bar.direct_insert("end", " " + os.sep + " ")
+            if i > 0:
+                if parts[0] != "":
+                    self.path_bar.window_create("end", window=create_spacer())
+                self.path_bar.direct_insert("end", sep)
+                self.path_bar.window_create("end", window=create_spacer())
             
-            if i == len(parts) - 1:
-                self.path_bar.direct_insert("end", part)
-            else:
-                self.path_bar.direct_insert("end", part, tags=("dir",))
+            self.path_bar.direct_insert("end", part, tags=("dir",))
              
         self.building_breadcrumbs = False
     
-    def get_title(self):
-        return "This computer"
+    def get_root_text(self):
+        return "THIS COMPUTER"
     
     def open_initial_folder(self):
         if self._last_folder_setting_name:
@@ -214,6 +241,8 @@ class BaseFileBrowser(ttk.Frame):
                 self.tree.see(self.tree.parent(current_node_id))
             else:
                 self.tree.see(current_node_id)
+
+    
 
     def refresh_tree(self, node_id="", opening=None):
         path = self.tree.set(node_id, "path")

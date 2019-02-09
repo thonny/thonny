@@ -15,7 +15,7 @@ from thonny.ui_utils import lookup_style_option
 class FilesView(tk.PanedWindow):
     def __init__(self, master=None):
         tk.PanedWindow.__init__(self, master, orient="vertical", borderwidth=0)
-        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 10))
+        self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 4))
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
         
         self.local_files = MainFileBrowser(self)
@@ -38,6 +38,8 @@ class MainFileBrowser(BaseFileBrowser):
         if misc_utils.running_on_mac_os():
             self.tree.bind("<2>", self.on_secondary_click, True)
             self.tree.bind("<Control-1>", self.on_secondary_click, True)
+            
+        self.set_breadcrumbs("C:\\Users\\Aivar\\Documents\\Python\\PyGame\\NikaNaka")
 
     def create_new_file(self):
         selected_path = self.get_selected_path()
@@ -108,11 +110,13 @@ class MainFileBrowser(BaseFileBrowser):
 class RemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         BaseFileBrowser.__init__(
-            self, master, show_hidden_files, "device.last_browser_folder"
+            self, master, show_hidden_files, "device.last_browser_folder",
+            breadcrumbs_pady=(0,7)
         )
+        self.set_breadcrumbs("")
 
-    def get_title(self):
-        return "Connected device"
+    def get_root_text(self):
+        return "TARGET DEVICE"
     
 
 
