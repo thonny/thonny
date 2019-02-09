@@ -2,7 +2,7 @@
 Version history
 ===============
 
-3.1.1 (2019-02-02)
+3.1.1 (2019-02-09)
 ==================
 * FIXED #674: Print doesn't work on Mac
 * FIXED #675: Make focus editor / shell shortcuts usable on Mac
