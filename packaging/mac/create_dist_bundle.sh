@@ -74,6 +74,13 @@ cd $PYTHON_CURRENT/bin
 ln -s python3.7 python3
 cd $SCRIPT_DIR
 
+# create pip
+# NB! check that pip.sh refers to correct executable!
+cp $SCRIPT_DIR/../pip.sh $TARGET_DIR/bin/pip3
+cp $SCRIPT_DIR/../pip.sh $TARGET_DIR/bin/pip3.7
+
+
+
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $PYTHON_CURRENT/bin 
 
