@@ -69,15 +69,16 @@ mv $PYTHON_CURRENT/bin/python3.7 $SCRIPT_DIR # save python exe
 rm -rf $PYTHON_CURRENT/bin/*
 mv $SCRIPT_DIR/python3.7 $PYTHON_CURRENT/bin/
 
-# create new commands ###############################################################
-cd $PYTHON_CURRENT/bin
-ln -s python3.7 python3
-cd $SCRIPT_DIR
-
 # create pip
 # NB! check that pip.sh refers to correct executable!
-cp $SCRIPT_DIR/../pip.sh $TARGET_DIR/bin/pip3
 cp $SCRIPT_DIR/../pip.sh $TARGET_DIR/bin/pip3.7
+
+# create linkns ###############################################################
+cd $PYTHON_CURRENT/bin
+ln -s python3.7 python3
+ln -s pip3.7 pip3
+cd $SCRIPT_DIR
+
 
 
 

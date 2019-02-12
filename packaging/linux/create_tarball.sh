@@ -81,20 +81,17 @@ mv $TARGET_DIR/bin/python3.7 $SCRIPT_DIR # save python exe
 rm -rf $TARGET_DIR/bin/*
 mv $SCRIPT_DIR/python3.7 $TARGET_DIR/bin/
 
-# create exe link
-cd $TARGET_DIR/bin
-ln -s python3.7 python3
-cd -
-
 # create other executables and links
 # NB! check that pip.sh refers to correct executable!
-cp ../pip.sh $TARGET_DIR/bin/pip3
 cp ../pip.sh $TARGET_DIR/bin/pip3.7
 
 # create new commands ###############################################################
 cp thonny $TARGET_DIR/bin
+
+# create links ###############################################################
 cd $TARGET_DIR/bin
 ln -s python3.7 python3
+ln -s pip3.7 pip3
 cd $SCRIPT_DIR
 
 # copy the token signifying Thonny-private Python
