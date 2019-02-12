@@ -37,6 +37,10 @@ def is_virtual_exe(p):
         or os.path.exists(os.path.join(pdir, "activate.bat"))
     )
 
+def is_bundled_exe(p):
+    pdir = os.path.dirname(p)
+    return os.path.exists(os.path.join(pdir, "thonny_python.ini"))
+
 def list_commands(prefix, highlighted_reals, highlighted_dirs):
     for suffix in ["", "3", "3.5", "3.6", "3.7", "3.8"]:
         cmd = prefix + suffix
@@ -95,7 +99,7 @@ if __name__ == "__main__":
     sys_real = normpath_with_actual_case(equivalent_realpath(sys.executable))
     sys_executable = normpath_with_actual_case(sys.executable)
     
-    if is_virtual_exe(sys_executable):
+    if is_virtual_exe(sys_executable) or is_bundled_exe(sys_executable):
         highlight_dirs = [os.path.dirname(sys_executable)]
     else:
         highlight_dirs = []
