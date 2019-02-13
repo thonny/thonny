@@ -2,7 +2,7 @@
 Version history
 ===============
 
-3.1.2 (2019-02-??)
+3.1.2 (2019-02-13)
 ==================
 * FIXED: Make Terminal features work in Windows again
 * FIXED #685: Print cuts lines
