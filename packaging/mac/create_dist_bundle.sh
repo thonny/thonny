@@ -71,7 +71,7 @@ mv $SCRIPT_DIR/python3.7 $PYTHON_CURRENT/bin/
 
 # create pip
 # NB! check that pip.sh refers to correct executable!
-cp $SCRIPT_DIR/../pip.sh $TARGET_DIR/bin/pip3.7
+cp $SCRIPT_DIR/../pip.sh $PYTHON_CURRENT/bin/pip3.7
 
 # create linkns ###############################################################
 cd $PYTHON_CURRENT/bin
