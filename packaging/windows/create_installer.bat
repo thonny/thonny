@@ -41,6 +41,10 @@ rmdir %BUILDDIR%\libs /S /Q>NUL
 rmdir %BUILDDIR%\Tools /S /Q>NUL
 del "%BUILDDIR%\Scripts\*" /Q>NUL
 
+copy .\pip.bat "%BUILDDIR%\Scripts\pip.bat"
+copy .\pip.bat "%BUILDDIR%\Scripts\pip3.bat"
+copy .\pip.bat "%BUILDDIR%\Scripts\pip3.7.bat"
+
 rmdir %BUILDDIR%\lib\test /S /Q>NUL
 
 del %BUILDDIR%\tcl\*.sh /Q>NUL
