@@ -14,7 +14,13 @@
 
 pre {
     counter-reset: line;
+    white-space: pre-wrap;       /* Since CSS 2.1 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
 code {
     counter-increment: line;
 	padding-left: 1em;    
@@ -27,7 +33,7 @@ code:before {
     border-right: solid gray 1px;
     display: inline-block;
     text-align: right;
-    width: 1.5em;
+    width: 2em;
     font-style: italic;
     -webkit-user-select: none;
 }

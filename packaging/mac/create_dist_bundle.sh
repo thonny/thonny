@@ -69,10 +69,18 @@ mv $PYTHON_CURRENT/bin/python3.7 $SCRIPT_DIR # save python exe
 rm -rf $PYTHON_CURRENT/bin/*
 mv $SCRIPT_DIR/python3.7 $PYTHON_CURRENT/bin/
 
-# create new commands ###############################################################
+# create pip
+# NB! check that pip.sh refers to correct executable!
+cp $SCRIPT_DIR/../pip.sh $PYTHON_CURRENT/bin/pip3.7
+
+# create linkns ###############################################################
 cd $PYTHON_CURRENT/bin
 ln -s python3.7 python3
+ln -s pip3.7 pip3
 cd $SCRIPT_DIR
+
+
+
 
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $PYTHON_CURRENT/bin 

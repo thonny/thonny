@@ -2,6 +2,13 @@
 Version history
 ===============
 
+3.1.2 (2019-02-13)
+==================
+* FIXED: Make Terminal features work in Windows again
+* FIXED #685: Print cuts lines
+* FIXED #686: Stepping over user modules can be too slow
+* ENHANCEMENT: Include pip in binary bundles
+
 3.1.1 (2019-02-09)
 ==================
 * FIXED #674: Print doesn't work on Mac

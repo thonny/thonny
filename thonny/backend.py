@@ -2479,8 +2479,13 @@ class FancySourceFileLoader(SourceFileLoader):
         self._tracer = tracer
 
     def source_to_code(self, data, path, *, _optimize=-1):
-        root = self._tracer._prepare_ast(data, path, "exec")
-        return super().source_to_code(root, path)
+        old_tracer = sys.gettrace()
+        sys.settrace(None)
+        try:
+            root = self._tracer._prepare_ast(data, path, "exec")
+            return super().source_to_code(root, path)
+        finally:
+            sys.settrace(old_tracer)
 
 
 def _get_frame_prefix(frame):

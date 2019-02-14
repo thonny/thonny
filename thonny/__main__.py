@@ -3,6 +3,8 @@ import runpy
 
 if sys.executable.endswith("thonny.exe"):
     # otherwise some library may try to run its subprocess with thonny.exe
+    # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
+    # is already allocated.
     sys.executable = sys.executable[:-len("thonny.exe")] + "pythonw.exe"
 
 from thonny import launch

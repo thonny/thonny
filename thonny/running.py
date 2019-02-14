@@ -1159,7 +1159,9 @@ class BackendTerminatedError(Exception):
 
 
 def get_frontend_python():
-    return sys.executable.replace("thonny.exe", "python.exe")
+    return (sys.executable
+               .replace("thonny.exe", "python.exe")
+               .replace("pythonw.exe", "python.exe"))
 
 def is_venv_interpreter_of_current_interpreter(executable):
     for location in [".", ".."]:
