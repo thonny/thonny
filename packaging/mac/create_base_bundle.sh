@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-# Should be run once per new version of Python or Tk
+# Should be run once per new Python version
 
 # Before running this
-# * Install Python (official dmg)
-# * Build and install Tcl/Tk (from source (install_tcltk.sh), because ActiveTcl licence is not compatible)
-
-# This version takes official Python installation as base
+# * Install Python (official python.org dmg). This version takes official Python installation as base
 
 export PREFIX=$HOME/thonny_template_build_37
 APP_TEMPLATE=$PREFIX/Thonny.app
