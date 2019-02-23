@@ -1308,9 +1308,16 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
     def __init__(self, master):
         super().__init__(master)
-        
-        intro_label = ttk.Label(self, text="Connect your device to the computer and select corresponding port below (look for your device name, \n"
-                                + "\"USB Serial\" or \"UART\"). If you can't find it, you may need to install proper USB driver first.")
+        intro_text=("Connect your device to the computer and select corresponding port below (look for your device name, \n"
+                 + "\"USB Serial\" or \"UART\"). If you can't find it, you may need to install proper USB driver first.")
+        if self.allow_webrepl:
+            intro_text = ("Connecting via USB cable:\n" 
+                          + intro_text + "\n\n"
+                          + "Connecting via WebREPL protocol:\n"
+                          + "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
+                          + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below")
+            
+        intro_label = ttk.Label(self, text=intro_text)
         intro_label.grid(row=0, column=0, sticky="nw")
         
         driver_url = self._get_usb_driver_url()
@@ -1318,7 +1325,8 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
         
-        port_label = ttk.Label(self, text='Port')
+        port_label = ttk.Label(self, text='Port or WebREPL' if self.allow_webrepl
+                                          else "Port")
         port_label.grid(row=3, column=0, sticky="nw", pady=(10,0))
 
         self._ports_by_desc = {
@@ -1327,8 +1335,10 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             else p.description + " (" + p.device + ")": p.device
             for p in list_serial_ports()
         }
-        self._ports_by_desc["< Try to detect automatically >"] = "auto"
+        self._ports_by_desc["< Try to detect port automatically >"] = "auto"
         self._ports_by_desc["< None / don't connect at all >"] = None
+        if self.allow_webrepl:
+            self._ports_by_desc["< WebREPL >"] = "webrepl"
 
         def port_order(p):
             _, name = p
@@ -1380,6 +1390,10 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
     def _get_usb_driver_url(self):
         return None
+    
+    @property
+    def allow_webrepl(self):
+        return False
 
 
 
@@ -1394,8 +1408,9 @@ class GenericMicroPythonProxy(MicroPythonProxy):
 
 
 class GenericMicroPythonConfigPage(MicroPythonConfigPage):
-    pass
-
+    @property
+    def allow_webrepl(self):
+        return True
 
 class Connection:
     """Utility class for using Serial or WebSocket connection
@@ -1591,6 +1606,49 @@ class SerialConnection(Connection):
                 except Exception:
                     logging.exception("Couldn't close serial")
 
+class WebReplConnection():
+    def __init__(self, url, password):
+        super().__init__()
+        
+        # Some tricks are needed to use async library in sync program 
+        import asyncio
+        asyncio.get_event_loop().run_until_complete(self._connect(url, password))
+        
+        # use thread-safe queues to communicate with async world in another thread
+        self._write_queue = Queue() 
+        self._io_thread = threading.Thread(target=self._communicate, daemon=True)
+        self._io_thread.start()
+        
+        
+    
+    async def _connect(self, url, password):
+        import websockets
+        self._ws = await websockets.connect(url)
+        # TODO: read password prompt and send password
+    
+    def _communicate(self):
+        import asyncio
+        tasks = asyncio.gather(self._keep_reading(), self._keep_writing())
+        asyncio.get_event_loop().run_until_complete(tasks)
+    
+    async def _keep_reading(self):
+        while True:
+            data = await self._ws.recv()
+            if len(data) == 0:
+                self._error = "EOF"
+                break
+            
+            self.num_bytes_received += len(data)
+            self._read_queue.put(data, block=False)
+    
+    async def _keep_writing(self):
+        import asyncio
+        while True:
+            while not self._write_queue.empty():
+                self._ws.send(self._write_queue.get(block=False))
+            # Allow reading loop to progress
+            await asyncio.sleep(0.01)
+        
 
 class TimeHelper:
     def __init__(self, time_allowed):
@@ -1647,6 +1705,7 @@ def list_serial_ports():
 
 def add_micropython_backend(name, proxy_class, description, config_page):
     get_workbench().set_default(name + ".port", "auto")
+    get_workbench().set_default(name + ".webrepl_url", "ws://192.168.4.1:8266/")
     get_workbench().add_backend(name, proxy_class, description, config_page)
 
 
