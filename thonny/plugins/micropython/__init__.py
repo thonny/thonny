@@ -74,14 +74,14 @@ class MicroPythonProxy(BackendProxy):
 
         self.__idle = False
 
-        self._serial = self._create_serial()
+        self._connection = self._create_connection()
 
-        if self._serial is not None and (clean or _AUTOMATIC_INTERRUPT):
+        if self._connection is not None and (clean or _AUTOMATIC_INTERRUPT):
             try:
                 self._interrupt_to_prompt(clean)
                 self._builtin_modules = self._fetch_builtin_modules()
             except TimeoutError:
-                read_bytes = bytes(self._discarded_bytes + self._serial._read_buffer)
+                read_bytes = bytes(self._discarded_bytes + self._connection._read_buffer)
                 self._show_error_connect_again(
                     "Could not connect to REPL.\n"
                     + "Make sure your device has suitable firmware and is not in bootloader mode!\n"
@@ -103,12 +103,12 @@ class MicroPythonProxy(BackendProxy):
         if cmd.name in ["editor_autocomplete", "cd", "dump_api_info", "lsdevice"]:
             # Works even without connection to the board
             return super().send_command(cmd)
-        elif self._serial is None:
+        elif self._connection is None:
             return "discard"
         elif self.idle:
             try:
-                if not self._serial.buffers_are_empty():
-                    discarded = self._serial.read_all()
+                if not self._connection.buffers_are_empty():
+                    discarded = self._connection.read_all()
                     self._send_error_to_shell(
                         "Warning: when issuing %r,\nincoming was not emtpy: %r"
                         % (cmd, discarded)
@@ -123,7 +123,7 @@ class MicroPythonProxy(BackendProxy):
     def send_program_input(self, data: str) -> None:
 
         # TODO: what if there is a previous unused data waiting
-        assert self._serial.outgoing_is_empty()
+        assert self._connection.outgoing_is_empty()
 
         assert data.endswith("\n")
         if not data.endswith("\r\n"):
@@ -132,11 +132,11 @@ class MicroPythonProxy(BackendProxy):
         data = input_str.encode("utf-8")
 
         try:
-            self._serial.write(data)
+            self._connection.write(data)
             # Try to consume the echo
 
             try:
-                echo = self._serial.read(len(data))
+                echo = self._connection.read(len(data))
             except queue.Empty:
                 # leave it.
                 logging.warning("Timeout when reading echo")
@@ -146,7 +146,7 @@ class MicroPythonProxy(BackendProxy):
                 # because of autoreload? timing problems? interruption?
                 # Leave it.
                 logging.warning("Unexpected echo. Expected %s, got %s" % (data, echo))
-                self._serial.unread(echo)
+                self._connection.unread(echo)
 
         except SerialException as e:
             self._handle_serial_exception(e)
@@ -155,7 +155,7 @@ class MicroPythonProxy(BackendProxy):
         if not self._non_serial_msg_queue.empty():
             msg = self._non_serial_msg_queue.get_nowait()
 
-        elif self._serial is not None:
+        elif self._connection is not None:
             # Provide guidance for Ctrl-C
             if time.time() - self._start_time > 0.5:
                 if not self._has_been_idle:
@@ -178,13 +178,13 @@ class MicroPythonProxy(BackendProxy):
         return self.transform_message(msg)
 
     def interrupt(self):
-        if self._serial is None:
+        if self._connection is None:
             return
 
         try:
             self.idle = False
-            self._serial.reset_output_buffer()
-            self._serial.write(b"\x03")
+            self._connection.reset_output_buffer()
+            self._connection.write(b"\x03")
 
             # Wait a bit to avoid the situation where part of the prompt will
             # be treated as output and whole prompt is not detected.
@@ -197,9 +197,9 @@ class MicroPythonProxy(BackendProxy):
         self.disconnect()
 
     def disconnect(self):
-        if self._serial is not None:
+        if self._connection is not None:
             try:
-                self._serial.close()
+                self._connection.close()
                 self._send_text_to_shell(
                     "\n\nConnection closed.\nSelect Run → Stop/Restart or press Ctrl+F2 to connect again.",
                     "stdout",
@@ -210,27 +210,32 @@ class MicroPythonProxy(BackendProxy):
                     "Problem when closing serial connection: " + str(e)
                 )
 
-            self._serial = None
+            self._connection = None
 
     def is_connected(self):
-        return self._serial is not None
+        return self._connection is not None
 
     def is_functional(self):
         return self.is_connected()
 
-    def _create_serial(self):
-        self.port = get_workbench().get_option(self.backend_name + ".port")
-
-        if self.port is None:
+    def _create_connection(self):
+        port = get_workbench().get_option(self.backend_name + ".port")
+        if port == "webrepl":
+            return self._create_webrepl_connection()
+        else:
+            return self._create_serial_connection(port)
+        
+    def _create_serial_connection(self, port):
+        if port is None:
             self._send_text_to_shell(
                 'Not connected. Choose "Tools → Options → Backend" to change.', "stdout"
             )
             return None
 
-        if self.port == "auto":
+        if port == "auto":
             potential = self._detect_potential_ports()
             if len(potential) == 1:
-                self.port = potential[0][0]
+                port = potential[0][0]
             else:
                 message = dedent(
                     """\
@@ -249,11 +254,11 @@ class MicroPythonProxy(BackendProxy):
                 return None
 
         try:
-            return SerialHelper(self.port, baudrate=self._baudrate)
+            return SerialConnection(port, baudrate=self._baudrate)
         except SerialException as error:
             traceback.print_exc()
             message = (
-                "Unable to connect to " + self.port + "\n" + "Error: " + str(error)
+                "Unable to connect to " + port + "\n" + "Error: " + str(error)
             )
 
             # TODO: check if these error codes also apply to Linux and Mac
@@ -279,6 +284,9 @@ class MicroPythonProxy(BackendProxy):
             self._show_error_connect_again(message)
 
             return None
+    
+    def _create_webrepl_connection(self):
+        pass
 
     def _show_error_connect_again(self, msg):
         self._send_error_to_shell(
@@ -346,7 +354,7 @@ class MicroPythonProxy(BackendProxy):
         }
 
     def _interrupt_to_prompt(self, clean, timeout=8):
-        assert self._serial is not None
+        assert self._connection is not None
 
         timer = TimeHelper(timeout)
 
@@ -355,11 +363,11 @@ class MicroPythonProxy(BackendProxy):
 
         for delay in [0.05, 0.5, 2.0, 3.0]:
             # Interrupt several times, because with some drivers first interrupts seem to vanish
-            self._serial.reset_output_buffer()
-            self._serial.write(b"\x03")  # interrupt
-            self._serial.write(b"\x01")  # raw mode
+            self._connection.reset_output_buffer()
+            self._connection.write(b"\x03")  # interrupt
+            self._connection.write(b"\x01")  # raw mode
             sleep(delay)
-            self._discarded_bytes += self._serial.read_all()
+            self._discarded_bytes += self._connection.read_all()
             if self._discarded_bytes.endswith(
                 FIRST_RAW_PROMPT
             ) or self._discarded_bytes.endswith(b"\r\n>"):
@@ -383,17 +391,17 @@ class MicroPythonProxy(BackendProxy):
 
     def _clean_environment_during_startup(self, time_left):
         # In MP Ctrl+D doesn't run user code, in CP it does
-        self._serial.write(b"\x04")
-        self._discarded_bytes = self._serial.read_until(
+        self._connection.write(b"\x04")
+        self._discarded_bytes = self._connection.read_until(
             [FIRST_RAW_PROMPT, RAW_PROMPT], time_left
         )
 
     def _get_welcome_text_in_raw_mode(self, timeout):
         timer = TimeHelper(timeout)
         # get welcome text with Ctrl+B
-        self._serial.write(b"\x02")
+        self._connection.write(b"\x02")
         welcome_text = (
-            self._serial.read_until(NORMAL_PROMPT, timer.time_left)
+            self._connection.read_until(NORMAL_PROMPT, timer.time_left)
             .strip(b"\r\n >")
             .decode("utf-8", "replace")
         )
@@ -401,8 +409,8 @@ class MicroPythonProxy(BackendProxy):
             welcome_text = welcome_text.replace("\r\n", "\n")
 
         # Go back to raw prompt
-        self._serial.write(b"\x01")
-        self._serial.read_until((FIRST_RAW_PROMPT, b"\x04>"), timer.time_left)
+        self._connection.write(b"\x01")
+        self._connection.read_until((FIRST_RAW_PROMPT, b"\x04>"), timer.time_left)
 
         return welcome_text + " [backend=" + self.get_backend_name() + "]"
 
@@ -410,22 +418,22 @@ class MicroPythonProxy(BackendProxy):
         pass
 
     def _soft_reboot_and_run_main(self):
-        if self._serial is None:
+        if self._connection is None:
             return
 
         if not self.idle:
             # TODO: ignore??
-            # self._serial.write(b"\r\x03")
+            # self._connection.write(b"\r\x03")
             self.interrupt()
 
         get_runner()._set_state("running")
         self.idle = False
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
-        self._serial.write(b"\x02")
-        self._serial.read_until(NORMAL_PROMPT)
+        self._connection.write(b"\x02")
+        self._connection.read_until(NORMAL_PROMPT)
 
-        self._serial.write(b"\x04")
+        self._connection.write(b"\x04")
 
         # Returning to the raw prompt will be handled by
         # _read_next_serial_message
@@ -459,31 +467,31 @@ class MicroPythonProxy(BackendProxy):
         self._show_error_connect_again("\nLost connection to the device (%s)." % e)
         self.idle = False
         try:
-            self._serial.close()
+            self._connection.close()
         except Exception:
             logging.exception("Closing serial")
         finally:
-            self._serial = None
+            self._connection = None
 
     def _execute_async(self, script):
         """Executes given MicroPython script on the device"""
-        assert self._serial.buffers_are_empty()
+        assert self._connection.buffers_are_empty()
 
         command_bytes = script.encode("utf-8")
-        self._serial.write(command_bytes + b"\x04")
+        self._connection.write(command_bytes + b"\x04")
         self.idle = False
 
         # fetch confirmation
-        ok = self._serial.read(2)
+        ok = self._connection.read(2)
         assert ok == b"OK", "Expected OK, got %s, followed by %s" % (
             ok,
-            self._serial.read_all(),
+            self._connection.read_all(),
         )
 
     def _execute_and_get_response(self, script):
         self._execute_async(script)
         terminator = b"\x04>"
-        output = self._serial.read_until(terminator)[: -len(terminator)]
+        output = self._connection.read_until(terminator)[: -len(terminator)]
         self.idle = True
         return output.split(b"\x04")
 
@@ -979,7 +987,7 @@ class MicroPythonProxy(BackendProxy):
                 return candidates[0]
 
     def _read_next_serial_message(self) -> Optional[MessageFromBackend]:
-        new_bytes = self._serial.read_all()
+        new_bytes = self._connection.read_all()
 
         if len(new_bytes) == 0:
             return None
@@ -1006,7 +1014,7 @@ class MicroPythonProxy(BackendProxy):
 
         elif match.start() > 0:
             # starts with block of normal output
-            self._serial.unread(new_bytes[match.start() :])
+            self._connection.unread(new_bytes[match.start() :])
             return self._read_output_message(new_bytes[: match.start()], True)
 
         elif match.group() == FIRST_RAW_PROMPT:
@@ -1025,19 +1033,19 @@ class MicroPythonProxy(BackendProxy):
 
             if len(new_bytes) == 1:
                 # can't decide anything yet
-                self._serial.unread(new_bytes)
+                self._connection.unread(new_bytes)
                 return None
             elif new_bytes[1:2] == RAW_PROMPT:
                 # must be end of the response to a non-Thonny command
                 # Only treat as raw prompt if it ends the output
                 if new_bytes[1:] == RAW_PROMPT:
-                    assert self._serial.incoming_is_empty()  # TODO: what about Ctlr-? ?
+                    assert self._connection.incoming_is_empty()  # TODO: what about Ctlr-? ?
                     self.idle = True
                     return ToplevelResponse()
                 else:
                     # Looks like the prompt was discarded by a soft reboot (or some other reason?)
                     # hide it and forget it
-                    self._serial.unread(new_bytes[2:])
+                    self._connection.unread(new_bytes[2:])
                     return None
             elif new_bytes[1:2] == THONNY_MSG_START:
                 # must be followed by empty error block and raw prompt
@@ -1046,13 +1054,13 @@ class MicroPythonProxy(BackendProxy):
                 term_loc = new_bytes.find(terminator)
                 if term_loc == -1:
                     # not complete yet
-                    self._serial.unread(new_bytes)
+                    self._connection.unread(new_bytes)
                     return None
 
                 elif term_loc == len(new_bytes) - len(terminator):
                     # This terminator ends the bytes
                     # The normal, completed case
-                    assert self._serial.incoming_is_empty()
+                    assert self._connection.incoming_is_empty()
                     msg_bytes = new_bytes[2 : -len(terminator)]
                     self.idle = True
                     return self._parse_message(msg_bytes)
@@ -1064,7 +1072,7 @@ class MicroPythonProxy(BackendProxy):
                         "disregarding out of date Thonny message: %r", new_bytes
                     )
                     # Unread following stuff
-                    self._serial.unread(new_bytes[term_loc + len(terminator) :])
+                    self._connection.unread(new_bytes[term_loc + len(terminator) :])
 
             else:
                 # exception block
@@ -1072,13 +1080,13 @@ class MicroPythonProxy(BackendProxy):
                 next_eot_loc = new_bytes.find(EOT, 1)
                 if next_eot_loc == -1:
                     # the block isn't complete yet
-                    self._serial.unread(new_bytes)
+                    self._connection.unread(new_bytes)
                     return None
                 else:
                     # block is complete
                     block_bytes = new_bytes[1:next_eot_loc]
                     leftover_bytes = new_bytes[next_eot_loc:]  # should be EOT + >
-                    self._serial.unread(leftover_bytes)
+                    self._connection.unread(leftover_bytes)
 
                     if len(block_bytes) > 0:
                         # non-empty exception block
@@ -1118,7 +1126,7 @@ class MicroPythonProxy(BackendProxy):
                     break
                 except UnicodeDecodeError:
                     # unread last byte and try again
-                    self._serial.unread(out_bytes[-1:])
+                    self._connection.unread(out_bytes[-1:])
                     out_bytes = out_bytes[:-1]
 
         if len(out_str) == 0:
@@ -1193,17 +1201,17 @@ class MicroPythonProxy(BackendProxy):
 
     def _enter_raw_repl(self, strict):
         if strict:
-            assert self._serial.buffers_are_empty()
+            assert self._connection.buffers_are_empty()
 
         discarded_data = b""
 
         for delay in [0.01, 0.05, 0.1, 0.5]:
-            self._serial.write(b"\x03")
+            self._connection.write(b"\x03")
             sleep(delay / 3)
-            self._serial.write(b"\x01")
+            self._connection.write(b"\x01")
             sleep(delay)
             # Consume the raw repl introduction + prompt
-            discarded_data += self._serial.read_all()
+            discarded_data += self._connection.read_all()
             if discarded_data.endswith(b"\r\n>"):
                 self.idle = True
                 return ToplevelResponse()
@@ -1254,7 +1262,7 @@ class MicroPythonProxy(BackendProxy):
 
     @property
     def micropython_upload_enabled(self):
-        return self.port is not None
+        return self._connection is not None
 
     def select_and_upload_micropython(self):
         firmware_path = askopenfilename(
@@ -1389,10 +1397,10 @@ class GenericMicroPythonConfigPage(MicroPythonConfigPage):
     pass
 
 
-class SerialHelper:
-    """Utility class for using Serial connection
+class Connection:
+    """Utility class for using Serial or WebSocket connection
     
-    Uses background thread to read from serial as soon as possible
+    Uses background thread to read from the source as soon as possible
     to avoid loss of data (because buffer overflow or the device discarding 
     unread data).
 
@@ -1401,16 +1409,12 @@ class SerialHelper:
     Allows unreading data.    
     """
 
-    def __init__(self, port, baudrate):
+    def __init__(self):
         self._read_queue = Queue()  # populated by reader thread
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
-        self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
         self.num_bytes_received = 0
         self._error = None
-
-        self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
-        self._reading_thread.start()
-
+        
     def read(self, size, timeout=1):
         if timeout == 0:
             raise TimeoutError()
@@ -1491,6 +1495,52 @@ class SerialHelper:
         self._read_buffer = data + self._read_buffer
 
     def write(self, data, block_size=32, delay=0.01):
+        raise NotImplementedError()
+
+    def _log_data(self, data):
+        print(
+            data.decode("Latin-1")
+            .replace("\r\n", "\n")
+            .replace("\x01", "①")
+            .replace("\x02", "②")
+            .replace("\x03", "③")
+            .replace("\x04", "④"),
+            end="",
+        )
+
+    def incoming_is_empty(self):
+        return (
+            self._read_queue.empty()
+            and len(self._read_buffer) == 0
+        )
+
+    def outgoing_is_empty(self):
+        return True
+
+    def buffers_are_empty(self):
+        return self.incoming_is_empty() and self.outgoing_is_empty()
+
+    def reset_input_buffer(self):
+        return self.read_all()
+
+    def reset_output_buffer(self):
+        pass
+
+    def close(self):
+        raise NotImplementedError()
+
+    
+
+class SerialConnection(Connection):
+
+    def __init__(self, port, baudrate):
+        super().__init__()
+
+        self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+        self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
+        self._reading_thread.start()
+
+    def write(self, data, block_size=32, delay=0.01):
         for i in range(0, len(data), block_size):
             block = data[i : i + block_size]
             # self._log_data(b"[" + block + b"]")
@@ -1517,32 +1567,14 @@ class SerialHelper:
             logging.exception("Error while reading from serial")
             self._error = str("Serial reading error: %s" % e)
 
-    def _log_data(self, data):
-        print(
-            data.decode("Latin-1")
-            .replace("\r\n", "\n")
-            .replace("\x01", "①")
-            .replace("\x02", "②")
-            .replace("\x03", "③")
-            .replace("\x04", "④"),
-            end="",
-        )
-
     def incoming_is_empty(self):
         return (
             self._serial.in_waiting == 0
-            and self._read_queue.empty()
-            and len(self._read_buffer) == 0
+            and super().incoming_is_empty()
         )
 
     def outgoing_is_empty(self):
         return self._serial.out_waiting == 0
-
-    def buffers_are_empty(self):
-        return self.incoming_is_empty() and self.outgoing_is_empty()
-
-    def reset_input_buffer(self):
-        return self.read_all()
 
     def reset_output_buffer(self):
         self._serial.reset_output_buffer()
