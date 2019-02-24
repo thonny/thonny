@@ -286,7 +286,9 @@ class MicroPythonProxy(BackendProxy):
             return None
     
     def _create_webrepl_connection(self):
-        pass
+        url = get_workbench().get_option(self.backend_name + ".webrepl_url")
+        print("URL", url)
+        return WebReplConnection(url, "suvaline")
 
     def _show_error_connect_again(self, msg):
         self._send_error_to_shell(
@@ -1606,7 +1608,7 @@ class SerialConnection(Connection):
                 except Exception:
                     logging.exception("Couldn't close serial")
 
-class WebReplConnection():
+class WebReplConnection(Connection):
     def __init__(self, url, password):
         super().__init__()
         
@@ -1622,18 +1624,40 @@ class WebReplConnection():
         
     
     async def _connect(self, url, password):
+        url = "ws://192.168.1.226:8266"
+        import asyncio
         import websockets
-        self._ws = await websockets.connect(url)
-        # TODO: read password prompt and send password
+        self._ws = await asyncio.wait_for(
+            websockets.connect(url, ping_timeout=5, close_timeout=5),
+            3
+        )
+        print("GOT WS", self._ws)
+        
+        # read password prompt and send password
+        read_chars = ""
+        while read_chars != "Password: ":
+            print("prelude", read_chars)
+            ch = await self._ws.recv()
+            print("GOT", ch)
+            read_chars += ch 
+        
+        print("sending password")
+        await self._ws.send("suvaline\n")
+        print("sent password")
     
     def _communicate(self):
         import asyncio
-        tasks = asyncio.gather(self._keep_reading(), self._keep_writing())
-        asyncio.get_event_loop().run_until_complete(tasks)
+        async def main():
+            await asyncio.gather(self._keep_reading(), self._keep_writing())
+            
+        loop = asyncio.new_event_loop()
+        #loop = asyncio.get_event_loop()
+        loop.run_until_complete(main())
     
     async def _keep_reading(self):
         while True:
             data = await self._ws.recv()
+            print("Read:", repr(data))
             if len(data) == 0:
                 self._error = "EOF"
                 break
@@ -1645,10 +1669,21 @@ class WebReplConnection():
         import asyncio
         while True:
             while not self._write_queue.empty():
-                self._ws.send(self._write_queue.get(block=False))
+                data = self._write_queue.get(block=False)
+                print("Wrote:", repr(data))
+                self._ws.send(data)
             # Allow reading loop to progress
             await asyncio.sleep(0.01)
         
+    def write(self, data, block_size=32, delay=0.01):
+        self._write_queue.put_nowait(data)
+    
+    async def async_close(self):
+        await self._ws.close()
+        
+    def close(self):
+        import asyncio
+        asyncio.get_event_loop().run_until_complete(self.async_close())
 
 class TimeHelper:
     def __init__(self, time_allowed):
