@@ -37,6 +37,7 @@ from thonny.misc_utils import find_volumes_by_name
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import BackendProxy
 from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
+from builtins import False
 
 EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
@@ -66,7 +67,7 @@ class MicroPythonProxy(BackendProxy):
         self._baudrate = 115200
 
         self._reading_cancelled = False
-        self._welcome_text = None
+        self._welcome_text = ""
         self._discarded_bytes = bytearray()
         self._builtins_info = self._get_builtins_info()
         # TODO: provide default builtins for script completion
@@ -367,7 +368,7 @@ class MicroPythonProxy(BackendProxy):
         else:
             raise TimeoutError("Can't get to raw prompt")
 
-        welcome_text = self._get_welcome_text_in_raw_mode(timer.time_left)
+        self._welcome_text = self._get_welcome_text_in_raw_mode(timer.time_left)
 
         if clean:
             self._clean_environment_during_startup(timer.time_left)
@@ -376,7 +377,7 @@ class MicroPythonProxy(BackendProxy):
 
         # report ready
         self._non_serial_msg_queue.put(
-            ToplevelResponse(welcome_text=welcome_text.strip())
+            ToplevelResponse(welcome_text=self._welcome_text.strip())
         )
 
         self.idle = True
@@ -956,7 +957,10 @@ class MicroPythonProxy(BackendProxy):
             return os.listdir(mount)
 
     def _supports_directories(self):
-        return None
+        if "micro:bit" in self._welcome_text.lower():
+            return False
+        else:
+            return True
 
     def _get_fs_mount_name(self):
         return None
@@ -1151,10 +1155,12 @@ class MicroPythonProxy(BackendProxy):
         )
         
     def _get_path_prefix(self):
-        if self._supports_directories():
-            return "/"
-        else:
+        if not self._supports_directories():
             return ""
+        elif "LoBo" in self._welcome_text:
+            return "/flash/"
+        else:
+            return "/"
 
     def _get_main_script_path(self):
         return self._get_path_prefix() + "main.py"
