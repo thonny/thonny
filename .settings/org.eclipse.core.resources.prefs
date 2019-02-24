@@ -17,7 +17,6 @@ encoding//thonny/plugins/ast_view.py=utf-8
 encoding//thonny/plugins/cells.py=utf-8
 encoding//thonny/plugins/common_editing_commands.py=utf-8
 encoding//thonny/plugins/debugger.py=utf-8
-encoding//thonny/plugins/files.py=utf-8
 encoding//thonny/plugins/find_replace.py=utf-8
 encoding//thonny/plugins/heap.py=utf-8
 encoding//thonny/plugins/pip_gui.py=utf-8
