@@ -49,6 +49,7 @@ THONNY_START = "<ForThonny>"
 THONNY_END = "</ForThonny>"
 THONNY_MSG_START = b"\x02"
 NEWLINE = "\n"
+DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 
 # TODO: Current code has some preparations in place to make automatic initial interrupt optional
 # It's not so easy, though (initial interrupt also fetches some required info etc)
@@ -226,7 +227,7 @@ class MicroPythonProxy(BackendProxy):
             return self._create_serial_connection(port)
         
     def _create_serial_connection(self, port):
-        if port is None:
+        if port is None or port == "None":
             self._send_text_to_shell(
                 'Not connected. Choose "Tools → Options → Backend" to change.', "stdout"
             )
@@ -287,10 +288,16 @@ class MicroPythonProxy(BackendProxy):
     
     def _create_webrepl_connection(self):
         url = get_workbench().get_option(self.backend_name + ".webrepl_url")
-        url = "ws://192.168.1.226:8266"
-        password = "suvaline"
+        password = get_workbench().get_option(self.backend_name + ".webrepl_password")
         print("URL", url)
-        conn = WebReplConnection(url, password)
+        try:
+            conn = WebReplConnection(url, password)
+        except:
+            e_type, e_value, _ = sys.exc_info()
+            self._send_error_to_shell("Could not connect to " + url + "\nError: " 
+                                      + "\n".join(traceback.format_exception_only(e_type, e_value)))
+            return None
+        
         conn.read_until([b"WebREPL connected\r\n"])
         return conn
 
@@ -1348,8 +1355,10 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         }
         self._ports_by_desc["< Try to detect port automatically >"] = "auto"
         self._ports_by_desc["< None / don't connect at all >"] = None
+        
+        self._WEBREPL_OPTION_DESC = "< WebREPL >" 
         if self.allow_webrepl:
-            self._ports_by_desc["< WebREPL >"] = "webrepl"
+            self._ports_by_desc[self._WEBREPL_OPTION_DESC] = "webrepl"
 
         def port_order(p):
             _, name = p
@@ -1366,7 +1375,8 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             key for key, _ in sorted(self._ports_by_desc.items(), key=port_order)
         ]
 
-        self._port_desc_variable = create_string_var(self.current_port_desc)
+        self._port_desc_variable = create_string_var(self.get_current_port_desc(),
+                                                     self._on_change_port)
         self._port_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -1377,28 +1387,66 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._port_combo.grid(row=4, column=0, sticky="new")
         self.columnconfigure(0, weight=1)
+        
+        if self.allow_webrepl:
+            self._init_webrepl_frame()
+        
+        self._on_change_port()
+    
+    def _init_webrepl_frame(self):
+        self._webrepl_frame = ttk.Frame(self)
+        
+        self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
+        url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
+        url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
+        url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var,
+                              width=24)
+        url_entry.grid(row=1, column=0, sticky="nw")
+        
+        self._webrepl_password_var = create_string_var(
+            get_workbench().get_option(self.backend_name + ".webrepl_password"))
+        pw_label = ttk.Label(self._webrepl_frame, text="Password (the one specified with `import webrepl_setup`)")
+        pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
+        pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var,
+                             width=9)
+        pw_entry.grid(row=3, column=0, sticky="nw")
+        
 
-    @property
-    def current_port_desc(self):
+    def get_current_port_desc(self):
         name = get_workbench().get_option(self.backend_name + ".port")
         for desc in self._ports_by_desc:
             if self._ports_by_desc[desc] == name:
                 return desc
 
         return ""
+    
+    def is_modified(self):
+        return (self._port_desc_variable.modified  # pylint: disable=no-member
+                or self._webrepl_password_var.modified  # pylint: disable=no-member
+                or self._webrepl_url_var.modified)  # pylint: disable=no-member
 
     def should_restart(self):
-        return self._port_desc_variable.modified  # pylint: disable=no-member
+        return self.is_modified()
 
     def apply(self):
-        if not self._port_desc_variable.modified:  # pylint: disable=no-member
+        if not self.is_modified():
             return
 
         else:
             port_desc = self._port_desc_variable.get()
             port_name = self._ports_by_desc[port_desc]
             get_workbench().set_option(self.backend_name + ".port", port_name)
+            get_workbench().set_option(self.backend_name + ".webrepl_url", 
+                                       self._webrepl_url_var.get())
+            get_workbench().set_option(self.backend_name + ".webrepl_password",
+                                       self._webrepl_password_var.get())
 
+    def _on_change_port(self, *args):
+        if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
+            self._webrepl_frame.grid(row=6, column=0, sticky="nwe")
+        elif self._webrepl_frame.winfo_ismapped():
+            self._webrepl_frame.grid_forget()
+            
     def _get_usb_driver_url(self):
         return None
     
@@ -1631,7 +1679,9 @@ class WebReplConnection(Connection):
         self._ws_thread.start()
         
         # Wait until connection was made
-        res = self._connection_result.get() 
+        res = self._connection_result.get()
+        if res != "OK":
+            raise res
         
         
     
@@ -1643,7 +1693,12 @@ class WebReplConnection(Connection):
     
     async def _ws_main(self):
         import asyncio
-        await self._ws_connect()
+        try:
+            await self._ws_connect()
+        except Exception as e:
+            self._connection_result.put_nowait(e)
+            return
+        
         self._connection_result.put_nowait("OK")
         await asyncio.gather(self._ws_keep_reading(), self._ws_keep_writing())
          
@@ -1755,7 +1810,8 @@ def list_serial_ports():
 
 def add_micropython_backend(name, proxy_class, description, config_page):
     get_workbench().set_default(name + ".port", "auto")
-    get_workbench().set_default(name + ".webrepl_url", "ws://192.168.4.1:8266/")
+    get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
+    get_workbench().set_default(name + ".webrepl_password", "")
     get_workbench().add_backend(name, proxy_class, description, config_page)
 
 
