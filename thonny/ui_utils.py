@@ -1871,6 +1871,11 @@ class _ZenityDialogProvider:
             pattern = pattern.replace(" .", " *.")
             if pattern.startswith("."):
                 pattern = "*" + pattern
+            
+            if pattern == "*.*":
+                # ".*" was provided to make the pattern safe for Tk dialog
+                # not required with Zenity
+                pattern = "*"
 
             args.append("--file-filter=%s | %s" % (desc, pattern))
         
