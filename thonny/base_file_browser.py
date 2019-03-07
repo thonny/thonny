@@ -67,7 +67,7 @@ class BaseFileBrowser(ttk.Frame):
         
     
     def init_header(self, row, column):
-        header_frame = ttk.Frame(self)
+        header_frame = ttk.Frame(self, style="ViewToolbar.TFrame")
         header_frame.grid(row=row, column=column, sticky="nsew")
         header_frame.columnconfigure(0, weight=1)
         
@@ -125,7 +125,9 @@ class BaseFileBrowser(ttk.Frame):
         
         
         #self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
-        #self.menu_button.grid(row=0, column=1, sticky="ne")
+        self.menu_button = ttk.Button(header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton")
+        # self.menu_button.grid(row=0, column=1, sticky="ne")
+        self.menu_button.place(anchor="ne", rely=0, relx=1)
     
     
     def focus_into(self, path):
