@@ -244,7 +244,7 @@ def desert_sunset() -> SyntaxThemeSettings:
         "stdin": {"foreground": normal_fg},
         "stdout": {"foreground": "#eeeeee"},
         "value": {"foreground": "#eeeeee"},
-        "stderr": {"foreground": "#ff3e40"},
+        "stderr": {"foreground": "#ff595b"},
         "found": {"foreground": "", "underline": True},
         "current_found": {"foreground": "#ffffff", "background": "#333333"},
     }

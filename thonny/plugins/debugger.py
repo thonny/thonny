@@ -21,7 +21,7 @@ from thonny import (
     misc_utils,
     ui_utils,
 )
-from thonny.codeview import CodeView, get_syntax_options_for_tag
+from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.config_ui import ConfigurationPage
 from thonny.memory import VariablesFrame
@@ -926,6 +926,7 @@ class ExceptionView(TextFrame):
             undo=False,
             read_only=True,
             font="TkDefaultFont",
+            text_class=SyntaxText,
             foreground=get_syntax_options_for_tag("stderr")["foreground"],
             highlightthickness=0,
             padx=5,
