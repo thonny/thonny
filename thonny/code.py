@@ -178,12 +178,20 @@ class Editor(ttk.Frame):
         if self._filename is not None and not ask_filename:
             get_workbench().event_generate("Save", editor=self, filename=self._filename)
         else:
+            if self._filename is None:
+                initialdir = get_workbench().get_cwd()
+                initialfile = None
+            else:
+                initialdir = os.path.dirname(self._filename)
+                initialfile = os.path.basename(self._filename)
+                
             # http://tkinter.unpythonic.net/wiki/tkFileDialog
             new_filename = asksaveasfilename(
                 master=get_workbench(),
                 filetypes=_dialog_filetypes,
                 defaultextension=".py",
-                initialdir=get_workbench().get_cwd(),
+                initialdir=initialdir,
+                initialfile=initialfile
             )
 
             # Different tkinter versions may return different values
