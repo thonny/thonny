@@ -2,10 +2,11 @@ import os.path
 import tkinter as tk
 from tkinter import ttk
 
-from thonny import get_workbench, misc_utils, tktextext
+from thonny import get_workbench, misc_utils, tktextext, get_runner
 from thonny.ui_utils import scrollbar_style, lookup_style_option
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
+from thonny.common import InlineCommand
 
 _dummy_node_text = "..."
 
@@ -267,58 +268,57 @@ class BaseFileBrowser(ttk.Frame):
                 self.tree.see(current_node_id)
 
     
-    def refresh_tree(self, node_id="", opening=None):
+    def refresh_tree(self, node_id="", opening=False, fs_data={}):
         path = self.tree.set(node_id, "path")
         # print("REFRESH", path)
 
         if os.path.isfile(path):
             self.tree.set_children(node_id)
             self.tree.item(node_id, open=False)
-        else:
-            # either root or directory
-            if node_id == "" or self.tree.item(node_id, "open") or opening == True:
-                fs_children_names = self.listdir(path, self.show_hidden_files)
-                tree_children_ids = self.tree.get_children(node_id)
+        elif node_id == "" or self.tree.item(node_id, "open") or opening:
+            # either root or open directory
+            fs_children_names = self.listdir(path, fs_data)
+            tree_children_ids = self.tree.get_children(node_id)
 
-                # recollect children
-                children = {}
+            # recollect children
+            children = {}
 
-                # first the ones, which are present already in tree
-                for child_id in tree_children_ids:
-                    name = self.tree.item(child_id, "text")
-                    if name in fs_children_names:
-                        children[name] = child_id
+            # first the ones, which are present already in tree
+            for child_id in tree_children_ids:
+                name = self.tree.item(child_id, "text")
+                if name in fs_children_names:
+                    children[name] = child_id
 
-                # add missing children
-                for name in fs_children_names:
-                    if name not in children:
-                        children[name] = self.tree.insert(node_id, "end")
-                        self.tree.set(children[name], "path", os.path.join(path, name))
+            # add missing children
+            for name in fs_children_names:
+                if name not in children:
+                    children[name] = self.tree.insert(node_id, "end")
+                    self.tree.set(children[name], "path", os.path.join(path, name))
 
-                def file_order(name):
-                    # items in a folder should be ordered so that
-                    # folders come first and names are ordered case insensitively
-                    return (os.path.isfile(os.path.join(path, name)), name.upper())
+            def file_order(name):
+                # items in a folder should be ordered so that
+                # folders come first and names are ordered case insensitively
+                return (os.path.isfile(os.path.join(path, name)), name.upper())
 
-                # update tree
-                ids_sorted_by_name = list(
-                    map(
-                        lambda key: children[key],
-                        sorted(children.keys(), key=file_order),
-                    )
+            # update tree
+            ids_sorted_by_name = list(
+                map(
+                    lambda key: children[key],
+                    sorted(children.keys(), key=file_order),
                 )
-                self.tree.set_children(node_id, *ids_sorted_by_name)
+            )
+            self.tree.set_children(node_id, *ids_sorted_by_name)
 
-                for child_id in ids_sorted_by_name:
-                    self.update_node_format(child_id)
-                    self.refresh_tree(child_id)
+            for child_id in ids_sorted_by_name:
+                self.update_node_format(child_id)
+                self.refresh_tree(child_id, fs_data=fs_data)
 
-            else:
-                # closed dir
-                # Don't fetch children yet, but ensure that expand button is visible
-                children_ids = self.tree.get_children(node_id)
-                if len(children_ids) == 0:
-                    self.tree.insert(node_id, "end", text=_dummy_node_text)
+        else:
+            # closed dir
+            # Don't fetch children yet, but ensure that expand button is visible
+            children_ids = self.tree.get_children(node_id)
+            if len(children_ids) == 0:
+                self.tree.insert(node_id, "end", text=_dummy_node_text)
 
     def update_node_format(self, node_id):
         assert node_id != ""
@@ -348,8 +348,10 @@ class BaseFileBrowser(ttk.Frame):
         self.tree.item(node_id, text=" " + text, image=img)
         self.tree.set(node_id, "path", path)
 
-    def listdir(self, path="", include_hidden_files=False):
-
+    def listdir(self, path, fs_data={}):
+        if path in fs_data:
+            return fs_data[path]
+        
         if path == "" and misc_utils.running_on_windows():
             result = misc_utils.get_win_drives()
         else:
@@ -361,7 +363,7 @@ class BaseFileBrowser(ttk.Frame):
             result = [
                 x
                 for x in os.listdir(path)
-                if include_hidden_files
+                if self.show_hidden_files
                 or not misc_utils.is_hidden_or_system_file(os.path.join(path, x))
             ]
 
@@ -369,6 +371,9 @@ class BaseFileBrowser(ttk.Frame):
                 result = ["/" + x for x in result]
 
         return sorted(result, key=str.upper)
+    
+    def isdir(self, path, fs_data):
+        pass
     
     def on_double_click(self, event):
         path = self.get_selected_path()
@@ -437,4 +442,26 @@ class BaseFileBrowser(ttk.Frame):
         self.open_path_in_browser(path, True)
         
         return path
+
+class BackEndFileBrowser(BaseFileBrowser):
+    def listdir(self, path, fs_data={}):
+        if path in fs_data:
+            return fs_data[path]
+        
+        # initiate async update
+        get_runner().send_command(InlineCommand("listdir", paths=[path]))
+        
+        # send placeholder
+        return ["..."]
     
+    def refresh_tree(self, node_id="", opening=False, fs_data={}):
+        if fs_data:
+            # Meaning it is called on backend event
+            super().refresh_tree(node_id, opening, fs_data)
+            # TODO: make it look active
+        else:
+            # TODO: make it look inactive
+            # TODO: collect all open paths
+            paths = ...
+            # initiate async update
+            get_runner().send_command(InlineCommand("listdir", paths=paths))
