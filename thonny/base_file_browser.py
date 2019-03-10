@@ -6,7 +6,7 @@ from thonny import get_workbench, misc_utils, tktextext, get_runner
 from thonny.ui_utils import scrollbar_style, lookup_style_option
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
-from thonny.common import InlineCommand
+from thonny.common import InlineCommand, get_dir_data
 
 _dummy_node_text = "..."
 
@@ -15,6 +15,7 @@ TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yam
 class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None,
                  breadcrumbs_pady=(5,7)):
+        self._cached_dir_data = {}
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL,
                                             style=scrollbar_style("Vertical"))
@@ -267,17 +268,27 @@ class BaseFileBrowser(ttk.Frame):
             else:
                 self.tree.see(current_node_id)
 
+    def request_dir_data(self, paths):
+        raise NotImplementedError()
     
-    def refresh_tree(self, node_id="", opening=False, fs_data={}):
+    def get_open_folders(self):
+        pass
+    
+    def refresh_tree(self, node_id="", opening=False):
         path = self.tree.set(node_id, "path")
         # print("REFRESH", path)
 
+        if path not in self._cached_dir_data and not opening:
+            self.request_dir_data(self.get_open_folders())
+            # leave it for now, it will be updated later
+            return
+        
         if os.path.isfile(path):
-            self.tree.set_children(node_id)
+            self.tree.set_children(node_id) # clear list of children
             self.tree.item(node_id, open=False)
         elif node_id == "" or self.tree.item(node_id, "open") or opening:
             # either root or open directory
-            fs_children_names = self.listdir(path, fs_data)
+            fs_children_names = self.listdir(path)
             tree_children_ids = self.tree.get_children(node_id)
 
             # recollect children
@@ -311,7 +322,7 @@ class BaseFileBrowser(ttk.Frame):
 
             for child_id in ids_sorted_by_name:
                 self.update_node_format(child_id)
-                self.refresh_tree(child_id, fs_data=fs_data)
+                self.refresh_tree(child_id)
 
         else:
             # closed dir
@@ -348,7 +359,7 @@ class BaseFileBrowser(ttk.Frame):
         self.tree.item(node_id, text=" " + text, image=img)
         self.tree.set(node_id, "path", path)
 
-    def listdir(self, path, fs_data={}):
+    def listdir(self, path):
         if path in fs_data:
             return fs_data[path]
         
@@ -443,25 +454,25 @@ class BaseFileBrowser(ttk.Frame):
         
         return path
 
-class BackEndFileBrowser(BaseFileBrowser):
-    def listdir(self, path, fs_data={}):
-        if path in fs_data:
-            return fs_data[path]
-        
-        # initiate async update
-        get_runner().send_command(InlineCommand("listdir", paths=[path]))
-        
-        # send placeholder
-        return ["..."]
+class LocalFileBrowser(BaseFileBrowser):
+    def request_dir_data(self, paths):
+        self._cached_dir_data.update(get_dir_data(paths))
+        self.refresh_tree()
     
-    def refresh_tree(self, node_id="", opening=False, fs_data={}):
-        if fs_data:
-            # Meaning it is called on backend event
-            super().refresh_tree(node_id, opening, fs_data)
-            # TODO: make it look active
-        else:
-            # TODO: make it look inactive
-            # TODO: collect all open paths
-            paths = ...
-            # initiate async update
-            get_runner().send_command(InlineCommand("listdir", paths=paths))
+
+class BackEndFileBrowser(BaseFileBrowser):
+    def __init__(self, master, show_hidden_files=False, 
+                 last_folder_setting_name=None, 
+                 breadcrumbs_pady=(5, 7)):
+        super().__init__(master, 
+                         show_hidden_files=show_hidden_files, 
+                         last_folder_setting_name=last_folder_setting_name,
+                         breadcrumbs_pady=breadcrumbs_pady)
+        get_workbench().bind("DirectoryData", self.update_dir_data)
+    
+    def request_dir_data(self, paths):
+        get_runner().send_command(InlineCommand("get_dir_data", paths=paths))
+    
+    def update_dir_data(self, msg):
+        self._cached_dir_data.update([msg["data"]])
+        self.refresh_tree()

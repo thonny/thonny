@@ -3,7 +3,6 @@
 """
 Classes used both by front-end and back-end
 """
-import logging
 import os.path
 import platform
 import site
@@ -328,4 +327,24 @@ class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""
 
     pass
+
+
+def get_dir_data(dir_paths):
+    # For using in file browser
+    res = {}
+    for directory in dir_paths:
+        if os.path.isdir(directory):
+            children = []
+            for child_name in os.listdir(directory):
+                child_full_path = normpath_with_actual_case(os.path.join(directory), child_name)
+                children.append({
+                    "text" : child_name,
+                    "path" : child_full_path,
+                    "stat" : os.stat(child_full_path)
+                })
+            res[directory] = children
+        else:
+            res[directory] = None
+    
+    return res
 
