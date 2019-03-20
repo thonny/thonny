@@ -475,10 +475,10 @@ class ErrorHelper(Helper):
             self.last_frame_module_source = self.last_frame.source
             self.last_frame_module_ast = self.last_frame_ast
         elif self.last_frame.filename is not None:
-            self.last_frame_module_source = read_source(self.last_frame.filename)
             try:
+                self.last_frame_module_source = read_source(self.last_frame.filename)
                 self.last_frame_module_ast = ast.parse(self.last_frame_module_source)
-            except SyntaxError:
+            except Exception:
                 pass
 
         self.intro_confidence = 1
