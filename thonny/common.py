@@ -11,6 +11,7 @@ import tokenize
 from collections import namedtuple
 from typing import List, Optional  # @UnusedImport
 import subprocess
+from pygments.lexer import include
 
 MESSAGE_MARKER = "\x02"
 
@@ -329,22 +330,115 @@ class UserError(RuntimeError):
     pass
 
 
-def get_dir_data(dir_paths):
-    # For using in file browser
+def get_file_browser_data(paths):
+    """Used for populating local file browser's tree view.
+    dir_paths contains full paths of the open directories.
+    Returns information required for refreshing this view"""
     res = {}
-    for directory in dir_paths:
-        if os.path.isdir(directory):
-            children = []
-            for child_name in os.listdir(directory):
-                child_full_path = normpath_with_actual_case(os.path.join(directory), child_name)
-                children.append({
-                    "text" : child_name,
-                    "path" : child_full_path,
-                    "stat" : os.stat(child_full_path)
-                })
-            res[directory] = children
-        else:
-            res[directory] = None
+    for path in paths:
+        # assuming the path already has actual case
+        res[path] = get_path_data(path, True)
     
     return res
 
+def get_path_data(path, include_children):
+    # assuming the path already has actual case
+    if path == "":
+        assert include_children
+        if platform.system() == "Windows":
+            return get_windows_volumes_info()
+        else:
+            return get_path_data("/", include_children)
+        
+    elif os.path.exists(path):
+        label = os.path.basename(path)
+        stat = os.stat(path)
+        if include_children and os.path.isdir(path):
+            children = [get_path_data(
+                            normpath_with_actual_case(os.path.join(path), child_name),
+                            False)
+                        for child_name in os.listdir(path)]
+        else:
+            children = None
+            
+    else:
+        label = None
+        stat = None
+        children = None
+    
+    return {"label" : label, "stat" : stat, "children" : children}
+            
+def get_windows_volumes_info():
+    # http://stackoverflow.com/a/2288225/261181
+    # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
+    import string
+    
+    from ctypes import windll
+
+    all_drive_types = [
+        "DRIVE_UNKNOWN",
+        "DRIVE_NO_ROOT_DIR",
+        "DRIVE_REMOVABLE",
+        "DRIVE_FIXED",
+        "DRIVE_REMOTE",
+        "DRIVE_CDROM",
+        "DRIVE_RAMDISK",
+    ]
+
+    required_drive_types = [
+        "DRIVE_REMOVABLE",
+        "DRIVE_FIXED",
+        "DRIVE_REMOTE",
+        "DRIVE_RAMDISK",
+    ]
+
+    result = {}
+    
+    bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
+    for letter in string.ascii_uppercase:
+        drive_type = all_drive_types[windll.kernel32.GetDriveTypeW("%s:\\" % letter)]  # @UndefinedVariable
+        
+        if bitmask & 1 and drive_type in required_drive_types:
+            drive = letter + ":" 
+            path = drive + "\\"
+            volume_name = get_windows_volume_name(path)
+            if volume_name:
+                label = volume_name + " (" + drive + ")"
+            else:
+                label = drive
+            stat = os.path.stat(path)
+            result[path] = {
+                "label" : label,
+                "stat" : stat,
+                "children" : None
+            }
+            
+        bitmask >>= 1
+
+    return result
+
+def get_windows_volume_name(path):
+    # https://stackoverflow.com/a/12056414/261181
+    import ctypes
+    kernel32 = ctypes.windll.kernel32
+    volume_name_buffer = ctypes.create_unicode_buffer(1024)
+    file_system_name_buffer = ctypes.create_unicode_buffer(1024)
+    serial_number = None
+    max_component_length = None
+    file_system_flags = None
+    
+    result = kernel32.GetVolumeInformationW(
+        ctypes.c_wchar_p(path),
+        volume_name_buffer,
+        ctypes.sizeof(volume_name_buffer),
+        serial_number,
+        max_component_length,
+        file_system_flags,
+        file_system_name_buffer,
+        ctypes.sizeof(file_system_name_buffer)
+    )
+    
+    if result:
+        return file_system_name_buffer.value
+    else:
+        return None

@@ -1,4 +1,3 @@
-import os.path
 import tkinter as tk
 from tkinter import ttk
 
@@ -6,7 +5,9 @@ from thonny import get_workbench, misc_utils, tktextext, get_runner
 from thonny.ui_utils import scrollbar_style, lookup_style_option
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
-from thonny.common import InlineCommand, get_dir_data
+from thonny.common import InlineCommand, get_file_browser_data
+from misc.widget_wraps import path
+import stat
 
 _dummy_node_text = "..."
 
@@ -15,7 +16,7 @@ TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yam
 class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None,
                  breadcrumbs_pady=(5,7)):
-        self._cached_dir_data = {}
+        self._cached_path_data = {}
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL,
                                             style=scrollbar_style("Vertical"))
@@ -134,7 +135,7 @@ class BaseFileBrowser(ttk.Frame):
     
     def focus_into(self, path):
         if path != "":
-            while not os.path.isdir(path):
+            while not self.isdir(path):
                 path = os.path.dirname(path)
         
         self.tree.set("", "path", path)
@@ -192,7 +193,7 @@ class BaseFileBrowser(ttk.Frame):
         if not path:
             return
 
-        if os.path.isfile(path):
+        if not self.isdir(path):
             path = os.path.dirname(path)
             
         get_workbench().set_option(self._last_folder_setting_name, path)
@@ -278,12 +279,12 @@ class BaseFileBrowser(ttk.Frame):
         path = self.tree.set(node_id, "path")
         # print("REFRESH", path)
 
-        if path not in self._cached_dir_data and not opening:
+        if path not in self._cached_path_data and not opening:
             self.request_dir_data(self.get_open_folders())
             # leave it for now, it will be updated later
             return
         
-        if os.path.isfile(path):
+        if not self.isdir(path):
             self.tree.set_children(node_id) # clear list of children
             self.tree.item(node_id, open=False)
         elif node_id == "" or self.tree.item(node_id, "open") or opening:
@@ -309,7 +310,7 @@ class BaseFileBrowser(ttk.Frame):
             def file_order(name):
                 # items in a folder should be ordered so that
                 # folders come first and names are ordered case insensitively
-                return (os.path.isfile(os.path.join(path, name)), name.upper())
+                return (not self.isdir(os.path.join(path, name)), name.upper())
 
             # update tree
             ids_sorted_by_name = list(
@@ -336,7 +337,7 @@ class BaseFileBrowser(ttk.Frame):
 
         path = self.tree.set(node_id, "path")
 
-        if os.path.isdir(path) or path.endswith(":") or path.endswith(":\\"):
+        if self.isdir(path) or path.endswith(":") or path.endswith(":\\"):
             self.tree.set(node_id, "kind", "dir")
             if path.endswith(":") or path.endswith(":\\"):
                 img = self.hard_drive_icon
@@ -383,16 +384,22 @@ class BaseFileBrowser(ttk.Frame):
 
         return sorted(result, key=str.upper)
     
-    def isdir(self, path, fs_data):
-        pass
-    
+    def isdir(self, path):
+        if path not in self._cached_path_data:
+            return False
+        
+        path_stat = self._cached_path_data[path]["stat"]
+        if not path_stat:
+            return False
+        
+        return stat.S_ISDIR(path_stat[0])
+        
     def on_double_click(self, event):
         path = self.get_selected_path()
         _, ext = os.path.splitext(path)
-        if (os.path.isfile(path)
-            and ext.lower() in TEXT_EXTENSIONS):
+        if not self.isdir(path) and ext.lower() in TEXT_EXTENSIONS:
             get_workbench().get_editor_notebook().show_file(path)
-        elif os.path.isdir(path):
+        elif self.isdir(path):
             self.focus_into(path)
             
         return "break" 
@@ -414,7 +421,7 @@ class BaseFileBrowser(ttk.Frame):
         self.menu.add_command(label="Delete", command=self.delete)
         self.menu.add_command(label="Focus into", 
                               command=lambda: self.focus_into(selected_path),
-                              state="active" if os.path.isdir(selected_path) else "disabled")
+                              state="active" if self.isdir(selected_path) else "disabled")
     
     def delete(self, selected_path):
         print("DELETE")
@@ -425,7 +432,7 @@ class BaseFileBrowser(ttk.Frame):
         if not selected_path:
             return
 
-        if os.path.isdir(selected_path):
+        if self.isdir(selected_path):
             parent_path = selected_path
         else:
             parent_path = os.path.dirname(selected_path)
@@ -456,7 +463,7 @@ class BaseFileBrowser(ttk.Frame):
 
 class LocalFileBrowser(BaseFileBrowser):
     def request_dir_data(self, paths):
-        self._cached_dir_data.update(get_dir_data(paths))
+        self._cached_path_data.update(get_file_browser_data(paths))
         self.refresh_tree()
     
 
@@ -474,5 +481,5 @@ class BackEndFileBrowser(BaseFileBrowser):
         get_runner().send_command(InlineCommand("get_dir_data", paths=paths))
     
     def update_dir_data(self, msg):
-        self._cached_dir_data.update([msg["data"]])
+        self._cached_path_data.update([msg["data"]])
         self.refresh_tree()
