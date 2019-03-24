@@ -676,9 +676,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         if (
             len(self._command_history) == 0
-            or self._command_history_current_index == len(self._command_history) - 1
+            or self._command_history_current_index >= len(self._command_history) - 1
         ):
             # can't take next command
+            self._command_history_current_index = len(self._command_history)
+            self._propose_command("")
             return "break"
 
         if self._command_history_current_index is None:
