@@ -337,36 +337,31 @@ def get_file_browser_data(paths):
     res = {}
     for path in paths:
         # assuming the path already has actual case
-        res[path] = get_path_data(path, True)
+        res[path] = get_children_for_single_dir(path)
     
     return res
 
-def get_path_data(path, include_children):
-    # assuming the path already has actual case
+def get_children_for_single_dir(path):
     if path == "":
-        assert include_children
         if platform.system() == "Windows":
             return get_windows_volumes_info()
         else:
-            return get_path_data("/", include_children)
+            return get_children_for_single_dir("/")
         
-    elif os.path.exists(path):
-        label = os.path.basename(path)
-        stat = os.stat(path)
-        if include_children and os.path.isdir(path):
-            children = [get_path_data(
-                            normpath_with_actual_case(os.path.join(path), child_name),
-                            False)
-                        for child_name in os.listdir(path)]
-        else:
-            children = None
-            
+    elif os.path.isdir(path) or os.path.ismount(path):
+        result = {}
+        
+        for child in os.listdir(path):
+            full_child_path = normpath_with_actual_case(os.path.join(path, child))
+            st = os.stat(path, dir_fd=None, follow_symlinks=True)
+            name = os.path.basename(full_child_path)
+            result[name] = {"size" : st.st_size,
+                           "mode" : st.st_mode,
+                           "time" : max(st.st_mtime, st.ctime)}
+        
+        return result
     else:
-        label = None
-        stat = None
-        children = None
-    
-    return {"label" : label, "stat" : stat, "children" : children}
+        return None
             
 def get_windows_volumes_info():
     # http://stackoverflow.com/a/2288225/261181
@@ -392,7 +387,7 @@ def get_windows_volumes_info():
         "DRIVE_RAMDISK",
     ]
 
-    result = {}
+    result = []
     
     bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
     for letter in string.ascii_uppercase:
@@ -406,12 +401,13 @@ def get_windows_volumes_info():
                 label = volume_name + " (" + drive + ")"
             else:
                 label = drive
-            stat = os.path.stat(path)
-            result[path] = {
+            st = os.path.stat(path)
+            result.append({
+                "name" : path,
                 "label" : label,
-                "stat" : stat,
-                "children" : None
-            }
+                "size" : st.st_sizem,
+                "time" : max(st.st_mtime, st.ctime)
+            })
             
         bitmask >>= 1
 
