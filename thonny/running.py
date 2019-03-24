@@ -278,6 +278,10 @@ class Runner:
         
         filename = get_saved_current_script_filename()
 
+        if not filename:
+            # cancel must have been pushed
+            return
+
         # changing dir may be required
         script_dir = normpath_with_actual_case(os.path.dirname(filename))
 
