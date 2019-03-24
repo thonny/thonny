@@ -206,6 +206,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._try_submit_input()
 
     def _handle_input_request(self, msg):
+        self._ensure_visible()
         self.focus_set()
         self.mark_set("insert", "end")
         self.tag_remove("sel", "1.0", tk.END)
