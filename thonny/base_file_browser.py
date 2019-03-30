@@ -5,9 +5,8 @@ from thonny import get_workbench, misc_utils, tktextext, get_runner
 from thonny.ui_utils import scrollbar_style, lookup_style_option
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
-from thonny.common import InlineCommand, get_file_browser_data
-from misc.widget_wraps import path
-import stat
+from thonny.common import InlineCommand, get_dirs_child_data
+from copy import deepcopy
 
 _dummy_node_text = "..."
 
@@ -16,7 +15,7 @@ TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yam
 class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None,
                  breadcrumbs_pady=(5,7)):
-        self._cached_path_data = {}
+        self._cached_child_data = {}
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL,
                                             style=scrollbar_style("Vertical"))
@@ -134,9 +133,9 @@ class BaseFileBrowser(ttk.Frame):
     
     
     def focus_into(self, path):
-        if path != "":
-            while not self.isdir(path):
-                path = os.path.dirname(path)
+        self.clear_error()
+         
+        # TODO: clear
         
         self.tree.set("", "path", path)
 
@@ -193,9 +192,6 @@ class BaseFileBrowser(ttk.Frame):
         if not path:
             return
 
-        if not self.isdir(path):
-            path = os.path.dirname(path)
-            
         get_workbench().set_option(self._last_folder_setting_name, path)
 
     def on_open_node(self, event):
@@ -218,10 +214,16 @@ class BaseFileBrowser(ttk.Frame):
             return None
     
     def get_selected_path(self):
+        return self.get_selected_value("path")
+    
+    def get_selected_kind(self):
+        return self.get_selected_value("kind")
+    
+    def get_selected_value(self, key):
         node_id = self.get_selected_node()
 
         if node_id:
-            return self.tree.set(node_id, "path")
+            return self.tree.set(node_id, key)
         else:
             return None
     
@@ -269,29 +271,67 @@ class BaseFileBrowser(ttk.Frame):
             else:
                 self.tree.see(current_node_id)
 
-    def request_dir_data(self, paths):
+    def request_dirs_child_data(self, paths):
         raise NotImplementedError()
+    
+    def cache_dirs_child_data(self, data):
+        data = deepcopy(data)
+        
+        for parent_path in data:
+            children_data = data[parent_path]
+            if isinstance(children_data, dict):
+                for child_name in children_data:
+                    child_data = children_data[child_name]
+                    if child_data is None or isinstance(child_data, int):
+                        # this is shortcut for simple systems
+                        child_data = {"size" : child_data}
+                        children_data[child_name] = child_data 
+                        
+                    assert isinstance(child_data, dict)
+                    if "label" not in child_data:
+                        child_data["label"] = child_name
+                    
+                    if "isdir" not in child_data:
+                        child_data["isdir"] = child_data.get("size", 0) is None
+            else:
+                assert child_data in ("file", "missing")
+                
+        self._cached_child_data.update(data)    
     
     def get_open_folders(self):
         pass
     
-    def refresh_tree(self, node_id="", opening=False):
+    def refresh_tree(self, node_id=""):
+        """ This node is supposed to be a directory and 
+        its contents needs to be shown and/or refreshed"""
+        
         path = self.tree.set(node_id, "path")
         # print("REFRESH", path)
 
-        if path not in self._cached_path_data and not opening:
-            self.request_dir_data(self.get_open_folders())
-            # leave it for now, it will be updated later
+        if path not in self._cached_child_data:
+            self.request_dirs_child_data(self.get_open_folders())
+            # leave it as is for now, it will be updated later
             return
         
-        if not self.isdir(path):
-            self.tree.set_children(node_id) # clear list of children
-            self.tree.item(node_id, open=False)
-        elif node_id == "" or self.tree.item(node_id, "open") or opening:
-            # either root or open directory
-            fs_children_names = self.listdir(path)
+        child_data = self._cached_child_data[path]
+        
+        if child_data in ["file", "missing"]:
+            # path used to be a dir but is now a file or does not exist
+            
+            # if browser is focused into this path
+            if node_id == "":
+                self.show_error("Directory " + path + " does not exist anymore")
+            elif child_data == "missing":
+                self.tree.delete(node_id)
+            else:
+                assert child_data == "file"    
+                self.tree.set_children(node_id) # clear the list of children
+                self.tree.item(node_id, open=False)
+                
+        else:
+            fs_children_names = child_data.keys()
             tree_children_ids = self.tree.get_children(node_id)
-
+            
             # recollect children
             children = {}
 
@@ -300,17 +340,20 @@ class BaseFileBrowser(ttk.Frame):
                 name = self.tree.item(child_id, "text")
                 if name in fs_children_names:
                     children[name] = child_id
+                    self.update_node_data(child_id, child_data[name])
 
             # add missing children
             for name in fs_children_names:
                 if name not in children:
-                    children[name] = self.tree.insert(node_id, "end")
-                    self.tree.set(children[name], "path", os.path.join(path, name))
+                    child_id = self.tree.insert(node_id, "end")
+                    children[name] = child_id
+                    self.tree.set(children[name], "path", self.join(path, name))
+                    self.update_node_data(child_id, child_data[name])
 
             def file_order(name):
                 # items in a folder should be ordered so that
                 # folders come first and names are ordered case insensitively
-                return (not self.isdir(os.path.join(path, name)), name.upper())
+                return (not child_data[name], name.upper(), name)
 
             # update tree
             ids_sorted_by_name = list(
@@ -321,30 +364,37 @@ class BaseFileBrowser(ttk.Frame):
             )
             self.tree.set_children(node_id, *ids_sorted_by_name)
 
-            for child_id in ids_sorted_by_name:
-                self.update_node_format(child_id)
-                self.refresh_tree(child_id)
+    def show_error(self, msg):
+        "TODO:"
+        "clear tree"
+        "show message"
+    
+    def clear_error(self):
+        "TODO:"
 
-        else:
-            # closed dir
-            # Don't fetch children yet, but ensure that expand button is visible
-            children_ids = self.tree.get_children(node_id)
-            if len(children_ids) == 0:
-                self.tree.insert(node_id, "end", text=_dummy_node_text)
-
-    def update_node_format(self, node_id):
+    def update_node_data(self, node_id, data):
         assert node_id != ""
 
         path = self.tree.set(node_id, "path")
 
-        if self.isdir(path) or path.endswith(":") or path.endswith(":\\"):
+        if data["isdir"]:
             self.tree.set(node_id, "kind", "dir")
+            
+            # Ensure that expand button is visible
+            children_ids = self.tree.get_children(node_id)
+            if len(children_ids) == 0:
+                self.tree.insert(node_id, "end", text=_dummy_node_text)
+                
             if path.endswith(":") or path.endswith(":\\"):
                 img = self.hard_drive_icon
             else:
                 img = self.folder_icon
         else:
             self.tree.set(node_id, "kind", "file")
+            
+            # Make sure it doesn't have children
+            self.tree.set_children(node_id)
+            
             if path.lower().endswith(".py"):
                 img = self.python_file_icon
             elif path.lower().endswith(".txt") or path.lower().endswith(".csv"):
@@ -352,54 +402,22 @@ class BaseFileBrowser(ttk.Frame):
             else:
                 img = self.generic_file_icon
 
-        # compute caption
-        text = os.path.basename(path)
-        if text == "":  # in case of drive roots
-            text = path
-
-        self.tree.item(node_id, text=" " + text, image=img)
-        self.tree.set(node_id, "path", path)
-
-    def listdir(self, path):
-        if path in fs_data:
-            return fs_data[path]
-        
-        if path == "" and misc_utils.running_on_windows():
-            result = misc_utils.get_win_drives()
-        else:
-            if path == "":
-                first_level = True
-                path = "/"
-            else:
-                first_level = False
-            result = [
-                x
-                for x in os.listdir(path)
-                if self.show_hidden_files
-                or not misc_utils.is_hidden_or_system_file(os.path.join(path, x))
-            ]
-
-            if first_level:
-                result = ["/" + x for x in result]
-
-        return sorted(result, key=str.upper)
+        self.tree.item(node_id, text=" " + data["label"], image=img)
     
-    def isdir(self, path):
-        if path not in self._cached_path_data:
-            return False
-        
-        path_stat = self._cached_path_data[path]["stat"]
-        if not path_stat:
-            return False
-        
-        return stat.S_ISDIR(path_stat[0])
-        
+    
+    def join(self, *path_parts):
+        return self.get_dir_separator().join(path_parts)
+    
+    def get_dir_separator(self):
+        return os.path.sep
+    
     def on_double_click(self, event):
         path = self.get_selected_path()
+        kind = self.get_selected_kind()
         _, ext = os.path.splitext(path)
-        if not self.isdir(path) and ext.lower() in TEXT_EXTENSIONS:
+        if kind == "file" and ext.lower() in TEXT_EXTENSIONS:
             get_workbench().get_editor_notebook().show_file(path)
-        elif self.isdir(path):
+        else:
             self.focus_into(path)
             
         return "break" 
@@ -411,31 +429,37 @@ class BaseFileBrowser(ttk.Frame):
             self.tree.selection_set(node_id)
             self.tree.focus(node_id)
             path = self.tree.set(node_id, "path")
-            self.refresh_menu(path)
+            kind = self.tree.set(node_id, "kind")
+            self.refresh_menu(path, kind)
             self.menu.tk_popup(event.x_root, event.y_root)
     
-    def refresh_menu(self, selected_path):
+    def refresh_menu(self, selected_path, selected_kind):
         self.menu.delete(0, "end")
         
         self.menu.add_command(label="New file", command=self.create_new_file)
-        self.menu.add_command(label="Delete", command=self.delete)
+        self.menu.add_command(label="Delete", command=lambda: self.delete_path(selected_path, selected_kind))
         self.menu.add_command(label="Focus into", 
                               command=lambda: self.focus_into(selected_path),
-                              state="active" if self.isdir(selected_path) else "disabled")
+                              state="active" if selected_kind == "dir" else "disabled")
     
-    def delete(self, selected_path):
+    def delete_path(self, path, kind):
         print("DELETE")
     
     def create_new_file(self):
-        selected_path = self.get_selected_path()
-
-        if not selected_path:
+        selected_node_id = self.get_selected_node()
+        
+        if not selected_node_id:
             return
+        
+        selected_path = self.tree.set(selected_node_id, "path")
+        selected_kind = self.tree.set(selected_node_id, "kind")
 
-        if self.isdir(selected_path):
+
+        if selected_kind == "dir":
             parent_path = selected_path
         else:
-            parent_path = os.path.dirname(selected_path)
+            parent_id = self.tree.parent(selected_node_id)
+            parent_path = self.tree.set(parent_id, "path") 
 
         initial_name = self.get_proposed_new_file_name(parent_path, ".py")
         name = askstring(
@@ -448,22 +472,24 @@ class BaseFileBrowser(ttk.Frame):
         if not name:
             return
 
-        path = os.path.join(parent_path, name)
 
-        if os.path.exists(path):
+        path = self.join(parent_path, name)
+        
+        if name in self._cached_child_data[parent_path]:
+            # TODO: ignore case in windows
             showerror("Error", "The file '" + path + "' already exists", parent=get_workbench())
         else:
             # Create file
             with open(path, "w"):
                 pass
 
-        self.open_path_in_browser(path, True)
+            self.open_path_in_browser(path, True)
         
-        return path
+            return path
 
 class LocalFileBrowser(BaseFileBrowser):
-    def request_dir_data(self, paths):
-        self._cached_path_data.update(get_file_browser_data(paths))
+    def request_dirs_child_data(self, paths):
+        self.cache_dirs_child_data(get_dirs_child_data(paths))
         self.refresh_tree()
     
 
@@ -477,18 +503,10 @@ class BackEndFileBrowser(BaseFileBrowser):
                          breadcrumbs_pady=breadcrumbs_pady)
         get_workbench().bind("DirectoryData", self.update_dir_data)
     
-    def request_dir_data(self, paths):
+    def request_dirs_child_data(self, paths):
         get_runner().send_command(InlineCommand("get_dir_data", paths=paths))
     
     def update_dir_data(self, msg):
-        self._cached_path_data.update([msg["data"]])
+        self._cached_child_data.update([msg["data"]])
         self.refresh_tree()
 
-def expand_dirs_info(dirs_info, dir_sep):
-    result = {}
-    
-    for parent_path in dirs_info:
-        children = dirs_info[parent_path]
-        result[parent]
-    
-    

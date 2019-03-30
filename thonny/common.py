@@ -330,23 +330,23 @@ class UserError(RuntimeError):
     pass
 
 
-def get_dirs_children_info(paths):
+def get_dirs_child_data(paths):
     """Used for populating local file browser's tree view.
     dir_paths contains full paths of the open directories.
     Returns information required for refreshing this view"""
     res = {}
     for path in paths:
         # assuming the path already has actual case
-        res[path] = get_single_dir_children_info(path)
+        res[path] = get_single_dir_child_data(path)
     
     return res
 
-def get_single_dir_children_info(path):
+def get_single_dir_child_data(path):
     if path == "":
         if platform.system() == "Windows":
             return get_windows_volumes_info()
         else:
-            return get_single_dir_children_info("/")
+            return get_single_dir_child_data("/")
         
     elif os.path.isdir(path) or os.path.ismount(path):
         result = {}
@@ -355,13 +355,14 @@ def get_single_dir_children_info(path):
             full_child_path = normpath_with_actual_case(os.path.join(path, child))
             st = os.stat(path, dir_fd=None, follow_symlinks=True)
             name = os.path.basename(full_child_path)
-            result[name] = {"size" : st.st_size,
-                            "mode" : st.st_mode,
+            result[name] = {"size" : None if os.path.isdir(full_child_path) else st.st_size,
                             "time" : max(st.st_mtime, st.ctime)}
         
         return result
+    elif os.path.isfile(path):
+        return "file"
     else:
-        return None
+        return "missing"
             
 def get_windows_volumes_info():
     # http://stackoverflow.com/a/2288225/261181
@@ -387,7 +388,7 @@ def get_windows_volumes_info():
         "DRIVE_RAMDISK",
     ]
 
-    result = []
+    result = {}
     
     bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
     for letter in string.ascii_uppercase:
@@ -402,12 +403,12 @@ def get_windows_volumes_info():
             else:
                 label = drive
             st = os.path.stat(path)
-            result.append({
+            result[path] = {
                 "name" : path,
                 "label" : label,
-                "size" : st.st_sizem,
+                "size" : None,
                 "time" : max(st.st_mtime, st.ctime)
-            })
+            }
             
         bitmask >>= 1
 
