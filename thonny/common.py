@@ -330,23 +330,23 @@ class UserError(RuntimeError):
     pass
 
 
-def get_file_browser_data(paths):
+def get_dirs_children_info(paths):
     """Used for populating local file browser's tree view.
     dir_paths contains full paths of the open directories.
     Returns information required for refreshing this view"""
     res = {}
     for path in paths:
         # assuming the path already has actual case
-        res[path] = get_children_for_single_dir(path)
+        res[path] = get_single_dir_children_info(path)
     
     return res
 
-def get_children_for_single_dir(path):
+def get_single_dir_children_info(path):
     if path == "":
         if platform.system() == "Windows":
             return get_windows_volumes_info()
         else:
-            return get_children_for_single_dir("/")
+            return get_single_dir_children_info("/")
         
     elif os.path.isdir(path) or os.path.ismount(path):
         result = {}
@@ -356,8 +356,8 @@ def get_children_for_single_dir(path):
             st = os.stat(path, dir_fd=None, follow_symlinks=True)
             name = os.path.basename(full_child_path)
             result[name] = {"size" : st.st_size,
-                           "mode" : st.st_mode,
-                           "time" : max(st.st_mtime, st.ctime)}
+                            "mode" : st.st_mode,
+                            "time" : max(st.st_mtime, st.ctime)}
         
         return result
     else:

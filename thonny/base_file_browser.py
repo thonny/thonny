@@ -483,3 +483,12 @@ class BackEndFileBrowser(BaseFileBrowser):
     def update_dir_data(self, msg):
         self._cached_path_data.update([msg["data"]])
         self.refresh_tree()
+
+def expand_dirs_info(dirs_info, dir_sep):
+    result = {}
+    
+    for parent_path in dirs_info:
+        children = dirs_info[parent_path]
+        result[parent]
+    
+    
