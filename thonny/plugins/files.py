@@ -4,7 +4,7 @@ import os
 import tkinter as tk
 
 from thonny import get_workbench
-from thonny.base_file_browser import BaseFileBrowser
+from thonny.base_file_browser import LocalFileBrowser, BackEndFileBrowser
 from thonny.ui_utils import lookup_style_option
 from thonny.common import normpath_with_actual_case
 
@@ -22,12 +22,10 @@ class FilesView(tk.PanedWindow):
         self.add(self.remote_files)
         
 
-class MainFileBrowser(BaseFileBrowser):
+class MainFileBrowser(LocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        BaseFileBrowser.__init__(
-            self, master, show_hidden_files, 
-            last_folder_setting_name="file.last_browser_folder"
-        )
+        super().__init__(master, show_hidden_files, 
+            last_folder_setting_name="file.last_browser_folder")
 
 
     def create_new_file(self):
@@ -51,12 +49,10 @@ class MainFileBrowser(BaseFileBrowser):
         else:
             return base + extension
 
-class RemoteFileBrowser(BaseFileBrowser):
+class RemoteFileBrowser(BackEndFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        BaseFileBrowser.__init__(
-            self, master, show_hidden_files, "device.last_browser_folder",
-            breadcrumbs_pady=(0,7)
-        )
+        super().__init__(master, show_hidden_files, "device.last_browser_folder",
+            breadcrumbs_pady=(0,7))
 
     def get_root_text(self):
         return "TARGET DEVICE"

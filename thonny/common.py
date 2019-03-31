@@ -353,10 +353,10 @@ def get_single_dir_child_data(path):
         
         for child in os.listdir(path):
             full_child_path = normpath_with_actual_case(os.path.join(path, child))
-            st = os.stat(path, dir_fd=None, follow_symlinks=True)
+            st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
             name = os.path.basename(full_child_path)
             result[name] = {"size" : None if os.path.isdir(full_child_path) else st.st_size,
-                            "time" : max(st.st_mtime, st.ctime)}
+                            "time" : max(st.st_mtime, st.st_ctime)}
         
         return result
     elif os.path.isfile(path):
@@ -407,7 +407,7 @@ def get_windows_volumes_info():
                 "name" : path,
                 "label" : label,
                 "size" : None,
-                "time" : max(st.st_mtime, st.ctime)
+                "time" : max(st.st_mtime, st.st_ctime)
             }
             
         bitmask >>= 1
