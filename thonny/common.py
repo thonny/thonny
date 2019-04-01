@@ -209,7 +209,7 @@ def parse_message(msg_string: str) -> Record:
 
 def normpath_with_actual_case(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
-    assert os.path.isabs(name)
+    assert os.path.isabs(name) or os.path.ismount(name), "Not abs nor mount: " + name
     assert os.path.exists(name)
 
     if os.name == "nt":
@@ -402,13 +402,17 @@ def get_windows_volumes_info():
                 label = volume_name + " (" + drive + ")"
             else:
                 label = drive
-            st = os.path.stat(path)
-            result[path] = {
-                "name" : path,
-                "label" : label,
-                "size" : None,
-                "time" : max(st.st_mtime, st.st_ctime)
-            }
+            try:
+                st = os.stat(path)
+                result[path] = {
+                    "name" : path,
+                    "label" : label,
+                    "size" : None,
+                    "time" : max(st.st_mtime, st.st_ctime)
+                }
+            except PermissionError:
+                # probably an empty cardreader slot
+                pass
             
         bitmask >>= 1
 
@@ -436,6 +440,6 @@ def get_windows_volume_name(path):
     )
     
     if result:
-        return file_system_name_buffer.value
+        return volume_name_buffer.value
     else:
         return None

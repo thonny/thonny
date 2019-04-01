@@ -33,8 +33,8 @@ class BaseFileBrowser(ttk.Frame):
         
         self.tree = ttk.Treeview(   
             self,
-            columns=["#0", "kind", "path"],
-            displaycolumns=(0,),
+            columns=["#0", "kind", "path", "name", "size", "time"],
+            displaycolumns=(0,1,2,3,4),
             yscrollcommand=self.vert_scrollbar.set,
         )
         self.tree["show"] = "headings"
@@ -44,7 +44,7 @@ class BaseFileBrowser(ttk.Frame):
         self.rowconfigure(2, weight=1)
 
         self.show_hidden_files = show_hidden_files
-        self.tree["show"] = ("tree",)
+        #self.tree["show"] = ("tree",)
         
         self.tree.bind("<3>", self.on_secondary_click, True)
         if misc_utils.running_on_mac_os():
@@ -254,7 +254,7 @@ class BaseFileBrowser(ttk.Frame):
                     if "isdir" not in child_data:
                         child_data["isdir"] = child_data.get("size", 0) is None
             else:
-                assert child_data in ("file", "missing")
+                assert children_data in ("file", "missing")
         
         print("Adding", data, "to cache")
         self._cached_child_data.update(data)    
@@ -308,10 +308,10 @@ class BaseFileBrowser(ttk.Frame):
 
             # first the ones, which are present already in tree
             for child_id in tree_children_ids:
-                name = self.tree.item(child_id, "text")
+                name = self.tree.set(child_id, "name")
                 if name in fs_children_names:
                     children[name] = child_id
-                    self.update_node_data(child_id, children_data[name])
+                    self.update_node_data(child_id, name, children_data[name])
 
             # add missing children
             for name in fs_children_names:
@@ -319,7 +319,7 @@ class BaseFileBrowser(ttk.Frame):
                     child_id = self.tree.insert(node_id, "end")
                     children[name] = child_id
                     self.tree.set(children[name], "path", self.join(path, name))
-                    self.update_node_data(child_id, children_data[name])
+                    self.update_node_data(child_id, name, children_data[name])
 
             def file_order(name):
                 # items in a folder should be ordered so that
@@ -346,13 +346,14 @@ class BaseFileBrowser(ttk.Frame):
     def clear_error(self):
         "TODO:"
 
-    def update_node_data(self, node_id, data):
+    def update_node_data(self, node_id, name, data):
         assert node_id != ""
 
         path = self.tree.set(node_id, "path")
 
         if data["isdir"]:
             self.tree.set(node_id, "kind", "dir")
+            self.tree.set(node_id, "size", "")
             
             # Ensure that expand button is visible 
             # unless we know it doesn't have children
@@ -368,6 +369,7 @@ class BaseFileBrowser(ttk.Frame):
                 img = self.folder_icon
         else:
             self.tree.set(node_id, "kind", "file")
+            self.tree.set(node_id, "size", data["size"])
             
             # Make sure it doesn't have children
             self.tree.set_children(node_id)
@@ -378,18 +380,29 @@ class BaseFileBrowser(ttk.Frame):
                 img = self.text_file_icon
             else:
                 img = self.generic_file_icon
-
+        
+        self.tree.set(node_id, "name", name)
         self.tree.item(node_id, text=" " + data["label"], image=img)
     
     
-    def join(self, *path_parts):
-        return self.get_dir_separator().join(path_parts)
+    def join(self, parent, child):
+        if parent == "":
+            if self.get_dir_separator() == "/":
+                return "/" + child
+            else:
+                return child
+             
+        if parent.endswith(self.get_dir_separator()):
+            return parent + child
+        else:
+            return parent + self.get_dir_separator() + child 
     
     def get_dir_separator(self):
         return os.path.sep
     
     def on_double_click(self, event):
         path = self.get_selected_path()
+        print("dblclick:", path)
         kind = self.get_selected_kind()
         parts = path.split(".")
         ext = "." + parts[-1]
