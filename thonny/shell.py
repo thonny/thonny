@@ -206,6 +206,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._try_submit_input()
 
     def _handle_input_request(self, msg):
+        self._ensure_visible()
         self.focus_set()
         self.mark_set("insert", "end")
         self.tag_remove("sel", "1.0", tk.END)
@@ -675,9 +676,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         if (
             len(self._command_history) == 0
-            or self._command_history_current_index == len(self._command_history) - 1
+            or self._command_history_current_index >= len(self._command_history) - 1
         ):
             # can't take next command
+            self._command_history_current_index = len(self._command_history)
+            self._propose_command("")
             return "break"
 
         if self._command_history_current_index is None:
