@@ -501,6 +501,9 @@ class Workbench(tk.Tk):
             "Exit",
             self._on_close,
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
+            extra_sequences=["<Alt-F4>"] if running_on_linux() 
+                            else ["<Control-q>"] if running_on_windows()
+                            else [] 
         )
 
         self.add_command(
