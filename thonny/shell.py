@@ -312,7 +312,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset()
     
     def _ensure_visible(self):
+        focused_view = get_workbench().focus_get()
         get_workbench().show_view("ShellView")
+        if focused_view is not None:
+            focused_view.focus()
 
     def restart(self):
         self._insert_text_directly(

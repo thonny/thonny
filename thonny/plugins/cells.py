@@ -74,6 +74,10 @@ def _submit_code(code):
 
     if len(lines) > 0:
         code = "\n".join(lines) + "\n"
+        # if code is function definition/last line start with whitespace
+        # end function definition with a second endline
+        if re.match(r"^[ \t].*", lines[-1]) is not None:
+            code += "\n"
         shell = get_workbench().show_view("ShellView", False)
         shell.submit_python_code(code)
 
@@ -146,6 +150,10 @@ def run_selection(event=None):
             code = text.get("sel.first", "sel.last")
         else:
             code = text.get("insert linestart", "insert lineend")
+
+        # move cursor to next row
+        row, col = map(int, text.index("insert").split("."))
+        text.mark_set("insert", "{}.{}".format(row + 1, col))
 
         _submit_code(code)
 

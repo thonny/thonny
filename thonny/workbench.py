@@ -500,7 +500,7 @@ class Workbench(tk.Tk):
             "file",
             "Exit",
             self._on_close,
-            default_sequence=select_sequence("<Alt-F4>", "<Command-q>"),
+            default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
         )
 
         self.add_command(
