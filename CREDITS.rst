@@ -26,8 +26,8 @@ Libraries and resources
 * distro (https://pypi.python.org/pypi/distro) is optionally used for detecting Linux version in About dialog.
 * Most icons are taken from Eclipse project (https://www.eclipse.org/, https://github.com/eclipse/eclipse.platform.debug/tree/master/org.eclipse.debug.ui/icons/full/, https://github.com/eclipse/eclipse.platform.ui/tree/master/bundles/org.eclipse.ui/icons/full/, https://github.com/eclipse/eclipse.jdt.ui/tree/master/org.eclipse.jdt.ui/icons/full/), on Linux, some are overriden by Tango icons (http://tango.freedesktop.org/)
 
-Source contributors and frequent bug-reporters
-----------------------------------------------
+Source contributors, advisors and frequent bug-reporters
+--------------------------------------------------------
 * Aivar Annamaa
 * Alar Leemet
 * Alex Hall
@@ -47,6 +47,7 @@ Source contributors and frequent bug-reporters
 * Phil Duby
 * Rene Lehtma
 * segalion
+* Simon Long
 * Sven Duzont
 * Taavi Ilp
 * Toomas Mölder
