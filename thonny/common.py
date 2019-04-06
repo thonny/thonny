@@ -11,7 +11,6 @@ import tokenize
 from collections import namedtuple
 from typing import List, Optional  # @UnusedImport
 import subprocess
-from pygments.lexer import include
 
 MESSAGE_MARKER = "\x02"
 
