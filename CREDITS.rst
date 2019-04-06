@@ -31,15 +31,23 @@ Source contributors and frequent bug-reporters
 * Aivar Annamaa
 * Alar Leemet
 * Alex Hall
+* anatoly techtonik
 * Austin Bart
 * cefn
+* Chad Purdy
+* cubimon
 * Filip Schouwenaars
 * Fizban
+* fstengel
+* Илья Кругликов
 * Jens Diemer
+* Juan Falgueras
 * Kauri Raba
 * Miro Hrončok 
+* Phil Duby
 * Rene Lehtma
-* Sven (s_v_e_n)
+* segalion
+* Sven Duzont
 * Taavi Ilp
 * Toomas Mölder
 * Xin Rong
