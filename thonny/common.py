@@ -11,6 +11,7 @@ import tokenize
 from collections import namedtuple
 from typing import List, Optional  # @UnusedImport
 import subprocess
+import logging
 
 MESSAGE_MARKER = "\x02"
 
@@ -219,9 +220,11 @@ def normpath_with_actual_case(name: str) -> str:
         buf = create_unicode_buffer(512)
         windll.kernel32.GetShortPathNameW(name, buf, 512)  # @UndefinedVariable
         windll.kernel32.GetLongPathNameW(buf.value, buf, 512)  # @UndefinedVariable
-        assert len(buf.value) >= 2
-
-        result = buf.value
+        if len(buf.value):
+            result = buf.value
+        else:
+            result = name
+            
         assert isinstance(result, str)
 
         if result[1] == ":":
@@ -328,6 +331,21 @@ class UserError(RuntimeError):
 
     pass
 
+def is_hidden_or_system_file(path: str) -> bool:
+    if os.path.basename(path).startswith("."):
+        return True
+    elif platform.system() == "Windows":
+        from ctypes import windll
+
+        FILE_ATTRIBUTE_HIDDEN = 0x2
+        FILE_ATTRIBUTE_SYSTEM = 0x4
+        return bool(
+            windll.kernel32.GetFileAttributesW(path)  # @UndefinedVariable
+            & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)
+        )
+    else:
+        return False
+
 
 def get_dirs_child_data(paths):
     """Used for populating local file browser's tree view.
@@ -343,19 +361,29 @@ def get_dirs_child_data(paths):
 def get_single_dir_child_data(path):
     if path == "":
         if platform.system() == "Windows":
-            return get_windows_volumes_info()
+            get_windows_network_locations()
+            return {**get_windows_volumes_info(),
+                    **get_windows_network_locations()}
         else:
             return get_single_dir_child_data("/")
         
     elif os.path.isdir(path) or os.path.ismount(path):
         result = {}
         
-        for child in os.listdir(path):
-            full_child_path = normpath_with_actual_case(os.path.join(path, child))
-            st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
-            name = os.path.basename(full_child_path)
-            result[name] = {"size" : None if os.path.isdir(full_child_path) else st.st_size,
-                            "time" : max(st.st_mtime, st.st_ctime)}
+        try:
+            for child in os.listdir(path):
+                full_child_path = normpath_with_actual_case(os.path.join(path, child))
+                if not is_hidden_or_system_file(full_child_path):
+                    st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
+                    name = os.path.basename(full_child_path)
+                    result[name] = {"size" : None if os.path.isdir(full_child_path) else st.st_size,
+                                    "time" : max(st.st_mtime, st.st_ctime)}
+        except PermissionError:
+            result["<not accessible>"] = {
+                "kind" : "error",
+                "size" : -1,
+                "time" : None,
+            }
         
         return result
     elif os.path.isfile(path):
@@ -397,14 +425,14 @@ def get_windows_volumes_info():
             drive = letter + ":" 
             path = drive + "\\"
             volume_name = get_windows_volume_name(path)
-            if volume_name:
-                label = volume_name + " (" + drive + ")"
-            else:
-                label = drive
+            if not volume_name:
+                volume_name = "Local Disk"
+            
+            label = volume_name + " (" + drive + ")"
+            
             try:
                 st = os.stat(path)
                 result[path] = {
-                    "name" : path,
                     "label" : label,
                     "size" : None,
                     "time" : max(st.st_mtime, st.st_ctime)
@@ -442,3 +470,41 @@ def get_windows_volume_name(path):
         return volume_name_buffer.value
     else:
         return None
+
+def get_windows_network_locations():
+    import ctypes.wintypes
+
+    CSIDL_NETHOOD = 0x13
+    SHGFP_TYPE_CURRENT = 0
+    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+    ctypes.windll.shell32.SHGetFolderPathW(
+        0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf
+    )
+    shortcuts_dir = buf.value
+    
+    result = {}
+    for entry in os.scandir(shortcuts_dir):
+        #full_path = normpath_with_actual_case(entry.path)
+        lnk_path = os.path.join(entry.path, "target.lnk")
+        if os.path.exists(lnk_path):
+            try:
+                target = get_windows_lnk_target(lnk_path)
+                result[target] = {
+                    "label" : entry.name + " (" + target + ")",
+                    "size" : None,
+                    "time" : None
+                }
+            except:
+                logging.getLogger("thonny").error("Can't get target from %s", lnk_path, exc_info=True)
+    
+    return result
+                
+    
+def get_windows_lnk_target(lnk_file_path):
+    import thonny
+    script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")
+    cmd = ["cscript", "/NoLogo", script_path, lnk_file_path]
+    result = subprocess.check_output(cmd,
+                    universal_newlines=True, timeout=3)
+    
+    return result.strip()

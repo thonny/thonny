@@ -39,21 +39,6 @@ def running_on_linux() -> bool:
     return platform.system() == "Linux"
 
 
-def is_hidden_or_system_file(path: str) -> bool:
-    if os.path.basename(path).startswith("."):
-        return True
-    elif running_on_windows():
-        from ctypes import windll
-
-        FILE_ATTRIBUTE_HIDDEN = 0x2
-        FILE_ATTRIBUTE_SYSTEM = 0x4
-        return bool(
-            windll.kernel32.GetFileAttributesW(path)  # @UndefinedVariable
-            & (FILE_ATTRIBUTE_HIDDEN | FILE_ATTRIBUTE_SYSTEM)
-        )
-    else:
-        return False
-
 
 
 def list_volumes() -> Sequence[str]:

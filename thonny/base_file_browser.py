@@ -8,6 +8,7 @@ from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
+from thonny.misc_utils import running_on_windows
 
 _dummy_node_text = "..."
 
@@ -34,7 +35,10 @@ class BaseFileBrowser(ttk.Frame):
         self.tree = ttk.Treeview(   
             self,
             columns=["#0", "kind", "path", "name", "size", "time"],
-            displaycolumns=(0,1,2,3,4),
+            displaycolumns=(
+                #4,
+                #5
+                ),
             yscrollcommand=self.vert_scrollbar.set,
         )
         self.tree["show"] = "headings"
@@ -44,7 +48,9 @@ class BaseFileBrowser(ttk.Frame):
         self.rowconfigure(2, weight=1)
 
         self.show_hidden_files = show_hidden_files
-        #self.tree["show"] = ("tree",)
+        self.tree["show"] = ("tree"
+                             #, "headings"
+                             )
         
         self.tree.bind("<3>", self.on_secondary_click, True)
         if misc_utils.running_on_mac_os():
@@ -60,7 +66,18 @@ class BaseFileBrowser(ttk.Frame):
         self.generic_file_icon = wb.get_image("generic-file")
         self.hard_drive_icon = wb.get_image("hard-drive")
 
-        self.tree.column("#0", width=500, anchor=tk.W)
+        self.tree.column("#0", width=200, anchor=tk.W)
+        self.tree.heading("#0", text="Name")
+        self.tree.column("kind", width=30, anchor=tk.W)
+        self.tree.heading("kind", text="Kind")
+        self.tree.column("path", width=300, anchor=tk.W)
+        self.tree.heading("path", text="path")
+        self.tree.column("name", width=60, anchor=tk.W)
+        self.tree.heading("name", text="name")
+        self.tree.column("size", width=40, anchor=tk.W)
+        self.tree.heading("size", text="Size")
+        self.tree.column("time", width=60, anchor=tk.W)
+        self.tree.heading("time", text="Time")
 
         # set-up root node
         self.tree.set(ROOT_NODE_ID, "kind", "root")
@@ -108,10 +125,8 @@ class BaseFileBrowser(ttk.Frame):
         
         def dir_tag_click(event):
             mouse_index = self.path_bar.index("@%d,%d" % (event.x, event.y))
-            print(mouse_index)
             lineno = int(float(mouse_index))
             if lineno == 1:
-                print("select root")
                 self.focus_into(ROOT_NODE_ID)
             else:
                 assert lineno == 2
@@ -119,7 +134,8 @@ class BaseFileBrowser(ttk.Frame):
                 if dir_range:
                     _, end_index = dir_range
                     path = self.path_bar.get("2.0", end_index)
-                    print("select", path)
+                    if path.endswith(":"):
+                        path += "\\"
                     self.focus_into(path)
         
         self.path_bar.tag_bind("dir", "<1>", dir_tag_click)
@@ -137,7 +153,8 @@ class BaseFileBrowser(ttk.Frame):
     def focus_into(self, path):
         self.clear_error()
          
-        # TODO: clear
+        # clear
+        self.tree.set_children(ROOT_NODE_ID)
         
         self.tree.set(ROOT_NODE_ID, "path", path)
 
@@ -153,14 +170,12 @@ class BaseFileBrowser(ttk.Frame):
                 return ttk.Frame(self.path_bar, height=1, width=4,
                                  style="ViewToolbar.TFrame")
             
-            sep = self.get_dir_separator()
-            
-            parts = path.split(sep)
+            parts = self.split_path(path)
             for i, part in enumerate(parts):
                 if i > 0:
                     if parts[i-1] != "":
                         self.path_bar.window_create("end", window=create_spacer())
-                    self.path_bar.direct_insert("end", sep)
+                    self.path_bar.direct_insert("end", self.get_dir_separator())
                     self.path_bar.window_create("end", window=create_spacer())
                 
                 self.path_bar.direct_insert("end", part, tags=("dir",))
@@ -170,8 +185,11 @@ class BaseFileBrowser(ttk.Frame):
         self.refresh_children()
         self.save_focused_folder()
     
+    def split_path(self, path):
+        return path.split(self.get_dir_separator())
+    
     def get_root_text(self):
-        return "MY COMPUTER"
+        return "THIS COMPUTER"
     
     def focus_into_saved_folder(self):
         if self._last_folder_setting_name:
@@ -196,8 +214,11 @@ class BaseFileBrowser(ttk.Frame):
     def on_open_node(self, event):
         node_id = self.get_selected_node()
         path = self.tree.set(node_id, "path")
-        if path and path not in self._cached_child_data:
-            self.request_dirs_child_data(node_id, [path])
+        if path: #and path not in self._cached_child_data:
+            self.refresh_children(node_id)
+            #self.request_dirs_child_data(node_id, [path])
+        #else:
+            
 
     def resize_path_bar(self, event=None):
         if self.building_breadcrumbs:
@@ -256,7 +277,6 @@ class BaseFileBrowser(ttk.Frame):
             else:
                 assert children_data in ("file", "missing")
         
-        print("Adding", data, "to cache")
         self._cached_child_data.update(data)    
     
     def get_open_paths(self, node_id=ROOT_NODE_ID):
@@ -277,10 +297,9 @@ class BaseFileBrowser(ttk.Frame):
         its contents needs to be shown and/or refreshed"""
         
         path = self.tree.set(node_id, "path")
-        # print("REFRESH", path)
 
         if path not in self._cached_child_data:
-            self.request_dirs_child_data(node_id, self.get_open_paths())
+            self.request_dirs_child_data(node_id, self.get_open_paths() | {path})
             # leave it as is for now, it will be updated later
             return
         
@@ -402,7 +421,6 @@ class BaseFileBrowser(ttk.Frame):
     
     def on_double_click(self, event):
         path = self.get_selected_path()
-        print("dblclick:", path)
         kind = self.get_selected_kind()
         parts = path.split(".")
         ext = "." + parts[-1]
@@ -480,9 +498,23 @@ class BaseFileBrowser(ttk.Frame):
 
 class LocalFileBrowser(BaseFileBrowser):
     def request_dirs_child_data(self, node_id, paths):
-        print("requesting", paths)
         self.cache_dirs_child_data(get_dirs_child_data(paths))
         self.refresh_children(node_id)
+
+    def split_path(self, path):
+        parts = super().split_path(path)
+        if running_on_windows() and path.startswith("\\\\"):
+            # Don't split a network name!
+            sep = self.get_dir_separator()
+            for i in reversed(range(len(parts))):
+                prefix = sep.join(parts[:i+1])
+                if os.path.ismount(prefix):
+                    return [prefix] + parts[i+1:]
+            
+            # Could not find the prefix corresponding to mount
+            return [path]
+        else:
+            return parts
     
 
 class BackEndFileBrowser(BaseFileBrowser):
