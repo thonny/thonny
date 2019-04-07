@@ -48,6 +48,7 @@ class Editor(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
+        self._newlines = None
         self._filename = None
         self._last_known_mtime = None
         self._asking_about_external_change = False
@@ -157,6 +158,9 @@ class Editor(ttk.Frame):
         with tokenize.open(filename) as fp:  # TODO: support also text files
             source = fp.read()
 
+        # get the file file format (DOS/UNIX)
+        self._newlines = fp.newlines
+
         # Make sure Windows filenames have proper format
         filename = normpath_with_actual_case(filename)
         self._filename = filename
@@ -241,7 +245,7 @@ class Editor(ttk.Frame):
             self._filename = new_filename
             get_workbench().event_generate("SaveAs", editor=self, filename=new_filename)
 
-        content = self._code_view.get_content_as_bytes()
+        content = self._code_view.get_content_as_bytes(self._newlines == '\r\n')
         try:
             f = open(self._filename, mode="wb")
             f.write(content)
