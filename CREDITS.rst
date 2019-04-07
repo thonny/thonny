@@ -33,6 +33,7 @@ Source contributors, advisors and frequent bug-reporters
 * Alex Hall
 * anatoly techtonik
 * Austin Bart
+* badukaire
 * cefn
 * Chad Purdy
 * cubimon
