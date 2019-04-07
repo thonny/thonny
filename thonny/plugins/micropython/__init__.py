@@ -1320,6 +1320,9 @@ class MicroPythonProxy(BackendProxy):
     def known_port_descriptions(self):
         return set()
 
+    def has_separate_files(self):
+        return self._connection is not None
+
 
 class MicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend

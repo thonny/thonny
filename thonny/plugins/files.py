@@ -3,23 +3,50 @@
 import os
 import tkinter as tk
 
-from thonny import get_workbench
+from thonny import get_workbench, get_runner
 from thonny.base_file_browser import LocalFileBrowser, BackEndFileBrowser
 from thonny.ui_utils import lookup_style_option
 from thonny.common import normpath_with_actual_case
 
 
+minsize = 100
 class FilesView(tk.PanedWindow):
     def __init__(self, master=None):
         tk.PanedWindow.__init__(self, master, orient="vertical", borderwidth=0)
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 4))
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
         
+        get_workbench().bind("BackendRestart", self.update_remote, True)
+        
         self.local_files = MainFileBrowser(self)
-        self.add(self.local_files)
+        self.add(self.local_files, minsize=minsize)
         
         self.remote_files = RemoteFileBrowser(self)
-        self.add(self.remote_files)
+        self.remote_added = False
+        self.update_remote()
+    
+    def on_show(self):
+        self.update_remote()
+    
+    def update_remote(self, msg=None):
+        print("restart")
+        runner = get_runner()
+        if not runner:
+            return
+        
+        proxy = runner.get_backend_proxy()
+        if not proxy:
+            self.hide_remote()
+            return
+        
+        if proxy.has_separate_files():
+            if not self.remote_added:
+                self.add(self.remote_files, minsize=minsize)
+                self.remote_added = True
+        else:
+            if self.remote_added:
+                self.remove(self.remote_files)
+                self.remote_added = False
         
 
 class MainFileBrowser(LocalFileBrowser):

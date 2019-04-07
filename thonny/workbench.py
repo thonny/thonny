@@ -1399,6 +1399,8 @@ class Workbench(tk.Tk):
                 text=self._view_records[view_id]["label"],
             )
             view.hidden = False  # type: ignore
+            if hasattr(view, "on_show"):  # type: ignore
+                view.on_show()
 
         # switch to the tab
         notebook.select(view.home_widget)  # type: ignore

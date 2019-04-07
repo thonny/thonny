@@ -529,7 +529,7 @@ class BackEndFileBrowser(BaseFileBrowser):
     
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
-            get_runner().send_command(InlineCommand("get_dir_data", node_id=node_id, paths=paths))
+            get_runner().send_command(InlineCommand("get_child_data", node_id=node_id, paths=paths))
     
     def update_dir_data(self, msg):
         self.cache_dirs_child_data(msg["data"])

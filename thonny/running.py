@@ -609,6 +609,9 @@ class BackendProxy:
     def get_supported_features(self):
         return {"run"}
     
+    def has_separate_files(self):
+        return False
+    
     
 
 
