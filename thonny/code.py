@@ -245,7 +245,7 @@ class Editor(ttk.Frame):
             self._filename = new_filename
             get_workbench().event_generate("SaveAs", editor=self, filename=new_filename)
 
-        content = self._code_view.get_content_as_bytes(self._newlines == '\r\n')
+        content = self._code_view.get_content_as_bytes(self._newlines)
         try:
             f = open(self._filename, mode="wb")
             f.write(content)
