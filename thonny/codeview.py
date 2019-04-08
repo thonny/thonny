@@ -255,7 +255,7 @@ class CodeView(tktextext.TextFrame):
         )
         return encoding
 
-    def get_content_as_bytes(self, newlines):
+    def get_content_as_bytes(self, newlines = None):
         newlines_windows = "\r\n"
         chars = self.get_content().replace("\r", "")
         if newlines == None and running_on_windows() or newlines == newlines_windows:
