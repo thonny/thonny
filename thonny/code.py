@@ -83,7 +83,7 @@ class Editor(ttk.Frame):
         if self.get_filename() is None:
             result = "<untitled>"
         elif self.get_filename().startswith(REMOTE_PATH_PREFIX):
-            result = "◘ " + self._filename[len(REMOTE_PATH_PREFIX):]  
+            result = "◘ " + self._filename[len(REMOTE_PATH_PREFIX):]
         else:
             result = os.path.basename(self.get_filename())
 
@@ -91,7 +91,7 @@ class Editor(ttk.Frame):
             result += " ..."
         elif self.is_modified():
             result += " *"
-        
+
 
         return result
 
@@ -103,7 +103,7 @@ class Editor(ttk.Frame):
 
         if self._filename is None:
             return
-        
+
         if self._filename.endswith(REMOTE_PATH_PREFIX):
             return
 
@@ -162,12 +162,12 @@ class Editor(ttk.Frame):
 
     def _load_file(self, filename, keep_undo=False):
         self._waiting_write_completion = False
-        
+
         if filename.startswith(REMOTE_PATH_PREFIX):
             self._start_loading_remote_file(filename)
         else:
             self._load_local_file(filename, keep_undo)
-            
+
         self.update_appearance()
 
     def _load_local_file(self, filename, keep_undo=False):
@@ -188,44 +188,44 @@ class Editor(ttk.Frame):
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
         self._loading = False
-    
+
     def _start_loading_remote_file(self, filename):
         self._loading = True
         self._filename = filename
         self._newlines = None
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
-        
+
         assert self._filename.startswith(REMOTE_PATH_PREFIX)
         target_filename = self._filename[len(REMOTE_PATH_PREFIX):]
-        
-        get_runner().send_command(InlineCommand("read_file", 
+
+        get_runner().send_command(InlineCommand("read_file",
                                                 path=target_filename))
         self.update_title()
-    
+
     def _complete_loading_remote_file(self, msg):
         print("Got data", msg)
         if not self._filename or not self._filename.endswith(msg["path"]):
             return
-        
+
         content = msg["content_bytes"]
-        
+
         if msg.get("error"):
             # TODO: make it softer
             raise RuntimeError(msg["error"])
-        
+
         if content.count(b"\r\n") > content.count(b"\n") / 2:
             self._newlines = "\r\n"
         else:
             self._newlines = "\n"
-        
+
         self._code_view.text.set_read_only(False)
         self._code_view.set_content_as_bytes(content)
         self.get_text_widget().edit_modified(False)
         self._loading = False
         self.update_title()
-        
-    
+
+
     def is_modified(self):
         return self._code_view.text.edit_modified()
 
@@ -239,17 +239,17 @@ class Editor(ttk.Frame):
             new_filename = self.get_new_filename()
             if not new_filename:
                 return None
-            
+
             self._filename = new_filename
             get_workbench().event_generate("SaveAs", editor=self, filename=self._filename)
 
-        content_bytes = self._code_view.get_content_as_bytes(self._newlines == '\r\n')
-        
+        content_bytes = self._code_view.get_content_as_bytes(self._newlines)
+
         if self._filename.startswith(REMOTE_PATH_PREFIX):
             return self.write_remote_file(content_bytes)
         else:
             return self.write_local_file(content_bytes)
-    
+
     def write_local_file(self, content_bytes):
         try:
             f = open(self._filename, mode="wb")
@@ -282,23 +282,23 @@ class Editor(ttk.Frame):
             assert self._filename.startswith(REMOTE_PATH_PREFIX)
             target_filename = self._filename[len(REMOTE_PATH_PREFIX)].strip()
             self._waiting_write_completion = True
-            get_runner().send_command(InlineCommand("write_file", 
+            get_runner().send_command(InlineCommand("write_file",
                                                     path=target_filename,
                                                     content_bytes=content_bytes))
-            
+
             # NB! edit_modified is not falsed yet!
             return self._filename
         else:
             messagebox.showwarning("Can't save", "Device is busy, wait and try again!")
             return None
-    
+
     def _complete_writing_remote_file(self, msg):
         if (self._waiting_write_completion
             and self._filename
             and self._filename.endswith(msg["filename"])):
             self._code_view.text.edit_modified(False)
             self.update_title()
-            
+
     def get_new_filename(self):
         if self._filename is None:
             initialdir = get_workbench().get_cwd()
@@ -306,7 +306,7 @@ class Editor(ttk.Frame):
         else:
             initialdir = os.path.dirname(self._filename)
             initialfile = os.path.basename(self._filename)
-            
+
         # http://tkinter.unpythonic.net/wiki/tkFileDialog
         new_filename = asksaveasfilename(
             master=get_workbench(),
@@ -359,7 +359,7 @@ class Editor(ttk.Frame):
                     parent=get_workbench(),
                 ):
                     return self.get_new_filename()
-        
+
         return new_filename
 
     def show(self):
@@ -421,7 +421,7 @@ class Editor(ttk.Frame):
     def _on_text_modified(self, event):
         self.update_title()
         self._waiting_write_completion = False
-    
+
     def update_title(self):
         try:
             self.master.update_editor_title(self)
@@ -789,7 +789,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             editor.select_range(text_range)
 
         return editor
-    
+
     def show_remote_file(self, filename):
         if not get_runner().can_do_file_operations():
             messagebox.showwarning("Can't open",
@@ -888,5 +888,5 @@ def get_saved_current_script_filename(force=True):
 
     if editor.is_modified():
         filename = editor.save_file()
-    
+
     return filename
