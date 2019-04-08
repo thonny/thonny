@@ -568,6 +568,7 @@ class BackendProxy:
         if hasattr(self, method_name):
             return getattr(self, method_name)(cmd)
         else:
+            logging.getLogger("thonny").warn("Discarding %s", cmd)
             return "discard"
 
     def send_program_input(self, data: str) -> None:

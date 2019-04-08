@@ -84,7 +84,6 @@ class BaseFileBrowser(ttk.Frame):
         self.menu = tk.Menu(self.tree, tearoff=False)
         
         self._last_folder_setting_name = last_folder_setting_name
-        self.focus_into_saved_folder()
         
     
     def init_header(self, row, column):
@@ -525,13 +524,14 @@ class BackEndFileBrowser(BaseFileBrowser):
                          show_hidden_files=show_hidden_files, 
                          last_folder_setting_name=last_folder_setting_name,
                          breadcrumbs_pady=breadcrumbs_pady)
-        get_workbench().bind("DirectoryData", self.update_dir_data, True)
+        get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
     
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
-            get_runner().send_command(InlineCommand("get_child_data", node_id=node_id, paths=paths))
+            get_runner().send_command(InlineCommand("get_dirs_child_data", node_id=node_id, paths=paths))
     
     def update_dir_data(self, msg):
+        print("updating", msg)
         self.cache_dirs_child_data(msg["data"])
         self.refresh_children(msg["node_id"])
 

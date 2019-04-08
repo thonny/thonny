@@ -170,6 +170,8 @@ class MicroPythonProxy(BackendProxy):
             # get the message
             try:
                 msg = self._read_next_serial_message()
+                if msg:
+                    print("GOT", msg)
             except SerialException as e:
                 self._handle_serial_exception(e)
                 return None
@@ -606,7 +608,62 @@ class MicroPythonProxy(BackendProxy):
             )
 
         return None
+    
+    def _cmd_get_dirs_child_data(self, cmd):
+        print("GETTING", cmd)
+        try:
+            self._execute_async(
+                dedent("""
+                try:
+                    import os as __temp_os
+                    __temp_result = {}
+                    for path in %(paths)r:
+                        real_path = path or '/'
+                        __temp_children = {}
+                        for name in __temp_os.listdir(real_path):
+                            __temp_st = __temp_os.stat(real_path + '/' + name)
+                            if __temp_st[0] & 0o170000 == 0o040000:
+                                # directory
+                                __temp_children[name] = None
+                            else:
+                                __temp_children[name] = __temp_st[6]
+                                
+                        __temp_result[path] = __temp_children                            
+                        
+                    print('\\x04\\x02', {
+                        'message_class' : 'InlineResponse',
+                        'command_name': 'get_dirs_child_data',
+                        'node_id' : '%(node_id)s',
+                        'data': __temp_result
+                    })
+                    del __temp_os
+                    del __temp_st
+                    del __temp_result
+                    del __temp_children
+                except Exception as e:
+                    print('\\x04\\x02', {
+                        'message_class' : 'InlineResponse',
+                        'command_name':'get_dirs_child_data',
+                        'node_id' : '%(node_id)s',
+                        'data':{},
+                        'error' : 'Error getting file data:\\n' + str(e)
+                    })
+                """
+                    % {"paths": cmd.paths, "node_id": cmd.node_id}
+                )
+            )
+        except Exception:
+            self._non_serial_msg_queue.put(
+                InlineResponse(
+                    command_name="get_globals",
+                    module_name=cmd.module_name,
+                    globals={},
+                    error="Error requesting globals:\\n" + traceback.format_exc(),
+                )
+            )
 
+        return None
+        
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
         msg = InlineResponse(
