@@ -534,7 +534,10 @@ class Runner:
                 logging.getLogger("thonny").exception(
                     "Problem with finalizing console allocation"
                 )
-
+    
+    def can_do_file_operations(self):
+        return self._proxy and self._proxy.can_do_file_operations()
+    
     def get_supported_features(self) -> Set[str]:
         if self._proxy is None:
             return set()
@@ -613,6 +616,8 @@ class BackendProxy:
     def has_separate_files(self):
         return False
     
+    def can_do_file_operations(self):
+        return False
     
 
 

@@ -491,6 +491,8 @@ class MicroPythonProxy(BackendProxy):
     def _execute_async(self, script):
         """Executes given MicroPython script on the device"""
         assert self._connection.buffers_are_empty()
+        
+        print("----\n",script,"\n---")
 
         command_bytes = script.encode("utf-8")
         self._connection.write(command_bytes + b"\x04")
@@ -634,6 +636,7 @@ class MicroPythonProxy(BackendProxy):
                         'message_class' : 'InlineResponse',
                         'command_name': 'get_dirs_child_data',
                         'node_id' : '%(node_id)s',
+                        'dir_separator' : '',
                         'data': {'' : {name : __temp_os.size(name) for name in __temp_os.listdir()}}
                     })
                     del __temp_os
@@ -642,6 +645,7 @@ class MicroPythonProxy(BackendProxy):
                         'message_class' : 'InlineResponse',
                         'command_name':'get_dirs_child_data',
                         'node_id' : '%(node_id)s',
+                        'dir_separator' : '',
                         'data':{},
                         'error' : 'Error getting file data: ' + str(e)
                     })
@@ -652,10 +656,8 @@ class MicroPythonProxy(BackendProxy):
         except Exception:
             self._non_serial_msg_queue.put(
                 InlineResponse(
-                    command_name="get_globals",
-                    module_name=cmd.module_name,
-                    globals={},
-                    error="Error requesting globals:\\n" + traceback.format_exc(),
+                    command_name="get_dirs_child_data",
+                    error="Error requesting file data:\\n" + traceback.format_exc(),
                 )
             )
 
@@ -685,6 +687,7 @@ class MicroPythonProxy(BackendProxy):
                         'message_class' : 'InlineResponse',
                         'command_name': 'get_dirs_child_data',
                         'node_id' : '%(node_id)s',
+                        'dir_separator' : '/',
                         'data': __temp_result
                     })
                     del __temp_os
@@ -696,6 +699,7 @@ class MicroPythonProxy(BackendProxy):
                     print('\\x04\\x02', {
                         'message_class' : 'InlineResponse',
                         'command_name':'get_dirs_child_data',
+                        'dir_separator' : '/',
                         'node_id' : '%(node_id)s',
                         'data':{},
                         'error' : 'Error getting file data: ' + str(e)
@@ -707,10 +711,8 @@ class MicroPythonProxy(BackendProxy):
         except Exception:
             self._non_serial_msg_queue.put(
                 InlineResponse(
-                    command_name="get_globals",
-                    module_name=cmd.module_name,
-                    globals={},
-                    error="Error requesting globals:\\n" + traceback.format_exc(),
+                    command_name="get_dirs_child_data",
+                    error="Error requesting file data:\\n" + traceback.format_exc(),
                 )
             )
 
@@ -972,7 +974,47 @@ class MicroPythonProxy(BackendProxy):
             self._non_serial_msg_queue.put(ToplevelResponse())
             # TODO: Output confirmation ? (together with file size)
             # Or should the confirmation be given in terms of mount path?
+    
+    def _cmd_write_file(self, cmd):
+        print("WRITING", cmd)
+    
+    def _cmd_read_file(self, cmd):
+        print("READING", cmd)
+        try:
+            self._execute_async(
+                dedent("""
+                try:
+                    with open(%(path)r, 'b') as __temp_fp:
+                        print('\\x04\\x02', {
+                            'message_class' : 'InlineResponse',
+                            'command_name': 'read_file',
+                            'path' : %(path)r,  
+                            'content_bytes': __temp_fp.read()
+                        })
+                    del __temp_fp
+                except Exception as e:
+                    print('\\x04\\x02', {
+                        'message_class' : 'InlineResponse',
+                        'command_name':'read_file',
+                        'path' : '%(path)s',
+                        'content_bytes': b'',
+                        'error' : 'Error getting file content: ' + str(e)
+                    })
+                """
+                    % cmd
+                )
+            )
+        except Exception:
+            self._non_serial_msg_queue.put(
+                InlineResponse(
+                    command_name="read_file",
+                    path=cmd.path,
+                    content_bytes=b"",
+                    error="Error requesting file content:\\n" + traceback.format_exc(),
+                )
+            )
 
+    
     def _check_and_upload(self, source, target):
         # if target is a py file,
         # then give warning if source has syntax errors
@@ -1431,6 +1473,9 @@ class MicroPythonProxy(BackendProxy):
 
     def has_separate_files(self):
         return self._connection is not None
+
+    def can_do_file_operations(self):
+        return self.idle
 
 
 class MicroPythonConfigPage(BackendDetailsConfigPage):

@@ -249,9 +249,9 @@ class CodeView(tktextext.TextFrame):
             "1.0", "end-1c"
         )  # -1c because Text always adds a newline itself
 
-    def detect_encoding(self):
+    def detect_encoding(self, data):
         encoding, _ = tokenize.detect_encoding(
-            io.BytesIO(self.get_content().encode("ascii", errors="replace")).readline
+            io.BytesIO(data).readline
         )
         return encoding
 
@@ -260,7 +260,13 @@ class CodeView(tktextext.TextFrame):
         if running_on_windows() or in_DOS_fileformat:
             chars = chars.replace("\n", "\r\n")
 
-        return chars.encode(self.detect_encoding())
+        return chars.encode(self.detect_encoding(
+            self.get_content().encode("ascii", errors="replace")))
+    
+    def set_content_as_bytes(self, data):
+        encoding = self.detect_encoding(data)
+        chars = data.decode(encoding).replace("\r\n", "\n")
+        self.set_content(chars)
 
     def set_content(self, content, keep_undo=False):
         self.text.direct_delete("1.0", tk.END)

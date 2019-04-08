@@ -4,7 +4,7 @@ import os
 import tkinter as tk
 
 from thonny import get_workbench, get_runner
-from thonny.base_file_browser import LocalFileBrowser, BackEndFileBrowser
+from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
 from thonny.ui_utils import lookup_style_option
 from thonny.common import normpath_with_actual_case
 
@@ -19,7 +19,7 @@ class FilesView(tk.PanedWindow):
         get_workbench().bind("BackendRestart", self.reset_remote, True)
         get_workbench().bind("WorkbenchClose", self.on_workbench_close, True)
         
-        self.local_files = MainFileBrowser(self)
+        self.local_files = LocalFileBrowser(self)
         self.add(self.local_files, minsize=minsize)
         self.local_files.focus_into_saved_folder()
         
@@ -70,7 +70,9 @@ class FilesView(tk.PanedWindow):
         if self.remote_added:
             self.save_split()
 
-class MainFileBrowser(LocalFileBrowser):
+
+
+class LocalFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files, 
             last_folder_setting_name="file.last_browser_folder")
@@ -96,15 +98,12 @@ class MainFileBrowser(LocalFileBrowser):
                     return name
         else:
             return base + extension
+        
 
-class RemoteFileBrowser(BackEndFileBrowser):
+class RemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files, "device.last_browser_folder",
             breadcrumbs_pady=(0,7))
-
-    def get_root_text(self):
-        return "TARGET DEVICE"
-    
 
 
 def load_plugin() -> None:

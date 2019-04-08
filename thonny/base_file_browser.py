@@ -276,7 +276,7 @@ class BaseFileBrowser(ttk.Frame):
             else:
                 assert children_data in ("file", "missing")
         
-        self._cached_child_data.update(data)    
+        self._cached_child_data.update(data)  
     
     def get_open_paths(self, node_id=ROOT_NODE_ID):
         if self.tree.set(node_id, "kind") == "file":
@@ -425,11 +425,14 @@ class BaseFileBrowser(ttk.Frame):
         parts = path.split(".")
         ext = "." + parts[-1]
         if path.endswith(ext) and kind == "file" and ext.lower() in TEXT_EXTENSIONS:
-            get_workbench().get_editor_notebook().show_file(path)
+            self.open_file(path)
         elif kind == "dir":
             self.focus_into(path)
             
-        return "break" 
+        return "break"
+    
+    def open_file(self, path):
+        pass
 
     def on_secondary_click(self, event):
         node_id = self.tree.identify_row(event.y)
@@ -496,7 +499,7 @@ class BaseFileBrowser(ttk.Frame):
         
             return path
 
-class LocalFileBrowser(BaseFileBrowser):
+class BaseLocalFileBrowser(BaseFileBrowser):
     def request_dirs_child_data(self, node_id, paths):
         self.cache_dirs_child_data(get_dirs_child_data(paths))
         self.refresh_children(node_id)
@@ -516,8 +519,10 @@ class LocalFileBrowser(BaseFileBrowser):
         else:
             return parts
     
+    def open_file(self, path):
+        get_workbench().get_editor_notebook().show_file(path)    
 
-class BackEndFileBrowser(BaseFileBrowser):
+class BaseRemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False, 
                  last_folder_setting_name=None, 
                  breadcrumbs_pady=(5, 7)):
@@ -525,17 +530,29 @@ class BackEndFileBrowser(BaseFileBrowser):
                          show_hidden_files=show_hidden_files, 
                          last_folder_setting_name=last_folder_setting_name,
                          breadcrumbs_pady=breadcrumbs_pady)
+        self.dir_separator = "/"
         get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
+        
+    def get_root_text(self):
+        return "◘ TARGET DEVICE ◘"
     
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
             get_runner().send_command(InlineCommand("get_dirs_child_data", node_id=node_id, paths=paths))
     
+    def get_dir_separator(self):
+        return self.dir_separator
+    
     def update_dir_data(self, msg):
         print("updating", msg)
+        self.dir_separator = msg["dir_separator"]
         if msg.get("error"):
             self.show_error(msg["error"], msg["node_id"])
         else:
             self.cache_dirs_child_data(msg["data"])
             self.refresh_children(msg["node_id"])
+
+    def open_file(self, path):
+        get_workbench().get_editor_notebook().show_remote_file(path)    
+
 

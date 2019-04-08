@@ -8,14 +8,13 @@ from logging import exception
 from tkinter import messagebox, ttk
 from tkinter.messagebox import askyesno
 
-from thonny import get_workbench, ui_utils
+from thonny import get_workbench, ui_utils, get_runner
 from thonny.codeview import CodeView
 from thonny.common import (
     TextRange,
     ToplevelResponse,
     normpath_with_actual_case,
-    is_same_path,
-)
+    is_same_path, InlineCommand)
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 from thonny.misc_utils import running_on_windows
@@ -26,9 +25,10 @@ _dialog_filetypes = [
     ("all files", ".*"),
 ]
 
+REMOTE_PATH_PREFIX = "TARGET DEVICE | "
 
 class Editor(ttk.Frame):
-    def __init__(self, master, filename=None):
+    def __init__(self, master):
 
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
@@ -52,19 +52,17 @@ class Editor(ttk.Frame):
         self._filename = None
         self._last_known_mtime = None
         self._asking_about_external_change = False
-
-        if filename is not None:
-            self._load_file(filename)
-            self._code_view.text.edit_modified(False)
+        self._loading = False
+        self._waiting_write_completion = False
 
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
-        get_workbench().bind(
-            "ToplevelResponse", self._listen_for_toplevel_response, True
-        )
+        get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
+        get_workbench().bind("read_file_response", self._complete_loading_remote_file, True)
+        get_workbench().bind("write_file_response", self._complete_writing_remote_file, True)
 
         self.update_appearance()
 
@@ -84,11 +82,16 @@ class Editor(ttk.Frame):
     def get_title(self):
         if self.get_filename() is None:
             result = "<untitled>"
+        elif self.get_filename().startswith(REMOTE_PATH_PREFIX):
+            result = "◘ " + self._filename[len(REMOTE_PATH_PREFIX):]  
         else:
             result = os.path.basename(self.get_filename())
 
-        if self.is_modified():
+        if self._loading:
+            result += " ..."
+        elif self.is_modified():
             result += " *"
+        
 
         return result
 
@@ -99,6 +102,9 @@ class Editor(ttk.Frame):
             return
 
         if self._filename is None:
+            return
+        
+        if self._filename.endswith(REMOTE_PATH_PREFIX):
             return
 
         try:
@@ -155,6 +161,16 @@ class Editor(ttk.Frame):
         return result
 
     def _load_file(self, filename, keep_undo=False):
+        self._waiting_write_completion = False
+        
+        if filename.startswith(REMOTE_PATH_PREFIX):
+            self._start_loading_remote_file(filename)
+        else:
+            self._load_local_file(filename, keep_undo)
+            
+        self.update_appearance()
+
+    def _load_local_file(self, filename, keep_undo=False):
         with tokenize.open(filename) as fp:  # TODO: support also text files
             source = fp.read()
 
@@ -171,7 +187,45 @@ class Editor(ttk.Frame):
         self.get_text_widget().edit_modified(False)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
-
+        self._loading = False
+    
+    def _start_loading_remote_file(self, filename):
+        self._loading = True
+        self._filename = filename
+        self._newlines = None
+        self._code_view.set_content("")
+        self._code_view.text.set_read_only(True)
+        
+        assert self._filename.startswith(REMOTE_PATH_PREFIX)
+        target_filename = self._filename[len(REMOTE_PATH_PREFIX):]
+        
+        get_runner().send_command(InlineCommand("read_file", 
+                                                path=target_filename))
+        self.update_title()
+    
+    def _complete_loading_remote_file(self, msg):
+        print("Got data", msg)
+        if not self._filename or not self._filename.endswith(msg["path"]):
+            return
+        
+        content = msg["content_bytes"]
+        
+        if msg.get("error"):
+            # TODO: make it softer
+            raise RuntimeError(msg["error"])
+        
+        if content.count(b"\r\n") > content.count(b"\n") / 2:
+            self._newlines = "\r\n"
+        else:
+            self._newlines = "\n"
+        
+        self._code_view.text.set_read_only(False)
+        self._code_view.set_content_as_bytes(content)
+        self.get_text_widget().edit_modified(False)
+        self._loading = False
+        self.update_title()
+        
+    
     def is_modified(self):
         return self._code_view.text.edit_modified()
 
@@ -182,73 +236,24 @@ class Editor(ttk.Frame):
         if self._filename is not None and not ask_filename:
             get_workbench().event_generate("Save", editor=self, filename=self._filename)
         else:
-            if self._filename is None:
-                initialdir = get_workbench().get_cwd()
-                initialfile = None
-            else:
-                initialdir = os.path.dirname(self._filename)
-                initialfile = os.path.basename(self._filename)
-                
-            # http://tkinter.unpythonic.net/wiki/tkFileDialog
-            new_filename = asksaveasfilename(
-                master=get_workbench(),
-                filetypes=_dialog_filetypes,
-                defaultextension=".py",
-                initialdir=initialdir,
-                initialfile=initialfile
-            )
-
-            # Different tkinter versions may return different values
-            if new_filename in ["", (), None,]:
+            new_filename = self.get_new_filename()
+            if not new_filename:
                 return None
-
-            # Seems that in some Python versions defaultextension
-            # acts funny
-            if new_filename.lower().endswith(".py.py"):
-                new_filename = new_filename[:-3]
-
-            if running_on_windows():
-                # may have /-s instead of \-s and wrong case
-                new_filename = os.path.join(
-                    normpath_with_actual_case(os.path.dirname(new_filename)),
-                    os.path.basename(new_filename)
-                )
-
-            if new_filename.endswith(".py"):
-                base = os.path.basename(new_filename)
-                mod_name = base[:-3].lower()
-                if running_on_windows():
-                    mod_name = mod_name.lower()
-
-                if mod_name in [
-                    "math",
-                    "turtle",
-                    "random",
-                    "statistics",
-                    "pygame",
-                    "matplotlib",
-                    "numpy",
-                ]:
-
-                    # More proper name analysis will be performed by ProgramNamingAnalyzer
-                    if not tk.messagebox.askyesno(
-                        "Potential problem",
-                        "If you name your script '%s', " % base
-                        + "you won't be able to import the library module named '%s'"
-                        % mod_name
-                        + ".\n\n"
-                        + "Do you still want to use this name for your script?",
-                        parent=get_workbench(),
-                    ):
-                        return self.save_file(ask_filename)
-
+            
             self._filename = new_filename
-            get_workbench().event_generate("SaveAs", editor=self, filename=new_filename)
+            get_workbench().event_generate("SaveAs", editor=self, filename=self._filename)
 
-        content = self._code_view.get_content_as_bytes(self._newlines == '\r\n')
+        content_bytes = self._code_view.get_content_as_bytes(self._newlines == '\r\n')
+        
+        if self._filename.startswith(REMOTE_PATH_PREFIX):
+            return self.write_remote_file(content_bytes)
+        else:
+            return self.write_local_file(content_bytes)
+    
+    def write_local_file(self, content_bytes):
         try:
             f = open(self._filename, mode="wb")
-            f.write(content)
+            f.write(content_bytes)
             f.flush()
             # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             os.fsync(f)
@@ -267,9 +272,95 @@ class Editor(ttk.Frame):
 
         self.master.remember_recent_file(self._filename)
 
+        self._waiting_write_completion = False
         self._code_view.text.edit_modified(False)
 
         return self._filename
+
+    def write_remote_file(self, content_bytes):
+        if get_runner().can_do_file_operations():
+            assert self._filename.startswith(REMOTE_PATH_PREFIX)
+            target_filename = self._filename[len(REMOTE_PATH_PREFIX)].strip()
+            self._waiting_write_completion = True
+            get_runner().send_command(InlineCommand("write_file", 
+                                                    path=target_filename,
+                                                    content_bytes=content_bytes))
+            
+            # NB! edit_modified is not falsed yet!
+            return self._filename
+        else:
+            messagebox.showwarning("Can't save", "Device is busy, wait and try again!")
+            return None
+    
+    def _complete_writing_remote_file(self, msg):
+        if (self._waiting_write_completion
+            and self._filename
+            and self._filename.endswith(msg["filename"])):
+            self._code_view.text.edit_modified(False)
+            self.update_title()
+            
+    def get_new_filename(self):
+        if self._filename is None:
+            initialdir = get_workbench().get_cwd()
+            initialfile = None
+        else:
+            initialdir = os.path.dirname(self._filename)
+            initialfile = os.path.basename(self._filename)
+            
+        # http://tkinter.unpythonic.net/wiki/tkFileDialog
+        new_filename = asksaveasfilename(
+            master=get_workbench(),
+            filetypes=_dialog_filetypes,
+            defaultextension=".py",
+            initialdir=initialdir,
+            initialfile=initialfile
+        )
+
+        # Different tkinter versions may return different values
+        if new_filename in ["", (), None,]:
+            return None
+
+        # Seems that in some Python versions defaultextension
+        # acts funny
+        if new_filename.lower().endswith(".py.py"):
+            new_filename = new_filename[:-3]
+
+        if running_on_windows():
+            # may have /-s instead of \-s and wrong case
+            new_filename = os.path.join(
+                normpath_with_actual_case(os.path.dirname(new_filename)),
+                os.path.basename(new_filename)
+            )
+
+        if new_filename.endswith(".py"):
+            base = os.path.basename(new_filename)
+            mod_name = base[:-3].lower()
+            if running_on_windows():
+                mod_name = mod_name.lower()
+
+            if mod_name in [
+                "math",
+                "turtle",
+                "random",
+                "statistics",
+                "pygame",
+                "matplotlib",
+                "numpy",
+            ]:
+
+                # More proper name analysis will be performed by ProgramNamingAnalyzer
+                if not tk.messagebox.askyesno(
+                    "Potential problem",
+                    "If you name your script '%s', " % base
+                    + "you won't be able to import the library module named '%s'"
+                    % mod_name
+                    + ".\n\n"
+                    + "Do you still want to use this name for your script?",
+                    parent=get_workbench(),
+                ):
+                    return self.get_new_filename()
+        
+        return new_filename
 
     def show(self):
         self.master.select(self)
@@ -328,13 +419,18 @@ class Editor(ttk.Frame):
         return self.focus_displayof() == self._code_view.text
 
     def _on_text_modified(self, event):
+        self.update_title()
+        self._waiting_write_completion = False
+    
+    def update_title(self):
         try:
             self.master.update_editor_title(self)
         except Exception:
             traceback.print_exc()
 
     def _on_text_change(self, event):
-        self.master.update_editor_title(self)
+        self.update_title()
+        self._waiting_write_completion = False
 
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
@@ -693,6 +789,15 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             editor.select_range(text_range)
 
         return editor
+    
+    def show_remote_file(self, filename):
+        if not get_runner().can_do_file_operations():
+            messagebox.showwarning("Can't open",
+                                   "Device is busy, can't read file content.\n"
+                                   + "Please try again later!")
+            return None
+        else:
+            return self.show_file(REMOTE_PATH_PREFIX + filename)
 
     def show_file_at_line(self, filename, lineno, col_offset=None):
         editor = self.show_file(filename)
@@ -708,7 +813,8 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         self.tab(editor, text=title)
 
     def _open_file(self, filename):
-        editor = Editor(self, filename)
+        editor = Editor(self)
+        editor._load_file(filename)
         self.add(editor, text=editor.get_title())
 
         return editor
@@ -716,7 +822,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def get_editor(self, filename, open_when_necessary=False):
         for child in self.winfo_children():
             child_filename = child.get_filename(False)
-            if child_filename and is_same_path(child.get_filename(), filename):
+            if child_filename == filename:
                 return child
 
         if open_when_necessary:
