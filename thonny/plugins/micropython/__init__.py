@@ -610,25 +610,76 @@ class MicroPythonProxy(BackendProxy):
         return None
     
     def _cmd_get_dirs_child_data(self, cmd):
-        print("GETTING", cmd)
+        if not self._welcome_text:
+            return "postpone"
+        
+        if "micro:bit" in self._welcome_text.lower():
+            return self._cmd_get_dirs_child_data_microbit(cmd)
+        else:
+            print("notwel", self._welcome_text)
+            return self._cmd_get_dirs_child_data_generic(cmd)
+    
+    def _cmd_get_dirs_child_data_microbit(self, cmd):
+        """let it be here so micro:bit works with generic proxy as well"""
+        
+        assert cmd["paths"] == {""}
+        
+        try:
+            self._execute_async(
+                dedent("""
+                try:
+                    import os as __temp_os
+                        
+                    print('\\x04\\x02', {
+                        'message_class' : 'InlineResponse',
+                        'command_name': 'get_dirs_child_data',
+                        'node_id' : '%(node_id)s',
+                        'data': {'' : {name : __temp_os.size(name) for name in __temp_os.listdir()}}
+                    })
+                    del __temp_os
+                except Exception as e:
+                    print('\\x04\\x02', {
+                        'message_class' : 'InlineResponse',
+                        'command_name':'get_dirs_child_data',
+                        'node_id' : '%(node_id)s',
+                        'data':{},
+                        'error' : 'Error getting file data: ' + str(e)
+                    })
+                """
+                    % {"paths": cmd.paths, "node_id": cmd.node_id}
+                )
+            )
+        except Exception:
+            self._non_serial_msg_queue.put(
+                InlineResponse(
+                    command_name="get_globals",
+                    module_name=cmd.module_name,
+                    globals={},
+                    error="Error requesting globals:\\n" + traceback.format_exc(),
+                )
+            )
+
+        return None
+    
+    def _cmd_get_dirs_child_data_generic(self, cmd):
         try:
             self._execute_async(
                 dedent("""
                 try:
                     import os as __temp_os
                     __temp_result = {}
-                    for path in %(paths)r:
-                        real_path = path or '/'
+                    for __temp_path in %(paths)r:
+                        real_path = __temp_path or '/'
                         __temp_children = {}
-                        for name in __temp_os.listdir(real_path):
-                            __temp_st = __temp_os.stat(real_path + '/' + name)
+                        for __temp_name in __temp_os.listdir(real_path):
+                            __temp_st = __temp_os.stat(real_path + '/' + __temp_name)
                             if __temp_st[0] & 0o170000 == 0o040000:
                                 # directory
-                                __temp_children[name] = None
+                                __temp_children[__temp_name] = None
                             else:
-                                __temp_children[name] = __temp_st[6]
+                                __temp_children[__temp_name] = __temp_st[6]
                                 
-                        __temp_result[path] = __temp_children                            
+                        __temp_result[__temp_path] = __temp_children                            
                         
                     print('\\x04\\x02', {
                         'message_class' : 'InlineResponse',
@@ -640,13 +691,14 @@ class MicroPythonProxy(BackendProxy):
                     del __temp_st
                     del __temp_result
                     del __temp_children
+                    del __temp_name
                 except Exception as e:
                     print('\\x04\\x02', {
                         'message_class' : 'InlineResponse',
                         'command_name':'get_dirs_child_data',
                         'node_id' : '%(node_id)s',
                         'data':{},
-                        'error' : 'Error getting file data:\\n' + str(e)
+                        'error' : 'Error getting file data: ' + str(e)
                     })
                 """
                     % {"paths": cmd.paths, "node_id": cmd.node_id}
@@ -1482,8 +1534,8 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     
     def is_modified(self):
         return (self._port_desc_variable.modified  # pylint: disable=no-member
-                or self._webrepl_password_var.modified  # pylint: disable=no-member
-                or self._webrepl_url_var.modified)  # pylint: disable=no-member
+                or self.allow_webrepl and self._webrepl_password_var.modified  # pylint: disable=no-member
+                or self.allow_webrepl and self._webrepl_url_var.modified)  # pylint: disable=no-member
 
     def should_restart(self):
         return self.is_modified()
@@ -1504,7 +1556,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
             self._webrepl_frame.grid(row=6, column=0, sticky="nwe")
-        elif self._webrepl_frame.winfo_ismapped():
+        elif self.allow_webrepl and self._webrepl_frame.winfo_ismapped():
             self._webrepl_frame.grid_forget()
             
     def _get_usb_driver_url(self):
