@@ -309,7 +309,7 @@ class BaseFileBrowser(ttk.Frame):
             
             # if browser is focused into this path
             if node_id == "":
-                self.show_error("Directory " + path + " does not exist anymore")
+                self.show_error("Directory " + path + " does not exist anymore", node_id)
             elif children_data == "missing":
                 self.tree.delete(node_id)
             else:
@@ -356,10 +356,11 @@ class BaseFileBrowser(ttk.Frame):
             )
             self.tree.set_children(node_id, *ids_sorted_by_name)
 
-    def show_error(self, msg):
-        "TODO:"
-        "clear tree"
-        "show message"
+    def show_error(self, msg, node_id):
+        err_id = self.tree.insert(node_id, "end")
+        self.tree.item(err_id, text=msg)
+        self.tree.set_children(node_id, err_id)
+        
     
     def clear_error(self):
         "TODO:"
@@ -532,6 +533,9 @@ class BackEndFileBrowser(BaseFileBrowser):
     
     def update_dir_data(self, msg):
         print("updating", msg)
-        self.cache_dirs_child_data(msg["data"])
-        self.refresh_children(msg["node_id"])
+        if msg.get("error"):
+            self.show_error(msg["error"], msg["node_id"])
+        else:
+            self.cache_dirs_child_data(msg["data"])
+            self.refresh_children(msg["node_id"])
 

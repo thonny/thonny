@@ -1916,8 +1916,8 @@ class Workbench(tk.Tk):
         try:
             self._save_layout()
             self._editor_notebook.remember_open_files()
-            self._configuration_manager.save()
             self.event_generate("WorkbenchClose")
+            self._configuration_manager.save()
         except Exception:
             self.report_exception()
 

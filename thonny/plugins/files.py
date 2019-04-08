@@ -9,7 +9,7 @@ from thonny.ui_utils import lookup_style_option
 from thonny.common import normpath_with_actual_case
 
 
-minsize = 100
+minsize = 80
 class FilesView(tk.PanedWindow):
     def __init__(self, master=None):
         tk.PanedWindow.__init__(self, master, orient="vertical", borderwidth=0)
@@ -17,6 +17,7 @@ class FilesView(tk.PanedWindow):
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
         
         get_workbench().bind("BackendRestart", self.reset_remote, True)
+        get_workbench().bind("WorkbenchClose", self.on_workbench_close, True)
         
         self.local_files = MainFileBrowser(self)
         self.add(self.local_files, minsize=minsize)
@@ -30,7 +31,6 @@ class FilesView(tk.PanedWindow):
         self.reset_remote()
     
     def reset_remote(self, msg=None):
-        print("restart")
         runner = get_runner()
         if not runner:
             return
@@ -44,12 +44,31 @@ class FilesView(tk.PanedWindow):
             if not self.remote_added:
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
+                self.restore_split()
             self.remote_files.focus_into("")
         else:
             if self.remote_added:
+                self.save_split()
                 self.remove(self.remote_files)
                 self.remote_added = False
-        
+    
+    def save_split(self):
+        _, y = self.sash_coord(0)
+        get_workbench().set_option("view.files_split", y)
+    
+    def restore_split(self):
+        split = get_workbench().get_option("view.files_split", None)
+        if split is None:
+            if self.winfo_height() > 5:
+                split = int(self.winfo_height() * 0.66)
+            else:
+                split = 600
+            
+        self.sash_place(0, 0, split)
+    
+    def on_workbench_close(self, event=None):
+        if self.remote_added:
+            self.save_split()
 
 class MainFileBrowser(LocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
