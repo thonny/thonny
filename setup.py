@@ -2,6 +2,7 @@ import os.path
 import sys
 
 from setuptools import find_packages, setup
+from babel.messages import frontend as babel
 
 if sys.version_info < (3, 5):
     raise RuntimeError("Thonny requires Python 3.5 or later")
@@ -68,4 +69,8 @@ setup(
         "thonny.plugins.mypy": ["typeshed_extras/*.pyi"],
     },
     entry_points={"gui_scripts": ["thonny = thonny:launch"]},
+    cmdclass = {'compile_catalog': babel.compile_catalog,
+                'extract_messages': babel.extract_messages,
+                'init_catalog': babel.init_catalog,
+                'update_catalog': babel.update_catalog}
 )
