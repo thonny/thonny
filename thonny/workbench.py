@@ -207,6 +207,7 @@ class Workbench(tk.Tk):
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
+        self.set_default("general.language", "English")
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
 
