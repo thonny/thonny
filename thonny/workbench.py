@@ -53,7 +53,7 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
 )
-
+from thonny.languages import LANGUAGES_DICT
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -216,8 +216,17 @@ class Workbench(tk.Tk):
     def _init_language(self) -> None:
         """Initialize language."""
         language_option = self.get_option("general.language")
-        french = gettext.translation('thonny', "locale",  languages=['fr_FR'])
-        french.install()
+        self._set_language(language_option)
+
+    def _set_language(self, language_name) -> None:
+        if language_name in LANGUAGES_DICT:
+
+            language = gettext.translation(
+                'thonny',
+                "locale",
+                languages=[LANGUAGES_DICT[language_name]]
+            )
+            language.install()
 
     def _get_logging_level(self) -> int:
         if self.in_debug_mode():
