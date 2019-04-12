@@ -3,7 +3,7 @@ from tkinter import ttk
 
 from thonny import get_workbench
 from thonny.config_ui import ConfigurationPage
-
+from thonny.languages import LANGUAGES_DICT
 
 class GeneralConfigurationPage(ConfigurationPage):
     def __init__(self, master):
@@ -13,7 +13,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         self._language_label.grid(
             row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
-        languages = ["English", "Francais"]
+        languages = list(LANGUAGES_DICT.keys())
         self._language_combo = ttk.Combobox(
             self,
             width=7,
