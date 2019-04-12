@@ -54,7 +54,6 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
 )
 
-_ = gettext.gettext
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -138,6 +137,9 @@ class Workbench(tk.Tk):
         self._init_scaling()
 
         self._add_main_backends()
+
+        self._init_language()
+
         self._init_theming()
         self._init_window()
         self.add_view(
@@ -210,6 +212,12 @@ class Workbench(tk.Tk):
         self.set_default("general.language", "English")
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
+
+    def _init_language(self) -> None:
+        """Initialize language."""
+        language_option = self.get_option("general.language")
+        french = gettext.translation('thonny', "locale",  languages=['fr_FR'])
+        french.install()
 
     def _get_logging_level(self) -> int:
         if self.in_debug_mode():
@@ -362,6 +370,7 @@ class Workbench(tk.Tk):
 
         for m in sorted(modules, key=module_sort_key):
             getattr(m, load_function_name)()
+
     def _init_fonts(self) -> None:
         # set up editor and shell fonts
         self.set_default(
