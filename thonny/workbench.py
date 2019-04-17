@@ -223,7 +223,7 @@ class Workbench(tk.Tk):
 
             language = gettext.translation(
                 'thonny',
-                "locale",
+                os.path.join('thonny', 'locale'),
                 languages=[LANGUAGES_DICT[language_name]]
             )
             language.install()
