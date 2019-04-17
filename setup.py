@@ -2,7 +2,6 @@ import os.path
 import sys
 
 from setuptools import find_packages, setup
-from babel.messages import frontend as babel
 
 if sys.version_info < (3, 5):
     raise RuntimeError("Thonny requires Python 3.5 or later")
