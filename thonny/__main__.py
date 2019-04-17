@@ -15,5 +15,5 @@ try:
 except ImportError:
     pass
 
-gettext.install('thonny', 'locale/')
+gettext.install('thonny', 'locale')
 launch()
