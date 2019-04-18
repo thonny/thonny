@@ -80,7 +80,7 @@ class PipDialog(tk.Toplevel):
 
         self.search_button = ttk.Button(
             header_frame,
-            text="Find package from PyPI",
+            text=_("Find package from PyPI"),
             command=self._on_search,
             width=25,
         )
@@ -181,14 +181,14 @@ class PipDialog(tk.Toplevel):
         self.command_frame.grid(row=2, column=0, sticky="w")
 
         self.install_button = ttk.Button(
-            self.command_frame, text=" Upgrade ", command=self._on_click_install
+            self.command_frame, text=_(" Upgrade "), command=self._on_click_install
         )
 
         self.install_button.grid(row=0, column=0, sticky="w", padx=0)
 
         self.uninstall_button = ttk.Button(
             self.command_frame,
-            text="Uninstall",
+            text=_("Uninstall"),
             command=lambda: self._perform_action("uninstall"),
         )
 
@@ -203,7 +203,7 @@ class PipDialog(tk.Toplevel):
 
         self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5, 0))
 
-        self.close_button = ttk.Button(info_frame, text="Close", command=self._on_close)
+        self.close_button = ttk.Button(info_frame, text=_("Close"), command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
 
     def _on_click_install(self):
@@ -241,18 +241,18 @@ class PipDialog(tk.Toplevel):
 
     def _install_pip(self):
         self._clear()
-        self.info_text.direct_insert("end", "Installing pip\n\n", ("caption",))
+        self.info_text.direct_insert("end", _("Installing pip\n\n"), ("caption",))
         self.info_text.direct_insert(
             "end",
-            "pip, a required module for managing packages is missing or too old.\n\n"
-            + "Downloading pip installer (about 1.5 MB), please wait ...\n",
+            _("pip, a required module for managing packages is missing or too old.\n\n"
+            + "Downloading pip installer (about 1.5 MB), please wait ...\n"),
         )
         self.update()
         self.update_idletasks()
 
         installer_filename, _ = urlretrieve(PIP_INSTALLER_URL)
 
-        self.info_text.direct_insert("end", "Installing pip, please wait ...\n")
+        self.info_text.direct_insert("end", _("Installing pip, please wait ...\n"))
         self.update()
         self.update_idletasks()
 
@@ -276,20 +276,20 @@ class PipDialog(tk.Toplevel):
         self._clear()
         self.info_text.direct_insert("end", error)
         self.info_text.direct_insert(
-            "end", "You seem to have problems with pip\n\n", ("caption",)
+            "end", _("You seem to have problems with pip\n\n"), ("caption",)
         )
         self.info_text.direct_insert(
             "end",
-            "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
+            _("pip, a required module for managing packages is missing or too old for Thonny.\n\n"
             + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
-            + "then you can install newest version by downloading ",
+            + "then you can install newest version by downloading "),
         )
         self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
         self.info_text.direct_insert(
             "end",
-            " and running it with "
+            _(" and running it with ")
             + self._get_interpreter()
-            + " (probably needs admin privileges).\n\n",
+            + _(" (probably needs admin privileges).\n\n"),
         )
 
         self.info_text.direct_insert(
@@ -299,8 +299,8 @@ class PipDialog(tk.Toplevel):
 
     def _instructions_for_command_line_install(self):
         return (
-            "Alternatively, if you have an older pip installed, then you can install packages "
-            + "on the command line (Tools → Open system shell...)"
+            _("Alternatively, if you have an older pip installed, then you can install packages "
+            + "on the command line (Tools → Open system shell...)")
         )
 
     def _start_update_list(self, name_to_show=None):
@@ -348,64 +348,64 @@ class PipDialog(tk.Toplevel):
             self.info_text.direct_insert("end", "Browse the packages\n", ("caption",))
             self.info_text.direct_insert(
                 "end",
-                "With current interpreter you can only browse the packages here.\n"
-                + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n\n",
+                _("With current interpreter you can only browse the packages here.\n"
+                + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n\n"),
             )
 
             if self._get_target_directory():
                 self.info_text.direct_insert(
-                    "end", "Packages' directory\n", ("caption",)
+                    "end", _("Packages' directory\n"), ("caption",)
                 )
                 self.info_text.direct_insert(
                     "end", self._get_target_directory(), ("target_directory")
                 )
         else:
-            self.info_text.direct_insert("end", "Install from PyPI\n", ("caption",))
+            self.info_text.direct_insert("end", _("Install from PyPI\n"), ("caption",))
             self.info_text.direct_insert(
                 "end",
-                "If you don't know where to get the package from, "
+                _("If you don't know where to get the package from, "
                 + "then most likely you'll want to search the Python Package Index. "
-                + "Start by entering the name of the package in the search box above and pressing ENTER.\n\n",
+                + "Start by entering the name of the package in the search box above and pressing ENTER.\n\n"),
             )
 
             self.info_text.direct_insert(
-                "end", "Install from local file\n", ("caption",)
+                "end", _("Install from local file\n"), ("caption",)
             )
-            self.info_text.direct_insert("end", "Click ")
-            self.info_text.direct_insert("end", "here", ("install_file",))
+            self.info_text.direct_insert("end", _("Click "))
+            self.info_text.direct_insert("end", _("here"), ("install_file",))
             self.info_text.direct_insert(
                 "end",
-                " to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n\n",
+                _(" to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n\n"),
             )
 
-            self.info_text.direct_insert("end", "Upgrade or uninstall\n", ("caption",))
+            self.info_text.direct_insert("end", _("Upgrade or uninstall\n"), ("caption",))
             self.info_text.direct_insert(
-                "end", "Start by selecting the package from the left.\n\n"
+                "end", _("Start by selecting the package from the left.\n\n")
             )
 
             if self._get_target_directory():
-                self.info_text.direct_insert("end", "Target:  ", ("caption",))
+                self.info_text.direct_insert("end", _("Target:  "), ("caption",))
                 if self._targets_virtual_environment():
                     self.info_text.direct_insert(
-                        "end", "virtual environment\n", ("caption",)
+                        "end", _("virtual environment\n"), ("caption",)
                     )
                 else:
                     self.info_text.direct_insert(
-                        "end", "user site packages\n", ("caption",)
+                        "end", _("user site packages\n"), ("caption",)
                     )
 
                 self.info_text.direct_insert(
                     "end",
-                    "This dialog lists all available packages,"
-                    + " but allows upgrading and uninstalling only packages from ",
+                    _("This dialog lists all available packages,"
+                    + " but allows upgrading and uninstalling only packages from "),
                 )
                 self.info_text.direct_insert(
                     "end", self._get_target_directory(), ("url")
                 )
                 self.info_text.direct_insert(
                     "end",
-                    ". New packages will be also installed into this directory."
-                    + " Other locations must be managed by alternative means.",
+                    _(". New packages will be also installed into this directory."
+                    + " Other locations must be managed by alternative means."),
                 )
 
         self._select_list_item(0)
@@ -427,9 +427,9 @@ class PipDialog(tk.Toplevel):
         active_dist = self._get_active_dist(name)
         if active_dist is not None:
             self.name_label["text"] = active_dist["project_name"]
-            self.info_text.direct_insert("end", "Installed version: ", ("caption",))
+            self.info_text.direct_insert("end", _("Installed version: "), ("caption",))
             self.info_text.direct_insert("end", active_dist["version"] + "\n")
-            self.info_text.direct_insert("end", "Installed to: ", ("caption",))
+            self.info_text.direct_insert("end", _("Installed to: "), ("caption",))
             self.info_text.direct_insert(
                 "end", normpath_with_actual_case(active_dist["location"]), ("url",)
             )
@@ -449,12 +449,12 @@ class PipDialog(tk.Toplevel):
 
             if active_dist is not None:
                 # existing package in target directory
-                self.install_button["text"] = "Upgrade"
+                self.install_button["text"] = _("Upgrade")
                 self.install_button["state"] = "disabled"
                 self.uninstall_button.grid(row=0, column=1)
             else:
                 # new package
-                self.install_button["text"] = "Install"
+                self.install_button["text"] = _("Install")
                 self.uninstall_button.grid_remove()
 
     def _show_package_info(self, name, data, error_code=None):
@@ -476,16 +476,16 @@ class PipDialog(tk.Toplevel):
 
         if error_code is not None:
             if error_code == 404:
-                write("Could not find the package from PyPI.")
+                write(_("Could not find the package from PyPI."))
                 if not self._get_active_version(name):
                     # new package
-                    write("\nPlease check your spelling!" + "\nYou need to enter ")
-                    write("exact package name", "bold")
+                    write(_("\nPlease check your spelling!") + _("\nYou need to enter "))
+                    write(_("exact package name"), "bold")
                     write("!")
 
             else:
                 write(
-                    "Could not find the package info from PyPI. Error code: "
+                    _("Could not find the package info from PyPI. Error code: ")
                     + str(error_code)
                 )
 
@@ -497,22 +497,22 @@ class PipDialog(tk.Toplevel):
         ]  # search name could have been a bit different
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
-            write_att("Latest stable version", latest_stable_version)
+            write_att(_("Latest stable version"), latest_stable_version)
         else:
-            write_att("Latest version", data["info"]["version"])
-        write_att("Summary", info["summary"])
-        write_att("Author", info["author"])
-        write_att("Homepage", info["home_page"], "url")
+            write_att(_("Latest version"), data["info"]["version"])
+        write_att(_("Summary"), info["summary"])
+        write_att(_("Author"), info["author"])
+        write_att(_("Homepage"), info["home_page"], "url")
         if info.get("bugtrack_url", None):
-            write_att("Bugtracker", info["bugtrack_url"], "url")
+            write_att(_("Bugtracker"), info["bugtrack_url"], "url")
         if info.get("docs_url", None):
-            write_att("Documentation", info["docs_url"], "url")
+            write_att(_("Documentation"), info["docs_url"], "url")
         if info.get("package_url", None):
-            write_att("PyPI page", info["package_url"], "url")
+            write_att(_("PyPI page"), info["package_url"], "url")
         if info.get("requires_dist", None):
             # Available only when release is created by a binary wheel
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
-            write_att("Requires", ", ".join(info["requires_dist"]))
+            write_att(_("Requires"), ", ".join(info["requires_dist"]))
 
         if self._get_active_version(
             name
@@ -550,7 +550,7 @@ class PipDialog(tk.Toplevel):
             try:
                 index = normalized_items.index(self._normalize_name(name_or_index))
             except Exception:
-                exception("Can't find package name from the list: " + name_or_index)
+                exception(_("Can't find package name from the list: ") + name_or_index)
                 return
 
         old_state = self.listbox["state"]
@@ -583,11 +583,11 @@ class PipDialog(tk.Toplevel):
             args.append(name)
         elif action == "uninstall":
             if name in ["pip", "setuptools"] and not messagebox.askyesno(
-                "Really uninstall?",
+                _("Really uninstall?"),
                 "Package '{}' is required for installing and uninstalling other packages.\n\n".format(
                     name
                 )
-                + "Are you sure you want to uninstall it?",
+                + _("Are you sure you want to uninstall it?"),
                 parent=get_workbench()
             ):
                 return
@@ -864,13 +864,13 @@ class PluginsPipDialog(PipDialog):
     def _confirm_install(self, package_data):
         name = package_data["info"]["name"]
         reqs = package_data["info"].get("requires_dist", None)
-        
+
         other_version_text = (
             "NB! There may be another version available "
             + "which is compatible with current Thonny version. "
             + "Click on '...' button to choose the version to install."
         )
-        
+
         if name.lower().startswith("thonny-") and not reqs:
             showerror(
                 "Thonny plugin without requirements",

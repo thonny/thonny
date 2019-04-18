@@ -23,7 +23,7 @@ def load_plugin():
     get_workbench().add_command(
         "toggle_pgzero_mode",
         "run",
-        "Pygame Zero mode",
+        _("Pygame Zero mode"),
         toggle_variable,
         flag_name=_OPTION_NAME,
         group=40,

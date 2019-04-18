@@ -24,7 +24,7 @@ def load_plugin():
     get_workbench().add_command(
         "toggle_dock_user_windows",
         "run",
-        "Dock user windows",
+        _("Dock user windows"),
         toggle_variable,
         flag_name=_OPTION_NAME,
         group=40,

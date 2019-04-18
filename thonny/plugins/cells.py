@@ -112,15 +112,15 @@ def _patch_perform_return():
 def _patch_intercept_mark():
     """Need to make cursor wider when in first column. Otherwise
     the border of the cell box makes it hard to notice the cursor.
-    
+
     NB! Need to be careful with setting text["insertwidth"]!
     My first straightforward solution caused unexplainable
     infinite loop of insertions and deletions in the text
     (insert a line and a word, select that word and then do Ctrl-Z).
-    
+
     Looks like this solution is safe, but I don't dare to include
     it in the main code.
-    
+
     UPADTE: not safe. Select and delete a block of lines. Write a new
     line and do Ctrl-Z"""
 
@@ -179,7 +179,7 @@ def _load_plugin():
     wb.add_command(
         "run_cell",
         "run",
-        "Run cell",
+        _("Run cell"),
         handler=dummy,  # actual handler is in the patch
         default_sequence="<Control-Return>",
         tester=run_enabled,
@@ -189,7 +189,7 @@ def _load_plugin():
     wb.add_command(
         "run_cell_and_advance",
         "run",
-        "Run cell and advance",
+        _("Run cell and advance"),
         handler=dummy,  # actual handler is in the patch
         default_sequence="<Shift-Return>",
         tester=run_enabled,
@@ -199,7 +199,7 @@ def _load_plugin():
     wb.add_command(
         "run_selection",
         "run",
-        "Run selection or current line",
+        _("Run selection or current line"),
         handler=run_selection,
         default_sequence="<F9>",
         tester=run_enabled,

@@ -336,12 +336,12 @@ class Workbench(tk.Tk):
 
         # create standard menus in correct order
         self.get_menu("file", _("File"))
-        self.get_menu("edit", "Edit")
-        self.get_menu("view", "View")
-        self.get_menu("run", "Run")
-        self.get_menu("device", "Device")
-        self.get_menu("tools", "Tools")
-        self.get_menu("help", "Help")
+        self.get_menu("edit", _("Edit"))
+        self.get_menu("view", _("View"))
+        self.get_menu("run", _("Run"))
+        self.get_menu("device", _("Device"))
+        self.get_menu("tools", _("Tools"))
+        self.get_menu("help", _("Help"))
 
     def _load_plugins(self) -> None:
         # built-in plugins
@@ -475,7 +475,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "CustomCPython",
             running.CustomCPythonProxy,
-            "Alternative Python 3 interpreter or virtual environment",
+            _("Alternative Python 3 interpreter or virtual environment"),
             running_config_page.CustomCPythonConfigurationPage,
             "2",
         )
@@ -483,7 +483,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "PrivateVenv",
             running.PrivateVenvCPythonProxy,
-            "A special virtual environment (deprecated)",
+            _("A special virtual environment (deprecated)"),
             "This virtual environment is automatically maintained by Thonny.\n"
             "Location: " + running.get_private_venv_path(),
             "z",
@@ -520,7 +520,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "exit",
             "file",
-            "Exit",
+            _("Exit"),
             self._on_close,
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
             extra_sequences=["<Alt-F4>"] if running_on_linux()
@@ -537,7 +537,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "increase_font_size",
             "view",
-            "Increase font size",
+            _("(Increase font size"),
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
             extra_sequences=["<Control-KP_Add>"],
@@ -547,7 +547,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "decrease_font_size",
             "view",
-            "Decrease font size",
+            _("Decrease font size"),
             lambda: self._change_font_size(-1),
             default_sequence=select_sequence("<Control-minus>", "<Command-minus>"),
             extra_sequences=["<Control-KP_Subtract>"],
@@ -559,7 +559,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "focus_editor",
             "view",
-            "Focus editor",
+            _("Focus editor"),
             self._cmd_focus_editor,
             default_sequence=select_sequence("<Alt-e>", "<Command-Alt-e>"),
             group=70,
@@ -568,7 +568,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "focus_shell",
             "view",
-            "Focus shell",
+            _("Focus shell"),
             self._cmd_focus_shell,
             default_sequence=select_sequence("<Alt-s>", "<Command-Alt-s>"),
             group=70,
@@ -579,7 +579,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "toggle_maximize_view",
                 "view",
-                "Maximize view",
+                _("Maximize view"),
                 self._cmd_toggle_maximize_view,
                 flag_name="view.maximize_view",
                 default_sequence=None,
@@ -591,7 +591,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "toggle_maximize_view",
                 "view",
-                "Full screen",
+                _("Full screen"),
                 self._cmd_toggle_full_screen,
                 flag_name="view.full_screen",
                 default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
@@ -1192,7 +1192,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "viewargs",
             "view",
-            "Program arguments",
+            _("Program arguments"),
             toggle,
             flag_name="view.show_program_arguments",
             group=11,

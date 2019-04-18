@@ -11,25 +11,25 @@ class GeneralConfigurationPage(ConfigurationPage):
 
         self.add_checkbox(
             "general.single_instance",
-            "Allow only single Thonny instance",
+            _("Allow only single Thonny instance"),
             row=1,
             columnspan=2,
         )
         self.add_checkbox(
             "general.debug_mode",
-            "Debug mode (provides more detailed logs)",
+            _("Debug mode (provides more detailed logs)"),
             row=3,
             columnspan=2,
         )
         self.add_checkbox(
             "file.reopen_all_files",
-            "Reopen all files from previous session",
+            _("Reopen all files from previous session"),
             row=4,
             columnspan=2,
         )
         self.add_checkbox(
             "general.disable_notification_sound",
-            "Disable notification sound",
+            _("Disable notification sound"),
             row=5,
             columnspan=2,
         )
@@ -62,7 +62,7 @@ class GeneralConfigurationPage(ConfigurationPage):
 
 
         self._font_scaling_var = get_workbench().get_variable("general.font_scaling_mode")
-        self._font_scaling_label = ttk.Label(self, text="Font scaling mode")
+        self._font_scaling_label = ttk.Label(self, text=_("Font scaling mode"))
         self._font_scaling_label.grid(
             row=8, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
@@ -80,8 +80,8 @@ class GeneralConfigurationPage(ConfigurationPage):
 
         reopen_label = ttk.Label(
             self,
-            text="NB! Restart Thonny after changing these options"
-            + "\nin order to see the full effect",
+            text=_("NB! Restart Thonny after changing these options"
+            + "\nin order to see the full effect"),
             font="BoldTkDefaultFont",
         )
         reopen_label.grid(row=20, column=0, sticky=tk.W, pady=20, columnspan=2)

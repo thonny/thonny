@@ -12,32 +12,32 @@ class AssistantConfigPage(ConfigurationPage):
 
         self.add_checkbox(
             "assistance.open_assistant_on_errors",
-            "Open Assistant automatically when program crashes with an exception",
+            _("Open Assistant automatically when program crashes with an exception"),
             row=1,
         )
 
         self.add_checkbox(
             "assistance.open_assistant_on_warnings",
-            "Open Assistant automatically when it has warnings for your code",
+            _("Open Assistant automatically when it has warnings for your code"),
             row=2,
         )
-        
+
         if get_workbench().get_option("assistance.use_pylint", "missing") != "missing":
             self.add_checkbox(
                 "assistance.use_pylint",
-                "Perform selected Pylint checks",
+                _("Perform selected Pylint checks"),
                 row=3,
             )
 
         if get_workbench().get_option("assistance.use_mypy", "missing") != "missing":
             self.add_checkbox(
                 "assistance.use_mypy",
-                "Perform MyPy checks",
+                _("Perform MyPy checks"),
                 row=4,
             )
 
         disabled_checks_label = ttk.Label(
-            self, text="Disabled checks (one id per line)"
+            self, text=_("Disabled checks (one id per line)")
         )
         disabled_checks_label.grid(row=8, sticky="nw", pady=(10, 0))
 
@@ -77,4 +77,4 @@ class AssistantConfigPage(ConfigurationPage):
 
 
 def load_plugin():
-    get_workbench().add_configuration_page("Assistant", AssistantConfigPage)
+    get_workbench().add_configuration_page(_("Assistant"), AssistantConfigPage)

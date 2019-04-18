@@ -38,4 +38,4 @@ class EventsView(TextFrame):
 
 def load_plugin() -> None:
     if get_workbench().get_option("general.debug_mode"):
-        get_workbench().add_view(EventsView, "Events", "se")
+        get_workbench().add_view(EventsView, _("Events"), "se")

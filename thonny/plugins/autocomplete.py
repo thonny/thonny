@@ -104,7 +104,7 @@ class Completer(tk.Listbox):
 
     def _show_box(self, completions):
         self.delete(0, self.size())
-        self.insert(0, *[c["name"] + ("=" if c["complete"].endswith("=") else "") 
+        self.insert(0, *[c["name"] + ("=" if c["complete"].endswith("=") else "")
                          for c in completions])
         self.activate(0)
         self.selection_set(0)
@@ -326,7 +326,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "autocomplete",
         "edit",
-        "Auto-complete",
+        _("Auto-complete"),
         handle_autocomplete_request,
         default_sequence="<Control-space>"
         # TODO: tester

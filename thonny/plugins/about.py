@@ -21,7 +21,7 @@ class AboutDialog(tk.Toplevel):
         main_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
 
-        self.title("About Thonny")
+        self.title(_("About Thonny"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.protocol("WM_DELETE_WINDOW", self._ok)
 
@@ -77,12 +77,12 @@ class AboutDialog(tk.Toplevel):
 
         credits_label = ttk.Label(
             main_frame,
-            text="Made in\n"
-            + "University of Tartu, Estonia,\n"
-            + "with the help from\n"
-            + "open-source community,\n"
-            + "Raspberry Pi Foundation\n"
-            + "and Cybernetica AS",
+            text=_("Made in\n"
+                + "University of Tartu, Estonia,\n"
+                + "with the help from\n"
+                + "open-source community,\n"
+                + "Raspberry Pi Foundation\n"
+                + "and Cybernetica AS"),
             style="Url.TLabel",
             cursor="hand2",
             font=url_font,
@@ -103,12 +103,12 @@ class AboutDialog(tk.Toplevel):
             text="Copyright (©) "
             + str(datetime.datetime.now().year)
             + " Aivar Annamaa\n"
-            + "This program comes with\n"
-            + "ABSOLUTELY NO WARRANTY!\n"
-            + "It is free software, and you are welcome to\n"
-            + "redistribute it under certain conditions, see\n"
-            + "https://opensource.org/licenses/MIT\n"
-            + "for details",
+            + _("This program comes with\n"
+                + "ABSOLUTELY NO WARRANTY!\n"
+                + "It is free software, and you are welcome to\n"
+                + "redistribute it under certain conditions, see\n"
+                + "https://opensource.org/licenses/MIT\n"
+                + "for details"),
             justify=tk.CENTER,
             font=license_font,
         )
@@ -146,18 +146,18 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "changelog",
         "help",
-        "Version history",
+        _("Version history"),
         lambda: open_url("https://github.com/thonny/thonny/blob/master/CHANGELOG.rst"),
         group=60,
     )
     get_workbench().add_command(
         "issues",
         "help",
-        "Report problems",
+        _("Report problems"),
         lambda: open_url("https://github.com/thonny/thonny/issues/new"),
         group=60,
     )
-    get_workbench().add_command("about", "help", "About Thonny", open_about, group=61)
+    get_workbench().add_command("about", "help", _("About Thonny"), open_about, group=61)
 
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)

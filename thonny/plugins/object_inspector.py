@@ -107,10 +107,10 @@ class ObjectInspector(ttk.Frame):
         self.title_label.bind("<Configure>", configure, True)
 
         self.back_button = create_navigation_link(
-            1, "nav-backward", self.navigate_back, "Previous object", (5, 0)
+            1, "nav-backward", self.navigate_back, _("Previous object"), (5, 0)
         )
         self.forward_button = create_navigation_link(
-            2, "nav-forward", self.navigate_forward, "Next object"
+            2, "nav-forward", self.navigate_forward, _("Next object")
         )
         self.back_links = []
         self.forward_links = []
@@ -249,7 +249,7 @@ class ObjectInspector(ttk.Frame):
             self.back_label.config(foreground="lightgray", cursor="arrow")
         else:
             self.back_label.config(foreground="blue", cursor="hand2")
-    
+
         if self.forward_links == []:
             self.forward_label.config(foreground="lightgray", cursor="arrow")
         else:
@@ -340,10 +340,10 @@ class FileHandleInspector(TextFrame, ContentInspector):
 
         # TODO: show this info somewhere
         """
-        label.configure(text="Read %d/%d %s, %d/%d %s" 
+        label.configure(text="Read %d/%d %s, %d/%d %s"
                         % (read_char_count,
                            char_count,
-                           "symbol" if char_count == 1 else "symbols",  
+                           "symbol" if char_count == 1 else "symbols",
                            read_line_count_term,
                            line_count_term,
                            "line" if line_count_term == 1 else "lines"))
@@ -386,10 +386,10 @@ class StringInspector(TextFrame, ContentInspector):
         self.text.configure(height=min(line_count_sep, 10))
         self.text.set_content(content)
         """ TODO:
-        label.configure(text="%d %s, %d %s" 
+        label.configure(text="%d %s, %d %s"
                         % (len(content),
                            "symbol" if len(content) == 1 else "symbols",
-                           line_count_term, 
+                           line_count_term,
                            "line" if line_count_term == 1 else "lines"))
         """
 
@@ -412,10 +412,10 @@ class ReprInspector(TextFrame, ContentInspector):
         line_count_sep = len(content.split("\n"))
         line_count_term = len(content.splitlines())
         self.text.configure(height=min(line_count_sep, 10))
-        label.configure(text="%d %s, %d %s" 
+        label.configure(text="%d %s, %d %s"
                         % (len(content),
                            "symbol" if len(content) == 1 else "symbols",
-                           line_count_term, 
+                           line_count_term,
                            "line" if line_count_term == 1 else "lines"))
         """
 
@@ -494,7 +494,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
         """ TODO:
         label.configure (
             text=("%d element" if count == 1 else "%d elements") % count
-        ) 
+        )
         """
 
 
@@ -560,7 +560,7 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
         """ TODO:
         label.configure (
             text=("%d entry" if count == 1 else "%d entries") % count
-        ) 
+        )
         """
 
         self.update_memory_model()
@@ -611,4 +611,4 @@ class AttributesFrame(thonny.memory.VariablesFrame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(ObjectInspector, "Object inspector", "se")
+    get_workbench().add_view(ObjectInspector, _("Object inspector"), "se")

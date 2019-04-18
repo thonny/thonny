@@ -57,13 +57,13 @@ class FindDialog(tk.Toplevel):
             )
         )
 
-        self.title("Find & Replace")
+        self.title(_("Find & Replace"))
         self.resizable(height=tk.FALSE, width=tk.FALSE)
         self.transient(master)
         self.protocol("WM_DELETE_WINDOW", self._ok)
 
         # Find text label
-        self.find_label = ttk.Label(main_frame, text="Find:")
+        self.find_label = ttk.Label(main_frame, text=_("Find:"))
         self.find_label.grid(
             column=0, row=0, sticky="w", padx=(padx, 0), pady=(pady, 0)
         )
@@ -78,7 +78,7 @@ class FindDialog(tk.Toplevel):
             self.find_entry.insert(0, FindDialog.last_searched_word)
 
         # Replace text label
-        self.replace_label = ttk.Label(main_frame, text="Replace with:")
+        self.replace_label = ttk.Label(main_frame, text=_("Replace with:"))
         self.replace_label.grid(column=0, row=1, sticky="w", padx=(padx, 0))
 
         # Replace text field
@@ -96,25 +96,25 @@ class FindDialog(tk.Toplevel):
         # Case checkbox
         self.case_var = tk.IntVar()
         self.case_checkbutton = ttk.Checkbutton(
-            main_frame, text="Case sensitive", variable=self.case_var
+            main_frame, text=_("Case sensitive"), variable=self.case_var
         )
         self.case_checkbutton.grid(column=0, row=3, padx=(padx, 0), pady=(0, pady))
 
         # Direction radiobuttons
         self.direction_var = tk.IntVar()
         self.up_radiobutton = ttk.Radiobutton(
-            main_frame, text="Up", variable=self.direction_var, value=1
+            main_frame, text=_("Up"), variable=self.direction_var, value=1
         )
         self.up_radiobutton.grid(column=1, row=3, pady=(0, pady))
         self.down_radiobutton = ttk.Radiobutton(
-            main_frame, text="Down", variable=self.direction_var, value=2
+            main_frame, text=_("Down"), variable=self.direction_var, value=2
         )
         self.down_radiobutton.grid(column=2, row=3, pady=(0, pady))
         self.down_radiobutton.invoke()
 
         # Find button - goes to the next occurrence
         self.find_button = ttk.Button(
-            main_frame, text="Find", command=self._perform_find, default="active"
+            main_frame, text=_("Find"), command=self._perform_find, default="active"
         )
         self.find_button.grid(
             column=3, row=0, sticky=tk.W + tk.E, pady=(pady, 0), padx=(0, padx)
@@ -123,14 +123,14 @@ class FindDialog(tk.Toplevel):
 
         # Replace button - replaces the current occurrence, if it exists
         self.replace_button = ttk.Button(
-            main_frame, text="Replace", command=self._perform_replace
+            main_frame, text=_("Replace"), command=self._perform_replace
         )
         self.replace_button.grid(column=3, row=1, sticky=tk.W + tk.E, padx=(0, padx))
         self.replace_button.config(state="disabled")
 
         # Replace + find button - replaces the current occurence and goes to next
         self.replace_and_find_button = ttk.Button(
-            main_frame, text="Replace+Find", command=self._perform_replace_and_find
+            main_frame, text=_("Replace+Find"), command=self._perform_replace_and_find
         )  # TODO - text to resources
         self.replace_and_find_button.grid(
             column=3, row=2, sticky=tk.W + tk.E, padx=(0, padx)
@@ -139,7 +139,7 @@ class FindDialog(tk.Toplevel):
 
         # Replace all button - replaces all occurrences
         self.replace_all_button = ttk.Button(
-            main_frame, text="Replace all", command=self._perform_replace_all
+            main_frame, text=_("Replace all"), command=self._perform_replace_all
         )  # TODO - text to resources
         self.replace_all_button.grid(
             column=3, row=3, sticky=tk.W + tk.E, padx=(0, padx), pady=(0, pady)
@@ -233,7 +233,7 @@ class FindDialog(tk.Toplevel):
 
         tofind = self.find_entry.get()
         if len(tofind) == 0:
-            self.infotext_label_var.set("Enter string to be replaced.")
+            self.infotext_label_var.set(_("Enter string to be replaced."))
             return
 
         toreplace = self.replace_entry.get()
@@ -321,7 +321,7 @@ class FindDialog(tk.Toplevel):
         )  # performs the search and sets the start index of the found string
         if len(wordstart) == 0:
             self.infotext_label_var.set(
-                "The specified text was not found!"
+                _("The specified text was not found!")
             )  # TODO - better text, also move it to the texts resources list
             self.replace_and_find_button.config(state="disabled")
             self.replace_button.config(state="disabled")
@@ -419,7 +419,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "OpenFindDialog",
         "edit",
-        "Find & Replace",
+        _("Find & Replace"),
         cmd_open_find_dialog,
         default_sequence=select_sequence("<Control-f>", "<Command-f>"),
         extra_sequences=["<Control-Greek_phi>"],
