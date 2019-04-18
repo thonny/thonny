@@ -14,6 +14,15 @@ xcopy ucrt_redist\api-ms-win*.dll %BUILDDIR%\DLLs /S /E /K>NUL
 copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
+%BUILDDIR%\python -m pip install parso==0.3.4
+%BUILDDIR%\python -m pip install typed_ast==1.2.0
+%BUILDDIR%\python -m pip install wrapt==1.11.1
+%BUILDDIR%\python -m pip install six==1.12.0
+%BUILDDIR%\python -m pip install mypy_extensions==0.4.1
+%BUILDDIR%\python -m pip install astroid==2.1.0
+%BUILDDIR%\python -m pip install docutils==0.14
+
+
 %BUILDDIR%\python -m pip install jedi==0.13.2
 %BUILDDIR%\python -m pip install mypy==0.660
 %BUILDDIR%\python -m pip install pylint==2.2.2
@@ -78,6 +87,11 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
+@echo ............... CREATING PORTABLE ..........................
+copy ..\portable\customize.py %BUILDDIR%\lib\site-packages\thonny
+cd %BUILDDIR%
+7z a -tzip ..\dist\thonny-%VERSION%-portable.zip *
 
-rmdir %BUILDDIR% /S /Q
+
+@rem rmdir %BUILDDIR% /S /Q
 pause
