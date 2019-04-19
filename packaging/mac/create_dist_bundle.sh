@@ -100,8 +100,8 @@ sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
 
 # sign frameworks and app ##############################
-codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain build/Thonny.app/Contents/Frameworks/Python.framework
-codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain build/Thonny.app
+codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain build/Thonny.app/Contents/Frameworks/Python.framework
+codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain build/Thonny.app
 
 # add readme #####################################################################
 cp readme.txt build
