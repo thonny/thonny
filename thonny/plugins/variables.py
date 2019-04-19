@@ -16,7 +16,7 @@ class VariablesView(VariablesFrame):
         self.back_button = ttk.Button(
             self.tree,
             style="Centered.TButton",
-            text="Back to\ncurrent frame",
+            text=_("Back to\ncurrent frame"),
             command=self._handle_back_button,
             width=15,
         )
@@ -139,5 +139,5 @@ class VariablesView(VariablesFrame):
 
 def load_plugin() -> None:
     get_workbench().add_view(
-        VariablesView, "Variables", "ne", default_position_key="AAA"
+        VariablesView, _("Variables"), "ne", default_position_key="AAA"
     )

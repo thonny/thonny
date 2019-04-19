@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Adds debugging commands and features. 
+Adds debugging commands and features.
 """
 
 import ast
@@ -71,7 +71,7 @@ class Debugger:
         if command == "run_to_cursor":
             return self.get_run_to_cursor_breakpoint() is not None
         elif command == "step_back":
-            return (self._last_progress_message 
+            return (self._last_progress_message
                     and self._last_progress_message["tracer_class"] == "NiceTracer")
         else:
             return True
@@ -111,7 +111,7 @@ class Debugger:
             menu = tk.Menu(get_workbench())
             menu.add(
                 "command",
-                label="Run to cursor",
+                label=_("Run to cursor"),
                 command=lambda: self.check_issue_command("run_to_cursor"),
             )
             menu.add("separator")
@@ -120,7 +120,7 @@ class Debugger:
             )
             menu.add(
                 "command",
-                label="Select all",
+                label=_("Select all"),
                 command=create_edit_command_handler("<<SelectAll>>"),
             )
             self._editor_context_menu = menu
@@ -303,10 +303,10 @@ class FrameVisualizer:
         self._line_debug = frame_info.current_statement is None
 
         self._reconfigure_tags()
-    
+
     def _translate_lineno(self, lineno):
         return lineno - self._firstlineno + 1
-        
+
     def _reconfigure_tags(self):
         for tag in ["active_focus", "exception_focus"]:
             conf = get_syntax_options_for_tag(tag).copy()
@@ -390,7 +390,7 @@ class FrameVisualizer:
 
         self._expression_box.update_expression(msg, frame_info)
 
-        if (frame_info.id in msg["exception_info"]["affected_frame_ids"] 
+        if (frame_info.id in msg["exception_info"]["affected_frame_ids"]
             and msg["exception_info"]["is_fresh"]):
             self._show_exception(
                 msg["exception_info"]["lines_with_frame_info"], frame_info
@@ -504,8 +504,8 @@ class FrameVisualizer:
 
 class EditorVisualizer(FrameVisualizer):
     """
-    Takes care of stepping in the editor 
-    (main module in case of StackedWindowsDebugger) 
+    Takes care of stepping in the editor
+    (main module in case of StackedWindowsDebugger)
     """
 
     def __init__(self, frame_info):
@@ -828,8 +828,8 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
 
     def _on_close(self):
         showinfo(
-            "Can't close yet", 
-            'Use "Stop" command if you want to cancel debugging',
+            _("Can't close yet"),
+            _('Use "Stop" command if you want to cancel debugging'),
             parent=self
         )
 
@@ -1036,7 +1036,7 @@ def _start_debug_enabled():
 def _request_debug(command_name):
     # Don't assume Debug command gets issued after this
     # This may just call the %cd command
-    # or the user may deny saving current editor 
+    # or the user may deny saving current editor
     get_runner().execute_current(command_name)
 
 def _debug_accepted(event):
@@ -1059,7 +1059,7 @@ def _handle_toplevel_response(msg):
     global _current_debugger
     if _current_debugger is not None:
         _current_debugger.close()
-        _current_debugger = None    
+        _current_debugger = None
 
 class DebuggerConfigurationPage(ConfigurationPage):
     def __init__(self, master):
@@ -1079,16 +1079,16 @@ class DebuggerConfigurationPage(ConfigurationPage):
             row=2,
             columnspan=3
         )
-        
+
         if get_workbench().get_option("run.birdseye_port", None):
             port_label = ttk.Label(self, text="Birdseye port", anchor="w")
             port_label.grid(row=3, column=0, sticky="w", pady=5)
             self.add_entry("run.birdseye_port", row=3, column=1, width=5, pady=15, padx=5)
             comment_label = ttk.Label(self, text="(restart Thonny after changing this)", anchor="w")
             comment_label.grid(row=3, column=2, sticky="w", pady=5)
-            
+
         self.columnconfigure(2, weight=1)
-        
+
 
 
 def get_current_debugger():
@@ -1204,4 +1204,3 @@ def load_plugin() -> None:
     get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
     get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
     get_workbench().bind("CommandAccepted", _debug_accepted, True)
-    

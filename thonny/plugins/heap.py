@@ -31,18 +31,18 @@ class HeapView(MemoryFrame):
         get_workbench().bind("ToplevelResponse", self._request_heap_data, True)
         # Showing new globals may introduce new interesting objects
         get_workbench().bind("get_globals_response", self._request_heap_data, True)
-        
+
         self.bind("<Map>", self._on_map, True)
         self.bind("<Unmap>", self._on_unmap, True)
         info_icon = get_workbench().get_image("information")
-        self.info_label = ttk.Label(get_workbench().get_toolbar(), 
-                                    text="Heap mode is on.\nClose Heap view to turn it off.",
+        self.info_label = ttk.Label(get_workbench().get_toolbar(),
+                                    text=_("Heap mode is on.\nClose Heap view to turn it off."),
                                     image=info_icon,
-                                    compound="left", 
+                                    compound="left",
                                     background="#F4FFBA",
                                     foreground="green",
                                     padding=(3,0))
-        
+
 
     def _update_data(self, data):
         self._clear_tree()
@@ -74,16 +74,16 @@ class HeapView(MemoryFrame):
         if self.winfo_ismapped():
             if hasattr(msg, "heap"):
                 self._update_data(msg.heap)
-    
+
     def _on_map(self, event):
         self.info_label.grid(row=0, column=1005)
-    
+
     def _on_unmap(self, event):
         try:
             self.info_label.grid_remove()
         except TclError:
             pass
-    
+
 
 def load_plugin() -> None:
-    get_workbench().add_view(HeapView, "Heap", "e")
+    get_workbench().add_view(HeapView, _("Heap"), "e")

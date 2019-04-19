@@ -46,7 +46,7 @@ def _toggle_selection_comment(text):
 
 
 def _comment_selection(text):
-    """Adds ## in front of all selected lines if any lines are selected, 
+    """Adds ## in front of all selected lines if any lines are selected,
     or just the current line otherwise"""
 
     sel_range = _get_focused_code_range(text)
@@ -110,7 +110,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "toggle_comment",
         "edit",
-        "Toggle comment",
+        _("Toggle comment"),
         _cmd_toggle_selection_comment,
         default_sequence=select_sequence("<Control-Key-3>", "<Command-Key-3>"),
         tester=_writable_text_is_focused,
@@ -120,7 +120,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "comment_selection",
         "edit",
-        "Comment out",
+        _("Comment out"),
         _cmd_comment_selection,
         default_sequence="<Alt-Key-3>",
         tester=_writable_text_is_focused,
@@ -130,7 +130,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "uncomment_selection",
         "edit",
-        "Uncomment",
+        _("Uncomment"),
         _cmd_uncomment_selection,
         default_sequence="<Alt-Key-4>",
         tester=_writable_text_is_focused,

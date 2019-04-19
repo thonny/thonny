@@ -151,4 +151,4 @@ class OutlineView(ttk.Frame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(OutlineView, "Outline", "ne")
+    get_workbench().add_view(OutlineView, _("Outline"), "ne")

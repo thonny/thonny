@@ -16,6 +16,7 @@ import tkinter.font as tk_font
 import tkinter.messagebox as tk_messagebox
 import traceback
 import webbrowser
+import gettext
 from threading import Thread
 from tkinter import ttk
 from typing import (
@@ -25,7 +26,7 @@ from typing import (
     List,
     Optional,  # pylint: disable=unused-import
     Sequence,
-    Set,       # pylint: disable=unused-import 
+    Set,       # pylint: disable=unused-import
     Tuple,     # pylint: disable=unused-import
     Type,
     Union,
@@ -52,6 +53,7 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
 )
+from thonny.languages import LANGUAGES_DICT
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -79,27 +81,27 @@ FlexibleSyntaxThemeSettings = Union[
 class Workbench(tk.Tk):
     """
     Thonny's main window and communication hub.
-    
+
     Is responsible for:
-    
+
         * creating the main window
         * maintaining layout (_init_containers)
-        * loading plugins (_init_plugins, add_view, add_command)        
+        * loading plugins (_init_plugins, add_view, add_command)
         * providing references to main components (editor_notebook and runner)
         * communication between other components (see event_generate and bind)
         * configuration services (get_option, set_option, add_defaults)
         * loading translations
         * maintaining fonts (named fonts, increasing and decreasing font size)
-    
+
     After workbench and plugins get loaded, 3 kinds of events start happening:
-        
+
         * User events (keypresses, mouse clicks, menu selections, ...)
         * Virtual events (mostly via get_workbench().event_generate). These include:
           events reported via and dispatched by Tk event system;
           WorkbenchEvent-s, reported via and dispatched by enhanced get_workbench().event_generate.
         * Events from the background process (program output notifications, input requests,
           notifications about debugger's progress)
-          
+
     """
 
     def __init__(self, server_socket=None) -> None:
@@ -135,6 +137,9 @@ class Workbench(tk.Tk):
         self._init_scaling()
 
         self._add_main_backends()
+
+        self._init_language()
+
         self._init_theming()
         self._init_window()
         self.add_view(
@@ -204,8 +209,24 @@ class Workbench(tk.Tk):
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
+        self.set_default("general.language", "English")
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
+
+    def _init_language(self) -> None:
+        """Initialize language."""
+        language_option = self.get_option("general.language")
+        self._set_language(language_option)
+
+    def _set_language(self, language_name) -> None:
+        if language_name in LANGUAGES_DICT:
+
+            language = gettext.translation(
+                'thonny',
+                os.path.join('thonny', 'locale'),
+                languages=[LANGUAGES_DICT[language_name]]
+            )
+            language.install()
 
     def _get_logging_level(self) -> int:
         if self.in_debug_mode():
@@ -314,13 +335,13 @@ class Workbench(tk.Tk):
         )  # type: Dict[Tuple[str, str], MenuItem] # key is pair (menu_name, command_label)
 
         # create standard menus in correct order
-        self.get_menu("file", "File")
-        self.get_menu("edit", "Edit")
-        self.get_menu("view", "View")
-        self.get_menu("run", "Run")
-        self.get_menu("device", "Device")
-        self.get_menu("tools", "Tools")
-        self.get_menu("help", "Help")
+        self.get_menu("file", _("File"))
+        self.get_menu("edit", _("Edit"))
+        self.get_menu("view", _("View"))
+        self.get_menu("run", _("Run"))
+        self.get_menu("device", _("Device"))
+        self.get_menu("tools", _("Tools"))
+        self.get_menu("help", _("Help"))
 
     def _load_plugins(self) -> None:
         # built-in plugins
@@ -341,7 +362,7 @@ class Workbench(tk.Tk):
 
     def _load_plugins_from_path(self, path: List[str], prefix: str) -> None:
         load_function_name = "load_plugin"
-        
+
         modules = []
         for _, module_name, _ in sorted(
             pkgutil.iter_modules(path, prefix), key=lambda x: x[2]
@@ -355,9 +376,10 @@ class Workbench(tk.Tk):
 
         def module_sort_key(m):
             return getattr(m, "load_order_key", m.__name__)
-        
+
         for m in sorted(modules, key=module_sort_key):
             getattr(m, load_function_name)()
+
     def _init_fonts(self) -> None:
         # set up editor and shell fonts
         self.set_default(
@@ -376,7 +398,7 @@ class Workbench(tk.Tk):
         self.set_default("view.editor_font_size", 14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
-        
+
         if running_on_linux():
             heading_font = tk_font.nametofont("TkHeadingFont")
             heading_font.configure(weight="normal")
@@ -453,7 +475,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "CustomCPython",
             running.CustomCPythonProxy,
-            "Alternative Python 3 interpreter or virtual environment",
+            _("Alternative Python 3 interpreter or virtual environment"),
             running_config_page.CustomCPythonConfigurationPage,
             "2",
         )
@@ -461,7 +483,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "PrivateVenv",
             running.PrivateVenvCPythonProxy,
-            "A special virtual environment (deprecated)",
+            _("A special virtual environment (deprecated)"),
             "This virtual environment is automatically maintained by Thonny.\n"
             "Location: " + running.get_private_venv_path(),
             "z",
@@ -498,12 +520,12 @@ class Workbench(tk.Tk):
         self.add_command(
             "exit",
             "file",
-            "Exit",
+            _("Exit"),
             self._on_close,
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
-            extra_sequences=["<Alt-F4>"] if running_on_linux() 
+            extra_sequences=["<Alt-F4>"] if running_on_linux()
                             else ["<Control-q>"] if running_on_windows()
-                            else [] 
+                            else []
         )
 
         self.add_command(
@@ -515,7 +537,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "increase_font_size",
             "view",
-            "Increase font size",
+            _("(Increase font size"),
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
             extra_sequences=["<Control-KP_Add>"],
@@ -525,7 +547,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "decrease_font_size",
             "view",
-            "Decrease font size",
+            _("Decrease font size"),
             lambda: self._change_font_size(-1),
             default_sequence=select_sequence("<Control-minus>", "<Command-minus>"),
             extra_sequences=["<Control-KP_Subtract>"],
@@ -537,7 +559,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "focus_editor",
             "view",
-            "Focus editor",
+            _("Focus editor"),
             self._cmd_focus_editor,
             default_sequence=select_sequence("<Alt-e>", "<Command-Alt-e>"),
             group=70,
@@ -546,7 +568,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "focus_shell",
             "view",
-            "Focus shell",
+            _("Focus shell"),
             self._cmd_focus_shell,
             default_sequence=select_sequence("<Alt-s>", "<Command-Alt-s>"),
             group=70,
@@ -557,7 +579,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "toggle_maximize_view",
                 "view",
-                "Maximize view",
+                _("Maximize view"),
                 self._cmd_toggle_maximize_view,
                 flag_name="view.maximize_view",
                 default_sequence=None,
@@ -569,7 +591,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "toggle_maximize_view",
                 "view",
-                "Full screen",
+                _("Full screen"),
                 self._cmd_toggle_full_screen,
                 flag_name="view.full_screen",
                 default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
@@ -703,14 +725,14 @@ class Workbench(tk.Tk):
         show_extra_sequences = False
     ) -> None:
         """Registers an item to be shown in specified menu.
-        
+
         Args:
             menu_name: Name of the menu the command should appear in.
                 Standard menu names are "file", "edit", "run", "view", "help".
                 If a menu with given name doesn't exist, then new menu is created
                 (with label=name).
             command_label: Label for this command
-            handler: Function to be called when the command is invoked. 
+            handler: Function to be called when the command is invoked.
                 Should be callable with one argument (the event or None).
             tester: Function to be called for determining if command is available or not.
                 Should be callable with one argument (the event or None).
@@ -718,9 +740,9 @@ class Workbench(tk.Tk):
                 If None then command is assumed to be always available.
             default_sequence: Default shortcut (Tk style)
             flag_name: Used for toggle commands. Indicates the name of the boolean option.
-            group: Used for grouping related commands together. Value should be int. 
+            group: Used for grouping related commands together. Value should be int.
                 Groups with smaller numbers appear before.
-        
+
         Returns:
             None
         """
@@ -842,7 +864,7 @@ class Workbench(tk.Tk):
                 for extra_seq in extra_sequences:
                     accelerator += " or " + sequence_to_accelerator(extra_seq)
             """
-            
+
         # remember the details that can't be stored in Tkinter objects
         self._menu_item_specs[(menu_name, command_label)] = MenuItem(
             group, position_in_group, tester
@@ -882,15 +904,15 @@ class Workbench(tk.Tk):
         visible_by_default: bool = False,
         default_position_key: Optional[str] = None,
     ) -> None:
-        """Adds item to "View" menu for showing/hiding given view. 
-        
+        """Adds item to "View" menu for showing/hiding given view.
+
         Args:
             view_class: Class or constructor for view. Should be callable with single
                 argument (the master of the view)
             label: Label of the view tab
             location: Location descriptor. Can be "nw", "sw", "s", "se", "ne"
-        
-        Returns: None        
+
+        Returns: None
         """
         view_id = cls.__name__
         if default_position_key == None:
@@ -1170,31 +1192,31 @@ class Workbench(tk.Tk):
         self.add_command(
             "viewargs",
             "view",
-            "Program arguments",
+            _("Program arguments"),
             toggle,
             flag_name="view.show_program_arguments",
             group=11,
         )
-        
+
         update_visibility()
-    
+
     def _init_regular_mode_link(self):
         if self.get_ui_mode() != "simple":
             return
-        
-        default_font = tk_font.nametofont("TkDefaultFont") 
+
+        default_font = tk_font.nametofont("TkDefaultFont")
         small_font = default_font.copy()
-        small_font.configure(size=int(default_font.cget("size") * 0.7), underline=True) 
+        small_font.configure(size=int(default_font.cget("size") * 0.7), underline=True)
         label = ttk.Label(
-            self._toolbar, 
-            text="Switch to\nregular mode", 
+            self._toolbar,
+            text="Switch to\nregular mode",
             justify="right",
             font=small_font,
             style="Url.TLabel",
             cursor="hand2",
         )
         label.grid(row=0, column=1001, sticky="ne")
-        
+
         def on_click(_):
             self.set_option("general.ui_mode", "regular")
             tk_messagebox.showinfo(
@@ -1203,9 +1225,9 @@ class Workbench(tk.Tk):
                 + "Restart Thonny to start working in regular mode.\n\n"
                 + "(See 'Tools → Options → General' if you change your mind later.)",
                 parent=self)
-        
+
         label.bind("<1>", on_click, True)
-        
+
 
     def log_program_arguments_string(self, arg_str: str) -> None:
         arg_str = arg_str.strip()
@@ -1259,12 +1281,12 @@ class Workbench(tk.Tk):
 
     def set_default(self, name: str, default_value: Any) -> None:
         """Registers a new option.
-        
+
         If the name contains a period, then the part left to the (first) period
-        will become the section of the option and rest will become name under that 
+        will become the section of the option and rest will become name under that
         section.
-        
-        If the name doesn't contain a period, then it will be added under section 
+
+        If the name doesn't contain a period, then it will be added under section
         "general".
         """
         self._configuration_manager.set_default(name, default_value)
@@ -1274,7 +1296,7 @@ class Workbench(tk.Tk):
 
     def get_menu(self, name: str, label: Optional[str] = None) -> tk.Menu:
         """Gives the menu with given name. Creates if not created yet.
-        
+
         Args:
             name: meant to be used as not translatable menu name
             label: translated label, used only when menu with given name doesn't exist yet
@@ -1375,11 +1397,11 @@ class Workbench(tk.Tk):
 
     def show_view(self, view_id: str, set_focus: bool = True) -> Union[bool, tk.Widget]:
         """View must be already registered.
-        
+
         Args:
-            view_id: View class name 
+            view_id: View class name
             without package name (eg. 'ShellView') """
-        
+
         if view_id == "MainFileBrowser":
             # Was renamed in 3.1.1
             view_id = "FilesView"
@@ -1524,44 +1546,44 @@ class Workbench(tk.Tk):
             self._scaling_factor = self._default_scaling_factor
         else:
             self._scaling_factor = float(scaling)
-        
+
         MAC_SCALING_MODIFIER = 1.7
         if running_on_mac_os():
             self._scaling_factor *= MAC_SCALING_MODIFIER
 
         self.tk.call("tk", "scaling", self._scaling_factor)
-        
+
         font_scaling_mode = self.get_option("general.font_scaling_mode")
-        
-        if (running_on_linux() 
+
+        if (running_on_linux()
             and font_scaling_mode in ["default", "extra"]
             and scaling not in ["default", "auto"]):
             # update system fonts which are given in pixel sizes
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
                 orig_size = f.cget("size")
-                # According to do documentation, absolute values of negative font sizes 
+                # According to do documentation, absolute values of negative font sizes
                 # should be interpreted as pixel sizes (not affected by "tk scaling")
                 # and positive values are point sizes, which are supposed to scale automatically
                 # http://www.tcl.tk/man/tcl8.6/TkCmd/font.htm#M26
-                
+
                 # Unfortunately it seems that this cannot be relied on
                 # https://groups.google.com/forum/#!msg/comp.lang.tcl/ZpL6tq77M4M/GXImiV2INRQJ
-                
-                # My experiments show that manually changing negative font sizes 
+
+                # My experiments show that manually changing negative font sizes
                 # doesn't have any effect -- fonts keep their default size
                 # (Tested in Raspbian Stretch, Ubuntu 18.04 and Fedora 29)
                 # On the other hand positive sizes scale well (and they don't scale automatically)
-                
+
                 # convert pixel sizes to point_size
                 if orig_size < 0:
                     orig_size = -orig_size / self._default_scaling_factor
-                
+
                 # scale
                 scaled_size = round(orig_size
-                        * (self._scaling_factor / self._default_scaling_factor)) 
+                        * (self._scaling_factor / self._default_scaling_factor))
                 f.configure(size=scaled_size)
-                
+
         elif running_on_mac_os() and scaling not in ["default", "auto"]:
             # see http://wiki.tcl.tk/44444
             # update system fonts
@@ -1768,7 +1790,7 @@ class Workbench(tk.Tk):
         dlg = ConfigurationDialog(self, self._configuration_pages)
         if page:
             dlg.select_page(page)
-            
+
         ui_utils.show_dialog(dlg)
 
     def _cmd_focus_editor(self) -> None:
@@ -1779,14 +1801,14 @@ class Workbench(tk.Tk):
 
     def _cmd_toggle_full_screen(self) -> None:
         """
-        TODO: For mac 
+        TODO: For mac
         http://wiki.tcl.tk/44444
-        
+
         Switching a window to fullscreen mode
         (Normal Difference)
         To switch a window to fullscreen mode, the window must first be withdrawn.
               # For Linux/Mac OS X:
-        
+
               set cfs [wm attributes $w -fullscreen]
               if { $::tcl_platform(os) eq "Darwin" } {
                 if { $cfs == 0 } {
@@ -1802,7 +1824,7 @@ class Workbench(tk.Tk):
                   after idle [list wm geometry $w $savevar]
                 }
               }
-        
+
         """
         var = self.get_variable("view.full_screen")
         var.set(not var.get())
@@ -1942,7 +1964,7 @@ class Workbench(tk.Tk):
     def destroy(self) -> None:
         try:
             self._destroying = True
-            
+
             # Tk clipboard gets cleared on exit and won't end up in system clipboard
             # https://bugs.python.org/issue1207592
             # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
@@ -1959,7 +1981,7 @@ class Workbench(tk.Tk):
                     pyperclip.copy(clipboard_data)
             except Exception:
                 pass
-                
+
             tk.Tk.destroy(self)
         except tk.TclError:
             logging.exception("Error while destroying workbench")
@@ -2001,7 +2023,7 @@ class Workbench(tk.Tk):
                 msg = str(value)
             else:
                 msg = traceback.format_exc()
-            
+
             dlg = ui_utils.LongTextDialog(title, msg, parent=self)
             ui_utils.show_dialog(dlg, self)
 
@@ -2012,7 +2034,7 @@ class Workbench(tk.Tk):
                 if view_name == "GlobalsView":
                     # was renamed in 2.2b5
                     view_name = "VariablesView"
-                
+
                 if self.get_ui_mode() != "simple" or view_name in SIMPLE_MODE_VIEWS:
                     self.show_view(view_name)
 
@@ -2021,9 +2043,9 @@ class Workbench(tk.Tk):
         # and will show empty table on open
         self.get_view("VariablesView")
 
-        if ((self.get_option("assistance.open_assistant_on_errors") 
+        if ((self.get_option("assistance.open_assistant_on_errors")
             or self.get_option("assistance.open_assistant_on_warnings"))
-            and 
+            and
             (self.get_ui_mode() != "simple" or "AssistantView" in SIMPLE_MODE_VIEWS)):
             self.get_view("AssistantView")
 
@@ -2110,7 +2132,7 @@ class Workbench(tk.Tk):
             fragment = m.group(3)
             self.show_view("HelpView").load_topic(topic, fragment)
             return
-        
+
         if url.endswith(".rst") and not url.startswith("http"):
             parts = url.split("#", maxsplit=1)
             topic = parts[0][:-4]
@@ -2118,13 +2140,13 @@ class Workbench(tk.Tk):
                 fragment = parts[1]
             else:
                 fragment = None
-                
+
             self.show_view("HelpView").load_topic(topic, fragment)
             return
 
         # Fallback
         webbrowser.open(url, False, True)
-    
+
     def open_help_topic(self, topic, fragment=None):
         self.show_view("HelpView").load_topic(topic, fragment)
 
@@ -2134,7 +2156,7 @@ class Workbench(tk.Tk):
 
     def _mac_quit(self, *args):
         self._on_close()
-    
+
     def get_toolbar(self):
         return self._toolbar
 

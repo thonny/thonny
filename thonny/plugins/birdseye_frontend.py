@@ -27,9 +27,9 @@ def _debug_with_birdseye():
     try:
         import birdseye  # @UnusedImport
     except ImportError:
-        if messagebox.askyesno("About Birdseye",
-                               "Birdseye is a Python debugger which needs to be installed separately.\n\n"
-                               + "Do you want to open the help page and learn more?"):
+        if messagebox.askyesno(_("About Birdseye"),
+                               _("Birdseye is a Python debugger which needs to be installed separately.\n\n"
+                               + "Do you want to open the help page and learn more?")):
             get_workbench().open_help_topic("birdseye")
 
         return
@@ -52,7 +52,7 @@ def load_plugin():
     get_workbench().add_command(
         "birdseye",
         "run",
-        "Debug current script (birdseye)",
+        _("Debug current script (birdseye)"),
         _debug_with_birdseye,
         caption="birdseye",
         tester=_start_debug_enabled,

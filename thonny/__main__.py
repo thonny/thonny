@@ -1,5 +1,6 @@
 import sys
 import runpy
+import gettext
 
 if sys.executable.endswith("thonny.exe"):
     # otherwise some library may try to run its subprocess with thonny.exe
@@ -14,5 +15,5 @@ try:
 except ImportError:
     pass
 
-
+gettext.install('thonny', 'locale')
 launch()

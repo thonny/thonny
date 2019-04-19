@@ -29,7 +29,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "undo",
         "edit",
-        "Undo",
+        _("Undo"),
         create_edit_command_handler("<<Undo>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-z>", "<Command-z>"),
@@ -41,7 +41,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "redo",
         "edit",
-        "Redo",
+        _("Redo"),
         create_edit_command_handler("<<Redo>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-y>", "<Command-y>"),
@@ -57,7 +57,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "Cut",
         "edit",
-        "Cut",
+        _("Cut"),
         create_edit_command_handler("<<Cut>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-x>", "<Command-x>"),
@@ -69,7 +69,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "Copy",
         "edit",
-        "Copy",
+        _("Copy"),
         create_edit_command_handler("<<Copy>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-c>", "<Command-c>"),
@@ -81,7 +81,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "Paste",
         "edit",
-        "Paste",
+        _("Paste"),
         create_edit_command_handler("<<Paste>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-v>", "<Command-v>"),
@@ -93,7 +93,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "SelectAll",
         "edit",
-        "Select all",
+        _("Select all"),
         select_all,
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-a>", "<Command-a>"),
