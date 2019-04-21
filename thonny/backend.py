@@ -2205,13 +2205,19 @@ class NiceTracer(Tracer):
 
             elif isinstance(node, ast.ListComp):
                 add_tag(node.elt, "ListComp.elt")
+                if len(node.generators) > 1:
+                    add_tag(node, "ignore_children")
 
             elif isinstance(node, ast.SetComp):
                 add_tag(node.elt, "SetComp.elt")
+                if len(node.generators) > 1:
+                    add_tag(node, "ignore_children")
 
             elif isinstance(node, ast.DictComp):
                 add_tag(node.key, "DictComp.key")
                 add_tag(node.value, "DictComp.value")
+                if len(node.generators) > 1:
+                    add_tag(node, "ignore_children")
 
             elif isinstance(node, ast.BinOp):
                 # TODO: use static analysis to detect type of left child
