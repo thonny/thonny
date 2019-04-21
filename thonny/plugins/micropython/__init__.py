@@ -170,8 +170,8 @@ class MicroPythonProxy(BackendProxy):
             # get the message
             try:
                 msg = self._read_next_serial_message()
-                if msg:
-                    print("GOT", msg)
+                #if msg:
+                #    print("GOT", msg)
             except SerialException as e:
                 self._handle_serial_exception(e)
                 return None
@@ -492,7 +492,7 @@ class MicroPythonProxy(BackendProxy):
         """Executes given MicroPython script on the device"""
         assert self._connection.buffers_are_empty()
         
-        print("----\n",script,"\n---")
+        #print("----\n",script,"\n---")
 
         command_bytes = script.encode("utf-8")
         self._connection.write(command_bytes + b"\x04")
@@ -618,7 +618,6 @@ class MicroPythonProxy(BackendProxy):
         if "micro:bit" in self._welcome_text.lower():
             return self._cmd_get_dirs_child_data_microbit(cmd)
         else:
-            print("notwel", self._welcome_text)
             return self._cmd_get_dirs_child_data_generic(cmd)
     
     def _cmd_get_dirs_child_data_microbit(self, cmd):
@@ -669,12 +668,23 @@ class MicroPythonProxy(BackendProxy):
                 dedent("""
                 try:
                     import os as __temp_os
+                    # Init all vars, so that they can be deleted
+                    # even if loop makes no iterations
                     __temp_result = {}
+                    __temp_path = None
+                    __temp_st = None 
+                    __temp_children = None
+                    __temp_name = None
+                    __temp_real_path = None
+                    __temp_full = None
+                    
                     for __temp_path in %(paths)r:
-                        real_path = __temp_path or '/'
+                        __temp_real_path = __temp_path or '/'
                         __temp_children = {}
-                        for __temp_name in __temp_os.listdir(real_path):
-                            __temp_st = __temp_os.stat(real_path + '/' + __temp_name)
+                        for __temp_name in __temp_os.listdir(__temp_real_path):
+                            __temp_full = (__temp_real_path + '/' + __temp_name).replace("//", "/")
+                            # print("processing", __temp_full)
+                            __temp_st = __temp_os.stat(__temp_full)
                             if __temp_st[0] & 0o170000 == 0o040000:
                                 # directory
                                 __temp_children[__temp_name] = None
@@ -683,6 +693,13 @@ class MicroPythonProxy(BackendProxy):
                                 
                         __temp_result[__temp_path] = __temp_children                            
                         
+                    del __temp_os
+                    del __temp_st
+                    del __temp_children
+                    del __temp_name
+                    del __temp_path
+                    del __temp_full
+                     
                     print('\\x04\\x02', {
                         'message_class' : 'InlineResponse',
                         'command_name': 'get_dirs_child_data',
@@ -690,11 +707,7 @@ class MicroPythonProxy(BackendProxy):
                         'dir_separator' : '/',
                         'data': __temp_result
                     })
-                    del __temp_os
-                    del __temp_st
                     del __temp_result
-                    del __temp_children
-                    del __temp_name
                 except Exception as e:
                     print('\\x04\\x02', {
                         'message_class' : 'InlineResponse',
@@ -1270,8 +1283,17 @@ class MicroPythonProxy(BackendProxy):
         return None
 
     def _parse_message(self, msg_bytes):
-        msg_str = msg_bytes.decode("utf-8", "replace").strip()
-        msg = ast.literal_eval(msg_str)
+        try:
+            msg_str = msg_bytes.decode("utf-8").strip()
+        except:
+            traceback.print_exc()
+            msg_str = msg_bytes.decode("utf-8", "replace").strip()
+        
+        try:
+            msg = ast.literal_eval(msg_str)
+        except:
+            logging.getLogger("thonny").error("Could not eval %r", msg_str)
+            raise
         assert isinstance(msg, dict)
 
         class_name = msg["message_class"]
@@ -1328,10 +1350,18 @@ class MicroPythonProxy(BackendProxy):
     def _get_path_prefix(self):
         if not self._supports_directories():
             return ""
-        elif "LoBo" in self._welcome_text:
+        elif ("LoBo" in self._welcome_text
+              or "WiPy with ESP32" in self._welcome_text):
             return "/flash/"
         else:
             return "/"
+    
+    def get_default_directory(self):
+        prefix = self._get_path_prefix() 
+        if prefix.endswith("/") and prefix != "/":
+            return prefix[:-1]
+        else:
+            return prefix
 
     def _get_main_script_path(self):
         return self._get_path_prefix() + "main.py"

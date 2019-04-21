@@ -45,7 +45,7 @@ class FilesView(tk.PanedWindow):
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
                 self.restore_split()
-            self.remote_files.focus_into("")
+            self.remote_files.focus_into(proxy.get_default_directory())
         else:
             if self.remote_added:
                 self.save_split()
