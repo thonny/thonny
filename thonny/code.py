@@ -18,6 +18,7 @@ from thonny.common import (
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 from thonny.misc_utils import running_on_windows
+from _tkinter import TclError
 
 _dialog_filetypes = [
     ("Python files", ".py .pyw"),
@@ -25,7 +26,7 @@ _dialog_filetypes = [
     ("all files", ".*"),
 ]
 
-REMOTE_PATH_PREFIX = "TARGET DEVICE | "
+REMOTE_PATH_MARKER = " :: "
 
 class Editor(ttk.Frame):
     def __init__(self, master):
@@ -82,8 +83,10 @@ class Editor(ttk.Frame):
     def get_title(self):
         if self.get_filename() is None:
             result = "<untitled>"
-        elif self.get_filename().startswith(REMOTE_PATH_PREFIX):
-            result = "◘ " + self._filename[len(REMOTE_PATH_PREFIX):]
+        elif is_remote_path(self.get_filename()):
+            path = extract_target_path(self.get_filename())
+            name = path.split("/")[-1]
+            result = "[ " + name + " ]"
         else:
             result = os.path.basename(self.get_filename())
 
@@ -104,7 +107,7 @@ class Editor(ttk.Frame):
         if self._filename is None:
             return
 
-        if self._filename.endswith(REMOTE_PATH_PREFIX):
+        if is_remote_path(self._filename):
             return
 
         try:
@@ -163,7 +166,7 @@ class Editor(ttk.Frame):
     def _load_file(self, filename, keep_undo=False):
         self._waiting_write_completion = False
 
-        if filename.startswith(REMOTE_PATH_PREFIX):
+        if is_remote_path(filename):
             self._start_loading_remote_file(filename)
         else:
             self._load_local_file(filename, keep_undo)
@@ -196,8 +199,7 @@ class Editor(ttk.Frame):
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
 
-        assert self._filename.startswith(REMOTE_PATH_PREFIX)
-        target_filename = self._filename[len(REMOTE_PATH_PREFIX):]
+        target_filename = extract_target_path(self._filename)
 
         get_runner().send_command(InlineCommand("read_file",
                                                 path=target_filename))
@@ -245,7 +247,7 @@ class Editor(ttk.Frame):
 
         content_bytes = self._code_view.get_content_as_bytes(self._newlines)
 
-        if self._filename.startswith(REMOTE_PATH_PREFIX):
+        if is_remote_path(self._filename):
             return self.write_remote_file(content_bytes)
         else:
             return self.write_local_file(content_bytes)
@@ -279,8 +281,7 @@ class Editor(ttk.Frame):
 
     def write_remote_file(self, content_bytes):
         if get_runner().can_do_file_operations():
-            assert self._filename.startswith(REMOTE_PATH_PREFIX)
-            target_filename = self._filename[len(REMOTE_PATH_PREFIX)].strip()
+            target_filename = extract_target_path(self._filename)
             self._waiting_write_completion = True
             get_runner().send_command(InlineCommand("write_file",
                                                     path=target_filename,
@@ -790,14 +791,14 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         return editor
 
-    def show_remote_file(self, filename):
+    def show_remote_file(self, target_filename):
         if not get_runner().can_do_file_operations():
             messagebox.showwarning("Can't open",
                                    "Device is busy, can't read file content.\n"
                                    + "Please try again later!")
             return None
         else:
-            return self.show_file(REMOTE_PATH_PREFIX + filename)
+            return self.show_file(make_remote_path(target_filename))
 
     def show_file_at_line(self, filename, lineno, col_offset=None):
         editor = self.show_file(filename)
@@ -810,7 +811,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def update_editor_title(self, editor, title=None):
         if title is None:
             title = editor.get_title()
-        self.tab(editor, text=title)
+        try:
+            self.tab(editor, text=title)
+        except TclError:
+            pass
 
     def _open_file(self, filename):
         editor = Editor(self)
@@ -890,3 +894,13 @@ def get_saved_current_script_filename(force=True):
         filename = editor.save_file()
 
     return filename
+
+def is_remote_path(s):
+    return REMOTE_PATH_MARKER in s
+
+def extract_target_path(s):
+    assert is_remote_path(s)
+    return s[s.find(REMOTE_PATH_MARKER) + len(REMOTE_PATH_MARKER):]
+
+def make_remote_path(target_path):
+    return get_runner().get_node_label() + REMOTE_PATH_MARKER + target_path

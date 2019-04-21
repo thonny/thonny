@@ -162,7 +162,7 @@ class BaseFileBrowser(ttk.Frame):
         
         self.path_bar.direct_insert("1.0", self.get_root_text(), ("dir",))
         
-        if path:
+        if path and path != "/":
             self.path_bar.direct_insert("end", "\n")
             
             def create_spacer():
@@ -188,7 +188,7 @@ class BaseFileBrowser(ttk.Frame):
         return path.split(self.get_dir_separator())
     
     def get_root_text(self):
-        return "THIS COMPUTER"
+        return "This computer"
     
     def focus_into_saved_folder(self):
         if self._last_folder_setting_name:
@@ -534,7 +534,11 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
         
     def get_root_text(self):
-        return "◘ TARGET DEVICE ◘"
+        runner = get_runner()
+        if runner:
+            return runner.get_node_label()
+            
+        return "Back-end"
     
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():

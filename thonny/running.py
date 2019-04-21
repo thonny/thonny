@@ -543,6 +543,12 @@ class Runner:
             return set()
         else:
             return self._proxy.get_supported_features()
+    
+    def get_node_label(self):
+        if self._proxy is None:
+            return "Back-end"
+        else:
+            return self._proxy.get_node_label()
 
     def using_venv(self) -> bool:
         return isinstance(self._proxy, CPythonProxy) and self._proxy.in_venv
@@ -612,6 +618,10 @@ class BackendProxy:
 
     def get_supported_features(self):
         return {"run"}
+    
+    def get_node_label(self):
+        """Used as files caption if back-end has separate files"""
+        return "Back-end"
     
     def has_separate_files(self):
         return False

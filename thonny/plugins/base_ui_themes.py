@@ -16,10 +16,12 @@ def _treeview_settings() -> BasicUiThemeSettings:
 
     if running_on_linux():
         bg_sel_focus = light_blue
-        fg = "black"
+        fg_sel_focus = "black"
+        fg_sel_notfocus = "black"
     else:
         bg_sel_focus = "SystemHighlight"
-        fg = "SystemHighlightText"
+        fg_sel_focus = "SystemHighlightText"
+        fg_sel_notfocus = "SystemWindowText"
 
     return {
         "Treeview": {
@@ -29,7 +31,10 @@ def _treeview_settings() -> BasicUiThemeSettings:
                     ("selected", "focus", bg_sel_focus),
                     ("selected", "!focus", light_grey),
                 ],
-                "foreground": [("selected", fg)],
+                "foreground": [
+                    ("selected", "focus", fg_sel_focus),
+                    ("selected", "!focus", fg_sel_notfocus),
+                ],
             },
             "layout": [
                 # get rid of borders

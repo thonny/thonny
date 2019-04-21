@@ -997,7 +997,7 @@ class MicroPythonProxy(BackendProxy):
             self._execute_async(
                 dedent("""
                 try:
-                    with open(%(path)r, 'b') as __temp_fp:
+                    with open(%(path)r, 'rb') as __temp_fp:
                         print('\\x04\\x02', {
                             'message_class' : 'InlineResponse',
                             'command_name': 'read_file',
@@ -1501,6 +1501,14 @@ class MicroPythonProxy(BackendProxy):
     def known_port_descriptions(self):
         return set()
 
+    def get_node_label(self):
+        if "CircuitPython" in self._welcome_text:
+            return "CircuitPython device"
+        elif "micro:bit" in self._welcome_text.lower():
+            return "micro:bit"
+        else:
+            return "MicroPython device"
+    
     def has_separate_files(self):
         return self._connection is not None
 
