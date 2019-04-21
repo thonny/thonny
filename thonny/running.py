@@ -544,6 +544,12 @@ class Runner:
         else:
             return self._proxy.get_supported_features()
     
+    def has_separate_files(self):
+        if self._proxy is None:
+            return False
+        else:
+            return self._proxy.has_separate_files()
+    
     def get_node_label(self):
         if self._proxy is None:
             return "Back-end"

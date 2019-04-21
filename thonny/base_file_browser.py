@@ -3,15 +3,16 @@ from tkinter import ttk
 import os.path
 
 from thonny import get_workbench, misc_utils, tktextext, get_runner
-from thonny.ui_utils import scrollbar_style, lookup_style_option
+from thonny.ui_utils import scrollbar_style, lookup_style_option, show_dialog
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
 from thonny.misc_utils import running_on_windows
 
-_dummy_node_text = "..."
+_dummy_node_text = "..." 
 
+LOCAL_FILES_ROOT_TEXT = "This computer"
 TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yaml"]
 ROOT_NODE_ID = ""
 
@@ -34,23 +35,20 @@ class BaseFileBrowser(ttk.Frame):
         
         self.tree = ttk.Treeview(   
             self,
-            columns=["#0", "kind", "path", "name", "size", "time"],
+            columns=["#0", "kind", "path", "name", "time", "size"],
             displaycolumns=(
                 #4,
                 #5
                 ),
             yscrollcommand=self.vert_scrollbar.set,
         )
-        self.tree["show"] = "headings"
         self.tree.grid(row=2, column=0, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.tree.yview
         self.columnconfigure(0, weight=1)
         self.rowconfigure(2, weight=1)
 
         self.show_hidden_files = show_hidden_files
-        self.tree["show"] = ("tree"
-                             #, "headings"
-                             )
+        self.tree["show"] = "tree"
         
         self.tree.bind("<3>", self.on_secondary_click, True)
         if misc_utils.running_on_mac_os():
@@ -67,17 +65,17 @@ class BaseFileBrowser(ttk.Frame):
         self.hard_drive_icon = wb.get_image("hard-drive")
 
         self.tree.column("#0", width=200, anchor=tk.W)
-        self.tree.heading("#0", text="Name")
-        self.tree.column("kind", width=30, anchor=tk.W)
-        self.tree.heading("kind", text="Kind")
-        self.tree.column("path", width=300, anchor=tk.W)
-        self.tree.heading("path", text="path")
-        self.tree.column("name", width=60, anchor=tk.W)
-        self.tree.heading("name", text="name")
-        self.tree.column("size", width=40, anchor=tk.W)
-        self.tree.heading("size", text="Size")
+        self.tree.heading("#0", text="Name", anchor=tk.W)
         self.tree.column("time", width=60, anchor=tk.W)
-        self.tree.heading("time", text="Time")
+        self.tree.heading("time", text="Time", anchor=tk.W)
+        self.tree.column("size", width=40, anchor=tk.E)
+        self.tree.heading("size", text="Size", anchor=tk.E)
+#         self.tree.column("kind", width=30, anchor=tk.W)
+#         self.tree.heading("kind", text="Kind")
+#         self.tree.column("path", width=300, anchor=tk.W)
+#         self.tree.heading("path", text="path")
+#         self.tree.column("name", width=60, anchor=tk.W)
+#         self.tree.heading("name", text="name")
 
         # set-up root node
         self.tree.set(ROOT_NODE_ID, "kind", "root")
@@ -188,7 +186,7 @@ class BaseFileBrowser(ttk.Frame):
         return path.split(self.get_dir_separator())
     
     def get_root_text(self):
-        return "This computer"
+        return LOCAL_FILES_ROOT_TEXT
     
     def focus_into_saved_folder(self):
         if self._last_folder_setting_name:
@@ -548,7 +546,6 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         return self.dir_separator
     
     def update_dir_data(self, msg):
-        print("updating", msg)
         self.dir_separator = msg["dir_separator"]
         if msg.get("error"):
             self.show_error(msg["error"], msg["node_id"])
@@ -560,3 +557,155 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         get_workbench().get_editor_notebook().show_remote_file(path)    
 
 
+class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
+    def __init__(self, master):
+        super().__init__(master)
+        self.tree["show"] = ("tree", "headings")
+        self.tree.configure(displaycolumns=(5,))
+    
+    
+        
+
+class BackendFileDialog(tk.Toplevel):
+    def __init__(self, master, kind, initial_dir):
+        super().__init__(master=master)
+        self.result = None
+        
+        self.kind = kind
+        if kind == "open":
+            self.title("Open from " + get_runner().get_node_label())
+        else:
+            assert kind == "save"
+            self.title("Save to " + get_runner().get_node_label())
+        
+        background = ttk.Frame(self)
+        background.grid(row=0, column=0, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        self.browser = DialogRemoteFileBrowser(background)
+        self.browser.grid(row=0, column=0, columnspan=4, sticky="nsew",
+                          pady=20, padx=20)
+        self.browser.configure(borderwidth=1, relief="groove")
+        
+        self.name_label = ttk.Label(background, text="File name:")
+        self.name_label.grid(row=1, column=0, pady=(0,20), padx=20, sticky="w")
+        
+        self.name_var = tk.StringVar()
+        self.name_entry = ttk.Entry(background, textvariable=self.name_var)
+        self.name_entry.grid(row=1, column=1, pady=(0,20), padx=(0,20), sticky="we")
+        
+        self.ok_button = ttk.Button(background, text="OK", command=self.on_ok)
+        self.ok_button.grid(row=1, column=2, pady=(0,20), padx=(0,20), sticky="e")
+        
+        self.cancel_button = ttk.Button(background, text="Cancel", command=self.on_cancel)
+        self.cancel_button.grid(row=1, column=3, pady=(0,20), padx=(0,20), sticky="e")
+        
+        background.rowconfigure(0, weight=1)
+        background.columnconfigure(1, weight=1)
+    
+        self.bind("<Escape>", self.on_cancel, True)
+        self.bind("<Return>", self.on_ok, True)
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+        
+        self.browser.tree.bind("<<TreeviewSelect>>", self.on_tree_select, True)
+        
+        self.browser.focus_into(initial_dir)
+        
+    
+    def on_ok(self, event=None):
+        self.result = self.name_var.get()
+    
+    def on_cancel(self, event=None):
+        self.result = None
+        self.destroy()
+    
+    def on_tree_select(self, event=None):
+        kind = self.browser.get_selected_kind()
+        if kind == "dir":
+            return
+        else:
+            self.name_var.set(self.browser.get_selected_value("name"))
+
+class NodeChoiceDialog(tk.Toplevel):
+    def __init__(self, master, prompt):
+        super().__init__(master=master)
+        self.result = None
+        
+        self.title(prompt)
+        
+        background = ttk.Frame(self)
+        background.grid(row=0, column=0, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        
+        local_caption = LOCAL_FILES_ROOT_TEXT
+        remote_caption = get_runner().get_node_label()
+        
+        button_width = max(len(local_caption), len(remote_caption)) + 10
+        
+        self.local_button = ttk.Button(background, 
+                                       text=" \n" + local_caption + "\n ",
+                                       width=button_width,
+                                       command=self.on_local)
+        self.local_button.grid(row=0, column=0, pady=20, padx=20)
+        
+        self.remote_button = ttk.Button(background, 
+                                       text=" \n" + remote_caption + "\n ",
+                                       width=button_width,
+                                       command=self.on_remote)
+        self.remote_button.grid(row=1, column=0, pady=(0,20), padx=20)
+        
+        self.local_button.focus_set()
+    
+        self.bind("<Escape>", self.on_cancel, True)
+        self.bind("<Return>", self.on_return, True)
+        self.bind("<Down>", self.on_down, True)
+        self.bind("<Up>", self.on_up, True)
+        self.protocol("WM_DELETE_WINDOW", self.on_cancel)
+
+    def on_local(self, event=None):
+        self.result = "local"
+        self.destroy()
+        
+    def on_remote(self, event=None):
+        self.result = "remote"
+        self.destroy()
+    
+    def on_return(self, event=None):
+        if self.focus_get() == self.local_button:
+            return self.on_local(event)
+        elif self.focus_get() == self.remote_button:
+            return self.on_remote(event)
+        
+    def on_down(self, event=None):
+        if self.focus_get() == self.local_button:
+            self.remote_button.focus_set()
+        
+    def on_up(self, event=None):
+        if self.focus_get() == self.remote_button:
+            self.local_button.focus_set()
+        
+    def on_cancel(self, event=None):
+        self.result = None
+        self.destroy()
+
+def ask_backend_path(master, dialog_kind):
+    proxy = get_runner().get_backend_proxy()
+    if not proxy:
+        return None
+
+    assert proxy.has_separate_files()
+            
+    dlg = BackendFileDialog(master, dialog_kind, proxy.get_default_directory())
+    show_dialog(dlg, master)
+    return dlg.result
+
+def choose_node_for_file_operations(master, prompt):
+    if get_runner().has_separate_files():
+        dlg = NodeChoiceDialog(master, prompt)
+        show_dialog(dlg, master)
+        return dlg.result
+    else:
+        return "local"
+    

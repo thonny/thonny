@@ -19,6 +19,8 @@ from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 from thonny.misc_utils import running_on_windows
 from _tkinter import TclError
+from thonny.base_file_browser import choose_node_for_file_operations,\
+    ask_backend_path
 
 _dialog_filetypes = [
     ("Python files", ".py .pyw"),
@@ -238,7 +240,7 @@ class Editor(ttk.Frame):
         if self._filename is not None and not ask_filename:
             get_workbench().event_generate("Save", editor=self, filename=self._filename)
         else:
-            new_filename = self.get_new_filename()
+            new_filename = self.ask_new_path()
             if not new_filename:
                 return None
 
@@ -300,14 +302,32 @@ class Editor(ttk.Frame):
             self._code_view.text.edit_modified(False)
             self.update_title()
 
-    def get_new_filename(self):
+    def ask_new_path(self):
+        node = choose_node_for_file_operations(self, "Where to save?")
+        if not node:
+            return None
+        
+        if node == "local":
+            return self.ask_new_local_path()
+        else:
+            assert node == "remote"
+            return self.ask_new_remote_path()
+    
+    def ask_new_remote_path(self):
+        target_path = ask_backend_path(self, "save")
+        if target_path:
+            return make_remote_path(target_path)
+        else:
+            return None
+    
+    def ask_new_local_path(self):
         if self._filename is None:
             initialdir = get_workbench().get_cwd()
             initialfile = None
         else:
             initialdir = os.path.dirname(self._filename)
             initialfile = os.path.basename(self._filename)
-
+        
         # http://tkinter.unpythonic.net/wiki/tkFileDialog
         new_filename = asksaveasfilename(
             master=get_workbench(),
@@ -359,7 +379,7 @@ class Editor(ttk.Frame):
                     + "Do you still want to use this name for your script?",
                     parent=get_workbench(),
                 ):
-                    return self.get_new_filename()
+                    return self.ask_new_local_path()
 
         return new_filename
 
