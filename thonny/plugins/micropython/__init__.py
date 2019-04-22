@@ -492,7 +492,7 @@ class MicroPythonProxy(BackendProxy):
         """Executes given MicroPython script on the device"""
         assert self._connection.buffers_are_empty()
         
-        #print("----\n",script,"\n---")
+        print("----\n",script,"\n---")
 
         command_bytes = script.encode("utf-8")
         self._connection.write(command_bytes + b"\x04")
@@ -989,7 +989,53 @@ class MicroPythonProxy(BackendProxy):
             # Or should the confirmation be given in terms of mount path?
     
     def _cmd_write_file(self, cmd):
-        print("WRITING", cmd)
+        BUFFER_SIZE = 32
+        data = cmd["content_bytes"]
+        
+        self._execute_and_expect_empty_response(
+            dedent("""
+            __temp_path = '{path}'
+            __temp_f = open(__temp_path, 'wb')
+            __temp_written = 0
+            """
+            ).format(path=cmd["path"])
+        )
+        
+        size = len(data)
+        for i in range(0, size, BUFFER_SIZE):
+            chunk_size = min(BUFFER_SIZE, size - i)
+            chunk = data[i : i + chunk_size]
+            self._execute_and_expect_empty_response(
+                "__temp_written += __temp_f.write({chunk!r})".format(chunk=chunk))
+        
+        self._execute_async(
+            dedent("""
+            try:
+                __temp_f.close()
+                del __temp_f
+                
+                if __temp_written != <<size>>:
+                    raise RuntimeError("Wrote %d bytes out of %d" % (__temp_written, <<size>>))
+                del __temp_written
+                    
+                print('\\x04\\x02', {
+                    'message_class' : 'InlineResponse',
+                    'command_name': 'write_file',
+                    'path' : __temp_path
+                })
+                
+            except Exception as e:
+                print('\\x04\\x02', {
+                    'message_class' : 'InlineResponse',
+                    'command_name':'write_file',
+                    'path' : __temp_path,
+                    'error' : 'Error saving file content: ' + str(e)
+                })
+            
+            del __temp_path
+            """
+            ).replace("<<size>>", str(size))
+        )
     
     def _cmd_read_file(self, cmd):
         print("READING", cmd)
@@ -997,25 +1043,26 @@ class MicroPythonProxy(BackendProxy):
             self._execute_async(
                 dedent("""
                 try:
-                    with open(%(path)r, 'rb') as __temp_fp:
+                    __temp_path = '%(path)s' 
+                    with open(__temp_path, 'rb') as __temp_fp:
                         print('\\x04\\x02', {
                             'message_class' : 'InlineResponse',
                             'command_name': 'read_file',
-                            'path' : %(path)r,  
+                            'path' : __temp_path,  
                             'content_bytes': __temp_fp.read()
                         })
                     del __temp_fp
+                    del __temp_path
                 except Exception as e:
                     print('\\x04\\x02', {
                         'message_class' : 'InlineResponse',
                         'command_name':'read_file',
-                        'path' : '%(path)s',
+                        'path' : __temp_path,
                         'content_bytes': b'',
                         'error' : 'Error getting file content: ' + str(e)
                     })
                 """
-                    % cmd
-                )
+                ) % cmd
             )
         except Exception:
             self._non_serial_msg_queue.put(

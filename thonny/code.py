@@ -208,12 +208,11 @@ class Editor(ttk.Frame):
         self.update_title()
 
     def _complete_loading_remote_file(self, msg):
-        print("Got data", msg)
         if not self._filename or not self._filename.endswith(msg["path"]):
             return
 
         content = msg["content_bytes"]
-
+        
         if msg.get("error"):
             # TODO: make it softer
             raise RuntimeError(msg["error"])
@@ -298,7 +297,7 @@ class Editor(ttk.Frame):
     def _complete_writing_remote_file(self, msg):
         if (self._waiting_write_completion
             and self._filename
-            and self._filename.endswith(msg["filename"])):
+            and extract_target_path(self._filename) == msg["path"]):
             self._code_view.text.edit_modified(False)
             self.update_title()
 
