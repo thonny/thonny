@@ -1283,38 +1283,39 @@ def remove_line_numbers(s):
 
 def assign_geometry(win, master=None):
     
+    if master is None:
+        master = tk._default_root
+    
     size = get_workbench().get_option(get_size_option_name(win)) 
     if size:
         width, height = size
         saved_size = True
     else:
+        fallback_width = 600
+        fallback_height = 400
         # need to wait until size is computed
         # (unfortunately this causes dialog to jump)
         if getattr(master, "initializing", False): 
             # can't get reliable positions when main window is not in mainloop yet
-            width = 600
-            height = 400
+            width = fallback_width
+            height = fallback_height
         else:
-            win.update_idletasks()
+            if not running_on_linux():
+                # better to avoid in Linux because it causes ugly jump
+                win.update_idletasks()
             # looks like it doesn't take window border into account
             width = win.winfo_width()
             height = win.winfo_height()
+            
+            if width < 10:
+                # ie. size measurement is not correct
+                width = fallback_width
+                height = fallback_height
+                
         saved_size = False
 
-    if master is None:
-        left = win.winfo_screenwidth() - width // 2
-        top = win.winfo_screenheight() - height // 2
-    else:
-        left = (
-            master.winfo_rootx()
-            + master.winfo_width() // 2
-            - win.winfo_width() // 2
-        )
-        top = (
-            master.winfo_rooty()
-            + master.winfo_height() // 2
-            - win.winfo_height() // 2
-        )
+    left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
+    top = master.winfo_rooty() + master.winfo_height() // 2 - height // 2
 
     if saved_size:
         win.geometry("%dx%d+%d+%d" % (width, height, left, top))
@@ -1961,17 +1962,20 @@ def handle_mistreated_latin_shortcuts(registry, event):
 
 
 def show_dialog(dlg, master=None, geometry=True):
-    if True or master is None:
+    if master is None:
         master = tk._default_root
 
     # following order seems to give most smooth appearance
     focused_widget = master.focus_get()
     dlg.transient(master.winfo_toplevel())
     
-    if isinstance(geometry, str):
-        dlg.geometry(geometry)
-    elif geometry:
-        assign_geometry(dlg, master)
+    if geometry:
+        #dlg.withdraw() # unfortunately inhibits size calculations in assign_geometry 
+        if isinstance(geometry, str):
+            dlg.geometry(geometry)
+        else:
+            assign_geometry(dlg, master)
+        #dlg.wm_deiconify()
 
     dlg.grab_set()
     dlg.lift()

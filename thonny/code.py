@@ -302,7 +302,7 @@ class Editor(ttk.Frame):
             self.update_title()
 
     def ask_new_path(self):
-        node = choose_node_for_file_operations(self, "Where to save?")
+        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save?")
         if not node:
             return None
         
@@ -313,7 +313,7 @@ class Editor(ttk.Frame):
             return self.ask_new_remote_path()
     
     def ask_new_remote_path(self):
-        target_path = ask_backend_path(self, "save")
+        target_path = ask_backend_path(self.winfo_toplevel(), "save")
         if target_path:
             return make_remote_path(target_path)
         else:
