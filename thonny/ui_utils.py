@@ -1955,8 +1955,8 @@ def show_dialog(dlg, master=None, center=True):
     dlg.grab_set()
     dlg.lift()
     dlg.focus_set()
-    if center and not running_on_linux(): 
-        # centering seems to happen automatically on Linux
+    if center: 
+        # centering seems to sometimes happen automatically on Linux
         # and manual centering doesn't look good there
         center_window(dlg, master)
     master.wait_window(dlg)
