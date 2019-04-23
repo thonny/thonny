@@ -302,7 +302,7 @@ class Editor(ttk.Frame):
             self.update_title()
 
     def ask_new_path(self):
-        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save?")
+        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
         if not node:
             return None
         
@@ -682,16 +682,27 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         new_editor.focus_set()
 
     def _cmd_open_file(self):
-        filename = askopenfilename(
-            master=get_workbench(),
-            filetypes=_dialog_filetypes,
-            initialdir=get_workbench().get_cwd(),
-        )
-        if (
-            filename
-        ):  # Note that missing filename may be "" or () depending on tkinter version
+        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to open from?")
+        if not node:
+            return None
+        
+        if node == "local":
+            path = askopenfilename(
+                master=get_workbench(),
+                filetypes=_dialog_filetypes,
+                initialdir=get_workbench().get_cwd(),
+            )
+        else:
+            assert node == "remote"
+            target_path = ask_backend_path(self.winfo_toplevel(), "open")
+            if not target_path:
+                return None
+            
+            path = make_remote_path(target_path)
+        
+        if path:
             # self.close_single_untitled_unmodified_editor()
-            self.show_file(filename)
+            self.show_file(path)
 
     def _control_o(self, event):
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
