@@ -492,7 +492,7 @@ class MicroPythonProxy(BackendProxy):
         """Executes given MicroPython script on the device"""
         assert self._connection.buffers_are_empty()
         
-        print("----\n",script,"\n---")
+        #print("----\n",script,"\n---")
 
         command_bytes = script.encode("utf-8")
         self._connection.write(command_bytes + b"\x04")

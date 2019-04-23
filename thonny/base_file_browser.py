@@ -1,9 +1,9 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import os.path
 
 from thonny import get_workbench, misc_utils, tktextext, get_runner
-from thonny.ui_utils import scrollbar_style, lookup_style_option, show_dialog
+from thonny.ui_utils import scrollbar_style, lookup_style_option, show_dialog, create_string_var
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
@@ -18,8 +18,12 @@ ROOT_NODE_ID = ""
 
 class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None,
-                 breadcrumbs_pady=(5,7)):
+                 breadcrumbs_pady=(5,7), allow_expand=True):
+        
+        self.allow_expand = allow_expand
         self._cached_child_data = {}
+        
+        
         ttk.Frame.__init__(self, master, borderwidth=0, relief="flat")
         self.vert_scrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL,
                                             style=scrollbar_style("Vertical"))
@@ -41,6 +45,7 @@ class BaseFileBrowser(ttk.Frame):
                 #5
                 ),
             yscrollcommand=self.vert_scrollbar.set,
+            selectmode="browse"
         )
         self.tree.grid(row=2, column=0, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.tree.yview
@@ -69,8 +74,8 @@ class BaseFileBrowser(ttk.Frame):
         self.tree.column("time", width=60, anchor=tk.W)
         self.tree.heading("time", text="Time", anchor=tk.W)
         self.tree.column("size", width=40, anchor=tk.E)
-        self.tree.heading("size", text="Size", anchor=tk.E)
-#         self.tree.column("kind", width=30, anchor=tk.W)
+        self.tree.heading("size", text="Size (bytes)", anchor=tk.E)
+        self.tree.column("kind", width=30, anchor=tk.W)
 #         self.tree.heading("kind", text="Kind")
 #         self.tree.column("path", width=300, anchor=tk.W)
 #         self.tree.heading("path", text="path")
@@ -375,7 +380,8 @@ class BaseFileBrowser(ttk.Frame):
             # Ensure that expand button is visible 
             # unless we know it doesn't have children
             children_ids = self.tree.get_children(node_id)
-            if (len(children_ids) == 0 
+            if (self.allow_expand
+                and len(children_ids) == 0 
                 and (path not in self._cached_child_data
                      or self._cached_child_data[path])):
                 self.tree.insert(node_id, "end", text=_dummy_node_text)
@@ -523,14 +529,19 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 class BaseRemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False, 
                  last_folder_setting_name=None, 
-                 breadcrumbs_pady=(5, 7)):
+                 breadcrumbs_pady=(5, 7), allow_expand=False):
         super().__init__(master, 
                          show_hidden_files=show_hidden_files, 
                          last_folder_setting_name=last_folder_setting_name,
-                         breadcrumbs_pady=breadcrumbs_pady)
+                         breadcrumbs_pady=breadcrumbs_pady,
+                         allow_expand=allow_expand)
         self.dir_separator = "/"
         get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
-        
+    
+    def destroy(self):
+        super().destroy()
+        get_workbench().unbind("get_dirs_child_data_response", self.update_dir_data)
+    
     def get_root_text(self):
         runner = get_runner()
         if runner:
@@ -559,9 +570,10 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master):
-        super().__init__(master)
+        super().__init__(master, allow_expand=False)
         self.tree["show"] = ("tree", "headings")
         self.tree.configure(displaycolumns=(5,))
+        self.tree.configure(height=10)
     
     
         
@@ -570,6 +582,8 @@ class BackendFileDialog(tk.Toplevel):
     def __init__(self, master, kind, initial_dir):
         super().__init__(master=master)
         self.result = None
+        
+        self.updating_selection = False
         
         self.kind = kind
         if kind == "open":
@@ -591,9 +605,11 @@ class BackendFileDialog(tk.Toplevel):
         self.name_label = ttk.Label(background, text="File name:")
         self.name_label.grid(row=1, column=0, pady=(0,20), padx=20, sticky="w")
         
-        self.name_var = tk.StringVar()
-        self.name_entry = ttk.Entry(background, textvariable=self.name_var)
+        self.name_var = create_string_var("")
+        self.name_entry = ttk.Entry(background, textvariable=self.name_var,
+                                    state="normal" if kind == "save" else "disabled")
         self.name_entry.grid(row=1, column=1, pady=(0,20), padx=(0,20), sticky="we")
+        self.name_entry.bind("<KeyRelease>", self.on_name_edit, True)
         
         self.ok_button = ttk.Button(background, text="OK", command=self.on_ok)
         self.ok_button.grid(row=1, column=2, pady=(0,20), padx=(0,20), sticky="e")
@@ -608,24 +624,68 @@ class BackendFileDialog(tk.Toplevel):
         self.bind("<Return>", self.on_ok, True)
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
         
-        self.browser.tree.bind("<<TreeviewSelect>>", self.on_tree_select, True)
+        self.tree_select_handler_id = self.browser.tree.bind(
+            "<<TreeviewSelect>>", self.on_tree_select, True)
         
         self.browser.focus_into(initial_dir)
         
     
     def on_ok(self, event=None):
-        self.result = self.name_var.get()
+        tree = self.browser.tree
+        name = self.name_var.get()
+        
+        for node_id in tree.get_children(""):
+            if name == tree.set(node_id, "name"):
+                break
+        else:
+            node_id = None
+        
+        if node_id is not None:
+            node_kind = tree.set(node_id, "kind")
+            if node_kind != "file":
+                messagebox.showerror("Error", "You need to select a file!")
+                return
+            elif self.kind == "save":
+                if not messagebox.askyesno("Overwrite?", 
+                                           "Do you want to overwrite '" + name + "' ?"):
+                    return
+        
+        parent_path = tree.set("", "path")
+        if parent_path == "" or parent_path.endswith("/"):
+            self.result = parent_path + name
+        else:
+            self.result = parent_path + "/" + name
+        
+        self.destroy()
     
     def on_cancel(self, event=None):
         self.result = None
         self.destroy()
     
     def on_tree_select(self, event=None):
-        kind = self.browser.get_selected_kind()
-        if kind == "dir":
+        if self.updating_selection:
             return
-        else:
-            self.name_var.set(self.browser.get_selected_value("name"))
+        
+        name = self.browser.get_selected_value("name")
+        if name:
+            self.name_var.set(name)
+    
+    def on_name_edit(self, event=None):
+        self.updating_selection = True
+        tree = self.browser.tree
+        if self.tree_select_handler_id:
+            tree.unbind("<<TreeviewSelect>>", self.tree_select_handler_id)
+            self.tree_select_handler_id = None
+        
+        name = self.name_var.get()
+        for node_id in tree.get_children(""):
+            if name == tree.set(node_id, "name"):
+                tree.selection_add(node_id)
+            else:
+                tree.selection_remove(node_id)
+        
+        self.updating_selection = False
+        self.tree_select_handler_id = tree.bind("<<TreeviewSelect>>", self.on_tree_select, True)
 
 class NodeChoiceDialog(tk.Toplevel):
     def __init__(self, master, prompt):
