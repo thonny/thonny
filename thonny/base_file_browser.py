@@ -569,13 +569,17 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
-    def __init__(self, master):
+    def __init__(self, master, dialog):
         super().__init__(master, allow_expand=False)
+        
+        self.dialog = dialog
         self.tree["show"] = ("tree", "headings")
         self.tree.configure(displaycolumns=(5,))
         self.tree.configure(height=10)
     
     
+    def open_file(self, path):
+        self.dialog.double_click_file(path)
         
 
 class BackendFileDialog(tk.Toplevel):
@@ -597,7 +601,7 @@ class BackendFileDialog(tk.Toplevel):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
         
-        self.browser = DialogRemoteFileBrowser(background)
+        self.browser = DialogRemoteFileBrowser(background, self)
         self.browser.grid(row=0, column=0, columnspan=4, sticky="nsew",
                           pady=20, padx=20)
         self.browser.configure(borderwidth=1, relief="groove")
@@ -686,6 +690,10 @@ class BackendFileDialog(tk.Toplevel):
         
         self.updating_selection = False
         self.tree_select_handler_id = tree.bind("<<TreeviewSelect>>", self.on_tree_select, True)
+    
+    def double_click_file(self, path):
+        assert path.endswith(self.name_var.get())
+        self.on_ok()
 
 class NodeChoiceDialog(tk.Toplevel):
     def __init__(self, master, prompt):
