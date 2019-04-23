@@ -1281,31 +1281,45 @@ def remove_line_numbers(s):
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
 
 
-def center_window(win, master=None):
-    # looks like it doesn't take window border into account
-    win.update_idletasks()
-
-    if getattr(master, "initializing", False):
-        # can't get reliable positions when main window is not in mainloop yet
-        left = (win.winfo_screenwidth() - 600) // 2
-        top = (win.winfo_screenheight() - 400) // 2
+def assign_geometry(win, master=None):
+    
+    size = get_workbench().get_option(get_size_option_name(win)) 
+    if size:
+        width, height = size
+        saved_size = True
     else:
-        if master is None:
-            left = win.winfo_screenwidth() - win.winfo_width() // 2
-            top = win.winfo_screenheight() - win.winfo_height() // 2
+        # need to wait until size is computed
+        # (unfortunately this causes dialog to jump)
+        if getattr(master, "initializing", False): 
+            # can't get reliable positions when main window is not in mainloop yet
+            width = 600
+            height = 400
         else:
-            left = (
-                master.winfo_rootx()
-                + master.winfo_width() // 2
-                - win.winfo_width() // 2
-            )
-            top = (
-                master.winfo_rooty()
-                + master.winfo_height() // 2
-                - win.winfo_height() // 2
-            )
+            win.update_idletasks()
+            # looks like it doesn't take window border into account
+            width = win.winfo_width()
+            height = win.winfo_height()
+        saved_size = False
 
-    win.geometry("+%d+%d" % (left, top))
+    if master is None:
+        left = win.winfo_screenwidth() - width // 2
+        top = win.winfo_screenheight() - height // 2
+    else:
+        left = (
+            master.winfo_rootx()
+            + master.winfo_width() // 2
+            - win.winfo_width() // 2
+        )
+        top = (
+            master.winfo_rooty()
+            + master.winfo_height() // 2
+            - win.winfo_height() // 2
+        )
+
+    if saved_size:
+        win.geometry("%dx%d+%d+%d" % (width, height, left, top))
+    else:
+        win.geometry("+%d+%d" % (left, top))
 
 
 class WaitingDialog(tk.Toplevel):
@@ -1946,7 +1960,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, center=True):
+def show_dialog(dlg, master=None, geometry=True):
     if master is None:
         master = tk._default_root
 
@@ -1955,10 +1969,10 @@ def show_dialog(dlg, master=None, center=True):
     dlg.grab_set()
     dlg.lift()
     dlg.focus_set()
-    if center: 
-        # centering seems to sometimes happen automatically on Linux
-        # and manual centering doesn't look good there
-        center_window(dlg, master)
+    if isinstance(geometry, str):
+        dlg.geometry(geometry)
+    elif geometry:
+        assign_geometry(dlg, master)
     master.wait_window(dlg)
     dlg.grab_release()
     master.lift()
@@ -2107,6 +2121,9 @@ def create_url_label(master, url, text=None):
     url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
     return url_label
     
+def get_size_option_name(window):
+    return  "layout." + type(window).__name__ + "_size"
+
 
 if __name__ == "__main__":
     root = tk.Tk()
