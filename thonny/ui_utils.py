@@ -1961,24 +1961,30 @@ def handle_mistreated_latin_shortcuts(registry, event):
 
 
 def show_dialog(dlg, master=None, geometry=True):
-    if master is None:
+    if True or master is None:
         master = tk._default_root
 
+    # following order seems to give most smooth appearance
     focused_widget = master.focus_get()
-    dlg.transient(master)
-    dlg.grab_set()
-    dlg.lift()
-    dlg.focus_set()
+    dlg.transient(master.winfo_toplevel())
+    
     if isinstance(geometry, str):
         dlg.geometry(geometry)
     elif geometry:
         assign_geometry(dlg, master)
-    master.wait_window(dlg)
+
+    dlg.grab_set()
+    dlg.lift()
+    dlg.focus_set()
+    
+    master.winfo_toplevel().wait_window(dlg)
     dlg.grab_release()
-    master.lift()
-    master.focus_force()
+    master.winfo_toplevel().lift()
+    master.winfo_toplevel().focus_force()
+    master.winfo_toplevel().grab_set()
+    
     if focused_widget is not None:
-        focused_widget.focus_set()
+        focused_widget.focus_force()
 
 
 def popen_with_ui_thread_callback(
