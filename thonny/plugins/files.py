@@ -29,6 +29,7 @@ class FilesView(tk.PanedWindow):
 
     def on_show(self):
         self.reset_remote()
+        self.local_files.refresh_tree()
 
     def reset_remote(self, msg=None):
         runner = get_runner()
@@ -45,6 +46,7 @@ class FilesView(tk.PanedWindow):
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
                 self.restore_split()
+            self.remote_files.invalidate_cache()
             self.remote_files.focus_into(proxy.get_default_directory())
         else:
             if self.remote_added:

@@ -282,6 +282,19 @@ class BaseFileBrowser(ttk.Frame):
         
         self._cached_child_data.update(data)  
     
+    def file_exists_in_cache(self, path):
+        for parent_path in self._cached_child_data:
+            print("looking for " + path + " in", self._cached_child_data[parent_path])
+            # hard to split because it may not be in this system format
+            name = path[len(parent_path):]
+            if name[0:1] in ["/", "\\"]:
+                name = name[1:]
+                
+            if name in self._cached_child_data[parent_path]:
+                return True
+        
+        return False
+    
     def get_open_paths(self, node_id=ROOT_NODE_ID):
         if self.tree.set(node_id, "kind") == "file":
             return set()
@@ -481,11 +494,12 @@ class BaseFileBrowser(ttk.Frame):
                               command=lambda: self.focus_into(selected_path),
                               state="active" if selected_kind == "dir" else "disabled")
     
-    def refresh_tree(self):
-        start_time("BEF reset")
-        self.invalidate_cache()
-        self.render_children_from_cache("")
-        lap_time("DONE reset")
+    def refresh_tree(self, paths_to_invalidate=None):
+        self.invalidate_cache(paths_to_invalidate)
+        if self.winfo_ismapped():
+            start_time("BEF reset")
+            self.render_children_from_cache("")
+            lap_time("DONE reset")
     
     def delete_path(self, path, kind):
         print("DELETE")
@@ -533,6 +547,21 @@ class BaseFileBrowser(ttk.Frame):
             return path
 
 class BaseLocalFileBrowser(BaseFileBrowser):
+    
+    def __init__(self, master, show_hidden_files=False, last_folder_setting_name=None, 
+                 breadcrumbs_pady=(5, 7), allow_expand=True):
+        super().__init__(master, show_hidden_files=show_hidden_files,
+                                 last_folder_setting_name=last_folder_setting_name,
+                                 breadcrumbs_pady=breadcrumbs_pady,
+                                 allow_expand=allow_expand)
+        get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
+        get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
+    
+    def destroy(self):
+        super().destroy()
+        get_workbench().unbind("WindowFocusIn", self.on_window_focus_in)
+        get_workbench().unbind("LocalFileOperation", self.on_local_file_operation)
+    
     def request_dirs_child_data(self, node_id, paths):
         print("requesting", paths)
         self.cache_dirs_child_data(get_dirs_child_data(paths))
@@ -554,7 +583,15 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             return parts
     
     def open_file(self, path):
-        get_workbench().get_editor_notebook().show_file(path)    
+        get_workbench().get_editor_notebook().show_file(path)
+    
+    def on_window_focus_in(self, event=None):
+        self.refresh_tree()
+    
+    def on_local_file_operation(self, event):
+        if event["operation"] in ["save", "delete"]:
+            self.refresh_tree()
+            # TODO: select this file in tree?
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False, 
@@ -567,10 +604,12 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
                          allow_expand=allow_expand)
         self.dir_separator = "/"
         get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
+        get_workbench().bind("RemoteFileOperation", self.on_remote_file_operation, True)
     
     def destroy(self):
         super().destroy()
         get_workbench().unbind("get_dirs_child_data_response", self.update_dir_data)
+        get_workbench().unbind("RemoteFileOperation", self.on_remote_file_operation)
     
     def get_root_text(self):
         runner = get_runner()
@@ -581,6 +620,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
+            print("REMREQ", paths)
             get_runner().send_command(InlineCommand("get_dirs_child_data", node_id=node_id, paths=paths))
     
     def get_dir_separator(self):
@@ -595,7 +635,25 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             self.render_children_from_cache(msg["node_id"])
 
     def open_file(self, path):
-        get_workbench().get_editor_notebook().show_remote_file(path)    
+        get_workbench().get_editor_notebook().show_remote_file(path)
+    
+    def on_remote_file_operation(self, event):
+        path = event["target_path"]
+        exists_in_cache = self.file_exists_in_cache(path)
+        print(exists_in_cache, event)
+        if (event["operation"] == "save" and exists_in_cache
+            or event["operation"] == "delete" and not exists_in_cache): 
+            # No need to refresh
+            return
+        
+        if "/" in path:
+            parent = path[:path.rfind("/")]
+            if not parent:
+                parent = "/"
+        else:
+            parent = ""
+            
+        self.refresh_tree([parent])
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):

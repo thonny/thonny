@@ -262,6 +262,8 @@ class Editor(ttk.Frame):
             os.fsync(f)
             f.close()
             self._last_known_mtime = os.path.getmtime(self._filename)
+            get_workbench().event_generate("LocalFileOperation", path=self._filename, 
+                                           operation="save")
         except PermissionError:
             if askyesno(
                 "Permission Error",
@@ -289,6 +291,9 @@ class Editor(ttk.Frame):
                                                     content_bytes=content_bytes))
 
             # NB! edit_modified is not falsed yet!
+            get_workbench().event_generate("RemoteFileOperation",
+                                           target_path=extract_target_path(self._filename), 
+                                           operation="save")
             return self._filename
         else:
             messagebox.showwarning("Can't save", "Device is busy, wait and try again!")

@@ -1955,6 +1955,7 @@ class Workbench(tk.Tk):
     def _on_focus_in(self, event):
         if self._lost_focus:
             self._lost_focus = False
+            self.event_generate("WindowFocusIn")
             for editor in self.get_editor_notebook().get_all_editors():
                 editor.check_for_external_changes()
 
