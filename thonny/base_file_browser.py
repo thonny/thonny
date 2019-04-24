@@ -8,7 +8,7 @@ from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
-from thonny.misc_utils import running_on_windows
+from thonny.misc_utils import running_on_windows, start_time, lap_time
 
 _dummy_node_text = "..." 
 
@@ -147,7 +147,8 @@ class BaseFileBrowser(ttk.Frame):
         
         
         #self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
-        self.menu_button = ttk.Button(header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton")
+        self.menu_button = ttk.Button(header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton",
+                                      command=self.post_button_menu)
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)
     
@@ -184,7 +185,7 @@ class BaseFileBrowser(ttk.Frame):
              
         self.building_breadcrumbs = False
         self.resize_path_bar()
-        self.refresh_children()
+        self.render_children_from_cache()
         self.save_focused_folder()
     
     def split_path(self, path):
@@ -217,7 +218,7 @@ class BaseFileBrowser(ttk.Frame):
         node_id = self.get_selected_node()
         path = self.tree.set(node_id, "path")
         if path: #and path not in self._cached_child_data:
-            self.refresh_children(node_id)
+            self.render_children_from_cache(node_id)
             #self.request_dirs_child_data(node_id, [path])
         #else:
             
@@ -294,10 +295,20 @@ class BaseFileBrowser(ttk.Frame):
         else:
             return set()
     
-    def refresh_children(self, node_id=""):
+    def invalidate_cache(self, paths=None):
+        if paths is None:
+            self._cached_child_data.clear()
+        else:
+            for path in paths:
+                if path in self._cached_child_data:
+                    del self._cached_child_data[path]
+        
+         
+    
+    def render_children_from_cache(self, node_id=""):
         """ This node is supposed to be a directory and 
         its contents needs to be shown and/or refreshed"""
-        
+        print("rendering", repr(node_id))
         path = self.tree.set(node_id, "path")
 
         if path not in self._cached_child_data:
@@ -358,6 +369,11 @@ class BaseFileBrowser(ttk.Frame):
                 )
             )
             self.tree.set_children(node_id, *ids_sorted_by_name)
+            
+            # recursively update open children
+            for child_id in ids_sorted_by_name:
+                if self.tree.item(child_id, "open"):
+                    self.render_children_from_cache(child_id)
 
     def show_error(self, msg, node_id):
         err_id = self.tree.insert(node_id, "end")
@@ -449,14 +465,27 @@ class BaseFileBrowser(ttk.Frame):
             self.refresh_menu(path, kind)
             self.menu.tk_popup(event.x_root, event.y_root)
     
+    def post_button_menu(self):
+        self.refresh_menu(self.get_selected_path(), self.get_selected_kind())
+        print("posting", self.menu_button.winfo_rootx(), self.menu_button.winfo_rooty())
+        self.menu.tk_popup(self.menu_button.winfo_rootx(),
+                           self.menu_button.winfo_rooty() + self.menu_button.winfo_height())
+    
     def refresh_menu(self, selected_path, selected_kind):
         self.menu.delete(0, "end")
         
+        self.menu.add_command(label="Refresh", command=self.refresh_tree)
         self.menu.add_command(label="New file", command=self.create_new_file)
         self.menu.add_command(label="Delete", command=lambda: self.delete_path(selected_path, selected_kind))
         self.menu.add_command(label="Focus into", 
                               command=lambda: self.focus_into(selected_path),
                               state="active" if selected_kind == "dir" else "disabled")
+    
+    def refresh_tree(self):
+        start_time("BEF reset")
+        self.invalidate_cache()
+        self.render_children_from_cache("")
+        lap_time("DONE reset")
     
     def delete_path(self, path, kind):
         print("DELETE")
@@ -505,8 +534,9 @@ class BaseFileBrowser(ttk.Frame):
 
 class BaseLocalFileBrowser(BaseFileBrowser):
     def request_dirs_child_data(self, node_id, paths):
+        print("requesting", paths)
         self.cache_dirs_child_data(get_dirs_child_data(paths))
-        self.refresh_children(node_id)
+        self.render_children_from_cache(node_id)
 
     def split_path(self, path):
         parts = super().split_path(path)
@@ -562,7 +592,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             self.show_error(msg["error"], msg["node_id"])
         else:
             self.cache_dirs_child_data(msg["data"])
-            self.refresh_children(msg["node_id"])
+            self.render_children_from_cache(msg["node_id"])
 
     def open_file(self, path):
         get_workbench().get_editor_notebook().show_remote_file(path)    
