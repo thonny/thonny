@@ -109,6 +109,7 @@ class Workbench(tk.Tk):
 
         self._destroying = False
         self._destroyed = False
+        self._lost_focus = False
         self.initializing = True
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
@@ -185,6 +186,7 @@ class Workbench(tk.Tk):
             "<<NotebookTabChanged>>", self.update_title, True
         )
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
+        self.bind("<FocusOut>", self._on_focus_out, True)
         self.bind("<FocusIn>", self._on_focus_in, True)
 
         self._publish_commands()
@@ -1951,8 +1953,14 @@ class Workbench(tk.Tk):
             ui_utils.handle_mistreated_latin_shortcuts(self._latin_shortcuts, event)
 
     def _on_focus_in(self, event):
-        for editor in self.get_editor_notebook().get_all_editors():
-            editor.check_for_external_changes()
+        if self._lost_focus:
+            self._lost_focus = False
+            for editor in self.get_editor_notebook().get_all_editors():
+                editor.check_for_external_changes()
+
+    def _on_focus_out(self, event):
+        if self.focus_get() is None:
+            self._lost_focus = True
 
     def focus_get(self) -> Optional[tk.Widget]:
         try:
