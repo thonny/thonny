@@ -292,7 +292,7 @@ class Editor(ttk.Frame):
 
             # NB! edit_modified is not falsed yet!
             get_workbench().event_generate("RemoteFileOperation",
-                                           target_path=extract_target_path(self._filename), 
+                                           path=extract_target_path(self._filename), 
                                            operation="save")
             return self._filename
         else:
