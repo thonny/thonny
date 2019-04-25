@@ -2075,8 +2075,9 @@ class Workbench(tk.Tk):
 
         if not ui_utils.get_zoomed(self) or running_on_mac_os():
             # can't restore zoom on mac without setting actual dimensions
-            self.set_option("layout.top", self.winfo_y())
-            self.set_option("layout.left", self.winfo_x())
+            gparts = self.wm_geometry().split("+")
+            self.set_option("layout.left", int(gparts[1]))
+            self.set_option("layout.top", int(gparts[2]))
             self.set_option("layout.width", self.winfo_width())
             self.set_option("layout.height", self.winfo_height())
 
