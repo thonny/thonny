@@ -58,9 +58,9 @@ class EditorConfigurationPage(ConfigurationPage):
             state="readonly",
             values=[0, 60, 70, 80, 90, 100, 110, 120],
         )
-        self._line_length_combo.grid(row=20, column=1, sticky=tk.E)
+        self._line_length_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
     def apply(self):
         ConfigurationPage.apply(self)
