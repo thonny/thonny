@@ -483,6 +483,20 @@ class ClosableNotebook(ttk.Notebook):
             ],
         )
 
+    def _check_remove_padding(self, kw):
+        # Windows themes produce 1-pixel padding to the bottom of the pane
+        # Don't know how to get rid of it using themes
+        if ("padding" not in kw
+            and ttk.Style().theme_use().lower() in ("windows", "xpnative", "vista")):
+            kw["padding"] = (0, 0, 0, -1)
+    
+    def add(self, child, **kw):
+        self._check_remove_padding(kw)
+        super().add(child, **kw)
+    
+    def insert(self, pos, child, **kw):
+        self._check_remove_padding(kw)
+        super().insert(pos, child, **kw)
 
 class AutomaticNotebook(ClosableNotebook):
     """
