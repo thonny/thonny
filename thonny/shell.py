@@ -44,6 +44,8 @@ class ShellView(ttk.Frame):
             default_sequence=_CLEAR_SHELL_DEFAULT_SEQ,
             group=200,
         )
+        
+        get_workbench().set_default("shell.soft_max_chars", 10000)
 
         self.text = ShellText(
             self,
@@ -275,6 +277,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     self.active_object_tags.add(object_tag)
 
         self.mark_set("output_end", self.index("end-1c"))
+        self._discard_old_content()
         self._update_visible_io(None)
         self._insert_prompt()
         self._try_submit_input()  # Trying to submit leftover code (eg. second magic command)
@@ -773,7 +776,32 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
 
             self._insert_text_directly(line, tags)
-
+    
+    def _discard_old_content(self):
+        max_chars = max(get_workbench().get_option("shell.soft_max_chars"), 0)
+        proposed_cut = self.index("end -%d chars" % max_chars)
+        if proposed_cut == "1.0":
+            return
+        
+        # at least one block must remain 
+        next_prompt = self.tag_nextrange("prompt", proposed_cut, "end")
+        if next_prompt:
+            #final_cut = next_prompt[0] # if cut must be at blocks's boundary
+            final_cut = self.index(proposed_cut + " linestart")
+        else:
+            # no prompt after the proposed cut, so we must take one before
+            # so that last block remains complete
+            prev_prompt = self.tag_prevrange("prompt", proposed_cut, "1.0")
+            if not prev_prompt:
+                return
+            final_cut = prev_prompt[0]
+        
+        self.direct_delete("0.1", final_cut)
+            
+            
+            
+        
+    
     def _invalidate_current_data(self):
         """
         Grayes out input & output displayed so far
