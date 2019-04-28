@@ -24,47 +24,47 @@ msgstr "Fichier"
 
 #: thonny/workbench.py:339
 msgid "Edit"
-msgstr ""
+msgstr "Édition"
 
 #: thonny/workbench.py:340
 msgid "View"
-msgstr ""
+msgstr "Affichage"
 
 #: thonny/workbench.py:341
 msgid "Run"
-msgstr ""
+msgstr "Exécuter"
 
 #: thonny/workbench.py:342
 msgid "Device"
-msgstr ""
+msgstr "Appareil"
 
 #: thonny/workbench.py:343
 msgid "Tools"
-msgstr ""
+msgstr "Outils"
 
 #: thonny/workbench.py:344
 msgid "Help"
-msgstr ""
+msgstr "Aide"
 
 #: thonny/workbench.py:478
 msgid "Alternative Python 3 interpreter or virtual environment"
-msgstr ""
+msgstr "Interpréteur ou environnement virtuel Python 3 alternatif"
 
 #: thonny/workbench.py:486
 msgid "A special virtual environment (deprecated)"
-msgstr ""
+msgstr "Environnement virtuel spécial (obsolète)"
 
 #: thonny/workbench.py:523
 msgid "Exit"
-msgstr ""
+msgstr "Quitter"
 
 #: thonny/workbench.py:540
 msgid "(Increase font size"
-msgstr ""
+msgstr "(Augmenter la taille de la police"
 
 #: thonny/workbench.py:550
 msgid "Decrease font size"
-msgstr ""
+msgstr "Diminuer la taille de la police"
 
 #: thonny/workbench.py:562
 msgid "Focus editor"
@@ -76,19 +76,19 @@ msgstr ""
 
 #: thonny/workbench.py:582
 msgid "Maximize view"
-msgstr ""
+msgstr "Maximiser la fenêtre"
 
 #: thonny/workbench.py:594
 msgid "Full screen"
-msgstr ""
+msgstr "Plein écran"
 
 #: thonny/workbench.py:1195
 msgid "Program arguments"
-msgstr ""
+msgstr "Arguments du programme"
 
 #: thonny/plugins/about.py:24 thonny/plugins/about.py:160
 msgid "About Thonny"
-msgstr ""
+msgstr "À propos de Thonny"
 
 #: thonny/plugins/about.py:80
 msgid ""
@@ -112,19 +112,19 @@ msgstr ""
 
 #: thonny/plugins/about.py:149
 msgid "Version history"
-msgstr ""
+msgstr "Historique des versions"
 
 #: thonny/plugins/about.py:156
 msgid "Report problems"
-msgstr ""
+msgstr "Rapporter un problème"
 
 #: thonny/plugins/assistant_config_page.py:15
 msgid "Open Assistant automatically when program crashes with an exception"
-msgstr ""
+msgstr "Ouvrir automatiquement l’assistant quand le programme plante avec une exception"
 
 #: thonny/plugins/assistant_config_page.py:21
 msgid "Open Assistant automatically when it has warnings for your code"
-msgstr ""
+msgstr "Ouvrir automatiquement l’assistant quand il y a des messages d’erreur dans votre code"
 
 #: thonny/plugins/assistant_config_page.py:28
 msgid "Perform selected Pylint checks"
@@ -140,11 +140,11 @@ msgstr ""
 
 #: thonny/plugins/assistant_config_page.py:80
 msgid "Assistant"
-msgstr ""
+msgstr "Assistant"
 
 #: thonny/plugins/autocomplete.py:329
 msgid "Auto-complete"
-msgstr ""
+msgstr "Auto-complétion"
 
 #: thonny/plugins/backend_config_page.py:44
 msgid "Which interpreter or device should Thonny use for running your code?"
@@ -152,11 +152,11 @@ msgstr ""
 
 #: thonny/plugins/backend_config_page.py:128
 msgid "Interpreter"
-msgstr ""
+msgstr "Interpréteur"
 
 #: thonny/plugins/birdseye_frontend.py:30
 msgid "About Birdseye"
-msgstr ""
+msgstr "À propos de Birdseye"
 
 #: thonny/plugins/birdseye_frontend.py:31
 msgid ""
@@ -183,7 +183,7 @@ msgstr ""
 
 #: thonny/plugins/commenting.py:113
 msgid "Toggle comment"
-msgstr ""
+msgstr "Activer les commentaires"
 
 #: thonny/plugins/commenting.py:123
 msgid "Comment out"
@@ -195,27 +195,27 @@ msgstr ""
 
 #: thonny/plugins/common_editing_commands.py:32
 msgid "Undo"
-msgstr ""
+msgstr "Annuler"
 
 #: thonny/plugins/common_editing_commands.py:44
 msgid "Redo"
-msgstr ""
+msgstr "Rétablir"
 
 #: thonny/plugins/common_editing_commands.py:60
 msgid "Cut"
-msgstr ""
+msgstr "Couper"
 
 #: thonny/plugins/common_editing_commands.py:72
 msgid "Copy"
-msgstr ""
+msgstr "Copier"
 
 #: thonny/plugins/common_editing_commands.py:84
 msgid "Paste"
-msgstr ""
+msgstr "Coller"
 
 #: thonny/plugins/common_editing_commands.py:96 thonny/plugins/debugger.py:123
 msgid "Select all"
-msgstr ""
+msgstr "Sélectionner tout"
 
 #: thonny/plugins/debugger.py:114
 msgid "Run to cursor"
@@ -263,7 +263,7 @@ msgstr ""
 
 #: thonny/plugins/editor_config_page.py:44
 msgid "Show line numbers"
-msgstr ""
+msgstr "Afficher les numéros de ligne"
 
 #: thonny/plugins/editor_config_page.py:50
 msgid ""
@@ -273,7 +273,7 @@ msgstr ""
 
 #: thonny/plugins/editor_config_page.py:71
 msgid "Editor"
-msgstr ""
+msgstr "Éditeur"
 
 #: thonny/plugins/event_logging.py:24
 msgid "Export usage logs..."
@@ -281,51 +281,51 @@ msgstr ""
 
 #: thonny/plugins/event_view.py:41
 msgid "Events"
-msgstr ""
+msgstr "Évènements"
 
 #: thonny/plugins/files.py:113
 msgid "Files"
-msgstr ""
+msgstr "Fichiers"
 
 #: thonny/plugins/find_replace.py:60 thonny/plugins/find_replace.py:422
 msgid "Find & Replace"
-msgstr ""
+msgstr "Rechercher et remplacer"
 
 #: thonny/plugins/find_replace.py:66
 msgid "Find:"
-msgstr ""
+msgstr "Rechercher :"
 
 #: thonny/plugins/find_replace.py:81
 msgid "Replace with:"
-msgstr ""
+msgstr "Remplacer par :"
 
 #: thonny/plugins/find_replace.py:99
 msgid "Case sensitive"
-msgstr ""
+msgstr "Sensible à la casse"
 
 #: thonny/plugins/find_replace.py:106
 msgid "Up"
-msgstr ""
+msgstr "Monter"
 
 #: thonny/plugins/find_replace.py:110
 msgid "Down"
-msgstr ""
+msgstr "Descendre"
 
 #: thonny/plugins/find_replace.py:117
 msgid "Find"
-msgstr ""
+msgstr "Chercher"
 
 #: thonny/plugins/find_replace.py:126
 msgid "Replace"
-msgstr ""
+msgstr "Remplacer"
 
 #: thonny/plugins/find_replace.py:133
 msgid "Replace+Find"
-msgstr ""
+msgstr "Remplacer et rechercher"
 
 #: thonny/plugins/find_replace.py:142
 msgid "Replace all"
-msgstr ""
+msgstr "Remplacer tout"
 
 #: thonny/plugins/find_replace.py:236
 msgid "Enter string to be replaced."
@@ -369,15 +369,15 @@ msgstr ""
 
 #: thonny/plugins/heap.py:89
 msgid "Heap"
-msgstr ""
+msgstr "Pile"
 
 #: thonny/plugins/language.py:13 thonny/plugins/language.py:39
 msgid "Language"
-msgstr ""
+msgstr "Langue"
 
 #: thonny/plugins/language.py:30
 msgid "You must restart Thonny for language change to take effect."
-msgstr ""
+msgstr "Vous devez redémarrer Thony pour que le changement de langue soit pris en compte."
 
 #: thonny/plugins/notes.py:32
 msgid ""
@@ -392,19 +392,19 @@ msgstr ""
 
 #: thonny/plugins/notes.py:57
 msgid "Notes"
-msgstr ""
+msgstr "Notes"
 
 #: thonny/plugins/object_inspector.py:110
 msgid "Previous object"
-msgstr ""
+msgstr "Objet précédent"
 
 #: thonny/plugins/object_inspector.py:113
 msgid "Next object"
-msgstr ""
+msgstr "Objet suivant"
 
 #: thonny/plugins/object_inspector.py:614
 msgid "Object inspector"
-msgstr ""
+msgstr "Inspecteur d’objet"
 
 #: thonny/plugins/outline.py:154
 msgid "Outline"
@@ -420,15 +420,15 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:184
 msgid " Upgrade "
-msgstr ""
+msgstr " Mettre à jour "
 
 #: thonny/plugins/pip_gui.py:191
 msgid "Uninstall"
-msgstr ""
+msgstr "Désinstaller"
 
 #: thonny/plugins/pip_gui.py:206
 msgid "Close"
-msgstr ""
+msgstr "Fermer"
 
 #: thonny/plugins/pip_gui.py:244
 msgid ""
@@ -445,7 +445,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:255
 msgid "Installing pip, please wait ...\n"
-msgstr ""
+msgstr "Installation de pip, veuillez patienter…\n"
 
 #: thonny/plugins/pip_gui.py:279
 msgid ""
@@ -488,7 +488,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:357
 msgid "Packages' directory\n"
-msgstr ""
+msgstr "Répertoire des paquets\n"
 
 #: thonny/plugins/pip_gui.py:363
 msgid "Install from PyPI\n"
@@ -504,15 +504,15 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:372
 msgid "Install from local file\n"
-msgstr ""
+msgstr "Installer à partir d’un fichier local\n"
 
 #: thonny/plugins/pip_gui.py:374
 msgid "Click "
-msgstr ""
+msgstr "Cliquez"
 
 #: thonny/plugins/pip_gui.py:375
 msgid "here"
-msgstr ""
+msgstr "ici"
 
 #: thonny/plugins/pip_gui.py:378
 msgid ""
@@ -523,7 +523,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:381
 msgid "Upgrade or uninstall\n"
-msgstr ""
+msgstr "Mettre à jour ou désinstaller\n"
 
 #: thonny/plugins/pip_gui.py:383
 msgid ""
@@ -533,7 +533,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:387
 msgid "Target:  "
-msgstr ""
+msgstr "Cible :  "
 
 #: thonny/plugins/pip_gui.py:390
 msgid "virtual environment\n"
@@ -557,7 +557,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:430
 msgid "Installed version: "
-msgstr ""
+msgstr "Version installée : "
 
 #: thonny/plugins/pip_gui.py:432
 msgid "Installed to: "
@@ -565,15 +565,15 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:452
 msgid "Upgrade"
-msgstr ""
+msgstr "Mettre à jour"
 
 #: thonny/plugins/pip_gui.py:457
 msgid "Install"
-msgstr ""
+msgstr "Installer"
 
 #: thonny/plugins/pip_gui.py:479
 msgid "Could not find the package from PyPI."
-msgstr ""
+msgstr "Impossible de trouver le paquet sur PyPI."
 
 #: thonny/plugins/pip_gui.py:482
 msgid ""
@@ -589,7 +589,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:483
 msgid "exact package name"
-msgstr ""
+msgstr "nom exact du paquet"
 
 #: thonny/plugins/pip_gui.py:488
 msgid "Could not find the package info from PyPI. Error code: "
@@ -597,23 +597,23 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:500
 msgid "Latest stable version"
-msgstr ""
+msgstr "Dernière version stable"
 
 #: thonny/plugins/pip_gui.py:502
 msgid "Latest version"
-msgstr ""
+msgstr "Dernière version"
 
 #: thonny/plugins/pip_gui.py:503
 msgid "Summary"
-msgstr ""
+msgstr "Résumé"
 
 #: thonny/plugins/pip_gui.py:504
 msgid "Author"
-msgstr ""
+msgstr "Auteur"
 
 #: thonny/plugins/pip_gui.py:505
 msgid "Homepage"
-msgstr ""
+msgstr "Page d’accueil"
 
 #: thonny/plugins/pip_gui.py:507
 msgid "Bugtracker"
@@ -621,7 +621,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:509
 msgid "Documentation"
-msgstr ""
+msgstr "Documentation"
 
 #: thonny/plugins/pip_gui.py:511
 msgid "PyPI page"
@@ -629,11 +629,11 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:515
 msgid "Requires"
-msgstr ""
+msgstr "Nécessite"
 
 #: thonny/plugins/pip_gui.py:553
 msgid "Can't find package name from the list: "
-msgstr ""
+msgstr "Impossible de trouver ce nom de paquet dans la liste : "
 
 #: thonny/plugins/pip_gui.py:586
 msgid "Really uninstall?"
@@ -641,7 +641,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:590
 msgid "Are you sure you want to uninstall it?"
-msgstr ""
+msgstr "Êtes-vous sur de vouloir désinstaller ?"
 
 #: thonny/plugins/variables.py:19
 msgid ""
@@ -651,5 +651,5 @@ msgstr ""
 
 #: thonny/plugins/variables.py:142
 msgid "Variables"
-msgstr ""
+msgstr "Variables"
 
