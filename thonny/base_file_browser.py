@@ -284,7 +284,6 @@ class BaseFileBrowser(ttk.Frame):
     
     def file_exists_in_cache(self, path):
         for parent_path in self._cached_child_data:
-            print("looking for " + path + " in", self._cached_child_data[parent_path])
             # hard to split because it may not be in this system format
             name = path[len(parent_path):]
             if name[0:1] in ["/", "\\"]:
@@ -296,11 +295,8 @@ class BaseFileBrowser(ttk.Frame):
         return False
     
     def select_path_if_visible(self, path, node_id=""):
-        print("looking for", path, "in", node_id)
         for child_id in self.tree.get_children(node_id):
-            print("considering", self.tree.set(child_id, "path"))
             if self.tree.set(child_id, "path") == path:
-                print("found")
                 self.tree.selection_set(child_id)
                 return
             
@@ -334,7 +330,6 @@ class BaseFileBrowser(ttk.Frame):
     def render_children_from_cache(self, node_id=""):
         """ This node is supposed to be a directory and 
         its contents needs to be shown and/or refreshed"""
-        print("rendering", repr(node_id))
         path = self.tree.set(node_id, "path")
 
         if path not in self._cached_child_data:
@@ -493,7 +488,6 @@ class BaseFileBrowser(ttk.Frame):
     
     def post_button_menu(self):
         self.refresh_menu(self.get_selected_path(), self.get_selected_kind())
-        print("posting", self.menu_button.winfo_rootx(), self.menu_button.winfo_rooty())
         self.menu.tk_popup(self.menu_button.winfo_rootx(),
                            self.menu_button.winfo_rooty() + self.menu_button.winfo_height())
     
@@ -510,9 +504,7 @@ class BaseFileBrowser(ttk.Frame):
     def refresh_tree(self, paths_to_invalidate=None):
         self.invalidate_cache(paths_to_invalidate)
         if self.winfo_ismapped():
-            start_time("BEF reset")
             self.render_children_from_cache("")
-            lap_time("DONE reset")
 
         if self.path_to_highlight:
             self.select_path_if_visible(self.path_to_highlight)
@@ -580,7 +572,6 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         get_workbench().unbind("LocalFileOperation", self.on_local_file_operation)
     
     def request_dirs_child_data(self, node_id, paths):
-        print("requesting", paths)
         self.cache_dirs_child_data(get_dirs_child_data(paths))
         self.render_children_from_cache(node_id)
 
@@ -639,7 +630,6 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     
     def request_dirs_child_data(self, node_id, paths):
         if get_runner():
-            print("REMREQ", paths)
             get_runner().send_command(InlineCommand("get_dirs_child_data", node_id=node_id, paths=paths))
     
     def get_dir_separator(self):
@@ -663,7 +653,6 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     def on_remote_file_operation(self, event):
         path = event["path"]
         exists_in_cache = self.file_exists_in_cache(path)
-        print(exists_in_cache, event)
         if (event["operation"] == "save" and exists_in_cache
             or event["operation"] == "delete" and not exists_in_cache): 
             # No need to refresh
