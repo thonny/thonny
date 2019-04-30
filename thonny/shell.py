@@ -128,11 +128,15 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         super().__init__(master, cnf, **kw)
         self.bindtags(self.bindtags() + ("ShellText",))
 
-        self._before_io = True
         self._command_history = (
             []
         )  # actually not really history, because each command occurs only once
         self._command_history_current_index = None
+        
+        # logs of IO events for current toplevel block
+        # (enables undoing and redoing the events)
+        self._applied_io_events = []
+        self._queued_io_events = []
 
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
@@ -171,8 +175,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                            underline=False,
                            font=io_hyperlink_font)
         self.tag_raise("io_hyperlink", "hyperlink")
-
-        self.tag_configure("suppressed_io", elide=True)
 
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
         # input starts, output_end shows the end of last output,
@@ -217,21 +219,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def _handle_program_output(self, msg):
         self._ensure_visible()
-        # mark first line of io
-        if self._before_io:
-            self._insert_text_directly(
-                msg.data[0], ("io", msg.stream_name, "vertically_spaced")
-            )
-            self._before_io = False
-            self._insert_text_directly(msg.data[1:], ("io", msg.stream_name))
-        else:
-            self._insert_text_directly(msg.data, ("io", msg.stream_name))
-
-        self.mark_set("output_end", self.index("end-1c"))
-        self.see("end")
+        self._queued_io_events.append((msg.data, msg.stream_name))
+        self._update_visible_io(None)
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
-        self._before_io = True
         if msg.get("error"):
             self._insert_text_directly(msg["error"] + "\n", ("toplevel", "stderr"))
             self._ensure_visible()
@@ -289,12 +280,44 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         else:
             self._update_visible_io(msg.io_symbol_count)
 
-    def _update_visible_io(self, num_visible_chars):
-        self.tag_remove("suppressed_io", "1.0", "end")
-        if num_visible_chars is not None:
-            start_index = self.index("command_io_start+" + str(num_visible_chars) + "c")
-            self.tag_add("suppressed_io", start_index, "end")
-
+    def _update_visible_io(self, target_num_visible_chars):
+        current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
+        
+        if (target_num_visible_chars is not None
+            and target_num_visible_chars < current_num_visible_chars):
+            # hard to undo complex renderings (squeezed texts and ANSI codes)
+            # easier to clean everything and start again
+            self._queued_io_events = self._applied_io_events + self._queued_io_events
+            self._applied_io_events = []
+            self.direct_delete("command_io_start", "output_end")
+            current_num_visible_chars = 0
+        
+        
+        while (self._queued_io_events
+               and current_num_visible_chars != target_num_visible_chars):
+            data, stream_name = self._queued_io_events.pop(0)
+            
+            if target_num_visible_chars is not None:
+                leftover_count = current_num_visible_chars + len(data) - target_num_visible_chars 
+             
+                if leftover_count > 0:
+                    # add suffix to the queue
+                    self._queued_io_events.insert(0, (data[-leftover_count:], stream_name))
+                    data = data[:-leftover_count]
+        
+            # mark first line of io
+            if current_num_visible_chars == 0:
+                self._insert_text_directly(
+                    data[0], ("io", stream_name, "vertically_spaced")
+                )
+                self._insert_text_directly(data[1:], ("io", stream_name))
+            else:
+                self._insert_text_directly(data, ("io", stream_name))
+            
+            self._applied_io_events.append((data, stream_name))
+            current_num_visible_chars += len(data)
+    
+        self.mark_set("output_end", self.index("end-1c"))
         self.see("end")
 
     def _insert_prompt(self):
@@ -342,10 +365,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             EnhancedTextWithLogging.intercept_insert(self, index, txt, tags)
 
             if not get_runner().is_waiting_toplevel_command():
-                if self._before_io:
+                if not self._applied_io_events:
                     # tag first char of io differently
                     self.tag_add("vertically_spaced", index)
-                    self._before_io = False
 
                 self._try_submit_input()
 
@@ -631,6 +653,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 # remember the place where the output of this command started
                 self.mark_set("command_io_start", "output_insert")
                 self.mark_gravity("command_io_start", "left")
+                # discard old io events
+                self._applied_io_events = []
+                self._queued_io_events = []
             except Exception:
                 get_workbench().report_exception()
                 self._insert_prompt()
@@ -644,6 +669,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             get_workbench().event_generate(
                 "ShellInput", input_text=text_to_be_submitted
             )
+            self._applied_io_events.append((text_to_be_submitted, "stdin"))
 
     def _arrow_up(self, event):
         if not self._in_current_input_range("insert"):
