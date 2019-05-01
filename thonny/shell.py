@@ -19,13 +19,12 @@ from thonny.misc_utils import (
 from thonny.tktextext import index2line
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
-    get_style_configuration,
     scrollbar_style,
-    sequence_to_accelerator,
     select_sequence, TextMenu)
 from _tkinter import TclError
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
+DELIM_RETURNING_ANSI_ESCAPE_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~])')
 
 
 class ShellView(ttk.Frame):
@@ -137,6 +136,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # (enables undoing and redoing the events)
         self._applied_io_events = []
         self._queued_io_events = []
+        self._tag_context = set()
 
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
@@ -219,7 +219,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def _handle_program_output(self, msg):
         self._ensure_visible()
-        self._queued_io_events.append((msg.data, msg.stream_name))
+        self._append_to_io_queue((msg.data, msg.stream_name))
         self._update_visible_io(None)
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
@@ -279,7 +279,16 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._update_visible_io(None)
         else:
             self._update_visible_io(msg.io_symbol_count)
-
+    
+    def _append_to_io_queue(self, data, stream_name):
+        # Make sure ANSI CSI codes are stored as separate events
+        # TODO: try to complete previously submitted incomplete code
+        
+        parts = re.split(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data)
+        for part in parts:
+            if part: # split may produce empty string in the beginning or start
+                self._queued_io_events((part, stream_name))
+    
     def _update_visible_io(self, target_num_visible_chars):
         current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
         
@@ -305,20 +314,26 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     self._queued_io_events.insert(0, (data[-leftover_count:], stream_name))
                     data = data[:-leftover_count]
         
-            # mark first line of io
-            if current_num_visible_chars == 0:
-                self._insert_text_directly(
-                    data[0], ("io", stream_name, "vertically_spaced")
-                )
-                self._insert_text_directly(data[1:], ("io", stream_name))
-            else:
-                self._insert_text_directly(data, ("io", stream_name))
-            
-            self._applied_io_events.append((data, stream_name))
+            self._apply_io_event(data, stream_name)
             current_num_visible_chars += len(data)
     
         self.mark_set("output_end", self.index("end-1c"))
         self.see("end")
+    
+    def _apply_io_event(self, data, stream_name):
+        if re.match(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data):
+            ...
+        elif not self._applied_io_events and len(data) > 1:
+            # mark first char of io
+            self._tag_context.append("vertically_spaced")
+            self._apply_io_event(data[0], stream_name)
+            self._tag_context.remove()
+            self._apply_io_event(data[1:], stream_name)
+        else:
+            self._insert_text_directly(data, ("io", stream_name))
+            
+        
+        self._applied_io_events.append((data, stream_name))
 
     def _insert_prompt(self):
         # if previous output didn't put a newline, then do it now
