@@ -189,7 +189,7 @@ class EventLogger:
 
 def _generate_timestamp_file_name(extension):
     # generate log filename
-    folder = os.path.expanduser(os.path.join(THONNY_USER_DIR, "user_logs"))
+    folder = os.path.join(THONNY_USER_DIR, "user_logs")
     if not os.path.exists(folder):
         os.makedirs(folder)
 

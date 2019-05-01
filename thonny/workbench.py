@@ -18,7 +18,7 @@ import traceback
 import webbrowser
 import gettext
 from threading import Thread
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from typing import (
     Any,
     Callable,
@@ -106,7 +106,6 @@ class Workbench(tk.Tk):
 
     def __init__(self, server_socket=None) -> None:
         thonny._workbench = self
-
         self._destroying = False
         self._destroyed = False
         self._lost_focus = False
@@ -192,10 +191,23 @@ class Workbench(tk.Tk):
         self._publish_commands()
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
+        self._make_sanity_checks()
         self.after(
             1, self._start_runner
         )  # Show UI already before waiting for the backend to start
-
+    
+    def _make_sanity_checks(self):
+        home_dir = os.path.expanduser("~")
+        bad_home_msg = None
+        if home_dir == "~":
+            bad_home_msg = "Can not find your home directory."
+        elif not os.path.exists(home_dir):
+            bad_home_msg = "Reported home directory (%s) does not exist." % home_dir
+        if bad_home_msg: 
+            messagebox.showwarning("Problems with home directory",
+                                   bad_home_msg
+                                   + "\nThis may cause problems for Thonny.")
+    
     def _try_action(self, action: Callable) -> None:
         try:
             action()
