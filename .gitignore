@@ -5,6 +5,7 @@
 *.tlog
 *.ipdb
 *.dmg
+.venv
 .vs
 .idea
 .cache
