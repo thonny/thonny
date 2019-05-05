@@ -25,6 +25,7 @@ from _tkinter import TclError
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 DELIM_RETURNING_ANSI_ESCAPE_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~])')
+INT_REGEX = re.compile(r"\d+")
 
 
 class ShellView(ttk.Frame):
@@ -136,8 +137,16 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # (enables undoing and redoing the events)
         self._applied_io_events = []
         self._queued_io_events = []
-        self._tag_context = set()
-
+        
+        self._ansi_foreground = None
+        self._ansi_background = None
+        self._ansi_inverse = False
+        self._ansi_intensity = None
+        self._ansi_italic = False
+        self._ansi_underline = False
+        self._ansi_conceal = False
+        self._ansi_strikethrough = False
+        
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
         self.bind("<KeyPress>", self._text_key_press, True)
@@ -219,7 +228,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def _handle_program_output(self, msg):
         self._ensure_visible()
-        self._append_to_io_queue((msg.data, msg.stream_name))
+        self._append_to_io_queue(msg.data, msg.stream_name)
         self._update_visible_io(None)
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
@@ -270,6 +279,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.mark_set("output_end", self.index("end-1c"))
         self._discard_old_content()
         self._update_visible_io(None)
+        self._reset_ansi_attributes()
         self._insert_prompt()
         self._try_submit_input()  # Trying to submit leftover code (eg. second magic command)
         self.see("end")
@@ -287,7 +297,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         parts = re.split(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data)
         for part in parts:
             if part: # split may produce empty string in the beginning or start
-                self._queued_io_events((part, stream_name))
+                self._queued_io_events.append((part, stream_name))
     
     def _update_visible_io(self, target_num_visible_chars):
         current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
@@ -300,6 +310,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._applied_io_events = []
             self.direct_delete("command_io_start", "output_end")
             current_num_visible_chars = 0
+            self._reset_ansi_attributes()
         
         
         while (self._queued_io_events
@@ -320,20 +331,121 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.mark_set("output_end", self.index("end-1c"))
         self.see("end")
     
-    def _apply_io_event(self, data, stream_name):
-        if re.match(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data):
-            ...
-        elif not self._applied_io_events and len(data) > 1:
-            # mark first char of io
-            self._tag_context.append("vertically_spaced")
-            self._apply_io_event(data[0], stream_name)
-            self._tag_context.remove()
-            self._apply_io_event(data[1:], stream_name)
-        else:
-            self._insert_text_directly(data, ("io", stream_name))
-            
+    def _apply_io_event(self, data, stream_name, extra_tags=set()):
+        if not data:
+            return
         
+        if re.match(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data):
+            self._update_ansi_attributes(data)
+            
+        elif len(data) > 100000: 
+            "TODO:"
+        else:
+            tags = extra_tags | {"io", stream_name} | self._get_ansi_tags()
+            print("text:", repr(data), "tags:", tags)
+            if not self._applied_io_events: # TODO: not right when IO starts with ANSI code
+                # mark the first char of io
+                self._insert_text_directly(data[0], tuple(tags | {"vertically_spaced"}))
+                self._insert_text_directly(data[1:], tuple(tags))
+            else:
+                self._insert_text_directly(data, tuple(tags))
+            
         self._applied_io_events.append((data, stream_name))
+    
+    def _reset_ansi_attributes(self):
+        self._ansi_foreground = None
+        self._ansi_background = None
+        self._ansi_inverse = False
+        self._ansi_intensity = None
+        self._ansi_italic = False
+        self._ansi_underline = False
+        self._ansi_conceal = False
+        self._ansi_strikethrough = False
+        
+    def _update_ansi_attributes(self, marker):
+        if not marker.endswith("m"):
+            # ignore
+            return 
+        
+        codes = re.findall(INT_REGEX, marker)
+        if not codes:
+            self._reset_ansi_attributes()
+            
+        while codes:
+            code = codes.pop(0)
+            
+            if code == "0":
+                self._reset_ansi_attributes()
+            elif code in ["1", "2"]:
+                self._ansi_intensity = code
+            elif code == "3":
+                self._ansi_italic = True
+            elif code == "4":
+                self._ansi_underline = True
+            elif code == "7": 
+                self._ansi_inverse = True
+            elif code == "8":
+                self._ansi_conceal = True
+            elif code == "9":
+                self._ansi_strikethrough = True
+            elif code == "22":
+                self._ansi_intensity = None
+            elif code == "23":
+                self._ansi_italic = False
+            elif code == "24":
+                self._ansi_underline = False
+            elif code == "27":
+                self._ansi_inverse = False
+            elif code == "28":
+                self._ansi_conceal = False
+            elif code == "29":
+                self._ansi_strikethrough = False
+            if code in ["30", "31", "32", "33", "34", "35", "36", "37"]:
+                self._ansi_foreground = code
+            elif code == "39":
+                self._ansi_foreground = None
+            elif code in ["40", "41", "42", "43", "44", "45", "46", "47"]:
+                self._ansi_background = code
+            elif code == "49":
+                self._ansi_background = None
+            elif code in ["38", "48"]:
+                # multipart code, ignore for now,
+                # but make sure all arguments are ignored
+                if not codes:
+                    # nothing follows, ie. invalid code
+                    break
+                mode = codes.pop(0)
+                if mode == "5":
+                    # 256-color code, just ignore for now
+                    if not codes:
+                        break
+                    codes = codes[1:]
+                elif mode == "2":
+                    # 24-bit code, ignore
+                    if len(codes) < 3:
+                        # invalid code
+                        break
+                    codes = codes[3:]
+            else:
+                # ignore other codes
+                pass
+    
+    def _get_ansi_tags(self):
+        result = set()
+        
+        if self._ansi_foreground:
+            tag = "ansi_" + self._ansi_foreground
+            if self._ansi_intensity:
+                tag += "_" + self._ansi_intensity
+            result.add(tag)
+        elif self._ansi_intensity:
+            # default color
+            result.add("ansi_" + self._ansi_intensity)
+            
+        if self._ansi_background:
+            result.add("ansi_" + self._ansi_background)
+        
+        return result
 
     def _insert_prompt(self):
         # if previous output didn't put a newline, then do it now

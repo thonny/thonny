@@ -56,6 +56,10 @@ def default_light() -> SyntaxThemeSettings:
             "relief": "solid",
         },
         "expression_box": {"background": "#DCEDF2", "foreground": default_fg},
+        
+        "ansi_31" : {"foreground" : "red"},
+        "ansi_41" : {"background" : "red"},
+        
     }
 
 
