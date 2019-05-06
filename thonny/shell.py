@@ -221,6 +221,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         )
 
         self._menu = ShellMenu(self)
+        
+        self.tag_raise("intense")
+        self.tag_raise("sel")
+        
 
     def submit_command(self, cmd_line, tags):
         assert get_runner().is_waiting_toplevel_command()
@@ -348,13 +352,20 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             return
         
         if re.match(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data):
-            self._update_ansi_attributes(data)
+            # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
+            # codes sent to stderr shouldn't affect later output in stdout
+            # It makes sense, but Ubuntu terminal does not confirm it.
+            # For now I'm just throwing out stderr color codes 
+            if stream_name == "stdout":
+                self._update_ansi_attributes(data)
             
         elif len(data) > 100000: 
             "TODO:"
         else:
-            tags = extra_tags | {"io", stream_name} | self._get_ansi_tags()
-            print("text:", repr(data), "tags:", tags)
+            tags = extra_tags | {"io", stream_name}
+            if stream_name == "stdout":
+                tags |= self._get_ansi_tags()
+                
             if not self._applied_io_events:
                 # add spacing between command and first line of IO
                 self.tag_add("before_io", "output_insert -1 line linestart") 
