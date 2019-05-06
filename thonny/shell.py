@@ -164,7 +164,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.bind("<KeyRelease>", self._text_key_release, True)
 
         prompt_font = tk.font.nametofont("BoldEditorFont")
-        vert_spacing = 10
+        io_vert_spacing = 10
         io_indent = 16
         code_indent = prompt_font.measure(">>> ")
 
@@ -186,7 +186,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
         self.tag_raise("hyperlink")
 
-        self.tag_configure("vertically_spaced", spacing1=vert_spacing)
+        self.tag_configure("after_io_or_value", spacing1=io_vert_spacing)
+        self.tag_configure("before_io", spacing3=io_vert_spacing)
         
         # Underline on font looks better than underline on tag
         io_hyperlink_font = tk.font.nametofont("IOFont").copy()
@@ -354,12 +355,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         else:
             tags = extra_tags | {"io", stream_name} | self._get_ansi_tags()
             print("text:", repr(data), "tags:", tags)
-            if not self._applied_io_events: # TODO: not right when IO starts with ANSI code
-                # mark the first char of io
-                self._insert_text_directly(data[0], tuple(tags | {"vertically_spaced"}))
-                self._insert_text_directly(data[1:], tuple(tags))
-            else:
-                self._insert_text_directly(data, tuple(tags))
+            if not self._applied_io_events:
+                # add spacing between command and first line of IO
+                self.tag_add("before_io", "output_insert -1 line linestart") 
+                
+            self._insert_text_directly(data, tuple(tags))
             
         self._applied_io_events.append((data, stream_name))
     
@@ -491,8 +491,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         prev_line = self.index("output_insert - 1 lines")
         prev_line_tags = self.tag_names(prev_line)
         if "io" in prev_line_tags or "value" in prev_line_tags:
-            prompt_tags += ("vertically_spaced",)
-            # self.tag_add("last_result_line", prev_line)
+            prompt_tags += ("after_io_or_value",)
 
         self._insert_text_directly(">>> ", prompt_tags)
         self.edit_reset()
@@ -526,8 +525,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
             if not get_runner().is_waiting_toplevel_command():
                 if not self._applied_io_events:
-                    # tag first char of io differently
-                    self.tag_add("vertically_spaced", index)
+                    # tag preceding command line differently
+                    self.tag_add("before_io", "input_start -1 lines linestart")
 
                 self._try_submit_input()
 
