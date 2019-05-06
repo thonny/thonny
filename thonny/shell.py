@@ -26,6 +26,17 @@ from _tkinter import TclError
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 DELIM_RETURNING_ANSI_ESCAPE_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~])')
 INT_REGEX = re.compile(r"\d+")
+ANSI_COLOR_NAMES = {
+    "0" : "black",
+    "1" : "red",
+    "2" : "green",
+    "3" : "yellow",
+    "4" : "blue",
+    "5" : "magenta",
+    "6" : "cyan",
+    "7" : "white",
+    "9" : "default",
+}
 
 
 class ShellView(ttk.Frame):
@@ -400,11 +411,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self._ansi_conceal = False
             elif code == "29":
                 self._ansi_strikethrough = False
-            if code in ["30", "31", "32", "33", "34", "35", "36", "37"]:
+            if code in ["30", "31", "32", "33", "34", "35", "36", "37",
+                        "90", "91", "92", "93", "94", "95", "96", "97"]:
                 self._ansi_foreground = code
             elif code == "39":
                 self._ansi_foreground = None
-            elif code in ["40", "41", "42", "43", "44", "45", "46", "47"]:
+            elif code in ["40", "41", "42", "43", "44", "45", "46", "47",
+                          "100", "101", "102", "103", "104", "105", "106", "107"]:
                 self._ansi_background = code
             elif code == "49":
                 self._ansi_background = None
@@ -434,16 +447,36 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         result = set()
         
         if self._ansi_foreground:
-            tag = "ansi_" + self._ansi_foreground
-            if self._ansi_intensity:
-                tag += "_" + self._ansi_intensity
-            result.add(tag)
-        elif self._ansi_intensity:
-            # default color
-            result.add("ansi_" + self._ansi_intensity)
+            fg = ANSI_COLOR_NAMES[self._ansi_foreground[-1]]
+            if self._ansi_intensity == "1" or self._ansi_foreground[0] == "9":
+                fg = "bright_" + fg
+            elif self._ansi_intensity == "2":
+                fg = "dim_" + fg
+        else:
+            fg = "default" 
+            if self._ansi_intensity == "1":
+                fg = "bright_" + fg
+            elif self._ansi_intensity == "2":
+                fg = "dim_" + fg
             
         if self._ansi_background:
-            result.add("ansi_" + self._ansi_background)
+            bg = ANSI_COLOR_NAMES[self._ansi_background[-1]]
+            if self._ansi_foreground.startswith("10"):
+                bg = "bright_" + bg
+        else:
+            bg = "default" 
+        
+        if self._ansi_inverse:
+            result.add(fg + "_bg")
+            result.add(bg + "_fg")
+        else:
+            if fg != "default":
+                result.add(fg + "_fg")
+            if bg != "default":
+                result.add(bg + "_bg")
+                
+        if self._ansi_intensity == "1":
+            result.add("intense")
         
         return result
 

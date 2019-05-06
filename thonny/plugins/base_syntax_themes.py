@@ -57,14 +57,76 @@ def default_light() -> SyntaxThemeSettings:
         },
         "expression_box": {"background": "#DCEDF2", "foreground": default_fg},
         
-        "ansi_31" : {"foreground" : "red"},
-        "ansi_41" : {"background" : "red"},
+        "black_fg" : {"foreground" : "#0c0c0c"},
+        "black_bg" : {"background" : "#0c0c0c"},
+        "bright_black_fg" : {"foreground" : "#767676"},
+        "bright_black_bg" : {"background" : "#767676"},
+        "dim_black_fg" : {"foreground" : "#000000"},
+        "dim_black_bg" : {"background" : "#000000"},
         
+        "red_fg" : {"foreground" : "#c50f1f"},
+        "red_bg" : {"background" : "#c50f1f"},
+        "bright_red_fg" : {"foreground" : "#e74856"},
+        "bright_red_bg" : {"background" : "#e74856"},
+        "dim_red_fg" : {"foreground" : "#9d0c18"},
+        "dim_red_bg" : {"background" : "#9d0c18"},
+        
+        "green_fg" : {"foreground" : "#13a10e"},
+        "green_bg" : {"background" : "#13a10e"},
+        "bright_green_fg" : {"foreground" : "#16c60c"},
+        "bright_green_bg" : {"background" : "#16c60c"},
+        "dim_green_fg" : {"foreground" : "#0f800b"},
+        "dim_green_bg" : {"background" : "#0f800b"},
+        
+        "yellow_fg" : {"foreground" : "#c19c00"},
+        "yellow_bg" : {"background" : "#c19c00"},
+        "bright_yellow_fg" : {"foreground" : "#f9f1a5"},
+        "bright_yellow_bg" : {"background" : "#f9f1a5"},
+        "dim_yellow_fg" : {"foreground" : "#9a7c00"},
+        "dim_yellow_bg" : {"background" : "#9a7c00"},
+        
+        "blue_fg" : {"foreground" : "#0037da"},
+        "blue_bg" : {"background" : "#0037da"},
+        "bright_blue_fg" : {"foreground" : "#3b78ff"},
+        "bright_blue_bg" : {"background" : "#3b78ff"},
+        "dim_blue_fg" : {"foreground" : "#002cae"},
+        "dim_blue_bg" : {"background" : "#002cae"},
+        
+        "magenta_fg" : {"foreground" : "#881798"},
+        "magenta_bg" : {"background" : "#881798"},
+        "bright_magenta_fg" : {"foreground" : "#b4009e"},
+        "bright_magenta_bg" : {"background" : "#b4009e"},
+        "dim_magenta_fg" : {"foreground" : "#6c1279"},
+        "dim_magenta_bg" : {"background" : "#6c1279"},
+        
+        "cyan_fg" : {"foreground" : "#3a96dd"},
+        "cyan_bg" : {"background" : "#3a96dd"},
+        "bright_cyan_fg" : {"foreground" : "#61d6d6"},
+        "bright_cyan_bg" : {"background" : "#61d6d6"},
+        "dim_cyan_fg" : {"foreground" : "#2e78b0"},
+        "dim_cyan_bg" : {"background" : "#2e78b0"},
+        
+        "white_fg" : {"foreground" : "#cccccc"},
+        "white_bg" : {"background" : "#cccccc"},
+        "bright_white_fg" : {"foreground" : "#f2f2f2"},
+        "bright_white_bg" : {"background" : "#f2f2f2"},
+        "dim_white_fg" : {"foreground" : "#a3a3a3"},
+        "dim_white_bg" : {"background" : "#a3a3a3"},
+        
+        "default_fg" : {"foreground" : default_fg},
+        "default_bg" : {"background" : default_bg},
+        "bright_default_fg" : {"foreground" : "#000000"},
+        "bright_default_bg" : {"background" : "#ffffff"},
+        "dim_default_fg" : {"foreground" : "#222222"},
+        "dim_default_bg" : {"background" : "#e0e0e0"},
+        
+        "intense" : {"font": "BoldEditorFont"}
     }
 
 
 def default_dark() -> SyntaxThemeSettings:
     default_fg = "#B3B3B3"
+    default_bg = "#2d2d2d"
     string_fg = "#8DC76F"
     open_string_bg = "#224533"
 
@@ -75,7 +137,7 @@ def default_dark() -> SyntaxThemeSettings:
         "TEXT": {
             "foreground": default_fg,
             "insertbackground": default_fg,
-            "background": "#2d2d2d",
+            "background": default_bg,
         },
         "GUTTER": {"foreground": "#606060", "background": "#323232"},
         "breakpoint": {"foreground": "pink"},
@@ -120,6 +182,71 @@ def default_dark() -> SyntaxThemeSettings:
             "relief": "solid",
         },
         "expression_box": {"background": "#506E67", "foreground": default_fg},
+        
+        "black_fg" : {"foreground" : "#0c0c0c"},
+        "black_bg" : {"background" : "#0c0c0c"},
+        "bright_black_fg" : {"foreground" : "#767676"},
+        "bright_black_bg" : {"background" : "#767676"},
+        "dim_black_fg" : {"foreground" : "#000000"},
+        "dim_black_bg" : {"background" : "#000000"},
+        
+        "red_fg" : {"foreground" : "#c50f1f"},
+        "red_bg" : {"background" : "#c50f1f"},
+        "bright_red_fg" : {"foreground" : "#e74856"},
+        "bright_red_bg" : {"background" : "#e74856"},
+        "dim_red_fg" : {"foreground" : "#9d0c18"},
+        "dim_red_bg" : {"background" : "#9d0c18"},
+        
+        "green_fg" : {"foreground" : "#13a10e"},
+        "green_bg" : {"background" : "#13a10e"},
+        "bright_green_fg" : {"foreground" : "#16c60c"},
+        "bright_green_bg" : {"background" : "#16c60c"},
+        "dim_green_fg" : {"foreground" : "#0f800b"},
+        "dim_green_bg" : {"background" : "#0f800b"},
+        
+        "yellow_fg" : {"foreground" : "#c19c00"},
+        "yellow_bg" : {"background" : "#c19c00"},
+        "bright_yellow_fg" : {"foreground" : "#f9f1a5"},
+        "bright_yellow_bg" : {"background" : "#f9f1a5"},
+        "dim_yellow_fg" : {"foreground" : "#9a7c00"},
+        "dim_yellow_bg" : {"background" : "#9a7c00"},
+        
+        "blue_fg" : {"foreground" : "#0037da"},
+        "blue_bg" : {"background" : "#0037da"},
+        "bright_blue_fg" : {"foreground" : "#3b78ff"},
+        "bright_blue_bg" : {"background" : "#3b78ff"},
+        "dim_blue_fg" : {"foreground" : "#002cae"},
+        "dim_blue_bg" : {"background" : "#002cae"},
+        
+        "magenta_fg" : {"foreground" : "#881798"},
+        "magenta_bg" : {"background" : "#881798"},
+        "bright_magenta_fg" : {"foreground" : "#b4009e"},
+        "bright_magenta_bg" : {"background" : "#b4009e"},
+        "dim_magenta_fg" : {"foreground" : "#6c1279"},
+        "dim_magenta_bg" : {"background" : "#6c1279"},
+        
+        "cyan_fg" : {"foreground" : "#3a96dd"},
+        "cyan_bg" : {"background" : "#3a96dd"},
+        "bright_cyan_fg" : {"foreground" : "#61d6d6"},
+        "bright_cyan_bg" : {"background" : "#61d6d6"},
+        "dim_cyan_fg" : {"foreground" : "#2e78b0"},
+        "dim_cyan_bg" : {"background" : "#2e78b0"},
+        
+        "white_fg" : {"foreground" : "#cccccc"},
+        "white_bg" : {"background" : "#cccccc"},
+        "bright_white_fg" : {"foreground" : "#f2f2f2"},
+        "bright_white_bg" : {"background" : "#f2f2f2"},
+        "dim_white_fg" : {"foreground" : "#a3a3a3"},
+        "dim_white_bg" : {"background" : "#a3a3a3"},
+        
+        "default_fg" : {"foreground" : default_fg},
+        "default_bg" : {"background" : default_bg},
+        "bright_default_fg" : {"foreground" : "#000000"},
+        "bright_default_bg" : {"background" : "#ffffff"},
+        "dim_default_fg" : {"foreground" : "#222222"},
+        "dim_default_bg" : {"background" : "#e0e0e0"},
+        
+        "intense" : {"font": "BoldEditorFont"}
     }
 
 
