@@ -453,7 +453,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             elif self._ansi_intensity == "2":
                 fg = "dim_" + fg
         else:
-            fg = "default" 
+            fg = "fore" 
             if self._ansi_intensity == "1":
                 fg = "bright_" + fg
             elif self._ansi_intensity == "2":
@@ -461,18 +461,16 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
         if self._ansi_background:
             bg = ANSI_COLOR_NAMES[self._ansi_background[-1]]
-            if self._ansi_foreground.startswith("10"):
-                bg = "bright_" + bg
         else:
-            bg = "default" 
+            bg = "back" 
         
         if self._ansi_inverse:
             result.add(fg + "_bg")
             result.add(bg + "_fg")
         else:
-            if fg != "default":
+            if fg != "fore":
                 result.add(fg + "_fg")
-            if bg != "default":
+            if bg != "back":
                 result.add(bg + "_bg")
                 
         if self._ansi_intensity == "1":

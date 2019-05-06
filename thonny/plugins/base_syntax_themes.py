@@ -113,12 +113,19 @@ def default_light() -> SyntaxThemeSettings:
         "dim_white_fg" : {"foreground" : "#a3a3a3"},
         "dim_white_bg" : {"background" : "#a3a3a3"},
         
-        "default_fg" : {"foreground" : default_fg},
-        "default_bg" : {"background" : default_bg},
-        "bright_default_fg" : {"foreground" : "#000000"},
-        "bright_default_bg" : {"background" : "#ffffff"},
-        "dim_default_fg" : {"foreground" : "#222222"},
-        "dim_default_bg" : {"background" : "#e0e0e0"},
+        "fore_fg" : {"foreground" : default_fg},
+        "fore_bg" : {"background" : default_fg},
+        "bright_fore_fg" : {"foreground" : "#ffffff"},
+        "bright_fore_bg" : {"background" : "#ffffff"},
+        "dim_fore_fg" : {"foreground" : "#e0e0e0"},
+        "dim_fore_bg" : {"background" : "#e0e0e0"},
+        
+        "back_fg" : {"foreground" : default_bg},
+        "back_bg" : {"background" : default_bg},
+        "bright_back_fg" : {"foreground" : "#000000"},
+        "bright_back_bg" : {"background" : "#000000"},
+        "dim_back_fg" : {"foreground" : "#222222"},
+        "dim_back_bg" : {"background" : "#222222"},
         
         "intense" : {"font": "BoldEditorFont"}
     }
