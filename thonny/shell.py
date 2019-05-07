@@ -300,6 +300,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._discard_old_content()
         self._update_visible_io(None)
         self._reset_ansi_attributes()
+        self._io_cursor_offset = 0
         self._insert_prompt()
         self._try_submit_input()  # Trying to submit leftover code (eg. second magic command)
         self.see("end")
@@ -360,7 +361,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if data == "\b":
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
-                self._change_io_cursor_offset("line") 
+                self._change_io_cursor_offset("line")
+            elif data.endswith("D") or data.endswith("C"):
+                self._change_io_cursor_offset_csi(data) 
             elif stream_name == "stdout":
                 # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
                 # codes sent to stderr shouldn't affect later output in stdout
@@ -378,11 +381,66 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if not self._applied_io_events:
                 # add spacing between command and first line of IO
                 self.tag_add("before_io", "output_insert -1 line linestart") 
+            
+            if self._io_cursor_offset < 0:
+                overwrite_len = min(len(data), -self._io_cursor_offset)
                 
-            self._insert_text_directly(data, tuple(tags))
+                if 0 <= data.find("\n") < overwrite_len:
+                    overwrite_len = data.find("\n")
+                    
+                overwrite_data = data[:overwrite_len]
+                self.direct_insert("output_insert -%d chars" % -self._io_cursor_offset,
+                                   overwrite_data, tuple(tags))
+                print("offlen", -self._io_cursor_offset, overwrite_len)
+                del_start = self.index("output_insert -%d chars" % -self._io_cursor_offset)
+                del_end = self.index("output_insert -%d chars" % 
+                                        (-self._io_cursor_offset - overwrite_len))
+                print("before del", self.get("output_insert linestart", "output_insert lineend"))
+                print("del", del_start, del_end)
+                self.direct_delete(del_start, del_end)
+                
+                # compute leftover data to be printed normally
+                data = data[overwrite_len:]
+                print("split", (overwrite_data, overwrite_len, data))
+                
+                if "\n" in data:
+                    # cursor offset doesn't apply on new line
+                    self._io_cursor_offset = 0
+                else:
+                    # offset becomes closer to 0
+                    self._io_cursor_offset + overwrite_len
+                
+            elif self._io_cursor_offset > 0:
+                # insert spaces before actual data 
+                # NB! Print without formatting tags 
+                self._insert_text_directly(" " * self._io_cursor_offset, ("io", stream_name))
+                self._io_cursor_offset = 0
+            
+            if data:
+                # if any data is still left, then this should be output normally
+                self._insert_text_directly(data, tuple(tags))
+                
             
         self._applied_io_events.append((data, stream_name))
     
+    def _change_io_cursor_offset_csi(self, marker):
+        ints = re.findall(INT_REGEX, marker)
+        if len(ints) != 1:
+            logging.warn("bad CSI cursor positioning: %s", marker)
+            # do nothing
+            return
+        
+        try:
+            delta = int(ints[0])
+        except ValueError:
+            logging.warn("bad CSI cursor positioning: %s", marker)
+            return
+        
+        if marker.endswith("D"):
+            delta = -delta
+        
+        self._change_io_cursor_offset(delta)        
+            
     def _change_io_cursor_offset(self, delta):
         line = self.get("output_insert linestart", "output_insert")
         if delta == "line":
@@ -897,6 +955,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         if (
             len(self._command_history) == 0
+            # FIXME: _command_history_current_index may be None
             or self._command_history_current_index >= len(self._command_history) - 1
         ):
             # can't take next command
