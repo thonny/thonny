@@ -24,7 +24,10 @@ from thonny.ui_utils import (
 from _tkinter import TclError
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
-DELIM_RETURNING_ANSI_ESCAPE_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~])')
+
+# NB! Don't add parens without refactoring split procedure!
+OUTPUT_SPLIT_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])')
+
 INT_REGEX = re.compile(r"\d+")
 ANSI_COLOR_NAMES = {
     "0" : "black",
@@ -157,6 +160,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._ansi_underline = False
         self._ansi_conceal = False
         self._ansi_strikethrough = False
+        self._io_cursor_offset = 0
         
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
@@ -310,7 +314,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # Make sure ANSI CSI codes are stored as separate events
         # TODO: try to complete previously submitted incomplete code
         
-        parts = re.split(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data)
+        parts = re.split(OUTPUT_SPLIT_REGEX, data)
+        print(parts)
         for part in parts:
             if part: # split may produce empty string in the beginning or start
                 self._queued_io_events.append((part, stream_name))
@@ -351,14 +356,18 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if not data:
             return
         
-        if re.match(DELIM_RETURNING_ANSI_ESCAPE_REGEX, data):
-            # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
-            # codes sent to stderr shouldn't affect later output in stdout
-            # It makes sense, but Ubuntu terminal does not confirm it.
-            # For now I'm just throwing out stderr color codes 
-            if stream_name == "stdout":
+        if re.match(OUTPUT_SPLIT_REGEX, data):
+            if data == "\b":
+                self._change_io_cursor_offset(-1)
+            elif data == "\r":
+                self._change_io_cursor_offset("line") 
+            elif stream_name == "stdout":
+                # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
+                # codes sent to stderr shouldn't affect later output in stdout
+                # It makes sense, but Ubuntu terminal does not confirm it.
+                # For now I'm just trimming stderr color codes 
                 self._update_ansi_attributes(data)
-            
+                
         elif len(data) > 100000: 
             "TODO:"
         else:
@@ -373,6 +382,18 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._insert_text_directly(data, tuple(tags))
             
         self._applied_io_events.append((data, stream_name))
+    
+    def _change_io_cursor_offset(self, delta):
+        line = self.get("output_insert linestart", "output_insert")
+        if delta == "line":
+            self._io_cursor_offset = - len(line)
+        else:
+            self._io_cursor_offset += delta
+            if self._io_cursor_offset < - len(line):
+                # cap
+                self._io_cursor_offset = - len(line) 
+        
+        print("new offset:", self._io_cursor_offset)
     
     def _reset_ansi_attributes(self):
         self._ansi_foreground = None
