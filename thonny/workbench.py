@@ -424,6 +424,12 @@ class Workbench(tk.Tk):
             tk_font.Font(name="BoldIOFont", 
                          family=self.get_option("view.io_font_family"),
                          weight="bold"),
+            tk_font.Font(name="ItalicIOFont", 
+                         family=self.get_option("view.io_font_family"),
+                         slant="italic"),
+            tk_font.Font(name="BoldItalicIOFont", 
+                         family=self.get_option("view.io_font_family"),
+                         weight="bold", slant="italic"),
             tk_font.Font(
                 name="EditorFont", family=self.get_option("view.editor_font_family")
             ),
@@ -1616,15 +1622,12 @@ class Workbench(tk.Tk):
         )
         editor_font_family = self.get_option("view.editor_font_family")
         io_font_family = self.get_option("view.io_font_family")
-
-        tk_font.nametofont("IOFont").configure(
-            family=io_font_family,
-            size=min(editor_font_size - 2, int(editor_font_size * 0.8 + 3)),
-        )
-        tk_font.nametofont("BoldIOFont").configure(
-            family=io_font_family,
-            size=min(editor_font_size - 2, int(editor_font_size * 0.8 + 3)),
-        )
+        
+        for name in ("IOFont", "BoldIOFont", "ItalicIOFont", "BoldItalicIOFont"):
+            tk_font.nametofont(name).configure(
+                family=io_font_family,
+                size=min(editor_font_size - 2, int(editor_font_size * 0.8 + 3)),
+            )
         tk_font.nametofont("EditorFont").configure(
             family=editor_font_family, size=editor_font_size
         )

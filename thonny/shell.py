@@ -563,8 +563,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if bg != "back":
                 result.add(bg + "_bg")
                 
-        if self._ansi_intensity == "1":
-            result.add("intense")
+        if self._ansi_intensity == "1" and self._ansi_italic:
+            result.add("intense_italic_io")
+        elif self._ansi_intensity == "1":
+            result.add("intense_io")
+        elif self._ansi_italic:
+            result.add("italic_io")
         
         return result
 
