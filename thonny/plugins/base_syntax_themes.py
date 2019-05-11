@@ -115,19 +115,24 @@ def default_light() -> SyntaxThemeSettings:
         
         "fore_fg" : {"foreground" : default_fg},
         "fore_bg" : {"background" : default_fg},
-        "bright_fore_fg" : {"foreground" : "#ffffff"},
-        "bright_fore_bg" : {"background" : "#ffffff"},
-        "dim_fore_fg" : {"foreground" : "#e0e0e0"},
-        "dim_fore_bg" : {"background" : "#e0e0e0"},
+        "bright_fore_fg" : {"foreground" : "#000000"},
+        "bright_fore_bg" : {"background" : "#000000"},
+        "dim_fore_fg" : {"foreground" : "#222222"},
+        "dim_fore_bg" : {"background" : "#222222"},
         
         "back_fg" : {"foreground" : default_bg},
         "back_bg" : {"background" : default_bg},
-        "bright_back_fg" : {"foreground" : "#000000"},
-        "bright_back_bg" : {"background" : "#000000"},
-        "dim_back_fg" : {"foreground" : "#222222"},
-        "dim_back_bg" : {"background" : "#222222"},
+        "bright_back_fg" : {"foreground" : "#ffffff"},
+        "bright_back_bg" : {"background" : "#ffffff"},
+        "dim_back_fg" : {"foreground" : "#e0e0e0"},
+        "dim_back_bg" : {"background" : "#e0e0e0"},
         
-        "intense" : {"font": "BoldIOFont"}
+        "intense_io" : {"font": "BoldIOFont"},
+        "italic_io" : {"font": "ItalicIOFont"},
+        "intense_italic_io" : {"font": "BoldItalicIOFont"},
+        
+        "underline" : {"underline" : True},
+        "strikethrough" : {"overstrike" : True},
     }
 
 
@@ -260,7 +265,12 @@ def default_dark() -> SyntaxThemeSettings:
         "dim_back_fg" : {"foreground" : "#222222"},
         "dim_back_bg" : {"background" : "#222222"},
         
-        "intense" : {"font": "BoldIOFont"}
+        "intense_io" : {"font": "BoldIOFont"},
+        "italic_io" : {"font": "ItalicIOFont"},
+        "intense_italic_io" : {"font": "BoldItalicIOFont"},
+        
+        "underline" : {"underline" : True},
+        "strikethrough" : {"overstrike" : True},
     }
 
 

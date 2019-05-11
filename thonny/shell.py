@@ -226,7 +226,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         self._menu = ShellMenu(self)
         
-        self.tag_raise("intense")
+        self.tag_raise("underline")
+        self.tag_raise("strikethrough")
+        self.tag_raise("intense_io")
+        self.tag_raise("italic_io")
+        self.tag_raise("intense_italic_io")
         self.tag_raise("sel")
         
 
@@ -249,6 +253,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _handle_program_output(self, msg):
         self._ensure_visible()
         self._append_to_io_queue(msg.data, msg.stream_name)
+        
+        if not self._applied_io_events:
+            # this is first line of io, add padding below command line
+            self.tag_add("before_io", "output_insert -1 line linestart") 
+            
         self._update_visible_io(None)
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
@@ -377,11 +386,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             tags = extra_tags | {"io", stream_name}
             if stream_name == "stdout":
                 tags |= self._get_ansi_tags()
-                
-            if not self._applied_io_events:
-                # add spacing between command and first line of IO
-                self.tag_add("before_io", "output_insert -1 line linestart") 
-            
+            print(tags)
             if self._io_cursor_offset < 0:
                 overwrite_len = min(len(data), -self._io_cursor_offset)
                 
@@ -551,6 +556,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             
         if self._ansi_background:
             bg = ANSI_COLOR_NAMES[self._ansi_background[-1]]
+            if self._ansi_background.startswith("10"):
+                bg = "bright_" + bg
         else:
             bg = "back" 
         
@@ -569,7 +576,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             result.add("intense_io")
         elif self._ansi_italic:
             result.add("italic_io")
-        
+            
+        if self._ansi_underline:
+            result.add("underline")
+                
+        if self._ansi_strikethrough:
+            result.add("strikethrough")
+                
         return result
 
     def _insert_prompt(self):
