@@ -40,6 +40,7 @@ ANSI_COLOR_NAMES = {
     "7" : "white",
     "9" : "default",
 }
+LINEBREAK_REGEX = re.compile(r"\r?\n", re.MULTILINE)
 
 
 class ShellView(ttk.Frame):
@@ -60,6 +61,7 @@ class ShellView(ttk.Frame):
         )
         
         get_workbench().set_default("shell.soft_max_chars", 10000)
+        get_workbench().set_default("shell.squeeze_length", 100)
 
         self.text = ShellText(
             self,
@@ -321,6 +323,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._update_visible_io(msg.io_symbol_count)
     
     def _append_to_io_queue(self, data, stream_name):
+        max_chars = get_workbench().get_option("shell.max_chars_in_line_block")
+        # first split the data so that very long lines get separated
+        for block in re.split("(.{%d,})" % max_chars + 1, data):
+            if len(block) <= max_chars or "\n" in block:
+                pass
+                
+        
         # Make sure ANSI CSI codes are stored as separate events
         # TODO: try to complete previously submitted incomplete code
         
