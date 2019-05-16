@@ -9,18 +9,17 @@ from thonny.config_ui import ConfigurationPage
 class ShellConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         ConfigurationPage.__init__(self, master)
+        self.columnconfigure(1, weight=1)
 
-        soft_max_chars_var = get_workbench().get_variable(
-            "shell.soft_max_chars"
-        )
-        label = ttk.Label(
+        soft_max_chars_var = get_workbench().get_variable("shell.soft_max_chars")
+        max_lines_label = ttk.Label(
             self,
             text=_("Preferred size of output history (scroll buffer) in characters.\n"
                    + "This does not constrain last block, which is always shown in full.\n"
                    + "NB! Larger values may cause poor performance!"),
         )
-        label.grid(row=20, column=0, sticky=tk.W)
-        self._line_length_combo = ttk.Combobox(
+        max_lines_label.grid(row=20, column=0, sticky=tk.W)
+        max_lines_combo = ttk.Combobox(
             self,
             width=9,
             exportselection=False,
@@ -28,9 +27,23 @@ class ShellConfigurationPage(ConfigurationPage):
             state="readonly",
             values=[1000, 5000, 10000, 50000, 100000, 500000, 1000000],
         )
-        self._line_length_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
+        max_lines_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
-        self.columnconfigure(1, weight=1)
+        squeeze_var = get_workbench().get_variable("shell.squeeze_threshold")
+        squeeze_label = ttk.Label(
+            self,
+            text="Maximum length of line fragments before squeezing"
+        )
+        squeeze_label.grid(row=22, column=0, sticky="w")
+        squeeze_combo = ttk.Combobox(
+            self,
+            width=9,
+            exportselection=False,
+            textvariable=squeeze_var,
+            state="readonly",
+            values=[500, 1000, 1500, 2000, 3000, 4000, 5000, 10000],
+        )
+        squeeze_combo.grid(row=22, column=1, sticky=tk.W, padx=10, pady=10)
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page(_("Shell"), ShellConfigurationPage)

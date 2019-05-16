@@ -16,11 +16,11 @@ from thonny.misc_utils import (
     running_on_mac_os,
     shorten_repr,
 )
-from thonny.tktextext import index2line
+from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
     scrollbar_style,
-    select_sequence, TextMenu)
+    select_sequence, TextMenu, create_tooltip, show_dialog)
 from _tkinter import TclError
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
@@ -40,7 +40,6 @@ ANSI_COLOR_NAMES = {
     "7" : "white",
     "9" : "default",
 }
-LINEBREAK_REGEX = re.compile(r"\r?\n", re.MULTILINE)
 
 
 class ShellView(ttk.Frame):
@@ -61,7 +60,7 @@ class ShellView(ttk.Frame):
         )
         
         get_workbench().set_default("shell.soft_max_chars", 10000)
-        get_workbench().set_default("shell.squeeze_length", 100)
+        get_workbench().set_default("shell.squeeze_threshold", 1000)
 
         self.text = ShellText(
             self,
@@ -322,14 +321,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         else:
             self._update_visible_io(msg.io_symbol_count)
     
+    def _get_squeeze_threshold(self):
+        return get_workbench().get_option("shell.squeeze_threshold")
+    
     def _append_to_io_queue(self, data, stream_name):
-        max_chars = get_workbench().get_option("shell.max_chars_in_line_block")
-        # first split the data so that very long lines get separated
-        for block in re.split("(.{%d,})" % max_chars + 1, data):
-            if len(block) <= max_chars or "\n" in block:
-                pass
-                
-        
         # Make sure ANSI CSI codes are stored as separate events
         # TODO: try to complete previously submitted incomplete code
         
@@ -337,7 +332,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         print(parts)
         for part in parts:
             if part: # split may produce empty string in the beginning or start
-                self._queued_io_events.append((part, stream_name))
+                # split the data so that very long lines separated
+                for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
+                    print("Block %r" % block)
+                    if block:
+                        self._queued_io_events.append((block, stream_name))
     
     def _update_visible_io(self, target_num_visible_chars):
         current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
@@ -375,6 +374,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if not data:
             return
         
+        original_data = data
+        
+        print("Apply", repr(data), self._get_squeeze_threshold(), "\n" not in data)
+        
         if re.match(OUTPUT_SPLIT_REGEX, data):
             if data == "\b":
                 self._change_io_cursor_offset(-1)
@@ -389,14 +392,33 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 # For now I'm just trimming stderr color codes 
                 self._update_ansi_attributes(data)
                 
-        elif len(data) > 100000: 
-            "TODO:"
         else:
             tags = extra_tags | {"io", stream_name}
             if stream_name == "stdout":
                 tags |= self._get_ansi_tags()
+                
             print(tags)
-            if self._io_cursor_offset < 0:
+            
+            if len(data) > self._get_squeeze_threshold() and "\n" not in data: 
+                self._io_cursor_offset = 0 # ignore the effect of preceding \r and \b
+                button_text = (data[:40] + " …") 
+                btn = tk.Label(self,
+                                 text=button_text,
+                                 #width=len(button_text),
+                                 cursor="arrow",
+                                 borderwidth=2,
+                                 relief="raised",
+                                 font="IOFont",
+                                 )
+                btn.bind("<1>", lambda e:self._show_squeezed_text(btn), True)
+                btn.contained_text = data
+                btn.tags = tags
+                create_tooltip(btn, "%d characters squeezed. " % len(data)
+                               + "Click for details.")
+                self.window_create("output_insert", window=btn)
+                data = ""
+            
+            elif self._io_cursor_offset < 0:
                 overwrite_len = min(len(data), -self._io_cursor_offset)
                 
                 if 0 <= data.find("\n") < overwrite_len:
@@ -435,7 +457,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self._insert_text_directly(data, tuple(tags))
                 
             
-        self._applied_io_events.append((data, stream_name))
+        self._applied_io_events.append((original_data, stream_name))
+    
+    def _show_squeezed_text(self, button):
+        dlg = SqueezedTextDialog(self, button)
+        show_dialog(dlg)
+    
+    def _expand_squeezed_text(self, button):
+        print("expa", button.contained_text)
     
     def _change_io_cursor_offset_csi(self, marker):
         ints = re.findall(INT_REGEX, marker)
@@ -1099,9 +1128,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.direct_delete("0.1", final_cut)
             
             
-            
-        
-    
     def _invalidate_current_data(self):
         """
         Grayes out input & output displayed so far
@@ -1113,3 +1139,85 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         while len(self.active_object_tags) > 0:
             self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
+
+class SqueezedTextDialog(tk.Toplevel):
+    def __init__(self, master, button):
+        super().__init__(master)
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+        self.button = button
+        self.content = button.contained_text
+        self.shell_text = master
+        
+        padding = 20
+        
+        mainframe = ttk.Frame(self)
+        mainframe.grid(row=0, column=0, sticky="nsew")
+        mainframe.columnconfigure(0, weight=1)
+        mainframe.rowconfigure(2, weight=1)
+        
+        explanation_label = ttk.Label(mainframe, 
+                                      text="For performance reasons, Shell avoids showing "
+                                        + "very long lines in full (see Tools => Options => Shell).\n"
+                                        + "Here you can interact with the original text fragment.")
+        explanation_label.grid(row=0, column=0, sticky="nsew", padx=padding, pady=padding)
+        
+        self._wrap_var = tk.BooleanVar(False)
+        self.wrap_checkbox = ttk.Checkbutton(mainframe, text="Wrap text (may be slow)",
+                                             variable=self._wrap_var,
+                                             onvalue=True,
+                                             offvalue=False,
+                                             command=self._on_wrap_changed)
+        self.wrap_checkbox.grid(row=1, padx=padding, pady=(0,padding//2), sticky="w")
+        
+        self.text_frame = TextFrame(mainframe, text_class=TweakableText, height=10, width=80,
+                                    relief="sunken", borderwidth=1,
+                                    wrap="none")
+        self.text_frame.grid(row=2, column=0, padx=padding)
+        self.text_frame.text.insert("1.0", button.contained_text)
+        self.text_frame.text.set_read_only(True)
+        
+        button_frame = ttk.Frame(mainframe)
+        button_frame.grid(row=3, column=0, padx=padding, pady=padding, sticky="nswe")
+        button_frame.columnconfigure(2, weight=1)
+        
+        copy_caption = "Copy to clipboard"
+        copy_button = ttk.Button(button_frame, text=copy_caption,
+                                 width=len(copy_caption), 
+                                 command=self._on_copy)
+        copy_button.grid(row=0, column=1, sticky="w", padx=(0, padding))
+        
+        expand_caption = "Expand in Shell"
+        expand_button = ttk.Button(button_frame, text=expand_caption,
+                                   width=len(expand_caption),
+                                   command=self._on_expand)
+        expand_button.grid(row=0, column=2, sticky="e", padx=padding)
+        
+        close_button = ttk.Button(button_frame, text="Close", 
+                                  command=self._on_close)
+        close_button.grid(row=0, column=3, sticky="e")
+
+        self.bind("<Escape>", self._on_close, True)
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+        self.title("Squeezed text (%d characters)" % len(self.content))
+    
+    def _on_wrap_changed(self):
+        if self._wrap_var.get():
+            self.text_frame.text.configure(wrap="word")
+        else:
+            self.text_frame.text.configure(wrap="none")
+    
+    def _on_expand(self):
+        index = self.shell_text.index(self.button)
+        self.shell_text.direct_delete(index, index + " +1 chars")
+        self.shell_text.direct_insert(index, self.content, tuple(self.button.tags))
+        self.destroy()
+    
+    def _on_copy(self):
+        self.clipboard_clear()
+        self.clipboard_append(self.content)
+    
+    def _on_close(self, event=None):
+        self.destroy()
+        
+        

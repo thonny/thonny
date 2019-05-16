@@ -1991,8 +1991,12 @@ def show_dialog(dlg, master=None, geometry=True):
         else:
             assign_geometry(dlg, master)
         #dlg.wm_deiconify()
-
-    dlg.grab_set()
+    
+    try:
+        dlg.grab_set()
+    except:
+        pass
+    
     dlg.lift()
     dlg.focus_set()
     
@@ -2003,7 +2007,10 @@ def show_dialog(dlg, master=None, geometry=True):
     master.winfo_toplevel().grab_set()
     
     if focused_widget is not None:
-        focused_widget.focus_force()
+        try:
+            focused_widget.focus_force()
+        except TclError:
+            pass
 
 
 def popen_with_ui_thread_callback(

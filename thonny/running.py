@@ -57,6 +57,7 @@ from thonny.ui_utils import select_sequence
 
 
 WINDOWS_EXE = "python.exe"
+OUTPUT_MERGE_THRESHOLD = 10
 
 
 class Runner:
@@ -664,7 +665,7 @@ class CPythonProxy(BackendProxy):
         self._store_state_info(msg)
 
         if msg.event_type == "ProgramOutput":
-            # combine available output messages to one single message,
+            # combine available small output messages to one single message,
             # in order to put less pressure on UI code
 
             while True:
@@ -672,10 +673,9 @@ class CPythonProxy(BackendProxy):
                     return msg
                 else:
                     next_msg = self._message_queue.popleft()
-                    if (
-                        next_msg.event_type == "ProgramOutput"
+                    if (next_msg.event_type == "ProgramOutput"
                         and next_msg["stream_name"] == msg["stream_name"]
-                    ):
+                        and len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD):
                         msg["data"] += next_msg["data"]
                     else:
                         # not same type of message, put it back
