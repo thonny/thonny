@@ -57,7 +57,7 @@ from thonny.ui_utils import select_sequence
 
 
 WINDOWS_EXE = "python.exe"
-OUTPUT_MERGE_THRESHOLD = 10
+OUTPUT_MERGE_THRESHOLD = 1000
 
 
 class Runner:

@@ -904,7 +904,6 @@ class ToolTip:
         self.id = None
         self.x = self.y = 0
         self.options = options
-        get_workbench().bind("WindowFocusOut", self.hidetip, True)
 
     def showtip(self, text):
         "Display text in tooltip window"
@@ -933,12 +932,15 @@ class ToolTip:
             pass
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
+        #get_workbench().bind("WindowFocusOut", self.hidetip, True)
 
     def hidetip(self, event=None):
         tw = self.tipwindow
         self.tipwindow = None
         if tw:
             tw.destroy()
+        
+        #get_workbench().unbind("WindowFocusOut", self.hidetip)
     
 def create_tooltip(widget, text, **kw):
     options = get_style_configuration("Tooltip").copy()

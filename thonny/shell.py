@@ -59,7 +59,7 @@ class ShellView(ttk.Frame):
             group=200,
         )
         
-        get_workbench().set_default("shell.soft_max_chars", 10000)
+        get_workbench().set_default("shell.max_lines", 1000)
         get_workbench().set_default("shell.squeeze_threshold", 1000)
 
         self.text = ShellText(
@@ -162,6 +162,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._ansi_conceal = False
         self._ansi_strikethrough = False
         self._io_cursor_offset = 0
+        self._squeeze_buttons = set()
         
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
@@ -314,6 +315,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._insert_prompt()
         self._try_submit_input()  # Trying to submit leftover code (eg. second magic command)
         self.see("end")
+        
+        #import os
+        #import psutil
+        #process = psutil.Process(os.getpid())
+        #print("MEM", process.memory_info().rss // (1024*1024))          
 
     def _handle_fancy_debugger_progress(self, msg):
         if msg.in_present or msg.io_symbol_count is None:
@@ -329,12 +335,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # TODO: try to complete previously submitted incomplete code
         
         parts = re.split(OUTPUT_SPLIT_REGEX, data)
-        print(parts)
         for part in parts:
             if part: # split may produce empty string in the beginning or start
                 # split the data so that very long lines separated
                 for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
-                    print("Block %r" % block)
                     if block:
                         self._queued_io_events.append((block, stream_name))
     
@@ -376,8 +380,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         
         original_data = data
         
-        print("Apply", repr(data), self._get_squeeze_threshold(), "\n" not in data)
-        
         if re.match(OUTPUT_SPLIT_REGEX, data):
             if data == "\b":
                 self._change_io_cursor_offset(-1)
@@ -397,8 +399,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if stream_name == "stdout":
                 tags |= self._get_ansi_tags()
                 
-            print(tags)
-            
             if len(data) > self._get_squeeze_threshold() and "\n" not in data: 
                 self._io_cursor_offset = 0 # ignore the effect of preceding \r and \b
                 button_text = (data[:40] + " …") 
@@ -413,8 +413,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 btn.bind("<1>", lambda e:self._show_squeezed_text(btn), True)
                 btn.contained_text = data
                 btn.tags = tags
-                create_tooltip(btn, "%d characters squeezed. " % len(data)
-                               + "Click for details.")
+                self._squeeze_buttons.add(btn)
+                create_tooltip(btn, "%d characters squeezed. " % len(data) + "Click for details.")
                 self.window_create("output_insert", window=btn)
                 data = ""
             
@@ -427,17 +427,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 overwrite_data = data[:overwrite_len]
                 self.direct_insert("output_insert -%d chars" % -self._io_cursor_offset,
                                    overwrite_data, tuple(tags))
-                print("offlen", -self._io_cursor_offset, overwrite_len)
                 del_start = self.index("output_insert -%d chars" % -self._io_cursor_offset)
                 del_end = self.index("output_insert -%d chars" % 
                                         (-self._io_cursor_offset - overwrite_len))
-                print("before del", self.get("output_insert linestart", "output_insert lineend"))
-                print("del", del_start, del_end)
                 self.direct_delete(del_start, del_end)
                 
                 # compute leftover data to be printed normally
                 data = data[overwrite_len:]
-                print("split", (overwrite_data, overwrite_len, data))
                 
                 if "\n" in data:
                     # cursor offset doesn't apply on new line
@@ -462,9 +458,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _show_squeezed_text(self, button):
         dlg = SqueezedTextDialog(self, button)
         show_dialog(dlg)
-    
-    def _expand_squeezed_text(self, button):
-        print("expa", button.contained_text)
     
     def _change_io_cursor_offset_csi(self, marker):
         ints = re.findall(INT_REGEX, marker)
@@ -493,8 +486,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if self._io_cursor_offset < - len(line):
                 # cap
                 self._io_cursor_offset = - len(line) 
-        
-        print("new offset:", self._io_cursor_offset)
     
     def _reset_ansi_attributes(self):
         self._ansi_foreground = None
@@ -1054,7 +1045,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def _clear_shell(self):
         end_index = self.index("output_end")
-        self.direct_delete("1.0", end_index)
+        self._clear_content(end_index)
 
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
@@ -1107,25 +1098,33 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self._insert_text_directly(line, tags)
     
     def _discard_old_content(self):
-        max_chars = max(get_workbench().get_option("shell.soft_max_chars"), 0)
-        proposed_cut = self.index("end -%d chars" % max_chars)
+        max_lines = max(get_workbench().get_option("shell.max_lines"), 0)
+        proposed_cut = self.index("end -%d lines linestart" % max_lines)
         if proposed_cut == "1.0":
             return
         
-        # at least one block must remain 
-        next_prompt = self.tag_nextrange("prompt", proposed_cut, "end")
-        if next_prompt:
-            #final_cut = next_prompt[0] # if cut must be at blocks's boundary
-            final_cut = self.index(proposed_cut + " linestart")
-        else:
-            # no prompt after the proposed cut, so we must take one before
-            # so that last block remains complete
-            prev_prompt = self.tag_prevrange("prompt", proposed_cut, "1.0")
-            if not prev_prompt:
-                return
-            final_cut = prev_prompt[0]
         
-        self.direct_delete("0.1", final_cut)
+        
+        # would this keep current block intact? 
+        next_prompt = self.tag_nextrange("prompt", proposed_cut, "end")
+        if not next_prompt:
+            pass # TODO: disable stepping back
+        
+        self._clear_content(proposed_cut)
+    
+    def _clear_content(self, cut_idx):
+        proposed_cut_float = float(cut_idx)
+        for btn in list(self._squeeze_buttons):
+            btn_pos = float(self.index(btn))
+            if btn_pos < proposed_cut_float:
+                self._squeeze_buttons.remove(btn)
+                # looks like the widgets are not fully GC-d.
+                # At least avoid leaking big chunks of texts
+                btn.contained_text = None 
+                btn.destroy()
+                
+            
+        self.direct_delete("0.1", cut_idx)
             
             
     def _invalidate_current_data(self):
@@ -1212,6 +1211,12 @@ class SqueezedTextDialog(tk.Toplevel):
         self.shell_text.direct_delete(index, index + " +1 chars")
         self.shell_text.direct_insert(index, self.content, tuple(self.button.tags))
         self.destroy()
+        
+        # looks like the widgets are not fully GC-d.
+        # At least avoid leaking big chunks of texts
+        self.button.contained_text = None
+        self.button.destroy()
+        
     
     def _on_copy(self):
         self.clipboard_clear()

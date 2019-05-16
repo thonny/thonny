@@ -11,21 +11,20 @@ class ShellConfigurationPage(ConfigurationPage):
         ConfigurationPage.__init__(self, master)
         self.columnconfigure(1, weight=1)
 
-        soft_max_chars_var = get_workbench().get_variable("shell.soft_max_chars")
+        max_lines_var = get_workbench().get_variable("shell.max_lines")
         max_lines_label = ttk.Label(
             self,
-            text=_("Preferred size of output history (scroll buffer) in characters.\n"
-                   + "This does not constrain last block, which is always shown in full.\n"
-                   + "NB! Larger values may cause poor performance!"),
+            text=_("Maximum number of lines to keep.\n"
+                   + "NB! Large values may cause poor performance!"),
         )
         max_lines_label.grid(row=20, column=0, sticky=tk.W)
         max_lines_combo = ttk.Combobox(
             self,
             width=9,
             exportselection=False,
-            textvariable=soft_max_chars_var,
+            textvariable=max_lines_var,
             state="readonly",
-            values=[1000, 5000, 10000, 50000, 100000, 500000, 1000000],
+            values=[100, 500, 1000, 5000, 10000, 50000, 100000],
         )
         max_lines_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
