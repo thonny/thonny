@@ -497,6 +497,8 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         # should be in the end, so that it can be detected when
         # constructor hasn't completed yet
         self.preferred_size_in_pw = None
+        
+        get_workbench().bind("WindowFocusIn", self.on_focus_window, True)
 
     def _init_commands(self):
         # TODO: do these commands have to be in EditorNotebook ??
@@ -902,7 +904,10 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return False
         else:
             return True
-
+    
+    def on_focus_window(self, event=None):
+        for editor in self.get_all_editors():
+            editor.check_for_external_changes()
 
 def get_current_breakpoints():
     result = {}

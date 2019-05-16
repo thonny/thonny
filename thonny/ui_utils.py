@@ -904,6 +904,7 @@ class ToolTip:
         self.id = None
         self.x = self.y = 0
         self.options = options
+        get_workbench().bind("WindowFocusOut", self.hidetip, True)
 
     def showtip(self, text):
         "Display text in tooltip window"
@@ -912,7 +913,7 @@ class ToolTip:
             return
         x, y, _, cy = self.widget.bbox("insert")
         x = x + self.widget.winfo_rootx() + 27
-        y = y + cy + self.widget.winfo_rooty() + 27
+        y = y + cy + self.widget.winfo_rooty() + self.widget.winfo_height() + 2
         self.tipwindow = tw = tk.Toplevel(self.widget)
         tw.wm_overrideredirect(1)
         if running_on_mac_os():
@@ -933,13 +934,12 @@ class ToolTip:
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
 
-    def hidetip(self):
+    def hidetip(self, event=None):
         tw = self.tipwindow
         self.tipwindow = None
         if tw:
             tw.destroy()
-
-
+    
 def create_tooltip(widget, text, **kw):
     options = get_style_configuration("Tooltip").copy()
     options.setdefault("background", "#ffffe0")
@@ -1978,7 +1978,8 @@ def handle_mistreated_latin_shortcuts(registry, event):
 def show_dialog(dlg, master=None, geometry=True):
     if master is None:
         master = tk._default_root
-
+    
+    get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
     focused_widget = master.focus_get()
     dlg.transient(master.winfo_toplevel())

@@ -1978,12 +1978,12 @@ class Workbench(tk.Tk):
         if self._lost_focus:
             self._lost_focus = False
             self.event_generate("WindowFocusIn")
-            for editor in self.get_editor_notebook().get_all_editors():
-                editor.check_for_external_changes()
 
     def _on_focus_out(self, event):
         if self.focus_get() is None:
-            self._lost_focus = True
+            if not self._lost_focus:
+                self._lost_focus = True
+                self.event_generate("WindowFocusOut")
 
     def focus_get(self) -> Optional[tk.Widget]:
         try:
