@@ -2001,11 +2001,14 @@ class Workbench(tk.Tk):
             # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
             try:
                 clipboard_data = self.clipboard_get()
-                if all(map(os.path.exists, clipboard_data.splitlines())):
+                if len(clipboard_data) < 1000 and all(map(os.path.exists, clipboard_data.splitlines())):
                     # Looks like the clipboard contains file name(s)
                     # Most likely this means actual file cut/copy operation
                     # was made outside of Thonny.
                     # Don't want to replace this with simple string data of file names.
+                    pass
+                elif running_on_linux():
+                    # May freeze on Ubuntu 18.04
                     pass
                 else:
                     import pyperclip
