@@ -10,7 +10,7 @@ possibilities for fixing the situation. For example:
 * Change *something* in the code and try again. 
 * Approach the problem in two phases: 1) diagnosing the problem and 2) fixing it.
 
-Asking for help may a very good idea, but it won't give you this sweet sense of accomplishment.
+Asking for help may be a very good idea, but it won't give you this sweet sense of accomplishment.
 Anyway, it's better not to use this without first putting in some effort on your own.
 
 If your programs are small, then you may hit the jackpot by changing something randomly and 
