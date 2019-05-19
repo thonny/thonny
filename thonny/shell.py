@@ -20,7 +20,7 @@ from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
     scrollbar_style,
-    select_sequence, TextMenu, create_tooltip, show_dialog)
+    select_sequence, TextMenu, create_tooltip, show_dialog, lookup_style_option)
 from _tkinter import TclError
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
@@ -42,12 +42,19 @@ ANSI_COLOR_NAMES = {
 }
 
 
-class ShellView(ttk.Frame):
-    def __init__(self, master, **kw):
-        ttk.Frame.__init__(self, master, **kw)
-
+class ShellView(tk.PanedWindow):
+    def __init__(self, master):
+        super().__init__(master,
+                         orient="horizontal",
+                         sashwidth=lookup_style_option("Sash", "sashthickness", 4),
+                         background=lookup_style_option("TPanedWindow", "background"),
+                         borderwidth=0,)
+        
+        main_frame = tk.Frame(self)
+        self.add(main_frame, minsize=100)
+        
         self.vert_scrollbar = ttk.Scrollbar(
-            self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
+            main_frame, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
         )
         self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
         get_workbench().add_command(
@@ -63,7 +70,7 @@ class ShellView(ttk.Frame):
         get_workbench().set_default("shell.squeeze_threshold", 1000)
 
         self.text = ShellText(
-            self,
+            main_frame,
             font="EditorFont",
             # foreground="white",
             # background="#666666",
@@ -76,15 +83,23 @@ class ShellView(ttk.Frame):
             height=10,
             undo=True,
         )
+        
+        self.plotter = PlotterCanvas(self)
+        self.add(self.plotter, minsize=300)
 
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
 
         self.text.grid(row=1, column=1, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.text.yview
-        self.columnconfigure(1, weight=1)
-        self.rowconfigure(1, weight=1)
+        main_frame.columnconfigure(1, weight=1)
+        main_frame.rowconfigure(1, weight=1)
 
         self.notice = ttk.Label(self, text="", background="#ffff99", padding=3)
+    
+    def set_plotter_visibility(self, value):
+        if self.plotter is None:
+            if value:
+                self.plotter
 
     def set_notice(self, text):
         if text is None:
@@ -1172,7 +1187,7 @@ class SqueezedTextDialog(tk.Toplevel):
         self.text_frame = TextFrame(mainframe, text_class=TweakableText, height=10, width=80,
                                     relief="sunken", borderwidth=1,
                                     wrap="none")
-        self.text_frame.grid(row=2, column=0, padx=padding)
+        self.text_frame.grid(row=2, column=0, padx=padding, sticky="nsew")
         self.text_frame.text.insert("1.0", button.contained_text)
         self.text_frame.text.set_read_only(True)
         
@@ -1224,5 +1239,42 @@ class SqueezedTextDialog(tk.Toplevel):
     
     def _on_close(self, event=None):
         self.destroy()
+
+class PlotterFrame(ttk.Frame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.vert_scrollbar = ttk.Scrollbar(
+            self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
+        )
+        #self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
+
+        self.canvas = tk.Canvas(self,
+                                background=get_syntax_options_for_tag("TEXT")["background"],
+                                borderwidth=0,
+                                highlightthickness=0
+                                )
+        self.canvas.grid(row=1, column=1, sticky="nsew")
         
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(1, weight=1)
+
+class PlotterCanvas(tk.Canvas):
+    def __init__(self, master):
+        super().__init__(master,
+                        background=get_syntax_options_for_tag("TEXT")["background"],
+                        borderwidth=0,
+                        width=204,
+                        highlightthickness=0)
+        self.bind("<1>", self.click, True)
+        #self.bind("<Configure>", self.on_resize, True)
+    
+    def click(self, *args):
+        print("Args", args, self.cget("width"), self.cget("height"))
+    
+    def on_resize(self, event):
+        self.config(width=event.width, height=event.height)
+    
+    
         
+            
