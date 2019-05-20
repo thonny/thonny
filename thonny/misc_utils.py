@@ -354,7 +354,7 @@ def start_time(text=""):
     print("RESET", text)
     _timer_time = time.time()
 
-def lap_time(text):
+def lap_time(text=""):
     global _timer_time
     new_time = time.time()
     print("LAP", text, round(new_time - _timer_time, 4))

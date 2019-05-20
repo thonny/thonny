@@ -14,8 +14,7 @@ from thonny.misc_utils import (
     construct_cmd_line,
     parse_cmd_line,
     running_on_mac_os,
-    shorten_repr,
-)
+    shorten_repr, lap_time, start_time)
 from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
@@ -77,7 +76,7 @@ class ShellView(tk.PanedWindow):
             highlightthickness=0,
             # highlightcolor="LightBlue",
             borderwidth=0,
-            yscrollcommand=self.vert_scrollbar.set,
+            yscrollcommand=self.set_scrollbar,
             padx=4,
             insertwidth=2,
             height=10,
@@ -85,9 +84,11 @@ class ShellView(tk.PanedWindow):
         )
         
         self.plotter = PlotterCanvas(self)
-        self.add(self.plotter, minsize=300)
+        self.add(self.plotter, before=main_frame, minsize=300)
 
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
+        get_workbench().bind("TextInsert", self.text_inserted, True)
+        get_workbench().bind("TextDelete", self.text_deleted, True)
 
         self.text.grid(row=1, column=1, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.text.yview
@@ -143,6 +144,20 @@ class ShellView(tk.PanedWindow):
 
         if conclusion is not None:
             self.text.direct_insert("end", conclusion + "\n", ("stderr",))
+    
+    def set_scrollbar(self, *args):
+        self.vert_scrollbar.set(*args)
+        self.update_plotter()
+    
+    def text_deleted(self, event):
+        self.update_plotter()
+    
+    def text_inserted(self, event):
+        if "\n" in event.text:
+            self.update_plotter()
+    
+    def update_plotter(self):
+        self.plotter.update_plot(self.text)
 
 class ShellMenu(TextMenu):
     def add_extra_items(self):
@@ -1153,6 +1168,21 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         while len(self.active_object_tags) > 0:
             self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
+    
+    def get_lines_above_viewport_bottom(self, tag_name, n):
+        end_index = self.index("@%d,%d lineend" % (self.winfo_height(), self.winfo_height()))
+        start_index = self.index(end_index + " -50 lines")
+        
+        result = ""
+        while True:
+            r = self.tag_nextrange(tag_name, start_index, end_index)
+            if not r:
+                break
+            result += self.get(r[0], r[1])
+            start_index = r[1]
+        
+        return result
+        
 
 class SqueezedTextDialog(tk.Toplevel):
     def __init__(self, master, button):
@@ -1266,15 +1296,71 @@ class PlotterCanvas(tk.Canvas):
                         borderwidth=0,
                         width=204,
                         highlightthickness=0)
-        self.bind("<1>", self.click, True)
+        #self.bind("<1>", self.click, True)
         #self.bind("<Configure>", self.on_resize, True)
+    
+    def update_plot(self, text):
+        
+        data = []
+        
+        bottom_index = text.index("@%d,%d" % (text.winfo_width(), text.winfo_height()))
+        bottom_lineno = int(float(bottom_index))
+        
+        for i in range(bottom_lineno-50, bottom_lineno + 1):
+            line_start_index = "%d.0" % i
+            if (i < 1
+                or "stdout" not in text.tag_names(line_start_index)):
+                data.append(("", []))
+            else:
+                content = text.get(line_start_index, line_start_index + " lineend")
+                data.append(self.extract_pattern_and_numbers(content))
+    
+    def extract_pattern_and_numbers(self, line):
+        return ("", [])
     
     def click(self, *args):
         print("Args", args, self.cget("width"), self.cget("height"))
+        self.demo()
     
     def on_resize(self, event):
         self.config(width=event.width, height=event.height)
     
+    def demo(self):
+        self.nums = []
+        self.y = 0
+        self.line_id = None
+        self.step()
+        start_time()
+        
+    def step(self):
+        import random
+        self.y += random.randint(-1,1)
+        self.nums.append(self.y)
+        while len(self.nums) > 20:
+            self.nums.pop(0)
+        
+        self.draw(self.nums)
+        self.after(1, self.step)
+        
+    def draw(self, nums):
+        lap_time()
+        
+        #print(self.nums)
+        
+        if len(self.nums) < 2:
+            return
+        
+        point_args = []
+        
+        
+        if self.line_id is not None:
+            self.delete(self.line_id)
+        
+        for i, y in enumerate(nums):
+            point_args.extend([i*10+10, y*1 + self.winfo_height() // 2])
+        
+        self.line_id = self.create_line(*point_args)
+        
     
         
             
