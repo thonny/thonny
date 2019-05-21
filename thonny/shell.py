@@ -26,6 +26,7 @@ _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
 OUTPUT_SPLIT_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])')
+NUMBER_SPLIT_REGEX = re.compile(r"([-+]?[0-9]*\.?[0-9]+)")
 
 INT_REGEX = re.compile(r"\d+")
 ANSI_COLOR_NAMES = {
@@ -83,8 +84,10 @@ class ShellView(tk.PanedWindow):
             undo=True,
         )
         
-        self.plotter = PlotterCanvas(self)
-        self.add(self.plotter, before=main_frame, minsize=300)
+        self.plotter = PlotterCanvas(self, self.text)
+        self.add(self.plotter, 
+                 #before=main_frame, 
+                 minsize=100)
 
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         get_workbench().bind("TextInsert", self.text_inserted, True)
@@ -150,14 +153,15 @@ class ShellView(tk.PanedWindow):
         self.update_plotter()
     
     def text_deleted(self, event):
-        self.update_plotter()
+        if event.text_widget == self.text:
+            self.update_plotter()
     
     def text_inserted(self, event):
-        if "\n" in event.text:
+        if event.text_widget == self.text and "\n" in event.text:
             self.update_plotter()
     
     def update_plotter(self):
-        self.plotter.update_plot(self.text)
+        self.plotter.update_plot()
 
 class ShellMenu(TextMenu):
     def add_extra_items(self):
@@ -1290,40 +1294,230 @@ class PlotterFrame(ttk.Frame):
         self.rowconfigure(1, weight=1)
 
 class PlotterCanvas(tk.Canvas):
-    def __init__(self, master):
+    def __init__(self, master, text):
         super().__init__(master,
                         background=get_syntax_options_for_tag("TEXT")["background"],
                         borderwidth=0,
-                        width=204,
+                        height=10000, # size of the virtual drawing area
+                        width=10000,
                         highlightthickness=0)
-        #self.bind("<1>", self.click, True)
-        #self.bind("<Configure>", self.on_resize, True)
+        self.text = text
+        
+        self.x_padding_left = 0
+        self.x_padding_right = 10
+        self.y_padding = 20
+        self.x_scale = None
+        self.x_scale = None
+        self.range_start = -1
+        self.range_end = 2
+        self.range_block_size = 0
+        self.value_range = 2
+        self.colors = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
+        self.range_block_sizes = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        self.bind("<Configure>", self.on_resize, True)
     
-    def update_plot(self, text):
+    def get_num_steps(self):
+        return 20
+    
+    def update_plot(self):
         
-        data = []
+        data_lines = []
         
-        bottom_index = text.index("@%d,%d" % (text.winfo_width(), text.winfo_height()))
+        bottom_index = self.text.index("@%d,%d" % (self.text.winfo_width(), self.text.winfo_height()))
         bottom_lineno = int(float(bottom_index))
         
-        for i in range(bottom_lineno-50, bottom_lineno + 1):
+        for i in range(bottom_lineno-self.get_num_steps(), bottom_lineno + 1):
             line_start_index = "%d.0" % i
             if (i < 1
-                or "stdout" not in text.tag_names(line_start_index)):
-                data.append(("", []))
+                or "stdout" not in self.text.tag_names(line_start_index)):
+                data_lines.append(([], []))
             else:
-                content = text.get(line_start_index, line_start_index + " lineend")
-                data.append(self.extract_pattern_and_numbers(content))
+                content = self.text.get(line_start_index, line_start_index + " lineend")
+                data_lines.append(self.extract_pattern_and_numbers(content))
+        
+        # data_lines need to be transposed
+        segments_by_color = []
+        for i in range(100):
+            segments = list(self.extract_series_segments(data_lines, i))
+            if segments:
+                segments_by_color.append(segments)
+            else:
+                break
+        
+        legends = []
+        for legend, _ in data_lines:
+            if legend and legend not in legends:
+                legends.append(legend)
+        
+        self.delete("segment", "guide", "tick")
+        self.draw_guides_and_segments(segments_by_color)
+        
+    def draw_guides_and_segments(self, segments_by_color):
+        self.update_range(segments_by_color)
+        
+        available_height = self.winfo_height() - 2 * self.y_padding
+        available_width = self.winfo_width() - self.x_padding_left - self.x_padding_right
+        num_steps = self.get_num_steps()
+        
+        self.x_scale = available_width / (num_steps-1)
+        self.y_scale = available_height / self.value_range
+        
+        guides = self.draw_guides()
+        
+        for color, segments in enumerate(segments_by_color):
+            for pos, nums in segments:
+                self.draw_segment(color, pos, nums)
+        
+        self.draw_ticks(guides)
+    
+    def draw_guides(self):
+        guide_positions = []
+        value = self.range_start
+        while value <= self.range_end:
+            guide_positions.append(self.draw_guide(value, (2,2)))
+            value += self.range_block_size
+        
+        return guide_positions
+        
+    
+    def draw_guide(self, value, dash=None):
+        y = self.y_padding + (self.range_end - value) * self.y_scale
+        self.create_line(0, y, self.winfo_width(), y, 
+                         tags=("guide",),
+                         dash=dash,
+                         fill="#aaaaaa")
+        
+        return (value, y)
+    
+    def draw_ticks(self, positions):
+        for value, y in positions:
+            x = 5
+            if value == int(value):
+                value = int(value)
+            
+            caption = str(value)
+            bg = "white"
+            # TODO: measure text and select correct color
+            self.create_rectangle(0, y-10, x+20, y+10, fill=bg, width=0)
+            self.create_text(x, y, anchor="w", text=caption, tags=("tick",))
+            
+    
+    def draw_segment(self, color, pos, nums):
+        
+        x = self.x_padding_left + pos * self.x_scale
+        
+        args = []
+        for num in nums:
+            y = self.y_padding + (self.range_end - num) * self.y_scale 
+            args.extend([x, y])
+            x += self.x_scale
+        
+        self.create_line(*args, width=2, fill=self.colors[color % len(self.colors)],
+                         tags=("segment",))
+        #self.current_segment_ids.append(line_id)
+        
+    
+    def update_range(self, segments_by_color):    
+        temp_range_start = 9999999999
+        temp_range_end = -9999999999
+        
+        can_shrink = False
+        for segments in segments_by_color:
+            for start_pos, nums in segments:
+                if start_pos > 0:
+                    # range can be shrunk only if a start of a segment is visible
+                    can_shrink = True
+                temp_range_start = min(temp_range_start, *nums)
+                temp_range_end = max(temp_range_end, *nums)
+        
+        print("temp", temp_range_start, "..", temp_range_end)
+        if can_shrink:
+            self.range_start = temp_range_start
+            self.range_end = temp_range_end
+        else:
+            # allow range only grow
+            self.range_start = min(temp_range_start, self.range_start)
+            self.range_end = max(temp_range_end, self.range_end)
+        
+        if self.range_end == self.range_start:
+            self.range_end += 1
+        
+        
+        self.value_range = self.range_end - self.range_start
+        self.range_block_size = self.value_range // 4
+        # prefer round blocks 
+        for size in self.range_block_sizes:
+            if size * 4 >= self.value_range:
+                print("fount", size)
+                self.range_block_size = size
+                break
+        print("new", self.range_start, "..", self.range_end, "|", self.range_block_size)
+        if self.range_end % self.range_block_size != 0:
+            # extend to range block boundary 
+            if self.range_end > 0:
+                self.range_end -= self.range_end % -self.range_block_size
+            else:
+                self.range_end += self.range_end % -self.range_block_size
+        
+        if self.range_start % self.range_block_size != 0:
+            self.range_start -= self.range_start % self.range_block_size
+        
+        assert self.range_start % self.range_block_size == 0
+        assert self.range_end % self.range_block_size == 0
+                            
+        print(self.range_start, self.range_end)
+        self.value_range = self.range_end - self.range_start
     
     def extract_pattern_and_numbers(self, line):
-        return ("", [])
+        parts = NUMBER_SPLIT_REGEX.split(line)
+        if len(parts) < 2:
+            return ([], [])
+        
+        assert len(parts) % 2 == 1
+        
+        pattern = []
+        numbers = []
+        for i in range(0, len(parts), 2):
+            pattern.append(parts[i])
+        
+        for i in range(1, len(parts), 2):
+            numbers.append(float(parts[i]))
+             
+        return (pattern, numbers)
     
-    def click(self, *args):
-        print("Args", args, self.cget("width"), self.cget("height"))
-        self.demo()
+    def extract_series_segments(self, data_lines, series_nr):
+        """Yields numbers which form connected multilines on graph
+        Each segment is pair of starting position and numbers"""
+        segment = (0,[])
+        prev_pattern = None
+        for i, (pattern, nums) in enumerate(data_lines):
+            if len(nums) <= series_nr or pattern != prev_pattern:
+                # break the segment
+                if len(segment[1]) > 1:
+                    yield segment
+                segment = (i,[])
+                    
+            if len(nums) > series_nr:
+                segment[1].append(nums[series_nr])
+            
+            prev_pattern = pattern
+        
+        if len(segment[1]) > 1:
+            yield segment            
     
     def on_resize(self, event):
-        self.config(width=event.width, height=event.height)
+        self.update_plot()
     
     def demo(self):
         self.nums = []
