@@ -59,6 +59,9 @@ from thonny.ui_utils import select_sequence
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
 
+# other components may turn it on in order to avoid grouping output lines into one event
+io_animation_required = False  
+
 
 class Runner:
     def __init__(self) -> None:
@@ -675,7 +678,8 @@ class CPythonProxy(BackendProxy):
                     next_msg = self._message_queue.popleft()
                     if (next_msg.event_type == "ProgramOutput"
                         and next_msg["stream_name"] == msg["stream_name"]
-                        and len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD):
+                        and len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD
+                        and ("\n" not in msg["data"] or not io_animation_required)):
                         msg["data"] += next_msg["data"]
                     else:
                         # not same type of message, put it back

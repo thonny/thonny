@@ -7,7 +7,8 @@ import re
 from tkinter import ttk
 import traceback
 
-from thonny import get_runner, get_workbench, memory, roughparse, ui_utils
+from thonny import get_runner, get_workbench, memory, roughparse, ui_utils,\
+    running
 from thonny.codeview import PythonText, get_syntax_options_for_tag
 from thonny.common import InlineCommand, ToplevelCommand, ToplevelResponse
 from thonny.misc_utils import (
@@ -1318,9 +1319,17 @@ class PlotterCanvas(tk.Canvas):
         self.bind("<Configure>", self.on_resize, True)
         
         self._prev_data_lines = None
+        
+        self.open()
     
     def get_num_steps(self):
         return 20
+    
+    def open(self):
+        running.io_animation_required = True
+    
+    def close(self):
+        running.io_animation_required = False
     
     def update_plot(self, force_clean=False):
         data_lines = []
@@ -1519,7 +1528,6 @@ class PlotterCanvas(tk.Canvas):
         for i in range(1, len(parts), 2):
             numbers.append(float(parts[i]))
         
-        print("pat", pattern)
         return (pattern, numbers)
     
     def extract_series_segments(self, data_lines, series_nr):
