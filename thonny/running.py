@@ -369,7 +369,7 @@ class Runner:
         if self._pull_vm_messages() is False:
             return
 
-        self._polling_after_id = get_workbench().after(50, self._poll_vm_messages)
+        self._polling_after_id = get_workbench().after(20, self._poll_vm_messages)
 
     def _pull_vm_messages(self):
         while self._proxy is not None:
@@ -821,18 +821,21 @@ class CPythonProxy(BackendProxy):
     def _listen_stdout(self):
         # debug("... started listening to stdout")
         # will be called from separate thread
+        
+        message_queue = self._message_queue
+        
         def publish_as_msg(data):
             msg = parse_message(data)
             if "cwd" in msg:
                 self.cwd = msg["cwd"]
-            self._message_queue.append(msg)
+            message_queue.append(msg)
 
-            if len(self._message_queue) > 100:
+            while len(message_queue) > 100:
                 # Probably backend runs an infinite/long print loop.
                 # Throttle message thougput in order to keep GUI thread responsive.
-                sleep(0.1)
+                sleep(0.01)
 
-        while True:
+        while self._proc is not None:
             data = self._proc.stdout.readline()
             # debug("... read some stdout data", repr(data))
             if data == "":
@@ -850,7 +853,7 @@ class CPythonProxy(BackendProxy):
                     parts = data.rsplit(common.MESSAGE_MARKER, maxsplit=1)
 
                     # print first part as it is
-                    self._message_queue.append(
+                    message_queue.append(
                         BackendEvent(
                             "ProgramOutput", data=parts[0], stream_name="stdout"
                         )
@@ -862,7 +865,7 @@ class CPythonProxy(BackendProxy):
                             publish_as_msg(second_part)
                         except Exception:
                             # just print ...
-                            self._message_queue.append(
+                            message_queue.append(
                                 BackendEvent(
                                     "ProgramOutput",
                                     data=second_part,
