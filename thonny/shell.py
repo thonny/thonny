@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
+from _tkinter import TclError
 import logging
 import os.path
 import re
-import tkinter as tk
-import traceback
 from tkinter import ttk
+import traceback
 
 from thonny import get_runner, get_workbench, memory, roughparse, ui_utils
 from thonny.codeview import PythonText, get_syntax_options_for_tag
@@ -20,7 +20,8 @@ from thonny.ui_utils import (
     EnhancedTextWithLogging,
     scrollbar_style,
     select_sequence, TextMenu, create_tooltip, show_dialog, lookup_style_option)
-from _tkinter import TclError
+import tkinter as tk
+
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
@@ -157,8 +158,13 @@ class ShellView(tk.PanedWindow):
             self.update_plotter()
     
     def text_inserted(self, event):
-        if event.text_widget == self.text and "\n" in event.text:
-            self.update_plotter()
+        if (event.text_widget == self.text 
+            and "\n" in event.text
+            # only when scrollbar doesn't move, because otherwise 
+            # the update gets triggered by scrollbar anyway 
+            and self.vert_scrollbar.get() == (0.0, 1.0)
+            ):
+                self.update_plotter()
     
     def update_plotter(self):
         self.plotter.update_plot()
@@ -268,7 +274,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_raise("italic_io")
         self.tag_raise("intense_italic_io")
         self.tag_raise("sel")
-        
 
     def submit_command(self, cmd_line, tags):
         assert get_runner().is_waiting_toplevel_command()
@@ -1326,14 +1331,15 @@ class PlotterCanvas(tk.Canvas):
         ]
         self.range_block_sizes = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
         self.bind("<Configure>", self.on_resize, True)
+        
+        self._prev_data_lines = None
     
     def get_num_steps(self):
         return 20
     
-    def update_plot(self):
-        
+    def update_plot(self, clean=False):
         data_lines = []
-        
+        start_time()
         bottom_index = self.text.index("@%d,%d" % (self.text.winfo_width(), self.text.winfo_height()))
         bottom_lineno = int(float(bottom_index))
         
@@ -1359,59 +1365,20 @@ class PlotterCanvas(tk.Canvas):
         for legend, _ in data_lines:
             if legend and legend not in legends:
                 legends.append(legend)
+                
+        self.delete("segment")
         
-        self.delete("segment", "guide", "tick")
-        self.draw_guides_and_segments(segments_by_color)
+        self.update_range(segments_by_color, clean)
+        self.draw_segments(segments_by_color)
+        lap_time("draw")
         
-    def draw_guides_and_segments(self, segments_by_color):
-        self.update_range(segments_by_color)
-        
-        available_height = self.winfo_height() - 2 * self.y_padding
-        available_width = self.winfo_width() - self.x_padding_left - self.x_padding_right
-        num_steps = self.get_num_steps()
-        
-        self.x_scale = available_width / (num_steps-1)
-        self.y_scale = available_height / self.value_range
-        
-        guides = self.draw_guides()
-        
+    def draw_segments(self, segments_by_color):
         for color, segments in enumerate(segments_by_color):
             for pos, nums in segments:
                 self.draw_segment(color, pos, nums)
         
-        self.draw_ticks(guides)
-    
-    def draw_guides(self):
-        guide_positions = []
-        value = self.range_start
-        while value <= self.range_end:
-            guide_positions.append(self.draw_guide(value, (2,2)))
-            value += self.range_block_size
-        
-        return guide_positions
-        
-    
-    def draw_guide(self, value, dash=None):
-        y = self.y_padding + (self.range_end - value) * self.y_scale
-        self.create_line(0, y, self.winfo_width(), y, 
-                         tags=("guide",),
-                         dash=dash,
-                         fill="#aaaaaa")
-        
-        return (value, y)
-    
-    def draw_ticks(self, positions):
-        for value, y in positions:
-            x = 5
-            if value == int(value):
-                value = int(value)
-            
-            caption = str(value)
-            bg = "white"
-            # TODO: measure text and select correct color
-            self.create_rectangle(0, y-10, x+20, y+10, fill=bg, width=0)
-            self.create_text(x, y, anchor="w", text=caption, tags=("tick",))
-            
+        # raise ticks above segments
+        self.tag_raise("tick")
     
     def draw_segment(self, color, pos, nums):
         
@@ -1428,9 +1395,9 @@ class PlotterCanvas(tk.Canvas):
         #self.current_segment_ids.append(line_id)
         
     
-    def update_range(self, segments_by_color):    
-        temp_range_start = 9999999999
-        temp_range_end = -9999999999
+    def update_range(self, segments_by_color, clean):    
+        range_start = 9999999999
+        range_end = -9999999999
         
         can_shrink = False
         for segments in segments_by_color:
@@ -1438,47 +1405,82 @@ class PlotterCanvas(tk.Canvas):
                 if start_pos > 0:
                     # range can be shrunk only if a start of a segment is visible
                     can_shrink = True
-                temp_range_start = min(temp_range_start, *nums)
-                temp_range_end = max(temp_range_end, *nums)
+                range_start = min(range_start, *nums)
+                range_end = max(range_end, *nums)
         
-        print("temp", temp_range_start, "..", temp_range_end)
-        if can_shrink:
-            self.range_start = temp_range_start
-            self.range_end = temp_range_end
-        else:
-            # allow range only grow
-            self.range_start = min(temp_range_start, self.range_start)
-            self.range_end = max(temp_range_end, self.range_end)
+        if not can_shrink:
+            range_start = min(range_start, self.range_start)
+            range_end = max(range_end, self.range_end)
         
-        if self.range_end == self.range_start:
-            self.range_end += 1
+        if range_end == range_start:
+            range_end += 1
+        
+        if not clean and range_end == self.range_end and range_start == self.range_start:
+            # don't recompute as nothing was changed
+            return
         
         
-        self.value_range = self.range_end - self.range_start
-        self.range_block_size = self.value_range // 4
+        value_range = range_end - range_start
+        range_block_size = value_range // 4
         # prefer round blocks 
         for size in self.range_block_sizes:
-            if size * 4 >= self.value_range:
-                print("fount", size)
-                self.range_block_size = size
+            if size * 4 >= value_range:
+                range_block_size = size
                 break
-        print("new", self.range_start, "..", self.range_end, "|", self.range_block_size)
-        if self.range_end % self.range_block_size != 0:
+        
+        if range_end % range_block_size != 0:
             # extend to range block boundary 
-            if self.range_end > 0:
-                self.range_end -= self.range_end % -self.range_block_size
+            if range_end > 0:
+                range_end -= range_end % -range_block_size
             else:
-                self.range_end += self.range_end % -self.range_block_size
+                range_end += range_end % -range_block_size
         
-        if self.range_start % self.range_block_size != 0:
-            self.range_start -= self.range_start % self.range_block_size
+        if range_start % range_block_size != 0:
+            range_start -= range_start % range_block_size
         
-        assert self.range_start % self.range_block_size == 0
-        assert self.range_end % self.range_block_size == 0
-                            
-        print(self.range_start, self.range_end)
-        self.value_range = self.range_end - self.range_start
+        assert range_start % range_block_size == 0
+        assert range_end % range_block_size == 0
+        
+        # remember                
+        self.range_start = range_start
+        self.range_end = range_end
+        self.value_range = range_end - range_start
+        self.range_block_size = range_block_size
+
+        available_height = self.winfo_height() - 2 * self.y_padding
+        available_width = self.winfo_width() - self.x_padding_left - self.x_padding_right
+        num_steps = self.get_num_steps()
+        
+        self.x_scale = available_width / (num_steps-1)
+        self.y_scale = available_height / self.value_range
+        
+        self.update_guides_and_ticks()
     
+    def update_guides_and_ticks(self):
+        self.delete("guide", "tick")
+        value = self.range_start
+        while value <= self.range_end:
+            y = self.y_padding + (self.range_end - value) * self.y_scale
+            
+            # guide
+            self.create_line(0, y, self.winfo_width(), y, 
+                             tags=("guide",),
+                             dash=(2,2),
+                             fill="#aaaaaa")
+            
+            # tick
+            x = 5
+            if value == int(value):
+                value = int(value)
+            
+            caption = str(value)
+            bg = "white"
+            # TODO: measure text and select correct color
+            self.create_rectangle(0, y-10, x+20, y+10, fill=bg, width=0, tags=("tick",))
+            self.create_text(x, y, anchor="w", text=caption, tags=("tick",))
+            
+            value += self.range_block_size
+        
     def extract_pattern_and_numbers(self, line):
         parts = NUMBER_SPLIT_REGEX.split(line)
         if len(parts) < 2:
@@ -1517,44 +1519,6 @@ class PlotterCanvas(tk.Canvas):
             yield segment            
     
     def on_resize(self, event):
-        self.update_plot()
-    
-    def demo(self):
-        self.nums = []
-        self.y = 0
-        self.line_id = None
-        self.step()
-        start_time()
-        
-    def step(self):
-        import random
-        self.y += random.randint(-1,1)
-        self.nums.append(self.y)
-        while len(self.nums) > 20:
-            self.nums.pop(0)
-        
-        self.draw(self.nums)
-        self.after(1, self.step)
-        
-    def draw(self, nums):
-        lap_time()
-        
-        #print(self.nums)
-        
-        if len(self.nums) < 2:
-            return
-        
-        point_args = []
-        
-        
-        if self.line_id is not None:
-            self.delete(self.line_id)
-        
-        for i, y in enumerate(nums):
-            point_args.extend([i*10+10, y*1 + self.winfo_height() // 2])
-        
-        self.line_id = self.create_line(*point_args)
-        
-    
-        
+        self.update_plot(True)
+
             
