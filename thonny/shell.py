@@ -21,6 +21,7 @@ from thonny.ui_utils import (
     scrollbar_style,
     select_sequence, TextMenu, create_tooltip, show_dialog, lookup_style_option)
 import tkinter as tk
+from numpy.core.numeric import full
 
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
@@ -1300,23 +1301,28 @@ class PlotterFrame(ttk.Frame):
 
 class PlotterCanvas(tk.Canvas):
     def __init__(self, master, text):
+        self.background = get_syntax_options_for_tag("TEXT")["background"]
         super().__init__(master,
-                        background=get_syntax_options_for_tag("TEXT")["background"],
+                        background=self.background,
                         borderwidth=0,
                         height=10000, # size of the virtual drawing area
                         width=10000,
                         highlightthickness=0)
         self.text = text
         
-        self.x_padding_left = 0
-        self.x_padding_right = 10
-        self.y_padding = 20
         self.x_scale = None
         self.x_scale = None
         self.range_start = -1
         self.range_end = 2
         self.range_block_size = 0
         self.value_range = 2
+        self.last_legend = None
+        self.font = tk.font.nametofont("TkDefaultFont")
+        self.linespace = self.font.metrics("linespace")
+        self.y_padding = self.linespace
+        self.x_padding_left = 0
+        self.x_padding_right = self.linespace
+        
         self.colors = [
             "#1f77b4",
             "#ff7f0e",
@@ -1361,16 +1367,59 @@ class PlotterCanvas(tk.Canvas):
             else:
                 break
         
-        legends = []
-        for legend, _ in data_lines:
-            if legend and legend not in legends:
-                legends.append(legend)
-                
         self.delete("segment")
         
         self.update_range(segments_by_color, clean)
         self.draw_segments(segments_by_color)
+        
+        # display legend of the last column
+        print("lastdata", data_lines[-1])
+        self.update_legend(data_lines)
+        
         lap_time("draw")
+    
+    def update_legend(self, data_lines):
+        for legend, _ in reversed(data_lines):
+            if legend:
+                break
+            
+        if self.last_legend == legend:
+            # just make sure it remains topmost
+            self.tag_raise("legend")
+            return
+        
+        self.delete("legend")
+        
+        if legend is None:
+            return
+        
+        # add horizontal padding 
+        #legend[0] = " " + legend[0]
+        #legend[-1] = legend[-1] + " "
+        
+        marker = "•" # "●"
+        marker_width = self.font.measure(marker)
+        full_text_width = self.font.measure(marker.join(legend))
+        
+        y = self.winfo_height() - self.linespace // 2
+        x = self.winfo_width() - full_text_width - self.linespace
+        
+        self.create_rectangle(x - self.linespace//4, y - self.linespace,
+                              x + full_text_width + self.linespace//4, y,
+                              fill=self.background,
+                              width=0,
+                              tags=("legend",))
+        
+        for i, part in enumerate(legend):
+            if i > 0:
+                self.create_text(x, y, text=marker, anchor="sw", 
+                                 fill=self.colors[i-1 % len(self.colors)],
+                                 tags=("legend",))
+                x += marker_width
+                
+            self.create_text(x, y, text=part, anchor="sw",tags=("legend",))
+            x += self.font.measure(part)
+        
         
     def draw_segments(self, segments_by_color):
         for color, segments in enumerate(segments_by_color):
@@ -1469,16 +1518,11 @@ class PlotterCanvas(tk.Canvas):
                              fill="#aaaaaa")
             
             # tick
-            x = 5
             if value == int(value):
                 value = int(value)
             
-            caption = str(value)
-            bg = "white"
-            # TODO: measure text and select correct color
-            self.create_rectangle(0, y-10, x+20, y+10, fill=bg, width=0, tags=("tick",))
-            self.create_text(x, y, anchor="w", text=caption, tags=("tick",))
-            
+            caption = " " + str(value) + " "
+            self.create_text_with_background(self.linespace // 2, y, caption, anchor="w", tags=("tick",))
             value += self.range_block_size
         
     def extract_pattern_and_numbers(self, line):
@@ -1495,7 +1539,8 @@ class PlotterCanvas(tk.Canvas):
         
         for i in range(1, len(parts), 2):
             numbers.append(float(parts[i]))
-             
+        
+        print("pat", pattern)
         return (pattern, numbers)
     
     def extract_series_segments(self, data_lines, series_nr):
@@ -1516,7 +1561,18 @@ class PlotterCanvas(tk.Canvas):
             prev_pattern = pattern
         
         if len(segment[1]) > 1:
-            yield segment            
+            yield segment
+    
+    def create_text_with_background(self, x, y, text, anchor="w", background=None, tags=()):
+        if background is None:
+            background = self.background
+        
+        half_height = self.linespace // 2
+        
+        self.create_rectangle(x, y-half_height, 
+                              x+self.font.measure(text), y+half_height,
+                              fill=background, width=0, tags=tags)
+        self.create_text(x, y, anchor="w", text=text, tags=tags)
     
     def on_resize(self, event):
         self.update_plot(True)
