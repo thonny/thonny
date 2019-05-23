@@ -21,8 +21,6 @@ from thonny.ui_utils import (
     scrollbar_style,
     select_sequence, TextMenu, create_tooltip, show_dialog, lookup_style_option)
 import tkinter as tk
-from numpy.core.numeric import full
-
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
@@ -1280,25 +1278,6 @@ class SqueezedTextDialog(tk.Toplevel):
     def _on_close(self, event=None):
         self.destroy()
 
-class PlotterFrame(ttk.Frame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        self.vert_scrollbar = ttk.Scrollbar(
-            self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
-        )
-        #self.vert_scrollbar.grid(row=1, column=2, sticky=tk.NSEW)
-
-        self.canvas = tk.Canvas(self,
-                                background=get_syntax_options_for_tag("TEXT")["background"],
-                                borderwidth=0,
-                                highlightthickness=0
-                                )
-        self.canvas.grid(row=1, column=1, sticky="nsew")
-        
-        self.columnconfigure(1, weight=1)
-        self.rowconfigure(1, weight=1)
-
 class PlotterCanvas(tk.Canvas):
     def __init__(self, master, text):
         self.background = get_syntax_options_for_tag("TEXT")["background"]
@@ -1320,7 +1299,7 @@ class PlotterCanvas(tk.Canvas):
         self.font = tk.font.nametofont("TkDefaultFont")
         self.linespace = self.font.metrics("linespace")
         self.y_padding = self.linespace
-        self.x_padding_left = 0
+        self.x_padding_left = -1 # makes sharper cut for partly hidden line
         self.x_padding_right = self.linespace
         
         self.colors = [
@@ -1343,7 +1322,7 @@ class PlotterCanvas(tk.Canvas):
     def get_num_steps(self):
         return 20
     
-    def update_plot(self, clean=False):
+    def update_plot(self, force_clean=False):
         data_lines = []
         start_time()
         bottom_index = self.text.index("@%d,%d" % (self.text.winfo_width(), self.text.winfo_height()))
@@ -1369,21 +1348,19 @@ class PlotterCanvas(tk.Canvas):
         
         self.delete("segment")
         
-        self.update_range(segments_by_color, clean)
+        self.update_range(segments_by_color, force_clean)
         self.draw_segments(segments_by_color)
         
-        # display legend of the last column
-        print("lastdata", data_lines[-1])
-        self.update_legend(data_lines)
+        self.update_legend(data_lines, force_clean)
         
         lap_time("draw")
     
-    def update_legend(self, data_lines):
+    def update_legend(self, data_lines, force_clean=False):
         for legend, _ in reversed(data_lines):
             if legend:
                 break
             
-        if self.last_legend == legend:
+        if self.last_legend == legend and not force_clean:
             # just make sure it remains topmost
             self.tag_raise("legend")
             return
@@ -1397,7 +1374,7 @@ class PlotterCanvas(tk.Canvas):
         #legend[0] = " " + legend[0]
         #legend[-1] = legend[-1] + " "
         
-        marker = "•" # "●"
+        marker = "●" # "●" "•"
         marker_width = self.font.measure(marker)
         full_text_width = self.font.measure(marker.join(legend))
         
@@ -1419,6 +1396,8 @@ class PlotterCanvas(tk.Canvas):
                 
             self.create_text(x, y, text=part, anchor="sw",tags=("legend",))
             x += self.font.measure(part)
+        
+        self.last_legend = legend
         
         
     def draw_segments(self, segments_by_color):
@@ -1576,5 +1555,4 @@ class PlotterCanvas(tk.Canvas):
     
     def on_resize(self, event):
         self.update_plot(True)
-
             
