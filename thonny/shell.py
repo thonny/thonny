@@ -1282,6 +1282,7 @@ class SqueezedTextDialog(tk.Toplevel):
 class PlotterCanvas(tk.Canvas):
     def __init__(self, master, text):
         self.background = get_syntax_options_for_tag("TEXT")["background"]
+        self.foreground = get_syntax_options_for_tag("TEXT")["foreground"]
         super().__init__(master,
                         background=self.background,
                         borderwidth=0,
@@ -1403,7 +1404,8 @@ class PlotterCanvas(tk.Canvas):
                                  tags=("legend",))
                 x += marker_width
                 
-            self.create_text(x, y, text=part, anchor="sw",tags=("legend",))
+            self.create_text(x, y, text=part, anchor="sw",tags=("legend",),
+                             fill=self.foreground)
             x += self.font.measure(part)
         
         self.last_legend = legend
@@ -1559,7 +1561,7 @@ class PlotterCanvas(tk.Canvas):
         self.create_rectangle(x, y-half_height, 
                               x+self.font.measure(text), y+half_height,
                               fill=background, width=0, tags=tags)
-        self.create_text(x, y, anchor="w", text=text, tags=tags)
+        self.create_text(x, y, anchor="w", text=text, tags=tags, fill=self.foreground)
     
     def on_resize(self, event):
         self.update_plot(True)
