@@ -1366,9 +1366,14 @@ class PlotterCanvas(tk.Canvas):
         lap_time("draw")
     
     def update_legend(self, data_lines, force_clean=False):
-        for legend, _ in reversed(data_lines):
-            if legend:
+        legend = None
+        i = len(data_lines) - 2 # one before last
+        while i >= 0:
+            legend = data_lines[i][0]
+            if legend and legend == data_lines[i+1][0]:
+                # found last legend, which covers at least 2 consecutive points
                 break
+            i -= 1
             
         if self.last_legend == legend and not force_clean:
             # just make sure it remains topmost
@@ -1430,7 +1435,9 @@ class PlotterCanvas(tk.Canvas):
             x += self.x_scale
         
         self.create_line(*args, width=2, fill=self.colors[color % len(self.colors)],
-                         tags=("segment",))
+                         tags=("segment",), arrow="last",
+                         #arrowshape=(3,5,3)
+                         )
         #self.current_segment_ids.append(line_id)
         
     
