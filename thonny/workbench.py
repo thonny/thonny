@@ -560,7 +560,7 @@ class Workbench(tk.Tk):
         self.add_command(
             "increase_font_size",
             "view",
-            _("(Increase font size"),
+            _("Increase font size"),
             lambda: self._change_font_size(1),
             default_sequence=select_sequence("<Control-plus>", "<Command-Shift-plus>"),
             extra_sequences=["<Control-KP_Add>"],

@@ -27,7 +27,7 @@ _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
 OUTPUT_SPLIT_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])')
-NUMBER_SPLIT_REGEX = re.compile(r"([-+]?[0-9]*\.?[0-9]+)")
+NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 
 INT_REGEX = re.compile(r"\d+")
 ANSI_COLOR_NAMES = {
@@ -72,6 +72,7 @@ class ShellView(tk.PanedWindow):
 
         self.text = ShellText(
             main_frame,
+            self,
             font="EditorFont",
             # foreground="white",
             # background="#666666",
@@ -85,11 +86,6 @@ class ShellView(tk.PanedWindow):
             undo=True,
         )
         
-        self.plotter = PlotterCanvas(self, self.text)
-        self.add(self.plotter, 
-                 #before=main_frame, 
-                 minsize=100)
-
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         get_workbench().bind("TextInsert", self.text_inserted, True)
         get_workbench().bind("TextDelete", self.text_deleted, True)
@@ -100,11 +96,61 @@ class ShellView(tk.PanedWindow):
         main_frame.rowconfigure(1, weight=1)
 
         self.notice = ttk.Label(self, text="", background="#ffff99", padding=3)
+        
+        self.init_plotter()
+        self.menu = ShellMenu(self.text, self)
+        
     
-    def set_plotter_visibility(self, value):
+    def init_plotter(self):
+        self.plotter = None
+        get_workbench().set_default("view.show_plotter", False)
+        get_workbench().set_default("view.shell_sash_position", 400)
+
+        self.plotter_visibility_var = get_workbench().get_variable("view.show_plotter")
+        
+        get_workbench().add_command(
+            "toggle_plotter",
+            "view",
+            _("Shell plotter"),
+            self.toggle_plotter,
+            flag_name="view.show_plotter",
+            group=11,
+        )
+
+        self.update_plotter_visibility(True)
+    
+    def toggle_plotter(self):
+        self.plotter_visibility_var.set(not self.plotter_visibility_var.get())
+        self.update_plotter_visibility()
+
+    def update_plotter_visibility(self, initializing_shell_view=False):
+        if self.plotter_visibility_var.get():
+            self.show_plotter(initializing_shell_view)
+        else:
+            self.hide_plotter()
+
+    def show_plotter(self, initializing_shell_view=False):
+        if not initializing_shell_view:
+            get_workbench().show_view("ShellView", True)
+        
         if self.plotter is None:
-            if value:
-                self.plotter
+            self.plotter = PlotterCanvas(self, self.text) 
+    
+        if not self.plotter.winfo_ismapped():
+            self.add(self.plotter, minsize=100)
+
+        self.sash_place(0, get_workbench().get_option("view.shell_sash_position"), 0)
+        
+        running.io_animation_required = True
+        self.update_plotter()
+        
+    
+    def hide_plotter(self):
+        if self.plotter is None or not self.plotter.winfo_ismapped():
+            return
+        else:
+            self.remove(self.plotter)
+            running.io_animation_required = False
 
     def set_notice(self, text):
         if text is None:
@@ -167,19 +213,46 @@ class ShellView(tk.PanedWindow):
                 self.update_plotter()
     
     def update_plotter(self):
-        self.plotter.update_plot()
+        if self.plotter is not None and self.plotter.winfo_ismapped():
+            self.plotter.update_plot()
+    
+    def resize_plotter(self):
+        if len(self.panes()) > 1 and self.text.winfo_width() > 5:
+            get_workbench().set_option("view.shell_sash_position",
+                                       self.sash_coord(0)[0])
 
 class ShellMenu(TextMenu):
+    
+    def __init__(self, target, view):
+        self.view = view
+        TextMenu.__init__(self, target)
+    
     def add_extra_items(self):
         self.add_separator()
         self.add_command(label="Clear", command=self.text._clear_shell)
         
+        def toggle_from_menu():
+            # I don't like that Tk menu toggles checbutton variable
+            # automatically before calling the handler.
+            # So I revert the toggle before calling the actual handler.
+            # This way the handler doesn't have to worry whether it
+            # needs to toggle the variable or not, and it can choose to
+            # decline the toggle.
+            self.view.plotter_visibility_var.set(not self.view.plotter_visibility_var.get())
+            self.view.toggle_plotter()
+            
+        self.add_checkbutton(label="Show Plotter", 
+                         command=toggle_from_menu,
+                         variable=self.view.plotter_visibility_var)
+        
     def selection_is_read_only(self):
         return not self.text.selection_is_writable()
 
-class ShellText(EnhancedTextWithLogging, PythonText):
-    def __init__(self, master, cnf={}, **kw):
 
+
+class ShellText(EnhancedTextWithLogging, PythonText):
+    def __init__(self, master, view, cnf={}, **kw):
+        self.view = view
         super().__init__(master, cnf, **kw)
         self.bindtags(self.bindtags() + ("ShellText",))
 
@@ -266,8 +339,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             "DebuggerResponse", self._handle_fancy_debugger_progress, True
         )
 
-        self._menu = ShellMenu(self)
-        
         self.tag_raise("underline")
         self.tag_raise("strikethrough")
         self.tag_raise("intense_io")
@@ -771,7 +842,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def on_secondary_click(self, event=None):
         super().on_secondary_click(event)
-        self._menu.tk_popup(event.x_root, event.y_root)
+        self.view.menu.tk_popup(event.x_root, event.y_root)
 
     def _in_current_input_range(self, index):
         try:
@@ -1281,6 +1352,7 @@ class SqueezedTextDialog(tk.Toplevel):
 
 class PlotterCanvas(tk.Canvas):
     def __init__(self, master, text):
+        self.master = master
         self.background = get_syntax_options_for_tag("TEXT")["background"]
         self.foreground = get_syntax_options_for_tag("TEXT")["foreground"]
         super().__init__(master,
@@ -1316,25 +1388,52 @@ class PlotterCanvas(tk.Canvas):
             "#bcbd22",
             "#17becf",
         ]
-        self.range_block_sizes = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        self.range_block_sizes = [0.1, 0.25, 0.5, 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
         self.bind("<Configure>", self.on_resize, True)
         
-        self._prev_data_lines = None
+        self.create_close_button()
+    
+    def create_close_button(self):
+        self.close_img = get_workbench().get_image("tab-close")
+        self.close_active_img = get_workbench().get_image("tab-close-active")
         
-        self.open()
+        self.close_rect = self.create_rectangle(
+            self.winfo_width() - self.close_img.width() - self.linespace,
+            self.linespace / 2,
+            self.winfo_width(),
+            self.linespace / 2 + self.close_img.height(),
+            fill=self.background,
+            width=0,
+            tags=("close",))
+        
+        self.close_button = self.create_image(
+            self.winfo_width() - self.linespace / 2,
+            self.linespace / 2,
+            anchor="ne",
+            image=self.close_img,
+            activeimage=self.close_active_img,
+            tags=("close",))
+        
+        self.tag_bind("close", "<1>", self.on_close)
+    
+    def update_close_button(self):
+        self.coords(self.close_rect,
+                    self.winfo_width() - self.close_img.width() - self.linespace / 1.5,
+                    self.linespace / 2,
+                    self.winfo_width() - self.linespace / 2,
+                    self.linespace / 2 + self.close_img.height())
+        self.coords(self.close_button, 
+                    self.winfo_width() - self.linespace / 2,
+                    self.linespace / 2)
+    
+    def on_close(self, event):
+        self.master.toggle_plotter()
     
     def get_num_steps(self):
-        return 20
-    
-    def open(self):
-        running.io_animation_required = True
-    
-    def close(self):
-        running.io_animation_required = False
+        return 30
     
     def update_plot(self, force_clean=False):
         data_lines = []
-        start_time()
         bottom_index = self.text.index("@%d,%d" % (self.text.winfo_width(), self.text.winfo_height()))
         bottom_lineno = int(float(bottom_index))
         
@@ -1359,11 +1458,27 @@ class PlotterCanvas(tk.Canvas):
         self.delete("segment")
         
         self.update_range(segments_by_color, force_clean)
-        self.draw_segments(segments_by_color)
-        
+        segment_count = self.draw_segments(segments_by_color)
         self.update_legend(data_lines, force_clean)
-        
-        lap_time("draw")
+
+        self.delete("info")
+        if segment_count == 0:
+            info_text = (
+                "Plotter visualizes series of\n"
+                + "numbers printed to the Shell.\n\n"
+                + "See Help for details.")
+            
+            self.create_text_with_background(
+                self.winfo_width() / 2,
+                self.winfo_height() / 2,
+                text=info_text, 
+                anchor="center",
+                justify="center", 
+                tags=("info",))
+            #self.delete("guide", "tick", "legend")
+            #self.range_start = 0
+            #self.range_end = 0
+            self.tag_raise("info")
     
     def update_legend(self, data_lines, force_clean=False):
         legend = None
@@ -1417,12 +1532,16 @@ class PlotterCanvas(tk.Canvas):
         
         
     def draw_segments(self, segments_by_color):
+        count = 0
         for color, segments in enumerate(segments_by_color):
             for pos, nums in segments:
                 self.draw_segment(color, pos, nums)
+                count += 1
         
-        # raise ticks above segments
+        # raise certain elements above segments
         self.tag_raise("tick")
+        self.tag_raise("close")
+        return count
     
     def draw_segment(self, color, pos, nums):
         
@@ -1435,26 +1554,40 @@ class PlotterCanvas(tk.Canvas):
             x += self.x_scale
         
         self.create_line(*args, width=2, fill=self.colors[color % len(self.colors)],
-                         tags=("segment",), arrow="last",
+                         tags=("segment",),
+                         # arrow may be confusing
+                         # and doesn't play nice with distinguising between
+                         # scrollback view and fresh view 
+                         #arrow="last", 
                          #arrowshape=(3,5,3)
                          )
         #self.current_segment_ids.append(line_id)
         
     
-    def update_range(self, segments_by_color, clean):    
+    def update_range(self, segments_by_color, clean):  
+        if not segments_by_color:
+            return 
+          
         range_start = 9999999999
         range_end = -9999999999
         
-        can_shrink = False
+        # if new block is using 3/4 of the width, 
+        # then don't consider old block's values anymore
+        interest_position = 0
+        for start_pos, nums in reversed(segments_by_color[0]):
+            if start_pos < self.get_num_steps() / 10:
+                interest_position = start_pos
+                break 
+        
+        assert isinstance(interest_position, int)
         for segments in segments_by_color:
             for start_pos, nums in segments:
-                if start_pos > 0:
-                    # range can be shrunk only if a start of a segment is visible
-                    can_shrink = True
-                range_start = min(range_start, *nums)
-                range_end = max(range_end, *nums)
+                if start_pos >= interest_position:
+                    range_start = min(range_start, *nums)
+                    range_end = max(range_end, *nums)
         
-        if not can_shrink:
+        if interest_position == 0:
+            # meaning we still care about old line's values
             range_start = min(range_start, self.range_start)
             range_end = max(range_end, self.range_end)
         
@@ -1474,18 +1607,16 @@ class PlotterCanvas(tk.Canvas):
                 range_block_size = size
                 break
         
+        # extend to range block boundary 
         if range_end % range_block_size != 0:
-            # extend to range block boundary 
-            if range_end > 0:
-                range_end -= range_end % -range_block_size
-            else:
-                range_end += range_end % -range_block_size
+            range_end -= range_end % -range_block_size
         
         if range_start % range_block_size != 0:
             range_start -= range_start % range_block_size
         
-        assert range_start % range_block_size == 0
-        assert range_end % range_block_size == 0
+        # not sure about these assertions when using floats
+        #assert range_start % range_block_size == 0
+        #assert range_end % range_block_size == 0, "range_end: %s, bs: %s" % (range_end, range_block_size)
         
         # remember                
         self.range_start = range_start
@@ -1559,17 +1690,42 @@ class PlotterCanvas(tk.Canvas):
         if len(segment[1]) > 1:
             yield segment
     
-    def create_text_with_background(self, x, y, text, anchor="w", background=None, tags=()):
+    def create_text_with_background(self, x, y, text,
+                                    anchor="w",
+                                    justify="left", 
+                                    background=None, tags=()):
         if background is None:
             background = self.background
         
-        half_height = self.linespace // 2
         
-        self.create_rectangle(x, y-half_height, 
-                              x+self.font.measure(text), y+half_height,
+        width = 0
+        lines = text.splitlines()
+        for line in lines:
+            width = max(width, self.font.measure(line))
+            
+        height = len(lines) * self.linespace
+        
+        rect_x = x
+        rect_y = y
+        if anchor == "center":
+            rect_x = x - width / 2
+            rect_y = y - height / 2
+        elif anchor == "w":
+            rect_y = y - height / 2
+        else:
+            "TODO:"
+            
+        self.create_rectangle(rect_x, rect_y, 
+                              rect_x + width, rect_y + height,
                               fill=background, width=0, tags=tags)
-        self.create_text(x, y, anchor="w", text=text, tags=tags, fill=self.foreground)
+        self.create_text(x, y, anchor=anchor, text=text, tags=tags,
+                         fill=self.foreground,
+                         justify=justify)
     
     def on_resize(self, event):
+        if self.winfo_width() > 10:
+            get_workbench().set_option("view.plotter_width", self.winfo_width())
         self.update_plot(True)
+        self.update_close_button()
+        self.master.resize_plotter()
             
