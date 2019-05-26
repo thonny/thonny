@@ -108,11 +108,15 @@ class ShellView(tk.PanedWindow):
 
         self.plotter_visibility_var = get_workbench().get_variable("view.show_plotter")
         
+        def can_toggle():
+            return self.winfo_ismapped()
+        
         get_workbench().add_command(
             "toggle_plotter",
             "view",
-            _("Shell plotter"),
+            _("Plotter"),
             self.toggle_plotter,
+            can_toggle,
             flag_name="view.show_plotter",
             group=11,
         )
@@ -1375,6 +1379,7 @@ class PlotterCanvas(tk.Canvas):
         self.y_padding = self.linespace
         self.x_padding_left = -1 # makes sharper cut for partly hidden line
         self.x_padding_right = self.linespace
+        self.fresh_range = True
         
         self.colors = [
             "#1f77b4",
@@ -1390,6 +1395,7 @@ class PlotterCanvas(tk.Canvas):
         ]
         self.range_block_sizes = [0.1, 0.25, 0.5, 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
         self.bind("<Configure>", self.on_resize, True)
+        self.bind("<Button-1>", self.reset_range, True)
         
         self.create_close_button()
     
@@ -1428,6 +1434,9 @@ class PlotterCanvas(tk.Canvas):
     
     def on_close(self, event):
         self.master.toggle_plotter()
+    
+    def reset_range(self, event=None):
+        self.fresh_range = True
     
     def get_num_steps(self):
         return 30
@@ -1479,6 +1488,8 @@ class PlotterCanvas(tk.Canvas):
             #self.range_start = 0
             #self.range_end = 0
             self.tag_raise("info")
+        
+        self.fresh_range = False
     
     def update_legend(self, data_lines, force_clean=False):
         legend = None
@@ -1557,7 +1568,7 @@ class PlotterCanvas(tk.Canvas):
                          tags=("segment",),
                          # arrow may be confusing
                          # and doesn't play nice with distinguising between
-                         # scrollback view and fresh view 
+                         # scrollback view and fresh_range view 
                          #arrow="last", 
                          #arrowshape=(3,5,3)
                          )
@@ -1586,7 +1597,7 @@ class PlotterCanvas(tk.Canvas):
                     range_start = min(range_start, *nums)
                     range_end = max(range_end, *nums)
         
-        if interest_position == 0:
+        if interest_position == 0 and not self.fresh_range:
             # meaning we still care about old line's values
             range_start = min(range_start, self.range_start)
             range_end = max(range_end, self.range_end)
@@ -1594,7 +1605,10 @@ class PlotterCanvas(tk.Canvas):
         if range_end == range_start:
             range_end += 1
         
-        if not clean and range_end == self.range_end and range_start == self.range_start:
+        if (not clean
+            and not self.fresh_range
+            and self.x_scale is not None 
+            and range_end == self.range_end and range_start == self.range_start):
             # don't recompute as nothing was changed
             return
         
