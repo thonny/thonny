@@ -1280,6 +1280,7 @@ class Workbench(tk.Tk):
                     self.report_exception("Problem showing " + view_id)
 
     def update_image_mapping(self, mapping: Dict[str, str]) -> None:
+        """Was used by thonny-pi. Not recommended anymore"""
         self._default_image_mapping.update(mapping)
 
     def get_backends(self) -> Dict[str, BackendSpec]:
