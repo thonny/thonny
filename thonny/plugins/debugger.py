@@ -1079,13 +1079,23 @@ class DebuggerConfigurationPage(ConfigurationPage):
             row=2,
             columnspan=3
         )
+        
+        default_label = ttk.Label(self, text="Preferred debugger", anchor="w")
+        default_label.grid(row=3, column=0, sticky="w", pady=5)
+        self.add_combobox( 
+            "debugger.preferred_debugger",
+            ["nicer", "faster", "birdseye"],
+            width=8,
+            row=3, column=1, padx=5)
+        default_comment_label = ttk.Label(self, text="(used when clicking Debug toolbar button)", anchor="w")
+        default_comment_label.grid(row=3, column=2, sticky="w", pady=5)
 
         if get_workbench().get_option("run.birdseye_port", None):
             port_label = ttk.Label(self, text="Birdseye port", anchor="w")
-            port_label.grid(row=3, column=0, sticky="w", pady=5)
-            self.add_entry("run.birdseye_port", row=3, column=1, width=5, pady=15, padx=5)
-            comment_label = ttk.Label(self, text="(restart Thonny after changing this)", anchor="w")
-            comment_label.grid(row=3, column=2, sticky="w", pady=5)
+            port_label.grid(row=5, column=0, sticky="w", pady=5)
+            self.add_entry("run.birdseye_port", row=5, column=1, width=5, pady=15, padx=5)
+            port_comment_label = ttk.Label(self, text="(restart Thonny after changing this)", anchor="w")
+            port_comment_label.grid(row=5, column=2, sticky="w", pady=5)
 
         self.columnconfigure(2, weight=1)
 
@@ -1094,34 +1104,55 @@ class DebuggerConfigurationPage(ConfigurationPage):
 def get_current_debugger():
     return _current_debugger
 
+def run_preferred_debug_command():
+    preferred_debugger = get_workbench().get_option("debugger.preferred_debugger").lower() 
+    if preferred_debugger == "faster":
+        return _request_debug("FastDebug")
+    elif preferred_debugger == "birdseye":
+        from thonny.plugins.birdseye_frontend import debug_with_birdseye
+        return debug_with_birdseye()
+    else:
+        return _request_debug("Debug")
 
 def load_plugin() -> None:
 
     get_workbench().set_default("debugger.single_window", False)
     get_workbench().set_default("debugger.automatic_stack_view", True)
+    get_workbench().set_default("debugger.preferred_debugger", "nicer")
 
     get_workbench().add_command(
-        "debug",
+        "debug_preferred",
         "run",
-        "Debug current script (nicer)",
-        lambda: _request_debug("Debug"),
+        "Debug current script",
+        run_preferred_debug_command,
         caption="Debug",
         tester=_start_debug_enabled,
-        default_sequence="<Control-F5>",
         group=10,
         image="debug-current-script",
         include_in_toolbar=True,
     )
 
     get_workbench().add_command(
-        "debuglite",
+        "debug_nicer",
+        "run",
+        "Debug current script (nicer)",
+        lambda: _request_debug("Debug"),
+        caption="Debug (nicer)",
+        tester=_start_debug_enabled,
+        default_sequence="<Control-F5>",
+        group=11,
+        #image="debug-current-script",
+    )
+
+    get_workbench().add_command(
+        "debug_faster",
         "run",
         "Debug current script (faster)",
         lambda: _request_debug("FastDebug"),
-        caption="Fast-debug",
+        caption="Debug (faster)",
         tester=_start_debug_enabled,
         default_sequence="<Shift-F5>",
-        group=10,
+        group=11,
     )
 
     get_workbench().add_command(

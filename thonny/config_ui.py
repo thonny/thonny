@@ -116,7 +116,8 @@ class ConfigurationPage(ttk.Frame):
         if tooltip is not None:
             ui_utils.create_tooltip(checkbox, tooltip)
     
-    def add_combobox(self, option_name, values, row=None, column=0, pady=0, columnspan=1):
+    def add_combobox(self, option_name, values, row=None, column=0, 
+                     padx=0, pady=0, columnspan=1, width=None):
         variable = get_workbench().get_variable(option_name)
         combobox = ttk.Combobox(
             self,
@@ -124,9 +125,12 @@ class ConfigurationPage(ttk.Frame):
             textvariable=variable,
             state="readonly",
             height=15,
+            width=width,
             values=values,
         )
-        combobox.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan)
+        combobox.grid(row=row, column=column, sticky=tk.W, 
+                      pady=pady, padx=padx,
+                      columnspan=columnspan)
 
     
     def add_entry(self, option_name,  row=None, column=0, pady=0, padx=0, columnspan=1, **kw):

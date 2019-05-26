@@ -21,7 +21,7 @@ def start_server():
     )
 
 
-def _debug_with_birdseye():
+def debug_with_birdseye():
     global _server_started
 
     try:
@@ -53,10 +53,10 @@ def load_plugin():
         "birdseye",
         "run",
         _("Debug current script (birdseye)"),
-        _debug_with_birdseye,
+        debug_with_birdseye,
         caption="birdseye",
         tester=_start_debug_enabled,
         default_sequence="<Control-B>",
-        group=10,
+        group=11,
         image=os.path.join(os.path.dirname(__file__), "..", "res", "birdseye.png"),
     )
