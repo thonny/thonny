@@ -7,6 +7,7 @@ Features
 * `Special support for Turtle programs <turtle.rst>`_
 * `Specifying program arguments <program_arguments.rst>`_
 * `Simple mode and expert mode <modes.rst>`_
+* `Plotter <plotter.rst>`_
 * `Birdseye <birdseye.rst>`_
 
 General topics
