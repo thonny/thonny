@@ -2,7 +2,7 @@
 
 Plotter
 ==========================
-Plotter is an extra pane in the Shell, which extracts numbers from 
+Plotter is an add-on for the Shell, which extracts numbers from 
 the program output and displays them as line chart. It can be useful for 
 observing live sensor data coming from attached devices or even for analyzing 
 static data (if you don't bother using more serious tools). It is inspired
@@ -26,19 +26,19 @@ For an examply try following program (you can stop it with Ctrl+C or with
 	    sleep(0.05)
 
 When you run it with Plotter opened, you'll see a line chart with two series forming.
-One column on the chart corresponds to one line in the Shell. 
+Each column on the chart corresponds to one line in the Shell. 
 The rightmost column on the chart always corresponds the bottom-most visible line in the shell,
 even if you stop the program and scroll the text in the shell.
 
-Plotter starts drawing when it detects at least two consecutive lines where the pattern
-of numbers and surrounding text match. The numbers get plotted and the surrounding
+Plotter starts drawing when it detects at least two consecutive lines containing same pattern
+of numbers and surrounding text. The numbers get plotted and the surrounding
 text becomes the legend in the lower-right corner of the Plotter.
 
 Speed of the animation
 --------------------------------
 Unless you are plotting a fixed number of lines, it is good idea not to flood the 
 shell and plotter with data. This is why the example above makes a little pause 
-(`sleep(0.05)`) before outputting next line.
+(``sleep(0.05)``) before outputting next line.
 
 Range of the y-axis
 -------------------
@@ -51,4 +51,4 @@ it by waiting until the outliers are out of the picture and clicking on the Plot
 
 If you want make the range larger (or just compare your data against certain values),
 then simply include suitable constant(s) in your data lines, eg: 
-`print(0, measure1, measure2, 100)`.
+``print(0, measure1, measure2, 100)``.
