@@ -837,7 +837,7 @@ class CPythonProxy(BackendProxy):
             while len(message_queue) > 100:
                 # Probably backend runs an infinite/long print loop.
                 # Throttle message thougput in order to keep GUI thread responsive.
-                sleep(0.01)
+                sleep(0.1)
 
         while self._proc is not None:
             data = self._proc.stdout.readline()
