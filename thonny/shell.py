@@ -22,12 +22,14 @@ from thonny.ui_utils import (
     scrollbar_style,
     select_sequence, TextMenu, create_tooltip, show_dialog, lookup_style_option)
 import tkinter as tk
+import webbrowser
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
 OUTPUT_SPLIT_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])')
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
+SIMPLE_URL_SPLIT_REGEX = re.compile(r"(https?:\/\/[\w\/.:\-\?#=%]+[\w\/])")
 
 INT_REGEX = re.compile(r"\d+")
 ANSI_COLOR_NAMES = {
@@ -862,13 +864,23 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         def _insert(txt, tags):
             if txt != "":
                 self.direct_insert("output_insert", txt, tags)
+        
+        def _insert_and_highlight_urls(txt, tags):
+            parts = SIMPLE_URL_SPLIT_REGEX.split(txt)
+            for i, part in enumerate(parts):
+                if i % 2 == 0:
+                    _insert(part, tags)
+                else:
+                    _insert(part, tags + ("hyperlink", "io_hyperlink"))
+                
 
         # I want the insertion to go before marks
         # self._print_marks("before output")
         self.mark_gravity("input_start", tk.RIGHT)
         self.mark_gravity("output_insert", tk.RIGHT)
         tags = tuple(tags)
-
+        
+        # Make stacktrace clickable
         if "stderr" in tags or "error" in tags:
             # show lines pointing to source lines as hyperlinks
             for line in txt.splitlines(True):
@@ -878,13 +890,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     _insert(parts[1], tags + ("hyperlink", "io_hyperlink",))
                     _insert(parts[2], tags)
                 else:
-                    _insert(line, tags)
+                    _insert_and_highlight_urls(line, tags)
         else:
-            _insert(txt, tags)
+            _insert_and_highlight_urls(txt, tags)
 
         # self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
-
+    
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
         input_text = self.get("input_start", "insert")
@@ -1188,6 +1200,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     get_workbench().get_editor_notebook().show_file(
                         filename, lineno, set_focus=False
                     )
+            else:
+                r = self.tag_prevrange("hyperlink", "@%d,%d" % (event.x, event.y))
+                if r and len(r) == 2:
+                    url = self.get(r[0], r[1])
+                    if SIMPLE_URL_SPLIT_REGEX.match(url):
+                        webbrowser.open(url)
+                
         except Exception:
             traceback.print_exc()
 
