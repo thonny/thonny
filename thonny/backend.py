@@ -86,6 +86,7 @@ class VM:
         self._object_info_tweakers = []
         self._import_handlers = {}
         self._input_queue = queue.Queue()
+        self._source_preprocessors = []
         self._ast_postprocessors = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = (
@@ -189,6 +190,9 @@ class VM:
         if module_name not in self._import_handlers:
             self._import_handlers[module_name] = []
         self._import_handlers[module_name].append(handler)
+    
+    def add_source_preprocessor(self, func):
+        self._source_preprocessors.append(func)
     
     def add_ast_postprocessor(self, func):
         self._ast_postprocessors.append(func)
@@ -834,6 +838,9 @@ class VM:
 
             with tokenize.open(full_filename) as fp:
                 source = fp.read()
+            
+            for preproc in self._source_preprocessors:
+                source = preproc(source, cmd)
 
             result_attributes = self._execute_source(
                 source, full_filename, "exec", executor_class, cmd,
@@ -1072,7 +1079,7 @@ class VM:
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return False
+            return True
 
         def __getattr__(self, name):
             # TODO: is it safe to perform those other functions without notifying vm
