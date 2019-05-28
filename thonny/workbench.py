@@ -26,8 +26,8 @@ from typing import (
     List,
     Optional,  # pylint: disable=unused-import
     Sequence,
-    Set,       # pylint: disable=unused-import
-    Tuple,     # pylint: disable=unused-import
+    Set,  # pylint: disable=unused-import
+    Tuple,  # pylint: disable=unused-import
     Type,
     Union,
     cast,
@@ -195,7 +195,7 @@ class Workbench(tk.Tk):
         self.after(
             1, self._start_runner
         )  # Show UI already before waiting for the backend to start
-    
+
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
         bad_home_msg = None
@@ -203,11 +203,12 @@ class Workbench(tk.Tk):
             bad_home_msg = "Can not find your home directory."
         elif not os.path.exists(home_dir):
             bad_home_msg = "Reported home directory (%s) does not exist." % home_dir
-        if bad_home_msg: 
-            messagebox.showwarning("Problems with home directory",
-                                   bad_home_msg
-                                   + "\nThis may cause problems for Thonny.")
-    
+        if bad_home_msg:
+            messagebox.showwarning(
+                "Problems with home directory",
+                bad_home_msg + "\nThis may cause problems for Thonny.",
+            )
+
     def _try_action(self, action: Callable) -> None:
         try:
             action()
@@ -236,9 +237,9 @@ class Workbench(tk.Tk):
         if language_name in LANGUAGES_DICT:
 
             language = gettext.translation(
-                'thonny',
-                os.path.join('thonny', 'locale'),
-                languages=[LANGUAGES_DICT[language_name]]
+                "thonny",
+                os.path.join("thonny", "locale"),
+                languages=[LANGUAGES_DICT[language_name]],
             )
             language.install()
 
@@ -410,6 +411,7 @@ class Workbench(tk.Tk):
 
         self.set_default("view.editor_font_family", default_editor_family)
         self.set_default("view.editor_font_size", 14 if running_on_mac_os() else 11)
+        self.set_default("view.io_font_size", 14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
 
@@ -421,15 +423,22 @@ class Workbench(tk.Tk):
 
         self._fonts = [
             tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
-            tk_font.Font(name="BoldIOFont", 
-                         family=self.get_option("view.io_font_family"),
-                         weight="bold"),
-            tk_font.Font(name="ItalicIOFont", 
-                         family=self.get_option("view.io_font_family"),
-                         slant="italic"),
-            tk_font.Font(name="BoldItalicIOFont", 
-                         family=self.get_option("view.io_font_family"),
-                         weight="bold", slant="italic"),
+            tk_font.Font(
+                name="BoldIOFont",
+                family=self.get_option("view.io_font_family"),
+                weight="bold",
+            ),
+            tk_font.Font(
+                name="ItalicIOFont",
+                family=self.get_option("view.io_font_family"),
+                slant="italic",
+            ),
+            tk_font.Font(
+                name="BoldItalicIOFont",
+                family=self.get_option("view.io_font_family"),
+                weight="bold",
+                slant="italic",
+            ),
             tk_font.Font(
                 name="EditorFont", family=self.get_option("view.editor_font_family")
             ),
@@ -546,9 +555,11 @@ class Workbench(tk.Tk):
             _("Exit"),
             self._on_close,
             default_sequence=select_sequence("<Alt-F4>", "<Command-q>", "<Control-q>"),
-            extra_sequences=["<Alt-F4>"] if running_on_linux()
-                            else ["<Control-q>"] if running_on_windows()
-                            else []
+            extra_sequences=["<Alt-F4>"]
+            if running_on_linux()
+            else ["<Control-q>"]
+            if running_on_windows()
+            else [],
         )
 
         self.add_command(
@@ -745,7 +756,7 @@ class Workbench(tk.Tk):
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
-        show_extra_sequences = False
+        show_extra_sequences=False,
     ) -> None:
         """Registers an item to be shown in specified menu.
 
@@ -946,9 +957,7 @@ class Workbench(tk.Tk):
         self.set_default("view." + view_id + ".position_key", default_position_key)
 
         if self.get_ui_mode() == "simple":
-            visibility_flag = tk.BooleanVar(
-                value=view_id in SIMPLE_MODE_VIEWS
-            )
+            visibility_flag = tk.BooleanVar(value=view_id in SIMPLE_MODE_VIEWS)
         else:
             visibility_flag = cast(
                 tk.BooleanVar, self.get_variable("view." + view_id + ".visible")
@@ -1247,10 +1256,10 @@ class Workbench(tk.Tk):
                 "Configuration has been updated. "
                 + "Restart Thonny to start working in regular mode.\n\n"
                 + "(See 'Tools → Options → General' if you change your mind later.)",
-                parent=self)
+                parent=self,
+            )
 
         label.bind("<1>", on_click, True)
-
 
     def log_program_arguments_string(self, arg_str: str) -> None:
         arg_str = arg_str.strip()
@@ -1579,9 +1588,11 @@ class Workbench(tk.Tk):
 
         font_scaling_mode = self.get_option("general.font_scaling_mode")
 
-        if (running_on_linux()
+        if (
+            running_on_linux()
             and font_scaling_mode in ["default", "extra"]
-            and scaling not in ["default", "auto"]):
+            and scaling not in ["default", "auto"]
+        ):
             # update system fonts which are given in pixel sizes
             for name in tk_font.names():
                 f = tk_font.nametofont(name)
@@ -1604,8 +1615,9 @@ class Workbench(tk.Tk):
                     orig_size = -orig_size / self._default_scaling_factor
 
                 # scale
-                scaled_size = round(orig_size
-                        * (self._scaling_factor / self._default_scaling_factor))
+                scaled_size = round(
+                    orig_size * (self._scaling_factor / self._default_scaling_factor)
+                )
                 f.configure(size=scaled_size)
 
         elif running_on_mac_os() and scaling not in ["default", "auto"]:
@@ -1615,20 +1627,22 @@ class Workbench(tk.Tk):
                 f = tk_font.nametofont(name)
                 orig_size = f.cget("size")
                 assert orig_size > 0
-                f.configure(size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER))
+                f.configure(
+                    size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER)
+                )
 
     def update_fonts(self) -> None:
         editor_font_size = self._guard_font_size(
             self.get_option("view.editor_font_size")
         )
         editor_font_family = self.get_option("view.editor_font_family")
+
+        io_font_size = self._guard_font_size(self.get_option("view.io_font_size"))
         io_font_family = self.get_option("view.io_font_family")
-        
+
+
         for name in ("IOFont", "BoldIOFont", "ItalicIOFont", "BoldItalicIOFont"):
-            tk_font.nametofont(name).configure(
-                family=io_font_family,
-                size=min(editor_font_size - 2, int(editor_font_size * 0.8 + 3)),
-            )
+            tk_font.nametofont(name).configure(family=io_font_family, size=io_font_size)
         tk_font.nametofont("EditorFont").configure(
             family=editor_font_family, size=editor_font_size
         )
@@ -1738,6 +1752,9 @@ class Workbench(tk.Tk):
             self.set_option(
                 "view.editor_font_size", self._guard_font_size(editor_font_size)
             )
+            io_font_size = self.get_option("view.io_font_size")
+            io_font_size += delta
+            self.set_option("view.io_font_size", self._guard_font_size(io_font_size))
             self.update_fonts()
 
     def _guard_font_size(self, size: int) -> int:
@@ -2002,7 +2019,9 @@ class Workbench(tk.Tk):
             # https://stackoverflow.com/questions/26321333/tkinter-in-python-3-4-on-windows-dont-post-internal-clipboard-data-to-the-windo
             try:
                 clipboard_data = self.clipboard_get()
-                if len(clipboard_data) < 1000 and all(map(os.path.exists, clipboard_data.splitlines())):
+                if len(clipboard_data) < 1000 and all(
+                    map(os.path.exists, clipboard_data.splitlines())
+                ):
                     # Looks like the clipboard contains file name(s)
                     # Most likely this means actual file cut/copy operation
                     # was made outside of Thonny.
@@ -2013,6 +2032,7 @@ class Workbench(tk.Tk):
                     pass
                 else:
                     import pyperclip
+
                     pyperclip.copy(clipboard_data)
             except Exception:
                 pass
@@ -2078,10 +2098,10 @@ class Workbench(tk.Tk):
         # and will show empty table on open
         self.get_view("VariablesView")
 
-        if ((self.get_option("assistance.open_assistant_on_errors")
-            or self.get_option("assistance.open_assistant_on_warnings"))
-            and
-            (self.get_ui_mode() != "simple" or "AssistantView" in SIMPLE_MODE_VIEWS)):
+        if (
+            self.get_option("assistance.open_assistant_on_errors")
+            or self.get_option("assistance.open_assistant_on_warnings")
+        ) and (self.get_ui_mode() != "simple" or "AssistantView" in SIMPLE_MODE_VIEWS):
             self.get_view("AssistantView")
 
     def _save_layout(self) -> None:

@@ -5,12 +5,12 @@ For performance reasons, coloring is updated in 2 phases:
     1. recolor single-line tokens on the modified line(s)
     2. recolor multi-line tokens (triple-quoted strings) in the whole text
 
-First phase may insert wrong tokens inside triple-quoted strings, but the 
-priorities of triple-quoted-string tags are higher and therefore user 
+First phase may insert wrong tokens inside triple-quoted strings, but the
+priorities of triple-quoted-string tags are higher and therefore user
 doesn't see these wrong taggings.
 
 In Shell only current command entry is colored
-    
+
 Regexes are adapted from idlelib
 """
 
