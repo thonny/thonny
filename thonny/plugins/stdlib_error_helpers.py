@@ -7,6 +7,7 @@ import os.path
 
 from thonny.assistance import ErrorHelper, Suggestion, name_similarity, add_error_helper
 from thonny import assistance
+from thonny.misc_utils import running_on_linux, running_on_windows
 
 
 class SyntaxErrorHelper(ErrorHelper):
@@ -549,6 +550,60 @@ class AttributeErrorHelper(ErrorHelper):
             self.error_info["line"].replace(" ", "").replace("\n", "").replace("\r", "")
         )
 
+class OSErrorHelper(ErrorHelper):
+    def __init__(self, error_info):
+        super().__init__(error_info)
+
+        if "Address already in use" in self.error_info["message"]:
+            self.intro_text = (
+                "Your programs tries to listen on a port which is already taken."
+            )
+            self.suggestions = [
+                Suggestion(
+                    "kill-by-port-type-error",
+                    "Want to close the other process?",
+                    self.get_kill_process_instructions(),
+                    5,
+                ),
+                Suggestion(
+                    "use-another-type-error",
+                    "Can you use another port?",
+                    "If you don't want to mess with the other process, then check whether"
+                    + " you can configure your program to use another port.",
+                    3,
+                ),
+            ]
+
+        else:
+            self.intro_text = (
+                "No specific information is available for this error."
+            )
+    
+    def get_kill_process_instructions(self):
+        s = ("Let's say you need port 5000. If you don't know which process is using it,"
+            + " then enter following system command into Thonny's Shell:\n\n")
+        
+        if running_on_windows():
+            s += ("``!netstat -ano | findstr :5000``\n\n"
+                  + "You should see the process ID in the last column.\n\n")
+        else:
+            s += ("``!lsof -i:5000``\n\n"
+                  + "You should see the process ID under the heading PID.\n\n")
+        
+        s += ("Let's pretend the ID is 12345."
+              " You can try hard-killing the process with following command:\n\n")
+        
+        if running_on_windows():
+            s += ("``!tskill 12345``\n")
+        else:
+            s += ("``!kill -9 12345``\n\n"
+                  + "Both steps can be combined into single command:\n\n"
+                  + "``!kill -9 $(lsof -t -i:5000)``\n\n")
+        
+        
+        return s
+        
+        
 
 class TypeErrorHelper(ErrorHelper):
     def __init__(self, error_info):

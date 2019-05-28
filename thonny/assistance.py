@@ -115,6 +115,12 @@ class AssistantView(tktextext.TextFrame):
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         # Can be called by event system or by Workbench
         # (if Assistant wasn't created yet but an error came)
+        if (not msg.get("user_exception") 
+            and msg.get("command_name") in ["execute_system_command", "execute_source"]
+            ):
+            # Shell commands may be used to investigate the problem, don't clear assistance 
+            return
+        
         self._clear()
 
         if not isinstance(get_runner().get_backend_proxy(), CPythonProxy):
