@@ -753,10 +753,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             focused_view.focus()
 
     def restart(self):
-        self._insert_text_directly(
-            "\n========================= RESTART =========================\n",
-            ("magic",),
-        )
+        self._insert_text_directly("\n")
+        self._insert_text_directly(" Restart\n", ("restart_line", "GUTTER"))
+        self._insert_text_directly("\n")
 
     def intercept_insert(self, index, txt, tags=()):
         # pylint: disable=arguments-differ

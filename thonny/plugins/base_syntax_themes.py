@@ -8,6 +8,8 @@ def default_light() -> SyntaxThemeSettings:
     light_fg = "DarkGray"
     string_fg = "DarkGreen"
     open_string_bg = "#c3f9d3"
+    gutter_foreground = "#999999"
+    gutter_background = "#e0e0e0"
 
     return {
         "TEXT": {
@@ -15,7 +17,9 @@ def default_light() -> SyntaxThemeSettings:
             "insertbackground": default_fg,
             "background": default_bg,
         },
-        "GUTTER": {"foreground": "#999999", "background": "#e0e0e0"},
+        "GUTTER": {"foreground": gutter_foreground, "background": gutter_background},
+        "restart_line" : {"spacing1" : 6, "spacing3" : 4,
+                          "foreground": gutter_foreground, "background": gutter_background},
         "breakpoint": {"foreground": "crimson"},
         "current_line": {"background": "#f5f5f5"},
         "definition": {"foreground": "DarkBlue", "font": "BoldEditorFont"},
@@ -141,6 +145,8 @@ def default_dark() -> SyntaxThemeSettings:
     default_bg = "#2d2d2d"
     string_fg = "#8DC76F"
     open_string_bg = "#224533"
+    gutter_foreground = "#606060"
+    gutter_background = "#323232"
 
     # s.configure("Local.Code", foreground="#BCCAE8")
     # s.configure("MatchedName.Code", background="#193022")
@@ -151,7 +157,9 @@ def default_dark() -> SyntaxThemeSettings:
             "insertbackground": default_fg,
             "background": default_bg,
         },
-        "GUTTER": {"foreground": "#606060", "background": "#323232"},
+        "GUTTER": {"foreground": gutter_foreground, "background": gutter_background},
+        "restart_line" : {"spacing1" : 6, "spacing3" : 4,
+                          "foreground": gutter_foreground, "background": gutter_background},
         "breakpoint": {"foreground": "pink"},
         "current_line": {"background": "#363636"},
         "sel": {"foreground": "#eeeeee", "background": "#6E6E6E"},
@@ -276,10 +284,12 @@ def default_dark() -> SyntaxThemeSettings:
 
 def default_dark_green() -> SyntaxThemeSettings:
     open_string_bg = "#453B22"
+    gutter_background = "#33402F"
 
     return {
         "TEXT": {"background": "#273627"},
-        "GUTTER": {"background": "#33402F"},
+        "GUTTER": {"background": gutter_background},
+        "restart_line" : {"background": gutter_background},
         "current_line": {"background": "#2E402E"},
         "sel": {"background": "#6E6E6E"},
         "unclosed_expression": {"background": "#0F1F15"},
@@ -297,9 +307,11 @@ def default_dark_green() -> SyntaxThemeSettings:
 
 def default_dark_blue() -> SyntaxThemeSettings:
     open_string_bg = "#224533"
+    gutter_background = "#2F3640"
     return {
         "TEXT": {"background": "#272936"},
-        "GUTTER": {"background": "#2F3640"},
+        "GUTTER": {"background": gutter_background},
+        "restart_line" : {"background": gutter_background},
         "current_line": {"background": "#2D3040"},
         "sel": {"background": "#6E6E6E"},
         "unclosed_expression": {"background": "#100B21"},
