@@ -1072,7 +1072,7 @@ class VM:
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return True
+            return False
 
         def __getattr__(self, name):
             # TODO: is it safe to perform those other functions without notifying vm
@@ -1087,6 +1087,10 @@ class VM:
         def write(self, data):
             try:
                 self._vm._enter_io_function()
+                # click may send bytes instead of strings
+                if isinstance(data, bytes):
+                    data = data.decode(errors="replace")
+                    
                 if data != "":
                     self._vm.send_message(
                         BackendEvent(
