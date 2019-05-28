@@ -31,7 +31,7 @@ def default_light() -> SyntaxThemeSettings:
         "magic": {"foreground": light_fg},
         "stdin": {"foreground": "Blue"},
         "stdout": {"foreground": "Black"},
-        "stderr": {"foreground": "Red"},
+        "stderr": {"foreground": "#CC0000"}, # same as ANSI red
         "value": {"foreground": "DarkBlue"},
         "hyperlink": {"foreground": "#3A66DD", "underline": True},
         # paren matcher
