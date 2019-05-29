@@ -10,14 +10,7 @@ import traceback
 from thonny import get_runner, get_workbench, memory, roughparse, ui_utils, running
 from thonny.codeview import PythonText, get_syntax_options_for_tag
 from thonny.common import InlineCommand, ToplevelCommand, ToplevelResponse
-from thonny.misc_utils import (
-    construct_cmd_line,
-    parse_cmd_line,
-    running_on_mac_os,
-    shorten_repr,
-    lap_time,
-    start_time,
-)
+from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
 from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
@@ -385,6 +378,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
 
     def _handle_program_output(self, msg):
+        # Discard but not too often, as toplevel response will discard anyway
+        if int(float(self.index("end"))) > get_workbench().get_option("shell.max_lines") + 100:
+            self._discard_old_content()
+
         self._ensure_visible()
         self._append_to_io_queue(msg.data, msg.stream_name)
 
