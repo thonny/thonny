@@ -224,7 +224,7 @@ def normpath_with_actual_case(name: str) -> str:
             result = buf.value
         else:
             result = name
-            
+
         assert isinstance(result, str)
 
         if result[1] == ":":
@@ -260,56 +260,69 @@ def get_exe_dirs():
     if site.ENABLE_USER_SITE:
         if platform.system() == "Windows":
             if site.getusersitepackages():
-                result.append(site.getusersitepackages()
-                              .replace("site-packages", "Scripts"))
+                result.append(
+                    site.getusersitepackages().replace("site-packages", "Scripts")
+                )
         else:
             if site.getuserbase():
                 result.append(site.getuserbase() + "/bin")
-    
+
     main_scripts = os.path.join(sys.prefix, "Scripts")
     if os.path.isdir(main_scripts) and main_scripts not in result:
         result.append(main_scripts)
-    
+
     if os.path.dirname(sys.executable) not in result:
         result.append(os.path.dirname(sys.executable))
-    
+
     return result
+
 
 def get_site_dir(symbolic_name, executable=None):
     if not executable or executable == sys.executable:
         result = getattr(site, symbolic_name, "")
     else:
-        result = subprocess.check_output(
-            [executable, '-m', 'site', 
-                '--' + symbolic_name.lower().replace("_", "-")],
-            universal_newlines=True
-        ).decode().strip()
-    
+        result = (
+            subprocess.check_output(
+                [
+                    executable,
+                    "-m",
+                    "site",
+                    "--" + symbolic_name.lower().replace("_", "-"),
+                ],
+                universal_newlines=True,
+            )
+            .decode()
+            .strip()
+        )
+
     return result if result else None
+
 
 def get_base_executable():
     if sys.exec_prefix == sys.base_exec_prefix:
         return sys.executable
-    
+
     if platform.system() == "Windows":
         result = sys.base_exec_prefix + "\\" + os.path.basename(sys.executable)
         result = normpath_with_actual_case(result)
     else:
         result = sys.executable.replace(sys.exec_prefix, sys.base_exec_prefix)
-    
+
     if not os.path.isfile(result):
         raise RuntimeError("Can't locate base executable")
-    
+
     return result
+
 
 def get_augmented_system_path(extra_dirs):
     path_items = os.environ.get("PATH", "").split(os.pathsep)
-    
+
     for d in reversed(extra_dirs):
         if d not in path_items:
             path_items.insert(0, d)
-    
+
     return os.pathsep.join(path_items)
+
 
 def update_system_path(env, value):
     # in Windows, env keys are not case sensitive
@@ -320,16 +333,18 @@ def update_system_path(env, value):
             if key.upper() == "PATH":
                 found = True
                 env[key] = value
-        
+
         if not found:
             env["PATH"] = value
     else:
         env["PATH"] = value
 
+
 class UserError(RuntimeError):
     """Errors of this class are meant to be presented without stacktrace"""
 
     pass
+
 
 def is_hidden_or_system_file(path: str) -> bool:
     if os.path.basename(path).startswith("."):
@@ -355,47 +370,46 @@ def get_dirs_child_data(paths):
     for path in paths:
         # assuming the path already has actual case
         res[path] = get_single_dir_child_data(path)
-    
+
     return res
+
 
 def get_single_dir_child_data(path):
     if path == "":
         if platform.system() == "Windows":
             get_windows_network_locations()
-            return {**get_windows_volumes_info(),
-                    **get_windows_network_locations()}
+            return {**get_windows_volumes_info(), **get_windows_network_locations()}
         else:
             return get_single_dir_child_data("/")
-        
+
     elif os.path.isdir(path) or os.path.ismount(path):
         result = {}
-        
+
         try:
             for child in os.listdir(path):
                 full_child_path = normpath_with_actual_case(os.path.join(path, child))
                 if not is_hidden_or_system_file(full_child_path):
                     st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
                     name = os.path.basename(full_child_path)
-                    result[name] = {"size" : None if os.path.isdir(full_child_path) else st.st_size,
-                                    "time" : max(st.st_mtime, st.st_ctime)}
+                    result[name] = {
+                        "size": None if os.path.isdir(full_child_path) else st.st_size,
+                        "time": max(st.st_mtime, st.st_ctime),
+                    }
         except PermissionError:
-            result["<not accessible>"] = {
-                "kind" : "error",
-                "size" : -1,
-                "time" : None,
-            }
-        
+            result["<not accessible>"] = {"kind": "error", "size": -1, "time": None}
+
         return result
     elif os.path.isfile(path):
         return "file"
     else:
         return "missing"
-            
+
+
 def get_windows_volumes_info():
     # http://stackoverflow.com/a/2288225/261181
     # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
     import string
-    
+
     from ctypes import windll
 
     all_drive_types = [
@@ -416,45 +430,49 @@ def get_windows_volumes_info():
     ]
 
     result = {}
-    
+
     bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
     for letter in string.ascii_uppercase:
-        drive_type = all_drive_types[windll.kernel32.GetDriveTypeW("%s:\\" % letter)]  # @UndefinedVariable
-        
+        drive_type = all_drive_types[
+            windll.kernel32.GetDriveTypeW("%s:\\" % letter)
+        ]  # @UndefinedVariable
+
         if bitmask & 1 and drive_type in required_drive_types:
-            drive = letter + ":" 
+            drive = letter + ":"
             path = drive + "\\"
             volume_name = get_windows_volume_name(path)
             if not volume_name:
                 volume_name = "Local Disk"
-            
+
             label = volume_name + " (" + drive + ")"
-            
+
             try:
                 st = os.stat(path)
                 result[path] = {
-                    "label" : label,
-                    "size" : None,
-                    "time" : max(st.st_mtime, st.st_ctime)
+                    "label": label,
+                    "size": None,
+                    "time": max(st.st_mtime, st.st_ctime),
                 }
             except PermissionError:
                 # probably an empty cardreader slot
                 pass
-            
+
         bitmask >>= 1
 
     return result
 
+
 def get_windows_volume_name(path):
     # https://stackoverflow.com/a/12056414/261181
     import ctypes
+
     kernel32 = ctypes.windll.kernel32
     volume_name_buffer = ctypes.create_unicode_buffer(1024)
     file_system_name_buffer = ctypes.create_unicode_buffer(1024)
     serial_number = None
     max_component_length = None
     file_system_flags = None
-    
+
     result = kernel32.GetVolumeInformationW(
         ctypes.c_wchar_p(path),
         volume_name_buffer,
@@ -463,13 +481,14 @@ def get_windows_volume_name(path):
         max_component_length,
         file_system_flags,
         file_system_name_buffer,
-        ctypes.sizeof(file_system_name_buffer)
+        ctypes.sizeof(file_system_name_buffer),
     )
-    
+
     if result:
         return volume_name_buffer.value
     else:
         return None
+
 
 def get_windows_network_locations():
     import ctypes.wintypes
@@ -477,34 +496,36 @@ def get_windows_network_locations():
     CSIDL_NETHOOD = 0x13
     SHGFP_TYPE_CURRENT = 0
     buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-    ctypes.windll.shell32.SHGetFolderPathW(
-        0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf
-    )
+    ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_NETHOOD, 0, SHGFP_TYPE_CURRENT, buf)
     shortcuts_dir = buf.value
-    
+
     result = {}
     for entry in os.scandir(shortcuts_dir):
-        #full_path = normpath_with_actual_case(entry.path)
+        # full_path = normpath_with_actual_case(entry.path)
         lnk_path = os.path.join(entry.path, "target.lnk")
         if os.path.exists(lnk_path):
             try:
                 target = get_windows_lnk_target(lnk_path)
                 result[target] = {
-                    "label" : entry.name + " (" + target + ")",
-                    "size" : None,
-                    "time" : None
+                    "label": entry.name + " (" + target + ")",
+                    "size": None,
+                    "time": None,
                 }
             except:
-                logging.getLogger("thonny").error("Can't get target from %s", lnk_path, exc_info=True)
-    
+                logging.getLogger("thonny").error(
+                    "Can't get target from %s", lnk_path, exc_info=True
+                )
+
     return result
-                
-    
+
+
 def get_windows_lnk_target(lnk_file_path):
     import thonny
-    script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")
+
+    script_path = os.path.join(
+        os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs"
+    )
     cmd = ["cscript", "/NoLogo", script_path, lnk_file_path]
-    result = subprocess.check_output(cmd,
-                    universal_newlines=True, timeout=3)
-    
+    result = subprocess.check_output(cmd, universal_newlines=True, timeout=3)
+
     return result.strip()

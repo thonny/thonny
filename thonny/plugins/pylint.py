@@ -10,7 +10,7 @@ import logging
 class PylintAnalyzer(SubprocessProgramAnalyzer):
     def is_enabled(self):
         return get_workbench().get_option("assistance.use_pylint")
-    
+
     def start_analysis(self, main_file_path, imported_file_paths):
         relevant_symbols = {
             key
@@ -53,7 +53,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
             # (unfortunately can't separate main script when user modules are present)
             options.append("--allow-global-unused-variables=no")
         """
-        
+
         self._proc = ui_utils.popen_with_ui_thread_callback(
             [get_frontend_python(), "-m", "pylint"]
             + options
@@ -68,10 +68,12 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
     def _parse_and_output_warnings(self, pylint_proc, out_lines, err_lines):
         # print("COMPL", out, err)
         # get rid of non-error
-        err = "".join(err_lines).replace(
-            "No config file found, using default configuration", ""
-        ).strip()
-        
+        err = (
+            "".join(err_lines)
+            .replace("No config file found, using default configuration", "")
+            .strip()
+        )
+
         if err:
             logging.getLogger("thonny").error("Pylint: " + err)
 

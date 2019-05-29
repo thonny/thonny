@@ -8,12 +8,15 @@ _server_started = False
 
 
 def _start_debug_enabled():
-    return (get_workbench().get_editor_notebook().get_current_editor() is not None
-            and "debug" in get_runner().get_supported_features())
+    return (
+        get_workbench().get_editor_notebook().get_current_editor() is not None
+        and "debug" in get_runner().get_supported_features()
+    )
 
 
 def start_server():
     from birdseye import server
+
     server.app.run(
         port=get_workbench().get_option("run.birdseye_port"),
         debug=False,
@@ -27,9 +30,13 @@ def debug_with_birdseye():
     try:
         import birdseye  # @UnusedImport
     except ImportError:
-        if messagebox.askyesno(_("About Birdseye"),
-                               _("Birdseye is a Python debugger which needs to be installed separately.\n\n"
-                               + "Do you want to open the help page and learn more?")):
+        if messagebox.askyesno(
+            _("About Birdseye"),
+            _(
+                "Birdseye is a Python debugger which needs to be installed separately.\n\n"
+                + "Do you want to open the help page and learn more?"
+            ),
+        ):
             get_workbench().open_help_topic("birdseye")
 
         return

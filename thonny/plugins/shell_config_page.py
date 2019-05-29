@@ -14,8 +14,10 @@ class ShellConfigurationPage(ConfigurationPage):
         max_lines_var = get_workbench().get_variable("shell.max_lines")
         max_lines_label = ttk.Label(
             self,
-            text=_("Maximum number of lines to keep.\n"
-                   + "NB! Large values may cause poor performance!"),
+            text=_(
+                "Maximum number of lines to keep.\n"
+                + "NB! Large values may cause poor performance!"
+            ),
         )
         max_lines_label.grid(row=20, column=0, sticky=tk.W)
         max_lines_combo = ttk.Combobox(
@@ -30,8 +32,7 @@ class ShellConfigurationPage(ConfigurationPage):
 
         squeeze_var = get_workbench().get_variable("shell.squeeze_threshold")
         squeeze_label = ttk.Label(
-            self,
-            text="Maximum length of line fragments before squeezing"
+            self, text="Maximum length of line fragments before squeezing"
         )
         squeeze_label.grid(row=22, column=0, sticky="w")
         squeeze_combo = ttk.Combobox(
@@ -43,6 +44,7 @@ class ShellConfigurationPage(ConfigurationPage):
             values=[500, 1000, 1500, 2000, 3000, 4000, 5000, 10000],
         )
         squeeze_combo.grid(row=22, column=1, sticky=tk.W, padx=10, pady=10)
+
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page(_("Shell"), ShellConfigurationPage)

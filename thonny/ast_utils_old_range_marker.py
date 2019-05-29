@@ -6,6 +6,7 @@ import logging
 import token
 import tokenize
 
+
 def old_mark_text_ranges(node, source: bytes):
     """
     Node is an AST, source is corresponding source as string.
@@ -281,7 +282,9 @@ def _fix_ast_problems(tree, source_lines, tokens):
             # Note that this doesn't fix
             # (3)+3
 
-        elif isinstance(node, ast.Call) and _compare_node_positions(node, node.func) > 0:
+        elif (
+            isinstance(node, ast.Call) and _compare_node_positions(node, node.func) > 0
+        ):
             # Python 3.4 call problem
             # get position from an already fixed child
             node.lineno = node.func.lineno

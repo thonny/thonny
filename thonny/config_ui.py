@@ -56,7 +56,7 @@ class ConfigurationDialog(tk.Toplevel):
         self._notebook.select(
             self._notebook.tabs()[ConfigurationDialog.last_shown_tab_index]
         )
-    
+
     def select_page(self, title):
         for i, tab in enumerate(self._notebook.tabs()):
             if self._notebook.tab(i)["text"] == title:
@@ -105,19 +105,41 @@ class ConfigurationPage(ttk.Frame):
         ttk.Frame.__init__(self, master)
 
     def add_checkbox(
-        self, flag_name, description, row=None, column=0, 
-        padx=0, pady=0, columnspan=1, tooltip=None
+        self,
+        flag_name,
+        description,
+        row=None,
+        column=0,
+        padx=0,
+        pady=0,
+        columnspan=1,
+        tooltip=None,
     ):
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
-        checkbox.grid(row=row, column=column, sticky=tk.W, 
-                      padx=padx, pady=pady, columnspan=columnspan)
+        checkbox.grid(
+            row=row,
+            column=column,
+            sticky=tk.W,
+            padx=padx,
+            pady=pady,
+            columnspan=columnspan,
+        )
 
         if tooltip is not None:
             ui_utils.create_tooltip(checkbox, tooltip)
-    
-    def add_combobox(self, option_name, values, row=None, column=0, 
-                     padx=0, pady=0, columnspan=1, width=None):
+
+    def add_combobox(
+        self,
+        option_name,
+        values,
+        row=None,
+        column=0,
+        padx=0,
+        pady=0,
+        columnspan=1,
+        width=None,
+    ):
         variable = get_workbench().get_variable(option_name)
         combobox = ttk.Combobox(
             self,
@@ -128,16 +150,28 @@ class ConfigurationPage(ttk.Frame):
             width=width,
             values=values,
         )
-        combobox.grid(row=row, column=column, sticky=tk.W, 
-                      pady=pady, padx=padx,
-                      columnspan=columnspan)
+        combobox.grid(
+            row=row,
+            column=column,
+            sticky=tk.W,
+            pady=pady,
+            padx=padx,
+            columnspan=columnspan,
+        )
 
-    
-    def add_entry(self, option_name,  row=None, column=0, pady=0, padx=0, columnspan=1, **kw):
+    def add_entry(
+        self, option_name, row=None, column=0, pady=0, padx=0, columnspan=1, **kw
+    ):
         variable = get_workbench().get_variable(option_name)
         entry = ttk.Entry(self, textvariable=variable, **kw)
-        entry.grid(row=row, column=column, sticky=tk.W, pady=pady, 
-                   columnspan=columnspan, padx=padx)
+        entry.grid(
+            row=row,
+            column=column,
+            sticky=tk.W,
+            pady=pady,
+            columnspan=columnspan,
+            padx=padx,
+        )
 
     def apply(self):
         """Apply method should return False, when page contains invalid

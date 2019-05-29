@@ -335,10 +335,10 @@ def clean(
                 "background": normal_detail,
                 "foreground": high_foreground,
                 "selectcolor": normal_foreground,
-                #"borderwidth": 0, # Interacts badly with right-clicks in Linux
+                # "borderwidth": 0, # Interacts badly with right-clicks in Linux
                 "activebackground": normal_foreground,
                 "activeforeground": frame_background,
-                #"activeborderwidth": 0, # Interacts badly with right-clicks in Linux
+                # "activeborderwidth": 0, # Interacts badly with right-clicks in Linux
                 "relief": "flat",
             }
         },

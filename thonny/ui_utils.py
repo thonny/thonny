@@ -486,17 +486,21 @@ class ClosableNotebook(ttk.Notebook):
     def _check_remove_padding(self, kw):
         # Windows themes produce 1-pixel padding to the bottom of the pane
         # Don't know how to get rid of it using themes
-        if ("padding" not in kw
-            and ttk.Style().theme_use().lower() in ("windows", "xpnative", "vista")):
+        if "padding" not in kw and ttk.Style().theme_use().lower() in (
+            "windows",
+            "xpnative",
+            "vista",
+        ):
             kw["padding"] = (0, 0, 0, -1)
-    
+
     def add(self, child, **kw):
         self._check_remove_padding(kw)
         super().add(child, **kw)
-    
+
     def insert(self, pos, child, **kw):
         self._check_remove_padding(kw)
         super().insert(pos, child, **kw)
+
 
 class AutomaticNotebook(ClosableNotebook):
     """
@@ -932,16 +936,17 @@ class ToolTip:
             pass
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
-        #get_workbench().bind("WindowFocusOut", self.hidetip, True)
+        # get_workbench().bind("WindowFocusOut", self.hidetip, True)
 
     def hidetip(self, event=None):
         tw = self.tipwindow
         self.tipwindow = None
         if tw:
             tw.destroy()
-        
-        #get_workbench().unbind("WindowFocusOut", self.hidetip)
-    
+
+        # get_workbench().unbind("WindowFocusOut", self.hidetip)
+
+
 def create_tooltip(widget, text, **kw):
     options = get_style_configuration("Tooltip").copy()
     options.setdefault("background", "#ffffe0")
@@ -1298,11 +1303,11 @@ def remove_line_numbers(s):
 
 
 def assign_geometry(win, master=None):
-    
+
     if master is None:
         master = tk._default_root
-    
-    size = get_workbench().get_option(get_size_option_name(win)) 
+
+    size = get_workbench().get_option(get_size_option_name(win))
     if size:
         width, height = size
         saved_size = True
@@ -1311,7 +1316,7 @@ def assign_geometry(win, master=None):
         fallback_height = 400
         # need to wait until size is computed
         # (unfortunately this causes dialog to jump)
-        if getattr(master, "initializing", False): 
+        if getattr(master, "initializing", False):
             # can't get reliable positions when main window is not in mainloop yet
             width = fallback_width
             height = fallback_height
@@ -1322,12 +1327,12 @@ def assign_geometry(win, master=None):
             # looks like it doesn't take window border into account
             width = win.winfo_width()
             height = win.winfo_height()
-            
+
             if width < 10:
                 # ie. size measurement is not correct
                 width = fallback_width
                 height = fallback_height
-                
+
         saved_size = False
 
     left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
@@ -1521,55 +1526,56 @@ class ChoiceDialog(tk.Toplevel):
         self.result = None
         self.destroy()
 
+
 class LongTextDialog(tk.Toplevel):
     def __init__(self, title, text_content, parent=None):
         if parent is None:
             parent = tk._default_root
-        
+
         super().__init__(master=parent)
-        self.title(title)    
-        
+        self.title(title)
+
         main_frame = ttk.Frame(self)
         main_frame.grid(row=0, column=0, sticky="nsew")
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
-        
+
         default_font = tk.font.nametofont("TkDefaultFont")
-        self._text = tktextext.TextFrame(main_frame, read_only=True, 
-                                         wrap="none",
-                                         font=default_font,
-                                         width=80,
-                                         height=10,
-                                         relief="sunken",
-                                         borderwidth=1)
+        self._text = tktextext.TextFrame(
+            main_frame,
+            read_only=True,
+            wrap="none",
+            font=default_font,
+            width=80,
+            height=10,
+            relief="sunken",
+            borderwidth=1,
+        )
         self._text.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=20, pady=20)
         self._text.text.direct_insert("1.0", text_content)
         self._text.text.see("1.0")
-        
-        copy_button = ttk.Button(main_frame, command=self._copy, 
-                                 text="Copy to clipboard",
-                                 width=20)
-        copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0,20))        
-        
+
+        copy_button = ttk.Button(
+            main_frame, command=self._copy, text="Copy to clipboard", width=20
+        )
+        copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0, 20))
+
         close_button = ttk.Button(main_frame, command=self._close, text="Close")
-        close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0,20))
-        
+        close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0, 20))
+
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(1, weight=1)
-        
+
         self.protocol("WM_DELETE_WINDOW", self._close)
-        self.bind("<Escape>", self._close, True)        
-        
+        self.bind("<Escape>", self._close, True)
+
     def _copy(self, event=None):
         self.clipboard_clear()
         self.clipboard_append(self._text.text.get("1.0", "end"))
-    
+
     def _close(self, event=None):
         self.destroy()
-    
-    
-        
-        
+
 
 def ask_one_from_choices(
     master=None, title="Choose one", question: str = "Choose one:", choices=[]
@@ -1838,12 +1844,14 @@ def askdirectory(**options):
     _ensure_parent(options)
     return _get_dialog_provider().askdirectory(**options)
 
+
 def _ensure_parent(options):
     if "parent" not in options:
         if "master" in options:
             options["parent"] = options["master"]
         else:
             options["parent"] = tk._default_root
+
 
 class _ZenityDialogProvider:
     # https://www.writebash.com/bash-gui/zenity-create-file-selection-dialog-224.html
@@ -1902,14 +1910,14 @@ class _ZenityDialogProvider:
             pattern = pattern.replace(" .", " *.")
             if pattern.startswith("."):
                 pattern = "*" + pattern
-            
+
             if pattern == "*.*":
                 # ".*" was provided to make the pattern safe for Tk dialog
                 # not required with Zenity
                 pattern = "*"
 
             args.append("--file-filter=%s | %s" % (desc, pattern))
-        
+
         return args
 
     @classmethod
@@ -1980,34 +1988,34 @@ def handle_mistreated_latin_shortcuts(registry, event):
 def show_dialog(dlg, master=None, geometry=True):
     if master is None:
         master = tk._default_root
-    
+
     get_workbench().event_generate("WindowFocusOut")
     # following order seems to give most smooth appearance
     focused_widget = master.focus_get()
     dlg.transient(master.winfo_toplevel())
-    
+
     if geometry:
-        #dlg.withdraw() # unfortunately inhibits size calculations in assign_geometry 
+        # dlg.withdraw() # unfortunately inhibits size calculations in assign_geometry
         if isinstance(geometry, str):
             dlg.geometry(geometry)
         else:
             assign_geometry(dlg, master)
-        #dlg.wm_deiconify()
-    
+        # dlg.wm_deiconify()
+
     try:
         dlg.grab_set()
     except:
         pass
-    
+
     dlg.lift()
     dlg.focus_set()
-    
+
     master.winfo_toplevel().wait_window(dlg)
     dlg.grab_release()
     master.winfo_toplevel().lift()
     master.winfo_toplevel().focus_force()
     master.winfo_toplevel().grab_set()
-    
+
     if focused_widget is not None:
         try:
             focused_widget.focus_force()
@@ -2019,19 +2027,19 @@ def popen_with_ui_thread_callback(
     *Popen_args, on_completion, poll_delay=0.1, **Popen_kwargs
 ):
     if "encoding" not in Popen_kwargs:
-        if "env" not in Popen_kwargs: 
+        if "env" not in Popen_kwargs:
             Popen_kwargs["env"] = os.environ.copy()
         Popen_kwargs["env"]["PYTHONIOENCODING"] = "utf-8"
-        if sys.version_info >= (3,6): 
+        if sys.version_info >= (3, 6):
             Popen_kwargs["encoding"] = "utf-8"
-    
+
     proc = subprocess.Popen(*Popen_args, **Popen_kwargs)
-    
+
     # Need to read in thread in order to avoid blocking because
     # of full pipe buffer (see https://bugs.python.org/issue1256)
     out_lines = []
     err_lines = []
-    
+
     def read_stream(stream, target_list):
         while True:
             line = stream.readline()
@@ -2039,14 +2047,16 @@ def popen_with_ui_thread_callback(
                 target_list.append(line)
             else:
                 break
-            
-    t_out = threading.Thread(target=read_stream, daemon=True,
-                             args=(proc.stdout, out_lines))
-    t_err = threading.Thread(target=read_stream, daemon=True,
-                             args=(proc.stderr, err_lines))
+
+    t_out = threading.Thread(
+        target=read_stream, daemon=True, args=(proc.stdout, out_lines)
+    )
+    t_err = threading.Thread(
+        target=read_stream, daemon=True, args=(proc.stderr, err_lines)
+    )
     t_out.start()
     t_err.start()
-    
+
     def poll():
         if proc.poll() is not None:
             t_out.join(3)
@@ -2059,16 +2069,20 @@ def popen_with_ui_thread_callback(
     poll()
     return proc
 
+
 class MenuEx(tk.Menu):
     def __init__(self, target):
         self._testers = {}
-        super().__init__(target, tearoff=False,
-                         postcommand=self.on_post, 
-                         **get_style_configuration("Menu"))
-    
+        super().__init__(
+            target,
+            tearoff=False,
+            postcommand=self.on_post,
+            **get_style_configuration("Menu")
+        )
+
     def on_post(self, *args):
         self.update_item_availability()
-    
+
     def update_item_availability(self):
         for i in range(self.index("end") + 1):
             item_data = self.entryconfigure(i)
@@ -2078,20 +2092,20 @@ class MenuEx(tk.Menu):
                     self.entryconfigure(i, state=tk.DISABLED)
                 else:
                     self.entryconfigure(i, state=tk.NORMAL)
-                
-    
+
     def add(self, kind, cnf={}, **kw):
         cnf = cnf or kw
         tester = cnf.get("tester")
         if "tester" in cnf:
             del cnf["tester"]
-        
+
         super().add(kind, cnf)
-        
+
         itemdata = self.entryconfigure(self.index("end"))
         labeldata = itemdata.get("label")
-        if labeldata: 
+        if labeldata:
             self._testers[labeldata] = tester
+
 
 class TextMenu(MenuEx):
     def __init__(self, target):
@@ -2099,64 +2113,67 @@ class TextMenu(MenuEx):
         MenuEx.__init__(self, target)
         self.add_basic_items()
         self.add_extra_items()
-    
+
     def add_basic_items(self):
         self.add_command(label="Cut", command=self.on_cut, tester=self.can_cut)
         self.add_command(label="Copy", command=self.on_copy, tester=self.can_copy)
         self.add_command(label="Paste", command=self.on_paste, tester=self.can_paste)
-    
+
     def add_extra_items(self):
         self.add_separator()
         self.add_command(label="Select All", command=self.on_select_all)
-    
+
     def on_cut(self):
         self.text.event_generate("<<Cut>>")
-    
+
     def on_copy(self):
         self.text.event_generate("<<Copy>>")
-    
+
     def on_paste(self):
         self.text.event_generate("<<Paste>>")
-    
+
     def on_select_all(self):
         self.text.event_generate("<<SelectAll>>")
-    
+
     def can_cut(self):
-        return (
-            self.get_selected_text()
-            and not self.selection_is_read_only()
-        )
-    
+        return self.get_selected_text() and not self.selection_is_read_only()
+
     def can_copy(self):
         return self.get_selected_text()
-    
+
     def can_paste(self):
         return not self.selection_is_read_only()
-    
+
     def get_selected_text(self):
         try:
             return self.text.get("sel.first", "sel.last")
         except TclError:
             return ""
-    
+
     def selection_is_read_only(self):
         if hasattr(self.text, "is_read_only"):
             return self.text.is_read_only()
-        
+
         return False
+
 
 def create_url_label(master, url, text=None):
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
     url_label = ttk.Label(
-        master, text=text if text else url, style="Url.TLabel", cursor="hand2", font=url_font
+        master,
+        text=text if text else url,
+        style="Url.TLabel",
+        cursor="hand2",
+        font=url_font,
     )
     url_label.grid()
     url_label.bind("<Button-1>", lambda _: webbrowser.open(url))
     return url_label
-    
+
+
 def get_size_option_name(window):
-    return  "layout." + type(window).__name__ + "_size"
+    return "layout." + type(window).__name__ + "_size"
 
 
 if __name__ == "__main__":

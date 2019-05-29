@@ -82,7 +82,9 @@ class MicroPythonProxy(BackendProxy):
                 self._interrupt_to_prompt(clean)
                 self._builtin_modules = self._fetch_builtin_modules()
             except TimeoutError:
-                read_bytes = bytes(self._discarded_bytes + self._connection._read_buffer)
+                read_bytes = bytes(
+                    self._discarded_bytes + self._connection._read_buffer
+                )
                 self._show_error_connect_again(
                     "Could not connect to REPL.\n"
                     + "Make sure your device has suitable firmware and is not in bootloader mode!\n"
@@ -170,7 +172,7 @@ class MicroPythonProxy(BackendProxy):
             # get the message
             try:
                 msg = self._read_next_serial_message()
-                #if msg:
+                # if msg:
                 #    print("GOT", msg)
             except SerialException as e:
                 self._handle_serial_exception(e)
@@ -227,7 +229,7 @@ class MicroPythonProxy(BackendProxy):
             return self._create_webrepl_connection()
         else:
             return self._create_serial_connection(port)
-        
+
     def _create_serial_connection(self, port):
         if port is None or port == "None":
             self._send_text_to_shell(
@@ -260,9 +262,7 @@ class MicroPythonProxy(BackendProxy):
             return SerialConnection(port, baudrate=self._baudrate)
         except SerialException as error:
             traceback.print_exc()
-            message = (
-                "Unable to connect to " + port + "\n" + "Error: " + str(error)
-            )
+            message = "Unable to connect to " + port + "\n" + "Error: " + str(error)
 
             # TODO: check if these error codes also apply to Linux and Mac
             if error.errno == 13 and platform.system() == "Linux":
@@ -287,7 +287,7 @@ class MicroPythonProxy(BackendProxy):
             self._show_error_connect_again(message)
 
             return None
-    
+
     def _create_webrepl_connection(self):
         url = get_workbench().get_option(self.backend_name + ".webrepl_url")
         password = get_workbench().get_option(self.backend_name + ".webrepl_password")
@@ -296,10 +296,14 @@ class MicroPythonProxy(BackendProxy):
             conn = WebReplConnection(url, password)
         except:
             e_type, e_value, _ = sys.exc_info()
-            self._send_error_to_shell("Could not connect to " + url + "\nError: " 
-                                      + "\n".join(traceback.format_exception_only(e_type, e_value)))
+            self._send_error_to_shell(
+                "Could not connect to "
+                + url
+                + "\nError: "
+                + "\n".join(traceback.format_exception_only(e_type, e_value))
+            )
             return None
-        
+
         conn.read_until([b"WebREPL connected\r\n"])
         return conn
 
@@ -491,8 +495,8 @@ class MicroPythonProxy(BackendProxy):
     def _execute_async(self, script):
         """Executes given MicroPython script on the device"""
         assert self._connection.buffers_are_empty()
-        
-        #print("----\n",script,"\n---")
+
+        # print("----\n",script,"\n---")
 
         command_bytes = script.encode("utf-8")
         self._connection.write(command_bytes + b"\x04")
@@ -517,7 +521,7 @@ class MicroPythonProxy(BackendProxy):
 
         if err:
             # display script on error
-            self._send_text_to_shell(script, "stderr") 
+            self._send_text_to_shell(script, "stderr")
 
         # TODO: report the error to stderr
         assert len(err) == 0, "Error was " + repr(err)
@@ -528,7 +532,7 @@ class MicroPythonProxy(BackendProxy):
 
         if out or err:
             # display script on error
-            self._send_text_to_shell(script, "stderr")    
+            self._send_text_to_shell(script, "stderr")
 
         assert len(out) == 0, "Output was " + repr(out)
         assert len(err) == 0, "Error was " + repr(err)
@@ -610,24 +614,25 @@ class MicroPythonProxy(BackendProxy):
             )
 
         return None
-    
+
     def _cmd_get_dirs_child_data(self, cmd):
         if not self._welcome_text:
             return "postpone"
-        
+
         if "micro:bit" in self._welcome_text.lower():
             return self._cmd_get_dirs_child_data_microbit(cmd)
         else:
             return self._cmd_get_dirs_child_data_generic(cmd)
-    
+
     def _cmd_get_dirs_child_data_microbit(self, cmd):
         """let it be here so micro:bit works with generic proxy as well"""
-        
+
         assert cmd["paths"] == {""}
-        
+
         try:
             self._execute_async(
-                dedent("""
+                dedent(
+                    """
                 try:
                     import os as __temp_os
                         
@@ -661,11 +666,12 @@ class MicroPythonProxy(BackendProxy):
             )
 
         return None
-    
+
     def _cmd_get_dirs_child_data_generic(self, cmd):
         try:
             self._execute_async(
-                dedent("""
+                dedent(
+                    """
                 try:
                     import os as __temp_os
                     # Init all vars, so that they can be deleted
@@ -730,7 +736,7 @@ class MicroPythonProxy(BackendProxy):
             )
 
         return None
-        
+
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
         msg = InlineResponse(
@@ -987,29 +993,32 @@ class MicroPythonProxy(BackendProxy):
             self._non_serial_msg_queue.put(ToplevelResponse())
             # TODO: Output confirmation ? (together with file size)
             # Or should the confirmation be given in terms of mount path?
-    
+
     def _cmd_write_file(self, cmd):
         BUFFER_SIZE = 32
         data = cmd["content_bytes"]
-        
+
         self._execute_and_expect_empty_response(
-            dedent("""
+            dedent(
+                """
             __temp_path = '{path}'
             __temp_f = open(__temp_path, 'wb')
             __temp_written = 0
             """
             ).format(path=cmd["path"])
         )
-        
+
         size = len(data)
         for i in range(0, size, BUFFER_SIZE):
             chunk_size = min(BUFFER_SIZE, size - i)
             chunk = data[i : i + chunk_size]
             self._execute_and_expect_empty_response(
-                "__temp_written += __temp_f.write({chunk!r})".format(chunk=chunk))
-        
+                "__temp_written += __temp_f.write({chunk!r})".format(chunk=chunk)
+            )
+
         self._execute_async(
-            dedent("""
+            dedent(
+                """
             try:
                 __temp_f.close()
                 del __temp_f
@@ -1036,12 +1045,13 @@ class MicroPythonProxy(BackendProxy):
             """
             ).replace("<<size>>", str(size))
         )
-    
+
     def _cmd_read_file(self, cmd):
         print("READING", cmd)
         try:
             self._execute_async(
-                dedent("""
+                dedent(
+                    """
                 try:
                     __temp_path = '%(path)s' 
                     with open(__temp_path, 'rb') as __temp_fp:
@@ -1062,7 +1072,8 @@ class MicroPythonProxy(BackendProxy):
                         'error' : 'Error getting file content: ' + str(e)
                     })
                 """
-                ) % cmd
+                )
+                % cmd
             )
         except Exception:
             self._non_serial_msg_queue.put(
@@ -1074,7 +1085,6 @@ class MicroPythonProxy(BackendProxy):
                 )
             )
 
-    
     def _check_and_upload(self, source, target):
         # if target is a py file,
         # then give warning if source has syntax errors
@@ -1266,7 +1276,9 @@ class MicroPythonProxy(BackendProxy):
                 # must be end of the response to a non-Thonny command
                 # Only treat as raw prompt if it ends the output
                 if new_bytes[1:] == RAW_PROMPT:
-                    assert self._connection.incoming_is_empty()  # TODO: what about Ctlr-? ?
+                    assert (
+                        self._connection.incoming_is_empty()
+                    )  # TODO: what about Ctlr-? ?
                     self.idle = True
                     return ToplevelResponse()
                 else:
@@ -1335,7 +1347,7 @@ class MicroPythonProxy(BackendProxy):
         except:
             traceback.print_exc()
             msg_str = msg_bytes.decode("utf-8", "replace").strip()
-        
+
         try:
             msg = ast.literal_eval(msg_str)
         except:
@@ -1393,18 +1405,17 @@ class MicroPythonProxy(BackendProxy):
             "Press any key to enter the REPL. Use CTRL-D to reload.",
             "Press CTRL-C to enter the REPL. Use CTRL-D to reload.",
         )
-        
+
     def _get_path_prefix(self):
         if not self._supports_directories():
             return ""
-        elif ("LoBo" in self._welcome_text
-              or "WiPy with ESP32" in self._welcome_text):
+        elif "LoBo" in self._welcome_text or "WiPy with ESP32" in self._welcome_text:
             return "/flash/"
         else:
             return "/"
-    
+
     def get_default_directory(self):
-        prefix = self._get_path_prefix() 
+        prefix = self._get_path_prefix()
         if prefix.endswith("/") and prefix != "/":
             return prefix[:-1]
         else:
@@ -1417,7 +1428,9 @@ class MicroPythonProxy(BackendProxy):
         return self._get_path_prefix() + "boot.py"
 
     def _get_script_path(self):
-        local_path = (get_workbench().get_editor_notebook().get_current_editor().save_file(False))
+        local_path = (
+            get_workbench().get_editor_notebook().get_current_editor().save_file(False)
+        )
         assert os.path.isfile(local_path), "File not found: %s" % local_path
         return self._get_path_prefix() + os.path.basename(local_path)
 
@@ -1555,7 +1568,7 @@ class MicroPythonProxy(BackendProxy):
             return "micro:bit"
         else:
             return "MicroPython device"
-    
+
     def has_separate_files(self):
         return self._connection is not None
 
@@ -1568,26 +1581,32 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
     def __init__(self, master):
         super().__init__(master)
-        intro_text=("Connect your device to the computer and select corresponding port below (look for your device name, \n"
-                 + "\"USB Serial\" or \"UART\"). If you can't find it, you may need to install proper USB driver first.")
+        intro_text = (
+            "Connect your device to the computer and select corresponding port below (look for your device name, \n"
+            + '"USB Serial" or "UART"). If you can\'t find it, you may need to install proper USB driver first.'
+        )
         if self.allow_webrepl:
-            intro_text = ("Connecting via USB cable:\n" 
-                          + intro_text + "\n\n"
-                          + "Connecting via WebREPL protocol:\n"
-                          + "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
-                          + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below")
-            
+            intro_text = (
+                "Connecting via USB cable:\n"
+                + intro_text
+                + "\n\n"
+                + "Connecting via WebREPL protocol:\n"
+                + "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
+                + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below"
+            )
+
         intro_label = ttk.Label(self, text=intro_text)
         intro_label.grid(row=0, column=0, sticky="nw")
-        
+
         driver_url = self._get_usb_driver_url()
         if driver_url:
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
-        
-        port_label = ttk.Label(self, text='Port or WebREPL' if self.allow_webrepl
-                                          else "Port")
-        port_label.grid(row=3, column=0, sticky="nw", pady=(10,0))
+
+        port_label = ttk.Label(
+            self, text="Port or WebREPL" if self.allow_webrepl else "Port"
+        )
+        port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
             p.description
@@ -1597,8 +1616,8 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         }
         self._ports_by_desc["< Try to detect port automatically >"] = "auto"
         self._ports_by_desc["< None / don't connect at all >"] = None
-        
-        self._WEBREPL_OPTION_DESC = "< WebREPL >" 
+
+        self._WEBREPL_OPTION_DESC = "< WebREPL >"
         if self.allow_webrepl:
             self._ports_by_desc[self._WEBREPL_OPTION_DESC] = "webrepl"
 
@@ -1617,8 +1636,9 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             key for key, _ in sorted(self._ports_by_desc.items(), key=port_order)
         ]
 
-        self._port_desc_variable = create_string_var(self.get_current_port_desc(),
-                                                     self._on_change_port)
+        self._port_desc_variable = create_string_var(
+            self.get_current_port_desc(), self._on_change_port
+        )
         self._port_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -1629,30 +1649,37 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._port_combo.grid(row=4, column=0, sticky="new")
         self.columnconfigure(0, weight=1)
-        
+
         if self.allow_webrepl:
             self._init_webrepl_frame()
-        
+
         self._on_change_port()
-    
+
     def _init_webrepl_frame(self):
         self._webrepl_frame = ttk.Frame(self)
-        
+
         self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
-        url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
+        url_label = ttk.Label(
+            self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL
+        )
         url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
-        url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var,
-                              width=24)
+        url_entry = ttk.Entry(
+            self._webrepl_frame, textvariable=self._webrepl_url_var, width=24
+        )
         url_entry.grid(row=1, column=0, sticky="nw")
-        
+
         self._webrepl_password_var = create_string_var(
-            get_workbench().get_option(self.backend_name + ".webrepl_password"))
-        pw_label = ttk.Label(self._webrepl_frame, text="Password (the one specified with `import webrepl_setup`)")
+            get_workbench().get_option(self.backend_name + ".webrepl_password")
+        )
+        pw_label = ttk.Label(
+            self._webrepl_frame,
+            text="Password (the one specified with `import webrepl_setup`)",
+        )
         pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
-        pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var,
-                             width=9)
+        pw_entry = ttk.Entry(
+            self._webrepl_frame, textvariable=self._webrepl_password_var, width=9
+        )
         pw_entry.grid(row=3, column=0, sticky="nw")
-        
 
     def get_current_port_desc(self):
         name = get_workbench().get_option(self.backend_name + ".port")
@@ -1661,11 +1688,15 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
                 return desc
 
         return ""
-    
+
     def is_modified(self):
-        return (self._port_desc_variable.modified  # pylint: disable=no-member
-                or self.allow_webrepl and self._webrepl_password_var.modified  # pylint: disable=no-member
-                or self.allow_webrepl and self._webrepl_url_var.modified)  # pylint: disable=no-member
+        return (
+            self._port_desc_variable.modified  # pylint: disable=no-member
+            or self.allow_webrepl
+            and self._webrepl_password_var.modified  # pylint: disable=no-member
+            or self.allow_webrepl
+            and self._webrepl_url_var.modified
+        )  # pylint: disable=no-member
 
     def should_restart(self):
         return self.is_modified()
@@ -1678,24 +1709,26 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             port_desc = self._port_desc_variable.get()
             port_name = self._ports_by_desc[port_desc]
             get_workbench().set_option(self.backend_name + ".port", port_name)
-            get_workbench().set_option(self.backend_name + ".webrepl_url", 
-                                       self._webrepl_url_var.get())
-            get_workbench().set_option(self.backend_name + ".webrepl_password",
-                                       self._webrepl_password_var.get())
+            get_workbench().set_option(
+                self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
+            )
+            get_workbench().set_option(
+                self.backend_name + ".webrepl_password",
+                self._webrepl_password_var.get(),
+            )
 
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
             self._webrepl_frame.grid(row=6, column=0, sticky="nwe")
         elif self.allow_webrepl and self._webrepl_frame.winfo_ismapped():
             self._webrepl_frame.grid_forget()
-            
+
     def _get_usb_driver_url(self):
         return None
-    
+
     @property
     def allow_webrepl(self):
         return False
-
 
 
 class GenericMicroPythonProxy(MicroPythonProxy):
@@ -1712,6 +1745,7 @@ class GenericMicroPythonConfigPage(MicroPythonConfigPage):
     @property
     def allow_webrepl(self):
         return True
+
 
 class Connection:
     """Utility class for using Serial or WebSocket connection
@@ -1730,7 +1764,7 @@ class Connection:
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
         self.num_bytes_received = 0
         self._error = None
-        
+
     def read(self, size, timeout=1):
         if timeout == 0:
             raise TimeoutError()
@@ -1825,10 +1859,7 @@ class Connection:
         )
 
     def incoming_is_empty(self):
-        return (
-            self._read_queue.empty()
-            and len(self._read_buffer) == 0
-        )
+        return self._read_queue.empty() and len(self._read_buffer) == 0
 
     def outgoing_is_empty(self):
         return True
@@ -1845,10 +1876,8 @@ class Connection:
     def close(self):
         raise NotImplementedError()
 
-    
 
 class SerialConnection(Connection):
-
     def __init__(self, port, baudrate):
         super().__init__()
 
@@ -1884,10 +1913,7 @@ class SerialConnection(Connection):
             self._error = str("Serial reading error: %s" % e)
 
     def incoming_is_empty(self):
-        return (
-            self._serial.in_waiting == 0
-            and super().incoming_is_empty()
-        )
+        return self._serial.in_waiting == 0 and super().incoming_is_empty()
 
     def outgoing_is_empty(self):
         return self._serial.out_waiting == 0
@@ -1907,63 +1933,65 @@ class SerialConnection(Connection):
                 except Exception:
                     logging.exception("Couldn't close serial")
 
+
 class WebReplConnection(Connection):
     def __init__(self, url, password):
         super().__init__()
         self._url = url
         self._password = password
-        
-        # Some tricks are needed to use async library in sync program 
+
+        # Some tricks are needed to use async library in sync program
         # use thread-safe queues to communicate with async world in another thread
-        self._write_queue = Queue() 
+        self._write_queue = Queue()
         self._connection_result = Queue()
         self._ws_thread = threading.Thread(target=self._wrap_ws_main, daemon=True)
         self._ws_thread.start()
-        
+
         # Wait until connection was made
         res = self._connection_result.get()
         if res != "OK":
             raise res
-        
-        
-    
+
     def _wrap_ws_main(self):
         import asyncio
+
         loop = asyncio.new_event_loop()
         loop.set_debug(True)
         loop.run_until_complete(self._ws_main())
-    
+
     async def _ws_main(self):
         import asyncio
+
         try:
             await self._ws_connect()
         except Exception as e:
             self._connection_result.put_nowait(e)
             return
-        
+
         self._connection_result.put_nowait("OK")
         await asyncio.gather(self._ws_keep_reading(), self._ws_keep_writing())
-         
+
     async def _ws_connect(self):
         import asyncio
         import websockets
-        self._ws = await asyncio.wait_for(websockets.connect(
-            self._url,
-            ping_interval=None), 3)
+
+        self._ws = await asyncio.wait_for(
+            websockets.connect(self._url, ping_interval=None), 3
+        )
         print("GOT WS", self._ws)
-        
+
         # read password prompt and send password
         read_chars = ""
         while read_chars != "Password: ":
             print("prelude", read_chars)
             ch = await self._ws.recv()
             print("GOT", ch)
-            read_chars += ch 
-        
+            read_chars += ch
+
         print("sending password")
         await self._ws.send(self._password + "\n")
         print("sent password")
-    
+
     async def _ws_keep_reading(self):
         while True:
             data = (await self._ws.recv()).encode("UTF-8")
@@ -1971,12 +1999,13 @@ class WebReplConnection(Connection):
             if len(data) == 0:
                 self._error = "EOF"
                 break
-            
+
             self.num_bytes_received += len(data)
             self._read_queue.put(data, block=False)
-    
+
     async def _ws_keep_writing(self):
         import asyncio
+
         while True:
             while not self._write_queue.empty():
                 data = self._write_queue.get(block=False).decode("UTF-8")
@@ -1984,18 +2013,19 @@ class WebReplConnection(Connection):
                 await self._ws.send(data)
             # Allow reading loop to progress
             await asyncio.sleep(0.01)
-        
+
     def write(self, data, block_size=32, delay=0.01):
         self._write_queue.put_nowait(data)
-    
+
     async def _async_close(self):
         await self._ws.close()
-        
+
     def close(self):
         """
         import asyncio
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
+
 
 class TimeHelper:
     def __init__(self, time_allowed):
@@ -2133,18 +2163,14 @@ def load_plugin():
             and get_workbench().get_editor_notebook().get_current_editor() is not None
             and get_runner().is_waiting_toplevel_command()
         )
-    
+
     def select_device():
         get_workbench().show_options("Interpreter")
 
     get_workbench().add_command(
-        "selectdevice",
-        "device",
-        "Select device",
-        select_device,
-        group=1
+        "selectdevice", "device", "Select device", select_device, group=1
     )
-    
+
     get_workbench().add_command(
         "softreboot",
         "device",

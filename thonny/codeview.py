@@ -64,9 +64,9 @@ class PythonText(SyntaxText):
     def __init__(self, master=None, cnf={}, **kw):
         if "indent_with_tabs" not in kw:
             kw["indent_with_tabs"] = False
-            
+
         super().__init__(master=master, cnf=cnf, **kw)
-    
+
     def perform_return(self, event):
         # copied from idlelib.EditorWindow (Python 3.4.2)
         # slightly modified
@@ -250,20 +250,19 @@ class CodeView(tktextext.TextFrame):
         )  # -1c because Text always adds a newline itself
 
     def detect_encoding(self, data):
-        encoding, _ = tokenize.detect_encoding(
-            io.BytesIO(data).readline
-        )
+        encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
         return encoding
 
-    def get_content_as_bytes(self, newlines = None):
+    def get_content_as_bytes(self, newlines=None):
         newlines_windows = "\r\n"
         chars = self.get_content().replace("\r", "")
         if newlines == None and running_on_windows() or newlines == newlines_windows:
             chars = chars.replace("\n", newlines_windows)
 
-        return chars.encode(self.detect_encoding(
-            self.get_content().encode("ascii", errors="replace")))
-    
+        return chars.encode(
+            self.detect_encoding(self.get_content().encode("ascii", errors="replace"))
+        )
+
     def set_content_as_bytes(self, data):
         encoding = self.detect_encoding(data)
         chars = data.decode(encoding).replace("\r\n", "\n")

@@ -83,9 +83,9 @@ def launch():
         from thonny import ui_utils
         import traceback
 
-        dlg = ui_utils.LongTextDialog("Internal error", 
-                                      traceback.format_exc(), 
-                                      parent=get_workbench())
+        dlg = ui_utils.LongTextDialog(
+            "Internal error", traceback.format_exc(), parent=get_workbench()
+        )
         ui_utils.show_dialog(dlg, get_workbench())
         return -1
     finally:

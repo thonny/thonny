@@ -182,8 +182,16 @@ class EnhancedText(TweakableText):
     Most of the code is adapted from idlelib.EditorWindow.
     """
 
-    def __init__(self, master=None, style="Text", tag_current_line=False,
-                 indent_with_tabs=False, replace_tabs=False, cnf={}, **kw):
+    def __init__(
+        self,
+        master=None,
+        style="Text",
+        tag_current_line=False,
+        indent_with_tabs=False,
+        replace_tabs=False,
+        cnf={},
+        **kw
+    ):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
         kw["autoseparators"] = False
@@ -637,7 +645,7 @@ class EnhancedText(TweakableText):
     def _on_paste(self, e):
         if self.is_read_only():
             return
-        
+
         try:
             if self.has_selection():
                 self.direct_delete("sel.first", "sel.last")
@@ -719,22 +727,27 @@ class EnhancedText(TweakableText):
     def direct_insert(self, index, chars, tags=None, **kw):
         chars = self.check_convert_tabs_to_spaces(chars)
         super().direct_insert(index, chars, tags, **kw)
-    
+
     def check_convert_tabs_to_spaces(self, chars):
         tab_count = chars.count("\t")
         if not self.replace_tabs or tab_count == 0:
             return chars
         else:
-            
-            if messagebox.askyesno("Convert tabs to spaces?",
-                                   "Thonny (according to Python recommendation) uses spaces for indentation, "
-                                   + "but the text you are about to insert/open contains %d tab characters. " % tab_count
-                                   + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n" 
-                                   + "Do you want me to replace each tab with %d spaces?\n\n" % self.indent_width,
-                                   parent=tk._default_root):
+
+            if messagebox.askyesno(
+                "Convert tabs to spaces?",
+                "Thonny (according to Python recommendation) uses spaces for indentation, "
+                + "but the text you are about to insert/open contains %d tab characters. "
+                % tab_count
+                + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n"
+                + "Do you want me to replace each tab with %d spaces?\n\n"
+                % self.indent_width,
+                parent=tk._default_root,
+            ):
                 return chars.expandtabs(self.indent_width)
             else:
                 return chars
+
 
 class TextFrame(ttk.Frame):
     "Decorates text with scrollbars, line numbers and print margin"

@@ -14,13 +14,14 @@ from thonny.common import (
     TextRange,
     ToplevelResponse,
     normpath_with_actual_case,
-    is_same_path, InlineCommand)
+    is_same_path,
+    InlineCommand,
+)
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 from thonny.misc_utils import running_on_windows
 from _tkinter import TclError
-from thonny.base_file_browser import choose_node_for_file_operations,\
-    ask_backend_path
+from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
 
 _dialog_filetypes = [
     ("Python files", ".py .pyw"),
@@ -29,6 +30,7 @@ _dialog_filetypes = [
 ]
 
 REMOTE_PATH_MARKER = " :: "
+
 
 class Editor(ttk.Frame):
     def __init__(self, master):
@@ -63,9 +65,15 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
-        get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
-        get_workbench().bind("read_file_response", self._complete_loading_remote_file, True)
-        get_workbench().bind("write_file_response", self._complete_writing_remote_file, True)
+        get_workbench().bind(
+            "ToplevelResponse", self._listen_for_toplevel_response, True
+        )
+        get_workbench().bind(
+            "read_file_response", self._complete_loading_remote_file, True
+        )
+        get_workbench().bind(
+            "write_file_response", self._complete_writing_remote_file, True
+        )
 
         self.update_appearance()
 
@@ -97,7 +105,6 @@ class Editor(ttk.Frame):
         elif self.is_modified():
             result += " *"
 
-
         return result
 
     def check_for_external_changes(self):
@@ -126,7 +133,7 @@ class Editor(ttk.Frame):
                     "Looks like '%s' was deleted or moved outside Thonny.\n\n"
                     % self._filename
                     + "Do you want to also close this editor?",
-                    parent=get_workbench()
+                    parent=get_workbench(),
                 ):
                     self.master.close_editor(self)
                 else:
@@ -203,8 +210,7 @@ class Editor(ttk.Frame):
 
         target_filename = extract_target_path(self._filename)
 
-        get_runner().send_command(InlineCommand("read_file",
-                                                path=target_filename))
+        get_runner().send_command(InlineCommand("read_file", path=target_filename))
         self.update_title()
 
     def _complete_loading_remote_file(self, msg):
@@ -212,7 +218,7 @@ class Editor(ttk.Frame):
             return
 
         content = msg["content_bytes"]
-        
+
         if msg.get("error"):
             # TODO: make it softer
             raise RuntimeError(msg["error"])
@@ -227,7 +233,6 @@ class Editor(ttk.Frame):
         self.get_text_widget().edit_modified(False)
         self._loading = False
         self.update_title()
-
 
     def is_modified(self):
         return self._code_view.text.edit_modified()
@@ -244,7 +249,9 @@ class Editor(ttk.Frame):
                 return None
 
             self._filename = new_filename
-            get_workbench().event_generate("SaveAs", editor=self, filename=self._filename)
+            get_workbench().event_generate(
+                "SaveAs", editor=self, filename=self._filename
+            )
 
         content_bytes = self._code_view.get_content_as_bytes(self._newlines)
 
@@ -262,8 +269,9 @@ class Editor(ttk.Frame):
             os.fsync(f)
             f.close()
             self._last_known_mtime = os.path.getmtime(self._filename)
-            get_workbench().event_generate("LocalFileOperation", path=self._filename, 
-                                           operation="save")
+            get_workbench().event_generate(
+                "LocalFileOperation", path=self._filename, operation="save"
+            )
         except PermissionError:
             if askyesno(
                 "Permission Error",
@@ -286,44 +294,52 @@ class Editor(ttk.Frame):
         if get_runner().can_do_file_operations():
             target_filename = extract_target_path(self._filename)
             self._waiting_write_completion = True
-            get_runner().send_command(InlineCommand("write_file",
-                                                    path=target_filename,
-                                                    content_bytes=content_bytes))
+            get_runner().send_command(
+                InlineCommand(
+                    "write_file", path=target_filename, content_bytes=content_bytes
+                )
+            )
 
             # NB! edit_modified is not falsed yet!
-            get_workbench().event_generate("RemoteFileOperation",
-                                           path=extract_target_path(self._filename), 
-                                           operation="save")
+            get_workbench().event_generate(
+                "RemoteFileOperation",
+                path=extract_target_path(self._filename),
+                operation="save",
+            )
             return self._filename
         else:
             messagebox.showwarning("Can't save", "Device is busy, wait and try again!")
             return None
 
     def _complete_writing_remote_file(self, msg):
-        if (self._waiting_write_completion
+        if (
+            self._waiting_write_completion
             and self._filename
-            and extract_target_path(self._filename) == msg["path"]):
+            and extract_target_path(self._filename) == msg["path"]
+        ):
             self._code_view.text.edit_modified(False)
             self.update_title()
 
     def ask_new_path(self):
-        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
+        node = choose_node_for_file_operations(
+            self.winfo_toplevel(), "Where to save to?"
+        )
         if not node:
             return None
-        
+
         if node == "local":
             return self.ask_new_local_path()
         else:
             assert node == "remote"
             return self.ask_new_remote_path()
-    
+
     def ask_new_remote_path(self):
         target_path = ask_backend_path(self.winfo_toplevel(), "save")
         if target_path:
             return make_remote_path(target_path)
         else:
             return None
-    
+
     def ask_new_local_path(self):
         if self._filename is None:
             initialdir = get_workbench().get_cwd()
@@ -331,18 +347,18 @@ class Editor(ttk.Frame):
         else:
             initialdir = os.path.dirname(self._filename)
             initialfile = os.path.basename(self._filename)
-        
+
         # http://tkinter.unpythonic.net/wiki/tkFileDialog
         new_filename = asksaveasfilename(
             master=get_workbench(),
             filetypes=_dialog_filetypes,
             defaultextension=".py",
             initialdir=initialdir,
-            initialfile=initialfile
+            initialfile=initialfile,
         )
 
         # Different tkinter versions may return different values
-        if new_filename in ["", (), None,]:
+        if new_filename in ["", (), None]:
             return None
 
         # Seems that in some Python versions defaultextension
@@ -354,7 +370,7 @@ class Editor(ttk.Frame):
             # may have /-s instead of \-s and wrong case
             new_filename = os.path.join(
                 normpath_with_actual_case(os.path.dirname(new_filename)),
-                os.path.basename(new_filename)
+                os.path.basename(new_filename),
             )
 
         if new_filename.endswith(".py"):
@@ -497,7 +513,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         # should be in the end, so that it can be detected when
         # constructor hasn't completed yet
         self.preferred_size_in_pw = None
-        
+
         get_workbench().bind("WindowFocusIn", self.on_focus_window, True)
 
     def _init_commands(self):
@@ -603,7 +619,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         """If no filename was sent from command line
         then load previous files (if setting allows)"""
 
-        cmd_line_filenames = [os.path.abspath(name) for name in sys.argv[1:] if os.path.exists(name)]
+        cmd_line_filenames = [
+            os.path.abspath(name) for name in sys.argv[1:] if os.path.exists(name)
+        ]
 
         if len(cmd_line_filenames) > 0:
             filenames = cmd_line_filenames
@@ -689,10 +707,12 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         new_editor.focus_set()
 
     def _cmd_open_file(self):
-        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to open from?")
+        node = choose_node_for_file_operations(
+            self.winfo_toplevel(), "Where to open from?"
+        )
         if not node:
             return None
-        
+
         if node == "local":
             path = askopenfilename(
                 master=get_workbench(),
@@ -704,9 +724,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             target_path = ask_backend_path(self.winfo_toplevel(), "open")
             if not target_path:
                 return None
-            
+
             path = make_remote_path(target_path)
-        
+
         if path:
             # self.close_single_untitled_unmodified_editor()
             self.show_file(path)
@@ -830,9 +850,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
     def show_remote_file(self, target_filename):
         if not get_runner().can_do_file_operations():
-            messagebox.showwarning("Can't open",
-                                   "Device is busy, can't read file content.\n"
-                                   + "Please try again later!")
+            messagebox.showwarning(
+                "Can't open",
+                "Device is busy, can't read file content.\n"
+                + "Please try again later!",
+            )
             return None
         else:
             return self.show_file(make_remote_path(target_filename))
@@ -887,7 +909,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             message = "Do you want to save file before closing?"
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close", message=message, default=messagebox.YES,
+            title="Save On Close",
+            message=message,
+            default=messagebox.YES,
             master=get_workbench(),
             parent=get_workbench(),
         )
@@ -904,10 +928,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return False
         else:
             return True
-    
+
     def on_focus_window(self, event=None):
         for editor in self.get_all_editors():
             editor.check_for_external_changes()
+
 
 def get_current_breakpoints():
     result = {}
@@ -920,6 +945,7 @@ def get_current_breakpoints():
                 result[filename] = linenos
 
     return result
+
 
 def get_saved_current_script_filename(force=True):
     editor = get_workbench().get_editor_notebook().get_current_editor()
@@ -935,12 +961,15 @@ def get_saved_current_script_filename(force=True):
 
     return filename
 
+
 def is_remote_path(s):
     return REMOTE_PATH_MARKER in s
 
+
 def extract_target_path(s):
     assert is_remote_path(s)
-    return s[s.find(REMOTE_PATH_MARKER) + len(REMOTE_PATH_MARKER):]
+    return s[s.find(REMOTE_PATH_MARKER) + len(REMOTE_PATH_MARKER) :]
+
 
 def make_remote_path(target_path):
     return get_runner().get_node_label() + REMOTE_PATH_MARKER + target_path

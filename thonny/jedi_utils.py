@@ -84,9 +84,11 @@ def get_name_of_position(obj, position):
 def parse_source(source):
     try:
         import parso
+
         return parso.parse(source)
     except ImportError:
         import jedi
+
         script = jedi.Script(source)
         return get_module_node(script)
 

@@ -35,14 +35,15 @@ class HeapView(MemoryFrame):
         self.bind("<Map>", self._on_map, True)
         self.bind("<Unmap>", self._on_unmap, True)
         info_icon = get_workbench().get_image("information")
-        self.info_label = ttk.Label(get_workbench().get_toolbar(),
-                                    text=_("Heap mode is on.\nClose Heap view to turn it off."),
-                                    image=info_icon,
-                                    compound="left",
-                                    background="#F4FFBA",
-                                    foreground="green",
-                                    padding=(3,0))
-
+        self.info_label = ttk.Label(
+            get_workbench().get_toolbar(),
+            text=_("Heap mode is on.\nClose Heap view to turn it off."),
+            image=info_icon,
+            compound="left",
+            background="#F4FFBA",
+            foreground="green",
+            padding=(3, 0),
+        )
 
     def _update_data(self, data):
         self._clear_tree()
