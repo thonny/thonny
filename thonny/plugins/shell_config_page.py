@@ -13,7 +13,7 @@ class ShellConfigurationPage(ConfigurationPage):
 
         self.add_checkbox(
             "shell.tty_mode",
-            "TTY emulation (supports ANSI-colors, \\a, \\r, \\b)",
+            "Terminal emulation (supports basic ANSI-colors and styles, \\a, \\r, \\b)",
             10,
             0,
             columnspan=2,

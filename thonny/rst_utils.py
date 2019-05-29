@@ -77,6 +77,7 @@ class RstText(TweakableText):
         self.tag_configure(
             "code",
             font="TkFixedFont",
+            # wrap="none", # TODO: needs automatic hor-scrollbar and better padding mgmt
             # background="#eeeeee"
         )
         # if ui_utils.get_tk_version_info() >= (8,6,6):
