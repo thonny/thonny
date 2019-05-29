@@ -45,7 +45,10 @@ from thonny.common import (
     range_contains_smaller,
     range_contains_smaller_or_equal,
     serialize_message,
-    get_exe_dirs, get_augmented_system_path, update_system_path)
+    get_exe_dirs,
+    get_augmented_system_path,
+    update_system_path,
+)
 import queue
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -86,6 +89,7 @@ class VM:
         self._object_info_tweakers = []
         self._import_handlers = {}
         self._input_queue = queue.Queue()
+        self._source_preprocessors = []
         self._ast_postprocessors = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._heap = (
@@ -109,7 +113,7 @@ class VM:
         # start in shell mode
         sys.argv[:] = [""]  # empty "script name"
         sys.path.insert(0, "")  # current dir
-        
+
         # clean __main__ global scope
         for key in list(__main__.__dict__.keys()):
             if not key.startswith("__") or key in {"__file__", "__cached__"}:
@@ -117,7 +121,7 @@ class VM:
 
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
-        
+
         self._frontend_sys_path = init_msg["frontend_sys_path"]
         self._load_shared_modules()
         self._load_plugins()
@@ -130,8 +134,8 @@ class VM:
                 argv=sys.argv,
                 path=sys.path,
                 usersitepackages=site.getusersitepackages()
-                    if site.ENABLE_USER_SITE
-                    else None,
+                if site.ENABLE_USER_SITE
+                else None,
                 prefix=sys.prefix,
                 welcome_text="Python " + _get_python_version_string(),
                 executable=sys.executable,
@@ -180,7 +184,7 @@ class VM:
         or a BackendResponse
         """
         self._command_handlers[command_name] = handler
-    
+
     def add_object_info_tweaker(self, tweaker):
         """Tweaker should be 2-argument function taking value and export record"""
         self._object_info_tweakers.append(tweaker)
@@ -189,10 +193,13 @@ class VM:
         if module_name not in self._import_handlers:
             self._import_handlers[module_name] = []
         self._import_handlers[module_name].append(handler)
-    
+
+    def add_source_preprocessor(self, func):
+        self._source_preprocessors.append(func)
+
     def add_ast_postprocessor(self, func):
         self._ast_postprocessors.append(func)
-    
+
     def get_main_module(self):
         return __main__
 
@@ -267,17 +274,16 @@ class VM:
             value = repr(value)
         ini.set(section, subname, value)
         self.save_settings()
-    
+
     def switch_env_to_script_mode(self, cmd):
         if "" in sys.path:
-            sys.path.remove("") # current directory
-            
+            sys.path.remove("")  # current directory
+
         filename = cmd.args[0]
         if os.path.isfile(filename):
-            sys.path.insert(0, os.path.abspath(os.path.dirname(filename))) 
+            sys.path.insert(0, os.path.abspath(os.path.dirname(filename)))
             __main__.__dict__["__file__"] = filename
-        
-    
+
     def _parse_option_name(self, name):
         if "." in name:
             return name.split(".", 1)
@@ -299,14 +305,13 @@ class VM:
 
         with open(_CONFIG_FILENAME, "w") as fp:
             self._ini.write(fp)
-    
-    
+
     def _custom_import(self, *args, **kw):
         module = self._original_import(*args, **kw)
-        
+
         if not hasattr(module, "__name__"):
             return module
-        
+
         # module specific handlers
         for handler in self._import_handlers.get(module.__name__, []):
             try:
@@ -324,10 +329,13 @@ class VM:
         return module
 
     def _load_shared_modules(self):
-        self.load_modules_with_frontend_path(["parso", "jedi", "thonnycontrib", "six", "asttokens"])
+        self.load_modules_with_frontend_path(
+            ["parso", "jedi", "thonnycontrib", "six", "asttokens"]
+        )
 
     def load_modules_with_frontend_path(self, names):
         from importlib import import_module
+
         original_sys_path = sys.path
         try:
             sys.path = sys.path + self._frontend_sys_path
@@ -454,7 +462,7 @@ class VM:
         encoding = "utf-8"
         env["PYTHONIOENCODING"] = encoding
         # Make sure this python interpreter and its scripts are available
-        # in PATH 
+        # in PATH
         update_system_path(env, get_augmented_system_path(get_exe_dirs()))
         popen_kw = dict(
             stdout=subprocess.PIPE,
@@ -463,15 +471,15 @@ class VM:
             env=env,
             universal_newlines=True,
         )
-        
-        if sys.version_info >= (3,6):
+
+        if sys.version_info >= (3, 6):
             popen_kw["errors"] = "replace"
             popen_kw["encoding"] = encoding
-        
+
         assert cmd.cmd_line.startswith("!")
         cmd_line = cmd.cmd_line[1:]
         proc = subprocess.Popen(cmd_line, **popen_kw)
-        
+
         def copy_stream(source, target):
             while True:
                 c = source.readline()
@@ -479,17 +487,21 @@ class VM:
                     break
                 else:
                     target.write(c)
-        
-        copy_out = Thread(target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True)
-        copy_err = Thread(target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True)
-        
+
+        copy_out = Thread(
+            target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True
+        )
+        copy_err = Thread(
+            target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True
+        )
+
         copy_out.start()
         copy_err.start()
         try:
             proc.wait()
         except KeyboardInterrupt as e:
             print(str(e), file=sys.stderr)
-        
+
         copy_out.join()
         copy_err.join()
 
@@ -825,7 +837,7 @@ class VM:
         # TODO: are they?
 
         if len(cmd.args) >= 1:
-            sys.argv = cmd.args  
+            sys.argv = cmd.args
             filename = cmd.args[0]
             if os.path.isabs(filename):
                 full_filename = filename
@@ -835,17 +847,31 @@ class VM:
             with tokenize.open(full_filename) as fp:
                 source = fp.read()
 
+            for preproc in self._source_preprocessors:
+                source = preproc(source, cmd)
+
             result_attributes = self._execute_source(
-                source, full_filename, "exec", executor_class, cmd,
-                self._ast_postprocessors
+                source,
+                full_filename,
+                "exec",
+                executor_class,
+                cmd,
+                self._ast_postprocessors,
             )
             result_attributes["filename"] = full_filename
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
         else:
             raise UserError("Command '%s' takes at least one argument" % cmd.name)
 
-    def _execute_source(self, source, filename, execution_mode, executor_class,
-                        cmd, ast_postprocessors=[]):
+    def _execute_source(
+        self,
+        source,
+        filename,
+        execution_mode,
+        executor_class,
+        cmd,
+        ast_postprocessors=[],
+    ):
         self._current_executor = executor_class(self, cmd)
 
         try:
@@ -903,7 +929,7 @@ class VM:
         except Exception:
             # See https://bitbucket.org/plas/thonny/issues/584/problem-with-thonnys-back-end-obj-no
             rep = "??? <repr error>"
-            
+
         if len(rep) > max_repr_length:
             rep = rep[:max_repr_length] + "…"
 
@@ -943,10 +969,12 @@ class VM:
         while system_frame is not None:
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
-            
+
             if not skip_checker or not skip_checker(system_frame):
-                source, firstlineno, in_library = self._get_frame_source_info(system_frame)
-    
+                source, firstlineno, in_library = self._get_frame_source_info(
+                    system_frame
+                )
+
                 result.insert(
                     0,
                     FrameInfo(
@@ -1072,7 +1100,7 @@ class VM:
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return False
+            return True
 
         def __getattr__(self, name):
             # TODO: is it safe to perform those other functions without notifying vm
@@ -1090,7 +1118,7 @@ class VM:
                 # click may send bytes instead of strings
                 if isinstance(data, bytes):
                     data = data.decode(errors="replace")
-                    
+
                 if data != "":
                     self._vm.send_message(
                         BackendEvent(
@@ -1115,7 +1143,7 @@ class VM:
                 cmd = self._vm._input_queue.get()
                 self._processed_symbol_count += len(cmd.data)
                 return cmd.data
-            
+
             # new input needs to be requested
             try:
                 self._vm._enter_io_function()
@@ -1145,10 +1173,10 @@ class VM:
 
         def readlines(self, limit=-1):
             return self._generic_read("readlines", limit)
-        
+
         def __next__(self):
             return self.readline()
-        
+
         def __iter__(self):
             return self
 
@@ -1201,7 +1229,7 @@ class Executor:
 
         try:
             if mode == "exec+eval":
-                assert not ast_postprocessors 
+                assert not ast_postprocessors
                 # Useful in shell to get last expression value in multi-statement block
                 root = self._prepare_ast(source, filename, "exec")
                 statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
@@ -1211,7 +1239,7 @@ class Executor:
             else:
                 root = self._prepare_ast(source, filename, mode)
                 if mode == "eval":
-                    assert not ast_postprocessors 
+                    assert not ast_postprocessors
                     expression = compile(root, filename, mode)
                 elif mode == "exec":
                     for func in ast_postprocessors:
@@ -1364,7 +1392,7 @@ class Tracer(Executor):
                 "type_name": None,
                 "lines_with_frame_info": None,
                 "affected_frame_ids": set(),
-                "is_fresh": False, 
+                "is_fresh": False,
             }
         else:
             return {
@@ -1373,7 +1401,7 @@ class Tracer(Executor):
                 "type_name": exc[0].__name__,
                 "lines_with_frame_info": format_exception_with_frame_info(*exc),
                 "affected_frame_ids": exc[1]._affected_frame_ids_,
-                "is_fresh": exc == self._fresh_exception, 
+                "is_fresh": exc == self._fresh_exception,
             }
 
     def _get_breakpoints_with_cursor_position(self, cmd):
@@ -1526,9 +1554,10 @@ class NiceTracer(Tracer):
                 setattr(builtins, name, getattr(self, name))
 
     def _prepare_ast(self, source, filename, mode):
-        # ast_utils need to be imported after asttokens 
-        # is (custom-)imported 
+        # ast_utils need to be imported after asttokens
+        # is (custom-)imported
         from thonny import ast_utils
+
         root = ast.parse(source, filename, mode)
 
         ast_utils.mark_text_ranges(root, source)
@@ -1544,7 +1573,7 @@ class NiceTracer(Tracer):
         code = frame.f_code
         return (
             # never skip marker functions
-            code.co_name not in self.marker_function_names  
+            code.co_name not in self.marker_function_names
             and (
                 super()._should_skip_frame(frame)
                 or code.co_filename not in self._instrumented_files
@@ -1575,7 +1604,7 @@ class NiceTracer(Tracer):
             traceback.print_exc()
             sys.settrace(None)
             return None
-            
+
     def _trace_and_catch(self, frame, event, arg):
         """
         1) Detects marker calls and responds to client queries in these spots
@@ -2086,10 +2115,10 @@ class NiceTracer(Tracer):
 
     def _tag_nodes(self, root):
         """Marks interesting properties of AST nodes"""
-        # ast_utils need to be imported after asttokens 
-        # is (custom-)imported 
+        # ast_utils need to be imported after asttokens
+        # is (custom-)imported
         from thonny import ast_utils
-        
+
         def add_tag(node, tag):
             if not hasattr(node, "tags"):
                 node.tags = set()
@@ -2112,11 +2141,12 @@ class NiceTracer(Tracer):
         for node in ast.walk(root):
             if not isinstance(node, (ast.expr, ast.stmt)):
                 continue
-            
+
             # tag last children
             last_child = ast_utils.get_last_child(node)
-            assert last_child in [True, False, None] or isinstance(last_child, (ast.expr, ast.stmt, type(None))), \
-                "Bad last child " + str(last_child) + " of " + str(node)
+            assert last_child in [True, False, None] or isinstance(
+                last_child, (ast.expr, ast.stmt, type(None))
+            ), ("Bad last child " + str(last_child) + " of " + str(node))
             if last_child is not None:
                 add_tag(node, "has_children")
 
@@ -2516,7 +2546,7 @@ def _get_python_version_string(add_word_size=False):
 def _fetch_frame_source_info(frame):
     if frame.f_code.co_filename is None or not os.path.exists(frame.f_code.co_filename):
         return None, None, True
-    
+
     is_libra = _is_library_file(frame.f_code.co_filename)
     if frame.f_code.co_name == "<module>":
         # inspect.getsource and getsourcelines don't help here
@@ -2526,20 +2556,24 @@ def _fetch_frame_source_info(frame):
         # function or class
         try:
             source = inspect.getsource(frame.f_code)
-            
+
             # inspect.getsource is not reliable, see eg:
             # https://bugs.python.org/issue35101
             # If the code name is not present as definition
             # in the beginning of the source,
-            # then play safe and return the whole script 
+            # then play safe and return the whole script
             first_line = source.splitlines()[0]
-            if re.search(r"\b(class|def)\b\s+\b%s\b" % frame.f_code.co_name,
-                         first_line) is None:
+            if (
+                re.search(
+                    r"\b(class|def)\b\s+\b%s\b" % frame.f_code.co_name, first_line
+                )
+                is None
+            ):
                 with tokenize.open(frame.f_code.co_filename) as fp:
                     return fp.read(), 1, is_libra
-                
+
             else:
-                return source, frame.f_code.co_firstlineno, is_libra 
+                return source, frame.f_code.co_firstlineno, is_libra
         except OSError:
             logger.exception("Problem getting source")
             return None, None, True

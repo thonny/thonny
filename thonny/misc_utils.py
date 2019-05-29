@@ -39,8 +39,6 @@ def running_on_linux() -> bool:
     return platform.system() == "Linux"
 
 
-
-
 def list_volumes() -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
     if os.name == "posix":
@@ -348,15 +346,18 @@ def get_file_creation_date(path_to_file):
             # so we'll settle for when its content was last modified.
             return stat.st_mtime
 
+
 _timer_time = 0
+
+
 def start_time(text=""):
     global _timer_time
     print("RESET", text)
     _timer_time = time.time()
+
 
 def lap_time(text=""):
     global _timer_time
     new_time = time.time()
     print("LAP", text, round(new_time - _timer_time, 4))
     _timer_time = time.time()
-    

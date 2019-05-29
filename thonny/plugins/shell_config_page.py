@@ -122,5 +122,6 @@ class ShellConfigurationPage(ConfigurationPage):
         return sorted(set(filter(lambda name: name[0].isalpha(), tk_font.families())))
 
 
+
 def load_plugin() -> None:
     get_workbench().add_configuration_page(_("Shell"), ShellConfigurationPage)

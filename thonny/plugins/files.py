@@ -10,6 +10,8 @@ from thonny.common import normpath_with_actual_case
 
 
 minsize = 80
+
+
 class FilesView(tk.PanedWindow):
     def __init__(self, master=None):
         tk.PanedWindow.__init__(self, master, orient="vertical", borderwidth=0)
@@ -73,12 +75,13 @@ class FilesView(tk.PanedWindow):
             self.save_split()
 
 
-
 class LocalFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        super().__init__(master, show_hidden_files,
-            last_folder_setting_name="file.last_browser_folder")
-
+        super().__init__(
+            master,
+            show_hidden_files,
+            last_folder_setting_name="file.last_browser_folder",
+        )
 
     def create_new_file(self):
         path = super().create_new_file()
@@ -104,12 +107,17 @@ class LocalFileBrowser(BaseLocalFileBrowser):
 
 class RemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        super().__init__(master, show_hidden_files, "device.last_browser_folder",
-            breadcrumbs_pady=(0,7))
+        super().__init__(
+            master,
+            show_hidden_files,
+            "device.last_browser_folder",
+            breadcrumbs_pady=(0, 7),
+        )
 
 
 def load_plugin() -> None:
-    get_workbench().set_default("file.last_browser_folder",
-                                normpath_with_actual_case(os.path.expanduser("~")))
+    get_workbench().set_default(
+        "file.last_browser_folder", normpath_with_actual_case(os.path.expanduser("~"))
+    )
 
     get_workbench().add_view(FilesView, _("Files"), "nw")

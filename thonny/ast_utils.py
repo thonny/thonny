@@ -4,6 +4,7 @@ import ast
 import sys
 import logging
 
+
 def extract_text_range(source, text_range):
     if isinstance(source, bytes):
         # TODO: may be wrong encoding
@@ -39,12 +40,13 @@ def parse_source(source: bytes, filename="<unknown>", mode="exec"):
 
 def get_last_child(node, skip_incorrect=True):
     """Returns last focusable child expression or child statement"""
+
     def ok_node(node):
         if node is None:
             return None
 
         assert isinstance(node, (ast.expr, ast.stmt))
-         
+
         if skip_incorrect and getattr(node, "incorrect_range", False):
             return None
 
@@ -102,8 +104,10 @@ def get_last_child(node, skip_incorrect=True):
         # TODO: actually should pairwise check last value, then last key, etc.
         return last_ok(node.values)
 
-    elif isinstance(node, (ast.Index, ast.Return, ast.Assign, ast.AugAssign, 
-                           ast.Yield, ast.YieldFrom)):
+    elif isinstance(
+        node,
+        (ast.Index, ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom),
+    ):
         return ok_node(node.value)
 
     elif isinstance(node, ast.Delete):
@@ -117,7 +121,7 @@ def get_last_child(node, skip_incorrect=True):
             return node.msg
         else:
             return ok_node(node.test)
-    
+
     elif isinstance(node, ast.Slice):
         # [:]
         if ok_node(node.step):
@@ -126,7 +130,7 @@ def get_last_child(node, skip_incorrect=True):
             return node.upper
         else:
             return ok_node(node.lower)
-    
+
     elif isinstance(node, ast.ExtSlice):
         # [:,:]
         for dim in reversed(node.dims):
@@ -135,7 +139,7 @@ def get_last_child(node, skip_incorrect=True):
             if result is not None:
                 return result
         return None
-        
+
     elif isinstance(node, ast.Subscript):
         result = get_last_child(node.slice, skip_incorrect)
         if result is not None:
@@ -148,10 +152,10 @@ def get_last_child(node, skip_incorrect=True):
             return node.cause
         elif ok_node(node.exc):
             return node.exc
-    
+
     elif isinstance(node, (ast.For, ast.While, ast.If, ast.With)):
         return True  # There is last child, but I don't know which it will be
-    
+
     # TODO: pick more cases from here:
     """
     (isinstance(node, (ast.IfExp, ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp))
@@ -176,19 +180,19 @@ def mark_text_ranges(node, source: bytes):
     except ImportError:
         # asttokens may be missing in some configurations
         from thonny.ast_utils_old_range_marker import old_mark_text_ranges
+
         logger = logging.getLogger("thonny")
         if not getattr(logger, "old_astutils_warned", False):
             logger.warn("asttokens not found, using deprecated alternative")
             logger.old_astutils_warned = True
         return old_mark_text_ranges(node, source)
 
-    
-    ASTTokens(source.decode('utf8'), tree=node)
+    ASTTokens(source.decode("utf8"), tree=node)
     for child in ast.walk(node):
-        if hasattr(child, 'last_token'):
+        if hasattr(child, "last_token"):
             child.end_lineno, child.end_col_offset = child.last_token.end
 
-            if hasattr(child, 'lineno'):
+            if hasattr(child, "lineno"):
                 # Fixes problems with some nodes like binop
                 child.lineno, child.col_offset = child.first_token.start
 

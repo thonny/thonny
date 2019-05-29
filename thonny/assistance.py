@@ -13,14 +13,14 @@ import webbrowser
 from collections import namedtuple
 from tkinter import messagebox, ttk
 from typing import (
-    Dict,# pylint disable=unused-import
+    Dict,  # pylint disable=unused-import
     Iterable,
-    List,# pylint disable=unused-import
-    Optional,# pylint disable=unused-import
+    List,  # pylint disable=unused-import
+    Optional,  # pylint disable=unused-import
     Tuple,  # pylint disable=unused-import
-    Type,# pylint disable=unused-import
-    Union, # pylint disable=unused-import
-)  
+    Type,  # pylint disable=unused-import
+    Union,  # pylint disable=unused-import
+)
 
 
 import thonny
@@ -80,32 +80,27 @@ class AssistantView(tktextext.TextFrame):
         self.text.tag_configure("body", font="ItalicTkDefaultFont")
 
         main_font = tk.font.nametofont("TkDefaultFont")
-        
+
         # Underline on font looks better than underline on tag
         italic_underline_font = main_font.copy()
-        italic_underline_font.configure(slant="italic", 
-                                        size=main_font.cget("size"),
-                                        underline=True)
-        
-        
-        
+        italic_underline_font.configure(
+            slant="italic", size=main_font.cget("size"), underline=True
+        )
+
         self.text.tag_configure(
-            "feedback_link",
-            justify="right",
-            font=italic_underline_font,
+            "feedback_link", justify="right", font=italic_underline_font
         )
         self.text.tag_bind(
             "feedback_link", "<ButtonRelease-1>", self._ask_feedback, True
         )
         self.text.tag_configure(
-            "python_errors_link",
-            justify="right",
-            font=italic_underline_font,
+            "python_errors_link", justify="right", font=italic_underline_font
         )
         self.text.tag_bind(
-            "python_errors_link", "<ButtonRelease-1>",
+            "python_errors_link",
+            "<ButtonRelease-1>",
             lambda e: get_workbench().open_url("errors.rst"),
-            True
+            True,
         )
 
         get_workbench().bind("ToplevelResponse", self.handle_toplevel_response, True)
@@ -115,6 +110,13 @@ class AssistantView(tktextext.TextFrame):
     def handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         # Can be called by event system or by Workbench
         # (if Assistant wasn't created yet but an error came)
+        if not msg.get("user_exception") and msg.get("command_name") in [
+            "execute_system_command",
+            "execute_source",
+        ]:
+            # Shell commands may be used to investigate the problem, don't clear assistance
+            return
+
         self._clear()
 
         if not isinstance(get_runner().get_backend_proxy(), CPythonProxy):
@@ -133,7 +135,7 @@ class AssistantView(tktextext.TextFrame):
         if msg.get("user_exception"):
             if not msg["user_exception"].get("message", None):
                 msg["user_exception"]["message"] = "<no message>"
-                
+
             self._exception_info = msg["user_exception"]
             self._explain_exception(msg["user_exception"])
             if get_workbench().get_option("assistance.open_assistant_on_errors"):
@@ -161,10 +163,12 @@ class AssistantView(tktextext.TextFrame):
             )
             + "\n"
         )
-        
-        if (error_info.get("lineno") is not None 
+
+        if (
+            error_info.get("lineno") is not None
             and error_info.get("filename")
-            and os.path.exists(error_info["filename"])):
+            and os.path.exists(error_info["filename"])
+        ):
             rst += "`%s, line %d <%s>`__\n\n" % (
                 os.path.basename(error_info["filename"]),
                 error_info["lineno"],
@@ -217,7 +221,7 @@ class AssistantView(tktextext.TextFrame):
                 # It looks cleaner if it is not.
                 False,  # i==0
             )
-        
+
         self._current_snapshot["exception_suggestions"] = [
             dict(sug._asdict()) for sug in suggestions
         ]
@@ -262,10 +266,10 @@ class AssistantView(tktextext.TextFrame):
             analyzer = cls(self._accept_warnings)
             if analyzer.is_enabled():
                 self._analyzer_instances.append(analyzer)
-        
+
         if not self._analyzer_instances:
             return
-        
+
         self._append_text("\nAnalyzing your code ...", ("em",))
 
         # save snapshot of current source
@@ -274,16 +278,15 @@ class AssistantView(tktextext.TextFrame):
         self._current_snapshot["imported_files"] = {
             name: read_source(name) for name in imported_file_paths
         }
-        
+
         # start the analysis
         for analyzer in self._analyzer_instances:
             analyzer.start_analysis(main_file_path, imported_file_paths)
 
-
     def _accept_warnings(self, analyzer, warnings):
         if analyzer.cancelled:
             return
-        
+
         self._accepted_warning_sets.append(warnings)
         if len(self._accepted_warning_sets) == len(self._analyzer_instances):
             self._present_warnings()
@@ -307,14 +310,14 @@ class AssistantView(tktextext.TextFrame):
                     + "`debugging techniques <debugging.rst>`__.\n\n",
                     ("em",),
                 )
-        
-        
 
         if self.text.get("1.0", "end").strip():
             self._append_feedback_link()
-        
+
         if self._exception_info:
-            self._append_text("General advice on dealing with errors.\n", ("a", "python_errors_link"))
+            self._append_text(
+                "General advice on dealing with errors.\n", ("a", "python_errors_link")
+            )
 
     def _present_warnings(self):
         warnings = [w for ws in self._accepted_warning_sets for w in ws]
@@ -392,7 +395,8 @@ class AssistantView(tktextext.TextFrame):
 
         return (
             ".. topic:: %s\n" % title
-            + "    :class: " + topic_class
+            + "    :class: "
+            + topic_class
             + ("" if last else ", tight")
             + "\n"
             + "    \n"
@@ -404,7 +408,9 @@ class AssistantView(tktextext.TextFrame):
         self._append_text("Was it helpful or confusing?\n", ("a", "feedback_link"))
 
     def _format_file_url(self, atts):
-        return format_file_url(atts["filename"], atts.get("lineno"), atts.get("col_offset"))
+        return format_file_url(
+            atts["filename"], atts.get("lineno"), atts.get("col_offset")
+        )
 
     def _ask_feedback(self, event=None):
 
@@ -418,12 +424,14 @@ class AssistantView(tktextext.TextFrame):
         ui_utils.show_dialog(
             FeedbackDialog(get_workbench(), self.main_file_path, snapshots)
         )
-    
+
     def _get_rst_prelude(self):
-        return (".. default-role:: code\n\n"
-                + ".. role:: light\n\n"
-                + ".. role:: remark\n\n"
-                )
+        return (
+            ".. default-role:: code\n\n"
+            + ".. role:: light\n\n"
+            + ".. role:: remark\n\n"
+        )
+
 
 class AssistantRstText(rst_utils.RstText):
     def configure_tags(self):
@@ -440,7 +448,9 @@ class AssistantRstText(rst_utils.RstText):
         self.tag_configure("h1", font=h1_font, spacing3=0, spacing1=10)
         self.tag_configure("topic_title", font="TkDefaultFont")
 
-        self.tag_configure("topic_body", font=italic_font, spacing1=10, lmargin1=25, lmargin2=25)
+        self.tag_configure(
+            "topic_body", font=italic_font, spacing1=10, lmargin1=25, lmargin2=25
+        )
 
         self.tag_raise("sel")
 
@@ -500,20 +510,23 @@ class GenericErrorHelper(ErrorHelper):
                 + "about your problem. They may add support for "
                 + "such cases in future Thonny versions.",
                 1,
-            ),
+            )
         ]
-        
+
         if error_info["message"].lower() != "invalid syntax":
-            self.suggestions.append(Suggestion(
-                "generic-search-the-web",
-                "Search the web",
-                "Try performing a web search for\n\n``Python %s: %s``"
-                % (
-                    self.error_info["type_name"],
-                    rst_utils.escape(self.error_info["message"]),
-                ),
-                1,
-            ))
+            self.suggestions.append(
+                Suggestion(
+                    "generic-search-the-web",
+                    "Search the web",
+                    "Try performing a web search for\n\n``Python %s: %s``"
+                    % (
+                        self.error_info["type_name"],
+                        rst_utils.escape(self.error_info["message"]),
+                    ),
+                    1,
+                )
+            )
+
 
 class ProgramAnalyzer:
     def __init__(self, on_completion):
@@ -522,7 +535,7 @@ class ProgramAnalyzer:
 
     def is_enabled(self):
         return True
-    
+
     def start_analysis(self, main_file_path, imported_file_paths):
         raise NotImplementedError()
 
@@ -838,7 +851,7 @@ class FeedbackDialog(tk.Toplevel):
             messagebox.showinfo(
                 "Done!",
                 "Thank you for the feedback!\n\nLet us know again when Assistant\nhelps or confuses you!",
-                parent=get_workbench()
+                parent=get_workbench(),
             )
             self._close()
         else:
@@ -846,7 +859,7 @@ class FeedbackDialog(tk.Toplevel):
                 "Problem",
                 "Something went wrong:\n%s\n\nIf you don't mind, then try again later!"
                 % result[:1000],
-                parent=get_workbench()
+                parent=get_workbench(),
             )
 
     def _select_unsent_snapshots(self, all_snapshots):
@@ -1003,4 +1016,3 @@ def init():
     get_workbench().set_default("assistance.open_assistant_on_warnings", False)
     get_workbench().set_default("assistance.disabled_checks", [])
     get_workbench().add_view(AssistantView, "Assistant", "se", visible_by_default=False)
-

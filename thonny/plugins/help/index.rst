@@ -9,6 +9,7 @@ Features
 * `Simple mode and expert mode <modes.rst>`_
 * `Plotter <plotter.rst>`_
 * `Birdseye <birdseye.rst>`_
+* `Web development with Flask <flask.rst>`_
 
 General topics
 ==============

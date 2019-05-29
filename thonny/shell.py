@@ -7,53 +7,64 @@ import re
 from tkinter import ttk
 import traceback
 
-from thonny import get_runner, get_workbench, memory, roughparse, ui_utils,\
-    running
+from thonny import get_runner, get_workbench, memory, roughparse, ui_utils, running
 from thonny.codeview import PythonText, get_syntax_options_for_tag
 from thonny.common import InlineCommand, ToplevelCommand, ToplevelResponse
 from thonny.misc_utils import (
     construct_cmd_line,
     parse_cmd_line,
     running_on_mac_os,
-    shorten_repr, lap_time, start_time)
+    shorten_repr,
+    lap_time,
+    start_time,
+)
 from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
     scrollbar_style,
-    select_sequence, TextMenu, create_tooltip, show_dialog, lookup_style_option)
+    select_sequence,
+    TextMenu,
+    create_tooltip,
+    show_dialog,
+    lookup_style_option,
+)
 import tkinter as tk
+import webbrowser
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
-OUTPUT_SPLIT_REGEX = re.compile(r'(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])')
+OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])")
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
+SIMPLE_URL_SPLIT_REGEX = re.compile(r"(https?:\/\/[\w\/.:\-\?#=%]+[\w\/])")
 
 INT_REGEX = re.compile(r"\d+")
 ANSI_COLOR_NAMES = {
-    "0" : "black",
-    "1" : "red",
-    "2" : "green",
-    "3" : "yellow",
-    "4" : "blue",
-    "5" : "magenta",
-    "6" : "cyan",
-    "7" : "white",
-    "9" : "default",
+    "0": "black",
+    "1": "red",
+    "2": "green",
+    "3": "yellow",
+    "4": "blue",
+    "5": "magenta",
+    "6": "cyan",
+    "7": "white",
+    "9": "default",
 }
 
 
 class ShellView(tk.PanedWindow):
     def __init__(self, master):
-        super().__init__(master,
-                         orient="horizontal",
-                         sashwidth=lookup_style_option("Sash", "sashthickness", 4),
-                         background=lookup_style_option("TPanedWindow", "background"),
-                         borderwidth=0,)
-        
+        super().__init__(
+            master,
+            orient="horizontal",
+            sashwidth=lookup_style_option("Sash", "sashthickness", 4),
+            background=lookup_style_option("TPanedWindow", "background"),
+            borderwidth=0,
+        )
+
         main_frame = tk.Frame(self)
         self.add(main_frame, minsize=100)
-        
+
         self.vert_scrollbar = ttk.Scrollbar(
             main_frame, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
         )
@@ -66,7 +77,7 @@ class ShellView(tk.PanedWindow):
             default_sequence=_CLEAR_SHELL_DEFAULT_SEQ,
             group=200,
         )
-        
+
         get_workbench().set_default("shell.max_lines", 1000)
         get_workbench().set_default("shell.squeeze_threshold", 1000)
 
@@ -85,7 +96,7 @@ class ShellView(tk.PanedWindow):
             height=10,
             undo=True,
         )
-        
+
         get_workbench().event_generate("ShellTextCreated", text_widget=self.text)
         get_workbench().bind("TextInsert", self.text_inserted, True)
         get_workbench().bind("TextDelete", self.text_deleted, True)
@@ -96,21 +107,20 @@ class ShellView(tk.PanedWindow):
         main_frame.rowconfigure(1, weight=1)
 
         self.notice = ttk.Label(self, text="", background="#ffff99", padding=3)
-        
+
         self.init_plotter()
         self.menu = ShellMenu(self.text, self)
-        
-    
+
     def init_plotter(self):
         self.plotter = None
         get_workbench().set_default("view.show_plotter", False)
         get_workbench().set_default("view.shell_sash_position", 400)
 
         self.plotter_visibility_var = get_workbench().get_variable("view.show_plotter")
-        
+
         def can_toggle():
             return self.winfo_ismapped()
-        
+
         get_workbench().add_command(
             "toggle_plotter",
             "view",
@@ -122,7 +132,7 @@ class ShellView(tk.PanedWindow):
         )
 
         self.update_plotter_visibility(True)
-    
+
     def toggle_plotter(self):
         self.plotter_visibility_var.set(not self.plotter_visibility_var.get())
         self.update_plotter_visibility()
@@ -136,19 +146,18 @@ class ShellView(tk.PanedWindow):
     def show_plotter(self, initializing_shell_view=False):
         if not initializing_shell_view:
             get_workbench().show_view("ShellView", True)
-        
+
         if self.plotter is None:
-            self.plotter = PlotterCanvas(self, self.text) 
-    
+            self.plotter = PlotterCanvas(self, self.text)
+
         if not self.plotter.winfo_ismapped():
             self.add(self.plotter, minsize=100)
 
         self.sash_place(0, get_workbench().get_option("view.shell_sash_position"), 0)
-        
+
         running.io_animation_required = True
         self.update_plotter()
-        
-    
+
     def hide_plotter(self):
         if self.plotter is None or not self.plotter.winfo_ismapped():
             return
@@ -198,43 +207,45 @@ class ShellView(tk.PanedWindow):
 
         if conclusion is not None:
             self.text.direct_insert("end", conclusion + "\n", ("stderr",))
-    
+
     def set_scrollbar(self, *args):
         self.vert_scrollbar.set(*args)
         self.update_plotter()
-    
+
     def text_deleted(self, event):
         if event.text_widget == self.text:
             self.update_plotter()
-    
+
     def text_inserted(self, event):
-        if (event.text_widget == self.text 
+        if (
+            event.text_widget == self.text
             and "\n" in event.text
-            # only when scrollbar doesn't move, because otherwise 
-            # the update gets triggered by scrollbar anyway 
+            # only when scrollbar doesn't move, because otherwise
+            # the update gets triggered by scrollbar anyway
             and self.vert_scrollbar.get() == (0.0, 1.0)
-            ):
-                self.update_plotter()
-    
+        ):
+            self.update_plotter()
+
     def update_plotter(self):
         if self.plotter is not None and self.plotter.winfo_ismapped():
             self.plotter.update_plot()
-    
+
     def resize_plotter(self):
         if len(self.panes()) > 1 and self.text.winfo_width() > 5:
-            get_workbench().set_option("view.shell_sash_position",
-                                       self.sash_coord(0)[0])
+            get_workbench().set_option(
+                "view.shell_sash_position", self.sash_coord(0)[0]
+            )
+
 
 class ShellMenu(TextMenu):
-    
     def __init__(self, target, view):
         self.view = view
         TextMenu.__init__(self, target)
-    
+
     def add_extra_items(self):
         self.add_separator()
         self.add_command(label="Clear", command=self.text._clear_shell)
-        
+
         def toggle_from_menu():
             # I don't like that Tk menu toggles checbutton variable
             # automatically before calling the handler.
@@ -242,16 +253,19 @@ class ShellMenu(TextMenu):
             # This way the handler doesn't have to worry whether it
             # needs to toggle the variable or not, and it can choose to
             # decline the toggle.
-            self.view.plotter_visibility_var.set(not self.view.plotter_visibility_var.get())
+            self.view.plotter_visibility_var.set(
+                not self.view.plotter_visibility_var.get()
+            )
             self.view.toggle_plotter()
-            
-        self.add_checkbutton(label="Show Plotter", 
-                         command=toggle_from_menu,
-                         variable=self.view.plotter_visibility_var)
-        
+
+        self.add_checkbutton(
+            label="Show Plotter",
+            command=toggle_from_menu,
+            variable=self.view.plotter_visibility_var,
+        )
+
     def selection_is_read_only(self):
         return not self.text.selection_is_writable()
-
 
 
 class ShellText(EnhancedTextWithLogging, PythonText):
@@ -264,12 +278,12 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             []
         )  # actually not really history, because each command occurs only once
         self._command_history_current_index = None
-        
+
         # logs of IO events for current toplevel block
         # (enables undoing and redoing the events)
         self._applied_io_events = []
         self._queued_io_events = []
-        
+
         self._ansi_foreground = None
         self._ansi_background = None
         self._ansi_inverse = False
@@ -280,7 +294,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._ansi_strikethrough = False
         self._io_cursor_offset = 0
         self._squeeze_buttons = set()
-        
+
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
         self.bind("<KeyPress>", self._text_key_press, True)
@@ -304,21 +318,21 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 "io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"]
             )
 
-        self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
-        self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
-        self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
-        self.tag_raise("hyperlink")
+        self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
+        self.tag_bind("io_hyperlink", "<Enter>", self._hyperlink_enter)
+        self.tag_bind("io_hyperlink", "<Leave>", self._hyperlink_leave)
 
         self.tag_configure("after_io_or_value", spacing1=io_vert_spacing)
         self.tag_configure("before_io", spacing3=io_vert_spacing)
-        
-        # Underline on font looks better than underline on tag
-        io_hyperlink_font = tk.font.nametofont("IOFont").copy()
-        io_hyperlink_font.configure(underline=get_syntax_options_for_tag("hyperlink").get("underline", True))
-        self.tag_configure("io_hyperlink", 
-                           underline=False,
-                           font=io_hyperlink_font)
-        self.tag_raise("io_hyperlink", "hyperlink")
+
+        # Underline on the font looks better than underline on the tag,
+        # therefore Shell doesn't use configured "hyperlink" style directly
+        hyperlink_opts = get_syntax_options_for_tag("hyperlink").copy()
+        if hyperlink_opts.get("underline"):
+            hyperlink_opts["font"] = "UnderlineIOFont"
+            del hyperlink_opts["underline"]
+
+        self.tag_configure("io_hyperlink", **hyperlink_opts)
 
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
         # input starts, output_end shows the end of last output,
@@ -343,6 +357,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             "DebuggerResponse", self._handle_fancy_debugger_progress, True
         )
 
+        self.tag_raise("io_hyperlink")
         self.tag_raise("underline")
         self.tag_raise("strikethrough")
         self.tag_raise("intense_io")
@@ -369,11 +384,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
     def _handle_program_output(self, msg):
         self._ensure_visible()
         self._append_to_io_queue(msg.data, msg.stream_name)
-        
+
         if not self._applied_io_events:
             # this is first line of io, add padding below command line
-            self.tag_add("before_io", "output_insert -1 line linestart") 
-            
+            self.tag_add("before_io", "output_insert -1 line linestart")
+
         self._update_visible_io(None)
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
@@ -429,38 +444,44 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._insert_prompt()
         self._try_submit_input()  # Trying to submit leftover code (eg. second magic command)
         self.see("end")
-        
-        #import os
-        #import psutil
-        #process = psutil.Process(os.getpid())
-        #print("MEM", process.memory_info().rss // (1024*1024))          
+
+        # import os
+        # import psutil
+        # process = psutil.Process(os.getpid())
+        # print("MEM", process.memory_info().rss // (1024*1024))
 
     def _handle_fancy_debugger_progress(self, msg):
         if msg.in_present or msg.io_symbol_count is None:
             self._update_visible_io(None)
         else:
             self._update_visible_io(msg.io_symbol_count)
-    
+
     def _get_squeeze_threshold(self):
         return get_workbench().get_option("shell.squeeze_threshold")
-    
+
     def _append_to_io_queue(self, data, stream_name):
         # Make sure ANSI CSI codes are stored as separate events
         # TODO: try to complete previously submitted incomplete code
-        
+
         parts = re.split(OUTPUT_SPLIT_REGEX, data)
         for part in parts:
-            if part: # split may produce empty string in the beginning or start
+            if part:  # split may produce empty string in the beginning or start
                 # split the data so that very long lines separated
-                for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
+                for block in re.split(
+                    "(.{%d,})" % (self._get_squeeze_threshold() + 1), part
+                ):
                     if block:
                         self._queued_io_events.append((block, stream_name))
-    
+
     def _update_visible_io(self, target_num_visible_chars):
-        current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
-        
-        if (target_num_visible_chars is not None
-            and target_num_visible_chars < current_num_visible_chars):
+        current_num_visible_chars = sum(
+            map(lambda x: len(x[0]), self._applied_io_events)
+        )
+
+        if (
+            target_num_visible_chars is not None
+            and target_num_visible_chars < current_num_visible_chars
+        ):
             # hard to undo complex renderings (squeezed texts and ANSI codes)
             # easier to clean everything and start again
             self._queued_io_events = self._applied_io_events + self._queued_io_events
@@ -468,139 +489,155 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.direct_delete("command_io_start", "output_end")
             current_num_visible_chars = 0
             self._reset_ansi_attributes()
-        
-        
-        while (self._queued_io_events
-               and current_num_visible_chars != target_num_visible_chars):
+
+        while (
+            self._queued_io_events
+            and current_num_visible_chars != target_num_visible_chars
+        ):
             data, stream_name = self._queued_io_events.pop(0)
-            
+
             if target_num_visible_chars is not None:
-                leftover_count = current_num_visible_chars + len(data) - target_num_visible_chars 
-             
+                leftover_count = (
+                    current_num_visible_chars + len(data) - target_num_visible_chars
+                )
+
                 if leftover_count > 0:
                     # add suffix to the queue
-                    self._queued_io_events.insert(0, (data[-leftover_count:], stream_name))
+                    self._queued_io_events.insert(
+                        0, (data[-leftover_count:], stream_name)
+                    )
                     data = data[:-leftover_count]
-        
+
             self._apply_io_event(data, stream_name)
             current_num_visible_chars += len(data)
-    
+
         self.mark_set("output_end", self.index("end-1c"))
         self.see("end")
-    
+
     def _apply_io_event(self, data, stream_name, extra_tags=set()):
         if not data:
             return
-        
+
         original_data = data
-        
+
         if re.match(OUTPUT_SPLIT_REGEX, data):
             if data == "\b":
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
                 self._change_io_cursor_offset("line")
             elif data.endswith("D") or data.endswith("C"):
-                self._change_io_cursor_offset_csi(data) 
+                self._change_io_cursor_offset_csi(data)
             elif stream_name == "stdout":
                 # According to https://github.com/tartley/colorama/blob/master/demos/demo04.py
                 # codes sent to stderr shouldn't affect later output in stdout
                 # It makes sense, but Ubuntu terminal does not confirm it.
-                # For now I'm just trimming stderr color codes 
+                # For now I'm just trimming stderr color codes
                 self._update_ansi_attributes(data)
-                
+
         else:
             tags = extra_tags | {"io", stream_name}
             if stream_name == "stdout":
                 tags |= self._get_ansi_tags()
-                
-            if len(data) > self._get_squeeze_threshold() and "\n" not in data: 
-                self._io_cursor_offset = 0 # ignore the effect of preceding \r and \b
-                button_text = (data[:40] + " …") 
-                btn = tk.Label(self,
-                                 text=button_text,
-                                 #width=len(button_text),
-                                 cursor="arrow",
-                                 borderwidth=2,
-                                 relief="raised",
-                                 font="IOFont",
-                                 )
-                btn.bind("<1>", lambda e:self._show_squeezed_text(btn), True)
+
+            if len(data) > self._get_squeeze_threshold() and "\n" not in data:
+                self._io_cursor_offset = 0  # ignore the effect of preceding \r and \b
+                button_text = data[:40] + " …"
+                btn = tk.Label(
+                    self,
+                    text=button_text,
+                    # width=len(button_text),
+                    cursor="arrow",
+                    borderwidth=2,
+                    relief="raised",
+                    font="IOFont",
+                )
+                btn.bind("<1>", lambda e: self._show_squeezed_text(btn), True)
                 btn.contained_text = data
                 btn.tags = tags
                 self._squeeze_buttons.add(btn)
-                create_tooltip(btn, "%d characters squeezed. " % len(data) + "Click for details.")
+                create_tooltip(
+                    btn, "%d characters squeezed. " % len(data) + "Click for details."
+                )
                 self.window_create("output_insert", window=btn)
                 data = ""
-            
+
             elif self._io_cursor_offset < 0:
                 overwrite_len = min(len(data), -self._io_cursor_offset)
-                
+
                 if 0 <= data.find("\n") < overwrite_len:
                     overwrite_len = data.find("\n")
-                    
+
                 overwrite_data = data[:overwrite_len]
-                self.direct_insert("output_insert -%d chars" % -self._io_cursor_offset,
-                                   overwrite_data, tuple(tags))
-                del_start = self.index("output_insert -%d chars" % -self._io_cursor_offset)
-                del_end = self.index("output_insert -%d chars" % 
-                                        (-self._io_cursor_offset - overwrite_len))
+                self.direct_insert(
+                    "output_insert -%d chars" % -self._io_cursor_offset,
+                    overwrite_data,
+                    tuple(tags),
+                )
+                del_start = self.index(
+                    "output_insert -%d chars" % -self._io_cursor_offset
+                )
+                del_end = self.index(
+                    "output_insert -%d chars"
+                    % (-self._io_cursor_offset - overwrite_len)
+                )
                 self.direct_delete(del_start, del_end)
-                
+
                 # compute leftover data to be printed normally
                 data = data[overwrite_len:]
-                
+
                 if "\n" in data:
                     # cursor offset doesn't apply on new line
                     self._io_cursor_offset = 0
                 else:
                     # offset becomes closer to 0
                     self._io_cursor_offset + overwrite_len
-                
+
             elif self._io_cursor_offset > 0:
-                # insert spaces before actual data 
-                # NB! Print without formatting tags 
-                self._insert_text_directly(" " * self._io_cursor_offset, ("io", stream_name))
+                # insert spaces before actual data
+                # NB! Print without formatting tags
+                self._insert_text_directly(
+                    " " * self._io_cursor_offset, ("io", stream_name)
+                )
                 self._io_cursor_offset = 0
-            
+
             if data:
                 # if any data is still left, then this should be output normally
                 self._insert_text_directly(data, tuple(tags))
-                
-            
+
         self._applied_io_events.append((original_data, stream_name))
-    
+
     def _show_squeezed_text(self, button):
         dlg = SqueezedTextDialog(self, button)
         show_dialog(dlg)
-    
+
     def _change_io_cursor_offset_csi(self, marker):
         ints = re.findall(INT_REGEX, marker)
         if len(ints) != 1:
             logging.warn("bad CSI cursor positioning: %s", marker)
             # do nothing
             return
-        
+
         try:
             delta = int(ints[0])
         except ValueError:
             logging.warn("bad CSI cursor positioning: %s", marker)
             return
-        
+
         if marker.endswith("D"):
             delta = -delta
-        
-        self._change_io_cursor_offset(delta)        
-            
+
+        self._change_io_cursor_offset(delta)
+
     def _change_io_cursor_offset(self, delta):
         line = self.get("output_insert linestart", "output_insert")
         if delta == "line":
-            self._io_cursor_offset = - len(line)
+            self._io_cursor_offset = -len(line)
         else:
             self._io_cursor_offset += delta
-            if self._io_cursor_offset < - len(line):
+            if self._io_cursor_offset < -len(line):
                 # cap
-                self._io_cursor_offset = - len(line) 
-    
+                self._io_cursor_offset = -len(line)
+
     def _reset_ansi_attributes(self):
         self._ansi_foreground = None
         self._ansi_background = None
@@ -610,19 +647,19 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._ansi_underline = False
         self._ansi_conceal = False
         self._ansi_strikethrough = False
-        
+
     def _update_ansi_attributes(self, marker):
         if not marker.endswith("m"):
             # ignore
-            return 
-        
+            return
+
         codes = re.findall(INT_REGEX, marker)
         if not codes:
             self._reset_ansi_attributes()
-            
+
         while codes:
             code = codes.pop(0)
-            
+
             if code == "0":
                 self._reset_ansi_attributes()
             elif code in ["1", "2"]:
@@ -631,7 +668,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self._ansi_italic = True
             elif code == "4":
                 self._ansi_underline = True
-            elif code == "7": 
+            elif code == "7":
                 self._ansi_inverse = True
             elif code == "8":
                 self._ansi_conceal = True
@@ -649,13 +686,45 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self._ansi_conceal = False
             elif code == "29":
                 self._ansi_strikethrough = False
-            if code in ["30", "31", "32", "33", "34", "35", "36", "37",
-                        "90", "91", "92", "93", "94", "95", "96", "97"]:
+            if code in [
+                "30",
+                "31",
+                "32",
+                "33",
+                "34",
+                "35",
+                "36",
+                "37",
+                "90",
+                "91",
+                "92",
+                "93",
+                "94",
+                "95",
+                "96",
+                "97",
+            ]:
                 self._ansi_foreground = code
             elif code == "39":
                 self._ansi_foreground = None
-            elif code in ["40", "41", "42", "43", "44", "45", "46", "47",
-                          "100", "101", "102", "103", "104", "105", "106", "107"]:
+            elif code in [
+                "40",
+                "41",
+                "42",
+                "43",
+                "44",
+                "45",
+                "46",
+                "47",
+                "100",
+                "101",
+                "102",
+                "103",
+                "104",
+                "105",
+                "106",
+                "107",
+            ]:
                 self._ansi_background = code
             elif code == "49":
                 self._ansi_background = None
@@ -680,10 +749,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             else:
                 # ignore other codes
                 pass
-    
+
     def _get_ansi_tags(self):
         result = set()
-        
+
         if self._ansi_foreground:
             fg = ANSI_COLOR_NAMES[self._ansi_foreground[-1]]
             if self._ansi_intensity == "1" or self._ansi_foreground[0] == "9":
@@ -691,19 +760,19 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             elif self._ansi_intensity == "2":
                 fg = "dim_" + fg
         else:
-            fg = "fore" 
+            fg = "fore"
             if self._ansi_intensity == "1":
                 fg = "bright_" + fg
             elif self._ansi_intensity == "2":
                 fg = "dim_" + fg
-            
+
         if self._ansi_background:
             bg = ANSI_COLOR_NAMES[self._ansi_background[-1]]
             if self._ansi_background.startswith("10"):
                 bg = "bright_" + bg
         else:
-            bg = "back" 
-        
+            bg = "back"
+
         if self._ansi_inverse:
             result.add(fg + "_bg")
             result.add(bg + "_fg")
@@ -712,20 +781,20 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 result.add(fg + "_fg")
             if bg != "back":
                 result.add(bg + "_bg")
-                
+
         if self._ansi_intensity == "1" and self._ansi_italic:
             result.add("intense_italic_io")
         elif self._ansi_intensity == "1":
             result.add("intense_io")
         elif self._ansi_italic:
             result.add("italic_io")
-            
+
         if self._ansi_underline:
             result.add("underline")
-                
+
         if self._ansi_strikethrough:
             result.add("strikethrough")
-                
+
         return result
 
     def _insert_prompt(self):
@@ -743,7 +812,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         self._insert_text_directly(">>> ", prompt_tags)
         self.edit_reset()
-    
+
     def _ensure_visible(self):
         focused_view = get_workbench().focus_get()
         get_workbench().show_view("ShellView")
@@ -751,10 +820,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             focused_view.focus()
 
     def restart(self):
-        self._insert_text_directly(
-            "\n========================= RESTART =========================\n",
-            ("magic",),
-        )
+        self._insert_text_directly("\n")
+        self._insert_text_directly(" Restart\n", ("restart_line", "GUTTER"))
+        self._insert_text_directly("\n")
 
     def intercept_insert(self, index, txt, tags=()):
         # pylint: disable=arguments-differ
@@ -794,18 +862,17 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.direct_delete(index1, index2, **kw)
         else:
             get_workbench().bell()
-    
+
     def selection_is_writable(self):
         try:
             if not self.has_selection():
                 return self._in_current_input_range(self.index("insert"))
             else:
-                return (
-                    self._in_current_input_range(self.index("sel.first"))
-                    and self._in_current_input_range(self.index("sel.last")))
+                return self._in_current_input_range(
+                    self.index("sel.first")
+                ) and self._in_current_input_range(self.index("sel.last"))
         except TclError:
             return True
-        
 
     def perform_return(self, event):
         if get_runner().is_running():
@@ -863,24 +930,36 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if txt != "":
                 self.direct_insert("output_insert", txt, tags)
 
+        def _insert_and_highlight_urls(txt, tags):
+            parts = SIMPLE_URL_SPLIT_REGEX.split(txt)
+            for i, part in enumerate(parts):
+                if i % 2 == 0:
+                    _insert(part, tags)
+                else:
+                    _insert(part, tags + ("io_hyperlink",))
+
         # I want the insertion to go before marks
         # self._print_marks("before output")
         self.mark_gravity("input_start", tk.RIGHT)
         self.mark_gravity("output_insert", tk.RIGHT)
         tags = tuple(tags)
 
+        # Make stacktrace clickable
         if "stderr" in tags or "error" in tags:
             # show lines pointing to source lines as hyperlinks
             for line in txt.splitlines(True):
                 parts = re.split(r"(File .* line \d+.*)$", line, maxsplit=1)
                 if len(parts) == 3 and "<pyshell" not in line:
                     _insert(parts[0], tags)
-                    _insert(parts[1], tags + ("hyperlink", "io_hyperlink",))
+                    _insert(parts[1], tags + ("io_hyperlink",))
                     _insert(parts[2], tags)
+                    # self.tag_raise("io_hyperlink", "io")
+                    # self.tag_raise("io_hyperlink", "stderr")
+                    # self.tag_raise("io_hyperlink", "stdout")
                 else:
-                    _insert(line, tags)
+                    _insert_and_highlight_urls(line, tags)
         else:
-            _insert(txt, tags)
+            _insert_and_highlight_urls(txt, tags)
 
         # self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
@@ -1188,6 +1267,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     get_workbench().get_editor_notebook().show_file(
                         filename, lineno, set_focus=False
                     )
+            else:
+                r = self.tag_prevrange("io_hyperlink", "@%d,%d" % (event.x, event.y))
+                if r and len(r) == 2:
+                    url = self.get(r[0], r[1])
+                    if SIMPLE_URL_SPLIT_REGEX.match(url):
+                        webbrowser.open(url)
+
         except Exception:
             traceback.print_exc()
 
@@ -1210,22 +1296,20 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
 
             self._insert_text_directly(line, tags)
-    
+
     def _discard_old_content(self):
         max_lines = max(get_workbench().get_option("shell.max_lines"), 0)
         proposed_cut = self.index("end -%d lines linestart" % max_lines)
         if proposed_cut == "1.0":
             return
-        
-        
-        
-        # would this keep current block intact? 
+
+        # would this keep current block intact?
         next_prompt = self.tag_nextrange("prompt", proposed_cut, "end")
         if not next_prompt:
-            pass # TODO: disable stepping back
-        
+            pass  # TODO: disable stepping back
+
         self._clear_content(proposed_cut)
-    
+
     def _clear_content(self, cut_idx):
         proposed_cut_float = float(cut_idx)
         for btn in list(self._squeeze_buttons):
@@ -1234,13 +1318,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 self._squeeze_buttons.remove(btn)
                 # looks like the widgets are not fully GC-d.
                 # At least avoid leaking big chunks of texts
-                btn.contained_text = None 
+                btn.contained_text = None
                 btn.destroy()
-                
-            
+
         self.direct_delete("0.1", cut_idx)
-            
-            
+
     def _invalidate_current_data(self):
         """
         Grayes out input & output displayed so far
@@ -1252,11 +1334,13 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         while len(self.active_object_tags) > 0:
             self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
-    
+
     def get_lines_above_viewport_bottom(self, tag_name, n):
-        end_index = self.index("@%d,%d lineend" % (self.winfo_height(), self.winfo_height()))
+        end_index = self.index(
+            "@%d,%d lineend" % (self.winfo_height(), self.winfo_height())
+        )
         start_index = self.index(end_index + " -50 lines")
-        
+
         result = ""
         while True:
             r = self.tag_nextrange(tag_name, start_index, end_index)
@@ -1264,9 +1348,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 break
             result += self.get(r[0], r[1])
             start_index = r[1]
-        
+
         return result
-        
+
 
 class SqueezedTextDialog(tk.Toplevel):
     def __init__(self, master, button):
@@ -1276,97 +1360,117 @@ class SqueezedTextDialog(tk.Toplevel):
         self.button = button
         self.content = button.contained_text
         self.shell_text = master
-        
+
         padding = 20
-        
+
         mainframe = ttk.Frame(self)
         mainframe.grid(row=0, column=0, sticky="nsew")
         mainframe.columnconfigure(0, weight=1)
         mainframe.rowconfigure(2, weight=1)
-        
-        explanation_label = ttk.Label(mainframe, 
-                                      text="For performance reasons, Shell avoids showing "
-                                        + "very long lines in full (see Tools => Options => Shell).\n"
-                                        + "Here you can interact with the original text fragment.")
-        explanation_label.grid(row=0, column=0, sticky="nsew", padx=padding, pady=padding)
-        
+
+        explanation_label = ttk.Label(
+            mainframe,
+            text="For performance reasons, Shell avoids showing "
+            + "very long lines in full (see Tools => Options => Shell).\n"
+            + "Here you can interact with the original text fragment.",
+        )
+        explanation_label.grid(
+            row=0, column=0, sticky="nsew", padx=padding, pady=padding
+        )
+
         self._wrap_var = tk.BooleanVar(False)
-        self.wrap_checkbox = ttk.Checkbutton(mainframe, text="Wrap text (may be slow)",
-                                             variable=self._wrap_var,
-                                             onvalue=True,
-                                             offvalue=False,
-                                             command=self._on_wrap_changed)
-        self.wrap_checkbox.grid(row=1, padx=padding, pady=(0,padding//2), sticky="w")
-        
-        self.text_frame = TextFrame(mainframe, text_class=TweakableText, height=10, width=80,
-                                    relief="sunken", borderwidth=1,
-                                    wrap="none")
+        self.wrap_checkbox = ttk.Checkbutton(
+            mainframe,
+            text="Wrap text (may be slow)",
+            variable=self._wrap_var,
+            onvalue=True,
+            offvalue=False,
+            command=self._on_wrap_changed,
+        )
+        self.wrap_checkbox.grid(row=1, padx=padding, pady=(0, padding // 2), sticky="w")
+
+        self.text_frame = TextFrame(
+            mainframe,
+            text_class=TweakableText,
+            height=10,
+            width=80,
+            relief="sunken",
+            borderwidth=1,
+            wrap="none",
+        )
         self.text_frame.grid(row=2, column=0, padx=padding, sticky="nsew")
         self.text_frame.text.insert("1.0", button.contained_text)
         self.text_frame.text.set_read_only(True)
-        
+
         button_frame = ttk.Frame(mainframe)
         button_frame.grid(row=3, column=0, padx=padding, pady=padding, sticky="nswe")
         button_frame.columnconfigure(2, weight=1)
-        
+
         copy_caption = "Copy to clipboard"
-        copy_button = ttk.Button(button_frame, text=copy_caption,
-                                 width=len(copy_caption), 
-                                 command=self._on_copy)
+        copy_button = ttk.Button(
+            button_frame,
+            text=copy_caption,
+            width=len(copy_caption),
+            command=self._on_copy,
+        )
         copy_button.grid(row=0, column=1, sticky="w", padx=(0, padding))
-        
+
         expand_caption = "Expand in Shell"
-        expand_button = ttk.Button(button_frame, text=expand_caption,
-                                   width=len(expand_caption),
-                                   command=self._on_expand)
+        expand_button = ttk.Button(
+            button_frame,
+            text=expand_caption,
+            width=len(expand_caption),
+            command=self._on_expand,
+        )
         expand_button.grid(row=0, column=2, sticky="e", padx=padding)
-        
-        close_button = ttk.Button(button_frame, text="Close", 
-                                  command=self._on_close)
+
+        close_button = ttk.Button(button_frame, text="Close", command=self._on_close)
         close_button.grid(row=0, column=3, sticky="e")
 
         self.bind("<Escape>", self._on_close, True)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.title("Squeezed text (%d characters)" % len(self.content))
-    
+
     def _on_wrap_changed(self):
         if self._wrap_var.get():
             self.text_frame.text.configure(wrap="word")
         else:
             self.text_frame.text.configure(wrap="none")
-    
+
     def _on_expand(self):
         index = self.shell_text.index(self.button)
         self.shell_text.direct_delete(index, index + " +1 chars")
         self.shell_text.direct_insert(index, self.content, tuple(self.button.tags))
         self.destroy()
-        
+
         # looks like the widgets are not fully GC-d.
         # At least avoid leaking big chunks of texts
         self.button.contained_text = None
         self.button.destroy()
-        
-    
+
     def _on_copy(self):
         self.clipboard_clear()
         self.clipboard_append(self.content)
-    
+
     def _on_close(self, event=None):
         self.destroy()
+
 
 class PlotterCanvas(tk.Canvas):
     def __init__(self, master, text):
         self.master = master
         self.background = get_syntax_options_for_tag("TEXT")["background"]
         self.foreground = get_syntax_options_for_tag("TEXT")["foreground"]
-        super().__init__(master,
-                        background=self.background,
-                        borderwidth=0,
-                        height=10000, # size of the virtual drawing area
-                        width=10000,
-                        highlightthickness=0)
+        super().__init__(
+            master,
+            background=self.background,
+            borderwidth=0,
+            height=10000,  # size of the virtual drawing area
+            width=10000,
+            highlightthickness=0,
+        )
         self.text = text
-        
+
         self.x_scale = None
         self.x_scale = None
         self.range_start = -1
@@ -1377,10 +1481,10 @@ class PlotterCanvas(tk.Canvas):
         self.font = tk.font.nametofont("TkDefaultFont")
         self.linespace = self.font.metrics("linespace")
         self.y_padding = self.linespace
-        self.x_padding_left = -1 # makes sharper cut for partly hidden line
+        self.x_padding_left = -1  # makes sharper cut for partly hidden line
         self.x_padding_right = self.linespace
         self.fresh_range = True
-        
+
         self.colors = [
             "#1f77b4",
             "#ff7f0e",
@@ -1393,16 +1497,32 @@ class PlotterCanvas(tk.Canvas):
             "#bcbd22",
             "#17becf",
         ]
-        self.range_block_sizes = [0.1, 0.25, 0.5, 1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+        self.range_block_sizes = [
+            0.1,
+            0.25,
+            0.5,
+            1,
+            5,
+            10,
+            25,
+            50,
+            100,
+            250,
+            500,
+            1000,
+            2500,
+            5000,
+            10000,
+        ]
         self.bind("<Configure>", self.on_resize, True)
         self.bind("<Button-1>", self.reset_range, True)
-        
+
         self.create_close_button()
-    
+
     def create_close_button(self):
         self.close_img = get_workbench().get_image("tab-close")
         self.close_active_img = get_workbench().get_image("tab-close-active")
-        
+
         self.close_rect = self.create_rectangle(
             self.winfo_width() - self.close_img.width() - self.linespace,
             self.linespace / 2,
@@ -1410,51 +1530,58 @@ class PlotterCanvas(tk.Canvas):
             self.linespace / 2 + self.close_img.height(),
             fill=self.background,
             width=0,
-            tags=("close",))
-        
+            tags=("close",),
+        )
+
         self.close_button = self.create_image(
             self.winfo_width() - self.linespace / 2,
             self.linespace / 2,
             anchor="ne",
             image=self.close_img,
             activeimage=self.close_active_img,
-            tags=("close",))
-        
+            tags=("close",),
+        )
+
         self.tag_bind("close", "<1>", self.on_close)
-    
+
     def update_close_button(self):
-        self.coords(self.close_rect,
-                    self.winfo_width() - self.close_img.width() - self.linespace / 1.5,
-                    self.linespace / 2,
-                    self.winfo_width() - self.linespace / 2,
-                    self.linespace / 2 + self.close_img.height())
-        self.coords(self.close_button, 
-                    self.winfo_width() - self.linespace / 2,
-                    self.linespace / 2)
-    
+        self.coords(
+            self.close_rect,
+            self.winfo_width() - self.close_img.width() - self.linespace / 1.5,
+            self.linespace / 2,
+            self.winfo_width() - self.linespace / 2,
+            self.linespace / 2 + self.close_img.height(),
+        )
+        self.coords(
+            self.close_button,
+            self.winfo_width() - self.linespace / 2,
+            self.linespace / 2,
+        )
+
     def on_close(self, event):
         self.master.toggle_plotter()
-    
+
     def reset_range(self, event=None):
         self.fresh_range = True
-    
+
     def get_num_steps(self):
         return 30
-    
+
     def update_plot(self, force_clean=False):
         data_lines = []
-        bottom_index = self.text.index("@%d,%d" % (self.text.winfo_width(), self.text.winfo_height()))
+        bottom_index = self.text.index(
+            "@%d,%d" % (self.text.winfo_width(), self.text.winfo_height())
+        )
         bottom_lineno = int(float(bottom_index))
-        
-        for i in range(bottom_lineno-self.get_num_steps(), bottom_lineno + 1):
+
+        for i in range(bottom_lineno - self.get_num_steps(), bottom_lineno + 1):
             line_start_index = "%d.0" % i
-            if (i < 1
-                or "stdout" not in self.text.tag_names(line_start_index)):
+            if i < 1 or "stdout" not in self.text.tag_names(line_start_index):
                 data_lines.append(([], []))
             else:
                 content = self.text.get(line_start_index, line_start_index + " lineend")
                 data_lines.append(self.extract_pattern_and_numbers(content))
-        
+
         # data_lines need to be transposed
         segments_by_color = []
         for i in range(100):
@@ -1463,9 +1590,9 @@ class PlotterCanvas(tk.Canvas):
                 segments_by_color.append(segments)
             else:
                 break
-        
+
         self.delete("segment")
-        
+
         self.update_range(segments_by_color, force_clean)
         segment_count = self.draw_segments(segments_by_color)
         self.update_legend(data_lines, force_clean)
@@ -1475,250 +1602,272 @@ class PlotterCanvas(tk.Canvas):
             info_text = (
                 "Plotter visualizes series of\n"
                 + "numbers printed to the Shell.\n\n"
-                + "See Help for details.")
-            
+                + "See Help for details."
+            )
+
             self.create_text_with_background(
                 self.winfo_width() / 2,
                 self.winfo_height() / 2,
-                text=info_text, 
+                text=info_text,
                 anchor="center",
-                justify="center", 
-                tags=("info",))
-            #self.delete("guide", "tick", "legend")
-            #self.range_start = 0
-            #self.range_end = 0
+                justify="center",
+                tags=("info",),
+            )
+            # self.delete("guide", "tick", "legend")
+            # self.range_start = 0
+            # self.range_end = 0
             self.tag_raise("info")
-        
+
         self.fresh_range = False
-    
+
     def update_legend(self, data_lines, force_clean=False):
         legend = None
-        i = len(data_lines) - 2 # one before last
+        i = len(data_lines) - 2  # one before last
         while i >= 0:
             legend = data_lines[i][0]
-            if legend and legend == data_lines[i+1][0]:
+            if legend and legend == data_lines[i + 1][0]:
                 # found last legend, which covers at least 2 consecutive points
                 break
             i -= 1
-            
+
         if self.last_legend == legend and not force_clean:
             # just make sure it remains topmost
             self.tag_raise("legend")
             return
-        
+
         self.delete("legend")
-        
+
         if legend is None:
             return
-        
-        # add horizontal padding 
-        #legend[0] = " " + legend[0]
-        #legend[-1] = legend[-1] + " "
-        
-        marker = "●" # "●" "•"
+
+        # add horizontal padding
+        # legend[0] = " " + legend[0]
+        # legend[-1] = legend[-1] + " "
+
+        marker = "●"  # "●" "•"
         marker_width = self.font.measure(marker)
         full_text_width = self.font.measure(marker.join(legend))
-        
+
         y = self.winfo_height() - self.linespace // 2
         x = self.winfo_width() - full_text_width - self.linespace
-        
-        self.create_rectangle(x - self.linespace//4, y - self.linespace,
-                              x + full_text_width + self.linespace//4, y,
-                              fill=self.background,
-                              width=0,
-                              tags=("legend",))
-        
+
+        self.create_rectangle(
+            x - self.linespace // 4,
+            y - self.linespace,
+            x + full_text_width + self.linespace // 4,
+            y,
+            fill=self.background,
+            width=0,
+            tags=("legend",),
+        )
+
         for i, part in enumerate(legend):
             if i > 0:
-                self.create_text(x, y, text=marker, anchor="sw", 
-                                 fill=self.colors[i-1 % len(self.colors)],
-                                 tags=("legend",))
+                self.create_text(
+                    x,
+                    y,
+                    text=marker,
+                    anchor="sw",
+                    fill=self.colors[i - 1 % len(self.colors)],
+                    tags=("legend",),
+                )
                 x += marker_width
-                
-            self.create_text(x, y, text=part, anchor="sw",tags=("legend",),
-                             fill=self.foreground)
+
+            self.create_text(
+                x, y, text=part, anchor="sw", tags=("legend",), fill=self.foreground
+            )
             x += self.font.measure(part)
-        
+
         self.last_legend = legend
-        
-        
+
     def draw_segments(self, segments_by_color):
         count = 0
         for color, segments in enumerate(segments_by_color):
             for pos, nums in segments:
                 self.draw_segment(color, pos, nums)
                 count += 1
-        
+
         # raise certain elements above segments
         self.tag_raise("tick")
         self.tag_raise("close")
         return count
-    
+
     def draw_segment(self, color, pos, nums):
-        
+
         x = self.x_padding_left + pos * self.x_scale
-        
+
         args = []
         for num in nums:
-            y = self.y_padding + (self.range_end - num) * self.y_scale 
+            y = self.y_padding + (self.range_end - num) * self.y_scale
             args.extend([x, y])
             x += self.x_scale
-        
-        self.create_line(*args, width=2, fill=self.colors[color % len(self.colors)],
-                         tags=("segment",),
-                         # arrow may be confusing
-                         # and doesn't play nice with distinguising between
-                         # scrollback view and fresh_range view 
-                         #arrow="last", 
-                         #arrowshape=(3,5,3)
-                         )
-        #self.current_segment_ids.append(line_id)
-        
-    
-    def update_range(self, segments_by_color, clean):  
+
+        self.create_line(
+            *args,
+            width=2,
+            fill=self.colors[color % len(self.colors)],
+            tags=("segment",),
+            # arrow may be confusing
+            # and doesn't play nice with distinguising between
+            # scrollback view and fresh_range view
+            # arrow="last",
+            # arrowshape=(3,5,3)
+        )
+        # self.current_segment_ids.append(line_id)
+
+    def update_range(self, segments_by_color, clean):
         if not segments_by_color:
-            return 
-          
+            return
+
         range_start = 9999999999
         range_end = -9999999999
-        
-        # if new block is using 3/4 of the width, 
+
+        # if new block is using 3/4 of the width,
         # then don't consider old block's values anymore
         interest_position = 0
         for start_pos, nums in reversed(segments_by_color[0]):
             if start_pos < self.get_num_steps() / 10:
                 interest_position = start_pos
-                break 
-        
+                break
+
         assert isinstance(interest_position, int)
         for segments in segments_by_color:
             for start_pos, nums in segments:
                 if start_pos >= interest_position:
                     range_start = min(range_start, *nums)
                     range_end = max(range_end, *nums)
-        
+
         if interest_position == 0 and not self.fresh_range:
             # meaning we still care about old line's values
             range_start = min(range_start, self.range_start)
             range_end = max(range_end, self.range_end)
-        
+
         if range_end == range_start:
             range_end += 1
-        
-        if (not clean
+
+        if (
+            not clean
             and not self.fresh_range
-            and self.x_scale is not None 
-            and range_end == self.range_end and range_start == self.range_start):
+            and self.x_scale is not None
+            and range_end == self.range_end
+            and range_start == self.range_start
+        ):
             # don't recompute as nothing was changed
             return
-        
-        
+
         value_range = range_end - range_start
         range_block_size = value_range // 4
-        # prefer round blocks 
+        # prefer round blocks
         for size in self.range_block_sizes:
             if size * 4 >= value_range:
                 range_block_size = size
                 break
-        
-        # extend to range block boundary 
+
+        # extend to range block boundary
         if range_end % range_block_size != 0:
             range_end -= range_end % -range_block_size
-        
+
         if range_start % range_block_size != 0:
             range_start -= range_start % range_block_size
-        
+
         # not sure about these assertions when using floats
-        #assert range_start % range_block_size == 0
-        #assert range_end % range_block_size == 0, "range_end: %s, bs: %s" % (range_end, range_block_size)
-        
-        # remember                
+        # assert range_start % range_block_size == 0
+        # assert range_end % range_block_size == 0, "range_end: %s, bs: %s" % (range_end, range_block_size)
+
+        # remember
         self.range_start = range_start
         self.range_end = range_end
         self.value_range = range_end - range_start
         self.range_block_size = range_block_size
 
         available_height = self.winfo_height() - 2 * self.y_padding
-        available_width = self.winfo_width() - self.x_padding_left - self.x_padding_right
+        available_width = (
+            self.winfo_width() - self.x_padding_left - self.x_padding_right
+        )
         num_steps = self.get_num_steps()
-        
-        self.x_scale = available_width / (num_steps-1)
+
+        self.x_scale = available_width / (num_steps - 1)
         self.y_scale = available_height / self.value_range
-        
+
         self.update_guides_and_ticks()
-    
+
     def update_guides_and_ticks(self):
         self.delete("guide", "tick")
         value = self.range_start
         while value <= self.range_end:
             y = self.y_padding + (self.range_end - value) * self.y_scale
-            
+
             # guide
-            self.create_line(0, y, self.winfo_width(), y, 
-                             tags=("guide",),
-                             dash=(2,2),
-                             fill="#aaaaaa")
-            
+            self.create_line(
+                0,
+                y,
+                self.winfo_width(),
+                y,
+                tags=("guide",),
+                dash=(2, 2),
+                fill="#aaaaaa",
+            )
+
             # tick
             if value == int(value):
                 value = int(value)
-            
+
             caption = " " + str(value) + " "
-            self.create_text_with_background(self.linespace // 2, y, caption, anchor="w", tags=("tick",))
+            self.create_text_with_background(
+                self.linespace // 2, y, caption, anchor="w", tags=("tick",)
+            )
             value += self.range_block_size
-        
+
     def extract_pattern_and_numbers(self, line):
         parts = NUMBER_SPLIT_REGEX.split(line)
         if len(parts) < 2:
             return ([], [])
-        
+
         assert len(parts) % 2 == 1
-        
+
         pattern = []
         numbers = []
         for i in range(0, len(parts), 2):
             pattern.append(parts[i])
-        
+
         for i in range(1, len(parts), 2):
             numbers.append(float(parts[i]))
-        
+
         return (pattern, numbers)
-    
+
     def extract_series_segments(self, data_lines, series_nr):
         """Yields numbers which form connected multilines on graph
         Each segment is pair of starting position and numbers"""
-        segment = (0,[])
+        segment = (0, [])
         prev_pattern = None
         for i, (pattern, nums) in enumerate(data_lines):
             if len(nums) <= series_nr or pattern != prev_pattern:
                 # break the segment
                 if len(segment[1]) > 1:
                     yield segment
-                segment = (i,[])
-                    
+                segment = (i, [])
+
             if len(nums) > series_nr:
                 segment[1].append(nums[series_nr])
-            
+
             prev_pattern = pattern
-        
+
         if len(segment[1]) > 1:
             yield segment
-    
-    def create_text_with_background(self, x, y, text,
-                                    anchor="w",
-                                    justify="left", 
-                                    background=None, tags=()):
+
+    def create_text_with_background(
+        self, x, y, text, anchor="w", justify="left", background=None, tags=()
+    ):
         if background is None:
             background = self.background
-        
-        
+
         width = 0
         lines = text.splitlines()
         for line in lines:
             width = max(width, self.font.measure(line))
-            
+
         height = len(lines) * self.linespace
-        
+
         rect_x = x
         rect_y = y
         if anchor == "center":
@@ -1728,18 +1877,29 @@ class PlotterCanvas(tk.Canvas):
             rect_y = y - height / 2
         else:
             "TODO:"
-            
-        self.create_rectangle(rect_x, rect_y, 
-                              rect_x + width, rect_y + height,
-                              fill=background, width=0, tags=tags)
-        self.create_text(x, y, anchor=anchor, text=text, tags=tags,
-                         fill=self.foreground,
-                         justify=justify)
-    
+
+        self.create_rectangle(
+            rect_x,
+            rect_y,
+            rect_x + width,
+            rect_y + height,
+            fill=background,
+            width=0,
+            tags=tags,
+        )
+        self.create_text(
+            x,
+            y,
+            anchor=anchor,
+            text=text,
+            tags=tags,
+            fill=self.foreground,
+            justify=justify,
+        )
+
     def on_resize(self, event):
         if self.winfo_width() > 10:
             get_workbench().set_option("view.plotter_width", self.winfo_width())
         self.update_plot(True)
         self.update_close_button()
         self.master.resize_plotter()
-            

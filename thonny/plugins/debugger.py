@@ -71,8 +71,10 @@ class Debugger:
         if command == "run_to_cursor":
             return self.get_run_to_cursor_breakpoint() is not None
         elif command == "step_back":
-            return (self._last_progress_message
-                    and self._last_progress_message["tracer_class"] == "NiceTracer")
+            return (
+                self._last_progress_message
+                and self._last_progress_message["tracer_class"] == "NiceTracer"
+            )
         else:
             return True
 
@@ -368,15 +370,19 @@ class FrameVisualizer:
         self._remove_focus_tags()
 
         if frame_info.event == "line":
-            if (frame_info.id in msg["exception_info"]["affected_frame_ids"]
-                and msg["exception_info"]["is_fresh"]):
+            if (
+                frame_info.id in msg["exception_info"]["affected_frame_ids"]
+                and msg["exception_info"]["is_fresh"]
+            ):
                 self._tag_range(frame_info.focus, "exception_focus")
             else:
                 self._tag_range(frame_info.focus, "active_focus")
         else:
             if "statement" in frame_info.event:
-                if (msg["exception_info"]["msg"] is not None
-                    and msg["exception_info"]["is_fresh"]):
+                if (
+                    msg["exception_info"]["msg"] is not None
+                    and msg["exception_info"]["is_fresh"]
+                ):
                     stmt_tag = "exception_focus"
                 elif frame_info.event.startswith("before"):
                     stmt_tag = "active_focus"
@@ -390,8 +396,10 @@ class FrameVisualizer:
 
         self._expression_box.update_expression(msg, frame_info)
 
-        if (frame_info.id in msg["exception_info"]["affected_frame_ids"]
-            and msg["exception_info"]["is_fresh"]):
+        if (
+            frame_info.id in msg["exception_info"]["affected_frame_ids"]
+            and msg["exception_info"]["is_fresh"]
+        ):
             self._show_exception(
                 msg["exception_info"]["lines_with_frame_info"], frame_info
             )
@@ -422,7 +430,8 @@ class FrameVisualizer:
 
         line_prefix = self._text.get(
             "%d.0" % self._translate_lineno(text_range.lineno),
-            "%d.%d" % (self._translate_lineno(text_range.lineno), text_range.col_offset),
+            "%d.%d"
+            % (self._translate_lineno(text_range.lineno), text_range.col_offset),
         )
         if line_prefix.strip():
             # pseudo-statement
@@ -583,8 +592,10 @@ class ExpressionBox(tk.Text):
                 self._highlight_range(
                     focus,
                     event,
-                    (frame_info.id in msg["exception_info"]["affected_frame_ids"]
-                     and msg["exception_info"]["is_fresh"]),
+                    (
+                        frame_info.id in msg["exception_info"]["affected_frame_ids"]
+                        and msg["exception_info"]["is_fresh"]
+                    ),
                 )
 
             self._update_position(frame_info.current_root_expression)
@@ -830,7 +841,7 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
         showinfo(
             _("Can't close yet"),
             _('Use "Stop" command if you want to cancel debugging'),
-            parent=self
+            parent=self,
         )
 
     def close(self):
@@ -1039,6 +1050,7 @@ def _request_debug(command_name):
     # or the user may deny saving current editor
     get_runner().execute_current(command_name)
 
+
 def _debug_accepted(event):
     # Called when proxy accepted the debug command
     global _current_debugger
@@ -1050,16 +1062,19 @@ def _debug_accepted(event):
         else:
             _current_debugger = StackedWindowsDebugger()
 
+
 def _handle_debugger_progress(msg):
     global _current_debugger
     assert _current_debugger is not None
     _current_debugger.handle_debugger_progress(msg)
+
 
 def _handle_toplevel_response(msg):
     global _current_debugger
     if _current_debugger is not None:
         _current_debugger.close()
         _current_debugger = None
+
 
 class DebuggerConfigurationPage(ConfigurationPage):
     def __init__(self, master):
@@ -1069,7 +1084,7 @@ class DebuggerConfigurationPage(ConfigurationPage):
             "Use editors and Stack view for presenting call frames",
             tooltip="Presents the concept of stack like most professional IDE-s",
             row=1,
-            columnspan=3
+            columnspan=3,
         )
         self.add_checkbox(
             "debugger.automatic_stack_view",
@@ -1077,42 +1092,55 @@ class DebuggerConfigurationPage(ConfigurationPage):
             tooltip="Opens the Stack view on first call and "
             + "closes it when program returns to main frame.",
             row=2,
-            columnspan=3
+            columnspan=3,
         )
-        
+
         default_label = ttk.Label(self, text="Preferred debugger", anchor="w")
         default_label.grid(row=3, column=0, sticky="w", pady=5)
-        self.add_combobox( 
+        self.add_combobox(
             "debugger.preferred_debugger",
             ["nicer", "faster", "birdseye"],
             width=8,
-            row=3, column=1, padx=5)
-        default_comment_label = ttk.Label(self, text="(used when clicking Debug toolbar button)", anchor="w")
+            row=3,
+            column=1,
+            padx=5,
+        )
+        default_comment_label = ttk.Label(
+            self, text="(used when clicking Debug toolbar button)", anchor="w"
+        )
         default_comment_label.grid(row=3, column=2, sticky="w", pady=5)
 
         if get_workbench().get_option("run.birdseye_port", None):
             port_label = ttk.Label(self, text="Birdseye port", anchor="w")
             port_label.grid(row=5, column=0, sticky="w", pady=5)
-            self.add_entry("run.birdseye_port", row=5, column=1, width=5, pady=15, padx=5)
-            port_comment_label = ttk.Label(self, text="(restart Thonny after changing this)", anchor="w")
+            self.add_entry(
+                "run.birdseye_port", row=5, column=1, width=5, pady=15, padx=5
+            )
+            port_comment_label = ttk.Label(
+                self, text="(restart Thonny after changing this)", anchor="w"
+            )
             port_comment_label.grid(row=5, column=2, sticky="w", pady=5)
 
         self.columnconfigure(2, weight=1)
 
 
-
 def get_current_debugger():
     return _current_debugger
 
+
 def run_preferred_debug_command():
-    preferred_debugger = get_workbench().get_option("debugger.preferred_debugger").lower() 
+    preferred_debugger = (
+        get_workbench().get_option("debugger.preferred_debugger").lower()
+    )
     if preferred_debugger == "faster":
         return _request_debug("FastDebug")
     elif preferred_debugger == "birdseye":
         from thonny.plugins.birdseye_frontend import debug_with_birdseye
+
         return debug_with_birdseye()
     else:
         return _request_debug("Debug")
+
 
 def load_plugin() -> None:
 
@@ -1141,7 +1169,7 @@ def load_plugin() -> None:
         tester=_start_debug_enabled,
         default_sequence="<Control-F5>",
         group=11,
-        #image="debug-current-script",
+        # image="debug-current-script",
     )
 
     get_workbench().add_command(

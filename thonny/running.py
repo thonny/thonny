@@ -31,8 +31,7 @@ from thonny import (
     get_workbench,
     ui_utils,
 )
-from thonny.code import get_current_breakpoints,\
-    get_saved_current_script_filename
+from thonny.code import get_current_breakpoints, get_saved_current_script_filename
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -48,7 +47,8 @@ from thonny.common import (
     parse_message,
     path_startswith,
     serialize_message,
-    update_system_path)
+    update_system_path,
+)
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
@@ -60,7 +60,7 @@ WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
 
 # other components may turn it on in order to avoid grouping output lines into one event
-io_animation_required = False  
+io_animation_required = False
 
 
 class Runner:
@@ -90,7 +90,7 @@ class Runner:
     def _init_commands(self) -> None:
         get_workbench().set_default("run.run_in_terminal_python_repl", False)
         get_workbench().set_default("run.run_in_terminal_keep_open", True)
-        
+
         get_workbench().add_command(
             "run_current_script",
             "run",
@@ -170,13 +170,13 @@ class Runner:
     def send_command(self, cmd: CommandToBackend) -> None:
         if self._proxy is None:
             return
-        
+
         if self._publishing_events:
             # allow all event handlers to complete before sending the commands
             # issued by first event handlers
             self._postpone_command(cmd)
             return
-        
+
         # First sanity check
         if (
             isinstance(cmd, ToplevelCommand)
@@ -207,7 +207,7 @@ class Runner:
         else:
             assert response is None
             get_workbench().event_generate("CommandAccepted", command=cmd)
-            
+
         if isinstance(cmd, (ToplevelCommand, DebuggerCommand)):
             self._set_state("running")
 
@@ -279,7 +279,7 @@ class Runner:
 
         if not self.is_waiting_toplevel_command():
             self.restart_backend(False, False, 2)
-        
+
         filename = get_saved_current_script_filename()
 
         if not filename:
@@ -297,7 +297,7 @@ class Runner:
             working_directory = script_dir  # type: Optional[str]
         else:
             working_directory = None
-        
+
         args = self._get_active_arguments()
 
         self.execute_script(filename, args, working_directory, command_name)
@@ -309,7 +309,7 @@ class Runner:
             return shlex.split(args_str)
         else:
             return []
-    
+
     def _cmd_run_current_script_enabled(self) -> bool:
         return (
             get_workbench().get_editor_notebook().get_current_editor() is not None
@@ -317,9 +317,11 @@ class Runner:
         )
 
     def _cmd_run_current_script_in_terminal_enabled(self) -> bool:
-        return (self._proxy 
-                and "run_in_terminal" in self._proxy.get_supported_features()
-                and self._cmd_run_current_script_enabled())
+        return (
+            self._proxy
+            and "run_in_terminal" in self._proxy.get_supported_features()
+            and self._cmd_run_current_script_enabled()
+        )
 
     def _cmd_run_current_script(self) -> None:
         self.execute_current("Run")
@@ -412,12 +414,14 @@ class Runner:
             try:
                 self._publishing_events = True
                 class_event_type = type(msg).__name__
-                get_workbench().event_generate(class_event_type, event=msg)  # more general event
+                get_workbench().event_generate(
+                    class_event_type, event=msg
+                )  # more general event
                 if msg.event_type != class_event_type:
                     # more specific event
                     get_workbench().event_generate(msg.event_type, event=msg)
             finally:
-                self._publishing_events = False 
+                self._publishing_events = False
 
             # TODO: is it necessary???
             # https://stackoverflow.com/a/13520271/261181
@@ -538,22 +542,22 @@ class Runner:
                 logging.getLogger("thonny").exception(
                     "Problem with finalizing console allocation"
                 )
-    
+
     def can_do_file_operations(self):
         return self._proxy and self._proxy.can_do_file_operations()
-    
+
     def get_supported_features(self) -> Set[str]:
         if self._proxy is None:
             return set()
         else:
             return self._proxy.get_supported_features()
-    
+
     def has_separate_files(self):
         if self._proxy is None:
             return False
         else:
             return self._proxy.has_separate_files()
-    
+
     def get_node_label(self):
         if self._proxy is None:
             return "Back-end"
@@ -600,7 +604,7 @@ class BackendProxy:
 
     def run_script_in_terminal(self, script_path, interactive, keep_open):
         raise NotImplementedError()
-    
+
     def get_sys_path(self):
         "backend's sys.path"
         return []
@@ -628,17 +632,16 @@ class BackendProxy:
 
     def get_supported_features(self):
         return {"run"}
-    
+
     def get_node_label(self):
         """Used as files caption if back-end has separate files"""
         return "Back-end"
-    
+
     def has_separate_files(self):
         return False
-    
+
     def can_do_file_operations(self):
         return False
-    
 
 
 class CPythonProxy(BackendProxy):
@@ -676,10 +679,13 @@ class CPythonProxy(BackendProxy):
                     return msg
                 else:
                     next_msg = self._message_queue.popleft()
-                    if (next_msg.event_type == "ProgramOutput"
+                    if (
+                        next_msg.event_type == "ProgramOutput"
                         and next_msg["stream_name"] == msg["stream_name"]
-                        and len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD
-                        and ("\n" not in msg["data"] or not io_animation_required)):
+                        and len(msg["data"]) + len(next_msg["data"])
+                        <= OUTPUT_MERGE_THRESHOLD
+                        and ("\n" not in msg["data"] or not io_animation_required)
+                    ):
                         msg["data"] += next_msg["data"]
                     else:
                         # not same type of message, put it back
@@ -688,7 +694,7 @@ class CPythonProxy(BackendProxy):
 
         else:
             return msg
-    
+
     def _store_state_info(self, msg):
         if "gui_is_active" in msg:
             self._update_gui_updating(msg)
@@ -704,7 +710,7 @@ class CPythonProxy(BackendProxy):
 
         if "prefix" in msg:
             self._sys_prefix = msg["prefix"]
-        
+
         if "exe_dirs" in msg:
             self._exe_dirs = msg["exe_dirs"]
 
@@ -825,9 +831,9 @@ class CPythonProxy(BackendProxy):
     def _listen_stdout(self):
         # debug("... started listening to stdout")
         # will be called from separate thread
-        
+
         message_queue = self._message_queue
-        
+
         def publish_as_msg(data):
             msg = parse_message(data)
             if "cwd" in msg:
@@ -903,7 +909,7 @@ class CPythonProxy(BackendProxy):
 
     def get_user_site_packages(self):
         return self._usersitepackages
-    
+
     def get_exe_dirs(self):
         return self._exe_dirs
 
@@ -944,10 +950,9 @@ class CPythonProxy(BackendProxy):
             cmd.append("-i")
         cmd.append(os.path.basename(script_path))
         cmd.extend(args)
-        
-        run_in_terminal(cmd, os.path.dirname(script_path),
-                        keep_open=keep_open)
-    
+
+        run_in_terminal(cmd, os.path.dirname(script_path), keep_open=keep_open)
+
     def get_supported_features(self):
         return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
 
@@ -1115,6 +1120,7 @@ def _get_venv_info(venv_path):
 def using_bundled_python():
     return is_bundled_python(sys.executable)
 
+
 def is_bundled_python(executable):
     return os.path.exists(
         os.path.join(os.path.dirname(executable), "thonny_python.ini")
@@ -1195,9 +1201,10 @@ class BackendTerminatedError(Exception):
 
 
 def get_frontend_python():
-    return (sys.executable
-               .replace("thonny.exe", "python.exe")
-               .replace("pythonw.exe", "python.exe"))
+    return sys.executable.replace("thonny.exe", "python.exe").replace(
+        "pythonw.exe", "python.exe"
+    )
+
 
 def is_venv_interpreter_of_current_interpreter(executable):
     for location in [".", ".."]:
@@ -1213,10 +1220,11 @@ def is_venv_interpreter_of_current_interpreter(executable):
                         return True
     return False
 
-    
+
 def get_environment_for_python_subprocess(target_executable):
     overrides = get_environment_overrides_for_python_subprocess(target_executable)
     return get_environment_with_overrides(overrides)
+
 
 def get_environment_with_overrides(overrides):
     env = os.environ.copy()
@@ -1230,42 +1238,55 @@ def get_environment_with_overrides(overrides):
             else:
                 env[key] = overrides[key]
     return env
-    
+
+
 def get_environment_overrides_for_python_subprocess(target_executable):
     """Take care of not not confusing different interpreter 
     with variables meant for bundled interpreter"""
-    
-    # At the moment I'm tweaking the environment only if current 
-    # exe is bundled for Thonny. 
-    # In remaining cases it is user's responsibility to avoid 
-    # calling Thonny with environment which may be confusing for 
+
+    # At the moment I'm tweaking the environment only if current
+    # exe is bundled for Thonny.
+    # In remaining cases it is user's responsibility to avoid
+    # calling Thonny with environment which may be confusing for
     # different Pythons called in a subprocess.
-    
+
     this_executable = sys.executable.replace("pythonw.exe", "python.exe")
     target_executable = target_executable.replace("pythonw.exe", "python.exe")
-    
-    interpreter_specific_keys = ["TCL_LIBRARY", "TK_LIBRARY",
-                                 "LD_LIBRARY_PATH", "DYLD_LIBRARY_PATH",
-                                 "SSL_CERT_DIR", "SSL_CERT_FILE",
-                                 "PYTHONHOME", "PYTHONPATH",
-                                 "PYTHONNOUSERSITE", "PYTHONUSERBASE"]
-    
+
+    interpreter_specific_keys = [
+        "TCL_LIBRARY",
+        "TK_LIBRARY",
+        "LD_LIBRARY_PATH",
+        "DYLD_LIBRARY_PATH",
+        "SSL_CERT_DIR",
+        "SSL_CERT_FILE",
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "PYTHONNOUSERSITE",
+        "PYTHONUSERBASE",
+    ]
+
     result = {}
-    
-    if (os.path.samefile(target_executable, this_executable)
-        or is_venv_interpreter_of_current_interpreter(target_executable)):
-        # bring out some important variables so that they can 
+
+    if os.path.samefile(
+        target_executable, this_executable
+    ) or is_venv_interpreter_of_current_interpreter(target_executable):
+        # bring out some important variables so that they can
         # be explicitly set in macOS Terminal
         # (If they are set then it's most likely because current exe is in Thonny bundle)
         for key in interpreter_specific_keys:
             if key in os.environ:
                 result[key] = os.environ[key]
-        
+
         # never pass some variables to different interpreter
         # (even if it's venv or symlink to current one)
         if not is_same_path(target_executable, this_executable):
-            for key in ["PYTHONPATH", "PYTHONHOME",
-                        "PYTHONNOUSERSITE", "PYTHONUSERBASE"]:
+            for key in [
+                "PYTHONPATH",
+                "PYTHONHOME",
+                "PYTHONNOUSERSITE",
+                "PYTHONUSERBASE",
+            ]:
                 if key in os.environ:
                     result[key] = None
     else:
@@ -1274,23 +1295,25 @@ def get_environment_overrides_for_python_subprocess(target_executable):
         for key in interpreter_specific_keys:
             if key in os.environ:
                 result[key] = None
-    
-    
+
     # some keys should be never passed
-    for key in ["PYTHONSTARTUP", "PYTHONBREAKPOINT", "PYTHONDEBUG",
-                "PYTHONNOUSERSITE", "PYTHONASYNCIODEBUG"]:
+    for key in [
+        "PYTHONSTARTUP",
+        "PYTHONBREAKPOINT",
+        "PYTHONDEBUG",
+        "PYTHONNOUSERSITE",
+        "PYTHONASYNCIODEBUG",
+    ]:
         if key in os.environ:
             result[key] = None
 
     # venv may not find (correct) Tk without assistance (eg. in Ubuntu)
     if is_venv_interpreter_of_current_interpreter(target_executable):
         try:
-            if ("TCL_LIBRARY" not in os.environ
-                or "TK_LIBRARY" not in os.environ): 
+            if "TCL_LIBRARY" not in os.environ or "TK_LIBRARY" not in os.environ:
                 result["TCL_LIBRARY"] = get_workbench().tk.exprstring("$tcl_library")
                 result["TK_LIBRARY"] = get_workbench().tk.exprstring("$tk_library")
         except Exception:
             logging.exception("Can't compute Tcl/Tk library location")
 
-    
     return result

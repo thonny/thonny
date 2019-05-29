@@ -313,7 +313,7 @@ class UsagesHighlighter(BaseNameHighlighter):
 
     def get_positions_for(self, source, line, column):
         # https://github.com/davidhalter/jedi/issues/897
-        script = Script(source + ")", line=line, column=column, path="")  
+        script = Script(source + ")", line=line, column=column, path="")
         usages = script.usages()
 
         result = {

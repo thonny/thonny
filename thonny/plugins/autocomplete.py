@@ -76,7 +76,9 @@ class Completer(tk.Listbox):
             self._close()
         elif msg.error:
             self._close()
-            messagebox.showerror("Autocomplete error", msg.error, parent=get_workbench())
+            messagebox.showerror(
+                "Autocomplete error", msg.error, parent=get_workbench()
+            )
         else:
             self._present_completions(msg.completions)
 
@@ -104,8 +106,13 @@ class Completer(tk.Listbox):
 
     def _show_box(self, completions):
         self.delete(0, self.size())
-        self.insert(0, *[c["name"] + ("=" if c["complete"].endswith("=") else "")
-                         for c in completions])
+        self.insert(
+            0,
+            *[
+                c["name"] + ("=" if c["complete"].endswith("=") else "")
+                for c in completions
+            ]
+        )
         self.activate(0)
         self.selection_set(0)
 

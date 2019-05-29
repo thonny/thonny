@@ -3,45 +3,52 @@ import ast
 import sys
 from thonny.backend import VM, get_vm
 
+
 def augment_ast(root):
     mode = os.environ.get("PGZERO_MODE", "False")
     assert mode != "False"
-    
+
     warning_prelude = "WARNING: Pygame Zero mode is turned on (Run → Pygame Zero mode)"
     try:
         import pgzero  # @UnusedImport
     except ImportError:
-        if mode == "True": 
-            print(warning_prelude 
-                  + ",\nbut pgzero module is not found. Running program in regular mode.\n", 
-                  file=sys.stderr)
+        if mode == "True":
+            print(
+                warning_prelude
+                + ",\nbut pgzero module is not found. Running program in regular mode.\n",
+                file=sys.stderr,
+            )
         else:
             assert mode == "auto"
-            
+
         return
-            
-    
+
     # Check if draw is defined
     for stmt in root.body:
         if isinstance(stmt, ast.FunctionDef) and stmt.name == "draw":
             break
     else:
         if mode == "auto":
-            return 
+            return
         else:
-            print(warning_prelude 
-                  + ",\nbut your program doesn't look like usual Pygame Zero program\n"
-                  + "(draw function is missing).\n", 
-                  file=sys.stderr)
-    
+            print(
+                warning_prelude
+                + ",\nbut your program doesn't look like usual Pygame Zero program\n"
+                + "(draw function is missing).\n",
+                file=sys.stderr,
+            )
+
     # need more checks in auto mode
     if mode == "auto":
         # check that draw method is not called in the code
         for node in ast.walk(root):
-            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
-                and node.func.id == "draw"):
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Name)
+                and node.func.id == "draw"
+            ):
                 return
-    
+
     # prepend "import pgzrun as __pgzrun"
     imp = ast.Import([ast.alias("pgzrun", "__pgzrun")])
     imp.lineno = 0
@@ -49,17 +56,11 @@ def augment_ast(root):
     ast.fix_missing_locations(imp)
     imp.tags = {"ignore"}
     root.body.insert(0, imp)
-    
+
     # append "__pgzrun.go()"
     go = ast.Expr(
         ast.Call(
-            ast.Attribute(
-                ast.Name("__pgzrun", ast.Load()),
-                "go",
-                ast.Load()
-            ),
-            [],
-            []
+            ast.Attribute(ast.Name("__pgzrun", ast.Load()), "go", ast.Load()), [], []
         )
     )
     go.lineno = 1000000
@@ -68,22 +69,24 @@ def augment_ast(root):
     go.tags = {"ignore"}
     root.body.append(go)
 
+
 def patched_editor_autocomplete(self, cmd):
     # Make extra builtins visible for Jedi
     prefix = "from pgzero.builtins import *\n"
     cmd["source"] = prefix + cmd["source"]
     cmd["row"] = cmd["row"] + 1
-    
+
     result = get_vm()._original_editor_autocomplete(cmd)
     result["row"] = result["row"] - 1
-    result["source"] = result["source"][len(prefix):]
-     
+    result["source"] = result["source"][len(prefix) :]
+
     return result
+
 
 def load_plugin():
     if os.environ.get("PGZERO_MODE", "False").lower() == "false":
-        return 
-    
+        return
+
     get_vm().add_ast_postprocessor(augment_ast)
     VM._original_editor_autocomplete = VM._cmd_editor_autocomplete
     VM._cmd_editor_autocomplete = patched_editor_autocomplete
