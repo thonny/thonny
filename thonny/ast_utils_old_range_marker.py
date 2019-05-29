@@ -37,11 +37,7 @@ def old_mark_text_ranges(node, source: bytes):
         # set end markers to this node
         if "lineno" in node._attributes and "col_offset" in node._attributes:
             tokens = _extract_tokens(
-                tokens,
-                node.lineno,
-                node.col_offset,
-                prelim_end_lineno,
-                prelim_end_col_offset,
+                tokens, node.lineno, node.col_offset, prelim_end_lineno, prelim_end_col_offset
             )
             try:
                 tokens = _mark_end_and_return_child_tokens(
@@ -141,9 +137,7 @@ def old_mark_text_ranges(node, source: bytes):
                 tokens[:] = tokens[0:i]
                 level = 0  # keep going, there may be more unclosed brackets
 
-    def _mark_end_and_return_child_tokens(
-        node, tokens, prelim_end_lineno, prelim_end_col_offset
-    ):
+    def _mark_end_and_return_child_tokens(node, tokens, prelim_end_lineno, prelim_end_col_offset):
         """
         # shortcut
         node.end_lineno = prelim_end_lineno
@@ -167,9 +161,7 @@ def old_mark_text_ranges(node, source: bytes):
                 del tokens[-1]
 
         else:
-            _strip_trailing_extra_closers(
-                tokens, not isinstance(node, (ast.Tuple, ast.Lambda))
-            )
+            _strip_trailing_extra_closers(tokens, not isinstance(node, (ast.Tuple, ast.Lambda)))
             _strip_trailing_junk_from_expressions(tokens)
             _strip_unclosed_brackets(tokens)
 
@@ -262,18 +254,14 @@ def _fix_ast_problems(tree, source_lines, tokens):
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif isinstance(node, (ast.Expr, ast.Attribute)) and isinstance(
-            node.value, ast.Str
-        ):
+        elif isinstance(node, (ast.Expr, ast.Attribute)) and isinstance(node.value, ast.Str):
             # they share the wrong offset of their triple-quoted child
             # get position from already fixed child
             # TODO: try whether this works when child is in parentheses
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif (
-            isinstance(node, ast.BinOp) and _compare_node_positions(node, node.left) > 0
-        ):
+        elif isinstance(node, ast.BinOp) and _compare_node_positions(node, node.left) > 0:
             # fix binop problem
             # get position from an already fixed child
             node.lineno = node.left.lineno
@@ -282,9 +270,7 @@ def _fix_ast_problems(tree, source_lines, tokens):
             # Note that this doesn't fix
             # (3)+3
 
-        elif (
-            isinstance(node, ast.Call) and _compare_node_positions(node, node.func) > 0
-        ):
+        elif isinstance(node, ast.Call) and _compare_node_positions(node, node.func) > 0:
             # Python 3.4 call problem
             # get position from an already fixed child
             node.lineno = node.func.lineno
@@ -294,18 +280,12 @@ def _fix_ast_problems(tree, source_lines, tokens):
             # (f)()
             # but this can't be fixed without knowing child end position
 
-        elif (
-            isinstance(node, ast.Attribute)
-            and _compare_node_positions(node, node.value) > 0
-        ):
+        elif isinstance(node, ast.Attribute) and _compare_node_positions(node, node.value) > 0:
             # Python 3.4 attribute problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset
 
-        elif (
-            isinstance(node, ast.Subscript)
-            and _compare_node_positions(node, node.value) > 0
-        ):
+        elif isinstance(node, ast.Subscript) and _compare_node_positions(node, node.value) > 0:
             # Python 3.4 Subscript problem ...
             node.lineno = node.value.lineno
             node.col_offset = node.value.col_offset

@@ -23,11 +23,7 @@ from thonny.misc_utils import running_on_windows
 from _tkinter import TclError
 from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
 
-_dialog_filetypes = [
-    ("Python files", ".py .pyw"),
-    ("text files", ".txt"),
-    ("all files", ".*"),
-]
+_dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
 
 REMOTE_PATH_MARKER = " :: "
 
@@ -65,15 +61,9 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
-        get_workbench().bind(
-            "ToplevelResponse", self._listen_for_toplevel_response, True
-        )
-        get_workbench().bind(
-            "read_file_response", self._complete_loading_remote_file, True
-        )
-        get_workbench().bind(
-            "write_file_response", self._complete_writing_remote_file, True
-        )
+        get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
+        get_workbench().bind("read_file_response", self._complete_loading_remote_file, True)
+        get_workbench().bind("write_file_response", self._complete_writing_remote_file, True)
 
         self.update_appearance()
 
@@ -130,8 +120,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     "File is gone",
-                    "Looks like '%s' was deleted or moved outside Thonny.\n\n"
-                    % self._filename
+                    "Looks like '%s' was deleted or moved outside Thonny.\n\n" % self._filename
                     + "Do you want to also close this editor?",
                     parent=get_workbench(),
                 ):
@@ -249,9 +238,7 @@ class Editor(ttk.Frame):
                 return None
 
             self._filename = new_filename
-            get_workbench().event_generate(
-                "SaveAs", editor=self, filename=self._filename
-            )
+            get_workbench().event_generate("SaveAs", editor=self, filename=self._filename)
 
         content_bytes = self._code_view.get_content_as_bytes(self._newlines)
 
@@ -295,16 +282,12 @@ class Editor(ttk.Frame):
             target_filename = extract_target_path(self._filename)
             self._waiting_write_completion = True
             get_runner().send_command(
-                InlineCommand(
-                    "write_file", path=target_filename, content_bytes=content_bytes
-                )
+                InlineCommand("write_file", path=target_filename, content_bytes=content_bytes)
             )
 
             # NB! edit_modified is not falsed yet!
             get_workbench().event_generate(
-                "RemoteFileOperation",
-                path=extract_target_path(self._filename),
-                operation="save",
+                "RemoteFileOperation", path=extract_target_path(self._filename), operation="save"
             )
             return self._filename
         else:
@@ -321,9 +304,7 @@ class Editor(ttk.Frame):
             self.update_title()
 
     def ask_new_path(self):
-        node = choose_node_for_file_operations(
-            self.winfo_toplevel(), "Where to save to?"
-        )
+        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
         if not node:
             return None
 
@@ -393,8 +374,7 @@ class Editor(ttk.Frame):
                 if not tk.messagebox.askyesno(
                     "Potential problem",
                     "If you name your script '%s', " % base
-                    + "you won't be able to import the library module named '%s'"
-                    % mod_name
+                    + "you won't be able to import the library module named '%s'" % mod_name
                     + ".\n\n"
                     + "Do you still want to use this name for your script?",
                     parent=get_workbench(),
@@ -611,9 +591,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             group=10,
         )
 
-        get_workbench().createcommand(
-            "::tk::mac::OpenDocument", self._mac_open_document
-        )
+        get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
 
     def load_startup_files(self):
         """If no filename was sent from command line
@@ -669,9 +647,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _update_recent_menu(self):
         recents = get_workbench().get_option("file.recent_files")
         relevant_recents = [
-            path
-            for path in recents
-            if os.path.exists(path) and not self.file_is_opened(path)
+            path for path in recents if os.path.exists(path) and not self.file_is_opened(path)
         ]
         self._recent_menu.delete(0, "end")
         for path in relevant_recents:
@@ -693,9 +669,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_option("file.current_file", current_file)
 
         open_files = [
-            editor.get_filename()
-            for editor in self.winfo_children()
-            if editor.get_filename()
+            editor.get_filename() for editor in self.winfo_children() if editor.get_filename()
         ]
         get_workbench().set_option("file.open_files", open_files)
 
@@ -707,9 +681,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         new_editor.focus_set()
 
     def _cmd_open_file(self):
-        node = choose_node_for_file_operations(
-            self.winfo_toplevel(), "Where to open from?"
-        )
+        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to open from?")
         if not node:
             return None
 
@@ -768,9 +740,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self.update_editor_title(self.get_current_editor())
 
     def _cmd_save_file_enabled(self):
-        return (
-            self.get_current_editor() and self.get_current_editor().save_file_enabled()
-        )
+        return self.get_current_editor() and self.get_current_editor().save_file_enabled()
 
     def _cmd_save_file_as(self):
         if not self.get_current_editor():
@@ -794,18 +764,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             os.remove(old_filename)
 
     def _cmd_rename_file_enabled(self):
-        return (
-            self.get_current_editor()
-            and self.get_current_editor().get_filename() is not None
-        )
+        return self.get_current_editor() and self.get_current_editor().get_filename() is not None
 
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
-        if (
-            len(editors) == 1
-            and not editors[0].is_modified()
-            and not editors[0].get_filename()
-        ):
+        if len(editors) == 1 and not editors[0].is_modified() and not editors[0].get_filename():
             self._cmd_close_file()
 
     def _mac_open_document(self, *args):
@@ -852,8 +815,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if not get_runner().can_do_file_operations():
             messagebox.showwarning(
                 "Can't open",
-                "Device is busy, can't read file content.\n"
-                + "Please try again later!",
+                "Device is busy, can't read file content.\n" + "Please try again later!",
             )
             return None
         else:

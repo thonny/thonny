@@ -31,9 +31,7 @@ class ObjectInspector(ttk.Frame):
         self.rowconfigure(1, weight=1)
 
         get_workbench().bind("ObjectSelect", self.show_object, True)
-        get_workbench().bind(
-            "get_object_info_response", self._handle_object_info_event, True
-        )
+        get_workbench().bind("get_object_info_response", self._handle_object_info_event, True)
         get_workbench().bind("DebuggerResponse", self._handle_progress_event, True)
         get_workbench().bind("ToplevelResponse", self._handle_progress_event, True)
 
@@ -279,9 +277,7 @@ class ObjectInspector(ttk.Frame):
 
     def goto_type(self, event):
         if self.object_info is not None:
-            get_workbench().event_generate(
-                "ObjectSelect", object_id=self.object_info["type_id"]
-            )
+            get_workbench().event_generate("ObjectSelect", object_id=self.object_info["type_id"])
 
 
 class ContentInspector:
@@ -482,9 +478,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
 
             self.tree.set(node_id, "id", thonny.memory.format_object_id(element.id))
             self.tree.set(
-                node_id,
-                "value",
-                shorten_repr(element.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID),
+                node_id, "value", shorten_repr(element.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID)
             )
             index += 1
 
@@ -501,9 +495,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
 class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
-        thonny.memory.MemoryFrame.__init__(
-            self, master, ("key_id", "id", "key", "value")
-        )
+        thonny.memory.MemoryFrame.__init__(self, master, ("key_id", "id", "key", "value"))
         self.configure(border=1)
         # self.vert_scrollbar.grid_remove()
         self.tree.column("key_id", width=100, anchor=tk.W, stretch=False)
@@ -543,15 +535,11 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "key_id", thonny.memory.format_object_id(key.id))
             self.tree.set(
-                node_id,
-                "key",
-                shorten_repr(key.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID),
+                node_id, "key", shorten_repr(key.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID)
             )
             self.tree.set(node_id, "id", thonny.memory.format_object_id(value.id))
             self.tree.set(
-                node_id,
-                "value",
-                shorten_repr(value.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID),
+                node_id, "value", shorten_repr(value.repr, thonny.memory.MAX_REPR_LENGTH_IN_GRID)
             )
 
         count = len(object_info["entries"])
@@ -583,8 +571,7 @@ class ImageInspector(ContentInspector, tk.Frame):
             data = object_info["image_data"]
         else:
             self.label.configure(
-                image=None,
-                text="Unsupported image data (%s)" % type(object_info["image_data"]),
+                image=None, text="Unsupported image data (%s)" % type(object_info["image_data"])
             )
             return
 

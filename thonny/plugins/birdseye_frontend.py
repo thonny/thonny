@@ -18,9 +18,7 @@ def start_server():
     from birdseye import server
 
     server.app.run(
-        port=get_workbench().get_option("run.birdseye_port"),
-        debug=False,
-        use_reloader=False,
+        port=get_workbench().get_option("run.birdseye_port"), debug=False, use_reloader=False
     )
 
 

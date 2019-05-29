@@ -18,24 +18,16 @@ class ConfigurationDialog(tk.Toplevel):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        main_frame = ttk.Frame(
-            self
-        )  # otherwise there is wrong color background with clam
+        main_frame = ttk.Frame(self)  # otherwise there is wrong color background with clam
         main_frame.grid(row=0, column=0, sticky=tk.NSEW)
         main_frame.columnconfigure(0, weight=1)
         main_frame.rowconfigure(0, weight=1)
 
         self._notebook = ttk.Notebook(main_frame)
-        self._notebook.grid(
-            row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10
-        )
+        self._notebook.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10)
 
-        self._ok_button = ttk.Button(
-            main_frame, text="OK", command=self._ok, default="active"
-        )
-        self._cancel_button = ttk.Button(
-            main_frame, text="Cancel", command=self._cancel
-        )
+        self._ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
+        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
         self._ok_button.grid(row=1, column=1, padx=(0, 11), pady=(0, 10))
         self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
 
@@ -53,9 +45,7 @@ class ConfigurationDialog(tk.Toplevel):
         self.bind("<Return>", self._ok, True)
         self.bind("<Escape>", self._cancel, True)
 
-        self._notebook.select(
-            self._notebook.tabs()[ConfigurationDialog.last_shown_tab_index]
-        )
+        self._notebook.select(self._notebook.tabs()[ConfigurationDialog.last_shown_tab_index])
 
     def select_page(self, title):
         for i, tab in enumerate(self._notebook.tabs()):
@@ -69,9 +59,7 @@ class ConfigurationDialog(tk.Toplevel):
                 if page.apply() == False:
                     return
             except Exception:
-                get_workbench().report_exception(
-                    "Error when applying options in " + title
-                )
+                get_workbench().report_exception("Error when applying options in " + title)
 
         self.destroy()
 
@@ -81,16 +69,12 @@ class ConfigurationDialog(tk.Toplevel):
                 page = self._pages[title]
                 page.cancel()
             except Exception:
-                get_workbench().report_exception(
-                    "Error when cancelling options in " + title
-                )
+                get_workbench().report_exception("Error when cancelling options in " + title)
 
         self.destroy()
 
     def destroy(self):
-        ConfigurationDialog.last_shown_tab_index = self._notebook.index(
-            self._notebook.select()
-        )
+        ConfigurationDialog.last_shown_tab_index = self._notebook.index(self._notebook.select())
         tk.Toplevel.destroy(self)
 
 
@@ -105,40 +89,19 @@ class ConfigurationPage(ttk.Frame):
         ttk.Frame.__init__(self, master)
 
     def add_checkbox(
-        self,
-        flag_name,
-        description,
-        row=None,
-        column=0,
-        padx=0,
-        pady=0,
-        columnspan=1,
-        tooltip=None,
+        self, flag_name, description, row=None, column=0, padx=0, pady=0, columnspan=1, tooltip=None
     ):
         variable = get_workbench().get_variable(flag_name)
         checkbox = ttk.Checkbutton(self, text=description, variable=variable)
         checkbox.grid(
-            row=row,
-            column=column,
-            sticky=tk.W,
-            padx=padx,
-            pady=pady,
-            columnspan=columnspan,
+            row=row, column=column, sticky=tk.W, padx=padx, pady=pady, columnspan=columnspan
         )
 
         if tooltip is not None:
             ui_utils.create_tooltip(checkbox, tooltip)
 
     def add_combobox(
-        self,
-        option_name,
-        values,
-        row=None,
-        column=0,
-        padx=0,
-        pady=0,
-        columnspan=1,
-        width=None,
+        self, option_name, values, row=None, column=0, padx=0, pady=0, columnspan=1, width=None
     ):
         variable = get_workbench().get_variable(option_name)
         combobox = ttk.Combobox(
@@ -151,27 +114,13 @@ class ConfigurationPage(ttk.Frame):
             values=values,
         )
         combobox.grid(
-            row=row,
-            column=column,
-            sticky=tk.W,
-            pady=pady,
-            padx=padx,
-            columnspan=columnspan,
+            row=row, column=column, sticky=tk.W, pady=pady, padx=padx, columnspan=columnspan
         )
 
-    def add_entry(
-        self, option_name, row=None, column=0, pady=0, padx=0, columnspan=1, **kw
-    ):
+    def add_entry(self, option_name, row=None, column=0, pady=0, padx=0, columnspan=1, **kw):
         variable = get_workbench().get_variable(option_name)
         entry = ttk.Entry(self, textvariable=variable, **kw)
-        entry.grid(
-            row=row,
-            column=column,
-            sticky=tk.W,
-            pady=pady,
-            columnspan=columnspan,
-            padx=padx,
-        )
+        entry.grid(row=row, column=column, sticky=tk.W, pady=pady, columnspan=columnspan, padx=padx)
 
     def apply(self):
         """Apply method should return False, when page contains invalid

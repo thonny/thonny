@@ -779,19 +779,13 @@ class HyperParser:
                 return None
             bracketinglevel = min(bracketinglevel, self.bracketing[before][1])
         after = self.indexbracket + 1
-        while (
-            after < len(self.bracketing)
-            and self.bracketing[after][1] >= bracketinglevel
-        ):
+        while after < len(self.bracketing) and self.bracketing[after][1] >= bracketinglevel:
             after += 1
 
         beforeindex = self.text.index(
-            "%s-%dc"
-            % (self.stopatindex, len(self.rawtext) - self.bracketing[before][0])
+            "%s-%dc" % (self.stopatindex, len(self.rawtext) - self.bracketing[before][0])
         )
-        if after >= len(self.bracketing) or self.bracketing[after][0] > len(
-            self.rawtext
-        ):
+        if after >= len(self.bracketing) or self.bracketing[after][0] > len(self.rawtext):
             if mustclose:
                 return None
             afterindex = self.stopatindex
@@ -799,11 +793,7 @@ class HyperParser:
             # We are after a real char, so it is a ')' and we give the
             # index before it.
             afterindex = self.text.index(
-                "%s-%dc"
-                % (
-                    self.stopatindex,
-                    len(self.rawtext) - (self.bracketing[after][0] - 1),
-                )
+                "%s-%dc" % (self.stopatindex, len(self.rawtext) - (self.bracketing[after][0] - 1))
             )
 
         return beforeindex, afterindex
@@ -871,9 +861,7 @@ class HyperParser:
         given index, which is empty if there is no real one.
         """
         if not self.is_in_code():
-            raise ValueError(
-                "get_expression should only be called" "if index is inside a code."
-            )
+            raise ValueError("get_expression should only be called" "if index is inside a code.")
 
         rawtext = self.rawtext
         bracketing = self.bracketing

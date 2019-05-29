@@ -1565,8 +1565,7 @@ class Workbench(tk.Tk):
 
         io_font_size = self._guard_font_size(self.get_option("view.io_font_size"))
         io_font_family = self.get_option("view.io_font_family")
-
-        for io_name in ["IOFont", "BoldIOFont", "UnderlineIOFont", "ItalicIOFont"]:
+        for io_name in ["IOFont", "BoldIOFont", "UnderlineIOFont", "ItalicIOFont", "BoldItalicIOFont"]:
             tk_font.nametofont(io_name).configure(family=io_font_family, size=io_font_size)
         tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(

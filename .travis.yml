@@ -1,0 +1,7 @@
+dist: xenial
+language: python
+cache: pip
+install:
+- pip install black
+script:
+- black --check thonny

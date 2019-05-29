@@ -12,15 +12,7 @@ from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
 
-from thonny import (
-    ast_utils,
-    code,
-    get_runner,
-    get_workbench,
-    memory,
-    misc_utils,
-    ui_utils,
-)
+from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, ui_utils
 from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.config_ui import ConfigurationPage
@@ -81,6 +73,9 @@ class Debugger:
     def handle_debugger_progress(self, msg):
         self._last_brought_out_frame_id = None
 
+    def handle_debugger_return(self, msg):
+        pass
+
     def close(self) -> None:
         self._last_brought_out_frame_id = None
 
@@ -117,9 +112,7 @@ class Debugger:
                 command=lambda: self.check_issue_command("run_to_cursor"),
             )
             menu.add("separator")
-            menu.add(
-                "command", label="Copy", command=create_edit_command_handler("<<Copy>>")
-            )
+            menu.add("command", label="Copy", command=create_edit_command_handler("<<Copy>>"))
             menu.add(
                 "command",
                 label=_("Select all"),
@@ -185,9 +178,7 @@ class SingleWindowDebugger(Debugger):
         if self._last_frame_visualizer is None:
             self._last_frame_visualizer = EditorVisualizer(frame_info)
 
-        self._last_frame_visualizer._update_this_frame(
-            self._last_progress_message, frame_info
-        )
+        self._last_frame_visualizer._update_this_frame(self._last_progress_message, frame_info)
 
         # show variables
         var_view = get_workbench().get_view("VariablesView")
@@ -202,6 +193,9 @@ class SingleWindowDebugger(Debugger):
                 if frame_info.code_name == "<module>"
                 else frame_info.code_name,
             )
+
+    def handle_debugger_return(self, msg):
+        print("RETURN", msg)
 
 
 class StackedWindowsDebugger(Debugger):
@@ -284,6 +278,9 @@ class StackedWindowsDebugger(Debugger):
         frame_info = self.get_frame_by_id(frame_id)
         var_view.show_globals(frame_info.globals, frame_info.module_name)
 
+    def handle_debugger_return(self, msg):
+        print("RETURN", msg)
+
 
 class FrameVisualizer:
     """
@@ -341,16 +338,13 @@ class FrameVisualizer:
 
         # clear obsolete next frame visualizer
         if self._next_frame_visualizer and (
-            not next_frame_info
-            or self._next_frame_visualizer.get_frame_id() != next_frame_info.id
+            not next_frame_info or self._next_frame_visualizer.get_frame_id() != next_frame_info.id
         ):
             self._next_frame_visualizer.close()
             self._next_frame_visualizer = None
 
         if next_frame_info and not self._next_frame_visualizer:
-            self._next_frame_visualizer = self._create_next_frame_visualizer(
-                next_frame_info
-            )
+            self._next_frame_visualizer = self._create_next_frame_visualizer(next_frame_info)
 
         if self._next_frame_visualizer:
             self._next_frame_visualizer.update_this_and_next_frames(msg)
@@ -379,10 +373,7 @@ class FrameVisualizer:
                 self._tag_range(frame_info.focus, "active_focus")
         else:
             if "statement" in frame_info.event:
-                if (
-                    msg["exception_info"]["msg"] is not None
-                    and msg["exception_info"]["is_fresh"]
-                ):
+                if msg["exception_info"]["msg"] is not None and msg["exception_info"]["is_fresh"]:
                     stmt_tag = "exception_focus"
                 elif frame_info.event.startswith("before"):
                     stmt_tag = "active_focus"
@@ -400,9 +391,7 @@ class FrameVisualizer:
             frame_info.id in msg["exception_info"]["affected_frame_ids"]
             and msg["exception_info"]["is_fresh"]
         ):
-            self._show_exception(
-                msg["exception_info"]["lines_with_frame_info"], frame_info
-            )
+            self._show_exception(msg["exception_info"]["lines_with_frame_info"], frame_info)
         else:
             self.close_note()
 
@@ -430,8 +419,7 @@ class FrameVisualizer:
 
         line_prefix = self._text.get(
             "%d.0" % self._translate_lineno(text_range.lineno),
-            "%d.%d"
-            % (self._translate_lineno(text_range.lineno), text_range.col_offset),
+            "%d.%d" % (self._translate_lineno(text_range.lineno), text_range.col_offset),
         )
         if line_prefix.strip():
             # pseudo-statement
@@ -447,9 +435,7 @@ class FrameVisualizer:
             first_line, first_col, last_line = self._get_text_range_block(text_range)
 
             for lineno in range(first_line, last_line + 1):
-                self._text.tag_add(
-                    tag, "%d.%d" % (lineno, first_col), "%d.0" % (lineno + 1)
-                )
+                self._text.tag_add(tag, "%d.%d" % (lineno, first_col), "%d.0" % (lineno + 1))
 
         self._text.update_idletasks()
         self._text.see("%d.0" % (last_line))
@@ -465,9 +451,7 @@ class FrameVisualizer:
     def _get_text_range_block(self, text_range):
         first_line = text_range.lineno - self._firstlineno + 1
         last_line = (
-            text_range.end_lineno
-            - self._firstlineno
-            + (1 if text_range.end_col_offset > 0 else 0)
+            text_range.end_lineno - self._firstlineno + (1 if text_range.end_col_offset > 0 else 0)
         )
         first_line_content = self._text.get("%d.0" % first_line, "%d.end" % first_line)
         if first_line_content.strip().startswith("elif "):
@@ -499,9 +483,7 @@ class FrameVisualizer:
     def bring_out_this_frame(self):
         pass
 
-    def show_note(
-        self, *content_items: Union[str, List], target=None, focus=None
-    ) -> None:
+    def show_note(self, *content_items: Union[str, List], target=None, focus=None) -> None:
         if target is None:
             target = self._text
 
@@ -519,9 +501,7 @@ class EditorVisualizer(FrameVisualizer):
 
     def __init__(self, frame_info):
         self.editor = (
-            get_workbench()
-            .get_editor_notebook()
-            .show_file(frame_info.filename, set_focus=False)
+            get_workbench().get_editor_notebook().show_file(frame_info.filename, set_focus=False)
         )
         FrameVisualizer.__init__(self, self.editor.get_code_view(), frame_info)
         self._firstlineno = 1
@@ -534,9 +514,7 @@ class EditorVisualizer(FrameVisualizer):
             self._decorate_editor_title("   <<< REPLAYING >>> ")
 
     def _decorate_editor_title(self, suffix):
-        self.editor.master.update_editor_title(
-            self.editor, self.editor.get_title() + suffix
-        )
+        self.editor.master.update_editor_title(self.editor, self.editor.get_title() + suffix)
 
     def bring_out_this_frame(self):
         get_workbench().focus_set()
@@ -582,9 +560,7 @@ class ExpressionBox(tk.Text):
         event = frame_info.event
 
         if frame_info.current_root_expression is not None:
-            self._load_expression(
-                frame_info.filename, frame_info.current_root_expression
-            )
+            self._load_expression(frame_info.filename, frame_info.current_root_expression)
             for subrange, value in frame_info.current_evaluations:
                 self._replace(subrange, value)
             if "expression" in event:
@@ -610,9 +586,7 @@ class ExpressionBox(tk.Text):
 
     def get_focused_text(self):
         if self._last_focus:
-            start_mark = self._get_mark_name(
-                self._last_focus.lineno, self._last_focus.col_offset
-            )
+            start_mark = self._get_mark_name(self._last_focus.lineno, self._last_focus.col_offset)
             end_mark = self._get_mark_name(
                 self._last_focus.end_lineno, self._last_focus.end_col_offset
             )
@@ -654,9 +628,7 @@ class ExpressionBox(tk.Text):
         self.tag_bind(
             object_tag,
             sequence,
-            lambda _: get_workbench().event_generate(
-                "ObjectSelect", object_id=value.id
-            ),
+            lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id),
         )
 
     def _load_expression(self, filename, text_range):
@@ -728,9 +700,7 @@ class ExpressionBox(tk.Text):
             return
 
         start_index = self._get_mark_name(text_range.lineno, text_range.col_offset)
-        end_index = self._get_mark_name(
-            text_range.end_lineno, text_range.end_col_offset
-        )
+        end_index = self._get_mark_name(text_range.end_lineno, text_range.end_col_offset)
         self.tag_add(tag, start_index, end_index)
 
         if has_exception:
@@ -739,9 +709,7 @@ class ExpressionBox(tk.Text):
     def _update_position(self, text_range):
         self._codeview.update_idletasks()
         text_line_number = text_range.lineno - self._codeview._first_line_number + 1
-        bbox = self._codeview.text.bbox(
-            str(text_line_number) + "." + str(text_range.col_offset)
-        )
+        bbox = self._codeview.text.bbox(str(text_line_number) + "." + str(text_range.col_offset))
 
         if isinstance(bbox, tuple):
             x = bbox[0] - self._codeview.text.cget("padx") + 6
@@ -807,9 +775,7 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
         self.main_frame.grid(sticky=tk.NSEW)
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        self.main_pw = ui_utils.AutomaticPanedWindow(
-            self.main_frame, orient=tk.VERTICAL
-        )
+        self.main_pw = ui_utils.AutomaticPanedWindow(self.main_frame, orient=tk.VERTICAL)
         self.main_pw.grid(sticky=tk.NSEW, padx=10, pady=10)
         self.main_frame.rowconfigure(0, weight=1)
         self.main_frame.columnconfigure(0, weight=1)
@@ -882,9 +848,7 @@ class ModuleLoadDialog(DialogVisualizer):
 class StackView(ui_utils.TreeFrame):
     def __init__(self, master):
         super().__init__(
-            master,
-            ("function", "location", "id"),
-            displaycolumns=("function", "location"),
+            master, ("function", "location", "id"), displaycolumns=("function", "location")
         )
 
         # self.tree.configure(show="tree")
@@ -896,9 +860,7 @@ class StackView(ui_utils.TreeFrame):
         self.tree.heading("location", text="Location", anchor=tk.W)
 
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
-        get_workbench().bind(
-            "ToplevelResponse", lambda e=None: self._clear_tree(), True
-        )
+        get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
 
     def _update_stack(self, msg):
         self._clear_tree()
@@ -908,9 +870,7 @@ class StackView(ui_utils.TreeFrame):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "function", frame.code_name)
             self.tree.set(
-                node_id,
-                "location",
-                "%s, line %s" % (os.path.basename(frame.filename), lineno),
+                node_id, "location", "%s, line %s" % (os.path.basename(frame.filename), lineno)
             )
             self.tree.set(node_id, "id", frame.id)
 
@@ -958,8 +918,7 @@ class ExceptionView(TextFrame):
     def _show_description(self):
         self.text.configure(foreground=get_syntax_options_for_tag("TEXT")["foreground"])
         self.text.direct_insert(
-            "end",
-            "If last command raised an exception then this view will show the stacktrace.",
+            "end", "If last command raised an exception then this view will show the stacktrace."
         )
 
     def set_exception(self, exception_lines_with_frame_info):
@@ -972,20 +931,14 @@ class ExceptionView(TextFrame):
             self._show_description()
             return
 
-        self.text.configure(
-            foreground=get_syntax_options_for_tag("stderr")["foreground"]
-        )
+        self.text.configure(foreground=get_syntax_options_for_tag("stderr")["foreground"])
         for line, frame_id, filename, lineno in exception_lines_with_frame_info:
 
             if frame_id is not None:
                 frame_tag = "frame_%d" % frame_id
 
-                def handle_frame_click(
-                    event, frame_id=frame_id, filename=filename, lineno=lineno
-                ):
-                    get_runner().send_command(
-                        InlineCommand("get_frame_info", frame_id=frame_id)
-                    )
+                def handle_frame_click(event, frame_id=frame_id, filename=filename, lineno=lineno):
+                    get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
                     if os.path.exists(filename):
                         get_workbench().get_editor_notebook().show_file(
                             filename, lineno, set_focus=False
@@ -999,9 +952,7 @@ class ExceptionView(TextFrame):
                     end = len(line)
 
                 self.text.direct_insert("end", line[:start])
-                self.text.direct_insert(
-                    "end", line[start:end], ("hyperlink", frame_tag)
-                )
+                self.text.direct_insert("end", line[start:end], ("hyperlink", frame_tag))
                 self.text.direct_insert("end", line[end:])
 
             else:
@@ -1076,6 +1027,12 @@ def _handle_toplevel_response(msg):
         _current_debugger = None
 
 
+def _handle_debugger_return(msg):
+    global _current_debugger
+    assert _current_debugger is not None
+    _current_debugger.handle_debugger_return(msg)
+
+
 class DebuggerConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
@@ -1113,9 +1070,7 @@ class DebuggerConfigurationPage(ConfigurationPage):
         if get_workbench().get_option("run.birdseye_port", None):
             port_label = ttk.Label(self, text="Birdseye port", anchor="w")
             port_label.grid(row=5, column=0, sticky="w", pady=5)
-            self.add_entry(
-                "run.birdseye_port", row=5, column=1, width=5, pady=15, padx=5
-            )
+            self.add_entry("run.birdseye_port", row=5, column=1, width=5, pady=15, padx=5)
             port_comment_label = ttk.Label(
                 self, text="(restart Thonny after changing this)", anchor="w"
             )
@@ -1129,9 +1084,7 @@ def get_current_debugger():
 
 
 def run_preferred_debug_command():
-    preferred_debugger = (
-        get_workbench().get_option("debugger.preferred_debugger").lower()
-    )
+    preferred_debugger = get_workbench().get_option("debugger.preferred_debugger").lower()
     if preferred_debugger == "faster":
         return _request_debug("FastDebug")
     elif preferred_debugger == "birdseye":
@@ -1262,4 +1215,5 @@ def load_plugin() -> None:
     get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)
     get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
     get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
+    get_workbench().bind("debugger_return_response", _handle_debugger_return, True)
     get_workbench().bind("CommandAccepted", _debug_accepted, True)

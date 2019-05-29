@@ -13,9 +13,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
 
     def start_analysis(self, main_file_path, imported_file_paths):
         relevant_symbols = {
-            key
-            for key in all_checks_by_symbol
-            if all_checks_by_symbol[key]["usage"] == "warning"
+            key for key in all_checks_by_symbol if all_checks_by_symbol[key]["usage"] == "warning"
         }
 
         if "bad-python3-import" in relevant_symbols:
@@ -93,31 +91,19 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
                         explanation = check["msg_xpln"]
 
                     if explanation.startswith("Used when an "):
-                        explanation = (
-                            "It looks like the " + explanation[(len("Used when an ")) :]
-                        )
+                        explanation = "It looks like the " + explanation[(len("Used when an ")) :]
                     elif explanation.startswith("Emitted when an "):
                         explanation = (
-                            "It looks like the "
-                            + explanation[(len("Emitted when an ")) :]
+                            "It looks like the " + explanation[(len("Emitted when an ")) :]
                         )
                     elif explanation.startswith("Used when a "):
-                        explanation = (
-                            "It looks like the " + explanation[(len("Used when a ")) :]
-                        )
+                        explanation = "It looks like the " + explanation[(len("Used when a ")) :]
                     elif explanation.startswith("Emitted when a "):
-                        explanation = (
-                            "It looks like the "
-                            + explanation[(len("Emitted when a ")) :]
-                        )
+                        explanation = "It looks like the " + explanation[(len("Emitted when a ")) :]
                     elif explanation.startswith("Used when "):
-                        explanation = (
-                            "It looks like " + explanation[(len("Used when ")) :]
-                        )
+                        explanation = "It looks like " + explanation[(len("Used when ")) :]
                     elif explanation.startswith("Emitted when "):
-                        explanation = (
-                            "It looks like " + explanation[(len("Emitted when ")) :]
-                        )
+                        explanation = "It looks like " + explanation[(len("Emitted when ")) :]
 
                     atts["explanation"] = explanation
 
@@ -125,9 +111,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
                         atts["explanation_rst"] = check["tho_xpln_rst"]
 
                     if atts["category"] in ("I", "F"):
-                        atts["msg"] = (
-                            "INTERNAL ERROR when analyzing the code: " + atts["msg"]
-                        )
+                        atts["msg"] = "INTERNAL ERROR when analyzing the code: " + atts["msg"]
 
                     # atts["more_info_url"] = "http://pylint-messages.wikidot.com/messages:%s" % atts["msg_id"].lower()
                     warnings.append(atts)
@@ -141,8 +125,7 @@ all_checks = [
         "msg_id": "C0102",
         "msg_sym": "blacklisted-name",
         "msg_text": 'Black listed name "%s"',
-        "msg_xpln": "Used when the name is listed in the black list (unauthorized "
-        "names).",
+        "msg_xpln": "Used when the name is listed in the black list (unauthorized " "names).",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -215,8 +198,7 @@ all_checks = [
     {
         "msg_id": "C0200",
         "msg_sym": "consider-using-enumerate",
-        "msg_text": "Consider using enumerate instead of iterating with range and "
-        "len",
+        "msg_text": "Consider using enumerate instead of iterating with range and " "len",
         "msg_xpln": "Emitted when code that iterates with range and len is "
         "encountered. Such code can be simplified by using the enumerate "
         "builtin.",
@@ -226,8 +208,7 @@ all_checks = [
     {
         "msg_id": "C0201",
         "msg_sym": "consider-iterating-dictionary",
-        "msg_text": "Consider iterating the dictionary directly instead of calling "
-        ".keys()",
+        "msg_text": "Consider iterating the dictionary directly instead of calling " ".keys()",
         "msg_xpln": "Emitted when the keys of a dictionary are iterated through the "
         ".keys() method. It is enough to just iterate through the "
         'dictionary itself, as in "for key in dictionary".',
@@ -273,8 +254,7 @@ all_checks = [
         "msg_id": "C0205",
         "msg_sym": "single-string-used-for-slots",
         "msg_text": "Class __slots__ should be a non-string iterable",
-        "msg_xpln": "Used when a class __slots__ is a simple string, rather than an "
-        "iterable.",
+        "msg_xpln": "Used when a class __slots__ is a simple string, rather than an " "iterable.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -290,8 +270,7 @@ all_checks = [
         "msg_id": "C0302",
         "msg_sym": "too-many-lines",
         "msg_text": "Too many lines in module (%s/%s)",
-        "msg_xpln": "Used when a module has too many lines, reducing its "
-        "readability.",
+        "msg_xpln": "Used when a module has too many lines, reducing its " "readability.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -299,8 +278,7 @@ all_checks = [
         "msg_id": "C0303",
         "msg_sym": "trailing-whitespace",
         "msg_text": "Trailing whitespace",
-        "msg_xpln": "Used when there is whitespace between the end of a line and the "
-        "newline.",
+        "msg_xpln": "Used when there is whitespace between the end of a line and the " "newline.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -350,16 +328,14 @@ all_checks = [
         "msg_id": "C0327",
         "msg_sym": "mixed-line-endings",
         "msg_text": "Mixed line endings LF and CRLF",
-        "msg_xpln": "Used when there are mixed (LF and CRLF) newline signs in a "
-        "file.",
+        "msg_xpln": "Used when there are mixed (LF and CRLF) newline signs in a " "file.",
         "tho_xpln": "",
         "usage": "skip",
     },
     {
         "msg_id": "C0328",
         "msg_sym": "unexpected-line-ending-format",
-        "msg_text": "Unexpected line ending format. There is '%s' while it should be "
-        "'%s'.",
+        "msg_text": "Unexpected line ending format. There is '%s' while it should be " "'%s'.",
         "msg_xpln": "Used when there is different newline than expected.",
         "tho_xpln": "",
         "usage": "skip",
@@ -400,8 +376,7 @@ all_checks = [
         "msg_id": "C0410",
         "msg_sym": "multiple-imports",
         "msg_text": "Multiple imports on one line (%s)",
-        "msg_xpln": "Used when import statement importing multiple modules is "
-        "detected.",
+        "msg_xpln": "Used when import statement importing multiple modules is " "detected.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -489,8 +464,7 @@ all_checks = [
         "msg_id": "E0101",
         "msg_sym": "return-in-init",
         "msg_text": "Explicit return in __init__",
-        "msg_xpln": "Used when the special class method __init__ has an explicit "
-        "return value.",
+        "msg_xpln": "Used when the special class method __init__ has an explicit " "return value.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -514,8 +488,7 @@ all_checks = [
         "msg_id": "E0104",  # Will be reported by Python
         "msg_sym": "return-outside-function",
         "msg_text": "Return outside function",
-        "msg_xpln": 'Used when a "return" statement is found outside a function or '
-        "method.",
+        "msg_xpln": 'Used when a "return" statement is found outside a function or ' "method.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -523,8 +496,7 @@ all_checks = [
         "msg_id": "E0105",  # Will be reported by Python
         "msg_sym": "yield-outside-function",
         "msg_text": "Yield outside function",
-        "msg_xpln": 'Used when a "yield" statement is found outside a function or '
-        "method.",
+        "msg_xpln": 'Used when a "yield" statement is found outside a function or ' "method.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -542,8 +514,7 @@ all_checks = [
         "msg_id": "E0108",  # Will be reported by Python
         "msg_sym": "duplicate-argument-name",
         "msg_text": "Duplicate argument name %s in function definition",
-        "msg_xpln": "Duplicate argument names in function definitions are syntax "
-        "errors.",
+        "msg_xpln": "Duplicate argument names in function definitions are syntax " "errors.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -579,8 +550,7 @@ all_checks = [
         "msg_id": "E0113",  # Better message than in Python
         "msg_sym": "invalid-star-assignment-target",
         "msg_text": "Starred assignment target must be in a list or tuple",
-        "msg_xpln": "Emitted when a star expression is used as a starred assignment "
-        "target.",
+        "msg_xpln": "Emitted when a star expression is used as a starred assignment " "target.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -588,8 +558,7 @@ all_checks = [
         "msg_id": "E0114",  # ????
         "msg_sym": "star-needs-assignment-target",
         "msg_text": "Can use starred expression only in assignment target",
-        "msg_xpln": "Emitted when a star expression is not used in an assignment "
-        "target.",
+        "msg_xpln": "Emitted when a star expression is not used in an assignment " "target.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -654,8 +623,7 @@ all_checks = [
         "msg_id": "E0203",
         "msg_sym": "access-member-before-definition",
         "msg_text": "Access to member %r before its definition line %s",
-        "msg_xpln": "Used when an instance member is accessed before it's actually "
-        "assigned.",
+        "msg_xpln": "Used when an instance member is accessed before it's actually " "assigned.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -681,8 +649,7 @@ all_checks = [
     {
         "msg_id": "E0236",
         "msg_sym": "invalid-slots-object",
-        "msg_text": "Invalid object %r in __slots__, must contain only non empty "
-        "strings",
+        "msg_text": "Invalid object %r in __slots__, must contain only non empty " "strings",
         "msg_xpln": "Used when an invalid (non-string) object occurs in __slots__.",
         "tho_xpln": "",
         "usage": "skip",
@@ -691,8 +658,7 @@ all_checks = [
         "msg_id": "E0237",
         "msg_sym": "assigning-non-slot",
         "msg_text": "Assigning to attribute %r not defined in class slots",
-        "msg_xpln": "Used when assigning to an attribute not defined in the class "
-        "slots.",
+        "msg_xpln": "Used when assigning to an attribute not defined in the class " "slots.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -854,8 +820,7 @@ all_checks = [
     {
         "msg_id": "E0703",  # reported by Python and MyPy
         "msg_sym": "bad-exception-context",
-        "msg_text": "Exception context set to something which is not an exception, "
-        "nor None",
+        "msg_text": "Exception context set to something which is not an exception, " "nor None",
         "msg_xpln": 'Used when using the syntax "raise ... from ...", where the '
         "exception context is not an exception, nor None.",
         "tho_xpln": "",
@@ -877,8 +842,7 @@ all_checks = [
     {
         "msg_id": "E0710",
         "msg_sym": "raising-non-exception",
-        "msg_text": "Raising a new style class which doesn't inherit from "
-        "BaseException",
+        "msg_text": "Raising a new style class which doesn't inherit from " "BaseException",
         "msg_xpln": "Used when a new style class which doesn't inherit from "
         "BaseException is raised.",
         "tho_xpln": "",
@@ -888,8 +852,7 @@ all_checks = [
         "msg_id": "E0711",
         "msg_sym": "notimplemented-raised",
         "msg_text": "NotImplemented raised - should raise NotImplementedError",
-        "msg_xpln": "Used when NotImplemented is raised instead of "
-        "NotImplementedError",
+        "msg_xpln": "Used when NotImplemented is raised instead of " "NotImplementedError",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -976,8 +939,7 @@ all_checks = [
         "msg_id": "E1125",
         "msg_sym": "missing-kwoa",
         "msg_text": "Missing mandatory keyword argument %r in %s call",
-        "msg_xpln": "Used when a function call does not pass a mandatory "
-        "keyword-only argument.",
+        "msg_xpln": "Used when a function call does not pass a mandatory " "keyword-only argument.",
         "tho_xpln": "",
         "usage": "typing",
     },
@@ -1048,8 +1010,7 @@ all_checks = [
         "msg_id": "E1133",
         "msg_sym": "not-an-iterable",
         "msg_text": "Non-iterable value %s is used in an iterating context",
-        "msg_xpln": "Used when a non-iterable value is used in place where iterable "
-        "is expected",
+        "msg_xpln": "Used when a non-iterable value is used in place where iterable " "is expected",
         "tho_xpln": "",
         "usage": "typing",
     },
@@ -1057,8 +1018,7 @@ all_checks = [
         "msg_id": "E1134",
         "msg_sym": "not-a-mapping",
         "msg_text": "Non-mapping value %s is used in a mapping context",
-        "msg_xpln": "Used when a non-mapping value is used in place where mapping is "
-        "expected",
+        "msg_xpln": "Used when a non-mapping value is used in place where mapping is " "expected",
         "tho_xpln": "",
         "usage": "typing",
     },
@@ -1156,8 +1116,7 @@ all_checks = [
         "msg_id": "E1300",
         "msg_sym": "bad-format-character",
         "msg_text": "Unsupported format character %r (%#02x) at index %d",
-        "msg_xpln": "Used when an unsupported format character is used in a format "
-        "string.",
+        "msg_xpln": "Used when an unsupported format character is used in a format " "string.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1222,8 +1181,7 @@ all_checks = [
         "msg_id": "E1310",
         "msg_sym": "bad-str-strip-call",
         "msg_text": "Suspicious argument in %s.%s call",
-        "msg_xpln": "The argument to a str.{l,r,}strip call contains a duplicate "
-        "character,",
+        "msg_xpln": "The argument to a str.{l,r,}strip call contains a duplicate " "character,",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1240,8 +1198,7 @@ all_checks = [
         "msg_id": "E1601",
         "msg_sym": "print-statement",
         "msg_text": "print statement used",
-        "msg_xpln": "Used when a print statement is used (`print` is a function in "
-        "Python 3)",
+        "msg_xpln": "Used when a print statement is used (`print` is a function in " "Python 3)",
         "tho_xpln": "",
         "usage": "skip",
     },  # Nice SyntaxError from Python
@@ -1294,8 +1251,7 @@ all_checks = [
     {
         "msg_id": "E1701",
         "msg_sym": "not-async-context-manager",
-        "msg_text": "Async context manager '%s' doesn't implement __aenter__ and "
-        "__aexit__.",
+        "msg_text": "Async context manager '%s' doesn't implement __aenter__ and " "__aexit__.",
         "msg_xpln": "Used when an async context manager is used with an object that "
         "does not implement the async context management protocol. This "
         "message can't be emitted when using Python < 3.5.",
@@ -1368,8 +1324,7 @@ all_checks = [
         "msg_id": "I0011",
         "msg_sym": "locally-disabled",
         "msg_text": "Locally disabling %s (%s)",
-        "msg_xpln": "Used when an inline option disables a message or a messages "
-        "category.",
+        "msg_xpln": "Used when an inline option disables a message or a messages " "category.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -1377,8 +1332,7 @@ all_checks = [
         "msg_id": "I0012",
         "msg_sym": "locally-enabled",
         "msg_text": "Locally enabling %s (%s)",
-        "msg_xpln": "Used when an inline option enables a message or a messages "
-        "category.",
+        "msg_xpln": "Used when an inline option enables a message or a messages " "category.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -1472,8 +1426,7 @@ all_checks = [
         "msg_id": "R0202",
         "msg_sym": "no-classmethod-decorator",
         "msg_text": "Consider using a decorator instead of calling classmethod",
-        "msg_xpln": "Used when a class method is defined without using the decorator "
-        "syntax.",
+        "msg_xpln": "Used when a class method is defined without using the decorator " "syntax.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1481,16 +1434,14 @@ all_checks = [
         "msg_id": "R0203",
         "msg_sym": "no-staticmethod-decorator",
         "msg_text": "Consider using a decorator instead of calling staticmethod",
-        "msg_xpln": "Used when a static method is defined without using the "
-        "decorator syntax.",
+        "msg_xpln": "Used when a static method is defined without using the " "decorator syntax.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
     {
         "msg_id": "R0205",
         "msg_sym": "useless-object-inheritance",
-        "msg_text": "Class %r inherits from object, can be safely removed from bases "
-        "in python3",
+        "msg_text": "Class %r inherits from object, can be safely removed from bases " "in python3",
         "msg_xpln": "Used when a class inherit from object, which under python3 is "
         "implicit, hence can be safely removed from bases.",
         "tho_xpln": "",
@@ -1500,8 +1451,7 @@ all_checks = [
         "msg_id": "R0401",
         "msg_sym": "cyclic-import",
         "msg_text": "Cyclic import (%s)",
-        "msg_xpln": "Used when a cyclic import between two or more modules is "
-        "detected.",
+        "msg_xpln": "Used when a cyclic import between two or more modules is " "detected.",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -1598,8 +1548,7 @@ all_checks = [
         "msg_id": "R0916",
         "msg_sym": "too-many-boolean-expressions",
         "msg_text": "Too many boolean expressions in if statement (%s/%s)",
-        "msg_xpln": "Used when an if statement contains too many boolean "
-        "expressions.",
+        "msg_xpln": "Used when an if statement contains too many boolean " "expressions.",
         "tho_xpln": "Consider simplifying the expression with helper variables or functions.",
         "usage": "enhancement",
     },
@@ -1607,8 +1556,7 @@ all_checks = [
         "msg_id": "R1701",
         "msg_sym": "consider-merging-isinstance",
         "msg_text": "Consider merging these isinstance calls to isinstance(%s, (%s))",
-        "msg_xpln": "Used when multiple consecutive isinstance calls can be merged "
-        "into one.",
+        "msg_xpln": "Used when multiple consecutive isinstance calls can be merged " "into one.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1674,8 +1622,7 @@ all_checks = [
     {
         "msg_id": "R1708",
         "msg_sym": "stop-iteration-return",
-        "msg_text": "Do not raise StopIteration in generator, use return statement "
-        "instead",
+        "msg_text": "Do not raise StopIteration in generator, use return statement " "instead",
         "msg_xpln": "According to PEP479, the raise of StopIteration to end the loop "
         "of a generator may lead to hard to find bugs. This PEP specify "
         "that raise StopIteration has to be replaced by a simple return "
@@ -1842,8 +1789,7 @@ all_checks = [
         "msg_id": "W0107",
         "msg_sym": "unnecessary-pass",
         "msg_text": "Unnecessary pass statement",
-        "msg_xpln": 'Used when a "pass" statement that can be avoided is '
-        "encountered.",
+        "msg_xpln": 'Used when a "pass" statement that can be avoided is ' "encountered.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1862,8 +1808,7 @@ all_checks = [
         "msg_id": "W0109",
         "msg_sym": "duplicate-key",
         "msg_text": "Duplicate key %r in dictionary",
-        "msg_xpln": "Used when a dictionary expression binds the same key multiple "
-        "times.",
+        "msg_xpln": "Used when a dictionary expression binds the same key multiple " "times.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -1962,8 +1907,7 @@ all_checks = [
         "msg_id": "W0201",
         "msg_sym": "attribute-defined-outside-init",
         "msg_text": "Attribute %r defined outside __init__",
-        "msg_xpln": "Used when an instance attribute is defined outside the __init__ "
-        "method.",
+        "msg_xpln": "Used when an instance attribute is defined outside the __init__ " "method.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -2027,8 +1971,7 @@ all_checks = [
         "msg_id": "W0232",
         "msg_sym": "no-init",
         "msg_text": "Class has no __init__ method",
-        "msg_xpln": "Used when a class has no __init__ method, neither its parent "
-        "classes.",
+        "msg_xpln": "Used when a class has no __init__ method, neither its parent " "classes.",
         "tho_xpln": "",
         "usage": "skip",
     },  # so what?
@@ -2203,8 +2146,7 @@ all_checks = [
         "msg_id": "W0621",
         "msg_sym": "redefined-outer-name",
         "msg_text": "Redefining name %r from outer scope (line %s)",
-        "msg_xpln": "Used when a variable's name hides a name defined in the outer "
-        "scope.",
+        "msg_xpln": "Used when a variable's name hides a name defined in the outer " "scope.",
         "tho_xpln": "It looks like the local variable is "
         "hiding a global variable with the same name.\n\n"
         "Most likely there is nothing wrong with this. "
@@ -2226,8 +2168,7 @@ all_checks = [
         "msg_id": "W0623",
         "msg_sym": "redefine-in-handler",
         "msg_text": "Redefining name %r from %s in exception handler",
-        "msg_xpln": "Used when an exception handler assigns the exception to an "
-        "existing name",
+        "msg_xpln": "Used when an exception handler assigns the exception to an " "existing name",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2274,8 +2215,7 @@ all_checks = [
         "msg_id": "W0702",
         "msg_sym": "bare-except",
         "msg_text": "No exception type(s) specified",
-        "msg_xpln": "Used when an except clause doesn't specify exceptions type to "
-        "catch.",
+        "msg_xpln": "Used when an except clause doesn't specify exceptions type to " "catch.",
         "tho_xpln": "Used when an except clause doesn't specify exceptions type to catch. "
         "Did you mean to catch also SystemExit and KeyboardInterrupt? "
         'If not then prefer "except Exception:".',
@@ -2477,8 +2417,7 @@ all_checks = [
         "msg_sym": "anomalous-backslash-in-string",
         "msg_text": "Anomalous backslash in string: '%s'. String constant might be "
         "missing an r prefix.",
-        "msg_xpln": "Used when a backslash is in a literal string but not as an "
-        "escape.",
+        "msg_xpln": "Used when a backslash is in a literal string but not as an " "escape.",
         "tho_xpln_rst": "In regular string literals backslash is treated as a special character. "
         "If you meant to represent backslash itself, "
         """then you should double it, eg:\n\n``'C:\\\\Users\\\\Tim'``\n\n"""
@@ -2559,8 +2498,7 @@ all_checks = [
     {
         "msg_id": "W1509",
         "msg_sym": "subprocess-popen-preexec-fn",
-        "msg_text": "Using preexec_fn keyword which may be unsafe in the presence of "
-        "threads",
+        "msg_text": "Using preexec_fn keyword which may be unsafe in the presence of " "threads",
         "msg_xpln": "The preexec_fn parameter is not safe to use in the presence of "
         "threads in your application. The child process could deadlock "
         "before exec is called. If you must use it, keep it trivial! "
@@ -2600,8 +2538,7 @@ all_checks = [
         "msg_id": "W1604",
         "msg_sym": "cmp-builtin",
         "msg_text": "cmp built-in referenced",
-        "msg_xpln": "Used when the cmp built-in function is referenced (missing from "
-        "Python 3)",
+        "msg_xpln": "Used when the cmp built-in function is referenced (missing from " "Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2627,8 +2564,7 @@ all_checks = [
         "msg_id": "W1607",
         "msg_sym": "file-builtin",
         "msg_text": "file built-in referenced",
-        "msg_xpln": "Used when the file built-in function is referenced (missing "
-        "from Python 3)",
+        "msg_xpln": "Used when the file built-in function is referenced (missing " "from Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2636,8 +2572,7 @@ all_checks = [
         "msg_id": "W1608",
         "msg_sym": "long-builtin",
         "msg_text": "long built-in referenced",
-        "msg_xpln": "Used when the long built-in function is referenced (missing "
-        "from Python 3)",
+        "msg_xpln": "Used when the long built-in function is referenced (missing " "from Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2691,8 +2626,7 @@ all_checks = [
         "msg_id": "W1614",
         "msg_sym": "coerce-method",
         "msg_text": "__coerce__ method defined",
-        "msg_xpln": "Used when a __coerce__ method is defined (method is not used by "
-        "Python 3)",
+        "msg_xpln": "Used when a __coerce__ method is defined (method is not used by " "Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2794,8 +2728,7 @@ all_checks = [
         "msg_id": "W1625",
         "msg_sym": "raising-string",
         "msg_text": "Raising a string exception",
-        "msg_xpln": "Used when a string exception is raised. This will not work on "
-        "Python 3.",
+        "msg_xpln": "Used when a string exception is raised. This will not work on " "Python 3.",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2813,8 +2746,7 @@ all_checks = [
         "msg_id": "W1627",
         "msg_sym": "oct-method",
         "msg_text": "__oct__ method defined",
-        "msg_xpln": "Used when an __oct__ method is defined (method is not used by "
-        "Python 3)",
+        "msg_xpln": "Used when an __oct__ method is defined (method is not used by " "Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2822,8 +2754,7 @@ all_checks = [
         "msg_id": "W1628",
         "msg_sym": "hex-method",
         "msg_text": "__hex__ method defined",
-        "msg_xpln": "Used when a __hex__ method is defined (method is not used by "
-        "Python 3)",
+        "msg_xpln": "Used when a __hex__ method is defined (method is not used by " "Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2831,8 +2762,7 @@ all_checks = [
         "msg_id": "W1629",
         "msg_sym": "nonzero-method",
         "msg_text": "__nonzero__ method defined",
-        "msg_xpln": "Used when a __nonzero__ method is defined (method is not used "
-        "by Python 3)",
+        "msg_xpln": "Used when a __nonzero__ method is defined (method is not used " "by Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2840,8 +2770,7 @@ all_checks = [
         "msg_id": "W1630",
         "msg_sym": "cmp-method",
         "msg_text": "__cmp__ method defined",
-        "msg_xpln": "Used when a __cmp__ method is defined (method is not used by "
-        "Python 3)",
+        "msg_xpln": "Used when a __cmp__ method is defined (method is not used by " "Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -2876,8 +2805,7 @@ all_checks = [
         "msg_id": "W1635",
         "msg_sym": "unichr-builtin",
         "msg_text": "unichr built-in referenced",
-        "msg_xpln": "Used when the unichr built-in is referenced (Use chr in Python "
-        "3)",
+        "msg_xpln": "Used when the unichr built-in is referenced (Use chr in Python " "3)",
         "tho_xpln": "",
         "usage": "warning",
     },
@@ -3033,8 +2961,7 @@ all_checks = [
         "msg_id": "W1652",
         "msg_sym": "deprecated-types-field",
         "msg_text": "Accessing a deprecated fields on the types module",
-        "msg_xpln": "Used when accessing a field on types that has been removed in "
-        "Python 3.",
+        "msg_xpln": "Used when accessing a field on types that has been removed in " "Python 3.",
         "tho_xpln": "",
         "usage": "warning",
     },

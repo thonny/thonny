@@ -5,12 +5,7 @@ from tkinter import ttk
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
-from thonny.memory import (
-    MAX_REPR_LENGTH_IN_GRID,
-    MemoryFrame,
-    format_object_id,
-    parse_object_id,
-)
+from thonny.memory import MAX_REPR_LENGTH_IN_GRID, MemoryFrame, format_object_id, parse_object_id
 from thonny.misc_utils import shorten_repr
 from _tkinter import TclError
 
@@ -51,9 +46,7 @@ class HeapView(MemoryFrame):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "id", format_object_id(value_id))
             self.tree.set(
-                node_id,
-                "value",
-                shorten_repr(data[value_id].repr, MAX_REPR_LENGTH_IN_GRID),
+                node_id, "value", shorten_repr(data[value_id].repr, MAX_REPR_LENGTH_IN_GRID)
             )
 
     def before_show(self):

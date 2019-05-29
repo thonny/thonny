@@ -35,10 +35,7 @@ class CustomMenubar(ttk.Frame):
             "CustomMenubarLabel.TLabel",
             background=[
                 ("!active", lookup_style_option("Menubar", "background", "gray")),
-                (
-                    "active",
-                    lookup_style_option("Menubar", "activebackground", "LightYellow"),
-                ),
+                ("active", lookup_style_option("Menubar", "activebackground", "LightYellow")),
             ],
             foreground=[
                 ("!active", lookup_style_option("Menubar", "foreground", "black")),
@@ -328,9 +325,7 @@ class ClosableNotebook(ttk.Notebook):
         # self._check_update_style()
 
     def create_tab_menu(self):
-        menu = tk.Menu(
-            self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu")
-        )
+        menu = tk.Menu(self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu"))
         menu.add_command(label="Close", command=self._close_tab_from_menu)
         menu.add_command(label="Close others", command=self._close_other_tabs)
         menu.add_command(label="Close all", command=self.close_tabs)
@@ -429,8 +424,7 @@ class ClosableNotebook(ttk.Notebook):
                 "img_tab_close", file=os.path.join(img_dir, "tab_close.gif")
             )
             ClosableNotebook._close_active_img = tk.PhotoImage(
-                "img_tab_close_active",
-                file=os.path.join(img_dir, "tab_close_active.gif"),
+                "img_tab_close_active", file=os.path.join(img_dir, "tab_close_active.gif")
             )
 
         style.element_create(
@@ -578,7 +572,7 @@ class TreeFrame(ttk.Frame):
         show_scrollbar=True,
         borderwidth=0,
         relief="flat",
-        **tree_kw
+        **tree_kw,
     ):
         ttk.Frame.__init__(self, master, borderwidth=borderwidth, relief=relief)
         # http://wiki.tcl.tk/44444#pagetoc50f90d9a
@@ -593,7 +587,7 @@ class TreeFrame(ttk.Frame):
             columns=columns,
             displaycolumns=displaycolumns,
             yscrollcommand=self.vert_scrollbar.set,
-            **tree_kw
+            **tree_kw,
         )
         self.tree["show"] = "headings"
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)
@@ -638,10 +632,7 @@ def sequence_to_accelerator(sequence):
         return sequence
 
     accelerator = (
-        sequence.strip("<>")
-        .replace("Key-", "")
-        .replace("KeyPress-", "")
-        .replace("Control", "Ctrl")
+        sequence.strip("<>").replace("Key-", "").replace("KeyPress-", "").replace("Control", "Ctrl")
     )
 
     # Tweaking individual parts
@@ -693,16 +684,10 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             # if self._propose_remove_line_numbers and isinstance(chars, str):
             #    chars = try_remove_linenumbers(chars, self)
             concrete_index = self.index(index)
-            return tktextext.EnhancedText.direct_insert(
-                self, index, chars, tags=tags, **kw
-            )
+            return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
         finally:
             get_workbench().event_generate(
-                "TextInsert",
-                index=concrete_index,
-                text=chars,
-                tags=tags,
-                text_widget=self,
+                "TextInsert", index=concrete_index, text=chars, tags=tags, text_widget=self
             )
 
     def direct_delete(self, index1, index2=None, **kw):
@@ -714,15 +699,10 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             else:
                 concrete_index2 = None
 
-            return tktextext.EnhancedText.direct_delete(
-                self, index1, index2=index2, **kw
-            )
+            return tktextext.EnhancedText.direct_delete(self, index1, index2=index2, **kw)
         finally:
             get_workbench().event_generate(
-                "TextDelete",
-                index1=concrete_index1,
-                index2=concrete_index2,
-                text_widget=self,
+                "TextDelete", index1=concrete_index1, index2=concrete_index2, text_widget=self
             )
 
 
@@ -776,9 +756,7 @@ class VerticallyScrollableFrame(ttk.Frame):
 
         # set up scrolling with canvas
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
-        self.canvas = tk.Canvas(
-            self, bd=0, highlightthickness=0, yscrollcommand=vscrollbar.set
-        )
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, yscrollcommand=vscrollbar.set)
         vscrollbar.config(command=self.canvas.yview)
         self.canvas.xview_moveto(0)
         self.canvas.yview_moveto(0)
@@ -788,9 +766,7 @@ class VerticallyScrollableFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self.interior = ttk.Frame(self.canvas)
-        self.interior_id = self.canvas.create_window(
-            0, 0, window=self.interior, anchor=tk.NW
-        )
+        self.interior_id = self.canvas.create_window(0, 0, window=self.interior, anchor=tk.NW)
         self.bind("<Configure>", self._configure_interior, "+")
         self.bind("<Expose>", self._expose, "+")
 
@@ -823,9 +799,7 @@ class ScrollableFrame(ttk.Frame):
         # set up scrolling with canvas
         vscrollbar = ttk.Scrollbar(self, orient=tk.VERTICAL)
         hscrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self.canvas = tk.Canvas(
-            self, bd=0, highlightthickness=0, yscrollcommand=vscrollbar.set
-        )
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, yscrollcommand=vscrollbar.set)
         vscrollbar.config(command=self.canvas.yview)
         hscrollbar.config(command=self.canvas.xview)
 
@@ -842,9 +816,7 @@ class ScrollableFrame(ttk.Frame):
         self.interior = ttk.Frame(self.canvas)
         self.interior.columnconfigure(0, weight=1)
         self.interior.rowconfigure(0, weight=1)
-        self.interior_id = self.canvas.create_window(
-            0, 0, window=self.interior, anchor=tk.NW
-        )
+        self.interior_id = self.canvas.create_window(0, 0, window=self.interior, anchor=tk.NW)
         self.bind("<Configure>", self._configure_interior, "+")
         self.bind("<Expose>", self._expose, "+")
 
@@ -925,13 +897,7 @@ class ToolTip:
         tw.wm_geometry("+%d+%d" % (x, y))
         try:
             # For Mac OS
-            tw.tk.call(
-                "::tk::unsupported::MacWindowStyle",
-                "style",
-                tw._w,
-                "help",
-                "noActivates",
-            )
+            tw.tk.call("::tk::unsupported::MacWindowStyle", "style", tw._w, "help", "noActivates")
         except tk.TclError:
             pass
         label = tk.Label(tw, text=self.text, **self.options)
@@ -981,11 +947,7 @@ class NoteBox(tk.Toplevel):
         try:
             # For Mac OS
             self.tk.call(
-                "::tk::unsupported::MacWindowStyle",
-                "style",
-                self._w,
-                "help",
-                "noActivates",
+                "::tk::unsupported::MacWindowStyle", "style", self._w, "help", "noActivates"
             )
         except tk.TclError:
             pass
@@ -1077,9 +1039,7 @@ class NoteBox(tk.Toplevel):
                     "%d.%d lineend" % (focus.end_lineno - 1, focus.end_lineno - 1)
                 )
             else:
-                botright = target.bbox(
-                    "%d.%d" % (focus.end_lineno, focus.end_col_offset)
-                )
+                botright = target.bbox("%d.%d" % (focus.end_lineno, focus.end_col_offset))
 
             if topleft and botright:
                 focus_x += topleft[0]
@@ -1116,8 +1076,7 @@ class NoteBox(tk.Toplevel):
         line_height = font.metrics()["linespace"]
 
         self.wm_geometry(
-            "%dx%d+%d+%d"
-            % (width, line_count * line_height, focus_x, focus_y + focus_height)
+            "%dx%d+%d+%d" % (width, line_count * line_height, focus_x, focus_y + focus_height)
         )
 
         # TODO: detect the situation when note doesn't fit under
@@ -1125,9 +1084,7 @@ class NoteBox(tk.Toplevel):
 
         self.deiconify()
 
-    def show_note(
-        self, *content_items: Union[str, List], target=None, focus=None
-    ) -> None:
+    def show_note(self, *content_items: Union[str, List], target=None, focus=None) -> None:
 
         self.set_content(*content_items)
         self.place(target, focus)
@@ -1276,9 +1233,7 @@ def try_remove_linenumbers(text, master):
 
 def has_line_numbers(text):
     lines = text.splitlines()
-    return len(lines) > 2 and all(
-        [len(split_after_line_number(line)) == 2 for line in lines]
-    )
+    return len(lines) > 2 and all([len(split_after_line_number(line)) == 2 for line in lines])
 
 
 def split_after_line_number(s):
@@ -1345,9 +1300,7 @@ def assign_geometry(win, master=None):
 
 
 class WaitingDialog(tk.Toplevel):
-    def __init__(
-        self, master, async_result, description, title="Please wait!", timeout=None
-    ):
+    def __init__(self, master, async_result, description, title="Please wait!", timeout=None):
         self._async_result = async_result
         super().__init__(master)
         if misc_utils.running_on_mac_os():
@@ -1416,14 +1369,10 @@ class FileCopyDialog(tk.Toplevel):
         label = ttk.Label(main_frame, text=description)
         label.grid(row=0, column=0, columnspan=2, sticky="nw", padx=15, pady=15)
 
-        self._bar = ttk.Progressbar(
-            main_frame, maximum=os.path.getsize(source), length=200
-        )
+        self._bar = ttk.Progressbar(main_frame, maximum=os.path.getsize(source), length=200)
         self._bar.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
 
-        self._cancel_button = ttk.Button(
-            main_frame, text="Cancel", command=self._cancel
-        )
+        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
         self._cancel_button.grid(row=2, column=1, sticky="ne", padx=15, pady=15)
         self._bar.focus_set()
 
@@ -1431,9 +1380,7 @@ class FileCopyDialog(tk.Toplevel):
 
         self._update_progress()
 
-        self.bind(
-            "<Escape>", self._cancel, True
-        )  # escape-close only if process has completed
+        self.bind("<Escape>", self._cancel, True)  # escape-close only if process has completed
         self.protocol("WM_DELETE_WINDOW", self._cancel)
         self._start()
 
@@ -1491,9 +1438,7 @@ class ChoiceDialog(tk.Toplevel):
 
         row = 0
         question_label = ttk.Label(self, text=question)
-        question_label.grid(
-            row=row, column=0, columnspan=2, sticky="w", padx=20, pady=20
-        )
+        question_label.grid(row=row, column=0, columnspan=2, sticky="w", padx=20, pady=20)
         row += 1
 
         self.var = tk.StringVar()
@@ -1555,9 +1500,7 @@ class LongTextDialog(tk.Toplevel):
         self._text.text.direct_insert("1.0", text_content)
         self._text.text.see("1.0")
 
-        copy_button = ttk.Button(
-            main_frame, command=self._copy, text="Copy to clipboard", width=20
-        )
+        copy_button = ttk.Button(main_frame, command=self._copy, text="Copy to clipboard", width=20)
         copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0, 20))
 
         close_button = ttk.Button(main_frame, command=self._close, text="Close")
@@ -1590,13 +1533,7 @@ class SubprocessDialog(tk.Toplevel):
     Allows cancelling"""
 
     def __init__(
-        self,
-        master,
-        proc,
-        title,
-        long_description=None,
-        autoclose=True,
-        conclusion="Done.",
+        self, master, proc, title, long_description=None, autoclose=True, conclusion="Done."
     ):
         self._closed = False
         self._proc = proc
@@ -1666,9 +1603,7 @@ class SubprocessDialog(tk.Toplevel):
 
             self.returncode = self._proc.wait()
 
-        self._stdout_thread = threading.Thread(
-            target=listen_stream, args=["stdout"], daemon=True
-        )
+        self._stdout_thread = threading.Thread(target=listen_stream, args=["stdout"], daemon=True)
         self._stdout_thread.start()
         if self._proc.stderr is not None:
             self._stderr_thread = threading.Thread(
@@ -1715,9 +1650,7 @@ class SubprocessDialog(tk.Toplevel):
                 # try gently first
                 try:
                     if running_on_windows():
-                        os.kill(
-                            self._proc.pid, signal.CTRL_BREAK_EVENT
-                        )  # @UndefinedVariable
+                        os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
                     else:
                         os.kill(self._proc.pid, signal.SIGINT)
 
@@ -1924,10 +1857,7 @@ class _ZenityDialogProvider:
     def _call(cls, args):
         args = ["zenity", "--name=Thonny", "--class=Thonny"] + args
         result = subprocess.run(
-            args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            universal_newlines=True,
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True
         )
         if result.returncode == 0:
             return result.stdout.strip()
@@ -2023,9 +1953,7 @@ def show_dialog(dlg, master=None, geometry=True):
             pass
 
 
-def popen_with_ui_thread_callback(
-    *Popen_args, on_completion, poll_delay=0.1, **Popen_kwargs
-):
+def popen_with_ui_thread_callback(*Popen_args, on_completion, poll_delay=0.1, **Popen_kwargs):
     if "encoding" not in Popen_kwargs:
         if "env" not in Popen_kwargs:
             Popen_kwargs["env"] = os.environ.copy()
@@ -2048,12 +1976,8 @@ def popen_with_ui_thread_callback(
             else:
                 break
 
-    t_out = threading.Thread(
-        target=read_stream, daemon=True, args=(proc.stdout, out_lines)
-    )
-    t_err = threading.Thread(
-        target=read_stream, daemon=True, args=(proc.stderr, err_lines)
-    )
+    t_out = threading.Thread(target=read_stream, daemon=True, args=(proc.stdout, out_lines))
+    t_err = threading.Thread(target=read_stream, daemon=True, args=(proc.stderr, err_lines))
     t_out.start()
     t_err.start()
 
@@ -2074,10 +1998,7 @@ class MenuEx(tk.Menu):
     def __init__(self, target):
         self._testers = {}
         super().__init__(
-            target,
-            tearoff=False,
-            postcommand=self.on_post,
-            **get_style_configuration("Menu")
+            target, tearoff=False, postcommand=self.on_post, **get_style_configuration("Menu")
         )
 
     def on_post(self, *args):
@@ -2161,11 +2082,7 @@ def create_url_label(master, url, text=None):
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
     url_label = ttk.Label(
-        master,
-        text=text if text else url,
-        style="Url.TLabel",
-        cursor="hand2",
-        font=url_font,
+        master, text=text if text else url, style="Url.TLabel", cursor="hand2", font=url_font
     )
     url_label.grid()
     url_label.bind("<Button-1>", lambda _: webbrowser.open(url))

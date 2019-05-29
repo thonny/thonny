@@ -66,9 +66,7 @@ def _uncomment_selection(text):
     for lineno in range(sel_range.lineno, sel_range.end_lineno + 1):
         line = text.get(str(lineno) + ".0", str(lineno) + ".end")
         if line.startswith(BLOCK_COMMENT_PREFIX):
-            text.delete(
-                str(lineno) + ".0", str(lineno) + "." + str(len(BLOCK_COMMENT_PREFIX))
-            )
+            text.delete(str(lineno) + ".0", str(lineno) + "." + str(len(BLOCK_COMMENT_PREFIX)))
 
 
 def _get_focused_code_range(text):

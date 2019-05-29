@@ -35,8 +35,9 @@ def default_light() -> SyntaxThemeSettings:
         "builtin": {"foreground": "#7f0055"},
         "number": {"foreground": "#B04600"},
         "comment": {"foreground": light_fg},
-        "prompt": {"foreground": "purple", "font": "BoldEditorFont"},
+        "welcome": {"foreground": light_fg},
         "magic": {"foreground": light_fg},
+        "prompt": {"foreground": "purple", "font": "BoldEditorFont"},
         "stdin": {"foreground": "Blue"},
         "stdout": {"foreground": "Black"},
         "stderr": {"foreground": "#CC0000"},  # same as ANSI red
@@ -53,16 +54,8 @@ def default_light() -> SyntaxThemeSettings:
         # debugger
         "active_focus": {"background": "#F8FC9A", "borderwidth": 1, "relief": "solid"},
         "suspended_focus": {"background": "", "borderwidth": 1, "relief": "solid"},
-        "completed_focus": {
-            "background": "#BBEDB2",
-            "borderwidth": 1,
-            "relief": "flat",
-        },
-        "exception_focus": {
-            "background": "#FFBFD6",
-            "borderwidth": 1,
-            "relief": "solid",
-        },
+        "completed_focus": {"background": "#BBEDB2", "borderwidth": 1, "relief": "flat"},
+        "exception_focus": {"background": "#FFBFD6", "borderwidth": 1, "relief": "solid"},
         "expression_box": {"background": "#DCEDF2", "foreground": default_fg},
         "black_fg": {"foreground": "#2E3436"},
         "black_bg": {"background": "#2E3436"},
@@ -168,9 +161,10 @@ def default_dark() -> SyntaxThemeSettings:
         "keyword": {"foreground": "#A9B1C9", "font": "BoldEditorFont"},
         "number": {"foreground": "#FFCABF"},
         "comment": {"foreground": "#D4D44E"},
+        "welcome": {"foreground": "pink"},
+        "magic": {"foreground": "pink"},
         # shell
         "prompt": {"foreground": "#5BEBBB", "font": "BoldEditorFont"},
-        "magic": {"foreground": "pink"},
         "stdin": {"foreground": "LightBlue"},
         "stdout": {"foreground": "LightGray"},
         "stderr": {"foreground": "#EB5B83"},
@@ -187,16 +181,8 @@ def default_dark() -> SyntaxThemeSettings:
         # debugger
         "active_focus": {"background": "#807238", "borderwidth": 1, "relief": "solid"},
         "suspended_focus": {"background": "", "borderwidth": 1, "relief": "solid"},
-        "completed_focus": {
-            "background": "#807238",
-            "borderwidth": 1,
-            "relief": "flat",
-        },
-        "exception_focus": {
-            "background": "#FFBFD6",
-            "borderwidth": 1,
-            "relief": "solid",
-        },
+        "completed_focus": {"background": "#807238", "borderwidth": 1, "relief": "flat"},
+        "exception_focus": {"background": "#FFBFD6", "borderwidth": 1, "relief": "solid"},
         "expression_box": {"background": "#506E67", "foreground": default_fg},
         "black_fg": {"foreground": "#2E3436"},
         "black_bg": {"background": "#2E3436"},
@@ -314,11 +300,7 @@ def default_dark_blue() -> SyntaxThemeSettings:
 def idle_classic() -> SyntaxThemeSettings:
     string_fg = "#00aa00"
     return {
-        "TEXT": {
-            "foreground": "black",
-            "insertbackground": "black",
-            "background": "white",
-        },
+        "TEXT": {"foreground": "black", "insertbackground": "black", "background": "white"},
         "GUTTER": {"foreground": "gray", "background": "#efefef"},
         "sel": {"foreground": "black", "background": "gray"},
         "number": {"foreground": "black"},
@@ -345,11 +327,7 @@ def idle_dark() -> SyntaxThemeSettings:
     string_fg = "#02ff02"
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#002240",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#002240"},
         "sel": {"foreground": "#FFFFFF", "background": "#7e7e7e"},
         "number": {"foreground": normal_fg},
         "definition": {"foreground": "#5e5eff", "font": "EditorFont"},
@@ -360,6 +338,7 @@ def idle_dark() -> SyntaxThemeSettings:
         "keyword": {"foreground": "#ff8000", "font": "EditorFont"},
         "builtin": {"foreground": "#ff00ff"},
         "comment": {"foreground": "#dd0000"},
+        "welcome": {"foreground": "#dd0000"},
         "prompt": {"foreground": "#ff4d4d"},
         "stdin": {"foreground": normal_fg},
         "stdout": {"foreground": "#c2d1fa"},
@@ -375,11 +354,7 @@ def desert_sunset() -> SyntaxThemeSettings:
     string_fg = "#ffa0a0"
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#333333",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#333333"},
         "GUTTER": {"foreground": "gray", "background": "#404040"},
         "sel": {"foreground": "#000000", "background": "gray"},
         "number": {"foreground": normal_fg},
@@ -391,6 +366,7 @@ def desert_sunset() -> SyntaxThemeSettings:
         "keyword": {"foreground": "#cc6600"},
         "builtin": {"foreground": "#519e51"},
         "comment": {"foreground": "#87ceeb"},
+        "welcome": {"foreground": "#87ceeb"},
         "prompt": {"foreground": "#87ceeb"},
         "stdin": {"foreground": normal_fg},
         "stdout": {"foreground": "#eeeeee"},
@@ -408,11 +384,7 @@ def zenburn() -> SyntaxThemeSettings:
     string_fg = "#cc9393"
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#3f3f3f",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#3f3f3f"},
         "GUTTER": {"foreground": "#7f8f8f", "background": "#464646"},
         "current_line": {"background": "#4A4A4A"},
         "sel": {"foreground": "white", "background": "#506070"},
@@ -425,6 +397,7 @@ def zenburn() -> SyntaxThemeSettings:
         "keyword": {"foreground": "#f0dfaf", "font": "BoldEditorFont"},
         "builtin": {"foreground": "#efef8f"},
         "comment": {"foreground": "#7f9f7f"},
+        "welcome": {"foreground": "#7f9f7f"},
         "prompt": {"foreground": "#87ceeb"},
         "stdin": {"foreground": normal_fg},
         "stdout": {"foreground": "#eeeeee"},
@@ -438,12 +411,8 @@ def zenburn() -> SyntaxThemeSettings:
 def load_plugin() -> None:
     get_workbench().add_syntax_theme("Default Light", None, default_light)
     get_workbench().add_syntax_theme("Default Dark", None, default_dark)
-    get_workbench().add_syntax_theme(
-        "Default Dark Green", "Default Dark", default_dark_green
-    )
-    get_workbench().add_syntax_theme(
-        "Default Dark Blue", "Default Dark", default_dark_blue
-    )
+    get_workbench().add_syntax_theme("Default Dark Green", "Default Dark", default_dark_green)
+    get_workbench().add_syntax_theme("Default Dark Blue", "Default Dark", default_dark_blue)
     get_workbench().add_syntax_theme("Desert Sunset", "Default Dark", desert_sunset)
     get_workbench().add_syntax_theme("Zenburn", "Default Dark", zenburn)
     get_workbench().add_syntax_theme("IDLE Classic", "Default Light", idle_classic)

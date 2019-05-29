@@ -21,7 +21,7 @@ class RstText(TweakableText):
                 "font": "TkDefaultFont",
                 # "cursor" : "",
                 **kw,
-            }
+            },
         )
         self.configure_tags()
         self._visitor = None
@@ -64,7 +64,7 @@ class RstText(TweakableText):
         self.tag_configure(
             "a",
             **{**get_syntax_options_for_tag("hyperlink"), "underline": False},
-            font=underline_font
+            font=underline_font,
         )
         self.tag_configure("small", font=small_font)
         self.tag_configure("light", foreground="gray")
@@ -77,6 +77,7 @@ class RstText(TweakableText):
         self.tag_configure(
             "code",
             font="TkFixedFont",
+            # wrap="none", # TODO: needs automatic hor-scrollbar and better padding mgmt
             # background="#eeeeee"
         )
         # if ui_utils.get_tk_version_info() >= (8,6,6):
@@ -87,8 +88,7 @@ class RstText(TweakableText):
 
         toti_code_font = bold_font.copy()
         toti_code_font.configure(
-            family=tk.font.nametofont("TkFixedFont").cget("family"),
-            size=bold_font.cget("size"),
+            family=tk.font.nametofont("TkFixedFont").cget("family"), size=bold_font.cget("size")
         )
         self.tag_configure("topic_title_code", font=toti_code_font)
         self.tag_raise("topic_title_code", "code")
@@ -261,13 +261,9 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
                 self.text.tag_remove("sel", "1.0", "end")
 
             if elide:
-                label.configure(
-                    image=get_workbench().get_image(get_toggler_image_name("boxplus"))
-                )
+                label.configure(image=get_workbench().get_image(get_toggler_image_name("boxplus")))
             else:
-                label.configure(
-                    image=get_workbench().get_image(get_toggler_image_name("boxminus"))
-                )
+                label.configure(image=get_workbench().get_image(get_toggler_image_name("boxminus")))
 
         assert isinstance(node.children[0], docutils.nodes.title)
 
@@ -296,11 +292,7 @@ class TkTextRenderingVisitor(docutils.nodes.GenericNodeVisitor):
             "boxdot_light" if get_workbench().uses_dark_ui_theme() else "boxdot"
         )
         label = tk.Label(
-            self.text,
-            image=img,
-            borderwidth=0,
-            background=self.text["background"],
-            cursor="arrow",
+            self.text, image=img, borderwidth=0, background=self.text["background"], cursor="arrow"
         )
         self._append_window(label)
         assert isinstance(node.children[0], docutils.nodes.title)

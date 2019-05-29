@@ -20,12 +20,7 @@ from urllib.request import urlopen, urlretrieve
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
-from thonny.common import (
-    InlineCommand,
-    normpath_with_actual_case,
-    is_same_path,
-    path_startswith,
-)
+from thonny.common import InlineCommand, normpath_with_actual_case, is_same_path, path_startswith
 from thonny.ui_utils import (
     AutoScrollbar,
     SubprocessDialog,
@@ -79,10 +74,7 @@ class PipDialog(tk.Toplevel):
         self.search_box.bind("<Return>", self._on_search, False)
 
         self.search_button = ttk.Button(
-            header_frame,
-            text=_("Find package from PyPI"),
-            command=self._on_search,
-            width=25,
+            header_frame, text=_("Find package from PyPI"), command=self._on_search, width=25
         )
         self.search_button.grid(row=1, column=1, sticky="nse", padx=(10, 0))
 
@@ -149,15 +141,9 @@ class PipDialog(tk.Toplevel):
         link_color = lookup_style_option("Url.TLabel", "foreground", "red")
         self.info_text.tag_configure("url", foreground=link_color, underline=True)
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
-        self.info_text.tag_bind(
-            "url", "<Enter>", lambda e: self.info_text.config(cursor="hand2")
-        )
-        self.info_text.tag_bind(
-            "url", "<Leave>", lambda e: self.info_text.config(cursor="")
-        )
-        self.info_text.tag_configure(
-            "install_file", foreground=link_color, underline=True
-        )
+        self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
+        self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
+        self.info_text.tag_configure("install_file", foreground=link_color, underline=True)
         self.info_text.tag_bind(
             "install_file", "<ButtonRelease-1>", self._handle_install_file_click
         )
@@ -203,9 +189,7 @@ class PipDialog(tk.Toplevel):
 
         self.advanced_button.grid(row=0, column=2, sticky="w", padx=(5, 0))
 
-        self.close_button = ttk.Button(
-            info_frame, text=_("Close"), command=self._on_close
-        )
+        self.close_button = ttk.Button(info_frame, text=_("Close"), command=self._on_close)
         self.close_button.grid(row=2, column=3, sticky="e")
 
     def _on_click_install(self):
@@ -260,9 +244,7 @@ class PipDialog(tk.Toplevel):
         self.update()
         self.update_idletasks()
 
-        proc, _ = self._create_python_process(
-            [installer_filename], stderr=subprocess.PIPE
-        )
+        proc, _ = self._create_python_process([installer_filename], stderr=subprocess.PIPE)
         out, err = proc.communicate()
         os.remove(installer_filename)
 
@@ -298,9 +280,7 @@ class PipDialog(tk.Toplevel):
             + _(" (probably needs admin privileges).\n\n"),
         )
 
-        self.info_text.direct_insert(
-            "end", self._instructions_for_command_line_install()
-        )
+        self.info_text.direct_insert("end", self._instructions_for_command_line_install())
         self._set_state("disabled", True)
 
     def _instructions_for_command_line_install(self):
@@ -361,9 +341,7 @@ class PipDialog(tk.Toplevel):
             )
 
             if self._get_target_directory():
-                self.info_text.direct_insert(
-                    "end", _("Packages' directory\n"), ("caption",)
-                )
+                self.info_text.direct_insert("end", _("Packages' directory\n"), ("caption",))
                 self.info_text.direct_insert(
                     "end", self._get_target_directory(), ("target_directory")
                 )
@@ -378,9 +356,7 @@ class PipDialog(tk.Toplevel):
                 ),
             )
 
-            self.info_text.direct_insert(
-                "end", _("Install from local file\n"), ("caption",)
-            )
+            self.info_text.direct_insert("end", _("Install from local file\n"), ("caption",))
             self.info_text.direct_insert("end", _("Click "))
             self.info_text.direct_insert("end", _("here"), ("install_file",))
             self.info_text.direct_insert(
@@ -390,9 +366,7 @@ class PipDialog(tk.Toplevel):
                 ),
             )
 
-            self.info_text.direct_insert(
-                "end", _("Upgrade or uninstall\n"), ("caption",)
-            )
+            self.info_text.direct_insert("end", _("Upgrade or uninstall\n"), ("caption",))
             self.info_text.direct_insert(
                 "end", _("Start by selecting the package from the left.\n\n")
             )
@@ -400,13 +374,9 @@ class PipDialog(tk.Toplevel):
             if self._get_target_directory():
                 self.info_text.direct_insert("end", _("Target:  "), ("caption",))
                 if self._targets_virtual_environment():
-                    self.info_text.direct_insert(
-                        "end", _("virtual environment\n"), ("caption",)
-                    )
+                    self.info_text.direct_insert("end", _("virtual environment\n"), ("caption",))
                 else:
-                    self.info_text.direct_insert(
-                        "end", _("user site packages\n"), ("caption",)
-                    )
+                    self.info_text.direct_insert("end", _("user site packages\n"), ("caption",))
 
                 self.info_text.direct_insert(
                     "end",
@@ -415,9 +385,7 @@ class PipDialog(tk.Toplevel):
                         + " but allows upgrading and uninstalling only packages from "
                     ),
                 )
-                self.info_text.direct_insert(
-                    "end", self._get_target_directory(), ("url")
-                )
+                self.info_text.direct_insert("end", self._get_target_directory(), ("url"))
                 self.info_text.direct_insert(
                     "end",
                     _(
@@ -497,24 +465,19 @@ class PipDialog(tk.Toplevel):
                 write(_("Could not find the package from PyPI."))
                 if not self._get_active_version(name):
                     # new package
-                    write(
-                        _("\nPlease check your spelling!") + _("\nYou need to enter ")
-                    )
+                    write(_("\nPlease check your spelling!") + _("\nYou need to enter "))
                     write(_("exact package name"), "bold")
                     write("!")
 
             else:
                 write(
-                    _("Could not find the package info from PyPI. Error code: ")
-                    + str(error_code)
+                    _("Could not find the package info from PyPI. Error code: ") + str(error_code)
                 )
 
             return
 
         info = data["info"]
-        self.name_label["text"] = info[
-            "name"
-        ]  # search name could have been a bit different
+        self.name_label["text"] = info["name"]  # search name could have been a bit different
         latest_stable_version = _get_latest_stable_version(data["releases"].keys())
         if latest_stable_version is not None:
             write_att(_("Latest stable version"), latest_stable_version)
@@ -534,9 +497,9 @@ class PipDialog(tk.Toplevel):
             # https://github.com/pypa/pypi-legacy/issues/622#issuecomment-305829257
             write_att(_("Requires"), ", ".join(info["requires_dist"]))
 
-        if self._get_active_version(
+        if self._get_active_version(name) != latest_stable_version or not self._get_active_version(
             name
-        ) != latest_stable_version or not self._get_active_version(name):
+        ):
             self.install_button["state"] = "normal"
         else:
             self.install_button["state"] = "disabled"
@@ -546,10 +509,7 @@ class PipDialog(tk.Toplevel):
         if dist is None:
             return False
         else:
-            return (
-                normpath_with_actual_case(dist["location"])
-                != self._get_target_directory()
-            )
+            return normpath_with_actual_case(dist["location"]) != self._get_target_directory()
 
     def _normalize_name(self, name):
         # looks like (in some cases?) pip list gives the name as it was used during install
@@ -564,9 +524,7 @@ class PipDialog(tk.Toplevel):
         if isinstance(name_or_index, int):
             index = name_or_index
         else:
-            normalized_items = list(
-                map(self._normalize_name, self.listbox.get(0, "end"))
-            )
+            normalized_items = list(map(self._normalize_name, self.listbox.get(0, "end")))
             try:
                 index = normalized_items.index(self._normalize_name(name_or_index))
             except Exception:
@@ -648,9 +606,7 @@ class PipDialog(tk.Toplevel):
             filetypes=[("Package", ".whl .zip .tar.gz"), ("all files", ".*")],
             initialdir=get_workbench().get_cwd(),
         )
-        if (
-            filename
-        ):  # Note that missing filename may be "" or () depending on tkinter version
+        if filename:  # Note that missing filename may be "" or () depending on tkinter version
             self._install_local_file(filename)
 
     def _handle_target_directory_click(self, event):
@@ -761,16 +717,12 @@ class BackendPipDialog(PipDialog):
         assert self._get_state() in [None, "idle"]
         self._set_state("listing")
 
-        get_workbench().bind(
-            "get_active_distributions_response", self._complete_update_list, True
-        )
+        get_workbench().bind("get_active_distributions_response", self._complete_update_list, True)
         self._last_name_to_show = name_to_show
         get_runner().send_command(InlineCommand("get_active_distributions"))
 
     def _complete_update_list(self, msg):
-        get_workbench().unbind(
-            "get_active_distributions_response", self._complete_update_list
-        )
+        get_workbench().unbind("get_active_distributions_response", self._complete_update_list)
         if "error" in msg:
             self.info_text.direct_delete("1.0", "end")
             self.info_text.direct_insert("1.0", msg["error"])
@@ -947,9 +899,7 @@ class PluginsPipDialog(PipDialog):
         if (
             runner is not None
             and runner.get_local_executable() is not None
-            and is_same_path(
-                self._get_interpreter(), get_runner().get_local_executable()
-            )
+            and is_same_path(self._get_interpreter(), get_runner().get_local_executable())
         ):
             banner_msg += "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n"
 
@@ -987,9 +937,7 @@ class DetailsDialog(tk.Toplevel):
         main_frame.columnconfigure(0, weight=1)
 
         version_label = ttk.Label(main_frame, text="Desired version")
-        version_label.grid(
-            row=0, column=0, columnspan=2, padx=20, pady=(15, 0), sticky="w"
-        )
+        version_label.grid(row=0, column=0, columnspan=2, padx=20, pady=(15, 0), sticky="w")
 
         def version_sort_key(s):
             # Trying to massage understandable versions into valid StrictVersions
@@ -1014,21 +962,14 @@ class DetailsDialog(tk.Toplevel):
             selected_version, self._start_fetching_version_info
         )
         self.version_combo = ttk.Combobox(
-            main_frame,
-            textvariable=self.version_var,
-            values=version_strings,
-            exportselection=False,
+            main_frame, textvariable=self.version_var, values=version_strings, exportselection=False
         )
 
         self.version_combo.state(["!disabled", "readonly"])
-        self.version_combo.grid(
-            row=1, column=0, columnspan=2, pady=(0, 15), padx=20, sticky="ew"
-        )
+        self.version_combo.grid(row=1, column=0, columnspan=2, pady=(0, 15), padx=20, sticky="ew")
 
         self.requires_label = ttk.Label(main_frame, text="")
-        self.requires_label.grid(
-            row=2, column=0, columnspan=2, pady=(0, 15), padx=20, sticky="ew"
-        )
+        self.requires_label.grid(row=2, column=0, columnspan=2, pady=(0, 15), padx=20, sticky="ew")
 
         self.update_deps_var = tk.IntVar()
         self.update_deps_var.set(0)
@@ -1103,11 +1044,7 @@ class DetailsDialog(tk.Toplevel):
         self._set_state("idle")
 
     def _ok(self, event=None):
-        self.result = (
-            self.version_var.get(),
-            self._version_data,
-            bool(self.update_deps_var.get()),
-        )
+        self.result = (self.version_var.get(), self._version_data, bool(self.update_deps_var.get()))
         self._closed = True
         self.destroy()
 
@@ -1129,9 +1066,7 @@ def _fetch_url_future(url, timeout=10):
 def _get_latest_stable_version(version_strings):
     versions = []
     for s in version_strings:
-        if s.replace(
-            ".", ""
-        ).isnumeric():  # Assuming stable versions have only dots and numbers
+        if s.replace(".", "").isnumeric():  # Assuming stable versions have only dots and numbers
             versions.append(
                 LooseVersion(s)
             )  # LooseVersion __str__ doesn't change the version string
@@ -1173,9 +1108,7 @@ def _start_fetching_package_info(name, version_str, completion_handler):
                 completion_handler(name, json.loads(raw_data))
             except urllib.error.HTTPError as e:
                 completion_handler(
-                    name,
-                    {"info": {"name": name}, "error": str(e), "releases": {}},
-                    e.code,
+                    name, {"info": {"name": name}, "error": str(e), "releases": {}}, e.code
                 )
         else:
             tk._default_root.after(200, poll_fetch_complete)

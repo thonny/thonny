@@ -13,9 +13,7 @@ def _get_default_thonny_data_folder():
         CSIDL_APPDATA = 26
         SHGFP_TYPE_CURRENT = 0
         buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(
-            0, CSIDL_APPDATA, 0, SHGFP_TYPE_CURRENT, buf
-        )
+        ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_APPDATA, 0, SHGFP_TYPE_CURRENT, buf)
         return os.path.join(buf.value, "Thonny")
     elif platform.system() == "Darwin":
         return os.path.expanduser("~/Library/Thonny")
@@ -128,9 +126,7 @@ def _should_delegate():
 
     configuration_manager = try_load_configuration(workbench.CONFIGURATION_FILE_NAME)
     # Setting the default
-    configuration_manager.set_default(
-        "general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT
-    )
+    configuration_manager.set_default("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
     # getting the value (may use the default or return saved value)
     return configuration_manager.get_option("general.single_instance")
 

@@ -56,11 +56,7 @@ class AboutDialog(tk.Toplevel):
                 system_desc += " " + self.get_os_word_size_guess()
         else:
             system_desc = (
-                platform.system()
-                + " "
-                + platform.release()
-                + " "
-                + self.get_os_word_size_guess()
+                platform.system() + " " + platform.release() + " " + self.get_os_word_size_guess()
             )
 
         platform_label = ttk.Label(
@@ -93,9 +89,7 @@ class AboutDialog(tk.Toplevel):
         credits_label.grid()
         credits_label.bind(
             "<Button-1>",
-            lambda _: webbrowser.open(
-                "https://github.com/thonny/thonny/blob/master/CREDITS.rst"
-            ),
+            lambda _: webbrowser.open("https://github.com/thonny/thonny/blob/master/CREDITS.rst"),
         )
 
         license_font = tkinter.font.nametofont("TkDefaultFont").copy()
@@ -118,9 +112,7 @@ class AboutDialog(tk.Toplevel):
         )
         license_label.grid(pady=20)
 
-        ok_button = ttk.Button(
-            main_frame, text="OK", command=self._ok, default="active"
-        )
+        ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
         ok_button.grid(pady=(0, 15))
         ok_button.focus_set()
 
@@ -161,9 +153,7 @@ def load_plugin() -> None:
         lambda: open_url("https://github.com/thonny/thonny/issues/new"),
         group=60,
     )
-    get_workbench().add_command(
-        "about", "help", _("About Thonny"), open_about, group=61
-    )
+    get_workbench().add_command("about", "help", _("About Thonny"), open_about, group=61)
 
     # For Mac
     get_workbench().createcommand("tkAboutDialog", open_about)

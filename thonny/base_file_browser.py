@@ -3,12 +3,7 @@ from tkinter import ttk, messagebox
 import os.path
 
 from thonny import get_workbench, misc_utils, tktextext, get_runner
-from thonny.ui_utils import (
-    scrollbar_style,
-    lookup_style_option,
-    show_dialog,
-    create_string_var,
-)
+from thonny.ui_utils import scrollbar_style, lookup_style_option, show_dialog, create_string_var
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
@@ -167,10 +162,7 @@ class BaseFileBrowser(ttk.Frame):
 
         # self.menu_button = ttk.Button(header_frame, text="≡ ", style="ViewToolbar.Toolbutton")
         self.menu_button = ttk.Button(
-            header_frame,
-            text=" ≡ ",
-            style="ViewToolbar.Toolbutton",
-            command=self.post_button_menu,
+            header_frame, text=" ≡ ", style="ViewToolbar.Toolbutton", command=self.post_button_menu
         )
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)
@@ -192,9 +184,7 @@ class BaseFileBrowser(ttk.Frame):
             self.path_bar.direct_insert("end", "\n")
 
             def create_spacer():
-                return ttk.Frame(
-                    self.path_bar, height=1, width=4, style="ViewToolbar.TFrame"
-                )
+                return ttk.Frame(self.path_bar, height=1, width=4, style="ViewToolbar.TFrame")
 
             parts = self.split_path(path)
             for i, part in enumerate(parts):
@@ -248,9 +238,7 @@ class BaseFileBrowser(ttk.Frame):
     def resize_path_bar(self, event=None):
         if self.building_breadcrumbs:
             return
-        height = self.tk.call(
-            (self.path_bar, "count", "-update", "-displaylines", "1.0", "end")
-        )
+        height = self.tk.call((self.path_bar, "count", "-update", "-displaylines", "1.0", "end"))
         self.path_bar.configure(height=height)
 
     def get_selected_node(self):
@@ -365,9 +353,7 @@ class BaseFileBrowser(ttk.Frame):
 
             # if browser is focused into this path
             if node_id == "":
-                self.show_error(
-                    "Directory " + path + " does not exist anymore", node_id
-                )
+                self.show_error("Directory " + path + " does not exist anymore", node_id)
             elif children_data == "missing":
                 self.tree.delete(node_id)
             else:
@@ -441,9 +427,7 @@ class BaseFileBrowser(ttk.Frame):
             if (
                 self.allow_expand
                 and len(children_ids) == 0
-                and (
-                    path not in self._cached_child_data or self._cached_child_data[path]
-                )
+                and (path not in self._cached_child_data or self._cached_child_data[path])
             ):
                 self.tree.insert(node_id, "end", text=_dummy_node_text)
 
@@ -522,8 +506,7 @@ class BaseFileBrowser(ttk.Frame):
         self.menu.add_command(label="Refresh", command=self.refresh_tree)
         self.menu.add_command(label="New file", command=self.create_new_file)
         self.menu.add_command(
-            label="Delete",
-            command=lambda: self.delete_path(selected_path, selected_kind),
+            label="Delete", command=lambda: self.delete_path(selected_path, selected_kind)
         )
         self.menu.add_command(
             label="Focus into",
@@ -573,11 +556,7 @@ class BaseFileBrowser(ttk.Frame):
 
         if name in self._cached_child_data[parent_path]:
             # TODO: ignore case in windows
-            showerror(
-                "Error",
-                "The file '" + path + "' already exists",
-                parent=get_workbench(),
-            )
+            showerror("Error", "The file '" + path + "' already exists", parent=get_workbench())
         else:
             # Create file
             with open(path, "w"):
@@ -757,9 +736,7 @@ class BackendFileDialog(tk.Toplevel):
         self.rowconfigure(0, weight=1)
 
         self.browser = DialogRemoteFileBrowser(background, self)
-        self.browser.grid(
-            row=0, column=0, columnspan=4, sticky="nsew", pady=20, padx=20
-        )
+        self.browser.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=20, padx=20)
         self.browser.configure(borderwidth=1, relief="groove")
 
         self.name_label = ttk.Label(background, text="File name:")
@@ -767,9 +744,7 @@ class BackendFileDialog(tk.Toplevel):
 
         self.name_var = create_string_var("")
         self.name_entry = ttk.Entry(
-            background,
-            textvariable=self.name_var,
-            state="normal" if kind == "save" else "disabled",
+            background, textvariable=self.name_var, state="normal" if kind == "save" else "disabled"
         )
         self.name_entry.grid(row=1, column=1, pady=(0, 20), padx=(0, 20), sticky="we")
         self.name_entry.bind("<KeyRelease>", self.on_name_edit, True)
@@ -777,9 +752,7 @@ class BackendFileDialog(tk.Toplevel):
         self.ok_button = ttk.Button(background, text="OK", command=self.on_ok)
         self.ok_button.grid(row=1, column=2, pady=(0, 20), padx=(0, 20), sticky="e")
 
-        self.cancel_button = ttk.Button(
-            background, text="Cancel", command=self.on_cancel
-        )
+        self.cancel_button = ttk.Button(background, text="Cancel", command=self.on_cancel)
         self.cancel_button.grid(row=1, column=3, pady=(0, 20), padx=(0, 20), sticky="e")
 
         background.rowconfigure(0, weight=1)
@@ -851,9 +824,7 @@ class BackendFileDialog(tk.Toplevel):
                 tree.selection_remove(node_id)
 
         self.updating_selection = False
-        self.tree_select_handler_id = tree.bind(
-            "<<TreeviewSelect>>", self.on_tree_select, True
-        )
+        self.tree_select_handler_id = tree.bind("<<TreeviewSelect>>", self.on_tree_select, True)
 
     def double_click_file(self, path):
         assert path.endswith(self.name_var.get())

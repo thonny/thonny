@@ -10,14 +10,7 @@ import traceback
 from thonny import get_runner, get_workbench, memory, roughparse, ui_utils, running
 from thonny.codeview import PythonText, get_syntax_options_for_tag
 from thonny.common import InlineCommand, ToplevelCommand, ToplevelResponse
-from thonny.misc_utils import (
-    construct_cmd_line,
-    parse_cmd_line,
-    running_on_mac_os,
-    shorten_repr,
-    lap_time,
-    start_time,
-)
+from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
 from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
     EnhancedTextWithLogging,
@@ -34,7 +27,7 @@ import webbrowser
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
-OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])")
+OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r])")
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(r"(https?:\/\/[\w\/.:\-\?#=%]+[\w\/])")
 
@@ -80,6 +73,7 @@ class ShellView(tk.PanedWindow):
 
         get_workbench().set_default("shell.max_lines", 1000)
         get_workbench().set_default("shell.squeeze_threshold", 1000)
+        get_workbench().set_default("shell.tty_mode", True)
 
         self.text = ShellText(
             main_frame,
@@ -91,7 +85,8 @@ class ShellView(tk.PanedWindow):
             # highlightcolor="LightBlue",
             borderwidth=0,
             yscrollcommand=self.set_scrollbar,
-            padx=4,
+            padx=0,
+            pady=0,
             insertwidth=2,
             height=10,
             undo=True,
@@ -171,9 +166,7 @@ class ShellView(tk.PanedWindow):
         else:
             self.notice["text"] = text
             if not self.notice.winfo_ismapped():
-                self.notice.grid(
-                    row=0, column=1, columnspan=2, sticky="nsew", pady=(0, 1)
-                )
+                self.notice.grid(row=0, column=1, columnspan=2, sticky="nsew", pady=(0, 1))
                 # height of the text was reduced so adjust the scrolling
                 # self.update()
                 self.text.see("end")
@@ -232,9 +225,7 @@ class ShellView(tk.PanedWindow):
 
     def resize_plotter(self):
         if len(self.panes()) > 1 and self.text.winfo_width() > 5:
-            get_workbench().set_option(
-                "view.shell_sash_position", self.sash_coord(0)[0]
-            )
+            get_workbench().set_option("view.shell_sash_position", self.sash_coord(0)[0])
 
 
 class ShellMenu(TextMenu):
@@ -253,9 +244,7 @@ class ShellMenu(TextMenu):
             # This way the handler doesn't have to worry whether it
             # needs to toggle the variable or not, and it can choose to
             # decline the toggle.
-            self.view.plotter_visibility_var.set(
-                not self.view.plotter_visibility_var.get()
-            )
+            self.view.plotter_visibility_var.set(not self.view.plotter_visibility_var.get())
             self.view.toggle_plotter()
 
         self.add_checkbutton(
@@ -295,28 +284,26 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._io_cursor_offset = 0
         self._squeeze_buttons = set()
 
+        self.update_tty_mode()
+
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
         self.bind("<KeyPress>", self._text_key_press, True)
         self.bind("<KeyRelease>", self._text_key_release, True)
 
         prompt_font = tk.font.nametofont("BoldEditorFont")
+        x_padding = 4
+        y_padding = 6
         io_vert_spacing = 10
-        io_indent = 16
-        code_indent = prompt_font.measure(">>> ")
+        io_indent = 16 + x_padding
+        code_indent = prompt_font.measure(">>> ") + x_padding
 
         self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure(
-            "io",
-            lmargin1=io_indent,
-            lmargin2=io_indent,
-            rmargin=io_indent,
-            font="IOFont",
+            "io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent, font="IOFont"
         )
         if ui_utils.get_tk_version_info() >= (8, 6, 6):
-            self.tag_configure(
-                "io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"]
-            )
+            self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
 
         self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
         self.tag_bind("io_hyperlink", "<Enter>", self._hyperlink_enter)
@@ -325,13 +312,24 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("after_io_or_value", spacing1=io_vert_spacing)
         self.tag_configure("before_io", spacing3=io_vert_spacing)
 
+        self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("restart_line", lmargin1=x_padding, lmargin2=x_padding)
+
+        self.tag_configure(
+            "welcome",
+            lmargin1=x_padding,
+            lmargin2=x_padding,
+            spacing1=y_padding,
+            spacing3=y_padding,
+        )
+
         # Underline on the font looks better than underline on the tag,
         # therefore Shell doesn't use configured "hyperlink" style directly
         hyperlink_opts = get_syntax_options_for_tag("hyperlink").copy()
         if hyperlink_opts.get("underline"):
             hyperlink_opts["font"] = "UnderlineIOFont"
             del hyperlink_opts["underline"]
-
         self.tag_configure("io_hyperlink", **hyperlink_opts)
 
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
@@ -353,9 +351,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
-        get_workbench().bind(
-            "DebuggerResponse", self._handle_fancy_debugger_progress, True
-        )
+        get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
 
         self.tag_raise("io_hyperlink")
         self.tag_raise("underline")
@@ -382,6 +378,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.see("end")
 
     def _handle_program_output(self, msg):
+        # Discard but not too often, as toplevel response will discard anyway
+        if int(float(self.index("end"))) > get_workbench().get_option("shell.max_lines") + 100:
+            self._discard_old_content()
+
         self._ensure_visible()
         self._append_to_io_queue(msg.data, msg.stream_name)
 
@@ -402,16 +402,14 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         welcome_text = msg.get("welcome_text")
         if welcome_text and welcome_text != self._last_welcome_text:
-            self._insert_text_directly(welcome_text, ("comment",))
+            self._insert_text_directly(welcome_text, ("welcome",))
             self._last_welcome_text = welcome_text
 
         if "value_info" in msg:
             num_stripped_question_marks = getattr(msg, "num_stripped_question_marks", 0)
             if num_stripped_question_marks > 0:
                 # show the value in object inspector
-                get_workbench().event_generate(
-                    "ObjectSelect", object_id=msg["value_info"].id
-                )
+                get_workbench().event_generate("ObjectSelect", object_id=msg["value_info"].id)
             else:
                 # show the value in shell
                 value_repr = shorten_repr(msg["value_info"].repr, 10000)
@@ -419,9 +417,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     if get_workbench().in_heap_mode():
                         value_repr = memory.format_object_id(msg["value_info"].id)
                     object_tag = "object_" + str(msg["value_info"].id)
-                    self._insert_text_directly(
-                        value_repr + "\n", ("toplevel", "value", object_tag)
-                    )
+                    self._insert_text_directly(value_repr + "\n", ("toplevel", "value", object_tag))
                     if running_on_mac_os():
                         sequence = "<Command-Button-1>"
                     else:
@@ -460,23 +456,21 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         return get_workbench().get_option("shell.squeeze_threshold")
 
     def _append_to_io_queue(self, data, stream_name):
-        # Make sure ANSI CSI codes are stored as separate events
-        # TODO: try to complete previously submitted incomplete code
-
-        parts = re.split(OUTPUT_SPLIT_REGEX, data)
-        for part in parts:
-            if part:  # split may produce empty string in the beginning or start
-                # split the data so that very long lines separated
-                for block in re.split(
-                    "(.{%d,})" % (self._get_squeeze_threshold() + 1), part
-                ):
-                    if block:
-                        self._queued_io_events.append((block, stream_name))
+        if self.tty_mode:
+            # Make sure ANSI CSI codes are stored as separate events
+            # TODO: try to complete previously submitted incomplete code
+            parts = re.split(OUTPUT_SPLIT_REGEX, data)
+            for part in parts:
+                if part:  # split may produce empty string in the beginning or start
+                    # split the data so that very long lines separated
+                    for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
+                        if block:
+                            self._queued_io_events.append((block, stream_name))
+        else:
+            self._queued_io_events.append((data, stream_name))
 
     def _update_visible_io(self, target_num_visible_chars):
-        current_num_visible_chars = sum(
-            map(lambda x: len(x[0]), self._applied_io_events)
-        )
+        current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
 
         if (
             target_num_visible_chars is not None
@@ -490,22 +484,15 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             current_num_visible_chars = 0
             self._reset_ansi_attributes()
 
-        while (
-            self._queued_io_events
-            and current_num_visible_chars != target_num_visible_chars
-        ):
+        while self._queued_io_events and current_num_visible_chars != target_num_visible_chars:
             data, stream_name = self._queued_io_events.pop(0)
 
             if target_num_visible_chars is not None:
-                leftover_count = (
-                    current_num_visible_chars + len(data) - target_num_visible_chars
-                )
+                leftover_count = current_num_visible_chars + len(data) - target_num_visible_chars
 
                 if leftover_count > 0:
                     # add suffix to the queue
-                    self._queued_io_events.insert(
-                        0, (data[-leftover_count:], stream_name)
-                    )
+                    self._queued_io_events.insert(0, (data[-leftover_count:], stream_name))
                     data = data[:-leftover_count]
 
             self._apply_io_event(data, stream_name)
@@ -520,8 +507,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         original_data = data
 
-        if re.match(OUTPUT_SPLIT_REGEX, data):
-            if data == "\b":
+        if self.tty_mode and re.match(OUTPUT_SPLIT_REGEX, data):
+            if data == "\a":
+                get_workbench().bell()
+            elif data == "\b":
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
                 self._change_io_cursor_offset("line")
@@ -536,7 +525,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         else:
             tags = extra_tags | {"io", stream_name}
-            if stream_name == "stdout":
+            if stream_name == "stdout" and self.tty_mode:
                 tags |= self._get_ansi_tags()
 
             if len(data) > self._get_squeeze_threshold() and "\n" not in data:
@@ -555,9 +544,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 btn.contained_text = data
                 btn.tags = tags
                 self._squeeze_buttons.add(btn)
-                create_tooltip(
-                    btn, "%d characters squeezed. " % len(data) + "Click for details."
-                )
+                create_tooltip(btn, "%d characters squeezed. " % len(data) + "Click for details.")
                 self.window_create("output_insert", window=btn)
                 data = ""
 
@@ -569,16 +556,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
                 overwrite_data = data[:overwrite_len]
                 self.direct_insert(
-                    "output_insert -%d chars" % -self._io_cursor_offset,
-                    overwrite_data,
-                    tuple(tags),
+                    "output_insert -%d chars" % -self._io_cursor_offset, overwrite_data, tuple(tags)
                 )
-                del_start = self.index(
-                    "output_insert -%d chars" % -self._io_cursor_offset
-                )
+                del_start = self.index("output_insert -%d chars" % -self._io_cursor_offset)
                 del_end = self.index(
-                    "output_insert -%d chars"
-                    % (-self._io_cursor_offset - overwrite_len)
+                    "output_insert -%d chars" % (-self._io_cursor_offset - overwrite_len)
                 )
                 self.direct_delete(del_start, del_end)
 
@@ -595,9 +577,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             elif self._io_cursor_offset > 0:
                 # insert spaces before actual data
                 # NB! Print without formatting tags
-                self._insert_text_directly(
-                    " " * self._io_cursor_offset, ("io", stream_name)
-                )
+                self._insert_text_directly(" " * self._io_cursor_offset, ("io", stream_name))
                 self._io_cursor_offset = 0
 
             if data:
@@ -814,6 +794,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset()
 
     def _ensure_visible(self):
+        if self.winfo_ismapped():
+            return
+
         focused_view = get_workbench().focus_get()
         get_workbench().show_view("ShellView")
         if focused_view is not None:
@@ -889,9 +872,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         elif get_runner().is_waiting_toplevel_command():
             # Same with editin middle of command, but only if it's a single line command
             whole_input = self.get("input_start", "end-1c")  # asking the whole input
-            if "\n" not in whole_input and self._code_is_ready_for_submission(
-                whole_input
-            ):
+            if "\n" not in whole_input and self._code_is_ready_for_submission(whole_input):
                 self.mark_set("insert", "end")  # move cursor to the end
                 # Do the return without auto indent
                 EnhancedTextWithLogging.perform_return(self, event)
@@ -922,10 +903,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             return False
 
     def _insert_text_directly(self, txt, tags=()):
-        if "\a" in txt:
-            get_workbench().bell()
-            # TODO: elide bell character
-
         def _insert(txt, tags):
             if txt != "":
                 self.direct_insert("output_insert", txt, tags)
@@ -1015,9 +992,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         if get_runner().is_waiting_toplevel_command():
             if input_text.endswith("\n"):
-                if input_text.strip().startswith("%") or input_text.strip().startswith(
-                    "!"
-                ):
+                if input_text.strip().startswith("%") or input_text.strip().startswith("!"):
                     # if several magic command are submitted, then take only first
                     return input_text[: input_text.index("\n") + 1]
                 elif self._code_is_ready_for_submission(input_text, tail):
@@ -1049,32 +1024,17 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         # First check if it has unclosed parens, unclosed string or ending with : or \
         parser = roughparse.RoughParser(self.indent_width, self.tabwidth)
         parser.set_str(source.rstrip() + "\n")
-        if (
-            parser.get_continuation_type() != roughparse.C_NONE
-            or parser.is_block_opener()
-        ):
+        if parser.get_continuation_type() != roughparse.C_NONE or parser.is_block_opener():
             return False
 
         # Multiline compound statements need to end with empty line to be considered
         # complete.
         lines = source.splitlines()
         # strip starting empty and comment lines
-        while len(lines) > 0 and (
-            lines[0].strip().startswith("#") or lines[0].strip() == ""
-        ):
+        while len(lines) > 0 and (lines[0].strip().startswith("#") or lines[0].strip() == ""):
             lines.pop(0)
 
-        compound_keywords = [
-            "if",
-            "while",
-            "for",
-            "with",
-            "try",
-            "def",
-            "class",
-            "async",
-            "await",
-        ]
+        compound_keywords = ["if", "while", "for", "with", "try", "def", "class", "async", "await"]
         if len(lines) > 0:
             first_word = lines[0].strip().split()[0]
             if first_word in compound_keywords and not source.replace(" ", "").replace(
@@ -1087,18 +1047,18 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def _submit_input(self, text_to_be_submitted):
         logging.debug(
-            "SHELL: submitting %r in state %s",
-            text_to_be_submitted,
-            get_runner().get_state(),
+            "SHELL: submitting %r in state %s", text_to_be_submitted, get_runner().get_state()
         )
         if get_runner().is_waiting_toplevel_command():
             # register in history and count
             if text_to_be_submitted in self._command_history:
                 self._command_history.remove(text_to_be_submitted)
             self._command_history.append(text_to_be_submitted)
-            self._command_history_current_index = (
-                None
-            )  # meaning command selection is not in process
+
+            # meaning command selection is not in process
+            self._command_history_current_index = None
+
+            self.update_tty_mode()
 
             cmd_line = text_to_be_submitted.strip()
             try:
@@ -1110,30 +1070,32 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         args_str = ""
                     argv = parse_cmd_line(cmd_line[1:])
                     command_name = argv[0]
-                    get_workbench().event_generate(
-                        "MagicCommand", cmd_line=text_to_be_submitted
-                    )
+                    get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
                         ToplevelCommand(
                             command_name,
                             args=argv[1:],
                             args_str=args_str,
                             cmd_line=cmd_line,
+                            tty_mode=self.tty_mode,
                         )
                     )
                 elif cmd_line.startswith("!"):
                     argv = parse_cmd_line(cmd_line[1:])
-                    get_workbench().event_generate(
-                        "SystemCommand", cmd_line=text_to_be_submitted
-                    )
+                    get_workbench().event_generate("SystemCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
                         ToplevelCommand(
-                            "execute_system_command", argv=argv, cmd_line=cmd_line
+                            "execute_system_command",
+                            argv=argv,
+                            cmd_line=cmd_line,
+                            tty_mode=self.tty_mode,
                         )
                     )
                 else:
                     get_runner().send_command(
-                        ToplevelCommand("execute_source", source=text_to_be_submitted)
+                        ToplevelCommand(
+                            "execute_source", source=text_to_be_submitted, tty_mode=self.tty_mode
+                        )
                     )
 
                 # remember the place where the output of this command started
@@ -1146,15 +1108,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 get_workbench().report_exception()
                 self._insert_prompt()
 
-            get_workbench().event_generate(
-                "ShellCommand", command_text=text_to_be_submitted
-            )
+            get_workbench().event_generate("ShellCommand", command_text=text_to_be_submitted)
         else:
             assert get_runner().is_running()
             get_runner().send_program_input(text_to_be_submitted)
-            get_workbench().event_generate(
-                "ShellInput", input_text=text_to_be_submitted
-            )
+            get_workbench().event_generate("ShellInput", input_text=text_to_be_submitted)
             self._applied_io_events.append((text_to_be_submitted, "stdin"))
 
     def _arrow_up(self, event):
@@ -1286,9 +1244,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 frame_tag = "frame_%d" % frame_id
 
                 def handle_frame_click(event, frame_id=frame_id):
-                    get_runner().send_command(
-                        InlineCommand("get_frame_info", frame_id=frame_id)
-                    )
+                    get_runner().send_command(InlineCommand("get_frame_info", frame_id=frame_id))
                     return "break"
 
                 # TODO: put first line with frame tag and rest without
@@ -1336,9 +1292,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             self.tag_remove(self.active_object_tags.pop(), "1.0", "end")
 
     def get_lines_above_viewport_bottom(self, tag_name, n):
-        end_index = self.index(
-            "@%d,%d lineend" % (self.winfo_height(), self.winfo_height())
-        )
+        end_index = self.index("@%d,%d lineend" % (self.winfo_height(), self.winfo_height()))
         start_index = self.index(end_index + " -50 lines")
 
         result = ""
@@ -1350,6 +1304,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             start_index = r[1]
 
         return result
+
+    def update_tty_mode(self):
+        self.tty_mode = get_workbench().get_option("shell.tty_mode")
 
 
 class SqueezedTextDialog(tk.Toplevel):
@@ -1374,9 +1331,7 @@ class SqueezedTextDialog(tk.Toplevel):
             + "very long lines in full (see Tools => Options => Shell).\n"
             + "Here you can interact with the original text fragment.",
         )
-        explanation_label.grid(
-            row=0, column=0, sticky="nsew", padx=padding, pady=padding
-        )
+        explanation_label.grid(row=0, column=0, sticky="nsew", padx=padding, pady=padding)
 
         self._wrap_var = tk.BooleanVar(False)
         self.wrap_checkbox = ttk.Checkbutton(
@@ -1408,19 +1363,13 @@ class SqueezedTextDialog(tk.Toplevel):
 
         copy_caption = "Copy to clipboard"
         copy_button = ttk.Button(
-            button_frame,
-            text=copy_caption,
-            width=len(copy_caption),
-            command=self._on_copy,
+            button_frame, text=copy_caption, width=len(copy_caption), command=self._on_copy
         )
         copy_button.grid(row=0, column=1, sticky="w", padx=(0, padding))
 
         expand_caption = "Expand in Shell"
         expand_button = ttk.Button(
-            button_frame,
-            text=expand_caption,
-            width=len(expand_caption),
-            command=self._on_expand,
+            button_frame, text=expand_caption, width=len(expand_caption), command=self._on_expand
         )
         expand_button.grid(row=0, column=2, sticky="e", padx=padding)
 
@@ -1552,11 +1501,7 @@ class PlotterCanvas(tk.Canvas):
             self.winfo_width() - self.linespace / 2,
             self.linespace / 2 + self.close_img.height(),
         )
-        self.coords(
-            self.close_button,
-            self.winfo_width() - self.linespace / 2,
-            self.linespace / 2,
-        )
+        self.coords(self.close_button, self.winfo_width() - self.linespace / 2, self.linespace / 2)
 
     def on_close(self, event):
         self.master.toggle_plotter()
@@ -1673,9 +1618,7 @@ class PlotterCanvas(tk.Canvas):
                 )
                 x += marker_width
 
-            self.create_text(
-                x, y, text=part, anchor="sw", tags=("legend",), fill=self.foreground
-            )
+            self.create_text(x, y, text=part, anchor="sw", tags=("legend",), fill=self.foreground)
             x += self.font.measure(part)
 
         self.last_legend = legend
@@ -1781,9 +1724,7 @@ class PlotterCanvas(tk.Canvas):
         self.range_block_size = range_block_size
 
         available_height = self.winfo_height() - 2 * self.y_padding
-        available_width = (
-            self.winfo_width() - self.x_padding_left - self.x_padding_right
-        )
+        available_width = self.winfo_width() - self.x_padding_left - self.x_padding_right
         num_steps = self.get_num_steps()
 
         self.x_scale = available_width / (num_steps - 1)
@@ -1799,13 +1740,7 @@ class PlotterCanvas(tk.Canvas):
 
             # guide
             self.create_line(
-                0,
-                y,
-                self.winfo_width(),
-                y,
-                tags=("guide",),
-                dash=(2, 2),
-                fill="#aaaaaa",
+                0, y, self.winfo_width(), y, tags=("guide",), dash=(2, 2), fill="#aaaaaa"
             )
 
             # tick
@@ -1879,22 +1814,10 @@ class PlotterCanvas(tk.Canvas):
             "TODO:"
 
         self.create_rectangle(
-            rect_x,
-            rect_y,
-            rect_x + width,
-            rect_y + height,
-            fill=background,
-            width=0,
-            tags=tags,
+            rect_x, rect_y, rect_x + width, rect_y + height, fill=background, width=0, tags=tags
         )
         self.create_text(
-            x,
-            y,
-            anchor=anchor,
-            text=text,
-            tags=tags,
-            fill=self.foreground,
-            justify=justify,
+            x, y, anchor=anchor, text=text, tags=tags, fill=self.foreground, justify=justify
         )
 
     def on_resize(self, event):

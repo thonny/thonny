@@ -55,9 +55,7 @@ class SyntaxText(EnhancedText):
 
     def destroy(self):
         super().destroy()
-        tk._default_root.unbind(
-            "<<SyntaxThemeChanged>>", self._syntax_theme_change_binding
-        )
+        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
 
 
 class PythonText(SyntaxText):
@@ -186,7 +184,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
             master=master,
             tag_current_line=get_workbench().get_option("view.highlight_current_line"),
             cnf=cnf,
-            **kw
+            **kw,
         )
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ("CodeViewText",))
@@ -221,7 +219,7 @@ class CodeView(tktextext.TextFrame):
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
-            **text_frame_args
+            **text_frame_args,
         )
 
         # TODO: propose_remove_line_numbers on paste??
@@ -245,9 +243,7 @@ class CodeView(tktextext.TextFrame):
         self._gutter.tag_raise("spacer")
 
     def get_content(self):
-        return self.text.get(
-            "1.0", "end-1c"
-        )  # -1c because Text always adds a newline itself
+        return self.text.get("1.0", "end-1c")  # -1c because Text always adds a newline itself
 
     def detect_encoding(self, data):
         encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
@@ -299,9 +295,7 @@ class CodeView(tktextext.TextFrame):
         yield from super().compute_gutter_line(lineno)
         yield " ", ("spacer",)
 
-        if self.text.tag_nextrange(
-            "breakpoint_line", linestart, linestart + " lineend"
-        ):
+        if self.text.tag_nextrange("breakpoint_line", linestart, linestart + " lineend"):
             yield BREAKPOINT_SYMBOL, ("breakpoint",)
         else:
             yield " ", ()
@@ -342,9 +336,7 @@ class CodeView(tktextext.TextFrame):
     def get_selected_range(self):
         if self.text.has_selection():
             lineno, col_offset = map(int, self.text.index(tk.SEL_FIRST).split("."))
-            end_lineno, end_col_offset = map(
-                int, self.text.index(tk.SEL_LAST).split(".")
-            )
+            end_lineno, end_col_offset = map(int, self.text.index(tk.SEL_LAST).split("."))
         else:
             lineno, col_offset = map(int, self.text.index(tk.INSERT).split("."))
             end_lineno, end_col_offset = lineno, col_offset
@@ -353,9 +345,7 @@ class CodeView(tktextext.TextFrame):
 
     def destroy(self):
         super().destroy()
-        tk._default_root.unbind(
-            "<<SyntaxThemeChanged>>", self._syntax_theme_change_binding
-        )
+        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
 
     def _reload_theme_options(self, event=None):
         super()._reload_theme_options(event)
@@ -370,9 +360,7 @@ class CodeView(tktextext.TextFrame):
             self._gutter.configure(opts)
 
             if "background" in _syntax_options["GUTTER"]:
-                self._margin_line.configure(
-                    background=_syntax_options["GUTTER"]["background"]
-                )
+                self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
 
         if "breakpoint" in _syntax_options:
             self._gutter.tag_configure("breakpoint", _syntax_options["breakpoint"])

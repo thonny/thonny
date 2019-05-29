@@ -122,7 +122,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             textvariable=self._io_family_variable,
             values=self._get_families_to_show(),
         )
-        self._family_combo.grid(row=6, column=2, sticky=tk.NSEW, padx=(0, 10))
+        self._family_combo.grid(row=6, column=2, sticky=tk.NSEW, padx=(0, 10)
 
         ttk.Label(self, text="Size").grid(row=5, column=3, sticky="w", pady=(10, 0))
         self._size_combo = ttk.Combobox(

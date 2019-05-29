@@ -82,9 +82,7 @@ class MicroPythonProxy(BackendProxy):
                 self._interrupt_to_prompt(clean)
                 self._builtin_modules = self._fetch_builtin_modules()
             except TimeoutError:
-                read_bytes = bytes(
-                    self._discarded_bytes + self._connection._read_buffer
-                )
+                read_bytes = bytes(self._discarded_bytes + self._connection._read_buffer)
                 self._show_error_connect_again(
                     "Could not connect to REPL.\n"
                     + "Make sure your device has suitable firmware and is not in bootloader mode!\n"
@@ -113,8 +111,7 @@ class MicroPythonProxy(BackendProxy):
                 if not self._connection.buffers_are_empty():
                     discarded = self._connection.read_all()
                     self._send_error_to_shell(
-                        "Warning: when issuing %r,\nincoming was not emtpy: %r"
-                        % (cmd, discarded)
+                        "Warning: when issuing %r,\nincoming was not emtpy: %r" % (cmd, discarded)
                     )
                 return super().send_command(cmd)
             except SerialException as e:
@@ -211,9 +208,7 @@ class MicroPythonProxy(BackendProxy):
                 )
             except Exception as e:
                 logging.exception("Problem when closing serial")
-                self._send_error_to_shell(
-                    "Problem when closing serial connection: " + str(e)
-                )
+                self._send_error_to_shell("Problem when closing serial connection: " + str(e))
 
             self._connection = None
 
@@ -251,9 +246,7 @@ class MicroPythonProxy(BackendProxy):
 
                 if len(potential) > 1:
                     _, descriptions = zip(*potential)
-                    message += "\n\nLikely candidates are:\n * " + "\n * ".join(
-                        descriptions
-                    )
+                    message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
 
                 self._show_error_connect_again(message)
                 return None
@@ -387,9 +380,9 @@ class MicroPythonProxy(BackendProxy):
             self._connection.write(b"\x01")  # raw mode
             sleep(delay)
             self._discarded_bytes += self._connection.read_all()
-            if self._discarded_bytes.endswith(
-                FIRST_RAW_PROMPT
-            ) or self._discarded_bytes.endswith(b"\r\n>"):
+            if self._discarded_bytes.endswith(FIRST_RAW_PROMPT) or self._discarded_bytes.endswith(
+                b"\r\n>"
+            ):
                 break
         else:
             raise TimeoutError("Can't get to raw prompt")
@@ -402,9 +395,7 @@ class MicroPythonProxy(BackendProxy):
         self._finalize_repl()
 
         # report ready
-        self._non_serial_msg_queue.put(
-            ToplevelResponse(welcome_text=self._welcome_text.strip())
-        )
+        self._non_serial_msg_queue.put(ToplevelResponse(welcome_text=self._welcome_text.strip()))
 
         self.idle = True
 
@@ -543,9 +534,7 @@ class MicroPythonProxy(BackendProxy):
         if os.path.exists(path):
             self._non_serial_msg_queue.put(ToplevelResponse(cwd=path))
         else:
-            self._non_serial_msg_queue.put(
-                ToplevelResponse(error="Path doesn't exist: %s" % path)
-            )
+            self._non_serial_msg_queue.put(ToplevelResponse(error="Path doesn't exist: %s" % path))
 
     def _cmd_Run(self, cmd):
         self._clear_environment()
@@ -573,8 +562,7 @@ class MicroPythonProxy(BackendProxy):
             # If it didn't fail then source is an expression
             msg_template = """{'message_class':'ToplevelResponse', 'value_info':(id(v), repr(v))}"""
             self._execute_async(
-                "print('\\x04\\x02', [%s for v in [%s]][0])"
-                % (msg_template, cmd.source.strip())
+                "print('\\x04\\x02', [%s for v in [%s]][0])" % (msg_template, cmd.source.strip())
             )
         except SyntaxError:
             # source is a statement (or invalid syntax)
@@ -788,18 +776,13 @@ class MicroPythonProxy(BackendProxy):
         # TODO: combine dynamic results and jedi results
         if source.strip().startswith("import ") or source.strip().startswith("from "):
             # this needs the power of jedi
-            msg = InlineResponse(
-                command_name="shell_autocomplete", source=cmd.source, error=None
-            )
+            msg = InlineResponse(command_name="shell_autocomplete", source=cmd.source, error=None)
 
             try:
                 # at the moment I'm assuming source is the code before cursor, not whole input
                 lines = source.split("\n")
                 script = jedi.Script(
-                    source,
-                    len(lines),
-                    len(lines[-1]),
-                    sys_path=[self._get_api_stubs_path()],
+                    source, len(lines), len(lines[-1]), sys_path=[self._get_api_stubs_path()]
                 )
                 completions = script.completions()
                 msg["completions"] = self.filter_completions(completions)
@@ -865,8 +848,7 @@ class MicroPythonProxy(BackendProxy):
                 ):
                     # self._send_text_to_shell("Dumping " + module_name + "\n", "stdout")
                     file_name = os.path.join(
-                        self._get_api_stubs_path(),
-                        module_name.replace(".", "/") + ".py",
+                        self._get_api_stubs_path(), module_name.replace(".", "/") + ".py"
                     )
                     self._dump_module_stubs(module_name, file_name)
         finally:
@@ -934,9 +916,7 @@ class MicroPythonProxy(BackendProxy):
                 fp.write("\n")
                 fp.write(indent + "class " + name + ":\n")  # What about superclass?
                 fp.write(indent + "    ''\n")
-                self._dump_object_stubs(
-                    fp, "{0}.{1}".format(object_expr, name), indent + "    "
-                )
+                self._dump_object_stubs(fp, "{0}.{1}".format(object_expr, name), indent + "    ")
             else:
                 # keep only the name
                 fp.write(indent + name + " = None\n")
@@ -1100,8 +1080,7 @@ class MicroPythonProxy(BackendProxy):
                     ast.parse(src, source)
                 except SyntaxError as e:
                     self._send_error_to_shell(
-                        "%s has syntax errors:\n%s\n\nFile will not be uploaded."
-                        % (source, e)
+                        "%s has syntax errors:\n%s\n\nFile will not be uploaded." % (source, e)
                     )
                     return
         try:
@@ -1127,9 +1106,7 @@ class MicroPythonProxy(BackendProxy):
 
         BLOCK_SIZE = 64
         for i in range(0, len(content), BLOCK_SIZE):
-            self._execute_and_expect_empty_response(
-                "__upf.write(%r)" % content[i : i + BLOCK_SIZE]
-            )
+            self._execute_and_expect_empty_response("__upf.write(%r)" % content[i : i + BLOCK_SIZE])
 
         self._execute_and_expect_empty_response("__upf.close()")
         self._execute_and_expect_empty_response("del __upf")
@@ -1166,13 +1143,9 @@ class MicroPythonProxy(BackendProxy):
                 ).strip()
             )
             if out:
-                self._send_text_to_shell(
-                    out.decode("utf-8", errors="replace"), "stdout"
-                )
+                self._send_text_to_shell(out.decode("utf-8", errors="replace"), "stdout")
             if err:
-                self._send_text_to_shell(
-                    err.decode("utf-8", errors="replace"), "stderr"
-                )
+                self._send_text_to_shell(err.decode("utf-8", errors="replace"), "stderr")
         except Exception:
             self._send_error_to_shell(traceback.format_exc())
         finally:
@@ -1217,9 +1190,7 @@ class MicroPythonProxy(BackendProxy):
             if len(candidates) == 0:
                 raise RuntimeError("Could not find volume " + self._get_fs_mount_name())
             elif len(candidates) > 1:
-                raise RuntimeError(
-                    "Found several possible mount points: %s" % candidates
-                )
+                raise RuntimeError("Found several possible mount points: %s" % candidates)
             else:
                 return candidates[0]
 
@@ -1276,9 +1247,7 @@ class MicroPythonProxy(BackendProxy):
                 # must be end of the response to a non-Thonny command
                 # Only treat as raw prompt if it ends the output
                 if new_bytes[1:] == RAW_PROMPT:
-                    assert (
-                        self._connection.incoming_is_empty()
-                    )  # TODO: what about Ctlr-? ?
+                    assert self._connection.incoming_is_empty()  # TODO: what about Ctlr-? ?
                     self.idle = True
                     return ToplevelResponse()
                 else:
@@ -1307,9 +1276,7 @@ class MicroPythonProxy(BackendProxy):
                     # There is something following the terminator
                     # I guess this can be caused by interrupt
                     # This means the message is stale
-                    logging.info(
-                        "disregarding out of date Thonny message: %r", new_bytes
-                    )
+                    logging.info("disregarding out of date Thonny message: %r", new_bytes)
                     # Unread following stuff
                     self._connection.unread(new_bytes[term_loc + len(terminator) :])
 
@@ -1381,9 +1348,7 @@ class MicroPythonProxy(BackendProxy):
             return None
         else:
             transformed = self.transform_output(out_str, "stdout")
-            return BackendEvent(
-                event_type="ProgramOutput", stream_name="stdout", data=transformed
-            )
+            return BackendEvent(event_type="ProgramOutput", stream_name="stdout", data=transformed)
 
     def transform_output(self, s, stream_name):
         if os.name != "nt":
@@ -1428,9 +1393,7 @@ class MicroPythonProxy(BackendProxy):
         return self._get_path_prefix() + "boot.py"
 
     def _get_script_path(self):
-        local_path = (
-            get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        )
+        local_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
         assert os.path.isfile(local_path), "File not found: %s" % local_path
         return self._get_path_prefix() + os.path.basename(local_path)
 
@@ -1441,10 +1404,7 @@ class MicroPythonProxy(BackendProxy):
         if isinstance(msg.get("value_info", None), tuple):
             msg["value_info"] = common.ValueInfo(*msg["value_info"])
 
-        if (
-            getattr(msg, "command_name", None) == "shell_autocomplete"
-            and "completions" not in msg
-        ):
+        if getattr(msg, "command_name", None) == "shell_autocomplete" and "completions" not in msg:
             names = msg["names"]
             match = msg["match"]
             del msg["names"]
@@ -1490,9 +1450,7 @@ class MicroPythonProxy(BackendProxy):
             message_text += "\n"
 
         self._non_serial_msg_queue.put(
-            BackendEvent(
-                event_type="ProgramOutput", stream_name=stream_name, data=message_text
-            )
+            BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=message_text)
         )
 
     def _get_builtins_info(self):
@@ -1511,9 +1469,7 @@ class MicroPythonProxy(BackendProxy):
     def _get_api_stubs_path(self):
         import inspect
 
-        return os.path.join(
-            os.path.dirname(inspect.getfile(self.__class__)), "api_stubs"
-        )
+        return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
     @property
     def firmware_filetypes(self):
@@ -1535,10 +1491,7 @@ class MicroPythonProxy(BackendProxy):
         cmd = self.construct_firmware_upload_command(firmware_path)
         self.disconnect()
         proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
+            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True
         )
         dlg = SubprocessDialog(
             get_workbench(),
@@ -1603,9 +1556,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
 
-        port_label = ttk.Label(
-            self, text="Port or WebREPL" if self.allow_webrepl else "Port"
-        )
+        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else "Port")
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
@@ -1632,9 +1583,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
                 return name
 
         # order by port, auto first
-        port_descriptions = [
-            key for key, _ in sorted(self._ports_by_desc.items(), key=port_order)
-        ]
+        port_descriptions = [key for key, _ in sorted(self._ports_by_desc.items(), key=port_order)]
 
         self._port_desc_variable = create_string_var(
             self.get_current_port_desc(), self._on_change_port
@@ -1659,26 +1608,19 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         self._webrepl_frame = ttk.Frame(self)
 
         self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
-        url_label = ttk.Label(
-            self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL
-        )
+        url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
         url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
-        url_entry = ttk.Entry(
-            self._webrepl_frame, textvariable=self._webrepl_url_var, width=24
-        )
+        url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=24)
         url_entry.grid(row=1, column=0, sticky="nw")
 
         self._webrepl_password_var = create_string_var(
             get_workbench().get_option(self.backend_name + ".webrepl_password")
         )
         pw_label = ttk.Label(
-            self._webrepl_frame,
-            text="Password (the one specified with `import webrepl_setup`)",
+            self._webrepl_frame, text="Password (the one specified with `import webrepl_setup`)"
         )
         pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
-        pw_entry = ttk.Entry(
-            self._webrepl_frame, textvariable=self._webrepl_password_var, width=9
-        )
+        pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=9)
         pw_entry.grid(row=3, column=0, sticky="nw")
 
     def get_current_port_desc(self):
@@ -1713,8 +1655,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
                 self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
             )
             get_workbench().set_option(
-                self.backend_name + ".webrepl_password",
-                self._webrepl_password_var.get(),
+                self.backend_name + ".webrepl_password", self._webrepl_password_var.get()
             )
 
     def _on_change_port(self, *args):
@@ -1777,9 +1718,7 @@ class Connection:
             try:
                 self._read_buffer.extend(self._read_queue.get(True, timer.time_left))
             except queue.Empty:
-                raise TimeoutError(
-                    "Reaction timeout. Bytes read: %s" % self._read_buffer
-                )
+                raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
 
         try:
             data = self._read_buffer[:size]
@@ -1812,9 +1751,7 @@ class Connection:
                 assert len(data) > 0
                 self._read_buffer.extend(data)
             except queue.Empty:
-                raise TimeoutError(
-                    "Reaction timeout. Bytes read: %s" % self._read_buffer
-                )
+                raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
 
         assert terminator is not None
         size = self._read_buffer.index(terminator) + len(terminator)
@@ -1975,9 +1912,7 @@ class WebReplConnection(Connection):
         import asyncio
         import websockets
 
-        self._ws = await asyncio.wait_for(
-            websockets.connect(self._url, ping_interval=None), 3
-        )
+        self._ws = await asyncio.wait_for(websockets.connect(self._url, ping_interval=None), 3)
         print("GOT WS", self._ws)
 
         # read password prompt and send password
@@ -2096,9 +2031,7 @@ def load_plugin():
     )
 
     def _upload_as(target_provider_method):
-        source_path = (
-            get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        )
+        source_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
         if source_path is None:
             return
 
@@ -2141,11 +2074,7 @@ def load_plugin():
 
     def soft_reboot_enabled():
         proxy = get_runner().get_backend_proxy()
-        return (
-            proxy
-            and proxy.is_functional()
-            and hasattr(proxy, "_soft_reboot_and_run_main")
-        )
+        return proxy and proxy.is_functional() and hasattr(proxy, "_soft_reboot_and_run_main")
 
     def disconnect():
         proxy = get_runner().get_backend_proxy()
@@ -2167,9 +2096,7 @@ def load_plugin():
     def select_device():
         get_workbench().show_options("Interpreter")
 
-    get_workbench().add_command(
-        "selectdevice", "device", "Select device", select_device, group=1
-    )
+    get_workbench().add_command("selectdevice", "device", "Select device", select_device, group=1)
 
     get_workbench().add_command(
         "softreboot",

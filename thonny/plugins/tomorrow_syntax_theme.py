@@ -8,11 +8,7 @@ def tomorrow() -> SyntaxThemeSettings:
     string_fg = "#718C00"
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#FFFFFF",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#FFFFFF"},
         "GUTTER": {"foreground": "#4d4d4c", "background": "#efefef"},
         "current_line": {"background": "#efefef"},
         "sel": {"foreground": "#4D4D4C", "background": "#D6D6D6"},
@@ -35,11 +31,7 @@ def tomorrow_night() -> SyntaxThemeSettings:
     string3_fg = string_fg
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#1d1f21",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#1d1f21"},
         "GUTTER": {"foreground": "#c5c8c6", "background": "#282a2e"},
         "sel": {"foreground": "#c5c8c6", "background": "#373b41"},
         "current_line": {"background": "#282a2e"},
@@ -68,11 +60,7 @@ def tomorrow_night_blue() -> SyntaxThemeSettings:
     string3_fg = string_fg
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#002451",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#002451"},
         "GUTTER": {"foreground": "#ffffff", "background": "#00346e"},
         "sel": {"foreground": "#ffffff", "background": "#003f8e"},
         "current_line": {"background": "#00346e"},
@@ -101,11 +89,7 @@ def tomorrow_night_bright() -> SyntaxThemeSettings:
     string3_fg = string_fg
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#000000",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#000000"},
         "GUTTER": {"foreground": "#dedede", "background": "#2a2a2a"},
         "current_line": {"background": "#2a2a2a"},
         "sel": {"foreground": "#dedede", "background": "#424242"},
@@ -134,11 +118,7 @@ def tomorrow_night_eighties() -> SyntaxThemeSettings:
     string3_fg = string_fg
 
     return {
-        "TEXT": {
-            "foreground": normal_fg,
-            "insertbackground": normal_fg,
-            "background": "#2d2d2d",
-        },
+        "TEXT": {"foreground": normal_fg, "insertbackground": normal_fg, "background": "#2d2d2d"},
         "GUTTER": {"foreground": "#cccccc", "background": "#393939"},
         "current_line": {"background": "#393939"},
         "sel": {"foreground": "#cccccc", "background": "#515151"},
@@ -163,9 +143,7 @@ def tomorrow_night_eighties() -> SyntaxThemeSettings:
 def load_plugin() -> None:
     get_workbench().add_syntax_theme("Tomorrow", "Default Light", tomorrow)
     get_workbench().add_syntax_theme("Tomorrow Night", "Default Dark", tomorrow_night)
-    get_workbench().add_syntax_theme(
-        "Tomorrow Night Blue", "Tomorrow Night", tomorrow_night_blue
-    )
+    get_workbench().add_syntax_theme("Tomorrow Night Blue", "Tomorrow Night", tomorrow_night_blue)
     get_workbench().add_syntax_theme(
         "Tomorrow Night Bright", "Tomorrow Night", tomorrow_night_bright
     )

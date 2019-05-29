@@ -89,11 +89,9 @@ class VariablesHighlighter(BaseNameHighlighter):
             if isinstance(c, tree.Class):
                 c.children.sort(key=lambda x: x.end_pos)
             if c.start_pos <= pos <= c.end_pos:
-                if c.type not in (
-                    "decorated",
-                    "simple_stmt",
-                    "suite",
-                ) and not isinstance(c, (tree.Flow, tree.ClassOrFunc)):
+                if c.type not in ("decorated", "simple_stmt", "suite") and not isinstance(
+                    c, (tree.Flow, tree.ClassOrFunc)
+                ):
                     return c
                 else:
                     try:
@@ -140,14 +138,8 @@ class VariablesHighlighter(BaseNameHighlighter):
             if isinstance(c, tree.BaseNode) and c.type == "suite":
                 for x in c.children:
                     if self._is_global_stmt_with_name(x, name.value):
-                        return self._find_definition(
-                            jedi_utils.get_parent_scope(scope), name
-                        )
-                    if (
-                        isinstance(x, tree.Name)
-                        and x.is_definition()
-                        and x.value == name.value
-                    ):
+                        return self._find_definition(jedi_utils.get_parent_scope(scope), name)
+                    if isinstance(x, tree.Name) and x.is_definition() and x.value == name.value:
                         return x
                     def_candidate = self._find_def_in_simple_node(x, name)
                     if def_candidate:
@@ -163,11 +155,7 @@ class VariablesHighlighter(BaseNameHighlighter):
         return None
 
     def _find_def_in_simple_node(self, node, name):
-        if (
-            isinstance(node, tree.Name)
-            and node.is_definition()
-            and node.value == name.value
-        ):
+        if isinstance(node, tree.Name) and node.is_definition() and node.value == name.value:
             return name
         if not isinstance(node, tree.BaseNode):
             return None
@@ -214,16 +202,13 @@ class VariablesHighlighter(BaseNameHighlighter):
                     dot_names = self._get_dot_names(c)
                     if len(dot_names) > 1 and dot_names[1].value == name.value:
                         continue
-                    sub_result = find_usages_in_node(
-                        c, global_encountered=global_encountered
-                    )
+                    sub_result = find_usages_in_node(c, global_encountered=global_encountered)
 
                     if sub_result is None:
                         if not jedi_utils.is_scope(node):
                             return (
                                 None
-                                if definition
-                                and node != jedi_utils.get_parent_scope(definition)
+                                if definition and node != jedi_utils.get_parent_scope(definition)
                                 else [definition]
                             )
                         else:
@@ -235,9 +220,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                 if definition and definition != node:
                     if self._is_name_function_definition(node):
                         if isinstance(
-                            jedi_utils.get_parent_scope(
-                                jedi_utils.get_parent_scope(node)
-                            ),
+                            jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(node)),
                             tree.Class,
                         ):
                             return []
@@ -254,9 +237,7 @@ class VariablesHighlighter(BaseNameHighlighter):
                     ):
                         return None
                     if self._is_name_function_definition(definition) and isinstance(
-                        jedi_utils.get_parent_scope(
-                            jedi_utils.get_parent_scope(definition)
-                        ),
+                        jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition)),
                         tree.Class,
                     ):
                         return None
@@ -265,9 +246,7 @@ class VariablesHighlighter(BaseNameHighlighter):
 
         if definition:
             if self._is_name_function_definition(definition):
-                scope = jedi_utils.get_parent_scope(
-                    jedi_utils.get_parent_scope(definition)
-                )
+                scope = jedi_utils.get_parent_scope(jedi_utils.get_parent_scope(definition))
             else:
                 scope = jedi_utils.get_parent_scope(definition)
         else:

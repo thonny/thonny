@@ -38,9 +38,7 @@ class ParenMatcher:
         self._highlight_unclosed(remaining, start_index, end_index)
 
     def _highlight_surrounding(self, start_index, end_index):
-        open_index, close_index, remaining = self.find_surrounding(
-            start_index, end_index
-        )
+        open_index, close_index, remaining = self.find_surrounding(start_index, end_index)
         if None not in [open_index, close_index]:
             self.text.tag_add("surrounding_parens", open_index)
             self.text.tag_add("surrounding_parens", close_index)

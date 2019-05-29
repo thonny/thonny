@@ -11,6 +11,15 @@ class ShellConfigurationPage(ConfigurationPage):
         ConfigurationPage.__init__(self, master)
         self.columnconfigure(1, weight=1)
 
+        self.add_checkbox(
+            "shell.tty_mode",
+            "Terminal emulation (supports basic ANSI-colors and styles, \\a, \\r, \\b)",
+            10,
+            0,
+            columnspan=2,
+            pady=(0, 10),
+        )
+
         max_lines_var = get_workbench().get_variable("shell.max_lines")
         max_lines_label = ttk.Label(
             self,
@@ -31,9 +40,7 @@ class ShellConfigurationPage(ConfigurationPage):
         max_lines_combo.grid(row=20, column=1, sticky=tk.W, padx=10)
 
         squeeze_var = get_workbench().get_variable("shell.squeeze_threshold")
-        squeeze_label = ttk.Label(
-            self, text="Maximum length of line fragments before squeezing"
-        )
+        squeeze_label = ttk.Label(self, text="Maximum length of line fragments before squeezing")
         squeeze_label.grid(row=22, column=0, sticky="w")
         squeeze_combo = ttk.Combobox(
             self,

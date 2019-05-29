@@ -131,10 +131,7 @@ def _button_notebook_settings() -> BasicUiThemeSettings:
                                                 ],
                                             },
                                         ),
-                                        (
-                                            "Notebook.closebutton",
-                                            {"side": "right", "sticky": ""},
-                                        ),
+                                        ("Notebook.closebutton", {"side": "right", "sticky": ""}),
                                     ],
                                 },
                             )
@@ -190,11 +187,7 @@ def clam() -> BasicUiThemeSettings:
                 "relief": "raised",
             },
             "map": {
-                "background": [
-                    ("disabled", frame),
-                    ("pressed", darker),
-                    ("active", lighter),
-                ],
+                "background": [("disabled", frame), ("pressed", darker), ("active", lighter)],
                 "lightcolor": [("pressed", darker)],
                 "darkcolor": [("pressed", darker)],
                 "bordercolor": [("alternate", "#000000")],
@@ -209,11 +202,7 @@ def clam() -> BasicUiThemeSettings:
                     ("pressed", "sunken"),
                     ("active", "raised"),
                 ],
-                "background": [
-                    ("disabled", frame),
-                    ("pressed", darker),
-                    ("active", lighter),
-                ],
+                "background": [("disabled", frame), ("pressed", darker), ("active", lighter)],
                 "lightcolor": [("pressed", darker)],
                 "darkcolor": [("pressed", darker)],
             },
@@ -249,9 +238,7 @@ def clam() -> BasicUiThemeSettings:
                 ]
             },
         },
-        "TMenubutton": {
-            "configure": {"width": scale(11), "padding": scale(5), "relief": "raised"}
-        },
+        "TMenubutton": {"configure": {"width": scale(11), "padding": scale(5), "relief": "raised"}},
         "TEntry": {
             "configure": {"padding": scale(1), "insertwidth": scale(1)},
             "map": {
@@ -268,26 +255,15 @@ def clam() -> BasicUiThemeSettings:
             },
             "map": {
                 "background": [("active", lighter), ("pressed", lighter)],
-                "fieldbackground": [
-                    ("readonly", "focus", selectbg),
-                    ("readonly", frame),
-                ],
+                "fieldbackground": [("readonly", "focus", selectbg), ("readonly", frame)],
                 "foreground": [("readonly", "focus", selectfg)],
                 "arrowcolor": [("disabled", disabledfg)],
             },
         },
-        "ComboboxPopdownFrame": {
-            "configure": {"relief": "solid", "borderwidth": scale(1)}
-        },
+        "ComboboxPopdownFrame": {"configure": {"relief": "solid", "borderwidth": scale(1)}},
         "TSpinbox": {
-            "configure": {
-                "arrowsize": scale(10),
-                "padding": [scale(2), 0, scale(10), 0],
-            },
-            "map": {
-                "background": [("readonly", frame)],
-                "arrowcolor": [("disabled", disabledfg)],
-            },
+            "configure": {"arrowsize": scale(10), "padding": [scale(2), 0, scale(10), 0]},
+            "map": {"background": [("readonly", frame)], "arrowcolor": [("disabled", disabledfg)]},
         },
         "TNotebook.Tab": {
             "configure": {"padding": [scale(6), scale(2), scale(6), scale(2)]},
@@ -320,9 +296,7 @@ def clam() -> BasicUiThemeSettings:
                 "padding": [scale(3), scale(3), scale(3), scale(3)],
             }
         },
-        "TLabelframe": {
-            "configure": {"labeloutside": True, "labelmargins": [0, 0, 0, scale(4)]}
-        },
+        "TLabelframe": {"configure": {"labeloutside": True, "labelmargins": [0, 0, 0, scale(4)]}},
         "TProgressbar": {"configure": {"background": frame}},
         "Sash": {"configure": {"sashthickness": scale(6), "gripcount": 10}},
     }
@@ -342,11 +316,7 @@ def xpnative() -> BasicUiThemeSettings:
             "map": {"foreground": [("disabled", "SystemGrayText")]},
         },
         "TButton": {
-            "configure": {
-                "anchor": "center",
-                "width": scale(11),
-                "padding": [scale(1), scale(1)],
-            }
+            "configure": {"anchor": "center", "width": scale(11), "padding": [scale(1), scale(1)]}
         },
         "Toolbutton": {"configure": {"padding": [scale(4), scale(4)]}},
         "TCheckbutton": {"configure": {"padding": scale(2)}},
@@ -372,9 +342,7 @@ def xpnative() -> BasicUiThemeSettings:
                 "focusfill": [("readonly", "focus", "SystemHighlight")],
             },
         },
-        "ComboboxPopdownFrame": {
-            "configure": {"relief": "solid", "borderwidth": scale(1)}
-        },
+        "ComboboxPopdownFrame": {"configure": {"relief": "solid", "borderwidth": scale(1)}},
         "TSpinbox": {
             "configure": {"padding": [scale(2), 0, scale(14), 0]},
             "map": {
@@ -401,9 +369,7 @@ def xpnative() -> BasicUiThemeSettings:
                 ],
             },
         },
-        "Heading": {  # Treeview heading
-            "configure": {"font": "TkHeadingFont", "relief": "raised"}
-        },
+        "Heading": {"configure": {"font": "TkHeadingFont", "relief": "raised"}},  # Treeview heading
         "TLabelframe.Label": {"configure": {"foreground": "#0046d5"}},
     }
 
@@ -440,11 +406,7 @@ def aqua() -> BasicUiThemeSettings:
         "TButton": {"configure": {"anchor": "center", "width": "6"}},
         "Toolbutton": {"configure": {"padding": 4}},
         "TNotebook": {
-            "configure": {
-                "tabmargins": [10, 0],
-                "tabposition": "n",
-                "padding": [18, 8, 18, 17],
-            }
+            "configure": {"tabmargins": [10, 0], "tabposition": "n", "padding": [18, 8, 18, 17]}
         },
         "TNotebook.Tab": {"configure": {"padding": [12, 3, 12, 2]}},
         "TCombobox": {"configure": {"postoffset": [5, -2, -10, 0]}},
@@ -466,9 +428,7 @@ def aqua() -> BasicUiThemeSettings:
             },
         },
         "TProgressbar": {"configure": {"period": 100, "maxphase": 255}},
-        "Labelframe": {
-            "configure": {"labeloutside": True, "labelmargins": [14, 0, 14, 4]}
-        },
+        "Labelframe": {"configure": {"labeloutside": True, "labelmargins": [14, 0, 14, 4]}},
     }
 
 
@@ -539,9 +499,7 @@ def windows() -> CompoundUiThemeSettings:
                     "borderwidth": scale(1),
                 }
             },
-            "Inactive.ViewTab.TLabel": {
-                "configure": {"font": "UnderlineTkDefaultFont"}
-            },
+            "Inactive.ViewTab.TLabel": {"configure": {"font": "UnderlineTkDefaultFont"}},
         },
     ]
 
@@ -598,9 +556,7 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
         # _paned_window_settings(),
         _menu_settings(),
         {
-            "TPanedWindow": {
-                "configure": {"background": "systemDialogBackgroundActive"}
-            },
+            "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
             "TFrame": {"configure": {"background": "systemDialogBackgroundActive"}},
             "Tab": {"map": {"foreground": [("selected", "white")]}},
         },

@@ -92,15 +92,14 @@ class VM:
         self._source_preprocessors = []
         self._ast_postprocessors = []
         self._main_dir = os.path.dirname(sys.modules["thonny"].__file__)
-        self._heap = (
-            {}
-        )  # WeakValueDictionary would be better, but can't store reference to None
+        self._heap = {}  # WeakValueDictionary would be better, but can't store reference to None
         self._source_info_by_frame = {}
         site.sethelper()  # otherwise help function is not available
         pydoc.pager = pydoc.plainpager  # otherwise help command plays tricks
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
+        self._tty_mode = True
 
         init_msg = self._fetch_command()
 
@@ -133,9 +132,7 @@ class VM:
                 original_path=original_path,
                 argv=sys.argv,
                 path=sys.path,
-                usersitepackages=site.getusersitepackages()
-                if site.ENABLE_USER_SITE
-                else None,
+                usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
                 prefix=sys.prefix,
                 welcome_text="Python " + _get_python_version_string(),
                 executable=sys.executable,
@@ -231,14 +228,10 @@ class VM:
                 sys.stderr.write(str(e) + "\n")
                 response = create_error_response()
             except KeyboardInterrupt:
-                response = create_error_response(
-                    user_exception=self._prepare_user_exception()
-                )
+                response = create_error_response(user_exception=self._prepare_user_exception())
             except Exception:
                 _report_internal_error()
-                response = create_error_response(
-                    context_info="other unhandled exception"
-                )
+                response = create_error_response(context_info="other unhandled exception")
 
         if response is False:
             # Command doesn't want to send any response
@@ -251,8 +244,7 @@ class VM:
         # TODO: add these in response creation time in a helper function
         if isinstance(response, ToplevelResponse):
             response["gui_is_active"] = (
-                self._get_tkinter_default_root() is not None
-                or self._get_qt_app() is not None
+                self._get_tkinter_default_root() is not None or self._get_qt_app() is not None
             )
 
         self.send_message(response)
@@ -329,9 +321,7 @@ class VM:
         return module
 
     def _load_shared_modules(self):
-        self.load_modules_with_frontend_path(
-            ["parso", "jedi", "thonnycontrib", "six", "asttokens"]
-        )
+        self.load_modules_with_frontend_path(["parso", "jedi", "thonnycontrib", "six", "asttokens"])
 
     def load_modules_with_frontend_path(self, names):
         from importlib import import_module
@@ -351,9 +341,7 @@ class VM:
         # built-in plugins
         import thonny.plugins.backend  # pylint: disable=redefined-outer-name
 
-        self._load_plugins_from_path(
-            thonny.plugins.backend.__path__, "thonny.plugins.backend."
-        )
+        self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 
         # 3rd party plugins from namespace package
         try:
@@ -362,15 +350,11 @@ class VM:
             # No 3rd party plugins installed
             pass
         else:
-            self._load_plugins_from_path(
-                thonnycontrib.backend.__path__, "thonnycontrib.backend."
-            )
+            self._load_plugins_from_path(thonnycontrib.backend.__path__, "thonnycontrib.backend.")
 
     def _load_plugins_from_path(self, path, prefix):
         load_function_name = "load_plugin"
-        for _, module_name, _ in sorted(
-            pkgutil.iter_modules(path, prefix), key=lambda x: x[1]
-        ):
+        for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[1]):
             try:
                 m = importlib.import_module(module_name)
                 if hasattr(m, load_function_name):
@@ -423,6 +407,7 @@ class VM:
 
     def _cmd_execute_source(self, cmd):
         """Executes Python source entered into shell"""
+        self._check_update_tty_mode(cmd)
         filename = "<pyshell>"
         ws_stripped_source = cmd.source.strip()
         source = ws_stripped_source.strip("?")
@@ -458,6 +443,7 @@ class VM:
         return ToplevelResponse(command_name="execute_source", **result_attributes)
 
     def _cmd_execute_system_command(self, cmd):
+        self._check_update_tty_mode(cmd)
         env = dict(os.environ).copy()
         encoding = "utf-8"
         env["PYTHONIOENCODING"] = encoding
@@ -488,12 +474,8 @@ class VM:
                 else:
                     target.write(c)
 
-        copy_out = Thread(
-            target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True
-        )
-        copy_err = Thread(
-            target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True
-        )
+        copy_out = Thread(target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True)
+        copy_err = Thread(target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True)
 
         copy_out.start()
         copy_err.start()
@@ -538,9 +520,7 @@ class VM:
                 globals=self.export_globals(cmd.module_name),
             )
         except Exception as e:
-            return InlineResponse(
-                "get_globals", module_name=cmd.module_name, error=str(e)
-            )
+            return InlineResponse("get_globals", module_name=cmd.module_name, error=str(e))
 
     def _cmd_get_frame_info(self, cmd):
         atts = {}
@@ -599,21 +579,15 @@ class VM:
             return InlineResponse(
                 "get_active_distributions",
                 distributions=dists,
-                usersitepackages=site.getusersitepackages()
-                if site.ENABLE_USER_SITE
-                else None,
+                usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
             )
         except Exception:
-            return InlineResponse(
-                "get_active_distributions", error=traceback.format_exc()
-            )
+            return InlineResponse("get_active_distributions", error=traceback.format_exc())
 
     def _cmd_get_locals(self, cmd):
         for frame in inspect.stack():
             if id(frame) == cmd.frame_id:
-                return InlineResponse(
-                    "get_locals", locals=self.export_variables(frame.f_locals)
-                )
+                return InlineResponse("get_locals", locals=self.export_variables(frame.f_locals))
 
         raise RuntimeError("Frame '{0}' not found".format(cmd.frame_id))
 
@@ -641,10 +615,7 @@ class VM:
                 error = "Autocomplete error: " + str(e)
 
         return InlineResponse(
-            "shell_autocomplete",
-            source=cmd.source,
-            completions=completions,
-            error=error,
+            "shell_autocomplete", source=cmd.source, completions=completions, error=error
         )
 
     def _cmd_editor_autocomplete(self, cmd):
@@ -709,10 +680,7 @@ class VM:
         return result
 
     def _cmd_get_object_info(self, cmd):
-        if (
-            isinstance(self._current_executor, NiceTracer)
-            and self._current_executor.is_in_past()
-        ):
+        if isinstance(self._current_executor, NiceTracer) and self._current_executor.is_in_past():
             info = {"id": cmd.object_id, "error": "past info not available"}
 
         elif cmd.object_id in self._heap:
@@ -827,14 +795,14 @@ class VM:
     def _add_entries_info(self, value, info):
         info["entries"] = []
         for key in value:
-            info["entries"].append(
-                (self.export_value(key), self.export_value(value[key]))
-            )
+            info["entries"].append((self.export_value(key), self.export_value(value[key])))
 
     def _execute_file(self, cmd, executor_class):
         # args are accepted only in Run and Debug,
         # and were stored in sys.argv already in VM.__init__
         # TODO: are they?
+
+        self._check_update_tty_mode(cmd)
 
         if len(cmd.args) >= 1:
             sys.argv = cmd.args
@@ -851,12 +819,7 @@ class VM:
                 source = preproc(source, cmd)
 
             result_attributes = self._execute_source(
-                source,
-                full_filename,
-                "exec",
-                executor_class,
-                cmd,
-                self._ast_postprocessors,
+                source, full_filename, "exec", executor_class, cmd, self._ast_postprocessors
             )
             result_attributes["filename"] = full_filename
             return ToplevelResponse(command_name=cmd.name, **result_attributes)
@@ -864,13 +827,7 @@ class VM:
             raise UserError("Command '%s' takes at least one argument" % cmd.name)
 
     def _execute_source(
-        self,
-        source,
-        filename,
-        execution_mode,
-        executor_class,
-        cmd,
-        ast_postprocessors=[],
+        self, source, filename, execution_mode, executor_class, cmd, ast_postprocessors=[]
     ):
         self._current_executor = executor_class(self, cmd)
 
@@ -971,9 +928,7 @@ class VM:
             code_name = system_frame.f_code.co_name
 
             if not skip_checker or not skip_checker(system_frame):
-                source, firstlineno, in_library = self._get_frame_source_info(
-                    system_frame
-                )
+                source, firstlineno, in_library = self._get_frame_source_info(system_frame)
 
                 result.insert(
                     0,
@@ -996,9 +951,7 @@ class VM:
                         firstlineno=firstlineno,
                         in_library=in_library,
                         event="line",
-                        focus=TextRange(
-                            system_frame.f_lineno, 0, system_frame.f_lineno + 1, 0
-                        ),
+                        focus=TextRange(system_frame.f_lineno, 0, system_frame.f_lineno + 1, 0),
                         node_tags=None,
                         current_statement=None,
                         current_evaluations=None,
@@ -1052,11 +1005,7 @@ class VM:
 
     def _prepare_user_exception(self):
         e_type, e_value, e_traceback = sys.exc_info()
-        sys.last_type, sys.last_value, sys.last_traceback = (
-            e_type,
-            e_value,
-            e_traceback,
-        )
+        sys.last_type, sys.last_value, sys.last_traceback = (e_type, e_value, e_traceback)
 
         processed_tb = traceback.extract_tb(e_traceback)
 
@@ -1067,10 +1016,7 @@ class VM:
 
         if e_type is SyntaxError:
             # Don't show ast frame
-            while (
-                last_frame.f_code.co_filename
-                and last_frame.f_code.co_filename == ast.__file__
-            ):
+            while last_frame.f_code.co_filename and last_frame.f_code.co_filename == ast.__file__:
                 last_frame = last_frame.f_back
 
         if e_type is SyntaxError:
@@ -1093,6 +1039,10 @@ class VM:
             "line": getattr(e_value, "text", processed_tb[-1].line),
         }
 
+    def _check_update_tty_mode(self, cmd):
+        if "tty_mode" in cmd:
+            self._tty_mode = cmd["tty_mode"]
+
     class FakeStream:
         def __init__(self, vm, target_stream):
             self._vm = vm
@@ -1100,7 +1050,7 @@ class VM:
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return True
+            return self._vm._tty_mode
 
         def __getattr__(self, name):
             # TODO: is it safe to perform those other functions without notifying vm
@@ -1121,9 +1071,7 @@ class VM:
 
                 if data != "":
                     self._vm.send_message(
-                        BackendEvent(
-                            "ProgramOutput", stream_name=self._stream_name, data=data
-                        )
+                        BackendEvent("ProgramOutput", stream_name=self._stream_name, data=data)
                     )
                     self._processed_symbol_count += len(data)
             finally:
@@ -1147,9 +1095,7 @@ class VM:
             # new input needs to be requested
             try:
                 self._vm._enter_io_function()
-                self._vm.send_message(
-                    BackendEvent("InputRequest", method=method, limit=limit)
-                )
+                self._vm.send_message(BackendEvent("InputRequest", method=method, limit=limit))
 
                 while True:
                     cmd = self._vm._fetch_command()
@@ -1159,9 +1105,7 @@ class VM:
                     elif isinstance(cmd, InlineCommand):
                         self._vm.handle_command(cmd)
                     else:
-                        raise RuntimeError(
-                            "Wrong type of command when waiting for input"
-                        )
+                        raise RuntimeError("Wrong type of command when waiting for input")
             finally:
                 self._vm._exit_io_function()
 
@@ -1233,9 +1177,7 @@ class Executor:
                 # Useful in shell to get last expression value in multi-statement block
                 root = self._prepare_ast(source, filename, "exec")
                 statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
-                expression = compile(
-                    ast.Expression(root.body[-1].value), filename, "eval"
-                )
+                expression = compile(ast.Expression(root.body[-1].value), filename, "eval")
             else:
                 root = self._prepare_ast(source, filename, mode)
                 if mode == "eval":
@@ -1316,9 +1258,7 @@ class Tracer(Executor):
                 old_breakpointhook = sys.breakpointhook
                 sys.breakpointhook = self._breakpointhook
 
-            return super()._execute_prepared_user_code(
-                statements, expression, global_vars
-            )
+            return super()._execute_prepared_user_code(statements, expression, global_vars)
         finally:
             sys.settrace(None)
             if hasattr(sys, "breakpointhook"):
@@ -1358,9 +1298,9 @@ class Tracer(Executor):
 
     def _is_interesting_exception(self, frame):
         # interested only in exceptions in command frame or its parent frames
-        return id(frame) == self._current_command[
-            "frame_id"
-        ] or not self._frame_is_alive(self._current_command["frame_id"])
+        return id(frame) == self._current_command["frame_id"] or not self._frame_is_alive(
+            self._current_command["frame_id"]
+        )
 
     def _fetch_next_debugger_command(self):
         while True:
@@ -1418,6 +1358,11 @@ class Tracer(Executor):
     def _breakpointhook(self, *args, **kw):
         pass
 
+    def _notify_return(self, frame_id):
+        # Need extra notification, because the frame to be returned to may not
+        # be interesting for the user, so front-end can close the frame
+        self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
+
 
 class FastTracer(Tracer):
     def __init__(self, vm, original_cmd):
@@ -1441,10 +1386,7 @@ class FastTracer(Tracer):
         if event == "call":
             self._fresh_exception = None
             # can we skip this frame?
-            if (
-                self._current_command.name == "step_over"
-                and not self._current_command.breakpoints
-            ):
+            if self._current_command.name == "step_over" and not self._current_command.breakpoints:
                 return None
             else:
                 self._alive_frame_ids.add(id(frame))
@@ -1452,6 +1394,7 @@ class FastTracer(Tracer):
         elif event == "return":
             self._fresh_exception = None
             self._alive_frame_ids.remove(id(frame))
+            self._notify_return(id(frame))
 
         elif event == "exception":
             self._fresh_exception = arg
@@ -1497,17 +1440,13 @@ class FastTracer(Tracer):
         )
 
     def _cmd_step_out_completed(self, frame, cmd):
-        return cmd.frame_id not in self._alive_frame_ids or self._at_a_breakpoint(
-            frame, cmd
-        )
+        return cmd.frame_id not in self._alive_frame_ids or self._at_a_breakpoint(frame, cmd)
 
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
 
     def _cmd_run_to_cursor_completed(self, frame, cmd):
-        return self._at_a_breakpoint(
-            frame, cmd, self._get_breakpoints_with_cursor_position(cmd)
-        )
+        return self._at_a_breakpoint(frame, cmd, self._get_breakpoints_with_cursor_position(cmd))
 
     def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
         # TODO: try re-entering same line in loop
@@ -1640,12 +1579,8 @@ class NiceTracer(Tracer):
                 del marker_function_args["self"]
 
                 if "call_function" not in node.tags:
-                    self._handle_progress_event(
-                        frame.f_back, event, marker_function_args, node
-                    )
-                self._try_interpret_as_again_event(
-                    frame.f_back, event, marker_function_args, node
-                )
+                    self._handle_progress_event(frame.f_back, event, marker_function_args, node)
+                self._try_interpret_as_again_event(frame.f_back, event, marker_function_args, node)
 
             else:
                 # Calls to proper functions.
@@ -1671,6 +1606,8 @@ class NiceTracer(Tracer):
             self._fresh_exception = None
 
             if code_name not in self.marker_function_names:
+                frame_id = id(self._custom_stack[-1].system_frame)
+                self._notify_return(frame_id)
                 self._custom_stack.pop()
                 if len(self._custom_stack) == 0:
                     # We popped last frame, this means our program has ended.
@@ -1696,9 +1633,7 @@ class NiceTracer(Tracer):
         self._custom_stack always keeps last info,
         which gets exported as FrameInfos to _saved_states["stack"]
         """
-        focus = TextRange(
-            node.lineno, node.col_offset, node.end_lineno, node.end_col_offset
-        )
+        focus = TextRange(node.lineno, node.col_offset, node.end_lineno, node.end_col_offset)
 
         custom_frame = self._custom_stack[-1]
         custom_frame.event = event
@@ -1803,9 +1738,7 @@ class NiceTracer(Tracer):
             if "skip_" + frame.event not in frame.node_tags:
                 # if True:
                 # Has the command completed?
-                tester = getattr(
-                    self, "_cmd_" + self._current_command.name + "_completed"
-                )
+                tester = getattr(self, "_cmd_" + self._current_command.name + "_completed")
                 cmd_complete = tester(frame, self._current_command)
 
                 if cmd_complete:
@@ -1820,9 +1753,7 @@ class NiceTracer(Tracer):
                 else:
                     assert self._current_state_index > 0
                     # Current event is no longer present in GUI "undo log"
-                    self._saved_states[self._current_state_index][
-                        "in_client_log"
-                    ] = False
+                    self._saved_states[self._current_state_index]["in_client_log"] = False
                     self._current_state_index -= 1
             else:
                 # Other commands move the pointer forward
@@ -1862,9 +1793,7 @@ class NiceTracer(Tracer):
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
 
-            source, firstlineno, in_library = self._vm._get_frame_source_info(
-                system_frame
-            )
+            source, firstlineno, in_library = self._vm._get_frame_source_info(system_frame)
 
             assert firstlineno is not None, "nofir " + str(system_frame)
 
@@ -1895,9 +1824,7 @@ class NiceTracer(Tracer):
 
         self._vm.send_message(DebuggerResponse(**state))
 
-    def _try_interpret_as_again_event(
-        self, frame, original_event, original_args, original_node
-    ):
+    def _try_interpret_as_again_event(self, frame, original_event, original_args, original_node):
         """
         Some after_* events can be interpreted also as 
         "before_*_again" events (eg. when last argument of a call was 
@@ -2000,9 +1927,7 @@ class NiceTracer(Tracer):
         if self._at_a_breakpoint(frame, cmd):
             return True
 
-        prev_state_frame = self._saved_states[self._current_state_index - 1]["stack"][
-            -1
-        ]
+        prev_state_frame = self._saved_states[self._current_state_index - 1]["stack"][-1]
 
         return (
             # the frame has completed
@@ -2020,9 +1945,7 @@ class NiceTracer(Tracer):
         return self._at_a_breakpoint(frame, cmd)
 
     def _cmd_run_to_cursor_completed(self, frame, cmd):
-        return self._at_a_breakpoint(
-            frame, cmd, self._get_breakpoints_with_cursor_position(cmd)
-        )
+        return self._at_a_breakpoint(frame, cmd, self._get_breakpoints_with_cursor_position(cmd))
 
     def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
         if breakpoints is None:
@@ -2277,9 +2200,7 @@ class NiceTracer(Tracer):
                 # value will be presented in assignment's before_statement_again
                 add_tag(node.value, "skip_after_expression")
 
-            if isinstance(
-                node, (ast.Expr, ast.While, ast.For, ast.If, ast.Try, ast.With)
-            ):
+            if isinstance(node, (ast.Expr, ast.While, ast.For, ast.If, ast.Try, ast.With)):
                 add_tag(node, "skip_after_statement_again")
 
             # make sure every node has this field
@@ -2329,9 +2250,7 @@ class NiceTracer(Tracer):
                             # self._debug("EBFOMA", node)
                             # add before marker
                             new_list.append(
-                                self._create_statement_marker(
-                                    node, BEFORE_STATEMENT_MARKER
-                                )
+                                self._create_statement_marker(node, BEFORE_STATEMENT_MARKER)
                             )
 
                         # original statement
@@ -2345,9 +2264,7 @@ class NiceTracer(Tracer):
                         ):
                             # add after marker
                             new_list.append(
-                                self._create_statement_marker(
-                                    node, AFTER_STATEMENT_MARKER
-                                )
+                                self._create_statement_marker(node, AFTER_STATEMENT_MARKER)
                             )
                     setattr(root, name, new_list)
 
@@ -2369,15 +2286,8 @@ class NiceTracer(Tracer):
 
                 name_load = ast.Name(temp_name, ast.Load())
                 # value will be visible in parent's before_statement_again event
-                name_load.tags = {
-                    "skip_before_expression",
-                    "skip_after_expression",
-                    "last_child",
-                }
-                name_load.lineno, name_load.col_offset = (
-                    node.iter.lineno,
-                    node.iter.col_offset,
-                )
+                name_load.tags = {"skip_before_expression", "skip_after_expression", "last_child"}
+                name_load.lineno, name_load.col_offset = (node.iter.lineno, node.iter.col_offset)
                 name_load.end_lineno, name_load.end_col_offset = (
                     node.iter.end_lineno,
                     node.iter.end_col_offset,
@@ -2398,18 +2308,14 @@ class NiceTracer(Tracer):
                     node.iter.end_lineno,
                     node.iter.end_col_offset,
                 )
-                ass.tags = {
-                    "skip_before_statement"
-                }  # before_statement_again will be shown
+                ass.tags = {"skip_before_statement"}  # before_statement_again will be shown
 
                 name_load.parent_node = ass
 
                 ass_before = self._create_statement_marker(ass, BEFORE_STATEMENT_MARKER)
                 node.body.insert(0, ass_before)
                 node.body.insert(1, ass)
-                node.body.insert(
-                    2, self._create_statement_marker(ass, AFTER_STATEMENT_MARKER)
-                )
+                node.body.insert(2, self._create_statement_marker(ass, AFTER_STATEMENT_MARKER))
 
                 ast.fix_missing_locations(node)
 
@@ -2444,9 +2350,7 @@ class NiceTracer(Tracer):
                         if "ignore_children" in node.tags:
                             transformed_node = node
                         else:
-                            transformed_node = ast.NodeTransformer.generic_visit(
-                                self, node
-                            )
+                            transformed_node = ast.NodeTransformer.generic_visit(self, node)
 
                         # after marker
                         after_marker = ast.Call(
@@ -2474,9 +2378,7 @@ class NiceTracer(Tracer):
     def _create_simple_marker_call(self, node, fun_name, extra_args=[]):
         args = [self._export_node(node)] + extra_args
 
-        return ast.Call(
-            func=ast.Name(id=fun_name, ctx=ast.Load()), args=args, keywords=[]
-        )
+        return ast.Call(func=ast.Name(id=fun_name, ctx=ast.Load()), args=args, keywords=[])
 
     def _export_node(self, node):
         assert isinstance(node, (ast.expr, ast.stmt))
@@ -2489,9 +2391,7 @@ class NiceTracer(Tracer):
 
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
-            return Tracer._execute_prepared_user_code(
-                self, statements, expression, global_vars
-            )
+            return Tracer._execute_prepared_user_code(self, statements, expression, global_vars)
         finally:
             """
             from thonny.misc_utils import _win_get_used_memory
@@ -2563,12 +2463,7 @@ def _fetch_frame_source_info(frame):
             # in the beginning of the source,
             # then play safe and return the whole script
             first_line = source.splitlines()[0]
-            if (
-                re.search(
-                    r"\b(class|def)\b\s+\b%s\b" % frame.f_code.co_name, first_line
-                )
-                is None
-            ):
+            if re.search(r"\b(class|def)\b\s+\b%s\b" % frame.f_code.co_name, first_line) is None:
                 with tokenize.open(frame.f_code.co_filename) as fp:
                     return fp.read(), 1, is_libra
 
@@ -2579,9 +2474,7 @@ def _fetch_frame_source_info(frame):
             return None, None, True
 
 
-def format_exception_with_frame_info(
-    e_type, e_value, e_traceback, shorten_filenames=False
-):
+def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filenames=False):
     """Need to suppress thonny frames to avoid confusion"""
 
     _traceback_message = "Traceback (most recent call last):\n"
@@ -2589,19 +2482,13 @@ def format_exception_with_frame_info(
     _cause_message = getattr(
         traceback,
         "_cause_message",
-        (
-            "\nThe above exception was the direct cause "
-            + "of the following exception:\n\n"
-        ),
+        ("\nThe above exception was the direct cause " + "of the following exception:\n\n"),
     )
 
     _context_message = getattr(
         traceback,
         "_context_message",
-        (
-            "\nDuring handling of the above exception, "
-            + "another exception occurred:\n\n"
-        ),
+        ("\nDuring handling of the above exception, " + "another exception occurred:\n\n"),
     )
 
     def rec_format_exception_with_frame_info(etype, value, tb, chain=True):
@@ -2617,14 +2504,10 @@ def format_exception_with_frame_info(
 
         if chain:
             if value.__cause__ is not None:
-                yield from rec_format_exception_with_frame_info(
-                    None, value.__cause__, None
-                )
+                yield from rec_format_exception_with_frame_info(None, value.__cause__, None)
                 yield (_cause_message, None, None, None)
             elif value.__context__ is not None and not value.__suppress_context__:
-                yield from rec_format_exception_with_frame_info(
-                    None, value.__context__, None
-                )
+                yield from rec_format_exception_with_frame_info(None, value.__context__, None)
                 yield (_context_message, None, None, None)
 
         if tb is not None:

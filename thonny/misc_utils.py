@@ -84,14 +84,7 @@ def get_win_volume_name(path: str) -> str:
 
     vol_name_buf = ctypes.create_unicode_buffer(1024)
     ctypes.windll.kernel32.GetVolumeInformationW(  # @UndefinedVariable
-        ctypes.c_wchar_p(path),
-        vol_name_buf,
-        ctypes.sizeof(vol_name_buf),
-        None,
-        None,
-        None,
-        None,
-        0,
+        ctypes.c_wchar_p(path), vol_name_buf, ctypes.sizeof(vol_name_buf), None, None, None, None, 0
     )
     assert isinstance(vol_name_buf.value, str)
     return vol_name_buf.value
@@ -198,9 +191,7 @@ def _win_get_used_memory():
         if process is None:
             process = get_current_process()
         counters = PROCESS_MEMORY_COUNTERS_EX()
-        ret = GetProcessMemoryInfo(
-            process, ctypes.byref(counters), ctypes.sizeof(counters)
-        )
+        ret = GetProcessMemoryInfo(process, ctypes.byref(counters), ctypes.sizeof(counters))
         if not ret:
             raise ctypes.WinError()
         info = dict((name, getattr(counters, name)) for name, _ in counters._fields_)
@@ -306,9 +297,7 @@ def levenshtein_damerau_distance(s1, s2, maxDistance):
         for colNum in range(1, l1 + 1):
             insertionCost = curRow[colNum - 1] + 1
             deletionCost = prevRow[colNum] + 1
-            changeCost = prevRow[colNum - 1] + (
-                0 if s1[colNum - 1] == s2[rowNum - 1] else 1
-            )
+            changeCost = prevRow[colNum - 1] + (0 if s1[colNum - 1] == s2[rowNum - 1] else 1)
             #  set the cell value - min distance to reach this
             #  position
             curRow[colNum] = min(insertionCost, deletionCost, changeCost)
@@ -317,13 +306,8 @@ def levenshtein_damerau_distance(s1, s2, maxDistance):
             #  check to see if we have at least 2 characters
             if 1 < rowNum <= colNum:
                 #  test for possible transposition
-                if (
-                    s1[colNum - 1] == s2[colNum - 2]
-                    and s2[colNum - 1] == s1[colNum - 2]
-                ):
-                    curRow[colNum] = min(
-                        curRow[colNum], transpositionRow[colNum - 2] + 1
-                    )
+                if s1[colNum - 1] == s2[colNum - 2] and s2[colNum - 1] == s1[colNum - 2]:
+                    curRow[colNum] = min(curRow[colNum], transpositionRow[colNum - 2] + 1)
 
     #  the last cell of the matrix is ALWAYS the shortest distance between the two strings
     return curRow[-1]

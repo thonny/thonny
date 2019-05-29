@@ -24,12 +24,8 @@ class VariablesView(VariablesFrame):
         get_workbench().bind("BackendRestart", self._handle_backend_restart, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         # get_workbench().bind("DebuggerResponse", self._debugger_response, True)
-        get_workbench().bind(
-            "get_frame_info_response", self._handle_frame_info_event, True
-        )
-        get_workbench().bind(
-            "get_globals_response", self._handle_get_globals_response, True
-        )
+        get_workbench().bind("get_frame_info_response", self._handle_frame_info_event, True)
+        get_workbench().bind("get_globals_response", self._handle_get_globals_response, True)
 
         # records last info from progress messages
         self._last_active_info = None
@@ -61,9 +57,7 @@ class VariablesView(VariablesFrame):
             self.show_globals(event["globals"], "__main__")
         else:
             # MicroPython
-            get_runner().send_command(
-                InlineCommand("get_globals", module_name="__main__")
-            )
+            get_runner().send_command(InlineCommand("get_globals", module_name="__main__"))
 
     def show_globals(self, globals_, module_name, is_active=True):
         # TODO: update only if something has changed
@@ -78,9 +72,7 @@ class VariablesView(VariablesFrame):
 
         self._update_back_button(not is_active)
 
-    def show_frame_variables(
-        self, locals_, globals_, freevars, frame_name, is_active=True
-    ):
+    def show_frame_variables(self, locals_, globals_, freevars, frame_name, is_active=True):
         # TODO: update only if something has changed
         actual_locals = {}
         nonlocals = {}
@@ -117,9 +109,7 @@ class VariablesView(VariablesFrame):
             )
 
             if frame_info["code_name"] == "<module>":
-                self.show_globals(
-                    frame_info["globals"], frame_info["module_name"], is_active
-                )
+                self.show_globals(frame_info["globals"], frame_info["module_name"], is_active)
             else:
                 self.show_frame_variables(
                     frame_info["locals"],
@@ -138,6 +128,4 @@ class VariablesView(VariablesFrame):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(
-        VariablesView, _("Variables"), "ne", default_position_key="AAA"
-    )
+    get_workbench().add_view(VariablesView, _("Variables"), "ne", default_position_key="AAA")

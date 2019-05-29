@@ -35,18 +35,14 @@ class FindDialog(tk.Toplevel):
 
         # references to the current set of passive found tags e.g. all words that match the searched term but are not the active string
         self.passive_found_tags = set()
-        self.active_found_tag = (
-            None
-        )  # reference to the currently active (centered) found string
+        self.active_found_tag = None  # reference to the currently active (centered) found string
 
         # a tuple containing the start and indexes of the last processed string
         # if the last action was find, then the end index is start index + 1
         # if the last action was replace, then the indexes correspond to the start
         # and end of the inserted word
         self.last_processed_indexes = None
-        self.last_search_case = (
-            None
-        )  # case sensitivity value used during the last search
+        self.last_search_case = None  # case sensitivity value used during the last search
 
         # set up window display
         self.geometry(
@@ -64,16 +60,12 @@ class FindDialog(tk.Toplevel):
 
         # Find text label
         self.find_label = ttk.Label(main_frame, text=_("Find:"))
-        self.find_label.grid(
-            column=0, row=0, sticky="w", padx=(padx, 0), pady=(pady, 0)
-        )
+        self.find_label.grid(column=0, row=0, sticky="w", padx=(padx, 0), pady=(pady, 0))
 
         # Find text field
         self.find_entry_var = tk.StringVar()
         self.find_entry = ttk.Entry(main_frame, textvariable=self.find_entry_var)
-        self.find_entry.grid(
-            column=1, row=0, columnspan=2, padx=(0, 10), pady=(pady, 0)
-        )
+        self.find_entry.grid(column=1, row=0, columnspan=2, padx=(0, 10), pady=(pady, 0))
         if FindDialog.last_searched_word is not None:
             self.find_entry.insert(0, FindDialog.last_searched_word)
 
@@ -116,9 +108,7 @@ class FindDialog(tk.Toplevel):
         self.find_button = ttk.Button(
             main_frame, text=_("Find"), command=self._perform_find, default="active"
         )
-        self.find_button.grid(
-            column=3, row=0, sticky=tk.W + tk.E, pady=(pady, 0), padx=(0, padx)
-        )
+        self.find_button.grid(column=3, row=0, sticky=tk.W + tk.E, pady=(pady, 0), padx=(0, padx))
         self.find_button.config(state="disabled")
 
         # Replace button - replaces the current occurrence, if it exists
@@ -132,9 +122,7 @@ class FindDialog(tk.Toplevel):
         self.replace_and_find_button = ttk.Button(
             main_frame, text=_("Replace+Find"), command=self._perform_replace_and_find
         )  # TODO - text to resources
-        self.replace_and_find_button.grid(
-            column=3, row=2, sticky=tk.W + tk.E, padx=(0, padx)
-        )
+        self.replace_and_find_button.grid(column=3, row=2, sticky=tk.W + tk.E, padx=(0, padx))
         self.replace_and_find_button.config(state="disabled")
 
         # Replace all button - replaces all occurrences
@@ -257,9 +245,7 @@ class FindDialog(tk.Toplevel):
             if toreplace != "":
                 self.codeview.text.insert(currentpos, toreplace)
 
-            currentpos = self.codeview.text.index(
-                "%s+%dc" % (currentpos, len(toreplace))
-            )
+            currentpos = self.codeview.text.index("%s+%dc" % (currentpos, len(toreplace)))
 
         get_workbench().event_generate(
             "ReplaceAll", widget=self.codeview.text, old_text=tofind, new_text=toreplace
@@ -306,9 +292,7 @@ class FindDialog(tk.Toplevel):
             search_start_index = self.codeview.text.index(
                 "insert"
             )  # start searching from the current insert position
-            self._find_and_tag_all(
-                tofind
-            )  # set the passive tag to ALL found occurences
+            self._find_and_tag_all(tofind)  # set the passive tag to ALL found occurences
             FindDialog.last_searched_word = tofind  # set the data about last search
             self.last_search_case = self._is_search_case_sensitive()
 
@@ -361,9 +345,7 @@ class FindDialog(tk.Toplevel):
     # removes the active tag and all passive tags
     def _remove_all_tags(self):
         for tag in self.passive_found_tags:
-            self.codeview.text.tag_remove(
-                "found", tag[0], tag[1]
-            )  # removes the passive tags
+            self.codeview.text.tag_remove("found", tag[0], tag[1])  # removes the passive tags
 
         if self.active_found_tag is not None:
             self.codeview.text.tag_remove(

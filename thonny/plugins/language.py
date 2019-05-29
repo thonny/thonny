@@ -11,9 +11,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         ConfigurationPage.__init__(self, master)
         self._language_var = get_workbench().get_variable("general.language")
         self._language_label = ttk.Label(self, text=_("Language"))
-        self._language_label.grid(
-            row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
-        )
+        self._language_label.grid(row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         languages = list(LANGUAGES_DICT.keys())
         self._language_combo = ttk.Combobox(
             self,

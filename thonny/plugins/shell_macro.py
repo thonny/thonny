@@ -52,9 +52,7 @@ class ShellMacroDialog(tk.Toplevel):
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(row=2, column=0, sticky="nsew")
 
-        run_button = ttk.Button(
-            button_frame, text="Save and execute", command=self._save_exec
-        )
+        run_button = ttk.Button(button_frame, text="Save and execute", command=self._save_exec)
         run_button.grid(row=0, column=1, sticky="nsew")
         ok_button = ttk.Button(button_frame, text="Save", command=self._save)
         ok_button.grid(row=0, column=2, sticky="nsew")
@@ -97,9 +95,5 @@ def _load_plugin():
         "configure_shell_macro", "run", "Configure shell macro...", show_dialog
     )
     get_workbench().add_command(
-        "execute_shell_macro",
-        "run",
-        "Execute shell macro",
-        execute_macro,
-        default_sequence="<F9>",
+        "execute_shell_macro", "run", "Execute shell macro", execute_macro, default_sequence="<F9>"
     )

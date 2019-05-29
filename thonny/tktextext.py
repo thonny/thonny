@@ -25,15 +25,9 @@ class TweakableText(tk.Text):
         self.tk.createcommand(self._w, self._dispatch_tk_operation)
         self._tk_proxies = {}
 
-        self._original_insert = self._register_tk_proxy_function(
-            "insert", self.intercept_insert
-        )
-        self._original_delete = self._register_tk_proxy_function(
-            "delete", self.intercept_delete
-        )
-        self._original_mark = self._register_tk_proxy_function(
-            "mark", self.intercept_mark
-        )
+        self._original_insert = self._register_tk_proxy_function("insert", self.intercept_insert)
+        self._original_delete = self._register_tk_proxy_function("delete", self.intercept_delete)
+        self._original_mark = self._register_tk_proxy_function("mark", self.intercept_mark)
 
     def _register_tk_proxy_function(self, operation, function):
         self._tk_proxies[operation] = function
@@ -55,8 +49,7 @@ class TweakableText(tk.Text):
         except TclError as e:
             # Some Tk internal actions (eg. paste and cut) can cause this error
             if (
-                str(e).lower()
-                == '''text doesn't contain any characters tagged with "sel"'''
+                str(e).lower() == '''text doesn't contain any characters tagged with "sel"'''
                 and operation in ["delete", "index", "get"]
                 and args in [("sel.first", "sel.last"), ("sel.first",)]
             ):
@@ -64,10 +57,7 @@ class TweakableText(tk.Text):
                 pass
             else:
                 exception(
-                    "[_dispatch_tk_operation] operation: "
-                    + operation
-                    + ", args:"
-                    + repr(args)
+                    "[_dispatch_tk_operation] operation: " + operation + ", args:" + repr(args)
                 )
                 # traceback.print_exc()
 
@@ -109,9 +99,7 @@ class TweakableText(tk.Text):
 
     def intercept_insert(self, index, chars, tags=None, **kw):
         assert isinstance(chars, str)
-        if (
-            chars >= "\uf704" and chars <= "\uf70d"
-        ):  # Function keys F1..F10 in Mac cause these
+        if chars >= "\uf704" and chars <= "\uf70d":  # Function keys F1..F10 in Mac cause these
             pass
         elif self.is_read_only():
             self.bell()
@@ -190,7 +178,7 @@ class EnhancedText(TweakableText):
         indent_with_tabs=False,
         replace_tabs=False,
         cnf={},
-        **kw
+        **kw,
     ):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
@@ -269,9 +257,7 @@ class EnhancedText(TweakableText):
         self.bind("<Prior>", self.perform_page_up, True)
 
     def _bind_selection_aids(self):
-        self.bind(
-            "<Command-a>" if _running_on_mac() else "<Control-a>", self.select_all, True
-        )
+        self.bind("<Command-a>" if _running_on_mac() else "<Control-a>", self.select_all, True)
 
     def _bind_undo_aids(self):
         self.bind("<<Undo>>", self._on_undo, True)
@@ -424,9 +410,7 @@ class EnhancedText(TweakableText):
             row, _ = map(int, last_visible_idx.split("."))
             line_count = self.get_line_count()
 
-            if (
-                row == line_count or row == line_count - 1
-            ):  # otherwise tk doesn't show last line
+            if row == line_count or row == line_count - 1:  # otherwise tk doesn't show last line
                 self.mark_set("insert", "end")
         except Exception:
             traceback.print_exc()
@@ -507,9 +491,7 @@ class EnhancedText(TweakableText):
 
     def perform_tab(self, event=None):
         self._log_keypress_for_undo(event)
-        if (
-            event.state & 0x0001
-        ):  # shift is pressed (http://stackoverflow.com/q/32426250/261181)
+        if event.state & 0x0001:  # shift is pressed (http://stackoverflow.com/q/32426250/261181)
             return self.dedent_region(event)
         else:
             # check whether there are letters before cursor on this line
@@ -740,8 +722,7 @@ class EnhancedText(TweakableText):
                 + "but the text you are about to insert/open contains %d tab characters. "
                 % tab_count
                 + "To avoid confusion, it's better to convert them into spaces (unless you know they should be kept as tabs).\n\n"
-                + "Do you want me to replace each tab with %d spaces?\n\n"
-                % self.indent_width,
+                + "Do you want me to replace each tab with %d spaces?\n\n" % self.indent_width,
                 parent=tk._default_root,
             ):
                 return chars.expandtabs(self.indent_width)
@@ -769,7 +750,7 @@ class TextFrame(ttk.Frame):
         relief="sunken",
         gutter_background="#e0e0e0",
         gutter_foreground="#999999",
-        **text_options
+        **text_options,
     ):
         ttk.Frame.__init__(self, master=master, borderwidth=borderwidth, relief=relief)
 
@@ -838,9 +819,7 @@ class TextFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
 
         self._recommended_line_length = line_length_margin
-        margin_line_color = ttk.Style().lookup(
-            "Gutter", "background", default="LightGray"
-        )
+        margin_line_color = ttk.Style().lookup("Gutter", "background", default="LightGray")
         self._margin_line = tk.Canvas(
             self.text,
             borderwidth=0,
@@ -975,9 +954,7 @@ class TextFrame(ttk.Frame):
                 bbox = self.text.bbox(first_visible_idx)
                 first_visible_col_x = bbox[0]
 
-                margin_line_visible_col = (
-                    self._recommended_line_length - first_visible_col
-                )
+                margin_line_visible_col = self._recommended_line_length - first_visible_col
                 delta = first_visible_col_x
             except Exception:
                 # fall back to ignoring scroll position
@@ -986,9 +963,7 @@ class TextFrame(ttk.Frame):
 
             if margin_line_visible_col > -1:
                 x = (
-                    get_text_font(self.text).measure(
-                        (margin_line_visible_col - 1) * "M"
-                    )
+                    get_text_font(self.text).measure((margin_line_visible_col - 1) * "M")
                     + delta
                     + self.text["padx"]
                 )
@@ -1013,15 +988,10 @@ class TextFrame(ttk.Frame):
 
     def on_gutter_motion(self, event=None):
         try:
-            linepos = int(
-                self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0]
-            )
-            gutter_selection_start = int(
-                self._gutter.index("gutter_selection_start").split(".")[0]
-            )
+            linepos = int(self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0])
+            gutter_selection_start = int(self._gutter.index("gutter_selection_start").split(".")[0])
             self.text.select_lines(
-                min(gutter_selection_start, linepos),
-                max(gutter_selection_start - 1, linepos - 1),
+                min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1)
             )
             self.text.mark_set("insert", "%s.0" % linepos)
         except tk.TclError:

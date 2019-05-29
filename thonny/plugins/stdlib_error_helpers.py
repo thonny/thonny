@@ -19,24 +19,18 @@ class SyntaxErrorHelper(ErrorHelper):
 
         if self.error_info["message"] == "EOL while scanning string literal":
             self.intro_text = (
-                "You haven't properly closed the string on line %s."
-                % self.error_info["lineno"]
+                "You haven't properly closed the string on line %s." % self.error_info["lineno"]
                 + "\n(If you want a multi-line string, then surround it with"
                 + " `'''` or `\"\"\"` at both ends.)"
             )
 
-        elif (
-            self.error_info["message"]
-            == "EOF while scanning triple-quoted string literal"
-        ):
+        elif self.error_info["message"] == "EOF while scanning triple-quoted string literal":
             # lineno is not useful, as it is at the end of the file and user probably
             # didn't want the string to end there
             self.intro_text = "You haven't properly closed a triple-quoted string"
 
         else:
-            if self.error_info["filename"] and os.path.isfile(
-                self.error_info["filename"]
-            ):
+            if self.error_info["filename"] and os.path.isfile(self.error_info["filename"]):
                 with open(self.error_info["filename"], mode="rb") as fp:
                     try:
                         for t in tokenize.tokenize(fp.readline):
@@ -48,9 +42,7 @@ class SyntaxErrorHelper(ErrorHelper):
                     token.ERRORTOKEN,
                     token.ENDMARKER,
                 ]:
-                    self.tokens.append(
-                        tokenize.TokenInfo(token.ERRORTOKEN, "", None, None, "")
-                    )
+                    self.tokens.append(tokenize.TokenInfo(token.ERRORTOKEN, "", None, None, ""))
             else:
                 self.tokens = []
 
@@ -127,8 +119,7 @@ class SyntaxErrorHelper(ErrorHelper):
                     body = "Nothing is allowed between `%s` and colon." % t.string
                     relevance = 9
                     if (
-                        self.tokens[keyword_pos + 1].type
-                        not in (token.NEWLINE, tokenize.COMMENT)
+                        self.tokens[keyword_pos + 1].type not in (token.NEWLINE, tokenize.COMMENT)
                         and t.string == "else"
                     ):
                         body = "If you want to specify a conditon, then use `elif` or nested `if`."
@@ -143,9 +134,7 @@ class SyntaxErrorHelper(ErrorHelper):
         if not problem:
             return None
 
-        return Suggestion(
-            "missing-or-misplaced-colon", "Unbalanced brackets", problem[1], 8
-        )
+        return Suggestion("missing-or-misplaced-colon", "Unbalanced brackets", problem[1], 8)
 
     def _sug_wrong_increment_op(self):
         pass
@@ -258,11 +247,7 @@ class NameErrorHelper(ErrorHelper):
         ]
 
     def _sug_missing_quotes(self):
-        if (
-            self._is_attribute_value()
-            or self._is_call_function()
-            or self._is_subscript_value()
-        ):
+        if self._is_attribute_value() or self._is_call_function() or self._is_subscript_value():
             relevance = 0
         else:
             relevance = 5
@@ -309,9 +294,7 @@ class NameErrorHelper(ErrorHelper):
                 + " Don't forget that case of the letters matters!"
             )
 
-        return Suggestion(
-            "bad-spelling-name", "Did you misspell it (somewhere)?", body, relevance
-        )
+        return Suggestion("bad-spelling-name", "Did you misspell it (somewhere)?", body, relevance)
 
     def _sug_missing_import(self):
         likely_importable_functions = {
@@ -389,22 +372,15 @@ class NameErrorHelper(ErrorHelper):
             relevance = 3
 
         if body is None:
-            body = (
-                "Some functions/variables need to be imported before they can be used."
-            )
+            body = "Some functions/variables need to be imported before they can be used."
 
-        return Suggestion(
-            "missing-import", "Did you forget to import it?", body, relevance
-        )
+        return Suggestion("missing-import", "Did you forget to import it?", body, relevance)
 
     def _sug_local_from_global(self):
         relevance = 0
         body = None
 
-        if (
-            self.last_frame.code_name == "<module>"
-            and self.last_frame_module_ast is not None
-        ):
+        if self.last_frame.code_name == "<module>" and self.last_frame_module_ast is not None:
             function_names = set()
             for node in ast.walk(self.last_frame_module_ast):
                 if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
@@ -420,10 +396,7 @@ class NameErrorHelper(ErrorHelper):
                             and isinstance(localnode.ctx, ast.Store)
                         ):
                             function_names.add(node.name)
-                        elif (
-                            isinstance(localnode, ast.Global)
-                            and self.name in localnode.names
-                        ):
+                        elif isinstance(localnode, ast.Global) and self.name in localnode.names:
                             declared_global = True
 
                     if node.name in function_names and declared_global:
@@ -549,8 +522,7 @@ class AttributeErrorHelper(ErrorHelper):
         return Suggestion(
             "wrong-type-attribute",
             "Did you expect another type?",
-            "If you didn't mean %s %s, "
-            % (action, _get_phrase_for_object(self.type_name))
+            "If you didn't mean %s %s, " % (action, _get_phrase_for_object(self.type_name))
             + "then step through your program to see "
             + "why this type appears here.",
             3,
@@ -567,9 +539,7 @@ class OSErrorHelper(ErrorHelper):
         super().__init__(error_info)
 
         if "Address already in use" in self.error_info["message"]:
-            self.intro_text = (
-                "Your programs tries to listen on a port which is already taken."
-            )
+            self.intro_text = "Your programs tries to listen on a port which is already taken."
             self.suggestions = [
                 Suggestion(
                     "kill-by-port-type-error",
@@ -602,8 +572,7 @@ class OSErrorHelper(ErrorHelper):
             )
         else:
             s += (
-                "``!lsof -i:5000``\n\n"
-                + "You should see the process ID under the heading PID.\n\n"
+                "``!lsof -i:5000``\n\n" + "You should see the process ID under the heading PID.\n\n"
             )
 
         s += (
@@ -628,8 +597,7 @@ class TypeErrorHelper(ErrorHelper):
         super().__init__(error_info)
 
         self.intro_text = (
-            "Python was asked to do an operation with an object which "
-            + "doesn't support it."
+            "Python was asked to do an operation with an object which " + "doesn't support it."
         )
 
         self.suggestions = [
@@ -687,11 +655,7 @@ class TypeErrorHelper(ErrorHelper):
                     "Did you mean to treat both sides as numbers and produce a sum?",
                     "In this case you should first convert the string to a number "
                     + "using either function `float` or `int`, eg:\n\n"
-                    + (
-                        "`float('3.14') + 22`"
-                        if string_first
-                        else "`22 + float('3.14')`"
-                    ),
+                    + ("`float('3.14') + 22`" if string_first else "`22 + float('3.14')`"),
                     7,
                 )
             )

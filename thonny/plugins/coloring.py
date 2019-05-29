@@ -146,9 +146,7 @@ class SyntaxColorer:
                     match_start, match_end = match.span(token_type)
 
                     self.text.tag_add(
-                        token_type,
-                        start + "+%dc" % match_start,
-                        start + "+%dc" % match_end,
+                        token_type, start + "+%dc" % match_start, start + "+%dc" % match_end
                     )
 
                     # Mark also the word following def or class
@@ -188,9 +186,7 @@ class SyntaxColorer:
                             and not token_text.endswith("'''")
                             or len(token_text) == 3
                         ):
-                            str_end = int(
-                                float(self.text.index(start + "+%dc" % match_end))
-                            )
+                            str_end = int(float(self.text.index(start + "+%dc" % match_end)))
                             file_end = int(float(self.text.index("end")))
 
                             if str_end == file_end:
@@ -262,9 +258,7 @@ def update_coloring(event):
 
         text.syntax_colorer = class_(text)
 
-    text.syntax_colorer.schedule_update(
-        event, get_workbench().get_option("view.syntax_coloring")
-    )
+    text.syntax_colorer.schedule_update(event, get_workbench().get_option("view.syntax_coloring"))
 
 
 def load_plugin() -> None:

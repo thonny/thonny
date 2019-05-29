@@ -9,12 +9,7 @@ from thonny.common import normpath_with_actual_case
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import WINDOWS_EXE
-from thonny.ui_utils import (
-    SubprocessDialog,
-    askdirectory,
-    askopenfilename,
-    create_string_var,
-)
+from thonny.ui_utils import SubprocessDialog, askdirectory, askopenfilename, create_string_var
 
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
@@ -25,9 +20,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             get_workbench().get_option("CustomInterpreter.path")
         )
 
-        entry_label = ttk.Label(
-            self, text="Which interpreter to use for running programs?"
-        )
+        entry_label = ttk.Label(self, text="Which interpreter to use for running programs?")
         entry_label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
         self._entry = ttk.Combobox(
@@ -63,9 +56,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             command=self._create_venv,
         )
 
-        self._venv_button.grid(
-            row=4, column=0, columnspan=2, sticky=tk.NSEW, pady=(5, 0)
-        )
+        self._venv_button.grid(row=4, column=0, columnspan=2, sticky=tk.NSEW, pady=(5, 0))
 
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
@@ -74,10 +65,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         # TODO: get dir of current interpreter
         options = {"master": self}
         if running_on_windows():
-            options["filetypes"] = [
-                ("Python interpreters", "python.exe"),
-                ("all files", ".*"),
-            ]
+            options["filetypes"] = [("Python interpreters", "python.exe"), ("all files", ".*")]
 
         filename = askopenfilename(**options)
 
@@ -117,9 +105,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         ui_utils.show_dialog(dlg)
 
         if running_on_windows():
-            exe_path = normpath_with_actual_case(
-                os.path.join(path, "Scripts", "python.exe")
-            )
+            exe_path = normpath_with_actual_case(os.path.join(path, "Scripts", "python.exe"))
         else:
             exe_path = os.path.join(path, "bin", "python3")
 
@@ -155,12 +141,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
 
         else:
             # Common unix locations
-            dirs = [
-                "/bin",
-                "/usr/bin",
-                "/usr/local/bin",
-                os.path.expanduser("~/.local/bin"),
-            ]
+            dirs = ["/bin", "/usr/bin", "/usr/local/bin", os.path.expanduser("~/.local/bin")]
             for dir_ in dirs:
                 # if the dir_ is just a link to another dir_, skip it
                 # (not to show items twice)
@@ -171,35 +152,20 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 apath = normpath_with_actual_case(dir_)
                 if apath != dir_ and apath in dirs:
                     continue
-                for name in [
-                    "python3",
-                    "python3.5",
-                    "python3.6",
-                    "python3.7",
-                    "python3.8",
-                ]:
+                for name in ["python3", "python3.5", "python3.6", "python3.7", "python3.8"]:
                     path = os.path.join(dir_, name)
                     if os.path.exists(path):
                         result.add(path)
 
         if running_on_mac_os():
             for version in ["3.5", "3.6", "3.7", "3.8"]:
-                dir_ = os.path.join(
-                    "/Library/Frameworks/Python.framework/Versions", version, "bin"
-                )
+                dir_ = os.path.join("/Library/Frameworks/Python.framework/Versions", version, "bin")
                 path = os.path.join(dir_, "python3")
 
                 if os.path.exists(path):
                     result.add(path)
 
-        for command in [
-            "python3",
-            "python3.5",
-            "python3.5",
-            "python3.6",
-            "python3.7",
-            "python3.8",
-        ]:
+        for command in ["python3", "python3.5", "python3.5", "python3.6", "python3.7", "python3.8"]:
             path = which(command)
             if path is not None and os.path.isabs(path):
                 result.add(path)
@@ -233,9 +199,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 try:
                     for subkey in [
                         "SOFTWARE\\Python\\PythonCore\\" + version + "\\InstallPath",
-                        "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\"
-                        + version
-                        + "\\InstallPath",
+                        "SOFTWARE\\Python\\PythonCore\\Wow6432Node\\" + version + "\\InstallPath",
                     ]:
                         dir_ = winreg.QueryValue(key, subkey)
                         if dir_:
