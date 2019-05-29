@@ -794,6 +794,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.edit_reset()
 
     def _ensure_visible(self):
+        if self.winfo_ismapped():
+            return
+
         focused_view = get_workbench().focus_get()
         get_workbench().show_view("ShellView")
         if focused_view is not None:
