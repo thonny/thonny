@@ -120,12 +120,8 @@ def configure_text(text):
                     return base_predicate(x, y, top, bottom)
 
                 tag_name = "%s_%s_%s" % (orient, top, bottom)
-                bitmap_path = create_bitmap_file(
-                    indent_width, line_height, predicate, tag_name
-                )
-                text.tag_configure(
-                    tag_name, background=color, bgstipple="@" + bitmap_path
-                )
+                bitmap_path = create_bitmap_file(indent_width, line_height, predicate, tag_name)
+                text.tag_configure(tag_name, background=color, bgstipple="@" + bitmap_path)
 
     return True
 
@@ -160,9 +156,7 @@ def add_tags(text):
     def tag_tree(node):
         nonlocal last_line, last_col
 
-        if node.type == "simple_stmt" or isinstance(
-            node, (python_tree.Flow, python_tree.Scope)
-        ):
+        if node.type == "simple_stmt" or isinstance(node, (python_tree.Flow, python_tree.Scope)):
 
             start_line, start_col = node.start_pos
             end_line, end_col = node.end_pos
@@ -175,15 +169,9 @@ def add_tags(text):
                     # NB! tag not visible when logically empty line
                     # doesn't have indent prefix
                     text.tag_add(
-                        "ver_False_False",
-                        "%d.%d" % (i, last_col - 1),
-                        "%d.%d" % (i, last_col),
+                        "ver_False_False", "%d.%d" % (i, last_col - 1), "%d.%d" % (i, last_col)
                     )
-                    print(
-                        "ver_False_False",
-                        "%d.%d" % (i, last_col - 1),
-                        "%d.%d" % (i, last_col),
-                    )
+                    print("ver_False_False", "%d.%d" % (i, last_col - 1), "%d.%d" % (i, last_col))
 
             print(node)
 

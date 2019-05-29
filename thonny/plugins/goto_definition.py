@@ -27,9 +27,7 @@ def goto_definition(event):
         if module_path and line is not None:
             get_workbench().get_editor_notebook().show_file(module_path, line)
         elif module_name == "" and line is not None:  # current editor
-            get_workbench().get_editor_notebook().get_current_editor().select_range(
-                line
-            )
+            get_workbench().get_editor_notebook().get_current_editor().select_range(line)
 
 
 def load_plugin() -> None:

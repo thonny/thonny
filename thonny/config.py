@@ -27,9 +27,7 @@ def try_load_configuration(filename):
         ):
             os.replace(filename, filename + "_corrupt")
             # For some reasons Thonny styles are not loaded properly once messagebox has been shown before main window (At least Windows Py 3.5)
-            raise SystemExit(
-                "Configuration file has been discarded. Please restart Thonny!"
-            )
+            raise SystemExit("Configuration file has been discarded. Please restart Thonny!")
         else:
             raise
 
@@ -64,9 +62,7 @@ class ConfigurationManager:
                     # (I know, it's not proper place for this code, but ...)
                     old_user_logs = os.path.join(old_user_dir, "user_logs")
                     new_user_logs = os.path.join(THONNY_USER_DIR, "user_logs")
-                    if os.path.exists(old_user_logs) and not os.path.exists(
-                        new_user_logs
-                    ):
+                    if os.path.exists(old_user_logs) and not os.path.exists(new_user_logs):
                         try:
                             shutil.copytree(old_user_logs, new_user_logs)
                         except Exception:
@@ -74,8 +70,7 @@ class ConfigurationManager:
 
         if not self.get_option("general.configuration_creation_timestamp"):
             self.set_option(
-                "general.configuration_creation_timestamp",
-                datetime.datetime.now().isoformat(),
+                "general.configuration_creation_timestamp", datetime.datetime.now().isoformat()
             )
 
         # print(prefs_filename, self.sections())
@@ -143,10 +138,7 @@ class ConfigurationManager:
                 var = tk.StringVar(value=value)
             else:
                 raise KeyError(
-                    "Can't create Tk Variable for "
-                    + name
-                    + ". Type is "
-                    + str(type(value))
+                    "Can't create Tk Variable for " + name + ". Type is " + str(type(value))
                 )
             self._variables[name] = var
             return var

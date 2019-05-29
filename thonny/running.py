@@ -23,14 +23,7 @@ from logging import debug
 from threading import Thread
 from time import sleep
 
-from thonny import (
-    THONNY_USER_DIR,
-    common,
-    get_runner,
-    get_shell,
-    get_workbench,
-    ui_utils,
-)
+from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
 from thonny.code import get_current_breakpoints, get_saved_current_script_filename
 from thonny.common import (
     BackendEvent,
@@ -222,9 +215,7 @@ class Runner:
                     self._postponed_commands.remove(older_cmd)
 
         if len(self._postponed_commands) > 10:
-            logging.warning(
-                "Can't pile up too many commands. This command will be just ignored"
-            )
+            logging.warning("Can't pile up too many commands. This command will be just ignored")
         else:
             self._postponed_commands.append(cmd)
 
@@ -247,10 +238,7 @@ class Runner:
         working_directory: Optional[str] = None,
         command_name: str = "Run",
     ) -> None:
-        if (
-            working_directory is not None
-            and get_workbench().get_cwd() != working_directory
-        ):
+        if working_directory is not None and get_workbench().get_cwd() != working_directory:
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cmd_line(["%cd", working_directory]) + "\n"
@@ -262,16 +250,12 @@ class Runner:
 
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(script_path, next_cwd)
-        exe_cmd_line = (
-            construct_cmd_line(["%" + command_name, rel_filename] + args) + "\n"
-        )
+        exe_cmd_line = construct_cmd_line(["%" + command_name, rel_filename] + args) + "\n"
 
         # submit to shell (shell will execute it)
         get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
 
-    def execute_current(
-        self, command_name: str, always_change_to_script_dir: bool = False
-    ) -> None:
+    def execute_current(self, command_name: str, always_change_to_script_dir: bool = False) -> None:
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
@@ -383,10 +367,7 @@ class Runner:
                 if not msg:
                     break
                 logging.debug(
-                    "RUNNER GOT: %s, %s in state: %s",
-                    msg.event_type,
-                    msg,
-                    self.get_state(),
+                    "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
                 )
 
             except BackendTerminatedError as exc:
@@ -414,9 +395,7 @@ class Runner:
             try:
                 self._publishing_events = True
                 class_event_type = type(msg).__name__
-                get_workbench().event_generate(
-                    class_event_type, event=msg
-                )  # more general event
+                get_workbench().event_generate(class_event_type, event=msg)  # more general event
                 if msg.event_type != class_event_type:
                     # more specific event
                     get_workbench().event_generate(msg.event_type, event=msg)
@@ -446,9 +425,7 @@ class Runner:
 
         get_workbench().become_active_window()
 
-    def restart_backend(
-        self, clean: bool, first: bool = False, wait: float = 0
-    ) -> None:
+    def restart_backend(self, clean: bool, first: bool = False, wait: float = 0) -> None:
         """Recreate (or replace) backend proxy / backend process."""
 
         if not first:
@@ -473,10 +450,7 @@ class Runner:
 
         if wait:
             start_time = time.time()
-            while (
-                not self.is_waiting_toplevel_command()
-                and time.time() - start_time <= wait
-            ):
+            while not self.is_waiting_toplevel_command() and time.time() - start_time <= wait:
                 # self._pull_vm_messages()
                 get_workbench().update()
                 sleep(0.01)
@@ -503,9 +477,7 @@ class Runner:
         return self._proxy
 
     def _check_alloc_console(self) -> None:
-        if sys.executable.endswith("thonny.exe") or sys.executable.endswith(
-            "pythonw.exe"
-        ):
+        if sys.executable.endswith("thonny.exe") or sys.executable.endswith("pythonw.exe"):
             # These don't have console allocated.
             # Console is required for sending interrupts.
 
@@ -539,9 +511,7 @@ class Runner:
                 # May happen eg. when installation path has "&" in it
                 # See https://bitbucket.org/plas/thonny/issues/508/cant-allocate-windows-console-when
                 # Without flush the console window becomes visible, but Thonny can be still used
-                logging.getLogger("thonny").exception(
-                    "Problem with finalizing console allocation"
-                )
+                logging.getLogger("thonny").exception("Problem with finalizing console allocation")
 
     def can_do_file_operations(self):
         return self._proxy and self._proxy.can_do_file_operations()
@@ -682,8 +652,7 @@ class CPythonProxy(BackendProxy):
                     if (
                         next_msg.event_type == "ProgramOutput"
                         and next_msg["stream_name"] == msg["stream_name"]
-                        and len(msg["data"]) + len(next_msg["data"])
-                        <= OUTPUT_MERGE_THRESHOLD
+                        and len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD
                         and ("\n" not in msg["data"] or not io_animation_required)
                     ):
                         msg["data"] += next_msg["data"]
@@ -735,9 +704,7 @@ class CPythonProxy(BackendProxy):
         if self._proc is not None and self._proc.poll() is None:
             if running_on_windows():
                 try:
-                    os.kill(
-                        self._proc.pid, signal.CTRL_BREAK_EVENT
-                    )  # @UndefinedVariable
+                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
                 except Exception:
                     logging.exception("Could not interrupt backend process")
             else:
@@ -864,9 +831,7 @@ class CPythonProxy(BackendProxy):
 
                     # print first part as it is
                     message_queue.append(
-                        BackendEvent(
-                            "ProgramOutput", data=parts[0], stream_name="stdout"
-                        )
+                        BackendEvent("ProgramOutput", data=parts[0], stream_name="stdout")
                     )
 
                     if len(parts) == 2:
@@ -877,9 +842,7 @@ class CPythonProxy(BackendProxy):
                             # just print ...
                             message_queue.append(
                                 BackendEvent(
-                                    "ProgramOutput",
-                                    data=second_part,
-                                    stream_name="stdout",
+                                    "ProgramOutput", data=second_part, stream_name="stdout"
                                 )
                             )
 
@@ -993,9 +956,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
             if venv_version[2] != sys_version[2]:
                 self._create_private_venv(
-                    path,
-                    "Please wait!\nUpgrading Thonny's virtual environment.",
-                    upgrade=True,
+                    path, "Please wait!\nUpgrading Thonny's virtual environment.", upgrade=True
                 )
 
     def _create_private_venv(self, path, description, clear=False, upgrade=False):
@@ -1122,9 +1083,7 @@ def using_bundled_python():
 
 
 def is_bundled_python(executable):
-    return os.path.exists(
-        os.path.join(os.path.dirname(executable), "thonny_python.ini")
-    )
+    return os.path.exists(os.path.join(os.path.dirname(executable), "thonny_python.ini"))
 
 
 def create_backend_python_process(
@@ -1201,9 +1160,7 @@ class BackendTerminatedError(Exception):
 
 
 def get_frontend_python():
-    return sys.executable.replace("thonny.exe", "python.exe").replace(
-        "pythonw.exe", "python.exe"
-    )
+    return sys.executable.replace("thonny.exe", "python.exe").replace("pythonw.exe", "python.exe")
 
 
 def is_venv_interpreter_of_current_interpreter(executable):
@@ -1281,12 +1238,7 @@ def get_environment_overrides_for_python_subprocess(target_executable):
         # never pass some variables to different interpreter
         # (even if it's venv or symlink to current one)
         if not is_same_path(target_executable, this_executable):
-            for key in [
-                "PYTHONPATH",
-                "PYTHONHOME",
-                "PYTHONNOUSERSITE",
-                "PYTHONUSERBASE",
-            ]:
+            for key in ["PYTHONPATH", "PYTHONHOME", "PYTHONNOUSERSITE", "PYTHONUSERBASE"]:
                 if key in os.environ:
                     result[key] = None
     else:

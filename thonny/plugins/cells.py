@@ -5,18 +5,14 @@ import re
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.codeview import CodeViewText
 
-cell_regex = re.compile(
-    r"(^|\n)(# ?%%|##|# In\[\d+\]:)[^\n]*", re.MULTILINE
-)  # @UndefinedVariable
+cell_regex = re.compile(r"(^|\n)(# ?%%|##|# In\[\d+\]:)[^\n]*", re.MULTILINE)  # @UndefinedVariable
 
 
 def update_editor_cells(event):
     text = event.widget
 
     if not getattr(text, "cell_tags_configured", False):
-        text.tag_configure(
-            "CURRENT_CELL", borderwidth=1, relief="groove", background="LightYellow"
-        )
+        text.tag_configure("CURRENT_CELL", borderwidth=1, relief="groove", background="LightYellow")
         text.tag_configure("CELL_HEADER", font="BoldEditorFont", foreground="#665843")
 
         text.tag_lower("CELL_HEADER")
@@ -50,9 +46,7 @@ def update_editor_cells(event):
     # is elsewhere ? This would act as kind of bookmark.
 
     for start_index, end_index in cells:
-        if text.compare(start_index, "<=", "insert") and text.compare(
-            end_index, ">", "insert"
-        ):
+        if text.compare(start_index, "<=", "insert") and text.compare(end_index, ">", "insert"):
             text.tag_add("CURRENT_CELL", start_index, end_index)
             break
 
@@ -90,8 +84,7 @@ def _patch_perform_return():
         ranges = text.tag_ranges("CURRENT_CELL")
 
         if len(ranges) == 2 and (
-            ui_utils.shift_is_pressed(event.state)
-            or ui_utils.control_is_pressed(event.state)
+            ui_utils.shift_is_pressed(event.state) or ui_utils.control_is_pressed(event.state)
         ):
 
             if run_enabled():
@@ -160,9 +153,7 @@ def run_selection(event=None):
 
 def run_enabled():
     widget = get_workbench().focus_get()
-    return (
-        isinstance(widget, CodeViewText) and get_runner().is_waiting_toplevel_command()
-    )
+    return isinstance(widget, CodeViewText) and get_runner().is_waiting_toplevel_command()
 
 
 def _load_plugin():

@@ -16,11 +16,7 @@ asynchronous.
 class Completer(tk.Listbox):
     def __init__(self, text):
         tk.Listbox.__init__(
-            self,
-            master=text,
-            font="SmallEditorFont",
-            activestyle="dotbox",
-            exportselection=False,
+            self, master=text, font="SmallEditorFont", activestyle="dotbox", exportselection=False
         )
 
         self.text = text
@@ -34,13 +30,9 @@ class Completer(tk.Listbox):
         # of this binding
         self.text_priority_bindtag = "completable" + str(self.text.winfo_id())
         self.text.bindtags((self.text_priority_bindtag,) + self.text.bindtags())
-        self.text.bind_class(
-            self.text_priority_bindtag, "<Key>", self._on_text_keypress, True
-        )
+        self.text.bind_class(self.text_priority_bindtag, "<Key>", self._on_text_keypress, True)
 
-        self.text.bind(
-            "<<TextChange>>", self._on_text_change, True
-        )  # Assuming TweakableText
+        self.text.bind("<<TextChange>>", self._on_text_change, True)  # Assuming TweakableText
 
         # for cases when Listbox gets focus
         self.bind("<Escape>", self._close)
@@ -50,9 +42,7 @@ class Completer(tk.Listbox):
 
     def _bind_result_event(self):
         # TODO: remove binding when editor gets closed
-        get_workbench().bind(
-            "editor_autocomplete_response", self._handle_backend_response, True
-        )
+        get_workbench().bind("editor_autocomplete_response", self._handle_backend_response, True)
 
     def handle_autocomplete_request(self):
         row, column = self._get_position()
@@ -76,9 +66,7 @@ class Completer(tk.Listbox):
             self._close()
         elif msg.error:
             self._close()
-            messagebox.showerror(
-                "Autocomplete error", msg.error, parent=get_workbench()
-            )
+            messagebox.showerror("Autocomplete error", msg.error, parent=get_workbench())
         else:
             self._present_completions(msg.completions)
 
@@ -107,11 +95,7 @@ class Completer(tk.Listbox):
     def _show_box(self, completions):
         self.delete(0, self.size())
         self.insert(
-            0,
-            *[
-                c["name"] + ("=" if c["complete"].endswith("=") else "")
-                for c in completions
-            ],
+            0, *[c["name"] + ("=" if c["complete"].endswith("=") else "") for c in completions]
         )
         self.activate(0)
         self.selection_set(0)
@@ -121,9 +105,7 @@ class Completer(tk.Listbox):
 
             # _, _, _, list_box_height = self.bbox(0)
             height = 100  # min(150, list_box_height * len(completions) * 1.15)
-            typed_name_length = len(completions[0]["name"]) - len(
-                completions[0]["complete"]
-            )
+            typed_name_length = len(completions[0]["name"]) - len(completions[0]["complete"])
             text_box_x, text_box_y, _, text_box_height = self.text.bbox(
                 "insert-%dc" % typed_name_length
             )
@@ -269,9 +251,7 @@ class Completer(tk.Listbox):
 class ShellCompleter(Completer):
     def _bind_result_event(self):
         # TODO: remove binding when editor gets closed
-        get_workbench().bind(
-            "shell_autocomplete_response", self._handle_backend_response, True
-        )
+        get_workbench().bind("shell_autocomplete_response", self._handle_backend_response, True)
 
     def handle_autocomplete_request(self):
         source = self._get_prefix()

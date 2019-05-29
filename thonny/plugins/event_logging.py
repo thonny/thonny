@@ -19,11 +19,7 @@ class EventLogger:
 
     def _init_commands(self):
         get_workbench().add_command(
-            "export_usage_logs",
-            "tools",
-            _("Export usage logs..."),
-            self._cmd_export,
-            group=110,
+            "export_usage_logs", "tools", _("Export usage logs..."), self._cmd_export, group=110
         )
 
     def _init_logging(self):
@@ -177,9 +173,7 @@ class EventLogger:
 
         if total_size > 10 * 1024 * 1024:
             zip_filename = _generate_timestamp_file_name("zip")
-            with zipfile.ZipFile(
-                zip_filename, "w", compression=zipfile.ZIP_DEFLATED
-            ) as zipf:
+            with zipfile.ZipFile(zip_filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
                 for item, full_name in uncompressed_files:
                     zipf.write(full_name, arcname=item)
 

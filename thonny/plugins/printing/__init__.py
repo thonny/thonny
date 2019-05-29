@@ -18,9 +18,7 @@ def print_current_script():
 
     script_html = _export_text_as_html(editor.get_text_widget())
     title_html = escape_html(editor.get_title())
-    full_html = template_html.replace("%title%", title_html).replace(
-        "%script%", script_html
-    )
+    full_html = template_html.replace("%title%", title_html).replace("%script%", script_html)
 
     temp_handle, temp_fn = tempfile.mkstemp(suffix=".html", prefix="thonny_")
     with os.fdopen(temp_handle, "w", encoding="utf-8") as f:

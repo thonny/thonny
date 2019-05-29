@@ -63,8 +63,7 @@ SIMPLE_MODE_VIEWS = ["ShellView", "VariablesView"]
 
 MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"])
 BackendSpec = collections.namedtuple(
-    "BackendSpec",
-    ["name", "proxy_class", "description", "config_page_constructor", "sort_key"],
+    "BackendSpec", ["name", "proxy_class", "description", "config_page_constructor", "sort_key"]
 )
 
 BasicUiThemeSettings = Dict[str, Dict[str, Union[Dict, Sequence]]]
@@ -73,9 +72,7 @@ UiThemeSettings = Union[BasicUiThemeSettings, CompoundUiThemeSettings]
 FlexibleUiThemeSettings = Union[UiThemeSettings, Callable[[], UiThemeSettings]]
 
 SyntaxThemeSettings = Dict[str, Dict[str, Union[str, int, bool]]]
-FlexibleSyntaxThemeSettings = Union[
-    SyntaxThemeSettings, Callable[[], SyntaxThemeSettings]
-]
+FlexibleSyntaxThemeSettings = Union[SyntaxThemeSettings, Callable[[], SyntaxThemeSettings]]
 
 
 class Workbench(tk.Tk):
@@ -127,9 +124,7 @@ class Workbench(tk.Tk):
         self._commands = []  # type: List[Dict[str, Any]]
         self._view_records = {}  # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = []  # type: List[Type]
-        self._latin_shortcuts = (
-            {}
-        )  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
+        self._latin_shortcuts = {}  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
 
         self._init_configuration()
         self._init_diagnostic_logging()
@@ -142,9 +137,7 @@ class Workbench(tk.Tk):
 
         self._init_theming()
         self._init_window()
-        self.add_view(
-            ShellView, "Shell", "s", visible_by_default=True, default_position_key="A"
-        )
+        self.add_view(ShellView, "Shell", "s", visible_by_default=True, default_position_key="A")
         assistance.init()
         self._runner = Runner()
         self._load_plugins()
@@ -181,9 +174,7 @@ class Workbench(tk.Tk):
         self.bind_class("CodeViewText", "<<CursorMove>>", self.update_title, True)
         self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
-        self.get_editor_notebook().bind(
-            "<<NotebookTabChanged>>", self.update_title, True
-        )
+        self.get_editor_notebook().bind("<<NotebookTabChanged>>", self.update_title, True)
         self.bind_all("<KeyPress>", self._on_all_key_presses, True)
         self.bind("<FocusOut>", self._on_focus_out, True)
         self.bind("<FocusIn>", self._on_focus_in, True)
@@ -192,9 +183,7 @@ class Workbench(tk.Tk):
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
         self._make_sanity_checks()
-        self.after(
-            1, self._start_runner
-        )  # Show UI already before waiting for the backend to start
+        self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
@@ -297,14 +286,8 @@ class Workbench(tk.Tk):
             "{0}x{1}+{2}+{3}".format(
                 max(self.get_option("layout.width"), 320),
                 max(self.get_option("layout.height"), 240),
-                min(
-                    max(self.get_option("layout.left"), 0),
-                    self.winfo_screenwidth() - 200,
-                ),
-                min(
-                    max(self.get_option("layout.top"), 0),
-                    self.winfo_screenheight() - 200,
-                ),
+                min(max(self.get_option("layout.left"), 0), self.winfo_screenwidth() - 200),
+                min(max(self.get_option("layout.top"), 0), self.winfo_screenheight() - 200),
             )
         )
 
@@ -379,9 +362,7 @@ class Workbench(tk.Tk):
         load_function_name = "load_plugin"
 
         modules = []
-        for _, module_name, _ in sorted(
-            pkgutil.iter_modules(path, prefix), key=lambda x: x[2]
-        ):
+        for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[2]):
             try:
                 m = importlib.import_module(module_name)
                 if hasattr(m, load_function_name):
@@ -397,9 +378,7 @@ class Workbench(tk.Tk):
 
     def _init_fonts(self) -> None:
         # set up editor and shell fonts
-        self.set_default(
-            "view.io_font_family", "Courier" if running_on_mac_os() else "Courier New"
-        )
+        self.set_default("view.io_font_family", "Courier" if running_on_mac_os() else "Courier New")
 
         default_editor_family = "Courier New"
         families = tk_font.families()
@@ -423,9 +402,7 @@ class Workbench(tk.Tk):
         self._fonts = [
             tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
             tk_font.Font(
-                name="BoldIOFont",
-                family=self.get_option("view.io_font_family"),
-                weight="bold",
+                name="BoldIOFont", family=self.get_option("view.io_font_family"), weight="bold"
             ),
             tk_font.Font(
                 name="UnderlineIOFont",
@@ -433,9 +410,7 @@ class Workbench(tk.Tk):
                 underline=True,
             ),
             tk_font.Font(
-                name="ItalicIOFont",
-                family=self.get_option("view.io_font_family"),
-                slant="italic",
+                name="ItalicIOFont", family=self.get_option("view.io_font_family"), slant="italic"
             ),
             tk_font.Font(
                 name="BoldItalicIOFont",
@@ -443,13 +418,8 @@ class Workbench(tk.Tk):
                 weight="bold",
                 slant="italic",
             ),
-            tk_font.Font(
-                name="EditorFont", family=self.get_option("view.editor_font_family")
-            ),
-            tk_font.Font(
-                name="SmallEditorFont",
-                family=self.get_option("view.editor_font_family"),
-            ),
+            tk_font.Font(name="EditorFont", family=self.get_option("view.editor_font_family")),
+            tk_font.Font(name="SmallEditorFont", family=self.get_option("view.editor_font_family")),
             tk_font.Font(
                 name="BoldEditorFont",
                 family=self.get_option("view.editor_font_family"),
@@ -566,9 +536,7 @@ class Workbench(tk.Tk):
             else [],
         )
 
-        self.add_command(
-            "show_options", "tools", "Options...", self.show_options, group=180
-        )
+        self.add_command("show_options", "tools", "Options...", self.show_options, group=180)
         self.createcommand("::tk::mac::ShowPreferences", self.show_options)
         self.createcommand("::tk::mac::Quit", self._mac_quit)
 
@@ -637,9 +605,7 @@ class Workbench(tk.Tk):
             )
 
         if self.in_debug_mode():
-            self.bind_all(
-                "<Control-Shift-Alt-D>", self._print_state_for_debugging, True
-            )
+            self.bind_all("<Control-Shift-Alt-D>", self._print_state_for_debugging, True)
 
     def _print_state_for_debugging(self, event) -> None:
         print(get_runner()._postponed_commands)
@@ -690,31 +656,21 @@ class Workbench(tk.Tk):
 
         self._view_notebooks = {
             "nw": AutomaticNotebook(
-                self._west_pw,
-                1,
-                preferred_size_in_pw=self.get_option("layout.nw_nb_height"),
+                self._west_pw, 1, preferred_size_in_pw=self.get_option("layout.nw_nb_height")
             ),
             "w": AutomaticNotebook(self._west_pw, 2),
             "sw": AutomaticNotebook(
-                self._west_pw,
-                3,
-                preferred_size_in_pw=self.get_option("layout.sw_nb_height"),
+                self._west_pw, 3, preferred_size_in_pw=self.get_option("layout.sw_nb_height")
             ),
             "s": AutomaticNotebook(
-                self._center_pw,
-                3,
-                preferred_size_in_pw=self.get_option("layout.s_nb_height"),
+                self._center_pw, 3, preferred_size_in_pw=self.get_option("layout.s_nb_height")
             ),
             "ne": AutomaticNotebook(
-                self._east_pw,
-                1,
-                preferred_size_in_pw=self.get_option("layout.ne_nb_height"),
+                self._east_pw, 1, preferred_size_in_pw=self.get_option("layout.ne_nb_height")
             ),
             "e": AutomaticNotebook(self._east_pw, 2),
             "se": AutomaticNotebook(
-                self._east_pw,
-                3,
-                preferred_size_in_pw=self.get_option("layout.se_nb_height"),
+                self._east_pw, 3, preferred_size_in_pw=self.get_option("layout.se_nb_height")
             ),
         }
 
@@ -734,12 +690,8 @@ class Workbench(tk.Tk):
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
         # following will be overwritten by plugins.base_themes
-        self.set_default(
-            "view.ui_theme", "xpnative" if running_on_windows() else "clam"
-        )
-        self.set_default(
-            "view.ui_theme", "xpnative" if running_on_windows() else "clam"
-        )
+        self.set_default("view.ui_theme", "xpnative" if running_on_windows() else "clam")
+        self.set_default("view.ui_theme", "xpnative" if running_on_windows() else "clam")
 
     def add_command(
         self,
@@ -844,9 +796,7 @@ class Workbench(tk.Tk):
                 if bell_when_denied:
                     self.bell()
 
-            self.event_generate(
-                "UICommandDispatched", command_id=command_id, denied=denied
-            )
+            self.event_generate("UICommandDispatched", command_id=command_id, denied=denied)
 
         sequence_option_name = "shortcuts." + command_id
         self.set_default(sequence_option_name, default_sequence)
@@ -864,9 +814,7 @@ class Workbench(tk.Tk):
                 # Use greek alternatives only on Linux
                 # (they are not required on Mac
                 # and cause double events on Windows)
-                register_latin_shortcut(
-                    self._latin_shortcuts, sequence, handler, tester
-                )
+                register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
 
         def dispatch_from_menu():
             # I don't like that Tk menu toggles checbutton variable
@@ -925,13 +873,7 @@ class Workbench(tk.Tk):
             toolbar_group = self._get_menu_index(menu) * 100 + group
             assert caption is not None
             self._add_toolbar_button(
-                _image,
-                command_label,
-                caption,
-                accelerator,
-                handler,
-                tester,
-                toolbar_group,
+                _image, command_label, caption, accelerator, handler, tester, toolbar_group
             )
 
     def add_view(
@@ -963,9 +905,7 @@ class Workbench(tk.Tk):
         if self.get_ui_mode() == "simple":
             visibility_flag = tk.BooleanVar(value=view_id in SIMPLE_MODE_VIEWS)
         else:
-            visibility_flag = cast(
-                tk.BooleanVar, self.get_variable("view." + view_id + ".visible")
-            )
+            visibility_flag = cast(tk.BooleanVar, self.get_variable("view." + view_id + ".visible"))
 
         self._view_records[view_id] = {
             "class": cls,
@@ -1041,9 +981,7 @@ class Workbench(tk.Tk):
         self._syntax_themes[name] = (parent, settings)
 
     def get_usable_ui_theme_names(self) -> Sequence[str]:
-        return sorted(
-            [name for name in self._ui_themes if self._ui_themes[name][0] is not None]
-        )
+        return sorted([name for name in self._ui_themes if self._ui_themes[name][0] is not None])
 
     def get_syntax_theme_names(self) -> Sequence[str]:
         return sorted(self._syntax_themes.keys())
@@ -1111,12 +1049,7 @@ class Workbench(tk.Tk):
         self._style.theme_use(name)
 
         # https://wiki.tcl.tk/37973#pagetocfe8b22ab
-        for setting in [
-            "background",
-            "foreground",
-            "selectBackground",
-            "selectForeground",
-        ]:
+        for setting in ["background", "foreground", "selectBackground", "selectForeground"]:
             value = self._style.lookup("Listbox", setting)
             if value:
                 self.option_add("*TCombobox*Listbox." + setting, value)
@@ -1358,9 +1291,7 @@ class Workbench(tk.Tk):
             master = self._view_notebooks[location]
 
             # create the view
-            view = class_(
-                self
-            )  # View's master is workbench to allow making it maximized
+            view = class_(self)  # View's master is workbench to allow making it maximized
             view.position_key = self._view_records[view_id]["position_key"]
             self._view_records[view_id]["instance"] = view
 
@@ -1492,9 +1423,7 @@ class Workbench(tk.Tk):
 
         return None
 
-    def event_generate(
-        self, sequence: str, event: Optional[Record] = None, **kwargs
-    ) -> None:
+    def event_generate(self, sequence: str, event: Optional[Record] = None, **kwargs) -> None:
         """Uses custom event handling when sequence doesn't start with <.
         In this case arbitrary attributes can be added to the event.
         Otherwise forwards the call to Tk's event_generate"""
@@ -1516,15 +1445,11 @@ class Workbench(tk.Tk):
                     try:
                         handler(event)
                     except Exception:
-                        self.report_exception(
-                            "Problem when handling '" + sequence + "'"
-                        )
+                        self.report_exception("Problem when handling '" + sequence + "'")
 
         self._update_toolbar()
 
-    def bind(
-        self, sequence: str, func: Callable, add: bool = None
-    ) -> None:  # type: ignore
+    def bind(self, sequence: str, func: Callable, add: bool = None) -> None:  # type: ignore
         """Uses custom event handling when sequence doesn't start with <.
         Otherwise forwards the call to Tk's bind"""
         # pylint: disable=signature-differs
@@ -1559,9 +1484,9 @@ class Workbench(tk.Tk):
         # TODO: add a separate command for enabling the heap mode
         # untie the mode from HeapView
 
-        return self._configuration_manager.has_option(
+        return self._configuration_manager.has_option("view.HeapView.visible") and self.get_option(
             "view.HeapView.visible"
-        ) and self.get_option("view.HeapView.visible")
+        )
 
     def in_debug_mode(self) -> bool:
         return os.environ.get("THONNY_DEBUG", False) in [
@@ -1631,31 +1556,19 @@ class Workbench(tk.Tk):
                 f = tk_font.nametofont(name)
                 orig_size = f.cget("size")
                 assert orig_size > 0
-                f.configure(
-                    size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER)
-                )
+                f.configure(size=int(orig_size * self._scaling_factor / MAC_SCALING_MODIFIER))
 
     def update_fonts(self) -> None:
-        editor_font_size = self._guard_font_size(
-            self.get_option("view.editor_font_size")
-        )
+        editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
         editor_font_family = self.get_option("view.editor_font_family")
         io_font_family = self.get_option("view.io_font_family")
 
-        for name in (
-            "IOFont",
-            "BoldIOFont",
-            "UnderlineIOFont",
-            "ItalicIOFont",
-            "BoldItalicIOFont",
-        ):
+        for name in ("IOFont", "BoldIOFont", "UnderlineIOFont", "ItalicIOFont", "BoldItalicIOFont"):
             tk_font.nametofont(name).configure(
                 family=io_font_family,
                 size=min(editor_font_size - 2, int(editor_font_size * 0.8 + 3)),
             )
-        tk_font.nametofont("EditorFont").configure(
-            family=editor_font_family, size=editor_font_size
-        )
+        tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(
             family=editor_font_family, size=editor_font_size - 2
         )
@@ -1702,8 +1615,7 @@ class Workbench(tk.Tk):
     ) -> None:
 
         assert caption is not None and len(caption) > 0, (
-            "Missing caption for '%s'. Toolbar commands must have caption."
-            % command_label
+            "Missing caption for '%s'. Toolbar commands must have caption." % command_label
         )
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:
@@ -1759,9 +1671,7 @@ class Workbench(tk.Tk):
         if delta != 0:
             editor_font_size = self.get_option("view.editor_font_size")
             editor_font_size += delta
-            self.set_option(
-                "view.editor_font_size", self._guard_font_size(editor_font_size)
-            )
+            self.set_option("view.editor_font_size", self._guard_font_size(editor_font_size))
             self.update_fonts()
 
     def _guard_font_size(self, size: int) -> int:
@@ -1781,10 +1691,7 @@ class Workbench(tk.Tk):
             # TODO: shift to left if right edge goes away from screen
             # TODO: check with screen width
             new_geometry = "{0}x{1}+{2}+{3}".format(
-                self.winfo_width() + delta,
-                self.winfo_height(),
-                self.winfo_x(),
-                self.winfo_y(),
+                self.winfo_width() + delta, self.winfo_height(), self.winfo_x(), self.winfo_y()
             )
 
             self.geometry(new_geometry)
@@ -1827,10 +1734,7 @@ class Workbench(tk.Tk):
         self._main_frame.grid(row=1, column=0, sticky=tk.NSEW, in_=self)
         # put the maximized view back to its home_widget
         self._maximized_view.grid(
-            row=0,
-            column=0,
-            sticky=tk.NSEW,
-            in_=self._maximized_view.home_widget,  # type: ignore
+            row=0, column=0, sticky=tk.NSEW, in_=self._maximized_view.home_widget  # type: ignore
         )
         self._maximized_view = None
         self.get_variable("view.maximize_view").set(False)
@@ -1902,9 +1806,7 @@ class Workbench(tk.Tk):
                 else:
                     menu.entryconfigure(i, state=tk.NORMAL)
 
-    def _find_location_for_menu_item(
-        self, menu_name: str, command_label: str
-    ) -> Union[str, int]:
+    def _find_location_for_menu_item(self, menu_name: str, command_label: str) -> Union[str, int]:
 
         menu = self.get_menu(menu_name)
 
@@ -1923,10 +1825,7 @@ class Workbench(tk.Tk):
 
                 if sibling_group == specs.group:
                     this_group_exists = True
-                    if (
-                        specs.position_in_group == "alphabetic"
-                        and sibling_label > command_label
-                    ):
+                    if specs.position_in_group == "alphabetic" and sibling_label > command_label:
                         return i
 
                 if sibling_group > specs.group:
@@ -2055,17 +1954,12 @@ class Workbench(tk.Tk):
     def _on_configure(self, event) -> None:
         # called when window is moved or resized
         if (
-            hasattr(
-                self, "_maximized_view"
-            )  # configure may happen before the attribute is defined
+            hasattr(self, "_maximized_view")  # configure may happen before the attribute is defined
             and self._maximized_view  # type: ignore
         ):
             # grid again, otherwise it acts weird
             self._maximized_view.grid(
-                row=1,
-                column=0,
-                sticky=tk.NSEW,
-                in_=self._maximized_view.master,  # type: ignore
+                row=1, column=0, sticky=tk.NSEW, in_=self._maximized_view.master  # type: ignore
             )
 
     def _on_tk_exception(self, exc, val, tb) -> None:
@@ -2120,9 +2014,7 @@ class Workbench(tk.Tk):
             if hasattr(widget, "maximizable_widget"):
                 view = widget.maximizable_widget
                 view_name = type(view).__name__
-                self.set_option(
-                    "layout.notebook_" + nb_name + "_visible_view", view_name
-                )
+                self.set_option("layout.notebook_" + nb_name + "_visible_view", view_name)
             else:
                 self.set_option("layout.notebook_" + nb_name + "_visible_view", None)
 
@@ -2138,8 +2030,7 @@ class Workbench(tk.Tk):
         self.set_option("layout.east_pw_width", self._east_pw.preferred_size_in_pw)
         for key in ["nw", "sw", "s", "se", "ne"]:
             self.set_option(
-                "layout.%s_nb_height" % key,
-                self._view_notebooks[key].preferred_size_in_pw,
+                "layout.%s_nb_height" % key, self._view_notebooks[key].preferred_size_in_pw
             )
 
     def update_title(self, event=None) -> None:
@@ -2183,9 +2074,7 @@ class Workbench(tk.Tk):
             if lineno is None:
                 self.get_editor_notebook().show_file(filename)
             else:
-                self.get_editor_notebook().show_file_at_line(
-                    filename, lineno, col_offset
-                )
+                self.get_editor_notebook().show_file_at_line(filename, lineno, col_offset)
 
             return
 

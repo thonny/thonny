@@ -10,16 +10,10 @@ class GeneralConfigurationPage(ConfigurationPage):
         ConfigurationPage.__init__(self, master)
 
         self.add_checkbox(
-            "general.single_instance",
-            _("Allow only single Thonny instance"),
-            row=1,
-            columnspan=2,
+            "general.single_instance", _("Allow only single Thonny instance"), row=1, columnspan=2
         )
         self.add_checkbox(
-            "general.debug_mode",
-            _("Debug mode (provides more detailed logs)"),
-            row=3,
-            columnspan=2,
+            "general.debug_mode", _("Debug mode (provides more detailed logs)"), row=3, columnspan=2
         )
         self.add_checkbox(
             "file.reopen_all_files",
@@ -38,18 +32,12 @@ class GeneralConfigurationPage(ConfigurationPage):
             row=6, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
         self.add_combobox(
-            "general.ui_mode",
-            ["simple", "regular", "expert"],
-            row=6,
-            column=1,
-            pady=(10, 0),
+            "general.ui_mode", ["simple", "regular", "expert"], row=6, column=1, pady=(10, 0)
         )
 
         self._scaling_var = get_workbench().get_variable("general.scaling")
         self._scaling_label = ttk.Label(self, text="UI scaling factor")
-        self._scaling_label.grid(
-            row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
-        )
+        self._scaling_label.grid(row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
         self._scaling_combo = ttk.Combobox(
             self,
@@ -62,13 +50,9 @@ class GeneralConfigurationPage(ConfigurationPage):
         )
         self._scaling_combo.grid(row=7, column=1, sticky=tk.W, pady=(10, 0))
 
-        self._font_scaling_var = get_workbench().get_variable(
-            "general.font_scaling_mode"
-        )
+        self._font_scaling_var = get_workbench().get_variable("general.font_scaling_mode")
         self._font_scaling_label = ttk.Label(self, text=_("Font scaling mode"))
-        self._font_scaling_label.grid(
-            row=8, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
-        )
+        self._font_scaling_label.grid(row=8, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
         self._font_scaling_combo = ttk.Combobox(
             self,

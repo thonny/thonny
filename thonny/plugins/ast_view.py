@@ -20,9 +20,7 @@ class AstView(ui_utils.TreeFrame):
         self._current_code_view = None
         self.tree.bind("<<TreeviewSelect>>", self._locate_code)
         self.tree.bind("<<Copy>>", self._copy_to_clipboard)
-        get_workbench().get_editor_notebook().bind(
-            "<<NotebookTabChanged>>", self._update
-        )
+        get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
         get_workbench().bind_class("Text", "<Double-Button-1>", self._update, True)
@@ -98,9 +96,7 @@ class AstView(ui_utils.TreeFrame):
                 if hasattr(node, "end_lineno") and hasattr(node, "end_col_offset"):
                     self.tree.set(node_id, "end_lineno", node.end_lineno)
                     self.tree.set(node_id, "end_col_offset", node.end_col_offset)
-                    range_str += (
-                        "  -  " + str(node.end_lineno) + "." + str(node.end_col_offset)
-                    )
+                    range_str += "  -  " + str(node.end_lineno) + "." + str(node.end_col_offset)
                 else:
                     # fallback
                     self.tree.set(node_id, "end_lineno", node.lineno)
@@ -147,8 +143,7 @@ def _find_closest_containing_node(tree, text_range):
 
     # no suitable child was found
     if hasattr(tree, "lineno") and range_contains_smaller(
-        TextRange(tree.lineno, tree.col_offset, tree.end_lineno, tree.end_col_offset),
-        text_range,
+        TextRange(tree.lineno, tree.col_offset, tree.end_lineno, tree.end_col_offset), text_range
     ):
         return tree
     # nope

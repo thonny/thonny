@@ -59,9 +59,7 @@ def augment_ast(root):
 
     # append "__pgzrun.go()"
     go = ast.Expr(
-        ast.Call(
-            ast.Attribute(ast.Name("__pgzrun", ast.Load()), "go", ast.Load()), [], []
-        )
+        ast.Call(ast.Attribute(ast.Name("__pgzrun", ast.Load()), "go", ast.Load()), [], [])
     )
     go.lineno = 1000000
     go.col_offset = 0

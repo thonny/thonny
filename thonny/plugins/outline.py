@@ -18,9 +18,7 @@ class OutlineView(ttk.Frame):
         )
         get_workbench().bind("Save", self._update_frame_contents, True)
         get_workbench().bind("SaveAs", self._update_frame_contents, True)
-        get_workbench().bind_class(
-            "Text", "<<NewLine>>", self._update_frame_contents, True
-        )
+        get_workbench().bind_class("Text", "<<NewLine>>", self._update_frame_contents, True)
 
         self._update_frame_contents()
 
@@ -73,14 +71,7 @@ class OutlineView(ttk.Frame):
 
     def _parse_source(self, source):
         # all nodes in format (parent, node_indent, node_children, name, type, linenumber)
-        root_node = (
-            None,
-            0,
-            [],
-            None,
-            None,
-            None,
-        )  # name, type and linenumber not needed for root
+        root_node = (None, 0, [], None, None, None)  # name, type and linenumber not needed for root
         active_node = root_node
 
         lineno = 0
@@ -94,14 +85,7 @@ class OutlineView(ttk.Frame):
 
                 t = re.match(r"[ ]*(?P<type>(def|class){1})[ ]+(?P<name>[\w]+)", line)
                 if t:
-                    current = (
-                        active_node,
-                        indent,
-                        [],
-                        t.group("name"),
-                        t.group("type"),
-                        lineno,
-                    )
+                    current = (active_node, indent, [], t.group("name"), t.group("type"), lineno)
                     active_node[2].append(current)
                     active_node = current
 
@@ -121,9 +105,7 @@ class OutlineView(ttk.Frame):
             image = None
 
         # insert the item, set lineno as a 'hidden' value
-        current = self.tree.insert(
-            parent, "end", text=item_text, values=item[5], image=image
-        )
+        current = self.tree.insert(parent, "end", text=item_text, values=item[5], image=image)
 
         for child in item[2]:
             self._add_item_to_tree(current, child)
@@ -139,14 +121,11 @@ class OutlineView(ttk.Frame):
             code_view = editor.get_code_view()
             lineno = self.tree.item(self.tree.focus())["values"][0]
             index = code_view.text.index(str(lineno) + ".0")
-            code_view.text.see(
-                index
-            )  # make sure that the double-clicked item is visible
+            code_view.text.see(index)  # make sure that the double-clicked item is visible
             code_view.text.select_lines(lineno, lineno)
 
             get_workbench().event_generate(
-                "OutlineDoubleClick",
-                item_text=self.tree.item(self.tree.focus(), option="text"),
+                "OutlineDoubleClick", item_text=self.tree.item(self.tree.focus(), option="text")
             )
 
 

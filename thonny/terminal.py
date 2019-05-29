@@ -61,9 +61,7 @@ def _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title=None):
 
         subprocess.Popen(cmd_line, cwd=cwd, env=env, shell=True)
     else:
-        subprocess.Popen(
-            cmd, creationflags=subprocess.CREATE_NEW_CONSOLE, cwd=cwd, env=env
-        )
+        subprocess.Popen(cmd, creationflags=subprocess.CREATE_NEW_CONSOLE, cwd=cwd, env=env)
 
 
 def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
@@ -106,9 +104,7 @@ def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
         if env_overrides[key] is None:
             cmds += "; unset " + key
         else:
-            cmds += "; export {key}={value}".format(
-                key=key, value=_shellquote(env_overrides[key])
-            )
+            cmds += "; export {key}={value}".format(key=key, value=_shellquote(env_overrides[key]))
 
     if cmd:
         if isinstance(cmd, list):
@@ -121,18 +117,14 @@ def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
     # The script will be sent to Terminal with 'do script' command, which takes a string.
     # We'll prepare an AppleScript string literal for this
     # (http://stackoverflow.com/questions/10667800/using-quotes-in-a-applescript-string):
-    cmd_as_apple_script_string_literal = (
-        '"' + cmds.replace("\\", "\\\\").replace('"', '\\"') + '"'
-    )
+    cmd_as_apple_script_string_literal = '"' + cmds.replace("\\", "\\\\").replace('"', '\\"') + '"'
 
     # When Terminal is not open, then do script opens two windows.
     # do script ... in window 1 would solve this, but if Terminal is already
     # open, this could run the script in existing terminal (in undesirable env on situation)
     # That's why I need to prepare two variations of the 'do script' command
     doScriptCmd1 = """        do script %s """ % cmd_as_apple_script_string_literal
-    doScriptCmd2 = (
-        """        do script %s in window 1 """ % cmd_as_apple_script_string_literal
-    )
+    doScriptCmd2 = """        do script %s in window 1 """ % cmd_as_apple_script_string_literal
 
     # The whole AppleScript will be executed with osascript by giving script
     # lines as arguments. The lines containing our script need to be shell-quoted:

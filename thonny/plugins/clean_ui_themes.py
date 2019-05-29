@@ -36,10 +36,7 @@ def clean(
                 "selectforeground": high_foreground,
             },
             "map": {
-                "foreground": [
-                    ("disabled", low_foreground),
-                    ("active", high_foreground),
-                ],
+                "foreground": [("disabled", low_foreground), ("active", high_foreground)],
                 "background": [("disabled", frame_background), ("active", high_detail)],
                 "selectbackground": [("!focus", low_detail)],
                 "selectforeground": [("!focus", normal_foreground)],
@@ -62,22 +59,12 @@ def clean(
                     ("!selected", "!active", frame_background),
                     ("active", "!selected", high_detail),
                 ],
-                "bordercolor": [
-                    ("selected", frame_background),
-                    ("!selected", normal_detail),
-                ],
-                "lightcolor": [
-                    ("selected", normal_detail),
-                    ("!selected", frame_background),
-                ],
+                "bordercolor": [("selected", frame_background), ("!selected", normal_detail)],
+                "lightcolor": [("selected", normal_detail), ("!selected", frame_background)],
             },
         },
         "Treeview": {
-            "configure": {
-                "background": text_background,
-                "borderwidth": 0,
-                "relief": "flat",
-            },
+            "configure": {"background": text_background, "borderwidth": 0, "relief": "flat"},
             "map": {
                 "background": [
                     ("selected", "focus", high_detail),
@@ -96,9 +83,7 @@ def clean(
                 "lightcolor": normal_detail,
                 "borderwidth": 0,
             },
-            "map": {
-                "background": [("!active", normal_detail), ("active", normal_detail)]
-            },
+            "map": {"background": [("!active", normal_detail), ("active", normal_detail)]},
         },
         "TEntry": {
             "configure": {
@@ -147,18 +132,9 @@ def clean(
                 # arrowcolor="white"
             },
             "map": {
-                "background": [
-                    ("!disabled", normal_detail),
-                    ("disabled", normal_detail),
-                ],
-                "darkcolor": [
-                    ("!disabled", text_background),
-                    ("disabled", text_background),
-                ],
-                "lightcolor": [
-                    ("!disabled", text_background),
-                    ("disabled", text_background),
-                ],
+                "background": [("!disabled", normal_detail), ("disabled", normal_detail)],
+                "darkcolor": [("!disabled", text_background), ("disabled", text_background)],
+                "lightcolor": [("!disabled", text_background), ("disabled", text_background)],
             },
         },
         "Vertical.TScrollbar": {
@@ -169,10 +145,7 @@ def clean(
                     {
                         "sticky": "ns",
                         "children": [
-                            (
-                                "Vertical.Scrollbar.thumb",
-                                {"expand": "1", "sticky": "nswe"},
-                            )
+                            ("Vertical.Scrollbar.thumb", {"expand": "1", "sticky": "nswe"})
                         ],
                     },
                 )
@@ -186,20 +159,14 @@ def clean(
                     {
                         "sticky": "we",
                         "children": [
-                            (
-                                "Horizontal.Scrollbar.thumb",
-                                {"expand": "1", "sticky": "nswe"},
-                            )
+                            ("Horizontal.Scrollbar.thumb", {"expand": "1", "sticky": "nswe"})
                         ],
                     },
                 )
             ],
             "map": {
                 # Make disabled Hor Scrollbar invisible
-                "background": [
-                    ("disabled", frame_background),
-                    ("!disabled", normal_detail),
-                ],
+                "background": [("disabled", frame_background), ("!disabled", normal_detail)],
                 "troughcolor": [("disabled", frame_background)],
                 "bordercolor": [("disabled", frame_background)],
                 "darkcolor": [("disabled", frame_background)],
@@ -209,10 +176,7 @@ def clean(
         "TButton": {
             "configure": {"background": normal_detail, "foreground": normal_foreground},
             "map": {
-                "foreground": [
-                    ("disabled", low_foreground),
-                    ("alternate", high_foreground),
-                ],
+                "foreground": [("disabled", low_foreground), ("alternate", high_foreground)],
                 "background": [("pressed", low_detail), ("active", high_detail)],
                 "bordercolor": [("alternate", high_detail)],
             },
@@ -243,9 +207,7 @@ def clean(
         },
         "Toolbutton": {
             "configure": {"background": frame_background},
-            "map": {
-                "background": [("disabled", frame_background), ("active", high_detail)]
-            },
+            "map": {"background": [("disabled", frame_background), ("active", high_detail)]},
         },
         "TLabel": {"configure": {"foreground": normal_foreground}},
         "Url.TLabel": {"configure": {"foreground": high_foreground}},
@@ -275,9 +237,7 @@ def clean(
         "ViewBody.TFrame": {"configure": {"background": text_background}},
         "ViewToolbar.TFrame": {"configure": {"background": normal_detail}},
         "ViewToolbar.Toolbutton": {"configure": {"background": normal_detail}},
-        "ViewTab.TLabel": {
-            "configure": {"background": normal_detail, "padding": [5, 0]}
-        },
+        "ViewTab.TLabel": {"configure": {"background": normal_detail, "padding": [5, 0]}},
         "ViewToolbar.TLabel": {
             "configure": {"background": normal_detail, "padding": [scale(4), 0]}
         },
@@ -289,21 +249,11 @@ def clean(
             }
         },
         "Inactive.ViewTab.TLabel": {
-            "configure": {
-                "foreground": normal_foreground,
-                "font": "UnderlineTkDefaultFont",
-            },
+            "configure": {"foreground": normal_foreground, "font": "UnderlineTkDefaultFont"},
             "map": {"background": [("hover", high_detail)]},
         },
-        "Text": {
-            "configure": {
-                "background": text_background,
-                "foreground": normal_foreground,
-            }
-        },
-        "Gutter": {
-            "configure": {"background": low_detail, "foreground": low_foreground}
-        },
+        "Text": {"configure": {"background": text_background, "foreground": normal_foreground}},
+        "Gutter": {"configure": {"background": low_detail, "foreground": low_foreground}},
         "Listbox": {
             "configure": {
                 "background": text_background,
@@ -320,9 +270,7 @@ def clean(
             "configure": {
                 # Regular, system-provided Windows menubar doesn't allow changing colors.
                 # custom=True replaces it with a custom-built menubar.
-                "custom": running_on_windows()
-                if custom_menubar is None
-                else custom_menubar,
+                "custom": running_on_windows() if custom_menubar is None else custom_menubar,
                 "background": frame_background,
                 "foreground": normal_foreground,
                 "activebackground": normal_foreground,

@@ -6,9 +6,7 @@ from thonny import get_workbench
 
 
 class GridTable(tk.Frame):
-    def __init__(
-        self, master, header_rows, data_row_count, footer_row_count, frozen_column_count
-    ):
+    def __init__(self, master, header_rows, data_row_count, footer_row_count, frozen_column_count):
         super().__init__(master)
 
         self.header_widgets = {}
@@ -42,9 +40,7 @@ class GridTable(tk.Frame):
         for row_no in range(self.header_row_count):
             for col_no in range(self.column_count):
                 w = self.get_header_widget(self.screen_row_count, col_no)
-                w.grid(
-                    row=row_no, column=col_no, sticky="nsew", pady=(0, 1), padx=(0, 1)
-                )
+                w.grid(row=row_no, column=col_no, sticky="nsew", pady=(0, 1), padx=(0, 1))
                 w.configure(text=self.get_header_value(row_no, col_no))
 
         self.screen_row_count = self.header_row_count
@@ -106,11 +102,7 @@ class GridTable(tk.Frame):
             for col in range(self.column_count):
                 w = self.get_data_widget(self.screen_row_count, col)
                 w.grid(
-                    row=self.screen_row_count,
-                    column=col,
-                    sticky="nsew",
-                    pady=(0, 1),
-                    padx=(0, 1),
+                    row=self.screen_row_count, column=col, sticky="nsew", pady=(0, 1), padx=(0, 1)
                 )
 
             self.screen_row_count += 1
@@ -122,9 +114,7 @@ class GridTable(tk.Frame):
     def update_screen_data(self):
         self.update_screen_widgets(self.winfo_height())
         for screen_row_no in range(self.header_row_count, self.screen_row_count):
-            data_row_no = (
-                self.first_visible_data_row_no + screen_row_no - self.header_row_count
-            )
+            data_row_no = self.first_visible_data_row_no + screen_row_no - self.header_row_count
             if data_row_no == self.data_row_count:
                 break
 
@@ -164,16 +154,12 @@ class GridTable(tk.Frame):
 
 
 class ScrollableGridTable(ttk.Frame):
-    def __init__(
-        self, master, header_rows, data_row_count, footer_row_count, frozen_column_count
-    ):
+    def __init__(self, master, header_rows, data_row_count, footer_row_count, frozen_column_count):
         ttk.Frame.__init__(self, master)
 
         # set up scrolling with canvas
         hscrollbar = ttk.Scrollbar(self, orient=tk.HORIZONTAL)
-        self.canvas = tk.Canvas(
-            self, bd=0, highlightthickness=0, xscrollcommand=hscrollbar.set
-        )
+        self.canvas = tk.Canvas(self, bd=0, highlightthickness=0, xscrollcommand=hscrollbar.set)
         get_workbench().bind_all("<Control-r>", self.debug)
         self.create_infopanel(data_row_count)
         hscrollbar.config(command=self.canvas.xview)
@@ -196,18 +182,12 @@ class ScrollableGridTable(ttk.Frame):
         self.interior = ttk.Frame(self.canvas)
         self.interior.columnconfigure(0, weight=1)
         self.interior.rowconfigure(0, weight=1)
-        self.interior_id = self.canvas.create_window(
-            0, 0, window=self.interior, anchor=tk.NW
-        )
+        self.interior_id = self.canvas.create_window(0, 0, window=self.interior, anchor=tk.NW)
         self.bind("<Configure>", self._configure_interior, True)
         self.bind("<Expose>", self._on_expose, True)
 
         self.grid_table = GridTable(
-            self.interior,
-            header_rows,
-            data_row_count,
-            footer_row_count,
-            frozen_column_count,
+            self.interior, header_rows, data_row_count, footer_row_count, frozen_column_count
         )
         self.grid_table.grid(row=0, column=0, sticky=tk.NSEW)
 
@@ -222,13 +202,8 @@ class ScrollableGridTable(ttk.Frame):
         self.size_label.grid(row=0, column=0, padx=5)
 
     def _update_vertical_scrollbar(self):
-        first = (
-            self.grid_table.first_visible_data_row_no / self.grid_table.data_row_count
-        )
-        last = (
-            first
-            + self.grid_table.visible_data_row_count / self.grid_table.data_row_count
-        )
+        first = self.grid_table.first_visible_data_row_no / self.grid_table.data_row_count
+        last = first + self.grid_table.visible_data_row_count / self.grid_table.data_row_count
         # print(first, last, self.grid_table.visible_data_row_count)
         self.vscrollbar.set(first, last)
 
@@ -247,12 +222,7 @@ class ScrollableGridTable(ttk.Frame):
             assert args[0] == "moveto"
             pos = max(min(float(args[1]), 1.0), 0.0)
             top_row = math.floor(
-                (
-                    self.grid_table.data_row_count
-                    - self.grid_table.visible_data_row_count
-                    + 1
-                )
-                * pos
+                (self.grid_table.data_row_count - self.grid_table.visible_data_row_count + 1) * pos
             )
             self.grid_table.set_first_visible_data_row_no(top_row)
 
@@ -271,8 +241,6 @@ class ScrollableGridTable(ttk.Frame):
             and self.canvas.winfo_height() > 10
         ):
             # update the interior's height to fit canvas
-            self.canvas.itemconfigure(
-                self.interior_id, height=self.canvas.winfo_height()
-            )
+            self.canvas.itemconfigure(self.interior_id, height=self.canvas.winfo_height())
 
         self._update_vertical_scrollbar()

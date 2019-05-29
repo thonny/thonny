@@ -46,9 +46,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._ui_theme_combo.grid(row=2, column=0, sticky="nsew", padx=(0, 10))
 
-        ttk.Label(self, text="Syntax theme").grid(
-            row=1, column=1, sticky="w", pady=(10, 0)
-        )
+        ttk.Label(self, text="Syntax theme").grid(row=1, column=1, sticky="w", pady=(10, 0))
         self._syntax_theme_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -59,9 +57,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._syntax_theme_combo.grid(row=2, column=1, sticky="nsew", padx=(0, 10))
 
-        ttk.Label(self, text="Editor font").grid(
-            row=1, column=2, sticky="w", pady=(10, 0)
-        )
+        ttk.Label(self, text="Editor font").grid(row=1, column=2, sticky="w", pady=(10, 0))
         self._family_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -106,9 +102,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             """
             ).strip()
         )
-        self._preview_codeview.grid(
-            row=4, column=0, columnspan=4, sticky=tk.NSEW, pady=(0, 5)
-        )
+        self._preview_codeview.grid(row=4, column=0, columnspan=4, sticky=tk.NSEW, pady=(0, 5))
 
         (
             ttk.Label(
@@ -142,15 +136,9 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
     def _update_appearance(self):
         get_workbench().set_option("view.ui_theme", self._ui_theme_variable.get())
-        get_workbench().set_option(
-            "view.syntax_theme", self._syntax_theme_variable.get()
-        )
-        get_workbench().set_option(
-            "view.editor_font_size", int(self._size_variable.get())
-        )
-        get_workbench().set_option(
-            "view.editor_font_family", self._family_variable.get()
-        )
+        get_workbench().set_option("view.syntax_theme", self._syntax_theme_variable.get())
+        get_workbench().set_option("view.editor_font_size", int(self._size_variable.get()))
+        get_workbench().set_option("view.editor_font_family", self._family_variable.get())
         get_workbench().reload_themes()
         get_workbench().update_fonts()
 
@@ -160,6 +148,4 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page(
-        "Theme & Font", ThemeAndFontConfigurationPage
-    )
+    get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)

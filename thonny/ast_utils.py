@@ -105,8 +105,7 @@ def get_last_child(node, skip_incorrect=True):
         return last_ok(node.values)
 
     elif isinstance(
-        node,
-        (ast.Index, ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom),
+        node, (ast.Index, ast.Return, ast.Assign, ast.AugAssign, ast.Yield, ast.YieldFrom)
     ):
         return ok_node(node.value)
 

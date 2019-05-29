@@ -244,11 +244,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
                 else:
                     prelude = (
                         "Your working directory `%s <%s>`__ contains a file named '%s'.\n\n"
-                        % (
-                            rst_utils.escape(main_file_dir),
-                            rst_utils.escape(main_file_dir),
-                            item,
-                        )
+                        % (rst_utils.escape(main_file_dir), rst_utils.escape(main_file_dir), item)
                     )
                     rename_hint = ""
 
@@ -280,9 +276,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
 
         module_names = set()
         for item in sys_path:
-            if os.path.isdir(item) and (
-                "site-packages" in item or "dist-packages" in item
-            ):
+            if os.path.isdir(item) and ("site-packages" in item or "dist-packages" in item):
                 module_names.update(self._get_module_names(item))
                 for name in os.listdir(item):
                     if "-" not in name:

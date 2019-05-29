@@ -52,9 +52,7 @@ class LocalsHighlighter:
                     return
 
                 if isinstance(node, tree.Function):
-                    global_names = (
-                        set()
-                    )  # outer global statement doesn't have effect anymore
+                    global_names = set()  # outer global statement doesn't have effect anymore
 
                 for child in node.children:
                     process_node(child, local_names, global_names)

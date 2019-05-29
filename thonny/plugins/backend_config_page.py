@@ -33,19 +33,14 @@ class BackendConfigurationPage(ConfigurationPage):
 
         current_backend_name = get_workbench().get_option("run.backend_name")
         try:
-            current_backend_desc = (
-                get_workbench().get_backends()[current_backend_name].description
-            )
+            current_backend_desc = get_workbench().get_backends()[current_backend_name].description
         except KeyError:
             current_backend_desc = ""
 
         self._combo_variable = create_string_var(current_backend_desc)
 
         label = ttk.Label(
-            self,
-            text=_(
-                "Which interpreter or device should Thonny use for running your code?"
-            ),
+            self, text=_("Which interpreter or device should Thonny use for running your code?")
         )
         label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
@@ -94,9 +89,7 @@ class BackendConfigurationPage(ConfigurationPage):
 
     def _get_conf_page(self, backend_desc):
         if backend_desc not in self._conf_pages:
-            cp_constructor = self._backend_specs_by_desc[
-                backend_desc
-            ].config_page_constructor
+            cp_constructor = self._backend_specs_by_desc[backend_desc].config_page_constructor
             if isinstance(cp_constructor, str):
                 self._conf_pages[backend_desc] = OnlyTextConfigurationPage(
                     self.labelframe, cp_constructor
@@ -120,10 +113,7 @@ class BackendConfigurationPage(ConfigurationPage):
         backend_name = self._backend_specs_by_desc[backend_desc].name
         get_workbench().set_option("run.backend_name", backend_name)
 
-        if (
-            getattr(self._combo_variable, "modified")
-            or self._current_page.should_restart()
-        ):
+        if getattr(self._combo_variable, "modified") or self._current_page.should_restart():
             get_runner().restart_backend(False)
 
         return None

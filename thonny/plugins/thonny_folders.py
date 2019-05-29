@@ -20,9 +20,5 @@ def load_plugin() -> None:
         group=110,
     )
     get_workbench().add_command(
-        "open_data_dir",
-        "tools",
-        "Open Thonny data folder...",
-        cmd_open_data_dir,
-        group=110,
+        "open_data_dir", "tools", "Open Thonny data folder...", cmd_open_data_dir, group=110
     )

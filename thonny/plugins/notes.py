@@ -18,9 +18,7 @@ class NotesView(TextFrame):
     def __init__(self, master):
         self.filename = os.path.join(THONNY_USER_DIR, "user_notes.txt")
         super().__init__(
-            master,
-            text_class=NotesText,
-            horizontal_scrollbar_class=ui_utils.AutoScrollbar,
+            master, text_class=NotesText, horizontal_scrollbar_class=ui_utils.AutoScrollbar
         )
 
         self.load_content()

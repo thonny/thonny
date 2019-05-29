@@ -14,20 +14,14 @@ from thonny.ui_utils import lookup_style_option
 class ReplayWindow(tk.Toplevel):
     def __init__(self):
         tk.Toplevel.__init__(
-            self,
-            get_workbench(),
-            background=lookup_style_option("TFrame", "background"),
+            self, get_workbench(), background=lookup_style_option("TFrame", "background")
         )
         ui_utils.set_zoomed(self, True)
 
         self.main_pw = ReplayerPanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)
-        self.center_pw = ReplayerPanedWindow(
-            self.main_pw, orient=tk.VERTICAL, sashwidth=10
-        )
+        self.center_pw = ReplayerPanedWindow(self.main_pw, orient=tk.VERTICAL, sashwidth=10)
         self.right_frame = ttk.Frame(self.main_pw)
-        self.right_pw = ReplayerPanedWindow(
-            self.right_frame, orient=tk.VERTICAL, sashwidth=10
-        )
+        self.right_pw = ReplayerPanedWindow(self.right_frame, orient=tk.VERTICAL, sashwidth=10)
         self.editor_notebook = ReplayerEditorNotebook(self.center_pw)
         shell_book = ttk.Notebook(self.main_pw)
         self.shell = ShellFrame(shell_book)
@@ -58,9 +52,7 @@ class ReplayWindow(tk.Toplevel):
 
 class ReplayerFileBrowser(BaseFileBrowser):
     def __init__(self, master, log_frame):
-        BaseFileBrowser.__init__(
-            self, master, True, "tools.replayer_last_browser_folder"
-        )
+        BaseFileBrowser.__init__(self, master, True, "tools.replayer_last_browser_folder")
         self.log_frame = log_frame
         self.configure(border=1, relief=tk.GROOVE)
 
@@ -78,12 +70,8 @@ class ControlFrame(ttk.Frame):
         self.toggle_button = ttk.Button(self, text="Play")
         self.speed_scale = ttk.Scale(self, from_=1, to=100, orient=tk.HORIZONTAL)
 
-        self.toggle_button.grid(
-            row=0, column=0, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5)
-        )
-        self.speed_scale.grid(
-            row=0, column=1, sticky=tk.NSEW, pady=(10, 0), padx=(5, 0)
-        )
+        self.toggle_button.grid(row=0, column=0, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5))
+        self.speed_scale.grid(row=0, column=1, sticky=tk.NSEW, pady=(10, 0), padx=(5, 0))
 
         self.columnconfigure(1, weight=1)
 
@@ -319,9 +307,7 @@ class ShellFrame(ReplayerEditor):
         vert_spacing = 10
         io_indent = 16
         self.code_view.text.tag_configure("toplevel", font="EditorFont")
-        self.code_view.text.tag_configure(
-            "prompt", foreground="purple", font="BoldEditorFont"
-        )
+        self.code_view.text.tag_configure("prompt", foreground="purple", font="BoldEditorFont")
         self.code_view.text.tag_configure("command", foreground="black")
         self.code_view.text.tag_configure("version", foreground="DarkGray")
         self.code_view.text.tag_configure("automagic", foreground="DarkGray")
@@ -331,18 +317,12 @@ class ShellFrame(ReplayerEditor):
         self.code_view.text.tag_configure("error", foreground="Red")
 
         self.code_view.text.tag_configure(
-            "io",
-            lmargin1=io_indent,
-            lmargin2=io_indent,
-            rmargin=io_indent,
-            font="IOFont",
+            "io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent, font="IOFont"
         )
         self.code_view.text.tag_configure("stdin", foreground="Blue")
         self.code_view.text.tag_configure("stdout", foreground="Black")
         self.code_view.text.tag_configure("stderr", foreground="Red")
-        self.code_view.text.tag_configure(
-            "hyperlink", foreground="#3A66DD", underline=True
-        )
+        self.code_view.text.tag_configure("hyperlink", foreground="#3A66DD", underline=True)
 
         self.code_view.text.tag_configure("vertically_spaced", spacing1=vert_spacing)
         self.code_view.text.tag_configure("inactive", foreground="#aaaaaa")

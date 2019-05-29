@@ -20,12 +20,9 @@ class EventsView(TextFrame):
     def _log_event(self, event):
         self.text.insert("end", event.sequence + "\n")
         for name in dir(event):
-            if name not in ["sequence", "setdefault", "update"] and not name.startswith(
-                "_"
-            ):
+            if name not in ["sequence", "setdefault", "update"] and not name.startswith("_"):
                 self.text.insert(
-                    "end",
-                    "    " + name + ": " + repr(getattr(event, name))[:100] + "\n",
+                    "end", "    " + name + ": " + repr(getattr(event, name))[:100] + "\n"
                 )
 
         if isinstance(event, DebuggerResponse):

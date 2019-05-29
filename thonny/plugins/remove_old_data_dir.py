@@ -11,9 +11,7 @@ def load_plugin():
         def doit():
             if not os.path.exists(old_data_dir):
                 showinfo(
-                    "Already deleted",
-                    "Looks like it's already deleted",
-                    parent=get_workbench(),
+                    "Already deleted", "Looks like it's already deleted", parent=get_workbench()
                 )
                 return
 
@@ -22,8 +20,7 @@ def load_plugin():
                 "Thonny versions before 3.0 (and first 3.0 betas) used to keep "
                 + "configuration, logs and such in '%s'" % old_data_dir
                 + ". "
-                + "Since 3.0 this data is kept in a new location: '%s'.\n\n"
-                % THONNY_USER_DIR
+                + "Since 3.0 this data is kept in a new location: '%s'.\n\n" % THONNY_USER_DIR
                 + "If you don't intend to use older Thonny versions anymore, "
                 + "you probably want to delete the old directory and reclaim disk space.\n\n"
                 + "Do you want me to delete this directory now?",
@@ -35,9 +32,5 @@ def load_plugin():
                 showinfo("Done!", "Done!", parent=get_workbench())
 
         get_workbench().add_command(
-            "delolddatadir",
-            "tools",
-            "Clean up Thonny 2.1 data folder ...",
-            doit,
-            group=110,
+            "delolddatadir", "tools", "Clean up Thonny 2.1 data folder ...", doit, group=110
         )

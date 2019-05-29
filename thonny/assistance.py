@@ -83,19 +83,11 @@ class AssistantView(tktextext.TextFrame):
 
         # Underline on font looks better than underline on tag
         italic_underline_font = main_font.copy()
-        italic_underline_font.configure(
-            slant="italic", size=main_font.cget("size"), underline=True
-        )
+        italic_underline_font.configure(slant="italic", size=main_font.cget("size"), underline=True)
 
-        self.text.tag_configure(
-            "feedback_link", justify="right", font=italic_underline_font
-        )
-        self.text.tag_bind(
-            "feedback_link", "<ButtonRelease-1>", self._ask_feedback, True
-        )
-        self.text.tag_configure(
-            "python_errors_link", justify="right", font=italic_underline_font
-        )
+        self.text.tag_configure("feedback_link", justify="right", font=italic_underline_font)
+        self.text.tag_bind("feedback_link", "<ButtonRelease-1>", self._ask_feedback, True)
+        self.text.tag_configure("python_errors_link", justify="right", font=italic_underline_font)
         self.text.tag_bind(
             "python_errors_link",
             "<ButtonRelease-1>",
@@ -147,9 +139,7 @@ class AssistantView(tktextext.TextFrame):
             self.main_file_path = msg["filename"]
             source = read_source(msg["filename"])
             self._start_program_analyses(
-                msg["filename"],
-                source,
-                _get_imported_user_files(msg["filename"], source),
+                msg["filename"], source, _get_imported_user_files(msg["filename"], source)
             )
         else:
             self.main_file_path = None
@@ -178,8 +168,7 @@ class AssistantView(tktextext.TextFrame):
         helpers = [
             helper_class(error_info)
             for helper_class in (
-                _error_helper_classes.get(error_info["type_name"], [])
-                + _error_helper_classes["*"]
+                _error_helper_classes.get(error_info["type_name"], []) + _error_helper_classes["*"]
             )
         ]
 
@@ -258,9 +247,7 @@ class AssistantView(tktextext.TextFrame):
         self._analyzer_instances = []
         self.text.clear()
 
-    def _start_program_analyses(
-        self, main_file_path, main_file_source, imported_file_paths
-    ):
+    def _start_program_analyses(self, main_file_path, main_file_source, imported_file_paths):
 
         for cls in _program_analyzer_classes:
             analyzer = cls(self._accept_warnings)
@@ -351,8 +338,7 @@ class AssistantView(tktextext.TextFrame):
                 self._format_file_url(dict(filename=filename)),
             )
             file_warnings = sorted(
-                by_file[filename],
-                key=lambda x: (x.get("lineno", 0), -x.get("relevance", 1)),
+                by_file[filename], key=lambda x: (x.get("lineno", 0), -x.get("relevance", 1))
             )
 
             for i, warning in enumerate(file_warnings):
@@ -384,9 +370,7 @@ class AssistantView(tktextext.TextFrame):
             explanation_rst = ""
 
         if warning.get("more_info_url"):
-            explanation_rst += (
-                "\n\n`More info online <%s>`__" % warning["more_info_url"]
-            )
+            explanation_rst += "\n\n`More info online <%s>`__" % warning["more_info_url"]
 
         explanation_rst = explanation_rst.strip()
         topic_class = "toggle" if explanation_rst else "empty"
@@ -408,29 +392,19 @@ class AssistantView(tktextext.TextFrame):
         self._append_text("Was it helpful or confusing?\n", ("a", "feedback_link"))
 
     def _format_file_url(self, atts):
-        return format_file_url(
-            atts["filename"], atts.get("lineno"), atts.get("col_offset")
-        )
+        return format_file_url(atts["filename"], atts.get("lineno"), atts.get("col_offset"))
 
     def _ask_feedback(self, event=None):
 
-        all_snapshots = self._snapshots_per_main_file[
-            self._current_snapshot["main_file_path"]
-        ]
+        all_snapshots = self._snapshots_per_main_file[self._current_snapshot["main_file_path"]]
 
         # TODO: select only snapshots which are not sent yet
         snapshots = all_snapshots
 
-        ui_utils.show_dialog(
-            FeedbackDialog(get_workbench(), self.main_file_path, snapshots)
-        )
+        ui_utils.show_dialog(FeedbackDialog(get_workbench(), self.main_file_path, snapshots))
 
     def _get_rst_prelude(self):
-        return (
-            ".. default-role:: code\n\n"
-            + ".. role:: light\n\n"
-            + ".. role:: remark\n\n"
-        )
+        return ".. default-role:: code\n\n" + ".. role:: light\n\n" + ".. role:: remark\n\n"
 
 
 class AssistantRstText(rst_utils.RstText):
@@ -448,9 +422,7 @@ class AssistantRstText(rst_utils.RstText):
         self.tag_configure("h1", font=h1_font, spacing3=0, spacing1=10)
         self.tag_configure("topic_title", font="TkDefaultFont")
 
-        self.tag_configure(
-            "topic_body", font=italic_font, spacing1=10, lmargin1=25, lmargin2=25
-        )
+        self.tag_configure("topic_body", font=italic_font, spacing1=10, lmargin1=25, lmargin2=25)
 
         self.tag_raise("sel")
 
@@ -473,9 +445,7 @@ class ErrorHelper(Helper):
         self.last_frame_ast = None
         if self.last_frame.source:
             try:
-                self.last_frame_ast = ast.parse(
-                    self.last_frame.source, self.last_frame.filename
-                )
+                self.last_frame_ast = ast.parse(self.last_frame.source, self.last_frame.filename)
             except SyntaxError:
                 pass
 
@@ -519,10 +489,7 @@ class GenericErrorHelper(ErrorHelper):
                     "generic-search-the-web",
                     "Search the web",
                     "Try performing a web search for\n\n``Python %s: %s``"
-                    % (
-                        self.error_info["type_name"],
-                        rst_utils.escape(self.error_info["message"]),
-                    ),
+                    % (self.error_info["type_name"], rst_utils.escape(self.error_info["message"])),
                     1,
                 )
             )
@@ -595,17 +562,13 @@ class FeedbackDialog(tk.Toplevel):
             + "information and the data you enter or approve on this form.",
             wraplength=550,
         )
-        intro_label.grid(
-            row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15)
-        )
+        intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
 
         tree_label = ttk.Label(
             main_frame,
             text="Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!",
         )
-        tree_label.grid(
-            row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0)
-        )
+        tree_label.grid(row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         tree_frame = ui_utils.TreeFrame(
             main_frame,
             columns=["helpful", "confusing", "title", "group", "symbol"],
@@ -655,9 +618,7 @@ class FeedbackDialog(tk.Toplevel):
         )
 
         comments_label = ttk.Label(main_frame, text="Any comments? Enhancement ideas?")
-        comments_label.grid(
-            row=6, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0)
-        )
+        comments_label.grid(row=6, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         self.comments_text_frame = tktextext.TextFrame(
             main_frame,
             vertical_scrollbar_style=scrollbar_style("Vertical"),
@@ -672,9 +633,7 @@ class FeedbackDialog(tk.Toplevel):
             borderwidth=1,
             relief="groove",
         )
-        self.comments_text_frame.grid(
-            row=7, column=0, columnspan=3, sticky="nsew", padx=padx
-        )
+        self.comments_text_frame.grid(row=7, column=0, columnspan=3, sticky="nsew", padx=padx)
 
         url_font = tk.font.nametofont("TkDefaultFont").copy()
         url_font.configure(underline=1, size=url_font.cget("size"))
@@ -688,14 +647,10 @@ class FeedbackDialog(tk.Toplevel):
         preview_link.bind("<1>", self._preview_submission_data, True)
         preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
 
-        submit_button = ttk.Button(
-            main_frame, text="Submit", width=10, command=self._submit_data
-        )
+        submit_button = ttk.Button(main_frame, text="Submit", width=10, command=self._submit_data)
         submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
 
-        cancel_button = ttk.Button(
-            main_frame, text="Cancel", width=7, command=self._close
-        )
+        cancel_button = ttk.Button(main_frame, text="Cancel", width=7, command=self._close)
         cancel_button.grid(row=8, column=1, sticky="ne", padx=(10, 15), pady=15)
 
         self.protocol("WM_DELETE_WINDOW", self._close)
@@ -841,9 +796,7 @@ class FeedbackDialog(tk.Toplevel):
             except Exception as e:
                 return str(e)
 
-        result = ui_utils.run_with_waiting_dialog(
-            self, do_work, description="Uploading"
-        )
+        result = ui_utils.run_with_waiting_dialog(self, do_work, description="Uploading")
         if result == b"OK":
             if self.snapshots:
                 last_timestamp = self.snapshots[-1]["timestamp"]
@@ -882,9 +835,7 @@ class FeedbackDialog(tk.Toplevel):
                 _last_feedback_timestamps[self.main_file_path], "%Y-%m-%dT%H:%M:%S"
             )
         else:
-            since = datetime.datetime.strptime(
-                self.snapshots[0]["timestamp"], "%Y-%m-%dT%H:%M:%S"
-            )
+            since = datetime.datetime.strptime(self.snapshots[0]["timestamp"], "%Y-%m-%dT%H:%M:%S")
 
         if since.date() == datetime.date.today() or (
             datetime.datetime.now() - since
@@ -892,9 +843,7 @@ class FeedbackDialog(tk.Toplevel):
             since_str = since.strftime("%X")
         else:
             # date and time without yer
-            since_str = since.strftime("%c").replace(
-                str(datetime.date.today().year), ""
-            )
+            since_str = since.strftime("%c").replace(str(datetime.date.today().year), "")
 
         # remove seconds
         if since_str.count(":") == 2:
@@ -937,12 +886,7 @@ def name_similarity(a, b):
     # if names differ at final isolated digits,
     # then they are probably different vars, even if their
     # distance is small (eg. location_1 and location_2)
-    if (
-        a[-1].isdigit()
-        and not a[-2].isdigit()
-        and b[-1].isdigit()
-        and not b[-2].isdigit()
-    ):
+    if a[-1].isdigit() and not a[-2].isdigit() and b[-1].isdigit() and not b[-2].isdigit():
         return 0
 
     # same thing with _ + single char suffixes

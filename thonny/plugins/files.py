@@ -78,9 +78,7 @@ class FilesView(tk.PanedWindow):
 class LocalFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(
-            master,
-            show_hidden_files,
-            last_folder_setting_name="file.last_browser_folder",
+            master, show_hidden_files, last_folder_setting_name="file.last_browser_folder"
         )
 
     def create_new_file(self):
@@ -108,10 +106,7 @@ class LocalFileBrowser(BaseLocalFileBrowser):
 class RemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(
-            master,
-            show_hidden_files,
-            "device.last_browser_folder",
-            breadcrumbs_pady=(0, 7),
+            master, show_hidden_files, "device.last_browser_folder", breadcrumbs_pady=(0, 7)
         )
 
 

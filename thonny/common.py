@@ -39,9 +39,7 @@ FrameInfo = namedtuple(
     ],
 )
 
-TextRange = namedtuple(
-    "TextRange", ["lineno", "col_offset", "end_lineno", "end_col_offset"]
-)
+TextRange = namedtuple("TextRange", ["lineno", "col_offset", "end_lineno", "end_col_offset"])
 
 
 class Record:
@@ -237,17 +235,13 @@ def normpath_with_actual_case(name: str) -> str:
 
 
 def is_same_path(name1: str, name2: str) -> bool:
-    return os.path.normpath(os.path.normcase(name1)) == os.path.normpath(
-        os.path.normcase(name2)
-    )
+    return os.path.normpath(os.path.normcase(name1)) == os.path.normpath(os.path.normcase(name2))
 
 
 def path_startswith(child_name: str, dir_name: str) -> bool:
     normchild = os.path.normpath(os.path.normcase(child_name))
     normdir = os.path.normpath(os.path.normcase(dir_name))
-    return normdir == normchild or normchild.startswith(
-        normdir.rstrip(os.path.sep) + os.path.sep
-    )
+    return normdir == normchild or normchild.startswith(normdir.rstrip(os.path.sep) + os.path.sep)
 
 
 def read_source(filename):
@@ -260,9 +254,7 @@ def get_exe_dirs():
     if site.ENABLE_USER_SITE:
         if platform.system() == "Windows":
             if site.getusersitepackages():
-                result.append(
-                    site.getusersitepackages().replace("site-packages", "Scripts")
-                )
+                result.append(site.getusersitepackages().replace("site-packages", "Scripts"))
         else:
             if site.getuserbase():
                 result.append(site.getuserbase() + "/bin")
@@ -283,12 +275,7 @@ def get_site_dir(symbolic_name, executable=None):
     else:
         result = (
             subprocess.check_output(
-                [
-                    executable,
-                    "-m",
-                    "site",
-                    "--" + symbolic_name.lower().replace("_", "-"),
-                ],
+                [executable, "-m", "site", "--" + symbolic_name.lower().replace("_", "-")],
                 universal_newlines=True,
             )
             .decode()
@@ -422,12 +409,7 @@ def get_windows_volumes_info():
         "DRIVE_RAMDISK",
     ]
 
-    required_drive_types = [
-        "DRIVE_REMOVABLE",
-        "DRIVE_FIXED",
-        "DRIVE_REMOTE",
-        "DRIVE_RAMDISK",
-    ]
+    required_drive_types = ["DRIVE_REMOVABLE", "DRIVE_FIXED", "DRIVE_REMOTE", "DRIVE_RAMDISK"]
 
     result = {}
 
@@ -448,11 +430,7 @@ def get_windows_volumes_info():
 
             try:
                 st = os.stat(path)
-                result[path] = {
-                    "label": label,
-                    "size": None,
-                    "time": max(st.st_mtime, st.st_ctime),
-                }
+                result[path] = {"label": label, "size": None, "time": max(st.st_mtime, st.st_ctime)}
             except PermissionError:
                 # probably an empty cardreader slot
                 pass
@@ -522,9 +500,7 @@ def get_windows_network_locations():
 def get_windows_lnk_target(lnk_file_path):
     import thonny
 
-    script_path = os.path.join(
-        os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs"
-    )
+    script_path = os.path.join(os.path.dirname(thonny.__file__), "res", "PrintLnkTarget.vbs")
     cmd = ["cscript", "/NoLogo", script_path, lnk_file_path]
     result = subprocess.check_output(cmd, universal_newlines=True, timeout=3)
 
