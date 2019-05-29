@@ -91,7 +91,8 @@ class ShellView(tk.PanedWindow):
             # highlightcolor="LightBlue",
             borderwidth=0,
             yscrollcommand=self.set_scrollbar,
-            padx=4,
+            padx=0,
+            pady=0,
             insertwidth=2,
             height=10,
             undo=True,
@@ -295,9 +296,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.bind("<KeyRelease>", self._text_key_release, True)
 
         prompt_font = tk.font.nametofont("BoldEditorFont")
+        x_padding = 4
+        y_padding = 6
         io_vert_spacing = 10
-        io_indent = 16
-        code_indent = prompt_font.measure(">>> ")
+        io_indent = 16 + x_padding
+        code_indent = prompt_font.measure(">>> ") + x_padding
 
         self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
         self.tag_configure(
@@ -312,6 +315,18 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         self.tag_configure("after_io_or_value", spacing1=io_vert_spacing)
         self.tag_configure("before_io", spacing3=io_vert_spacing)
+
+        self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("restart_line", lmargin1=x_padding, lmargin2=x_padding)
+
+        self.tag_configure(
+            "welcome",
+            lmargin1=x_padding,
+            lmargin2=x_padding,
+            spacing1=y_padding,
+            spacing3=y_padding,
+        )
 
         # Underline on the font looks better than underline on the tag,
         # therefore Shell doesn't use configured "hyperlink" style directly
@@ -388,7 +403,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         welcome_text = msg.get("welcome_text")
         if welcome_text and welcome_text != self._last_welcome_text:
-            self._insert_text_directly(welcome_text, ("comment",))
+            self._insert_text_directly(welcome_text, ("welcome",))
             self._last_welcome_text = welcome_text
 
         if "value_info" in msg:
