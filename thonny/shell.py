@@ -306,21 +306,21 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 "io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"]
             )
 
-        self.tag_bind("hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
-        self.tag_bind("hyperlink", "<Enter>", self._hyperlink_enter)
-        self.tag_bind("hyperlink", "<Leave>", self._hyperlink_leave)
-        self.tag_raise("hyperlink")
+        self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
+        self.tag_bind("io_hyperlink", "<Enter>", self._hyperlink_enter)
+        self.tag_bind("io_hyperlink", "<Leave>", self._hyperlink_leave)
 
         self.tag_configure("after_io_or_value", spacing1=io_vert_spacing)
         self.tag_configure("before_io", spacing3=io_vert_spacing)
         
-        # Underline on font looks better than underline on tag
-        io_hyperlink_font = tk.font.nametofont("IOFont").copy()
-        io_hyperlink_font.configure(underline=get_syntax_options_for_tag("hyperlink").get("underline", True))
-        self.tag_configure("io_hyperlink", 
-                           underline=False,
-                           font=io_hyperlink_font)
-        self.tag_raise("io_hyperlink", "hyperlink")
+        # Underline on the font looks better than underline on the tag,
+        # therefore Shell doesn't use configured "hyperlink" style directly
+        hyperlink_opts = get_syntax_options_for_tag("hyperlink").copy()
+        if hyperlink_opts.get("underline"):
+            hyperlink_opts["font"] = "UnderlineIOFont"
+            del hyperlink_opts["underline"]
+        
+        self.tag_configure("io_hyperlink", **hyperlink_opts)
 
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
         # input starts, output_end shows the end of last output,
@@ -345,6 +345,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             "DebuggerResponse", self._handle_fancy_debugger_progress, True
         )
 
+        self.tag_raise("io_hyperlink")
         self.tag_raise("underline")
         self.tag_raise("strikethrough")
         self.tag_raise("intense_io")
@@ -870,7 +871,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 if i % 2 == 0:
                     _insert(part, tags)
                 else:
-                    _insert(part, tags + ("hyperlink", "io_hyperlink"))
+                    _insert(part, tags + ("io_hyperlink",))
                 
 
         # I want the insertion to go before marks
@@ -886,8 +887,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 parts = re.split(r"(File .* line \d+.*)$", line, maxsplit=1)
                 if len(parts) == 3 and "<pyshell" not in line:
                     _insert(parts[0], tags)
-                    _insert(parts[1], tags + ("hyperlink", "io_hyperlink",))
+                    _insert(parts[1], tags + ("io_hyperlink",))
                     _insert(parts[2], tags)
+                    #self.tag_raise("io_hyperlink", "io")
+                    #self.tag_raise("io_hyperlink", "stderr")
+                    #self.tag_raise("io_hyperlink", "stdout")
                 else:
                     _insert_and_highlight_urls(line, tags)
         else:
@@ -1200,7 +1204,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         filename, lineno, set_focus=False
                     )
             else:
-                r = self.tag_prevrange("hyperlink", "@%d,%d" % (event.x, event.y))
+                r = self.tag_prevrange("io_hyperlink", "@%d,%d" % (event.x, event.y))
                 if r and len(r) == 2:
                     url = self.get(r[0], r[1])
                     if SIMPLE_URL_SPLIT_REGEX.match(url):
