@@ -1358,6 +1358,11 @@ class Tracer(Executor):
     def _breakpointhook(self, *args, **kw):
         pass
 
+    def _notify_return(self, frame_id):
+        # Need extra notification, because the frame to be returned to may not
+        # be interesting for the user, so front-end can close the frame
+        self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
+
 
 class FastTracer(Tracer):
     def __init__(self, vm, original_cmd):
@@ -1389,6 +1394,7 @@ class FastTracer(Tracer):
         elif event == "return":
             self._fresh_exception = None
             self._alive_frame_ids.remove(id(frame))
+            self._notify_return(id(frame))
 
         elif event == "exception":
             self._fresh_exception = arg
@@ -1600,6 +1606,8 @@ class NiceTracer(Tracer):
             self._fresh_exception = None
 
             if code_name not in self.marker_function_names:
+                frame_id = id(self._custom_stack[-1].system_frame)
+                self._notify_return(frame_id)
                 self._custom_stack.pop()
                 if len(self._custom_stack) == 0:
                     # We popped last frame, this means our program has ended.

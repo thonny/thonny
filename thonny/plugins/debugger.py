@@ -73,6 +73,9 @@ class Debugger:
     def handle_debugger_progress(self, msg):
         self._last_brought_out_frame_id = None
 
+    def handle_debugger_return(self, msg):
+        pass
+
     def close(self) -> None:
         self._last_brought_out_frame_id = None
 
@@ -191,6 +194,9 @@ class SingleWindowDebugger(Debugger):
                 else frame_info.code_name,
             )
 
+    def handle_debugger_return(self, msg):
+        print("RETURN", msg)
+
 
 class StackedWindowsDebugger(Debugger):
     def __init__(self):
@@ -271,6 +277,9 @@ class StackedWindowsDebugger(Debugger):
         var_view = get_workbench().get_view("VariablesView")
         frame_info = self.get_frame_by_id(frame_id)
         var_view.show_globals(frame_info.globals, frame_info.module_name)
+
+    def handle_debugger_return(self, msg):
+        print("RETURN", msg)
 
 
 class FrameVisualizer:
@@ -1018,6 +1027,12 @@ def _handle_toplevel_response(msg):
         _current_debugger = None
 
 
+def _handle_debugger_return(msg):
+    global _current_debugger
+    assert _current_debugger is not None
+    _current_debugger.handle_debugger_return(msg)
+
+
 class DebuggerConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
@@ -1200,4 +1215,5 @@ def load_plugin() -> None:
     get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)
     get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
     get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
+    get_workbench().bind("debugger_return_response", _handle_debugger_return, True)
     get_workbench().bind("CommandAccepted", _debug_accepted, True)
