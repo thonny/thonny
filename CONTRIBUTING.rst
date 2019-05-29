@@ -28,7 +28,7 @@ Thonny uses `Black <https://black.readthedocs.io/en/stable/>`_ to keep code form
 Please format your code with ``black thonny`` before issuing a pull request. Format options are 
 specified in pyproject.toml in the root of the repository and will be picked up from there by Black.
 
-In recent PyDev versions you select Black as your formatter (Preferences => PyDev => Editor => 
+In recent PyDev versions you can select Black as your formatter (Preferences => PyDev => Editor => 
 Code Style => Code Formatter) and make it run on each save (Preferences => PyDev => Editor => 
 Save Actions). See 
 `Black's documentation about configuring other IDE-s <https://black.readthedocs.io/en/stable/editor_integration.html>`_.    
