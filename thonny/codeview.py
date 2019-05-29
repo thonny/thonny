@@ -186,7 +186,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
             master=master,
             tag_current_line=get_workbench().get_option("view.highlight_current_line"),
             cnf=cnf,
-            **kw
+            **kw,
         )
         # Allow binding to events of all CodeView texts
         self.bindtags(self.bindtags() + ("CodeViewText",))
@@ -221,7 +221,7 @@ class CodeView(tktextext.TextFrame):
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
             horizontal_scrollbar_class=ui_utils.AutoScrollbar,
-            **text_frame_args
+            **text_frame_args,
         )
 
         # TODO: propose_remove_line_numbers on paste??

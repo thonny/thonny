@@ -111,7 +111,7 @@ class Completer(tk.Listbox):
             *[
                 c["name"] + ("=" if c["complete"].endswith("=") else "")
                 for c in completions
-            ]
+            ],
         )
         self.activate(0)
         self.selection_set(0)
