@@ -34,7 +34,7 @@ import webbrowser
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
 # NB! Don't add parens without refactoring split procedure!
-OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\b\r])")
+OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r])")
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
 SIMPLE_URL_SPLIT_REGEX = re.compile(r"(https?:\/\/[\w\/.:\-\?#=%]+[\w\/])")
 
@@ -80,6 +80,7 @@ class ShellView(tk.PanedWindow):
 
         get_workbench().set_default("shell.max_lines", 1000)
         get_workbench().set_default("shell.squeeze_threshold", 1000)
+        get_workbench().set_default("shell.tty_mode", True)
 
         self.text = ShellText(
             main_frame,
@@ -290,6 +291,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self._io_cursor_offset = 0
         self._squeeze_buttons = set()
 
+        self.update_tty_mode()
+
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
         self.bind("<KeyPress>", self._text_key_press, True)
@@ -334,7 +337,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         if hyperlink_opts.get("underline"):
             hyperlink_opts["font"] = "UnderlineIOFont"
             del hyperlink_opts["underline"]
-
         self.tag_configure("io_hyperlink", **hyperlink_opts)
 
         # create 3 marks: input_start shows the place where user entered but not-yet-submitted
@@ -457,16 +459,18 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         return get_workbench().get_option("shell.squeeze_threshold")
 
     def _append_to_io_queue(self, data, stream_name):
-        # Make sure ANSI CSI codes are stored as separate events
-        # TODO: try to complete previously submitted incomplete code
-
-        parts = re.split(OUTPUT_SPLIT_REGEX, data)
-        for part in parts:
-            if part:  # split may produce empty string in the beginning or start
-                # split the data so that very long lines separated
-                for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
-                    if block:
-                        self._queued_io_events.append((block, stream_name))
+        if self.tty_mode:
+            # Make sure ANSI CSI codes are stored as separate events
+            # TODO: try to complete previously submitted incomplete code
+            parts = re.split(OUTPUT_SPLIT_REGEX, data)
+            for part in parts:
+                if part:  # split may produce empty string in the beginning or start
+                    # split the data so that very long lines separated
+                    for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
+                        if block:
+                            self._queued_io_events.append((block, stream_name))
+        else:
+            self._queued_io_events.append((data, stream_name))
 
     def _update_visible_io(self, target_num_visible_chars):
         current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
@@ -506,8 +510,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         original_data = data
 
-        if re.match(OUTPUT_SPLIT_REGEX, data):
-            if data == "\b":
+        if self.tty_mode and re.match(OUTPUT_SPLIT_REGEX, data):
+            if data == "\a":
+                get_workbench().bell()
+            elif data == "\b":
                 self._change_io_cursor_offset(-1)
             elif data == "\r":
                 self._change_io_cursor_offset("line")
@@ -522,7 +528,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
         else:
             tags = extra_tags | {"io", stream_name}
-            if stream_name == "stdout":
+            if stream_name == "stdout" and self.tty_mode:
                 tags |= self._get_ansi_tags()
 
             if len(data) > self._get_squeeze_threshold() and "\n" not in data:
@@ -897,10 +903,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             return False
 
     def _insert_text_directly(self, txt, tags=()):
-        if "\a" in txt:
-            get_workbench().bell()
-            # TODO: elide bell character
-
         def _insert(txt, tags):
             if txt != "":
                 self.direct_insert("output_insert", txt, tags)
@@ -1052,9 +1054,11 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             if text_to_be_submitted in self._command_history:
                 self._command_history.remove(text_to_be_submitted)
             self._command_history.append(text_to_be_submitted)
-            self._command_history_current_index = (
-                None
-            )  # meaning command selection is not in process
+
+            # meaning command selection is not in process
+            self._command_history_current_index = None
+
+            self.update_tty_mode()
 
             cmd_line = text_to_be_submitted.strip()
             try:
@@ -1069,18 +1073,29 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
                         ToplevelCommand(
-                            command_name, args=argv[1:], args_str=args_str, cmd_line=cmd_line
+                            command_name,
+                            args=argv[1:],
+                            args_str=args_str,
+                            cmd_line=cmd_line,
+                            tty_mode=self.tty_mode,
                         )
                     )
                 elif cmd_line.startswith("!"):
                     argv = parse_cmd_line(cmd_line[1:])
                     get_workbench().event_generate("SystemCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
-                        ToplevelCommand("execute_system_command", argv=argv, cmd_line=cmd_line)
+                        ToplevelCommand(
+                            "execute_system_command",
+                            argv=argv,
+                            cmd_line=cmd_line,
+                            tty_mode=self.tty_mode,
+                        )
                     )
                 else:
                     get_runner().send_command(
-                        ToplevelCommand("execute_source", source=text_to_be_submitted)
+                        ToplevelCommand(
+                            "execute_source", source=text_to_be_submitted, tty_mode=self.tty_mode
+                        )
                     )
 
                 # remember the place where the output of this command started
@@ -1289,6 +1304,9 @@ class ShellText(EnhancedTextWithLogging, PythonText):
             start_index = r[1]
 
         return result
+
+    def update_tty_mode(self):
+        self.tty_mode = get_workbench().get_option("shell.tty_mode")
 
 
 class SqueezedTextDialog(tk.Toplevel):

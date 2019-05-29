@@ -11,6 +11,15 @@ class ShellConfigurationPage(ConfigurationPage):
         ConfigurationPage.__init__(self, master)
         self.columnconfigure(1, weight=1)
 
+        self.add_checkbox(
+            "shell.tty_mode",
+            "TTY emulation (supports ANSI-colors, \\a, \\r, \\b)",
+            10,
+            0,
+            columnspan=2,
+            pady=(0, 10),
+        )
+
         max_lines_var = get_workbench().get_variable("shell.max_lines")
         max_lines_label = ttk.Label(
             self,

@@ -99,6 +99,7 @@ class VM:
         self._install_fake_streams()
         self._current_executor = None
         self._io_level = 0
+        self._tty_mode = True
 
         init_msg = self._fetch_command()
 
@@ -406,6 +407,7 @@ class VM:
 
     def _cmd_execute_source(self, cmd):
         """Executes Python source entered into shell"""
+        self._check_update_tty_mode(cmd)
         filename = "<pyshell>"
         ws_stripped_source = cmd.source.strip()
         source = ws_stripped_source.strip("?")
@@ -441,6 +443,7 @@ class VM:
         return ToplevelResponse(command_name="execute_source", **result_attributes)
 
     def _cmd_execute_system_command(self, cmd):
+        self._check_update_tty_mode(cmd)
         env = dict(os.environ).copy()
         encoding = "utf-8"
         env["PYTHONIOENCODING"] = encoding
@@ -799,6 +802,8 @@ class VM:
         # and were stored in sys.argv already in VM.__init__
         # TODO: are they?
 
+        self._check_update_tty_mode(cmd)
+
         if len(cmd.args) >= 1:
             sys.argv = cmd.args
             filename = cmd.args[0]
@@ -1034,6 +1039,10 @@ class VM:
             "line": getattr(e_value, "text", processed_tb[-1].line),
         }
 
+    def _check_update_tty_mode(self, cmd):
+        if "tty_mode" in cmd:
+            self._tty_mode = cmd["tty_mode"]
+
     class FakeStream:
         def __init__(self, vm, target_stream):
             self._vm = vm
@@ -1041,7 +1050,7 @@ class VM:
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return True
+            return self._vm._tty_mode
 
         def __getattr__(self, name):
             # TODO: is it safe to perform those other functions without notifying vm
