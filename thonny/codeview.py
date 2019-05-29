@@ -21,9 +21,7 @@ class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
         self._syntax_options = {}
         super().__init__(master=master, cnf=cnf, **kw)
-        self._syntax_theme_change_binding = tk._default_root.bind(
-            "<<SyntaxThemeChanged>>", self._reload_syntax_options, True
-        )
+        self._syntax_theme_change_binding = tk._default_root.bind("<<SyntaxThemeChanged>>", self._reload_syntax_options, True)
         self._reload_syntax_options()
 
     def set_syntax_options(self, syntax_options):
