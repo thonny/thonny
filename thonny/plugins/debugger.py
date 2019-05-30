@@ -195,7 +195,10 @@ class SingleWindowDebugger(Debugger):
             )
 
     def handle_debugger_return(self, msg):
-        print("RETURN", msg)
+        if self._last_frame_visualizer is not None and self._last_frame_visualizer.get_frame_id() == msg.get(
+            "frame_id"
+        ):
+            self._last_frame_visualizer.close()
 
 
 class StackedWindowsDebugger(Debugger):
@@ -279,7 +282,14 @@ class StackedWindowsDebugger(Debugger):
         var_view.show_globals(frame_info.globals, frame_info.module_name)
 
     def handle_debugger_return(self, msg):
-        print("RETURN", msg)
+        viz = self._main_frame_visualizer
+
+        while viz is not None:
+            if viz.get_frame_id() == msg.get("frame_id"):
+                viz.close()
+                break
+
+            viz = viz._next_frame_visualizer
 
 
 class FrameVisualizer:
@@ -560,7 +570,18 @@ class ExpressionBox(tk.Text):
         event = frame_info.event
 
         if frame_info.current_root_expression is not None:
-            self._load_expression(frame_info.filename, frame_info.current_root_expression)
+            with open(frame_info.filename, "rb") as fp:
+                whole_source = fp.read()
+
+            lines = whole_source.splitlines()
+            if len(lines) < frame_info.current_root_expression.end_lineno:
+                # it must be on a synthetical line which is not actually present in the editor
+                self.clear_debug_view()
+                return
+
+            self._load_expression(
+                whole_source, frame_info.filename, frame_info.current_root_expression
+            )
             for subrange, value in frame_info.current_evaluations:
                 self._replace(subrange, value)
             if "expression" in event:
@@ -631,9 +652,7 @@ class ExpressionBox(tk.Text):
             lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id),
         )
 
-    def _load_expression(self, filename, text_range):
-        with open(filename, "rb") as fp:
-            whole_source = fp.read()
+    def _load_expression(self, whole_source, filename, text_range):
 
         root = ast_utils.parse_source(whole_source, filename)
         main_node = ast_utils.find_expression(root, text_range)
