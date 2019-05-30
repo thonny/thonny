@@ -1050,7 +1050,7 @@ class VM:
             self._processed_symbol_count = 0
 
         def isatty(self):
-            return self._vm._tty_mode
+            return self._vm._tty_mode and (os.name != "nt" or "click" not in sys.modules)
 
         def __getattr__(self, name):
             # TODO: is it safe to perform those other functions without notifying vm
