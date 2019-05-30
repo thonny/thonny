@@ -390,6 +390,7 @@ class Workbench(tk.Tk):
 
         self.set_default("view.editor_font_family", default_editor_family)
         self.set_default("view.editor_font_size", 14 if running_on_mac_os() else 11)
+        self.set_default("view.io_font_size", 14 if running_on_mac_os() else 11)
 
         default_font = tk_font.nametofont("TkDefaultFont")
 
@@ -1561,13 +1562,11 @@ class Workbench(tk.Tk):
     def update_fonts(self) -> None:
         editor_font_size = self._guard_font_size(self.get_option("view.editor_font_size"))
         editor_font_family = self.get_option("view.editor_font_family")
-        io_font_family = self.get_option("view.io_font_family")
 
-        for name in ("IOFont", "BoldIOFont", "UnderlineIOFont", "ItalicIOFont", "BoldItalicIOFont"):
-            tk_font.nametofont(name).configure(
-                family=io_font_family,
-                size=min(editor_font_size - 2, int(editor_font_size * 0.8 + 3)),
-            )
+        io_font_size = self._guard_font_size(self.get_option("view.io_font_size"))
+        io_font_family = self.get_option("view.io_font_family")
+        for io_name in ["IOFont", "BoldIOFont", "UnderlineIOFont", "ItalicIOFont", "BoldItalicIOFont"]:
+            tk_font.nametofont(io_name).configure(family=io_font_family, size=io_font_size)
         tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(
             family=editor_font_family, size=editor_font_size - 2
@@ -1672,6 +1671,9 @@ class Workbench(tk.Tk):
             editor_font_size = self.get_option("view.editor_font_size")
             editor_font_size += delta
             self.set_option("view.editor_font_size", self._guard_font_size(editor_font_size))
+            io_font_size = self.get_option("view.io_font_size")
+            io_font_size += delta
+            self.set_option("view.io_font_size", self._guard_font_size(io_font_size))
             self.update_fonts()
 
     def _guard_font_size(self, size: int) -> int:
