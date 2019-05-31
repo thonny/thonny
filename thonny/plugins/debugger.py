@@ -50,6 +50,8 @@ class Debugger:
             )
 
             get_runner().send_command(cmd)
+            if command == "resume":
+                self.clear_last_frame()
         else:
             logging.debug("Bad state for sending debugger command " + str(command))
 
@@ -81,6 +83,9 @@ class Debugger:
 
         if get_workbench().get_option("debugger.automatic_stack_view"):
             get_workbench().hide_view("StackView")
+
+    def clear_last_frame(self):
+        pass
 
     def get_frame_by_id(self, frame_id):
         for frame_info in self._last_progress_message.stack:
@@ -159,6 +164,10 @@ class SingleWindowDebugger(Debugger):
         if self._last_frame_visualizer is not None:
             self._last_frame_visualizer.close()
             self._last_frame_visualizer = None
+
+    def clear_last_frame(self):
+        if self._last_frame_visualizer is not None:
+            self._last_frame_visualizer.clear()
 
     def bring_out_frame(self, frame_id, force=False):
         if not force and frame_id == self._last_brought_out_frame_id:
@@ -250,13 +259,25 @@ class StackedWindowsDebugger(Debugger):
             self._main_frame_visualizer.close()
             self._main_frame_visualizer = None
 
-    def _get_topmost_selected_visualizer(self):
+    def clear_last_frame(self):
+        visualizer = self._get_topmost_visualizer()
+        if visualizer is not None:
+            visualizer.clear()
+
+    def _get_topmost_visualizer(self):
         visualizer = self._main_frame_visualizer
         if visualizer is None:
             return None
 
         while visualizer._next_frame_visualizer is not None:
             visualizer = visualizer._next_frame_visualizer
+
+        return visualizer
+
+    def _get_topmost_selected_visualizer(self):
+        visualizer = self._get_topmost_visualizer()
+        if visualizer is None:
+            return None
 
         topmost_text_widget = visualizer._text
         focused_widget = get_workbench().focus_get()
@@ -282,14 +303,14 @@ class StackedWindowsDebugger(Debugger):
         var_view.show_globals(frame_info.globals, frame_info.module_name)
 
     def handle_debugger_return(self, msg):
-        viz = self._main_frame_visualizer
+        visualizer = self._get_topmost_visualizer()
+        if visualizer is None:
+            return
 
-        while viz is not None:
-            if viz.get_frame_id() == msg.get("frame_id"):
-                viz.close()
-                break
-
-            viz = viz._next_frame_visualizer
+        # detatch it from its parent
+        if visualizer._prev_frame_visualizer is not None:
+            visualizer._prev_frame_visualizer._next_frame_visualizer = None
+        visualizer.close()
 
 
 class FrameVisualizer:
@@ -308,6 +329,7 @@ class FrameVisualizer:
         self._expression_box = ExpressionBox(text_frame)
         self._note_box = ui_utils.NoteBox(text_frame.winfo_toplevel())
         self._next_frame_visualizer = None
+        self._prev_frame_visualizer = None
         self._text.set_read_only(True)
         self._line_debug = frame_info.current_statement is None
 
@@ -331,8 +353,12 @@ class FrameVisualizer:
             self._next_frame_visualizer = None
 
         self._text.set_read_only(False)
-        self._remove_focus_tags()
-        self._expression_box.clear_debug_view()
+        self.clear()
+        # self._expression_box.destroy()
+
+    def clear(self):
+        self.remove_focus_tags()
+        self.hide_expression_box()
         self.close_note()
 
     def get_frame_id(self):
@@ -355,11 +381,12 @@ class FrameVisualizer:
 
         if next_frame_info and not self._next_frame_visualizer:
             self._next_frame_visualizer = self._create_next_frame_visualizer(next_frame_info)
+            self._next_frame_visualizer._prev_frame_visualizer = self
 
         if self._next_frame_visualizer:
             self._next_frame_visualizer.update_this_and_next_frames(msg)
 
-    def _remove_focus_tags(self):
+    def remove_focus_tags(self):
         for name in [
             "exception_focus",
             "active_focus",
@@ -369,9 +396,13 @@ class FrameVisualizer:
         ]:
             self._text.tag_remove(name, "0.0", "end")
 
+    def hide_expression_box(self):
+        if self._expression_box is not None:
+            self._expression_box.clear_debug_view()
+
     def _update_this_frame(self, msg, frame_info):
         self._frame_info = frame_info
-        self._remove_focus_tags()
+        self.remove_focus_tags()
 
         if frame_info.event == "line":
             if (
@@ -529,8 +560,8 @@ class EditorVisualizer(FrameVisualizer):
     def bring_out_this_frame(self):
         get_workbench().focus_set()
 
-    def close(self):
-        super().close()
+    def clear(self):
+        super().clear()
         self._decorate_editor_title("")
 
 
@@ -616,7 +647,8 @@ class ExpressionBox(tk.Text):
             return ""
 
     def clear_debug_view(self):
-        self.place_forget()
+        if self.winfo_ismapped():
+            self.place_forget()
         self._main_range = None
         self._last_focus = None
         self._clear_expression()
@@ -830,7 +862,7 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
         )
 
     def close(self):
-        FrameVisualizer.close(self)
+        super().close()
         self.destroy()
 
 
