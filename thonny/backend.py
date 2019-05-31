@@ -48,6 +48,7 @@ from thonny.common import (
     get_exe_dirs,
     get_augmented_system_path,
     update_system_path,
+    is_same_path,
 )
 import queue
 
@@ -1286,13 +1287,13 @@ class Tracer(Executor):
         )
 
     def _is_interesting_module_file(self, path):
-        # interesting files are files directly in current directory
-        # or under the same directory as main module
+        # interesting files are the files in the same directory as main module
         # or the ones with breakpoints
+        # (used to be more flexible, but this caused problems
+        # when main script was in ~/. Then user site library became interesting as well)
         return (
-            path_startswith(path, os.getcwd())
-            or self._main_module_path is not None
-            and path_startswith(path, os.path.dirname(self._main_module_path))
+            self._main_module_path is not None
+            and is_same_path(os.path.dirname(path), os.path.dirname(self._main_module_path))
             or path in self._current_command["breakpoints"]
         )
 
