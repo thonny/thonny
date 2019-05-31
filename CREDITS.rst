@@ -32,7 +32,8 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Aivar Annamaa
 * Alar Leemet
 * Alex Hall
-* anatoly techtonik
+* Anatoly Techtonik
+* André Roberge
 * Austin Bart
 * badukaire
 * cefn
