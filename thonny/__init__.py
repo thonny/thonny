@@ -44,7 +44,7 @@ CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 def check_initialization():
     from thonny import workbench
 
-    if not os.path.exists(CONFIGURATION_FILE_NAME) or True:
+    if not os.path.exists(CONFIGURATION_FILE_NAME):
         from thonny.first_run import FirstRunWindow
         from thonny.config import ConfigurationManager
 

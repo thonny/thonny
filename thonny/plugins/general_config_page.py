@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from thonny import get_workbench
+from thonny import get_workbench, languages
 from thonny.config_ui import ConfigurationPage
 
 
@@ -28,42 +28,54 @@ class GeneralConfigurationPage(ConfigurationPage):
             columnspan=2,
         )
 
-        ttk.Label(self, text="UI mode").grid(
-            row=6, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
-        )
-        self.add_combobox(
-            "general.ui_mode", ["simple", "regular", "expert"], row=6, column=1, pady=(10, 0)
+        # language
+        self._language_name_var = tk.StringVar(
+            value=languages.LANGUAGES_DICT.get(get_workbench().get_option("general.language"), "")
         )
 
-        self._scaling_var = get_workbench().get_variable("general.scaling")
-        self._scaling_label = ttk.Label(self, text="UI scaling factor")
-        self._scaling_label.grid(row=7, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
-        self._scaling_combo = ttk.Combobox(
+        self._language_label = ttk.Label(self, text=_("Language"))
+        self._language_label.grid(row=10, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self._language_combo = ttk.Combobox(
             self,
-            width=7,
+            width=20,
             exportselection=False,
-            textvariable=self._scaling_var,
+            textvariable=self._language_name_var,
             state="readonly",
             height=15,
-            values=["default"] + scalings,
+            values=list(languages.LANGUAGES_DICT.values()),
         )
-        self._scaling_combo.grid(row=7, column=1, sticky=tk.W, pady=(10, 0))
+        self._language_combo.grid(row=10, column=1, sticky=tk.W, pady=(10, 0))
+
+        # Mode
+        ttk.Label(self, text="UI mode").grid(
+            row=20, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
+        )
+        self.add_combobox(
+            "general.ui_mode",
+            ["simple", "regular", "expert"],
+            row=20,
+            column=1,
+            pady=(10, 0),
+            width=10,
+        )
+
+        # scaling
+        self._scaling_label = ttk.Label(self, text="UI scaling factor")
+        self._scaling_label.grid(row=30, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
+        self.add_combobox("general.scaling", scalings, row=30, column=1, pady=(10, 0), width=10)
 
         self._font_scaling_var = get_workbench().get_variable("general.font_scaling_mode")
         self._font_scaling_label = ttk.Label(self, text=_("Font scaling mode"))
-        self._font_scaling_label.grid(row=8, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
-        self._font_scaling_combo = ttk.Combobox(
-            self,
+        self._font_scaling_label.grid(row=40, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
+        self.add_combobox(
+            "general.font_scaling_mode",
+            ["default", "extra", "automatic"],
+            row=40,
+            column=1,
+            pady=(10, 0),
             width=10,
-            exportselection=False,
-            textvariable=self._font_scaling_var,
-            state="readonly",
-            height=15,
-            values=["default", "extra", "automatic"],
         )
-        self._font_scaling_combo.grid(row=8, column=1, sticky=tk.W, pady=(10, 0))
 
         reopen_label = ttk.Label(
             self,
@@ -73,9 +85,14 @@ class GeneralConfigurationPage(ConfigurationPage):
             ),
             font="BoldTkDefaultFont",
         )
-        reopen_label.grid(row=20, column=0, sticky=tk.W, pady=20, columnspan=2)
+        reopen_label.grid(row=100, column=0, sticky=tk.W, pady=20, columnspan=2)
 
         self.columnconfigure(1, weight=1)
+
+    def apply(self):
+        get_workbench().set_option(
+            "general.language", languages.get_language_code_by_name(self._language_name_var.get())
+        )
 
 
 def load_plugin() -> None:

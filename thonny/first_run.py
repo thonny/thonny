@@ -34,9 +34,11 @@ class FirstRunWindow(tk.Tk):
         self.padx = 50
         self.pady = 50
 
-        self.language_variable = ui_utils.create_string_var("English", self.on_change_language)
+        self.language_variable = ui_utils.create_string_var(
+            languages.BASE_LANGUAGE_NAME, self.on_change_language
+        )
         self.add_combo(
-            1, "Language:", self.language_variable, list(languages.LANGUAGES_DICT.keys())
+            1, "Language:", self.language_variable, list(languages.LANGUAGES_DICT.values())
         )
 
         self.mode_variable = tk.StringVar(value=STD_MODE_TEXT)
@@ -94,6 +96,10 @@ class FirstRunWindow(tk.Tk):
             self.conf.set_option("debugger.preferred_debugger", "nicer")
             self.conf.set_option("view.ui_theme", "Enhanced Clam")
             self.conf.set_option("general.ui_mode", "regular")
+
+        self.conf.set_option(
+            "general.language", languages.get_language_code_by_name(self.language_variable.get())
+        )
 
         self.conf.save()
 

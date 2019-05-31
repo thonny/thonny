@@ -35,7 +35,7 @@ from typing import (
 from warnings import warn
 
 import thonny
-from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance
+from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
@@ -53,7 +53,6 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
 )
-from thonny.languages import LANGUAGES_DICT
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
@@ -212,23 +211,16 @@ class Workbench(tk.Tk):
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
-        self.set_default("general.language", "English")
+        self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
 
     def _init_language(self) -> None:
         """Initialize language."""
-        language_option = self.get_option("general.language")
-        self._set_language(language_option)
-
-    def _set_language(self, language_name) -> None:
-        if language_name in LANGUAGES_DICT:
-
-            language = gettext.translation(
-                "thonny",
-                os.path.join("thonny", "locale"),
-                languages=[LANGUAGES_DICT[language_name]],
-            )
+        language_code = self.get_option("general.language")
+        if language_code in languages.LANGUAGES_DICT:
+            path = os.path.join(os.path.dirname(__file__), "locale")
+            language = gettext.translation("thonny", path, [language_code])
             language.install()
 
     def _get_logging_level(self) -> int:

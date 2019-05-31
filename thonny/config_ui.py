@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
+import traceback
 
 
 class ConfigurationDialog(tk.Toplevel):
@@ -33,14 +34,17 @@ class ConfigurationDialog(tk.Toplevel):
 
         self._pages = {}
         for title in sorted(page_records):
-            page_class = page_records[title]
-            spacer = ttk.Frame(self)
-            spacer.rowconfigure(0, weight=1)
-            spacer.columnconfigure(0, weight=1)
-            page = page_class(spacer)
-            self._pages[title] = page
-            page.grid(sticky=tk.NSEW, pady=10, padx=15)
-            self._notebook.add(spacer, text=title)
+            try:
+                page_class = page_records[title]
+                spacer = ttk.Frame(self)
+                spacer.rowconfigure(0, weight=1)
+                spacer.columnconfigure(0, weight=1)
+                page = page_class(spacer)
+                self._pages[title] = page
+                page.grid(sticky=tk.NSEW, pady=10, padx=15)
+                self._notebook.add(spacer, text=title)
+            except Exception:
+                traceback.print_exc()
 
         self.bind("<Return>", self._ok, True)
         self.bind("<Escape>", self._cancel, True)
