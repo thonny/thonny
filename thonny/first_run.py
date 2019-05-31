@@ -92,10 +92,6 @@ class FirstRunWindow(tk.Tk):
             self.conf.set_option("debugger.preferred_debugger", "faster")
             self.conf.set_option("view.ui_theme", "Raspberry Pi")
             self.conf.set_option("general.ui_mode", "simple")
-        else:
-            self.conf.set_option("debugger.preferred_debugger", "nicer")
-            self.conf.set_option("view.ui_theme", "Enhanced Clam")
-            self.conf.set_option("general.ui_mode", "regular")
 
         self.conf.set_option(
             "general.language", languages.get_language_code_by_name(self.language_variable.get())
