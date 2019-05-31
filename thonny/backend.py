@@ -373,7 +373,7 @@ class VM:
             raise KeyboardInterrupt("Execution interrupted")
 
         if os.name == "nt":
-            signal.signal(signal.SIGBREAK, signal_handler)
+            signal.signal(signal.SIGBREAK, signal_handler)  # @UndefinedVariable
         else:
             signal.signal(signal.SIGINT, signal_handler)
 
@@ -1228,6 +1228,7 @@ class Tracer(Executor):
         super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
+        self._reported_frame_ids = set()
 
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1359,10 +1360,17 @@ class Tracer(Executor):
     def _breakpointhook(self, *args, **kw):
         pass
 
-    def _notify_return(self, frame_id):
-        # Need extra notification, because the frame to be returned to may not
-        # be interesting for the user, so front-end can close the frame
-        self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
+    def _check_notify_return(self, frame_id):
+        if frame_id in self._reported_frame_ids:
+            # Need extra notification, because it may be long time until next interesting event
+            self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
+
+    def _check_store_main_frame_id(self, frame):
+        if (
+            self._current_command.frame_id is None
+            and frame.f_code.co_filename == self._main_module_path
+        ):
+            self._current_command.frame_id = id(frame)
 
 
 class FastTracer(Tracer):
@@ -1380,11 +1388,13 @@ class FastTracer(Tracer):
 
     def _trace(self, frame, event, arg):
 
-        # is this frame interesting at all?
-        if event == "call" and self._should_skip_frame(frame):
-            return None
-
         if event == "call":
+            # is this frame interesting at all?
+            if self._should_skip_frame(frame):
+                return None
+            else:
+                self._check_store_main_frame_id(frame)
+
             self._fresh_exception = None
             # can we skip this frame?
             if self._current_command.name == "step_over" and not self._current_command.breakpoints:
@@ -1395,7 +1405,7 @@ class FastTracer(Tracer):
         elif event == "return":
             self._fresh_exception = None
             self._alive_frame_ids.remove(id(frame))
-            self._notify_return(id(frame))
+            self._check_notify_return(id(frame))
 
         elif event == "exception":
             self._fresh_exception = arg
@@ -1419,13 +1429,16 @@ class FastTracer(Tracer):
         return self._trace
 
     def _report_current_state(self, frame):
+        stack = self._vm._export_stack(frame, self._should_skip_frame)
         msg = DebuggerResponse(
-            stack=self._vm._export_stack(frame, self._should_skip_frame),
+            stack=stack,
             in_present=True,
             io_symbol_count=None,
             exception_info=self._export_exception_info(),
             tracer_class="FastTracer",
         )
+
+        self._reported_frame_ids.update(map(lambda f: f.id, stack))
 
         self._vm.send_message(msg)
 
@@ -1562,6 +1575,8 @@ class NiceTracer(Tracer):
             )  # some code is running, therefore exception is not fresh anymore
 
             if code_name in self.marker_function_names:
+                self._check_store_main_frame_id(frame.f_back)
+
                 # the main thing
                 if code_name == BEFORE_STATEMENT_MARKER:
                     event = "before_statement"
@@ -1608,7 +1623,7 @@ class NiceTracer(Tracer):
 
             if code_name not in self.marker_function_names:
                 frame_id = id(self._custom_stack[-1].system_frame)
-                self._notify_return(frame_id)
+                self._check_notify_return(frame_id)
                 self._custom_stack.pop()
                 if len(self._custom_stack) == 0:
                     # We popped last frame, this means our program has ended.
@@ -1797,10 +1812,10 @@ class NiceTracer(Tracer):
             source, firstlineno, in_library = self._vm._get_frame_source_info(system_frame)
 
             assert firstlineno is not None, "nofir " + str(system_frame)
-
+            frame_id = id(system_frame)
             new_stack.append(
                 FrameInfo(
-                    id=id(system_frame),
+                    id=frame_id,
                     filename=system_frame.f_code.co_filename,
                     module_name=module_name,
                     code_name=code_name,
@@ -1819,6 +1834,8 @@ class NiceTracer(Tracer):
                     current_root_expression=tframe.current_root_expression,
                 )
             )
+
+            self._reported_frame_ids.add(frame_id)
 
         state["stack"] = new_stack
         state["tracer_class"] = "NiceTracer"
