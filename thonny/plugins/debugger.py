@@ -913,6 +913,7 @@ class StackView(ui_utils.TreeFrame):
 
         get_workbench().bind("DebuggerResponse", self._update_stack, True)
         get_workbench().bind("ToplevelResponse", lambda e=None: self._clear_tree(), True)
+        get_workbench().bind("debugger_return_response", self._handle_debugger_return, True)
 
     def _update_stack(self, msg):
         self._clear_tree()
@@ -933,6 +934,16 @@ class StackView(ui_utils.TreeFrame):
             self.tree.see(node_id)
             self.tree.selection_add(node_id)
             self.tree.focus(node_id)
+
+    def _handle_debugger_return(self, msg):
+        delete = False
+        for iid in self.tree.get_children():
+            if self.tree.set(iid, "id") == msg["frame_id"]:
+                # start deleting from this frame
+                delete = True
+
+            if delete:
+                self.tree.delete(iid)
 
     def on_select(self, event):
         iid = self.tree.focus()
