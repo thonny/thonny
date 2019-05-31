@@ -72,12 +72,12 @@ class Record:
 
     def __repr__(self):
         keys = self.__dict__.keys()
-        items = ("{}={!r}".format(k, self.__dict__[k]) for k in keys)
+        items = ("{}={}".format(k, repr(self.__dict__[k])) for k in keys)
         return "{}({})".format(self.__class__.__name__, ", ".join(items))
 
     def __str__(self):
         keys = sorted(self.__dict__.keys())
-        items = ("{}={!r}".format(k, str(self.__dict__[k])) for k in keys)
+        items = ("{}={}".format(k, repr(self.__dict__[k])) for k in keys)
         return "{}({})".format(self.__class__.__name__, ", ".join(items))
 
     def __eq__(self, other):
