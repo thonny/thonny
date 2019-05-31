@@ -919,7 +919,7 @@ class VM:
     def is_doing_io(self):
         return self._io_level > 0
 
-    def _export_stack(self, newest_frame, skip_checker=None):
+    def _export_stack(self, newest_frame, relevance_checker=None):
         result = []
 
         system_frame = newest_frame
@@ -928,7 +928,7 @@ class VM:
             module_name = system_frame.f_globals["__name__"]
             code_name = system_frame.f_code.co_name
 
-            if not skip_checker or not skip_checker(system_frame):
+            if not relevance_checker or relevance_checker(system_frame):
                 source, firstlineno, in_library = self._get_frame_source_info(system_frame)
 
                 result.insert(
@@ -966,6 +966,7 @@ class VM:
 
             system_frame = system_frame.f_back
 
+        assert result  # not empty
         return result
 
     def _lookup_frame_by_id(self, frame_id):
@@ -1266,12 +1267,23 @@ class Tracer(Executor):
             if hasattr(sys, "breakpointhook"):
                 sys.breakpointhook = old_breakpointhook
 
-    def _should_skip_frame(self, frame):
+    def _should_skip_frame(self, frame, event):
+        if event == "return":
+            # need to close frame in UI even if user issued Resume
+            return False
+
+        return (
+            not self._is_interesting_frame(frame)
+            or self._current_command.name == "resume"
+            and frame.f_code.co_filename not in self._current_command.breakpoints
+        )
+
+    def _is_interesting_frame(self, frame):
         # For some reason Pylint doesn't see inspect.CO_GENERATOR and such
         # pylint: disable=no-member
         code = frame.f_code
 
-        return (
+        return not (
             code is None
             or code.co_filename is None
             or not self._is_interesting_module_file(code.co_filename)
@@ -1295,8 +1307,10 @@ class Tracer(Executor):
         # when main script was in ~/. Then user site library became interesting as well)
         return (
             self._main_module_path is not None
-            and is_same_path(os.path.dirname(path), os.path.dirname(self._main_module_path))
-            and self._current_command.name != "resume"
+            and (
+                self._current_command.get("allow_stepping_into_libraries", False)
+                or is_same_path(os.path.dirname(path), os.path.dirname(self._main_module_path))
+            )
             or path in self._current_command["breakpoints"]
         )
 
@@ -1383,19 +1397,17 @@ class FastTracer(Tracer):
 
     def _breakpointhook(self, *args, **kw):
         frame = inspect.currentframe()
-        while self._should_skip_frame(frame):
+        while not self._is_interesting_frame(frame):
             frame = frame.f_back
         self._report_current_state(frame)
         self._current_command = self._fetch_next_debugger_command()
 
     def _trace(self, frame, event, arg):
+        if self._should_skip_frame(frame, event):
+            return None
 
         if event == "call":
-            # is this frame interesting at all?
-            if self._should_skip_frame(frame):
-                return None
-            else:
-                self._check_store_main_frame_id(frame)
+            self._check_store_main_frame_id(frame)
 
             self._fresh_exception = None
             # can we skip this frame?
@@ -1431,7 +1443,7 @@ class FastTracer(Tracer):
         return self._trace
 
     def _report_current_state(self, frame):
-        stack = self._vm._export_stack(frame, self._should_skip_frame)
+        stack = self._vm._export_stack(frame, self._is_interesting_frame)
         msg = DebuggerResponse(
             stack=stack,
             in_present=True,
@@ -1524,13 +1536,14 @@ class NiceTracer(Tracer):
 
         return root
 
-    def _should_skip_frame(self, frame):
+    def _should_skip_frame(self, frame, event):
         code = frame.f_code
         return (
-            # never skip marker functions
+            # never skip marker functions, because they are triggers
+            # for adding new custom stack frames
             code.co_name not in self.marker_function_names
             and (
-                super()._should_skip_frame(frame)
+                super()._should_skip_frame(frame, event)
                 or code.co_filename not in self._instrumented_files
             )
         )
@@ -1565,8 +1578,10 @@ class NiceTracer(Tracer):
         1) Detects marker calls and responds to client queries in these spots
         2) Maintains a customized view of stack
         """
-        # frame skipping test should be done only in new frames
-        if event == "call" and self._should_skip_frame(frame):
+        # frame skipping test should be done both in new frames and old ones (because of Resume)
+        # Note that intermediate frames can't be skipped when jumping to a breakpoint
+        # because of the need to maintain custom stack
+        if self._should_skip_frame(frame, event):
             return None
 
         code_name = frame.f_code.co_name
@@ -2028,6 +2043,7 @@ class NiceTracer(Tracer):
                 )
             )
 
+        assert result  # not empty
         return result
 
     def _thonny_hidden_before_stmt(self, node_id):

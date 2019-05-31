@@ -42,13 +42,12 @@ class Debugger:
                 frame_id=self._last_progress_message.stack[-1].id,
                 breakpoints=code.get_current_breakpoints(),
                 cursor_position=self.get_run_to_cursor_breakpoint(),
-            )
-
-            cmd.setdefault(
                 state=self._last_progress_message.stack[-1].event,
                 focus=self._last_progress_message.stack[-1].focus,
+                allow_stepping_into_libraries=get_workbench().get_option(
+                    "debugger.allow_stepping_into_libraries"
+                ),
             )
-
             get_runner().send_command(cmd)
             if command == "resume":
                 self.clear_last_frame()
@@ -303,14 +302,12 @@ class StackedWindowsDebugger(Debugger):
         var_view.show_globals(frame_info.globals, frame_info.module_name)
 
     def handle_debugger_return(self, msg):
-        visualizer = self._get_topmost_visualizer()
-        if visualizer is None:
+        if self._main_frame_visualizer is None:
             return
 
-        # detatch it from its parent
-        if visualizer._prev_frame_visualizer is not None:
-            visualizer._prev_frame_visualizer._next_frame_visualizer = None
-        visualizer.close()
+        self._main_frame_visualizer.close(msg["frame_id"])
+        if msg["frame_id"] == self._main_frame_visualizer.get_frame_id():
+            self._main_frame_visualizer = None
 
 
 class FrameVisualizer:
@@ -347,14 +344,16 @@ class FrameVisualizer:
 
             self._text.tag_configure(tag, **conf)
 
-    def close(self):
+    def close(self, frame_id=None):
         if self._next_frame_visualizer:
-            self._next_frame_visualizer.close()
-            self._next_frame_visualizer = None
+            self._next_frame_visualizer.close(frame_id)
+            if frame_id is None or self._next_frame_visualizer.get_frame_id() == frame_id:
+                self._next_frame_visualizer = None
 
-        self._text.set_read_only(False)
-        self.clear()
-        # self._expression_box.destroy()
+        if frame_id is None or frame_id == self._frame_id:
+            self._text.set_read_only(False)
+            self.clear()
+            # self._expression_box.destroy()
 
     def clear(self):
         self.remove_focus_tags()
@@ -861,9 +860,11 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
             parent=self,
         )
 
-    def close(self):
+    def close(self, frame_id=None):
         super().close()
-        self.destroy()
+
+        if frame_id is None or frame_id == self._frame_id:
+            self.destroy()
 
 
 class FunctionCallDialog(DialogVisualizer):
@@ -915,6 +916,8 @@ class StackView(ui_utils.TreeFrame):
 
     def _update_stack(self, msg):
         self._clear_tree()
+
+        node_id = None
         for frame in msg.stack:
             lineno = frame.focus.lineno
 
@@ -926,9 +929,10 @@ class StackView(ui_utils.TreeFrame):
             self.tree.set(node_id, "id", frame.id)
 
         # select last frame
-        self.tree.see(node_id)
-        self.tree.selection_add(node_id)
-        self.tree.focus(node_id)
+        if node_id is not None:
+            self.tree.see(node_id)
+            self.tree.selection_add(node_id)
+            self.tree.focus(node_id)
 
     def on_select(self, event):
         iid = self.tree.focus()
@@ -1151,6 +1155,7 @@ def load_plugin() -> None:
     get_workbench().set_default("debugger.single_window", False)
     get_workbench().set_default("debugger.automatic_stack_view", True)
     get_workbench().set_default("debugger.preferred_debugger", "nicer")
+    get_workbench().set_default("debugger.allow_stepping_into_libraries", False)
 
     get_workbench().add_command(
         "debug_preferred",
