@@ -38,6 +38,24 @@ elif (
 else:
     THONNY_USER_DIR = _get_default_thonny_data_folder()
 
+CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
+
+
+def check_initialization():
+    from thonny import workbench
+
+    if not os.path.exists(CONFIGURATION_FILE_NAME) or True:
+        from thonny.first_run import FirstRunWindow
+        from thonny.config import ConfigurationManager
+
+        mgr = ConfigurationManager(CONFIGURATION_FILE_NAME)
+
+        win = FirstRunWindow(mgr)
+        win.mainloop()
+        return win.ok
+    else:
+        return True
+
 
 def launch():
     _prepare_thonny_user_dir()
@@ -124,7 +142,7 @@ def _should_delegate():
     from thonny import workbench
     from thonny.config import try_load_configuration
 
-    configuration_manager = try_load_configuration(workbench.CONFIGURATION_FILE_NAME)
+    configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
     # Setting the default
     configuration_manager.set_default("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
     # getting the value (may use the default or return saved value)

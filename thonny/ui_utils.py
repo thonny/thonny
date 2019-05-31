@@ -1257,6 +1257,11 @@ def remove_line_numbers(s):
     return textwrap.dedent(("\n".join(cleaned_lines)) + "\n")
 
 
+def center_window(win, master=None):
+    # for backward compat
+    return assign_geometry(win, master)
+
+
 def assign_geometry(win, master=None):
 
     if master is None:
@@ -2091,6 +2096,10 @@ def create_url_label(master, url, text=None):
 
 def get_size_option_name(window):
     return "layout." + type(window).__name__ + "_size"
+
+
+def get_default_theme():
+    return "xpnative" if running_on_windows() else "clam"
 
 
 if __name__ == "__main__":

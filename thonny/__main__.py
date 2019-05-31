@@ -8,7 +8,7 @@ if sys.executable.endswith("thonny.exe"):
     # is already allocated.
     sys.executable = sys.executable[: -len("thonny.exe")] + "pythonw.exe"
 
-from thonny import launch
+from thonny import launch, check_initialization
 
 try:
     runpy.run_module("thonny.customize", run_name="__main__")
@@ -16,4 +16,6 @@ except ImportError:
     pass
 
 gettext.install("thonny", "locale")
-launch()
+
+if check_initialization():
+    launch()

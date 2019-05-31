@@ -12,10 +12,19 @@ import shutil
 from thonny import THONNY_USER_DIR, get_workbench
 import traceback
 
+_manager_cache = {}
+
 
 def try_load_configuration(filename):
+    if filename in _manager_cache:
+        return _manager_cache[filename]
+
     try:
-        return ConfigurationManager(filename)
+        # use cache so Workbench doesn't create duplicate manager
+        # when FirstRunWindow already created one
+        mgr = ConfigurationManager(filename)
+        _manager_cache[filename] = mgr
+        return mgr
     except configparser.Error:
         from tkinter import messagebox
 

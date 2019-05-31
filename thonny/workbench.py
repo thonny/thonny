@@ -57,7 +57,6 @@ from thonny.languages import LANGUAGES_DICT
 
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
-CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 SINGLE_INSTANCE_DEFAULT = True
 SIMPLE_MODE_VIEWS = ["ShellView", "VariablesView"]
 
@@ -205,7 +204,7 @@ class Workbench(tk.Tk):
             self.report_exception()
 
     def _init_configuration(self) -> None:
-        self._configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
+        self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE_NAME)
         self._configuration_pages = {}  # type: Dict[str, Type[tk.Widget]]
 
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
@@ -691,8 +690,7 @@ class Workbench(tk.Tk):
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
         # following will be overwritten by plugins.base_themes
-        self.set_default("view.ui_theme", "xpnative" if running_on_windows() else "clam")
-        self.set_default("view.ui_theme", "xpnative" if running_on_windows() else "clam")
+        self.set_default("view.ui_theme", ui_utils.get_default_theme())
 
     def add_command(
         self,
@@ -1565,7 +1563,13 @@ class Workbench(tk.Tk):
 
         io_font_size = self._guard_font_size(self.get_option("view.io_font_size"))
         io_font_family = self.get_option("view.io_font_family")
-        for io_name in ["IOFont", "BoldIOFont", "UnderlineIOFont", "ItalicIOFont", "BoldItalicIOFont"]:
+        for io_name in [
+            "IOFont",
+            "BoldIOFont",
+            "UnderlineIOFont",
+            "ItalicIOFont",
+            "BoldItalicIOFont",
+        ]:
             tk_font.nametofont(io_name).configure(family=io_font_family, size=io_font_size)
         tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(
