@@ -1074,10 +1074,10 @@ def _debug_accepted(event):
     cmd = event.command
     if cmd.get("name") in ["Debug", "FastDebug"]:
         assert _current_debugger is None
-        if get_workbench().get_option("debugger.single_window"):
-            _current_debugger = SingleWindowDebugger()
-        else:
+        if get_workbench().get_option("debugger.frames_in_separate_windows"):
             _current_debugger = StackedWindowsDebugger()
+        else:
+            _current_debugger = SingleWindowDebugger()
 
 
 def _handle_debugger_progress(msg):
@@ -1103,9 +1103,9 @@ class DebuggerConfigurationPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
         self.add_checkbox(
-            "debugger.single_window",
-            "Use editors and Stack view for presenting call frames",
-            tooltip="Presents the concept of stack like most professional IDE-s",
+            "debugger.frames_in_separate_windows",
+            "Show function calls (frames) in separate windows",
+            tooltip="Uncheck if you want more traditional experience.",
             row=1,
             columnspan=3,
         )
@@ -1117,30 +1117,38 @@ class DebuggerConfigurationPage(ConfigurationPage):
             row=2,
             columnspan=3,
         )
+        self.add_checkbox(
+            "debugger.allow_stepping_into_libraries",
+            "Allow stepping into libraries (ie. outside of main script directory)",
+            tooltip="May make debugging slower.",
+            row=3,
+            columnspan=3,
+        )
 
         default_label = ttk.Label(self, text="Preferred debugger", anchor="w")
-        default_label.grid(row=3, column=0, sticky="w", pady=5)
+        default_label.grid(row=4, column=0, sticky="w", pady=(15, 0))
         self.add_combobox(
             "debugger.preferred_debugger",
             ["nicer", "faster", "birdseye"],
             width=8,
-            row=3,
+            row=4,
             column=1,
             padx=5,
+            pady=(15, 0),
         )
         default_comment_label = ttk.Label(
             self, text="(used when clicking Debug toolbar button)", anchor="w"
         )
-        default_comment_label.grid(row=3, column=2, sticky="w", pady=5)
+        default_comment_label.grid(row=4, column=2, sticky="w", pady=(15, 0))
 
         if get_workbench().get_option("run.birdseye_port", None):
             port_label = ttk.Label(self, text="Birdseye port", anchor="w")
-            port_label.grid(row=5, column=0, sticky="w", pady=5)
-            self.add_entry("run.birdseye_port", row=5, column=1, width=5, pady=15, padx=5)
+            port_label.grid(row=5, column=0, sticky="w", pady=(5, 0))
+            self.add_entry("run.birdseye_port", row=5, column=1, width=5, pady=(5, 0), padx=5)
             port_comment_label = ttk.Label(
                 self, text="(restart Thonny after changing this)", anchor="w"
             )
-            port_comment_label.grid(row=5, column=2, sticky="w", pady=5)
+            port_comment_label.grid(row=5, column=2, sticky="w", pady=(5, 0))
 
         self.columnconfigure(2, weight=1)
 
@@ -1163,7 +1171,7 @@ def run_preferred_debug_command():
 
 def load_plugin() -> None:
 
-    get_workbench().set_default("debugger.single_window", False)
+    get_workbench().set_default("debugger.frames_in_separate_windows", True)
     get_workbench().set_default("debugger.automatic_stack_view", True)
     get_workbench().set_default("debugger.preferred_debugger", "nicer")
     get_workbench().set_default("debugger.allow_stepping_into_libraries", False)
