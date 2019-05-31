@@ -1290,11 +1290,13 @@ class Tracer(Executor):
     def _is_interesting_module_file(self, path):
         # interesting files are the files in the same directory as main module
         # or the ones with breakpoints
+        # When command is "resume", then only modules with breakpoints are interesting
         # (used to be more flexible, but this caused problems
         # when main script was in ~/. Then user site library became interesting as well)
         return (
             self._main_module_path is not None
             and is_same_path(os.path.dirname(path), os.path.dirname(self._main_module_path))
+            and self._current_command.name != "resume"
             or path in self._current_command["breakpoints"]
         )
 
