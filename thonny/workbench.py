@@ -127,6 +127,7 @@ class Workbench(tk.Tk):
 
         self._init_configuration()
         self._init_diagnostic_logging()
+        self._active_ui_mode = os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
 
         self._init_scaling()
 
@@ -992,7 +993,7 @@ class Workbench(tk.Tk):
         return sorted(self._syntax_themes.keys())
 
     def get_ui_mode(self) -> str:
-        return os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
+        return self._active_ui_mode
 
     def in_simple_mode(self) -> bool:
         return self.get_ui_mode() == "simple"
