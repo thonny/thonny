@@ -277,8 +277,8 @@ class Workbench(tk.Tk):
 
         self.geometry(
             "{0}x{1}+{2}+{3}".format(
-                max(self.get_option("layout.width"), 320),
-                max(self.get_option("layout.height"), 240),
+                min(max(self.get_option("layout.width"), 320), self.winfo_screenwidth()),
+                min(max(self.get_option("layout.height"), 240), self.winfo_screenheight()),
                 min(max(self.get_option("layout.left"), 0), self.winfo_screenwidth() - 200),
                 min(max(self.get_option("layout.top"), 0), self.winfo_screenheight() - 200),
             )
