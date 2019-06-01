@@ -382,8 +382,16 @@ class Workbench(tk.Tk):
                 break
 
         self.set_default("view.editor_font_family", default_editor_family)
-        self.set_default("view.editor_font_size", 14 if running_on_mac_os() else 11)
-        self.set_default("view.io_font_size", 14 if running_on_mac_os() else 11)
+
+        if running_on_mac_os():
+            self.set_default("view.editor_font_size", 11)
+            self.set_default("view.io_font_size", 9)
+        elif self.in_simple_mode():
+            self.set_default("view.editor_font_size", 12)
+            self.set_default("view.io_font_size", 12)
+        else:
+            self.set_default("view.editor_font_size", 14)
+            self.set_default("view.io_font_size", 12)
 
         default_font = tk_font.nametofont("TkDefaultFont")
 
@@ -1622,6 +1630,13 @@ class Workbench(tk.Tk):
             family=editor_font_family, size=editor_font_size
         )
 
+        if self.get_ui_mode() == "simple":
+            tk_font.nametofont("TkDefaultFont").configure(size=editor_font_size)
+            tk_font.nametofont("TkHeadingFont").configure(size=editor_font_size)
+
+        small_link_ratio = 0.8 if running_on_windows() else 0.7
+        tk_font.nametofont("SmallLinkFont").configure(size=int(editor_font_size * small_link_ratio))
+
         style = ttk.Style()
         if running_on_mac_os():
             treeview_font_size = int(editor_font_size * 0.7 + 4)
@@ -1678,6 +1693,7 @@ class Workbench(tk.Tk):
             text=caption,
             compound="top" if self.in_simple_mode() else None,
             pad=(10, 0) if self.in_simple_mode() else None,
+            # width=7 if self.in_simple_mode() else None,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore
@@ -2088,11 +2104,11 @@ class Workbench(tk.Tk):
 
         if not ui_utils.get_zoomed(self) or running_on_mac_os():
             # can't restore zoom on mac without setting actual dimensions
-            gparts = self.wm_geometry().split("+")
-            self.set_option("layout.left", int(gparts[1]))
-            self.set_option("layout.top", int(gparts[2]))
-            self.set_option("layout.width", self.winfo_width())
-            self.set_option("layout.height", self.winfo_height())
+            gparts = re.findall(r"\d+", self.wm_geometry())
+            self.set_option("layout.width", int(gparts[0]))
+            self.set_option("layout.height", int(gparts[1]))
+            self.set_option("layout.left", int(gparts[2]))
+            self.set_option("layout.top", int(gparts[3]))
 
         self.set_option("layout.west_pw_width", self._west_pw.preferred_size_in_pw)
         self.set_option("layout.east_pw_width", self._east_pw.preferred_size_in_pw)
