@@ -52,6 +52,9 @@ from thonny.ui_utils import select_sequence
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
 
+RUN_COMMAND_LABEL = ""
+RUN_COMMAND_CAPTION = ""
+
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
 
@@ -81,21 +84,33 @@ class Runner:
         self._remove_obsolete_jedi_copies()
 
     def _init_commands(self) -> None:
+        global RUN_COMMAND_CAPTION, RUN_COMMAND_LABEL
+
+        RUN_COMMAND_LABEL = _("Run current script")
+        RUN_COMMAND_CAPTION = _("Run")
+
         get_workbench().set_default("run.run_in_terminal_python_repl", False)
         get_workbench().set_default("run.run_in_terminal_keep_open", True)
+
+        try:
+            import thonny.plugins.debugger  # @UnusedImport
+
+            debugger_available = True
+        except ImportError:
+            debugger_available = False
 
         get_workbench().add_command(
             "run_current_script",
             "run",
-            "Run current script",
-            caption="Run",
-            handler=self._cmd_run_current_script,
+            RUN_COMMAND_LABEL,
+            caption=RUN_COMMAND_CAPTION,
+            handler=self.cmd_run_current_script,
             default_sequence="<F5>",
             extra_sequences=[select_sequence("<Control-r>", "<Command-r>")],
-            tester=self._cmd_run_current_script_enabled,
+            tester=self.cmd_run_current_script_enabled,
             group=10,
             image="run-current-script",
-            include_in_toolbar=True,
+            include_in_toolbar=not (get_workbench().in_simple_mode() and debugger_available),
             show_extra_sequences=True,
         )
 
@@ -294,7 +309,7 @@ class Runner:
         else:
             return []
 
-    def _cmd_run_current_script_enabled(self) -> bool:
+    def cmd_run_current_script_enabled(self) -> bool:
         return (
             get_workbench().get_editor_notebook().get_current_editor() is not None
             and "run" in get_runner().get_supported_features()
@@ -304,10 +319,10 @@ class Runner:
         return (
             self._proxy
             and "run_in_terminal" in self._proxy.get_supported_features()
-            and self._cmd_run_current_script_enabled()
+            and self.cmd_run_current_script_enabled()
         )
 
-    def _cmd_run_current_script(self) -> None:
+    def cmd_run_current_script(self) -> None:
         self.execute_current("Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:

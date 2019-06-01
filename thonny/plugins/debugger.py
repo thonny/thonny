@@ -12,7 +12,7 @@ from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
 
-from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, ui_utils
+from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, ui_utils, running
 from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.config_ui import ConfigurationPage
@@ -22,6 +22,8 @@ from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence
 
 _current_debugger = None
+
+RESUME_COMMAND_CAPTION = ""
 
 
 class Debugger:
@@ -1084,6 +1086,7 @@ def _handle_debugger_progress(msg):
     global _current_debugger
     assert _current_debugger is not None
     _current_debugger.handle_debugger_progress(msg)
+    _update_run_or_resume_button()
 
 
 def _handle_toplevel_response(msg):
@@ -1092,11 +1095,43 @@ def _handle_toplevel_response(msg):
         _current_debugger.close()
         _current_debugger = None
 
+    _update_run_or_resume_button()
+
 
 def _handle_debugger_return(msg):
     global _current_debugger
     assert _current_debugger is not None
     _current_debugger.handle_debugger_return(msg)
+
+
+def _run_or_resume():
+    state = get_runner().get_state()
+    if state == "waiting_debugger_command":
+        _issue_debugger_command("resume")
+    elif state == "waiting_toplevel_command":
+        get_runner().cmd_run_current_script()
+
+
+def _run_or_resume_enabled():
+    return get_runner().cmd_run_current_script_enabled() or _debugger_command_enabled("resume")
+
+
+def _update_run_or_resume_button():
+    if not get_workbench().in_simple_mode():
+        return
+
+    state = get_runner().get_state()
+    if state == "waiting_debugger_command":
+        caption = RESUME_COMMAND_CAPTION
+        image = get_workbench().get_image("resume")
+    elif state == "waiting_toplevel_command":
+        caption = running.RUN_COMMAND_CAPTION
+        image = get_workbench().get_image("run-current-script")
+    else:
+        return
+
+    button = get_workbench().get_toolbar_button("runresume")
+    button.configure(text=caption, image=image)
 
 
 class DebuggerConfigurationPage(ConfigurationPage):
@@ -1171,10 +1206,27 @@ def run_preferred_debug_command():
 
 def load_plugin() -> None:
 
+    global RESUME_COMMAND_CAPTION
+    RESUME_COMMAND_CAPTION = _("Resume")
+
     get_workbench().set_default("debugger.frames_in_separate_windows", True)
     get_workbench().set_default("debugger.automatic_stack_view", True)
     get_workbench().set_default("debugger.preferred_debugger", "nicer")
     get_workbench().set_default("debugger.allow_stepping_into_libraries", False)
+
+    get_workbench().add_command(
+        "runresume",
+        "run",
+        "Run / resume",
+        _run_or_resume,
+        caption=running.RUN_COMMAND_CAPTION,
+        tester=_run_or_resume_enabled,
+        default_sequence=None,
+        group=10,
+        image="run-current-script",
+        include_in_menu=False,
+        include_in_toolbar=get_workbench().in_simple_mode(),
+    )
 
     get_workbench().add_command(
         "debug_preferred",
@@ -1253,14 +1305,14 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "resume",
         "run",
-        "Resume",
+        RESUME_COMMAND_CAPTION,
         lambda: _issue_debugger_command("resume"),
-        caption="Resume",
+        caption=RESUME_COMMAND_CAPTION,
         tester=lambda: _debugger_command_enabled("resume"),
         default_sequence="<F8>",
         group=30,
         image="resume",
-        include_in_toolbar=True,
+        include_in_toolbar=not get_workbench().in_simple_mode(),
     )
 
     get_workbench().add_command(
