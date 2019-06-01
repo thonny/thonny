@@ -893,7 +893,7 @@ class Workbench(tk.Tk):
         self.set_default("view." + view_id + ".location", default_location)
         self.set_default("view." + view_id + ".position_key", default_position_key)
 
-        if self.get_ui_mode() == "simple":
+        if self.in_simple_mode():
             visibility_flag = tk.BooleanVar(value=view_id in SIMPLE_MODE_VIEWS)
         else:
             visibility_flag = cast(tk.BooleanVar, self.get_variable("view." + view_id + ".visible"))
@@ -979,6 +979,9 @@ class Workbench(tk.Tk):
 
     def get_ui_mode(self) -> str:
         return os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
+
+    def in_simple_mode(self) -> bool:
+        return self.in_simple_mode()
 
     def scale(self, value: Union[int, float]) -> int:
         if isinstance(value, (int, float)):
@@ -1615,7 +1618,7 @@ class Workbench(tk.Tk):
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:
             group_frame = ttk.Frame(self._toolbar)
-            if self.get_ui_mode() == "simple":
+            if self.in_simple_mode():
                 padx = 0  # type: Union[int, Tuple[int, int]]
             else:
                 padx = (0, 10)
@@ -1630,8 +1633,8 @@ class Workbench(tk.Tk):
             style="Toolbutton",
             state=tk.NORMAL,
             text=caption,
-            compound="top" if self.get_ui_mode() == "simple" else None,
-            pad=(10, 0) if self.get_ui_mode() == "simple" else None,
+            compound="top" if self.in_simple_mode() else None,
+            pad=(10, 0) if self.in_simple_mode() else None,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore

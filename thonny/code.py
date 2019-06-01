@@ -389,7 +389,7 @@ class Editor(ttk.Frame):
     def update_appearance(self):
         self._code_view.set_gutter_visibility(
             get_workbench().get_option("view.show_line_numbers")
-            or get_workbench().get_ui_mode() == "simple"
+            or get_workbench().in_simple_mode()
         )
         self._code_view.set_line_length_margin(
             get_workbench().get_option("view.recommended_line_length")

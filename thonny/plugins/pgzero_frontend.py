@@ -12,7 +12,7 @@ def toggle_variable():
 
 
 def update_environment():
-    if get_workbench().get_ui_mode() == "simple":
+    if get_workbench().in_simple_mode():
         os.environ["PGZERO_MODE"] = "auto"
     else:
         os.environ["PGZERO_MODE"] = str(get_workbench().get_option(_OPTION_NAME))
