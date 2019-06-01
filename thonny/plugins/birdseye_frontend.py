@@ -62,6 +62,6 @@ def load_plugin():
         caption="birdseye",
         tester=_start_debug_enabled,
         default_sequence="<Control-B>",
-        group=11,
+        group=10,
         image=os.path.join(os.path.dirname(__file__), "..", "res", "birdseye.png"),
     )

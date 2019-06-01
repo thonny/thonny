@@ -700,6 +700,7 @@ class Workbench(tk.Tk):
         position_in_group="end",
         image: Optional[str] = None,
         caption: Optional[str] = None,
+        include_in_menu: bool = True,
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
@@ -745,6 +746,7 @@ class Workbench(tk.Tk):
                 position_in_group=position_in_group,
                 image=image,
                 caption=caption,
+                include_in_menu=include_in_menu,
                 include_in_toolbar=include_in_toolbar,
                 submenu=submenu,
                 bell_when_denied=bell_when_denied,
@@ -772,6 +774,7 @@ class Workbench(tk.Tk):
         position_in_group="end",
         image: Optional[str] = None,
         caption: Optional[str] = None,
+        include_in_menu: bool = True,
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
         bell_when_denied: bool = True,
@@ -807,32 +810,13 @@ class Workbench(tk.Tk):
                 # and cause double events on Windows)
                 register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
 
-        def dispatch_from_menu():
-            # I don't like that Tk menu toggles checbutton variable
-            # automatically before calling the handler.
-            # So I revert the toggle before calling the actual handler.
-            # This way the handler doesn't have to worry whether it
-            # needs to toggle the variable or not, and it can choose to
-            # decline the toggle.
-            if flag_name is not None:
-                var = self.get_variable(flag_name)
-                var.set(not var.get())
-
-            dispatch(None)
-
+        menu = self.get_menu(menu_name)
+        
         if image:
             _image = self.get_image(image)  # type: Optional[tk.PhotoImage]
         else:
             _image = None
-
-        if _image and lookup_style_option("OPTIONS", "icons_in_menus", True):
-            menu_image = _image  # type: Optional[tk.PhotoImage]
-        elif flag_name:
-            # no image or black next to a checkbox
-            menu_image = None
-        else:
-            menu_image = self.get_image("16x16-blank")
-
+            
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
             """
@@ -842,23 +826,47 @@ class Workbench(tk.Tk):
                     accelerator += " or " + sequence_to_accelerator(extra_seq)
             """
 
-        # remember the details that can't be stored in Tkinter objects
-        self._menu_item_specs[(menu_name, command_label)] = MenuItem(
-            group, position_in_group, tester
-        )
-
-        menu = self.get_menu(menu_name)
-        menu.insert(
-            self._find_location_for_menu_item(menu_name, command_label),
-            "checkbutton" if flag_name else "cascade" if submenu else "command",
-            label=command_label,
-            accelerator=accelerator,
-            image=menu_image,
-            compound=tk.LEFT,
-            variable=self.get_variable(flag_name) if flag_name else None,
-            command=dispatch_from_menu if handler else None,
-            menu=submenu,
-        )
+        
+        if include_in_menu:
+            def dispatch_from_menu():
+                # I don't like that Tk menu toggles checbutton variable
+                # automatically before calling the handler.
+                # So I revert the toggle before calling the actual handler.
+                # This way the handler doesn't have to worry whether it
+                # needs to toggle the variable or not, and it can choose to
+                # decline the toggle.
+                if flag_name is not None:
+                    var = self.get_variable(flag_name)
+                    var.set(not var.get())
+    
+                dispatch(None)
+    
+    
+            if _image and lookup_style_option("OPTIONS", "icons_in_menus", True):
+                menu_image = _image  # type: Optional[tk.PhotoImage]
+            elif flag_name:
+                # no image or black next to a checkbox
+                menu_image = None
+            else:
+                menu_image = self.get_image("16x16-blank")
+    
+    
+            # remember the details that can't be stored in Tkinter objects
+            self._menu_item_specs[(menu_name, command_label)] = MenuItem(
+                group, position_in_group, tester
+            )
+    
+            menu.insert(
+                self._find_location_for_menu_item(menu_name, command_label),
+                "checkbutton" if flag_name else "cascade" if submenu else "command",
+                label=command_label,
+                accelerator=accelerator,
+                image=menu_image,
+                compound=tk.LEFT,
+                variable=self.get_variable(flag_name) if flag_name else None,
+                command=dispatch_from_menu if handler else None,
+                menu=submenu,
+            )
 
         if include_in_toolbar:
             toolbar_group = self._get_menu_index(menu) * 100 + group
@@ -981,7 +989,7 @@ class Workbench(tk.Tk):
         return os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
 
     def in_simple_mode(self) -> bool:
-        return self.in_simple_mode()
+        return self.get_ui_mode() == "simple"
 
     def scale(self, value: Union[int, float]) -> int:
         if isinstance(value, (int, float)):

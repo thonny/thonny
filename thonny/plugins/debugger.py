@@ -1185,6 +1185,7 @@ def load_plugin() -> None:
         tester=_start_debug_enabled,
         group=10,
         image="debug-current-script",
+        include_in_menu=False,
         include_in_toolbar=True,
     )
 
@@ -1196,7 +1197,7 @@ def load_plugin() -> None:
         caption="Debug (nicer)",
         tester=_start_debug_enabled,
         default_sequence="<Control-F5>",
-        group=11,
+        group=10,
         # image="debug-current-script",
     )
 
@@ -1208,7 +1209,7 @@ def load_plugin() -> None:
         caption="Debug (faster)",
         tester=_start_debug_enabled,
         default_sequence="<Shift-F5>",
-        group=11,
+        group=10,
     )
 
     get_workbench().add_command(
