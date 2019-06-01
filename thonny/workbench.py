@@ -393,7 +393,14 @@ class Workbench(tk.Tk):
             caption_font = tk_font.nametofont("TkCaptionFont")
             caption_font.configure(weight="normal", size=default_font.cget("size"))
 
+        small_link_ratio = 0.8 if running_on_windows() else 0.7
         self._fonts = [
+            tk_font.Font(
+                name="SmallLinkFont",
+                family=default_font.cget("family"),
+                size=int(default_font.cget("size") * small_link_ratio),
+                underline=True,
+            ),
             tk_font.Font(name="IOFont", family=self.get_option("view.io_font_family")),
             tk_font.Font(
                 name="BoldIOFont", family=self.get_option("view.io_font_family"), weight="bold"
@@ -596,6 +603,28 @@ class Workbench(tk.Tk):
                 flag_name="view.full_screen",
                 default_sequence=select_sequence("<F11>", "<Command-Shift-F>"),
                 group=80,
+            )
+
+        if self.in_simple_mode():
+            self.add_command(
+                "font",
+                "tools",
+                "Change font size",
+                caption="Zoom",
+                handler=self._toggle_font_size,
+                image="zoom",
+                include_in_toolbar=True,
+            )
+
+            self.add_command(
+                "quit",
+                "help",
+                "Exit Thonny",
+                self._on_close,
+                image="quit",
+                caption="Quit",
+                include_in_toolbar=True,
+                group=101,
             )
 
         if self.in_debug_mode():
@@ -1182,14 +1211,11 @@ class Workbench(tk.Tk):
         if self.get_ui_mode() != "simple":
             return
 
-        default_font = tk_font.nametofont("TkDefaultFont")
-        small_font = default_font.copy()
-        small_font.configure(size=int(default_font.cget("size") * 0.7), underline=True)
         label = ttk.Label(
             self._toolbar,
             text="Switch to\nregular mode",
             justify="right",
-            font=small_font,
+            font="SmallLinkFont",
             style="Url.TLabel",
             cursor="hand2",
         )
@@ -1581,6 +1607,7 @@ class Workbench(tk.Tk):
             "BoldItalicIOFont",
         ]:
             tk_font.nametofont(io_name).configure(family=io_font_family, size=io_font_size)
+
         tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(
             family=editor_font_family, size=editor_font_size - 2
@@ -1684,6 +1711,25 @@ class Workbench(tk.Tk):
             self._change_font_size(1)
         else:
             self._change_font_size(-1)
+
+    def _toggle_font_size(self) -> None:
+        current_size = self.get_option("view.editor_font_size")
+
+        small_size = 12
+        medium_size = 16
+        large_size = 20
+
+        if current_size < small_size or current_size >= large_size:
+            new_size = small_size
+            twidth = 1200
+        elif current_size < medium_size:
+            new_size = medium_size
+            twidth = 1500
+        else:
+            new_size = large_size
+            twidth = 1800
+
+        self._change_font_size(new_size - current_size)
 
     def _change_font_size(self, delta: int) -> None:
 
