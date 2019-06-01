@@ -120,6 +120,7 @@ class Workbench(tk.Tk):
         self._current_theme_name = "clam"  # will be overwritten later
         self._backends = {}  # type: Dict[str, BackendSpec]
         self._commands = []  # type: List[Dict[str, Any]]
+        self._toolbar_buttons = {}
         self._view_records = {}  # type: Dict[str, Dict[str, Any]]
         self.content_inspector_classes = []  # type: List[Type]
         self._latin_shortcuts = {}  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
@@ -811,12 +812,12 @@ class Workbench(tk.Tk):
                 register_latin_shortcut(self._latin_shortcuts, sequence, handler, tester)
 
         menu = self.get_menu(menu_name)
-        
+
         if image:
             _image = self.get_image(image)  # type: Optional[tk.PhotoImage]
         else:
             _image = None
-            
+
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
             """
@@ -826,8 +827,8 @@ class Workbench(tk.Tk):
                     accelerator += " or " + sequence_to_accelerator(extra_seq)
             """
 
-        
         if include_in_menu:
+
             def dispatch_from_menu():
                 # I don't like that Tk menu toggles checbutton variable
                 # automatically before calling the handler.
@@ -838,10 +839,9 @@ class Workbench(tk.Tk):
                 if flag_name is not None:
                     var = self.get_variable(flag_name)
                     var.set(not var.get())
-    
+
                 dispatch(None)
-    
-    
+
             if _image and lookup_style_option("OPTIONS", "icons_in_menus", True):
                 menu_image = _image  # type: Optional[tk.PhotoImage]
             elif flag_name:
@@ -849,13 +849,12 @@ class Workbench(tk.Tk):
                 menu_image = None
             else:
                 menu_image = self.get_image("16x16-blank")
-    
-    
+
             # remember the details that can't be stored in Tkinter objects
             self._menu_item_specs[(menu_name, command_label)] = MenuItem(
                 group, position_in_group, tester
             )
-    
+
             menu.insert(
                 self._find_location_for_menu_item(menu_name, command_label),
                 "checkbutton" if flag_name else "cascade" if submenu else "command",
@@ -872,7 +871,14 @@ class Workbench(tk.Tk):
             toolbar_group = self._get_menu_index(menu) * 100 + group
             assert caption is not None
             self._add_toolbar_button(
-                _image, command_label, caption, accelerator, handler, tester, toolbar_group
+                command_id,
+                _image,
+                command_label,
+                caption,
+                accelerator,
+                handler,
+                tester,
+                toolbar_group,
             )
 
     def add_view(
@@ -1611,6 +1617,7 @@ class Workbench(tk.Tk):
 
     def _add_toolbar_button(
         self,
+        command_id: str,
         image: Optional[tk.PhotoImage],
         command_label: str,
         caption: str,
@@ -1653,6 +1660,11 @@ class Workbench(tk.Tk):
             ):
                 tooltip_text += " (" + accelerator + ")"
             create_tooltip(button, tooltip_text)
+
+        self._toolbar_buttons[command_id] = button
+
+    def get_toolbar_button(self, command_id):
+        return self._toolbar_buttons[command_id]
 
     def _update_toolbar(self) -> None:
         if self._destroyed or not hasattr(self, "_toolbar"):
