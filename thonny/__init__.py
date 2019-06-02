@@ -59,6 +59,7 @@ def check_initialization():
 
 
 def launch():
+    _set_dpi_aware()
     _prepare_thonny_user_dir()
 
     try:
