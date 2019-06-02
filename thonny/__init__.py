@@ -2,6 +2,8 @@ import os.path
 import sys
 import platform
 from typing import TYPE_CHECKING, cast, Optional
+import gettext
+import runpy
 
 
 def _get_default_thonny_data_folder():
@@ -44,13 +46,12 @@ CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 def check_initialization():
     from thonny import workbench
 
-    if not os.path.exists(CONFIGURATION_FILE_NAME):
+    if not os.path.exists(CONFIGURATION_FILE_NAME) or True:
         from thonny.first_run import FirstRunWindow
         from thonny.config import ConfigurationManager
 
         mgr = ConfigurationManager(CONFIGURATION_FILE_NAME)
 
-        _set_dpi_aware()
         win = FirstRunWindow(mgr)
         win.mainloop()
         return win.ok
@@ -59,8 +60,22 @@ def check_initialization():
 
 
 def launch():
+    if sys.executable.endswith("thonny.exe"):
+        # otherwise some library may try to run its subprocess with thonny.exe
+        # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
+        # is already allocated.
+        sys.executable = sys.executable[: -len("thonny.exe")] + "pythonw.exe"
+        
     _set_dpi_aware()
-    _prepare_thonny_user_dir()
+    gettext.install("thonny", "locale")
+    
+    try:
+        runpy.run_module("thonny.customize", run_name="__main__")
+    except ImportError:
+        pass
+
+    if not check_initialization():
+        return
 
     try:
         from thonny import workbench
