@@ -1,3 +1,4 @@
+
 # How to translate Thonny
 
 Thonny's internationalisation is a collaborative effort kindly hosted by [POeditor](https://poeditor.com) to support open source projects. You are very welcome to help us translate it in your language [here](https://poeditor.com/join/project/Gh188fdYH6).
@@ -8,6 +9,15 @@ We are using python [gettext](https://docs.python.org/3/library/gettext.html) li
 
 The languages files are inside the `thonny/locale` folder: `thonny/locale/<LANGUAGE_CODE>/LC_MESSAGES/`
 There, you will find the `pot`, `po` and `mo` files.
+
+## For the impatient
+
+Current files `Makefile` and `thonny/locale/Makefile` make it easier for
+you to update the `pot` template file, update messages for existing languages
+(`.po` files), compile the message catalog (`.mo` files).
+
+You just have to launch the command `make`, provided you installed previously
+GNU-make.
 
 ## Mark strings
 Mark the string to be translated as `_(string_to_be_translated)`.
