@@ -58,7 +58,7 @@ class BackendConfigurationPage(ConfigurationPage):
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
         self._combo.state(["!disabled", "readonly"])
 
-        self.labelframe = ttk.LabelFrame(self, text=" Details ")
+        self.labelframe = ttk.LabelFrame(self, text=_(" Details "))
         self.labelframe.grid(row=2, column=0, sticky="nsew")
         self.labelframe.columnconfigure(0, weight=1)
         self.labelframe.rowconfigure(0, weight=1)

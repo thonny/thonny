@@ -14,7 +14,7 @@ class ConfigurationDialog(tk.Toplevel):
         width = scale(500)
         height = scale(350)
         self.geometry("%dx%d" % (width, height))
-        self.title("Thonny options")
+        self.title(_("Thonny options"))
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
@@ -27,8 +27,8 @@ class ConfigurationDialog(tk.Toplevel):
         self._notebook = ttk.Notebook(main_frame)
         self._notebook.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10)
 
-        self._ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
-        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self._ok_button = ttk.Button(main_frame, text=_("OK"), command=self._ok, default="active")
+        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
         self._ok_button.grid(row=1, column=1, padx=(0, 11), pady=(0, 10))
         self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
 
@@ -63,7 +63,7 @@ class ConfigurationDialog(tk.Toplevel):
                 if page.apply() == False:
                     return
             except Exception:
-                get_workbench().report_exception("Error when applying options in " + title)
+                get_workbench().report_exception(_("Error when applying options in ") + title)
 
         self.destroy()
 
@@ -73,7 +73,7 @@ class ConfigurationDialog(tk.Toplevel):
                 page = self._pages[title]
                 page.cancel()
             except Exception:
-                get_workbench().report_exception("Error when cancelling options in " + title)
+                get_workbench().report_exception(_("Error when cancelling options in ") + title)
 
         self.destroy()
 

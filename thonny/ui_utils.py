@@ -24,6 +24,10 @@ import sys
 from _tkinter import TclError
 import webbrowser
 
+# i18n #
+import gettext
+gettext.install('thonny', os.path.join(os.path.dirname(__file__), "locale"))
+
 
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):
@@ -326,9 +330,9 @@ class ClosableNotebook(ttk.Notebook):
 
     def create_tab_menu(self):
         menu = tk.Menu(self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu"))
-        menu.add_command(label="Close", command=self._close_tab_from_menu)
-        menu.add_command(label="Close others", command=self._close_other_tabs)
-        menu.add_command(label="Close all", command=self.close_tabs)
+        menu.add_command(label=_("Close"), command=self._close_tab_from_menu)
+        menu.add_command(label=_("Close others"), command=self._close_other_tabs)
+        menu.add_command(label=_("Close all"), command=self.close_tabs)
         return menu
 
     def _letf_btn_press(self, event):
@@ -734,10 +738,10 @@ class AutoScrollbar(SafeScrollbar):
         ttk.Scrollbar.set(self, first, last)
 
     def pack(self, **kw):
-        raise tk.TclError("cannot use pack with this widget")
+        raise tk.TclError(_("cannot use pack with this widget"))
 
     def place(self, **kw):
-        raise tk.TclError("cannot use place with this widget")
+        raise tk.TclError(_("cannot use place with this widget"))
 
 
 def update_entry_text(entry, text):
@@ -1055,7 +1059,7 @@ class NoteBox(tk.Toplevel):
             pass
 
         else:
-            raise TypeError("Unsupported focus")
+            raise TypeError(_("Unsupported focus"))
 
         # Compute dimensions of the note
         font = self.text["font"]
@@ -1217,8 +1221,8 @@ def select_sequence(win_version, mac_version, linux_version=None):
 def try_remove_linenumbers(text, master):
     try:
         if has_line_numbers(text) and messagebox.askyesno(
-            title="Remove linenumbers",
-            message="Do you want to remove linenumbers from pasted text?",
+            title=_("Remove linenumbers"),
+            message=_("Do you want to remove linenumbers from pasted text?"),
             default=messagebox.YES,
             master=master,
             parent=master,
@@ -1305,7 +1309,7 @@ def assign_geometry(win, master=None):
 
 
 class WaitingDialog(tk.Toplevel):
-    def __init__(self, master, async_result, description, title="Please wait!", timeout=None):
+    def __init__(self, master, async_result, description, title=_("Please wait!"), timeout=None):
         self._async_result = async_result
         super().__init__(master)
         if misc_utils.running_on_mac_os():
@@ -1335,7 +1339,7 @@ class WaitingDialog(tk.Toplevel):
         self.destroy()
 
 
-def run_with_waiting_dialog(master, action, args=(), description="Working"):
+def run_with_waiting_dialog(master, action, args=(), description=_("Working")):
     # http://stackoverflow.com/a/14299004/261181
     from multiprocessing.pool import ThreadPool
 
@@ -1366,10 +1370,10 @@ class FileCopyDialog(tk.Toplevel):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.title("Copying")
+        self.title(_("Copying"))
 
         if description is None:
-            description = "Copying\n  %s\nto\n  %s" % (source, destination)
+            description = _("Copying\n  %s\nto\n  %s") % (source, destination)
 
         label = ttk.Label(main_frame, text=description)
         label.grid(row=0, column=0, columnspan=2, sticky="nw", padx=15, pady=15)
@@ -1377,7 +1381,7 @@ class FileCopyDialog(tk.Toplevel):
         self._bar = ttk.Progressbar(main_frame, maximum=os.path.getsize(source), length=200)
         self._bar.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
 
-        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
         self._cancel_button.grid(row=2, column=1, sticky="ne", padx=15, pady=15)
         self._bar.focus_set()
 
@@ -1432,7 +1436,7 @@ class FileCopyDialog(tk.Toplevel):
 
 class ChoiceDialog(tk.Toplevel):
     def __init__(
-        self, master=None, title="Choose one", question: str = "Choose one:", choices=[]
+        self, master=None, title=_("Choose one"), question: str = _("Choose one:"), choices=[]
     ) -> None:
         super().__init__(master=master)
 
@@ -1452,10 +1456,10 @@ class ChoiceDialog(tk.Toplevel):
             rb.grid(row=row, column=0, columnspan=2, sticky="w", padx=20)
             row += 1
 
-        ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
+        ok_button = ttk.Button(self, text=_("OK"), command=self._ok, default="active")
         ok_button.grid(row=row, column=0, sticky="e", pady=20)
 
-        cancel_button = ttk.Button(self, text="Cancel", command=self._cancel)
+        cancel_button = ttk.Button(self, text=_("Cancel"), command=self._cancel)
         cancel_button.grid(row=row, column=1, sticky="e", padx=20, pady=20)
 
         self.bind("<Escape>", self._cancel, True)
@@ -1505,10 +1509,10 @@ class LongTextDialog(tk.Toplevel):
         self._text.text.direct_insert("1.0", text_content)
         self._text.text.see("1.0")
 
-        copy_button = ttk.Button(main_frame, command=self._copy, text="Copy to clipboard", width=20)
+        copy_button = ttk.Button(main_frame, command=self._copy, text=_("Copy to clipboard"), width=20)
         copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0, 20))
 
-        close_button = ttk.Button(main_frame, command=self._close, text="Close")
+        close_button = ttk.Button(main_frame, command=self._close, text=_("Close"))
         close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0, 20))
 
         main_frame.columnconfigure(0, weight=1)
@@ -1526,7 +1530,7 @@ class LongTextDialog(tk.Toplevel):
 
 
 def ask_one_from_choices(
-    master=None, title="Choose one", question: str = "Choose one:", choices=[]
+    master=None, title=_("Choose one"), question: str = _("Choose one:"), choices=[]
 ):
     dlg = ChoiceDialog(master, title, question, choices)
     show_dialog(dlg, master)
@@ -1538,7 +1542,7 @@ class SubprocessDialog(tk.Toplevel):
     Allows cancelling"""
 
     def __init__(
-        self, master, proc, title, long_description=None, autoclose=True, conclusion="Done."
+        self, master, proc, title, long_description=None, autoclose=True, conclusion=_("Done.")
     ):
         self._closed = False
         self._proc = proc
@@ -1577,7 +1581,7 @@ class SubprocessDialog(tk.Toplevel):
         if long_description is not None:
             self.text.direct_insert("1.0", long_description + "\n\n")
 
-        self.button = ttk.Button(main_frame, text="Cancel", command=self._close)
+        self.button = ttk.Button(main_frame, text=_("Cancel"), command=self._close)
         self.button.grid(row=1, column=0, pady=(0, 15))
 
         main_frame.rowconfigure(0, weight=1)
@@ -1629,10 +1633,10 @@ class SubprocessDialog(tk.Toplevel):
             if self.returncode == None:
                 self.after(200, poll_output_events)
             else:
-                self.button["text"] = "OK"
+                self.button["text"] = _("OK")
                 self.button.focus_set()
                 if self.returncode != 0:
-                    self.text.direct_insert("end", "\n\nReturn code: ", ("stderr",))
+                    self.text.direct_insert("end", _("\n\nReturn code: "), ("stderr",))
                 elif self._autoclose:
                     self._close()
                 else:
@@ -1648,8 +1652,8 @@ class SubprocessDialog(tk.Toplevel):
     def _close(self, event=None):
         if self._proc.poll() is None:
             if messagebox.askyesno(
-                "Cancel the process?",
-                "The process is still running.\nAre you sure you want to cancel?",
+                _("Cancel the process?"),
+                _("The process is still running.\nAre you sure you want to cancel?"),
                 parent=self,
             ):
                 # try gently first
@@ -1675,7 +1679,7 @@ class SubprocessDialog(tk.Toplevel):
                 while len(self._event_queue) > 0:
                     stream_name, data = self._event_queue.popleft()
                     self.text.direct_insert("end", data, tags=(stream_name,))
-                self.text.direct_insert("end", "\n\nPROCESS CANCELLED")
+                self.text.direct_insert("end", _("\n\nPROCESS CANCELLED"))
                 self.text.see("end")
 
             else:
@@ -1800,17 +1804,17 @@ class _ZenityDialogProvider:
 
     @classmethod
     def askopenfilename(cls, **options):
-        args = cls._convert_common_options("Open file", **options)
+        args = cls._convert_common_options(_("Open file"), **options)
         return cls._call(args)
 
     @classmethod
     def askopenfilenames(cls, **options):
-        args = cls._convert_common_options("Open files", **options)
+        args = cls._convert_common_options(_("Open files"), **options)
         return cls._call(args + ["--multiple"]).split("|")
 
     @classmethod
     def asksaveasfilename(cls, **options):
-        args = cls._convert_common_options("Save as", **options)
+        args = cls._convert_common_options(_("Save as"), **options)
         args.append("--save")
         if options.get("confirmoverwrite", True):
             args.append("--confirm-overwrite")
@@ -1826,7 +1830,7 @@ class _ZenityDialogProvider:
 
     @classmethod
     def askdirectory(cls, **options):
-        args = cls._convert_common_options("Select directory", **options)
+        args = cls._convert_common_options(_("Select directory"), **options)
         args.append("--directory")
         return cls._call(args)
 
@@ -2041,13 +2045,13 @@ class TextMenu(MenuEx):
         self.add_extra_items()
 
     def add_basic_items(self):
-        self.add_command(label="Cut", command=self.on_cut, tester=self.can_cut)
-        self.add_command(label="Copy", command=self.on_copy, tester=self.can_copy)
-        self.add_command(label="Paste", command=self.on_paste, tester=self.can_paste)
+        self.add_command(label=_("Cut"), command=self.on_cut, tester=self.can_cut)
+        self.add_command(label=_("Copy"), command=self.on_copy, tester=self.can_copy)
+        self.add_command(label=_("Paste"), command=self.on_paste, tester=self.can_paste)
 
     def add_extra_items(self):
         self.add_separator()
-        self.add_command(label="Select All", command=self.on_select_all)
+        self.add_command(label=_("Select All"), command=self.on_select_all)
 
     def on_cut(self):
         self.text.event_generate("<<Cut>>")

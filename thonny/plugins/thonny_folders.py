@@ -15,10 +15,10 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "open_program_dir",
         "tools",
-        "Open Thonny program folder...",
+        _("Open Thonny program folder..."),
         cmd_open_program_dir,
         group=110,
     )
     get_workbench().add_command(
-        "open_data_dir", "tools", "Open Thonny data folder...", cmd_open_data_dir, group=110
+        "open_data_dir", "tools", _("Open Thonny data folder..."), cmd_open_data_dir, group=110
     )

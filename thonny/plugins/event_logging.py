@@ -130,7 +130,7 @@ class EventLogger:
     def _cmd_export(self):
 
         filename = asksaveasfilename(
-            filetypes=[("Zip-files", ".zip"), ("all files", ".*")],
+            filetypes=[(_("Zip-files"), ".zip"), (_("all files"), ".*")],
             defaultextension=".zip",
             initialdir=get_workbench().get_cwd(),
             initialfile=time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip"),

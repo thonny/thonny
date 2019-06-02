@@ -65,7 +65,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().add_command(
             "clear_shell",
             "edit",
-            "Clear shell",
+            _("Clear shell"),
             self.clear_shell,
             default_sequence=_CLEAR_SHELL_DEFAULT_SEQ,
             group=200,
@@ -235,7 +235,7 @@ class ShellMenu(TextMenu):
 
     def add_extra_items(self):
         self.add_separator()
-        self.add_command(label="Clear", command=self.text._clear_shell)
+        self.add_command(label=_("Clear"), command=self.text._clear_shell)
 
         def toggle_from_menu():
             # I don't like that Tk menu toggles checbutton variable

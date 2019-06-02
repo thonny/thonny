@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ast
 import logging
 import io
@@ -84,11 +85,11 @@ class MicroPythonProxy(BackendProxy):
             except TimeoutError:
                 read_bytes = bytes(self._discarded_bytes + self._connection._read_buffer)
                 self._show_error_connect_again(
-                    "Could not connect to REPL.\n"
-                    + "Make sure your device has suitable firmware and is not in bootloader mode!\n"
-                    + "Bytes read: "
+                    _("Could not connect to REPL.\n")
+                    + _("Make sure your device has suitable firmware and is not in bootloader mode!\n")
+                    + _("Bytes read: ")
                     + str(read_bytes)
-                    + "\nDisconnecting."
+                    + _("\nDisconnecting.")
                 )
                 self.disconnect()
             except:
@@ -111,7 +112,7 @@ class MicroPythonProxy(BackendProxy):
                 if not self._connection.buffers_are_empty():
                     discarded = self._connection.read_all()
                     self._send_error_to_shell(
-                        "Warning: when issuing %r,\nincoming was not emtpy: %r" % (cmd, discarded)
+                        _("Warning: when issuing %r,\nincoming was not emtpy: %r") % (cmd, discarded)
                     )
                 return super().send_command(cmd)
             except SerialException as e:
@@ -203,12 +204,12 @@ class MicroPythonProxy(BackendProxy):
             try:
                 self._connection.close()
                 self._send_text_to_shell(
-                    "\n\nConnection closed.\nSelect Run → Stop/Restart or press Ctrl+F2 to connect again.",
+                    _("\n\nConnection closed.\nSelect Run → Stop/Restart or press Ctrl+F2 to connect again."),
                     "stdout",
                 )
             except Exception as e:
                 logging.exception("Problem when closing serial")
-                self._send_error_to_shell("Problem when closing serial connection: " + str(e))
+                self._send_error_to_shell(_("Problem when closing serial connection: ") + str(e))
 
             self._connection = None
 
@@ -228,7 +229,7 @@ class MicroPythonProxy(BackendProxy):
     def _create_serial_connection(self, port):
         if port is None or port == "None":
             self._send_text_to_shell(
-                'Not connected. Choose "Tools → Options → Backend" to change.', "stdout"
+                _('Not connected. Choose "Tools → Options → Backend" to change.'), "stdout"
             )
             return None
 
@@ -238,15 +239,15 @@ class MicroPythonProxy(BackendProxy):
                 port = potential[0][0]
             else:
                 message = dedent(
-                    """\
+                    _("""\
                     Couldn't find the device automatically. 
                     Check the connection (making sure the device is not in bootloader mode)
-                    or choose "Tools → Options → Backend" to select the port manually."""
+                    or choose "Tools → Options → Backend" to select the port manually.""")
                 )
 
                 if len(potential) > 1:
                     _, descriptions = zip(*potential)
-                    message += "\n\nLikely candidates are:\n * " + "\n * ".join(descriptions)
+                    message += _("\n\nLikely candidates are:\n * ") + "\n * ".join(descriptions)
 
                 self._show_error_connect_again(message)
                 return None
@@ -255,27 +256,27 @@ class MicroPythonProxy(BackendProxy):
             return SerialConnection(port, baudrate=self._baudrate)
         except SerialException as error:
             traceback.print_exc()
-            message = "Unable to connect to " + port + "\n" + "Error: " + str(error)
+            message = _("Unable to connect to ") + port + "\n" + _("Error: ") + str(error)
 
             # TODO: check if these error codes also apply to Linux and Mac
             if error.errno == 13 and platform.system() == "Linux":
                 # TODO: check if user already has this group
                 message += "\n\n" + dedent(
-                    """\
+                    _("""\
                 Try adding yourself to the 'dialout' group:
                 > sudo usermod -a -G dialout <username>
-                (NB! This needs to be followed by reboot or logging out and logging in again!)"""
+                (NB! This needs to be followed by reboot or logging out and logging in again!)""")
                 )
 
             elif "PermissionError" in message:
                 message += "\n\n" + dedent(
-                    """\
+                    _("""\
                 If you have serial connection to the device from another program,
-                then disconnect it there."""
+                then disconnect it there.""")
                 )
 
             elif error.errno == 16:
-                message += "\n\n" + "Try restarting the device."
+                message += "\n\n" + _("Try restarting the device.")
 
             self._show_error_connect_again(message)
 
@@ -284,15 +285,15 @@ class MicroPythonProxy(BackendProxy):
     def _create_webrepl_connection(self):
         url = get_workbench().get_option(self.backend_name + ".webrepl_url")
         password = get_workbench().get_option(self.backend_name + ".webrepl_password")
-        print("URL", url)
+        print(_("URL"), url)
         try:
             conn = WebReplConnection(url, password)
         except:
             e_type, e_value, _ = sys.exc_info()
             self._send_error_to_shell(
-                "Could not connect to "
+                _("Could not connect to ")
                 + url
-                + "\nError: "
+                + _("\nError: ")
                 + "\n".join(traceback.format_exception_only(e_type, e_value))
             )
             return None
@@ -303,8 +304,8 @@ class MicroPythonProxy(BackendProxy):
     def _show_error_connect_again(self, msg):
         self._send_error_to_shell(
             msg
-            + "\n\nCheck the configuration, select Run → Stop/Restart or press Ctrl+F2 to try again."
-            + "\n(On some occasions it helps to wait before trying again.)"
+            + _("\n\nCheck the configuration, select Run → Stop/Restart or press Ctrl+F2 to try again.")
+            + _("\n(On some occasions it helps to wait before trying again.)")
         )
 
     def _detect_potential_ports(self):
@@ -343,7 +344,7 @@ class MicroPythonProxy(BackendProxy):
     def _fetch_builtin_modules(self):
         assert self.idle
         out, err = self._execute_and_get_response("help('modules')")
-        assert err == b"", "Error was: %r" % err
+        assert err == b"", _("Error was: %r") % err
         modules_str = (
             out.decode("utf-8")
             .replace("Plus any modules on the filesystem", "")
@@ -385,7 +386,7 @@ class MicroPythonProxy(BackendProxy):
             ):
                 break
         else:
-            raise TimeoutError("Can't get to raw prompt")
+            raise TimeoutError(_("Can't get to raw prompt"))
 
         self._welcome_text = self._get_welcome_text_in_raw_mode(timer.time_left)
 
@@ -474,7 +475,7 @@ class MicroPythonProxy(BackendProxy):
 
     def _handle_serial_exception(self, e):
         logging.exception("MicroPython serial error")
-        self._show_error_connect_again("\nLost connection to the device (%s)." % e)
+        self._show_error_connect_again(_("\nLost connection to the device (%s).") % e)
         self.idle = False
         try:
             self._connection.close()
@@ -495,7 +496,7 @@ class MicroPythonProxy(BackendProxy):
 
         # fetch confirmation
         ok = self._connection.read(2)
-        assert ok == b"OK", "Expected OK, got %s, followed by %s" % (
+        assert ok == b"OK", _("Expected OK, got %s, followed by %s") % (
             ok,
             self._connection.read_all(),
         )
@@ -515,7 +516,7 @@ class MicroPythonProxy(BackendProxy):
             self._send_text_to_shell(script, "stderr")
 
         # TODO: report the error to stderr
-        assert len(err) == 0, "Error was " + repr(err)
+        assert len(err) == 0, _("Error was ") + repr(err)
         return ast.literal_eval(out.strip().decode("utf-8"))
 
     def _execute_and_expect_empty_response(self, script):
@@ -525,8 +526,8 @@ class MicroPythonProxy(BackendProxy):
             # display script on error
             self._send_text_to_shell(script, "stderr")
 
-        assert len(out) == 0, "Output was " + repr(out)
-        assert len(err) == 0, "Error was " + repr(err)
+        assert len(out) == 0, _("Output was ") + repr(out)
+        assert len(err) == 0, _("Error was ") + repr(err)
 
     def _cmd_cd(self, cmd):
         assert len(cmd.args) == 1
@@ -534,7 +535,7 @@ class MicroPythonProxy(BackendProxy):
         if os.path.exists(path):
             self._non_serial_msg_queue.put(ToplevelResponse(cwd=path))
         else:
-            self._non_serial_msg_queue.put(ToplevelResponse(error="Path doesn't exist: %s" % path))
+            self._non_serial_msg_queue.put(ToplevelResponse(error=_("Path doesn't exist: %s") % path))
 
     def _cmd_Run(self, cmd):
         self._clear_environment()
@@ -597,7 +598,7 @@ class MicroPythonProxy(BackendProxy):
                     command_name="get_globals",
                     module_name=cmd.module_name,
                     globals={},
-                    error="Error requesting globals:\\n" + traceback.format_exc(),
+                    error=_("Error requesting globals:\\n") + traceback.format_exc(),
                 )
             )
 
@@ -649,7 +650,7 @@ class MicroPythonProxy(BackendProxy):
             self._non_serial_msg_queue.put(
                 InlineResponse(
                     command_name="get_dirs_child_data",
-                    error="Error requesting file data:\\n" + traceback.format_exc(),
+                    error=_("Error requesting file data:\\n") + traceback.format_exc(),
                 )
             )
 
@@ -719,7 +720,7 @@ class MicroPythonProxy(BackendProxy):
             self._non_serial_msg_queue.put(
                 InlineResponse(
                     command_name="get_dirs_child_data",
-                    error="Error requesting file data:\\n" + traceback.format_exc(),
+                    error=_("Error requesting file data:\\n") + traceback.format_exc(),
                 )
             )
 
@@ -741,7 +742,7 @@ class MicroPythonProxy(BackendProxy):
             )
             completions = script.completions()
         except Exception:
-            msg["error"] = "Autocomplete error"
+            msg["error"] = _("Autocomplete error")
             self._non_serial_msg_queue.put(msg)
             return
 
@@ -787,7 +788,7 @@ class MicroPythonProxy(BackendProxy):
                 completions = script.completions()
                 msg["completions"] = self.filter_completions(completions)
             except Exception:
-                msg["error"] = "Autocomplete error"
+                msg["error"] = _("Autocomplete error")
 
             self._non_serial_msg_queue.put(msg)
         else:
@@ -857,7 +858,7 @@ class MicroPythonProxy(BackendProxy):
     def _dump_module_stubs(self, module_name, file_name):
         _, err = self._execute_and_get_response("import {0}".format(module_name))
         if err:
-            print("FAILED IMPORTING MODULE:", module_name, "\nErr: " + repr(err))
+            print(_("FAILED IMPORTING MODULE:"), module_name, _("\nErr: ") + repr(err))
             return
 
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
@@ -888,22 +889,22 @@ class MicroPythonProxy(BackendProxy):
             # "http_client",
             # "http_server",
         ]:
-            print("SKIPPING problematic name:", object_expr)
+            print(_("SKIPPING problematic name:"), object_expr)
             return
 
-        print("DUMPING", indent, object_expr)
+        print(_("DUMPING"), indent, object_expr)
         items, errors = self._execute_and_parse_value(
             "__print_object_atts({0})".format(object_expr)
         )
 
         if errors:
-            print("ERRORS", errors)
+            print(_("ERRORS"), errors)
 
         for name, rep, typ in sorted(items, key=lambda x: x[0]):
             if name.startswith("__"):
                 continue
 
-            print("DUMPING", indent, object_expr, name)
+            print(_("DUMPING"), indent, object_expr, name)
             self._send_text_to_shell("  * " + name + " : " + typ, "stdout")
 
             if typ in ["<class 'function'>", "<class 'bound_method'>"]:
@@ -923,7 +924,7 @@ class MicroPythonProxy(BackendProxy):
 
     def _cmd_cat(self, cmd):
         if len(cmd.args) != 1:
-            self._send_error_to_shell("Command requires one argument")
+            self._send_error_to_shell(_("Command requires one argument"))
             return
 
         source = cmd.args[0]
@@ -953,13 +954,13 @@ class MicroPythonProxy(BackendProxy):
             target = cmd.args[1]
         else:
             # TODO: test this case
-            raise RuntimeError("Command requires 1 or 2 arguments")
+            raise RuntimeError(_("Command requires 1 or 2 arguments"))
 
         if not os.path.isabs(source):
             source = os.path.join(get_workbench().get_cwd(), source)
 
         if not os.path.isfile(source):
-            raise IOError("No such file: %s" % source)
+            raise IOError(_("No such file: %s") % source)
 
         target = target.replace("\\", "/")
         # Only prepend slash if it is known that device supports directories
@@ -1080,7 +1081,7 @@ class MicroPythonProxy(BackendProxy):
                     ast.parse(src, source)
                 except SyntaxError as e:
                     self._send_error_to_shell(
-                        "%s has syntax errors:\n%s\n\nFile will not be uploaded." % (source, e)
+                        _("%s has syntax errors:\n%s\n\nFile will not be uploaded.") % (source, e)
                     )
                     return
         try:
@@ -1127,7 +1128,7 @@ class MicroPythonProxy(BackendProxy):
 
     def _report_upload_via_mount_error(self, source, target, error):
         self._send_error_to_shell(
-            "Couldn't write to %s\nOriginal error: %s\n\nIf the target directory exists then it may be corrupted."
+            _("Couldn't write to %s\nOriginal error: %s\n\nIf the target directory exists then it may be corrupted.")
             % (target, error)
         )
 
@@ -1188,9 +1189,9 @@ class MicroPythonProxy(BackendProxy):
         else:
             candidates = find_volumes_by_name(self._get_fs_mount_name())
             if len(candidates) == 0:
-                raise RuntimeError("Could not find volume " + self._get_fs_mount_name())
+                raise RuntimeError(_("Could not find volume ") + self._get_fs_mount_name())
             elif len(candidates) > 1:
-                raise RuntimeError("Found several possible mount points: %s" % candidates)
+                raise RuntimeError(_("Found several possible mount points: %s") % candidates)
             else:
                 return candidates[0]
 
@@ -1232,7 +1233,7 @@ class MicroPythonProxy(BackendProxy):
 
         elif match.group() == NORMAL_PROMPT:
             # Go to raw prompt
-            assert new_bytes == NORMAL_PROMPT, "Got %s" % new_bytes
+            assert new_bytes == NORMAL_PROMPT, _("Got %s") % new_bytes
             return self._enter_raw_repl(True)
 
         else:
@@ -1394,7 +1395,7 @@ class MicroPythonProxy(BackendProxy):
 
     def _get_script_path(self):
         local_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        assert os.path.isfile(local_path), "File not found: %s" % local_path
+        assert os.path.isfile(local_path), _("File not found: %s") % local_path
         return self._get_path_prefix() + os.path.basename(local_path)
 
     def transform_message(self, msg):
@@ -1436,7 +1437,7 @@ class MicroPythonProxy(BackendProxy):
                 return ToplevelResponse()
 
         self._send_error_to_shell(
-            "Couldn't connect to the raw REPL. Serial output: " + str(discarded_data)
+            _("Couldn't connect to the raw REPL. Serial output: ") + str(discarded_data)
         )
 
         self.idle = False
@@ -1473,7 +1474,7 @@ class MicroPythonProxy(BackendProxy):
 
     @property
     def firmware_filetypes(self):
-        return [("all files", ".*")]
+        return [(_("all files"), ".*")]
 
     @property
     def micropython_upload_enabled(self):
@@ -1496,9 +1497,9 @@ class MicroPythonProxy(BackendProxy):
         dlg = SubprocessDialog(
             get_workbench(),
             proc,
-            "Uploading firmware",
+            _("Uploading firmware"),
             autoclose=False,
-            conclusion="Done.\nNB! If opening REPL fails on first trial\nthen wait a second and try again.",
+            conclusion=_("Done.\nNB! If opening REPL fails on first trial\nthen wait a second and try again."),
         )
         show_dialog(dlg)
 
@@ -1535,17 +1536,17 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
         intro_text = (
-            "Connect your device to the computer and select corresponding port below (look for your device name, \n"
-            + '"USB Serial" or "UART"). If you can\'t find it, you may need to install proper USB driver first.'
+            _("Connect your device to the computer and select corresponding port below (look for your device name, \n")
+            + _('"USB Serial" or "UART"). If you can\'t find it, you may need to install proper USB driver first.')
         )
         if self.allow_webrepl:
             intro_text = (
-                "Connecting via USB cable:\n"
+                _("Connecting via USB cable:\n")
                 + intro_text
                 + "\n\n"
-                + "Connecting via WebREPL protocol:\n"
-                + "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
-                + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below"
+                + _("Connecting via WebREPL protocol:\n")
+                + _("If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n")
+                + _("(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below")
             )
 
         intro_label = ttk.Label(self, text=intro_text)
@@ -1556,7 +1557,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
 
-        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else "Port")
+        port_label = ttk.Label(self, text=_("Port or WebREPL") if self.allow_webrepl else "Port")
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
@@ -1608,7 +1609,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         self._webrepl_frame = ttk.Frame(self)
 
         self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
-        url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
+        url_label = ttk.Label(self._webrepl_frame, text=_("URL (eg. %s)") % DEFAULT_WEBREPL_URL)
         url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
         url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=24)
         url_entry.grid(row=1, column=0, sticky="nw")
@@ -1617,7 +1618,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             get_workbench().get_option(self.backend_name + ".webrepl_password")
         )
         pw_label = ttk.Label(
-            self._webrepl_frame, text="Password (the one specified with `import webrepl_setup`)"
+            self._webrepl_frame, text=_("Password (the one specified with `import webrepl_setup`)")
         )
         pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
         pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=9)
@@ -1718,7 +1719,7 @@ class Connection:
             try:
                 self._read_buffer.extend(self._read_queue.get(True, timer.time_left))
             except queue.Empty:
-                raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
+                raise TimeoutError(_("Reaction timeout. Bytes read: %s") % self._read_buffer)
 
         try:
             data = self._read_buffer[:size]
@@ -1751,7 +1752,7 @@ class Connection:
                 assert len(data) > 0
                 self._read_buffer.extend(data)
             except queue.Empty:
-                raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
+                raise TimeoutError(_("Reaction timeout. Bytes read: %s") % self._read_buffer)
 
         assert terminator is not None
         size = self._read_buffer.index(terminator) + len(terminator)
@@ -1847,7 +1848,7 @@ class SerialConnection(Connection):
 
         except SerialException as e:
             logging.exception("Error while reading from serial")
-            self._error = str("Serial reading error: %s" % e)
+            self._error = str(_("Serial reading error: %s") % e)
 
     def incoming_is_empty(self):
         return self._serial.in_waiting == 0 and super().incoming_is_empty()
@@ -1918,19 +1919,19 @@ class WebReplConnection(Connection):
         # read password prompt and send password
         read_chars = ""
         while read_chars != "Password: ":
-            print("prelude", read_chars)
+            print(_("prelude"), read_chars)
             ch = await self._ws.recv()
-            print("GOT", ch)
+            print(_("GOT"), ch)
             read_chars += ch
 
-        print("sending password")
+        print(_("sending password"))
         await self._ws.send(self._password + "\n")
-        print("sent password")
+        print(_("sent password"))
 
     async def _ws_keep_reading(self):
         while True:
             data = (await self._ws.recv()).encode("UTF-8")
-            print("Read:", repr(data))
+            print(_("Read:"), repr(data))
             if len(data) == 0:
                 self._error = "EOF"
                 break
@@ -1944,7 +1945,7 @@ class WebReplConnection(Connection):
         while True:
             while not self._write_queue.empty():
                 data = self._write_queue.get(block=False).decode("UTF-8")
-                print("Wrote:", repr(data))
+                print(_("Wrote:"), repr(data))
                 await self._ws.send(data)
             # Allow reading loop to progress
             await asyncio.sleep(0.01)
@@ -2026,7 +2027,7 @@ def load_plugin():
     add_micropython_backend(
         "GenericMicroPython",
         GenericMicroPythonProxy,
-        "MicroPython on a generic device",
+        _("MicroPython on a generic device"),
         GenericMicroPythonConfigPage,
     )
 
@@ -2096,12 +2097,12 @@ def load_plugin():
     def select_device():
         get_workbench().show_options("Interpreter")
 
-    get_workbench().add_command("selectdevice", "device", "Select device", select_device, group=1)
+    get_workbench().add_command("selectdevice", "device", _("Select device"), select_device, group=1)
 
     get_workbench().add_command(
         "softreboot",
         "device",
-        "Soft reboot",
+        _("Soft reboot"),
         soft_reboot,
         soft_reboot_enabled,
         group=100,
@@ -2112,7 +2113,7 @@ def load_plugin():
     get_workbench().add_command(
         "uploadmainscript",
         "device",
-        "Upload current script as main script",
+        _("Upload current script as main script"),
         _upload_as_main_script,
         tester=file_commands_enabled,
         default_sequence="<Control-u>",
@@ -2122,7 +2123,7 @@ def load_plugin():
     get_workbench().add_command(
         "uploadbootscript",
         "device",
-        "Upload current script as boot script",
+        _("Upload current script as boot script"),
         _upload_as_boot_script,
         tester=file_commands_enabled,
         group=20,
@@ -2131,7 +2132,7 @@ def load_plugin():
     get_workbench().add_command(
         "uploadscript",
         "device",
-        "Upload current script with current name",
+        _("Upload current script with current name"),
         _upload_script,
         tester=file_commands_enabled,
         group=20,
@@ -2140,7 +2141,7 @@ def load_plugin():
     get_workbench().add_command(
         "catmainscript",
         "device",
-        "Show device's main script",
+        _("Show device's main script"),
         _cat_main_script,
         tester=file_commands_enabled,
         group=20,
@@ -2149,7 +2150,7 @@ def load_plugin():
     get_workbench().add_command(
         "catbootscript",
         "device",
-        "Show device's boot script",
+        _("Show device's boot script"),
         _cat_boot_script,
         tester=file_commands_enabled,
         group=20,
@@ -2158,7 +2159,7 @@ def load_plugin():
     get_workbench().add_command(
         "disconnectserial",
         "device",
-        "Close serial connection",
+        _("Close serial connection"),
         disconnect,
         disconnect_enabled,
         group=100,

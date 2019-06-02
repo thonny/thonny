@@ -171,7 +171,7 @@ class ObjectInspector(ttk.Frame):
 
             self.object_id = object_id
             self.set_object_info(None)
-            self._set_title("object @ " + thonny.memory.format_object_id(object_id))
+            self._set_title(_("object @ ") + thonny.memory.format_object_id(object_id))
             self.request_object_info()
 
     def _set_title(self, text):
@@ -426,9 +426,9 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
 
-        self.tree.heading("index", text="Index", anchor=tk.W)
-        self.tree.heading("id", text="Value ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("index", text=_("Index"), anchor=tk.W)
+        self.tree.heading("id", text=_("Value ID"), anchor=tk.W)
+        self.tree.heading("value", text=_("Value"), anchor=tk.W)
 
         self.elements_have_indices = None
         self.update_memory_model()
@@ -503,10 +503,10 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
 
-        self.tree.heading("key_id", text="Key ID", anchor=tk.W)
-        self.tree.heading("key", text="Key", anchor=tk.W)
-        self.tree.heading("id", text="Value ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("key_id", text=_("Key ID"), anchor=tk.W)
+        self.tree.heading("key", text=_("Key"), anchor=tk.W)
+        self.tree.heading("id", text=_("Value ID"), anchor=tk.W)
+        self.tree.heading("value", text=_("Value"), anchor=tk.W)
 
         self.update_memory_model()
 
@@ -571,7 +571,7 @@ class ImageInspector(ContentInspector, tk.Frame):
             data = object_info["image_data"]
         else:
             self.label.configure(
-                image=None, text="Unsupported image data (%s)" % type(object_info["image_data"])
+                image=None, text=_("Unsupported image data (%s)") % type(object_info["image_data"])
             )
             return
 
@@ -579,7 +579,7 @@ class ImageInspector(ContentInspector, tk.Frame):
             self.image = tk.PhotoImage(data=data)
             self.label.configure(image=self.image)
         except Exception as e:
-            self.label.configure(image=None, text="Unsupported image data (%s)" % e)
+            self.label.configure(image=None, text=_("Unsupported image data (%s)") % e)
 
     def applies_to(self, object_info):
         return "image_data" in object_info

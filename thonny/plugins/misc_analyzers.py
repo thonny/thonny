@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from thonny.assistance import ProgramAnalyzer, add_program_analyzer
 from thonny import get_runner, rst_utils
 from thonny.running import CPythonProxy

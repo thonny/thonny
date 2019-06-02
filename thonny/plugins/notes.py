@@ -30,13 +30,11 @@ class NotesView(TextFrame):
         if not os.path.isfile(self.filename):
             self.text.insert(
                 "1.0",
-                _(
-                    "This box is meant for your working notes -- assignment instructions, "
-                    + "code snippets, whatever.\n\n"
-                    + "Everything will be saved automatically "
-                    + "and loaded when you open Thonny next time.\n\n"
-                    + "Feel free to delete this text to make room for your own notes."
-                ),
+                _("This box is meant for your working notes -- assignment instructions, ")
+                + _("code snippets, whatever.\n\n")
+                + _("Everything will be saved automatically ")
+                + _("and loaded when you open Thonny next time.\n\n")
+                + _("Feel free to delete this text to make room for your own notes."),
             )
             return
 

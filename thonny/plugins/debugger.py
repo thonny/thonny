@@ -93,7 +93,7 @@ class Debugger:
             if frame_info.id == frame_id:
                 return frame_info
 
-        raise ValueError("Could not find frame %d" % frame_id)
+        raise ValueError(_("Could not find frame %d") % frame_id)
 
     def bring_out_frame(self, frame_id, force=False):
         # called by StackView
@@ -118,7 +118,7 @@ class Debugger:
                 command=lambda: self.check_issue_command("run_to_cursor"),
             )
             menu.add("separator")
-            menu.add("command", label="Copy", command=create_edit_command_handler("<<Copy>>"))
+            menu.add("command", label=_("Copy"), command=create_edit_command_handler("<<Copy>>"))
             menu.add(
                 "command",
                 label=_("Select all"),
@@ -453,7 +453,7 @@ class FrameVisualizer:
                 else:
                     return stack[i], stack[i + 1]
 
-        raise AssertionError("Frame doesn't exist anymore")
+        raise AssertionError(_("Frame doesn't exist anymore"))
 
     def _tag_range(self, text_range, tag):
         # For most statements I want to highlight block of whole lines
@@ -512,7 +512,7 @@ class FrameVisualizer:
             if self._expression_box.winfo_ismapped():
                 dialog.title(self._expression_box.get_focused_text())
             else:
-                dialog.title("Function call at " + hex(self._frame_id))
+                dialog.title(_("Function call at ") + hex(self._frame_id))
 
             return dialog
 
@@ -553,7 +553,7 @@ class EditorVisualizer(FrameVisualizer):
         if msg.in_present:
             self._decorate_editor_title("")
         else:
-            self._decorate_editor_title("   <<< REPLAYING >>> ")
+            self._decorate_editor_title(_("   <<< REPLAYING >>> "))
 
     def _decorate_editor_title(self, suffix):
         self.editor.master.update_editor_title(self.editor, self.editor.get_title() + suffix)
@@ -836,7 +836,7 @@ class DialogVisualizer(tk.Toplevel, FrameVisualizer):
         self._text_frame = CodeView(
             self._code_book, first_line_number=frame_info.firstlineno, font="EditorFont"
         )
-        self._code_book.add(self._text_frame, text="Source")
+        self._code_book.add(self._text_frame, text=_("Source"))
         self.main_pw.add(self._code_book, minsize=200)
         self._code_book.preferred_size_in_pw = 400
 
@@ -878,7 +878,7 @@ class FunctionCallDialog(DialogVisualizer):
         self._locals_book = ttk.Notebook(self.main_pw)
         self._locals_frame = VariablesFrame(self._locals_book)
         self._locals_book.preferred_size_in_pw = 200
-        self._locals_book.add(self._locals_frame, text="Local variables")
+        self._locals_book.add(self._locals_frame, text=_("Local variables"))
         self.main_pw.add(self._locals_book, minsize=100)
 
     def _load_code(self, frame_info):
@@ -927,7 +927,7 @@ class StackView(ui_utils.TreeFrame):
             node_id = self.tree.insert("", "end")
             self.tree.set(node_id, "function", frame.code_name)
             self.tree.set(
-                node_id, "location", "%s, line %s" % (os.path.basename(frame.filename), lineno)
+                node_id, "location", _("%s, line %s") % (os.path.basename(frame.filename), lineno)
             )
             self.tree.set(node_id, "id", frame.id)
 
@@ -986,7 +986,7 @@ class ExceptionView(TextFrame):
     def _show_description(self):
         self.text.configure(foreground=get_syntax_options_for_tag("TEXT")["foreground"])
         self.text.direct_insert(
-            "end", "If last command raised an exception then this view will show the stacktrace."
+            "end", _("If last command raised an exception then this view will show the stacktrace.")
         )
 
     def set_exception(self, exception_lines_with_frame_info):
@@ -1050,7 +1050,7 @@ def _debugger_command_enabled(command):
 
 def _issue_debugger_command(command):
     if _current_debugger is None:
-        raise AssertionError("Trying to send debugger command without debugger")
+        raise AssertionError(_("Trying to send debugger command without debugger"))
     else:
         return _current_debugger.check_issue_command(command)
 
@@ -1149,16 +1149,16 @@ class DebuggerConfigurationPage(ConfigurationPage):
         )
         self.add_checkbox(
             "debugger.automatic_stack_view",
-            "Open and close Stack view automatically",
-            tooltip="Opens the Stack view on first call and "
-            + "closes it when program returns to main frame.",
+            _("Open and close Stack view automatically"),
+            tooltip=_("Opens the Stack view on first call and ")
+            + _("closes it when program returns to main frame."),
             row=2,
             columnspan=3,
         )
         self.add_checkbox(
             "debugger.allow_stepping_into_libraries",
-            "Allow stepping into libraries (ie. outside of main script directory)",
-            tooltip="May make debugging slower.",
+            _("Allow stepping into libraries (ie. outside of main script directory)"),
+            tooltip=_("May make debugging slower."),
             row=3,
             columnspan=3,
         )
@@ -1175,16 +1175,16 @@ class DebuggerConfigurationPage(ConfigurationPage):
             pady=(15, 0),
         )
         default_comment_label = ttk.Label(
-            self, text="(used when clicking Debug toolbar button)", anchor="w"
+            self, text=_("(used when clicking Debug toolbar button)"), anchor="w"
         )
         default_comment_label.grid(row=4, column=2, sticky="w", pady=(15, 0))
 
         if get_workbench().get_option("run.birdseye_port", None):
-            port_label = ttk.Label(self, text="Birdseye port", anchor="w")
+            port_label = ttk.Label(self, text=_("Birdseye port"), anchor="w")
             port_label.grid(row=5, column=0, sticky="w", pady=(5, 0))
             self.add_entry("run.birdseye_port", row=5, column=1, width=5, pady=(5, 0), padx=5)
             port_comment_label = ttk.Label(
-                self, text="(restart Thonny after changing this)", anchor="w"
+                self, text=_("(restart Thonny after changing this)"), anchor="w"
             )
             port_comment_label.grid(row=5, column=2, sticky="w", pady=(5, 0))
 
@@ -1234,9 +1234,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_preferred",
         "run",
-        "Debug current script",
+        _("Debug current script"),
         run_preferred_debug_command,
-        caption="Debug",
+        caption=_("Debug"),
         tester=_start_debug_enabled,
         group=10,
         image="debug-current-script",
@@ -1247,9 +1247,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_nicer",
         "run",
-        "Debug current script (nicer)",
+        _("Debug current script (nicer)"),
         lambda: _request_debug("Debug"),
-        caption="Debug (nicer)",
+        caption=_("Debug (nicer)"),
         tester=_start_debug_enabled,
         default_sequence="<Control-F5>",
         group=10,
@@ -1259,9 +1259,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_faster",
         "run",
-        "Debug current script (faster)",
+        _("Debug current script (faster)"),
         lambda: _request_debug("FastDebug"),
-        caption="Debug (faster)",
+        caption=_("Debug (faster)"),
         tester=_start_debug_enabled,
         default_sequence="<Shift-F5>",
         group=10,
@@ -1270,9 +1270,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_over",
         "run",
-        "Step over",
+        _("Step over"),
         lambda: _issue_debugger_command("step_over"),
-        caption="Over",
+        caption=_("Over"),
         tester=lambda: _debugger_command_enabled("step_over"),
         default_sequence="<F6>",
         group=30,
@@ -1283,9 +1283,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_into",
         "run",
-        "Step into",
+        _("Step into"),
         lambda: _issue_debugger_command("step_into"),
-        caption="Into",
+        caption=_("Into"),
         tester=lambda: _debugger_command_enabled("step_into"),
         default_sequence="<F7>",
         group=30,
@@ -1296,9 +1296,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_out",
         "run",
-        "Step out",
+        _("Step out"),
         lambda: _issue_debugger_command("step_out"),
-        caption="Out",
+        caption=_("Out"),
         tester=lambda: _debugger_command_enabled("step_out"),
         group=30,
         image="step-out",
@@ -1321,7 +1321,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "run_to_cursor",
         "run",
-        "Run to cursor",
+        _("Run to cursor"),
         lambda: _issue_debugger_command("run_to_cursor"),
         tester=lambda: _debugger_command_enabled("run_to_cursor"),
         default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
@@ -1333,17 +1333,17 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_back",
         "run",
-        "Step back",
+        _("Step back"),
         lambda: _issue_debugger_command("step_back"),
-        caption="Back",
+        caption=_("Back"),
         tester=lambda: _debugger_command_enabled("step_back"),
         default_sequence=select_sequence("<Control-b>", "<Command-b>"),
         group=30,
     )
 
-    get_workbench().add_view(StackView, "Stack", "se")
-    get_workbench().add_view(ExceptionView, "Exception", "s")
-    get_workbench().add_configuration_page("Debugger", DebuggerConfigurationPage)
+    get_workbench().add_view(StackView, _("Stack"), "se")
+    get_workbench().add_view(ExceptionView, _("Exception"), "s")
+    get_workbench().add_configuration_page(_("Debugger"), DebuggerConfigurationPage)
     get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
     get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
     get_workbench().bind("debugger_return_response", _handle_debugger_return, True)

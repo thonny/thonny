@@ -9,7 +9,7 @@ class ShellMacroDialog(tk.Toplevel):
     def __init__(self, master):
         tk.Toplevel.__init__(self, master)
 
-        self.title("Configure shell macro")
+        self.title(_("Configure shell macro"))
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.transient(master)
@@ -31,7 +31,7 @@ class ShellMacroDialog(tk.Toplevel):
         banner_frame.columnconfigure(0, weight=1)
         banner_text = tk.Label(
             banner_frame,
-            text="These\nare\ninstructions asdfa afs fa sfasdf",
+            text=_("These\nare\ninstructions asdfa afs fa sfasdf"),
             background=bg,
             justify="left",
         )
@@ -52,11 +52,11 @@ class ShellMacroDialog(tk.Toplevel):
         button_frame = ttk.Frame(main_frame)
         button_frame.grid(row=2, column=0, sticky="nsew")
 
-        run_button = ttk.Button(button_frame, text="Save and execute", command=self._save_exec)
+        run_button = ttk.Button(button_frame, text=_("Save and execute"), command=self._save_exec)
         run_button.grid(row=0, column=1, sticky="nsew")
-        ok_button = ttk.Button(button_frame, text="Save", command=self._save)
+        ok_button = ttk.Button(button_frame, text=_("Save"), command=self._save)
         ok_button.grid(row=0, column=2, sticky="nsew")
-        cancel_button = ttk.Button(button_frame, text="Cancel", command=self._cancel)
+        cancel_button = ttk.Button(button_frame, text=_("Cancel"), command=self._cancel)
         cancel_button.grid(row=0, column=3, sticky="nsew")
         button_frame.columnconfigure(0, weight=1)
 
@@ -92,8 +92,8 @@ def execute_macro():
 def _load_plugin():
     get_workbench().set_default("run.shell_macro_main", None)
     get_workbench().add_command(
-        "configure_shell_macro", "run", "Configure shell macro...", show_dialog
+        "configure_shell_macro", "run", _("Configure shell macro..."), show_dialog
     )
     get_workbench().add_command(
-        "execute_shell_macro", "run", "Execute shell macro", execute_macro, default_sequence="<F9>"
+        "execute_shell_macro", "run", _("Execute shell macro"), execute_macro, default_sequence="<F9>"
     )

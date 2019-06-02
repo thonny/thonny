@@ -480,7 +480,7 @@ class Workbench(tk.Tk):
         self.add_backend(
             "SameAsFrontend",
             running.SameAsFrontendCPythonProxy,
-            "The same interpreter which runs Thonny (default)",
+            _("The same interpreter which runs Thonny (default)"),
             running.get_frontend_python(),
             "1",
         )
@@ -499,8 +499,8 @@ class Workbench(tk.Tk):
             "PrivateVenv",
             running.PrivateVenvCPythonProxy,
             _("A special virtual environment (deprecated)"),
-            "This virtual environment is automatically maintained by Thonny.\n"
-            "Location: " + running.get_private_venv_path(),
+            _("This virtual environment is automatically maintained by Thonny.\n")
+            + _("Location: ") + running.get_private_venv_path(),
             "z",
         )
 
@@ -545,7 +545,7 @@ class Workbench(tk.Tk):
             else [],
         )
 
-        self.add_command("show_options", "tools", "Options...", self.show_options, group=180)
+        self.add_command("show_options", "tools", _("Options..."), self.show_options, group=180)
         self.createcommand("::tk::mac::ShowPreferences", self.show_options)
         self.createcommand("::tk::mac::Quit", self._mac_quit)
 
@@ -617,7 +617,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "font",
                 "tools",
-                "Change font size",
+                _("Change font size"),
                 caption="Zoom",
                 handler=self._toggle_font_size,
                 image="zoom",
@@ -627,7 +627,7 @@ class Workbench(tk.Tk):
             self.add_command(
                 "quit",
                 "help",
-                "Exit Thonny",
+                _("Exit Thonny"),
                 self._on_close,
                 image="quit",
                 caption="Quit",
@@ -1011,7 +1011,7 @@ class Workbench(tk.Tk):
         images: Dict[str, str] = {},
     ) -> None:
         if name in self._ui_themes:
-            warn("Overwriting theme '%s'" % name)
+            warn(_("Overwriting theme '%s'") % name)
 
         self._ui_themes[name] = (parent, settings, images)
 
@@ -1019,7 +1019,7 @@ class Workbench(tk.Tk):
         self, name: str, parent: Optional[str], settings: FlexibleSyntaxThemeSettings
     ) -> None:
         if name in self._syntax_themes:
-            warn("Overwriting theme '%s'" % name)
+            warn(_("Overwriting theme '%s'") % name)
 
         self._syntax_themes[name] = (parent, settings)
 
@@ -1046,7 +1046,7 @@ class Workbench(tk.Tk):
             else:
                 return result
         else:
-            raise NotImplementedError("Only numeric dimensions supported at the moment")
+            raise NotImplementedError(_("Only numeric dimensions supported at the moment"))
 
     def _register_ui_theme_as_tk_theme(self, name: str) -> None:
         # collect settings from all ancestors
@@ -1118,7 +1118,7 @@ class Workbench(tk.Tk):
             try:
                 parent, settings = self._syntax_themes[name]
             except KeyError:
-                self.report_exception("Can't find theme '%s'" % name)
+                self.report_exception(_("Can't find theme '%s'") % name)
                 return {}
 
             if callable(settings):
@@ -1178,7 +1178,7 @@ class Workbench(tk.Tk):
         col = 1000
         self._toolbar.columnconfigure(col, weight=1)
 
-        label = ttk.Label(frame, text="Program arguments:")
+        label = ttk.Label(frame, text=_("Program arguments:"))
         label.grid(row=0, column=0, sticky="nse", padx=5)
 
         self.program_arguments_box = ttk.Combobox(
@@ -1221,7 +1221,7 @@ class Workbench(tk.Tk):
 
         label = ttk.Label(
             self._toolbar,
-            text="Switch to\nregular mode",
+            text=_("Switch to\nregular mode"),
             justify="right",
             font="SmallLinkFont",
             style="Url.TLabel",
@@ -1232,10 +1232,10 @@ class Workbench(tk.Tk):
         def on_click(_):
             self.set_option("general.ui_mode", "regular")
             tk_messagebox.showinfo(
-                "Regular mode",
-                "Configuration has been updated. "
-                + "Restart Thonny to start working in regular mode.\n\n"
-                + "(See 'Tools → Options → General' if you change your mind later.)",
+                _("Regular mode"),
+                _("Configuration has been updated. ")
+                + _("Restart Thonny to start working in regular mode.\n\n")
+                + _("(See 'Tools → Options → General' if you change your mind later.)"),
                 parent=self,
             )
 
@@ -1266,7 +1266,7 @@ class Workbench(tk.Tk):
                 try:
                     self.show_view(view_id, False)
                 except Exception:
-                    self.report_exception("Problem showing " + view_id)
+                    self.report_exception(_("Problem showing ") + view_id)
 
     def update_image_mapping(self, mapping: Dict[str, str]) -> None:
         """Was used by thonny-pi. Not recommended anymore"""
@@ -1328,7 +1328,7 @@ class Workbench(tk.Tk):
     def get_view(self, view_id: str, create: bool = True) -> tk.Widget:
         if "instance" not in self._view_records[view_id]:
             if not create:
-                raise RuntimeError("View %s not created" % view_id)
+                raise RuntimeError(_("View %s not created") % view_id)
             class_ = self._view_records[view_id]["class"]
             location = self._view_records[view_id]["location"]
             master = self._view_notebooks[location]
@@ -1488,7 +1488,7 @@ class Workbench(tk.Tk):
                     try:
                         handler(event)
                     except Exception:
-                        self.report_exception("Problem when handling '" + sequence + "'")
+                        self.report_exception(_("Problem when handling '") + sequence + "'")
 
         self._update_toolbar()
 
@@ -1656,7 +1656,7 @@ class Workbench(tk.Tk):
             if menu == self._menubar.winfo_children()[i]:
                 return i
 
-        raise RuntimeError("Couldn't find menu")
+        raise RuntimeError(_("Couldn't find menu"))
 
     def _add_toolbar_button(
         self,
@@ -1671,7 +1671,7 @@ class Workbench(tk.Tk):
     ) -> None:
 
         assert caption is not None and len(caption) > 0, (
-            "Missing caption for '%s'. Toolbar commands must have caption." % command_label
+            _("Missing caption for '%s'. Toolbar commands must have caption.") % command_label
         )
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:

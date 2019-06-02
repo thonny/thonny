@@ -44,7 +44,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             self._original_io_size, modification_listener=self._update_appearance
         )
 
-        ttk.Label(self, text="UI theme").grid(row=1, column=0, sticky="w", pady=(10, 0))
+        ttk.Label(self, text=_("UI theme")).grid(row=1, column=0, sticky="w", pady=(10, 0))
         self._ui_theme_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -55,7 +55,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._ui_theme_combo.grid(row=2, column=0, sticky="nsew", padx=(0, 10))
 
-        ttk.Label(self, text="Syntax theme").grid(row=1, column=1, sticky="w", pady=(10, 0))
+        ttk.Label(self, text=_("Syntax theme")).grid(row=1, column=1, sticky="w", pady=(10, 0))
         self._syntax_theme_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -66,7 +66,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._syntax_theme_combo.grid(row=2, column=1, sticky="nsew", padx=(0, 10))
 
-        ttk.Label(self, text="Editor font").grid(row=1, column=2, sticky="w", pady=(10, 0))
+        ttk.Label(self, text=_("Editor font")).grid(row=1, column=2, sticky="w", pady=(10, 0))
         self._family_combo = ttk.Combobox(
             self,
             exportselection=False,
@@ -77,7 +77,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._family_combo.grid(row=2, column=2, sticky=tk.NSEW, padx=(0, 10))
 
-        ttk.Label(self, text="Size").grid(row=1, column=3, sticky="w", pady=(10, 0))
+        ttk.Label(self, text=_("Size")).grid(row=1, column=3, sticky="w", pady=(10, 0))
         self._size_combo = ttk.Combobox(
             self,
             width=4,
@@ -89,7 +89,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         )
         self._size_combo.grid(row=2, column=3, sticky="nsew")
 
-        ttk.Label(self, text="Editor preview").grid(
+        ttk.Label(self, text=_("Editor preview")).grid(
             row=3, column=0, sticky="w", pady=(10, 0), columnspan=4
         )
         self._preview_codeview = CodeView(
@@ -143,7 +143,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
         self._shell_preview.grid(row=8, column=0, columnspan=4, sticky=tk.NSEW, pady=(0, 5))
         self._insert_shell_text()
 
-        ttk.Label(self, text="NB! Some style elements change only after restarting Thonny").grid(
+        ttk.Label(self, text=_("NB! Some style elements change only after restarting Thonny")).grid(
             row=9, column=0, columnspan=4, sticky="w", pady=(0, 5)
         )
 
@@ -207,4 +207,4 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)
+    get_workbench().add_configuration_page(_("Theme & Font"), ThemeAndFontConfigurationPage)

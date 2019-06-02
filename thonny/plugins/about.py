@@ -31,7 +31,7 @@ class AboutDialog(tk.Toplevel):
         heading_font = tkinter.font.nametofont("TkHeadingFont").copy()
         heading_font.configure(size=19, weight="bold")
         heading_label = ttk.Label(
-            main_frame, text="Thonny " + thonny.get_version(), font=heading_font
+            main_frame, text=_("Thonny ") + thonny.get_version(), font=heading_font
         )
         heading_label.grid()
 
@@ -73,14 +73,12 @@ class AboutDialog(tk.Toplevel):
 
         credits_label = ttk.Label(
             main_frame,
-            text=_(
-                "Made in\n"
-                + "University of Tartu, Estonia,\n"
-                + "with the help from\n"
-                + "open-source community,\n"
-                + "Raspberry Pi Foundation\n"
-                + "and Cybernetica AS"
-            ),
+            text=_("Made in\n")
+            + _("University of Tartu, Estonia,\n")
+            + _("with the help from\n")
+            + _("open-source community,\n")
+            + _("Raspberry Pi Foundation\n")
+            + _("and Cybernetica AS"),
             style="Url.TLabel",
             cursor="hand2",
             font=url_font,
@@ -96,17 +94,15 @@ class AboutDialog(tk.Toplevel):
         license_font.configure(size=7)
         license_label = ttk.Label(
             main_frame,
-            text="Copyright (©) "
+            text=_("Copyright (©) ")
             + str(datetime.datetime.now().year)
-            + " Aivar Annamaa\n"
-            + _(
-                "This program comes with\n"
-                + "ABSOLUTELY NO WARRANTY!\n"
-                + "It is free software, and you are welcome to\n"
-                + "redistribute it under certain conditions, see\n"
-                + "https://opensource.org/licenses/MIT\n"
-                + "for details"
-            ),
+            + _(" Aivar Annamaa\n")
+            + _("This program comes with\n")
+            + _("ABSOLUTELY NO WARRANTY!\n")
+            + _("It is free software, and you are welcome to\n")
+            + _("redistribute it under certain conditions, see\n")
+            + _("https://opensource.org/licenses/MIT\n")
+            + _("for details"),
             justify=tk.CENTER,
             font=license_font,
         )

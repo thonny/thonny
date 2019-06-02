@@ -117,8 +117,8 @@ class Runner:
         get_workbench().add_command(
             "run_current_script_in_terminal",
             "run",
-            "Run current script in terminal",
-            caption="RunT",
+            _("Run current script in terminal"),
+            caption=_("RunT"),
             handler=self._cmd_run_current_script_in_terminal,
             default_sequence="<Control-t>",
             extra_sequences=["<<CtrlTInText>>"],
@@ -130,8 +130,8 @@ class Runner:
         get_workbench().add_command(
             "restart",
             "run",
-            "Stop/Restart backend",
-            caption="Stop",
+            _("Stop/Restart backend"),
+            caption=_("Stop"),
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
             group=70,
@@ -142,7 +142,7 @@ class Runner:
         get_workbench().add_command(
             "interrupt",
             "run",
-            "Interrupt execution",
+            _("Interrupt execution"),
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
             default_sequence="<Control-c>",
@@ -405,7 +405,7 @@ class Runner:
             elif isinstance(msg, DebuggerResponse):
                 self._set_state("waiting_debugger_command")
             else:
-                "other messages don't affect the state"
+                _("other messages don't affect the state")
 
             if "cwd" in msg:
                 get_workbench().set_cwd(msg["cwd"])
@@ -429,7 +429,7 @@ class Runner:
         self._send_postponed_commands()
 
     def _report_backend_crash(self, exc: Exception) -> None:
-        err = "Backend terminated (returncode: %s)\n" % getattr(exc, "returncode", "?")
+        err = _("Backend terminated (returncode: %s)\n") % getattr(exc, "returncode", "?")
 
         try:
             faults_file = os.path.join(THONNY_USER_DIR, "backend_faults.log")
@@ -439,7 +439,7 @@ class Runner:
         except Exception:
             logging.exception("Failed retrieving backend faults")
 
-        err = err.strip() + "\nUse 'Stop/Restart' to restart the backend ...\n"
+        err = err.strip() + _("\nUse 'Stop/Restart' to restart the backend ...\n")
 
         get_workbench().event_generate("ProgramOutput", stream_name="stderr", data=err)
 
@@ -456,7 +456,7 @@ class Runner:
         backend_name = get_workbench().get_option("run.backend_name")
         if backend_name not in get_workbench().get_backends():
             raise UserError(
-                "Can't find backend '{}'. Please select another backend from options".format(
+                _("Can't find backend '{}'. Please select another backend from options").format(
                     backend_name
                 )
             )
@@ -511,7 +511,7 @@ class Runner:
                 "pythonw.exe", "python.exe"
             )
 
-            cmd = [exe, "-c", "print('Hi!'); input()"]
+            cmd = [exe, "-c", _("print('Hi!'); input()")]
             child = subprocess.Popen(
                 cmd,
                 stdin=subprocess.PIPE,
@@ -761,7 +761,7 @@ class CPythonProxy(BackendProxy):
 
         if not os.path.exists(self._executable):
             raise UserError(
-                "Interpreter (%s) not found. Please recheck corresponding option!"
+                _("Interpreter (%s) not found. Please recheck corresponding option!")
                 % self._executable
             )
 
@@ -787,7 +787,7 @@ class CPythonProxy(BackendProxy):
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
 
-        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_cwd())
+        debug(_("Starting the backend: %s %s"), cmd_line, get_workbench().get_cwd())
         self._proc = subprocess.Popen(
             cmd_line,
             # bufsize=0,
@@ -808,7 +808,7 @@ class CPythonProxy(BackendProxy):
             ready_line = self._proc.stdout.readline()
             if ready_line == "":  # There was some problem
                 error_msg = self._proc.stderr.read()
-                raise Exception("Error starting backend process: " + error_msg)
+                raise Exception(_("Error starting backend process: ") + error_msg)
             self._store_state_info(parse_message(ready_line))
 
         # setup asynchronous output listeners
@@ -951,7 +951,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
             self._check_upgrade_private_venv(path)
         else:
             self._create_private_venv(
-                path, "Please wait!\nThonny prepares its virtual environment."
+                path, _("Please wait!\nThonny prepares its virtual environment.")
             )
 
     def _check_upgrade_private_venv(self, path):
@@ -962,10 +962,10 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         if not is_same_path(info["home"], os.path.dirname(sys.executable)):
             self._create_private_venv(
                 path,
-                "Thonny's virtual environment was created for another interpreter.\n"
-                + "Regenerating the virtual environment for current interpreter.\n"
-                + "(You may need to reinstall your 3rd party packages)\n"
-                + "Please wait!.",
+                _("Thonny's virtual environment was created for another interpreter.\n")
+                + _("Regenerating the virtual environment for current interpreter.\n")
+                + _("(You may need to reinstall your 3rd party packages)\n")
+                + _("Please wait!."),
                 clear=True,
             )
         else:
@@ -1006,7 +1006,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         from thonny.ui_utils import SubprocessDialog
 
         dlg = SubprocessDialog(
-            get_workbench(), proc, "Preparing the backend", long_description=description
+            get_workbench(), proc, _("Preparing the backend"), long_description=description
         )
         try:
             ui_utils.show_dialog(dlg)

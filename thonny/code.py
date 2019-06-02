@@ -23,7 +23,11 @@ from thonny.misc_utils import running_on_windows
 from _tkinter import TclError
 from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
 
-_dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
+# i18n #
+import gettext
+gettext.install('thonny', os.path.dirname(__file__))
+
+_dialog_filetypes = [(_("Python files"), ".py .pyw"), (_("text files"), ".txt"), (_("all files"), ".*")]
 
 REMOTE_PATH_MARKER = " :: "
 
@@ -82,7 +86,7 @@ class Editor(ttk.Frame):
 
     def get_title(self):
         if self.get_filename() is None:
-            result = "<untitled>"
+            result = _("<untitled>")
         elif is_remote_path(self.get_filename()):
             path = extract_target_path(self.get_filename())
             name = path.split("/")[-1]
@@ -119,9 +123,9 @@ class Editor(ttk.Frame):
                 self.master.select(self)
 
                 if messagebox.askyesno(
-                    "File is gone",
-                    "Looks like '%s' was deleted or moved outside Thonny.\n\n" % self._filename
-                    + "Do you want to also close this editor?",
+                    _("File is gone"),
+                    _("Looks like '%s' was deleted or moved outside Thonny.\n\n") % self._filename
+                    + _("Do you want to also close this editor?"),
                     parent=get_workbench(),
                 ):
                     self.master.close_editor(self)
@@ -133,9 +137,9 @@ class Editor(ttk.Frame):
                 self.master.select(self)
 
                 if messagebox.askyesno(
-                    "External modification",
-                    "Looks like '%s' was modified outside Thonny.\n\n" % self._filename
-                    + "Do you want to discard current editor content and reload the file from disk?",
+                    _("External modification"),
+                    _("Looks like '%s' was modified outside Thonny.\n\n") % self._filename
+                    + _("Do you want to discard current editor content and reload the file from disk?"),
                     parent=get_workbench(),
                 ):
                     self._load_file(self._filename, keep_undo=True)
@@ -147,7 +151,7 @@ class Editor(ttk.Frame):
     def get_long_description(self):
 
         if self._filename is None:
-            result = "<untitled>"
+            result = _("<untitled>")
         else:
             result = self._filename
 
@@ -157,7 +161,7 @@ class Editor(ttk.Frame):
                 line, col = index.split(".")
                 result += "  @  {} : {}".format(line, int(col) + 1)
         except Exception:
-            exception("Finding cursor location")
+            exception(_("Finding cursor location"))
 
         return result
 
@@ -261,9 +265,9 @@ class Editor(ttk.Frame):
             )
         except PermissionError:
             if askyesno(
-                "Permission Error",
-                "Looks like this file or folder is not writable.\n\n"
-                + "Do you want to save under another folder and/or filename?",
+                _("Permission Error"),
+                _("Looks like this file or folder is not writable.\n\n")
+                + _("Do you want to save under another folder and/or filename?"),
                 parent=get_workbench(),
             ):
                 return self.save_file(True)
@@ -372,11 +376,11 @@ class Editor(ttk.Frame):
 
                 # More proper name analysis will be performed by ProgramNamingAnalyzer
                 if not tk.messagebox.askyesno(
-                    "Potential problem",
-                    "If you name your script '%s', " % base
-                    + "you won't be able to import the library module named '%s'" % mod_name
+                    _("Potential problem"),
+                    _("If you name your script '%s', ") % base
+                    +  _("you won't be able to import the library module named '%s'") % mod_name
                     + ".\n\n"
-                    + "Do you still want to use this name for your script?",
+                    +  _("Do you still want to use this name for your script?"),
                     parent=get_workbench(),
                 ):
                     return self.ask_new_local_path()
@@ -504,9 +508,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "new_file",
             "file",
-            "New",
+            _("New"),
             self._cmd_new_file,
-            caption="New",
+            caption=_("New"),
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             extra_sequences=["<Control-Greek_nu>"],
             group=10,
@@ -517,9 +521,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "open_file",
             "file",
-            "Open...",
+            _("Open..."),
             self._cmd_open_file,
-            caption="Load",
+            caption=_("Load"),
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             extra_sequences=["<Control-Greek_omicron>"],
             group=10,
@@ -528,7 +532,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
-            "recents", "file", "Recent files", group=10, submenu=self._recent_menu
+            "recents", "file", _("Recent files"), group=10, submenu=self._recent_menu
         )
 
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -539,7 +543,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "close_file",
             "file",
-            "Close",
+            _("Close"),
             self._cmd_close_file,
             default_sequence=select_sequence("<Control-w>", "<Command-w>"),
             extra_sequences=["<Control-Greek_finalsmallsigma>"],
@@ -550,7 +554,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "close_files",
             "file",
-            "Close all",
+            _("Close all"),
             self.close_tabs,
             tester=lambda: self.get_current_editor() is not None,
             default_sequence=select_sequence("<Control-W>", "<Command-Alt-w>"),
@@ -560,9 +564,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_file",
             "file",
-            "Save",
+            _("Save"),
             self._cmd_save_file,
-            caption="Save",
+            caption=_("Save"),
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             extra_sequences=["<Control-Greek_sigma>"],
             tester=self._cmd_save_file_enabled,
@@ -574,7 +578,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_file_as",
             "file",
-            "Save as...",
+            _("Save as..."),
             self._cmd_save_file_as,
             default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-S>"),
             extra_sequences=["<Control-Greek_SIGMA>"],
@@ -585,7 +589,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "rename_file",
             "file",
-            "Rename...",
+            _("Rename..."),
             self._cmd_rename_file,
             tester=self._cmd_rename_file_enabled,
             group=10,
@@ -866,12 +870,12 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         if len(modified_editors) == 0:
             return True
 
-        message = "Do you want to save files before closing?"
+        message = _("Do you want to save files before closing?")
         if editor:
-            message = "Do you want to save file before closing?"
+            message = _("Do you want to save file before closing?")
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close",
+            title=_("Save On Close"),
             message=message,
             default=messagebox.YES,
             master=get_workbench(),

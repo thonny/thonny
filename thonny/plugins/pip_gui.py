@@ -230,10 +230,8 @@ class PipDialog(tk.Toplevel):
         self.info_text.direct_insert("end", _("Installing pip\n\n"), ("caption",))
         self.info_text.direct_insert(
             "end",
-            _(
-                "pip, a required module for managing packages is missing or too old.\n\n"
-                + "Downloading pip installer (about 1.5 MB), please wait ...\n"
-            ),
+            _("pip, a required module for managing packages is missing or too old.\n\n")
+            + _("Downloading pip installer (about 1.5 MB), please wait ...\n"),
         )
         self.update()
         self.update_idletasks()
@@ -249,7 +247,7 @@ class PipDialog(tk.Toplevel):
         os.remove(installer_filename)
 
         if err != "":
-            raise RuntimeError("Error while installing pip:\n" + err)
+            raise RuntimeError(_("Error while installing pip:\n") + err)
 
         self.info_text.direct_insert("end", out + "\n")
         self.update()
@@ -266,11 +264,9 @@ class PipDialog(tk.Toplevel):
         )
         self.info_text.direct_insert(
             "end",
-            _(
-                "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
-                + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
-                + "then you can install newest version by downloading "
-            ),
+            _("pip, a required module for managing packages is missing or too old for Thonny.\n\n")
+            + _("If your system package manager doesn't provide recent pip (9.0.0 or later), ")
+            + _("then you can install newest version by downloading "),
         )
         self.info_text.direct_insert("end", PIP_INSTALLER_URL, ("url",))
         self.info_text.direct_insert(
@@ -284,9 +280,9 @@ class PipDialog(tk.Toplevel):
         self._set_state("disabled", True)
 
     def _instructions_for_command_line_install(self):
-        return _(
-            "Alternatively, if you have an older pip installed, then you can install packages "
-            + "on the command line (Tools → Open system shell...)"
+        return (
+            _("Alternatively, if you have an older pip installed, then you can install packages ")
+            + _("on the command line (Tools → Open system shell...)")
         )
 
     def _start_update_list(self, name_to_show=None):
@@ -331,13 +327,11 @@ class PipDialog(tk.Toplevel):
     def _show_instructions(self):
         self._clear()
         if self._read_only():
-            self.info_text.direct_insert("end", "Browse the packages\n", ("caption",))
+            self.info_text.direct_insert("end", _("Browse the packages\n"), ("caption",))
             self.info_text.direct_insert(
                 "end",
-                _(
-                    "With current interpreter you can only browse the packages here.\n"
-                    + "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n\n"
-                ),
+                _("With current interpreter you can only browse the packages here.\n")
+                + _("Use 'Tools → Open system shell...' for installing, upgrading or uninstalling.\n\n"),
             )
 
             if self._get_target_directory():
@@ -349,11 +343,9 @@ class PipDialog(tk.Toplevel):
             self.info_text.direct_insert("end", _("Install from PyPI\n"), ("caption",))
             self.info_text.direct_insert(
                 "end",
-                _(
-                    "If you don't know where to get the package from, "
-                    + "then most likely you'll want to search the Python Package Index. "
-                    + "Start by entering the name of the package in the search box above and pressing ENTER.\n\n"
-                ),
+                _("If you don't know where to get the package from, ")
+                + _("then most likely you'll want to search the Python Package Index. ")
+                + _("Start by entering the name of the package in the search box above and pressing ENTER.\n\n"),
             )
 
             self.info_text.direct_insert("end", _("Install from local file\n"), ("caption",))
@@ -361,9 +353,7 @@ class PipDialog(tk.Toplevel):
             self.info_text.direct_insert("end", _("here"), ("install_file",))
             self.info_text.direct_insert(
                 "end",
-                _(
-                    " to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n\n"
-                ),
+                _(" to locate and install the package file (usually with .whl, .tar.gz or .zip extension).\n\n"),
             )
 
             self.info_text.direct_insert("end", _("Upgrade or uninstall\n"), ("caption",))
@@ -380,18 +370,14 @@ class PipDialog(tk.Toplevel):
 
                 self.info_text.direct_insert(
                     "end",
-                    _(
-                        "This dialog lists all available packages,"
-                        + " but allows upgrading and uninstalling only packages from "
-                    ),
+                    _("This dialog lists all available packages,"),
+                    + _(" but allows upgrading and uninstalling only packages from "),
                 )
                 self.info_text.direct_insert("end", self._get_target_directory(), ("url"))
                 self.info_text.direct_insert(
                     "end",
-                    _(
-                        ". New packages will be also installed into this directory."
-                        + " Other locations must be managed by alternative means."
-                    ),
+                    _(". New packages will be also installed into this directory.")
+                    + _(" Other locations must be managed by alternative means."),
                 )
 
         self._select_list_item(0)
@@ -562,7 +548,7 @@ class PipDialog(tk.Toplevel):
         elif action == "uninstall":
             if name in ["pip", "setuptools"] and not messagebox.askyesno(
                 _("Really uninstall?"),
-                "Package '{}' is required for installing and uninstalling other packages.\n\n".format(
+                _("Package '{}' is required for installing and uninstalling other packages.\n\n").format(
                     name
                 )
                 + _("Are you sure you want to uninstall it?"),
@@ -586,7 +572,7 @@ class PipDialog(tk.Toplevel):
                 args.append("--upgrade")
             args.append(name + "==" + version)
         else:
-            raise RuntimeError("Unknown action")
+            raise RuntimeError(_("Unknown action"))
 
         proc, cmd = self._create_pip_process(args)
         title = subprocess.list2cmdline(cmd)
@@ -603,7 +589,7 @@ class PipDialog(tk.Toplevel):
 
         filename = askopenfilename(
             master=self,
-            filetypes=[("Package", ".whl .zip .tar.gz"), ("all files", ".*")],
+            filetypes=[(_("Package"), ".whl .zip .tar.gz"), (_("all files"), ".*")],
             initialdir=get_workbench().get_cwd(),
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
@@ -689,7 +675,7 @@ class PipDialog(tk.Toplevel):
         raise NotImplementedError()
 
     def _get_title(self):
-        return "Manage packages for " + self._get_interpreter()
+        return _("Manage packages for ") + self._get_interpreter()
 
     def _confirm_install(self, package_data):
         return True
@@ -745,14 +731,14 @@ class BackendPipDialog(PipDialog):
 
         if name.lower().startswith("thonny"):
             return messagebox.askyesno(
-                "Confirmation",
-                "Looks like you are installing a Thonny-related package.\n"
-                + "If you meant to install a Thonny plugin, then you should\n"
-                + "choose 'Tools → Manage plugins...' instead\n"
+                _("Confirmation"),
+                _("Looks like you are installing a Thonny-related package.\n")
+                + _("If you meant to install a Thonny plugin, then you should\n")
+                + _("choose 'Tools → Manage plugins...' instead\n")
                 + "\n"
-                + "Are you sure you want to install '"
+                + _("Are you sure you want to install '")
                 + name
-                + "' for the back-end?",
+                + _("' for the back-end?"),
                 parent=get_workbench(),
             )
         else:
@@ -838,17 +824,17 @@ class PluginsPipDialog(PipDialog):
         reqs = package_data["info"].get("requires_dist", None)
 
         other_version_text = (
-            "NB! There may be another version available "
-            + "which is compatible with current Thonny version. "
-            + "Click on '...' button to choose the version to install."
+            _("NB! There may be another version available ")
+            + _("which is compatible with current Thonny version. ")
+            + _("Click on '...' button to choose the version to install.")
         )
 
         if name.lower().startswith("thonny-") and not reqs:
             showerror(
-                "Thonny plugin without requirements",
-                "Looks like you are trying to install an outdated Thonny\n"
-                + "plug-in (it doesn't specify required Thonny version).\n\n"
-                + "If you still want it, then please install it from the command line."
+                _("Thonny plugin without requirements"),
+                _("Looks like you are trying to install an outdated Thonny\n")
+                + _("plug-in (it doesn't specify required Thonny version).\n\n")
+                + _("If you still want it, then please install it from the command line.")
                 + "\n\n"
                 + other_version_text,
                 parent=get_workbench(),
@@ -858,10 +844,10 @@ class PluginsPipDialog(PipDialog):
             conflicts = self._conflicts_with_thonny_version(reqs)
             if conflicts:
                 showerror(
-                    "Unsuitable requirements",
-                    "This package requires different Thonny version:\n\n  "
+                    _("Unsuitable requirements"),
+                    _("This package requires different Thonny version:\n\n  ")
                     + "\n  ".join(conflicts)
-                    + "\n\nIf you still want it, then please install it from the command line."
+                    + _("\n\nIf you still want it, then please install it from the command line.")
                     + "\n\n"
                     + other_version_text,
                     parent=get_workbench(),
@@ -891,8 +877,8 @@ class PluginsPipDialog(PipDialog):
         banner.grid(row=0, column=0, sticky="nsew")
 
         banner_msg = (
-            "This dialog is for managing Thonny plug-ins and their dependencies.\n"
-            + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n"
+            _("This dialog is for managing Thonny plug-ins and their dependencies.\n")
+            + _("If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n")
         )
 
         runner = get_runner()
@@ -901,11 +887,11 @@ class PluginsPipDialog(PipDialog):
             and runner.get_local_executable() is not None
             and is_same_path(self._get_interpreter(), get_runner().get_local_executable())
         ):
-            banner_msg += "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n"
+            banner_msg += _("(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)\n")
 
         banner_msg += (
             "\n"
-            + "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+            + _("NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in.")
         )
 
         banner_text = tk.Label(banner, text=banner_msg, background=bg, justify="left")
@@ -914,7 +900,7 @@ class PluginsPipDialog(PipDialog):
         PipDialog._create_widgets(self, parent)
 
     def _get_title(self):
-        return "Thonny plug-ins"
+        return _("Thonny plug-ins")
 
     def _handle_outdated_or_missing_pip(self, error):
         return self._provide_pip_install_instructions(error)
@@ -927,7 +913,7 @@ class DetailsDialog(tk.Toplevel):
         self._closed = False
         self._version_data = None
         self._package_name = package_metadata["info"]["name"]
-        self.title("Advanced install / upgrade / downgrade")
+        self.title(_("Advanced install / upgrade / downgrade"))
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -936,7 +922,7 @@ class DetailsDialog(tk.Toplevel):
         main_frame.rowconfigure(0, weight=1)
         main_frame.columnconfigure(0, weight=1)
 
-        version_label = ttk.Label(main_frame, text="Desired version")
+        version_label = ttk.Label(main_frame, text=_("Desired version"))
         version_label.grid(row=0, column=0, columnspan=2, padx=20, pady=(15, 0), sticky="w")
 
         def version_sort_key(s):
@@ -974,13 +960,13 @@ class DetailsDialog(tk.Toplevel):
         self.update_deps_var = tk.IntVar()
         self.update_deps_var.set(0)
         self.update_deps_cb = ttk.Checkbutton(
-            main_frame, text="Upgrade dependencies", variable=self.update_deps_var
+            main_frame, text=_("Upgrade dependencies"), variable=self.update_deps_var
         )
         self.update_deps_cb.grid(row=3, column=0, columnspan=2, padx=20, sticky="w")
 
-        self.ok_button = ttk.Button(main_frame, text="Install", command=self._ok)
+        self.ok_button = ttk.Button(main_frame, text=_("Install"), command=self._ok)
         self.ok_button.grid(row=4, column=0, pady=15, padx=(20, 0), sticky="se")
-        self.cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self.cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
         self.cancel_button.grid(row=4, column=1, pady=15, padx=(5, 20), sticky="se")
 
         # self.resizable(height=tk.FALSE, width=tk.FALSE)
@@ -1032,11 +1018,11 @@ class DetailsDialog(tk.Toplevel):
             and "requires_dist" in info["info"]
             and isinstance(info["info"]["requires_dist"], list)
         ):
-            reqs = "Requires:\n  * " + "\n  * ".join(info["info"]["requires_dist"])
+            reqs = _("Requires:\n  * ") + "\n  * ".join(info["info"]["requires_dist"])
         elif error_code:
-            reqs = "Error code: " + str(error_code)
+            reqs = _("Error code: ") + str(error_code)
             if "error" in info:
-                reqs += "\nError: " + info["error"]
+                reqs += _("\nError: ") + info["error"]
         else:
             reqs = ""
 
@@ -1146,11 +1132,11 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "backendpipgui",
         "tools",
-        "Manage packages...",
+        _("Manage packages..."),
         open_backend_pip_gui,
         tester=open_backend_pip_gui_enabled,
         group=80,
     )
     get_workbench().add_command(
-        "pluginspipgui", "tools", "Manage plug-ins...", open_frontend_pip_gui, group=180
+        "pluginspipgui", "tools", _("Manage plug-ins..."), open_frontend_pip_gui, group=180
     )

@@ -66,7 +66,7 @@ class Completer(tk.Listbox):
             self._close()
         elif msg.error:
             self._close()
-            messagebox.showerror("Autocomplete error", msg.error, parent=get_workbench())
+            messagebox.showerror(_("Autocomplete error"), msg.error, parent=get_workbench())
         else:
             self._present_completions(msg.completions)
 

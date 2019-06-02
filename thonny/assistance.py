@@ -126,7 +126,7 @@ class AssistantView(tktextext.TextFrame):
 
         if msg.get("user_exception"):
             if not msg["user_exception"].get("message", None):
-                msg["user_exception"]["message"] = "<no message>"
+                msg["user_exception"]["message"] = _("<no message>")
 
             self._exception_info = msg["user_exception"]
             self._explain_exception(msg["user_exception"])
@@ -285,16 +285,16 @@ class AssistantView(tktextext.TextFrame):
             if self.main_file_path is not None and os.path.exists(self.main_file_path):
                 self._append_text("\n")
                 self.text.append_rst(
-                    "The code in `%s <%s>`__ looks good.\n\n"
+                    _("The code in `%s <%s>`__ looks good.\n\n")
                     % (
                         os.path.basename(self.main_file_path),
                         self._format_file_url({"filename": self.main_file_path}),
                     )
                 )
                 self.text.append_rst(
-                    "If it is not working as it should, "
-                    + "then consider using some general "
-                    + "`debugging techniques <debugging.rst>`__.\n\n",
+                    _("If it is not working as it should, ")
+                    + _("then consider using some general ")
+                    + _("`debugging techniques <debugging.rst>`__.\n\n"),
                     ("em",),
                 )
 
@@ -303,7 +303,7 @@ class AssistantView(tktextext.TextFrame):
 
         if self._exception_info:
             self._append_text(
-                "General advice on dealing with errors.\n", ("a", "python_errors_link")
+                _("General advice on dealing with errors.\n"), ("a", "python_errors_link")
             )
 
     def _present_warnings(self):
@@ -314,13 +314,13 @@ class AssistantView(tktextext.TextFrame):
             return
 
         if self._exception_info is None:
-            intro = "May be ignored if you are happy with your program."
+            intro = _("May be ignored if you are happy with your program.")
         else:
-            intro = "May help you find the cause of the error."
+            intro = _("May help you find the cause of the error.")
 
         rst = (
             self._get_rst_prelude()
-            + rst_utils.create_title("Warnings")
+            + rst_utils.create_title(_("Warnings"))
             + ":remark:`%s`\n\n" % intro
         )
 
@@ -360,7 +360,7 @@ class AssistantView(tktextext.TextFrame):
         if warning.get("lineno") is not None:
             url = self._format_file_url(warning)
             if warning.get("lineno"):
-                title = "`Line %d <%s>`__ : %s" % (warning["lineno"], url, title)
+                title = _("`Line %d <%s>`__ : %s") % (warning["lineno"], url, title)
 
         if warning.get("explanation_rst"):
             explanation_rst = warning["explanation_rst"]
@@ -370,7 +370,7 @@ class AssistantView(tktextext.TextFrame):
             explanation_rst = ""
 
         if warning.get("more_info_url"):
-            explanation_rst += "\n\n`More info online <%s>`__" % warning["more_info_url"]
+            explanation_rst += _("\n\n`More info online <%s>`__") % warning["more_info_url"]
 
         explanation_rst = explanation_rst.strip()
         topic_class = "toggle" if explanation_rst else "empty"
@@ -389,7 +389,7 @@ class AssistantView(tktextext.TextFrame):
         )
 
     def _append_feedback_link(self):
-        self._append_text("Was it helpful or confusing?\n", ("a", "feedback_link"))
+        self._append_text(_("Was it helpful or confusing?\n"), ("a", "feedback_link"))
 
     def _format_file_url(self, atts):
         return format_file_url(atts["filename"], atts.get("lineno"), atts.get("col_offset"))
@@ -470,15 +470,15 @@ class GenericErrorHelper(ErrorHelper):
     def __init__(self, error_info):
         super().__init__(error_info)
 
-        self.intro_text = "No specific suggestions for this error (yet)."
+        self.intro_text = _("No specific suggestions for this error (yet).")
         self.intro_confidence = 1
         self.suggestions = [
             Suggestion(
                 "ask-for-specific-support",
-                "Let Thonny developers know",
-                "Click on the feedback link at the bottom of this panel to let Thonny developers know "
-                + "about your problem. They may add support for "
-                + "such cases in future Thonny versions.",
+                _("Let Thonny developers know"),
+                _("Click on the feedback link at the bottom of this panel to let Thonny developers know ")
+                + _("about your problem. They may add support for ")
+                + _("such cases in future Thonny versions."),
                 1,
             )
         ]
@@ -487,8 +487,8 @@ class GenericErrorHelper(ErrorHelper):
             self.suggestions.append(
                 Suggestion(
                     "generic-search-the-web",
-                    "Search the web",
-                    "Try performing a web search for\n\n``Python %s: %s``"
+                    _("Search the web"),
+                    _("Try performing a web search for\n\n``Python %s: %s``")
                     % (self.error_info["type_name"], rst_utils.escape(self.error_info["message"])),
                     1,
                 )
@@ -525,7 +525,7 @@ class LibraryErrorHelper(ErrorHelper):
     """Explains exceptions, which doesn't happen in user code"""
 
     def get_intro(self):
-        return "This error happened in library code. This may mean a bug in "
+        return _("This error happened in library code. This may mean a bug in ")
 
     def get_suggestions(self):
         return []
@@ -542,31 +542,31 @@ class FeedbackDialog(tk.Toplevel):
         self.main_file_path = main_file_path
         self.snapshots = self._select_unsent_snapshots(all_snapshots)
 
-        self.title("Send feedback for Assistant")
+        self.title(_("Send feedback for Assistant"))
 
         padx = 15
 
         intro_label = ttk.Label(
             main_frame,
-            text="Below are the messages Assistant gave you in response to "
+            text=_("Below are the messages Assistant gave you in response to ")
             + (
-                "using the shell"
+                _("using the shell")
                 if self._happened_in_shell()
-                else "testing '" + os.path.basename(main_file_path) + "'"
+                else _("testing '") + os.path.basename(main_file_path) + "'"
             )
-            + " since "
+            + _(" since ")
             + self._get_since_str()
             + ".\n\n"
-            + "In order to improve this feature, Thonny developers would love to know how "
-            + "useful or confusing these messages were. We will only collect version "
-            + "information and the data you enter or approve on this form.",
+            + _("In order to improve this feature, Thonny developers would love to know how ")
+            + _("useful or confusing these messages were. We will only collect version ")
+            + _("information and the data you enter or approve on this form."),
             wraplength=550,
         )
         intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
 
         tree_label = ttk.Label(
             main_frame,
-            text="Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!",
+            text=_("Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!"),
         )
         tree_label.grid(row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         tree_frame = ui_utils.TreeFrame(
@@ -585,7 +585,7 @@ class FeedbackDialog(tk.Toplevel):
 
         self.tree.heading("helpful", text="H", anchor=tk.CENTER)
         self.tree.heading("confusing", text="C", anchor=tk.CENTER)
-        self.tree.heading("title", text="Group / Message", anchor=tk.W)
+        self.tree.heading("title", text=_("Group / Message"), anchor=tk.W)
         self.tree["show"] = ("headings",)
         self.tree.bind("<1>", self._on_tree_click, True)
         main_font = tk.font.nametofont("TkDefaultFont")
@@ -599,7 +599,7 @@ class FeedbackDialog(tk.Toplevel):
             variable=self.include_thonny_id_var,
             onvalue=1,
             offvalue=0,
-            text="Include Thonny's installation time (allows us to group your submissions)",
+            text=_("Include Thonny's installation time (allows us to group your submissions)"),
         )
         include_thonny_id_check.grid(
             row=4, column=0, columnspan=3, sticky="nw", padx=padx, pady=(5, 0)
@@ -611,13 +611,13 @@ class FeedbackDialog(tk.Toplevel):
             variable=self.include_snapshots_var,
             onvalue=1,
             offvalue=0,
-            text="Include snapshots of the code and Assistant responses at each run",
+            text=_("Include snapshots of the code and Assistant responses at each run"),
         )
         include_snapshots_check.grid(
             row=5, column=0, columnspan=3, sticky="nw", padx=padx, pady=(0, 0)
         )
 
-        comments_label = ttk.Label(main_frame, text="Any comments? Enhancement ideas?")
+        comments_label = ttk.Label(main_frame, text=_("Any comments? Enhancement ideas?"))
         comments_label.grid(row=6, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         self.comments_text_frame = tktextext.TextFrame(
             main_frame,
@@ -639,7 +639,7 @@ class FeedbackDialog(tk.Toplevel):
         url_font.configure(underline=1, size=url_font.cget("size"))
         preview_link = ttk.Label(
             main_frame,
-            text="(Preview the data to be sent)",
+            text=_("(Preview the data to be sent)"),
             style="Url.TLabel",
             cursor="hand2",
             font=url_font,
@@ -647,10 +647,10 @@ class FeedbackDialog(tk.Toplevel):
         preview_link.bind("<1>", self._preview_submission_data, True)
         preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
 
-        submit_button = ttk.Button(main_frame, text="Submit", width=10, command=self._submit_data)
+        submit_button = ttk.Button(main_frame, text=_("Submit"), width=10, command=self._submit_data)
         submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
 
-        cancel_button = ttk.Button(main_frame, text="Cancel", width=7, command=self._close)
+        cancel_button = ttk.Button(main_frame, text=_("Cancel"), width=7, command=self._close)
         cancel_button.grid(row=8, column=1, sticky="ne", padx=(10, 15), pady=15)
 
         self.protocol("WM_DELETE_WINDOW", self._close)
@@ -796,21 +796,21 @@ class FeedbackDialog(tk.Toplevel):
             except Exception as e:
                 return str(e)
 
-        result = ui_utils.run_with_waiting_dialog(self, do_work, description="Uploading")
+        result = ui_utils.run_with_waiting_dialog(self, do_work, description=_("Uploading"))
         if result == b"OK":
             if self.snapshots:
                 last_timestamp = self.snapshots[-1]["timestamp"]
                 _last_feedback_timestamps[self.main_file_path] = last_timestamp
             messagebox.showinfo(
-                "Done!",
-                "Thank you for the feedback!\n\nLet us know again when Assistant\nhelps or confuses you!",
+                _("Done!"),
+                _("Thank you for the feedback!\n\nLet us know again when Assistant\nhelps or confuses you!"),
                 parent=get_workbench(),
             )
             self._close()
         else:
             messagebox.showerror(
-                "Problem",
-                "Something went wrong:\n%s\n\nIf you don't mind, then try again later!"
+                _("Problem"),
+                _("Something went wrong:\n%s\n\nIf you don't mind, then try again later!")
                 % result[:1000],
                 parent=get_workbench(),
             )
@@ -959,4 +959,4 @@ def init():
     get_workbench().set_default("assistance.open_assistant_on_errors", True)
     get_workbench().set_default("assistance.open_assistant_on_warnings", False)
     get_workbench().set_default("assistance.disabled_checks", [])
-    get_workbench().add_view(AssistantView, "Assistant", "se", visible_by_default=False)
+    get_workbench().add_view(AssistantView, _("Assistant"), "se", visible_by_default=False)
