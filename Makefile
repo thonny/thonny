@@ -1,13 +1,13 @@
 DESTDIR =
-
+SUBDIRS = thonny/locale
 all:
-	make -C locale all DESTDIR=$(DESTDIR)
+	for d in $(SUBDIRS); do make -C $$d $@ DESTDIR=$(DESTDIR); done
 
 clean:
 	find . -name __pycache__ -o name "*~" | xargs rm -rf
-	make -C locale clean DESTDIR=$(DESTDIR)
+	for d in $(SUBDIRS); do make -C $$d $@ DESTDIR=$(DESTDIR); done
 
 install: all
-	make -C locale install DESTDIR=$(DESTDIR)
+	for d in $(SUBDIRS); do make -C $$d $@ DESTDIR=$(DESTDIR); done
 
 .PHONY: all clean install
