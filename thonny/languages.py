@@ -1,5 +1,5 @@
 BASE_LANGUAGE_CODE = "en_US"
-BASE_LANGUAGE_NAME = "English (US)"
+BASE_LANGUAGE_NAME = "English"
 
 LANGUAGES_DICT = {
     "de_DE": "Deutsch [BETA]",
