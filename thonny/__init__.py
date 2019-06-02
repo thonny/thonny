@@ -50,6 +50,7 @@ def check_initialization():
 
         mgr = ConfigurationManager(CONFIGURATION_FILE_NAME)
 
+        _set_dpi_aware()
         win = FirstRunWindow(mgr)
         win.mainloop()
         return win.ok
@@ -59,7 +60,6 @@ def check_initialization():
 
 def launch():
     _prepare_thonny_user_dir()
-    _misc_prepare()
 
     try:
         from thonny import workbench
@@ -196,7 +196,7 @@ def _delegate_to_existing_instance(args):
     return response.decode("UTF-8") == workbench.SERVER_SUCCESS
 
 
-def _misc_prepare():
+def _set_dpi_aware():
     if os.name == "nt":
         import ctypes
 
