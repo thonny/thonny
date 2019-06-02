@@ -323,6 +323,8 @@ class Runner:
         )
 
     def cmd_run_current_script(self) -> None:
+        if get_workbench().in_simple_mode():
+            get_workbench().hide_view("VariablesView")
         self.execute_current("Run")
 
     def _cmd_run_current_script_in_terminal(self) -> None:
@@ -362,6 +364,9 @@ class Runner:
         return True
 
     def cmd_stop_restart(self) -> None:
+        if get_workbench().in_simple_mode():
+            get_workbench().hide_view("VariablesView")
+
         self.restart_backend(True)
 
     def _poll_vm_messages(self) -> None:

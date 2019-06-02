@@ -1067,6 +1067,9 @@ def _request_debug(command_name):
     # Don't assume Debug command gets issued after this
     # This may just call the %cd command
     # or the user may deny saving current editor
+    if get_workbench().in_simple_mode():
+        get_workbench().show_view("VariablesView")
+
     get_runner().execute_current(command_name)
 
 

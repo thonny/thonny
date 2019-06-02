@@ -57,7 +57,7 @@ from thonny.ui_utils import (
 THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
 SINGLE_INSTANCE_DEFAULT = True
-SIMPLE_MODE_VIEWS = ["ShellView", "VariablesView"]
+SIMPLE_MODE_VIEWS = ["ShellView"]
 
 MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"])
 BackendSpec = collections.namedtuple(
