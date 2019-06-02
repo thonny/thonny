@@ -1631,11 +1631,11 @@ class Workbench(tk.Tk):
         )
 
         if self.get_ui_mode() == "simple":
-            tk_font.nametofont("TkDefaultFont").configure(size=editor_font_size)
-            tk_font.nametofont("TkHeadingFont").configure(size=editor_font_size)
+            tk_font.nametofont("TkDefaultFont").configure(size=round(editor_font_size*0.8))
+            tk_font.nametofont("TkHeadingFont").configure(size=round(editor_font_size*0.8))
 
-        small_link_ratio = 0.8 if running_on_windows() else 0.7
-        tk_font.nametofont("SmallLinkFont").configure(size=int(editor_font_size * small_link_ratio))
+        small_link_ratio = 0.7
+        tk_font.nametofont("SmallLinkFont").configure(size=round(editor_font_size * small_link_ratio))
 
         style = ttk.Style()
         if running_on_mac_os():
@@ -1693,7 +1693,7 @@ class Workbench(tk.Tk):
             text=caption,
             compound="top" if self.in_simple_mode() else None,
             pad=(10, 0) if self.in_simple_mode() else None,
-            # width=7 if self.in_simple_mode() else None,
+            width=6 if self.in_simple_mode() and len(caption) < 5 else None,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore

@@ -1134,7 +1134,7 @@ def _update_run_or_resume_button():
         return
 
     button = get_workbench().get_toolbar_button("runresume")
-    button.configure(text=caption, image=image)
+    button.configure(text=caption, image=image, width=None)
 
 
 class DebuggerConfigurationPage(ConfigurationPage):
