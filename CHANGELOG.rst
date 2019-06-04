@@ -599,4 +599,4 @@ Updates in this version are relevant only on Windows
 
 Older versions
 ==============
-See https://bitbucket.org/plas/thonny/issues/ and https://bitbucket.org/plas/thonny/commits/ for details 
+See https://github.com/thonny/thonny/issues and https://github.com/thonny/thonny/commits  
