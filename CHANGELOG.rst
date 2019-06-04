@@ -2,6 +2,33 @@
 Version history
 ===============
 
+3.2.0b1 (2019-06-0?)
+====================
+* NEW: [Work in progress] UI can be translated to other languages (big thanks to cspaier and translators). See docs/translate.md for contrubution instructions.
+* NEW: Shell supports ANSI color codes and line overwriting with ``\b`` and ``\r``. See "Help => Shell" for more info.
+* NEW: Shell now has extension called "Plotter", which visualizes series of numbers printed to the standard output. See "Help => Plotter" for more info.
+* NEW: You can now choose which debugger is invoked when clicking on the "Debug" toolbar button (Tools => Options => Debugger)
+* NEW: On first run Thonny presents a dialog for selecting UI language and initial settings ("standard" or "Raspberry Pi"). With Raspberry Pi settings Thonny will start in simple mode, preferred debugger set to "faster" and UI theme set to "Raspberry Pi".
+* NEW: Shell IO font can be configured (Tools => Options => Fonts & Themes). By André Roberge 
+* NEW: Support for running Flask programs with F5. Also fixed several issues which prevented running and debugging Flask programs. See "Help => Web development with Flask" for more info.
+* FIXED #630: Pressing up then down in shell doesn't leave shell in previous state. Fixed by Chad Purdy    
+* FIXED #691: No Show shell on run with no input() prompt. Fixed by Chad Purdy
+* FIXED #692: Cancelling Save As dialog causes error. Fixed by Chad Purdy
+* FIXED #700: Allow viewing all files in file dialogs in Linux
+* FIXED #703: Exception view was not legible with dark theme
+* FIXED #704: Suggest current filename with Save As. Fixed by Илья Кругликов
+* FIXED #708: Error when stacktrace includes Cython frames.
+* FIXED #711: Thonny can now handle UNC paths
+* FIXED #725: When saving a file, respect the original fileformat. By badukaire 
+* FIXED #727: Respect fileformat for unix files too. By badukaire 
+* FIXED #731: Right click menu disappears immediately and executes unwanted Undo action
+* FIXED #738: Window appears lower on each start
+* CHANGED: In order to work around ``tkinter.Text`` performance problems, Shell squeezes very long lines into a button. The button opens a dialog for expanding, viewing or copying those lines. Shell also deletes old output to remain responsive.
+* CHANGED: Various changes in simple mode (Zoom and Quit buttons, merging Run and Resume buttons, automatic display of Variables view).
+* CHANGED: Disabled Tk clipboard management workaround in Linux (occasionally caused UI freezes). This means clipboard becomes emptied after closing Thonny.
+
+Several of these features were proposed and supported by Raspberry Pi Foundation.
+
 3.1.2 (2019-02-13)
 ==================
 * FIXED: Make Terminal features work in Windows again
