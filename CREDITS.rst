@@ -31,6 +31,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 ---------------------------------------------------------------------
 * Aivar Annamaa
 * Alar Leemet
+* Aleks ANDRÉ
 * Alex Hall
 * Anatoly Techtonik
 * André Roberge
@@ -47,6 +48,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Jens Diemer
 * Juan Falgueras
 * Kauri Raba
+* Matt Iversen
 * Miro Hrončok 
 * Phil Duby
 * Rene Lehtma
