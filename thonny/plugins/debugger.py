@@ -20,6 +20,7 @@ from thonny.memory import VariablesFrame
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence
+from thonny.running import RUN_COMMAND_CAPTION
 
 _current_debugger = None
 
@@ -1134,7 +1135,11 @@ def _update_run_or_resume_button():
         return
 
     button = get_workbench().get_toolbar_button("runresume")
-    button.configure(text=caption, image=image, width=None)
+    button.configure(
+        text=caption,
+        image=image,
+        width=max(len(RUN_COMMAND_CAPTION), len(RESUME_COMMAND_CAPTION)) + 1,
+    )
 
 
 class DebuggerConfigurationPage(ConfigurationPage):

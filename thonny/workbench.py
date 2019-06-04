@@ -1631,12 +1631,27 @@ class Workbench(tk.Tk):
         )
 
         if self.get_ui_mode() == "simple":
-            tk_font.nametofont("TkDefaultFont").configure(size=round(editor_font_size*0.8))
-            tk_font.nametofont("TkHeadingFont").configure(size=round(editor_font_size*0.8))
-
-        small_link_ratio = 0.7
-        tk_font.nametofont("SmallLinkFont").configure(size=round(editor_font_size * small_link_ratio))
-
+            default_size_factor = max(0.7, 1 - (editor_font_size - 10) / 25)
+            small_size_factor = max(0.6, 0.8 - (editor_font_size - 10) / 25)
+                        
+            """
+                default_size = editor_font_size
+                small_size = editor_font_size - 1
+            elif editor_font_size < 16:
+                default_size = 12
+                small_size = 10
+            elif editor_font_size < 20:
+                default_size = 13
+                small_size = 11
+            else:
+                default_size = 14
+                small_size = 12
+            """
+                
+            tk_font.nametofont("TkDefaultFont").configure(size=round(editor_font_size*default_size_factor))
+            tk_font.nametofont("TkHeadingFont").configure(size=round(editor_font_size*default_size_factor))
+            tk_font.nametofont("SmallLinkFont").configure(size=round(editor_font_size*small_size_factor))
+            
         style = ttk.Style()
         if running_on_mac_os():
             treeview_font_size = int(editor_font_size * 0.7 + 4)
@@ -1693,7 +1708,7 @@ class Workbench(tk.Tk):
             text=caption,
             compound="top" if self.in_simple_mode() else None,
             pad=(10, 0) if self.in_simple_mode() else None,
-            width=6 if self.in_simple_mode() and len(caption) < 5 else None,
+            width=5 if self.in_simple_mode() and len(caption) < 5 else None,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore
@@ -1730,20 +1745,34 @@ class Workbench(tk.Tk):
 
     def _toggle_font_size(self) -> None:
         current_size = self.get_option("view.editor_font_size")
-
-        small_size = 12
-        medium_size = 16
-        large_size = 20
+        
+        if True or self.winfo_screenwidth() < 1024:
+            # assuming 32x32 icons
+            small_size = 8
+            medium_size = 10
+            large_size = 12
+        elif True or self.winfo_screenwidth() < 1280:
+            # assuming 32x32 icons
+            small_size = 10
+            medium_size = 12
+            large_size = 16
+        else:  
+            small_size = 12
+            medium_size = 16
+            large_size = 20
+        
+        widths = {
+            12 : 1200,
+            16 : 1500,
+            20 : 1800
+        }
 
         if current_size < small_size or current_size >= large_size:
             new_size = small_size
-            twidth = 1200
         elif current_size < medium_size:
             new_size = medium_size
-            twidth = 1500
         else:
             new_size = large_size
-            twidth = 1800
 
         self._change_font_size(new_size - current_size)
 
