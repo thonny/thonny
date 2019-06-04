@@ -259,8 +259,12 @@ class Workbench(tk.Tk):
         self.set_default("layout.zoomed", False)
         self.set_default("layout.top", 15)
         self.set_default("layout.left", 150)
-        self.set_default("layout.width", 800)
-        self.set_default("layout.height", 650)
+        if self.in_simple_mode():
+            self.set_default("layout.width", 1050)
+            self.set_default("layout.height", 700)
+        else:
+            self.set_default("layout.width", 800)
+            self.set_default("layout.height", 650)
         self.set_default("layout.w_width", 200)
         self.set_default("layout.e_width", 200)
         self.set_default("layout.s_height", 200)
@@ -1633,25 +1637,17 @@ class Workbench(tk.Tk):
         if self.get_ui_mode() == "simple":
             default_size_factor = max(0.7, 1 - (editor_font_size - 10) / 25)
             small_size_factor = max(0.6, 0.8 - (editor_font_size - 10) / 25)
-                        
-            """
-                default_size = editor_font_size
-                small_size = editor_font_size - 1
-            elif editor_font_size < 16:
-                default_size = 12
-                small_size = 10
-            elif editor_font_size < 20:
-                default_size = 13
-                small_size = 11
-            else:
-                default_size = 14
-                small_size = 12
-            """
-                
-            tk_font.nametofont("TkDefaultFont").configure(size=round(editor_font_size*default_size_factor))
-            tk_font.nametofont("TkHeadingFont").configure(size=round(editor_font_size*default_size_factor))
-            tk_font.nametofont("SmallLinkFont").configure(size=round(editor_font_size*small_size_factor))
-            
+
+            tk_font.nametofont("TkDefaultFont").configure(
+                size=round(editor_font_size * default_size_factor)
+            )
+            tk_font.nametofont("TkHeadingFont").configure(
+                size=round(editor_font_size * default_size_factor)
+            )
+            tk_font.nametofont("SmallLinkFont").configure(
+                size=round(editor_font_size * small_size_factor)
+            )
+
         style = ttk.Style()
         if running_on_mac_os():
             treeview_font_size = int(editor_font_size * 0.7 + 4)
@@ -1745,27 +1741,23 @@ class Workbench(tk.Tk):
 
     def _toggle_font_size(self) -> None:
         current_size = self.get_option("view.editor_font_size")
-        
-        if True or self.winfo_screenwidth() < 1024:
-            # assuming 32x32 icons
-            small_size = 8
-            medium_size = 10
-            large_size = 12
-        elif True or self.winfo_screenwidth() < 1280:
+
+        if self.winfo_screenwidth() < 1024:
             # assuming 32x32 icons
             small_size = 10
             medium_size = 12
-            large_size = 16
-        else:  
+            large_size = 14
+        elif self.winfo_screenwidth() < 1280:
+            # assuming 32x32 icons
+            small_size = 12
+            medium_size = 14
+            large_size = 18
+        else:
             small_size = 12
             medium_size = 16
             large_size = 20
-        
-        widths = {
-            12 : 1200,
-            16 : 1500,
-            20 : 1800
-        }
+
+        widths = {10: 800, 12: 1050, 14: 1200, 16: 1300, 20: 1650}
 
         if current_size < small_size or current_size >= large_size:
             new_size = small_size
@@ -1775,6 +1767,10 @@ class Workbench(tk.Tk):
             new_size = large_size
 
         self._change_font_size(new_size - current_size)
+
+        new_width = min(widths[new_size], self.winfo_screenwidth())
+        geo = re.findall(r"\d+", self.wm_geometry())
+        self.geometry("{0}x{1}+{2}+{3}".format(new_width, geo[1], geo[2], geo[3]))
 
     def _change_font_size(self, delta: int) -> None:
 
