@@ -2561,7 +2561,10 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
                         or entry.name != "parse"
                         or etype is not SyntaxError
                     )
-                    or have_seen_first_relevant_frame
+                    or (
+                        have_seen_first_relevant_frame
+                        and not (issubclass(etype, ImportError) and entry.name == "_custom_import")
+                    )
                     or in_debug_mode()
                 ):
 
