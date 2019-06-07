@@ -345,7 +345,7 @@ class MicroPythonProxy(BackendProxy):
         out, err = self._execute_and_get_response("help('modules')")
         assert err == b"", "Error was: %r" % err
         modules_str_lines = out.decode("utf-8").strip().splitlines()
-        
+
         last_line = modules_str_lines[-1].strip()
         if last_line.count(" ") > 0 and "  " not in last_line and "\t" not in last_line:
             # probably something like "plus any modules on the filesystem"
@@ -851,7 +851,7 @@ class MicroPythonProxy(BackendProxy):
             for module_name in sorted(self._fetch_builtin_modules()):
                 if (
                     not module_name.startswith("_")
-                    # and not module_name.startswith("ada")
+                    and not module_name.startswith("adafruit")
                     # and not module_name == "builtins"
                 ):
                     # self._send_text_to_shell("Dumping " + module_name + "\n", "stdout")
