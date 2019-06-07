@@ -213,12 +213,17 @@ def _delegate_to_existing_instance(args):
 
 
 def _set_dpi_aware():
-    if os.name == "nt":
-        import ctypes
-
-        # TODO: see also SetProcessDPIAwareness (Win 8.1+)
-        # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
-        ctypes.windll.user32.SetProcessDPIAware()
+    # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
+    # https://bugs.python.org/issue33656
+    # https://msdn.microsoft.com/en-us/library/windows/desktop/dn280512(v=vs.85).aspx
+    # https://github.com/python/cpython/blob/master/Lib/idlelib/pyshell.py
+    if sys.platform == 'win32':
+        try:
+            import ctypes
+            PROCESS_SYSTEM_DPI_AWARE = 1
+            ctypes.OleDLL('shcore').SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE)
+        except (ImportError, AttributeError, OSError):
+            pass
 
 
 def get_version():
