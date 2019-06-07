@@ -360,8 +360,7 @@ class Runner:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
 
-        # TODO: should it be get_runner().is_waiting_toplevel_command() ??
-        return True
+        return self.is_running() or self.is_waiting_toplevel_command()
 
     def cmd_stop_restart(self) -> None:
         if get_workbench().in_simple_mode():
