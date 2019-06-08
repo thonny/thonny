@@ -2,12 +2,16 @@
 Version history
 ===============
 
-3.2.0b1 (2019-06-0?)
+3.2.0b1 (2019-06-??)
 ====================
 * NEW: [Work in progress] UI can be translated to other languages (big thanks to cspaier and translators). See docs/translate.md for contrubution instructions.
 * NEW: Shell supports ANSI color codes and line overwriting with ``\b`` and ``\r``. See "Help => Shell" for more info.
 * NEW: Shell now has extension called "Plotter", which visualizes series of numbers printed to the standard output. See "Help => Plotter" for more info.
-* NEW: You can now choose which debugger is invoked when clicking on the "Debug" toolbar button (Tools => Options => Debugger)
+* NEW: Automatic change of working directory is now optional (Tools => Options => Run & Debug)
+* NEW: Files view now allows setting working directory (double-click on folder name)
+* NEW: Files view allows browsing device's filesystem with MicroPython back-ends 
+* NEW: Files from MicroPython devices can be opened in the editor and edited directly 
+* NEW: You can now choose which debugger is invoked when clicking on the "Debug" toolbar button (Tools => Options => Run & Debug)
 * NEW: On first run Thonny presents a dialog for selecting UI language and initial settings ("standard" or "Raspberry Pi"). With Raspberry Pi settings Thonny will start in simple mode, preferred debugger set to "faster" and UI theme set to "Raspberry Pi".
 * NEW: Shell IO font can be configured (Tools => Options => Fonts & Themes). By André Roberge 
 * NEW: Support for running Flask programs with F5. Also fixed several issues which prevented running and debugging Flask programs. See "Help => Web development with Flask" for more info.
