@@ -256,7 +256,7 @@ class Runner:
         if working_directory is not None and get_workbench().get_local_cwd() != working_directory:
             # create compound command
             # start with %cd
-            cd_cmd_line = construct_cmd_line(["%cd", working_directory]) + "\n"
+            cd_cmd_line = construct_cd_command(working_directory) + "\n"
             next_cwd = working_directory
         else:
             # create simple command
@@ -627,6 +627,9 @@ class BackendProxy:
 
     def has_own_filesystem(self):
         return False
+
+    def uses_local_filesystem(self):
+        return True
 
     def can_do_file_operations(self):
         return False
@@ -1287,3 +1290,7 @@ def get_environment_overrides_for_python_subprocess(target_executable):
             logging.exception("Can't compute Tcl/Tk library location")
 
     return result
+
+
+def construct_cd_command(path):
+    return construct_cmd_line(["%cd", normpath_with_actual_case(path)])

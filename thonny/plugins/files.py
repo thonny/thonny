@@ -3,10 +3,12 @@
 import os
 import tkinter as tk
 
-from thonny import get_workbench, get_runner
+from thonny import get_workbench, get_runner, get_shell
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
 from thonny.ui_utils import lookup_style_option
 from thonny.common import normpath_with_actual_case
+from thonny.running import construct_cd_command
+from thonny.misc_utils import running_on_windows
 
 
 minsize = 80
@@ -100,6 +102,29 @@ class LocalFileBrowser(BaseLocalFileBrowser):
                     return name
         else:
             return base + extension
+
+    def request_focus_into(self, path):
+        if not path:
+            if running_on_windows():
+                # list of drives, can't cd
+                return self.focus_into(path)
+            else:
+                path = "/"
+
+        if not os.path.isdir(path):
+            return
+
+        proxy = get_runner().get_backend_proxy()
+        if (
+            proxy
+            and proxy.uses_local_filesystem()
+            and get_workbench().get_local_cwd() != path
+            and get_runner().is_waiting_toplevel_command()
+        ):
+            get_shell().submit_magic_command(construct_cd_command(path))
+        else:
+            # change directly without notifying (non-existing, busy or remote) back-end
+            get_workbench().set_local_cwd(path)
 
     def on_local_backend_cd(self, event):
         self.change_to_cwd()

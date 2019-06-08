@@ -35,7 +35,8 @@ from typing import (
 from warnings import warn
 
 import thonny
-from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages
+from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages,\
+    get_shell
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
@@ -156,7 +157,7 @@ class Workbench(tk.Tk):
 
         self._show_views()
         # Make sure ShellView is loaded
-        self.get_view("ShellView")
+        get_shell()
 
         self._init_commands()
         self._init_icon()

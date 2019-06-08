@@ -1532,6 +1532,9 @@ class MicroPythonProxy(BackendProxy):
 
     def has_own_filesystem(self):
         return self._connection is not None
+    
+    def uses_local_filesystem(self):
+        return False
 
     def can_do_file_operations(self):
         return self.idle

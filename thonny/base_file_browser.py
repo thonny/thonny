@@ -448,7 +448,7 @@ class BaseFileBrowser(ttk.Frame):
         if path.endswith(ext) and kind == "file" and ext.lower() in TEXT_EXTENSIONS:
             self.open_file(path)
         elif kind == "dir":
-            self.focus_into(path)
+            self.request_focus_into(path)
 
         return "break"
 
@@ -483,7 +483,7 @@ class BaseFileBrowser(ttk.Frame):
         )
         self.menu.add_command(
             label="Focus into",
-            command=lambda: self.focus_into(selected_path),
+            command=lambda: self.request_focus_into(selected_path),
             state="active" if selected_kind == "dir" else "disabled",
         )
 
@@ -717,7 +717,7 @@ class BackendFileDialog(tk.Toplevel):
             "<<TreeviewSelect>>", self.on_tree_select, True
         )
 
-        self.browser.focus_into(initial_dir)
+        self.browser.request_focus_into(initial_dir)
 
     def on_ok(self, event=None):
         tree = self.browser.tree
