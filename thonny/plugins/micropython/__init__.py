@@ -553,7 +553,7 @@ class MicroPythonProxy(BackendProxy):
             if os.path.isabs(filename):
                 full_filename = filename
             else:
-                full_filename = os.path.join(get_workbench().get_cwd(), filename)
+                full_filename = os.path.join(get_workbench().get_local_cwd(), filename)
                 cmd.script_path = full_filename
 
             with tokenize.open(full_filename) as fp:
@@ -964,7 +964,7 @@ class MicroPythonProxy(BackendProxy):
             raise RuntimeError("Command requires 1 or 2 arguments")
 
         if not os.path.isabs(source):
-            source = os.path.join(get_workbench().get_cwd(), source)
+            source = os.path.join(get_workbench().get_local_cwd(), source)
 
         if not os.path.isfile(source):
             raise IOError("No such file: %s" % source)
@@ -1490,7 +1490,7 @@ class MicroPythonProxy(BackendProxy):
     def select_and_upload_micropython(self):
         firmware_path = askopenfilename(
             filetypes=self.firmware_filetypes,
-            initialdir=get_workbench().get_option("run.working_directory"),
+            initialdir=get_workbench().get_local_cwd(),
         )
         if firmware_path:
             self.upload_micropython(firmware_path)
@@ -1530,7 +1530,7 @@ class MicroPythonProxy(BackendProxy):
         else:
             return "MicroPython device"
 
-    def has_separate_files(self):
+    def has_own_filesystem(self):
         return self._connection is not None
 
     def can_do_file_operations(self):
@@ -2047,7 +2047,7 @@ def load_plugin():
         assert isinstance(proxy, MicroPythonProxy)
 
         if os.path.isabs(source_path):
-            source_path = os.path.relpath(source_path, get_workbench().get_cwd())
+            source_path = os.path.relpath(source_path, get_workbench().get_local_cwd())
 
         target = getattr(proxy, target_provider_method)()
         get_shell().submit_magic_command(["%upload", source_path, target])

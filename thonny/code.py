@@ -323,7 +323,7 @@ class Editor(ttk.Frame):
 
     def ask_new_local_path(self):
         if self._filename is None:
-            initialdir = get_workbench().get_cwd()
+            initialdir = get_workbench().get_local_cwd()
             initialfile = None
         else:
             initialdir = os.path.dirname(self._filename)
@@ -689,7 +689,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             path = askopenfilename(
                 master=get_workbench(),
                 filetypes=_dialog_filetypes,
-                initialdir=get_workbench().get_cwd(),
+                initialdir=get_workbench().get_local_cwd(),
             )
         else:
             assert node == "remote"

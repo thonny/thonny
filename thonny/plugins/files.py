@@ -22,8 +22,8 @@ class FilesView(tk.PanedWindow):
         get_workbench().bind("WorkbenchClose", self.on_workbench_close, True)
 
         self.local_files = LocalFileBrowser(self)
+        self.local_files.change_to_cwd()
         self.add(self.local_files, minsize=minsize)
-        self.local_files.focus_into_saved_folder()
 
         self.remote_files = RemoteFileBrowser(self)
         self.remote_added = False
@@ -43,7 +43,7 @@ class FilesView(tk.PanedWindow):
             self.hide_remote()
             return
 
-        if proxy.has_separate_files():
+        if proxy.has_own_filesystem():
             if not self.remote_added:
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
@@ -77,9 +77,8 @@ class FilesView(tk.PanedWindow):
 
 class LocalFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        super().__init__(
-            master, show_hidden_files, last_folder_setting_name="file.last_browser_folder"
-        )
+        super().__init__(master, show_hidden_files)
+        get_workbench().bind("LocalWorkingDirectoryChanged", self.on_local_backend_cd, True)
 
     def create_new_file(self):
         path = super().create_new_file()
@@ -102,12 +101,22 @@ class LocalFileBrowser(BaseLocalFileBrowser):
         else:
             return base + extension
 
+    def on_local_backend_cd(self, event):
+        self.change_to_cwd()
+
+    def change_to_cwd(self):
+        cwd = get_workbench().get_local_cwd()
+        if os.path.isdir(cwd):
+            self.focus_into(cwd)
+
 
 class RemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        super().__init__(
-            master, show_hidden_files, "device.last_browser_folder", breadcrumbs_pady=(0, 7)
-        )
+        super().__init__(master, show_hidden_files, "device.last_browser_folder")
+        get_workbench().bind("RemoteWorkingDirectoryChanged", self.on_remote_backend_cd, True)
+
+    def on_remote_backend_cd(self, event):
+        print("new remote cwd:", event.cwd)
 
 
 def load_plugin() -> None:

@@ -18,16 +18,9 @@ ROOT_NODE_ID = ""
 
 
 class BaseFileBrowser(ttk.Frame):
-    def __init__(
-        self,
-        master,
-        show_hidden_files=False,
-        last_folder_setting_name=None,
-        breadcrumbs_pady=(5, 7),
-        allow_expand=True,
-    ):
+    def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
 
-        self.allow_expand = allow_expand
+        self.show_expand_buttons = show_expand_buttons
         self._cached_child_data = {}
         self.path_to_highlight = None
 
@@ -93,8 +86,6 @@ class BaseFileBrowser(ttk.Frame):
         self.tree.set(ROOT_NODE_ID, "kind", "root")
         self.menu = tk.Menu(self.tree, tearoff=False)
 
-        self._last_folder_setting_name = last_folder_setting_name
-
     def init_header(self, row, column):
         header_frame = ttk.Frame(self, style="ViewToolbar.TFrame")
         header_frame.grid(row=row, column=column, sticky="nsew")
@@ -144,7 +135,7 @@ class BaseFileBrowser(ttk.Frame):
             mouse_index = self.path_bar.index("@%d,%d" % (event.x, event.y))
             lineno = int(float(mouse_index))
             if lineno == 1:
-                self.focus_into(ROOT_NODE_ID)
+                self.request_focus_into(ROOT_NODE_ID)
             else:
                 assert lineno == 2
                 dir_range = get_dir_range(event)
@@ -153,7 +144,7 @@ class BaseFileBrowser(ttk.Frame):
                     path = self.path_bar.get("2.0", end_index)
                     if path.endswith(":"):
                         path += "\\"
-                    self.focus_into(path)
+                    self.request_focus_into(path)
 
         self.path_bar.tag_bind("dir", "<1>", dir_tag_click)
         self.path_bar.tag_bind("dir", "<Enter>", dir_tag_enter)
@@ -166,6 +157,9 @@ class BaseFileBrowser(ttk.Frame):
         )
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)
+
+    def request_focus_into(self, path):
+        return self.focus_into(path)
 
     def focus_into(self, path):
         self.clear_error()
@@ -199,33 +193,12 @@ class BaseFileBrowser(ttk.Frame):
         self.building_breadcrumbs = False
         self.resize_path_bar()
         self.render_children_from_cache()
-        self.save_focused_folder()
 
     def split_path(self, path):
         return path.split(self.get_dir_separator())
 
     def get_root_text(self):
         return LOCAL_FILES_ROOT_TEXT
-
-    def focus_into_saved_folder(self):
-        if self._last_folder_setting_name:
-            path = get_workbench().get_option(self._last_folder_setting_name)
-            if path:
-                self.focus_into(path)
-                return
-
-        self.focus_into("")
-
-    def save_focused_folder(self):
-        if not self._last_folder_setting_name:
-            return
-
-        path = self.get_focused_path()
-
-        if not path:
-            return
-
-        get_workbench().set_option(self._last_folder_setting_name, path)
 
     def on_open_node(self, event):
         node_id = self.get_selected_node()
@@ -425,7 +398,7 @@ class BaseFileBrowser(ttk.Frame):
             # unless we know it doesn't have children
             children_ids = self.tree.get_children(node_id)
             if (
-                self.allow_expand
+                self.show_expand_buttons
                 and len(children_ids) == 0
                 and (path not in self._cached_child_data or self._cached_child_data[path])
             ):
@@ -568,20 +541,9 @@ class BaseFileBrowser(ttk.Frame):
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):
-    def __init__(
-        self,
-        master,
-        show_hidden_files=False,
-        last_folder_setting_name=None,
-        breadcrumbs_pady=(5, 7),
-        allow_expand=True,
-    ):
+    def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
         super().__init__(
-            master,
-            show_hidden_files=show_hidden_files,
-            last_folder_setting_name=last_folder_setting_name,
-            breadcrumbs_pady=breadcrumbs_pady,
-            allow_expand=allow_expand,
+            master, show_hidden_files=show_hidden_files, show_expand_buttons=show_expand_buttons
         )
         get_workbench().bind("WindowFocusIn", self.on_window_focus_in, True)
         get_workbench().bind("LocalFileOperation", self.on_local_file_operation, True)
@@ -624,20 +586,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
-    def __init__(
-        self,
-        master,
-        show_hidden_files=False,
-        last_folder_setting_name=None,
-        breadcrumbs_pady=(5, 7),
-        allow_expand=False,
-    ):
+    def __init__(self, master, show_hidden_files=False, show_expand_buttons=False):
         super().__init__(
-            master,
-            show_hidden_files=show_hidden_files,
-            last_folder_setting_name=last_folder_setting_name,
-            breadcrumbs_pady=breadcrumbs_pady,
-            allow_expand=allow_expand,
+            master, show_hidden_files=show_hidden_files, show_expand_buttons=show_expand_buttons
         )
         self.dir_separator = "/"
 
@@ -705,7 +656,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, dialog):
-        super().__init__(master, allow_expand=False)
+        super().__init__(master, show_expand_buttons=False)
 
         self.dialog = dialog
         self.tree["show"] = ("tree", "headings")
@@ -904,7 +855,7 @@ def ask_backend_path(master, dialog_kind):
     if not proxy:
         return None
 
-    assert proxy.has_separate_files()
+    assert proxy.has_own_filesystem()
 
     dlg = BackendFileDialog(master, dialog_kind, proxy.get_default_directory())
     show_dialog(dlg, master)
@@ -912,7 +863,7 @@ def ask_backend_path(master, dialog_kind):
 
 
 def choose_node_for_file_operations(master, prompt):
-    if get_runner().has_separate_files():
+    if get_runner().has_own_filesystem():
         dlg = NodeChoiceDialog(master, prompt)
         show_dialog(dlg, master)
         return dlg.result

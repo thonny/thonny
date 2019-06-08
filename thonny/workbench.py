@@ -216,6 +216,7 @@ class Workbench(tk.Tk):
         self.set_default("general.language", languages.BASE_LANGUAGE_CODE)
         self.set_default("general.font_scaling_mode", "default")
         self.set_default("run.working_directory", os.path.expanduser("~"))
+        self.set_default("run.remote_working_directory", None)
 
     def _init_language(self) -> None:
         """Initialize language."""
@@ -1286,15 +1287,27 @@ class Workbench(tk.Tk):
     def set_option(self, name: str, value: Any) -> None:
         self._configuration_manager.set_option(name, value)
 
-    def get_cwd(self) -> str:
+    def get_local_cwd(self) -> str:
         cwd = self.get_option("run.working_directory")
         if os.path.exists(cwd):
             return normpath_with_actual_case(cwd)
         else:
             return normpath_with_actual_case(os.path.expanduser("~"))
 
-    def set_cwd(self, value: str) -> None:
-        self.set_option("run.working_directory", value)
+    def set_local_cwd(self, value: str) -> None:
+        if self.get_option("run.working_directory") != value:
+            self.set_option("run.working_directory", value)
+            if value:
+                self.event_generate("LocalWorkingDirectoryChanged", cwd=value)
+
+    def get_remote_cwd(self) -> str:
+        return self.get_option("run.remote_working_directory")
+
+    def set_remote_cwd(self, value: str) -> None:
+        if self.get_option("run.remote_working_directory") != value:
+            self.set_option("run.remote_working_directory", value)
+            if value:
+                self.event_generate("RemoteWorkingDirectoryChanged", cwd=value)
 
     def set_default(self, name: str, default_value: Any) -> None:
         """Registers a new option.

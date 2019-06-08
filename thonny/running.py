@@ -253,7 +253,7 @@ class Runner:
         working_directory: Optional[str] = None,
         command_name: str = "Run",
     ) -> None:
-        if working_directory is not None and get_workbench().get_cwd() != working_directory:
+        if working_directory is not None and get_workbench().get_local_cwd() != working_directory:
             # create compound command
             # start with %cd
             cd_cmd_line = construct_cmd_line(["%cd", working_directory]) + "\n"
@@ -261,7 +261,7 @@ class Runner:
         else:
             # create simple command
             cd_cmd_line = ""
-            next_cwd = get_workbench().get_cwd()
+            next_cwd = get_workbench().get_local_cwd()
 
         # append main command (Run, run, Debug or debug)
         rel_filename = os.path.relpath(script_path, next_cwd)
@@ -270,7 +270,7 @@ class Runner:
         # submit to shell (shell will execute it)
         get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
 
-    def execute_current(self, command_name: str, always_change_to_script_dir: bool = False) -> None:
+    def execute_current(self, command_name: str) -> None:
         """
         This method's job is to create a command for running/debugging
         current file/script and submit it to shell
@@ -288,11 +288,7 @@ class Runner:
         # changing dir may be required
         script_dir = normpath_with_actual_case(os.path.dirname(filename))
 
-        if (
-            get_workbench().get_option("run.auto_cd")
-            and command_name[0].isupper()
-            or always_change_to_script_dir
-        ):
+        if get_workbench().get_option("run.auto_cd") and command_name[0].isupper():
             working_directory = script_dir  # type: Optional[str]
         else:
             working_directory = None
@@ -407,7 +403,10 @@ class Runner:
                 "other messages don't affect the state"
 
             if "cwd" in msg:
-                get_workbench().set_cwd(msg["cwd"])
+                if self.has_own_filesystem():
+                    get_workbench().set_remote_cwd(msg["cwd"])
+                else:
+                    get_workbench().set_local_cwd(msg["cwd"])
 
             # Publish the event
             # NB! This may cause another command to be sent before we get to postponed commands.
@@ -541,11 +540,11 @@ class Runner:
         else:
             return self._proxy.get_supported_features()
 
-    def has_separate_files(self):
+    def has_own_filesystem(self):
         if self._proxy is None:
             return False
         else:
-            return self._proxy.has_separate_files()
+            return self._proxy.has_own_filesystem()
 
     def get_node_label(self):
         if self._proxy is None:
@@ -626,7 +625,7 @@ class BackendProxy:
         """Used as files caption if back-end has separate files"""
         return "Back-end"
 
-    def has_separate_files(self):
+    def has_own_filesystem(self):
         return False
 
     def can_do_file_operations(self):
@@ -786,14 +785,14 @@ class CPythonProxy(BackendProxy):
         if running_on_windows():
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
 
-        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_cwd())
+        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
         self._proc = subprocess.Popen(
             cmd_line,
             # bufsize=0,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=get_workbench().get_cwd(),
+            cwd=get_workbench().get_local_cwd(),
             env=my_env,
             universal_newlines=True,
             creationflags=creationflags,
