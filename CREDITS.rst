@@ -58,5 +58,6 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Taavi Ilp
 * Toomas Mölder
 * Xin Rong
+* 涂紳騰 (Shen-Teng Tu)
 
 Please let us know if we have forgotten to add your name to this list! Also, let us know if you want to remove your name.
