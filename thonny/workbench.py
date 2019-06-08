@@ -1873,7 +1873,7 @@ class Workbench(tk.Tk):
 
     def _cmd_focus_shell(self) -> None:
         self.show_view("ShellView", True)
-        shell = self.get_view("ShellView")
+        shell = get_shell()
         # go to the end of any current input
         shell.text.mark_set("insert", "end")
         shell.text.see("insert")
