@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+
 """
 This file is run by CPythonProxy
 
@@ -13,12 +14,15 @@ gives relative __file__-s on imported modules.)
 if __name__ == "__main__":
     # imports required by the backend itself
     import sys
-    
-    if not sys.version_info > (3,5):
-        print("Thonny only supports Python 3.5 and later.\n"
-              + "Choose another interpreter from Tools => Options => Interpreter", file=sys.stderr)
+
+    if not sys.version_info > (3, 5):
+        print(
+            "Thonny only supports Python 3.5 and later.\n"
+            + "Choose another interpreter from Tools => Options => Interpreter",
+            file=sys.stderr,
+        )
         exit()
-    
+
     import logging
     import os.path
 

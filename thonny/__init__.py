@@ -65,10 +65,10 @@ def launch():
         # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
         # is already allocated.
         sys.executable = sys.executable[: -len("thonny.exe")] + "pythonw.exe"
-        
+
     _set_dpi_aware()
     gettext.install("thonny", "locale")
-    
+
     try:
         runpy.run_module("thonny.customize", run_name="__main__")
     except ImportError:
@@ -217,11 +217,12 @@ def _set_dpi_aware():
     # https://bugs.python.org/issue33656
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dn280512(v=vs.85).aspx
     # https://github.com/python/cpython/blob/master/Lib/idlelib/pyshell.py
-    if sys.platform == 'win32':
+    if sys.platform == "win32":
         try:
             import ctypes
+
             PROCESS_SYSTEM_DPI_AWARE = 1
-            ctypes.OleDLL('shcore').SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE)
+            ctypes.OleDLL("shcore").SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE)
         except (ImportError, AttributeError, OSError):
             pass
 

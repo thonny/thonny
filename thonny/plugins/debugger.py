@@ -1142,7 +1142,6 @@ def _update_run_or_resume_button():
     )
 
 
-
 def get_current_debugger():
     return _current_debugger
 

@@ -1489,8 +1489,7 @@ class MicroPythonProxy(BackendProxy):
 
     def select_and_upload_micropython(self):
         firmware_path = askopenfilename(
-            filetypes=self.firmware_filetypes,
-            initialdir=get_workbench().get_local_cwd(),
+            filetypes=self.firmware_filetypes, initialdir=get_workbench().get_local_cwd()
         )
         if firmware_path:
             self.upload_micropython(firmware_path)
@@ -1532,7 +1531,7 @@ class MicroPythonProxy(BackendProxy):
 
     def has_own_filesystem(self):
         return self._connection is not None
-    
+
     def uses_local_filesystem(self):
         return False
 
