@@ -35,8 +35,7 @@ from typing import (
 from warnings import warn
 
 import thonny
-from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages,\
-    get_shell
+from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages, get_shell
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
