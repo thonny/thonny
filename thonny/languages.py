@@ -8,6 +8,7 @@ LANGUAGES_DICT = {
     "es_ES": "Español [BETA]",
     "fr_FR": "Français [BETA]",
     "ru_RU": "Русский [BETA]",
+    "zh_TW": "繁體中文-TW [BETA]",
 }
 
 
