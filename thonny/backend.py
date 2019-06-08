@@ -385,6 +385,8 @@ class VM:
                 return ToplevelResponse()
             except FileNotFoundError:
                 raise UserError("No such folder: " + path)
+            except OSError as e:
+                raise UserError("\n".join(traceback.format_exception_only(type(e), e)))
         else:
             raise UserError("cd takes one parameter")
 
