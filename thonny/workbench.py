@@ -1229,13 +1229,13 @@ class Workbench(tk.Tk):
         )
         label.grid(row=0, column=1001, sticky="ne")
 
-        def on_click(_):
+        def on_click(ev):
             self.set_option("general.ui_mode", "regular")
             tk_messagebox.showinfo(
-                "Regular mode",
-                "Configuration has been updated. "
-                + "Restart Thonny to start working in regular mode.\n\n"
-                + "(See 'Tools → Options → General' if you change your mind later.)",
+                _("Regular mode",)
+                _("Configuration has been updated. ")
+                + _("Restart Thonny to start working in regular mode.\n\n")
+                + _("(See 'Tools → Options → General' if you change your mind later.)"),
                 parent=self,
             )
 
