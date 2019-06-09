@@ -85,6 +85,7 @@ class BaseFileBrowser(ttk.Frame):
         # set-up root node
         self.tree.set(ROOT_NODE_ID, "kind", "root")
         self.menu = tk.Menu(self.tree, tearoff=False)
+        self.current_focus = None
 
     def init_header(self, row, column):
         header_frame = ttk.Frame(self, style="ViewToolbar.TFrame")
@@ -135,7 +136,7 @@ class BaseFileBrowser(ttk.Frame):
             mouse_index = self.path_bar.index("@%d,%d" % (event.x, event.y))
             lineno = int(float(mouse_index))
             if lineno == 1:
-                self.request_focus_into(ROOT_NODE_ID)
+                self.request_focus_into("")
             else:
                 assert lineno == 2
                 dir_range = get_dir_range(event)
@@ -157,6 +158,13 @@ class BaseFileBrowser(ttk.Frame):
         )
         # self.menu_button.grid(row=0, column=1, sticky="ne")
         self.menu_button.place(anchor="ne", rely=0, relx=1)
+
+    def clear(self):
+        self.clear_error()
+        self.invalidate_cache()
+        self.path_bar.direct_delete("1.0", "end")
+        self.tree.set_children("")
+        self.current_focus = None
 
     def request_focus_into(self, path):
         return self.focus_into(path)
@@ -193,6 +201,7 @@ class BaseFileBrowser(ttk.Frame):
         self.building_breadcrumbs = False
         self.resize_path_bar()
         self.render_children_from_cache()
+        self.current_focus = path
 
     def split_path(self, path):
         return path.split(self.get_dir_separator())

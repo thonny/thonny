@@ -51,7 +51,8 @@ class FilesView(tk.PanedWindow):
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
                 self.restore_split()
-            self.remote_files.invalidate_cache()
+            self.remote_files.clear()
+            self.remote_files.check_update_focus()
         else:
             if self.remote_added:
                 self.save_split()
@@ -141,36 +142,34 @@ class RemoteFileBrowser(BaseRemoteFileBrowser):
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
     def on_toplevel_response(self, event):
-        print("on_toplevel_response", event)
-        self.change_to_cwd()
+        self.check_update_focus()
 
-    def change_to_cwd(self):
-        cwd = get_workbench().get_remote_cwd()
-        if cwd:
-            self.focus_into(cwd)
+    def check_update_focus(self):
+        proxy = get_runner().get_backend_proxy()
+        if self.current_focus != proxy.get_cwd():
+            self.focus_into(proxy.get_cwd())
 
     def request_focus_into(self, path):
         proxy = get_runner().get_backend_proxy()
-        print("requesting", path)
         if proxy:
             assert proxy.has_own_filesystem()
-            
-            if not get_runner().is_waiting_toplevel_command():
-                messagebox.showerror("Error", "Can't change directories when device is busy.\n"
-                                     + "Wait until current command completes and try again.")
-            elif not proxy.supports_directories():
-                print("nodir")
-                assert not path
-                self.focus_into(path)
-                get_workbench().set_remote_cwd(path)
-            elif get_workbench().get_remote_cwd() == path:
-                print("issame")
-                self.focus_into(path)
-                get_workbench().set_remote_cwd(path)
-            else:
-                print("notsame")
-                get_shell().submit_magic_command(construct_cd_command(path))
 
+            if path == "":
+                path = "/"
+
+            if not get_runner().is_waiting_toplevel_command():
+                messagebox.showerror(
+                    "Error",
+                    "Can't change directories when device is busy.\n"
+                    + "Wait until current command completes and try again.",
+                )
+            elif not proxy.supports_directories():
+                assert path == ""
+                self.focus_into(path)
+            elif self.current_focus == path:
+                self.focus_into(path)
+            else:
+                get_shell().submit_magic_command(["%cd", path])
 
 
 def load_plugin() -> None:

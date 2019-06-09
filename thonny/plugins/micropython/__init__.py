@@ -178,7 +178,12 @@ class MicroPythonProxy(BackendProxy):
         else:
             msg = None
 
-        return self.transform_message(msg)
+        msg = self.transform_message(msg)
+
+        if msg and "cwd" in msg:
+            self._cwd = msg["cwd"]
+
+        return msg
 
     def interrupt(self):
         if self._connection is None:
@@ -327,19 +332,21 @@ class MicroPythonProxy(BackendProxy):
             or "UART" in p.description
             or "DAPLink" in p.description
         ]
-    
+
     def _fetch_cwd(self):
         assert self.idle
-        
+
         if not self._supports_directories():
             self._cwd = None
         else:
-            out, err = self._execute_and_get_response_str("import os as __thonny_os; print(__thonny_os.getcwd())")
+            out, err = self._execute_and_get_response_str(
+                "import os as __thonny_os; print(__thonny_os.getcwd())"
+            )
             if not err:
                 self._cwd = out.strip()
             else:
                 self._send_error_to_shell("Error when querying working directory:\n" + err)
-        
+
         return self._cwd
 
     @property
@@ -354,6 +361,9 @@ class MicroPythonProxy(BackendProxy):
         self.__idle = value
         if value:
             self._has_been_idle = True
+
+    def get_cwd(self):
+        return self._cwd
 
     def _fetch_builtin_modules(self):
         assert self.idle
@@ -411,7 +421,7 @@ class MicroPythonProxy(BackendProxy):
             raise TimeoutError("Can't get to raw prompt")
 
         self._welcome_text = self._get_welcome_text_in_raw_mode(timer.time_left)
-        
+
         if clean:
             self._clean_environment_during_startup(timer.time_left)
 
@@ -420,8 +430,9 @@ class MicroPythonProxy(BackendProxy):
         self.idle = True
         self._fetch_cwd()
         # report ready
-        self._non_serial_msg_queue.put(ToplevelResponse(welcome_text=self._welcome_text.strip(), cwd=self._cwd))
-
+        self._non_serial_msg_queue.put(
+            ToplevelResponse(welcome_text=self._welcome_text.strip(), cwd=self._cwd)
+        )
 
     def _clean_environment_during_startup(self, time_left):
         # In MP Ctrl+D doesn't run user code, in CP it does
@@ -530,7 +541,7 @@ class MicroPythonProxy(BackendProxy):
         output = self._connection.read_until(terminator)[: -len(terminator)]
         self.idle = True
         return output.split(b"\x04")
-    
+
     def _execute_and_get_response_str(self, script):
         out, err = self._execute_and_get_response(script)
         return out.decode("utf-8"), err.decode("utf-8")
@@ -559,13 +570,15 @@ class MicroPythonProxy(BackendProxy):
     def _cmd_cd(self, cmd):
         assert len(cmd.args) == 1
         path = cmd.args[0]
-        
+
         self._execute_async(
-            dedent("""
+            dedent(
+                """
             import os as __thonny_os
             __thonny_os.chdir(%r)
             print('\\x04\\x02', {'message_class': 'ToplevelResponse', 'cwd': __thonny_os.getcwd()})
-            """ % path
+            """
+                % path
             )
         )
 

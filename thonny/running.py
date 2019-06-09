@@ -403,9 +403,7 @@ class Runner:
                 "other messages don't affect the state"
 
             if "cwd" in msg:
-                if self.has_own_filesystem():
-                    get_workbench().set_remote_cwd(msg["cwd"])
-                else:
+                if not self.has_own_filesystem():
                     get_workbench().set_local_cwd(msg["cwd"])
 
             # Publish the event
@@ -630,12 +628,15 @@ class BackendProxy:
 
     def uses_local_filesystem(self):
         return True
-    
+
     def supports_directories(self):
         return True
 
     def can_do_file_operations(self):
         return False
+
+    def get_cwd(self):
+        return None
 
 
 class CPythonProxy(BackendProxy):
@@ -652,6 +653,7 @@ class CPythonProxy(BackendProxy):
         self._gui_update_loop_id = None
         self.in_venv = None
         self._start_new_process()
+        self._cwd = get_workbench().get_local_cwd()
 
     def fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
@@ -706,6 +708,9 @@ class CPythonProxy(BackendProxy):
 
         if "exe_dirs" in msg:
             self._exe_dirs = msg["exe_dirs"]
+
+        if "cwd" in msg:
+            self._cwd = msg["cwd"]
 
     def send_command(self, cmd):
         if isinstance(cmd, ToplevelCommand) and cmd.name[0].isupper():
@@ -798,7 +803,7 @@ class CPythonProxy(BackendProxy):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=get_workbench().get_local_cwd(),
+            cwd=self.get_cwd(),
             env=my_env,
             universal_newlines=True,
             creationflags=creationflags,
@@ -899,6 +904,9 @@ class CPythonProxy(BackendProxy):
 
     def get_exe_dirs(self):
         return self._exe_dirs
+
+    def get_cwd(self):
+        return self._cwd
 
     def _update_gui_updating(self, msg):
         """Enables running Tkinter or Qt programs which doesn't call mainloop. 
