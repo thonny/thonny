@@ -74,6 +74,7 @@ class MicroPythonProxy(BackendProxy):
         self._builtin_modules = []
 
         self.__idle = False
+        self._cwd = None
 
         self._connection = self._create_connection()
 
@@ -326,6 +327,20 @@ class MicroPythonProxy(BackendProxy):
             or "UART" in p.description
             or "DAPLink" in p.description
         ]
+    
+    def _fetch_cwd(self):
+        assert self.idle
+        
+        if not self._supports_directories():
+            self._cwd = None
+        else:
+            out, err = self._execute_and_get_response_str("import os as __thonny_os; print(__thonny_os.getcwd())")
+            if not err:
+                self._cwd = out.strip()
+            else:
+                self._send_error_to_shell("Error when querying working directory:\n" + err)
+        
+        return self._cwd
 
     @property
     def idle(self):
@@ -396,16 +411,17 @@ class MicroPythonProxy(BackendProxy):
             raise TimeoutError("Can't get to raw prompt")
 
         self._welcome_text = self._get_welcome_text_in_raw_mode(timer.time_left)
-
+        
         if clean:
             self._clean_environment_during_startup(timer.time_left)
 
         self._finalize_repl()
 
-        # report ready
-        self._non_serial_msg_queue.put(ToplevelResponse(welcome_text=self._welcome_text.strip()))
-
         self.idle = True
+        self._fetch_cwd()
+        # report ready
+        self._non_serial_msg_queue.put(ToplevelResponse(welcome_text=self._welcome_text.strip(), cwd=self._cwd))
+
 
     def _clean_environment_during_startup(self, time_left):
         # In MP Ctrl+D doesn't run user code, in CP it does
@@ -514,6 +530,10 @@ class MicroPythonProxy(BackendProxy):
         output = self._connection.read_until(terminator)[: -len(terminator)]
         self.idle = True
         return output.split(b"\x04")
+    
+    def _execute_and_get_response_str(self, script):
+        out, err = self._execute_and_get_response(script)
+        return out.decode("utf-8"), err.decode("utf-8")
 
     def _execute_and_parse_value(self, script):
         out, err = self._execute_and_get_response(script)
@@ -539,10 +559,15 @@ class MicroPythonProxy(BackendProxy):
     def _cmd_cd(self, cmd):
         assert len(cmd.args) == 1
         path = cmd.args[0]
-        if os.path.exists(path):
-            self._non_serial_msg_queue.put(ToplevelResponse(cwd=path))
-        else:
-            self._non_serial_msg_queue.put(ToplevelResponse(error="Path doesn't exist: %s" % path))
+        
+        self._execute_async(
+            dedent("""
+            import os as __thonny_os
+            __thonny_os.chdir(%r)
+            print('\\x04\\x02', {'message_class': 'ToplevelResponse', 'cwd': __thonny_os.getcwd()})
+            """ % path
+            )
+        )
 
     def _cmd_Run(self, cmd):
         self._clear_environment()
@@ -1183,6 +1208,9 @@ class MicroPythonProxy(BackendProxy):
             return False
         else:
             return True
+
+    def supports_directories(self):
+        return self._supports_directories()
 
     def _get_fs_mount_name(self):
         return None

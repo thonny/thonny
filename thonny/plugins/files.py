@@ -9,6 +9,7 @@ from thonny.ui_utils import lookup_style_option
 from thonny.common import normpath_with_actual_case
 from thonny.running import construct_cd_command
 from thonny.misc_utils import running_on_windows
+from tkinter import messagebox
 
 
 minsize = 80
@@ -51,7 +52,6 @@ class FilesView(tk.PanedWindow):
                 self.remote_added = True
                 self.restore_split()
             self.remote_files.invalidate_cache()
-            self.remote_files.focus_into(proxy.get_default_directory())
         else:
             if self.remote_added:
                 self.save_split()
@@ -137,11 +137,40 @@ class LocalFileBrowser(BaseLocalFileBrowser):
 
 class RemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
-        super().__init__(master, show_hidden_files, "device.last_browser_folder")
-        get_workbench().bind("RemoteWorkingDirectoryChanged", self.on_remote_backend_cd, True)
+        super().__init__(master, show_hidden_files)
+        get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
-    def on_remote_backend_cd(self, event):
-        print("new remote cwd:", event.cwd)
+    def on_toplevel_response(self, event):
+        print("on_toplevel_response", event)
+        self.change_to_cwd()
+
+    def change_to_cwd(self):
+        cwd = get_workbench().get_remote_cwd()
+        if cwd:
+            self.focus_into(cwd)
+
+    def request_focus_into(self, path):
+        proxy = get_runner().get_backend_proxy()
+        print("requesting", path)
+        if proxy:
+            assert proxy.has_own_filesystem()
+            
+            if not get_runner().is_waiting_toplevel_command():
+                messagebox.showerror("Error", "Can't change directories when device is busy.\n"
+                                     + "Wait until current command completes and try again.")
+            elif not proxy.supports_directories():
+                print("nodir")
+                assert not path
+                self.focus_into(path)
+                get_workbench().set_remote_cwd(path)
+            elif get_workbench().get_remote_cwd() == path:
+                print("issame")
+                self.focus_into(path)
+                get_workbench().set_remote_cwd(path)
+            else:
+                print("notsame")
+                get_shell().submit_magic_command(construct_cd_command(path))
+
 
 
 def load_plugin() -> None:

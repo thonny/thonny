@@ -630,6 +630,9 @@ class BackendProxy:
 
     def uses_local_filesystem(self):
         return True
+    
+    def supports_directories(self):
+        return True
 
     def can_do_file_operations(self):
         return False
