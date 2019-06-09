@@ -1,48 +1,52 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Installing 3rd party packages
-==============================
-Thonny has two options for installing 3rd party libraries.
+Installation de paquets de tierces parties
+==========================================
 
-With pip-GUI
--------------
-From "Tools" menu select "Manage packages..." and follow the instructions.
-
-With pip on command line
-------------------------
-#. From "Tools" menu select "Open system shell...". You should get a new terminal window stating the correct name of *pip* command (usually ``pip`` or ``pip3``). In the following I've assumed the command name is ``pip``.
-#. Enter ``pip install <package name>`` (eg. ``pip install pygame``) and press ENTER. You should see *pip* downloading and installing the package and printing a success message.
-#. Close the terminal (optional)
-#. Return to Thonny
-#. Reset interpreter by selecting "Stop/Reset" from "Run menu" (this is required only first time you do pip install)
-#. Start using the package
+Thonny a deux options pour l'installation de paquets de tierces parties.
 
 
-Using scientific Python packages
-================================
-Python distribution coming with Thonny doesn't contain scientific programming libraries 
-(eg. `NumPy <http://numpy.org/>`_  and `Matplotlib <http://matplotlib.org/>`_). 
+Avec pip dans l'interface graphique
+-----------------------------------
 
-Recent versions of most popular scientific Python packages (eg. numpy, pandas and 
-matplotlib) have wheels available for popular platforms so you can most likely install 
-them with pip but in case you have troubles, you could try using Thonny with separate 
-Python distribution meant for scientific computing 
-(eg. `Anaconda <https://www.continuum.io/downloads>`_, `Canopy <https://www.enthought.com/products/canopy/>`_ 
-or `Pyzo <http://www.pyzo.org/>`_).
+Depuis le menu « Outils », sélectionnez « Gérer les paquets ... » et suivez les instructions.
+
+Avec pip en ligne de commande
+-----------------------------
+
+#. Depuis le menu « Outils », sélectionnez « Ouvrir un Shell système ... ». Vous devriez avoir un nouveau terminal, qui présente le nom correct de la commande *pip (normalement ``pip`` ou ``pip3``). Par la suite on supposera que le nom de la commande est ``pip``.
+#. Entrez ``pip install <package name>`` (p. ex. ``pip install pygame``) et tapez Entrée. Vous devriez voir *pip* qui télécharge et installe le paquet puis affiche son message de succès.
+#. Fermez le terminal (facultatif)
+#. Revenez à Thonny
+#. Réinitialisez l'interpréteur en sélectionnant « Arrêter/relancer » depuis le menu « Lancer » (ceci est nécessaire la première fois que vous faite l'installation pip)
+#. Commencez à utiliser la paquet.
 
 
-Example: Using Anaconda
-------------------------------------
-Go to https://www.continuum.io/downloads and download a suitable binary distribution for 
-your platform. Most likely you want graphical installer and 64-bit version (you may need 
-32-bit version if you have very old system). **Note that Thonny supports only on Python 3, 
-so make sure you choose Python 3 version of Anaconda.**
+Utiliser des paquets Python scientifiques
+=========================================
 
-Install it and find out where it puts Python executable (*pythonw.exe* in Windows and 
-*python3* or *python* in Linux and Mac).
+La distribution Python qui vient avec Thonny ne contient pas de bibliothèques de programmation scientifique
+(p. ex. `NumPy <http://numpy.org/>`_  et `Matplotlib <http://matplotlib.org/>`_). 
 
-In Thonny open "Tools" menu and select "Options...". In the options dialog open "Intepreter" 
-tab, click "Select executable" and show the location of Anaconda's Python executable.
+Les versions récentes de la plupart des paquets Python scientifiques (p. ex. numpy, pandas et
+matplotlib) sont outillés pour les plate-formes populaires si bien que vous pouvez la plupart du temps les installer
+avec pip mais au cas où il y a des problèmes, vous pouvez utiliser Thonny avec une distribution
+Python séparée prévue pour le calcul scientifique
+(p. ex. `Anaconda <https://www.continuum.io/downloads>`_, `Canopy <https://www.enthought.com/products/canopy/>`_ 
+ou `Pyzo <http://www.pyzo.org/>`_).
 
-After you have done this, next time you run your program, it will be run through Anaconda's 
-Python and all the libraries installed there are available.
+
+Exemple: Utilisation d'Anaconda
+-------------------------------
+
+Allez à https://www.continuum.io/downloads et téléchargez une distribution binaire appropriée pour
+votre plate-forme. La plupart du temps vous voudrez un installeur graphique et une version 64-bits (on peut avoir besoin
+d'une version 32-bits avec un très vieux système). **Notez que Thonny ne supporte que Python3, assurez-vous bien de choisir la version pour Python 3 d'Ananconda**.
+
+Installez-la et trouvez où il installe l'exécutable Python (*pythonw.exe* sous Windows et 
+*python3* ou *python* sous Linux et Mac).
+
+Dans Thonny ouvrez « Outils » et sélectionnez « Options ... ». Dans le dialogue d'options ouvrez l'onglet « Interpréteur »,
+cliquez « Sélectionner l'exécutable » et désignez l'emplacement de l'exécutable Python d'Anaconda.
+
+Après avoir fait ça, la prochaine fois que vous relancerez votre programme, il utilisera le Python d'Anaconda et toutes les bibliothèques installées là sont disponibles.

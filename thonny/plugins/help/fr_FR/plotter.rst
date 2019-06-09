@@ -1,17 +1,18 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Plotter
-==========================
-Plotter is an add-on for the Shell, which extracts numbers from 
-the program output and displays them as line chart. It can be useful for 
-observing live sensor data coming from attached devices or even for analyzing 
-static data (if you don't bother using more serious tools). It is inspired
-by `Mu Python editor <https://codewith.mu/>`__. 
+Le grapheur
+===========
 
-You can open it from the "View" menu or from the Shell's context menu.
+Le grapheur est un greffon pour le Shell, qui en extrait les nombres venus
+du programme et les affiche comme une courbe. Il peut être utile pour
+observer des données de capteurs en direct venant de périphériques ou même pour analyser
+des données statiques (si vous hésitez à utiliser des outils plus sérieux). Il est inspiré
+du `Mu Python editor <https://codewith.mu/>`__. 
 
-For an examply try following program (you can stop it with Ctrl+C or with 
-"Stop / reset" button on the toolbar):
+Vous pouvez l'ouvrir depuis le menu « Afficher » ou depuis le menu contextuel du Shell.
+
+Par exemple essayez le programme suivant (on peut l'arrêter avec Ctrl+C ou
+avec le bouton Arrêter/Relancer de la barre d'outils) :
 
 .. code::
 
@@ -22,33 +23,39 @@ For an examply try following program (you can stop it with Ctrl+C or with
 	while True:
 	    p1 += randint(-1, 1)
 	    p2 = randint(-10, 10)
-	    print("Random walk:", p1, " just random:", p2)
+	    print("Marche aléatoire :", p1, " juste aléatoire:", p2)
 	    sleep(0.05)
 
-When you run it with Plotter opened, you'll see a line chart with two series forming.
-Each column on the chart corresponds to one line in the Shell. 
-The rightmost column on the chart always corresponds the bottom-most visible line in the shell,
-even if you stop the program and scroll the text in the shell.
 
-Plotter starts drawing when it detects at least two consecutive lines containing same pattern
-of numbers and surrounding text. The numbers get plotted and the surrounding
-text becomes the legend in the lower-right corner of the Plotter.
+Quand on le lance avec le Grapheur ouvert, on voir un graphique en ligne avec deux courbes qui défilent.
+Chaque colonne du graphique correspond à une ligne dans le Shell.
+La colonne le plus à droite dans le graphique correspond toujours à la ligne visible en bas du Shell,
+même quand on arrête le programme et qu'on se déplace dans le texte du Shell.
 
-Speed of the animation
---------------------------------
-Unless you are plotting a fixed number of lines, it is good idea not to flood the 
-shell and plotter with data. This is why the example above makes a little pause 
-(``sleep(0.05)``) before outputting next line.
+Le grapheur commence à tracer des courbes dès qu'il détecte au moins deux lignes consécutives contenant le même motif
+de nombres et de texte d'accompagnement. Les nombres sont représentés sous forme de courbes et le texte d'accompagnement
+devient la légende dans le coin en bas à droite du Grapheur.
 
-Range of the y-axis
--------------------
-Plotter tries to detect a suitable range for your plot without having to 
-change it too often. For this reason it extends the range if required, but only
-shrinks it at the start of a new series. 
 
-If some outliers have made the range too large, then you can manually shrink 
-it by waiting until the outliers are out of the picture and clicking on the Plotter. 
+La vitesse de l'animation
+-------------------------
 
-If you want make the range larger (or just compare your data against certain values),
-then simply include suitable constant(s) in your data lines, eg: 
+À moins que vous ne produisiez un nombre fixe de lignes, c'est une bonne idée d'éviter de noyer
+le Shell et le Grapheur sous les données. C'est pourquoi l'exemple ci-dessus
+fait une petite pause (``sleep(0.05)``) avant d'afficher la ligne suivante.
+
+
+Intervalle de l'axe-Y
+---------------------
+
+Le Grapheur tente de détecter un intervalle adapté pour votre courbe sans qu'il soit
+nécessaire de le changer trop souvent. Pour cette raison, il augmente l'intervalle si besoin est, mais ne
+le diminue qu'au début d'une nouvelle série.
+
+Si certaines données extraordinaires rendent l'intervalle trop grand, on peut le rétrécir manuellement
+en attendant que les données trop grande sortent de la figure et en cliquant sur le Grapheur.
+
+Si vous voulez rendre l'intervalle plus grand (ou juste comparer vos valeurs à d'autres),
+il suffit simplement d'inclure une ou des constantes adéquates dans vos lignes de données, p.ex. :
+
 ``print(0, measure1, measure2, 100)``.

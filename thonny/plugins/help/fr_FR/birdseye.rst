@@ -1,26 +1,26 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Birdseye
-==========================
+L'œil d'oiseau (Birdseye)
+=========================
 
-Birdseye is a cool Python debugger by Alex Hall, which records the values of expressions 
-when the program runs and lets you explore them after the program completes. See
-`https://birdseye.readthedocs.io <https://birdseye.readthedocs.io>`_ for more info.
+L'Œil d'oiseau est un débogueur Python vraiment *cool* créé par Alex Hall, qui enregistre les valeurs des expressions
+quand le programme fonctionne et vous laisse les explorer quand le programme se termine. Voir `https://birdseye.readthedocs.io <https://birdseye.readthedocs.io>`_ pour en savoir plus.
 
-Birdseye is not installed by default, but it is easy to install via *Tools → Manage plug-ins*. You need 
-to install the package named ``birdseye``.
+L'Œil d'oiseau n'est pas installé par défaut, mais il est facile de l'installer via *Outils → Gérer les greffons*. Il faut
+installer la paquet nommé ``birdseye``.
 
-Birdseye works differently than `Thonny's built-in debuggers <debuggers.rst>`_. 
-When you execute your program with *Run → Debug current script (Birdseye)*, the execution takes a bit 
-longer than usual, but otherwise your program should run just as if you executed it with 
-*Run current script*. This means breakpoints are ignored and you can't step through the program.
-But when the program completes, Thonny opens a webpage (served by a local server provided 
-by Birdseye), which allows you to dig into the execution process and learn how final results were composed
-of intermediate values. 
+L'Œil d'oiseau fonctionne d'une façon différente des `débogueurs intégrés à Thonny <debuggers.rst>`_.
+Quand on exécute son programme avec *Lancer → Débogage du script courant (Œil d'oiseau)*, l'exécution est un peut plus
+longue qu'à l'habitude, mais autrement le programme fonctionne exactement comme si on l'avait exécuté avec
+*Lancer le script courant*. Ça signifie que les points d'arrêt sont ignorés et qu'on ne peut pas se déplacer pas-à-pas dans le programme.
+Mais quand le programme se termine, Thonny ouvre une page web (servie localement par Œil d'oiseau),
+qui vous permet de creuser le processus d'exécution et d'apprendre comment ils résultats finaux ont été composés
+à partir des valeurs intermédiaires.
 
-NB! When using Birdseye in Thonny you don't need to import ``birdseye.eye`` or use it 
-for decorating your functions. Thonny executes Birdseye such that it records information about all
-functions.
+N.B. ! Quand vous utilisez Œil d'oiseau dans Thonny il n'y a pas besoin d'importer ``birdseye.eye`` ou de l'utiliser pour
+décorer vos fonctions. Thonny exécute Œil d'oiseau d'une façon telle qu'il enregistre des informations pour toutes les
+fonctions.
 
-The local server uses port 7777 by default. If this is used by another application, then configure
-another port (Tools → Options → Debugger) and restart Thonny.
+Le serveur local utilise le port 7777 par défaut. Si celui-ci est utilisé par une autre application, alors on peut configurer
+un autre port (Outils → Options → Débogueur) et redémarrer Thonny.
+

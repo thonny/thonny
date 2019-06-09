@@ -1,9 +1,9 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Special support for Turtle programs
-===================================
+Support spécial pour les programmes Turtle
+==========================================
 
-When developing programs with ``turtle`` module, Thonny offers you following support:
+Quand on développe des programmes avec le module ``turtle``, Thonny offre le support suivant :
 
-* You can leave out ``mainloop``, ``done`` or ``exitonclick`` calls from your script (Thonny will take care of keeping the Turtle window responsive). This allows you to create part of your drawing with script and continue adding features via the shell. You can also create whole drawing via the shell.
-* You can `dock the Turtle window <dock.rst>`_, so that it's visible while you are working on your script. 
+* On peut faire sans les appels de ``mainloop``, ``done`` ou ``exitonclick`` dans le script (Thonny s'occupera de garder la fenêtre Turtle interactive). Cela permet de créer des parts de son dessin à l'aide d'un script et de continuer à ajouter des propriétés à l'aide du shell. On peut aussi faire tout le dessin à partir du shell.
+* On peut `ancrer la fenêtre Turtle <dock.rst>`_, afin qu'elle reste bien visibles tant qu'on travaille sur le script.

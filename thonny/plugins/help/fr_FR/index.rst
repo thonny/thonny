@@ -1,23 +1,25 @@
-Features
-===========
+Sujets spécifiques
+==================
 
-* `Using debuggers <debuggers.rst>`_
-* `Using 3rd party packages <packages.rst>`_
-* `Docking user windows <dock.rst>`_
-* `Special support for Turtle programs <turtle.rst>`_
-* `Specifying program arguments <program_arguments.rst>`_
-* `Simple mode and expert mode <modes.rst>`_
-* `Shell <shell.rst>`_
-* `Plotter <plotter.rst>`_
-* `Birdseye <birdseye.rst>`_
-* `Web development with Flask <flask.rst>`_
+* `Utilisation des débogueurs <debuggers.rst>`_
+* `Utilisation des paquets de tierces parties <packages.rst>`_
+* `Ancrer les fenêtres utilisateurs <dock.rst>`_
+* `Support spécial pour les programmes Turtle <turtle.rst>`_
+* `Spécifier des arguments de programme <program_arguments.rst>`_
+* `Mode simple et mode expert <modes.rst>`_
+* `Le Shell <shell.rst>`_
+* `Le Grapheur <plotter.rst>`_
+* `L'Œil d'oiseau (Birdseye) <birdseye.rst>`_
+* `Le développement web avec Flask <flask.rst>`_
 
-General topics
-==============
-* `Dealing with errors <errors.rst>`_
-* `General advice on debugging <debugging.rst>`_
+Sujets généraux
+===============
 
-Online
-======
-There is more information available on Thonny wiki: https://github.com/thonny/thonny/wiki.
+* `Gérer les erreurs <errors.rst>`_
+* `Conseils généraux pour le débogage <debugging.rst>`_
+
+En Ligne
+========
+
+Vous trouverez plus d'information sur le wiki de Thonny :  https://github.com/thonny/thonny/wiki.
 

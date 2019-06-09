@@ -1,95 +1,96 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Debugging techniques
-====================
+Les techniques de débogage
+==========================
 
-If your program is not working properly then don't panic. You have several
-possibilities for fixing the situation. For example: 
+Si votre programme ne fonctionne pas, pas de panique ! Vous avez plusieurs
+possibilités pour corriger la situation. Par exemple :
 
-* Let somebody else fix it.
-* Change *something* in the code and try again. 
-* Approach the problem in two phases: 1) diagnosing the problem and 2) fixing it.
+* La faire corriger par quelqu'un d'autre ;
+* Changer *quelque chose* dans le code et réessayer ;
+* Approcher le problème en deux phases : 1) diagnostiquer le problème et 2) le réparer.
 
-Asking for help may be a very good idea, but it won't give you this sweet sense of accomplishment.
-Anyway, it's better not to use this without first putting in some effort on your own.
+  Demander de l'aide peut être une très bonne idée, mais elle ne vous procurera pas cette douce sensation de réussite.
+De toute façon, c'est mieux de ne pas y recourir sans avoir d'abord tenté quelque chose vous-même.
 
-If your programs are small, then you may hit the jackpot by changing something randomly and 
-trying again (repeat many times), but you'll lose even if you win as you won't learn anything.
+Si vos programmes sont petits, vous pourriez toucher le jackpot en changeant quelque chose au hasard et
+en recommençant (plusieurs fois), mais vous allez perdre même si vous gagnez, comme vous n'en aurez rien appris.
 
-If you want to become good in programming, then you really need to approach the problem more
-systematically. Among other things, this means that you need to pinpoint the reason your program misbehaves
-before attempting to fix it. The process of finding the source of the problem is called *debugging*.
+Si vous voulez devenir bon en programmation, il vous faut vraiment approcher le problème de façon plus
+systématique. Entre autres choses, ça signifie que vous devez trouver la raison pour laquelle votre programme dysfonctionne
+avant d'essayer de le corriger. Le processus consistant à trouver la source du problème se nomme *débogage*.
 
-Tracing the program flow / thinking along with Python
-------------------------------------------------------
-Most likely your program isn't entirely wrong. There may be a typo somewhere or you overlooked 
-or misunderstood something. *NB! Don't get into the habit of thinking that Python misunderstood you -- it
-is a machine that doesn't even try to understand you.* The key to debugging is finding out precisely where
-and when your assumptions about program behavior diverge from the actual behavior.
 
-If your program prints out wrong final answer then this tells you something about
-the program behavior, but it is usually not enough to locate the problem precisely. You need to also check 
-which of the **intermediate steps** align with your assumptions and which don't.
+Tracer le flux du programme / penser en même temps que Python
+-------------------------------------------------------------
 
-One obvious (and very useful) technique is to add **extra print statements** into the code, which tell you
-where Python is and what it has accomplished so far, eg. 
+Le plus souvent votre programme n'est pas entièrement mauvais. Il peut y avoir une faute de frappe quelque part ou vous avez manqué
+ou mal compris quelque chose. *N.B. ! Ne prenez pas l'habitude de penser que Python vous a mal compris -- c'est une machine qui ne cherche pas à vous comprendre*. La clé du débogage c'est de trouver précisément où
+et quand vos conceptions du comportement du programme divergent du comportement réel.
+
+Si votre programme affiche une réponse finale fausse cela vous dit quelque chose au sujet
+du comportement du programme, mais ce n'est généralement pas assez pour localiser le problème précisément. Il faut aussi vérifier
+lesquelles des **étapes intermédiaires** sont en accord avec vos conceptions et lesquelles non.
+
+Une technique évidente (et très utile) est d'ajouter des **directives d'affichage en plus** dans le code, qui vous diront
+où en est Python et ce qu'il a fait jusque-là, par exemple :
 
 .. code::
 
-	print("friends before for-loop", friends)
+	print("amis avant la boucle-for", amis)
 
-NB! Sometimes you need to introduce new variables and break complex expressions into smaller parts in order
-to print out more detailed information.
+N.B. ! Quelquefois il faut introduire de nouvelles variables et décomposer des expressions complexes en parties plus simples afin
+d'afficher des informations plus détaillées.
 
-Although print-debugging is used even by the professionals (they may call it *logging*), there is an alternative,
-which is more comfortable in most cases. It's called **stepping through the code** and it is Thonny's bread and
-butter. Move on to the chapter `Using debuggers <debuggers.rst>`_ to learn more.
+Bien que le débogage à base d'affichages soit utilisé aussi par des professionnels (il leur arrive de l'appeler *logging*, journalisation), il y a une alternative,
+qui est plus confortable dans la plupart des cas. Elle s'appelle **avancer pas-à-pas dans le code** et c'est le pain béni de Thonny. Allez au chapitre `Utilisation des débogueurs <debuggers.rst>`_ pour en apprendre plus.
 
 
-Code review
----------------------
-Another useful technique is code review. It is somewhat similar to tracing the program flow, but you do it in your
-head and you are trying to see the bigger picture instead of following small steps.
+Revue du code
+-------------
 
-Look at each of the statements in your code and try understand its purpose and how it relates to your task.
+Une autre technique utile est la revue de code. Cela revient à peu près à tracer le flux du programme, mais on le fait dans sa
+tête et on essaie de visualiser une figure plus grande au lieu de suivre des petits pas.
 
-For each **variable** ask yourself:
+Voyez chacune des expressions de votre code et essayez de comprendre son rôle et comment elle est reliée à votre tâche.
 
-* Does the name of the variable reaveal its purpose? Is it better to name it in singular or in plural?
-* Which type of values can end up in this variable? Strings, integers, lists of strings, lists of floats, ...?
-* What is the role of the variable? Is it meant to updated repeatedly so that it eventually contain useful information? Is it meant to use same information in several places and reduce copy-pasting? Anything else? 
+Pour chaque **variable** demandez-vous :
 
-For each **loop** ask yourself:
+* Est-ce que le nom de la variable dit ce qu'elle fait ? Vaut-il mieux utiliser un nom au singulier ou au pluriel ?
+* Quel type de valeurs peut se trouver dans cette variable ? Chaînes, entiers, listes de chaînes, liste de flottants, ... ?
+* Quel est le rôle de cette variable ? est-elle  prévue pour être mise à jour de façon répétée de façon à contenir quelque information utile ? est-elle prévue pour utiliser la même information à plusieurs endroits et éviter le copier-coller ? Quoi d'autre ?
 
-* How do you know the loop is required?
-* How many times should the body of the loop be executed? What does this depend of?
-* Which code should be inside the loop and which should be outside?
-* What must be done before loop and what must be done after it?
+Pour chaque **boucle** demandez-vous :
 
-For each complex **expression** ask yourself:
+* Comment savez-vous que la boucle est nécessaire ?
+* Combien de fois le corps de la boucle doit-il être exécuté ? De quoi cela dépend-il ?
+* Quel code devrait être dans la boucle et quel code devrait être dehors ?
+* Que faut-il faire avant la boucle et que faut-il faire après ?
 
-* In which order should be the steps of evaluating this expression? Does Python agree with this? When in doubt, use the debugger or introduce helper variables and break the expression into smaller parts.
-* What type of value should come out of this expression? String? List of strings?
+Pour chaque **expression** complexe demandez-vous :
 
-You may be also missing some important parts in your program:
+* Dans quel ordre devraient se faire les étapes d'évaluation de cette expression ? Est-ce que Python fait ainsi ? En cas de doute, utilisez le débogueur ou introduisez des variables auxiliaires et décomposez l'expression en morceaux plus petits.
+* Quel type de valeur est censé sortir de cette expression ? Chaîne ? Liste de chaînes ?
 
-* Does your task require treating different situations differently? If yes, then you probably need an if-statement.
-* Does the task require doing something several times? If yes, then you probably need a loop.
+Il vous manque peut-être des parties importantes dans votre programme :
 
-Still losing track?
-------------------------------
-"Find you the place where your assumptions break" -- this is definitely easier said than done. In case of 
-complex programs it's easy to arrive to the situation where you're not sure anymore what do you assume
-and why did you start with this programming thing at all.
+* Votre tâche nécessite-t-elle de traiter des situations différente différemment ? Si oui, vous avez probablement besoin d'une construction conditionnelle (**if**) ;
+* Votre tâche nécessite-t-elle de faire quelque chose plusieurs fois ? Si oui, il vous faut probablement une boucle.
 
-In this case it's useful to simplify your task as much as possible and try to implement the simpler problem
-first. Take a new editor and either start from scratch or copy existing code and throw out everything that 
-is not essential to the problem. For example, you can assume that user is cooperative and always inputs "good" data.
-If the task requires doing something repeatedly, then throw out the "repeatedly" part, if the task involves
-a complex condition for doing something, make the condition simpler etc.
 
-After solving the simplified problem you are much better equipped to solve the original task as well.
+Encore perdu ?
+--------------
 
- 
+« Trouvez-vous l'emplacement ou vos suppositions deviennent fausses » -- ceci est plus simple à dire qu'à faire. Dans le cas de
+programmes complexes c'est facile d'arriver à la situation où vous n'êtes plus du tout sûr de savoir ce que vous supposez
+ni pourquoi vous avez commencé ce fichu programme.
+
+Dans ce cas c'est utile de simplifier votre tâche autant que possible et d'essayer d'implémenter les problèmes plus simples
+en premier. Prenez un autre éditeur, et soit recommencez depuis le début, soit copiez le code existant en jetant tout ce qui
+n'est pas essentiel à votre problème. Par exemple, vous pouvez supposer que l'utilisateur est coopératif et saisit toujours de « bonnes » données.
+Si la tâche implique de faire quelque chose de façon répétitive, alors jetez la partie « répétitive », si la tâche implique
+une condition complexe pour faire quelque chose, rendez la condition plus simple, etc.
+
+Après avoir résolu le problème plus simple vous serez bien mieux équipé pour résoudre aussi la tâche d'origine aussi bien.
 
 

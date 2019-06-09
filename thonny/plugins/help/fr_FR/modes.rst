@@ -1,24 +1,30 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Different modes
-===============
-*Tools → Options → General* allows switching Thonny's user interface to one of three different modes.
+Différents modes
+================
+*Outils → Options → Général* permet de régler l'interface utilisateur de Thonny selon un des trois modes différents.
 
-Regular mode
-------------
-This is the default mode. Nothing much to say about this.
 
-Simple mode
+Mode ordinaire
+--------------
+
+C'est le mode par défaut. Il n'y a pas grand-chose à en dire.
+
+
+Mode simple
 -----------
-In this mode the menus are hidden and Variables view gets automatically opened. 
-Use a small link in the upper-right corner of the main window to return to regular mode.
 
-Expert mode
+Dans ce mode les menus sont cachés et la vue des Variables est automatiquement ouverte.
+On peut utiliser un petit lien dans le coin en haut à droite pour revenir au mode ordinaire.
+
+
+Mode expert
 -----------
-This mode looks almost like regular mode, but has some extra features, which are
-useful for teachers.
 
-* View menu gets an extra item *Full screen* which puts Thonny to full screen.
-* Double clicking on the tab of an editor or view maximizes this editor or view. Unmaximize by double clicking the tab again.
-* Tools menu gets an extra item *Open replayer...* which allows replaying user action logs.   
+Ce mode ressemble beaucoup au mode ordinaire, mais offre quelques fonctionnalités de plus, utiles pour enseigner.
+
+* Le menu Afficher dispose d'un item *Plein écran* pour mettre Thonny en mode plein écran.
+* Quand on double-clique sur l'onglet d'un éditeur ou d'une vue, cela permet de la maximiser ; on peut revenir à la taille d'origine en double-cliquant l'onglet à nouveau.
+* Le menu des Outils gagne un item de plus *Ouvrir et rejouer ...* qui permet de rejouer les journaux d'action de l'utilisateur.
+
 

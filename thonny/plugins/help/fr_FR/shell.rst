@@ -1,59 +1,70 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Shell 
-=====
+Le Shell
+========
 
-Shell is the primary means for running and communicating with your program. It mostly looks like
-official Python REPL (Read-Evaluate-Print Loop), but there are some differences and extra features.
+Le Shell est le moyen principal pour lancer et communiquer avec votre programme. Il ressemble pour l'essentiel à
+la boucle REPL (Read-Evaluate-Print Loop) officielle de Python, mais il y a quelques différences et propriétés supplémentaires.
 
-Python commands
----------------
-Just like the official Python REPL, Thonny's Shell accepts Python expressions and statements, both
-single-line and multiline. If you press ENTER, then Thonny uses some heuristics to predict 
-whether you wanted to submit the command or continue typing the command on the next line. 
-If you want to submit the command but Thonny offers you a new line, then check whether you forgot
-to close some parentheses.   
 
-Magic commands
---------------
-If you select "Run => Run current script" or press F5, then you'll see how Thonny inserts a command
-starting with ``%Run`` into Shell. Commands starting with ``%`` are called *magic commands* (just 
-like in `IPython <https://ipython.org/>`_ and they perform certain actions, which can't be
-(easily) expressed as Python commands. Thonny's magic commands usually have
-corresponding menu commands so you don't need write them by hand.
+Les commandes Python
+--------------------
 
-System commands
----------------
-If you need to quickly run a simple system command then you don't have to start a Terminal. Just
-prefix the command with ``!`` (eg. ``!pytest my-script.py``) and enter it into Thonny's shell.
+Tout comme l'invite REPL officielle de Python, le Shell de Thonny accepte des expressions et des commandes Python, qu'elles soient
+sur une seule ligne ou sur plusieurs. Si on presse la touche Entrée, Thonny utilise quelques heuristiques pour prédire
+si on veut lancer la commande ou continuer à taper la commande sur la ligne suivante.
+Si vous voulez lancer la commande mais que Thonny vous offre une nouvelle ligne, vérifiez si vous avez oublié
+de refermer quelques parenthèses.
 
-Command history
----------------
-If you want to issue same or similar command several times, then you don't need to type it each time --
-use Up-key to fetch previous command from the command history. Another Up-press brings you the command
-before that and so on. Use Down-key to move in the opposite direction in history.  
 
-Colored output
---------------
-If you have your Shell in Terminal emulation mode (see Tools => Options => Shell), then you can
-use `ANSI codes <https://en.wikipedia.org/wiki/ANSI_escape_code>`_ to produce colored output. 
+Les commandes magiques
+----------------------
 
-Try the following example:
+Si on sélectionne "Lancer => Lancer le script courant" ou qu'on presse la touche F5, on voit que Thonny insère une commande
+commençant par ``%Run`` dans le Shell. Les commandes qui commencent par ``%`` sont appelées *commandes magiques* (tout
+comme dans `IPython <https://ipython.org/>`_ et elles réalisent certaines actionnes, qui ne peuvent pas
+(facilement) s'exprimer par des commandes Python. Les commandes magiques de Thonny ont d'habitude
+des commandes correspondantes dans le menu si bien qu'il est inutile de les écrire à la main.
+
+Les commandes système
+---------------------
+
+Si on doit rapidement lancer une simple commande système il n'est pas nécessaire de démarrer un Terminal. Il suffit de
+préfixer la commande par ``!`` (p. ex. ``!pytest mon-script.py``) et de la saisir dans le Shell de Thonny.
+
+
+L'historique des commandes
+--------------------------
+
+Si on veut relancer la même commande ou presque plusieurs fois, il n'est pas nécessaire de la retaper à chaque fois --
+on utilisera la flèche vers le haut pour récupérer la commande précédente dans l'historique. Une nouvelle action sur la même touche récupère le commande
+précédente et ainsi de suite. On utilise la touche flèche vers le bas pour se déplacer dans l'historique en sens opposé.
+
+
+Sortie colorisée
+----------------
+
+Si votre Shell est en mode émulation de Terminal (voir Outils => Options => Shell), on peut
+utiliser des `codes ANSI <https://en.wikipedia.org/wiki/ANSI_escape_code>`_ pour produire une sortie colorisée.
+
+Essayez l'exemple suivant :
 
 .. code::
 
 	print("\033[31m" + "Red" + "\033[m")
-	print("\033[1;3;33;46m" + "Bright&bold italic yellow text on cyan background" + "\033[m")
-	 
-You may want to use a package like `colorama <https://pypi.org/project/colorama/>`_ for producing 
-the color codes.
+	print("\033[1;3;33;46m" + "Texte brillant et gras, italique, en jaune sur fond cyan" + "\033[m")
 
-Overwriting output lines
-------------------------
-Proper terminal emulators support ANSI codes which allow writing to arbitrary positions in the terminal
-screen. Thonny's Shell is not so capable, but it does support a couple of simpler tricks.
+Vous pouvez avoir envie d'utiliser un paquet comme `colorama <https://pypi.org/project/colorama/>`_ pour produire
+Les codes couleur.
 
-Try the following program:
+
+Réécrire par-dessus les lignes de sortie
+----------------------------------------
+
+Les bons émulateurs de terminal supportent des codes ANSI autorisant l'écriture à une position arbitraire sur l'écran
+du terminal. Le Shell de Thonny ne peut pas en faire autant, mais il supporte cependant quelques trucs et astuces.
+
+Essayez le programme suivant :
 
 .. code::
 
@@ -64,21 +75,23 @@ Try the following program:
 	    sleep(0.05)
 	    print("\r", end="")
 	
-	print("Done!")
-	
-The trick relies on character ``"\r"``, which causes the output cursor to go back to the beginning of current 
-line, so that next print will overwrite previously printed text. Note how we used ``print(..., end="")``
-to avoid creating a new line.
+	print("Terminé !")
 
-The cousin of ``"\r"`` is ``"\b"``, which moves the output cursor leftwards by one character. 
-It doesn't do anything if it is already at the first position on the line. 
+Le truc est d'utiliser le caractère ``"\r"``, qui fait revenir le curseur de sortie au début de la ligne
+courante, si bien que les caractères suivants seront affichés en écrasant le texte précédent. Notez bien l'usage de ``print(..., end="")``
+pour éviter de créer une nouvelle ligne.
+
+Le cousin de ``"\r"`` est ``"\b"``, qui déplace le curseur de sortie à gauche d'un caractère.
+Cela ne fait rien s'il est déjà à la première position de la ligne.
+
 		
-Making sound
-------------
-When Shell is in terminal emulation mode, then you can produce a bell (or "ding") sound by outputting
-character ``"\a"``.
+Émettre un son
+--------------
+
+Quand le Shell est en mode émulation de terminal, on peut faire sonner (ou émettre un tintement) en sortant un caractère ``"\a"``.
  
  
-Plotting series of numbers
---------------------------
-You can visualize series of numbers printed to the Shell by using the `Plotter <plotter.rst>`_.
+Mettre en graphique une série de nombres
+----------------------------------------
+
+On peut visualiser les séries de nombres envoyées vers le Shell à l'aide du `Grapheur <plotter.rst>`_.

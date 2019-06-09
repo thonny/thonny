@@ -1,17 +1,18 @@
-`Home <index.rst>`_
+`Accueil <index.rst>`_
 
-Docking user windows
-====================
-When developing your Turtle (or other Tkinter) programs, you may want to look at the window
-from last run while fixing something in the code. If you have large or several screens, 
-it's not hard to fit your window next to Thonny's, 
-but on the next run the window manager may position it somewhere else and you need
-to arrange the windows again. 
- 
-**Dock user windows** in the **Run menu** is meant to help you in this situation. If you 
-check it and run your Tkinter program, Thonny performs following magic tricks:
+Ancrer les fenêtres utilisateur
+===============================
 
-* It remembers where you position your window. Next time it places the window at the same position.
-* It makes your window stay on top even if you click on Thonny window to start modifying the code. In fact, after your Tkinter window becomes visible, Thonny automatically focuses its own window so that you can continue editing the script without grabbing the mouse. When you're done, just press F5 again and old window gets replaced with the new one.
+Quand on développe son programme Turtle (ou utilisant Tkinter), on peut vouloir regarder la fenêtre
+de l'essai précédent tout en réparant quelques lignes de code. Si on a des écrans de grande taille ou nombreux,
+ce n'est pas difficile de placer cette fenêtre près de celle de Thonny,
+mais au lancement suivant, le gestionnaire de fenêtre peut la replacer n'importe où et il faut
+remettre en place à nouveau les fenêtres.
+
+**Ancrer les fenêtres utilisateur** dans le **menu Lancer** est prévu pour vous aider dans cette situation. Si vous
+cochez cette option et que vous lancez votre programme Tkinter, Thonny réaliser la magie suivante :
+
+* Il se souvient des emplacements de vos fenêtres. Les fois suivantes il place les fenêtres à la même position.
+* Il fait en sorte que votre fenêtre reste au-dessus même si on clique sur la fenêtre Thonny pour commencer à modifier le code. En fait, après que la fenêtre Tkinter est apparue, Thonny met automatiquement le focus sur sa propre fenêtre si bien que vous pouvez continuer à éditer le code sans utiliser la souris. Quand on a fini, il suffit d'appuyer à nouveau sur F5 et l'ancienne fenêtre est remplacée par la nouvelle.
  
  
