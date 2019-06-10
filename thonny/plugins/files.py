@@ -24,11 +24,11 @@ class FilesView(tk.PanedWindow):
         get_workbench().bind("BackendRestart", self.reset_remote, True)
         get_workbench().bind("WorkbenchClose", self.on_workbench_close, True)
 
-        self.local_files = LocalFileBrowser(self)
-        self.local_files.change_to_cwd()
+        self.local_files = ActiveLocalFileBrowser(self)
+        self.local_files.check_update_focus()
         self.add(self.local_files, minsize=minsize)
 
-        self.remote_files = RemoteFileBrowser(self)
+        self.remote_files = ActiveRemoteFileBrowser(self)
         self.remote_added = False
         self.reset_remote()
 
@@ -47,6 +47,7 @@ class FilesView(tk.PanedWindow):
             return
 
         if proxy.has_own_filesystem():
+            # remote pane is needed
             if not self.remote_added:
                 self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
@@ -54,6 +55,7 @@ class FilesView(tk.PanedWindow):
             self.remote_files.clear()
             self.remote_files.check_update_focus()
         else:
+            # remote pane not needed
             if self.remote_added:
                 self.save_split()
                 self.remove(self.remote_files)
@@ -78,10 +80,10 @@ class FilesView(tk.PanedWindow):
             self.save_split()
 
 
-class LocalFileBrowser(BaseLocalFileBrowser):
+class ActiveLocalFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files)
-        get_workbench().bind("LocalWorkingDirectoryChanged", self.on_local_backend_cd, True)
+        get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
     def create_new_file(self):
         path = super().create_new_file()
@@ -105,7 +107,7 @@ class LocalFileBrowser(BaseLocalFileBrowser):
             return base + extension
 
     def request_focus_into(self, path):
-        if not path:
+        if path == "":
             if running_on_windows():
                 # list of drives, can't cd
                 return self.focus_into(path)
@@ -119,24 +121,24 @@ class LocalFileBrowser(BaseLocalFileBrowser):
         if (
             proxy
             and proxy.uses_local_filesystem()
-            and get_workbench().get_local_cwd() != path
+            and proxy.get_cwd() != path
             and get_runner().is_waiting_toplevel_command()
         ):
             get_shell().submit_magic_command(construct_cd_command(path))
         else:
-            # change directly without notifying (non-existing, busy or remote) back-end
+            self.focus_into(path)
             get_workbench().set_local_cwd(path)
 
-    def on_local_backend_cd(self, event):
-        self.change_to_cwd()
+    def on_toplevel_response(self, event):
+        self.check_update_focus()
 
-    def change_to_cwd(self):
+    def check_update_focus(self):
         cwd = get_workbench().get_local_cwd()
-        if os.path.isdir(cwd):
+        if cwd != self.current_focus and os.path.isdir(cwd):
             self.focus_into(cwd)
 
 
-class RemoteFileBrowser(BaseRemoteFileBrowser):
+class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
         super().__init__(master, show_hidden_files)
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
@@ -154,22 +156,20 @@ class RemoteFileBrowser(BaseRemoteFileBrowser):
         if proxy:
             assert proxy.has_own_filesystem()
 
-            if path == "":
-                path = "/"
-
             if not get_runner().is_waiting_toplevel_command():
                 messagebox.showerror(
                     "Error",
-                    "Can't change directories when device is busy.\n"
+                    "Can't change or refresh directories when device is busy.\n"
                     + "Wait until current command completes and try again.",
                 )
             elif not proxy.supports_directories():
                 assert path == ""
                 self.focus_into(path)
             elif self.current_focus == path:
+                # refreshes
                 self.focus_into(path)
             else:
-                get_shell().submit_magic_command(["%cd", path])
+                get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
 
 
 def load_plugin() -> None:

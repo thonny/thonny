@@ -390,7 +390,7 @@ class BaseFileBrowser(ttk.Frame):
         if not node_id:
             # clear tree
             self.tree.set_children("")
-            
+
         err_id = self.tree.insert(node_id, "end")
         self.tree.item(err_id, text=msg)
         self.tree.set_children(node_id, err_id)
