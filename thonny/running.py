@@ -652,8 +652,8 @@ class CPythonProxy(BackendProxy):
         self._usersitepackages = None
         self._gui_update_loop_id = None
         self.in_venv = None
-        self._start_new_process()
         self._cwd = get_workbench().get_local_cwd()
+        self._start_new_process()
 
     def fetch_next_message(self):
         if not self._message_queue or len(self._message_queue) == 0:
