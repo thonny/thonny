@@ -8,13 +8,16 @@ We are welcoming all kinds of contributions:
 * proposals for changes and new features
 * documentation
 * fixes for the language in GUI and web (Thonny's main developers don't speak English natively)
-* translations
+* translations (consult docs/translate.md first)
 * plug-ins (a guide is in the works, see https://bitbucket.org/KauriRaba/thonny-microbit for now)
 * bug fixes
 * creating and maintaining Linux packages (see https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=857042) 
 * tests
 * refactorings
 * ...
+
+NB! For non-trivial contributions you should discuss your plan under a GitHub issue first
+to make sure your goals and means align with the vision of Thonny core team.
 
 See the `wiki <https://github.com/thonny/thonny/wiki>`_ for more info.
 
