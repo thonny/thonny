@@ -221,7 +221,7 @@ class Runner:
             self._set_state("running")
 
         if cmd.name[0].isupper():
-            get_workbench().event_generate("BackendRestart")
+            get_workbench().event_generate("BackendRestart", full=False)
 
     def _postpone_command(self, cmd: CommandToBackend) -> None:
         # in case of InlineCommands, discard older same type command
@@ -480,7 +480,7 @@ class Runner:
                 get_workbench().update()
                 sleep(0.01)
 
-        get_workbench().event_generate("BackendRestart")
+        get_workbench().event_generate("BackendRestart", full=True)
 
     def destroy_backend(self) -> None:
         if self._polling_after_id is not None:

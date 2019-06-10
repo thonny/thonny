@@ -21,7 +21,7 @@ class FilesView(tk.PanedWindow):
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 4))
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
 
-        get_workbench().bind("BackendRestart", self.reset_remote, True)
+        get_workbench().bind("BackendRestart", self.on_backend_restart, True)
         get_workbench().bind("WorkbenchClose", self.on_workbench_close, True)
 
         self.local_files = ActiveLocalFileBrowser(self)
@@ -74,6 +74,10 @@ class FilesView(tk.PanedWindow):
                 split = 600
 
         self.sash_place(0, 0, split)
+
+    def on_backend_restart(self, event):
+        if event.get("full"):
+            self.reset_remote(event)
 
     def on_workbench_close(self, event=None):
         if self.remote_added:
