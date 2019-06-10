@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Web development with Flask
 ==========================
 

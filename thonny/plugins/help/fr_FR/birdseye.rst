@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 L'œil d'oiseau (Birdseye)
 =========================
 

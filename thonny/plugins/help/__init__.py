@@ -48,7 +48,12 @@ class HelpView(TextFrame):
                 full_path = os.path.join(os.path.dirname(__file__), filename)
 
         with open(full_path, encoding="UTF-8") as fp:
-            self.text.append_rst(fp.read())
+            rst_source = fp.read()
+        
+        if not filename.endswith("index.rst"):
+            rst_source = "`" + _("Home") + " <index.rst>`_\n\n" + rst_source
+
+        self.text.append_rst(rst_source)
 
 
 def open_help():

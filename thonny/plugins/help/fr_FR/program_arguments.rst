@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Lancer les programmes avec des arguments en ligne de commande
 =============================================================
 

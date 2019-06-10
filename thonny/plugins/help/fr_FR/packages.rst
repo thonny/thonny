@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Installation de paquets de tierces parties
 ==========================================
 

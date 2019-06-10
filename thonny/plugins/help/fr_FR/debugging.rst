@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Les techniques de débogage
 ==========================
 

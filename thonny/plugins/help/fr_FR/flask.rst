@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Développement Web avec Flask
 ============================
 

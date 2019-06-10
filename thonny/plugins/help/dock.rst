@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Docking user windows
 ====================
 When developing your Turtle (or other Tkinter) programs, you may want to look at the window

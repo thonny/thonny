@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Différents modes
 ================
 *Outils → Options → Général* permet de régler l'interface utilisateur de Thonny selon un des trois modes différents.

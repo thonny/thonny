@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Running your programs with command line arguments 
 =================================================
 

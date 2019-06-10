@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Using debuggers
 ==========================
 If you want to see how Python executes your program step-by-step then you 

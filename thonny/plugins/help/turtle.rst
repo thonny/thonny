@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Special support for Turtle programs
 ===================================
 

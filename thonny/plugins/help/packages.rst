@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Installing 3rd party packages
 ==============================
 Thonny has two options for installing 3rd party libraries.

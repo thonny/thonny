@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Utilisation des débogueurs
 ==========================
 

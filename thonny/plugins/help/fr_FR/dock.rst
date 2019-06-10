@@ -1,5 +1,3 @@
-`Accueil <index.rst>`_
-
 Ancrer les fenêtres utilisateur
 ===============================
 

@@ -1,5 +1,3 @@
-`Home <index.rst>`_
-
 Plotter
 ==========================
 Plotter is an add-on for the Shell, which extracts numbers from 
