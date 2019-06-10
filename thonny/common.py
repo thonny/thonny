@@ -425,9 +425,13 @@ def get_windows_volumes_info():
             # NB! Drive A can be present in bitmask but actually missing.
             # In this case querying information about it would freeze the UI
             # for several seconds.
-            # The solution is to uninstall the device in device manager.
+            # One solution is to uninstall the device in device manager,
+            # but OS may restore the drive later.
+            # Therefore it is safest to skip A drive (user can access it via Open dialog)
 
-            if drive_type in required_drive_types:
+            if drive_type in required_drive_types and (
+                letter != "A" or drive_type != "DRIVE_REMOVABLE"
+            ):
                 drive = letter + ":"
                 path = drive + "\\"
 
