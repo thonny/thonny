@@ -44,6 +44,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Filip Schouwenaars
 * Fizban
 * fstengel
+* Georges Khaznadar
 * Илья Кругликов
 * Jens Diemer
 * Juan Falgueras
