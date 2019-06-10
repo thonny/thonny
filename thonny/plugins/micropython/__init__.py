@@ -337,7 +337,7 @@ class MicroPythonProxy(BackendProxy):
         assert self.idle
 
         if not self._supports_directories():
-            self._cwd = None
+            self._cwd = ""
         else:
             out, err = self._execute_and_get_response_str(
                 "import os as __thonny_os; print(__thonny_os.getcwd())"
@@ -568,6 +568,15 @@ class MicroPythonProxy(BackendProxy):
         assert len(err) == 0, "Error was " + repr(err)
 
     def _cmd_cd(self, cmd):
+        if not self._supports_directories():
+            self._non_serial_msg_queue.put(
+                InlineResponse(
+                    command_name="cd",
+                    error="This device doesn't have directories",
+                )
+            )
+            return
+            
         assert len(cmd.args) == 1
         path = cmd.args[0]
 
@@ -661,7 +670,7 @@ class MicroPythonProxy(BackendProxy):
     def _cmd_get_dirs_child_data_microbit(self, cmd):
         """let it be here so micro:bit works with generic proxy as well"""
 
-        assert cmd["paths"] == {""}
+        assert cmd["paths"] == {""}, "Bad command: " + repr(cmd)
 
         try:
             self._execute_async(

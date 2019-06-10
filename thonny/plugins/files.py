@@ -126,6 +126,8 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         ):
             get_shell().submit_magic_command(construct_cd_command(path))
         else:
+            # it's OK, if it's already focused into this directory
+            # focus again to refresh
             self.focus_into(path)
             get_workbench().set_local_cwd(path)
 
