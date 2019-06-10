@@ -53,7 +53,7 @@ You can render a new `po` catalog file for a  new language like that:
 output should be:
 `creating catalog thonny/locale/<LANGUAGE_CODE>/LC_MESSAGES/thonny.po based on thonny/locale/thonny.pot`
 
-NB:One should not forget to add a the new language in `thonny/languages.py` so it's available in the configuration page.
+NB! One should not forget to add a the new language in `thonny/languages.py` so it's available in the configuration page.
 
 ### Compile catalog
 You can compile all `po` catalog files into `mo` files as follow:
@@ -72,3 +72,12 @@ Translations have move forwards? New language have been added? That's great news
 
 ## How to push new strings to POeditor
 When new strings have been marked, you have extract it into the `pot` template file and update all existing `po` files, you want to push the new strings to POeditor. Please see this [documentation](https://poeditor.com/kb/importing-and-exporting-strings) on how to import files to POeditor. Just import the `pot` template file.
+
+## Translating Help pages
+
+HelpView takes its content from `thonny/plugins/help`. The root of this location contains original (English) content, translated content is under subdirectories.
+
+In order to add a translations for a new language, create a subdirectory with the code of your language under `thonny/plugins/help` and add translated copies of .rst files into this directory.
+
+Note that you don't have to translate all pages at once. If a page is requested and corresponding file is missing from the directory of current language code, it displays the page in English.
+
