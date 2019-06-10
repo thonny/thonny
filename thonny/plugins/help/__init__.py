@@ -26,10 +26,12 @@ class HelpView(TextFrame):
             pady=0,
             read_only=True,
         )
-        self.language_dir = os.path.join(os.path.dirname(thonny.__file__),
-                                         "locale",
-                                          get_workbench().get_option("general.language"),
-                                          "HELP_CONTENT")
+        self.language_dir = os.path.join(
+            os.path.dirname(thonny.__file__),
+            "locale",
+            get_workbench().get_option("general.language"),
+            "HELP_CONTENT",
+        )
         self.load_rst_file("index.rst")
 
     def load_topic(self, topic, fragment=None):
@@ -51,7 +53,7 @@ class HelpView(TextFrame):
 
         with open(full_path, encoding="UTF-8") as fp:
             rst_source = fp.read()
-        
+
         if not filename.endswith("index.rst"):
             rst_source = "`" + _("Home") + " <index.rst>`_\n\n" + rst_source
 
