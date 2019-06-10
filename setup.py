@@ -3,6 +3,13 @@ import sys
 
 from setuptools import find_packages, setup
 
+def recursive_files(directory):
+    paths = []
+    for (path, _, filenames) in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join('..', path, filename))
+    return paths
+
 if sys.version_info < (3, 5):
     raise RuntimeError("Thonny requires Python 3.5 or later")
 
@@ -61,7 +68,7 @@ setup(
     python_requires=">=3.5",
     packages=find_packages(),
     package_data={
-        "": ["VERSION", "res/*"],
+        "": ["VERSION", "res/*"] + recursive_files("thonny/locale"),
         "thonny.plugins.help": ["*.rst"],
         "thonny.plugins.printing": ["*.html"],
         "thonny.plugins.micropython": ["api_stubs/*.*"],
