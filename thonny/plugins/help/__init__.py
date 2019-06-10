@@ -3,6 +3,7 @@ import tkinter as tk
 import tkinter.font
 from tkinter import ttk
 
+import thonny
 from thonny import get_workbench, rst_utils, tktextext, ui_utils
 from thonny.config import try_load_configuration
 from thonny.tktextext import TextFrame
@@ -25,9 +26,10 @@ class HelpView(TextFrame):
             pady=0,
             read_only=True,
         )
-        # retrieve the directory of the preferred language
-        # for help's .rst files ; this directory is ./ by default
-        self.language_dir = get_workbench().get_option("general.language", ".")
+        self.language_dir = os.path.join(os.path.dirname(thonny.__file__),
+                                         "locale",
+                                          get_workbench().get_option("general.language"),
+                                          "HELP_CONTENT")
         self.load_rst_file("index.rst")
 
     def load_topic(self, topic, fragment=None):
@@ -42,7 +44,7 @@ class HelpView(TextFrame):
             full_path = filename
         else:
             # try to access filename in a language subdirectory
-            full_path = os.path.join(os.path.dirname(__file__), self.language_dir, filename)
+            full_path = os.path.join(self.language_dir, filename)
             if not os.path.exists(full_path):
                 # if the localized file does not exist, default to English
                 full_path = os.path.join(os.path.dirname(__file__), filename)

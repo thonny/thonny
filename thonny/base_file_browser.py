@@ -386,7 +386,11 @@ class BaseFileBrowser(ttk.Frame):
                 if self.tree.item(child_id, "open"):
                     self.render_children_from_cache(child_id)
 
-    def show_error(self, msg, node_id):
+    def show_error(self, msg, node_id=""):
+        if not node_id:
+            # clear tree
+            self.tree.set_children("")
+            
         err_id = self.tree.insert(node_id, "end")
         self.tree.item(err_id, text=msg)
         self.tree.set_children(node_id, err_id)
@@ -626,10 +630,10 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         return self.dir_separator
 
     def update_dir_data(self, msg):
-        self.dir_separator = msg["dir_separator"]
         if msg.get("error"):
-            self.show_error(msg["error"], msg["node_id"])
+            self.show_error(msg["error"])
         else:
+            self.dir_separator = msg["dir_separator"]
             self.cache_dirs_child_data(msg["data"])
             self.render_children_from_cache(msg["node_id"])
 

@@ -75,9 +75,7 @@ When new strings have been marked, you have extract it into the `pot` template f
 
 ## Translating Help pages
 
-HelpView takes its content from `thonny/plugins/help`. The root of this location contains original (English) content, translated content is under subdirectories.
+Original text for help pages comes from .rst files in `thonny/plugins/help`. Translated versions of these files should be put under `thonny/locale/<lang>/HELP_CONTENT`.
 
-In order to add a translations for a new language, create a subdirectory with the code of your language under `thonny/plugins/help` and add translated copies of .rst files into this directory.
-
-Note that you don't have to translate all pages at once. If a page is requested and corresponding file is missing from the directory of current language code, it displays the page in English.
+Note that you don't have to translate all pages at once. If a page is requested and corresponding file is missing from the translation directory, the page is displayed in English.
 
