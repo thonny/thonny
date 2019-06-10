@@ -23,6 +23,7 @@ from thonny.ui_utils import (
 )
 import tkinter as tk
 import webbrowser
+from thonny.running import EDITOR_CONTENT_TOKEN
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 
@@ -1070,14 +1071,28 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                         args_str = ""
                     argv = parse_cmd_line(cmd_line[1:])
                     command_name = argv[0]
+                    cmd_args = argv[1:]
+
+                    if len(cmd_args) >= 2 and cmd_args[0] == "-c":
+                        # move source argument to source attribute
+                        source = cmd_args[1]
+                        cmd_args = [cmd_args[0]] + cmd_args[2:]
+                        if source == EDITOR_CONTENT_TOKEN:
+                            source = (
+                                get_workbench().get_editor_notebook().get_current_editor_content()
+                            )
+                    else:
+                        source = None
+
                     get_workbench().event_generate("MagicCommand", cmd_line=text_to_be_submitted)
                     get_runner().send_command(
                         ToplevelCommand(
                             command_name,
-                            args=argv[1:],
+                            args=cmd_args,
                             args_str=args_str,
                             cmd_line=cmd_line,
                             tty_mode=self.tty_mode,
+                            source=source,
                         )
                     )
                 elif cmd_line.startswith("!"):

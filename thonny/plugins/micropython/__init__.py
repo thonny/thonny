@@ -573,7 +573,7 @@ class MicroPythonProxy(BackendProxy):
                 ToplevelResponse(command_name="cd", error="This device doesn't have directories")
             )
             return
-            
+
         assert len(cmd.args) == 1
         path = cmd.args[0]
 
@@ -590,22 +590,8 @@ class MicroPythonProxy(BackendProxy):
 
     def _cmd_Run(self, cmd):
         self._clear_environment()
-
-        if not hasattr(cmd, "source"):
-            assert len(cmd.args) == 1
-            filename = cmd.args[0]
-            if os.path.isabs(filename):
-                full_filename = filename
-            else:
-                full_filename = os.path.join(get_workbench().get_local_cwd(), filename)
-                cmd.script_path = full_filename
-
-            with tokenize.open(full_filename) as fp:
-                source = fp.read()
-        else:
-            source = cmd.source
-
-        self._execute_async(source)
+        assert cmd.get("source")
+        self._execute_async(cmd["source"])
 
     def _cmd_execute_source(self, cmd):
         try:

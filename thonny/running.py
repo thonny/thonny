@@ -24,7 +24,7 @@ from threading import Thread
 from time import sleep
 
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
-from thonny.code import get_current_breakpoints, get_saved_current_script_filename
+from thonny.code import get_current_breakpoints, get_saved_current_script_filename, is_remote_path
 from thonny.common import (
     BackendEvent,
     CommandToBackend,
@@ -54,6 +54,7 @@ OUTPUT_MERGE_THRESHOLD = 1000
 
 RUN_COMMAND_LABEL = ""
 RUN_COMMAND_CAPTION = ""
+EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
@@ -253,6 +254,7 @@ class Runner:
         working_directory: Optional[str] = None,
         command_name: str = "Run",
     ) -> None:
+
         if working_directory is not None and get_workbench().get_local_cwd() != working_directory:
             # create compound command
             # start with %cd
@@ -263,9 +265,13 @@ class Runner:
             cd_cmd_line = ""
             next_cwd = get_workbench().get_local_cwd()
 
-        # append main command (Run, run, Debug or debug)
-        rel_filename = os.path.relpath(script_path, next_cwd)
-        exe_cmd_line = construct_cmd_line(["%" + command_name, rel_filename] + args) + "\n"
+        if not is_remote_path(script_path) and self._proxy.uses_local_filesystem():
+            rel_filename = os.path.relpath(script_path, next_cwd)
+            cmd_parts = ["%" + command_name, rel_filename] + args
+        else:
+            cmd_parts = ["%" + command_name, "-c", EDITOR_CONTENT_TOKEN] + args
+
+        exe_cmd_line = construct_cmd_line(cmd_parts, [EDITOR_CONTENT_TOKEN]) + "\n"
 
         # submit to shell (shell will execute it)
         get_shell().submit_magic_command(cd_cmd_line + exe_cmd_line)
@@ -282,16 +288,19 @@ class Runner:
         filename = get_saved_current_script_filename()
 
         if not filename:
-            # cancel must have been pushed
+            # user has cancelled file saving
             return
 
-        # changing dir may be required
-        script_dir = normpath_with_actual_case(os.path.dirname(filename))
-
-        if get_workbench().get_option("run.auto_cd") and command_name[0].isupper():
-            working_directory = script_dir  # type: Optional[str]
-        else:
+        if is_remote_path(filename) or not self._proxy.uses_local_filesystem():
             working_directory = None
+        else:
+            # changing dir may be required
+            script_dir = os.path.dirname(filename)
+
+            if get_workbench().get_option("run.auto_cd") and command_name[0].isupper():
+                working_directory = script_dir  # type: Optional[str]
+            else:
+                working_directory = None
 
         args = self._get_active_arguments()
 

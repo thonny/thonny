@@ -205,8 +205,14 @@ def _unix_get_used_memory():
     "TODO:"
 
 
-def construct_cmd_line(parts):
-    return " ".join(map(shlex.quote, parts))
+def construct_cmd_line(parts, safe_tokens=[]):
+    def quote(s):
+        if s in safe_tokens:
+            return s
+        else:
+            return shlex.quote(s)
+
+    return " ".join(map(quote, parts))
 
 
 def parse_cmd_line(s):

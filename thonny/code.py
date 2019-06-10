@@ -779,6 +779,13 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def get_current_editor(self):
         return self.get_current_child()
 
+    def get_current_editor_content(self):
+        editor = self.get_current_editor()
+        if editor is None:
+            return None
+        else:
+            return editor.get_code_view().get_content()
+
     def get_all_editors(self):
         # When workspace is closing, self.winfo_children()
         # may return an unexplainable tkinter.Frame
