@@ -12,6 +12,7 @@ from collections import namedtuple
 from typing import List, Optional  # @UnusedImport
 import subprocess
 import logging
+import traceback
 
 MESSAGE_MARKER = "\x02"
 
@@ -364,7 +365,6 @@ def get_dirs_child_data(paths):
 def get_single_dir_child_data(path):
     if path == "":
         if platform.system() == "Windows":
-            get_windows_network_locations()
             return {**get_windows_volumes_info(), **get_windows_network_locations()}
         else:
             return get_single_dir_child_data("/")
@@ -415,25 +415,38 @@ def get_windows_volumes_info():
 
     bitmask = windll.kernel32.GetLogicalDrives()  # @UndefinedVariable
     for letter in string.ascii_uppercase:
-        drive_type = all_drive_types[
-            windll.kernel32.GetDriveTypeW("%s:\\" % letter)
-        ]  # @UndefinedVariable
+        if not bitmask & 1:
+            pass
+        else:
+            drive_type = all_drive_types[
+                windll.kernel32.GetDriveTypeW("%s:\\" % letter)
+            ]  # @UndefinedVariable
 
-        if bitmask & 1 and drive_type in required_drive_types:
-            drive = letter + ":"
-            path = drive + "\\"
-            volume_name = get_windows_volume_name(path)
-            if not volume_name:
-                volume_name = "Local Disk"
+            # NB! Drive A can be present in bitmask but actually missing.
+            # In this case querying information about it would freeze the UI
+            # for several seconds.
+            # The solution is to uninstall the device in device manager.
 
-            label = volume_name + " (" + drive + ")"
+            if drive_type in required_drive_types:
+                drive = letter + ":"
+                path = drive + "\\"
 
-            try:
-                st = os.stat(path)
-                result[path] = {"label": label, "size": None, "time": max(st.st_mtime, st.st_ctime)}
-            except PermissionError:
-                # probably an empty cardreader slot
-                pass
+                try:
+                    st = os.stat(path)
+                    volume_name = get_windows_volume_name(path)
+                    if not volume_name:
+                        volume_name = "Disk"
+
+                    label = volume_name + " (" + drive + ")"
+                    result[path] = {
+                        "label": label,
+                        "size": None,
+                        "time": max(st.st_mtime, st.st_ctime),
+                    }
+
+                except PermissionError:
+                    traceback.print_exc()
+                    # probably an empty cardreader slot
 
         bitmask >>= 1
 
