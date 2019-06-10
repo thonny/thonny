@@ -570,10 +570,7 @@ class MicroPythonProxy(BackendProxy):
     def _cmd_cd(self, cmd):
         if not self._supports_directories():
             self._non_serial_msg_queue.put(
-                InlineResponse(
-                    command_name="cd",
-                    error="This device doesn't have directories",
-                )
+                ToplevelResponse(command_name="cd", error="This device doesn't have directories")
             )
             return
             
