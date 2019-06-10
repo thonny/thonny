@@ -10,7 +10,7 @@ possibilités pour corriger la situation. Par exemple :
 * Changer *quelque chose* dans le code et réessayer ;
 * Approcher le problème en deux phases : 1) diagnostiquer le problème et 2) le réparer.
 
-  Demander de l'aide peut être une très bonne idée, mais elle ne vous procurera pas cette douce sensation de réussite.
+Demander de l'aide peut être une très bonne idée, mais elle ne vous procurera pas cette douce sensation de réussite.
 De toute façon, c'est mieux de ne pas y recourir sans avoir d'abord tenté quelque chose vous-même.
 
 Si vos programmes sont petits, vous pourriez toucher le jackpot en changeant quelque chose au hasard et

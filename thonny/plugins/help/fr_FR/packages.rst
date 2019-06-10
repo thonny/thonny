@@ -14,7 +14,7 @@ Depuis le menu « Outils », sélectionnez « Gérer les paquets ... » et 
 Avec pip en ligne de commande
 -----------------------------
 
-#. Depuis le menu « Outils », sélectionnez « Ouvrir un Shell système ... ». Vous devriez avoir un nouveau terminal, qui présente le nom correct de la commande *pip (normalement ``pip`` ou ``pip3``). Par la suite on supposera que le nom de la commande est ``pip``.
+#. Depuis le menu « Outils », sélectionnez « Ouvrir un Shell système ... ». Vous devriez avoir un nouveau terminal, qui présente le nom correct de la commande *pip* (normalement ``pip`` ou ``pip3``). Par la suite on supposera que le nom de la commande est ``pip``.
 #. Entrez ``pip install <package name>`` (p. ex. ``pip install pygame``) et tapez Entrée. Vous devriez voir *pip* qui télécharge et installe le paquet puis affiche son message de succès.
 #. Fermez le terminal (facultatif)
 #. Revenez à Thonny

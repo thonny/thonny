@@ -3,10 +3,11 @@ import tkinter as tk
 import tkinter.font
 from tkinter import ttk
 
-from thonny import get_workbench, rst_utils, tktextext, ui_utils, CONFIGURATION_FILE_NAME
+from thonny import get_workbench, rst_utils, tktextext, ui_utils
 from thonny.config import try_load_configuration
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import scrollbar_style
+
 
 class HelpView(TextFrame):
     def __init__(self, master):
@@ -26,9 +27,7 @@ class HelpView(TextFrame):
         )
         # retrieve the directory of the preferred language
         # for help's .rst files ; this directory is ./ by default
-        self.languageDir="."
-        self._configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
-        self.languageDir=self._configuration_manager.get_option("general.language",".")
+        self.language_dir = get_workbench().get_option("general.language", ".")
         self.load_rst_file("index.rst")
 
     def load_topic(self, topic, fragment=None):
@@ -39,14 +38,16 @@ class HelpView(TextFrame):
         self.text.clear()
         self.text.direct_insert("1.0", "\n")
 
-        # try to access filename in a language subdirectory
-        if not os.path.isabs(filename):
-            filename1 = os.path.join(os.path.dirname(__file__), self.languageDir, filename)
-        if not os.path.exists(filename1):
-            # if the localized file does not exist, default to English
-            filename1 = os.path.join(os.path.dirname(__file__), filename)
+        if os.path.isabs(filename):
+            full_path = filename
+        else:
+            # try to access filename in a language subdirectory
+            full_path = os.path.join(os.path.dirname(__file__), self.language_dir, filename)
+            if not os.path.exists(full_path):
+                # if the localized file does not exist, default to English
+                full_path = os.path.join(os.path.dirname(__file__), filename)
 
-        with open(filename1, encoding="UTF-8") as fp:
+        with open(full_path, encoding="UTF-8") as fp:
             self.text.append_rst(fp.read())
 
 

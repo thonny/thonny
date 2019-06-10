@@ -504,7 +504,8 @@ class Workbench(tk.Tk):
             running.PrivateVenvCPythonProxy,
             _("A special virtual environment (deprecated)"),
             _("This virtual environment is automatically maintained by Thonny.\n")
-            + _("Location: ") + running.get_private_venv_path(),
+            + _("Location: ")
+            + running.get_private_venv_path(),
             "z",
         )
 
@@ -1233,13 +1234,15 @@ class Workbench(tk.Tk):
         )
         label.grid(row=0, column=1001, sticky="ne")
 
-        def on_click(ev):
+        def on_click(event):
             self.set_option("general.ui_mode", "regular")
             tk.messagebox.showinfo(
                 _("Regular mode"),
-                _("Configuration has been updated. ")
-                + _("Restart Thonny to start working in regular mode.\n\n")
-                + _("(See 'Tools → Options → General' if you change your mind later.)"),
+                _(
+                    "Configuration has been updated. "
+                    + "Restart Thonny to start working in regular mode.\n\n"
+                    + "(See 'Tools → Options → General' if you change your mind later.)"
+                ),
                 parent=self,
             )
 

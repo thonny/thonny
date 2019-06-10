@@ -48,7 +48,7 @@ Quand votre programme devient plus gros, on observe que le parcours en mode « 
 C'est parce que les ornements (p. ex. la possibilité de faire de petits pas durant l'évaluation d'expressions et de revenir en arrière)
 nécessitent une machinerie lourde et lente.
 
-Avec *Débogage du script courant (vite) on perd les ornements mais on peut avancer dans le programme beaucoup plus vite.
+Avec *Débogage du script courant (vite)* on perd les ornements mais on peut avancer dans le programme beaucoup plus vite.
 On peut utiliser les mêmes commandes (sauf « Un pas en arrière » comme avec le débogueur en mode joli. C'est le style de débogage que la plupart des programmeurs
 professionnels utilisent d'habitude.
 
