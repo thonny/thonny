@@ -94,7 +94,7 @@ class EventLogger:
 
         if "text_widget" in attributes:
             widget = attributes["text_widget"]
-            if isinstance(widget.master, ShellView):
+            if isinstance(widget.master.master, ShellView):
                 attributes["text_widget_context"] = "shell"
 
         # select attributes

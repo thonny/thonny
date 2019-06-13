@@ -5,8 +5,8 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import ttk
 
-from thonny import codeview, get_workbench, ui_utils
-from thonny.base_file_browser import BaseFileBrowser
+from thonny import codeview, get_workbench, ui_utils, THONNY_USER_DIR
+from thonny.base_file_browser import BaseLocalFileBrowser
 from thonny.plugins.coloring import SyntaxColorer
 from thonny.ui_utils import lookup_style_option
 
@@ -50,14 +50,20 @@ class ReplayWindow(tk.Toplevel):
         self.rowconfigure(0, weight=1)
 
 
-class ReplayerFileBrowser(BaseFileBrowser):
+class ReplayerFileBrowser(BaseLocalFileBrowser):
     def __init__(self, master, log_frame):
-        BaseFileBrowser.__init__(self, master, True, "tools.replayer_last_browser_folder")
+        super().__init__(master, True)
         self.log_frame = log_frame
         self.configure(border=1, relief=tk.GROOVE)
+        
+        user_logs_path = os.path.join(THONNY_USER_DIR, "user_logs")
+        if os.path.exists(user_logs_path):
+            self.focus_into(user_logs_path)
+        else:
+            self.focus_into(os.path.expanduser("~"))
 
     def on_double_click(self, event):
-        self.save_current_folder()
+        #self.save_current_folder()
         path = self.get_selected_path()
         if path:
             self.log_frame.load_log(path)
@@ -125,7 +131,8 @@ class LogFrame(ui_utils.TreeFrame):
         # print("log replay", event)
 
         if "text_widget_id" in event:
-            if event.get("text_widget_context", None) == "shell":
+            if (event.get("text_widget_context", None) == "shell"
+                or event.get("text_widget_class") == "ShellText"):
                 self.shell.replay_event(event)
             else:
                 self.editor_notebook.replay_event(event)
