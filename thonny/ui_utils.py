@@ -572,7 +572,7 @@ class TreeFrame(ttk.Frame):
         show_scrollbar=True,
         borderwidth=0,
         relief="flat",
-        **tree_kw,
+        **tree_kw
     ):
         ttk.Frame.__init__(self, master, borderwidth=borderwidth, relief=relief)
         # http://wiki.tcl.tk/44444#pagetoc50f90d9a
@@ -587,7 +587,7 @@ class TreeFrame(ttk.Frame):
             columns=columns,
             displaycolumns=displaycolumns,
             yscrollcommand=self.vert_scrollbar.set,
-            **tree_kw,
+            **tree_kw
         )
         self.tree["show"] = "headings"
         self.tree.grid(row=0, column=0, sticky=tk.NSEW)

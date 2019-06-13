@@ -178,7 +178,7 @@ class EnhancedText(TweakableText):
         indent_with_tabs=False,
         replace_tabs=False,
         cnf={},
-        **kw,
+        **kw
     ):
         # Parent class shouldn't autoseparate
         # TODO: take client provided autoseparators value into account
@@ -750,7 +750,7 @@ class TextFrame(ttk.Frame):
         relief="sunken",
         gutter_background="#e0e0e0",
         gutter_foreground="#999999",
-        **text_options,
+        **text_options
     ):
         ttk.Frame.__init__(self, master=master, borderwidth=borderwidth, relief=relief)
 

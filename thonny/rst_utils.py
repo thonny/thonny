@@ -21,7 +21,7 @@ class RstText(TweakableText):
                 "font": "TkDefaultFont",
                 # "cursor" : "",
                 **kw,
-            },
+            }
         )
         self.configure_tags()
         self._visitor = None
@@ -64,7 +64,7 @@ class RstText(TweakableText):
         self.tag_configure(
             "a",
             **{**get_syntax_options_for_tag("hyperlink"), "underline": False},
-            font=underline_font,
+            font=underline_font
         )
         self.tag_configure("small", font=small_font)
         self.tag_configure("light", foreground="gray")
