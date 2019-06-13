@@ -30,7 +30,9 @@ _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 # NB! Don't add parens without refactoring split procedure!
 OUTPUT_SPLIT_REGEX = re.compile(r"(\x1B\[[0-?]*[ -/]*[@-~]|[\a\b\r])")
 NUMBER_SPLIT_REGEX = re.compile(r"((?<!\w)[-+]?[0-9]*\.?[0-9]+\b)")
-SIMPLE_URL_SPLIT_REGEX = re.compile(r"(https?:\/\/[\w\/.:\-\?#=%]+[\w\/]|data:image\/[a-z]+;base64,[A-Za-z0-9\/=]+)")
+SIMPLE_URL_SPLIT_REGEX = re.compile(
+    r"(https?:\/\/[\w\/.:\-\?#=%]+[\w\/]|data:image\/[a-z]+;base64,[A-Za-z0-9\/=]+)"
+)
 
 INT_REGEX = re.compile(r"\d+")
 ANSI_COLOR_NAMES = {
@@ -917,10 +919,10 @@ class ShellText(EnhancedTextWithLogging, PythonText):
                 else:
                     if part.startswith("data:image/"):
                         token = ";base64,"
-                        data = part[part.index(token)+len(token):]
+                        data = part[part.index(token) + len(token) :]
                         try:
                             img = tk.PhotoImage(data=data)
-                            self._images.add(img) # to avoit it being gc-d"""
+                            self._images.add(img)  # to avoit it being gc-d"""
                             self.image_create("output_insert", image=img)
                             for tag in tags:
                                 self.tag_add(tag, "output_insert -1 chars")

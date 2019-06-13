@@ -55,7 +55,7 @@ class ReplayerFileBrowser(BaseLocalFileBrowser):
         super().__init__(master, True)
         self.log_frame = log_frame
         self.configure(border=1, relief=tk.GROOVE)
-        
+
         user_logs_path = os.path.join(THONNY_USER_DIR, "user_logs")
         if os.path.exists(user_logs_path):
             self.focus_into(user_logs_path)
@@ -63,7 +63,7 @@ class ReplayerFileBrowser(BaseLocalFileBrowser):
             self.focus_into(os.path.expanduser("~"))
 
     def on_double_click(self, event):
-        #self.save_current_folder()
+        # self.save_current_folder()
         path = self.get_selected_path()
         if path:
             self.log_frame.load_log(path)
@@ -131,8 +131,10 @@ class LogFrame(ui_utils.TreeFrame):
         # print("log replay", event)
 
         if "text_widget_id" in event:
-            if (event.get("text_widget_context", None) == "shell"
-                or event.get("text_widget_class") == "ShellText"):
+            if (
+                event.get("text_widget_context", None) == "shell"
+                or event.get("text_widget_class") == "ShellText"
+            ):
                 self.shell.replay_event(event)
             else:
                 self.editor_notebook.replay_event(event)
