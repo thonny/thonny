@@ -2140,7 +2140,6 @@ class NiceTracer(Tracer):
             # TODO: assert (it doesn't evaluate msg when test == True)
 
             if isinstance(node, ast.Str):
-                add_tag(node, "StringLiteral")
                 add_tag(node, "skipexport")
 
             if hasattr(ast, "JoinedStr") and isinstance(node, ast.JoinedStr):
@@ -2149,7 +2148,6 @@ class NiceTracer(Tracer):
                 add_tag(node, "ignore_children")
 
             elif isinstance(node, ast.Num):
-                add_tag(node, "NumberLiteral")
                 add_tag(node, "skipexport")
 
             elif isinstance(node, ast.List):
@@ -2168,6 +2166,9 @@ class NiceTracer(Tracer):
                 add_tag(node, "skipexport")
 
             elif isinstance(node, ast.NameConstant):
+                add_tag(node, "skipexport")
+            
+            elif hasattr(ast, "Constant" and isinstance(node, ast.Constant)):
                 add_tag(node, "skipexport")
 
             elif isinstance(node, ast.Expr):
