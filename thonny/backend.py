@@ -2168,7 +2168,7 @@ class NiceTracer(Tracer):
             elif isinstance(node, ast.NameConstant):
                 add_tag(node, "skipexport")
             
-            elif hasattr(ast, "Constant" and isinstance(node, ast.Constant)):
+            elif hasattr(ast, "Constant") and isinstance(node, ast.Constant):
                 add_tag(node, "skipexport")
 
             elif isinstance(node, ast.Expr):
