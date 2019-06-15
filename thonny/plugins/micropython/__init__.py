@@ -1728,7 +1728,7 @@ class GenericMicroPythonProxy(MicroPythonProxy):
 class GenericMicroPythonConfigPage(MicroPythonConfigPage):
     @property
     def allow_webrepl(self):
-        return True
+        return False
 
 
 class Connection:
