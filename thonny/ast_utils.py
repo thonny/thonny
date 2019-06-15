@@ -193,4 +193,3 @@ def mark_text_ranges(node, source: bytes):
             if hasattr(child, "lineno"):
                 # Fixes problems with some nodes like binop
                 child.lineno, child.col_offset = child.first_token.start
-
