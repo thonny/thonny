@@ -1016,7 +1016,7 @@ class MicroPythonProxy(BackendProxy):
         BUFFER_SIZE = 32
         data = cmd["content_bytes"]
 
-        self._execute_and_expect_empty_response(
+        out, err = self._execute_and_get_response(
             dedent(
                 """
             __temp_path = '{path}'
@@ -1025,6 +1025,13 @@ class MicroPythonProxy(BackendProxy):
             """
             ).format(path=cmd["path"])
         )
+
+        if out:
+            self._send_text_to_shell(out, "stdout")
+        if err:
+            self._send_text_to_shell(err, "stderr")
+        if out or err:
+            return
 
         size = len(data)
         for i in range(0, size, BUFFER_SIZE):
@@ -1048,7 +1055,8 @@ class MicroPythonProxy(BackendProxy):
                 print('\\x04\\x02', {
                     'message_class' : 'InlineResponse',
                     'command_name': 'write_file',
-                    'path' : __temp_path
+                    'path' : __temp_path,
+                    'editor_id' : <<editor_id>>
                 })
                 
             except Exception as e:
@@ -1061,7 +1069,9 @@ class MicroPythonProxy(BackendProxy):
             
             del __temp_path
             """
-            ).replace("<<size>>", str(size))
+            )
+            .replace("<<size>>", str(size))
+            .replace("<<editor_id>>", str(cmd.get("editor_id")))
         )
 
     def _cmd_read_file(self, cmd):
@@ -1487,6 +1497,9 @@ class MicroPythonProxy(BackendProxy):
         self._send_text_to_shell(message_text, "stderr")
 
     def _send_text_to_shell(self, message_text, stream_name):
+        if isinstance(message_text, (bytes, bytearray)):
+            message_text = message_text.decode("utf-8")
+
         if not message_text.endswith("\n"):
             message_text += "\n"
 

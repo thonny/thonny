@@ -769,9 +769,10 @@ class BackendFileDialog(tk.Toplevel):
         if self.updating_selection:
             return
 
-        name = self.browser.get_selected_value("name")
-        if name:
-            self.name_var.set(name)
+        if self.browser.get_selected_kind() == "file":
+            name = self.browser.get_selected_value("name")
+            if name:
+                self.name_var.set(name)
 
     def on_name_edit(self, event=None):
         self.updating_selection = True
@@ -870,7 +871,7 @@ def ask_backend_path(master, dialog_kind):
 
     assert proxy.has_own_filesystem()
 
-    dlg = BackendFileDialog(master, dialog_kind, proxy.get_default_directory())
+    dlg = BackendFileDialog(master, dialog_kind, proxy.get_cwd())
     show_dialog(dlg, master)
     return dlg.result
 

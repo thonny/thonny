@@ -6,7 +6,6 @@ import tokenize
 import traceback
 from logging import exception
 from tkinter import messagebox, ttk
-from tkinter.messagebox import askyesno
 
 from thonny import get_workbench, ui_utils, get_runner
 from thonny.codeview import CodeView
@@ -90,7 +89,7 @@ class Editor(ttk.Frame):
         else:
             result = os.path.basename(self.get_filename())
 
-        if self._loading:
+        if self._loading or self._waiting_write_completion:
             result += " ..."
         elif self.is_modified():
             result += " *"
@@ -229,78 +228,100 @@ class Editor(ttk.Frame):
     def save_file_enabled(self):
         return self.is_modified() or not self.get_filename()
 
-    def save_file(self, ask_filename=False):
+    def save_file(self, ask_filename=False, save_copy=False):
         if self._filename is not None and not ask_filename:
-            get_workbench().event_generate("Save", editor=self, filename=self._filename)
+            save_filename = self._filename
+            get_workbench().event_generate("Save", editor=self, filename=save_filename)
         else:
-            new_filename = self.ask_new_path()
-            if not new_filename:
+            save_filename = self.ask_new_path()
+            if not save_filename:
                 return None
 
-            self._filename = new_filename
-            get_workbench().event_generate("SaveAs", editor=self, filename=self._filename)
+            get_workbench().event_generate(
+                "SaveAs", editor=self, filename=save_filename, save_copy=save_copy
+            )
 
         content_bytes = self._code_view.get_content_as_bytes(self._newlines)
 
-        if is_remote_path(self._filename):
-            return self.write_remote_file(content_bytes)
+        if is_remote_path(save_filename):
+            result = self.write_remote_file(save_filename, content_bytes, save_copy)
         else:
-            return self.write_local_file(content_bytes)
+            result = self.write_local_file(save_filename, content_bytes, save_copy)
 
-    def write_local_file(self, content_bytes):
+        if not result:
+            return None
+
+        if not save_copy:
+            self._filename = save_filename
+
+        self.update_title()
+        return save_filename
+
+    def write_local_file(self, save_filename, content_bytes, save_copy):
         try:
-            f = open(self._filename, mode="wb")
+            f = open(save_filename, mode="wb")
             f.write(content_bytes)
             f.flush()
             # Force writes on disk, see https://learn.adafruit.com/adafruit-circuit-playground-express/creating-and-editing-code#1-use-an-editor-that-writes-out-the-file-completely-when-you-save-it
             os.fsync(f)
             f.close()
-            self._last_known_mtime = os.path.getmtime(self._filename)
+            if not save_copy or save_filename == self._filename:
+                self._last_known_mtime = os.path.getmtime(save_filename)
             get_workbench().event_generate(
-                "LocalFileOperation", path=self._filename, operation="save"
+                "LocalFileOperation", path=save_filename, operation="save"
             )
         except PermissionError:
-            if askyesno(
+            messagebox.showerror(
                 "Permission Error",
-                "Looks like this file or folder is not writable.\n\n"
-                + "Do you want to save under another folder and/or filename?",
+                "Looks like this file or folder is not writable.",
                 parent=get_workbench(),
-            ):
-                return self.save_file(True)
-            else:
-                return None
+            )
+            return False
 
-        self.master.remember_recent_file(self._filename)
+        if not save_copy or save_filename == self._filename:
+            self.master.remember_recent_file(save_filename)
 
-        self._waiting_write_completion = False
-        self._code_view.text.edit_modified(False)
+        if not save_copy or save_filename == self._filename:
+            self._waiting_write_completion = False
+            self._code_view.text.edit_modified(False)
 
-        return self._filename
+        return True
 
-    def write_remote_file(self, content_bytes):
+    def write_remote_file(self, save_filename, content_bytes, save_copy):
         if get_runner().can_do_file_operations():
-            target_filename = extract_target_path(self._filename)
+            target_filename = extract_target_path(save_filename)
+
+            # causes progress marker to be displayed, even when saving a copy
             self._waiting_write_completion = True
+
             get_runner().send_command(
-                InlineCommand("write_file", path=target_filename, content_bytes=content_bytes)
+                InlineCommand(
+                    "write_file",
+                    path=target_filename,
+                    content_bytes=content_bytes,
+                    editor_id=id(self),
+                )
             )
 
             # NB! edit_modified is not falsed yet!
             get_workbench().event_generate(
-                "RemoteFileOperation", path=extract_target_path(self._filename), operation="save"
+                "RemoteFileOperation", path=target_filename, operation="save"
             )
-            return self._filename
+            return True
         else:
             messagebox.showwarning("Can't save", "Device is busy, wait and try again!")
-            return None
+            return False
 
     def _complete_writing_remote_file(self, msg):
-        if (
-            self._waiting_write_completion
-            and self._filename
-            and extract_target_path(self._filename) == msg["path"]
-        ):
-            self._code_view.text.edit_modified(False)
+        if msg.get("editor_id") == id(self):
+            self._waiting_write_completion = False
+            if (
+                self._filename
+                and is_remote_path(self._filename)
+                and extract_target_path(self._filename) == msg["path"]
+            ):
+                # ie. it was not "Save copy ..."
+                self._code_view.text.edit_modified(False)
             self.update_title()
 
     def ask_new_path(self):
@@ -582,6 +603,15 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
+            "save_copy",
+            "file",
+            "Save copy...",
+            self._cmd_save_copy,
+            tester=lambda: self.get_current_editor() is not None,
+            group=10,
+        )
+
+        get_workbench().add_command(
             "rename_file",
             "file",
             "Rename...",
@@ -748,6 +778,13 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         self.get_current_editor().save_file(ask_filename=True)
         self.update_editor_title(self.get_current_editor())
         get_workbench().update_title()
+
+    def _cmd_save_copy(self):
+        if not self.get_current_editor():
+            return
+
+        self.get_current_editor().save_file(ask_filename=True, save_copy=True)
+        self.update_editor_title(self.get_current_editor())
 
     def _cmd_save_file_as_enabled(self):
         return self.get_current_editor() is not None
