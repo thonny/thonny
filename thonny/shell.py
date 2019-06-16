@@ -799,9 +799,9 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
     def restart(self):
         self._insert_text_directly(
-            #"\n============================== RESTART ==============================\n",
-            "\n" + "─"*200 + "\n",
-            #"\n" + "═"*200 + "\n",
+            # "\n============================== RESTART ==============================\n",
+            "\n" + "─" * 200 + "\n",
+            # "\n" + "═"*200 + "\n",
             ("magic", "restart_line"),
         )
 
