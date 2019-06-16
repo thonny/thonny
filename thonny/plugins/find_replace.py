@@ -105,29 +105,37 @@ class FindDialog(tk.Toplevel):
         self.down_radiobutton.invoke()
 
         # Find button - goes to the next occurrence
+        button_width = 17
         self.find_button = ttk.Button(
-            main_frame, text=_("Find"), command=self._perform_find, default="active"
+            main_frame,
+            text=_("Find"),
+            width=button_width,
+            command=self._perform_find,
+            default="active",
         )
         self.find_button.grid(column=3, row=0, sticky=tk.W + tk.E, pady=(pady, 0), padx=(0, padx))
         self.find_button.config(state="disabled")
 
         # Replace button - replaces the current occurrence, if it exists
         self.replace_button = ttk.Button(
-            main_frame, text=_("Replace"), command=self._perform_replace
+            main_frame, text=_("Replace"), width=button_width, command=self._perform_replace
         )
         self.replace_button.grid(column=3, row=1, sticky=tk.W + tk.E, padx=(0, padx))
         self.replace_button.config(state="disabled")
 
         # Replace + find button - replaces the current occurence and goes to next
         self.replace_and_find_button = ttk.Button(
-            main_frame, text=_("Replace+Find"), command=self._perform_replace_and_find
+            main_frame,
+            text=_("Replace+Find"),
+            width=button_width,
+            command=self._perform_replace_and_find,
         )  # TODO - text to resources
         self.replace_and_find_button.grid(column=3, row=2, sticky=tk.W + tk.E, padx=(0, padx))
         self.replace_and_find_button.config(state="disabled")
 
         # Replace all button - replaces all occurrences
         self.replace_all_button = ttk.Button(
-            main_frame, text=_("Replace all"), command=self._perform_replace_all
+            main_frame, text=_("Replace all"), width=button_width, command=self._perform_replace_all
         )  # TODO - text to resources
         self.replace_all_button.grid(
             column=3, row=3, sticky=tk.W + tk.E, padx=(0, padx), pady=(0, pady)

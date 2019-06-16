@@ -25,6 +25,7 @@ Version history
 * FIXED #704: Suggest current filename with Save As. Fixed by Илья Кругликов
 * FIXED #708: Error when stacktrace includes Cython frames.
 * FIXED #711: Thonny can now handle UNC paths
+* FIXED #719: Buttons are too narrow in Search/Replace dialog
 * FIXED #725: When saving a file, respect the original fileformat. By badukaire 
 * FIXED #727: Respect fileformat for unix files too. By badukaire 
 * FIXED #731: Right click menu disappears immediately and executes unwanted Undo action
