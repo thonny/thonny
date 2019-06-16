@@ -65,4 +65,4 @@ class EditorConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page(_("Editor"), EditorConfigurationPage)
+    get_workbench().add_configuration_page("editor", _("Editor"), EditorConfigurationPage, 30)

@@ -65,4 +65,4 @@ class AssistantConfigPage(ConfigurationPage):
 
 
 def load_plugin():
-    get_workbench().add_configuration_page(_("Assistant"), AssistantConfigPage)
+    get_workbench().add_configuration_page("assistant", _("Assistant"), AssistantConfigPage, 80)

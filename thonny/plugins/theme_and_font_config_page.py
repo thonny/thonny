@@ -207,4 +207,6 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page("Theme & Font", ThemeAndFontConfigurationPage)
+    get_workbench().add_configuration_page(
+        "theme", "Theme & Font", ThemeAndFontConfigurationPage, 40
+    )

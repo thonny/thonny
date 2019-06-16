@@ -54,4 +54,4 @@ class ShellConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page(_("Shell"), ShellConfigurationPage)
+    get_workbench().add_configuration_page("shell", _("Shell"), ShellConfigurationPage, 70)

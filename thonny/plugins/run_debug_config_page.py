@@ -67,4 +67,4 @@ class RunDebugConfigurationPage(ConfigurationPage):
 
 
 def load_plugin():
-    get_workbench().add_configuration_page("Run & Debug", RunDebugConfigurationPage)
+    get_workbench().add_configuration_page("run", "Run & Debug", RunDebugConfigurationPage, 50)

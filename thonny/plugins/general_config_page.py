@@ -96,4 +96,4 @@ class GeneralConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page("General", GeneralConfigurationPage)
+    get_workbench().add_configuration_page("general", "General", GeneralConfigurationPage, 10)

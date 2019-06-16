@@ -206,7 +206,7 @@ class Workbench(tk.Tk):
 
     def _init_configuration(self) -> None:
         self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE_NAME)
-        self._configuration_pages = {}  # type: Dict[str, Type[tk.Widget]]
+        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]
 
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.ui_mode", "regular")
@@ -985,8 +985,10 @@ class Workbench(tk.Tk):
             position_in_group="alphabetic",
         )
 
-    def add_configuration_page(self, title: str, page_class: Type[tk.Widget]) -> None:
-        self._configuration_pages[title] = page_class
+    def add_configuration_page(
+        self, key: str, title: str, page_class: Type[tk.Widget], order: int
+    ) -> None:
+        self._configuration_pages.append((key, title, page_class, order))
 
     def add_content_inspector(self, inspector_class: Type) -> None:
         self.content_inspector_classes.append(inspector_class)
@@ -1859,10 +1861,10 @@ class Workbench(tk.Tk):
         self._maximized_view = None
         self.get_variable("view.maximize_view").set(False)
 
-    def show_options(self, page=None):
+    def show_options(self, page_key=None):
         dlg = ConfigurationDialog(self, self._configuration_pages)
-        if page:
-            dlg.select_page(page)
+        if page_key:
+            dlg.select_page(page_key)
 
         ui_utils.show_dialog(dlg)
 

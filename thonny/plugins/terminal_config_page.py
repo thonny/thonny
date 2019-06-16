@@ -35,4 +35,4 @@ class TerminalConfigurationPage(ConfigurationPage):
 
 
 def load_plugin():
-    get_workbench().add_configuration_page("Terminal", TerminalConfigurationPage)
+    get_workbench().add_configuration_page("terminal", "Terminal", TerminalConfigurationPage, 60)

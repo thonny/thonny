@@ -32,15 +32,15 @@ class ConfigurationDialog(tk.Toplevel):
         self._ok_button.grid(row=1, column=1, padx=(0, 11), pady=(0, 10))
         self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
 
-        self._pages = {}
-        for title in sorted(page_records):
+        self._page_records = []
+        for key, title, page_class, order in sorted(page_records, key=lambda r: (r[3], r[0])):
             try:
-                page_class = page_records[title]
                 spacer = ttk.Frame(self)
                 spacer.rowconfigure(0, weight=1)
                 spacer.columnconfigure(0, weight=1)
                 page = page_class(spacer)
-                self._pages[title] = page
+                page.key = key
+                self._page_records.append((key, title, page))
                 page.grid(sticky=tk.NSEW, pady=10, padx=15)
                 self._notebook.add(spacer, text=title)
             except Exception:
@@ -51,15 +51,14 @@ class ConfigurationDialog(tk.Toplevel):
 
         self._notebook.select(self._notebook.tabs()[ConfigurationDialog.last_shown_tab_index])
 
-    def select_page(self, title):
+    def select_page(self, key):
         for i, tab in enumerate(self._notebook.tabs()):
-            if self._notebook.tab(i)["text"] == title:
+            if self._page_records[i][0] == key:
                 self._notebook.select(tab)
 
     def _ok(self, event=None):
-        for title in sorted(self._pages):
+        for key, title, page in self._page_records:
             try:
-                page = self._pages[title]
                 if page.apply() == False:
                     return
             except Exception:
@@ -68,9 +67,8 @@ class ConfigurationDialog(tk.Toplevel):
         self.destroy()
 
     def _cancel(self, event=None):
-        for title in sorted(self._pages):
+        for key, title, page in self._page_records:
             try:
-                page = self._pages[title]
                 page.cancel()
             except Exception:
                 get_workbench().report_exception("Error when cancelling options in " + title)
