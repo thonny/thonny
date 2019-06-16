@@ -1141,6 +1141,9 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             self._applied_io_events.append((text_to_be_submitted, "stdin"))
 
     def _arrow_up(self, event):
+        if not get_runner().is_waiting_toplevel_command():
+            return None
+
         if not self._in_current_input_range("insert"):
             return None
 
@@ -1166,6 +1169,9 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         return "break"
 
     def _arrow_down(self, event):
+        if not get_runner().is_waiting_toplevel_command():
+            return None
+
         if not self._in_current_input_range("insert"):
             return None
 
@@ -1177,7 +1183,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         if (
             len(self._command_history) == 0
-            # FIXME: _command_history_current_index may be None
+            or self._command_history_current_index is None
             or self._command_history_current_index >= len(self._command_history) - 1
         ):
             # can't take next command
