@@ -490,10 +490,10 @@ class BaseFileBrowser(ttk.Frame):
         self.menu.delete(0, "end")
 
         self.menu.add_command(label="Refresh", command=self.refresh_tree)
-        self.menu.add_command(label="New file", command=self.create_new_file)
-        self.menu.add_command(
-            label="Delete", command=lambda: self.delete_path(selected_path, selected_kind)
-        )
+        #self.menu.add_command(label="New file", command=self.create_new_file)
+        #self.menu.add_command(
+        #    label="Delete", command=lambda: self.delete_path(selected_path, selected_kind)
+        #)
         self.menu.add_command(
             label="Focus into",
             command=lambda: self.request_focus_into(selected_path),
@@ -515,24 +515,22 @@ class BaseFileBrowser(ttk.Frame):
     def create_new_file(self):
         selected_node_id = self.get_selected_node()
 
-        if not selected_node_id:
-            return
-
-        selected_path = self.tree.set(selected_node_id, "path")
-        selected_kind = self.tree.set(selected_node_id, "kind")
-
-        if selected_kind == "dir":
-            parent_path = selected_path
+        if selected_node_id:
+            selected_path = self.tree.set(selected_node_id, "path")
+            selected_kind = self.tree.set(selected_node_id, "kind")
+    
+            if selected_kind == "dir":
+                parent_path = selected_path
+            else:
+                parent_id = self.tree.parent(selected_node_id)
+                parent_path = self.tree.set(parent_id, "path")
         else:
-            parent_id = self.tree.parent(selected_node_id)
-            parent_path = self.tree.set(parent_id, "path")
+            parent_path = self.current_focus
 
-        initial_name = self.get_proposed_new_file_name(parent_path, ".py")
         name = askstring(
             "File name",
             "Provide filename",
-            initialvalue=initial_name,
-            # selection_range=(0, len(initial_name)-3)
+            initialvalue="",
         )
 
         if not name:
@@ -544,13 +542,7 @@ class BaseFileBrowser(ttk.Frame):
             # TODO: ignore case in windows
             showerror("Error", "The file '" + path + "' already exists", parent=get_workbench())
         else:
-            # Create file
-            with open(path, "w"):
-                pass
-
-            self.open_path_in_browser(path, True)
-
-            return path
+            self.open_file(path)
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):
