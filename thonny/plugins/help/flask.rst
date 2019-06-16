@@ -8,6 +8,12 @@ but this may intimidate some beginners. Thonny tries make things easeir and allo
 just like any other program (with simple F5). If it detects you are running a Flask program, then it executes
 it with some lines of code appended, which start the development server with suitable settings.
 
+Debugging
+---------
+If you want to step through your Flask program, set a breakpoint inside some function and invoke 
+the debugger (both nicer and faster work, but faster is ... faster). Reload your page and start 
+stepping inside the function. You may want to turn off "Frames in separate windows" (Tools => Options
+=> Run & Debug) for more comfortable operation. 
 
 Details
 -------
