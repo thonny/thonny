@@ -1586,12 +1586,13 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             port_desc = self._port_desc_variable.get()
             port_name = self._ports_by_desc[port_desc]
             get_workbench().set_option(self.backend_name + ".port", port_name)
-            get_workbench().set_option(
-                self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
-            )
-            get_workbench().set_option(
-                self.backend_name + ".webrepl_password", self._webrepl_password_var.get()
-            )
+            if self.allow_webrepl:
+                get_workbench().set_option(
+                    self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
+                )
+                get_workbench().set_option(
+                    self.backend_name + ".webrepl_password", self._webrepl_password_var.get()
+                )
 
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
