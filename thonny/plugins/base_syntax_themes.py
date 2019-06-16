@@ -18,12 +18,6 @@ def default_light() -> SyntaxThemeSettings:
             "background": default_bg,
         },
         "GUTTER": {"foreground": gutter_foreground, "background": gutter_background},
-        "restart_line": {
-            "spacing1": 6,
-            "spacing3": 4,
-            "foreground": gutter_foreground,
-            "background": gutter_background,
-        },
         "breakpoint": {"foreground": "crimson"},
         "current_line": {"background": "#f5f5f5"},
         "definition": {"foreground": "DarkBlue", "font": "BoldEditorFont"},
@@ -143,12 +137,6 @@ def default_dark() -> SyntaxThemeSettings:
             "background": default_bg,
         },
         "GUTTER": {"foreground": gutter_foreground, "background": gutter_background},
-        "restart_line": {
-            "spacing1": 6,
-            "spacing3": 4,
-            "foreground": gutter_foreground,
-            "background": gutter_background,
-        },
         "breakpoint": {"foreground": "pink"},
         "current_line": {"background": "#363636"},
         "sel": {"foreground": "#eeeeee", "background": "#6E6E6E"},
@@ -259,7 +247,6 @@ def default_dark_green() -> SyntaxThemeSettings:
     return {
         "TEXT": {"background": "#273627"},
         "GUTTER": {"background": gutter_background},
-        "restart_line": {"background": gutter_background},
         "current_line": {"background": "#2E402E"},
         "sel": {"background": "#6E6E6E"},
         "unclosed_expression": {"background": "#0F1F15"},
@@ -281,7 +268,6 @@ def default_dark_blue() -> SyntaxThemeSettings:
     return {
         "TEXT": {"background": "#272936"},
         "GUTTER": {"background": gutter_background},
-        "restart_line": {"background": gutter_background},
         "current_line": {"background": "#2D3040"},
         "sel": {"background": "#6E6E6E"},
         "unclosed_expression": {"background": "#100B21"},

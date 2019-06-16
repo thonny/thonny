@@ -314,7 +314,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
-        self.tag_configure("restart_line", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("restart_line", wrap="none", lmargin1=x_padding, lmargin2=x_padding)
 
         self.tag_configure(
             "welcome",
@@ -798,9 +798,12 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             focused_view.focus()
 
     def restart(self):
-        self._insert_text_directly("\n")
-        self._insert_text_directly(" Restart\n", ("restart_line", "GUTTER"))
-        self._insert_text_directly("\n")
+        self._insert_text_directly(
+            #"\n============================== RESTART ==============================\n",
+            "\n" + "─"*200 + "\n",
+            #"\n" + "═"*200 + "\n",
+            ("magic", "restart_line"),
+        )
 
     def intercept_insert(self, index, txt, tags=()):
         # pylint: disable=arguments-differ
