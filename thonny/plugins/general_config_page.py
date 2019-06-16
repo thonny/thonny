@@ -79,10 +79,7 @@ class GeneralConfigurationPage(ConfigurationPage):
 
         reopen_label = ttk.Label(
             self,
-            text=_(
-                "NB! Restart Thonny after changing these options"
-                + "\nin order to see the full effect"
-            ),
+            text=_("NB! Restart Thonny after changing these options!"),
             font="BoldTkDefaultFont",
         )
         reopen_label.grid(row=100, column=0, sticky=tk.W, pady=20, columnspan=2)

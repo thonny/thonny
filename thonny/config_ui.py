@@ -41,7 +41,7 @@ class ConfigurationDialog(tk.Toplevel):
                 page = page_class(spacer)
                 page.key = key
                 self._page_records.append((key, title, page))
-                page.grid(sticky=tk.NSEW, pady=10, padx=15)
+                page.grid(sticky=tk.NSEW, pady=(15, 10), padx=15)
                 self._notebook.add(spacer, text=title)
             except Exception:
                 traceback.print_exc()

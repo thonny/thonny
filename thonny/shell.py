@@ -260,11 +260,12 @@ class ShellMenu(TextMenu):
         return not self.text.selection_is_writable()
 
 
-class ShellText(EnhancedTextWithLogging, PythonText):
-    def __init__(self, master, view, cnf={}, **kw):
+class BaseShellText(EnhancedTextWithLogging, PythonText):
+    """Passive version of ShellText. Used also for preview"""
+
+    def __init__(self, master, view=None, cnf={}, **kw):
         self.view = view
         super().__init__(master, cnf, **kw)
-        self.bindtags(self.bindtags() + ("ShellText",))
 
         self._command_history = (
             []
@@ -306,12 +307,7 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure(
             "io", lmargin1=io_indent, lmargin2=io_indent, rmargin=io_indent, font="IOFont"
         )
-        if ui_utils.get_tk_version_info() >= (8, 6, 6):
-            self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
-
-        self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
-        self.tag_bind("io_hyperlink", "<Enter>", self._hyperlink_enter)
-        self.tag_bind("io_hyperlink", "<Leave>", self._hyperlink_leave)
+        self.update_margin_color()
 
         self.tag_configure("after_io_or_value", spacing1=io_vert_spacing)
         self.tag_configure("before_io", spacing3=io_vert_spacing)
@@ -351,11 +347,6 @@ class ShellText(EnhancedTextWithLogging, PythonText):
         self.active_object_tags = set()
 
         self._last_welcome_text = None
-
-        get_workbench().bind("InputRequest", self._handle_input_request, True)
-        get_workbench().bind("ProgramOutput", self._handle_program_output, True)
-        get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
-        get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
 
         self.tag_raise("io_hyperlink")
         self.tag_raise("underline")
@@ -898,7 +889,8 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def on_secondary_click(self, event=None):
         super().on_secondary_click(event)
-        self.view.menu.tk_popup(event.x_root, event.y_root)
+        if self.view:
+            self.view.menu.tk_popup(event.x_root, event.y_root)
 
     def _in_current_input_range(self, index):
         try:
@@ -1337,6 +1329,29 @@ class ShellText(EnhancedTextWithLogging, PythonText):
 
     def update_tty_mode(self):
         self.tty_mode = get_workbench().get_option("shell.tty_mode")
+
+    def set_syntax_options(self, syntax_options):
+        super().set_syntax_options(syntax_options)
+        self.update_margin_color()
+
+    def update_margin_color(self):
+        if ui_utils.get_tk_version_info() >= (8, 6, 6):
+            self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
+
+
+class ShellText(BaseShellText):
+    def __init__(self, master, view, cnf={}, **kw):
+        super().__init__(master, view, cnf=cnf, **kw)
+        self.bindtags(self.bindtags() + ("ShellText",))
+
+        self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
+        self.tag_bind("io_hyperlink", "<Enter>", self._hyperlink_enter)
+        self.tag_bind("io_hyperlink", "<Leave>", self._hyperlink_leave)
+
+        get_workbench().bind("InputRequest", self._handle_input_request, True)
+        get_workbench().bind("ProgramOutput", self._handle_program_output, True)
+        get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
+        get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
 
 
 class SqueezedTextDialog(tk.Toplevel):
