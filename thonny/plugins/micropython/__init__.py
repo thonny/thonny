@@ -960,6 +960,40 @@ class MicroPythonProxy(BackendProxy):
                 fp.write(indent + name + " = None\n")
 
     def _cmd_write_file(self, cmd):
+        mount_name = self._get_fs_mount_name()
+        if mount_name is not None:
+            # CircuitPython devices only allow writing via mount,
+            # other mounted devices may show outdated data in mount
+            # when written via serial.
+            self._write_file_via_mount(cmd)
+        else:
+            self._write_file_via_serial(cmd)
+
+    def _write_file_via_mount(self, cmd):
+        # TODO: should be done async in background process
+
+        flash_prefix = self._get_flash_prefix()
+        if cmd["path"].startswith(flash_prefix):
+            path_suffix = cmd["path"][len(flash_prefix) :]
+        elif cmd["path"].startswith("/"):
+            path_suffix = cmd["path"][1:]
+        else:
+            # something like micro:bit but with mounted fs
+            path_suffix
+
+        target_path = os.path.join(self._get_fs_mount(), path_suffix)
+        with open(target_path, "wb") as f:
+            f.write(cmd["content_bytes"])
+            f.flush()
+            os.fsync(f)
+
+        self._non_serial_msg_queue.put(
+            InlineResponse(
+                command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
+            )
+        )
+
+    def _write_file_via_serial(self, cmd):
         BUFFER_SIZE = 32
         data = cmd["content_bytes"]
 
@@ -1022,7 +1056,6 @@ class MicroPythonProxy(BackendProxy):
         )
 
     def _cmd_read_file(self, cmd):
-        print("READING", cmd)
         try:
             self._execute_async(
                 dedent(
@@ -1070,16 +1103,44 @@ class MicroPythonProxy(BackendProxy):
         return self._supports_directories()
 
     def _get_fs_mount_name(self):
+        if self._welcome_text is None:
+            return None
+
+        markers_by_name = {"PYBFLASH": {"pyblite", "pyboard"}, "CIRCUITPY": {"circuitpython"}}
+
+        for name in markers_by_name:
+            for marker in markers_by_name[name]:
+                if marker.lower() in self._welcome_text.lower():
+                    return name
+
         return None
 
     def _get_bootloader_mount_name(self):
         return None
 
+    def _get_flash_prefix(self):
+        if not self._supports_directories():
+            return ""
+        elif (
+            "LoBo" in self._welcome_text
+            or "WiPy with ESP32" in self._welcome_text
+            or "PYBLITE" in self._welcome_text
+            or "PYBv" in self._welcome_text
+            or "PYBOARD" in self._welcome_text.upper()
+        ):
+            return "/flash/"
+        else:
+            return "/"
+
     def _get_fs_mount(self):
         if self._get_fs_mount_name() is None:
             return None
         else:
-            candidates = find_volumes_by_name(self._get_fs_mount_name())
+            candidates = find_volumes_by_name(
+                self._get_fs_mount_name(),
+                # querying A can be very slow
+                skip_letters="A",
+            )
             if len(candidates) == 0:
                 raise RuntimeError("Could not find volume " + self._get_fs_mount_name())
             elif len(candidates) > 1:
@@ -1802,7 +1863,6 @@ class WebReplConnection(Connection):
     async def _ws_keep_reading(self):
         while True:
             data = (await self._ws.recv()).encode("UTF-8")
-            print("Read:", repr(data))
             if len(data) == 0:
                 self._error = "EOF"
                 break

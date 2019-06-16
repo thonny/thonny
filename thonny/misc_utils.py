@@ -39,7 +39,7 @@ def running_on_linux() -> bool:
     return platform.system() == "Linux"
 
 
-def list_volumes() -> Sequence[str]:
+def list_volumes(skip_letters=set()) -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
     if os.name == "posix":
         # 'posix' means we're on Linux or OSX (Mac).
@@ -61,6 +61,8 @@ def list_volumes() -> Sequence[str]:
         try:
             volumes = []
             for disk in "ABCDEFGHIJKLMNOPQRSTUVWXYZ":
+                if disk in skip_letters:
+                    continue
                 path = "{}:\\".format(disk)
                 if os.path.exists(path):
                     volumes.append(path)
@@ -90,8 +92,8 @@ def get_win_volume_name(path: str) -> str:
     return vol_name_buf.value
 
 
-def find_volumes_by_name(volume_name: str) -> Sequence[str]:
-    volumes = list_volumes()
+def find_volumes_by_name(volume_name: str, skip_letters=set()) -> Sequence[str]:
+    volumes = list_volumes(skip_letters=skip_letters)
     if os.name == "nt":
         return [
             volume
