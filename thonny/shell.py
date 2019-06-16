@@ -540,7 +540,15 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                 btn.tags = tags
                 self._squeeze_buttons.add(btn)
                 create_tooltip(btn, "%d characters squeezed. " % len(data) + "Click for details.")
+
+                # TODO: refactor
+                # (currently copied from insert_text_directly)
+                self.mark_gravity("input_start", tk.RIGHT)
+                self.mark_gravity("output_insert", tk.RIGHT)
+
                 self.window_create("output_insert", window=btn)
+                for tag_name in tags:
+                    self.tag_add(tag_name, "output_insert -1 chars")
                 data = ""
 
             elif self._io_cursor_offset < 0:
