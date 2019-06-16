@@ -163,10 +163,19 @@ class Editor(ttk.Frame):
     def _load_file(self, filename, keep_undo=False):
         self._waiting_write_completion = False
 
-        if is_remote_path(filename):
-            self._start_loading_remote_file(filename)
-        else:
-            self._load_local_file(filename, keep_undo)
+        try:
+            if is_remote_path(filename):
+                self._start_loading_remote_file(filename)
+            else:
+                self._load_local_file(filename, keep_undo)
+        except SyntaxError as e:
+            assert "encoding" in str(e).lower()
+            messagebox.showerror(
+                "Problem loading file",
+                "This file seems to have problems with encoding.\n\n"
+                + "Make sure it is in UTF-8 or contains proper encoding hint.",
+            )
+            return False
 
         self.update_appearance()
 
