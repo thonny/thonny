@@ -44,6 +44,7 @@ class SyntaxText(EnhancedText):
             self.tag_lower("current_line")
 
         self.tag_raise("sel")
+        self.tag_lower("stdout")
 
     def _reload_theme_options(self, event=None):
         super()._reload_theme_options(event)
