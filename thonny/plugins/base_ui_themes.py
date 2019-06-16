@@ -1,7 +1,8 @@
 from typing import Callable, Dict, Union  # @UnusedImport
 
 from thonny import get_workbench
-from thonny.misc_utils import running_on_linux, running_on_windows
+from thonny.misc_utils import running_on_linux, running_on_windows,\
+    running_on_mac_os
 from thonny.workbench import BasicUiThemeSettings, CompoundUiThemeSettings
 
 
@@ -14,7 +15,7 @@ def _treeview_settings() -> BasicUiThemeSettings:
     light_blue = "#ADD8E6"
     light_grey = "#D3D3D3"
 
-    if running_on_linux():
+    if running_on_linux() or running_on_mac_os():
         bg_sel_focus = light_blue
         fg_sel_focus = "black"
         fg_sel_notfocus = "black"
