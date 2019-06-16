@@ -2,7 +2,7 @@
 Version history
 ===============
 
-3.2.0b1 (2019-06-??)
+3.2.0b1 (2019-06-17)
 ====================
 * NEW: [Work in progress] UI and help content can be translated to other languages (big thanks to cspaier, Georges Khaznadar and translators). See docs/translate.md for contrubution instructions.
 * NEW: Shell supports ANSI color codes and line overwriting with ``\b`` and ``\r``. See "Help => Shell" for more info.
