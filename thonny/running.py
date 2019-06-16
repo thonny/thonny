@@ -135,7 +135,7 @@ class Runner:
             caption="Stop",
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
-            group=70,
+            group=100,
             image="stop",
             include_in_toolbar=True,
         )
@@ -147,8 +147,28 @@ class Runner:
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
             default_sequence="<Control-c>",
-            group=70,
+            group=100,
             bell_when_denied=False,
+        )
+
+        get_workbench().add_command(
+            "softreboot",
+            "run",
+            "Send EOF / Soft reboot",
+            self.soft_reboot,
+            self.soft_reboot_enabled,
+            group=100,
+            default_sequence="<Control-d>",
+            extra_sequences=["<<CtrlDInText>>"],
+        )
+
+        get_workbench().add_command(
+            "disconnectserial",
+            "run",
+            "Disconnect",
+            self.disconnect,
+            self.disconnect_enabled,
+            group=100,
         )
 
     def get_state(self) -> str:
@@ -372,6 +392,24 @@ class Runner:
             get_workbench().hide_view("VariablesView")
 
         self.restart_backend(True)
+
+    def disconnect(self):
+        proxy = self.get_backend_proxy()
+        assert hasattr(proxy, "disconnect")
+        proxy.disconnect()
+
+    def disconnect_enabled(self):
+        hasattr(self.get_backend_proxy(), "disconnect")
+
+    def soft_reboot(self):
+        proxy = self.get_backend_proxy()
+        if hasattr(proxy, "_soft_reboot_and_run_main"):
+            return proxy._soft_reboot_and_run_main()
+        return None
+
+    def soft_reboot_enabled(self):
+        proxy = self.get_backend_proxy()
+        return proxy and proxy.is_functional() and hasattr(proxy, "_soft_reboot_and_run_main")
 
     def _poll_vm_messages(self) -> None:
         """I chose polling instead of event_generate in listener thread,

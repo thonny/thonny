@@ -30,6 +30,8 @@ Version history
 * CHANGED: In order to work around ``tkinter.Text`` performance problems, Shell squeezes very long lines into a button. The button opens a dialog for expanding, viewing or copying those lines. Shell also deletes old output to remain responsive.
 * CHANGED: Various changes in simple mode (Zoom and Quit buttons, merging Run and Resume buttons, automatic display of Variables view).
 * CHANGED: Disabled Tk clipboard management workaround in Linux (occasionally caused UI freezes). This means clipboard becomes emptied after closing Thonny.
+* CHANGED: MicroPython commands from "Device" menu have been redesigned (use Files view instead) or moved to other menus (Run and Tools). The goal is to get rid of Device menu and keep only magic commands which make sense from the back-end perspective. 
+
 
 Several of these features were proposed and supported by Raspberry Pi Foundation.
 

@@ -16,7 +16,7 @@ import webbrowser
 from queue import Queue
 from textwrap import dedent
 from time import sleep
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from thonny.ui_utils import askopenfilename, create_url_label
 from typing import Optional
 
@@ -959,59 +959,6 @@ class MicroPythonProxy(BackendProxy):
                 # keep only the name
                 fp.write(indent + name + " = None\n")
 
-    def _cmd_cat(self, cmd):
-        if len(cmd.args) != 1:
-            self._send_error_to_shell("Command requires one argument")
-            return
-
-        source = cmd.args[0]
-        mount = self._get_fs_mount()
-        if mount is None:
-            self._cat_via_serial(source)
-        else:
-            source = os.path.join(mount, source.strip("/"))
-            self._cat_via_mount(source)
-
-    def _cmd_lsdevice(self, cmd):
-        try:
-            items = self._list_files()
-            out = "\n".join(items) + "\n"
-            self._send_text_to_shell(out, "stdout")
-        finally:
-            self._non_serial_msg_queue.put(ToplevelResponse())
-
-    def _cmd_upload(self, cmd):
-        # Target is interpreted relative to the root
-        if len(cmd.args) == 1:
-            source = cmd.args[0]
-            # target is at root
-            target = os.path.basename(source)
-        elif len(cmd.args) == 2:
-            source = cmd.args[0]
-            target = cmd.args[1]
-        else:
-            # TODO: test this case
-            raise RuntimeError("Command requires 1 or 2 arguments")
-
-        if not os.path.isabs(source):
-            source = os.path.join(get_workbench().get_local_cwd(), source)
-
-        if not os.path.isfile(source):
-            raise IOError("No such file: %s" % source)
-
-        target = target.replace("\\", "/")
-        # Only prepend slash if it is known that device supports directories
-        # (it's probably safe to omit slash anyway)
-        if self._supports_directories() and not target.startswith("/"):
-            target = "/" + target
-
-        try:
-            self._check_and_upload(source, target)
-        finally:
-            self._non_serial_msg_queue.put(ToplevelResponse())
-            # TODO: Output confirmation ? (together with file size)
-            # Or should the confirmation be given in terms of mount path?
-
     def _cmd_write_file(self, cmd):
         BUFFER_SIZE = 32
         data = cmd["content_bytes"]
@@ -1112,111 +1059,6 @@ class MicroPythonProxy(BackendProxy):
                     error="Error requesting file content:\\n" + traceback.format_exc(),
                 )
             )
-
-    def _check_and_upload(self, source, target):
-        # if target is a py file,
-        # then give warning if source has syntax errors
-
-        # Note that it's incomplete solution --
-        # if current Python version is later than 3.5, then it may
-        # accept source which gives syntax errors on MP.
-
-        if target.endswith(".py"):
-            with tokenize.open(source) as fp:
-                src = fp.read()
-                try:
-                    ast.parse(src, source)
-                except SyntaxError as e:
-                    self._send_error_to_shell(
-                        "%s has syntax errors:\n%s\n\nFile will not be uploaded." % (source, e)
-                    )
-                    return
-        try:
-            self._upload(source, target)
-        except Exception:
-            self._send_error_to_shell(traceback.format_exc())
-
-    def _upload(self, source, target):
-        mount = self._get_fs_mount()
-        if mount is None:
-            self._upload_via_serial(source, target)
-        else:
-            virtual_path = os.path.join(mount, target.strip("/"))
-            self._upload_via_mount(source, virtual_path)
-
-    def _upload_via_serial(self, source, target):
-        assert self.idle
-
-        with open(source, "rb") as local:
-            content = local.read()
-
-        self._execute_and_expect_empty_response("__upf = open(%r, 'wb')" % target)
-
-        BLOCK_SIZE = 64
-        for i in range(0, len(content), BLOCK_SIZE):
-            self._execute_and_expect_empty_response("__upf.write(%r)" % content[i : i + BLOCK_SIZE])
-
-        self._execute_and_expect_empty_response("__upf.close()")
-        self._execute_and_expect_empty_response("del __upf")
-
-    def _upload_via_mount(self, source, target):
-        with open(source, "rb") as fp:
-            content = fp.read()
-
-        try:
-            with open(target, "wb") as fp:
-                fp.write(content)
-                # Force writes to the device to avoid data corruption
-                # when user resets or plugs out the device
-                os.fsync(fp)
-        except OSError as e:
-            self._report_upload_via_mount_error(source, target, e)
-            return
-
-    def _report_upload_via_mount_error(self, source, target, error):
-        self._send_error_to_shell(
-            "Couldn't write to %s\nOriginal error: %s\n\nIf the target directory exists then it may be corrupted."
-            % (target, error)
-        )
-
-    def _cat_via_serial(self, source):
-        try:
-            out, err = self._execute_and_get_response(
-                dedent(
-                    """
-                    with open(%r, "r") as fp:
-                        print(fp.read())
-                    """
-                    % source
-                ).strip()
-            )
-            if out:
-                self._send_text_to_shell(out.decode("utf-8", errors="replace"), "stdout")
-            if err:
-                self._send_text_to_shell(err.decode("utf-8", errors="replace"), "stderr")
-        except Exception:
-            self._send_error_to_shell(traceback.format_exc())
-        finally:
-            self._non_serial_msg_queue.put(ToplevelResponse())
-
-    def _cat_via_mount(self, source):
-        try:
-            with open(source, "r", encoding="UTF-8", errors="replace") as fp:
-                self._send_text_to_shell(fp.read(), "stdout")
-
-        except Exception:
-            self._send_error_to_shell(traceback.format_exc())
-        finally:
-            self._non_serial_msg_queue.put(ToplevelResponse())
-
-    def _list_files(self):
-        mount = self._get_fs_mount()
-        if mount is None:
-            return self._execute_and_parse_value(
-                "import os as __os_; print(__os_.listdir()); del __os_"
-            )
-        else:
-            return os.listdir(mount)
 
     def _supports_directories(self):
         if "micro:bit" in self._welcome_text.lower():
@@ -1421,32 +1263,6 @@ class MicroPythonProxy(BackendProxy):
             "Press any key to enter the REPL. Use CTRL-D to reload.",
             "Press CTRL-C to enter the REPL. Use CTRL-D to reload.",
         )
-
-    def _get_path_prefix(self):
-        if not self._supports_directories():
-            return ""
-        elif "LoBo" in self._welcome_text or "WiPy with ESP32" in self._welcome_text:
-            return "/flash/"
-        else:
-            return "/"
-
-    def get_default_directory(self):
-        prefix = self._get_path_prefix()
-        if prefix.endswith("/") and prefix != "/":
-            return prefix[:-1]
-        else:
-            return prefix
-
-    def _get_main_script_path(self):
-        return self._get_path_prefix() + "main.py"
-
-    def _get_boot_script_path(self):
-        return self._get_path_prefix() + "boot.py"
-
-    def _get_script_path(self):
-        local_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        assert os.path.isfile(local_path), "File not found: %s" % local_path
-        return self._get_path_prefix() + os.path.basename(local_path)
 
     def transform_message(self, msg):
         if msg is None:
@@ -2086,136 +1902,36 @@ def load_plugin():
         GenericMicroPythonConfigPage,
     )
 
-    def _upload_as(target_provider_method):
-        source_path = get_workbench().get_editor_notebook().get_current_editor().save_file(False)
-        if source_path is None:
-            return
-
-        proxy = get_runner().get_backend_proxy()
-        assert isinstance(proxy, MicroPythonProxy)
-
-        if os.path.isabs(source_path):
-            source_path = os.path.relpath(source_path, get_workbench().get_local_cwd())
-
-        target = getattr(proxy, target_provider_method)()
-        get_shell().submit_magic_command(["%upload", source_path, target])
-
-    def _cat(source_provider_method):
-        proxy = get_runner().get_backend_proxy()
-        assert isinstance(proxy, MicroPythonProxy)
-
-        source = getattr(proxy, source_provider_method)()
-        get_shell().submit_magic_command(["%cat", source])
-
-    def _upload_as_main_script():
-        _upload_as("_get_main_script_path")
-
-    def _upload_as_boot_script():
-        _upload_as("_get_boot_script_path")
-
-    def _upload_script():
-        _upload_as("_get_script_path")
-
-    def _cat_main_script():
-        _cat("_get_main_script_path")
-
-    def _cat_boot_script():
-        _cat("_get_boot_script_path")
-
-    def soft_reboot():
-        proxy = get_runner().get_backend_proxy()
-        if hasattr(proxy, "_soft_reboot_and_run_main"):
-            return proxy._soft_reboot_and_run_main()
-        return None
-
-    def soft_reboot_enabled():
-        proxy = get_runner().get_backend_proxy()
-        return proxy and proxy.is_functional() and hasattr(proxy, "_soft_reboot_and_run_main")
-
-    def disconnect():
-        proxy = get_runner().get_backend_proxy()
-        assert hasattr(proxy, "disconnect")
-        proxy.disconnect()
-
-    def disconnect_enabled():
-        proxy = get_runner().get_backend_proxy()
-        return hasattr(proxy, "disconnect")
-
-    def file_commands_enabled():
-        proxy = get_runner().get_backend_proxy()
-        return (
-            isinstance(proxy, MicroPythonProxy)
-            and get_workbench().get_editor_notebook().get_current_editor() is not None
-            and get_runner().is_waiting_toplevel_command()
+    def explain_deprecation():
+        messagebox.showinfo(
+            "Moved commands",
+            dedent(
+                """
+            MicroPython commands have been moved or replaced:
+            
+            * "Select device"
+                    * Moved into "Run" menu as "Select interpreter"
+            * "Upload current script as main script"
+            * "Upload current script as boot script"
+            * "Upload current script with current name"
+                    * use "File => Save copy..."
+            * "Show device's main script"
+            * "Show device's boot script"
+                    * Double-click in Files view (Show => Files)
+            * "Upload ____ firmware"
+                    * Moved into "Tools" menu
+            * "Soft reboot"
+                    * Moved into "Run" menu as "Send EOF / Soft reboot"
+            " "Close serial connection"
+                    * Moved into "Run" menu as "Disconnect"
+        """
+            ),
         )
 
-    def select_device():
-        get_workbench().show_options("Interpreter")
-
-    get_workbench().add_command("selectdevice", "device", "Select device", select_device, group=1)
-
     get_workbench().add_command(
-        "softreboot",
-        "device",
-        "Soft reboot",
-        soft_reboot,
-        soft_reboot_enabled,
-        group=100,
-        default_sequence="<Control-d>",
-        extra_sequences=["<<CtrlDInText>>"],
-    )
-
-    get_workbench().add_command(
-        "uploadmainscript",
-        "device",
-        "Upload current script as main script",
-        _upload_as_main_script,
-        tester=file_commands_enabled,
-        default_sequence="<Control-u>",
-        group=20,
-    )
-
-    get_workbench().add_command(
-        "uploadbootscript",
-        "device",
-        "Upload current script as boot script",
-        _upload_as_boot_script,
-        tester=file_commands_enabled,
-        group=20,
-    )
-
-    get_workbench().add_command(
-        "uploadscript",
-        "device",
-        "Upload current script with current name",
-        _upload_script,
-        tester=file_commands_enabled,
-        group=20,
-    )
-
-    get_workbench().add_command(
-        "catmainscript",
-        "device",
-        "Show device's main script",
-        _cat_main_script,
-        tester=file_commands_enabled,
-        group=20,
-    )
-
-    get_workbench().add_command(
-        "catbootscript",
-        "device",
-        "Show device's boot script",
-        _cat_boot_script,
-        tester=file_commands_enabled,
-        group=20,
-    )
-
-    get_workbench().add_command(
-        "disconnectserial",
-        "device",
-        "Close serial connection",
-        disconnect,
-        disconnect_enabled,
-        group=100,
+        "devicedeprecation",
+        "tempdevice",
+        "Where are all the commands?",
+        explain_deprecation,
+        group=1,
     )

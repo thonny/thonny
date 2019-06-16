@@ -120,4 +120,10 @@ class BackendConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
+    def select_device():
+        get_workbench().show_options("Interpreter")
+
     get_workbench().add_configuration_page(_("Interpreter"), BackendConfigurationPage)
+    get_workbench().add_command(
+        "select_interpreter", "run", "Select interpreter", select_device, group=1
+    )
