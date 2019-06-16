@@ -75,7 +75,16 @@ Making sound
 ------------
 When Shell is in terminal emulation mode, then you can produce a bell (or "ding") sound by outputting
 character ``"\a"``.
- 
+
+Displaying images
+-----------------
+You can display images in the shell by encoding your GIF or PNG file with Base64 and printing it 
+as single-line data URL:
+
+.. code::
+
+	print("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==")
+		
  
 Plotting series of numbers
 --------------------------
