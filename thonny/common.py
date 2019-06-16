@@ -209,7 +209,7 @@ def parse_message(msg_string: str) -> Record:
 def normpath_with_actual_case(name: str) -> str:
     """In Windows return the path with the case it is stored in the filesystem"""
     assert os.path.isabs(name) or os.path.ismount(name), "Not abs nor mount: " + name
-    assert os.path.exists(name)
+    assert os.path.exists(name), "Not exists: " + name
 
     if os.name == "nt":
         name = os.path.realpath(name)
@@ -374,7 +374,11 @@ def get_single_dir_child_data(path):
 
         try:
             for child in os.listdir(path):
-                full_child_path = normpath_with_actual_case(os.path.join(path, child))
+                full_child_path = os.path.join(path, child)
+                if not os.path.exists(full_child_path):
+                    # must be broken link
+                    continue
+                full_child_path = normpath_with_actual_case(full_child_path)
                 if not is_hidden_or_system_file(full_child_path):
                     st = os.stat(full_child_path, dir_fd=None, follow_symlinks=True)
                     name = os.path.basename(full_child_path)

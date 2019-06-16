@@ -19,7 +19,7 @@ class FilesView(tk.PanedWindow):
     def __init__(self, master=None):
         tk.PanedWindow.__init__(self, master, orient="vertical", borderwidth=0)
         self.remote_added = False
-        
+
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 4))
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
 
