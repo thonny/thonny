@@ -714,6 +714,8 @@ class MicroPythonProxy(BackendProxy):
                         __temp_real_path = __temp_path or '/'
                         __temp_children = {}
                         for __temp_name in __temp_os.listdir(__temp_real_path):
+                            if __temp_name.startswith('.') or __temp_name == "System Volume Information":
+                                continue
                             __temp_full = (__temp_real_path + '/' + __temp_name).replace("//", "/")
                             # print("processing", __temp_full)
                             __temp_st = __temp_os.stat(__temp_full)
