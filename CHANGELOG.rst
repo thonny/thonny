@@ -4,9 +4,10 @@ Version history
 
 3.2.0b1 (2019-06-??)
 ====================
-* NEW: [Work in progress] UI can be translated to other languages (big thanks to cspaier and translators). See docs/translate.md for contrubution instructions.
+* NEW: [Work in progress] UI and help content can be translated to other languages (big thanks to cspaier, Georges Khaznadar and translators). See docs/translate.md for contrubution instructions.
 * NEW: Shell supports ANSI color codes and line overwriting with ``\b`` and ``\r``. See "Help => Shell" for more info.
 * NEW: Shell now has extension called "Plotter", which visualizes series of numbers printed to the standard output. See "Help => Plotter" for more info.
+* NEW: Shell presents PNG data URL-s printed to stdout as images. Try print("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==")
 * NEW: Automatic change of working directory is now optional (Tools => Options => Run & Debug)
 * NEW: Files view now allows setting working directory (double-click on folder name)
 * NEW: Files view allows browsing device's filesystem with MicroPython back-ends 
@@ -15,6 +16,7 @@ Version history
 * NEW: On first run Thonny presents a dialog for selecting UI language and initial settings ("standard" or "Raspberry Pi"). With Raspberry Pi settings Thonny will start in simple mode, preferred debugger set to "faster" and UI theme set to "Raspberry Pi".
 * NEW: Shell IO font can be configured (Tools => Options => Fonts & Themes). By André Roberge 
 * NEW: Support for running Flask programs with F5. Also fixed several issues which prevented running and debugging Flask programs. See "Help => Web development with Flask" for more info.
+* NEW: "File => Save copy" allows saving current editor content to a different location without changing editor file name.
 * FIXED #630: Pressing up then down in shell doesn't leave shell in previous state. Fixed by Chad Purdy    
 * FIXED #691: No Show shell on run with no input() prompt. Fixed by Chad Purdy
 * FIXED #692: Cancelling Save As dialog causes error. Fixed by Chad Purdy
@@ -27,6 +29,7 @@ Version history
 * FIXED #727: Respect fileformat for unix files too. By badukaire 
 * FIXED #731: Right click menu disappears immediately and executes unwanted Undo action
 * FIXED #738: Window appears lower on each start
+* FIXED #749: "Focus shell" should bring you to a new prompt. By Ivoz 
 * CHANGED: In order to work around ``tkinter.Text`` performance problems, Shell squeezes very long lines into a button. The button opens a dialog for expanding, viewing or copying those lines. Shell also deletes old output to remain responsive.
 * CHANGED: Various changes in simple mode (Zoom and Quit buttons, merging Run and Resume buttons, automatic display of Variables view).
 * CHANGED: Disabled Tk clipboard management workaround in Linux (occasionally caused UI freezes). This means clipboard becomes emptied after closing Thonny.
