@@ -490,10 +490,10 @@ class BaseFileBrowser(ttk.Frame):
         self.menu.delete(0, "end")
 
         self.menu.add_command(label="Refresh", command=self.refresh_tree)
-        #self.menu.add_command(label="New file", command=self.create_new_file)
-        #self.menu.add_command(
+        # self.menu.add_command(label="New file", command=self.create_new_file)
+        # self.menu.add_command(
         #    label="Delete", command=lambda: self.delete_path(selected_path, selected_kind)
-        #)
+        # )
         self.menu.add_command(
             label="Focus into",
             command=lambda: self.request_focus_into(selected_path),
@@ -518,7 +518,7 @@ class BaseFileBrowser(ttk.Frame):
         if selected_node_id:
             selected_path = self.tree.set(selected_node_id, "path")
             selected_kind = self.tree.set(selected_node_id, "kind")
-    
+
             if selected_kind == "dir":
                 parent_path = selected_path
             else:
@@ -527,11 +527,7 @@ class BaseFileBrowser(ttk.Frame):
         else:
             parent_path = self.current_focus
 
-        name = askstring(
-            "File name",
-            "Provide filename",
-            initialvalue="",
-        )
+        name = askstring("File name", "Provide filename", initialvalue="")
 
         if not name:
             return
