@@ -1,5 +1,7 @@
 ﻿  thonny.cpp
   Generating code
-  All 1 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
+  1 of 1 functions (100.0%) were compiled.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   ThonnyRunner.vcxproj -> C:\workspaces\python_stuff\thonny\packaging\windows\ThonnyRunner37\Release\thonny.exe

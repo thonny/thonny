@@ -16,6 +16,16 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR pCmdLine, int nCmdShow
 		return 10;
 	}
 
+	Py_IgnoreEnvironmentFlag = 1;
+	// Flag doesn't affect the back-end.
+	// Clear misleading environment variables for good...
+	_putenv("PYTHONHOME=");
+	_putenv("PYTHONPATH=");
+	_putenv("PYTHONSTARTUP=");
+	_putenv("PYTHONINSPECT=");
+	_putenv("TCL_LIBRARY=");
+	_putenv("TK_LIBRARY=");
+
 	Py_SetProgramName(argv[0]);
 	Py_Initialize();
 	PySys_SetArgvEx(argc, argv, 0);
