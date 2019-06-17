@@ -6,4 +6,11 @@ export LD_LIBRARY_PATH="$DIR/../lib"
 export SSL_CERT_DIR=$(readlink -m "$DIR/../lib/python3.7/site-packages/certifi")
 export SSL_CERT_FILE="$SSL_CERT_DIR/cacert.pem"
 
-"$DIR/python3.7" -m thonny "$@"
+unset PYTHONHOME
+unset PYTHONPATH
+unset PYTHONSTARTUP
+unset PYTHONINSPECT
+unset TCL_LIBRARY
+unset TK_LIBRARY
+
+"$DIR/python3.7" -E -m thonny "$@"
