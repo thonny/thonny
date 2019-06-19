@@ -1097,7 +1097,7 @@ class SameAsFrontendCPythonProxy(CPythonProxy):
     def fetch_next_message(self):
         msg = super().fetch_next_message()
         if msg and "welcome_text" in msg:
-            if using_bundled_python():
+            if is_bundled_python(self._executable):
                 msg["welcome_text"] += " (bundled)"
             else:
                 msg["welcome_text"] += " (" + self._executable + ")"
@@ -1124,7 +1124,7 @@ class CustomCPythonProxy(CPythonProxy):
 
 
 def get_private_venv_path():
-    if "thonny" in sys.executable.lower():
+    if is_bundled_python(sys.executable.lower()):
         prefix = "BundledPython"
     else:
         prefix = "Python"
@@ -1155,10 +1155,6 @@ def _get_venv_info(venv_path):
                 result[key.strip()] = val.strip()
 
     return result
-
-
-def using_bundled_python():
-    return is_bundled_python(sys.executable)
 
 
 def is_bundled_python(executable):
