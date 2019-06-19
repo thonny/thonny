@@ -11,7 +11,9 @@ def _compute_thonny_user_dir():
         if platform.system() == "Windows":
             root_dir = os.path.dirname(sys.executable)
         elif platform.system() == "Darwin":
-            root_dir = os.path.join(os.path.dirname(sys.executable), "..", "..", "..", "..", "..", "..")
+            root_dir = os.path.join(
+                os.path.dirname(sys.executable), "..", "..", "..", "..", "..", ".."
+            )
         else:
             root_dir = os.path.join(os.path.dirname(sys.executable), "..")
         return os.path.normpath(os.path.abspath(os.path.join(root_dir, "user_data")))
@@ -45,20 +47,21 @@ def _compute_thonny_user_dir():
 
 def is_portable():
     # it can be explicitly declared as portable or shared ...
-    portable_marker_path = os.path.join(os.path.dirname(sys.executable), "portable_thonny.ini") 
+    portable_marker_path = os.path.join(os.path.dirname(sys.executable), "portable_thonny.ini")
     shared_marker_path = os.path.join(os.path.dirname(sys.executable), "shared_thonny.ini")
-    
+
     if os.path.exists(portable_marker_path) and not os.path.exists(shared_marker_path):
-        return True 
+        return True
     elif not os.path.exists(portable_marker_path) and os.path.exists(shared_marker_path):
         return False
-    
+
     # ... or it becomes implicitly portable if it's on a removable drive
     abs_location = os.path.abspath(__file__)
     if platform.system() == "Windows":
         drive = os.path.splitdrive(abs_location)[0]
         if drive.endswith(":"):
             from ctypes import windll
+
             return windll.kernel32.GetDriveTypeW(drive) == 2  # @UndefinedVariable
         else:
             return False
@@ -67,7 +70,8 @@ def is_portable():
         return abs_location.startswith("/Volumes/")
     else:
         # not exact heuristics
-        return abs_location.startswith("/media/") or abs_location.startswith("/mnt/")  
+        return abs_location.startswith("/media/") or abs_location.startswith("/mnt/")
+
 
 def get_version():
     try:
@@ -101,7 +105,7 @@ def _check_welcome():
 def launch():
     import gettext
     import runpy
-    
+
     if sys.executable.endswith("thonny.exe"):
         # otherwise some library may try to run its subprocess with thonny.exe
         # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
@@ -293,4 +297,3 @@ def get_runner() -> "Runner":
 
 def get_shell() -> "ShellView":
     return cast("ShellView", get_workbench().get_view("ShellView"))
-
