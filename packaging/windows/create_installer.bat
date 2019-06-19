@@ -93,10 +93,9 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
-@echo ............... CREATING PORTABLE ..........................
-copy ..\portable\customize.py %BUILDDIR%\lib\site-packages\thonny
+@echo ............... CREATING ZIP ..........................
 cd %BUILDDIR%
-7z a -tzip ..\dist\thonny-%VERSION%-portable.zip *
+7z a -tzip ..\dist\thonny-%VERSION%-windows.zip *
 
 
 @rem rmdir %BUILDDIR% /S /Q
