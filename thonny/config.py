@@ -46,6 +46,7 @@ class ConfigurationManager:
         self._ini = ConfigParser(interpolation=None)
         self._filename = filename
         self._defaults = {}
+        self._defaults_overrides_str = {}
         self._variables = {}  # Tk variables
 
         if os.path.exists(self._filename):
@@ -83,6 +84,19 @@ class ConfigurationManager:
             )
 
         # print(prefs_filename, self.sections())
+        self._init_default_overrides()
+
+    def _init_default_overrides(self):
+        overrides_path = os.path.join(os.path.dirname(__file__), "defaults.ini")
+        if not os.path.isfile(overrides_path):
+            return
+
+        defparser = configparser.ConfigParser()
+        defparser.read(overrides_path, "utf-8")
+        for section in defparser.sections():
+            for key in defparser[section]:
+                # leave parsing until base default value is known
+                self._defaults_overrides_str[section + "." + key] = defparser[section][key]
 
     def get_option(self, name, secondary_default=None):
         section, option = self._parse_name(name)
@@ -94,12 +108,13 @@ class ConfigurationManager:
 
         try:
             val = self._ini.get(section, option)
-            if name in self._defaults and isinstance(self._defaults[name], str):
+
+            # if option's data type is str (inferred from the default value)
+            # then don't try to parse anything
+            if isinstance(self._defaults.get(name), str):
                 return val
-            try:
-                return ast.literal_eval(val)
-            except Exception:
-                return val
+            else:
+                return self._parse_value(val)
         except Exception:
             if name in self._defaults:
                 return self._defaults[name]
@@ -125,9 +140,21 @@ class ConfigurationManager:
             self._variables[name].set(value)
 
     def set_default(self, name, primary_default_value):
+        # normalize name
         section, option = self._parse_name(name)
         name = section + "." + option
         self._defaults[name] = primary_default_value
+        return
+
+        if name in self._defaults_overrides_str:
+            if isinstance(primary_default_value, str):
+                value = self._defaults_overrides_str[name]
+            else:
+                value = self._parse_value(self._defaults_overrides_str[name])
+        else:
+            value = primary_default_value
+
+        self._defaults[name] = value
 
     def get_variable(self, name: str) -> tk.Variable:
         section, option = self._parse_name(name)
@@ -183,3 +210,9 @@ class ConfigurationManager:
             return name.split(".", 1)
         else:
             return "general", name
+
+    def _parse_value(self, value):
+        try:
+            return ast.literal_eval(value)
+        except Exception:
+            return value
