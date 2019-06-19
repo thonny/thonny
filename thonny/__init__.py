@@ -2,12 +2,28 @@ import os.path
 import sys
 import platform
 from typing import TYPE_CHECKING, cast, Optional
-import gettext
-import runpy
 
 
-def _get_default_thonny_data_folder():
-    if platform.system() == "Windows":
+def _compute_thonny_user_dir():
+    if os.environ.get("THONNY_USER_DIR", ""):
+        return os.path.expanduser(os.environ["THONNY_USER_DIR"])
+    elif is_portable():
+        if platform.system() == "Windows":
+            root_dir = os.path.dirname(sys.executable)
+        elif platform.system() == "Darwin":
+            root_dir = os.path.join(os.path.dirname(sys.executable), "..", "..", "..", "..", "..", "..")
+        else:
+            root_dir = os.path.join(os.path.dirname(sys.executable), "..")
+        return os.path.normpath(os.path.abspath(os.path.join(root_dir, "user_data")))
+    elif (
+        hasattr(sys, "base_prefix")
+        and sys.base_prefix != sys.prefix
+        or hasattr(sys, "real_prefix")
+        and getattr(sys, "real_prefix") != sys.prefix
+    ):
+        # we're in a virtualenv or venv
+        return os.path.join(sys.prefix, ".thonny")
+    elif platform.system() == "Windows":
         # http://stackoverflow.com/a/3859336/261181
         # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
         import ctypes.wintypes
@@ -27,23 +43,46 @@ def _get_default_thonny_data_folder():
         return os.path.join(data_home, "Thonny")
 
 
-if os.environ.get("THONNY_USER_DIR", ""):
-    THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
-elif (
-    hasattr(sys, "base_prefix")
-    and sys.base_prefix != sys.prefix
-    or hasattr(sys, "real_prefix")
-    and getattr(sys, "real_prefix") != sys.prefix
-):
-    # we're in a virtualenv or venv
-    THONNY_USER_DIR = os.path.join(sys.prefix, ".thonny")
-else:
-    THONNY_USER_DIR = _get_default_thonny_data_folder()
+def is_portable():
+    # it can be explicitly declared as portable or shared ...
+    portable_marker_path = os.path.join(os.path.dirname(sys.executable), "portable_thonny.ini") 
+    shared_marker_path = os.path.join(os.path.dirname(sys.executable), "shared_thonny.ini")
+    
+    if os.path.exists(portable_marker_path) and not os.path.exists(shared_marker_path):
+        return True 
+    elif not os.path.exists(portable_marker_path) and os.path.exists(shared_marker_path):
+        return False
+    
+    # ... or it becomes implicitly portable if it's on a removable drive
+    abs_location = os.path.abspath(__file__)
+    if platform.system() == "Windows":
+        drive = os.path.splitdrive(abs_location)[0]
+        if drive.endswith(":"):
+            from ctypes import windll
+            return windll.kernel32.GetDriveTypeW(drive) == 2  # @UndefinedVariable
+        else:
+            return False
+    elif platform.system() == "Darwin":
+        # not exact heuristics
+        return abs_location.startswith("/Volumes/")
+    else:
+        # not exact heuristics
+        return abs_location.startswith("/media/") or abs_location.startswith("/mnt/")  
 
+def get_version():
+    try:
+        package_dir = os.path.dirname(sys.modules["thonny"].__file__)
+        with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
+            return fp.read().strip()
+    except Exception:
+        return "0.0.0"
+
+
+THONNY_USER_DIR = _compute_thonny_user_dir()
 CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 
 
-def check_initialization():
+def _check_welcome():
     from thonny import workbench
 
     if not os.path.exists(CONFIGURATION_FILE_NAME):
@@ -60,13 +99,16 @@ def check_initialization():
 
 
 def launch():
+    import gettext
+    import runpy
+    
     if sys.executable.endswith("thonny.exe"):
         # otherwise some library may try to run its subprocess with thonny.exe
         # NB! Must be pythonw.exe not python.exe, otherwise Runner thinks console
         # is already allocated.
         sys.executable = sys.executable[: -len("thonny.exe")] + "pythonw.exe"
 
-    _set_dpi_aware()
+    set_dpi_aware()
     gettext.install("thonny", "locale")
 
     try:
@@ -74,7 +116,7 @@ def launch():
     except ImportError:
         pass
 
-    if not check_initialization():
+    if not _check_welcome():
         return
 
     try:
@@ -212,7 +254,7 @@ def _delegate_to_existing_instance(args):
     return response.decode("UTF-8") == workbench.SERVER_SUCCESS
 
 
-def _set_dpi_aware():
+def set_dpi_aware():
     # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
     # https://bugs.python.org/issue33656
     # https://msdn.microsoft.com/en-us/library/windows/desktop/dn280512(v=vs.85).aspx
@@ -225,15 +267,6 @@ def _set_dpi_aware():
             ctypes.OleDLL("shcore").SetProcessDpiAwareness(PROCESS_SYSTEM_DPI_AWARE)
         except (ImportError, AttributeError, OSError):
             pass
-
-
-def get_version():
-    try:
-        package_dir = os.path.dirname(sys.modules["thonny"].__file__)
-        with open(os.path.join(package_dir, "VERSION"), encoding="ASCII") as fp:
-            return fp.read().strip()
-    except Exception:
-        return "0.0.0"
 
 
 if TYPE_CHECKING:
@@ -260,3 +293,4 @@ def get_runner() -> "Runner":
 
 def get_shell() -> "ShellView":
     return cast("ShellView", get_workbench().get_view("ShellView"))
+
