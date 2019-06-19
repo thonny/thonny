@@ -35,10 +35,10 @@ if __name__ == "__main__":
     spec = importlib.util.spec_from_file_location(
         "thonny", os.path.join(os.path.dirname(__file__), "__init__.py")
     )
-    module = importlib.util.module_from_spec(spec)
-    sys.modules["thonny"] = module
+    thonny = importlib.util.module_from_spec(spec)
+    sys.modules["thonny"] = thonny
     assert spec.loader is not None
-    spec.loader.exec_module(module)
+    spec.loader.exec_module(thonny)
 
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
@@ -69,12 +69,7 @@ if __name__ == "__main__":
     faulthandler.enable(fault_out)
 
     # Disable blurry scaling in Windows
-    if os.name == "nt":
-        import ctypes
-
-        # TODO: see also SetProcessDPIAwareness (Win 8.1+)
-        # https://stackoverflow.com/questions/36134072/setprocessdpiaware-seems-not-to-work-under-windows-10
-        ctypes.windll.user32.SetProcessDPIAware()
+    thonny.set_dpi_aware()
 
     from thonny.backend import VM  # @UnresolvedImport
 
