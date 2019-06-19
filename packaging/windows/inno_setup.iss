@@ -14,9 +14,9 @@ AppVerName=Thonny {#AppVer}
 ;AppComments string is displayed on the "Support" dialog of the Add/Remove Programs Control Panel applet
 AppComments=Thonny is Python IDE for beginners
 AppPublisher=Aivar Annamaa
-AppPublisherURL=http://thonny.org
-AppSupportURL=http://thonny.org
-AppUpdatesURL=http://thonny.org
+AppPublisherURL=https://thonny.org
+AppSupportURL=https://thonny.org
+AppUpdatesURL=https://thonny.org
 
 ; Actual privileges depend on how user started the installer
 PrivilegesRequired=lowest
