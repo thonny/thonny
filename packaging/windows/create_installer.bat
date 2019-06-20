@@ -91,7 +91,7 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 
 @echo ............... CREATING INSTALLER ..........................
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
-"C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
+"C:\Program Files (x86)\Inno Setup 6\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
 @echo ............... CREATING ZIP ..........................
 cd %BUILDDIR%
