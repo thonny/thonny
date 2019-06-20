@@ -824,7 +824,7 @@ class PluginsPipDialog(PipDialog):
         return sys.executable.replace("thonny.exe", "python.exe")
 
     def _should_install_to_site_packages(self):
-        return self._targets_virtual_environment() or thonny.is_portable()
+        return self._targets_virtual_environment()
 
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
