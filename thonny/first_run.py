@@ -1,7 +1,7 @@
 import os.path
 import tkinter as tk
 from tkinter import ttk
-from thonny import ui_utils, languages
+from thonny import ui_utils, languages, is_portable
 
 STD_MODE_TEXT = "Standard"
 RPI_MODE_TEXT = "Raspberry Pi"
@@ -12,7 +12,8 @@ class FirstRunWindow(tk.Tk):
         super().__init__(className="Thonny")
         ttk.Style().theme_use(ui_utils.get_default_theme())
 
-        self.title("Welcome to Thonny!")
+        self.title("Welcome to Thonny!" 
+                   + "   [portable]" if is_portable() else "")
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.ok = False
 

@@ -33,11 +33,11 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -m pip install pyserial==3.4
 %BUILDDIR%\python -m pip install pyperclip==1.7.0
 
-@rem plug-ins
-%BUILDDIR%\python -m pip install thonny-pi==1.4
-
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
+
+@rem plug-ins
+%BUILDDIR%\python -m pip install thonny-pi==1.4
 
 @echo ............... CLEANING PYTHON ............................
 @rem delete following 3 files to avoid confusion (user may think they're Thonny license etc.)

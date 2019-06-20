@@ -35,7 +35,8 @@ from typing import (
 from warnings import warn
 
 import thonny
-from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages, get_shell
+from thonny import THONNY_USER_DIR, get_runner, running, ui_utils, assistance, languages, get_shell,\
+    is_portable
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
@@ -104,6 +105,7 @@ class Workbench(tk.Tk):
         self._destroying = False
         self._destroyed = False
         self._lost_focus = False
+        self._is_portable = is_portable()
         self.initializing = True
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
@@ -2161,7 +2163,10 @@ class Workbench(tk.Tk):
 
     def update_title(self, event=None) -> None:
         editor = self.get_editor_notebook().get_current_editor()
-        title_text = "Thonny"
+        if self._is_portable:
+            title_text = "Portable Thonny"
+        else:
+            title_text = "Thonny"
         if editor != None:
             title_text += "  -  " + editor.get_long_description()
 

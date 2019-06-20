@@ -373,7 +373,7 @@ class PipDialog(tk.Toplevel):
 
             if self._get_target_directory():
                 self.info_text.direct_insert("end", _("Target:  "), ("caption",))
-                if self._targets_virtual_environment():
+                if self._should_install_to_site_packages():
                     self.info_text.direct_insert("end", _("virtual environment\n"), ("caption",))
                 else:
                     self.info_text.direct_insert("end", _("user site packages\n"), ("caption",))
@@ -679,11 +679,11 @@ class PipDialog(tk.Toplevel):
     def _get_interpreter(self):
         pass
 
-    def _targets_virtual_environment(self):
+    def _should_install_to_site_packages(self):
         raise NotImplementedError()
 
     def _use_user_install(self):
-        return not self._targets_virtual_environment()
+        return not self._should_install_to_site_packages()
 
     def _get_target_directory(self):
         raise NotImplementedError()
@@ -695,7 +695,7 @@ class PipDialog(tk.Toplevel):
         return True
 
     def _read_only(self):
-        if self._targets_virtual_environment():
+        if self._should_install_to_site_packages():
             return False
         else:
             # readonly if not in a virtual environment
@@ -765,13 +765,16 @@ class BackendPipDialog(PipDialog):
             self._provide_pip_install_instructions(error)
 
     def _get_target_directory(self):
-        if self._targets_virtual_environment():
+        if self._should_install_to_site_packages():
             return normpath_with_actual_case(self._backend_proxy.get_site_packages())
         else:
             usp = self._backend_proxy.get_user_site_packages()
             os.makedirs(usp, exist_ok=True)
             return normpath_with_actual_case(usp)
 
+    def _should_install_to_site_packages(self):
+        return self._targets_virtual_environment()
+    
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
 
@@ -820,6 +823,9 @@ class PluginsPipDialog(PipDialog):
     def _get_interpreter(self):
         return sys.executable.replace("thonny.exe", "python.exe")
 
+    def _should_install_to_site_packages(self):
+        return self._targets_virtual_environment() or thonny.is_portable()
+    
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
         return (
