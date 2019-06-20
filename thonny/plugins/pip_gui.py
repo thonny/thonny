@@ -774,7 +774,7 @@ class BackendPipDialog(PipDialog):
 
     def _should_install_to_site_packages(self):
         return self._targets_virtual_environment()
-    
+
     def _targets_virtual_environment(self):
         return get_runner().using_venv()
 
@@ -825,7 +825,7 @@ class PluginsPipDialog(PipDialog):
 
     def _should_install_to_site_packages(self):
         return self._targets_virtual_environment() or thonny.is_portable()
-    
+
     def _targets_virtual_environment(self):
         # https://stackoverflow.com/a/42580137/261181
         return (
