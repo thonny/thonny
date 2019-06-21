@@ -5,6 +5,8 @@ Version history
 3.2.0b2 (2019-06-??)
 ====================
 * NEW: pip GUI now allows installing from requirements.txt file
+* NEW: Portable/thumbdrive bundles for Windows, macOS and Linux (https://github.com/thonny/thonny/wiki/DeploymentOptions#portable-version) 
+* FIXED #639: Unset misleading environment variables in Windows launcher
 
 3.2.0b1 (2019-06-17)
 ====================
