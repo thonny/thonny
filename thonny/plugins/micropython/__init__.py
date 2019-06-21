@@ -33,7 +33,7 @@ from thonny.common import (
     ToplevelResponse,
 )
 from thonny.config_ui import ConfigurationPage
-from thonny.misc_utils import find_volumes_by_name
+from thonny.misc_utils import find_volumes_by_name, TimeHelper
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
 from thonny.running import BackendProxy
 from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
@@ -1896,19 +1896,6 @@ class WebReplConnection(Connection):
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
 
-
-class TimeHelper:
-    def __init__(self, time_allowed):
-        self.start_time = time.time()
-        self.time_allowed = time_allowed
-
-    @property
-    def time_spent(self):
-        return time.time() - self.start_time
-
-    @property
-    def time_left(self):
-        return max(self.time_allowed - self.time_spent, 0)
 
 
 def parse_api_information(file_path):
