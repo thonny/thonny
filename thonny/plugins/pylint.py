@@ -119,7 +119,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         self.completion_handler(self, warnings)
 
 
-# according to version 2.1.1
+# according to version 2.3.1 (pylint --list-msgs)
 all_checks = [
     {
         "msg_id": "C0102",
@@ -781,7 +781,16 @@ all_checks = [
         "usage": "typing",
     },
     {
-        "msg_id": "E0632",
+        "msg_id": "W0632", # used to be an error
+        "msg_sym": "unbalanced-tuple-unpacking",
+        "msg_text": "Possible unbalanced tuple unpacking with sequence%s: left side "
+        "has %d label(s), right side has %d value(s)",
+        "msg_xpln": "Used when there is an unbalanced tuple unpacking in assignment",
+        "tho_xpln": "",
+        "usage": "typing",
+    },
+    {
+        "msg_id": "E0632", # is warning in later versions
         "msg_sym": "unbalanced-tuple-unpacking",
         "msg_text": "Possible unbalanced tuple unpacking with sequence%s: left side "
         "has %d label(s), right side has %d value(s)",
@@ -1740,6 +1749,24 @@ all_checks = [
         "usage": "enhancement",
     },
     {
+        "msg_id": "R1719",
+        "msg_sym": "simplifiable-if-expression",
+        "msg_text": "The if expression can be replaced with %s",
+        "msg_xpln": "Used when an if expression can be replaced with 'bool(test)'",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
+        "msg_id": "R1720",
+        "msg_sym": "no-else-raise",
+        "msg_text": 'Unnecessary "%s" after "raise"',
+        "msg_xpln": "Used in order to highlight an unnecessary block of code following an if "
+        "containing a raise statement. As such, it will warn when it encounters an else "
+        "following a chain of ifs, all of them containing a raise statement.",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
         "msg_id": "W0101",
         "msg_sym": "unreachable",
         "msg_text": "Unreachable code",
@@ -2413,6 +2440,15 @@ all_checks = [
         "usage": "warning",
     },
     {
+        "msg_id": "W1308",
+        "msg_sym": "duplicate-string-formatting-argument",
+        "msg_text": "Duplicate string formatting argument %r, consider passing as named argument",
+        "msg_xpln": "Used when we detect that a string formatting is repeating an argument instead "
+        "of using named string arguments",
+        "tho_xpln": "",
+        "usage": "warning",
+    },
+    {
         "msg_id": "W1401",
         "msg_sym": "anomalous-backslash-in-string",
         "msg_text": "Anomalous backslash in string: '%s'. String constant might be "
@@ -2431,6 +2467,15 @@ all_checks = [
         "might be missing an r or u prefix.",
         "msg_xpln": "Used when an escape like \\u is encountered in a byte string "
         "where it has no effect.",
+        "tho_xpln": "",
+        "usage": "warning",
+    },
+    {
+        "msg_id": "W1403",
+        "msg_sym": "implicit-str-concat-in-sequence",
+        "msg_text": "Implicit string concatenation found in %s",
+        "msg_xpln": "String literals are implicitly concatenated in a literal iterable definition : "
+        "maybe a comma is missing ?",
         "tho_xpln": "",
         "usage": "warning",
     },
