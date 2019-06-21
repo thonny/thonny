@@ -96,7 +96,7 @@ class PipDialog(tk.Toplevel):
             listframe,
             activestyle="dotbox",
             width=20,
-            height=18,
+            height=20,
             selectborderwidth=0,
             relief="flat",
             # highlightthickness=4,
@@ -132,7 +132,7 @@ class PipDialog(tk.Toplevel):
             vertical_scrollbar_class=AutoScrollbar,
             vertical_scrollbar_style=scrollbar_style("Vertical"),
             horizontal_scrollbar_style=scrollbar_style("Horizontal"),
-            width=60,
+            width=70,
             height=10,
         )
         info_text_frame.configure(borderwidth=0)
@@ -143,6 +143,16 @@ class PipDialog(tk.Toplevel):
         self.info_text.tag_bind("url", "<ButtonRelease-1>", self._handle_url_click)
         self.info_text.tag_bind("url", "<Enter>", lambda e: self.info_text.config(cursor="hand2"))
         self.info_text.tag_bind("url", "<Leave>", lambda e: self.info_text.config(cursor=""))
+        self.info_text.tag_configure("install_reqs", foreground=link_color, underline=True)
+        self.info_text.tag_bind(
+            "install_reqs", "<ButtonRelease-1>", self._handle_install_requirements_click
+        )
+        self.info_text.tag_bind(
+            "install_reqs", "<Enter>", lambda e: self.info_text.config(cursor="hand2")
+        )
+        self.info_text.tag_bind(
+            "install_reqs", "<Leave>", lambda e: self.info_text.config(cursor="")
+        )
         self.info_text.tag_configure("install_file", foreground=link_color, underline=True)
         self.info_text.tag_bind(
             "install_file", "<ButtonRelease-1>", self._handle_install_file_click
@@ -354,6 +364,14 @@ class PipDialog(tk.Toplevel):
                     + "then most likely you'll want to search the Python Package Index. "
                     + "Start by entering the name of the package in the search box above and pressing ENTER.\n\n"
                 ),
+            )
+
+            self.info_text.direct_insert("end", _("Install from requirements file\n"), ("caption",))
+            self.info_text.direct_insert("end", _("Click "))
+            self.info_text.direct_insert("end", _("here"), ("install_reqs",))
+            self.info_text.direct_insert(
+                "end",
+                _(" to locate requirements.txt file and install the packages specified in it.\n\n"),
             )
 
             self.info_text.direct_insert("end", _("Install from local file\n"), ("caption",))
@@ -604,19 +622,33 @@ class PipDialog(tk.Toplevel):
         filename = askopenfilename(
             master=self,
             filetypes=[("Package", ".whl .zip .tar.gz"), ("all files", ".*")],
-            initialdir=get_workbench().get_get_local_cwd,
+            initialdir=get_workbench().get_local_cwd,
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
-            self._install_local_file(filename)
+            self._install_local_file(filename, False)
+
+    def _handle_install_requirements_click(self, event):
+        if self._get_state() != "idle":
+            return
+
+        filename = askopenfilename(
+            master=self,
+            filetypes=[("requirements", ".txt"), ("all files", ".*")],
+            initialdir=get_workbench().get_local_cwd,
+        )
+        if filename:  # Note that missing filename may be "" or () depending on tkinter version
+            self._install_local_file(filename, True)
 
     def _handle_target_directory_click(self, event):
         if self._get_target_directory():
             open_path_in_system_file_manager(self._get_target_directory())
 
-    def _install_local_file(self, filename):
+    def _install_local_file(self, filename, is_requirements_file):
         args = ["install"]
         if self._use_user_install():
             args.append("--user")
+        if is_requirements_file:
+            args.append("-r")
         args.append(filename)
 
         proc, cmd = self._create_pip_process(args)

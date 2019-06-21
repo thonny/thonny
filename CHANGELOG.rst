@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.2.0b2 (2019-06-??)
+====================
+* NEW: pip GUI now allows installing from requirements.txt file
+
 3.2.0b1 (2019-06-17)
 ====================
 * NEW: [Work in progress] UI and help content can be translated to other languages (big thanks to cspaier, Georges Khaznadar and translators). See docs/translate.md for contrubution instructions.
