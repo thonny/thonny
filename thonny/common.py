@@ -135,6 +135,12 @@ class InputSubmission(Record):
         super().__init__(**kw)
         self.data = data
 
+class InterruptCommand(Record):
+    pass
+
+class EOFCommand(Record):
+    pass
+
 
 class CommandToBackend(Record):
     """Command meant for the back-end"""

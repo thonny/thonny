@@ -39,13 +39,12 @@ class MicroPythonConnection:
         finally:
             del self._read_buffer[:size]
 
-    def read_until(self, terminators, timeout=2):
-        if timeout == 0:
-            raise TimeoutError()
-
+    def read_until(self, terminator, timeout=1000000, timeout_is_soft=False):
         timer = TimeHelper(timeout)
-        if not isinstance(terminators, (set, list, tuple)):
-            terminators = [terminators]
+        if isinstance(terminator, (set, list, tuple)):
+            terminators = terminator
+        else:
+            terminators = [terminator]
 
         terminator = None
         while True:
@@ -64,7 +63,10 @@ class MicroPythonConnection:
                 assert len(data) > 0
                 self._read_buffer.extend(data)
             except queue.Empty:
-                raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
+                if timeout_is_soft:
+                    break
+                else:
+                    raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
 
         assert terminator is not None
         size = self._read_buffer.index(terminator) + len(terminator)
@@ -89,7 +91,8 @@ class MicroPythonConnection:
 
     def _check_for_error(self):
         if self._error:
-            raise SerialException("EOF")
+            # TODO:
+            raise EOFError("EOF")
 
     def unread(self, data):
         self._read_buffer = data + self._read_buffer

@@ -1,5 +1,7 @@
 from thonny.common import (
     InputSubmission,
+    InterruptCommand,
+    EOFCommand,
     parse_message,
     ToplevelCommand,
     ToplevelResponse,
@@ -16,9 +18,15 @@ from thonny.plugins.micropython.connection import ConnectionClosedException
 from time import sleep
 from textwrap import dedent
 import ast
+import re
+import time
+from queue import Queue
+import threading
+
+EOT = "\x04"
+THONNY_MSG_START = "\x02"
 
 logger = logging.getLogger("thonny.micropython.backend")
-
 
 
 class MicroPythonBackend:
@@ -26,6 +34,10 @@ class MicroPythonBackend:
         self._connection = connection
         self._cwd = None
         self._welcome_text = None
+        self._command_queue = Queue()  # populated by reader thread
+
+        self._command_reading_thread = threading.Thread(target=self._read_commands, daemon=True)
+        self._command_reading_thread.start()
 
     def mainloop(self):
         try:
@@ -33,7 +45,7 @@ class MicroPythonBackend:
                 try:
                     cmd = self._fetch_command()
                     if isinstance(cmd, InputSubmission):
-                        self._send_input(cmd.data)
+                        self._submit_input(cmd.data)
                     else:
                         self.handle_command(cmd)
                 except KeyboardInterrupt:
@@ -55,13 +67,16 @@ class MicroPythonBackend:
         except ConnectionClosedException as e:
             self._handle_connection_closed(e)
 
-    def _fetch_command(self):
-        line = self._original_stdin.readline()
-        if line == "":
-            logger.info("Read stdin EOF")
-            sys.exit()
-        cmd = parse_message(line)
-        return cmd
+    def _read_commands(self):
+        "works in separate thread"
+
+        while True:
+            line = self._original_stdin.readline()
+            if line == "":
+                logger.info("Read stdin EOF")
+                sys.exit()
+            cmd = parse_message(line)
+            self._command_queue.put(cmd)
 
     def handle_command(self, cmd):
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
@@ -105,7 +120,7 @@ class MicroPythonBackend:
 
         self.send_message(response)
 
-    def _send_input(self, data: str) -> None:
+    def _submit_input(self, data: str) -> None:
 
         # TODO: what if there is a previous unused data waiting
         assert self._connection.outgoing_is_empty()
@@ -146,7 +161,8 @@ class MicroPythonBackend:
     def _send_output(self, data, stream_name):
         if not data:
             return
-        "TODO:"
+
+        # TODO:
 
     def _flush_output(self):
         "TODO: send current stdout and stderr to UI"
@@ -161,53 +177,133 @@ class MicroPythonBackend:
         finally:
             self._connection = None
 
-    def _execute(self, script):
-        # assuming buffers are empty, but ...
+    def _execute(self, script, hide_stdout=False, hide_stderr=False):
+        # Assuming device is at raw prompt.
+        # Buffers should be empty, but let's output what we have,
+        # this will help diagnosing problems
         self._flush_output()
 
+        out = ""
+        err = ""
+
         # send command
-        self._connection.write(script + "\x04")
+        self._connection.write(script + EOT)
 
-        # fetch confirmation
+        # fetch command confirmation
         ok = self._connection.read(2)
-        assert ok == b"OK", "Expected OK, got %r, followed by %r" % (
-            ok,
-            self._connection.read_all(),
-        )
+        assert ok == "OK", "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
 
-        terminator = "\x04>"
-        output = self._connection.read_until(terminator)[: -len(terminator)]
-        self.idle = True
+        # Normally the output will be something like this:
+        # {stdout}\x04\{stderr}\x04\n\>
+        # In the end of {stdout} there may be \x02{value-for-thonny}
+        # TODO: experiment with Ctrl+C, Ctrl+D, reset
 
-        # return content of out, err
-        return output.split("\x04")
+        # State machine for extracting relevant parts
+        value = None
+        state = "out"
+        data = ""
+        while state != "done":
+            self._check_for_execution_alteration_commands()
+            # prefer whole lines, but don't wait too long
+            new_data = self._connection.read_until(
+                ["\n", EOT, THONNY_MSG_START], timeout=0.01, timeout_is_soft=True
+            )
+            if not new_data:
+                continue
 
-    def _evaluate_to_repr(self, expr, prelude="", cleanup=""):
+            data += new_data
+            if state == "out":
+                # regular output should be forwarded incrementally
+                end_match = re.search(THONNY_MSG_START + "|" + EOT, data)
+                if end_match is None:
+                    to_be_sent = data
+                    data = ""
+                else:
+                    to_be_sent = data[: end_match.start()]
+                    data = data[end_match.start() :]
+
+                out += to_be_sent
+                if not hide_stdout:
+                    self._send_output(to_be_sent, "stdout")
+
+                if data.startswith(THONNY_MSG_START):
+                    state = "value"
+                    data = data[len(THONNY_MSG_START) :]
+                elif data.startswith(EOT):
+                    state = "err"
+                    data = data[len(EOT) :]
+
+            elif state == "value":
+                if "\n" in data:
+                    data += self._connection.read_until("\n")
+                value, data = data.split("\n", maxsplit=1)
+                state = "err"
+
+            elif state == "err":
+                end_pos = data.find(EOT)
+                if end_pos == -1:
+                    to_be_sent = data
+                    data = ""
+                else:
+                    to_be_sent = data[:end_pos]
+                    data = data[end_pos:]
+                    state = "done"
+
+                err += to_be_sent
+                if not hide_stderr:
+                    self._send_output(to_be_sent, "stderr")
+
+        return out, err, value
+
+    def _execute_print_expr(
+        self, expr, prelude="", cleanup="", hide_stdout=False, hide_stderr=False
+    ):
         # assuming expr really contains an expression
         # separator is for separating side-effect output and printed value
-        separator = "[out-val-sep]"
         script = ""
         if prelude:
             script += prelude + "\n"
-        script += "print(%r, %s, sep='', end='')" % (separator, expr)
+        script += "print(%r, %s, sep='', end='')" % (THONNY_MSG_START, expr)
 
         # assuming cleanup doesn't cause output
         if cleanup:
             script += "\n" + cleanup
 
-        out, err = self._execute(script)
-        if out.count(separator) == 1:
-            # print did not succeed
-            self._send_output(out, "stdout")
-            raise ExecutionError(err)
-
-        side_output, value_output = out.split(separator)
-        self._send_output(side_output, "stdout")
-        self._send_output(err, "stderr")
-        return value_output
+        return self._execute(script, hide_stdout=hide_stdout, hide_stderr=hide_stderr)
 
     def _evaluate(self, expr, prelude="", cleanup=""):
-        return ast.literal_eval(self._evaluate_to_repr(expr), prelude, cleanup)
+        out, err, value_repr = self._execute_print_expr(expr, prelude, cleanup, True, True)
+
+        if value_repr is None:
+            # print did not succeed
+            if not err:
+                err = "Could not receive value"
+            if out:
+                err += "\nstdout was:\n" + out
+            raise ExecutionError(err)
+
+        return ast.literal_eval(value_repr)
+
+    def _check_for_execution_alteration_commands(self):
+        # most likely the queue is empty
+        if self._command_queue.empty():
+            return
+
+        postponed = []
+        while not self._command_queue.empty():
+            cmd = self._command_queue.get()
+            if isinstance(cmd, InputSubmission):
+                self._submit_input(cmd.data)
+            elif isinstance(cmd, InterruptCommand):
+                self._interrupt()
+            elif isinstance(cmd, EOFCommand()):
+                self._soft_reboot()
+            else:
+                postponed.append(cmd)
+
+        # put back postponed commands
+        while postponed:
+            self._command_queue.put(postponed.pop(0))
 
     def _supports_directories(self):
         if "micro:bit" in self._welcome_text.lower():
@@ -237,7 +333,7 @@ class MicroPythonBackend:
             # Try to parse as expression
             ast.parse(cmd.source, mode="eval")
             # If it didn't fail then source is an expression
-            value_repr = self._evaluate_to_repr(cmd.source)
+            _, _, value_repr = self._execute_print_expr(cmd.source)
             return {"repr": value_repr}
         except SyntaxError:
             # source is a statement (or invalid syntax)
