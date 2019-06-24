@@ -39,6 +39,9 @@ class MicroPythonConnection:
         finally:
             del self._read_buffer[:size]
 
+    def soft_read_until(self, terminator, timeout=1000000):
+        return self.read_until(terminator, timeout, timeout_is_soft=True)
+
     def read_until(self, terminator, timeout=1000000, timeout_is_soft=False):
         timer = TimeHelper(timeout)
         if isinstance(terminator, (set, list, tuple)):
@@ -76,10 +79,17 @@ class MicroPythonConnection:
             return data
         finally:
             del self._read_buffer[:size]
-
-    def read_all(self):
+    
+    def _fetch_to_buffer(self):
         while not self._read_queue.empty():
             self._read_buffer.extend(self._read_queue.get(True))
+    
+    def peek_incoming(self):
+        self._fetch_to_buffer()
+        return self._read_buffer
+    
+    def read_all(self):
+        self._fetch_to_buffer()
 
         if len(self._read_buffer) == 0:
             self._check_for_error()

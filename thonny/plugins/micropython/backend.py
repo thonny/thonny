@@ -19,12 +19,27 @@ from time import sleep
 from textwrap import dedent
 import ast
 import re
-import time
 from queue import Queue
 import threading
 
-EOT = "\x04"
+# Commands
+RAW_MODE_CMD = "\x01"
+NORMAL_MODE_CMD = "\x02"
+INTERRUPT_CMD = "\x03"
+SOFT_REBOOT_CMD = "\x04"
+
+# Output tokens
 THONNY_MSG_START = "\x02"
+THONNY_MSG_END = "\x04"
+EOT = "\x04"
+NORMAL_PROMPT = ">>> "
+# first prompt when switching to raw mode (or after soft reboot in raw mode)
+
+# Looks like it's not translatable in CP
+# https://github.com/adafruit/circuitpython/blob/master/locale/circuitpython.pot
+FIRST_RAW_PROMPT = "raw REPL; CTRL-B to exit\r\n>"
+
+RAW_PROMPT = ">"
 
 logger = logging.getLogger("thonny.micropython.backend")
 
@@ -43,7 +58,7 @@ class MicroPythonBackend:
         try:
             while True:
                 try:
-                    cmd = self._fetch_command()
+                    cmd = self._command_queue.get()
                     if isinstance(cmd, InputSubmission):
                         self._submit_input(cmd.data)
                     else:
@@ -54,11 +69,31 @@ class MicroPythonBackend:
             logger.exception("Crash in mainloop")
             traceback.print_exc()
 
+    def _ensure_raw_prompt(self):
+        data = self._connection.read_all()
+        if data.endswith(RAW_PROMPT):
+            data = data[: len(RAW_PROMPT)]
+            self._send_output(data, "stdout")
+        else:
+            if data.endswith(NORMAL_PROMPT):
+                # strip prompt
+                data = data[: len(NORMAL_PROMPT)]
+            self._send_output(data, "stdout")
+            self._connection.write(RAW_MODE_CMD)
+
+            # wait for raw prompt while allowing interrupts and soft reboots
+            data = ""
+            while not data.endswith(FIRST_RAW_PROMPT):
+                self._check_for_side_commands()
+                data += self._connection.read_until(
+                    FIRST_RAW_PROMPT, timeout=0.01, timeout_is_soft=True
+                )
+
     def _interrupt(self):
         try:
             self.idle = False
             self._connection.reset_output_buffer()
-            self._connection.write(b"\x03")
+            self._connection.write(INTERRUPT_CMD)
 
             # Wait a bit to avoid the situation where part of the prompt will
             # be treated as output and whole prompt is not detected.
@@ -66,6 +101,22 @@ class MicroPythonBackend:
             sleep(0.1)
         except ConnectionClosedException as e:
             self._handle_connection_closed(e)
+
+    def _soft_reboot(self):
+        if not self.idle:
+            # TODO: ignore??
+            # self._connection.write(b"\r\x03")
+            self.interrupt()
+
+        # Need to go to normal mode. MP doesn't run user code in raw mode
+        # (CP does, but it doesn't hurt to do it there as well)
+        self._connection.write(NORMAL_MODE_CMD)
+        self._connection.read_until(NORMAL_PROMPT)
+
+        self._connection.write(SOFT_REBOOT_CMD)
+
+        # Returning to the raw prompt will be handled by
+        # _read_next_serial_message
 
     def _read_commands(self):
         "works in separate thread"
@@ -121,15 +172,13 @@ class MicroPythonBackend:
         self.send_message(response)
 
     def _submit_input(self, data: str) -> None:
-
         # TODO: what if there is a previous unused data waiting
         assert self._connection.outgoing_is_empty()
 
         assert data.endswith("\n")
         if not data.endswith("\r\n"):
-            input_str = data[:-1] + "\r\n"
-
-        data = input_str.encode("utf-8")
+            # submission is done with CRLF
+            data = data[:-1] + "\r\n"
 
         try:
             self._connection.write(data)
@@ -177,14 +226,8 @@ class MicroPythonBackend:
         finally:
             self._connection = None
 
-    def _execute(self, script, hide_stdout=False, hide_stderr=False):
-        # Assuming device is at raw prompt.
-        # Buffers should be empty, but let's output what we have,
-        # this will help diagnosing problems
-        self._flush_output()
-
-        out = ""
-        err = ""
+    def _execute(self, script):
+        self._ensure_raw_propmt()
 
         # send command
         self._connection.write(script + EOT)
@@ -192,21 +235,141 @@ class MicroPythonBackend:
         # fetch command confirmation
         ok = self._connection.read(2)
         assert ok == "OK", "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
+        return self._process_until_raw_prompt()
 
-        # Normally the output will be something like this:
-        # {stdout}\x04\{stderr}\x04\n\>
-        # In the end of {stdout} there may be \x02{value-for-thonny}
+    def _execute_print_expr(self, expr, prelude="", cleanup=""):
+        # assuming expr really contains an expression
+        # separator is for separating side-effect output and printed value
+        script = ""
+        if prelude:
+            script += prelude + "\n"
+        script += "print(%r, repr(%s), sep='', end=%r)" % (THONNY_MSG_START, expr, THONNY_MSG_END)
+
+        # assuming cleanup doesn't cause output
+        if cleanup:
+            script += "\n" + cleanup
+
+        return self._execute(script)
+
+    def _evaluate(self, expr, prelude="", cleanup=""):
+        out, err, value_repr = self._execute_print_expr(expr, prelude, cleanup)
+
+        if value_repr is None:
+            # print did not succeed
+            if not err:
+                err = "Could not receive value"
+            if out:
+                err += "\nstdout was:\n" + out
+            raise ExecutionError(err)
+
+        return ast.literal_eval(value_repr)
+
+    def _process_until_raw_prompt(self):
+        eot_count = 0
+        value = None
+        done = False
+
+        while not done:
+            # There may be an input submission waiting
+            # and we can't progress without resolving it first
+            self._check_for_side_commands()
+
+            # Process input in chunks (max 1 parsing marker per chunk).
+            # Prefer whole lines (to reduce the number of events),
+            # but don't wait too long for eol.
+            output = self._connection.soft_read_until(
+                ["\n", EOT, THONNY_MSG_START, NORMAL_PROMPT, FIRST_RAW_PROMPT], timeout=0.01
+            )
+            stream_name = "stderr" if eot_count == 1 else "stdout"
+
+            if output.endswith(THONNY_MSG_START):
+                output = output[: -len(THONNY_MSG_START)]
+
+                # Low chance of failure (eg. because of precisely timed reboot),
+                # therefore it's safe to use big timeout
+                temp = self._connection.soft_read_until(THONNY_MSG_END, timeout=3)
+                if temp.endswith(THONNY_MSG_END):
+                    value = temp[: -len(THONNY_MSG_END)]
+                else:
+                    # failure, restore everything to help diagnosis
+                    output = output + THONNY_MSG_START + temp
+
+            elif output.endswith(EOT):
+                output = output[: -len(EOT)]
+                eot_count += 1
+                if eot_count == 2:
+                    # Normal completion of the command
+                    # big chance of being at the raw prompt
+                    temp = self._connection.soft_read_until(RAW_PROMPT, timeout=0.1)
+                    if temp == RAW_PROMPT and self._connection.incoming_is_empty():
+                        done = True
+                    elif temp:
+                        # Failure, temp needs to be parsed again
+                        self._connection.unread(temp)
+
+            elif output.endswith(FIRST_RAW_PROMPT) and self._connection.incoming_is_empty():
+                output = output[: -len(FIRST_RAW_PROMPT)]
+                done = True
+
+            elif (
+                output.endswith(NORMAL_PROMPT)
+                and self._connection.peek_incoming() == "\r\n" + FIRST_RAW_PROMPT
+            ):
+                output = output + self._connection.read_until(FIRST_RAW_PROMPT)
+                # skip both normal and raw prompt together
+                # (otherwise they get processed separately)
+                output = output[: -len(NORMAL_PROMPT + "\r\n" + FIRST_RAW_PROMPT)]
+                done = True
+
+            elif output.endswith(NORMAL_PROMPT) and self._connection.incoming_is_empty():
+                output = output[: -len(NORMAL_PROMPT)]
+                # switch to raw mode and continue
+                self._connection.write(RAW_MODE_CMD)
+
+            self._send_output(output, stream_name)
+
+        return value
+
+    def _process_until_raw_prompt_old(self, hide_stdout=False, hide_stderr=False):
+        """
+        Forwards output, extracts Thonny message, replaces normal prompts with raw prompts.
+        
+        This is executed when some code is running or just after requesting raw prompt.
+        
+        After submitting commands to the raw REPL, the output should be like
+        {stdout}\x04\{stderr}\x04\n\>
+        In the end of {stdout} there may be \x02{value-for-thonny}
+        
+        Interrupts will alter the execution, but from the response parsing
+        perspective they don't matter as they look like any other exception.
+        
+        Things get complicated because of soft-reboots, which always end with
+        regular prompt. Soft-reboots can occur because of Ctrl+D, machine.soft_reset()
+        and even reset button (micro:bit).
+        
+        Because of soft-reboot we can't assume we'll find all 
+        
+        Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties, 
+        because it becomes impossible to say whether we are at prompt and output
+        is from another thread or main thread is running.
+        For now I'm ignoring these problems and assume all output comes from the main thread.
+         
+        """
         # TODO: experiment with Ctrl+C, Ctrl+D, reset
+        # TODO: don't collect out and err unless requested
 
         # State machine for extracting relevant parts
+        out = ""
+        err = ""
+
         value = None
         state = "out"
         data = ""
         while state != "done":
-            self._check_for_execution_alteration_commands()
+            self._check_for_side_commands()
             # prefer whole lines, but don't wait too long
-            new_data = self._connection.read_until(
-                ["\n", EOT, THONNY_MSG_START], timeout=0.01, timeout_is_soft=True
+            new_data = self._connection.soft_read_until(
+                ["\n", EOT, THONNY_MSG_START, THONNY_MSG_END, NORMAL_PROMPT], timeout=0.01
             )
             if not new_data:
                 continue
@@ -255,36 +418,7 @@ class MicroPythonBackend:
 
         return out, err, value
 
-    def _execute_print_expr(
-        self, expr, prelude="", cleanup="", hide_stdout=False, hide_stderr=False
-    ):
-        # assuming expr really contains an expression
-        # separator is for separating side-effect output and printed value
-        script = ""
-        if prelude:
-            script += prelude + "\n"
-        script += "print(%r, %s, sep='', end='')" % (THONNY_MSG_START, expr)
-
-        # assuming cleanup doesn't cause output
-        if cleanup:
-            script += "\n" + cleanup
-
-        return self._execute(script, hide_stdout=hide_stdout, hide_stderr=hide_stderr)
-
-    def _evaluate(self, expr, prelude="", cleanup=""):
-        out, err, value_repr = self._execute_print_expr(expr, prelude, cleanup, True, True)
-
-        if value_repr is None:
-            # print did not succeed
-            if not err:
-                err = "Could not receive value"
-            if out:
-                err += "\nstdout was:\n" + out
-            raise ExecutionError(err)
-
-        return ast.literal_eval(value_repr)
-
-    def _check_for_execution_alteration_commands(self):
+    def _check_for_side_commands(self):
         # most likely the queue is empty
         if self._command_queue.empty():
             return
