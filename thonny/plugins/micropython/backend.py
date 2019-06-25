@@ -21,6 +21,7 @@ import ast
 import re
 from queue import Queue
 import threading
+import os
 
 # Commands
 RAW_MODE_CMD = "\x01"
@@ -33,8 +34,8 @@ THONNY_MSG_START = "\x02"
 THONNY_MSG_END = "\x04"
 EOT = "\x04"
 NORMAL_PROMPT = ">>> "
-# first prompt when switching to raw mode (or after soft reboot in raw mode)
 
+# first prompt when switching to raw mode (or after soft reboot in raw mode)
 # Looks like it's not translatable in CP
 # https://github.com/adafruit/circuitpython/blob/master/locale/circuitpython.pot
 FIRST_RAW_PROMPT = "raw REPL; CTRL-B to exit\r\n>"
@@ -48,13 +49,21 @@ class MicroPythonBackend:
     def __init__(self, connection):
         self._connection = connection
         self._cwd = None
-        self._welcome_text = None
         self._command_queue = Queue()  # populated by reader thread
 
         self._command_reading_thread = threading.Thread(target=self._read_commands, daemon=True)
         self._command_reading_thread.start()
 
-    def mainloop(self):
+        self._process_until_initial_raw_prompt()
+        
+        self._welcome_text = self._fetch_welcome_text()
+        self._cwd = self._fetch_cwd()
+        
+        self._send_welcome_message()
+
+        self._mainloop()
+
+    def _mainloop(self):
         try:
             while True:
                 try:
@@ -69,25 +78,59 @@ class MicroPythonBackend:
             logger.exception("Crash in mainloop")
             traceback.print_exc()
 
-    def _ensure_raw_prompt(self):
-        data = self._connection.read_all()
-        if data.endswith(RAW_PROMPT):
-            data = data[: len(RAW_PROMPT)]
-            self._send_output(data, "stdout")
-        else:
-            if data.endswith(NORMAL_PROMPT):
-                # strip prompt
-                data = data[: len(NORMAL_PROMPT)]
-            self._send_output(data, "stdout")
-            self._connection.write(RAW_MODE_CMD)
+    def _fetch_welcome_text(self):
+        self._connection.write(NORMAL_MODE_CMD)
+        welcome_text = (
+            self._connection.read_until(NORMAL_PROMPT).strip("\r\n >")
+        )
+        if os.name != "nt":
+            welcome_text = welcome_text.replace("\r\n", "\n")
 
-            # wait for raw prompt while allowing interrupts and soft reboots
-            data = ""
-            while not data.endswith(FIRST_RAW_PROMPT):
-                self._check_for_side_commands()
-                data += self._connection.read_until(
-                    FIRST_RAW_PROMPT, timeout=0.01, timeout_is_soft=True
-                )
+        # Go back to raw prompt
+        self._connection.write(RAW_MODE_CMD)
+        self._connection.read_until(FIRST_RAW_PROMPT)
+
+        return welcome_text
+
+    def _fetch_uname(self):
+        res = self._evaluate("__module_os.uname()", prelude="import os as __module_os")
+        return {
+            "sysname": res[0],
+            "nodename": res[1],
+            "release": res[2],
+            "version": res[3],
+            "machine": res[4],
+        }
+
+    def _fetch_builtin_modules(self):
+        out, err, _ = self._execute("help('modules')", capture_output=True)
+        assert not err, "Error was: %r" % err
+        
+        modules_str_lines = out.strip().splitlines()
+
+        last_line = modules_str_lines[-1].strip()
+        if last_line.count(" ") > 0 and "  " not in last_line and "\t" not in last_line:
+            # probably something like "plus any modules on the filesystem"
+            # (can be in different languages)
+            modules_str_lines = modules_str_lines[:-1]
+
+        modules_str = (
+            " ".join(modules_str_lines)
+            .replace("/__init__", "")
+            .replace("__main__", "")
+            .replace("/", ".")
+        )
+        
+        return modules_str.split()
+
+    def _fetch_cwd(self):
+        if not self._supports_directories():
+            return None
+        else:
+            return self._evaluate("__module_os.getcwd()", prelude="import os as __module_os")
+
+    def _send_welcome_message(self):
+        pass
 
     def _interrupt(self):
         try:
@@ -226,7 +269,7 @@ class MicroPythonBackend:
         finally:
             self._connection = None
 
-    def _execute(self, script):
+    def _execute(self, script, capture_output=False):
         self._ensure_raw_propmt()
 
         # send command
@@ -235,9 +278,9 @@ class MicroPythonBackend:
         # fetch command confirmation
         ok = self._connection.read(2)
         assert ok == "OK", "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
-        return self._process_until_raw_prompt()
+        return self._process_until_raw_prompt(capture_output)
 
-    def _execute_print_expr(self, expr, prelude="", cleanup=""):
+    def _execute_print_expr(self, expr, prelude="", cleanup="", capture_output=False):
         # assuming expr really contains an expression
         # separator is for separating side-effect output and printed value
         script = ""
@@ -249,25 +292,51 @@ class MicroPythonBackend:
         if cleanup:
             script += "\n" + cleanup
 
-        return self._execute(script)
+        return self._execute(script, capture_output)
 
     def _evaluate(self, expr, prelude="", cleanup=""):
-        out, err, value_repr = self._execute_print_expr(expr, prelude, cleanup)
+        _, _, value_repr = self._execute_print_expr(expr, prelude, cleanup)
 
         if value_repr is None:
-            # print did not succeed
-            if not err:
-                err = "Could not receive value"
-            if out:
-                err += "\nstdout was:\n" + out
-            raise ExecutionError(err)
+            return None
+        else:
+            return ast.literal_eval(value_repr)
 
-        return ast.literal_eval(value_repr)
+    def _process_until_initial_raw_prompt(self):
+        self._connection.write(RAW_MODE_CMD)
+        self._process_until_raw_prompt()
 
-    def _process_until_raw_prompt(self):
+    def _process_until_raw_prompt(self, capture_output=False):
+        """
+        Forwards output, extracts Thonny message, replaces normal prompts with raw prompts.
+        
+        This is executed when some code is running or just after requesting raw prompt.
+        
+        After submitting commands to the raw REPL, the output should be like
+        {stdout}\x04\{stderr}\x04\n\>
+        In the end of {stdout} there may be \x02{value-for-thonny}
+        
+        Interrupts will alter the execution, but from the response parsing
+        perspective they don't matter as they look like any other exception.
+        
+        Things get complicated because of soft-reboots, which always end with
+        regular prompt. Soft-reboots can occur because of Ctrl+D, machine.soft_reset()
+        and even reset button (micro:bit).
+        
+        Because of soft-reboot we can't assume we'll find all 
+        
+        Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties, 
+        because it becomes impossible to say whether we are at prompt and output
+        is from another thread or the main thread is running.
+        For now I'm ignoring these problems and assume all output comes from the main thread.
+         
+        """
+        # TODO: experiment with Ctrl+C, Ctrl+D, reset
         eot_count = 0
         value = None
         done = False
+        out = ""
+        err = ""
 
         while not done:
             # There may be an input submission waiting
@@ -326,38 +395,18 @@ class MicroPythonBackend:
                 # switch to raw mode and continue
                 self._connection.write(RAW_MODE_CMD)
 
-            self._send_output(output, stream_name)
-
-        return value
+            if capture_output:
+                if stream_name == "stdout":
+                    out += output
+                else:
+                    assert stream_name == "stderr"
+                    err += output
+            else:
+                self._send_output(output, stream_name)
+                
+        return out, err, value
 
     def _process_until_raw_prompt_old(self, hide_stdout=False, hide_stderr=False):
-        """
-        Forwards output, extracts Thonny message, replaces normal prompts with raw prompts.
-        
-        This is executed when some code is running or just after requesting raw prompt.
-        
-        After submitting commands to the raw REPL, the output should be like
-        {stdout}\x04\{stderr}\x04\n\>
-        In the end of {stdout} there may be \x02{value-for-thonny}
-        
-        Interrupts will alter the execution, but from the response parsing
-        perspective they don't matter as they look like any other exception.
-        
-        Things get complicated because of soft-reboots, which always end with
-        regular prompt. Soft-reboots can occur because of Ctrl+D, machine.soft_reset()
-        and even reset button (micro:bit).
-        
-        Because of soft-reboot we can't assume we'll find all 
-        
-        Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties, 
-        because it becomes impossible to say whether we are at prompt and output
-        is from another thread or main thread is running.
-        For now I'm ignoring these problems and assume all output comes from the main thread.
-         
-        """
-        # TODO: experiment with Ctrl+C, Ctrl+D, reset
-        # TODO: don't collect out and err unless requested
-
         # State machine for extracting relevant parts
         out = ""
         err = ""
