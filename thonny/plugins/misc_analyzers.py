@@ -240,7 +240,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
 
                 if is_same_path(full_path, main_file_path):
                     prelude = "Your program file is named '%s'." % item
-                    rename_hint = " (*Run → Rename…* )"
+                    rename_hint = " (*File → Rename…* )"
                 else:
                     prelude = (
                         "Your working directory `%s <%s>`__ contains a file named '%s'.\n\n"
