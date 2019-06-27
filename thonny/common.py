@@ -135,8 +135,10 @@ class InputSubmission(Record):
         super().__init__(**kw)
         self.data = data
 
+
 class InterruptCommand(Record):
     pass
+
 
 class EOFCommand(Record):
     pass

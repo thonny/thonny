@@ -354,6 +354,7 @@ def lap_time(text=""):
     print("LAP", text, round(new_time - _timer_time, 4))
     _timer_time = time.time()
 
+
 class TimeHelper:
     def __init__(self, time_allowed):
         self.start_time = time.time()
@@ -366,4 +367,3 @@ class TimeHelper:
     @property
     def time_left(self):
         return max(self.time_allowed - self.time_spent, 0)
-

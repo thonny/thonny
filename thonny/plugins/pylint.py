@@ -781,7 +781,7 @@ all_checks = [
         "usage": "typing",
     },
     {
-        "msg_id": "W0632", # used to be an error
+        "msg_id": "W0632",  # used to be an error
         "msg_sym": "unbalanced-tuple-unpacking",
         "msg_text": "Possible unbalanced tuple unpacking with sequence%s: left side "
         "has %d label(s), right side has %d value(s)",
@@ -790,7 +790,7 @@ all_checks = [
         "usage": "typing",
     },
     {
-        "msg_id": "E0632", # is warning in later versions
+        "msg_id": "E0632",  # is warning in later versions
         "msg_sym": "unbalanced-tuple-unpacking",
         "msg_text": "Possible unbalanced tuple unpacking with sequence%s: left side "
         "has %d label(s), right side has %d value(s)",
