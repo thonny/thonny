@@ -1,6 +1,8 @@
 import queue
 from thonny.misc_utils import TimeHelper
 from queue import Queue
+
+
 class MicroPythonConnection:
     """Utility class for using Serial or WebSocket connection
     
@@ -79,15 +81,15 @@ class MicroPythonConnection:
             return data
         finally:
             del self._read_buffer[:size]
-    
+
     def _fetch_to_buffer(self):
         while not self._read_queue.empty():
             self._read_buffer.extend(self._read_queue.get(True))
-    
+
     def peek_incoming(self):
         self._fetch_to_buffer()
         return self._read_buffer
-    
+
     def read_all(self):
         self._fetch_to_buffer()
 
@@ -139,6 +141,6 @@ class MicroPythonConnection:
     def close(self):
         raise NotImplementedError()
 
+
 class ConnectionClosedException(Exception):
     pass
-

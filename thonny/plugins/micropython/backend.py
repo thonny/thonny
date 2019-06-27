@@ -55,10 +55,10 @@ class MicroPythonBackend:
         self._command_reading_thread.start()
 
         self._process_until_initial_raw_prompt()
-        
+
         self._welcome_text = self._fetch_welcome_text()
         self._cwd = self._fetch_cwd()
-        
+
         self._send_welcome_message()
 
         self._mainloop()
@@ -80,9 +80,7 @@ class MicroPythonBackend:
 
     def _fetch_welcome_text(self):
         self._connection.write(NORMAL_MODE_CMD)
-        welcome_text = (
-            self._connection.read_until(NORMAL_PROMPT).strip("\r\n >")
-        )
+        welcome_text = self._connection.read_until(NORMAL_PROMPT).strip("\r\n >")
         if os.name != "nt":
             welcome_text = welcome_text.replace("\r\n", "\n")
 
@@ -105,7 +103,7 @@ class MicroPythonBackend:
     def _fetch_builtin_modules(self):
         out, err, _ = self._execute("help('modules')", capture_output=True)
         assert not err, "Error was: %r" % err
-        
+
         modules_str_lines = out.strip().splitlines()
 
         last_line = modules_str_lines[-1].strip()
@@ -120,7 +118,7 @@ class MicroPythonBackend:
             .replace("__main__", "")
             .replace("/", ".")
         )
-        
+
         return modules_str.split()
 
     def _fetch_cwd(self):
@@ -403,7 +401,7 @@ class MicroPythonBackend:
                     err += output
             else:
                 self._send_output(output, stream_name)
-                
+
         return out, err, value
 
     def _process_until_raw_prompt_old(self, hide_stdout=False, hide_stderr=False):

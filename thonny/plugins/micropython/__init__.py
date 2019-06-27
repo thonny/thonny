@@ -435,7 +435,8 @@ class MicroPythonProxy(BackendProxy):
         )
 
     def _clean_environment_during_startup(self, time_left):
-        # In MP Ctrl+D doesn't run user code, in CP it does
+        # In MP Ctrl+D in raw mode cleans environment without running user code
+        # in CP it starts main.py
         self._connection.write(b"\x04")
         self._discarded_bytes = self._connection.read_until(
             [FIRST_RAW_PROMPT, RAW_PROMPT], time_left
@@ -1895,7 +1896,6 @@ class WebReplConnection(Connection):
         import asyncio
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
-
 
 
 def parse_api_information(file_path):
