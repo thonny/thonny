@@ -102,11 +102,6 @@ class VM:
         self._io_level = 0
         self._tty_mode = True
 
-        init_msg = self._fetch_command()
-
-        original_argv = sys.argv.copy()
-        original_path = sys.path.copy()
-
         # clean up path
         sys.path = [d for d in sys.path if d != ""]
 
@@ -122,32 +117,9 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
-        self._frontend_sys_path = init_msg["frontend_sys_path"]
+        self._frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
         self._load_shared_modules()
         self._load_plugins()
-
-        self.send_message(
-            ToplevelResponse(
-                main_dir=self._main_dir,
-                original_argv=original_argv,
-                original_path=original_path,
-                argv=sys.argv,
-                path=sys.path,
-                usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
-                prefix=sys.prefix,
-                welcome_text="Python " + _get_python_version_string(),
-                executable=sys.executable,
-                exe_dirs=get_exe_dirs(),
-                in_venv=(
-                    hasattr(sys, "base_prefix")
-                    and sys.base_prefix != sys.prefix
-                    or hasattr(sys, "real_prefix")
-                    and getattr(sys, "real_prefix") != sys.prefix
-                ),
-                python_version=_get_python_version_string(),
-                cwd=os.getcwd(),
-            )
-        )
 
         self._install_signal_handler()
 
@@ -376,6 +348,25 @@ class VM:
             signal.signal(signal.SIGBREAK, signal_handler)  # @UndefinedVariable
         else:
             signal.signal(signal.SIGINT, signal_handler)
+
+    def _cmd_get_environment_info(self, cmd):
+        return ToplevelResponse(
+            main_dir=self._main_dir,
+            path=sys.path,
+            usersitepackages=site.getusersitepackages() if site.ENABLE_USER_SITE else None,
+            prefix=sys.prefix,
+            welcome_text="Python " + _get_python_version_string(),
+            executable=sys.executable,
+            exe_dirs=get_exe_dirs(),
+            in_venv=(
+                hasattr(sys, "base_prefix")
+                and sys.base_prefix != sys.prefix
+                or hasattr(sys, "real_prefix")
+                and getattr(sys, "real_prefix") != sys.prefix
+            ),
+            python_version=_get_python_version_string(),
+            cwd=os.getcwd(),
+        )
 
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
@@ -801,10 +792,6 @@ class VM:
             info["entries"].append((self.export_value(key), self.export_value(value[key])))
 
     def _execute_file(self, cmd, executor_class):
-        # args are accepted only in Run and Debug,
-        # and were stored in sys.argv already in VM.__init__
-        # TODO: are they?
-
         self._check_update_tty_mode(cmd)
 
         if len(cmd.args) >= 1:
