@@ -22,25 +22,36 @@ import re
 from queue import Queue
 import threading
 import os
+from thonny.plugins.micropython.serial_connection import SerialConnection
+
+BAUDRATE = 115200
+ENCODING = "utf-8"
 
 # Commands
-RAW_MODE_CMD = "\x01"
-NORMAL_MODE_CMD = "\x02"
-INTERRUPT_CMD = "\x03"
-SOFT_REBOOT_CMD = "\x04"
+RAW_MODE_CMD = b"\x01"
+NORMAL_MODE_CMD = b"\x02"
+INTERRUPT_CMD = b"\x03"
+SOFT_REBOOT_CMD = b"\x04"
 
 # Output tokens
-THONNY_MSG_START = "\x02"
-THONNY_MSG_END = "\x04"
-EOT = "\x04"
-NORMAL_PROMPT = ">>> "
+THONNY_MSG_START = b"\x02"
+THONNY_MSG_END = b"\x04"
+EOT = b"\x04"
+NORMAL_PROMPT = b">>> "
+LF = b"\n"
+OK = b"OK"
 
 # first prompt when switching to raw mode (or after soft reboot in raw mode)
 # Looks like it's not translatable in CP
 # https://github.com/adafruit/circuitpython/blob/master/locale/circuitpython.pot
-FIRST_RAW_PROMPT = "raw REPL; CTRL-B to exit\r\n>"
+FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
 
-RAW_PROMPT = ">"
+RAW_PROMPT = b">"
+
+BLOCK_CLOSERS = re.compile(
+    b"|".join(map(re.escape, [LF, EOT, THONNY_MSG_START, NORMAL_PROMPT, FIRST_RAW_PROMPT]))
+)
+
 
 logger = logging.getLogger("thonny.micropython.backend")
 
@@ -80,9 +91,9 @@ class MicroPythonBackend:
 
     def _fetch_welcome_text(self):
         self._connection.write(NORMAL_MODE_CMD)
-        welcome_text = self._connection.read_until(NORMAL_PROMPT).strip("\r\n >")
+        welcome_text = self._connection.read_until(NORMAL_PROMPT).strip(b"\r\n >")
         if os.name != "nt":
-            welcome_text = welcome_text.replace("\r\n", "\n")
+            welcome_text = welcome_text.replace(b"\r\n", b"\n")
 
         # Go back to raw prompt
         self._connection.write(RAW_MODE_CMD)
@@ -163,7 +174,7 @@ class MicroPythonBackend:
         "works in separate thread"
 
         while True:
-            line = self._original_stdin.readline()
+            line = sys.stdin.readline()
             if line == "":
                 logger.info("Read stdin EOF")
                 sys.exit()
@@ -212,30 +223,32 @@ class MicroPythonBackend:
 
         self.send_message(response)
 
-    def _submit_input(self, data: str) -> None:
+    def _submit_input(self, cdata: str) -> None:
         # TODO: what if there is a previous unused data waiting
         assert self._connection.outgoing_is_empty()
 
-        assert data.endswith("\n")
-        if not data.endswith("\r\n"):
+        assert cdata.endswith("\n")
+        if not cdata.endswith("\r\n"):
             # submission is done with CRLF
-            data = data[:-1] + "\r\n"
+            cdata = cdata[:-1] + "\r\n"
+
+        bdata = cdata.encode(ENCODING)
 
         try:
-            self._connection.write(data)
+            self._connection.write(bdata)
             # Try to consume the echo
 
             try:
-                echo = self._connection.read(len(data))
+                echo = self._connection.read(len(bdata))
             except queue.Empty:
                 # leave it.
                 logging.warning("Timeout when reading echo")
                 return
 
-            if echo != data:
+            if echo != bdata:
                 # because of autoreload? timing problems? interruption?
                 # Leave it.
-                logging.warning("Unexpected echo. Expected %s, got %s" % (data, echo))
+                logging.warning("Unexpected echo. Expected %s, got %s" % (bdata, echo))
                 self._connection.unread(echo)
 
         except ConnectionClosedException as e:
@@ -245,8 +258,8 @@ class MicroPythonBackend:
         if "cwd" not in msg:
             msg["cwd"] = self._cwd
 
-        self._original_stdout.write(serialize_message(msg) + "\n")
-        self._original_stdout.flush()
+        sys.stdout.write(serialize_message(msg).encode(ENCODING) + b"\n")
+        sys.stdout.flush()
 
     def _send_output(self, data, stream_name):
         if not data:
@@ -271,11 +284,11 @@ class MicroPythonBackend:
         self._ensure_raw_propmt()
 
         # send command
-        self._connection.write(script + EOT)
+        self._connection.write(script.encode(ENCODING) + EOT)
 
         # fetch command confirmation
         ok = self._connection.read(2)
-        assert ok == "OK", "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
+        assert ok == OK, "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
         return self._process_until_raw_prompt(capture_output)
 
     def _execute_print_expr(self, expr, prelude="", cleanup="", capture_output=False):
@@ -333,8 +346,8 @@ class MicroPythonBackend:
         eot_count = 0
         value = None
         done = False
-        out = ""
-        err = ""
+        out = b""
+        err = b""
 
         while not done:
             # There may be an input submission waiting
@@ -344,9 +357,7 @@ class MicroPythonBackend:
             # Process input in chunks (max 1 parsing marker per chunk).
             # Prefer whole lines (to reduce the number of events),
             # but don't wait too long for eol.
-            output = self._connection.soft_read_until(
-                ["\n", EOT, THONNY_MSG_START, NORMAL_PROMPT, FIRST_RAW_PROMPT], timeout=0.01
-            )
+            output = self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.01)
             stream_name = "stderr" if eot_count == 1 else "stdout"
 
             if output.endswith(THONNY_MSG_START):
@@ -380,12 +391,12 @@ class MicroPythonBackend:
 
             elif (
                 output.endswith(NORMAL_PROMPT)
-                and self._connection.peek_incoming() == "\r\n" + FIRST_RAW_PROMPT
+                and self._connection.peek_incoming() == b"\r\n" + FIRST_RAW_PROMPT
             ):
                 output = output + self._connection.read_until(FIRST_RAW_PROMPT)
                 # skip both normal and raw prompt together
                 # (otherwise they get processed separately)
-                output = output[: -len(NORMAL_PROMPT + "\r\n" + FIRST_RAW_PROMPT)]
+                output = output[: -len(NORMAL_PROMPT + b"\r\n" + FIRST_RAW_PROMPT)]
                 done = True
 
             elif output.endswith(NORMAL_PROMPT) and self._connection.incoming_is_empty():
@@ -402,7 +413,7 @@ class MicroPythonBackend:
             else:
                 self._send_output(output, stream_name)
 
-        return out, err, value
+        return out.decode(ENCODING), err.decode(ENCODING), value
 
     def _process_until_raw_prompt_old(self, hide_stdout=False, hide_stderr=False):
         # State machine for extracting relevant parts
@@ -416,7 +427,7 @@ class MicroPythonBackend:
             self._check_for_side_commands()
             # prefer whole lines, but don't wait too long
             new_data = self._connection.soft_read_until(
-                ["\n", EOT, THONNY_MSG_START, THONNY_MSG_END, NORMAL_PROMPT], timeout=0.01
+                [LF, EOT, THONNY_MSG_START, THONNY_MSG_END, NORMAL_PROMPT], timeout=0.01
             )
             if not new_data:
                 continue
@@ -444,7 +455,7 @@ class MicroPythonBackend:
                     data = data[len(EOT) :]
 
             elif state == "value":
-                if "\n" in data:
+                if LF in data:
                     data += self._connection.read_until("\n")
                 value, data = data.split("\n", maxsplit=1)
                 state = "err"
@@ -477,7 +488,7 @@ class MicroPythonBackend:
                 self._submit_input(cmd.data)
             elif isinstance(cmd, InterruptCommand):
                 self._interrupt()
-            elif isinstance(cmd, EOFCommand()):
+            elif isinstance(cmd, EOFCommand):
                 self._soft_reboot()
             else:
                 postponed.append(cmd)
@@ -607,3 +618,8 @@ class ExecutionError(Exception):
 def _report_internal_error():
     print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
     traceback.print_exc()
+
+
+if __name__ == "__main__":
+    connection = SerialConnection("COM7", BAUDRATE)
+    vm = MicroPythonBackend(connection)

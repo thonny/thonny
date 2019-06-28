@@ -796,8 +796,6 @@ class SubprocessProxy(BackendProxy):
         self._close_backend()
 
     def _close_backend(self):
-        self._cancel_gui_update_loop()
-
         if self._proc is not None and self._proc.poll() is None:
             self._proc.kill()
 
@@ -869,9 +867,6 @@ class SubprocessProxy(BackendProxy):
     def _store_state_info(self, msg):
         if "cwd" in msg:
             self._cwd = msg["cwd"]
-
-        if "gui_is_active" in msg:
-            self._update_gui_updating(msg)
 
         if "in_venv" in msg:
             self._in_venv = msg["in_venv"]
@@ -952,6 +947,12 @@ class CPythonProxy(SubprocessProxy):
         import thonny.backend_launcher
 
         return thonny.backend_launcher.__file__
+
+    def _store_state_info(self, msg):
+        super()._store_state_info(msg)
+
+        if "gui_is_active" in msg:
+            self._update_gui_updating(msg)
 
     def _clear_environment(self):
         self._close_backend()

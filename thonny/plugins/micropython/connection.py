@@ -1,6 +1,7 @@
 import queue
 from thonny.misc_utils import TimeHelper
 from queue import Queue
+import re
 
 
 class MicroPythonConnection:
@@ -46,21 +47,17 @@ class MicroPythonConnection:
 
     def read_until(self, terminator, timeout=1000000, timeout_is_soft=False):
         timer = TimeHelper(timeout)
-        if isinstance(terminator, (set, list, tuple)):
-            terminators = terminator
-        else:
-            terminators = [terminator]
 
-        terminator = None
+        if isinstance(terminator, str):
+            terminator = re.compile(re.escape(terminator))
+
+        self._fetch_to_buffer()
+        match = None
         while True:
             self._check_for_error()
 
-            found = False
-            for terminator in terminators:
-                if terminator in self._read_buffer:
-                    found = True
-                    break
-            if found:
+            match = re.search(terminator, self._read_buffer)
+            if match:
                 break
 
             try:
@@ -73,14 +70,15 @@ class MicroPythonConnection:
                 else:
                     raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
 
-        assert terminator is not None
-        size = self._read_buffer.index(terminator) + len(terminator)
+        if match:
+            size = match.end()
+        else:
+            assert timeout_is_soft
+            size = len(self._read_buffer)
 
-        try:
-            data = self._read_buffer[:size]
-            return data
-        finally:
-            del self._read_buffer[:size]
+        data = self._read_buffer[:size]
+        del self._read_buffer[:size]
+        return data
 
     def _fetch_to_buffer(self):
         while not self._read_queue.empty():

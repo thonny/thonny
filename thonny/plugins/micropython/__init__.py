@@ -1952,6 +1952,15 @@ def load_plugin():
         GenericMicroPythonConfigPage,
     )
 
+    from thonny.plugins.micropython.new_proxy import NewMicroPythonProxy, NewGenericConfPage
+
+    add_micropython_backend(
+        "NewMicroPython",
+        NewMicroPythonProxy,
+        "MicroPython on a generic device (NEW)",
+        NewGenericConfPage,
+    )
+
     def explain_deprecation():
         messagebox.showinfo(
             "Moved commands",
