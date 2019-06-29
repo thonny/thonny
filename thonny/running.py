@@ -695,9 +695,8 @@ class SubprocessProxy(BackendProxy):
         self._usersitepackages = None
         self._gui_update_loop_id = None
         self._in_venv = None
-        self._cwd = get_workbench().get_local_cwd()
+        self._cwd = None
         self._start_background_process()
-        self._send_msg(ToplevelCommand("get_environment_info"))
 
     def _start_background_process(self):
         # deque, because in one occasion I need to put messages back
@@ -742,7 +741,7 @@ class SubprocessProxy(BackendProxy):
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            cwd=self.get_cwd(),
+            cwd=self.get_cwd() if self.uses_local_filesystem() else None,
             env=env,
             universal_newlines=True,
             creationflags=creationflags,
@@ -942,6 +941,10 @@ class SubprocessProxy(BackendProxy):
 
 class CPythonProxy(SubprocessProxy):
     "abstract class"
+
+    def __init__(self, clean: bool, executable: str) -> None:
+        super().__init__(clean, executable)
+        self._send_msg(ToplevelCommand("get_environment_info"))
 
     def _get_launcher_path(self):
         import thonny.backend_launcher

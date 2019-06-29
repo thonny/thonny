@@ -9,6 +9,8 @@ from thonny.common import (
     InlineResponse,
     UserError,
     serialize_message,
+    BackendEvent,
+    ValueInfo,
 )
 import sys
 import logging
@@ -56,6 +58,11 @@ BLOCK_CLOSERS = re.compile(
 logger = logging.getLogger("thonny.micropython.backend")
 
 
+def debug(msg):
+    return
+    print(msg, file=sys.stderr)
+
+
 class MicroPythonBackend:
     def __init__(self, connection):
         self._connection = connection
@@ -67,10 +74,14 @@ class MicroPythonBackend:
 
         self._process_until_initial_raw_prompt()
 
+        debug("after inrp")
         self._welcome_text = self._fetch_welcome_text()
+        debug("after welc: " + self._welcome_text)
         self._cwd = self._fetch_cwd()
+        debug("after fetch: " + self._cwd)
 
-        self._send_welcome_message()
+        self._send_ready_message()
+        debug("after welc")
 
         self._mainloop()
 
@@ -99,7 +110,7 @@ class MicroPythonBackend:
         self._connection.write(RAW_MODE_CMD)
         self._connection.read_until(FIRST_RAW_PROMPT)
 
-        return welcome_text
+        return welcome_text.decode(ENCODING)
 
     def _fetch_uname(self):
         res = self._evaluate("__module_os.uname()", prelude="import os as __module_os")
@@ -136,21 +147,16 @@ class MicroPythonBackend:
         if not self._supports_directories():
             return None
         else:
-            return self._evaluate("__module_os.getcwd()", prelude="import os as __module_os")
+            result = self._evaluate("__module_os.getcwd()", prelude="import os as __module_os")
+            assert result is not None, "Could not fetch cwd"
+            return result
 
-    def _send_welcome_message(self):
-        pass
+    def _send_ready_message(self):
+        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
     def _interrupt(self):
         try:
-            self.idle = False
-            self._connection.reset_output_buffer()
             self._connection.write(INTERRUPT_CMD)
-
-            # Wait a bit to avoid the situation where part of the prompt will
-            # be treated as output and whole prompt is not detected.
-            # (Happened with Calliope)
-            sleep(0.1)
         except ConnectionClosedException as e:
             self._handle_connection_closed(e)
 
@@ -221,6 +227,7 @@ class MicroPythonBackend:
             elif isinstance(cmd, InlineCommand):
                 response = InlineResponse(cmd.name, **response)
 
+        debug("cmd: " + str(cmd) + ", respin: " + str(response))
         self.send_message(response)
 
     def _submit_input(self, cdata: str) -> None:
@@ -258,14 +265,14 @@ class MicroPythonBackend:
         if "cwd" not in msg:
             msg["cwd"] = self._cwd
 
-        sys.stdout.write(serialize_message(msg).encode(ENCODING) + b"\n")
+        sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
 
     def _send_output(self, data, stream_name):
         if not data:
             return
-
-        # TODO:
+        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
+        self.send_message(msg)
 
     def _flush_output(self):
         "TODO: send current stdout and stderr to UI"
@@ -281,13 +288,15 @@ class MicroPythonBackend:
             self._connection = None
 
     def _execute(self, script, capture_output=False):
-        self._ensure_raw_propmt()
+        # self._ensure_raw_propmt()
 
         # send command
         self._connection.write(script.encode(ENCODING) + EOT)
+        debug("Wrote " + script + "\n--------\n")
 
         # fetch command confirmation
         ok = self._connection.read(2)
+        debug("GOTOK")
         assert ok == OK, "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
         return self._process_until_raw_prompt(capture_output)
 
@@ -297,7 +306,11 @@ class MicroPythonBackend:
         script = ""
         if prelude:
             script += prelude + "\n"
-        script += "print(%r, repr(%s), sep='', end=%r)" % (THONNY_MSG_START, expr, THONNY_MSG_END)
+        script += "print(%r, repr(%s), sep='', end=%r)" % (
+            THONNY_MSG_START.decode(),
+            expr,
+            THONNY_MSG_END.decode(),
+        )
 
         # assuming cleanup doesn't cause output
         if cleanup:
@@ -307,7 +320,7 @@ class MicroPythonBackend:
 
     def _evaluate(self, expr, prelude="", cleanup=""):
         _, _, value_repr = self._execute_print_expr(expr, prelude, cleanup)
-
+        debug("GOTVALUE")
         if value_repr is None:
             return None
         else:
@@ -315,7 +328,10 @@ class MicroPythonBackend:
 
     def _process_until_initial_raw_prompt(self):
         self._connection.write(RAW_MODE_CMD)
-        self._process_until_raw_prompt()
+        try:
+            self._process_until_raw_prompt()
+        except KeyboardInterrupt:
+            self._interrupt()
 
     def _process_until_raw_prompt(self, capture_output=False):
         """
@@ -349,6 +365,8 @@ class MicroPythonBackend:
         out = b""
         err = b""
 
+        assert not capture_output
+
         while not done:
             # There may be an input submission waiting
             # and we can't progress without resolving it first
@@ -361,6 +379,7 @@ class MicroPythonBackend:
             stream_name = "stderr" if eot_count == 1 else "stdout"
 
             if output.endswith(THONNY_MSG_START):
+                debug("MSGSTA: " + str(output))
                 output = output[: -len(THONNY_MSG_START)]
 
                 # Low chance of failure (eg. because of precisely timed reboot),
@@ -368,11 +387,13 @@ class MicroPythonBackend:
                 temp = self._connection.soft_read_until(THONNY_MSG_END, timeout=3)
                 if temp.endswith(THONNY_MSG_END):
                     value = temp[: -len(THONNY_MSG_END)]
+                    debug("GOTVALUE: " + str(value))
                 else:
                     # failure, restore everything to help diagnosis
                     output = output + THONNY_MSG_START + temp
 
             elif output.endswith(EOT):
+                debug("EOT: " + str(output))
                 output = output[: -len(EOT)]
                 eot_count += 1
                 if eot_count == 2:
@@ -386,6 +407,7 @@ class MicroPythonBackend:
                         self._connection.unread(temp)
 
             elif output.endswith(FIRST_RAW_PROMPT) and self._connection.incoming_is_empty():
+                debug("FIRAPRO: " + str(output))
                 output = output[: -len(FIRST_RAW_PROMPT)]
                 done = True
 
@@ -393,6 +415,7 @@ class MicroPythonBackend:
                 output.endswith(NORMAL_PROMPT)
                 and self._connection.peek_incoming() == b"\r\n" + FIRST_RAW_PROMPT
             ):
+                debug("NOPRO: " + str(output))
                 output = output + self._connection.read_until(FIRST_RAW_PROMPT)
                 # skip both normal and raw prompt together
                 # (otherwise they get processed separately)
@@ -400,6 +423,7 @@ class MicroPythonBackend:
                 done = True
 
             elif output.endswith(NORMAL_PROMPT) and self._connection.incoming_is_empty():
+                debug("NOPRO2: " + str(output))
                 output = output[: -len(NORMAL_PROMPT)]
                 # switch to raw mode and continue
                 self._connection.write(RAW_MODE_CMD)
@@ -411,72 +435,31 @@ class MicroPythonBackend:
                     assert stream_name == "stderr"
                     err += output
             else:
-                self._send_output(output, stream_name)
+                # TODO: deal with partial UTF-8 chars
+                self._send_output(output.decode(ENCODING), stream_name)
 
-        return out.decode(ENCODING), err.decode(ENCODING), value
+        debug("doneproc")
+        return (
+            out.decode(ENCODING),
+            err.decode(ENCODING),
+            None if value is None else value.decode(ENCODING),
+        )
 
-    def _process_until_raw_prompt_old(self, hide_stdout=False, hide_stderr=False):
-        # State machine for extracting relevant parts
-        out = ""
-        err = ""
+    def _clear_environment(self):
+        # TODO: Ctrl+D in raw repl is perfect for MicroPython
+        # but on CircuitPython it runs main.py
 
-        value = None
-        state = "out"
-        data = ""
-        while state != "done":
-            self._check_for_side_commands()
-            # prefer whole lines, but don't wait too long
-            new_data = self._connection.soft_read_until(
-                [LF, EOT, THONNY_MSG_START, THONNY_MSG_END, NORMAL_PROMPT], timeout=0.01
-            )
-            if not new_data:
-                continue
-
-            data += new_data
-            if state == "out":
-                # regular output should be forwarded incrementally
-                end_match = re.search(THONNY_MSG_START + "|" + EOT, data)
-                if end_match is None:
-                    to_be_sent = data
-                    data = ""
-                else:
-                    to_be_sent = data[: end_match.start()]
-                    data = data[end_match.start() :]
-
-                out += to_be_sent
-                if not hide_stdout:
-                    self._send_output(to_be_sent, "stdout")
-
-                if data.startswith(THONNY_MSG_START):
-                    state = "value"
-                    data = data[len(THONNY_MSG_START) :]
-                elif data.startswith(EOT):
-                    state = "err"
-                    data = data[len(EOT) :]
-
-            elif state == "value":
-                if LF in data:
-                    data += self._connection.read_until("\n")
-                value, data = data.split("\n", maxsplit=1)
-                state = "err"
-
-            elif state == "err":
-                end_pos = data.find(EOT)
-                if end_pos == -1:
-                    to_be_sent = data
-                    data = ""
-                else:
-                    to_be_sent = data[:end_pos]
-                    data = data[end_pos:]
-                    state = "done"
-
-                err += to_be_sent
-                if not hide_stderr:
-                    self._send_output(to_be_sent, "stderr")
-
-        return out, err, value
+        # TODO: which is better:
+        # self._execute_async(dedent("""
+        #    for name in globals():
+        #        if not name.startswith("__"):
+        #            del globals()[name]
+        # """).strip())
+        # or
+        self._execute("globals().clear(); __name__ = '__main__'")
 
     def _check_for_side_commands(self):
+        # TODO: do interrupts in reading thread
         # most likely the queue is empty
         if self._command_queue.empty():
             return
@@ -503,6 +486,9 @@ class MicroPythonBackend:
         else:
             return True
 
+    def _cmd_interrupt(self, cmd):
+        self._interrupt()
+
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
             if not self._supports_directories():
@@ -526,7 +512,7 @@ class MicroPythonBackend:
             ast.parse(cmd.source, mode="eval")
             # If it didn't fail then source is an expression
             _, _, value_repr = self._execute_print_expr(cmd.source)
-            return {"repr": value_repr}
+            return {"value_info": ValueInfo(0, value_repr)}
         except SyntaxError:
             # source is a statement (or invalid syntax)
             self._execute(cmd.source)
@@ -542,7 +528,7 @@ class MicroPythonBackend:
                 "{name : repr(getattr(__mod_for_globs, name)) in dir(__mod_for_globs) if not name.startswith('__')}",
                 prelude="import %s as __mod_for_globs",
             )
-            return {"module_name": cmd.module_name, "globals": globs}
+        return {"module_name": cmd.module_name, "globals": globs}
 
     def _cmd_get_dirs_child_data(self, cmd):
         if "micro:bit" in self._welcome_text.lower():
@@ -559,7 +545,7 @@ class MicroPythonBackend:
 
         assert cmd["paths"] == {""}, "Bad command: " + repr(cmd)
         file_sizes = self._evaluate(
-            "{name : __temp_os.size(name) for name in __module_os.listdir()}"
+            "{name : __module_os.size(name) for name in __module_os.listdir()}"
         )
         return {"": file_sizes}
 
@@ -568,7 +554,7 @@ class MicroPythonBackend:
             "__temp_result",
             prelude=dedent(
                 """
-                import os as __temp_os
+                import os as __module_os
                 # Init all vars, so that they can be deleted
                 # even if the loop makes no iterations
                 __temp_result = {}
@@ -582,12 +568,12 @@ class MicroPythonBackend:
                 for __temp_path in %(paths)r:
                     __temp_real_path = __temp_path or '/'
                     __temp_children = {}
-                    for __temp_name in __temp_os.listdir(__temp_real_path):
+                    for __temp_name in __module_os.listdir(__temp_real_path):
                         if __temp_name.startswith('.') or __temp_name == "System Volume Information":
                             continue
                         __temp_full = (__temp_real_path + '/' + __temp_name).replace("//", "/")
                         # print("processing", __temp_full)
-                        __temp_st = __temp_os.stat(__temp_full)
+                        __temp_st = __module_os.stat(__temp_full)
                         if __temp_st[0] & 0o170000 == 0o040000:
                             # directory
                             __temp_children[__temp_name] = None
@@ -600,7 +586,7 @@ class MicroPythonBackend:
             % {"paths": cmd.paths},
             cleanup=dedent(
                 """
-                del __temp_os
+                del __module_os
                 del __temp_st
                 del __temp_children
                 del __temp_name

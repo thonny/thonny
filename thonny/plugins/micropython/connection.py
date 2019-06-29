@@ -2,6 +2,7 @@ import queue
 from thonny.misc_utils import TimeHelper
 from queue import Queue
 import re
+import sys
 
 
 class MicroPythonConnection:
@@ -51,7 +52,6 @@ class MicroPythonConnection:
         if isinstance(terminator, str):
             terminator = re.compile(re.escape(terminator))
 
-        self._fetch_to_buffer()
         match = None
         while True:
             self._check_for_error()
@@ -62,6 +62,7 @@ class MicroPythonConnection:
 
             try:
                 data = self._read_queue.get(True, timer.time_left)
+                # print("RR", repr(data), file=sys.stderr)
                 assert len(data) > 0
                 self._read_buffer.extend(data)
             except queue.Empty:
