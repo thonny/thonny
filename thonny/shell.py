@@ -298,7 +298,6 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         prompt_font = tk.font.nametofont("BoldEditorFont")
         x_padding = 4
-        y_padding = 6
         io_vert_spacing = 10
         io_indent = 16 + x_padding
         code_indent = prompt_font.measure(">>> ") + x_padding
@@ -320,8 +319,6 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             "welcome",
             lmargin1=x_padding,
             lmargin2=x_padding,
-            spacing1=y_padding,
-            spacing3=y_padding,
         )
 
         # Underline on the font looks better than underline on the tag,
