@@ -26,6 +26,7 @@ import re
 from queue import Queue
 import threading
 import os
+import time
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -72,7 +73,8 @@ class MicroPythonBackend:
 
         self._command_reading_thread = threading.Thread(target=self._read_commands, daemon=True)
         self._command_reading_thread.start()
-
+        
+        self._startup_time = time.time()
         self._process_until_initial_raw_prompt()
 
         self._welcome_text = self._fetch_welcome_text()
@@ -266,10 +268,11 @@ class MicroPythonBackend:
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
 
-    def _send_output(self, data, stream_name):
+    def _send_output(self, data, stream_name, tags=()):
         if not data:
             return
-        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
+        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data,
+                           tags=tags)
         self.send_message(msg)
 
     def _flush_output(self):
@@ -348,7 +351,8 @@ class MicroPythonBackend:
         regular prompt. Soft-reboots can occur because of Ctrl+D, machine.soft_reset()
         and even reset button (micro:bit).
         
-        Because of soft-reboot we can't assume we'll find all 
+        Because of soft-reboot we can't assume we'll find the terminating markers for 
+        each command.
         
         Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties, 
         because it becomes impossible to say whether we are at prompt and output
@@ -363,9 +367,11 @@ class MicroPythonBackend:
         out = b""
         err = b""
 
-        assert not capture_output
-
         while not done:
+            if (self._connection.num_bytes_received == 0
+                and time.time() - self._startup_time > 2):
+                self._send_output("[Device seems to be busy. Use Ctrl+C to interrupt.]\n", "stdout")
+            
             # There may be an input submission waiting
             # and we can't progress without resolving it first
             self._check_for_side_commands()
