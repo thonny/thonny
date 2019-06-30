@@ -315,11 +315,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("restart_line", wrap="none", lmargin1=x_padding, lmargin2=x_padding)
 
-        self.tag_configure(
-            "welcome",
-            lmargin1=x_padding,
-            lmargin2=x_padding,
-        )
+        self.tag_configure("welcome", lmargin1=x_padding, lmargin2=x_padding)
 
         # Underline on the font looks better than underline on the tag,
         # therefore Shell doesn't use configured "hyperlink" style directly
