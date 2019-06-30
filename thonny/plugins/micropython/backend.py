@@ -16,14 +16,16 @@ import sys
 import logging
 import traceback
 import queue
-from thonny.plugins.micropython.connection import ConnectionClosedException
+from thonny.plugins.micropython.connection import (
+    ConnectionClosedException,
+    ConnectionFailedException,
+)
 from textwrap import dedent
 import ast
 import re
 from queue import Queue
 import threading
 import os
-from thonny.plugins.micropython.serial_connection import SerialConnection
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -603,5 +605,21 @@ def _report_internal_error():
 
 
 if __name__ == "__main__":
-    connection = SerialConnection("COM7", BAUDRATE)
+    port = None if sys.argv[1] == "None" else sys.argv[1]
+    try:
+        if port == "webrepl":
+            url = sys.argv[2]
+            password = sys.argv[3]
+            from thonny.plugins.micropython.webrepl_connection import WebReplConnection
+
+            connection = WebReplConnection(url, password)
+        else:
+            from thonny.plugins.micropython.serial_connection import SerialConnection
+
+            connection = SerialConnection(port, BAUDRATE)
+    except ConnectionFailedException as e:
+        msg = ToplevelResponse(error=str(e))
+        sys.stdout.write(serialize_message(msg) + "\n")
+        connection = None
+
     vm = MicroPythonBackend(connection)

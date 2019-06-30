@@ -1,16 +1,45 @@
 import serial
-from thonny.plugins.micropython.connection import MicroPythonConnection
+from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
 import threading
 import time
 from serial.serialutil import SerialException
 import logging
+import traceback
+import platform
+from textwrap import dedent
 
 
 class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate):
         super().__init__()
 
-        self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+        try:
+            self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
+        except SerialException as error:
+            message = "Unable to connect to " + port + "\n" + "Error: " + str(error)
+
+            # TODO: check if these error codes also apply to Linux and Mac
+            if error.errno == 13 and platform.system() == "Linux":
+                # TODO: check if user already has this group
+                message += "\n\n" + dedent(
+                    """\
+                Try adding yourself to the 'dialout' group:
+                > sudo usermod -a -G dialout <username>
+                (NB! This needs to be followed by reboot or logging out and logging in again!)"""
+                )
+
+            elif "PermissionError" in message:
+                message += "\n\n" + dedent(
+                    """\
+                If you have serial connection to the device from another program,
+                then disconnect it there."""
+                )
+
+            elif error.errno == 16:
+                message += "\n\n" + "Try restarting the device."
+
+            raise ConnectionFailedException(message)
+
         self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
         self._reading_thread.start()
 

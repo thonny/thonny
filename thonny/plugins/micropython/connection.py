@@ -141,5 +141,9 @@ class MicroPythonConnection:
         raise NotImplementedError()
 
 
+class ConnectionFailedException(Exception):
+    pass
+
+
 class ConnectionClosedException(Exception):
     pass

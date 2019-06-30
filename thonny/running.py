@@ -727,8 +727,7 @@ class SubprocessProxy(BackendProxy):
             "-u",  # unbuffered IO
             "-B",  # don't write pyo/pyc files
             # (to avoid problems when using different Python versions without write permissions)
-            self._get_launcher_path(),
-        ]
+        ] + self._get_launcher_with_args()
 
         creationflags = 0
         if running_on_windows():
@@ -751,7 +750,7 @@ class SubprocessProxy(BackendProxy):
         Thread(target=self._listen_stdout, args=(self._proc.stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(self._proc.stderr,), daemon=True).start()
 
-    def _get_launcher_path(self):
+    def _get_launcher_with_args(self):
         raise NotImplementedError()
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
@@ -946,10 +945,10 @@ class CPythonProxy(SubprocessProxy):
         super().__init__(clean, executable)
         self._send_msg(ToplevelCommand("get_environment_info"))
 
-    def _get_launcher_path(self):
+    def _get_launcher_with_args(self):
         import thonny.backend_launcher
 
-        return thonny.backend_launcher.__file__
+        return [thonny.backend_launcher.__file__]
 
     def _store_state_info(self, msg):
         super()._store_state_info(msg)
