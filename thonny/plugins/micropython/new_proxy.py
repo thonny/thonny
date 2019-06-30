@@ -41,6 +41,12 @@ class NewMicroPythonProxy(SubprocessProxy):
     def can_do_file_operations(self):
         return self._proc is not None and get_runner().is_waiting_toplevel_command()
 
+    def is_connected(self):
+        return self._proc is not None
+
+    def is_functional(self):
+        return self.is_connected()
+
 
 class NewGenericConfPage(MicroPythonConfigPage):
     pass

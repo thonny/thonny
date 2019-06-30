@@ -17,7 +17,6 @@ import logging
 import traceback
 import queue
 from thonny.plugins.micropython.connection import ConnectionClosedException
-from time import sleep
 from textwrap import dedent
 import ast
 import re
@@ -74,14 +73,11 @@ class MicroPythonBackend:
 
         self._process_until_initial_raw_prompt()
 
-        debug("after inrp")
         self._welcome_text = self._fetch_welcome_text()
-        debug("after welc: " + self._welcome_text)
         self._cwd = self._fetch_cwd()
-        debug("after fetch: " + self._cwd)
+        self._builtin_modules = self._fetch_builtin_modules()
 
         self._send_ready_message()
-        debug("after welc")
 
         self._mainloop()
 

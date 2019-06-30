@@ -343,8 +343,6 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         self.active_object_tags = set()
 
-        self._last_welcome_text = None
-
         self.tag_raise("io_hyperlink")
         self.tag_raise("underline")
         self.tag_raise("strikethrough")
@@ -393,9 +391,10 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             self._ensure_visible()
 
         welcome_text = msg.get("welcome_text")
-        if welcome_text and welcome_text != self._last_welcome_text:
+        if welcome_text and welcome_text:
+            if self.get("output_insert -1 c", "output_insert").endswith("\n"):
+                self._insert_text_directly("\n")
             self._insert_text_directly(welcome_text, ("welcome",))
-            self._last_welcome_text = welcome_text
 
         if "value_info" in msg:
             num_stripped_question_marks = getattr(msg, "num_stripped_question_marks", 0)
