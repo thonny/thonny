@@ -348,7 +348,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.tag_raise("sel")
 
     def submit_command(self, cmd_line, tags):
-        assert get_runner().is_waiting_toplevel_command()
+        # assert get_runner().is_waiting_toplevel_command()
         self.delete("input_start", "end")
         self.insert("input_start", cmd_line, tags)
         self.see("end")
@@ -388,7 +388,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         welcome_text = msg.get("welcome_text")
         if welcome_text and welcome_text:
-            if self.get("output_insert -1 c", "output_insert").endswith("\n"):
+            preceding = self.get("output_insert -1 c", "output_insert")
+            if preceding.strip() and not preceding.endswith("\n"):
                 self._insert_text_directly("\n")
             self._insert_text_directly(welcome_text, ("welcome",))
 
@@ -1522,6 +1523,8 @@ class PlotterCanvas(tk.Canvas):
 
         self.create_close_button()
 
+        get_workbench().bind("SyntaxThemeChanged", self.reload_theme_options, True)
+
     def create_close_button(self):
         self.close_img = get_workbench().get_image("tab-close")
         self.close_active_img = get_workbench().get_image("tab-close-active")
@@ -1873,6 +1876,13 @@ class PlotterCanvas(tk.Canvas):
         self.create_text(
             x, y, anchor=anchor, text=text, tags=tags, fill=self.foreground, justify=justify
         )
+
+    def reload_theme_options(self, event):
+        self.background = get_syntax_options_for_tag("TEXT")["background"]
+        self.foreground = get_syntax_options_for_tag("TEXT")["foreground"]
+        self.configure(background=self.background)
+        self.itemconfig(self.close_rect, fill=self.background)
+        self.update_plot(True)
 
     def on_resize(self, event):
         if self.winfo_width() > 10:

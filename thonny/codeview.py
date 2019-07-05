@@ -21,9 +21,7 @@ class SyntaxText(EnhancedText):
     def __init__(self, master=None, cnf={}, **kw):
         self._syntax_options = {}
         super().__init__(master=master, cnf=cnf, **kw)
-        self._syntax_theme_change_binding = tk._default_root.bind(
-            "<<SyntaxThemeChanged>>", self._reload_syntax_options, True
-        )
+        get_workbench().bind("SyntaxThemeChanged", self._reload_syntax_options, True)
         self._reload_syntax_options()
 
     def set_syntax_options(self, syntax_options):
@@ -56,7 +54,7 @@ class SyntaxText(EnhancedText):
 
     def destroy(self):
         super().destroy()
-        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
+        get_workbench().unbind("SyntaxThemeChanged", self._reload_syntax_options)
 
 
 class PythonText(SyntaxText):
@@ -227,8 +225,8 @@ class CodeView(tktextext.TextFrame):
 
         assert self._first_line_number is not None
 
-        self._syntax_theme_change_binding = tk._default_root.bind(
-            "<<SyntaxThemeChanged>>", self._reload_theme_options, True
+        self._syntax_theme_change_binding = get_workbench().bind(
+            "SyntaxThemeChanged", self._reload_theme_options, True
         )
 
         self._reload_theme_options()
@@ -346,7 +344,7 @@ class CodeView(tktextext.TextFrame):
 
     def destroy(self):
         super().destroy()
-        tk._default_root.unbind("<<SyntaxThemeChanged>>", self._syntax_theme_change_binding)
+        get_workbench().unbind("SyntaxThemeChanged", self._reload_theme_options)
 
     def _reload_theme_options(self, event=None):
         super()._reload_theme_options(event)
@@ -370,9 +368,7 @@ class CodeView(tktextext.TextFrame):
 def set_syntax_options(syntax_options):
     global _syntax_options
     _syntax_options = syntax_options
-
-    assert tk._default_root is not None
-    tk._default_root.event_generate("<<SyntaxThemeChanged>>")
+    get_workbench().event_generate("SyntaxThemeChanged")
 
 
 def get_syntax_options_for_tag(tag, **base_options):

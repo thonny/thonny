@@ -13,7 +13,6 @@ import socket
 import sys
 import tkinter as tk
 import tkinter.font as tk_font
-import tkinter.messagebox as tk_messagebox
 import traceback
 import webbrowser
 import gettext
@@ -49,8 +48,12 @@ from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows,\
-    running_on_rpi
+from thonny.misc_utils import (
+    running_on_linux,
+    running_on_mac_os,
+    running_on_windows,
+    running_on_rpi,
+)
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -1539,15 +1542,15 @@ class Workbench(tk.Tk):
 
             self._event_handlers[sequence].add(func)
 
-    def unbind(self, sequence: str, funcid=None) -> None:
+    def unbind(self, sequence: str, func=None) -> None:
         if sequence.startswith("<"):
-            tk.Tk.unbind(self, sequence, funcid=funcid)
+            tk.Tk.unbind(self, sequence, funcid=func)
         else:
             try:
-                self._event_handlers[sequence].remove(funcid)
+                self._event_handlers[sequence].remove(func)
             except Exception:
                 logging.getLogger("thonny").exception(
-                    "Can't remove binding for '%s' and '%s'", sequence, funcid
+                    "Can't remove binding for '%s' and '%s'", sequence, func
                 )
 
     def in_heap_mode(self) -> bool:
