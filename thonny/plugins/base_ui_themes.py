@@ -593,8 +593,3 @@ def load_plugin() -> None:
     if "aqua" in original_themes:
         get_workbench().add_ui_theme("Kind of Aqua", "aqua", enhanced_aqua)
 
-    if "Windows" in get_workbench().get_usable_ui_theme_names():
-        get_workbench().set_default("view.ui_theme", "Windows")
-
-    elif "Enhanced Clam" in get_workbench().get_usable_ui_theme_names():
-        get_workbench().set_default("view.ui_theme", "Enhanced Clam")

@@ -39,6 +39,13 @@ def running_on_linux() -> bool:
     return platform.system() == "Linux"
 
 
+def running_on_rpi() -> bool:
+    return running_on_linux() and (
+        platform.uname().machine.lower().startswith("arm")
+        or os.environ.get("DESKTOP_SESSION") == "LXDE-pi"
+    )
+
+
 def list_volumes(skip_letters=set()) -> Sequence[str]:
     "Adapted from https://github.com/ntoll/uflash/blob/master/uflash.py"
     if os.name == "posix":

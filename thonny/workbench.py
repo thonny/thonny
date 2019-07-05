@@ -49,7 +49,8 @@ from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows,\
+    running_on_rpi
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -219,7 +220,7 @@ class Workbench(tk.Tk):
         self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]
 
         self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
-        self.set_default("general.ui_mode", "regular")
+        self.set_default("general.ui_mode", "simple" if running_on_rpi() else "regular")
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
         self.set_default("general.scaling", "default")
@@ -735,7 +736,6 @@ class Workbench(tk.Tk):
         self._syntax_themes = (
             {}
         )  # type: Dict[str, Tuple[Optional[str], FlexibleSyntaxThemeSettings]] # value is (parent, settings)
-        # following will be overwritten by plugins.base_themes
         self.set_default("view.ui_theme", ui_utils.get_default_theme())
 
     def add_command(

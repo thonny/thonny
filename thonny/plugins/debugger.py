@@ -17,7 +17,7 @@ from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.config_ui import ConfigurationPage
 from thonny.memory import VariablesFrame
-from thonny.misc_utils import shorten_repr
+from thonny.misc_utils import shorten_repr, running_on_rpi
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence
 from thonny.running import RUN_COMMAND_CAPTION
@@ -1165,7 +1165,9 @@ def load_plugin() -> None:
 
     get_workbench().set_default("debugger.frames_in_separate_windows", True)
     get_workbench().set_default("debugger.automatic_stack_view", True)
-    get_workbench().set_default("debugger.preferred_debugger", "nicer")
+    get_workbench().set_default(
+        "debugger.preferred_debugger", "faster" if running_on_rpi() else "nicer"
+    )
     get_workbench().set_default("debugger.allow_stepping_into_libraries", False)
 
     get_workbench().add_command(

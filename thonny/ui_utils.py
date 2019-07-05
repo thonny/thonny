@@ -18,7 +18,8 @@ from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows,\
+    running_on_rpi
 from thonny.tktextext import TweakableText
 import sys
 from _tkinter import TclError
@@ -2099,7 +2100,12 @@ def get_size_option_name(window):
 
 
 def get_default_theme():
-    return "xpnative" if running_on_windows() else "clam"
+    if running_on_windows():
+        return "Windows"
+    elif running_on_rpi():
+        return "Raspberry Pi"
+    else:
+        return "Enhanced Clam"
 
 
 if __name__ == "__main__":
