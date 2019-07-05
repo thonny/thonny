@@ -15,7 +15,6 @@ from typing import List, Union  # @UnusedImport
 from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, ui_utils, running
 from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
-from thonny.config_ui import ConfigurationPage
 from thonny.memory import VariablesFrame
 from thonny.misc_utils import shorten_repr, running_on_rpi
 from thonny.tktextext import TextFrame

@@ -18,8 +18,12 @@ from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
-from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows,\
-    running_on_rpi
+from thonny.misc_utils import (
+    running_on_linux,
+    running_on_mac_os,
+    running_on_windows,
+    running_on_rpi,
+)
 from thonny.tktextext import TweakableText
 import sys
 from _tkinter import TclError

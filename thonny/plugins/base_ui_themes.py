@@ -592,4 +592,3 @@ def load_plugin() -> None:
 
     if "aqua" in original_themes:
         get_workbench().add_ui_theme("Kind of Aqua", "aqua", enhanced_aqua)
-
