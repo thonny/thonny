@@ -70,6 +70,7 @@ setup(
     package_data={
         "": ["VERSION", "res/*"] + recursive_files("thonny/locale"),
         "thonny.plugins.help": ["*.rst"],
+        "thonny.plugins.pi": ["res/*.*"],
         "thonny.plugins.printing": ["*.html"],
         "thonny.plugins.micropython": ["api_stubs/*.*"],
         "thonny.plugins.mypy": ["typeshed_extras/*.pyi"],
