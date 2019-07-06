@@ -11,8 +11,8 @@ class ConfigurationDialog(tk.Toplevel):
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
         scale = get_workbench().scale
-        width = scale(500)
-        height = scale(350)
+        width = scale(550)
+        height = scale(400)
         self.geometry("%dx%d" % (width, height))
         self.title("Thonny options")
 
