@@ -376,7 +376,7 @@ class Workbench(tk.Tk):
         modules = []
         for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[2]):
             if module_name in OBSOLETE_PLUGINS:
-                logging.warning("Skipping plug-in %s", module_name)
+                logging.debug("Skipping plug-in %s", module_name)
             else:
                 try:
                     m = importlib.import_module(module_name)

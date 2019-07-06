@@ -11,8 +11,8 @@ class ConfigurationDialog(tk.Toplevel):
 
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
-        width = ems_to_pixels(55)
-        height = ems_to_pixels(40)
+        width = ems_to_pixels(53)
+        height = ems_to_pixels(43)
         self.geometry("%dx%d" % (width, height))
         self.title("Thonny options")
 
