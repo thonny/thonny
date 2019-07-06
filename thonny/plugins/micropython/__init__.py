@@ -155,9 +155,7 @@ class MicroPythonProxy(SubprocessProxy):
         return self.is_connected()
 
     def _show_error(self, text):
-        self._response_queue.append(
-            BackendEvent(event_type="ProgramOutput", stream_name="stderr", data="stderr")
-        )
+        get_shell().print_error("\n" + text + "\n")
 
     @property
     def allow_webrepl(self):
@@ -209,7 +207,6 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             for p in list_serial_ports()
         }
         self._ports_by_desc["< Try to detect port automatically >"] = "auto"
-        self._ports_by_desc["< None / don't connect at all >"] = None
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
         if self.allow_webrepl:

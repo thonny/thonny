@@ -2,7 +2,6 @@ import queue
 from thonny.misc_utils import TimeHelper
 from queue import Queue
 import re
-import sys
 
 
 class MicroPythonConnection:
@@ -106,7 +105,7 @@ class MicroPythonConnection:
 
         if self._error == "EOF":
             # TODO:
-            raise EOFError(self._error)
+            raise ConnectionClosedException(self._error)
         else:
             raise RuntimeError(self._error)
 

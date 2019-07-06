@@ -174,6 +174,9 @@ class ShellView(tk.PanedWindow):
                 # self.update()
                 self.text.see("end")
 
+    def print_error(self, txt):
+        self.text._insert_text_directly(txt, ("io", "stderr"))
+
     def focus_set(self):
         self.text.focus_set()
 

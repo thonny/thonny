@@ -83,6 +83,16 @@ class MicroPythonBackend:
         self._startup_time = time.time()
         self._ctrl_suggestion_given = False
 
+        try:
+            self._prepare(clean)
+            self._mainloop()
+        except ConnectionClosedException:
+            self._on_connection_closed()
+        except Exception:
+            logger.exception("Crash in backend")
+            traceback.print_exc()
+
+    def _prepare(self, clean):
         if clean:
             self._interrupt_to_raw_prompt()
             self._clear_environment()
@@ -96,28 +106,23 @@ class MicroPythonBackend:
 
         self._send_ready_message()
 
-        self._mainloop()
-
     def _mainloop(self):
-        try:
-            while True:
-                try:
-                    cmd = self._command_queue.get(timeout=0.1)
-                    if isinstance(cmd, InputSubmission):
-                        self._submit_input(cmd.data)
-                    elif isinstance(cmd, EOFCommand):
-                        self._soft_reboot(False)
-                    elif isinstance(cmd, InterruptCommand):
-                        self._interrupt()
-                    else:
-                        self.handle_command(cmd)
-                except Empty:
-                    self._check_for_idle_events()
-                except KeyboardInterrupt:
+        while True:
+            try:
+                self._check_for_connection_errors()
+                cmd = self._command_queue.get(timeout=0.1)
+                if isinstance(cmd, InputSubmission):
+                    self._submit_input(cmd.data)
+                elif isinstance(cmd, EOFCommand):
+                    self._soft_reboot(False)
+                elif isinstance(cmd, InterruptCommand):
                     self._interrupt()
-        except Exception:
-            logger.exception("Crash in mainloop")
-            traceback.print_exc()
+                else:
+                    self.handle_command(cmd)
+            except Empty:
+                self._check_for_idle_events()
+            except KeyboardInterrupt:
+                self._interrupt()
 
     def _fetch_welcome_text(self):
         self._connection.write(NORMAL_MODE_CMD)
@@ -185,10 +190,7 @@ class MicroPythonBackend:
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
     def _interrupt(self):
-        try:
-            self._connection.write(INTERRUPT_CMD)
-        except ConnectionClosedException as e:
-            self._handle_connection_closed(e)
+        self._connection.write(INTERRUPT_CMD)
 
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -288,25 +290,21 @@ class MicroPythonBackend:
 
         bdata = cdata.encode(ENCODING)
 
+        self._connection.write(bdata)
+        # Try to consume the echo
+
         try:
-            self._connection.write(bdata)
-            # Try to consume the echo
+            echo = self._connection.read(len(bdata))
+        except queue.Empty:
+            # leave it.
+            logging.warning("Timeout when reading echo")
+            return
 
-            try:
-                echo = self._connection.read(len(bdata))
-            except queue.Empty:
-                # leave it.
-                logging.warning("Timeout when reading echo")
-                return
-
-            if echo != bdata:
-                # because of autoreload? timing problems? interruption?
-                # Leave it.
-                logging.warning("Unexpected echo. Expected %s, got %s" % (bdata, echo))
-                self._connection.unread(echo)
-
-        except ConnectionClosedException as e:
-            self._handle_connection_closed(e)
+        if echo != bdata:
+            # because of autoreload? timing problems? interruption?
+            # Leave it.
+            logging.warning("Unexpected echo. Expected %s, got %s" % (bdata, echo))
+            self._connection.unread(echo)
 
     def send_message(self, msg):
         if "cwd" not in msg:
@@ -320,29 +318,6 @@ class MicroPythonBackend:
             return
         msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
         self.send_message(msg)
-
-    def _flush_output(self):
-        "TODO: send current stdout and stderr to UI"
-
-    def _handle_connection_closed(self, e):
-        self._show_error_connect_again("\nLost connection to the device (%s)." % e)
-        self.idle = False
-        try:
-            self._connection.close()
-        except Exception:
-            logging.exception("Closing serial")
-        finally:
-            self._connection = None
-
-    def _show_error_connect_again(self, msg):
-        self._send_output(
-            msg
-            + "\n\n"
-            + "Check the configuration, select Run → Stop/Restart or press Ctrl+F2 to try again."
-            + "\n("
-            + "On some occasions it helps if you wait before trying again."
-            + ")"
-        )
 
     def _execute(self, script, capture_output=False):
         # self._ensure_raw_propmt()
@@ -427,10 +402,17 @@ class MicroPythonBackend:
             if (
                 self._connection.num_bytes_received == 0
                 and not self._ctrl_suggestion_given
-                and time.time() - self._startup_time > 2
+                and time.time() - self._startup_time > 1.5
             ):
                 self._send_output(
-                    "... Device seems to be busy. Wait or use Ctrl+C to interrupt.\n", "stdout"
+                    "\n"
+                    + "Device is busy or does not respond. Your options:\n\n"
+                    + "  - check the connection properties;\n"
+                    + "  - make sure the device has suitable firmware;\n"
+                    + "  - make sure the device is not in bootloader mode;\n"
+                    + "  - wait until current work is complete;\n"
+                    + "  - use Ctrl+C to interrupt current work.\n",
+                    "stderr",
                 )
                 self._ctrl_suggestion_given = True
 
@@ -547,9 +529,8 @@ class MicroPythonBackend:
             self._command_queue.put(postponed.pop(0))
 
     def _check_for_idle_events(self):
-        if self._connection:
-            self._send_output(self._connection.read_all().decode(ENCODING, "replace"), "stdout")
-            self._connection._check_for_error()
+        self._send_output(self._connection.read_all().decode(ENCODING, "replace"), "stdout")
+        self._check_for_connection_errors()
 
     def _supports_directories(self):
         # NB! make sure self._cwd is queried first
@@ -716,13 +697,13 @@ class MicroPythonBackend:
         try:
             script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
             completions = script.completions()
-            result["completions"] = self.filter_completions(completions)
+            result["completions"] = self._filter_completions(completions)
         except Exception:
             result["error"] = "Autocomplete error"
 
         return result
 
-    def filter_completions(self, completions):
+    def _filter_completions(self, completions):
         # filter out completions not applicable to MicroPython
         result = []
         for completion in completions:
@@ -759,7 +740,7 @@ class MicroPythonBackend:
                     source, len(lines), len(lines[-1]), sys_path=[self._api_stubs_path]
                 )
                 completions = script.completions()
-                response["completions"] = self.filter_completions(completions)
+                response["completions"] = self._filter_completions(completions)
             except Exception:
                 traceback.print_exc()
                 response["error"] = "Autocomplete error"
@@ -981,6 +962,17 @@ class MicroPythonBackend:
             ),
         )
 
+    def _check_for_connection_errors(self):
+        self._connection._check_for_error()
+
+    def _on_connection_closed(self):
+        self._send_output(
+            "\n" + "Connection closed. Use 'Run → Stop / Restart' to reconnect." + "\n", "stderr"
+        )
+        # remain busy
+        while True:
+            time.sleep(1000)
+
 
 class ExecutionError(Exception):
     pass
@@ -1030,7 +1022,11 @@ if __name__ == "__main__":
 
     port = None if args.port == "None" else args.port
     try:
-        if port == "webrepl":
+        if port is None:
+            # remain busy
+            while True:
+                time.sleep(1000)
+        elif port == "webrepl":
             from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
             connection = WebReplConnection(args.url, args.password)
