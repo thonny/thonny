@@ -186,42 +186,25 @@ def pix():
     ie. all themes will later inherit these"""
     update_fonts()
 
-    if os.path.exists(GLOBAL_CONFIGURATION_PATH):
-        with open(GLOBAL_CONFIGURATION_PATH) as fp:
-            for line in fp:
-                if "sGtk/ColorScheme" in line:
-                    if "selected_bg_color" in line:
-                        bgr = re.search(r"selected_bg_color:#([0-9a-fA-F]*)", line, re.M).group(
-                            1
-                        )  # @UndefinedVariable
-                        settings["Menu"]["configure"]["activebackground"] = (
-                            "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
-                        )
-                    if "selected_fg_color" in line:
-                        fgr = re.search(r"selected_fg_color:#([0-9a-fA-F]*)", line, re.M).group(
-                            1
-                        )  # @UndefinedVariable
-                        settings["Menu"]["configure"]["activeforeground"] = (
-                            "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
-                        )
-    if os.path.exists(CONFIGURATION_PATH):
-        with open(CONFIGURATION_PATH) as fp:
-            for line in fp:
-                if "sGtk/ColorScheme" in line:
-                    if "selected_bg_color" in line:
-                        bgr = re.search(r"selected_bg_color:#([0-9a-fA-F]*)", line, re.M).group(
-                            1
-                        )  # @UndefinedVariable
-                        settings["Menu"]["configure"]["activebackground"] = (
-                            "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
-                        )
-                    if "selected_fg_color" in line:
-                        fgr = re.search(r"selected_fg_color:#([0-9a-fA-F]*)", line, re.M).group(
-                            1
-                        )  # @UndefinedVariable
-                        settings["Menu"]["configure"]["activeforeground"] = (
-                            "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
-                        )
+    for path in [GLOBAL_CONFIGURATION_PATH, CONFIGURATION_PATH]:
+        if os.path.exists(path):
+            with open(path) as fp:
+                for line in fp:
+                    if "sGtk/ColorScheme" in line:
+                        if "selected_bg_color" in line:
+                            bgr = re.search(r"selected_bg_color:#([0-9a-fA-F]*)", line, re.M).group(
+                                1
+                            )  # @UndefinedVariable
+                            settings["Menu"]["configure"]["activebackground"] = (
+                                "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
+                            )
+                        if "selected_fg_color" in line:
+                            fgr = re.search(r"selected_fg_color:#([0-9a-fA-F]*)", line, re.M).group(
+                                1
+                            )  # @UndefinedVariable
+                            settings["Menu"]["configure"]["activeforeground"] = (
+                                "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
+                            )
 
     return settings
 
@@ -234,28 +217,31 @@ def pix_dark():
 def update_fonts():
     from tkinter import font
 
+    options = {}
     for path in [GLOBAL_CONFIGURATION_PATH, CONFIGURATION_PATH]:
         if os.path.exists(path):
             with open(path) as fp:
                 for line in fp:
                     if "sGtk/FontName" in line:
-                        fontname = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(1)
-                        fontsize = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(2)
-                        if re.search(r"\bBold\b", fontname):
-                            fontweight = "bold"
-                            fontname = fontname.replace(" Bold", "")
-                        else:
-                            fontweight = "normal"
-                        if re.search(r"\bItalic\b", fontname):
-                            fontslant = "italic"
-                            fontname = fontname.replace(" Italic", "")
-                        else:
-                            fontslant = "roman"
+                        result = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M)  # @UndefinedVariable
+                        family = result.group(1)
+                        options["size"] = int(result.group(2))
 
-                        for name in ["TkDefaultFont", "TkMenuFont", "TkHeadingFont"]:
-                            font.nametofont(name).configure(
-                                family=fontname, size=fontsize, weight=fontweight, slant=fontslant
-                            )
+                        if re.search(r"\bBold\b", family):
+                            options["weight"] = "bold"
+                        else:
+                            options["weight"] = "normal"
+
+                        if re.search(r"\bItalic\b", family):
+                            options["slant"] = "italic"
+                        else:
+                            options["slant"] = "roman"
+
+                        options["family"] = family.replace(" Bold", "").replace(" Italic", "")
+
+    if options:
+        for name in ["TkDefaultFont", "TkMenuFont", "TkTextFont", "TkHeadingFont"]:
+            font.nametofont(name).configure(**options)
 
 
 def load_plugin():
