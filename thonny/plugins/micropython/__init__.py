@@ -328,32 +328,6 @@ class GenericMicroPythonConfigPage(MicroPythonConfigPage):
         return False
 
 
-def parse_api_information(file_path):
-    with tokenize.open(file_path) as fp:
-        source = fp.read()
-
-    tree = ast.parse(source)
-
-    defs = {}
-
-    # TODO: read also docstrings ?
-
-    for toplevel_item in tree.body:
-        if isinstance(toplevel_item, ast.ClassDef):
-            class_name = toplevel_item.name
-            member_names = []
-            for item in toplevel_item.body:
-                if isinstance(item, ast.FunctionDef):
-                    member_names.append(item.name)
-                elif isinstance(item, ast.Assign):
-                    # TODO: check Python 3.4
-                    "TODO: item.targets[0].id"
-
-            defs[class_name] = member_names
-
-    return defs
-
-
 def list_serial_ports():
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)

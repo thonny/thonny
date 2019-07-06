@@ -2081,7 +2081,7 @@ class Workbench(tk.Tk):
                 else:
                     copy_to_clipboard(clipboard_data)
             except Exception:
-                traceback.print_exc()
+                pass
 
             tk.Tk.destroy(self)
         except tk.TclError:

@@ -30,6 +30,7 @@ import time
 from thonny.misc_utils import find_volumes_by_name
 import jedi
 import io
+import tokenize
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -91,6 +92,7 @@ class MicroPythonBackend:
         self._cwd = self._fetch_cwd()
         self._welcome_text = self._fetch_welcome_text()
         self._builtin_modules = self._fetch_builtin_modules()
+        self._builtins_info = self._fetch_builtins_info()
 
         self._send_ready_message()
 
@@ -159,6 +161,19 @@ class MicroPythonBackend:
         )
 
         return modules_str.split()
+
+    def _fetch_builtins_info(self):
+        """
+        for p in self._get_api_stubs_path():
+            builtins_file = os.path.join(p, "__builtins__.py")
+            if os.path.exists(builtins_file):
+                return parse_api_information(builtins_file)
+        """
+        path = os.path.join(self._api_stubs_path, "builtins.py")
+        if os.path.exists(path):
+            return parse_api_information(path)
+        else:
+            return {}
 
     def _fetch_cwd(self):
         return self._evaluate(
@@ -692,28 +707,20 @@ class MicroPythonBackend:
             cleanup="del __temp_fp; del __temp_path; del __temp_content",
         )
 
-        return {"content_bytes": content_bytes}
+        return {"content_bytes": content_bytes, "path": cmd["path"]}
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
-        msg = InlineResponse(
-            command_name="editor_autocomplete",
-            source=cmd.source,
-            row=cmd.row,
-            column=cmd.column,
-            error=None,
-        )
+        result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
 
         try:
             script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
             completions = script.completions()
+            result["completions"] = self.filter_completions(completions)
         except Exception:
-            msg["error"] = "Autocomplete error"
-            self._non_serial_msg_queue.put(msg)
-            return
+            result["error"] = "Autocomplete error"
 
-        msg["completions"] = self.filter_completions(completions)
-        self._non_serial_msg_queue.put(msg)
+        return result
 
     def filter_completions(self, completions):
         # filter out completions not applicable to MicroPython
@@ -743,7 +750,7 @@ class MicroPythonBackend:
         # TODO: combine dynamic results and jedi results
         if source.strip().startswith("import ") or source.strip().startswith("from "):
             # this needs the power of jedi
-            msg = InlineResponse(command_name="shell_autocomplete", source=cmd.source, error=None)
+            response = {"source": cmd.source}
 
             try:
                 # at the moment I'm assuming source is the code before cursor, not whole input
@@ -752,11 +759,12 @@ class MicroPythonBackend:
                     source, len(lines), len(lines[-1]), sys_path=[self._api_stubs_path]
                 )
                 completions = script.completions()
-                msg["completions"] = self.filter_completions(completions)
+                response["completions"] = self.filter_completions(completions)
             except Exception:
-                msg["error"] = "Autocomplete error"
+                traceback.print_exc()
+                response["error"] = "Autocomplete error"
 
-            return msg
+            return response
         else:
             # use live data
             match = re.search(
@@ -778,9 +786,7 @@ class MicroPythonBackend:
                 if name.startswith(prefix) and not name.startswith("__"):
                     completions.append({"name": name, "complete": name[len(prefix) :]})
 
-            return {"completions": completions}
-
-        return {"source": source}
+            return {"completions": completions, "source": source}
 
     def _cmd_dump_api_info(self, cmd):
         "For use during development of the plug-in"
@@ -983,6 +989,32 @@ class ExecutionError(Exception):
 def _report_internal_error():
     print("PROBLEM WITH THONNY'S BACK-END:\n", file=sys.stderr)
     traceback.print_exc()
+
+
+def parse_api_information(file_path):
+    with tokenize.open(file_path) as fp:
+        source = fp.read()
+
+    tree = ast.parse(source)
+
+    defs = {}
+
+    # TODO: read also docstrings ?
+
+    for toplevel_item in tree.body:
+        if isinstance(toplevel_item, ast.ClassDef):
+            class_name = toplevel_item.name
+            member_names = []
+            for item in toplevel_item.body:
+                if isinstance(item, ast.FunctionDef):
+                    member_names.append(item.name)
+                elif isinstance(item, ast.Assign):
+                    # TODO: check Python 3.4
+                    "TODO: item.targets[0].id"
+
+            defs[class_name] = member_names
+
+    return defs
 
 
 if __name__ == "__main__":

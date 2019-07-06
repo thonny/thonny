@@ -64,7 +64,7 @@ class Completer(tk.Listbox):
         if msg.source != source or msg.row != row or msg.column != column:
             # situation has changed, information is obsolete
             self._close()
-        elif msg.error:
+        elif msg.get("error"):
             self._close()
             messagebox.showerror("Autocomplete error", msg.error, parent=get_workbench())
         else:

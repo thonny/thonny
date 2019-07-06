@@ -688,6 +688,7 @@ class SubprocessProxy(BackendProxy):
         self._executable = executable
         self._response_queue = None
         self._cwd = None
+        self._welcome_text = ""
 
         self._proc = None
         self._response_queue = None
@@ -865,6 +866,9 @@ class SubprocessProxy(BackendProxy):
     def _store_state_info(self, msg):
         if "cwd" in msg:
             self._cwd = msg["cwd"]
+
+        if "welcome_text" in msg:
+            self._welcome_text = msg["welcome_text"]
 
         if "in_venv" in msg:
             self._in_venv = msg["in_venv"]
