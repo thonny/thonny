@@ -234,57 +234,28 @@ def pix_dark():
 def update_fonts():
     from tkinter import font
 
-    if os.path.exists(GLOBAL_CONFIGURATION_PATH):
-        with open(GLOBAL_CONFIGURATION_PATH) as fp:
-            for line in fp:
-                if "sGtk/FontName" in line:
-                    fontname = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(
-                        1
-                    )  # @UndefinedVariable
-                    fontsize = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(
-                        2
-                    )  # @UndefinedVariable
-                    if re.search(r"\bBold\b", fontname):
-                        fontweight = "bold"
-                        fontname = fontname.replace(" Bold", "")
-                    else:
-                        fontweight = "normal"
-                    if re.search(r"\bItalic\b", fontname):
-                        fontslant = "italic"
-                        fontname = fontname.replace(" Italic", "")
-                    else:
-                        fontslant = "roman"
+    for path in [GLOBAL_CONFIGURATION_PATH, CONFIGURATION_PATH]:
+        if os.path.exists(path):
+            with open(path) as fp:
+                for line in fp:
+                    if "sGtk/FontName" in line:
+                        fontname = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(1)
+                        fontsize = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(2)
+                        if re.search(r"\bBold\b", fontname):
+                            fontweight = "bold"
+                            fontname = fontname.replace(" Bold", "")
+                        else:
+                            fontweight = "normal"
+                        if re.search(r"\bItalic\b", fontname):
+                            fontslant = "italic"
+                            fontname = fontname.replace(" Italic", "")
+                        else:
+                            fontslant = "roman"
 
-                    for name in ["TkDefaultFont", "TkMenuFont", "TkHeadingFont"]:
-                        font.nametofont(name).configure(
-                            family=fontname, size=fontsize, weight=fontweight, slant=fontslant
-                        )
-
-    if os.path.exists(CONFIGURATION_PATH):
-        with open(CONFIGURATION_PATH) as fp:
-            for line in fp:
-                if "sGtk/FontName" in line:
-                    fontname = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(
-                        1
-                    )  # @UndefinedVariable
-                    fontsize = re.search(r"=([^0-9]*) ([0-9]*)", line, re.M).group(
-                        2
-                    )  # @UndefinedVariable
-                    if re.search(r"\bBold\b", fontname):
-                        fontweight = "bold"
-                        fontname = fontname.replace(" Bold", "")
-                    else:
-                        fontweight = "normal"
-                    if re.search(r"\bItalic\b", fontname):
-                        fontslant = "italic"
-                        fontname = fontname.replace(" Italic", "")
-                    else:
-                        fontslant = "roman"
-
-                    for name in ["TkDefaultFont", "TkMenuFont", "TkHeadingFont"]:
-                        font.nametofont(name).configure(
-                            family=fontname, size=fontsize, weight=fontweight, slant=fontslant
-                        )
+                        for name in ["TkDefaultFont", "TkMenuFont", "TkHeadingFont"]:
+                            font.nametofont(name).configure(
+                                family=fontname, size=fontsize, weight=fontweight, slant=fontslant
+                            )
 
 
 def load_plugin():
