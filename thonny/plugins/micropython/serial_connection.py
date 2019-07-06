@@ -57,16 +57,26 @@ class SerialConnection(MicroPythonConnection):
     def _listen_serial(self):
         "NB! works in background thread"
         try:
+            data = b""
             while True:
-                b = self._serial.read(1)  # To avoid busy loop
-                if len(b) == 0:
+                data += self._serial.read(1)  # To avoid busy loop
+                if len(data) == 0:
                     self._error = "EOF"
                     # print("LISTEN EOFFFFFFFFFF")
                     break
-                data = b + self._serial.read_all()
+                data += self._serial.read_all()
                 self.num_bytes_received += len(data)
-                self._read_queue.put(data)
-                # self._log_data(data)
+
+                # don't publish incomplete utf-8 data
+                try:
+                    data.decode("utf-8")
+                    to_be_published = data
+                    data = b""
+                except UnicodeDecodeError as e:
+                    to_be_published = data[: e.start]
+                    data = data[e.start :]
+                if to_be_published:
+                    self._read_queue.put(to_be_published)
 
         except SerialException as e:
             logging.exception("Error while reading from serial")
