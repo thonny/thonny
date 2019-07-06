@@ -85,6 +85,7 @@ FlexibleUiThemeSettings = Union[UiThemeSettings, Callable[[], UiThemeSettings]]
 SyntaxThemeSettings = Dict[str, Dict[str, Union[str, int, bool]]]
 FlexibleSyntaxThemeSettings = Union[SyntaxThemeSettings, Callable[[], SyntaxThemeSettings]]
 
+OBSOLETE_PLUGINS = ["thonnycontrib.pi", "thonnycontrib.micropython"]
 
 class Workbench(tk.Tk):
     """
@@ -374,12 +375,15 @@ class Workbench(tk.Tk):
 
         modules = []
         for _, module_name, _ in sorted(pkgutil.iter_modules(path, prefix), key=lambda x: x[2]):
-            try:
-                m = importlib.import_module(module_name)
-                if hasattr(m, load_function_name):
-                    modules.append(m)
-            except Exception:
-                logging.exception("Failed loading plugin '" + module_name + "'")
+            if module_name in OBSOLETE_PLUGINS:
+                logging.warning("Skipping plug-in %s", module_name)
+            else:
+                try:
+                    m = importlib.import_module(module_name)
+                    if hasattr(m, load_function_name):
+                        modules.append(m)
+                except Exception:
+                    logging.exception("Failed loading plugin '" + module_name + "'")
 
         def module_sort_key(m):
             return getattr(m, "load_order_key", m.__name__)
