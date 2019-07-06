@@ -424,7 +424,7 @@ class MicroPythonBackend:
             # Process input in chunks (max 1 parsing marker per chunk).
             # Prefer whole lines (to reduce the number of events),
             # but don't wait too long for eol.
-            output = self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.01)
+            output = self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.05)
             stream_name = "stderr" if eot_count == 1 else "stdout"
 
             if output.endswith(THONNY_MSG_START):
