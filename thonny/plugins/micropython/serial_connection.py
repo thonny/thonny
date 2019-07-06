@@ -15,7 +15,10 @@ class SerialConnection(MicroPythonConnection):
         try:
             self._serial = serial.Serial(port, baudrate=baudrate, timeout=None)
         except SerialException as error:
-            message = "Unable to connect to " + port + "\n" + "Error: " + str(error)
+            err_str = str(error)
+            if "FileNotFoundError" in err_str:
+                err_str = "port not found"
+            message = "Unable to connect to " + port + ": " + err_str
 
             # TODO: check if these error codes also apply to Linux and Mac
             if error.errno == 13 and platform.system() == "Linux":

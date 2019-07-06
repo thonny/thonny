@@ -56,6 +56,8 @@ RUN_COMMAND_LABEL = ""
 RUN_COMMAND_CAPTION = ""
 EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
+EXPECTED_TERMINATION_CODE = 1234
+
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
 
@@ -472,7 +474,8 @@ class Runner:
         self._send_postponed_commands()
 
     def _report_backend_crash(self, exc: Exception) -> None:
-        err = "Backend terminated (returncode: %s)\n" % getattr(exc, "returncode", "?")
+        returncode = getattr(exc, "returncode", "?")
+        err = "Backend terminated (returncode: %s)\n" % returncode
 
         try:
             faults_file = os.path.join(THONNY_USER_DIR, "backend_faults.log")
@@ -484,9 +487,10 @@ class Runner:
 
         err = err.strip() + "\nUse 'Stop/Restart' to restart the backend ...\n"
 
-        get_workbench().event_generate("ProgramOutput", stream_name="stderr", data=err)
+        if returncode != EXPECTED_TERMINATION_CODE:
+            get_workbench().event_generate("ProgramOutput", stream_name="stderr", data=err)
 
-        get_workbench().become_active_window()
+        get_workbench().become_active_window(False)
 
     def restart_backend(self, clean: bool, first: bool = False, wait: float = 0) -> None:
         """Recreate (or replace) backend proxy / backend process."""
@@ -529,6 +533,8 @@ class Runner:
         if self._proxy:
             self._proxy.destroy()
             self._proxy = None
+
+        get_workbench().event_generate("BackendTerminated")
 
     def get_local_executable(self) -> Optional[str]:
         if self._proxy is None:
@@ -910,7 +916,7 @@ class SubprocessProxy(BackendProxy):
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
             if self._is_disconnected():
-                raise BackendTerminatedError()
+                raise BackendTerminatedError(self._proc.returncode)
             else:
                 return None
 

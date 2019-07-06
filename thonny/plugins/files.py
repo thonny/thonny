@@ -23,6 +23,7 @@ class FilesView(tk.PanedWindow):
         self.configure(sashwidth=lookup_style_option("Sash", "sashthickness", 4))
         self.configure(background=lookup_style_option("TPanedWindow", "background"))
 
+        get_workbench().bind("BackendTerminated", self.on_backend_terminate, True)
         get_workbench().bind("BackendRestart", self.on_backend_restart, True)
         get_workbench().bind("WorkbenchClose", self.on_workbench_close, True)
 
@@ -57,10 +58,13 @@ class FilesView(tk.PanedWindow):
             self.remote_files.check_update_focus()
         else:
             # remote pane not needed
-            if self.remote_added:
-                self.save_split()
-                self.remove(self.remote_files)
-                self.remote_added = False
+            self.hide_remote()
+
+    def hide_remote(self):
+        if self.remote_added:
+            self.save_split()
+            self.remove(self.remote_files)
+            self.remote_added = False
 
     def save_split(self):
         _, y = self.sash_coord(0)
@@ -80,9 +84,18 @@ class FilesView(tk.PanedWindow):
         if event.get("full"):
             self.reset_remote(event)
 
+    def on_backend_terminate(self, event):
+        self.reset_remote(event)
+
     def on_workbench_close(self, event=None):
         if self.remote_added:
             self.save_split()
+
+    def destroy(self):
+        get_workbench().unbind("BackendTerminated", self.on_backend_terminate)
+        get_workbench().unbind("BackendRestart", self.on_backend_restart)
+        get_workbench().unbind("WorkbenchClose", self.on_workbench_close)
+        super().destroy()
 
 
 class ActiveLocalFileBrowser(BaseLocalFileBrowser):

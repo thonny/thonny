@@ -117,7 +117,7 @@ class Workbench(tk.Tk):
 
     def __init__(self, server_socket=None) -> None:
         thonny._workbench = self
-        self._destroying = False
+        self._closing = False
         self._destroyed = False
         self._lost_focus = False
         self._is_portable = is_portable()
@@ -1526,7 +1526,8 @@ class Workbench(tk.Tk):
                     except Exception:
                         self.report_exception(_("Problem when handling '") + sequence + "'")
 
-        self._update_toolbar()
+        if not self._closing:
+            self._update_toolbar()
 
     def bind(self, sequence: str, func: Callable, add: bool = None) -> None:  # type: ignore
         """Uses custom event handling when sequence doesn't start with <.
@@ -2028,6 +2029,7 @@ class Workbench(tk.Tk):
         if not self.get_editor_notebook().check_allow_closing():
             return
 
+        self._closing = True
         try:
             self._save_layout()
             self._editor_notebook.remember_open_files()
@@ -2063,7 +2065,7 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
-            self._destroying = True
+            self._closing = True
 
             # Tk clipboard gets cleared on exit and won't end up in system clipboard
             # https://bugs.python.org/issue1207592
@@ -2112,7 +2114,7 @@ class Workbench(tk.Tk):
 
     def report_exception(self, title: str = "Internal error") -> None:
         logging.exception(title)
-        if tk._default_root and not self._destroying:  # type: ignore
+        if tk._default_root and not self._closing:  # type: ignore
             (typ, value, _) = sys.exc_info()
             assert typ is not None
             if issubclass(typ, UserError):

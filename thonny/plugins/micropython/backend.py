@@ -31,6 +31,7 @@ from thonny.misc_utils import find_volumes_by_name
 import jedi
 import io
 import tokenize
+from thonny.running import EXPECTED_TERMINATION_CODE
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -969,9 +970,7 @@ class MicroPythonBackend:
         self._send_output(
             "\n" + "Connection closed. Use 'Run → Stop / Restart' to reconnect." + "\n", "stderr"
         )
-        # remain busy
-        while True:
-            time.sleep(1000)
+        sys.exit(EXPECTED_TERMINATION_CODE)
 
 
 class ExecutionError(Exception):
@@ -1035,9 +1034,10 @@ if __name__ == "__main__":
 
             connection = SerialConnection(port, BAUDRATE)
 
-    except ConnectionFailedException as e:
-        msg = ToplevelResponse(error=str(e))
-        sys.stdout.write(serialize_message(msg) + "\n")
-        connection = None
+        vm = MicroPythonBackend(connection, clean=args.clean, api_stubs_path=args.api_stubs_path)
 
-    vm = MicroPythonBackend(connection, clean=args.clean, api_stubs_path=args.api_stubs_path)
+    except ConnectionFailedException as e:
+        text = "\n" + str(e) + "\n"
+        msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
+        sys.stdout.write(serialize_message(msg) + "\n")
+        sys.stdout.flush()
