@@ -2111,7 +2111,10 @@ def get_default_theme():
     else:
         return "Enhanced Clam"
 
+
 EM_WIDTH = None
+
+
 def ems_to_pixels(x):
     global EM_WIDTH
     if EM_WIDTH is None:

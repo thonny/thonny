@@ -53,7 +53,8 @@ from thonny.misc_utils import (
     running_on_mac_os,
     running_on_windows,
     running_on_rpi,
-    copy_to_clipboard)
+    copy_to_clipboard,
+)
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -86,6 +87,7 @@ SyntaxThemeSettings = Dict[str, Dict[str, Union[str, int, bool]]]
 FlexibleSyntaxThemeSettings = Union[SyntaxThemeSettings, Callable[[], SyntaxThemeSettings]]
 
 OBSOLETE_PLUGINS = ["thonnycontrib.pi", "thonnycontrib.micropython"]
+
 
 class Workbench(tk.Tk):
     """
@@ -2074,7 +2076,7 @@ class Workbench(tk.Tk):
                     # Looks like the clipboard contains file name(s)
                     # Most likely this means actual file cut/copy operation
                     # was made outside of Thonny.
-                    # Don't want to replace this with simple string data of file names.                    
+                    # Don't want to replace this with simple string data of file names.
                     pass
                 else:
                     copy_to_clipboard(clipboard_data)
