@@ -28,7 +28,6 @@ $PYTHON_CURRENT/bin/python3.7 -m pip install mypy==0.660
 $PYTHON_CURRENT/bin/python3.7 -m pip install pylint==2.2.2
 $PYTHON_CURRENT/bin/python3.7 -m pip install docutils==0.14
 $PYTHON_CURRENT/bin/python3.7 -m pip install pyserial==3.4
-$PYTHON_CURRENT/bin/python3.7 -m pip install pyperclip==1.7.0
 
 # install certifi #####################################################
 $PYTHON_CURRENT/bin/python3.7 -m pip install certifi

@@ -53,7 +53,7 @@ from thonny.misc_utils import (
     running_on_mac_os,
     running_on_windows,
     running_on_rpi,
-)
+    copy_to_clipboard)
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView
 from thonny.ui_utils import (
@@ -2070,17 +2070,12 @@ class Workbench(tk.Tk):
                     # Looks like the clipboard contains file name(s)
                     # Most likely this means actual file cut/copy operation
                     # was made outside of Thonny.
-                    # Don't want to replace this with simple string data of file names.
-                    pass
-                elif running_on_linux():
-                    # May freeze on Ubuntu 18.04
+                    # Don't want to replace this with simple string data of file names.                    
                     pass
                 else:
-                    import pyperclip
-
-                    pyperclip.copy(clipboard_data)
+                    copy_to_clipboard(clipboard_data)
             except Exception:
-                pass
+                traceback.print_exc()
 
             tk.Tk.destroy(self)
         except tk.TclError:

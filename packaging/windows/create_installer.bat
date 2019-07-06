@@ -31,7 +31,6 @@ copy thonny_python.ini %BUILDDIR%
 
 %BUILDDIR%\python -m pip install docutils==0.14
 %BUILDDIR%\python -m pip install pyserial==3.4
-%BUILDDIR%\python -m pip install pyperclip==1.7.0
 
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
