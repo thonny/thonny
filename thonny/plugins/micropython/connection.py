@@ -20,7 +20,7 @@ class MicroPythonConnection:
     def __init__(self):
         self._read_queue = Queue()  # populated by reader thread
         self._read_buffer = bytearray()  # used for unreading and postponing bytes
-        self.num_bytes_received = 0 
+        self.num_bytes_received = 0
         self._error = None
 
     def read(self, size, timeout=1):
@@ -101,9 +101,14 @@ class MicroPythonConnection:
             self._read_buffer = bytearray()
 
     def _check_for_error(self):
-        if self._error:
+        if self._error is None:
+            return
+
+        if self._error == "EOF":
             # TODO:
-            raise EOFError("EOF")
+            raise EOFError(self._error)
+        else:
+            raise RuntimeError(self._error)
 
     def unread(self, data):
         self._read_buffer = data + self._read_buffer

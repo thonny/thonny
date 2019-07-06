@@ -303,7 +303,7 @@ class Runner:
         """
 
         if not self.is_waiting_toplevel_command():
-            self.restart_backend(False, False, 2)
+            self.restart_backend(True, False, 2)
 
         filename = get_saved_current_script_filename()
 

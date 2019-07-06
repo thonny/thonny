@@ -4,7 +4,6 @@ import threading
 import time
 from serial.serialutil import SerialException
 import logging
-import traceback
 import platform
 from textwrap import dedent
 

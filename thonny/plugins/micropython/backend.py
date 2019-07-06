@@ -23,10 +23,13 @@ from thonny.plugins.micropython.connection import (
 from textwrap import dedent
 import ast
 import re
-from queue import Queue
+from queue import Queue, Empty
 import threading
 import os
 import time
+from thonny.misc_utils import find_volumes_by_name
+import jedi
+import io
 
 BAUDRATE = 115200
 ENCODING = "utf-8"
@@ -66,19 +69,27 @@ def debug(msg):
 
 
 class MicroPythonBackend:
-    def __init__(self, connection):
+    def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
         self._cwd = None
         self._command_queue = Queue()  # populated by reader thread
 
+        self._api_stubs_path = api_stubs_path
+
         self._command_reading_thread = threading.Thread(target=self._read_commands, daemon=True)
         self._command_reading_thread.start()
-        
-        self._startup_time = time.time()
-        self._process_until_initial_raw_prompt()
 
-        self._welcome_text = self._fetch_welcome_text()
+        self._startup_time = time.time()
+        self._ctrl_suggestion_given = False
+
+        if clean:
+            self._interrupt_to_raw_prompt()
+            self._clear_environment()
+        else:
+            self._process_until_initial_raw_prompt()
+
         self._cwd = self._fetch_cwd()
+        self._welcome_text = self._fetch_welcome_text()
         self._builtin_modules = self._fetch_builtin_modules()
 
         self._send_ready_message()
@@ -89,11 +100,17 @@ class MicroPythonBackend:
         try:
             while True:
                 try:
-                    cmd = self._command_queue.get()
+                    cmd = self._command_queue.get(timeout=0.1)
                     if isinstance(cmd, InputSubmission):
                         self._submit_input(cmd.data)
+                    elif isinstance(cmd, EOFCommand):
+                        self._soft_reboot(False)
+                    elif isinstance(cmd, InterruptCommand):
+                        self._interrupt()
                     else:
                         self.handle_command(cmd)
+                except Empty:
+                    self._check_for_idle_events()
                 except KeyboardInterrupt:
                     self._interrupt()
         except Exception:
@@ -144,12 +161,10 @@ class MicroPythonBackend:
         return modules_str.split()
 
     def _fetch_cwd(self):
-        if not self._supports_directories():
-            return None
-        else:
-            result = self._evaluate("__module_os.getcwd()", prelude="import os as __module_os")
-            assert result is not None, "Could not fetch cwd"
-            return result
+        return self._evaluate(
+            "__module_os.getcwd() if hasattr(__module_os, 'getcwd') else None",
+            prelude="import os as __module_os",
+        )
 
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
@@ -160,11 +175,27 @@ class MicroPythonBackend:
         except ConnectionClosedException as e:
             self._handle_connection_closed(e)
 
-    def _soft_reboot(self):
-        if not self.idle:
-            # TODO: ignore??
-            # self._connection.write(b"\r\x03")
-            self.interrupt()
+    def _interrupt_to_raw_prompt(self):
+        # NB! Sometimes disconnecting and reconnecting (on macOS?)
+        # too quickly causes anomalies. See CalliopeMiniProxy for more details
+
+        discarded_bytes = b""
+
+        for delay in [0.05, 0.5, 0.1, 2.0]:
+            # Interrupt several times, because with some drivers first interrupts seem to vanish
+            self._connection.reset_output_buffer()
+            self._connection.write(INTERRUPT_CMD)
+            self._connection.write(RAW_MODE_CMD)
+            time.sleep(delay)
+            discarded_bytes += self._connection.read_all()
+            if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(b"\r\n>"):
+                break
+        else:
+            raise TimeoutError("Can't get to raw prompt. Read bytes: " + str(discarded_bytes))
+
+    def _soft_reboot(self, side_command):
+        if side_command:
+            self._interrupt_to_raw_prompt()
 
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
@@ -173,8 +204,9 @@ class MicroPythonBackend:
 
         self._connection.write(SOFT_REBOOT_CMD)
 
-        # Returning to the raw prompt will be handled by
-        # _read_next_serial_message
+        if not side_command:
+            self._process_until_raw_prompt()
+            self._send_ready_message()
 
     def _read_commands(self):
         "works in separate thread"
@@ -268,11 +300,10 @@ class MicroPythonBackend:
         sys.stdout.write(serialize_message(msg) + "\n")
         sys.stdout.flush()
 
-    def _send_output(self, data, stream_name, tags=()):
+    def _send_output(self, data, stream_name):
         if not data:
             return
-        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data,
-                           tags=tags)
+        msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
         self.send_message(msg)
 
     def _flush_output(self):
@@ -287,6 +318,16 @@ class MicroPythonBackend:
             logging.exception("Closing serial")
         finally:
             self._connection = None
+
+    def _show_error_connect_again(self, msg):
+        self._send_output(
+            msg
+            + "\n\n"
+            + "Check the configuration, select Run → Stop/Restart or press Ctrl+F2 to try again."
+            + "\n("
+            + "On some occasions it helps if you wait before trying again."
+            + ")"
+        )
 
     def _execute(self, script, capture_output=False):
         # self._ensure_raw_propmt()
@@ -368,10 +409,16 @@ class MicroPythonBackend:
         err = b""
 
         while not done:
-            if (self._connection.num_bytes_received == 0
-                and time.time() - self._startup_time > 2):
-                self._send_output("[Device seems to be busy. Use Ctrl+C to interrupt.]\n", "stdout")
-            
+            if (
+                self._connection.num_bytes_received == 0
+                and not self._ctrl_suggestion_given
+                and time.time() - self._startup_time > 2
+            ):
+                self._send_output(
+                    "... Device seems to be busy. Wait or use Ctrl+C to interrupt.\n", "stdout"
+                )
+                self._ctrl_suggestion_given = True
+
             # There may be an input submission waiting
             # and we can't progress without resolving it first
             self._check_for_side_commands()
@@ -476,7 +523,7 @@ class MicroPythonBackend:
             elif isinstance(cmd, InterruptCommand):
                 self._interrupt()
             elif isinstance(cmd, EOFCommand):
-                self._soft_reboot()
+                self._soft_reboot(True)
             else:
                 postponed.append(cmd)
 
@@ -484,11 +531,14 @@ class MicroPythonBackend:
         while postponed:
             self._command_queue.put(postponed.pop(0))
 
+    def _check_for_idle_events(self):
+        if self._connection:
+            self._send_output(self._connection.read_all().decode(ENCODING, "replace"), "stdout")
+            self._connection._check_for_error()
+
     def _supports_directories(self):
-        if "micro:bit" in self._welcome_text.lower():
-            return False
-        else:
-            return True
+        # NB! make sure self._cwd is queried first
+        return self._cwd is not None
 
     def _cmd_interrupt(self, cmd):
         self._interrupt()
@@ -516,6 +566,8 @@ class MicroPythonBackend:
             ast.parse(cmd.source, mode="eval")
             # If it didn't fail then source is an expression
             _, _, value_repr = self._execute_print_expr(cmd.source)
+            if value_repr is None:
+                value_repr = repr(None)
             return {"value_info": ValueInfo(0, value_repr)}
         except SyntaxError:
             # source is a statement (or invalid syntax)
@@ -543,6 +595,329 @@ class MicroPythonBackend:
             dir_separator = "/"
 
         return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
+
+    def _cmd_write_file(self, cmd):
+        mount_name = self._get_fs_mount_name()
+        if mount_name is not None:
+            # CircuitPython devices only allow writing via mount,
+            # other mounted devices may show outdated data in mount
+            # when written via serial.
+            self._write_file_via_mount(cmd)
+        else:
+            self._write_file_via_serial(cmd)
+
+        return InlineResponse(
+            command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
+        )
+
+    def _write_file_via_mount(self, cmd):
+        # TODO: should be done async in background process
+
+        flash_prefix = self._get_flash_prefix()
+        if cmd["path"].startswith(flash_prefix):
+            path_suffix = cmd["path"][len(flash_prefix) :]
+        elif cmd["path"].startswith("/"):
+            path_suffix = cmd["path"][1:]
+        else:
+            # something like micro:bit but with mounted fs
+            path_suffix
+
+        target_path = os.path.join(self._get_fs_mount(), path_suffix)
+        with open(target_path, "wb") as f:
+            f.write(cmd["content_bytes"])
+            f.flush()
+            os.fsync(f)
+
+    def _write_file_via_serial(self, cmd):
+        data = cmd["content_bytes"]
+
+        # Don't create too long commands
+        BUFFER_SIZE = 512
+
+        # prelude
+        out, err, __ = self._execute(
+            dedent(
+                """
+            __temp_path = '{path}'
+            __temp_f = open(__temp_path, 'wb')
+            __temp_written = 0
+            """
+            ).format(path=cmd["path"]),
+            capture_output=True,
+        )
+
+        if out:
+            self._send_output(out, "stdout")
+        if err:
+            self._send_output(err, "stderr")
+        if out or err:
+            return
+
+        size = len(data)
+        for i in range(0, size, BUFFER_SIZE):
+            chunk_size = min(BUFFER_SIZE, size - i)
+            chunk = data[i : i + chunk_size]
+            self._execute(
+                "__temp_written += __temp_f.write({chunk!r})".format(chunk=chunk),
+                capture_output=True,
+            )
+
+        bytes_written = self._evaluate(
+            "__temp_written",
+            cleanup=dedent(
+                """
+                __temp_f.close()
+                del __temp_f
+                del __temp_written
+                del __temp_path
+            """
+            ),
+        )
+
+        if bytes_written != size:
+            raise UserError("Expected %d written bytes but wrote %d" % (size, bytes_written))
+
+    def _cmd_read_file(self, cmd):
+        # TODO: better to read piecewise?
+        content_bytes = self._evaluate(
+            "__temp_content",
+            prelude=dedent(
+                """
+                __temp_path = '%(path)s' 
+                with open(__temp_path, 'rb') as __temp_fp:
+                    __temp_content = __temp_fp.read()
+                """
+            )
+            % cmd,
+            cleanup="del __temp_fp; del __temp_path; del __temp_content",
+        )
+
+        return {"content_bytes": content_bytes}
+
+    def _cmd_editor_autocomplete(self, cmd):
+        # template for the response
+        msg = InlineResponse(
+            command_name="editor_autocomplete",
+            source=cmd.source,
+            row=cmd.row,
+            column=cmd.column,
+            error=None,
+        )
+
+        try:
+            script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
+            completions = script.completions()
+        except Exception:
+            msg["error"] = "Autocomplete error"
+            self._non_serial_msg_queue.put(msg)
+            return
+
+        msg["completions"] = self.filter_completions(completions)
+        self._non_serial_msg_queue.put(msg)
+
+    def filter_completions(self, completions):
+        # filter out completions not applicable to MicroPython
+        result = []
+        for completion in completions:
+            if completion.name.startswith("__"):
+                continue
+
+            parent_name = completion.parent().name
+            name = completion.name
+            root = completion.full_name.split(".")[0]
+
+            # jedi proposes names from CPython builtins
+            if root in self._builtins_info and name not in self._builtins_info[root]:
+                continue
+
+            if parent_name == "builtins" and name not in self._builtins_info:
+                continue
+
+            result.append({"name": name, "complete": completion.complete})
+
+        return result
+
+    def _cmd_shell_autocomplete(self, cmd):
+        source = cmd.source
+
+        # TODO: combine dynamic results and jedi results
+        if source.strip().startswith("import ") or source.strip().startswith("from "):
+            # this needs the power of jedi
+            msg = InlineResponse(command_name="shell_autocomplete", source=cmd.source, error=None)
+
+            try:
+                # at the moment I'm assuming source is the code before cursor, not whole input
+                lines = source.split("\n")
+                script = jedi.Script(
+                    source, len(lines), len(lines[-1]), sys_path=[self._api_stubs_path]
+                )
+                completions = script.completions()
+                msg["completions"] = self.filter_completions(completions)
+            except Exception:
+                msg["error"] = "Autocomplete error"
+
+            return msg
+        else:
+            # use live data
+            match = re.search(
+                r"(\w+\.)*(\w+)?$", source
+            )  # https://github.com/takluyver/ubit_kernel/blob/master/ubit_kernel/kernel.py
+            if match:
+                prefix = match.group()
+                if "." in prefix:
+                    obj, prefix = prefix.rsplit(".", 1)
+                    names = self._evaluate("dir(%s)" % obj)
+                else:
+                    names = self._evaluate("dir()")
+            else:
+                names = []
+                prefix = ""
+
+            completions = []
+            for name in names:
+                if name.startswith(prefix) and not name.startswith("__"):
+                    completions.append({"name": name, "complete": name[len(prefix) :]})
+
+            return {"completions": completions}
+
+        return {"source": source}
+
+    def _cmd_dump_api_info(self, cmd):
+        "For use during development of the plug-in"
+
+        self._execute(
+            dedent(
+                """
+            def __get_object_atts(obj):
+                result = []
+                errors = []
+                for name in dir(obj):
+                    try:
+                        val = getattr(obj, name)
+                        result.append((name, repr(val), repr(type(val))))
+                    except BaseException as e:
+                        errors.append("Couldn't get attr '%s' from object '%r', Err: %r" % (name, obj, e))
+                return (result, errors)
+        """
+            )
+        )
+
+        for module_name in sorted(self._fetch_builtin_modules()):
+            if (
+                not module_name.startswith("_")
+                and not module_name.startswith("adafruit")
+                # and not module_name == "builtins"
+            ):
+                file_name = os.path.join(
+                    self._api_stubs_path, module_name.replace(".", "/") + ".py"
+                )
+                self._dump_module_stubs(module_name, file_name)
+
+    def _dump_module_stubs(self, module_name, file_name):
+        out, err, __ = self._execute("import {0}".format(module_name), capture_output=True)
+        if out or err:
+            print("FAILED IMPORTING MODULE:", module_name, "\nErr: " + out + err)
+            return
+
+        os.makedirs(os.path.dirname(file_name), exist_ok=True)
+        with io.open(file_name, "w", encoding="utf-8", newline="\n") as fp:
+            if module_name not in [
+                "webrepl",
+                "_webrepl",
+                "gc",
+                "http_client",
+                "http_client_ssl",
+                "http_server",
+                "framebuf",
+                "example_pub_button",
+                "flashbdev",
+            ]:
+                self._dump_object_stubs(fp, module_name, "")
+
+    def _dump_object_stubs(self, fp, object_expr, indent):
+        if object_expr in [
+            "docs.conf",
+            "pulseio.PWMOut",
+            "adafruit_hid",
+            "upysh",
+            # "webrepl",
+            # "gc",
+            # "http_client",
+            # "http_server",
+        ]:
+            print("SKIPPING problematic name:", object_expr)
+            return
+
+        print("DUMPING", indent, object_expr)
+        items, errors = self._evaluate("__get_object_atts({0})".format(object_expr))
+
+        if errors:
+            print("ERRORS", errors)
+
+        for name, rep, typ in sorted(items, key=lambda x: x[0]):
+            if name.startswith("__"):
+                continue
+
+            print("DUMPING", indent, object_expr, name)
+            self._send_text_to_shell("  * " + name + " : " + typ, "stdout")
+
+            if typ in ["<class 'function'>", "<class 'bound_method'>"]:
+                fp.write(indent + "def " + name + "():\n")
+                fp.write(indent + "    pass\n\n")
+            elif typ in ["<class 'str'>", "<class 'int'>", "<class 'float'>"]:
+                fp.write(indent + name + " = " + rep + "\n")
+            elif typ == "<class 'type'>" and indent == "":
+                # full expansion only on toplevel
+                fp.write("\n")
+                fp.write(indent + "class " + name + ":\n")  # What about superclass?
+                fp.write(indent + "    ''\n")
+                self._dump_object_stubs(fp, "{0}.{1}".format(object_expr, name), indent + "    ")
+            else:
+                # keep only the name
+                fp.write(indent + name + " = None\n")
+
+    def _get_fs_mount_name(self):
+        if self._welcome_text is None:
+            return None
+
+        markers_by_name = {"PYBFLASH": {"pyblite", "pyboard"}, "CIRCUITPY": {"circuitpython"}}
+
+        for name in markers_by_name:
+            for marker in markers_by_name[name]:
+                if marker.lower() in self._welcome_text.lower():
+                    return name
+
+        return None
+
+    def _get_flash_prefix(self):
+        if not self._supports_directories():
+            return ""
+        elif (
+            "LoBo" in self._welcome_text
+            or "WiPy with ESP32" in self._welcome_text
+            or "PYBLITE" in self._welcome_text
+            or "PYBv" in self._welcome_text
+            or "PYBOARD" in self._welcome_text.upper()
+        ):
+            return "/flash/"
+        else:
+            return "/"
+
+    def _get_fs_mount(self):
+        if self._get_fs_mount_name() is None:
+            return None
+        else:
+            candidates = find_volumes_by_name(
+                self._get_fs_mount_name(),
+                # querying A can be very slow
+                skip_letters="A",
+            )
+            if len(candidates) == 0:
+                raise RuntimeError("Could not find volume " + self._get_fs_mount_name())
+            elif len(candidates) > 1:
+                raise RuntimeError("Found several possible mount points: %s" % candidates)
+            else:
+                return candidates[0]
 
     def _get_dirs_child_data_microbit(self, cmd):
         """let it be here so micro:bit works with generic proxy as well"""
@@ -611,21 +986,30 @@ def _report_internal_error():
 
 
 if __name__ == "__main__":
-    port = None if sys.argv[1] == "None" else sys.argv[1]
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--clean", type=lambda s: True if s == "True" else False)
+    parser.add_argument("--port", type=str)
+    parser.add_argument("--url", type=str)
+    parser.add_argument("--password", type=str)
+    parser.add_argument("--api_stubs_path", type=str)
+    args = parser.parse_args()
+
+    port = None if args.port == "None" else args.port
     try:
         if port == "webrepl":
-            url = sys.argv[2]
-            password = sys.argv[3]
             from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
-            connection = WebReplConnection(url, password)
+            connection = WebReplConnection(args.url, args.password)
         else:
             from thonny.plugins.micropython.serial_connection import SerialConnection
 
             connection = SerialConnection(port, BAUDRATE)
+
     except ConnectionFailedException as e:
         msg = ToplevelResponse(error=str(e))
         sys.stdout.write(serialize_message(msg) + "\n")
         connection = None
 
-    vm = MicroPythonBackend(connection)
+    vm = MicroPythonBackend(connection, clean=args.clean, api_stubs_path=args.api_stubs_path)
