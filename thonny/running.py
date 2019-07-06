@@ -165,12 +165,7 @@ class Runner:
         )
 
         get_workbench().add_command(
-            "disconnectserial",
-            "run",
-            "Disconnect",
-            self.disconnect,
-            self.disconnect_enabled,
-            group=100,
+            "disconnect", "run", "Disconnect", self.disconnect, self.disconnect_enabled, group=100
         )
 
     def get_state(self) -> str:
@@ -401,7 +396,7 @@ class Runner:
         proxy.disconnect()
 
     def disconnect_enabled(self):
-        hasattr(self.get_backend_proxy(), "disconnect")
+        return hasattr(self.get_backend_proxy(), "disconnect")
 
     def soft_reboot(self):
         proxy = self.get_backend_proxy()
@@ -475,7 +470,7 @@ class Runner:
 
     def _report_backend_crash(self, exc: Exception) -> None:
         returncode = getattr(exc, "returncode", "?")
-        err = "Backend terminated (returncode: %s)\n" % returncode
+        err = "Backend terminated or disconnected."
 
         try:
             faults_file = os.path.join(THONNY_USER_DIR, "backend_faults.log")
@@ -485,10 +480,10 @@ class Runner:
         except Exception:
             logging.exception("Failed retrieving backend faults")
 
-        err = err.strip() + "\nUse 'Stop/Restart' to restart the backend ...\n"
+        err = err.strip() + " Use 'Stop/Restart' to restart ...\n"
 
         if returncode != EXPECTED_TERMINATION_CODE:
-            get_workbench().event_generate("ProgramOutput", stream_name="stderr", data=err)
+            get_workbench().event_generate("ProgramOutput", stream_name="stderr", data="\n" + err)
 
         get_workbench().become_active_window(False)
 
@@ -916,7 +911,7 @@ class SubprocessProxy(BackendProxy):
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
             if self._is_disconnected():
-                raise BackendTerminatedError(self._proc.returncode)
+                raise BackendTerminatedError(self._proc.returncode if self._proc else None)
             else:
                 return None
 

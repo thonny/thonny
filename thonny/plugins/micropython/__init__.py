@@ -161,6 +161,9 @@ class MicroPythonProxy(SubprocessProxy):
     def allow_webrepl(self):
         return False
 
+    def disconnect(self):
+        self.destroy()
+
     def get_node_label(self):
         if "CircuitPython" in self._welcome_text:
             return "CircuitPython device"
