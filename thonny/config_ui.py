@@ -3,6 +3,7 @@ from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
 import traceback
+from thonny.ui_utils import ems_to_pixels
 
 
 class ConfigurationDialog(tk.Toplevel):
@@ -10,9 +11,8 @@ class ConfigurationDialog(tk.Toplevel):
 
     def __init__(self, master, page_records):
         tk.Toplevel.__init__(self, master)
-        scale = get_workbench().scale
-        width = scale(550)
-        height = scale(400)
+        width = ems_to_pixels(55)
+        height = ems_to_pixels(40)
         self.geometry("%dx%d" % (width, height))
         self.title("Thonny options")
 

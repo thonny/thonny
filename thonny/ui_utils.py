@@ -2111,6 +2111,10 @@ def get_default_theme():
     else:
         return "Enhanced Clam"
 
+def ems_to_pixels(x):
+    m_pix = tkinter.font.nametofont("TkDefaultFont").measure("m")
+    return int(m_pix * x)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
