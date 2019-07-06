@@ -382,7 +382,7 @@ def copy_to_clipboard(data):
     elif running_on_mac_os():
         command = ["pbcopy"]
     else:
-        command = ["xsel", "-i"]
+        command = ["xsel", "-b", "-i"]
 
     env = dict(os.environ).copy()
     encoding = "utf-8"
@@ -402,7 +402,7 @@ def copy_to_clipboard(data):
         close_fds=True,
         **extra
     )
-    proc.communicate(input=data.encode(), timeout=0.1)
+    proc.communicate(input=data, timeout=0.1)
 
 
 def _copy_to_windows_clipboard(data):
