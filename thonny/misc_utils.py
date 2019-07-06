@@ -374,3 +374,58 @@ class TimeHelper:
     @property
     def time_left(self):
         return max(self.time_allowed - self.time_spent, 0)
+
+
+def copy_to_clipboard(data):
+    if running_on_windows():
+        return _copy_to_windows_clipboard(data)
+    elif running_on_mac_os():
+        command = ["pbcopy"]
+    else:
+        command = ["xsel", "-i"]
+
+    env = dict(os.environ).copy()
+    encoding = "utf-8"
+    env["PYTHONIOENCODING"] = encoding
+
+    if sys.version_info >= (3, 6):
+        extra = {"encoding": encoding}
+    else:
+        extra = {}
+
+    proc = subprocess.Popen(
+        command,
+        stdin=subprocess.PIPE,
+        shell=False,
+        env=env,
+        universal_newlines=True,
+        close_fds=True,
+        **extra
+    )
+    proc.communicate(input=data.encode(), timeout=0.1)
+
+
+def _copy_to_windows_clipboard(data):
+    # https://bugs.python.org/file37366/test_clipboard_win.py
+    import ctypes
+
+    wcscpy = ctypes.cdll.msvcrt.wcscpy
+    OpenClipboard = ctypes.windll.user32.OpenClipboard
+    EmptyClipboard = ctypes.windll.user32.EmptyClipboard
+    SetClipboardData = ctypes.windll.user32.SetClipboardData
+    CloseClipboard = ctypes.windll.user32.CloseClipboard
+    CF_UNICODETEXT = 13
+    GlobalAlloc = ctypes.windll.kernel32.GlobalAlloc
+    GlobalLock = ctypes.windll.kernel32.GlobalLock
+    GlobalUnlock = ctypes.windll.kernel32.GlobalUnlock
+    GMEM_DDESHARE = 0x2000
+
+    OpenClipboard(None)
+    EmptyClipboard()
+    hCd = GlobalAlloc(GMEM_DDESHARE, 2 * (len(data) + 1))
+    pchData = GlobalLock(hCd)
+    wcscpy(ctypes.c_wchar_p(pchData), data)
+    GlobalUnlock(hCd)
+    SetClipboardData(CF_UNICODETEXT, hCd)
+    # ctypes.windll.user32.SetClipboardText(CF_UNICODETEXT, hCd)
+    CloseClipboard()
