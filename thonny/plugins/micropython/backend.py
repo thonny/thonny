@@ -224,7 +224,7 @@ class MicroPythonBackend:
 
         if not side_command:
             self._process_until_raw_prompt()
-            self._send_ready_message()
+            self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _read_commands(self):
         "works in separate thread"
