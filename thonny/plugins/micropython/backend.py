@@ -396,9 +396,10 @@ class MicroPythonBackend:
         eot_count = 0
         value = None
         done = False
+        output = b""
         out = b""
         err = b""
-
+        debug("proura")
         while not done:
             if (
                 self._connection.num_bytes_received == 0
@@ -424,7 +425,7 @@ class MicroPythonBackend:
             # Process input in chunks (max 1 parsing marker per chunk).
             # Prefer whole lines (to reduce the number of events),
             # but don't wait too long for eol.
-            output = self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.05)
+            output += self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.05)
             stream_name = "stderr" if eot_count == 1 else "stdout"
 
             if output.endswith(THONNY_MSG_START):
@@ -477,15 +478,20 @@ class MicroPythonBackend:
                 # switch to raw mode and continue
                 self._connection.write(RAW_MODE_CMD)
 
-            if capture_output:
-                if stream_name == "stdout":
-                    out += output
-                else:
-                    assert stream_name == "stderr"
-                    err += output
+            if output.endswith(FIRST_RAW_PROMPT[:-1]):
+                # incomplete raw prompt, wait for more
+                pass
             else:
-                # TODO: deal with partial UTF-8 chars
-                self._send_output(output.decode(ENCODING), stream_name)
+                if capture_output:
+                    if stream_name == "stdout":
+                        out += output
+                    else:
+                        assert stream_name == "stderr"
+                        err += output
+                else:
+                    # TODO: deal with partial UTF-8 chars
+                    self._send_output(output.decode(ENCODING), stream_name)
+                output = b""
 
         debug("doneproc")
         return (
