@@ -157,10 +157,6 @@ class MicroPythonProxy(SubprocessProxy):
     def _show_error(self, text):
         get_shell().print_error("\n" + text + "\n")
 
-    @property
-    def allow_webrepl(self):
-        return False
-
     def disconnect(self):
         self.destroy()
 
@@ -179,8 +175,9 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
         intro_text = (
-            "Connect your device to the computer and select corresponding port below (look for your device name, \n"
-            + '"USB Serial" or "UART"). If you can\'t find it, you may need to install proper USB driver first.'
+            "Connect your device to the computer and select corresponding port below\n"
+            + '(look for your device name, "USB Serial" or "UART").\n'
+            + "If you can't find it, you may need to install proper USB driver first."
         )
         if self.allow_webrepl:
             intro_text = (
@@ -311,6 +308,10 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     def _get_usb_driver_url(self):
         return None
 
+    @property
+    def allow_webrepl(self):
+        return False
+
 
 class GenericMicroPythonProxy(MicroPythonProxy):
     @property
@@ -352,7 +353,7 @@ def load_plugin():
     add_micropython_backend(
         "GenericMicroPython",
         GenericMicroPythonProxy,
-        "MicroPython on a generic device",
+        "MicroPython (generic)",
         GenericMicroPythonConfigPage,
     )
 
