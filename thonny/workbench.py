@@ -86,7 +86,7 @@ FlexibleUiThemeSettings = Union[UiThemeSettings, Callable[[], UiThemeSettings]]
 SyntaxThemeSettings = Dict[str, Dict[str, Union[str, int, bool]]]
 FlexibleSyntaxThemeSettings = Union[SyntaxThemeSettings, Callable[[], SyntaxThemeSettings]]
 
-OBSOLETE_PLUGINS = ["thonnycontrib.pi", "thonnycontrib.micropython"]
+OBSOLETE_PLUGINS = ["thonnycontrib.pi", "thonnycontrib.micropython", "thonnycontrib.circuitpython"]
 
 
 class Workbench(tk.Tk):
