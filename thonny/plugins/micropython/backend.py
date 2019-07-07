@@ -317,8 +317,16 @@ class MicroPythonBackend:
     def _send_output(self, data, stream_name):
         if not data:
             return
+        data = self._transform_output(data)
         msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
         self.send_message(msg)
+
+    def _transform_output(self, data):
+        # Any keypress wouldn't work
+        return data.replace(
+            "Press any key to enter the REPL. Use CTRL-D to reload.",
+            "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
+        )
 
     def _execute(self, script, capture_output=False):
         # self._ensure_raw_propmt()
