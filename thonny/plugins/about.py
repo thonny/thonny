@@ -10,11 +10,12 @@ from tkinter import ttk
 import thonny
 from thonny import get_workbench, ui_utils
 from thonny.misc_utils import get_python_version_string
+from thonny.ui_utils import CommonDialog
 
 
-class AboutDialog(tk.Toplevel):
+class AboutDialog(CommonDialog):
     def __init__(self, master):
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
 
         main_frame = ttk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)

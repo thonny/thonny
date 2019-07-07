@@ -1,10 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
+from thonny.ui_utils import CommonDialog
 
 page_specs = []
 
 
-class ExportDialog(tk.Toplevel):
+class ExportDialog(CommonDialog):
     def __init__(self, master):
         super().__init__(master=master)
 

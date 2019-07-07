@@ -27,7 +27,7 @@ import thonny
 from thonny import get_workbench, rst_utils, tktextext, ui_utils, get_runner
 from thonny.common import ToplevelResponse, read_source
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import scrollbar_style
+from thonny.ui_utils import scrollbar_style, CommonDialog
 from thonny.running import CPythonProxy
 import subprocess
 
@@ -531,7 +531,7 @@ class LibraryErrorHelper(ErrorHelper):
         return []
 
 
-class FeedbackDialog(tk.Toplevel):
+class FeedbackDialog(CommonDialog):
     def __init__(self, master, main_file_path, all_snapshots):
         super().__init__(master=master)
         main_frame = ttk.Frame(self)

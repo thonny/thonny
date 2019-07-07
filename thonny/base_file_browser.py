@@ -3,7 +3,13 @@ from tkinter import ttk, messagebox
 import os.path
 
 from thonny import get_workbench, misc_utils, tktextext, get_runner
-from thonny.ui_utils import scrollbar_style, lookup_style_option, show_dialog, create_string_var
+from thonny.ui_utils import (
+    scrollbar_style,
+    lookup_style_option,
+    show_dialog,
+    create_string_var,
+    CommonDialog,
+)
 from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
@@ -668,7 +674,7 @@ class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
         self.dialog.double_click_file(path)
 
 
-class BackendFileDialog(tk.Toplevel):
+class BackendFileDialog(CommonDialog):
     def __init__(self, master, kind, initial_dir):
         super().__init__(master=master)
         self.result = None
@@ -784,7 +790,7 @@ class BackendFileDialog(tk.Toplevel):
         self.on_ok()
 
 
-class NodeChoiceDialog(tk.Toplevel):
+class NodeChoiceDialog(CommonDialog):
     def __init__(self, master, prompt):
         super().__init__(master=master)
         self.result = None

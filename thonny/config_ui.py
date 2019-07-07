@@ -3,14 +3,14 @@ from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
 import traceback
-from thonny.ui_utils import ems_to_pixels
+from thonny.ui_utils import ems_to_pixels, CommonDialog
 
 
-class ConfigurationDialog(tk.Toplevel):
+class ConfigurationDialog(CommonDialog):
     last_shown_tab_index = 0
 
     def __init__(self, master, page_records):
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
         width = ems_to_pixels(53)
         height = ems_to_pixels(43)
         self.geometry("%dx%d" % (width, height))
@@ -77,7 +77,7 @@ class ConfigurationDialog(tk.Toplevel):
 
     def destroy(self):
         ConfigurationDialog.last_shown_tab_index = self._notebook.index(self._notebook.select())
-        tk.Toplevel.destroy(self)
+        super().destroy()
 
 
 class ConfigurationPage(ttk.Frame):

@@ -8,14 +8,12 @@ from tkinter import ttk
 from thonny import codeview, get_workbench, ui_utils, THONNY_USER_DIR
 from thonny.base_file_browser import BaseLocalFileBrowser
 from thonny.plugins.coloring import SyntaxColorer
-from thonny.ui_utils import lookup_style_option
+from thonny.ui_utils import lookup_style_option, CommonDialog
 
 
-class ReplayWindow(tk.Toplevel):
+class ReplayWindow(CommonDialog):
     def __init__(self):
-        tk.Toplevel.__init__(
-            self, get_workbench(), background=lookup_style_option("TFrame", "background")
-        )
+        super().__init__(get_workbench(), background=lookup_style_option("TFrame", "background"))
         ui_utils.set_zoomed(self, True)
 
         self.main_pw = ReplayerPanedWindow(self, orient=tk.HORIZONTAL, sashwidth=10)

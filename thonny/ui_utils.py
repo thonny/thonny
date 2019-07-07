@@ -30,6 +30,15 @@ from _tkinter import TclError
 import webbrowser
 
 
+class CommonDialog(tk.Toplevel):
+    def __init__(self, master=None, cnf={}, **kw):
+        super().__init__(master=master, cnf=cnf, **kw)
+        self.bind("<FocusIn>", self._unlock_on_focus_in, True)
+
+    def _unlock_on_focus_in(self, event):
+        self.deiconify()
+
+
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master, style="CustomMenubar.TFrame")
@@ -939,7 +948,7 @@ def create_tooltip(widget, text, **kw):
     widget.bind("<Leave>", leave)
 
 
-class NoteBox(tk.Toplevel):
+class NoteBox(CommonDialog):
     def __init__(self, master=None, max_default_width=300, **kw):
         super().__init__(master=master, highlightthickness=0, **kw)
 
@@ -1309,7 +1318,7 @@ def assign_geometry(win, master=None):
         win.geometry("+%d+%d" % (left, top))
 
 
-class WaitingDialog(tk.Toplevel):
+class WaitingDialog(CommonDialog):
     def __init__(self, master, async_result, description, title="Please wait!", timeout=None):
         self._async_result = async_result
         super().__init__(master)
@@ -1353,7 +1362,7 @@ def run_with_waiting_dialog(master, action, args=(), description="Working"):
     return async_result.get()
 
 
-class FileCopyDialog(tk.Toplevel):
+class FileCopyDialog(CommonDialog):
     def __init__(self, master, source, destination, description=None, fsync=True):
         self._source = source
         self._destination = destination
@@ -1435,7 +1444,7 @@ class FileCopyDialog(tk.Toplevel):
         self._close()
 
 
-class ChoiceDialog(tk.Toplevel):
+class ChoiceDialog(CommonDialog):
     def __init__(
         self, master=None, title="Choose one", question: str = "Choose one:", choices=[]
     ) -> None:
@@ -1482,7 +1491,7 @@ class ChoiceDialog(tk.Toplevel):
         self.destroy()
 
 
-class LongTextDialog(tk.Toplevel):
+class LongTextDialog(CommonDialog):
     def __init__(self, title, text_content, parent=None):
         if parent is None:
             parent = tk._default_root
@@ -1538,7 +1547,7 @@ def ask_one_from_choices(
     return dlg.result
 
 
-class SubprocessDialog(tk.Toplevel):
+class SubprocessDialog(CommonDialog):
     """Shows incrementally the output of given subprocess.
     Allows cancelling"""
 
@@ -1557,7 +1566,7 @@ class SubprocessDialog(tk.Toplevel):
         self._event_queue = collections.deque()
         self._conclusion = conclusion
 
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)

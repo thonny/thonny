@@ -20,6 +20,7 @@ from thonny.ui_utils import (
     create_tooltip,
     show_dialog,
     lookup_style_option,
+    CommonDialog,
 )
 import tkinter as tk
 import webbrowser
@@ -1367,7 +1368,7 @@ class ShellText(BaseShellText):
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
 
 
-class SqueezedTextDialog(tk.Toplevel):
+class SqueezedTextDialog(CommonDialog):
     def __init__(self, master, button):
         super().__init__(master)
         self.columnconfigure(0, weight=1)

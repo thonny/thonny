@@ -29,19 +29,20 @@ from thonny.ui_utils import (
     lookup_style_option,
     open_path_in_system_file_manager,
     scrollbar_style,
+    CommonDialog,
 )
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
 
-class PipDialog(tk.Toplevel):
+class PipDialog(CommonDialog):
     def __init__(self, master):
         self._state = "idle"  # possible values: "listing", "fetching", "idle"
         self._process = None
         self._active_distributions = {}
         self.current_package_data = None
 
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
 
         main_frame = ttk.Frame(self)
         main_frame.grid(sticky=tk.NSEW, ipadx=15, ipady=15)
@@ -958,9 +959,9 @@ class PluginsPipDialog(PipDialog):
         return self._provide_pip_install_instructions(error)
 
 
-class DetailsDialog(tk.Toplevel):
+class DetailsDialog(CommonDialog):
     def __init__(self, master, package_metadata, selected_version):
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
         self.result = None
         self._closed = False
         self._version_data = None

@@ -18,7 +18,7 @@ from thonny.common import DebuggerCommand, InlineCommand
 from thonny.memory import VariablesFrame
 from thonny.misc_utils import shorten_repr, running_on_rpi
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import select_sequence
+from thonny.ui_utils import select_sequence, CommonDialog
 from thonny.running import RUN_COMMAND_CAPTION
 
 _current_debugger = None
@@ -786,9 +786,9 @@ class ExpressionBox(tk.Text):
         self["width"] = max(map(len, lines))
 
 
-class DialogVisualizer(tk.Toplevel, FrameVisualizer):
+class DialogVisualizer(CommonDialog, FrameVisualizer):
     def __init__(self, master, frame_info):
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
 
         self.transient(master)
         if misc_utils.running_on_windows():

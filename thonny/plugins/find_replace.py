@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny import get_workbench
-from thonny.ui_utils import select_sequence
+from thonny.ui_utils import select_sequence, CommonDialog
 
 # TODO - consider moving the cmd_find method to main class in order to pass the editornotebook reference
 # TODO - logging
@@ -17,7 +17,7 @@ from thonny.ui_utils import select_sequence
 _active_find_dialog = None
 
 
-class FindDialog(tk.Toplevel):
+class FindDialog(CommonDialog):
 
     last_searched_word = None
 
@@ -25,7 +25,7 @@ class FindDialog(tk.Toplevel):
         padx = 15
         pady = 15
 
-        tk.Toplevel.__init__(self, master, takefocus=1, background="pink")
+        super().__init__(master, takefocus=1, background="pink")
         main_frame = ttk.Frame(self)
         main_frame.grid(row=1, column=1, sticky="nsew")
         self.columnconfigure(1, weight=1)

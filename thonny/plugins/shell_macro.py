@@ -3,11 +3,12 @@ from tkinter import ttk
 
 from thonny import get_runner, get_workbench, misc_utils, ui_utils
 from thonny.codeview import CodeView
+from thonny.ui_utils import CommonDialog
 
 
-class ShellMacroDialog(tk.Toplevel):
+class ShellMacroDialog(CommonDialog):
     def __init__(self, master):
-        tk.Toplevel.__init__(self, master)
+        super().__init__(master)
 
         self.title("Configure shell macro")
         if misc_utils.running_on_mac_os():
