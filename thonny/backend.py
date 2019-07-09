@@ -101,6 +101,7 @@ class VM:
         self._current_executor = None
         self._io_level = 0
         self._tty_mode = True
+        self._tcl = None
 
         # clean up path
         sys.path = [d for d in sys.path if d != ""]
@@ -217,7 +218,7 @@ class VM:
         # TODO: add these in response creation time in a helper function
         if isinstance(response, ToplevelResponse):
             response["gui_is_active"] = (
-                self._get_tkinter_default_root() is not None or self._get_qt_app() is not None
+                self._get_tcl() is not None or self._get_qt_app() is not None
             )
 
         self.send_message(response)
@@ -486,14 +487,12 @@ class VM:
 
         try:
             # First try Tkinter:
-            root = self._get_tkinter_default_root()
-            if root is not None:
-                import tkinter
-
+            tcl = self._get_tcl()
+            if tcl is not None:
                 # http://bugs.python.org/issue989712
                 # http://bugs.python.org/file6090/run.py.diff
-                while root.dooneevent(tkinter._tkinter.DONT_WAIT):
-                    pass
+                # https://bugs.python.org/review/989712/diff/4528/Lib/idlelib/run.py
+                tcl.eval("update")
             else:
                 # Try Qt only when Tkinter is not used
                 app = self._get_qt_app()
@@ -733,14 +732,23 @@ class VM:
 
         return InlineResponse("get_object_info", id=cmd.object_id, info=info)
 
-    def _get_tkinter_default_root(self):
+    def _get_tcl(self):
         # tkinter._default_root is not None,
         # when window has been created and mainloop isn't called or hasn't ended yet
+        if self._tcl is not None:
+            return self._tcl
+        
         tkinter = sys.modules.get("tkinter")
-        if tkinter is not None:
-            return getattr(tkinter, "_default_root", None)
-        else:
+        if tkinter is None:
             return None
+        
+        if self._tcl is None:
+            #try:
+                self._tcl = tkinter.Tcl()
+            #except Exception:
+                pass
+            
+        return self._tcl
 
     def _get_qt_app(self):
         mod = sys.modules.get("PyQt5.QtCore")

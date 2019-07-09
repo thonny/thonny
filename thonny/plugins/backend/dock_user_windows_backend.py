@@ -29,17 +29,21 @@ def patch_tkinter(module):
     def patched_Tk_constructor(self, *args, **kw):
         original_constructor(self, *args, **kw)
 
-        # move window to the same place it was previously
-        last_pos = get_vm().get_option(_LAST_POS_SETTING)
-        if isinstance(last_pos, tuple):
-            self.geometry("+%d+%d" % last_pos)
-
-        self.wm_attributes("-topmost", 1)
-        # self.overrideredirect(1)
-
-        # I'm using bind_class because turtle._Screen later overwrites the bind handler
-        self.bind_class("Tk", "<Configure>", on_configure, True)
-
+        try:
+            # move window to the same place it was previously
+            last_pos = get_vm().get_option(_LAST_POS_SETTING)
+            if isinstance(last_pos, tuple):
+                self.geometry("+%d+%d" % last_pos)
+    
+            self.wm_attributes("-topmost", 1)
+            # self.overrideredirect(1)
+    
+            # I'm using bind_class because turtle._Screen later overwrites the bind handler
+            self.bind_class("Tk", "<Configure>", on_configure, True)
+        except Exception:
+            # expected to fail when constructing Tcl in backend
+            pass
+        
     module.Tk.__init__ = patched_Tk_constructor
     setattr(module, flag_name, True)
 
