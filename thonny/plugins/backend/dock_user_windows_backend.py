@@ -41,7 +41,7 @@ def patch_tkinter(module):
             # I'm using bind_class because turtle._Screen later overwrites the bind handler
             self.bind_class("Tk", "<Configure>", on_configure, True)
         except Exception:
-            # expected to fail when constructing Tcl in backend
+            # expected to fail when constructing Tcl for _cmd_process_gui_events
             pass
         
     module.Tk.__init__ = patched_Tk_constructor

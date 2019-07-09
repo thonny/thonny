@@ -484,15 +484,22 @@ class VM:
 
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
-
         try:
-            # First try Tkinter:
+            # First try Tkinter.
+            # Need to update even when tkinter._default_root is None
+            # because otherwise destroyed window will stay up in macOS.
+            
+            # When switching between closed user Tk window and another window,
+            # the closed window may reappear in IDLE and CLI REPL
             tcl = self._get_tcl()
-            if tcl is not None:
+            if (tcl is not None
+                and tcl.has_default_root or tcl.updates_without_root < 1):
                 # http://bugs.python.org/issue989712
                 # http://bugs.python.org/file6090/run.py.diff
                 # https://bugs.python.org/review/989712/diff/4528/Lib/idlelib/run.py
                 tcl.eval("update")
+                #if not tcl.has_default_root:
+                #    tcl.updates_without_root += 1
             else:
                 # Try Qt only when Tkinter is not used
                 app = self._get_qt_app()
@@ -733,8 +740,6 @@ class VM:
         return InlineResponse("get_object_info", id=cmd.object_id, info=info)
 
     def _get_tcl(self):
-        # tkinter._default_root is not None,
-        # when window has been created and mainloop isn't called or hasn't ended yet
         if self._tcl is not None:
             return self._tcl
         
@@ -743,11 +748,13 @@ class VM:
             return None
         
         if self._tcl is None:
-            #try:
+            try:
                 self._tcl = tkinter.Tcl()
-            #except Exception:
+                self._tcl.updates_without_root = 0
+            except Exception:
                 pass
-            
+        
+        self._tcl.has_default_root = tkinter._default_root is not None
         return self._tcl
 
     def _get_qt_app(self):
