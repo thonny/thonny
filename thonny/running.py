@@ -698,10 +698,10 @@ class SubprocessProxy(BackendProxy):
         self._in_venv = None
         self._cwd = self._get_initial_cwd()
         self._start_background_process()
-    
+
     def _get_initial_cwd(self):
         return None
-    
+
     def _start_background_process(self):
         # deque, because in one occasion I need to put messages back
         self._response_queue = collections.deque()
@@ -951,10 +951,10 @@ class CPythonProxy(SubprocessProxy):
     def __init__(self, clean: bool, executable: str) -> None:
         super().__init__(clean, executable)
         self._send_msg(ToplevelCommand("get_environment_info"))
-    
+
     def _get_initial_cwd(self):
         return get_workbench().get_local_cwd()
-    
+
     def _get_launcher_with_args(self):
         import thonny.backend_launcher
 
