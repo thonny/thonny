@@ -29,12 +29,20 @@ class SyntaxText(EnhancedText):
         for tag_name in self._syntax_options:
             self.tag_reset(tag_name)
 
+        background = syntax_options.get("TEXT", {}).get("background")
+
         # apply new options
         for tag_name in syntax_options:
+            opts = syntax_options[tag_name]
+
+            if tag_name in ["string3", "open_string3"]:
+                # They need explicit background to override uniline tags
+                opts["background"] = background
+
             if tag_name == "TEXT":
-                self.configure(**syntax_options[tag_name])
+                self.configure(**opts)
             else:
-                self.tag_configure(tag_name, **syntax_options[tag_name])
+                self.tag_configure(tag_name, **opts)
 
         self._syntax_options = syntax_options
 

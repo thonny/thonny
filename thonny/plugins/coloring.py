@@ -17,8 +17,10 @@ Regexes are adapted from idlelib
 import re
 
 from thonny import get_workbench
-from thonny.codeview import CodeViewText
+from thonny.codeview import CodeViewText, CodeView
 from thonny.shell import ShellText
+
+TODO = "COLOR_TODO"
 
 
 class SyntaxColorer:
@@ -27,8 +29,8 @@ class SyntaxColorer:
         self._compile_regexes()
         self._config_tags()
         self._update_scheduled = False
-        self._dirty_ranges = set()
         self._use_coloring = True
+        self._multiline_dirty = True
 
     def _compile_regexes(self):
         from thonny.token_utils import (
@@ -84,18 +86,25 @@ class SyntaxColorer:
             "definition",
         }
         self.multiline_tagdefs = {"string3", "open_string3"}
+        self._raise_tags()
+
+    def _raise_tags(self):
+        self.text.tag_raise("string3")
+        self.text.tag_raise("open_string3")
         self.text.tag_raise("sel")
+        """
         tags = self.text.tag_names()
         # take into account that without themes some tags may be undefined
         if "string3" in tags:
             self.text.tag_raise("string3")
         if "open_string3" in tags:
             self.text.tag_raise("open_string3")
+        """
 
-    def schedule_update(self, event, use_coloring=True):
-        self._use_coloring = use_coloring
+    def mark_dirty(self, event=None):
+        start_index = "1.0"
+        end_index = "end"
 
-        # Allow reducing work by remembering only changed lines
         if hasattr(event, "sequence"):
             if event.sequence == "TextInsert":
                 index = self.text.index(event.index)
@@ -103,31 +112,34 @@ class SyntaxColorer:
                 end_row = start_row + event.text.count("\n")
                 start_index = "%d.%d" % (start_row, 0)
                 end_index = "%d.%d" % (end_row + 1, 0)
+                if "'" in event.text or '"' in event.text:
+                    self._multiline_dirty = True
+
             elif event.sequence == "TextDelete":
                 index = self.text.index(event.index1)
                 start_row = int(index.split(".")[0])
                 start_index = "%d.%d" % (start_row, 0)
                 end_index = "%d.%d" % (start_row + 1, 0)
-        else:
-            start_index = "1.0"
-            end_index = "end"
+                # Don't know which text got deleted
+                self._multiline_dirty = True
 
-        self._dirty_ranges.add((start_index, end_index))
+        self.text.tag_add(TODO, start_index, end_index)
 
-        def perform_update():
-            try:
-                self._update_coloring()
-            finally:
-                self._update_scheduled = False
-                self._dirty_ranges = set()
+    def schedule_update(self):
+        self._use_coloring = get_workbench().get_option("view.syntax_coloring")
 
         if not self._update_scheduled:
             self._update_scheduled = True
-            self.text.after_idle(perform_update)
+            self.text.after_idle(self.perform_update)
+
+    def perform_update(self):
+        try:
+            self._update_coloring()
+        finally:
+            self._update_scheduled = False
 
     def _update_coloring(self):
-        self._update_uniline_tokens("1.0", "end")
-        self._update_multiline_tokens("1.0", "end")
+        raise NotImplementedError()
 
     def _update_uniline_tokens(self, start, end):
         chars = self.text.get(start, end)
@@ -160,6 +172,8 @@ class SyntaxColorer:
                                 start + "+%dc" % id_match_end,
                             )
 
+        self.text.tag_remove(TODO, start, end)
+
     def _update_multiline_tokens(self, start, end):
         chars = self.text.get(start, end)
         # clear old tags
@@ -168,9 +182,6 @@ class SyntaxColorer:
 
         if not self._use_coloring:
             return
-
-        # Count number of open multiline strings to be able to detect when string gets closed
-        self.text.number_of_open_multiline_strings = 0
 
         interesting_token_types = list(self.multiline_tagdefs) + ["string3"]
         for match in self.multiline_regex.finditer(chars):
@@ -191,37 +202,64 @@ class SyntaxColorer:
 
                             if str_end == file_end:
                                 token_type = "open_string3"
-                                self.text.number_of_open_multiline_strings += 1
                             else:
                                 token_type = None
                         elif len(token_text) >= 4 and token_text[-4] == "\\":
                             token_type = "open_string3"
-                            self.text.number_of_open_multiline_strings += 1
                         else:
                             token_type = "string3"
 
                     token_start = start + "+%dc" % match_start
                     token_end = start + "+%dc" % match_end
-                    # clear uniline tags
-                    for tag in self.uniline_tagdefs:
-                        self.text.tag_remove(tag, token_start, token_end)
-                    # add tag
+
                     self.text.tag_add(token_type, token_start, token_end)
+
+        self._multiline_dirty = False
+        self._raise_tags()
 
 
 class CodeViewSyntaxColorer(SyntaxColorer):
     def _update_coloring(self):
-        for dirty_range in self._dirty_ranges:
-            self._update_uniline_tokens(*dirty_range)
+        search_start = self.text.index("@0,0")
+        search_end = self.text.index(
+            "@%d,%d lineend" % (self.text.winfo_width(), self.text.winfo_height())
+        )
+
+        while True:
+            res = self.text.tag_nextrange(TODO, search_start, search_end)
+            if res:
+                update_start = res[0]
+                update_end = res[1]
+            else:
+                # maybe the range started earlier
+                res = self.text.tag_prevrange(TODO, search_start)
+                if res and self.text.compare(res[1], ">", search_end):
+                    update_start = search_start
+                    update_end = res[1]
+                else:
+                    break
+
+            if self.text.compare(update_end, ">", search_end):
+                update_end = search_end
+
+            self._update_uniline_tokens(update_start, update_end)
+
+            if update_end == search_end:
+                break
+            else:
+                search_start = update_end
 
         # Multiline tokens need to be searched from the whole source
-        open_before = getattr(self.text, "number_of_open_multiline_strings", 0)
-        self._update_multiline_tokens("1.0", "end")
-        open_after = getattr(self.text, "number_of_open_multiline_strings", 0)
+        # open_before = getattr(self.text, "number_of_open_multiline_strings", 0)
+        if self._multiline_dirty:
+            self._update_multiline_tokens("1.0", "end")
+        # open_after = getattr(self.text, "number_of_open_multiline_strings", 0)
 
+        """
         if open_after == 0 and open_before != 0:
             # recolor uniline tokens after closing last open multiline string
             self._update_uniline_tokens("1.0", "end")
+        """
 
 
 class ShellSyntaxColorer(SyntaxColorer):
@@ -242,12 +280,26 @@ class ShellSyntaxColorer(SyntaxColorer):
             self._update_multiline_tokens(start_index, end_index)
 
 
-def update_coloring(event):
+def patched_vertical_scrollbar_update(self, *args):
+    self._original_vertical_scrollbar_update(*args)
+    update_coloring_on_text(self.text)
+
+
+def patched_vertical_scroll(self, *args):
+    self._original_vertical_scroll(*args)
+    update_coloring_on_text(self.text)
+
+
+def update_coloring_on_event(event):
     if hasattr(event, "text_widget"):
         text = event.text_widget
     else:
         text = event.widget
 
+    update_coloring_on_text(text, event)
+
+
+def update_coloring_on_text(text, event=None):
     if not hasattr(text, "syntax_colorer"):
         if isinstance(text, ShellText):
             class_ = ShellSyntaxColorer
@@ -257,14 +309,26 @@ def update_coloring(event):
             return
 
         text.syntax_colorer = class_(text)
+        # mark whole text as unprocessed
+        text.syntax_colorer.mark_dirty()
+    else:
+        text.syntax_colorer.mark_dirty(event)
 
-    text.syntax_colorer.schedule_update(event, get_workbench().get_option("view.syntax_coloring"))
+    text.syntax_colorer.schedule_update()
+
+
+def patch_codeview():
+    CodeView._original_vertical_scrollbar_update = CodeView._vertical_scrollbar_update
+    CodeView._vertical_scrollbar_update = patched_vertical_scrollbar_update
+    CodeView._original_vertical_scroll = CodeView._vertical_scroll
+    CodeView._vertical_scroll = patched_vertical_scroll
 
 
 def load_plugin() -> None:
+    patch_codeview()
     wb = get_workbench()
 
     wb.set_default("view.syntax_coloring", True)
-    wb.bind("TextInsert", update_coloring, True)
-    wb.bind("TextDelete", update_coloring, True)
-    wb.bind("<<UpdateAppearance>>", update_coloring, True)
+    wb.bind("TextInsert", update_coloring_on_event, True)
+    wb.bind("TextDelete", update_coloring_on_event, True)
+    wb.bind("<<UpdateAppearance>>", update_coloring_on_event, True)
