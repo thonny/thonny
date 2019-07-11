@@ -2121,6 +2121,13 @@ def get_default_theme():
         return "Enhanced Clam"
 
 
+def get_default_basic_theme():
+    if running_on_windows():
+        return "xpnative"
+    else:
+        return "clam"
+
+
 EM_WIDTH = None
 
 

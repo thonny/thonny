@@ -10,7 +10,7 @@ RPI_MODE_TEXT = "Raspberry Pi"
 class FirstRunWindow(tk.Tk):
     def __init__(self, configuration_manager):
         super().__init__(className="Thonny")
-        ttk.Style().theme_use(ui_utils.get_default_theme())
+        ttk.Style().theme_use(ui_utils.get_default_basic_theme())
 
         self.title("Welcome to Thonny!" + "   [portable]" if is_portable() else "")
         self.protocol("WM_DELETE_WINDOW", self.destroy)
