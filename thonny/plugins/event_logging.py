@@ -14,15 +14,6 @@ from thonny.workbench import WorkbenchEvent
 class EventLogger:
     def __init__(self, filename):
         self._filename = filename
-        self._init_logging()
-        self._init_commands()
-
-    def _init_commands(self):
-        get_workbench().add_command(
-            "export_usage_logs", "tools", _("Export usage logs..."), self._cmd_export, group=110
-        )
-
-    def _init_logging(self):
         self._events = []
 
         wb = get_workbench()
@@ -124,28 +115,6 @@ class EventLogger:
 
         return data
 
-    def _get_log_dir(self):
-        return os.path.dirname(self._filename)
-
-    def _cmd_export(self):
-
-        filename = asksaveasfilename(
-            filetypes=[("Zip-files", ".zip"), ("all files", ".*")],
-            defaultextension=".zip",
-            initialdir=get_workbench().get_local_cwd(),
-            initialfile=time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip"),
-        )
-
-        if not filename:
-            return
-
-        log_dir = self._get_log_dir()
-
-        with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
-            for item in os.listdir(log_dir):
-                if item.endswith(".txt") or item.endswith(".zip"):
-                    zipf.write(os.path.join(log_dir, item), arcname=item)
-
     def _log_event(self, sequence, event):
         data = self._extract_interesting_data(event, sequence)
         data["sequence"] = sequence
@@ -183,7 +152,7 @@ class EventLogger:
 
 def _generate_timestamp_file_name(extension):
     # generate log filename
-    folder = os.path.join(THONNY_USER_DIR, "user_logs")
+    folder = _get_log_dir()
     if not os.path.exists(folder):
         os.makedirs(folder)
 
@@ -197,7 +166,37 @@ def _generate_timestamp_file_name(extension):
     raise RuntimeError()
 
 
+def _get_log_dir():
+    return os.path.join(THONNY_USER_DIR, "user_logs")
+
+
+def export():
+    filename = asksaveasfilename(
+        filetypes=[("Zip-files", ".zip"), ("all files", ".*")],
+        defaultextension=".zip",
+        initialdir=get_workbench().get_local_cwd(),
+        initialfile=time.strftime("ThonnyUsageLogs_%Y-%m-%d.zip"),
+    )
+
+    if not filename:
+        return
+
+    log_dir = _get_log_dir()
+
+    with zipfile.ZipFile(filename, "w", compression=zipfile.ZIP_DEFLATED) as zipf:
+        for item in os.listdir(log_dir):
+            if item.endswith(".txt") or item.endswith(".zip"):
+                zipf.write(os.path.join(log_dir, item), arcname=item)
+
+
 def load_plugin() -> None:
-    filename = _generate_timestamp_file_name("txt")
-    # create logger
-    EventLogger(filename)
+    get_workbench().set_default("general.event_logging", False)
+
+    if get_workbench().get_option("general.event_logging"):
+        get_workbench().add_command(
+            "export_usage_logs", "tools", _("Export usage logs..."), export, group=110
+        )
+        
+        filename = _generate_timestamp_file_name("txt")
+        # create logger
+        EventLogger(filename)

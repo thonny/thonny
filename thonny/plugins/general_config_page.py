@@ -13,18 +13,24 @@ class GeneralConfigurationPage(ConfigurationPage):
             "general.single_instance", _("Allow only single Thonny instance"), row=1, columnspan=2
         )
         self.add_checkbox(
-            "general.debug_mode", _("Debug mode (provides more detailed logs)"), row=3, columnspan=2
+            "general.event_logging", _("Log program usage events"), row=4, columnspan=2
         )
         self.add_checkbox(
             "file.reopen_all_files",
             _("Reopen all files from previous session"),
-            row=4,
+            row=5,
             columnspan=2,
         )
         self.add_checkbox(
             "general.disable_notification_sound",
             _("Disable notification sound"),
-            row=5,
+            row=6,
+            columnspan=2,
+        )
+        self.add_checkbox(
+            "general.debug_mode",
+            _("Debug mode (provides more detailed diagnostic logs)"),
+            row=7,
             columnspan=2,
         )
 
