@@ -112,7 +112,7 @@ class SyntaxColorer:
                 end_row = start_row + event.text.count("\n")
                 start_index = "%d.%d" % (start_row, 0)
                 end_index = "%d.%d" % (end_row + 1, 0)
-                if "'" in event.text or '"' in event.text:
+                if not event.is_trivial_edit:
                     self._multiline_dirty = True
 
             elif event.sequence == "TextDelete":
@@ -120,8 +120,8 @@ class SyntaxColorer:
                 start_row = int(index.split(".")[0])
                 start_index = "%d.%d" % (start_row, 0)
                 end_index = "%d.%d" % (start_row + 1, 0)
-                # Don't know which text got deleted
-                self._multiline_dirty = True
+                if not event.is_trivial_edit:
+                    self._multiline_dirty = True
 
         self.text.tag_add(TODO, start_index, end_index)
 
