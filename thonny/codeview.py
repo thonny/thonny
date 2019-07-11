@@ -274,12 +274,9 @@ class CodeView(tktextext.TextFrame):
     def set_content(self, content, keep_undo=False):
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)
-        self.update_gutter()
 
         if not keep_undo:
             self.text.edit_reset()
-
-        self.text.event_generate("<<TextChange>>")
 
     def _toggle_breakpoint(self, event):
         index = "@%d,%d" % (event.x, event.y)
