@@ -20,7 +20,7 @@ class ParenMatcher:
     def schedule_update(self):
         if not self._update_scheduled:
             self._update_scheduled = True
-            self.text.after_idle(self.perform_update)
+            self.text.after(500, self.perform_update)
 
     def perform_update(self):
         try:
