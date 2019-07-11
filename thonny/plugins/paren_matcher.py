@@ -13,6 +13,10 @@ class ParenMatcher:
         self.text = text
         self._update_scheduled = False
 
+        self._full_source_paren_tokens = None
+        self._unclosed_dirty = True
+        self._surrounding_dirty = True
+
     def schedule_update(self):
         if not self._update_scheduled:
             self._update_scheduled = True
@@ -23,19 +27,31 @@ class ParenMatcher:
             self.update_highlighting()
         finally:
             self._update_scheduled = False
-            
+
+    def invalidate_token_cache(self):
+        self._full_source_paren_tokens = None
+
     def update_highlighting(self):
+        if not self._surrounding_dirty and not self._unclosed_dirty:
+            return
+
         self.text.tag_remove("surrounding_parens", "0.1", "end")
-        self.text.tag_remove("unclosed_expression", "0.1", "end")
+
+        if self._unclosed_dirty:
+            self.text.tag_remove("unclosed_expression", "0.1", "end")
 
         if get_workbench().get_option("view.paren_highlighting"):
             self._update_highlighting_for_active_range()
 
     def _update_highlighting_for_active_range(self):
         start_index = "1.0"
-        end_index = self.text.index("end")
+        end_index = "end"
         remaining = self._highlight_surrounding(start_index, end_index)
-        self._highlight_unclosed(remaining, start_index, end_index)
+        self._surrounding_dirty = False
+
+        if self._unclosed_dirty:
+            self._highlight_unclosed(remaining, start_index, end_index)
+            self._unclosed_dirty = False
 
     def _highlight_surrounding(self, start_index, end_index):
         open_index, close_index, remaining = self.find_surrounding(start_index, end_index)
@@ -45,7 +61,6 @@ class ParenMatcher:
 
         return remaining
 
-    # highlights an unclosed bracket
     def _highlight_unclosed(self, remaining, start_index, end_index):
         # anything remaining in the stack is an unmatched opener
         # since the list is ordered, we can highlight everything starting from the first element
@@ -54,7 +69,21 @@ class ParenMatcher:
             open_index = "%d.%d" % (opener.start[0], opener.start[1])
             self.text.tag_add("unclosed_expression", open_index, end_index)
 
-    def _get_paren_tokens(self, source):
+    def _get_paren_tokens(self, start_index, end_index):
+        if (
+            self._full_source_paren_tokens is not None
+            and start_index == "1.0"
+            and end_index == "end"
+        ):
+            return self._full_source_paren_tokens
+
+        start_row, start_col = map(int, start_index.split("."))
+        source = self.text.get(start_index, end_index)
+
+        # prepend source with empty lines and spaces to make
+        # token rows and columns match with widget indices
+        source = ("\n" * (start_row - 1)) + (" " * start_col) + source
+
         result = []
         try:
             tokens = tokenize.tokenize(io.BytesIO(source.encode("utf-8")).readline)
@@ -65,6 +94,9 @@ class ParenMatcher:
             # happens eg when parens are unbalanced or there is indentation error or ...
             pass
 
+        if start_index == "1.0" and end_index == "end":
+            self._full_source_paren_tokens = result
+
         return result
 
     def find_surrounding(self, start_index, end_index):
@@ -73,16 +105,7 @@ class ParenMatcher:
         opener, closer = None, None
         open_index, close_index = None, None
 
-        start_row, start_col = map(int, start_index.split("."))
-        source = self.text.get(start_index, end_index)
-
-        # prepend source with empty lines and spaces to make
-        # token rows and columns match with widget indices
-        source = ("\n" * (start_row - 1)) + (" " * start_col) + source
-
-        for t in self._get_paren_tokens(source):
-            if t.string == "" or t.string not in "()[]{}":
-                continue
+        for t in self._get_paren_tokens(start_index, end_index):
             if t.string in "([{":
                 stack.append(t)
             elif len(stack) > 0:
@@ -118,7 +141,7 @@ class ShellParenMatcher(ParenMatcher):
             self._highlight_unclosed(remaining, start_index, "end")
 
 
-def update_highlighting(event=None):
+def _update_highlighting(event, text_changed, update_surrounding, update_unclosed):
     text = event.widget
     if not hasattr(text, "paren_matcher"):
         if isinstance(text, CodeViewText):
@@ -128,15 +151,41 @@ def update_highlighting(event=None):
         else:
             return
 
-    text.paren_matcher.schedule_update()
+    if text_changed:
+        text.paren_matcher.invalidate_token_cache()
+
+    if update_surrounding:
+        text.paren_matcher._surrounding_dirty = True
+
+    if update_unclosed:
+        text.paren_matcher._unclosed_dirty = True
+
+    if text.paren_matcher._surrounding_dirty or text.paren_matcher._unclosed_dirty:
+        text.paren_matcher.schedule_update()
+
+
+def update_highlighting_full(event):
+    _update_highlighting(event, True, True, True)
+
+
+def update_highlighting_move(event):
+    _update_highlighting(event, False, True, False)
+
+
+def update_highlighting_edit_cw(event):
+    if isinstance(event.text_widget, CodeViewText):
+        event.widget = event.text_widget
+        trivial = event.get("is_trivial_edit", False)
+        _update_highlighting(event, True, not trivial, not trivial)
 
 
 def load_plugin() -> None:
     wb = get_workbench()
 
     wb.set_default("view.paren_highlighting", True)
-    wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)
-    wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)
-    wb.bind_class("ShellText", "<<CursorMove>>", update_highlighting, True)
-    wb.bind_class("ShellText", "<<TextChange>>", update_highlighting, True)
-    wb.bind("<<UpdateAppearance>>", update_highlighting, True)
+    wb.bind("TextInsert", update_highlighting_edit_cw, True)
+    wb.bind("TextDelete", update_highlighting_edit_cw, True)
+    wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting_move, True)
+    wb.bind_class("ShellText", "<<TextChange>>", update_highlighting_full, True)
+    wb.bind_class("ShellText", "<<CursorMove>>", update_highlighting_full, True)
+    wb.bind("<<UpdateAppearance>>", update_highlighting_full, True)
