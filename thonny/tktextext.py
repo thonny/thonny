@@ -863,9 +863,7 @@ class TextFrame(ttk.Frame):
         self.update_margin_line()
 
     def _text_changed(self, event):
-        "# TODO: make more efficient"
         self.update_gutter()
-        self.update_margin_line()
 
     def _cursor_moved(self, event):
         self._update_gutter_active_line()
