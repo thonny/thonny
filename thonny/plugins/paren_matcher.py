@@ -14,16 +14,16 @@ class ParenMatcher:
         self._update_scheduled = False
 
     def schedule_update(self):
-        def perform_update():
-            try:
-                self.update_highlighting()
-            finally:
-                self._update_scheduled = False
-
         if not self._update_scheduled:
             self._update_scheduled = True
-            self.text.after_idle(perform_update)
+            self.text.after_idle(self.perform_update)
 
+    def perform_update(self):
+        try:
+            self.update_highlighting()
+        finally:
+            self._update_scheduled = False
+            
     def update_highlighting(self):
         self.text.tag_remove("surrounding_parens", "0.1", "end")
         self.text.tag_remove("unclosed_expression", "0.1", "end")
