@@ -49,6 +49,7 @@ class OutlineView(ttk.Frame):
 
         # init tree events
         self.tree.bind("<<TreeviewSelect>>", self._on_select, True)
+        self.tree.bind("<Map>", self._update_frame_contents, True)
 
         # configure the only tree column
         self.tree.column("#0", anchor=tk.W, stretch=True)
@@ -59,6 +60,9 @@ class OutlineView(ttk.Frame):
         self._method_img = get_workbench().get_image("outline-method")
 
     def _update_frame_contents(self, event=None):
+        if not self.winfo_ismapped():
+            return
+        print("upd")
         self._clear_tree()
 
         editor = get_workbench().get_editor_notebook().get_current_editor()
