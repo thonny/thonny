@@ -5,6 +5,7 @@ import tokenize
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
+import time
 
 _OPENERS = {")": "(", "]": "[", "}": "{"}
 
@@ -20,13 +21,17 @@ class ParenMatcher:
     def __init__(self, text):
         self.text = text
         self._update_scheduling_id = None
+        self._delayed_scheduling_id = None
         self._tokens_cache = {}
 
-    def schedule_update(self):
+    def schedule_update(self, delay=None):
         if self._update_scheduling_id is not None:
             self.text.after_cancel(self._update_scheduling_id)
 
-        self._update_scheduling_id = self.text.after_idle(self.perform_update)
+        if delay is not None:
+            self._update_scheduling_id = self.text.after(delay, self.perform_update)
+        else:
+            self._update_scheduling_id = self.text.after_idle(self.perform_update)
 
     def perform_update(self):
         try:
@@ -164,7 +169,7 @@ class ShellParenMatcher(ParenMatcher):
             self._highlight(start_index, end_index)
 
 
-def _update_highlighting(event, text_changed, need_update):
+def _update_highlighting(event, text_changed, need_update, delay=None):
     text = event.widget
     if not hasattr(text, "paren_matcher"):
         if isinstance(text, CodeViewText):
@@ -176,20 +181,29 @@ def _update_highlighting(event, text_changed, need_update):
 
     if text_changed:
         text.paren_matcher.invalidate_token_cache()
-    
-    if text.has_selection():
-        return
 
     if need_update:
-        text.paren_matcher.schedule_update()
+        text.paren_matcher.schedule_update(delay)
 
 
 def update_highlighting_full(event):
     _update_highlighting(event, True, True)
 
 
+_last_move_time = 0
+
+
 def update_highlighting_move(event):
-    _update_highlighting(event, False, True)
+    global _last_move_time
+    # needs delay because selecting with mouse causes many events
+    # and I don't know how to distinguish selection from other moves
+    t = time.time()
+    if t - _last_move_time > 0.1:
+        delay = None
+    else:
+        delay = 300
+    _last_move_time = t
+    _update_highlighting(event, False, True, delay=delay)
 
 
 def update_highlighting_edit_cw(event):
