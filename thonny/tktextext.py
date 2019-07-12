@@ -789,11 +789,10 @@ class TextFrame(ttk.Frame):
             wrap="none",
         )
         self._gutter_is_gridded = False
-        # TODO: gutter selection interacts badly with breakpoint toggling in Linux
-        #self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True),
-        #self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click, True)
-        #self._gutter.bind("<Button-1>", self.on_gutter_click, True)
-        #self._gutter.bind("<Button1-Motion>", self.on_gutter_motion, True)
+        self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True),
+        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click, True)
+        self._gutter.bind("<Button-1>", self.on_gutter_click, True)
+        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion, True)
         self._gutter["yscrollcommand"] = self._gutter_scroll
 
         # need tags for justifying and rmargin

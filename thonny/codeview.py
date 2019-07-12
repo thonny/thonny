@@ -370,13 +370,16 @@ class CodeView(tktextext.TextFrame):
             opts = _syntax_options["GUTTER"].copy()
             if "background" in opts and "selectbackground" not in opts:
                 opts["selectbackground"] = opts["background"]
+                opts["inactiveselectbackground"] = opts["background"]
             if "foreground" in opts and "selectforeground" not in opts:
                 opts["selectforeground"] = opts["foreground"]
 
             self._gutter.configure(opts)
 
-            if "background" in _syntax_options["GUTTER"]:
-                self._margin_line.configure(background=_syntax_options["GUTTER"]["background"])
+            if "background" in opts:
+                background = opts["background"]
+                self._margin_line.configure(background=background)
+                self._gutter.tag_configure("sel", background=background)
 
         if "breakpoint" in _syntax_options:
             self._gutter.tag_configure("breakpoint", _syntax_options["breakpoint"])
