@@ -2,12 +2,24 @@
 Version history
 ===============
 
-3.2.0b2 (2019-06-??)
+3.2.0b2 (2019-07-13)
 ====================
-* CHANGED: Usage event logging is now disabled by default and can be enabled in Tools => Options => General
+* NEW: Former thonny-pi plug-in (containing Raspberry Pi theme) is now part of main Thonny package
+* NEW: Former thonny-circuitpython plug-in (containing CircuitPython back-end) is now part of main Thonny package
 * NEW: pip GUI now allows installing from requirements.txt file
-* NEW: Portable/thumbdrive bundles for Windows, macOS and Linux (https://github.com/thonny/thonny/wiki/DeploymentOptions#portable-version) 
+* NEW: Portable/thumbdrive bundles for Windows, macOS and Linux (https://github.com/thonny/thonny/wiki/DeploymentOptions#portable-version)
+* FIXED #188: Tkinter windows won't close on macOS
+* FIXED #361: Include Python development files in binary bundles
+* FIXED #488: Modal dialogs may get stuck
 * FIXED #639: Unset misleading environment variables in Windows launcher
+* FIXED #676: Can't close matplotlib window when MacOSX backend is used
+* FIXED #706: In Linux Thonny hangs on close sometimes 
+* FIXED #800: Can't load large files
+* FIXED: Plotter now listens for theme changes (ie. changes background without restart)
+* CHANGED: Welcome dialog is not show on Raspberry Pi
+* CHANGED: Usage event logging is now disabled by default and can be enabled in Tools => Options => General
+* CHANGED: MicroPython back-ends don't interrupt running process on connecting
+* TECHNICAL: MicroPython back-end got a big refactoring
 
 3.2.0b1 (2019-06-17)
 ====================
