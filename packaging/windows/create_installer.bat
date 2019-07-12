@@ -16,7 +16,7 @@ copy thonny_python.ini %BUILDDIR%
 @echo ............... INSTALLING DEPS ...................................
 
 %BUILDDIR%\python -m pip install jedi==0.14.*
-%BUILDDIR%\python -m pip install mypy==0.720
+%BUILDDIR%\python -m pip install --no-binary mypy mypy==0.720
 %BUILDDIR%\python -m pip install pylint==2.3.*
 %BUILDDIR%\python -m pip install docutils==0.14
 %BUILDDIR%\python -m pip install pyserial==3.4
