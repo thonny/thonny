@@ -711,8 +711,10 @@ class EnhancedText(TweakableText):
         super().direct_insert(index, chars, tags, **kw)
 
     def check_convert_tabs_to_spaces(self, chars):
+        if not self.replace_tabs:
+            return chars
         tab_count = chars.count("\t")
-        if not self.replace_tabs or tab_count == 0:
+        if tab_count == 0:
             return chars
         else:
 
@@ -787,7 +789,7 @@ class TextFrame(ttk.Frame):
             wrap="none",
         )
         self._gutter_is_gridded = False
-        self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True), 
+        self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True),
         self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click, True)
         self._gutter.bind("<Button-1>", self.on_gutter_click, True)
         self._gutter.bind("<Button1-Motion>", self.on_gutter_motion, True)
@@ -846,19 +848,24 @@ class TextFrame(ttk.Frame):
         self.text.focus_set()
 
     def set_gutter_visibility(self, value):
-        if value and not self._gutter.winfo_ismapped():
+        if value and not self._gutter_is_gridded:
             self._gutter.grid(row=0, column=0, sticky=tk.NSEW)
-        elif not value and self._gutter.winfo_ismapped():
+            self._gutter_is_gridded = True
+        elif not value and self._gutter_is_gridded:
             self._gutter.grid_forget()
+            self._gutter_is_gridded = False
+        else:
+            return
 
+        """
         # insert first line number (NB! Without trailing linebreak. See update_gutter)
         self._gutter.config(state="normal")
         self._gutter.delete("1.0", "end")
         for content, tags in self.compute_gutter_line(self._first_line_number):
             self._gutter.insert("end", content, ("content",) + tags)
         self._gutter.config(state="disabled")
-
-        self.update_gutter()
+        """
+        self.update_gutter(True)
 
     def set_line_length_margin(self, value):
         self._recommended_line_length = value
@@ -918,10 +925,21 @@ class TextFrame(ttk.Frame):
             if text_line_count > gutter_line_count:
                 delta = text_line_count - gutter_line_count
                 start = gutter_line_count + self._first_line_number - 1
-                for i in range(start, start + delta):
-                    self._gutter.insert("end-1c", "\n", ("content",))
-                    for content, tags in self.compute_gutter_line(i):
-                        self._gutter.insert("end-1c", content, ("content",) + tags)
+
+                if not clean and text_line_count > 10 and gutter_line_count < 3:
+                    # probably initial load, do bulk insert
+                    parts = []
+                    for i in range(start, start + delta):
+                        parts.append("\n")
+                        for content, tags in self.compute_gutter_line(i, plain=True):
+                            parts.append(content)
+
+                    self._gutter.insert("end-1c", "".join(parts), ("content",) + tags)
+                else:
+                    for i in range(start, start + delta):
+                        self._gutter.insert("end-1c", "\n", ("content",))
+                        for content, tags in self.compute_gutter_line(i):
+                            self._gutter.insert("end-1c", content, ("content",) + tags)
             else:
                 self._gutter.delete(line2index(text_line_count) + "-1c", "end-1c")
 
@@ -932,7 +950,7 @@ class TextFrame(ttk.Frame):
         first, _ = self.text.yview()
         self._gutter.yview_moveto(first)
         self._update_gutter_active_line()
-        
+
         if text_line_count > 9998:
             self._gutter.configure(width=7)
         elif text_line_count > 998:
@@ -943,8 +961,8 @@ class TextFrame(ttk.Frame):
         insert = self.text.index("insert")
         self._gutter.tag_add("active", insert + " linestart", insert + " lineend")
 
-    def compute_gutter_line(self, lineno):
-        yield str(lineno), ("line_number",)
+    def compute_gutter_line(self, lineno, plain=False):
+        yield str(lineno), ()
 
     def update_margin_line(self):
         if self._recommended_line_length == 0:
@@ -989,7 +1007,7 @@ class TextFrame(ttk.Frame):
                 self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
             exception("on_gutter_click")
-    
+
     def on_gutter_double_click(self, event=None):
         try:
             self._gutter.mark_unset("gutter_selection_start")

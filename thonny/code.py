@@ -29,7 +29,6 @@ REMOTE_PATH_MARKER = " :: "
 
 class Editor(ttk.Frame):
     def __init__(self, master):
-
         ttk.Frame.__init__(self, master)
         assert isinstance(master, EditorNotebook)
 
@@ -893,7 +892,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         editor = Editor(self)
         editor._load_file(filename)
         self.add(editor, text=editor.get_title())
-
         return editor
 
     def get_editor(self, filename, open_when_necessary=False):

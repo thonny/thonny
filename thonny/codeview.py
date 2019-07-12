@@ -184,6 +184,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     """Provides opportunities for monkey-patching by plugins"""
 
     def __init__(self, master=None, cnf={}, **kw):
+
         if "replace_tabs" not in kw:
             kw["replace_tabs"] = True
 
@@ -216,7 +217,6 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
 
 class CodeView(tktextext.TextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
-
         tktextext.TextFrame.__init__(
             self,
             master,
@@ -292,17 +292,29 @@ class CodeView(tktextext.TextFrame):
 
         self.update_gutter(clean=True)
 
-    def compute_gutter_line(self, lineno):
-        visual_line_number = self._first_line_number + lineno - 1
-        linestart = str(visual_line_number) + ".0"
+    def _clean_selection(self):
+        self.text.tag_remove("sel", "1.0", "end")
+        self._gutter.tag_remove("sel", "1.0", "end")
 
-        yield from super().compute_gutter_line(lineno)
-        yield " ", ("spacer",)
+    def _text_changed(self, event):
+        self.update_gutter(
+            clean=self.text._last_event_changed_line_count
+            and self.text.tag_ranges("breakpoint_line")
+        )
 
-        if self.text.tag_nextrange("breakpoint_line", linestart, linestart + " lineend"):
-            yield BREAKPOINT_SYMBOL, ("breakpoint",)
+    def compute_gutter_line(self, lineno, plain=False):
+        if plain:
+            yield str(lineno) + " ", ()
         else:
-            yield " ", ()
+            visual_line_number = self._first_line_number + lineno - 1
+            linestart = str(visual_line_number) + ".0"
+
+            yield str(lineno), ()
+
+            if self.text.tag_nextrange("breakpoint_line", linestart, linestart + " lineend"):
+                yield BREAKPOINT_SYMBOL, ("breakpoint",)
+            else:
+                yield " ", ()
 
     def select_range(self, text_range):
         self.text.tag_remove("sel", "1.0", tk.END)

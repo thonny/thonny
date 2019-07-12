@@ -697,6 +697,28 @@ def set_zoomed(toplevel, value):
 
 
 class EnhancedTextWithLogging(tktextext.EnhancedText):
+    def __init__(
+        self,
+        master=None,
+        style="Text",
+        tag_current_line=False,
+        indent_with_tabs=False,
+        replace_tabs=False,
+        cnf={},
+        **kw
+    ):
+        super().__init__(
+            master=master,
+            style=style,
+            tag_current_line=tag_current_line,
+            indent_with_tabs=indent_with_tabs,
+            replace_tabs=replace_tabs,
+            cnf=cnf,
+            **kw
+        )
+
+        self._last_event_changed_line_count = False
+
     def direct_insert(self, index, chars, tags=None, **kw):
         try:
             # try removing line numbers
@@ -704,8 +726,10 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             # TODO: does it occur when opening a file with line numbers in it?
             # if self._propose_remove_line_numbers and isinstance(chars, str):
             #    chars = try_remove_linenumbers(chars, self)
+
             concrete_index = self.index(index)
             line_before = self.get(concrete_index + " linestart", concrete_index + " lineend")
+            self._last_event_changed_line_count = "\n" in chars
             return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
         finally:
             line_after = self.get(concrete_index + " linestart", concrete_index + " lineend")
@@ -732,6 +756,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
                 concrete_index2 = None
 
             chars = self.get(index1, index2)
+            self._last_event_changed_line_count = "\n" in chars
             line_before = self.get(
                 concrete_index1 + " linestart",
                 (concrete_index1 if concrete_index2 is None else concrete_index2) + " lineend",
