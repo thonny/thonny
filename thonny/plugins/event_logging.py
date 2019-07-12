@@ -196,7 +196,7 @@ def load_plugin() -> None:
         get_workbench().add_command(
             "export_usage_logs", "tools", _("Export usage logs..."), export, group=110
         )
-        
+
         filename = _generate_timestamp_file_name("txt")
         # create logger
         EventLogger(filename)
