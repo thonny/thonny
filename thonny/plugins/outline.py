@@ -62,7 +62,7 @@ class OutlineView(ttk.Frame):
     def _update_frame_contents(self, event=None):
         if not self.winfo_ismapped():
             return
-        print("upd")
+
         self._clear_tree()
 
         editor = get_workbench().get_editor_notebook().get_current_editor()
