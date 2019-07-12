@@ -786,9 +786,11 @@ class TextFrame(ttk.Frame):
             undo=False,
             wrap="none",
         )
-        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click)
-        self._gutter.bind("<Button-1>", self.on_gutter_click)
-        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion)
+        self._gutter_is_gridded = False
+        self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True), 
+        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click, True)
+        self._gutter.bind("<Button-1>", self.on_gutter_click, True)
+        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion, True)
         self._gutter["yscrollcommand"] = self._gutter_scroll
 
         # need tags for justifying and rmargin
@@ -987,9 +989,19 @@ class TextFrame(ttk.Frame):
                 self.text.tag_remove("sel", "1.0", "end")
         except tk.TclError:
             exception("on_gutter_click")
+    
+    def on_gutter_double_click(self, event=None):
+        try:
+            self._gutter.mark_unset("gutter_selection_start")
+            self.text.tag_remove("sel", "1.0", "end")
+            self._gutter.tag_remove("sel", "1.0", "end")
+        except tk.TclError:
+            exception("on_gutter_click")
 
     def on_gutter_motion(self, event=None):
         try:
+            if "gutter_selection_start" not in self._gutter.mark_names():
+                return
             linepos = int(self._gutter.index("@%s,%s" % (event.x, event.y)).split(".")[0])
             gutter_selection_start = int(self._gutter.index("gutter_selection_start").split(".")[0])
             self.text.select_lines(
