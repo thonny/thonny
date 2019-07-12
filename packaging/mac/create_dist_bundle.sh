@@ -39,11 +39,11 @@ rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
 # clean unnecessary stuff ###################################################
 
 # delete all *.h files except one
-mv $PYTHON_CURRENT/include/python3.7m/pyconfig.h $SCRIPT_DIR # pip needs this
-find $FRAMEWORKS -name '*.h' -delete
-mv $SCRIPT_DIR/pyconfig.h $PYTHON_CURRENT/include/python3.7m # put it back
+#mv $PYTHON_CURRENT/include/python3.7m/pyconfig.h $SCRIPT_DIR # pip needs this
+#find $FRAMEWORKS -name '*.h' -delete
+#mv $SCRIPT_DIR/pyconfig.h $PYTHON_CURRENT/include/python3.7m # put it back
 
-find $FRAMEWORKS -name '*.a' -delete
+#find $FRAMEWORKS -name '*.a' -delete
 
 rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Tcl_debug
 rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug

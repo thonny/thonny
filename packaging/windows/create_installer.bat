@@ -31,13 +31,14 @@ del %BUILDDIR%\README.txt>NUL
 del %BUILDDIR%\NEWS.txt>NUL
 
 del /S "%BUILDDIR%\*.pyc">NUL
-del /S "%BUILDDIR%\*.lib">NUL
+@rem del /S "%BUILDDIR%\*.lib">NUL
+del /S "%BUILDDIR%\tcl\*.lib">NUL
 del /S "%BUILDDIR%\*.a">NUL
 del /S "%BUILDDIR%\*.chm">NUL
 
 rmdir %BUILDDIR%\Doc /S /Q>NUL
-rmdir %BUILDDIR%\include /S /Q>NUL
-rmdir %BUILDDIR%\libs /S /Q>NUL
+@rem rmdir %BUILDDIR%\include /S /Q>NUL
+@rem rmdir %BUILDDIR%\libs /S /Q>NUL
 rmdir %BUILDDIR%\Tools /S /Q>NUL
 del "%BUILDDIR%\Scripts\*" /Q>NUL
 

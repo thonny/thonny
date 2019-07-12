@@ -47,7 +47,7 @@ rm -rf $TARGET_DIR/share
 rm -rf $TARGET_DIR/man
 rm -rf $TARGET_DIR/openssl
 
-find $TARGET_DIR -type f -name "*.a" -delete
+#find $TARGET_DIR -type f -name "*.a" -delete
 find $TARGET_DIR -type f -name "*.pyo" -delete
 find $TARGET_DIR -type f -name "*.pyc" -delete
 find $TARGET_DIR -type d -name "__pycache__" -delete
@@ -67,11 +67,11 @@ rm -rf $TARGET_DIR/lib/python3.7/site-packages/mypy/test
 
 
 # clear most of the include folder ##################################################
-rm -rf $TARGET_DIR/include/lzma
-rm -rf $TARGET_DIR/include/*.h
-mv $TARGET_DIR/include/python3.7m/pyconfig.h $SCRIPT_DIR # pip needs this
-rm -rf $TARGET_DIR/include/python3.7m/*
-mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.7m # put it back
+#rm -rf $TARGET_DIR/include/lzma
+#rm -rf $TARGET_DIR/include/*.h
+#mv $TARGET_DIR/include/python3.7m/pyconfig.h $SCRIPT_DIR # pip needs this
+#rm -rf $TARGET_DIR/include/python3.7m/*
+#mv $SCRIPT_DIR/pyconfig.h $TARGET_DIR/include/python3.7m # put it back
 
 
 
