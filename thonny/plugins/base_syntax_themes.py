@@ -27,7 +27,6 @@ def default_light() -> SyntaxThemeSettings:
         "open_string3": {
             "foreground": string_fg,
             "background": open_string_bg,
-            "background": None,
             "font": "EditorFont",
         },
         "keyword": {"foreground": "#7f0055", "font": "BoldEditorFont"},
@@ -147,9 +146,13 @@ def default_dark() -> SyntaxThemeSettings:
         "sel": {"foreground": "#eeeeee", "background": "#6E6E6E"},
         "definition": {"foreground": default_fg},
         "string": {"foreground": string_fg},
-        "string3": {"foreground": string_fg},
+        "string3": {"foreground": string_fg, "background": None, "font": "EditorFont"},
         "open_string": {"foreground": string_fg, "background": open_string_bg},
-        "open_string3": {"foreground": string_fg, "background": open_string_bg},
+        "open_string3": {
+            "foreground": string_fg,
+            "background": open_string_bg,
+            "font": "EditorFont",
+        },
         "builtin": {"foreground": "#A9B1C9"},
         "keyword": {"foreground": "#A9B1C9", "font": "BoldEditorFont"},
         "number": {"foreground": "#FFCABF"},

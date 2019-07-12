@@ -35,8 +35,8 @@ class SyntaxText(EnhancedText):
         for tag_name in syntax_options:
             opts = syntax_options[tag_name]
 
-            if tag_name in ["string3", "open_string3"]:
-                # They need explicit background to override uniline tags
+            if tag_name == "string3":
+                # Needs explicit background to override uniline tags
                 opts["background"] = background
 
             if tag_name == "TEXT":
