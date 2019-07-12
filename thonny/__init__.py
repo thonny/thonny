@@ -87,9 +87,9 @@ CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
 
 
 def _check_welcome():
-    from thonny import workbench
+    from thonny import workbench, misc_utils
 
-    if not os.path.exists(CONFIGURATION_FILE_NAME):
+    if not os.path.exists(CONFIGURATION_FILE_NAME) and not misc_utils.running_on_rpi():
         from thonny.first_run import FirstRunWindow
         from thonny.config import ConfigurationManager
 
