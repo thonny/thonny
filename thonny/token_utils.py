@@ -32,6 +32,7 @@ DQ3STRING = STRINGPREFIX + r'"""[^"\\]*((\\.|"(?!""))[^"\\]*)*(""")?'
 
 SQ3DELIMITER = STRINGPREFIX + "'''"
 DQ3DELIMITER = STRINGPREFIX + '"""'
+COMMENT_WITH_Q3DELIMITER = matches_any("q3comment", [r"#[^\n]*('''|\"\"\")[^\n]*"])
 
 STRING_OPEN = matches_any("open_string", [SQSTRING_OPEN, DQSTRING_OPEN])
 STRING_CLOSED = matches_any("string", [SQSTRING_CLOSED, DQSTRING_CLOSED])

@@ -29,6 +29,8 @@ import sys
 from _tkinter import TclError
 import webbrowser
 
+PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
+
 
 class CommonDialog(tk.Toplevel):
     def __init__(self, master=None, cnf={}, **kw):
@@ -703,15 +705,21 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             # if self._propose_remove_line_numbers and isinstance(chars, str):
             #    chars = try_remove_linenumbers(chars, self)
             concrete_index = self.index(index)
+            line_before = self.get(concrete_index + " linestart", concrete_index + " lineend")
             return tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
         finally:
+            line_after = self.get(concrete_index + " linestart", concrete_index + " lineend")
+            trivial_for_coloring, trivial_for_parens = self._is_trivial_edit(
+                chars, line_before, line_after
+            )
             get_workbench().event_generate(
                 "TextInsert",
                 index=concrete_index,
                 text=chars,
                 tags=tags,
                 text_widget=self,
-                is_trivial_edit=self._is_trivial_edit(chars),
+                trivial_for_coloring=trivial_for_coloring,
+                trivial_for_parens=trivial_for_parens,
             )
 
     def direct_delete(self, index1, index2=None, **kw):
@@ -724,22 +732,65 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
                 concrete_index2 = None
 
             chars = self.get(index1, index2)
+            line_before = self.get(
+                concrete_index1 + " linestart",
+                (concrete_index1 if concrete_index2 is None else concrete_index2) + " lineend",
+            )
             return tktextext.EnhancedText.direct_delete(self, index1, index2=index2, **kw)
         finally:
+            line_after = self.get(
+                concrete_index1 + " linestart",
+                (concrete_index1 if concrete_index2 is None else concrete_index2) + " lineend",
+            )
+            trivial_for_coloring, trivial_for_parens = self._is_trivial_edit(
+                chars, line_before, line_after
+            )
             get_workbench().event_generate(
                 "TextDelete",
                 index1=concrete_index1,
                 index2=concrete_index2,
                 text_widget=self,
-                is_trivial_edit=self._is_trivial_edit(chars),
+                trivial_for_coloring=trivial_for_coloring,
+                trivial_for_parens=trivial_for_parens,
             )
 
-    def _is_trivial_edit(self, text):
-        # used for optimizing coloring or parenhighlighting
-        if len(text) > 1:
-            return False
+    def _is_trivial_edit(self, chars, line_before, line_after):
+        # line is taken after edit for insertion and before edit for deletion
+        if chars == "\r\n":
+            # check it doesn't break a triple-quote
+            trivial_for_coloring = line_before.count("'''") == line_after.count(
+                "'''"
+            ) and line_before.count('"""') == line_after.count('"""')
+            trivial_for_parens = trivial_for_coloring
+        elif len(chars) > 1:
+            # paste, cut, load or something like this
+            trivial_for_coloring = False
+            trivial_for_parens = False
+        elif chars == "#":
+            trivial_for_coloring = "''''" not in line_before and '"""' not in line_before
+            trivial_for_parens = trivial_for_coloring and not re.search(PARENS_REGEX, line_before)
+        elif chars in "()[]{}":
+            trivial_for_coloring = line_before.count("'''") == line_after.count(
+                "'''"
+            ) and line_before.count('"""') == line_after.count('"""')
+            trivial_for_parens = False
+        elif chars == "'":
+            trivial_for_coloring = "'''" not in line_before and "'''" not in line_after
+            trivial_for_parens = False  # can put parens into open string
+        elif chars == '"':
+            trivial_for_coloring = '"""' not in line_before and '"""' not in line_after
+            trivial_for_parens = False  # can put parens into open string
+        elif chars == "\\":
+            # can shorten closing quote
+            trivial_for_coloring = '"""' not in line_before and '"""' not in line_after
+            trivial_for_parens = False
         else:
-            return text not in "\"'#(){}[]"
+            trivial_for_coloring = line_before.count("'''") == line_after.count(
+                "'''"
+            ) and line_before.count('"""') == line_after.count('"""')
+            trivial_for_parens = trivial_for_coloring
+
+        return trivial_for_coloring, trivial_for_parens
 
 
 class SafeScrollbar(ttk.Scrollbar):

@@ -36,6 +36,7 @@ class SyntaxColorer:
         from thonny.token_utils import (
             BUILTIN,
             COMMENT,
+            COMMENT_WITH_Q3DELIMITER,
             MAGIC_COMMAND,
             STRING3,
             STRING3_DELIMITER,
@@ -61,21 +62,19 @@ class SyntaxColorer:
             + STRING_CLOSED
             + "|"
             + STRING_OPEN,
-            re.S,
-        )  # @UndefinedVariable
+            re.S,  # @UndefinedVariable
+        )
 
+        # need to notice triple-quotes inside comments and magic commands
         self.multiline_regex = re.compile(
-            STRING3 + "|" + COMMENT + "|" + MAGIC_COMMAND
-            # + "|" + STRING_CLOSED # need to include single line strings otherwise '"""' ... '""""' will give wrong result
-            + "|"
-            + STRING_OPEN,  # (seems that it works faster and also correctly with only open strings)
-            re.S,
-        )  # @UndefinedVariable
+            "(" + STRING3 + ")|" + COMMENT_WITH_Q3DELIMITER + "|" + MAGIC_COMMAND,
+            re.S,  # @UndefinedVariable
+        )
 
         self.id_regex = re.compile(r"\s+(\w+)", re.S)  # @UndefinedVariable
 
     def _config_tags(self):
-        self.uniline_tagdefs = {
+        self.uniline_tags = {
             "comment",
             "magic",
             "string",
@@ -85,7 +84,7 @@ class SyntaxColorer:
             "builtin",
             "definition",
         }
-        self.multiline_tagdefs = {"string3", "open_string3"}
+        self.multiline_tags = {"string3", "open_string3"}
         self._raise_tags()
 
     def _raise_tags(self):
@@ -112,7 +111,7 @@ class SyntaxColorer:
                 end_row = start_row + event.text.count("\n")
                 start_index = "%d.%d" % (start_row, 0)
                 end_index = "%d.%d" % (end_row + 1, 0)
-                if not event.is_trivial_edit:
+                if not event.trivial_for_coloring:
                     self._multiline_dirty = True
 
             elif event.sequence == "TextDelete":
@@ -120,7 +119,7 @@ class SyntaxColorer:
                 start_row = int(index.split(".")[0])
                 start_index = "%d.%d" % (start_row, 0)
                 end_index = "%d.%d" % (start_row + 1, 0)
-                if not event.is_trivial_edit:
+                if not event.trivial_for_coloring:
                     self._multiline_dirty = True
 
         self.text.tag_add(TODO, start_index, end_index)
@@ -145,7 +144,7 @@ class SyntaxColorer:
         chars = self.text.get(start, end)
 
         # clear old tags
-        for tag in self.uniline_tagdefs:
+        for tag in self.uniline_tags:
             self.text.tag_remove(tag, start, end)
 
         if not self._use_coloring:
@@ -153,7 +152,7 @@ class SyntaxColorer:
 
         for match in self.uniline_regex.finditer(chars):
             for token_type, token_text in match.groupdict().items():
-                if token_text and token_type in self.uniline_tagdefs:
+                if token_text and token_type in self.uniline_tags:
                     token_text = token_text.strip()
                     match_start, match_end = match.span(token_type)
 
@@ -177,42 +176,35 @@ class SyntaxColorer:
     def _update_multiline_tokens(self, start, end):
         chars = self.text.get(start, end)
         # clear old tags
-        for tag in self.multiline_tagdefs:
+        for tag in self.multiline_tags:
             self.text.tag_remove(tag, start, end)
 
         if not self._use_coloring:
             return
 
-        interesting_token_types = list(self.multiline_tagdefs) + ["string3"]
         for match in self.multiline_regex.finditer(chars):
-            for token_type, token_text in match.groupdict().items():
-                if token_text and token_type in interesting_token_types:
-                    token_text = token_text.strip()
-                    match_start, match_end = match.span(token_type)
-                    if token_type == "string3":
-                        if (
-                            token_text.startswith('"""')
-                            and not token_text.endswith('"""')
-                            or token_text.startswith("'''")
-                            and not token_text.endswith("'''")
-                            or len(token_text) == 3
-                        ):
-                            str_end = int(float(self.text.index(start + "+%dc" % match_end)))
-                            file_end = int(float(self.text.index("end")))
+            token_text = match.group(1)
+            if token_text is None:
+                # not string3
+                continue
 
-                            if str_end == file_end:
-                                token_type = "open_string3"
-                            else:
-                                token_type = None
-                        elif len(token_text) >= 4 and token_text[-4] == "\\":
-                            token_type = "open_string3"
-                        else:
-                            token_type = "string3"
+            match_start, match_end = match.span()
+            if (
+                token_text.startswith('"""')
+                and not token_text.endswith('"""')
+                or token_text.startswith("'''")
+                and not token_text.endswith("'''")
+                or len(token_text) == 3
+            ):
+                token_type = "open_string3"
+            elif len(token_text) >= 4 and token_text[-4] == "\\":
+                token_type = "open_string3"
+            else:
+                token_type = "string3"
 
-                    token_start = start + "+%dc" % match_start
-                    token_end = start + "+%dc" % match_end
-
-                    self.text.tag_add(token_type, token_start, token_end)
+            token_start = start + "+%dc" % match_start
+            token_end = start + "+%dc" % match_end
+            self.text.tag_add(token_type, token_start, token_end)
 
         self._multiline_dirty = False
         self._raise_tags()
