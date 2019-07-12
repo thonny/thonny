@@ -176,6 +176,9 @@ def _update_highlighting(event, text_changed, need_update):
 
     if text_changed:
         text.paren_matcher.invalidate_token_cache()
+    
+    if text.has_selection():
+        return
 
     if need_update:
         text.paren_matcher.schedule_update()
