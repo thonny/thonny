@@ -871,6 +871,7 @@ class TextFrame(ttk.Frame):
     def _vertical_scrollbar_update(self, *args):
         self._vbar.set(*args)
         self._gutter.yview(tk.MOVETO, args[0])
+        self.text.event_generate("<<VerticalScroll>>")
 
     def _gutter_scroll(self, *args):
         # FIXME: this doesn't work properly
@@ -887,6 +888,7 @@ class TextFrame(ttk.Frame):
     def _vertical_scroll(self, *args):
         self.text.yview(*args)
         self._gutter.yview(*args)
+        self.text.event_generate("<<VerticalScroll>>")
 
     def _horizontal_scroll(self, *args):
         self.text.xview(*args)

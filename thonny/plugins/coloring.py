@@ -272,16 +272,6 @@ class ShellSyntaxColorer(SyntaxColorer):
             self._update_multiline_tokens(start_index, end_index)
 
 
-def patched_vertical_scrollbar_update(self, *args):
-    self._original_vertical_scrollbar_update(*args)
-    update_coloring_on_text(self.text)
-
-
-def patched_vertical_scroll(self, *args):
-    self._original_vertical_scroll(*args)
-    update_coloring_on_text(self.text)
-
-
 def update_coloring_on_event(event):
     if hasattr(event, "text_widget"):
         text = event.text_widget
@@ -309,18 +299,11 @@ def update_coloring_on_text(text, event=None):
     text.syntax_colorer.schedule_update()
 
 
-def patch_codeview():
-    CodeView._original_vertical_scrollbar_update = CodeView._vertical_scrollbar_update
-    CodeView._vertical_scrollbar_update = patched_vertical_scrollbar_update
-    CodeView._original_vertical_scroll = CodeView._vertical_scroll
-    CodeView._vertical_scroll = patched_vertical_scroll
-
-
 def load_plugin() -> None:
-    patch_codeview()
     wb = get_workbench()
 
     wb.set_default("view.syntax_coloring", True)
     wb.bind("TextInsert", update_coloring_on_event, True)
     wb.bind("TextDelete", update_coloring_on_event, True)
+    wb.bind_class("CodeViewText", "<<VerticalScroll>>", update_coloring_on_event, True)
     wb.bind("<<UpdateAppearance>>", update_coloring_on_event, True)
