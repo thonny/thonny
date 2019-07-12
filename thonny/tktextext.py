@@ -930,6 +930,11 @@ class TextFrame(ttk.Frame):
         first, _ = self.text.yview()
         self._gutter.yview_moveto(first)
         self._update_gutter_active_line()
+        
+        if text_line_count > 9998:
+            self._gutter.configure(width=7)
+        elif text_line_count > 998:
+            self._gutter.configure(width=6)
 
     def _update_gutter_active_line(self):
         self._gutter.tag_remove("active", "1.0", "end")
