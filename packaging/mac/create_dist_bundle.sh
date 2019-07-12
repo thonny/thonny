@@ -23,9 +23,9 @@ FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
 
 # install deps #####################################################
-$PYTHON_CURRENT/bin/python3.7 -m pip install jedi==0.13.2
-$PYTHON_CURRENT/bin/python3.7 -m pip install mypy==0.660
-$PYTHON_CURRENT/bin/python3.7 -m pip install pylint==2.2.2
+$PYTHON_CURRENT/bin/python3.7 -m pip install jedi==0.14.*
+$PYTHON_CURRENT/bin/python3.7 -m pip install mypy==0.720
+$PYTHON_CURRENT/bin/python3.7 -m pip install pylint==2.3.*
 $PYTHON_CURRENT/bin/python3.7 -m pip install docutils==0.14
 $PYTHON_CURRENT/bin/python3.7 -m pip install pyserial==3.4
 
@@ -45,11 +45,11 @@ mv $SCRIPT_DIR/pyconfig.h $PYTHON_CURRENT/include/python3.7m # put it back
 
 find $FRAMEWORKS -name '*.a' -delete
 
-rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Tcl_debug
-rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Tk_debug
-rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Resources/Scripts/demos
-rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.5/Resources/Documentation
-rm -rf $FRAMEWORKS/Tk.framework/Versions/8.5/Resources/Documentation
+rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Tcl_debug
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Tk_debug
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Resources/Scripts/demos
+rm -rf $FRAMEWORKS/Tcl.framework/Versions/8.6/Resources/Documentation
+rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Resources/Documentation
 
 find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete

@@ -15,28 +15,14 @@ copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
 
-@rem astroid (mypy 0.701 can't use typed_ast 1.4)
-%BUILDDIR%\python -m pip install typed_ast==1.3.5
-%BUILDDIR%\python -m pip install wrapt==1.11.1
-%BUILDDIR%\python -m pip install six==1.12.0
-%BUILDDIR%\python -m pip install astroid==2.2.5
-
-%BUILDDIR%\python -m pip install parso==0.4.0
-%BUILDDIR%\python -m pip install jedi==0.13.3
-
-%BUILDDIR%\python -m pip install mypy_extensions==0.4.1
-%BUILDDIR%\python -m pip install mypy==0.701
-
-%BUILDDIR%\python -m pip install pylint==2.3.1
-
+%BUILDDIR%\python -m pip install jedi==0.14.*
+%BUILDDIR%\python -m pip install mypy==0.720
+%BUILDDIR%\python -m pip install pylint==2.3.*
 %BUILDDIR%\python -m pip install docutils==0.14
 %BUILDDIR%\python -m pip install pyserial==3.4
 
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
-
-@rem plug-ins
-%BUILDDIR%\python -m pip install thonny-pi==1.4
 
 @echo ............... CLEANING PYTHON ............................
 @rem delete following 3 files to avoid confusion (user may think they're Thonny license etc.)
