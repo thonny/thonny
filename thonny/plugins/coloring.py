@@ -17,7 +17,7 @@ Regexes are adapted from idlelib
 import re
 
 from thonny import get_workbench
-from thonny.codeview import CodeViewText, CodeView
+from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
 
 TODO = "COLOR_TODO"
@@ -90,6 +90,9 @@ class SyntaxColorer:
     def _raise_tags(self):
         self.text.tag_raise("string3")
         self.text.tag_raise("open_string3")
+        # yes, unclosed_expression is another plugin's issue,
+        # but it must be higher than *string3
+        self.text.tag_raise("unclosed_expression")
         self.text.tag_raise("sel")
         """
         tags = self.text.tag_names()
