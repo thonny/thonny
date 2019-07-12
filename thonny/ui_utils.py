@@ -36,7 +36,12 @@ class CommonDialog(tk.Toplevel):
         self.bind("<FocusIn>", self._unlock_on_focus_in, True)
 
     def _unlock_on_focus_in(self, event):
-        self.deiconify()
+        if not self.winfo_ismapped():
+            print("unlocking")
+            focussed_widget = self.focus_get()
+            self.deiconify()
+            if focussed_widget:
+                focussed_widget.focus_set()
 
 
 class CustomMenubar(ttk.Frame):
