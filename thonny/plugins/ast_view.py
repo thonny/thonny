@@ -21,6 +21,7 @@ class AstView(ui_utils.TreeFrame):
         self._current_code_view = None
         self.tree.bind("<<TreeviewSelect>>", self._locate_code)
         self.tree.bind("<<Copy>>", self._copy_to_clipboard)
+        self.tree.bind("<Map>", self._update, True)
         get_workbench().get_editor_notebook().bind("<<NotebookTabChanged>>", self._update)
         get_workbench().bind("Save", self._update, True)
         get_workbench().bind("SaveAs", self._update, True)
@@ -42,14 +43,22 @@ class AstView(ui_utils.TreeFrame):
         self._update(None)
 
     def _update(self, event):
+        if not self.winfo_ismapped():
+            return
+
         editor = get_workbench().get_editor_notebook().get_current_editor()
 
         if not editor:
             self._current_code_view = None
             return
 
-        self._current_code_view = editor.get_code_view()
-        self._current_source = self._current_code_view.get_content_as_bytes()
+        new_cw = editor.get_code_view()
+        new_source = new_cw.get_content_as_bytes()
+        if self._current_code_view == new_cw and self._current_source == new_source:
+            return
+
+        self._current_code_view = new_cw
+        self._current_source = new_source
         selection = self._current_code_view.get_selected_range()
 
         self._clear_tree()
