@@ -756,7 +756,8 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
 
     def _is_trivial_edit(self, chars, line_before, line_after):
         # line is taken after edit for insertion and before edit for deletion
-        if chars == "\r\n":
+        if not chars.strip():
+            # linebreaks, including with automatic indent
             # check it doesn't break a triple-quote
             trivial_for_coloring = line_before.count("'''") == line_after.count(
                 "'''"
