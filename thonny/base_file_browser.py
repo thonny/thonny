@@ -593,7 +593,7 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
-    def __init__(self, master, show_hidden_files=False, show_expand_buttons=False):
+    def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
         super().__init__(
             master, show_hidden_files=show_hidden_files, show_expand_buttons=show_expand_buttons
         )
