@@ -115,6 +115,8 @@ def launch():
     set_dpi_aware()
     gettext.install("thonny", "locale")
 
+    _prepare_thonny_user_dir()
+
     try:
         runpy.run_module("thonny.customize", run_name="__main__")
     except ImportError:
