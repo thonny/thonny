@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.2.0b3 (2019-07-13)
+====================
+* FIXED #803: %cd gives error on MP/CP backend
+* FIXED #804: Changing directories does not show in FilesView for MP/CP
+* FIXED #805: Thonny user dir was not created at startup
+
 3.2.0b2 (2019-07-13)
 ====================
 * NEW: Former thonny-pi plug-in (containing Raspberry Pi theme) is now part of main Thonny package
