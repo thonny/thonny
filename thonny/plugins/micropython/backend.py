@@ -560,7 +560,7 @@ class MicroPythonBackend:
                 raise UserError("This device doesn't have directories")
 
             path = cmd.args[0]
-            self._execute("import os as __thonny_os; __module_os.chdir(%r)" % path)
+            self._execute("import os as __module_os; __module_os.chdir(%r)" % path)
             return {}
         else:
             raise UserError("%cd takes one parameter")
