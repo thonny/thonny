@@ -561,6 +561,7 @@ class MicroPythonBackend:
 
             path = cmd.args[0]
             self._execute("import os as __module_os; __module_os.chdir(%r)" % path)
+            self._cwd = self._fetch_cwd()
             return {}
         else:
             raise UserError("%cd takes one parameter")
