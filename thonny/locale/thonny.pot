@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-07-14 19:03+0300\n"
+"POT-Creation-Date: 2019-07-14 19:18+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,31 +21,31 @@ msgstr ""
 msgid "Assistant"
 msgstr ""
 
-#: thonny/base_file_browser.py:21
+#: thonny/base_file_browser.py:29
 msgid "This computer"
 msgstr ""
 
-#: thonny/base_file_browser.py:498
+#: thonny/base_file_browser.py:500
 msgid "Refresh"
 msgstr ""
 
-#: thonny/base_file_browser.py:504
+#: thonny/base_file_browser.py:506
 msgid "Focus into"
 msgstr ""
 
-#: thonny/base_file_browser.py:742
+#: thonny/base_file_browser.py:744
 msgid "Error"
 msgstr ""
 
-#: thonny/base_file_browser.py:742
+#: thonny/base_file_browser.py:744
 msgid "You need to select a file!"
 msgstr ""
 
-#: thonny/base_file_browser.py:746
+#: thonny/base_file_browser.py:748
 msgid "Overwrite?"
 msgstr ""
 
-#: thonny/base_file_browser.py:746
+#: thonny/base_file_browser.py:748
 #, python-format
 msgid "Do you want to overwrite '%s' ?"
 msgstr ""
@@ -300,10 +300,6 @@ msgstr ""
 msgid "View"
 msgstr ""
 
-#: thonny/workbench.py:354
-msgid "Device"
-msgstr ""
-
 #: thonny/workbench.py:355
 msgid "Tools"
 msgstr ""
@@ -545,15 +541,23 @@ msgstr ""
 msgid "Run selection or current line"
 msgstr ""
 
-#: thonny/plugins/commenting.py:111
+#: thonny/plugins/commenting_indenting.py:121
+msgid "Indent selected lines"
+msgstr ""
+
+#: thonny/plugins/commenting_indenting.py:131
+msgid "Dedent selected lines"
+msgstr ""
+
+#: thonny/plugins/commenting_indenting.py:141
 msgid "Toggle comment"
 msgstr ""
 
-#: thonny/plugins/commenting.py:121
+#: thonny/plugins/commenting_indenting.py:151
 msgid "Comment out"
 msgstr ""
 
-#: thonny/plugins/commenting.py:131
+#: thonny/plugins/commenting_indenting.py:161
 msgid "Uncomment"
 msgstr ""
 

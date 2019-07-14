@@ -102,8 +102,38 @@ def _cmd_uncomment_selection():
     if text is not None:
         _uncomment_selection(text)
 
+def _cmd_indent_selection():
+    text = _get_focused_writable_text()
+    if text is not None:
+        text.indent_region()
+
+def _cmd_dedent_selection():
+    text = _get_focused_writable_text()
+    if text is not None:
+        text.dedent_region()
+
 
 def load_plugin() -> None:
+
+    get_workbench().add_command(
+        "indent",
+        "edit",
+        _("Indent selected lines"),
+        _cmd_indent_selection,
+        tester=_writable_text_is_focused,
+        accelerator="Tab",
+        group=49,
+    )
+
+    get_workbench().add_command(
+        "dedent",
+        "edit",
+        _("Dedent selected lines"),
+        _cmd_dedent_selection,
+        tester=_writable_text_is_focused,
+        accelerator="Shift+Tab",
+        group=49,
+    )
 
     get_workbench().add_command(
         "toggle_comment",
