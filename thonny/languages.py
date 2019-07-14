@@ -11,7 +11,6 @@ LANGUAGES_DICT = {
     "ru_RU": "Русский [BETA]",
     "zh_TW": "繁體中文-TW [BETA]",
     "ja_JP": "日本語  [BETA]",
-    
 }
 
 

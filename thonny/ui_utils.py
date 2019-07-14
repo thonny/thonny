@@ -1692,7 +1692,7 @@ class SubprocessDialog(CommonDialog):
         if long_description is not None:
             self.text.direct_insert("1.0", long_description + "\n\n")
 
-        self.button = ttk.Button(main_frame, text="Cancel", command=self._close)
+        self.button = ttk.Button(main_frame, text=_("Cancel"), command=self._close)
         self.button.grid(row=1, column=0, pady=(0, 15))
 
         main_frame.rowconfigure(0, weight=1)

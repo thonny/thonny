@@ -187,6 +187,7 @@ class PipDialog(CommonDialog):
             self.command_frame,
             text=_("Uninstall"),
             command=lambda: self._perform_action("uninstall"),
+            width=len(_("Uninstall")),
         )
 
         self.uninstall_button.grid(row=0, column=1, sticky="w", padx=(5, 0))
@@ -375,7 +376,9 @@ class PipDialog(CommonDialog):
                 + "\n\n",
             )
 
-            self.info_text.direct_insert("end", _("Install from requirements file\n"), ("caption",))
+            self.info_text.direct_insert(
+                "end", _("Install from requirements file") + "\n", ("caption",)
+            )
             self.info_text.direct_insert("end", _("Click" + " "))
             self.info_text.direct_insert("end", _("here"), ("install_reqs",))
             self.info_text.direct_insert(
@@ -385,7 +388,7 @@ class PipDialog(CommonDialog):
                 + "\n\n",
             )
 
-            self.info_text.direct_insert("end", _("Install from local file\n"), ("caption",))
+            self.info_text.direct_insert("end", _("Install from local file") + "\n", ("caption",))
             self.info_text.direct_insert("end", _("Click") + " ")
             self.info_text.direct_insert("end", _("here"), ("install_file",))
             self.info_text.direct_insert(
@@ -963,9 +966,12 @@ class PluginsPipDialog(PipDialog):
         banner = tk.Label(parent, background=bg)
         banner.grid(row=0, column=0, sticky="nsew")
 
-        banner_msg = _(
-            "This dialog is for managing Thonny plug-ins and their dependencies.\n"
-            + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'\n"
+        banner_msg = (
+            _(
+                "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+                + "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+            )
+            + "\n"
         )
 
         runner = get_runner()

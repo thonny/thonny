@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from thonny import ui_utils, languages, is_portable
 
-STD_MODE_TEXT = "Standard"
+STD_MODE_TEXT = _("Standard")
 RPI_MODE_TEXT = "Raspberry Pi"
 
 
@@ -12,7 +12,9 @@ class FirstRunWindow(tk.Tk):
         super().__init__(className="Thonny")
         ttk.Style().theme_use(ui_utils.get_default_basic_theme())
 
-        self.title("Welcome to Thonny!" + "   [portable]" if is_portable() else "")
+        self.title(
+            _("Welcome to Thonny!") + ("   [" + _("portable") + "]" if is_portable() else "")
+        )
         self.protocol("WM_DELETE_WINDOW", self.destroy)
         self.ok = False
 
@@ -38,13 +40,15 @@ class FirstRunWindow(tk.Tk):
             languages.BASE_LANGUAGE_NAME, self.on_change_language
         )
         self.add_combo(
-            1, "Language:", self.language_variable, list(languages.LANGUAGES_DICT.values())
+            1, _("Language:"), self.language_variable, list(languages.LANGUAGES_DICT.values())
         )
 
         self.mode_variable = tk.StringVar(value=STD_MODE_TEXT)
-        self.add_combo(2, "Initial settings:", self.mode_variable, [STD_MODE_TEXT, RPI_MODE_TEXT])
+        self.add_combo(
+            2, _("Initial settings:"), self.mode_variable, [STD_MODE_TEXT, RPI_MODE_TEXT]
+        )
 
-        ok_button = ttk.Button(self.main_frame, text="Let's go!", command=self.on_ok)
+        ok_button = ttk.Button(self.main_frame, text=_("Let's go!"), command=self.on_ok)
         ok_button.grid(
             row=3, column=3, padx=(0, self.padx), pady=(self.pady * 0.7, self.pady), sticky="se"
         )

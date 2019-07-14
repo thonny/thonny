@@ -27,8 +27,8 @@ class ConfigurationDialog(CommonDialog):
         self._notebook = ttk.Notebook(main_frame)
         self._notebook.grid(row=0, column=0, columnspan=3, sticky=tk.NSEW, padx=10, pady=10)
 
-        self._ok_button = ttk.Button(main_frame, text="OK", command=self._ok, default="active")
-        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self._ok_button = ttk.Button(main_frame, text=_("OK"), command=self._ok, default="active")
+        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
         self._ok_button.grid(row=1, column=1, padx=(0, 11), pady=(0, 10))
         self._cancel_button.grid(row=1, column=2, padx=(0, 11), pady=(0, 10))
 

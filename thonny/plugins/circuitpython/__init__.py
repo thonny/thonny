@@ -44,5 +44,5 @@ class CircuitPythonConfigPage(MicroPythonConfigPage):
 
 def load_plugin():
     add_micropython_backend(
-        "CircuitPython", CircuitPythonProxy, "CircuitPython (generic)", CircuitPythonConfigPage
+        "CircuitPython", CircuitPythonProxy, _("CircuitPython (generic)"), CircuitPythonConfigPage
     )
