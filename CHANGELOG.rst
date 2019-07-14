@@ -2,6 +2,12 @@
 Version history
 ===============
 
+3.2.0b4 (2019-07-14)
+====================
+* FIXED #809: Advertise indent/dedent in Edit menu
+* FIXED: Marked more terms for translation
+* FIXED: Updated Estonian translation
+
 3.2.0b3 (2019-07-13)
 ====================
 * FIXED #803: %cd gives error on MP/CP backend
