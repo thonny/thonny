@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-07-14 18:53+0300\n"
+"POT-Creation-Date: 2019-07-14 19:03+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -102,30 +102,6 @@ msgstr ""
 #: thonny/config_ui.py:31 thonny/plugins/pip_gui.py:1066
 #: thonny/ui_utils.py:1493 thonny/ui_utils.py:1695
 msgid "Cancel"
-msgstr ""
-
-#: thonny/first_run.py:6
-msgid "Standard"
-msgstr ""
-
-#: thonny/first_run.py:16
-msgid "Welcome to Thonny!"
-msgstr ""
-
-#: thonny/first_run.py:16
-msgid "portable"
-msgstr ""
-
-#: thonny/first_run.py:43
-msgid "Language:"
-msgstr ""
-
-#: thonny/first_run.py:48
-msgid "Initial settings:"
-msgstr ""
-
-#: thonny/first_run.py:51
-msgid "Let's go!"
 msgstr ""
 
 #: thonny/running.py:92
