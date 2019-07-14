@@ -162,11 +162,11 @@ class MicroPythonProxy(SubprocessProxy):
 
     def get_node_label(self):
         if "CircuitPython" in self._welcome_text:
-            return "CircuitPython device"
+            return _("CircuitPython device")
         elif "micro:bit" in self._welcome_text.lower():
             return "micro:bit"
         else:
-            return "MicroPython device"
+            return _("MicroPython device")
 
 
 class MicroPythonConfigPage(BackendDetailsConfigPage):
@@ -175,18 +175,25 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
         intro_text = (
-            "Connect your device to the computer and select corresponding port below\n"
-            + '(look for your device name, "USB Serial" or "UART").\n'
-            + "If you can't find it, you may need to install proper USB driver first."
+            _("Connect your device to the computer and select corresponding port below")
+            + "\n"
+            + "("
+            + _('look for your device name, "USB Serial" or "UART"')
+            + ").\n"
+            + _("If you can't find it, you may need to install proper USB driver first.")
         )
         if self.allow_webrepl:
             intro_text = (
-                "Connecting via USB cable:\n"
+                ("Connecting via USB cable:")
+                + "\n"
                 + intro_text
                 + "\n\n"
-                + "Connecting via WebREPL protocol:\n"
-                + "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
-                + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below"
+                + ("Connecting via WebREPL protocol:")
+                + "\n"
+                + (
+                    "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
+                    + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below"
+                )
             )
 
         intro_label = ttk.Label(self, text=intro_text)
@@ -197,7 +204,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
 
-        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else "Port")
+        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else _("Port"))
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
@@ -206,7 +213,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             else p.description + " (" + p.device + ")": p.device
             for p in list_serial_ports()
         }
-        self._ports_by_desc["< Try to detect port automatically >"] = "auto"
+        self._ports_by_desc["< " + _("Try to detect port automatically") + " >"] = "auto"
 
         self._WEBREPL_OPTION_DESC = "< WebREPL >"
         if self.allow_webrepl:
@@ -353,7 +360,7 @@ def load_plugin():
     add_micropython_backend(
         "GenericMicroPython",
         GenericMicroPythonProxy,
-        "MicroPython (generic)",
+        _("MicroPython (generic)"),
         GenericMicroPythonConfigPage,
     )
 

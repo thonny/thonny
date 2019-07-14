@@ -76,7 +76,7 @@ def load_plugin():
     get_workbench().add_command(
         "printcurrent",
         "file",
-        "Print...",
+        _("Print..."),
         print_current_script,
         can_print_current_script,
         default_sequence=select_sequence("<Control-p>", "<Command-p>"),

@@ -18,7 +18,7 @@ from thonny.misc_utils import running_on_windows, start_time, lap_time
 
 _dummy_node_text = "..."
 
-LOCAL_FILES_ROOT_TEXT = "This computer"
+LOCAL_FILES_ROOT_TEXT = _("This computer")
 TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yaml"]
 ROOT_NODE_ID = ""
 
@@ -495,13 +495,13 @@ class BaseFileBrowser(ttk.Frame):
     def refresh_menu(self, selected_path, selected_kind):
         self.menu.delete(0, "end")
 
-        self.menu.add_command(label="Refresh", command=self.refresh_tree)
-        # self.menu.add_command(label="New file", command=self.create_new_file)
+        self.menu.add_command(label=_("Refresh"), command=self.refresh_tree)
+        # self.menu.add_command(label=_("New file"), command=self.create_new_file)
         # self.menu.add_command(
-        #    label="Delete", command=lambda: self.delete_path(selected_path, selected_kind)
+        #    label=_("Delete"), command=lambda: self.delete_path(selected_path, selected_kind)
         # )
         self.menu.add_command(
-            label="Focus into",
+            label=_("Focus into"),
             command=lambda: self.request_focus_into(selected_path),
             state="active" if selected_kind == "dir" else "disabled",
         )
@@ -739,11 +739,11 @@ class BackendFileDialog(CommonDialog):
         if node_id is not None:
             node_kind = tree.set(node_id, "kind")
             if node_kind != "file":
-                messagebox.showerror("Error", "You need to select a file!")
+                messagebox.showerror(_("Error"), _("You need to select a file!"))
                 return
             elif self.kind == "save":
                 if not messagebox.askyesno(
-                    "Overwrite?", "Do you want to overwrite '" + name + "' ?"
+                    _("Overwrite?"), _("Do you want to overwrite '%s' ?") % name
                 ):
                     return
 

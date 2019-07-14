@@ -154,7 +154,7 @@ class Workbench(tk.Tk):
 
         self._init_theming()
         self._init_window()
-        self.add_view(ShellView, "Shell", "s", visible_by_default=True, default_position_key="A")
+        self.add_view(ShellView, _("Shell"), "s", visible_by_default=True, default_position_key="A")
         assistance.init()
         self._runner = Runner()
         self._load_plugins()
@@ -643,7 +643,7 @@ class Workbench(tk.Tk):
                 "font",
                 "tools",
                 _("Change font size"),
-                caption="Zoom",
+                caption=_("Zoom"),
                 handler=self._toggle_font_size,
                 image="zoom",
                 include_in_toolbar=True,
@@ -655,7 +655,7 @@ class Workbench(tk.Tk):
                 _("Exit Thonny"),
                 self._on_close,
                 image="quit",
-                caption="Quit",
+                caption=_("Quit"),
                 include_in_toolbar=True,
                 group=101,
             )

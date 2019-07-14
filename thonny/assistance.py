@@ -959,4 +959,4 @@ def init():
     get_workbench().set_default("assistance.open_assistant_on_errors", True)
     get_workbench().set_default("assistance.open_assistant_on_warnings", False)
     get_workbench().set_default("assistance.disabled_checks", [])
-    get_workbench().add_view(AssistantView, "Assistant", "se", visible_by_default=False)
+    get_workbench().add_view(AssistantView, _("Assistant"), "se", visible_by_default=False)

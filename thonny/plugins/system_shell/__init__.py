@@ -56,7 +56,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "OpenSystemShell",
         "tools",
-        "Open system shell...",
+        _("Open system shell..."),
         _open_system_shell,
         group=80,
         image="terminal",

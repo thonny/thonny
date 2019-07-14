@@ -53,7 +53,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         self._language_combo.grid(row=10, column=1, sticky=tk.W, pady=(10, 0))
 
         # Mode
-        ttk.Label(self, text="UI mode").grid(
+        ttk.Label(self, text=_("UI mode")).grid(
             row=20, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0)
         )
         self.add_combobox(
@@ -66,7 +66,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         )
 
         # scaling
-        self._scaling_label = ttk.Label(self, text="UI scaling factor")
+        self._scaling_label = ttk.Label(self, text=_("UI scaling factor"))
         self._scaling_label.grid(row=30, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
         scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
         self.add_combobox("general.scaling", scalings, row=30, column=1, pady=(10, 0), width=10)
@@ -99,4 +99,4 @@ class GeneralConfigurationPage(ConfigurationPage):
 
 
 def load_plugin() -> None:
-    get_workbench().add_configuration_page("general", "General", GeneralConfigurationPage, 10)
+    get_workbench().add_configuration_page("general", _("General"), GeneralConfigurationPage, 10)

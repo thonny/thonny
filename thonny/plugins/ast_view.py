@@ -206,4 +206,4 @@ def pretty(node, key="/", level=0):
 
 
 def load_plugin() -> None:
-    get_workbench().add_view(AstView, "AST", "s")
+    get_workbench().add_view(AstView, _("Program tree"), "s")

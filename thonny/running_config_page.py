@@ -20,7 +20,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             get_workbench().get_option("CustomInterpreter.path")
         )
 
-        entry_label = ttk.Label(self, text="Which interpreter to use for running programs?")
+        entry_label = ttk.Label(self, text=_("Known interpreters"))
         entry_label.grid(row=0, column=0, columnspan=2, sticky=tk.W)
 
         self._entry = ttk.Combobox(
@@ -33,16 +33,18 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._entry.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW)
         self._entry.state(["!disabled", "readonly"])
 
-        another_label = ttk.Label(self, text="Your interpreter isn't in the list?")
+        another_label = ttk.Label(self, text=_("Your interpreter isn't in the list?"))
         another_label.grid(row=2, column=0, columnspan=2, sticky=tk.W, pady=(10, 0))
 
         ttk.Style().configure("Centered.TButton", justify="center")
         self._select_button = ttk.Button(
             self,
             style="Centered.TButton",
-            text="Locate another "
-            + ("python.exe ..." if running_on_windows() else "python executable ...")
-            + "\nNB! Thonny only supports Python 3.5 and later",
+            text=_("Locate another")
+            + " "
+            + ("python.exe ..." if running_on_windows() else _("python executable") + " ...")
+            + "\n"
+            + _("NB! Thonny only supports Python 3.5 and later"),
             command=self._select_executable,
         )
 
@@ -51,8 +53,11 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         self._venv_button = ttk.Button(
             self,
             style="Centered.TButton",
-            text="Create new virtual environment ...\n"
-            + "(Select existing or create a new empty directory)",
+            text=_("Create new virtual environment")
+            + " ...\n"
+            + "("
+            + _("Select existing or create a new empty directory")
+            + ")",
             command=self._create_venv,
         )
 
@@ -65,7 +70,10 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         # TODO: get dir of current interpreter
         options = {"master": self}
         if running_on_windows():
-            options["filetypes"] = [("Python interpreters", "python.exe"), ("all files", ".*")]
+            options["filetypes"] = [
+                (_("Python interpreters"), "python.exe"),
+                (_("all files"), ".*"),
+            ]
 
         filename = askopenfilename(**options)
 
@@ -78,15 +86,15 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             path = askdirectory(
                 master=self,
                 initialdir=path,
-                title="Select empty directory for new virtual environment",
+                title=_("Select empty directory for new virtual environment"),
             )
             if not path:
                 return
 
             if os.listdir(path):
                 messagebox.showerror(
-                    "Bad directory",
-                    "Selected directory is not empty.\nSelect another or cancel.",
+                    _("Bad directory"),
+                    _("Selected directory is not empty.\nSelect another or cancel."),
                     parent=get_workbench(),
                 )
             else:
@@ -101,7 +109,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
             stderr=subprocess.STDOUT,
             universal_newlines=True,
         )
-        dlg = SubprocessDialog(self, proc, "Creating virtual environment")
+        dlg = SubprocessDialog(self, proc, _("Creating virtual environment"))
         ui_utils.show_dialog(dlg)
 
         if running_on_windows():

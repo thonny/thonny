@@ -532,9 +532,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "new_file",
             "file",
-            "New",
+            _("New"),
             self._cmd_new_file,
-            caption="New",
+            caption=_("New"),
             default_sequence=select_sequence("<Control-n>", "<Command-n>"),
             extra_sequences=["<Control-Greek_nu>"],
             group=10,
@@ -545,9 +545,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "open_file",
             "file",
-            "Open...",
+            _("Open..."),
             self._cmd_open_file,
-            caption="Load",
+            caption=_("Load"),
             default_sequence=select_sequence("<Control-o>", "<Command-o>"),
             extra_sequences=["<Control-Greek_omicron>"],
             group=10,
@@ -556,7 +556,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
-            "recents", "file", "Recent files", group=10, submenu=self._recent_menu
+            "recents", "file", _("Recent files"), group=10, submenu=self._recent_menu
         )
 
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -567,7 +567,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "close_file",
             "file",
-            "Close",
+            _("Close"),
             self._cmd_close_file,
             default_sequence=select_sequence("<Control-w>", "<Command-w>"),
             extra_sequences=["<Control-Greek_finalsmallsigma>"],
@@ -578,7 +578,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "close_files",
             "file",
-            "Close all",
+            _("Close all"),
             self.close_tabs,
             tester=lambda: self.get_current_editor() is not None,
             default_sequence=select_sequence("<Control-W>", "<Command-Alt-w>"),
@@ -588,9 +588,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_file",
             "file",
-            "Save",
+            _("Save"),
             self._cmd_save_file,
-            caption="Save",
+            caption=_("Save"),
             default_sequence=select_sequence("<Control-s>", "<Command-s>"),
             extra_sequences=["<Control-Greek_sigma>"],
             tester=self._cmd_save_file_enabled,
@@ -602,7 +602,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_file_as",
             "file",
-            "Save as...",
+            _("Save as..."),
             self._cmd_save_file_as,
             default_sequence=select_sequence("<Control-Shift-S>", "<Command-Shift-S>"),
             extra_sequences=["<Control-Greek_SIGMA>"],
@@ -613,7 +613,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "save_copy",
             "file",
-            "Save copy...",
+            _("Save copy..."),
             self._cmd_save_copy,
             tester=lambda: self.get_current_editor() is not None,
             group=10,
@@ -622,7 +622,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().add_command(
             "rename_file",
             "file",
-            "Rename...",
+            _("Rename..."),
             self._cmd_rename_file,
             tester=self._cmd_rename_file_enabled,
             group=10,

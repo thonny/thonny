@@ -347,9 +347,9 @@ class ClosableNotebook(ttk.Notebook):
 
     def create_tab_menu(self):
         menu = tk.Menu(self.winfo_toplevel(), tearoff=False, **get_style_configuration("Menu"))
-        menu.add_command(label="Close", command=self._close_tab_from_menu)
-        menu.add_command(label="Close others", command=self._close_other_tabs)
-        menu.add_command(label="Close all", command=self.close_tabs)
+        menu.add_command(label=_("Close"), command=self._close_tab_from_menu)
+        menu.add_command(label=_("Close others"), command=self._close_other_tabs)
+        menu.add_command(label=_("Close all"), command=self.close_tabs)
         return menu
 
     def _letf_btn_press(self, event):
@@ -1479,10 +1479,10 @@ class FileCopyDialog(CommonDialog):
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.title("Copying")
+        self.title(_("Copying"))
 
         if description is None:
-            description = "Copying\n  %s\nto\n  %s" % (source, destination)
+            description = _("Copying\n  %s\nto\n  %s") % (source, destination)
 
         label = ttk.Label(main_frame, text=description)
         label.grid(row=0, column=0, columnspan=2, sticky="nw", padx=15, pady=15)
@@ -1490,7 +1490,7 @@ class FileCopyDialog(CommonDialog):
         self._bar = ttk.Progressbar(main_frame, maximum=os.path.getsize(source), length=200)
         self._bar.grid(row=1, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
 
-        self._cancel_button = ttk.Button(main_frame, text="Cancel", command=self._cancel)
+        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
         self._cancel_button.grid(row=2, column=1, sticky="ne", padx=15, pady=15)
         self._bar.focus_set()
 
@@ -1618,10 +1618,12 @@ class LongTextDialog(CommonDialog):
         self._text.text.direct_insert("1.0", text_content)
         self._text.text.see("1.0")
 
-        copy_button = ttk.Button(main_frame, command=self._copy, text="Copy to clipboard", width=20)
+        copy_button = ttk.Button(
+            main_frame, command=self._copy, text=_("Copy to clipboard"), width=20
+        )
         copy_button.grid(row=2, column=0, sticky="w", padx=20, pady=(0, 20))
 
-        close_button = ttk.Button(main_frame, command=self._close, text="Close")
+        close_button = ttk.Button(main_frame, command=self._close, text=_("Close"))
         close_button.grid(row=2, column=1, sticky="w", padx=20, pady=(0, 20))
 
         main_frame.columnconfigure(0, weight=1)
@@ -1742,7 +1744,7 @@ class SubprocessDialog(CommonDialog):
             if self.returncode == None:
                 self.after(200, poll_output_events)
             else:
-                self.button["text"] = "OK"
+                self.button["text"] = _("OK")
                 self.button.focus_set()
                 if self.returncode != 0:
                     self.text.direct_insert("end", "\n\nReturn code: ", ("stderr",))
@@ -1761,8 +1763,8 @@ class SubprocessDialog(CommonDialog):
     def _close(self, event=None):
         if self._proc.poll() is None:
             if messagebox.askyesno(
-                "Cancel the process?",
-                "The process is still running.\nAre you sure you want to cancel?",
+                _("Cancel the process?"),
+                _("The process is still running.\nAre you sure you want to cancel?"),
                 parent=self,
             ):
                 # try gently first
@@ -2154,13 +2156,13 @@ class TextMenu(MenuEx):
         self.add_extra_items()
 
     def add_basic_items(self):
-        self.add_command(label="Cut", command=self.on_cut, tester=self.can_cut)
-        self.add_command(label="Copy", command=self.on_copy, tester=self.can_copy)
-        self.add_command(label="Paste", command=self.on_paste, tester=self.can_paste)
+        self.add_command(label=_("Cut"), command=self.on_cut, tester=self.can_cut)
+        self.add_command(label=_("Copy"), command=self.on_copy, tester=self.can_copy)
+        self.add_command(label=_("Paste"), command=self.on_paste, tester=self.can_paste)
 
     def add_extra_items(self):
         self.add_separator()
-        self.add_command(label="Select All", command=self.on_select_all)
+        self.add_command(label=_("Select All"), command=self.on_select_all)
 
     def on_cut(self):
         self.text.event_generate("<<Cut>>")

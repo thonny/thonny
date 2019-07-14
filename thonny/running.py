@@ -52,7 +52,7 @@ from thonny.ui_utils import select_sequence
 WINDOWS_EXE = "python.exe"
 OUTPUT_MERGE_THRESHOLD = 1000
 
-RUN_COMMAND_LABEL = ""
+RUN_COMMAND_LABEL = ""  # init later when gettext is ready
 RUN_COMMAND_CAPTION = ""
 EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
@@ -120,7 +120,7 @@ class Runner:
         get_workbench().add_command(
             "run_current_script_in_terminal",
             "run",
-            "Run current script in terminal",
+            _("Run current script in terminal"),
             caption="RunT",
             handler=self._cmd_run_current_script_in_terminal,
             default_sequence="<Control-t>",
@@ -133,8 +133,8 @@ class Runner:
         get_workbench().add_command(
             "restart",
             "run",
-            "Stop/Restart backend",
-            caption="Stop",
+            _("Stop/Restart backend"),
+            caption=_("Stop"),
             handler=self.cmd_stop_restart,
             default_sequence="<Control-F2>",
             group=100,
@@ -145,7 +145,7 @@ class Runner:
         get_workbench().add_command(
             "interrupt",
             "run",
-            "Interrupt execution",
+            _("Interrupt execution"),
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
             default_sequence="<Control-c>",
@@ -156,7 +156,7 @@ class Runner:
         get_workbench().add_command(
             "softreboot",
             "run",
-            "Send EOF / Soft reboot",
+            _("Send EOF / Soft reboot"),
             self.soft_reboot,
             self.soft_reboot_enabled,
             group=100,
@@ -165,7 +165,12 @@ class Runner:
         )
 
         get_workbench().add_command(
-            "disconnect", "run", "Disconnect", self.disconnect, self.disconnect_enabled, group=100
+            "disconnect",
+            "run",
+            _("Disconnect"),
+            self.disconnect,
+            self.disconnect_enabled,
+            group=100,
         )
 
     def get_state(self) -> str:

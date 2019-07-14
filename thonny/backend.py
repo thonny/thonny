@@ -2522,13 +2522,13 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
     _cause_message = getattr(
         traceback,
         "_cause_message",
-        ("\nThe above exception was the direct cause " + "of the following exception:\n\n"),
+        ("\nThe above exception was the direct cause " + "of the following exception:") + "\n\n",
     )
 
     _context_message = getattr(
         traceback,
         "_context_message",
-        ("\nDuring handling of the above exception, " + "another exception occurred:\n\n"),
+        ("\nDuring handling of the above exception, " + "another exception occurred:") + "\n\n",
     )
 
     def rec_format_exception_with_frame_info(etype, value, tb, chain=True):

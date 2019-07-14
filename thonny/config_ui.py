@@ -14,7 +14,7 @@ class ConfigurationDialog(CommonDialog):
         width = ems_to_pixels(53)
         height = ems_to_pixels(43)
         self.geometry("%dx%d" % (width, height))
-        self.title("Thonny options")
+        self.title(_("Thonny options"))
 
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)

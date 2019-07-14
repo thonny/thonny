@@ -23,7 +23,7 @@ from thonny.running import RUN_COMMAND_CAPTION
 
 _current_debugger = None
 
-RESUME_COMMAND_CAPTION = ""
+RESUME_COMMAND_CAPTION = ""  # Init later when gettext is loaded
 
 
 class Debugger:
@@ -1172,7 +1172,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "runresume",
         "run",
-        "Run / resume",
+        _("Run / resume"),
         _run_or_resume,
         caption=running.RUN_COMMAND_CAPTION,
         tester=_run_or_resume_enabled,
@@ -1186,9 +1186,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_preferred",
         "run",
-        "Debug current script",
+        _("Debug current script"),
         run_preferred_debug_command,
-        caption="Debug",
+        caption=_("Debug"),
         tester=_start_debug_enabled,
         group=10,
         image="debug-current-script",
@@ -1199,7 +1199,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_nicer",
         "run",
-        "Debug current script (nicer)",
+        _("Debug current script (nicer)"),
         lambda: _request_debug("Debug"),
         caption="Debug (nicer)",
         tester=_start_debug_enabled,
@@ -1211,7 +1211,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "debug_faster",
         "run",
-        "Debug current script (faster)",
+        _("Debug current script (faster)"),
         lambda: _request_debug("FastDebug"),
         caption="Debug (faster)",
         tester=_start_debug_enabled,
@@ -1222,9 +1222,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_over",
         "run",
-        "Step over",
+        _("Step over"),
         lambda: _issue_debugger_command("step_over"),
-        caption="Over",
+        caption=_("Over"),
         tester=lambda: _debugger_command_enabled("step_over"),
         default_sequence="<F6>",
         group=30,
@@ -1235,9 +1235,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_into",
         "run",
-        "Step into",
+        _("Step into"),
         lambda: _issue_debugger_command("step_into"),
-        caption="Into",
+        caption=_("Into"),
         tester=lambda: _debugger_command_enabled("step_into"),
         default_sequence="<F7>",
         group=30,
@@ -1248,9 +1248,9 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_out",
         "run",
-        "Step out",
+        _("Step out"),
         lambda: _issue_debugger_command("step_out"),
-        caption="Out",
+        caption=_("Out"),
         tester=lambda: _debugger_command_enabled("step_out"),
         group=30,
         image="step-out",
@@ -1273,7 +1273,7 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "run_to_cursor",
         "run",
-        "Run to cursor",
+        _("Run to cursor"),
         lambda: _issue_debugger_command("run_to_cursor"),
         tester=lambda: _debugger_command_enabled("run_to_cursor"),
         default_sequence=select_sequence("<Control-F8>", "<Control-F8>"),
@@ -1285,16 +1285,16 @@ def load_plugin() -> None:
     get_workbench().add_command(
         "step_back",
         "run",
-        "Step back",
+        _("Step back"),
         lambda: _issue_debugger_command("step_back"),
-        caption="Back",
+        caption=_("Back"),
         tester=lambda: _debugger_command_enabled("step_back"),
         default_sequence=select_sequence("<Control-b>", "<Command-b>"),
         group=30,
     )
 
-    get_workbench().add_view(StackView, "Stack", "se")
-    get_workbench().add_view(ExceptionView, "Exception", "s")
+    get_workbench().add_view(StackView, _("Stack"), "se")
+    get_workbench().add_view(ExceptionView, _("Exception"), "s")
     get_workbench().bind("DebuggerResponse", _handle_debugger_progress, True)
     get_workbench().bind("ToplevelResponse", _handle_toplevel_response, True)
     get_workbench().bind("debugger_return_response", _handle_debugger_return, True)
