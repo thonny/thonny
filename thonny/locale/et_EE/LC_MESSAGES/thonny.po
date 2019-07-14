@@ -23,10 +23,6 @@ msgstr "Vaated"
 msgid "Run"
 msgstr "Jooksutamine"
 
-#: thonny/workbench.py:354
-msgid "Device"
-msgstr "Seade"
-
 #: thonny/workbench.py:355
 msgid "Tools"
 msgstr "Tööriistad"
@@ -175,15 +171,15 @@ msgstr ""
 msgid "Run selection or current line"
 msgstr ""
 
-#: thonny/plugins/commenting.py:111
+#: thonny/plugins/commenting_indenting.py:141
 msgid "Toggle comment"
 msgstr "Lülita kommentaar sisse/välja"
 
-#: thonny/plugins/commenting.py:121
+#: thonny/plugins/commenting_indenting.py:151
 msgid "Comment out"
 msgstr "Kommenteeri"
 
-#: thonny/plugins/commenting.py:131
+#: thonny/plugins/commenting_indenting.py:161
 msgid "Uncomment"
 msgstr "Eemalda kommentaar"
 
@@ -496,31 +492,31 @@ msgstr "Tagasi\n"
 msgid "Variables"
 msgstr "Muutujad"
 
-#: thonny/base_file_browser.py:21
+#: thonny/base_file_browser.py:29
 msgid "This computer"
 msgstr "See arvuti"
 
-#: thonny/base_file_browser.py:498
+#: thonny/base_file_browser.py:500
 msgid "Refresh"
 msgstr "Värskenda"
 
-#: thonny/base_file_browser.py:504
+#: thonny/base_file_browser.py:506
 msgid "Focus into"
 msgstr "Mine sisse"
 
-#: thonny/base_file_browser.py:742
+#: thonny/base_file_browser.py:744
 msgid "Error"
 msgstr "Viga"
 
-#: thonny/base_file_browser.py:742
+#: thonny/base_file_browser.py:744
 msgid "You need to select a file!"
 msgstr "Sa peand valima faili!"
 
-#: thonny/base_file_browser.py:746
+#: thonny/base_file_browser.py:748
 msgid "Overwrite?"
 msgstr "Kirjutada üle?"
 
-#: thonny/base_file_browser.py:746
+#: thonny/base_file_browser.py:748
 msgid "Do you want to overwrite '%s' ?"
 msgstr "Kas soovid '%s' üle kirjutada?"
 
@@ -1345,30 +1341,6 @@ msgstr "Prindi..."
 msgid "Open system shell..."
 msgstr "Ava süsteemi käsurida / terminal"
 
-#: thonny/first_run.py:6
-msgid "Standard"
-msgstr ""
-
-#: thonny/first_run.py:16
-msgid "Welcome to Thonny!"
-msgstr "Tere tulemast Thonny maailma!"
-
-#: thonny/first_run.py:16
-msgid "portable"
-msgstr ""
-
-#: thonny/first_run.py:43
-msgid "Language:"
-msgstr "Keel:"
-
-#: thonny/first_run.py:48
-msgid "Initial settings:"
-msgstr "Algsed seaded:"
-
-#: thonny/first_run.py:51
-msgid "Let's go!"
-msgstr "Sõidame!"
-
 #: thonny/plugins/backend_config_page.py:61
 msgid "Details"
 msgstr "Detailid"
@@ -1390,4 +1362,12 @@ msgstr "See dialoog on mõeldud Thonny pistiprogrammide haldamiseks.\n"
 #: thonny/plugins/circuitpython/__init__.py:47
 msgid "CircuitPython (generic)"
 msgstr "CircuitPython (üldine)"
+
+#: thonny/plugins/commenting_indenting.py:121
+msgid "Indent selected lines"
+msgstr "Suurenda ridade taanet"
+
+#: thonny/plugins/commenting_indenting.py:131
+msgid "Dedent selected lines"
+msgstr "Vähenda ridade taanet"
 
