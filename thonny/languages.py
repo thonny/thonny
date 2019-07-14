@@ -3,7 +3,7 @@ BASE_LANGUAGE_NAME = "English"
 
 LANGUAGES_DICT = {
     "de_DE": "Deutsch [BETA]",
-    "et_EE": "Eesti [BETA]",
+    "et_EE": "Eesti",
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
     "es_ES": "Español [BETA]",
     "fr_FR": "Français [BETA]",
