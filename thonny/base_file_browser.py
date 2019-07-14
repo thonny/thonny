@@ -18,13 +18,15 @@ from thonny.misc_utils import running_on_windows, start_time, lap_time
 
 _dummy_node_text = "..."
 
-LOCAL_FILES_ROOT_TEXT = _("This computer")
+LOCAL_FILES_ROOT_TEXT = "" # needs to be initialized later
 TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yaml"]
 ROOT_NODE_ID = ""
 
 
 class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
+        global LOCAL_FILES_ROOT_TEXT
+        LOCAL_FILES_ROOT_TEXT = _("This computer")
 
         self.show_expand_buttons = show_expand_buttons
         self._cached_child_data = {}
