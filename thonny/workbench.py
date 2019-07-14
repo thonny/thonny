@@ -144,13 +144,13 @@ class Workbench(tk.Tk):
 
         self._init_configuration()
         self._init_diagnostic_logging()
+        self._init_language()
+
         self._active_ui_mode = os.environ.get("THONNY_MODE", self.get_option("general.ui_mode"))
 
         self._init_scaling()
 
         self._add_main_backends()
-
-        self._init_language()
 
         self._init_theming()
         self._init_window()
