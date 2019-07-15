@@ -2,6 +2,8 @@
 
 Thonny's internationalisation is a collaborative effort kindly hosted by [POEditor](https://poeditor.com) to support open source projects. You are very welcome to help us translate it in your language [here](https://poeditor.com/join/project/Gh188fdYH6).
 
+Thonny's help pages are not translated in POEditor but in the main repository. See below for details.
+
 ## Short story for translators
 [Thonny project in POEditor](https://poeditor.com/join/project/Gh188fdYH6) is the main source for translations -- it is recommended you use this environment for translation. If you wish to use another tool then don't forget to import your updates to POEditor as well.
 
