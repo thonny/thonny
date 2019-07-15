@@ -80,6 +80,7 @@ set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 "C:\Program Files (x86)\Inno Setup 6\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
 @echo ............... CREATING ZIP ..........................
+SET PATH=%PATH%;C:\Program Files\7-Zip
 cd %BUILDDIR%
 7z a -tzip ..\dist\thonny-%VERSION%-windows.zip *
 
