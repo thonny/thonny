@@ -53,7 +53,7 @@ rm -rf $TARGET_DIR/share
 rm -rf $TARGET_DIR/man
 rm -rf $TARGET_DIR/openssl
 
-#find $TARGET_DIR -type f -name "*.a" -delete
+find $TARGET_DIR -type f -name "*.a" -delete
 find $TARGET_DIR -type f -name "*.pyo" -delete
 find $TARGET_DIR -type f -name "*.pyc" -delete
 find $TARGET_DIR -type d -name "__pycache__" -delete
