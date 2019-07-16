@@ -99,7 +99,7 @@ def get_win_volume_name(path: str) -> str:
     return vol_name_buf.value
 
 
-def find_volumes_by_name(volume_name: str, skip_letters=set()) -> Sequence[str]:
+def find_volumes_by_name(volume_name: str, skip_letters={"A"}) -> Sequence[str]:
     volumes = list_volumes(skip_letters=skip_letters)
     if os.name == "nt":
         return [
