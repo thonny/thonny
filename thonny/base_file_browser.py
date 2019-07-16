@@ -18,7 +18,7 @@ from thonny.misc_utils import running_on_windows, start_time, lap_time
 
 _dummy_node_text = "..."
 
-LOCAL_FILES_ROOT_TEXT = "" # needs to be initialized later
+LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
 TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yaml"]
 ROOT_NODE_ID = ""
 

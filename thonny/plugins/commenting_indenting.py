@@ -102,10 +102,12 @@ def _cmd_uncomment_selection():
     if text is not None:
         _uncomment_selection(text)
 
+
 def _cmd_indent_selection():
     text = _get_focused_writable_text()
     if text is not None:
         text.indent_region()
+
 
 def _cmd_dedent_selection():
     text = _get_focused_writable_text()
