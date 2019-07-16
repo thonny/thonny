@@ -183,7 +183,7 @@ class MicroPythonBackend:
 
     def _fetch_cwd(self):
         return self._evaluate(
-            "__module_os.getcwd() if hasattr(__module_os, 'getcwd') else None",
+            "__module_os.getcwd() if hasattr(__module_os, 'getcwd') else ''",
             prelude="import os as __module_os",
         )
 
