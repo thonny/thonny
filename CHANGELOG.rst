@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.2.0b5 (2019-07-16)
+====================
+* FIXED #810: Use regular spacing in simple mode toolbar 
+
 3.2.0b4 (2019-07-14)
 ====================
 * FIXED #809: Advertise indent/dedent in Edit menu
