@@ -763,6 +763,7 @@ class Workbench(tk.Tk):
         position_in_group="end",
         image: Optional[str] = None,
         caption: Optional[str] = None,
+        alternative_caption: Optional[str] = None,
         include_in_menu: bool = True,
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
@@ -814,6 +815,7 @@ class Workbench(tk.Tk):
                 position_in_group=position_in_group,
                 image=image,
                 caption=caption,
+                alternative_caption=alternative_caption,
                 include_in_menu=include_in_menu,
                 include_in_toolbar=include_in_toolbar,
                 submenu=submenu,
@@ -842,6 +844,7 @@ class Workbench(tk.Tk):
         position_in_group="end",
         image: Optional[str] = None,
         caption: Optional[str] = None,
+        alternative_caption: Optional[str] = None,
         include_in_menu: bool = True,
         include_in_toolbar: bool = False,
         submenu: Optional[tk.Menu] = None,
@@ -942,6 +945,7 @@ class Workbench(tk.Tk):
                 _image,
                 command_label,
                 caption,
+                caption if alternative_caption is None else alternative_caption,
                 accelerator,
                 handler,
                 tester,
@@ -1708,6 +1712,7 @@ class Workbench(tk.Tk):
         image: Optional[tk.PhotoImage],
         command_label: str,
         caption: str,
+        alternative_caption: str,
         accelerator: Optional[str],
         handler: Callable[[], None],
         tester: Optional[Callable[[], bool]],
@@ -1730,10 +1735,12 @@ class Workbench(tk.Tk):
 
         if self.in_simple_mode():
             screen_width = self.winfo_screenwidth()
-            if screen_width >= 1200:
-                button_width = max(7, len(caption))
+            if screen_width >= 1280:
+                button_width = max(7, len(caption), len(alternative_caption))
+            elif screen_width >= 1024:
+                button_width = max(6, len(caption), len(alternative_caption))
             else:
-                button_width = 5 if len(caption) < 5 else len(caption)
+                button_width = max(5, len(caption), len(alternative_caption))
         else:
             button_width = None
 

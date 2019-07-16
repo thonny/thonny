@@ -1134,11 +1134,7 @@ def _update_run_or_resume_button():
         return
 
     button = get_workbench().get_toolbar_button("runresume")
-    button.configure(
-        text=caption,
-        image=image,
-        width=max(len(RUN_COMMAND_CAPTION), len(RESUME_COMMAND_CAPTION)) + 1,
-    )
+    button.configure(text=caption, image=image)
 
 
 def get_current_debugger():
@@ -1181,6 +1177,7 @@ def load_plugin() -> None:
         image="run-current-script",
         include_in_menu=False,
         include_in_toolbar=get_workbench().in_simple_mode(),
+        alternative_caption=RESUME_COMMAND_CAPTION,
     )
 
     get_workbench().add_command(
