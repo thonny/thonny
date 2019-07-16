@@ -702,12 +702,12 @@ class SubprocessProxy(BackendProxy):
         self._gui_update_loop_id = None
         self._in_venv = None
         self._cwd = self._get_initial_cwd()
-        self._start_background_process()
+        self._start_background_process(clean=clean)
 
     def _get_initial_cwd(self):
         return None
 
-    def _start_background_process(self):
+    def _start_background_process(self, clean=None):
         # deque, because in one occasion I need to put messages back
         self._response_queue = collections.deque()
 
