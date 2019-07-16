@@ -1252,7 +1252,7 @@ class Workbench(tk.Tk):
 
         label = ttk.Label(
             self._toolbar,
-            text=_("Switch to\nregular mode"),
+            text=_("Switch to\nregular\nmode"),
             justify="right",
             font="SmallLinkFont",
             style="Url.TLabel",
@@ -1728,6 +1728,15 @@ class Workbench(tk.Tk):
         else:
             group_frame = slaves[0]
 
+        if self.in_simple_mode():
+            screen_width = self.winfo_screenwidth()
+            if screen_width >= 1200:
+                button_width = max(7, len(caption))
+            else:
+                button_width = 5 if len(caption) < 5 else len(caption)
+        else:
+            button_width = None
+
         button = ttk.Button(
             group_frame,
             command=handler,
@@ -1737,7 +1746,7 @@ class Workbench(tk.Tk):
             text=caption,
             compound="top" if self.in_simple_mode() else None,
             pad=(10, 0) if self.in_simple_mode() else None,
-            width=5 if self.in_simple_mode() and len(caption) < 5 else None,
+            width=button_width,
         )
         button.pack(side=tk.LEFT)
         button.tester = tester  # type: ignore
