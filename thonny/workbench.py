@@ -1806,7 +1806,7 @@ class Workbench(tk.Tk):
             medium_size = 16
             large_size = 20
 
-        widths = {10: 800, 12: 1050, 14: 1200, 16: 1300, 20: 1650}
+        widths = {10: 800, 12: 1050, 14: 1200, 16: 1300, 18: 1400, 20: 1650}
 
         if current_size < small_size or current_size >= large_size:
             new_size = small_size
