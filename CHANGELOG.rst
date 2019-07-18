@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.2.0b6 (2019-07-??)
+====================
+* FIXED #814: Ctrl+V inserts text twice in Windows (regression introduced in previous betas)
+
 3.2.0b5 (2019-07-16)
 ====================
 * FIXED #810: Use regular spacing in simple mode toolbar 
