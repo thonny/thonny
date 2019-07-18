@@ -40,16 +40,15 @@ class MicrobitConfigPage(MicroPythonConfigPage):
         return "https://microbit-micropython.readthedocs.io/en/latest/devguide/repl.html"
 
 
-class FirmwareDialog(CommonDialog):
-    def __init__(self, master):
+class FlashingDialog(CommonDialog):
+    def __init__(self, master, target_dir):
         self._release_info = None
-        self._source = source
         self._hex_url = None
         self._hex_size = None
-        self._target_dir = destination
+        self._target_dir = target_dir
+
         self._bytes_copied = 0
-        self._fsync = fsync
-        self._state = "starting"
+
         self._done = False
         self._closed = False
 
@@ -59,42 +58,47 @@ class FirmwareDialog(CommonDialog):
         main_frame.grid(row=0, column=0, sticky="nsew")
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-
-        self.title(_("Install firmware for BBC micro:bit"))
-
-        intro_label = ttk.Label(main_frame, text=_("NB! Files on the device will be deleted!"))
-        intro_label.grid(row=0, column=0, columnspan=3, sticky="nw", padx=15, pady=15)
-
-        version_caption_label = ttk.Label(
-            main_frame, text=_("Version to be installed:")
-        )
-        version_caption_label.grid(row=1, column=0, sticky="nw", padx=15, pady=(0, 15))
-        self._version_label = ttk.Label(main_frame, text=_("please wait") + " ...")
-        self._version_label.grid(row=1, column=1, columnspan=2, padx=15, pady=(0, 15))
         
+        main_frame.columnconfigure(1, weight=1)
+
+        self.title(_("Install latest MicroPython to BBC micro:bit"))
+
         target_caption_label = ttk.Label(main_frame, text=_("micro:bit location:"))
-        target_caption_label.grid(row=2, column=0, padx=15, pady=(0, 15))
+        target_caption_label.grid(row=0, column=0, padx=15, pady=(15, 0), sticky="w")
         target_label = ttk.Label(main_frame, text=self._target_dir)
-        target_label.grid(row=2, column=1, padx=15, pady=(0, 15))
+        target_label.grid(row=0, column=1, padx=15, pady=(15, 0), sticky="w", columnspan=2)
+
+        version_caption_label = ttk.Label(main_frame, text=_("Version to be installed:"))
+        version_caption_label.grid(row=1, column=0, sticky="w", padx=15, pady=(0, 15))
+        self._version_label = ttk.Label(main_frame, text=_("please wait") + " ...")
+        self._version_label.grid(row=1, column=1, columnspan=2, padx=15, pady=(0, 15), sticky="w")
+
+        intro_label = ttk.Label(main_frame, text=_("NB! All files on the device will be deleted!"))
+        intro_label.grid(row=2, column=0, columnspan=3, sticky="w", padx=15, pady=(0,15))
 
         self._progress_bar = ttk.Progressbar(main_frame, length=ems_to_pixels(30))
-        self._progress_bar.grid(row=3, column=0, columnspan=2, sticky="nsew", padx=15, pady=0)
+        self._progress_bar.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=15, pady=0)
 
-        self._install_button = ttk.Button(main_frame, text=_("Install"), command=self._start_installing)
-        self._install_button.grid(row=4, column=0, sticky="ne")
+        self._install_button = ttk.Button(
+            main_frame, text=_("Install"), command=self._start_installing
+        )
+        self._install_button.grid(row=4, column=1, sticky="ne", padx=0, pady=15)
 
         self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
-        self._cancel_button.grid(row=4, column=1, sticky="ne", padx=15, pady=15)
+        self._cancel_button.grid(row=4, column=2, sticky="ne", padx=15, pady=15)
         self._progress_bar.focus_set()
 
-        main_frame.columnconfigure(0, weight=1)
-
-        self._update_progress()
+        main_frame.columnconfigure(1, weight=1)
 
         self.bind("<Escape>", self._cancel, True)  # escape-close only if process has completed
         self.protocol("WM_DELETE_WINDOW", self._cancel)
+        
+        self._state = "starting"
         self._start_downloading_release_info()
         self._update_state()
+
+    def _locate_microbit(self):
+        pass
 
     def _start_downloading_release_info(self):
         def work():
@@ -105,9 +109,9 @@ class FirmwareDialog(CommonDialog):
 
     def _process_release_info(self):
         version_str = (
-            self._release_info["tag_name"] + "(" + self._release_info["published_at"][:10] + ")"
+            self._release_info["tag_name"] + " (" + self._release_info["published_at"][:10] + ")"
         )
-        self._version_label.configure(text=self._version_caption + " " + version_str)
+        self._version_label.configure(text=version_str)
 
         candidates = [
             asset
@@ -139,29 +143,29 @@ class FirmwareDialog(CommonDialog):
         if self._state == "starting" and self._release_info is not None:
             self._process_release_info()
             self._state = "ready_to_install"
-        
+
         if self._state == "ready_to_install":
             self._install_button.state(["!disabled"])
         else:
             self._install_button.state(["disabled"])
-        
+
         if self._state == "installing":
             self._progress_bar.configure(value=self._bytes_copied)
             self._old_bytes_copied = self._bytes_copied
-        
+
         if self._state == "done":
             self._progress_bar.configure(value=0)
 
-        if self._state != "done":         
-            self.after(200, self._update_state())
+        if self._state != "done":
+            self.after(200, self._update_state)
 
     def _start_installing(self):
-        
+
         self._progress_bar.configure(maximum=self._hex_size)
-        
+
         def work():
             self._copy_progess = 0
-            
+
             target = os.path.join(self._target_dir, "micropython.hex")
 
             with urlopen(self._hex_url, timeout=5) as fsrc:
@@ -177,7 +181,7 @@ class FirmwareDialog(CommonDialog):
                         self._bytes_copied += len(buf)
 
             self._state = "done"
-        
+
         self._state = "installing"
         threading.Thread(target=work, daemon=True).start()
 
@@ -190,29 +194,24 @@ class FirmwareDialog(CommonDialog):
         self._close()
 
 
-def flash_the_firmware(hex_path):
+def flash_micopython():
+    """
     mount_path = find_volume_by_name(
         "MICROBIT",
         not_found_msg="Could not find disk '%s'.\n"
         + "Make sure you have micro:bit plugged in!\n\n"
         + "Do you want to continue and locate the disk yourself?",
     )
+    """
+    mount_path = "C:\\"
     if mount_path is None:
         return
 
-    destination_path = os.path.join(mount_path, os.path.basename(hex_path))
-
-    dlg = FileCopyDialog(
+    dlg = FlashingDialog(
         get_workbench(),
-        hex_path,
-        destination_path,
-        "Uploading %s to %s" % (os.path.basename(hex_path), mount_path),
+        mount_path,
     )
     ui_utils.show_dialog(dlg)
-
-
-def flash_bundled_firmware():
-    flash_the_firmware(os.path.join(os.path.dirname(__file__), "firmware.hex"))
 
 
 def load_plugin():
@@ -224,6 +223,6 @@ def load_plugin():
         "InstallMicroPythonMicrobit",
         "device",
         _("Install MicroPython to BBC micro:bit"),
-        flash_bundled_firmware,
+        flash_micopython,
         group=40,
     )
