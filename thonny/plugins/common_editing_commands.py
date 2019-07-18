@@ -1,7 +1,4 @@
 # -*- coding: utf-8 -*-
-import tkinter as tk
-from tkinter import ttk
-
 from thonny import get_workbench
 from thonny.ui_utils import select_sequence
 
@@ -16,15 +13,6 @@ def load_plugin() -> None:
             return None
 
         return handler
-
-    def select_all(event=None):
-        # Tk 8.6 has <<SelectAll>> virtual event, but 8.5 doesn't
-        widget = get_workbench().focus_get()
-        if isinstance(widget, tk.Text):
-            widget.tag_remove("sel", "1.0", "end")
-            widget.tag_add("sel", "1.0", "end")
-        elif isinstance(widget, (ttk.Entry, tk.Entry)):
-            widget.select_range(0, tk.END)
 
     get_workbench().add_command(
         "undo",
@@ -94,7 +82,7 @@ def load_plugin() -> None:
         "SelectAll",
         "edit",
         _("Select all"),
-        select_all,
+        create_edit_command_handler("<<SelectAll>>"),
         tester=None,  # TODO:
         default_sequence=select_sequence("<Control-a>", "<Command-a>"),
         extra_sequences=["<Control-Greek_alpha>"],
