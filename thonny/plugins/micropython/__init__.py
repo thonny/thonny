@@ -117,15 +117,22 @@ class MicroPythonProxy(SubprocessProxy):
             for p in all_ports
             if (p.vid, p.pid) in self.known_usb_vids_pids
             or p.description in self.known_port_descriptions
-            or ("USB" in p.description and "serial" in p.description.lower())
-            or "UART" in p.description
-            or "DAPLink" in p.description
+            or self.consider_unknown_devices
+            and (
+                ("USB" in p.description and "serial" in p.description.lower())
+                or "UART" in p.description
+                or "DAPLink" in p.description
+            )
         ]
 
     @property
     def known_usb_vids_pids(self):
         """Return set of pairs of USB device VID, PID"""
         return set()
+
+    @property
+    def consider_unknown_devices(self):
+        return True
 
     @property
     def known_port_descriptions(self):
@@ -246,12 +253,16 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         self._port_combo.grid(row=4, column=0, sticky="new")
         self.columnconfigure(0, weight=1)
 
-        if self.allow_webrepl:
-            self._init_webrepl_frame()
+        self._webrepl_frame = None
+        self._flashing_frame = None
 
         self._on_change_port()
 
-    def _init_webrepl_frame(self):
+    def _get_webrepl_frame(self):
+
+        if self._webrepl_frame is not None:
+            return self._webrepl_frame
+
         self._webrepl_frame = ttk.Frame(self)
 
         self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
@@ -269,6 +280,30 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
         pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=9)
         pw_entry.grid(row=3, column=0, sticky="nw")
+
+        return self._webrepl_frame
+
+    def _get_flashing_frame(self):
+
+        if self._flashing_frame is not None:
+            return self._flashing_frame
+
+        self._flashing_frame = ttk.Frame(self)
+        self._flashing_label = ttk.Label(self._flashing_frame, text=_("Firmware"))
+        self._flashing_label.grid(row=1, column=0, sticky="w", pady=(10, 0))
+
+        button_caption = _("Open the dialog for installing or upgrading MicroPython on your device")
+        self._flashing_button = ttk.Button(
+            self._flashing_frame,
+            text=button_caption,
+            width=len(button_caption),
+            command=self._open_flashing_dialog,
+        )
+        self._flashing_button.grid(row=2, column=0, sticky="we")
+
+        self._flashing_frame.columnconfigure(0, weight=1)
+
+        return self._flashing_frame
 
     def get_current_port_desc(self):
         name = get_workbench().get_option(self.backend_name + ".port")
@@ -308,12 +343,25 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
     def _on_change_port(self, *args):
         if self._port_desc_variable.get() == self._WEBREPL_OPTION_DESC:
-            self._webrepl_frame.grid(row=6, column=0, sticky="nwe")
-        elif self.allow_webrepl and self._webrepl_frame.winfo_ismapped():
-            self._webrepl_frame.grid_forget()
+            self._get_webrepl_frame().grid(row=6, column=0, sticky="nwe")
+            if self._flashing_frame and self._flashing_frame.winfo_ismapped():
+                self._flashing_frame.grid_forget()
+
+        else:
+            if self._has_flashing_dialog():
+                self._get_flashing_frame().grid(row=6, column=0, sticky="nwe")
+
+            if self._webrepl_frame and self._webrepl_frame.winfo_ismapped():
+                self._webrepl_frame.grid_forget()
 
     def _get_usb_driver_url(self):
         return None
+
+    def _has_flashing_dialog(self):
+        return False
+
+    def _open_flashing_dialog(self):
+        raise NotImplementedError()
 
     @property
     def allow_webrepl(self):
@@ -381,7 +429,7 @@ def load_plugin():
             * "Show device's boot script"
                     * Double-click in Files view (Show => Files)
             * "Upload ____ firmware"
-                    * Moved into "Tools" menu
+                    * Moved into interpreter config page or "Tools" menu
             * "Soft reboot"
                     * Moved into "Run" menu as "Send EOF / Soft reboot"
             " "Close serial connection"

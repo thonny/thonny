@@ -4,6 +4,7 @@ Version history
 
 3.2.0b6 (2019-07-??)
 ====================
+* NEW: BBC micro:bit plug-in has been merged into main Thonny package 
 * FIXED #814: Ctrl+V inserts text twice in Windows (regression introduced in previous betas)
 
 3.2.0b5 (2019-07-16)

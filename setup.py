@@ -74,6 +74,7 @@ setup(
         "thonny.plugins.printing": ["*.html"],
         "thonny.plugins.micropython": ["api_stubs/*.*"],
         "thonny.plugins.circuitpython": ["api_stubs/*.*"],
+        "thonny.plugins.microbit": ["api_stubs/*.*"],
         "thonny.plugins.mypy": ["typeshed_extras/*.pyi"],
     },
     entry_points={"gui_scripts": ["thonny = thonny:launch"]},

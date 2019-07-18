@@ -34,10 +34,48 @@ class MicrobitProxy(MicroPythonProxy):
     def supports_directories(self):
         return False
 
+    @property
+    def consider_unknown_devices(self):
+        return False
+
+    @property
+    def known_usb_vids_pids(self):
+        """Copied from https://github.com/mu-editor/mu/blob/master/mu/modes/adafruit.py"""
+        return {(0x0D28, 0x0204)}  # Adafruit CRICKit M0
+
 
 class MicrobitConfigPage(MicroPythonConfigPage):
     def _get_usb_driver_url(self):
         return "https://microbit-micropython.readthedocs.io/en/latest/devguide/repl.html"
+
+    def _get_flashing_frame(self):
+        frame = super()._get_flashing_frame()
+        self._flashing_label.configure(
+            text=_("Make sure MicroPython has been installed to your micro:bit.")
+            + "\n("
+            + _("Don't forget that main.py only works without embedded main script.")
+            + ")"
+        )
+        return frame
+
+    def _has_flashing_dialog(self):
+        return True
+
+    def _open_flashing_dialog(self):
+        mount_path = find_volume_by_name(
+            "MICROBIT",
+            not_found_msg="Could not find disk '%s'.\n"
+            + "Make sure you have micro:bit plugged in!\n\n"
+            + "Do you want to continue and locate the disk yourself?",
+        )
+        """
+        mount_path = "C:\\"
+        """
+        if mount_path is None:
+            return
+
+        dlg = FlashingDialog(get_workbench(), mount_path)
+        ui_utils.show_dialog(dlg)
 
 
 class FlashingDialog(CommonDialog):
@@ -46,11 +84,9 @@ class FlashingDialog(CommonDialog):
         self._hex_url = None
         self._hex_size = None
         self._target_dir = target_dir
-
         self._bytes_copied = 0
 
-        self._done = False
-        self._closed = False
+        self._state = "starting"
 
         super().__init__(master)
 
@@ -58,7 +94,7 @@ class FlashingDialog(CommonDialog):
         main_frame.grid(row=0, column=0, sticky="nsew")
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
-        
+
         main_frame.columnconfigure(1, weight=1)
 
         self.title(_("Install latest MicroPython to BBC micro:bit"))
@@ -73,8 +109,10 @@ class FlashingDialog(CommonDialog):
         self._version_label = ttk.Label(main_frame, text=_("please wait") + " ...")
         self._version_label.grid(row=1, column=1, columnspan=2, padx=15, pady=(0, 15), sticky="w")
 
-        intro_label = ttk.Label(main_frame, text=_("NB! All files on the device will be deleted!"))
-        intro_label.grid(row=2, column=0, columnspan=3, sticky="w", padx=15, pady=(0,15))
+        self._state_label = ttk.Label(
+            main_frame, text=_("NB! All files on micro:bit will be deleted!")
+        )
+        self._state_label.grid(row=2, column=0, columnspan=3, sticky="w", padx=15, pady=(0, 15))
 
         self._progress_bar = ttk.Progressbar(main_frame, length=ems_to_pixels(30))
         self._progress_bar.grid(row=3, column=0, columnspan=3, sticky="nsew", padx=15, pady=0)
@@ -82,18 +120,17 @@ class FlashingDialog(CommonDialog):
         self._install_button = ttk.Button(
             main_frame, text=_("Install"), command=self._start_installing
         )
-        self._install_button.grid(row=4, column=1, sticky="ne", padx=0, pady=15)
+        self._install_button.grid(row=4, column=0, columnspan=2, sticky="ne", padx=0, pady=15)
 
-        self._cancel_button = ttk.Button(main_frame, text=_("Cancel"), command=self._cancel)
-        self._cancel_button.grid(row=4, column=2, sticky="ne", padx=15, pady=15)
+        self._close_button = ttk.Button(main_frame, text=_("Cancel"), command=self._close)
+        self._close_button.grid(row=4, column=2, sticky="ne", padx=15, pady=15)
         self._progress_bar.focus_set()
 
         main_frame.columnconfigure(1, weight=1)
 
-        self.bind("<Escape>", self._cancel, True)  # escape-close only if process has completed
-        self.protocol("WM_DELETE_WINDOW", self._cancel)
-        
-        self._state = "starting"
+        self.bind("<Escape>", self._close, True)  # escape-close only if process has completed
+        self.protocol("WM_DELETE_WINDOW", self._close)
+
         self._start_downloading_release_info()
         self._update_state()
 
@@ -112,6 +149,7 @@ class FlashingDialog(CommonDialog):
             self._release_info["tag_name"] + " (" + self._release_info["published_at"][:10] + ")"
         )
         self._version_label.configure(text=version_str)
+        # self._install_button.configure(text=_("Install") + " " + version_str)
 
         candidates = [
             asset
@@ -137,14 +175,14 @@ class FlashingDialog(CommonDialog):
         self._close()
 
     def _update_state(self):
-        if self._closed:
+        if self._state in ["closing", "closed"]:
             return
 
         if self._state == "starting" and self._release_info is not None:
             self._process_release_info()
-            self._state = "ready_to_install"
+            self._state = "ready"
 
-        if self._state == "ready_to_install":
+        if self._state == "ready":
             self._install_button.state(["!disabled"])
         else:
             self._install_button.state(["disabled"])
@@ -152,9 +190,12 @@ class FlashingDialog(CommonDialog):
         if self._state == "installing":
             self._progress_bar.configure(value=self._bytes_copied)
             self._old_bytes_copied = self._bytes_copied
+            self._state_label.configure(text=_("Installing ..."))
 
         if self._state == "done":
             self._progress_bar.configure(value=0)
+            self._state_label.configure(text=_("Done!") + " " + _("You can now close this dialog."))
+            self._close_button.configure(text=_("Close"))
 
         if self._state != "done":
             self.after(200, self._update_state)
@@ -171,7 +212,7 @@ class FlashingDialog(CommonDialog):
             with urlopen(self._hex_url, timeout=5) as fsrc:
                 with open(target, "wb") as fdst:
                     while True:
-                        buf = fsrc.read(16 * 1024)
+                        buf = fsrc.read(8 * 1024)
                         if not buf:
                             break
 
@@ -186,43 +227,17 @@ class FlashingDialog(CommonDialog):
         threading.Thread(target=work, daemon=True).start()
 
     def _close(self):
+        if self._state == "installing" and not messagebox.askyesno(
+            "Really cancel?", "Are you sure you want to cancel?"
+        ):
+            return
+
+        self._state = "closing"
         self.destroy()
-        self._closed = True
-
-    def _cancel(self, event=None):
-        self._closed = True
-        self._close()
-
-
-def flash_micopython():
-    """
-    mount_path = find_volume_by_name(
-        "MICROBIT",
-        not_found_msg="Could not find disk '%s'.\n"
-        + "Make sure you have micro:bit plugged in!\n\n"
-        + "Do you want to continue and locate the disk yourself?",
-    )
-    """
-    mount_path = "C:\\"
-    if mount_path is None:
-        return
-
-    dlg = FlashingDialog(
-        get_workbench(),
-        mount_path,
-    )
-    ui_utils.show_dialog(dlg)
+        self._state = "closed"
 
 
 def load_plugin():
     add_micropython_backend(
         "microbit", MicrobitProxy, "MicroPython (BBC micro:bit)", MicrobitConfigPage
-    )
-
-    get_workbench().add_command(
-        "InstallMicroPythonMicrobit",
-        "device",
-        _("Install MicroPython to BBC micro:bit"),
-        flash_micopython,
-        group=40,
     )
