@@ -2027,7 +2027,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
 
     # print(simplified_state, event.keycode)
     if (simplified_state, event.keycode) in registry:
-        if event.keycode != ord(event.char):
+        if event.keycode != ord(event.char) and event.keysym in (None, '??'):
             # keycode and char doesn't match,
             # this means non-latin keyboard
             for handler, tester in registry[(simplified_state, event.keycode)]:
