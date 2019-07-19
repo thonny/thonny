@@ -1,0 +1,1596 @@
+msgid ""
+msgstr ""
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: POEditor.com\n"
+"Project-Id-Version: Thonny\n"
+"Language: zh-CN\n"
+
+#: thonny/workbench.py:350
+#, fuzzy
+msgid "File"
+msgstr "文件"
+
+#: thonny/workbench.py:351
+#, fuzzy
+msgid "Edit"
+msgstr "编辑"
+
+#: thonny/workbench.py:352
+#, fuzzy
+msgid "View"
+msgstr "视图"
+
+#: thonny/running.py:93 thonny/workbench.py:353
+#, fuzzy
+msgid "Run"
+msgstr "运行"
+
+#: thonny/workbench.py:355
+#, fuzzy
+msgid "Tools"
+msgstr "工具"
+
+#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:356
+#, fuzzy
+msgid "Help"
+msgstr "帮助"
+
+#: thonny/workbench.py:517
+#, fuzzy
+msgid "Alternative Python 3 interpreter or virtual environment"
+msgstr "可选的python3解释器或虚拟环境"
+
+#: thonny/workbench.py:525
+#, fuzzy
+msgid "A special virtual environment (deprecated)"
+msgstr "特殊的虚拟环境(已弃用)"
+
+#: thonny/workbench.py:563
+#, fuzzy
+msgid "Exit"
+msgstr "退出"
+
+#: thonny/workbench.py:590
+#, fuzzy
+msgid "Decrease font size"
+msgstr "缩小字体"
+
+#: thonny/workbench.py:602
+#, fuzzy
+msgid "Focus editor"
+msgstr "移动到编辑器"
+
+#: thonny/workbench.py:611
+#, fuzzy
+msgid "Focus shell"
+msgstr "移动到shell"
+
+#: thonny/workbench.py:622
+#, fuzzy
+msgid "Maximize view"
+msgstr "最大化查看"
+
+#: thonny/workbench.py:634
+#, fuzzy
+msgid "Full screen"
+msgstr "全屏"
+
+#: thonny/workbench.py:1241
+msgid "Program arguments"
+msgstr ""
+
+#: thonny/plugins/about.py:25 thonny/plugins/about.py:157
+#, fuzzy
+msgid "About Thonny"
+msgstr "关于Thonny"
+
+#: thonny/plugins/about.py:77
+#, fuzzy
+msgid "Made in\n"
+"University of Tartu, Estonia,\n"
+"with the help from\n"
+"open-source community,\n"
+"Raspberry Pi Foundation\n"
+"and Cybernetica AS"
+msgstr "编写于塔尔图大学(爱沙尼亚),\n"
+"Raspberry Pi Foundation\n"
+"和 Cybernetica AS开源社区\n"
+"协助支持."
+
+#: thonny/plugins/about.py:103
+#, fuzzy
+msgid "This program comes with\n"
+"ABSOLUTELY NO WARRANTY!\n"
+"It is free software, and you are welcome to\n"
+"redistribute it under certain conditions, see\n"
+"https://opensource.org/licenses/MIT\n"
+"for details"
+msgstr "这是一款免费的软件(无保证),你也\n"
+"可以在特定的条件下分发它.详细参\n"
+"阅https://opensource.org/licenses/MIT\n"
+""
+
+#: thonny/plugins/about.py:146
+#, fuzzy
+msgid "Version history"
+msgstr "版本历史"
+
+#: thonny/plugins/about.py:153
+#, fuzzy
+msgid "Report problems"
+msgstr "报告问题"
+
+#: thonny/plugins/assistant_config_page.py:15
+#, fuzzy
+msgid "Open Assistant automatically when program crashes with an exception"
+msgstr "当程序遇到异常自动打开助手功能"
+
+#: thonny/plugins/assistant_config_page.py:21
+#, fuzzy
+msgid "Open Assistant automatically when it has warnings for your code"
+msgstr "当代码有警告自动打开助手功能"
+
+#: thonny/plugins/assistant_config_page.py:26
+#, fuzzy
+msgid "Perform selected Pylint checks"
+msgstr "执行选定的Pylink检查"
+
+#: thonny/plugins/assistant_config_page.py:29
+#, fuzzy
+msgid "Perform MyPy checks"
+msgstr "执行MyPy检查"
+
+#: thonny/plugins/assistant_config_page.py:31
+#, fuzzy
+msgid "Disabled checks (one id per line)"
+msgstr "禁用检查(one id per line)"
+
+#: thonny/assistance.py:962 thonny/plugins/assistant_config_page.py:68
+#, fuzzy
+msgid "Assistant"
+msgstr "助手"
+
+#: thonny/plugins/autocomplete.py:316
+#, fuzzy
+msgid "Auto-complete"
+msgstr "自动补全"
+
+#: thonny/plugins/backend_config_page.py:43
+#, fuzzy
+msgid "Which interpreter or device should Thonny use for running your code?"
+msgstr "Thonny应该使用哪个解释器或\n"
+"设备运行你的代码?"
+
+#: thonny/plugins/backend_config_page.py:127
+#, fuzzy
+msgid "Interpreter"
+msgstr "解释器"
+
+#: thonny/plugins/birdseye_frontend.py:32
+#, fuzzy
+msgid "About Birdseye"
+msgstr "关于Birdseye"
+
+#: thonny/plugins/birdseye_frontend.py:33
+#, fuzzy
+msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
+"\n"
+"Do you want to open the help page and learn more?"
+msgstr "Birdseye是一个python的调试器,需要独立安装.\n"
+"你想打开帮助页了解更多吗?"
+
+#: thonny/plugins/birdseye_frontend.py:60
+#, fuzzy
+msgid "Debug current script (birdseye)"
+msgstr "当前脚本调试(birdseye)"
+
+#: thonny/plugins/cells.py:173
+#, fuzzy
+msgid "Run cell"
+msgstr "运行块"
+
+#: thonny/plugins/cells.py:183
+#, fuzzy
+msgid "Run cell and advance"
+msgstr "运行块并前进"
+
+#: thonny/plugins/cells.py:193
+#, fuzzy
+msgid "Run selection or current line"
+msgstr "运行选中的块,或当前行"
+
+#: thonny/plugins/commenting_indenting.py:141
+#, fuzzy
+msgid "Toggle comment"
+msgstr "注释切换"
+
+#: thonny/plugins/commenting_indenting.py:151
+#, fuzzy
+msgid "Comment out"
+msgstr "转为注释"
+
+#: thonny/plugins/commenting_indenting.py:161
+#, fuzzy
+msgid "Uncomment"
+msgstr "取消注释"
+
+#: thonny/plugins/common_editing_commands.py:32
+#, fuzzy
+msgid "Undo"
+msgstr "撤销"
+
+#: thonny/plugins/common_editing_commands.py:44
+#, fuzzy
+msgid "Redo"
+msgstr "恢复撤销"
+
+#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2159
+#, fuzzy
+msgid "Cut"
+msgstr "剪切"
+
+#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2160
+#, fuzzy
+msgid "Copy"
+msgstr "复制"
+
+#: thonny/plugins/common_editing_commands.py:84 thonny/ui_utils.py:2161
+#, fuzzy
+msgid "Paste"
+msgstr "粘贴"
+
+#: thonny/plugins/common_editing_commands.py:96 thonny/plugins/debugger.py:124
+#, fuzzy
+msgid "Select all"
+msgstr "全选"
+
+#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1276
+#, fuzzy
+msgid "Run to cursor"
+msgstr "运行至光标"
+
+#: thonny/plugins/debugger.py:860
+#, fuzzy
+msgid "Can't close yet"
+msgstr "未能关闭"
+
+#: thonny/plugins/debugger.py:861
+#, fuzzy
+msgid "Use \"Stop\" command if you want to cancel debugging"
+msgstr "如果你想停止调试,请使用\"停止\"指令"
+
+#: thonny/plugins/dock_user_windows_frontend.py:27
+msgid "Dock user windows"
+msgstr ""
+
+#: thonny/plugins/editor_config_page.py:14
+#, fuzzy
+msgid "Highlight matching names"
+msgstr "高亮匹配名称"
+
+#: thonny/plugins/editor_config_page.py:20
+#, fuzzy
+msgid "Highlight local variables"
+msgstr "高亮显示局部(块)变量"
+
+#: thonny/plugins/editor_config_page.py:25
+#, fuzzy
+msgid "Highlight parentheses"
+msgstr "高亮显示括号"
+
+#: thonny/plugins/editor_config_page.py:26
+#, fuzzy
+msgid "Highlight syntax elements"
+msgstr "高亮显示语法元素"
+
+#: thonny/plugins/editor_config_page.py:29
+#, fuzzy
+msgid "Highlight current line (requires reopening the editor)"
+msgstr "高亮显示当前行(需要重启编辑器)"
+
+#: thonny/plugins/editor_config_page.py:34
+#, fuzzy
+msgid "Allow code completion with Tab-key in editors"
+msgstr "允许在编辑器中使用Tab键补全"
+
+#: thonny/plugins/editor_config_page.py:40
+#, fuzzy
+msgid "Allow code completion with Tab-key in Shell"
+msgstr "允许在shell中使用Tab键补全"
+
+#: thonny/plugins/editor_config_page.py:44
+#, fuzzy
+msgid "Show line numbers"
+msgstr "显示行号"
+
+#: thonny/plugins/editor_config_page.py:47
+#, fuzzy
+msgid "Recommended maximum line length\n"
+"(Set to 0 to turn off margin line)"
+msgstr "建议最大代码长度(0表示关闭边界线)"
+
+#: thonny/plugins/editor_config_page.py:68
+#, fuzzy
+msgid "Editor"
+msgstr "编辑器"
+
+#: thonny/plugins/event_logging.py:197
+#, fuzzy
+msgid "Export usage logs..."
+msgstr "导出使用日志"
+
+#: thonny/plugins/event_view.py:38
+#, fuzzy
+msgid "Events"
+msgstr "事件"
+
+#: thonny/plugins/files.py:200
+#, fuzzy
+msgid "Files"
+msgstr "文件"
+
+#: thonny/plugins/find_replace.py:56 thonny/plugins/find_replace.py:412
+#, fuzzy
+msgid "Find & Replace"
+msgstr "查找&替换"
+
+#: thonny/plugins/find_replace.py:62
+#, fuzzy
+msgid "Find:"
+msgstr "查找:"
+
+#: thonny/plugins/find_replace.py:73
+#, fuzzy
+msgid "Replace with:"
+msgstr "替代项:"
+
+#: thonny/plugins/find_replace.py:91
+#, fuzzy
+msgid "Case sensitive"
+msgstr "区分大小写"
+
+#: thonny/plugins/find_replace.py:98
+#, fuzzy
+msgid "Up"
+msgstr "向上"
+
+#: thonny/plugins/find_replace.py:102
+#, fuzzy
+msgid "Down"
+msgstr "向下"
+
+#: thonny/plugins/find_replace.py:111
+#, fuzzy
+msgid "Find"
+msgstr "查找"
+
+#: thonny/plugins/find_replace.py:121
+#, fuzzy
+msgid "Replace"
+msgstr "替换"
+
+#: thonny/plugins/find_replace.py:129
+#, fuzzy
+msgid "Replace+Find"
+msgstr "替换+查找"
+
+#: thonny/plugins/find_replace.py:138
+#, fuzzy
+msgid "Replace all"
+msgstr "全部替换"
+
+#: thonny/plugins/find_replace.py:232
+#, fuzzy
+msgid "Enter string to be replaced."
+msgstr "输入替换的字符串"
+
+#: thonny/plugins/find_replace.py:316
+#, fuzzy
+msgid "The specified text was not found!"
+msgstr "找不到替换的文字!"
+
+#: thonny/plugins/general_config_page.py:13
+#, fuzzy
+msgid "Allow only single Thonny instance"
+msgstr "只允许运行一个Thonny."
+
+#: thonny/plugins/general_config_page.py:20
+#, fuzzy
+msgid "Reopen all files from previous session"
+msgstr "重新打开上一个会话中的所有文件"
+
+#: thonny/plugins/general_config_page.py:26
+#, fuzzy
+msgid "Disable notification sound"
+msgstr "禁用通知声"
+
+#: thonny/plugins/general_config_page.py:75
+msgid "Font scaling mode"
+msgstr ""
+
+#: thonny/plugins/heap.py:35
+#, fuzzy
+msgid "Heap mode is on.\n"
+"Close Heap view to turn it off."
+msgstr "Heap模式已开启.\n"
+"在视图中可关闭"
+
+#: thonny/plugins/heap.py:83
+msgid "Heap"
+msgstr ""
+
+#: thonny/plugins/general_config_page.py:42
+#, fuzzy
+msgid "Language"
+msgstr "语言"
+
+#: thonny/plugins/notes.py:33
+#, fuzzy
+msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
+"\n"
+"Everything will be saved automatically and loaded when you open Thonny next time.\n"
+"\n"
+"Feel free to delete this text to make room for your own notes."
+msgstr "这里用于您的工作笔记 - 分配说明，代码段，等等。\n"
+"所有内容都会自动保存并下次打开Thonny时加载。\n"
+"您可以随意删除此文本，为自己的笔记腾出空间。"
+
+#: thonny/plugins/notes.py:61
+#, fuzzy
+msgid "Notes"
+msgstr "笔记"
+
+#: thonny/plugins/object_inspector.py:108
+#, fuzzy
+msgid "Previous object"
+msgstr "上一个对象"
+
+#: thonny/plugins/object_inspector.py:111
+#, fuzzy
+msgid "Next object"
+msgstr "下一个对象"
+
+#: thonny/plugins/object_inspector.py:601
+#, fuzzy
+msgid "Object inspector"
+msgstr "对象检查员"
+
+#: thonny/plugins/outline.py:137
+#, fuzzy
+msgid "Outline"
+msgstr "大纲"
+
+#: thonny/plugins/pgzero_frontend.py:26
+#, fuzzy
+msgid "Pygame Zero mode"
+msgstr "Pygame Zero模式\n"
+""
+
+#: thonny/plugins/pip_gui.py:78
+#, fuzzy
+msgid "Find package from PyPI"
+msgstr "从PyPI安装模块"
+
+#: thonny/plugins/pip_gui.py:188 thonny/plugins/pip_gui.py:190
+#, fuzzy
+msgid "Uninstall"
+msgstr "卸载"
+
+#: thonny/code.py:570 thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350
+#: thonny/ui_utils.py:1626
+#, fuzzy
+msgid "Close"
+msgstr "关闭"
+
+#: thonny/plugins/pip_gui.py:278
+#, fuzzy
+msgid "You seem to have problems with pip\n"
+"\n"
+""
+msgstr "你好像对pip有些疑惑"
+
+#: thonny/plugins/pip_gui.py:305
+#, fuzzy
+msgid "Alternatively, if you have an older pip installed, then you can install packages on the command line (Tools → Open system shell...)"
+msgstr "或者,假如你安装了旧版本的pip你可以在命令行上安装模块\n"
+"(工具-->开启系统shell)"
+
+#: thonny/plugins/pip_gui.py:382
+#, fuzzy
+msgid "Click "
+msgstr "点击"
+
+#: thonny/plugins/pip_gui.py:383 thonny/plugins/pip_gui.py:393
+#, fuzzy
+msgid "here"
+msgstr "这里"
+
+#: thonny/plugins/pip_gui.py:181 thonny/plugins/pip_gui.py:478
+#, fuzzy
+msgid "Upgrade"
+msgstr "升级"
+
+#: thonny/plugins/pip_gui.py:483 thonny/plugins/pip_gui.py:1064
+#, fuzzy
+msgid "Install"
+msgstr "安装"
+
+#: thonny/plugins/pip_gui.py:505
+#, fuzzy
+msgid "Could not find the package from PyPI."
+msgstr "没有从PyPI找到此模块"
+
+#: thonny/plugins/pip_gui.py:515
+#, fuzzy
+msgid "exact package name"
+msgstr "确切的库名"
+
+#: thonny/plugins/pip_gui.py:533
+#, fuzzy
+msgid "Latest stable version"
+msgstr "最新的稳定版本"
+
+#: thonny/plugins/pip_gui.py:535
+#, fuzzy
+msgid "Latest version"
+msgstr "最新的版本"
+
+#: thonny/plugins/pip_gui.py:536
+#, fuzzy
+msgid "Summary"
+msgstr "摘要"
+
+#: thonny/plugins/pip_gui.py:537
+#, fuzzy
+msgid "Author"
+msgstr "作者"
+
+#: thonny/plugins/pip_gui.py:538
+#, fuzzy
+msgid "Homepage"
+msgstr "网站主页"
+
+#: thonny/plugins/pip_gui.py:540
+#, fuzzy
+msgid "Bugtracker"
+msgstr "问题追踪"
+
+#: thonny/plugins/pip_gui.py:542
+#, fuzzy
+msgid "Documentation"
+msgstr "文档"
+
+#: thonny/plugins/pip_gui.py:544
+#, fuzzy
+msgid "PyPI page"
+msgstr "PyPI页面"
+
+#: thonny/plugins/pip_gui.py:548
+#, fuzzy
+msgid "Requires"
+msgstr "依赖项"
+
+#: thonny/plugins/pip_gui.py:614
+#, fuzzy
+msgid "Really uninstall?"
+msgstr "真的卸载吗?"
+
+#: thonny/plugins/pip_gui.py:619
+#, fuzzy
+msgid "Are you sure you want to uninstall it?"
+msgstr "你确定你想要卸载吗?"
+
+#: thonny/plugins/variables.py:19
+msgid "Back to\n"
+"current frame"
+msgstr ""
+
+#: thonny/plugins/variables.py:131
+#, fuzzy
+msgid "Variables"
+msgstr "变量"
+
+#: thonny/base_file_browser.py:29
+#, fuzzy
+msgid "This computer"
+msgstr "此电脑"
+
+#: thonny/base_file_browser.py:500
+#, fuzzy
+msgid "Refresh"
+msgstr "刷新"
+
+#: thonny/base_file_browser.py:506
+msgid "Focus into"
+msgstr ""
+
+#: thonny/base_file_browser.py:744
+#, fuzzy
+msgid "Error"
+msgstr "错误"
+
+#: thonny/base_file_browser.py:744
+#, fuzzy
+msgid "You need to select a file!"
+msgstr "你需要选择一个文件"
+
+#: thonny/base_file_browser.py:748
+#, fuzzy
+msgid "Overwrite?"
+msgstr "覆盖?"
+
+#: thonny/base_file_browser.py:748
+#, fuzzy
+msgid "Do you want to overwrite '%s' ?"
+msgstr "你想要覆盖掉'%s'?"
+
+#: thonny/code.py:535 thonny/code.py:537
+#, fuzzy
+msgid "New"
+msgstr "新文件"
+
+#: thonny/code.py:548
+#, fuzzy
+msgid "Open..."
+msgstr "打开..."
+
+#: thonny/code.py:550
+#, fuzzy
+msgid "Load"
+msgstr "加载"
+
+#: thonny/code.py:559
+#, fuzzy
+msgid "Recent files"
+msgstr "最近的文件"
+
+#: thonny/code.py:581 thonny/ui_utils.py:352
+#, fuzzy
+msgid "Close all"
+msgstr "全部关闭"
+
+#: thonny/code.py:591 thonny/code.py:593
+#, fuzzy
+msgid "Save"
+msgstr "保存"
+
+#: thonny/code.py:605
+#, fuzzy
+msgid "Save as..."
+msgstr "另存为..."
+
+#: thonny/code.py:616
+#, fuzzy
+msgid "Save copy..."
+msgstr "保存一个副本..."
+
+#: thonny/code.py:625
+#, fuzzy
+msgid "Rename..."
+msgstr "重命名..."
+
+#: thonny/config_ui.py:17
+#, fuzzy
+msgid "Thonny options"
+msgstr "Thonny 设置"
+
+#: thonny/running.py:92
+#, fuzzy
+msgid "Run current script"
+msgstr "运行当前脚本"
+
+#: thonny/running.py:123
+#, fuzzy
+msgid "Run current script in terminal"
+msgstr "在终端运行当前脚本"
+
+#: thonny/running.py:136
+#, fuzzy
+msgid "Stop/Restart backend"
+msgstr "停止/重启后端进程"
+
+#: thonny/running.py:137
+#, fuzzy
+msgid "Stop"
+msgstr "停止"
+
+#: thonny/running.py:148
+#, fuzzy
+msgid "Interrupt execution"
+msgstr "中断执行"
+
+#: thonny/running.py:159
+msgid "Send EOF / Soft reboot"
+msgstr ""
+
+#: thonny/running.py:170
+#, fuzzy
+msgid "Disconnect"
+msgstr "断开"
+
+#: thonny/running_config_page.py:23
+#, fuzzy
+msgid "Known interpreters"
+msgstr "已知的解释器"
+
+#: thonny/running_config_page.py:36
+#, fuzzy
+msgid "Your interpreter isn't in the list?"
+msgstr "你的解释器不在此列表里?"
+
+#: thonny/running_config_page.py:43
+#, fuzzy
+msgid "Locate another"
+msgstr "选择另一个?"
+
+#: thonny/running_config_page.py:45
+#, fuzzy
+msgid "python executable"
+msgstr "python可执行软件"
+
+#: thonny/running_config_page.py:47
+#, fuzzy
+msgid "NB! Thonny only supports Python 3.5 and later"
+msgstr "注意!Thonny仅支持Python3.5和之后的版本"
+
+#: thonny/running_config_page.py:56
+#, fuzzy
+msgid "Create new virtual environment"
+msgstr "生成新的虚拟环境"
+
+#: thonny/running_config_page.py:59
+#, fuzzy
+msgid "Select existing or create a new empty directory"
+msgstr "选择已存在或这创建新的文件夹"
+
+#: thonny/running_config_page.py:74
+#, fuzzy
+msgid "Python interpreters"
+msgstr "Python解释器"
+
+#: thonny/plugins/pip_gui.py:657 thonny/plugins/pip_gui.py:669
+#: thonny/running_config_page.py:75
+#, fuzzy
+msgid "all files"
+msgstr "全部文件"
+
+#: thonny/running_config_page.py:89
+#, fuzzy
+msgid "Select empty directory for new virtual environment"
+msgstr "为新的虚拟环境选择一个新的文件夹"
+
+#: thonny/running_config_page.py:96
+#, fuzzy
+msgid "Bad directory"
+msgstr "无效的文件夹"
+
+#: thonny/running_config_page.py:97
+#, fuzzy
+msgid "Selected directory is not empty.\n"
+"Select another or cancel."
+msgstr "选择的文件夹非空,\n"
+"请选择另一个或取消."
+
+#: thonny/running_config_page.py:112
+#, fuzzy
+msgid "Creating virtual environment"
+msgstr "新的虚拟环境"
+
+#: thonny/shell.py:72
+#, fuzzy
+msgid "Clear shell"
+msgstr "清空shell"
+
+#: thonny/shell.py:126
+msgid "Plotter"
+msgstr ""
+
+#: thonny/shell.py:245
+#, fuzzy
+msgid "Clear"
+msgstr "清空"
+
+#: thonny/shell.py:258
+msgid "Show Plotter"
+msgstr ""
+
+#: thonny/shell.py:1389
+#, fuzzy
+msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
+"Here you can interact with the original text fragment."
+msgstr "出于性能原因，Shell避免显示非常长的行(请参阅Tools => Options => Shell).\n"
+"在这里，您可以与原始文本片段进行交互."
+
+#: thonny/shell.py:1400
+#, fuzzy
+msgid "Wrap text (may be slow)"
+msgstr "换行文字（可能很慢）"
+
+#: thonny/shell.py:1425 thonny/ui_utils.py:1622
+#, fuzzy
+msgid "Copy to clipboard"
+msgstr "复制到剪切板"
+
+#: thonny/shell.py:1431
+#, fuzzy
+msgid "Expand in Shell"
+msgstr "在shell中扩展"
+
+#: thonny/shell.py:1442
+#, fuzzy
+msgid "Squeezed text (%d characters)"
+msgstr "压缩文本(%d 个字符)"
+
+#: thonny/shell.py:1611
+msgid "Plotter visualizes series of\n"
+"numbers printed to the Shell."
+msgstr ""
+
+#: thonny/shell.py:1613
+#, fuzzy
+msgid "See Help for details."
+msgstr "详细请查看帮助."
+
+#: thonny/ui_utils.py:351
+#, fuzzy
+msgid "Close others"
+msgstr "关闭其他的"
+
+#: thonny/ui_utils.py:1482
+#, fuzzy
+msgid "Copying"
+msgstr "复制中"
+
+#: thonny/ui_utils.py:1485
+#, fuzzy
+msgid "Copying\n"
+"  %s\n"
+"to\n"
+"  %s"
+msgstr "复制\n"
+"  %s\n"
+"到\n"
+"  %s"
+
+#: thonny/config_ui.py:31 thonny/plugins/pip_gui.py:1066
+#: thonny/ui_utils.py:1493 thonny/ui_utils.py:1695
+#, fuzzy
+msgid "Cancel"
+msgstr "取消"
+
+#: thonny/config_ui.py:30 thonny/ui_utils.py:1747
+msgid "OK"
+msgstr ""
+
+#: thonny/ui_utils.py:1766
+#, fuzzy
+msgid "Cancel the process?"
+msgstr "取消这个进程?"
+
+#: thonny/ui_utils.py:1767
+#, fuzzy
+msgid "The process is still running.\n"
+"Are you sure you want to cancel?"
+msgstr "这个进程正在运行,你确定取消吗?"
+
+#: thonny/ui_utils.py:2165
+#, fuzzy
+msgid "Select All"
+msgstr "全选"
+
+#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:157
+msgid "Shell"
+msgstr ""
+
+#: thonny/workbench.py:507
+#, fuzzy
+msgid "The same interpreter which runs Thonny (default)"
+msgstr "Thonny的解释器(默认)"
+
+#: thonny/workbench.py:526
+msgid "This virtual environment is automatically maintained by Thonny.\n"
+""
+msgstr ""
+
+#: thonny/workbench.py:527
+#, fuzzy
+msgid "Location: "
+msgstr "位置"
+
+#: thonny/workbench.py:573
+#, fuzzy
+msgid "Options..."
+msgstr "设置..."
+
+#: thonny/workbench.py:580
+#, fuzzy
+msgid "Increase font size"
+msgstr "增大字体"
+
+#: thonny/workbench.py:645
+#, fuzzy
+msgid "Change font size"
+msgstr "改变字体大小"
+
+#: thonny/workbench.py:646
+#, fuzzy
+msgid "Zoom"
+msgstr "放大"
+
+#: thonny/workbench.py:655
+#, fuzzy
+msgid "Exit Thonny"
+msgstr "退出Thonny"
+
+#: thonny/workbench.py:658
+#, fuzzy
+msgid "Quit"
+msgstr "退出"
+
+#: thonny/workbench.py:1045 thonny/workbench.py:1053
+msgid "Overwriting theme '%s'"
+msgstr ""
+
+#: thonny/workbench.py:1080
+msgid "Only numeric dimensions supported at the moment"
+msgstr ""
+
+#: thonny/workbench.py:1152
+#, fuzzy
+msgid "Can't find theme '%s'"
+msgstr "无法找到'%s'主题"
+
+#: thonny/workbench.py:1212
+msgid "Program arguments:"
+msgstr ""
+
+#: thonny/workbench.py:1255
+msgid "Switch to\n"
+"regular mode"
+msgstr ""
+
+#: thonny/workbench.py:1266
+#, fuzzy
+msgid "Regular mode"
+msgstr "常规模式"
+
+#: thonny/workbench.py:1267
+#, fuzzy
+msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
+"\n"
+"(See 'Tools → Options → General' if you change your mind later.)"
+msgstr "配置已更新。 重启Thonny以开始于常规模式工作。\n"
+"(如果您稍后改变主意，请参阅'工具→设置→通用'.)"
+
+#: thonny/workbench.py:1302
+msgid "Problem showing "
+msgstr ""
+
+#: thonny/workbench.py:1367
+msgid "View %s not created"
+msgstr ""
+
+#: thonny/workbench.py:1527
+msgid "Problem when handling '"
+msgstr ""
+
+#: thonny/workbench.py:1703
+#, fuzzy
+msgid "Couldn't find menu"
+msgstr "无法找到菜单"
+
+#: thonny/workbench.py:1718
+msgid "Missing caption for '%s'. Toolbar commands must have caption."
+msgstr ""
+
+#: thonny/plugins/ast_view.py:209
+#, fuzzy
+msgid "Program tree"
+msgstr "程序结构树"
+
+#: thonny/plugins/backend_config_page.py:130
+#, fuzzy
+msgid "Select interpreter"
+msgstr "选择解释器"
+
+#: thonny/plugins/debugger.py:1163
+msgid "Resume"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1175
+msgid "Run / resume"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1189
+#, fuzzy
+msgid "Debug current script"
+msgstr "调试当前脚本"
+
+#: thonny/plugins/debugger.py:1191
+#, fuzzy
+msgid "Debug"
+msgstr "调试"
+
+#: thonny/plugins/debugger.py:1202
+#, fuzzy
+msgid "Debug current script (nicer)"
+msgstr "调试当前脚本(完全)"
+
+#: thonny/plugins/debugger.py:1214
+#, fuzzy
+msgid "Debug current script (faster)"
+msgstr "调试当前脚本(快速)"
+
+#: thonny/plugins/debugger.py:1225
+msgid "Step over"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1227
+#, fuzzy
+msgid "Over"
+msgstr "结束"
+
+#: thonny/plugins/debugger.py:1238
+msgid "Step into"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1240
+msgid "Into"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1251
+msgid "Step out"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1253
+msgid "Out"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1288
+msgid "Step back"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1290
+#, fuzzy
+msgid "Back"
+msgstr "后退"
+
+#: thonny/plugins/debugger.py:1296
+msgid "Stack"
+msgstr ""
+
+#: thonny/plugins/debugger.py:1297
+#, fuzzy
+msgid "Exception"
+msgstr "异常"
+
+#: thonny/plugins/general_config_page.py:16
+#, fuzzy
+msgid "Log program usage events"
+msgstr "记录程序执行事件"
+
+#: thonny/plugins/general_config_page.py:32
+#, fuzzy
+msgid "Debug mode (provides more detailed diagnostic logs)"
+msgstr "调试模式（提供更详细的诊断日志）"
+
+#: thonny/plugins/general_config_page.py:56
+#, fuzzy
+msgid "UI mode"
+msgstr "UI 模式"
+
+#: thonny/plugins/general_config_page.py:69
+#, fuzzy
+msgid "UI scaling factor"
+msgstr "UI 缩放倍数"
+
+#: thonny/plugins/general_config_page.py:88
+#, fuzzy
+msgid "NB! Restart Thonny after changing these options!"
+msgstr "注意,改变设置后请重启Thonny!"
+
+#: thonny/plugins/general_config_page.py:102
+#, fuzzy
+msgid "General"
+msgstr "通用"
+
+#: thonny/plugins/pip_gui.py:108
+#, fuzzy
+msgid "INSTALL"
+msgstr "已安装"
+
+#: thonny/plugins/pip_gui.py:242
+#, fuzzy
+msgid "Installing pip"
+msgstr "安装pip中"
+
+#: thonny/plugins/pip_gui.py:245
+msgid "pip, a required module for managing packages is missing or too old.\n"
+"\n"
+"Downloading pip installer (about 1.5 MB), please wait ..."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:256
+#, fuzzy
+msgid "Installing pip, please wait ..."
+msgstr "正在安装pip,请稍等..."
+
+#: thonny/plugins/pip_gui.py:282
+msgid "pip, a required module for managing packages is missing or too old for Thonny.\n"
+"\n"
+"If your system package manager doesn't provide recent pip (9.0.0 or later), then you can install newest version by downloading"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:293
+msgid "and running it with"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:297
+msgid "(probably needs admin privileges)."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:352
+#, fuzzy
+msgid "Browse the packages"
+msgstr "浏览模块"
+
+#: thonny/plugins/pip_gui.py:355
+msgid "With current interpreter you can only browse the packages here.\n"
+"Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:363
+#, fuzzy
+msgid "Packages' directory"
+msgstr "模块文件夹"
+
+#: thonny/plugins/pip_gui.py:368
+#, fuzzy
+msgid "Install from PyPI"
+msgstr "从PyPI安装"
+
+#: thonny/plugins/pip_gui.py:371
+msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:387
+msgid "to locate requirements.txt file and install the packages specified in it."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:392
+#, fuzzy
+msgid "Click"
+msgstr "点击"
+
+#: thonny/plugins/pip_gui.py:397
+msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:403
+#, fuzzy
+msgid "Upgrade or uninstall"
+msgstr "升级或卸载"
+
+#: thonny/plugins/pip_gui.py:405
+msgid "Start by selecting the package from the left."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:409
+#, fuzzy
+msgid "Target:"
+msgstr "位置:"
+
+#: thonny/plugins/pip_gui.py:412
+#, fuzzy
+msgid "virtual environment"
+msgstr "虚拟环境"
+
+#: thonny/plugins/pip_gui.py:416
+#, fuzzy
+msgid "user site packages"
+msgstr "用户安装的模块"
+
+#: thonny/plugins/pip_gui.py:421
+#, fuzzy
+msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
+msgstr "这里列出了所有可用的模块,但升级或卸载只能在这里"
+
+#: thonny/plugins/pip_gui.py:431
+#, fuzzy
+msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
+msgstr "新的模块也会安装到这个文件夹下,其他位置必须通过其他方式管理."
+
+#: thonny/plugins/pip_gui.py:456
+#, fuzzy
+msgid "Installed version:"
+msgstr "已安装版本:"
+
+#: thonny/plugins/pip_gui.py:458
+#, fuzzy
+msgid "Installed to:"
+msgstr "安装在:"
+
+#: thonny/plugins/pip_gui.py:510
+#, fuzzy
+msgid "Please check your spelling!"
+msgstr "请检查你的拼写!"
+
+#: thonny/plugins/pip_gui.py:512
+#, fuzzy
+msgid "You need to enter"
+msgstr "你需要输入"
+
+#: thonny/plugins/pip_gui.py:520
+#, fuzzy
+msgid "Could not find the package info from PyPI."
+msgstr "无法从PyPI找到此模块"
+
+#: thonny/plugins/pip_gui.py:522 thonny/plugins/pip_gui.py:1120
+#, fuzzy
+msgid "Error code:"
+msgstr "错误代码"
+
+#: thonny/plugins/pip_gui.py:581
+#, fuzzy
+msgid "Can't find package name from the list:"
+msgstr "无法从这个表中找到模块的名字:"
+
+#: thonny/plugins/pip_gui.py:615
+msgid "Package '{}' is required for installing and uninstalling other packages."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:657
+#, fuzzy
+msgid "Package"
+msgstr "模块"
+
+#: thonny/plugins/pip_gui.py:757
+#, fuzzy
+msgid "Manage packages for %s"
+msgstr "管理%s模块"
+
+#: thonny/plugins/pip_gui.py:813
+msgid "Confirmation"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:814
+msgid "Looks like you are installing a Thonny-related package.\n"
+"If you meant to install a Thonny plugin, then you should\n"
+"choose 'Tools → Manage plugins...' instead\n"
+"\n"
+"Are you sure you want to install %s for the back-end?"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:912
+msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:920
+msgid "Thonny plugin without requirements"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:921
+msgid "Looks like you are trying to install an outdated Thonny\n"
+"plug-in (it doesn't specify required Thonny version).\n"
+"\n"
+"If you still want it, then please install it from the command line."
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:935
+msgid "Unsuitable requirements"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:936
+#, fuzzy
+msgid "This package requires different Thonny version:"
+msgstr "这个库需要另一个Thonny版本:"
+
+#: thonny/plugins/pip_gui.py:940
+#, fuzzy
+msgid "If you still want it, then please install it from the command line."
+msgstr "如果你需要它,那么请从命令行中安装."
+
+#: thonny/plugins/pip_gui.py:984
+msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:990
+#, fuzzy
+msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
+msgstr "注意!你需要重启Thonny在安装/升级/卸载一个插件后"
+
+#: thonny/plugins/pip_gui.py:1000
+#, fuzzy
+msgid "Thonny plug-ins"
+msgstr "Thonny插件"
+
+#: thonny/plugins/pip_gui.py:1013
+msgid "Advanced install / upgrade / downgrade"
+msgstr "高级 安装/升级/"
+
+#: thonny/plugins/pip_gui.py:1022
+msgid "Desired version"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:1060
+msgid "Upgrade dependencies"
+msgstr ""
+
+#: thonny/plugins/pip_gui.py:1118
+#, fuzzy
+msgid "Requires:"
+msgstr "依赖项:"
+
+#: thonny/plugins/pip_gui.py:1122
+#, fuzzy
+msgid "Error:"
+msgstr "错误:"
+
+#: thonny/plugins/pip_gui.py:1232
+#, fuzzy
+msgid "Manage packages..."
+msgstr "管理模块..."
+
+#: thonny/plugins/pip_gui.py:1238
+#, fuzzy
+msgid "Manage plug-ins..."
+msgstr "管理插件..."
+
+#: thonny/plugins/replayer.py:354
+msgid "Open replayer..."
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:12
+msgid "Change working directory to script directory on Run / Debug"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:20
+msgid "Show function calls (frames) in separate windows"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:21
+msgid "Uncheck if you want more traditional experience."
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:27
+msgid "Open and close Stack view automatically"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:28
+msgid "Opens the Stack view on first call and closes it when program returns to main frame."
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:37
+msgid "Allow stepping into libraries (ie. outside of main script directory)"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:38
+#, fuzzy
+msgid "May make debugging slower."
+msgstr "可能使调试变慢"
+
+#: thonny/plugins/run_debug_config_page.py:43
+#, fuzzy
+msgid "Preferred debugger"
+msgstr "首选调试器"
+
+#: thonny/plugins/run_debug_config_page.py:55
+msgid "(used when clicking Debug toolbar button)"
+msgstr ""
+
+#: thonny/plugins/run_debug_config_page.py:60
+#, fuzzy
+msgid "Birdseye port"
+msgstr "Birdseye端口"
+
+#: thonny/plugins/run_debug_config_page.py:64
+#, fuzzy
+msgid "(restart Thonny after changing this)"
+msgstr "(改变后重启Thonny)"
+
+#: thonny/plugins/run_debug_config_page.py:72
+#, fuzzy
+msgid "Run & Debug"
+msgstr "运行&调试"
+
+#: thonny/plugins/shell_config_page.py:16
+msgid "Terminal emulation"
+msgstr ""
+
+#: thonny/plugins/shell_config_page.py:18
+msgid "supports basic ANSI-colors and styles"
+msgstr ""
+
+#: thonny/plugins/shell_config_page.py:30
+msgid "Maximum number of lines to keep."
+msgstr ""
+
+#: thonny/plugins/shell_config_page.py:32
+msgid "NB! Large values may cause poor performance!"
+msgstr ""
+
+#: thonny/plugins/shell_config_page.py:47
+msgid "Maximum length of line fragments before squeezing"
+msgstr ""
+
+#: thonny/plugins/terminal_config_page.py:10
+#, fuzzy
+msgid "Running current script in terminal"
+msgstr "在终端运行此脚本"
+
+#: thonny/plugins/terminal_config_page.py:15
+msgid "Present Python REPL after program ends"
+msgstr ""
+
+#: thonny/plugins/terminal_config_page.py:22
+msgid "Keep terminal window open after Python process ends"
+msgstr ""
+
+#: thonny/plugins/terminal_config_page.py:29
+msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
+"(Profiles → Shell → When the shell exits)"
+msgstr ""
+
+#: thonny/plugins/terminal_config_page.py:38
+#, fuzzy
+msgid "Terminal"
+msgstr "终端"
+
+#: thonny/plugins/theme_and_font_config_page.py:39
+#, fuzzy
+msgid "UI theme"
+msgstr "UI主题"
+
+#: thonny/plugins/theme_and_font_config_page.py:52
+#, fuzzy
+msgid "Syntax theme"
+msgstr "语法主题"
+
+#: thonny/plugins/theme_and_font_config_page.py:84
+#, fuzzy
+msgid "Editor font"
+msgstr "编辑器字体"
+
+#: thonny/plugins/theme_and_font_config_page.py:107
+#, fuzzy
+msgid "IO font"
+msgstr "IO 字体"
+
+#: thonny/plugins/theme_and_font_config_page.py:132
+#, fuzzy
+msgid "Preview"
+msgstr "预览"
+
+#: thonny/plugins/theme_and_font_config_page.py:144
+#, fuzzy
+msgid "This is a comment"
+msgstr "这是一个留言"
+
+#: thonny/plugins/theme_and_font_config_page.py:147
+#, fuzzy
+msgid "The answer is"
+msgstr "结果是"
+
+#: thonny/plugins/theme_and_font_config_page.py:151
+msgid "unclosed_string"
+msgstr ""
+
+#: thonny/plugins/theme_and_font_config_page.py:153
+msgid "blah, blah"
+msgstr ""
+
+#: thonny/plugins/theme_and_font_config_page.py:176
+#, fuzzy
+msgid "NB! Some style elements change only after restarting Thonny!"
+msgstr "注意!改变一些风格在重启Thonny后生效!"
+
+#: thonny/plugins/theme_and_font_config_page.py:215
+#, fuzzy
+msgid "Enter an integer"
+msgstr "输入一个整数"
+
+#: thonny/plugins/theme_and_font_config_page.py:228
+#, fuzzy
+msgid "Theme & Font"
+msgstr "主题&字体"
+
+#: thonny/plugins/thonny_folders.py:18
+#, fuzzy
+msgid "Open Thonny program folder..."
+msgstr "打开Thonny安装目录..."
+
+#: thonny/plugins/thonny_folders.py:23
+#, fuzzy
+msgid "Open Thonny data folder..."
+msgstr "打开Thonny日志目录..."
+
+#: thonny/plugins/help/__init__.py:58
+msgid "Home"
+msgstr ""
+
+#: thonny/plugins/help/__init__.py:69
+#, fuzzy
+msgid "Help contents"
+msgstr "帮助内容"
+
+#: thonny/plugins/micropython/__init__.py:165
+msgid "CircuitPython device"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:169
+#, fuzzy
+msgid "MicroPython device"
+msgstr "MicroPython设备"
+
+#: thonny/plugins/micropython/__init__.py:178
+msgid "Connect your device to the computer and select corresponding port below"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:181
+msgid "look for your device name, \"USB Serial\" or \"UART\""
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:183
+msgid "If you can't find it, you may need to install proper USB driver first."
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:207
+#, fuzzy
+msgid "Port"
+msgstr "端口"
+
+#: thonny/plugins/micropython/__init__.py:216
+#, fuzzy
+msgid "Try to detect port automatically"
+msgstr "自动探测端口"
+
+#: thonny/plugins/micropython/__init__.py:363
+msgid "MicroPython (generic)"
+msgstr ""
+
+#: thonny/plugins/printing/__init__.py:79
+#, fuzzy
+msgid "Print..."
+msgstr "打印..."
+
+#: thonny/plugins/system_shell/__init__.py:59
+#, fuzzy
+msgid "Open system shell..."
+msgstr "打开系统shell..."
+
+#: thonny/plugins/backend_config_page.py:61
+#, fuzzy
+msgid "Details"
+msgstr "详细"
+
+#: thonny/plugins/pip_gui.py:380
+#, fuzzy
+msgid "Install from requirements file"
+msgstr "从requirements文件中安装"
+
+#: thonny/plugins/pip_gui.py:391
+#, fuzzy
+msgid "Install from local file"
+msgstr "从本地文件中安装"
+
+#: thonny/plugins/pip_gui.py:970
+msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
+"If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
+msgstr ""
+
+#: thonny/plugins/circuitpython/__init__.py:47
+msgid "CircuitPython (generic)"
+msgstr ""
+
+#: thonny/plugins/commenting_indenting.py:121
+#, fuzzy
+msgid "Indent selected lines"
+msgstr "缩进选择的行"
+
+#: thonny/plugins/commenting_indenting.py:131
+#, fuzzy
+msgid "Dedent selected lines"
+msgstr "反缩进选择的行"
+
