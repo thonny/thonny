@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.2.0b7 (2019-07-19)
+====================
+* FIXED: Problem with translation markers disturbing import
+
 3.2.0b6 (2019-07-19)
 ====================
 * NEW: BBC micro:bit plug-in has been merged into main Thonny package
