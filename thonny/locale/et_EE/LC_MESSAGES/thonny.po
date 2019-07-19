@@ -7,63 +7,63 @@ msgstr ""
 "Project-Id-Version: Thonny\n"
 "Language: et\n"
 
-#: thonny/workbench.py:350
+#: thonny/workbench.py:355
 msgid "File"
 msgstr "Fail"
 
-#: thonny/workbench.py:351
+#: thonny/workbench.py:356
 msgid "Edit"
 msgstr "Redigeeri"
 
-#: thonny/workbench.py:352
+#: thonny/workbench.py:357
 msgid "View"
 msgstr "Vaated"
 
-#: thonny/running.py:93 thonny/workbench.py:353
+#: thonny/running.py:93 thonny/workbench.py:358
 msgid "Run"
-msgstr "Jooksutamine"
+msgstr "Käivita"
 
-#: thonny/workbench.py:355
+#: thonny/workbench.py:360
 msgid "Tools"
 msgstr "Tööriistad"
 
-#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:356
+#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:361
 msgid "Help"
 msgstr "Abiinfo"
 
-#: thonny/workbench.py:517
+#: thonny/workbench.py:522
 msgid "Alternative Python 3 interpreter or virtual environment"
 msgstr "Alternatiivne Python 3 interpretaator või virtuaalkeskkond"
 
-#: thonny/workbench.py:525
+#: thonny/workbench.py:530
 msgid "A special virtual environment (deprecated)"
 msgstr "Spetsiaalne virtuaalkeskkond (pole soovitav)"
 
-#: thonny/workbench.py:563
+#: thonny/workbench.py:568
 msgid "Exit"
 msgstr "Välju"
 
-#: thonny/workbench.py:590
+#: thonny/workbench.py:595
 msgid "Decrease font size"
 msgstr "Vähenda fondi suurust"
 
-#: thonny/workbench.py:602
+#: thonny/workbench.py:607
 msgid "Focus editor"
 msgstr "Mine redaktorisse"
 
-#: thonny/workbench.py:611
+#: thonny/workbench.py:616
 msgid "Focus shell"
 msgstr "Mine käsureale"
 
-#: thonny/workbench.py:622
+#: thonny/workbench.py:627
 msgid "Maximize view"
 msgstr "Suurenda vaade"
 
-#: thonny/workbench.py:634
+#: thonny/workbench.py:639
 msgid "Full screen"
 msgstr "Täisekraan"
 
-#: thonny/workbench.py:1241
+#: thonny/workbench.py:1250
 msgid "Program arguments"
 msgstr "Programmi argumendid"
 
@@ -159,55 +159,43 @@ msgstr "Birdseye on Pythoni silur, mis tuleb eraldi paigaldada.\n"
 msgid "Debug current script (birdseye)"
 msgstr "Silu käesolevat skripti (birdseye)"
 
-#: thonny/plugins/cells.py:173
-msgid "Run cell"
-msgstr ""
-
-#: thonny/plugins/cells.py:183
-msgid "Run cell and advance"
-msgstr ""
-
-#: thonny/plugins/cells.py:193
-msgid "Run selection or current line"
-msgstr ""
-
-#: thonny/plugins/commenting_indenting.py:141
+#: thonny/plugins/commenting_indenting.py:143
 msgid "Toggle comment"
 msgstr "Lülita kommentaar sisse/välja"
 
-#: thonny/plugins/commenting_indenting.py:151
+#: thonny/plugins/commenting_indenting.py:153
 msgid "Comment out"
 msgstr "Kommenteeri"
 
-#: thonny/plugins/commenting_indenting.py:161
+#: thonny/plugins/commenting_indenting.py:163
 msgid "Uncomment"
 msgstr "Eemalda kommentaar"
 
-#: thonny/plugins/common_editing_commands.py:32
+#: thonny/plugins/common_editing_commands.py:20
 msgid "Undo"
 msgstr "Võta muudatus tagasi"
 
-#: thonny/plugins/common_editing_commands.py:44
+#: thonny/plugins/common_editing_commands.py:32
 msgid "Redo"
 msgstr "Rakenda tagasivõetud muudatus uuesti"
 
-#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2159
+#: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2159
 msgid "Cut"
 msgstr "Lõika"
 
-#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2160
+#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2160
 msgid "Copy"
 msgstr "Kopeeri"
 
-#: thonny/plugins/common_editing_commands.py:84 thonny/ui_utils.py:2161
+#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2161
 msgid "Paste"
 msgstr "Kleebi"
 
-#: thonny/plugins/common_editing_commands.py:96 thonny/plugins/debugger.py:124
+#: thonny/plugins/common_editing_commands.py:84 thonny/plugins/debugger.py:124
 msgid "Select all"
 msgstr "Vali kõik"
 
-#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1276
+#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1273
 msgid "Run to cursor"
 msgstr "Jooksuta kursorini"
 
@@ -399,20 +387,10 @@ msgstr "Otsi pakki PyPI-st"
 msgid "Uninstall"
 msgstr "Desinstalli"
 
-#: thonny/code.py:570 thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350
-#: thonny/ui_utils.py:1626
+#: thonny/code.py:570 thonny/plugins/microbit/__init__.py:200
+#: thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350 thonny/ui_utils.py:1626
 msgid "Close"
 msgstr "Sulge"
-
-#: thonny/plugins/pip_gui.py:278
-msgid "You seem to have problems with pip\n"
-"\n"
-""
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:305
-msgid "Alternatively, if you have an older pip installed, then you can install packages on the command line (Tools → Open system shell...)"
-msgstr ""
 
 #: thonny/plugins/pip_gui.py:382
 msgid "Click "
@@ -426,7 +404,8 @@ msgstr "siia"
 msgid "Upgrade"
 msgstr "Uuenda"
 
-#: thonny/plugins/pip_gui.py:483 thonny/plugins/pip_gui.py:1064
+#: thonny/plugins/microbit/__init__.py:123 thonny/plugins/pip_gui.py:483
+#: thonny/plugins/pip_gui.py:1064
 msgid "Install"
 msgstr "Installi"
 
@@ -710,8 +689,9 @@ msgstr "Kopeerin\n"
 "=> \n"
 "  %s"
 
-#: thonny/config_ui.py:31 thonny/plugins/pip_gui.py:1066
-#: thonny/ui_utils.py:1493 thonny/ui_utils.py:1695
+#: thonny/config_ui.py:31 thonny/plugins/microbit/__init__.py:127
+#: thonny/plugins/pip_gui.py:1066 thonny/ui_utils.py:1493
+#: thonny/ui_utils.py:1695
 msgid "Cancel"
 msgstr "Tühista"
 
@@ -733,100 +713,66 @@ msgstr "Protsess käib veel.\n"
 msgid "Select All"
 msgstr "Vali kõik"
 
-#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:157
+#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:162
 msgid "Shell"
 msgstr "Käsurida"
 
-#: thonny/workbench.py:507
+#: thonny/workbench.py:512
 msgid "The same interpreter which runs Thonny (default)"
 msgstr "Sama interpretaator, mis jooksutab Thonnyt (vaikimisi)"
 
-#: thonny/workbench.py:526
+#: thonny/workbench.py:531
 msgid "This virtual environment is automatically maintained by Thonny.\n"
 ""
 msgstr "Seda virtuaalkeskkonda haldab Thonny automaatselt."
 
-#: thonny/workbench.py:527
+#: thonny/workbench.py:532
 msgid "Location: "
 msgstr "Asukoht: "
 
-#: thonny/workbench.py:573
+#: thonny/workbench.py:578
 msgid "Options..."
 msgstr "Seaded..."
 
-#: thonny/workbench.py:580
+#: thonny/workbench.py:585
 msgid "Increase font size"
 msgstr "Suurenda kirja suurust"
 
-#: thonny/workbench.py:645
+#: thonny/workbench.py:650
 msgid "Change font size"
 msgstr "Muuda kirja suurust"
 
-#: thonny/workbench.py:646
+#: thonny/workbench.py:651
 msgid "Zoom"
 msgstr "Suurus"
 
-#: thonny/workbench.py:655
+#: thonny/workbench.py:660
 msgid "Exit Thonny"
 msgstr "Välju Thonnyst"
 
-#: thonny/workbench.py:658
+#: thonny/workbench.py:663
 msgid "Quit"
 msgstr "Välju"
 
-#: thonny/workbench.py:1045 thonny/workbench.py:1053
+#: thonny/workbench.py:1054 thonny/workbench.py:1062
 msgid "Overwriting theme '%s'"
 msgstr "Kirjutan üle teemat nimega '%s'"
 
-#: thonny/workbench.py:1080
-msgid "Only numeric dimensions supported at the moment"
-msgstr ""
-
-#: thonny/workbench.py:1152
-msgid "Can't find theme '%s'"
-msgstr ""
-
-#: thonny/workbench.py:1212
+#: thonny/workbench.py:1221
 msgid "Program arguments:"
 msgstr "Programmi argumendid:"
 
-#: thonny/workbench.py:1255
-msgid "Switch to\n"
-"regular mode"
-msgstr "Lülita\n"
-"tavarežiimi"
-
-#: thonny/workbench.py:1266
+#: thonny/workbench.py:1275
 msgid "Regular mode"
 msgstr "Tavarežiim"
 
-#: thonny/workbench.py:1267
+#: thonny/workbench.py:1276
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
 msgstr "Seaded on muudetud. Tavarežiimis alustamiseks taaskäivita Thonny.\n"
 "\n"
 "(Vaata 'Tööriistad → Seaded → Üldine', kui Sa mõtled hiljem ümber.)"
-
-#: thonny/workbench.py:1302
-msgid "Problem showing "
-msgstr ""
-
-#: thonny/workbench.py:1367
-msgid "View %s not created"
-msgstr ""
-
-#: thonny/workbench.py:1527
-msgid "Problem when handling '"
-msgstr ""
-
-#: thonny/workbench.py:1703
-msgid "Couldn't find menu"
-msgstr ""
-
-#: thonny/workbench.py:1718
-msgid "Missing caption for '%s'. Toolbar commands must have caption."
-msgstr ""
 
 #: thonny/plugins/ast_view.py:209
 msgid "Program tree"
@@ -836,67 +782,67 @@ msgstr "Programmipuu"
 msgid "Select interpreter"
 msgstr "Vali interpretaator"
 
-#: thonny/plugins/debugger.py:1163
+#: thonny/plugins/debugger.py:1159
 msgid "Resume"
 msgstr "Naase"
 
-#: thonny/plugins/debugger.py:1175
+#: thonny/plugins/debugger.py:1171
 msgid "Run / resume"
 msgstr "Jooksuta / naase"
 
-#: thonny/plugins/debugger.py:1189
+#: thonny/plugins/debugger.py:1186
 msgid "Debug current script"
 msgstr "Silu käesolevat skripti"
 
-#: thonny/plugins/debugger.py:1191
+#: thonny/plugins/debugger.py:1188
 msgid "Debug"
 msgstr "Silu"
 
-#: thonny/plugins/debugger.py:1202
+#: thonny/plugins/debugger.py:1199
 msgid "Debug current script (nicer)"
 msgstr "Silu käesolevat skripti (ägedam)"
 
-#: thonny/plugins/debugger.py:1214
+#: thonny/plugins/debugger.py:1211
 msgid "Debug current script (faster)"
 msgstr "Silu käesolevat skripti (kiirem)"
 
-#: thonny/plugins/debugger.py:1225
+#: thonny/plugins/debugger.py:1222
 msgid "Step over"
 msgstr "Astu üle"
 
-#: thonny/plugins/debugger.py:1227
+#: thonny/plugins/debugger.py:1224
 msgid "Over"
 msgstr "Üle"
 
-#: thonny/plugins/debugger.py:1238
+#: thonny/plugins/debugger.py:1235
 msgid "Step into"
 msgstr "Asti sisse"
 
-#: thonny/plugins/debugger.py:1240
+#: thonny/plugins/debugger.py:1237
 msgid "Into"
 msgstr "Sisse"
 
-#: thonny/plugins/debugger.py:1251
+#: thonny/plugins/debugger.py:1248
 msgid "Step out"
 msgstr "Astu välja"
 
-#: thonny/plugins/debugger.py:1253
+#: thonny/plugins/debugger.py:1250
 msgid "Out"
 msgstr "Välja"
 
-#: thonny/plugins/debugger.py:1288
+#: thonny/plugins/debugger.py:1285
 msgid "Step back"
 msgstr "Astu tagasi"
 
-#: thonny/plugins/debugger.py:1290
+#: thonny/plugins/debugger.py:1287
 msgid "Back"
 msgstr "Tagasi"
 
-#: thonny/plugins/debugger.py:1296
+#: thonny/plugins/debugger.py:1293
 msgid "Stack"
 msgstr "Pinu"
 
-#: thonny/plugins/debugger.py:1297
+#: thonny/plugins/debugger.py:1294
 msgid "Exception"
 msgstr "Erind"
 
@@ -927,34 +873,6 @@ msgstr "Üldine"
 #: thonny/plugins/pip_gui.py:108
 msgid "INSTALL"
 msgstr "INSTALLI"
-
-#: thonny/plugins/pip_gui.py:242
-msgid "Installing pip"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:245
-msgid "pip, a required module for managing packages is missing or too old.\n"
-"\n"
-"Downloading pip installer (about 1.5 MB), please wait ..."
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:256
-msgid "Installing pip, please wait ..."
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:282
-msgid "pip, a required module for managing packages is missing or too old for Thonny.\n"
-"\n"
-"If your system package manager doesn't provide recent pip (9.0.0 or later), then you can install newest version by downloading"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:293
-msgid "and running it with"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:297
-msgid "(probably needs admin privileges)."
-msgstr ""
 
 #: thonny/plugins/pip_gui.py:352
 msgid "Browse the packages"
@@ -1073,34 +991,41 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr ""
+msgstr "Paistab, et soovid installida Thonny pistikprogrammi.\n"
+"Õige oleks seda teha 'Tööriistad → Halda pistikprogramme' alt.\n"
+"\n"
+"Oled sa kindel, et tahad installida %s siin?"
 
 #: thonny/plugins/pip_gui.py:912
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
-msgstr ""
+msgstr "NB! Mõni muu versioon võib selle Thonny versiooniga klappida. \n"
+"Klõpsa '...' nupule versiooni valimiseks."
 
 #: thonny/plugins/pip_gui.py:920
 msgid "Thonny plugin without requirements"
-msgstr ""
+msgstr "Thonny pistikprogramm ilma sõltuvusteta"
 
 #: thonny/plugins/pip_gui.py:921
 msgid "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
 "\n"
 "If you still want it, then please install it from the command line."
-msgstr ""
+msgstr "Paistab, et proovid installida aegunud Thonny pistikprogrammi\n"
+"(sellel pole märgitud vajalikku Thonny versiooni).\n"
+"\n"
+"Kui sa tõesti tahad seda, siis installi see süsteemi käsurealt."
 
 #: thonny/plugins/pip_gui.py:935
 msgid "Unsuitable requirements"
-msgstr ""
+msgstr "Ebasobivad sõltuvused"
 
 #: thonny/plugins/pip_gui.py:936
 msgid "This package requires different Thonny version:"
-msgstr ""
+msgstr "See pakk vajab teistsugust Thonny versiooni:"
 
 #: thonny/plugins/pip_gui.py:940
 msgid "If you still want it, then please install it from the command line."
-msgstr ""
+msgstr "Kui sa ikkagi tahad seda, siis installi see süsteemi käsurealt.."
 
 #: thonny/plugins/pip_gui.py:984
 msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
@@ -1193,7 +1118,7 @@ msgstr "(taaskäivita Thonny peale selle muutmist)"
 
 #: thonny/plugins/run_debug_config_page.py:72
 msgid "Run & Debug"
-msgstr "Jooksutamine"
+msgstr "Käivitamine"
 
 #: thonny/plugins/shell_config_page.py:16
 msgid "Terminal emulation"
@@ -1217,7 +1142,7 @@ msgstr "Maksimaalne realõigu pikkus enne \"kokkupigistamist\""
 
 #: thonny/plugins/terminal_config_page.py:10
 msgid "Running current script in terminal"
-msgstr "Skripti jooksutamine terminalis"
+msgstr "Skripti käivitamine terminalis"
 
 #: thonny/plugins/terminal_config_page.py:15
 msgid "Present Python REPL after program ends"
@@ -1301,35 +1226,35 @@ msgstr "Avaleht"
 msgid "Help contents"
 msgstr "Abiinfo sisukord"
 
-#: thonny/plugins/micropython/__init__.py:165
+#: thonny/plugins/micropython/__init__.py:172
 msgid "CircuitPython device"
 msgstr "CircuitPythoni seade"
 
-#: thonny/plugins/micropython/__init__.py:169
+#: thonny/plugins/micropython/__init__.py:176
 msgid "MicroPython device"
 msgstr "MicroPythoni seade"
 
-#: thonny/plugins/micropython/__init__.py:178
+#: thonny/plugins/micropython/__init__.py:185
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr "Ühenda seade arvutiga ja vali allpoolt selle port"
 
-#: thonny/plugins/micropython/__init__.py:181
+#: thonny/plugins/micropython/__init__.py:188
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr "otsi oma seadme nime või fraase \"USB Serial\" või \"UART\""
 
-#: thonny/plugins/micropython/__init__.py:183
+#: thonny/plugins/micropython/__init__.py:190
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr "Kui sa ei leia seda, siis pead võibolla installima sobiva USB draiveri."
 
-#: thonny/plugins/micropython/__init__.py:207
+#: thonny/plugins/micropython/__init__.py:214
 msgid "Port"
 msgstr "Port"
 
-#: thonny/plugins/micropython/__init__.py:216
+#: thonny/plugins/micropython/__init__.py:223
 msgid "Try to detect port automatically"
 msgstr "Proovi tuvastada port automaatselt"
 
-#: thonny/plugins/micropython/__init__.py:363
+#: thonny/plugins/micropython/__init__.py:411
 msgid "MicroPython (generic)"
 msgstr "MicroPython (üldine)"
 
@@ -1363,11 +1288,91 @@ msgstr "See dialoog on mõeldud Thonny pistiprogrammide haldamiseks.\n"
 msgid "CircuitPython (generic)"
 msgstr "CircuitPython (üldine)"
 
-#: thonny/plugins/commenting_indenting.py:121
+#: thonny/plugins/commenting_indenting.py:123
 msgid "Indent selected lines"
 msgstr "Suurenda ridade taanet"
 
-#: thonny/plugins/commenting_indenting.py:131
+#: thonny/plugins/commenting_indenting.py:133
 msgid "Dedent selected lines"
 msgstr "Vähenda ridade taanet"
+
+#: thonny/workbench.py:1264
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr "Mine\n"
+"tavalisse\n"
+"režiimi"
+
+#: thonny/plugins/microbit/__init__.py:54
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr "Veendu, et MicroPython oleks su micro:bit-ile installitud."
+
+#: thonny/plugins/microbit/__init__.py:56
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr "Ära unusta, et main.py toimib ainult siis kui MicroPython on ilma peaskriptita."
+
+#: thonny/plugins/microbit/__init__.py:102
+msgid "Install latest MicroPython to BBC micro:bit"
+msgstr "Installi värskeim MicroPython BBC micro:bit-ile"
+
+#: thonny/plugins/microbit/__init__.py:104
+msgid "micro:bit location:"
+msgstr "micro:bit-i asukoht:"
+
+#: thonny/plugins/microbit/__init__.py:109
+msgid "Version to be installed:"
+msgstr "Installitav versioon:"
+
+#: thonny/plugins/microbit/__init__.py:111
+msgid "please wait"
+msgstr "palun oota"
+
+#: thonny/plugins/microbit/__init__.py:115
+msgid "NB! All files on micro:bit will be deleted!"
+msgstr "NB! kõik failid micro:bit-il kustutatakse"
+
+#: thonny/plugins/microbit/__init__.py:195
+msgid "Installing ..."
+msgstr "Installin ..."
+
+#: thonny/plugins/microbit/__init__.py:199
+msgid "Done!"
+msgstr "Valmis!"
+
+#: thonny/plugins/microbit/__init__.py:199
+msgid "You can now close this dialog."
+msgstr "Võid nüüd selle akna sulgeda."
+
+#: thonny/plugins/micropython/__init__.py:292
+msgid "Firmware"
+msgstr "Püsivara"
+
+#: thonny/plugins/micropython/__init__.py:295
+msgid "Open the dialog for installing or upgrading MicroPython on your device"
+msgstr "Ava MicroPythoni installimise või uuendamise dialoog"
+
+#: thonny/plugins/microbit/__init__.py:67
+msgid "Could not find disk '%s'."
+msgstr "Ei leia draivi '%s'."
+
+#: thonny/plugins/microbit/__init__.py:69
+msgid "Make sure you have micro:bit plugged in!"
+msgstr "Veendu, et micro:bit on ühendatud!"
+
+#: thonny/plugins/microbit/__init__.py:71
+msgid "Do you want to continue and locate the disk yourself?"
+msgstr "Kas soovid jätkata ja draivi ise valida?"
+
+#: thonny/misc_utils.py:116
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr "Ei leia draivi nimega '%s'. Kas soovid selle ise valida?"
+
+#: thonny/misc_utils.py:117
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr "Leidsin mitu draivi nimega '%s'. Kas soovid ühe neist ise valida?"
+
+#: thonny/misc_utils.py:132
+msgid "Can't find suitable disk"
+msgstr "Ei leia sobivat draivi."
 
