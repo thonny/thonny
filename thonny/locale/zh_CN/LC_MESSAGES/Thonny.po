@@ -404,25 +404,22 @@ msgstr "重新打开上一个会话中的所有文件"
 #: thonny/plugins/general_config_page.py:26
 #, fuzzy
 msgid "Disable notification sound"
-msgstr "禁用通知声\n"
-""
+msgstr "禁用通知声"
 
 #: thonny/plugins/general_config_page.py:75
-#, fuzzy
 msgid "Font scaling mode"
-msgstr "字体缩放模式"
+msgstr ""
 
 #: thonny/plugins/heap.py:35
 #, fuzzy
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
 msgstr "Heap模式已开启.\n"
-"关闭Heap view将其关闭."
+"在视图中可关闭"
 
 #: thonny/plugins/heap.py:83
-#, fuzzy
 msgid "Heap"
-msgstr "Heap"
+msgstr ""
 
 #: thonny/plugins/general_config_page.py:42
 #, fuzzy
@@ -492,7 +489,7 @@ msgstr "关闭"
 msgid "You seem to have problems with pip\n"
 "\n"
 ""
-msgstr "看起来pip有些问题"
+msgstr "你好像对pip有些疑惑"
 
 #: thonny/plugins/pip_gui.py:305
 #, fuzzy
@@ -632,7 +629,7 @@ msgstr "你想要覆盖掉'%s'?"
 #: thonny/code.py:535 thonny/code.py:537
 #, fuzzy
 msgid "New"
-msgstr "新的"
+msgstr "新文件"
 
 #: thonny/code.py:548
 #, fuzzy
@@ -884,9 +881,8 @@ msgid "Select All"
 msgstr "全选"
 
 #: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:157
-#, fuzzy
 msgid "Shell"
-msgstr "shell"
+msgstr ""
 
 #: thonny/workbench.py:507
 #, fuzzy
@@ -944,7 +940,7 @@ msgstr ""
 #: thonny/workbench.py:1152
 #, fuzzy
 msgid "Can't find theme '%s'"
-msgstr "无法找的'%s'主题"
+msgstr "无法找到'%s'主题"
 
 #: thonny/workbench.py:1212
 msgid "Program arguments:"
@@ -1071,8 +1067,9 @@ msgid "Exception"
 msgstr "异常"
 
 #: thonny/plugins/general_config_page.py:16
+#, fuzzy
 msgid "Log program usage events"
-msgstr ""
+msgstr "记录程序执行事件"
 
 #: thonny/plugins/general_config_page.py:32
 #, fuzzy
@@ -1080,12 +1077,14 @@ msgid "Debug mode (provides more detailed diagnostic logs)"
 msgstr "调试模式（提供更详细的诊断日志）"
 
 #: thonny/plugins/general_config_page.py:56
+#, fuzzy
 msgid "UI mode"
-msgstr ""
+msgstr "UI 模式"
 
 #: thonny/plugins/general_config_page.py:69
+#, fuzzy
 msgid "UI scaling factor"
-msgstr ""
+msgstr "UI 缩放倍数"
 
 #: thonny/plugins/general_config_page.py:88
 #, fuzzy
@@ -1100,9 +1099,10 @@ msgstr "通用"
 #: thonny/plugins/pip_gui.py:108
 #, fuzzy
 msgid "INSTALL"
-msgstr "安装"
+msgstr "已安装"
 
 #: thonny/plugins/pip_gui.py:242
+#, fuzzy
 msgid "Installing pip"
 msgstr "安装pip中"
 
@@ -1205,11 +1205,12 @@ msgstr "新的模块也会安装到这个文件夹下,其他位置必须通过�
 #: thonny/plugins/pip_gui.py:456
 #, fuzzy
 msgid "Installed version:"
-msgstr "安装了的版本:"
+msgstr "已安装版本:"
 
 #: thonny/plugins/pip_gui.py:458
+#, fuzzy
 msgid "Installed to:"
-msgstr ""
+msgstr "安装在:"
 
 #: thonny/plugins/pip_gui.py:510
 #, fuzzy
@@ -1371,16 +1372,18 @@ msgid "May make debugging slower."
 msgstr "可能使调试变慢"
 
 #: thonny/plugins/run_debug_config_page.py:43
+#, fuzzy
 msgid "Preferred debugger"
-msgstr ""
+msgstr "首选调试器"
 
 #: thonny/plugins/run_debug_config_page.py:55
 msgid "(used when clicking Debug toolbar button)"
 msgstr ""
 
 #: thonny/plugins/run_debug_config_page.py:60
+#, fuzzy
 msgid "Birdseye port"
-msgstr ""
+msgstr "Birdseye端口"
 
 #: thonny/plugins/run_debug_config_page.py:64
 #, fuzzy
@@ -1508,8 +1511,9 @@ msgid "Home"
 msgstr ""
 
 #: thonny/plugins/help/__init__.py:69
+#, fuzzy
 msgid "Help contents"
-msgstr ""
+msgstr "帮助内容"
 
 #: thonny/plugins/micropython/__init__.py:165
 msgid "CircuitPython device"
@@ -1581,10 +1585,12 @@ msgid "CircuitPython (generic)"
 msgstr ""
 
 #: thonny/plugins/commenting_indenting.py:121
+#, fuzzy
 msgid "Indent selected lines"
-msgstr ""
+msgstr "缩进选择的行"
 
 #: thonny/plugins/commenting_indenting.py:131
+#, fuzzy
 msgid "Dedent selected lines"
-msgstr ""
+msgstr "反缩进选择的行"
 
