@@ -113,8 +113,8 @@ def find_volumes_by_name(volume_name: str, skip_letters={"A"}) -> Sequence[str]:
 
 def find_volume_by_name(
     volume_name: str,
-    not_found_msg: str = "Could not find disk '%s'. Do you want to locate it yourself?",
-    found_several_msg: str = "Found several '%s' disks. Do you want to choose one yourself?",
+    not_found_msg: str = _("Could not find disk '%s'. Do you want to locate it yourself?"),
+    found_several_msg: str = _("Found several '%s' disks. Do you want to choose one yourself?"),
 ) -> Optional[str]:
 
     volumes = find_volumes_by_name(volume_name)
@@ -129,7 +129,7 @@ def find_volume_by_name(
         from tkinter.messagebox import askyesno
         from thonny.ui_utils import askdirectory
 
-        if askyesno("Can't find suitable disk", msg, parent=get_workbench()):
+        if askyesno(_("Can't find suitable disk"), msg, parent=get_workbench()):
             path = askdirectory(master=get_workbench())
             if path:
                 return path

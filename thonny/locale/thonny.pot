@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-07-14 19:18+0300\n"
+"POT-Creation-Date: 2019-07-19 08:46+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,8 +66,8 @@ msgstr ""
 msgid "Recent files"
 msgstr ""
 
-#: thonny/code.py:570 thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350
-#: thonny/ui_utils.py:1626
+#: thonny/code.py:570 thonny/plugins/microbit/__init__.py:200
+#: thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350 thonny/ui_utils.py:1626
 msgid "Close"
 msgstr ""
 
@@ -99,16 +99,31 @@ msgstr ""
 msgid "OK"
 msgstr ""
 
-#: thonny/config_ui.py:31 thonny/plugins/pip_gui.py:1066
-#: thonny/ui_utils.py:1493 thonny/ui_utils.py:1695
+#: thonny/config_ui.py:31 thonny/plugins/microbit/__init__.py:127
+#: thonny/plugins/pip_gui.py:1066 thonny/ui_utils.py:1493
+#: thonny/ui_utils.py:1695
 msgid "Cancel"
+msgstr ""
+
+#: thonny/misc_utils.py:116
+#, python-format
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr ""
+
+#: thonny/misc_utils.py:117
+#, python-format
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr ""
+
+#: thonny/misc_utils.py:132
+msgid "Can't find suitable disk"
 msgstr ""
 
 #: thonny/running.py:92
 msgid "Run current script"
 msgstr ""
 
-#: thonny/running.py:93 thonny/workbench.py:353
+#: thonny/running.py:93 thonny/workbench.py:358
 msgid "Run"
 msgstr ""
 
@@ -268,15 +283,15 @@ msgid ""
 "Are you sure you want to cancel?"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2159
+#: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2159
 msgid "Cut"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2160
+#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2160
 msgid "Copy"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:84 thonny/ui_utils.py:2161
+#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2161
 msgid "Paste"
 msgstr ""
 
@@ -284,158 +299,128 @@ msgstr ""
 msgid "Select All"
 msgstr ""
 
-#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:157
+#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:162
 msgid "Shell"
 msgstr ""
 
-#: thonny/workbench.py:350
+#: thonny/workbench.py:355
 msgid "File"
 msgstr ""
 
-#: thonny/workbench.py:351
+#: thonny/workbench.py:356
 msgid "Edit"
 msgstr ""
 
-#: thonny/workbench.py:352
+#: thonny/workbench.py:357
 msgid "View"
 msgstr ""
 
-#: thonny/workbench.py:355
+#: thonny/workbench.py:360
 msgid "Tools"
 msgstr ""
 
-#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:356
+#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:361
 msgid "Help"
 msgstr ""
 
-#: thonny/workbench.py:507
+#: thonny/workbench.py:512
 msgid "The same interpreter which runs Thonny (default)"
 msgstr ""
 
-#: thonny/workbench.py:517
+#: thonny/workbench.py:522
 msgid "Alternative Python 3 interpreter or virtual environment"
 msgstr ""
 
-#: thonny/workbench.py:525
+#: thonny/workbench.py:530
 msgid "A special virtual environment (deprecated)"
 msgstr ""
 
-#: thonny/workbench.py:526
+#: thonny/workbench.py:531
 msgid "This virtual environment is automatically maintained by Thonny.\n"
 msgstr ""
 
-#: thonny/workbench.py:527
+#: thonny/workbench.py:532
 msgid "Location: "
 msgstr ""
 
-#: thonny/workbench.py:563
+#: thonny/workbench.py:568
 msgid "Exit"
 msgstr ""
 
-#: thonny/workbench.py:573
+#: thonny/workbench.py:578
 msgid "Options..."
 msgstr ""
 
-#: thonny/workbench.py:580
+#: thonny/workbench.py:585
 msgid "Increase font size"
 msgstr ""
 
-#: thonny/workbench.py:590
+#: thonny/workbench.py:595
 msgid "Decrease font size"
 msgstr ""
 
-#: thonny/workbench.py:602
+#: thonny/workbench.py:607
 msgid "Focus editor"
 msgstr ""
 
-#: thonny/workbench.py:611
+#: thonny/workbench.py:616
 msgid "Focus shell"
 msgstr ""
 
-#: thonny/workbench.py:622
+#: thonny/workbench.py:627
 msgid "Maximize view"
 msgstr ""
 
-#: thonny/workbench.py:634
+#: thonny/workbench.py:639
 msgid "Full screen"
 msgstr ""
 
-#: thonny/workbench.py:645
+#: thonny/workbench.py:650
 msgid "Change font size"
 msgstr ""
 
-#: thonny/workbench.py:646
+#: thonny/workbench.py:651
 msgid "Zoom"
 msgstr ""
 
-#: thonny/workbench.py:655
+#: thonny/workbench.py:660
 msgid "Exit Thonny"
 msgstr ""
 
-#: thonny/workbench.py:658
+#: thonny/workbench.py:663
 msgid "Quit"
 msgstr ""
 
-#: thonny/workbench.py:1045 thonny/workbench.py:1053
+#: thonny/workbench.py:1054 thonny/workbench.py:1062
 #, python-format
 msgid "Overwriting theme '%s'"
 msgstr ""
 
-#: thonny/workbench.py:1080
-msgid "Only numeric dimensions supported at the moment"
-msgstr ""
-
-#: thonny/workbench.py:1152
-#, python-format
-msgid "Can't find theme '%s'"
-msgstr ""
-
-#: thonny/workbench.py:1212
+#: thonny/workbench.py:1221
 msgid "Program arguments:"
 msgstr ""
 
-#: thonny/workbench.py:1241
+#: thonny/workbench.py:1250
 msgid "Program arguments"
 msgstr ""
 
-#: thonny/workbench.py:1255
+#: thonny/workbench.py:1264
 msgid ""
 "Switch to\n"
-"regular mode"
+"regular\n"
+"mode"
 msgstr ""
 
-#: thonny/workbench.py:1266
+#: thonny/workbench.py:1275
 msgid "Regular mode"
 msgstr ""
 
-#: thonny/workbench.py:1267
+#: thonny/workbench.py:1276
 msgid ""
 "Configuration has been updated. Restart Thonny to start working in "
 "regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
-msgstr ""
-
-#: thonny/workbench.py:1302
-msgid "Problem showing "
-msgstr ""
-
-#: thonny/workbench.py:1367
-#, python-format
-msgid "View %s not created"
-msgstr ""
-
-#: thonny/workbench.py:1527
-msgid "Problem when handling '"
-msgstr ""
-
-#: thonny/workbench.py:1703
-msgid "Couldn't find menu"
-msgstr ""
-
-#: thonny/workbench.py:1718
-#, python-format
-msgid "Missing caption for '%s'. Toolbar commands must have caption."
 msgstr ""
 
 #: thonny/plugins/about.py:25 thonny/plugins/about.py:157
@@ -529,51 +514,39 @@ msgstr ""
 msgid "Debug current script (birdseye)"
 msgstr ""
 
-#: thonny/plugins/cells.py:173
-msgid "Run cell"
-msgstr ""
-
-#: thonny/plugins/cells.py:183
-msgid "Run cell and advance"
-msgstr ""
-
-#: thonny/plugins/cells.py:193
-msgid "Run selection or current line"
-msgstr ""
-
-#: thonny/plugins/commenting_indenting.py:121
+#: thonny/plugins/commenting_indenting.py:123
 msgid "Indent selected lines"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:131
+#: thonny/plugins/commenting_indenting.py:133
 msgid "Dedent selected lines"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:141
+#: thonny/plugins/commenting_indenting.py:143
 msgid "Toggle comment"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:151
+#: thonny/plugins/commenting_indenting.py:153
 msgid "Comment out"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:161
+#: thonny/plugins/commenting_indenting.py:163
 msgid "Uncomment"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:32
+#: thonny/plugins/common_editing_commands.py:20
 msgid "Undo"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:44
+#: thonny/plugins/common_editing_commands.py:32
 msgid "Redo"
 msgstr ""
 
-#: thonny/plugins/common_editing_commands.py:96 thonny/plugins/debugger.py:124
+#: thonny/plugins/common_editing_commands.py:84 thonny/plugins/debugger.py:124
 msgid "Select all"
 msgstr ""
 
-#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1276
+#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1273
 msgid "Run to cursor"
 msgstr ""
 
@@ -585,67 +558,67 @@ msgstr ""
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1163
+#: thonny/plugins/debugger.py:1159
 msgid "Resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1175
+#: thonny/plugins/debugger.py:1171
 msgid "Run / resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1189
+#: thonny/plugins/debugger.py:1186
 msgid "Debug current script"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1191
+#: thonny/plugins/debugger.py:1188
 msgid "Debug"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1202
+#: thonny/plugins/debugger.py:1199
 msgid "Debug current script (nicer)"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1214
+#: thonny/plugins/debugger.py:1211
 msgid "Debug current script (faster)"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1225
+#: thonny/plugins/debugger.py:1222
 msgid "Step over"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1227
+#: thonny/plugins/debugger.py:1224
 msgid "Over"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1238
+#: thonny/plugins/debugger.py:1235
 msgid "Step into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1240
+#: thonny/plugins/debugger.py:1237
 msgid "Into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1251
+#: thonny/plugins/debugger.py:1248
 msgid "Step out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1253
+#: thonny/plugins/debugger.py:1250
 msgid "Out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1288
+#: thonny/plugins/debugger.py:1285
 msgid "Step back"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1290
+#: thonny/plugins/debugger.py:1287
 msgid "Back"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1296
+#: thonny/plugins/debugger.py:1293
 msgid "Stack"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1297
+#: thonny/plugins/debugger.py:1294
 msgid "Exception"
 msgstr ""
 
@@ -860,50 +833,6 @@ msgstr ""
 msgid "Uninstall"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:242
-msgid "Installing pip"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:245
-msgid ""
-"pip, a required module for managing packages is missing or too old.\n"
-"\n"
-"Downloading pip installer (about 1.5 MB), please wait ..."
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:256
-msgid "Installing pip, please wait ..."
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:278
-msgid ""
-"You seem to have problems with pip\n"
-"\n"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:282
-msgid ""
-"pip, a required module for managing packages is missing or too old for "
-"Thonny.\n"
-"\n"
-"If your system package manager doesn't provide recent pip (9.0.0 or "
-"later), then you can install newest version by downloading"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:293
-msgid "and running it with"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:297
-msgid "(probably needs admin privileges)."
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:305
-msgid ""
-"Alternatively, if you have an older pip installed, then you can install "
-"packages on the command line (Tools → Open system shell...)"
-msgstr ""
-
 #: thonny/plugins/pip_gui.py:352
 msgid "Browse the packages"
 msgstr ""
@@ -1000,7 +929,8 @@ msgstr ""
 msgid "Installed to:"
 msgstr ""
 
-#: thonny/plugins/pip_gui.py:483 thonny/plugins/pip_gui.py:1064
+#: thonny/plugins/microbit/__init__.py:123 thonny/plugins/pip_gui.py:483
+#: thonny/plugins/pip_gui.py:1064
 msgid "Install"
 msgstr ""
 
@@ -1359,35 +1289,96 @@ msgstr ""
 msgid "Help contents"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:165
+#: thonny/plugins/microbit/__init__.py:54
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:56
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:67
+#, python-format
+msgid "Could not find disk '%s'."
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:69
+msgid "Make sure you have micro:bit plugged in!"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:71
+msgid "Do you want to continue and locate the disk yourself?"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:102
+msgid "Install latest MicroPython to BBC micro:bit"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:104
+msgid "micro:bit location:"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:109
+msgid "Version to be installed:"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:111
+msgid "please wait"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:115
+msgid "NB! All files on micro:bit will be deleted!"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:195
+msgid "Installing ..."
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:199
+msgid "Done!"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:199
+msgid "You can now close this dialog."
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:172
 msgid "CircuitPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:169
+#: thonny/plugins/micropython/__init__.py:176
 msgid "MicroPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:178
+#: thonny/plugins/micropython/__init__.py:185
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:181
+#: thonny/plugins/micropython/__init__.py:188
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:183
+#: thonny/plugins/micropython/__init__.py:190
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:207
+#: thonny/plugins/micropython/__init__.py:214
 msgid "Port"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:216
+#: thonny/plugins/micropython/__init__.py:223
 msgid "Try to detect port automatically"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:363
+#: thonny/plugins/micropython/__init__.py:292
+msgid "Firmware"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:295
+msgid "Open the dialog for installing or upgrading MicroPython on your device"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:411
 msgid "MicroPython (generic)"
 msgstr ""
 

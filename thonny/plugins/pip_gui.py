@@ -239,10 +239,10 @@ class PipDialog(CommonDialog):
 
     def _install_pip(self):
         self._clear()
-        self.info_text.direct_insert("end", _("Installing pip") + "\n\n", ("caption",))
+        self.info_text.direct_insert("end", ("Installing pip") + "\n\n", ("caption",))
         self.info_text.direct_insert(
             "end",
-            _(
+            (
                 "pip, a required module for managing packages is missing or too old.\n\n"
                 + "Downloading pip installer (about 1.5 MB), please wait ..."
             )
@@ -253,7 +253,7 @@ class PipDialog(CommonDialog):
 
         installer_filename, _ = urlretrieve(PIP_INSTALLER_URL)
 
-        self.info_text.direct_insert("end", _("Installing pip, please wait ...") + "\n")
+        self.info_text.direct_insert("end", ("Installing pip, please wait ...") + "\n")
         self.update()
         self.update_idletasks()
 
@@ -275,11 +275,11 @@ class PipDialog(CommonDialog):
         self._clear()
         self.info_text.direct_insert("end", error)
         self.info_text.direct_insert(
-            "end", _("You seem to have problems with pip" + "\n\n"), ("caption",)
+            "end", ("You seem to have problems with pip" + "\n\n"), ("caption",)
         )
         self.info_text.direct_insert(
             "end",
-            _(
+            (
                 "pip, a required module for managing packages is missing or too old for Thonny.\n\n"
                 + "If your system package manager doesn't provide recent pip (9.0.0 or later), "
                 + "then you can install newest version by downloading"
@@ -290,11 +290,11 @@ class PipDialog(CommonDialog):
         self.info_text.direct_insert(
             "end",
             " "
-            + _("and running it with")
+            + ("and running it with")
             + " "
             + self._get_interpreter()
             + " "
-            + _("(probably needs admin privileges).")
+            + ("(probably needs admin privileges).")
             + "\n\n",
         )
 
@@ -302,7 +302,7 @@ class PipDialog(CommonDialog):
         self._set_state("disabled", True)
 
     def _instructions_for_command_line_install(self):
-        return _(
+        return (
             "Alternatively, if you have an older pip installed, then you can install packages "
             + "on the command line (Tools → Open system shell...)"
         )

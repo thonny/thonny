@@ -64,9 +64,11 @@ class MicrobitConfigPage(MicroPythonConfigPage):
     def _open_flashing_dialog(self):
         mount_path = find_volume_by_name(
             "MICROBIT",
-            not_found_msg="Could not find disk '%s'.\n"
-            + "Make sure you have micro:bit plugged in!\n\n"
-            + "Do you want to continue and locate the disk yourself?",
+            not_found_msg=_("Could not find disk '%s'.")
+            + "\n"
+            + _("Make sure you have micro:bit plugged in!")
+            + "\n\n"
+            + _("Do you want to continue and locate the disk yourself?"),
         )
         """
         mount_path = "C:\\"

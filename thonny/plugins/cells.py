@@ -170,7 +170,7 @@ def _load_plugin():
     wb.add_command(
         "run_cell",
         "run",
-        _("Run cell"),
+        ("Run cell"),
         handler=dummy,  # actual handler is in the patch
         default_sequence="<Control-Return>",
         tester=run_enabled,
@@ -180,7 +180,7 @@ def _load_plugin():
     wb.add_command(
         "run_cell_and_advance",
         "run",
-        _("Run cell and advance"),
+        ("Run cell and advance"),
         handler=dummy,  # actual handler is in the patch
         default_sequence="<Shift-Return>",
         tester=run_enabled,
@@ -190,7 +190,7 @@ def _load_plugin():
     wb.add_command(
         "run_selection",
         "run",
-        _("Run selection or current line"),
+        ("Run selection or current line"),
         handler=run_selection,
         default_sequence="<F9>",
         tester=run_enabled,

@@ -1086,7 +1086,7 @@ class Workbench(tk.Tk):
             else:
                 return result
         else:
-            raise NotImplementedError(_("Only numeric dimensions supported at the moment"))
+            raise NotImplementedError("Only numeric dimensions supported at the moment")
 
     def _register_ui_theme_as_tk_theme(self, name: str) -> None:
         # collect settings from all ancestors
@@ -1158,7 +1158,7 @@ class Workbench(tk.Tk):
             try:
                 parent, settings = self._syntax_themes[name]
             except KeyError:
-                self.report_exception(_("Can't find theme '%s'") % name)
+                self.report_exception("Can't find theme '%s'" % name)
                 return {}
 
             if callable(settings):
@@ -1308,7 +1308,7 @@ class Workbench(tk.Tk):
                 try:
                     self.show_view(view_id, False)
                 except Exception:
-                    self.report_exception(_("Problem showing ") + view_id)
+                    self.report_exception("Problem showing " + view_id)
 
     def update_image_mapping(self, mapping: Dict[str, str]) -> None:
         """Was used by thonny-pi. Not recommended anymore"""
@@ -1373,7 +1373,7 @@ class Workbench(tk.Tk):
     def get_view(self, view_id: str, create: bool = True) -> tk.Widget:
         if "instance" not in self._view_records[view_id]:
             if not create:
-                raise RuntimeError(_("View %s not created") % view_id)
+                raise RuntimeError("View %s not created" % view_id)
             class_ = self._view_records[view_id]["class"]
             location = self._view_records[view_id]["location"]
             master = self._view_notebooks[location]
@@ -1533,7 +1533,7 @@ class Workbench(tk.Tk):
                     try:
                         handler(event)
                     except Exception:
-                        self.report_exception(_("Problem when handling '") + sequence + "'")
+                        self.report_exception("Problem when handling '" + sequence + "'")
 
         if not self._closing:
             self._update_toolbar()
@@ -1709,7 +1709,7 @@ class Workbench(tk.Tk):
             if menu == self._menubar.winfo_children()[i]:
                 return i
 
-        raise RuntimeError(_("Couldn't find menu"))
+        raise RuntimeError("Couldn't find menu")
 
     def _add_toolbar_button(
         self,
@@ -1725,7 +1725,7 @@ class Workbench(tk.Tk):
     ) -> None:
 
         assert caption is not None and len(caption) > 0, (
-            _("Missing caption for '%s'. Toolbar commands must have caption.") % command_label
+            "Missing caption for '%s'. Toolbar commands must have caption." % command_label
         )
         slaves = self._toolbar.grid_slaves(0, toolbar_group)
         if len(slaves) == 0:
