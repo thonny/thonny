@@ -1068,8 +1068,10 @@ msgid "Install from PyPI"
 msgstr "从PyPI安装"
 
 #: thonny/plugins/pip_gui.py:371
+#, fuzzy
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
-msgstr ""
+msgstr "如果你不知道模块的来源,那么你可从PyPI\n"
+"中查找,在搜索框输入名字并回车进行查找"
 
 #: thonny/plugins/pip_gui.py:387
 #, fuzzy
@@ -1092,8 +1094,9 @@ msgid "Upgrade or uninstall"
 msgstr "升级或卸载"
 
 #: thonny/plugins/pip_gui.py:405
+#, fuzzy
 msgid "Start by selecting the package from the left."
-msgstr ""
+msgstr "在左边选择你要操作的模块"
 
 #: thonny/plugins/pip_gui.py:409
 #, fuzzy
@@ -1275,7 +1278,7 @@ msgstr ""
 #: thonny/plugins/run_debug_config_page.py:27
 #, fuzzy
 msgid "Open and close Stack view automatically"
-msgstr "自动打开栈视图"
+msgstr "自动打开和关闭栈视图"
 
 #: thonny/plugins/run_debug_config_page.py:28
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
