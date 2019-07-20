@@ -715,10 +715,10 @@ class SubprocessProxy(BackendProxy):
         env = get_environment_for_python_subprocess(self._executable)
         # variables controlling communication with the back-end process
         env["PYTHONIOENCODING"] = "utf-8"
-        
+
         # because cmd line option -u won't reach child processes
         # see https://github.com/thonny/thonny/issues/808
-        env["PYTHONUNBUFFERED"] = "1" 
+        env["PYTHONUNBUFFERED"] = "1"
 
         # Let back-end know about plug-ins
         env["THONNY_USER_DIR"] = THONNY_USER_DIR

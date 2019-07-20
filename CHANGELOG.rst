@@ -2,9 +2,16 @@
 Version history
 ===============
 
-3.2.0b6 (2019-07-??)
+3.2.0b7 (2019-07-19)
 ====================
-* NEW: BBC micro:bit plug-in has been merged into main Thonny package 
+* FIXED: Problem with translation markers disturbing import
+
+3.2.0b6 (2019-07-19)
+====================
+* NEW: BBC micro:bit plug-in has been merged into main Thonny package
+* CHANGED: micro:bit flasher now downloads latest MicroPython from GitHub
+* FIXED: Problems with micro:bit file browser 
+* FIXED #808: multiprocessing doesn't work in Windows
 * FIXED #814: Ctrl+V inserts text twice in Windows (regression introduced in previous betas)
 
 3.2.0b5 (2019-07-16)
