@@ -7,77 +7,77 @@ msgstr ""
 "Project-Id-Version: Thonny\n"
 "Language: zh-CN\n"
 
-#: thonny/workbench.py:350
+#: thonny/workbench.py:355
 #, fuzzy
 msgid "File"
 msgstr "文件"
 
-#: thonny/workbench.py:351
+#: thonny/workbench.py:356
 #, fuzzy
 msgid "Edit"
 msgstr "编辑"
 
-#: thonny/workbench.py:352
+#: thonny/workbench.py:357
 #, fuzzy
 msgid "View"
 msgstr "视图"
 
-#: thonny/running.py:93 thonny/workbench.py:353
+#: thonny/running.py:93 thonny/workbench.py:358
 #, fuzzy
 msgid "Run"
 msgstr "运行"
 
-#: thonny/workbench.py:355
+#: thonny/workbench.py:360
 #, fuzzy
 msgid "Tools"
 msgstr "工具"
 
-#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:356
+#: thonny/plugins/help/__init__.py:68 thonny/workbench.py:361
 #, fuzzy
 msgid "Help"
 msgstr "帮助"
 
-#: thonny/workbench.py:517
+#: thonny/workbench.py:522
 #, fuzzy
 msgid "Alternative Python 3 interpreter or virtual environment"
 msgstr "可选的python3解释器或虚拟环境"
 
-#: thonny/workbench.py:525
+#: thonny/workbench.py:530
 #, fuzzy
 msgid "A special virtual environment (deprecated)"
 msgstr "特殊的虚拟环境(已弃用)"
 
-#: thonny/workbench.py:563
+#: thonny/workbench.py:568
 #, fuzzy
 msgid "Exit"
 msgstr "退出"
 
-#: thonny/workbench.py:590
+#: thonny/workbench.py:595
 #, fuzzy
 msgid "Decrease font size"
 msgstr "缩小字体"
 
-#: thonny/workbench.py:602
+#: thonny/workbench.py:607
 #, fuzzy
 msgid "Focus editor"
 msgstr "移动到编辑器"
 
-#: thonny/workbench.py:611
+#: thonny/workbench.py:616
 #, fuzzy
 msgid "Focus shell"
 msgstr "移动到shell"
 
-#: thonny/workbench.py:622
+#: thonny/workbench.py:627
 #, fuzzy
 msgid "Maximize view"
 msgstr "最大化查看"
 
-#: thonny/workbench.py:634
+#: thonny/workbench.py:639
 #, fuzzy
 msgid "Full screen"
 msgstr "全屏"
 
-#: thonny/workbench.py:1241
+#: thonny/workbench.py:1250
 msgid "Program arguments"
 msgstr ""
 
@@ -186,67 +186,52 @@ msgstr "Birdseye是一个python的调试器,需要独立安装.\n"
 msgid "Debug current script (birdseye)"
 msgstr "当前脚本调试(birdseye)"
 
-#: thonny/plugins/cells.py:173
-#, fuzzy
-msgid "Run cell"
-msgstr "运行块"
-
-#: thonny/plugins/cells.py:183
-#, fuzzy
-msgid "Run cell and advance"
-msgstr "运行块并前进"
-
-#: thonny/plugins/cells.py:193
-#, fuzzy
-msgid "Run selection or current line"
-msgstr "运行选中的块,或当前行"
-
-#: thonny/plugins/commenting_indenting.py:141
+#: thonny/plugins/commenting_indenting.py:143
 #, fuzzy
 msgid "Toggle comment"
 msgstr "注释切换"
 
-#: thonny/plugins/commenting_indenting.py:151
+#: thonny/plugins/commenting_indenting.py:153
 #, fuzzy
 msgid "Comment out"
 msgstr "转为注释"
 
-#: thonny/plugins/commenting_indenting.py:161
+#: thonny/plugins/commenting_indenting.py:163
 #, fuzzy
 msgid "Uncomment"
 msgstr "取消注释"
 
-#: thonny/plugins/common_editing_commands.py:32
+#: thonny/plugins/common_editing_commands.py:20
 #, fuzzy
 msgid "Undo"
 msgstr "撤销"
 
-#: thonny/plugins/common_editing_commands.py:44
+#: thonny/plugins/common_editing_commands.py:32
 #, fuzzy
 msgid "Redo"
 msgstr "恢复撤销"
 
-#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2159
+#: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2159
 #, fuzzy
 msgid "Cut"
 msgstr "剪切"
 
-#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2160
+#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2160
 #, fuzzy
 msgid "Copy"
 msgstr "复制"
 
-#: thonny/plugins/common_editing_commands.py:84 thonny/ui_utils.py:2161
+#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2161
 #, fuzzy
 msgid "Paste"
 msgstr "粘贴"
 
-#: thonny/plugins/common_editing_commands.py:96 thonny/plugins/debugger.py:124
+#: thonny/plugins/common_editing_commands.py:84 thonny/plugins/debugger.py:124
 #, fuzzy
 msgid "Select all"
 msgstr "全选"
 
-#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1276
+#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1273
 #, fuzzy
 msgid "Run to cursor"
 msgstr "运行至光标"
@@ -407,8 +392,9 @@ msgid "Disable notification sound"
 msgstr "禁用通知声"
 
 #: thonny/plugins/general_config_page.py:75
+#, fuzzy
 msgid "Font scaling mode"
-msgstr ""
+msgstr "字体缩放模式"
 
 #: thonny/plugins/heap.py:35
 #, fuzzy
@@ -453,9 +439,8 @@ msgid "Next object"
 msgstr "下一个对象"
 
 #: thonny/plugins/object_inspector.py:601
-#, fuzzy
 msgid "Object inspector"
-msgstr "对象检查员"
+msgstr ""
 
 #: thonny/plugins/outline.py:137
 #, fuzzy
@@ -478,24 +463,11 @@ msgstr "从PyPI安装模块"
 msgid "Uninstall"
 msgstr "卸载"
 
-#: thonny/code.py:570 thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350
-#: thonny/ui_utils.py:1626
+#: thonny/code.py:570 thonny/plugins/microbit/__init__.py:200
+#: thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350 thonny/ui_utils.py:1626
 #, fuzzy
 msgid "Close"
 msgstr "关闭"
-
-#: thonny/plugins/pip_gui.py:278
-#, fuzzy
-msgid "You seem to have problems with pip\n"
-"\n"
-""
-msgstr "你好像对pip有些疑惑"
-
-#: thonny/plugins/pip_gui.py:305
-#, fuzzy
-msgid "Alternatively, if you have an older pip installed, then you can install packages on the command line (Tools → Open system shell...)"
-msgstr "或者,假如你安装了旧版本的pip你可以在命令行上安装模块\n"
-"(工具-->开启系统shell)"
 
 #: thonny/plugins/pip_gui.py:382
 #, fuzzy
@@ -512,7 +484,8 @@ msgstr "这里"
 msgid "Upgrade"
 msgstr "升级"
 
-#: thonny/plugins/pip_gui.py:483 thonny/plugins/pip_gui.py:1064
+#: thonny/plugins/microbit/__init__.py:123 thonny/plugins/pip_gui.py:483
+#: thonny/plugins/pip_gui.py:1064
 #, fuzzy
 msgid "Install"
 msgstr "安装"
@@ -854,8 +827,9 @@ msgstr "复制\n"
 "到\n"
 "  %s"
 
-#: thonny/config_ui.py:31 thonny/plugins/pip_gui.py:1066
-#: thonny/ui_utils.py:1493 thonny/ui_utils.py:1695
+#: thonny/config_ui.py:31 thonny/plugins/microbit/__init__.py:127
+#: thonny/plugins/pip_gui.py:1066 thonny/ui_utils.py:1493
+#: thonny/ui_utils.py:1695
 #, fuzzy
 msgid "Cancel"
 msgstr "取消"
@@ -880,83 +854,70 @@ msgstr "这个进程正在运行,你确定取消吗?"
 msgid "Select All"
 msgstr "全选"
 
-#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:157
+#: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:162
 msgid "Shell"
 msgstr ""
 
-#: thonny/workbench.py:507
+#: thonny/workbench.py:512
 #, fuzzy
 msgid "The same interpreter which runs Thonny (default)"
 msgstr "Thonny的解释器(默认)"
 
-#: thonny/workbench.py:526
+#: thonny/workbench.py:531
+#, fuzzy
 msgid "This virtual environment is automatically maintained by Thonny.\n"
 ""
-msgstr ""
+msgstr "此虚拟环境由Thonny自动维护"
 
-#: thonny/workbench.py:527
+#: thonny/workbench.py:532
 #, fuzzy
 msgid "Location: "
 msgstr "位置"
 
-#: thonny/workbench.py:573
+#: thonny/workbench.py:578
 #, fuzzy
 msgid "Options..."
 msgstr "设置..."
 
-#: thonny/workbench.py:580
+#: thonny/workbench.py:585
 #, fuzzy
 msgid "Increase font size"
 msgstr "增大字体"
 
-#: thonny/workbench.py:645
+#: thonny/workbench.py:650
 #, fuzzy
 msgid "Change font size"
 msgstr "改变字体大小"
 
-#: thonny/workbench.py:646
+#: thonny/workbench.py:651
 #, fuzzy
 msgid "Zoom"
 msgstr "放大"
 
-#: thonny/workbench.py:655
+#: thonny/workbench.py:660
 #, fuzzy
 msgid "Exit Thonny"
 msgstr "退出Thonny"
 
-#: thonny/workbench.py:658
+#: thonny/workbench.py:663
 #, fuzzy
 msgid "Quit"
 msgstr "退出"
 
-#: thonny/workbench.py:1045 thonny/workbench.py:1053
+#: thonny/workbench.py:1054 thonny/workbench.py:1062
 msgid "Overwriting theme '%s'"
 msgstr ""
 
-#: thonny/workbench.py:1080
-msgid "Only numeric dimensions supported at the moment"
-msgstr ""
-
-#: thonny/workbench.py:1152
-#, fuzzy
-msgid "Can't find theme '%s'"
-msgstr "无法找到'%s'主题"
-
-#: thonny/workbench.py:1212
+#: thonny/workbench.py:1221
 msgid "Program arguments:"
 msgstr ""
 
-#: thonny/workbench.py:1255
-msgid "Switch to\n"
-"regular mode"
-msgstr ""
-
-#: thonny/workbench.py:1266
+#: thonny/workbench.py:1275
 #, fuzzy
 msgid "Regular mode"
 msgstr "常规模式"
 
-#: thonny/workbench.py:1267
+#: thonny/workbench.py:1276
 #, fuzzy
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
@@ -964,104 +925,89 @@ msgid "Configuration has been updated. Restart Thonny to start working in regula
 msgstr "配置已更新。 重启Thonny以开始于常规模式工作。\n"
 "(如果您稍后改变主意，请参阅'工具→设置→通用'.)"
 
-#: thonny/workbench.py:1302
-msgid "Problem showing "
-msgstr ""
-
-#: thonny/workbench.py:1367
-msgid "View %s not created"
-msgstr ""
-
-#: thonny/workbench.py:1527
-msgid "Problem when handling '"
-msgstr ""
-
-#: thonny/workbench.py:1703
-#, fuzzy
-msgid "Couldn't find menu"
-msgstr "无法找到菜单"
-
-#: thonny/workbench.py:1718
-msgid "Missing caption for '%s'. Toolbar commands must have caption."
-msgstr ""
-
 #: thonny/plugins/ast_view.py:209
 #, fuzzy
 msgid "Program tree"
-msgstr "程序结构树"
+msgstr "程序结构"
 
 #: thonny/plugins/backend_config_page.py:130
 #, fuzzy
 msgid "Select interpreter"
 msgstr "选择解释器"
 
-#: thonny/plugins/debugger.py:1163
+#: thonny/plugins/debugger.py:1159
+#, fuzzy
 msgid "Resume"
-msgstr ""
+msgstr "恢复执行"
 
-#: thonny/plugins/debugger.py:1175
+#: thonny/plugins/debugger.py:1171
 msgid "Run / resume"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1189
+#: thonny/plugins/debugger.py:1186
 #, fuzzy
 msgid "Debug current script"
 msgstr "调试当前脚本"
 
-#: thonny/plugins/debugger.py:1191
+#: thonny/plugins/debugger.py:1188
 #, fuzzy
 msgid "Debug"
 msgstr "调试"
 
-#: thonny/plugins/debugger.py:1202
+#: thonny/plugins/debugger.py:1199
 #, fuzzy
 msgid "Debug current script (nicer)"
 msgstr "调试当前脚本(完全)"
 
-#: thonny/plugins/debugger.py:1214
+#: thonny/plugins/debugger.py:1211
 #, fuzzy
 msgid "Debug current script (faster)"
 msgstr "调试当前脚本(快速)"
 
-#: thonny/plugins/debugger.py:1225
+#: thonny/plugins/debugger.py:1222
+#, fuzzy
 msgid "Step over"
-msgstr ""
+msgstr "单步"
 
-#: thonny/plugins/debugger.py:1227
+#: thonny/plugins/debugger.py:1224
 #, fuzzy
 msgid "Over"
 msgstr "结束"
 
-#: thonny/plugins/debugger.py:1238
+#: thonny/plugins/debugger.py:1235
+#, fuzzy
 msgid "Step into"
-msgstr ""
+msgstr "步入"
 
-#: thonny/plugins/debugger.py:1240
+#: thonny/plugins/debugger.py:1237
 msgid "Into"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1251
+#: thonny/plugins/debugger.py:1248
+#, fuzzy
 msgid "Step out"
-msgstr ""
+msgstr "步出"
 
-#: thonny/plugins/debugger.py:1253
+#: thonny/plugins/debugger.py:1250
 msgid "Out"
 msgstr ""
 
-#: thonny/plugins/debugger.py:1288
+#: thonny/plugins/debugger.py:1285
+#, fuzzy
 msgid "Step back"
-msgstr ""
+msgstr "回执"
 
-#: thonny/plugins/debugger.py:1290
+#: thonny/plugins/debugger.py:1287
 #, fuzzy
 msgid "Back"
 msgstr "后退"
 
-#: thonny/plugins/debugger.py:1296
+#: thonny/plugins/debugger.py:1293
+#, fuzzy
 msgid "Stack"
-msgstr ""
+msgstr "栈"
 
-#: thonny/plugins/debugger.py:1297
+#: thonny/plugins/debugger.py:1294
 #, fuzzy
 msgid "Exception"
 msgstr "异常"
@@ -1101,36 +1047,6 @@ msgstr "通用"
 msgid "INSTALL"
 msgstr "已安装"
 
-#: thonny/plugins/pip_gui.py:242
-#, fuzzy
-msgid "Installing pip"
-msgstr "安装pip中"
-
-#: thonny/plugins/pip_gui.py:245
-msgid "pip, a required module for managing packages is missing or too old.\n"
-"\n"
-"Downloading pip installer (about 1.5 MB), please wait ..."
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:256
-#, fuzzy
-msgid "Installing pip, please wait ..."
-msgstr "正在安装pip,请稍等..."
-
-#: thonny/plugins/pip_gui.py:282
-msgid "pip, a required module for managing packages is missing or too old for Thonny.\n"
-"\n"
-"If your system package manager doesn't provide recent pip (9.0.0 or later), then you can install newest version by downloading"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:293
-msgid "and running it with"
-msgstr ""
-
-#: thonny/plugins/pip_gui.py:297
-msgid "(probably needs admin privileges)."
-msgstr ""
-
 #: thonny/plugins/pip_gui.py:352
 #, fuzzy
 msgid "Browse the packages"
@@ -1156,8 +1072,9 @@ msgid "If you don't know where to get the package from, then most likely you'll 
 msgstr ""
 
 #: thonny/plugins/pip_gui.py:387
+#, fuzzy
 msgid "to locate requirements.txt file and install the packages specified in it."
-msgstr ""
+msgstr "安装requirements.txt中的模块"
 
 #: thonny/plugins/pip_gui.py:392
 #, fuzzy
@@ -1165,8 +1082,9 @@ msgid "Click"
 msgstr "点击"
 
 #: thonny/plugins/pip_gui.py:397
+#, fuzzy
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-msgstr ""
+msgstr "安装本地的模块（扩展名通常为.whl, .tar.gz or .zip）"
 
 #: thonny/plugins/pip_gui.py:403
 #, fuzzy
@@ -1355,8 +1273,9 @@ msgid "Uncheck if you want more traditional experience."
 msgstr ""
 
 #: thonny/plugins/run_debug_config_page.py:27
+#, fuzzy
 msgid "Open and close Stack view automatically"
-msgstr ""
+msgstr "自动打开栈视图"
 
 #: thonny/plugins/run_debug_config_page.py:28
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
@@ -1377,8 +1296,9 @@ msgid "Preferred debugger"
 msgstr "首选调试器"
 
 #: thonny/plugins/run_debug_config_page.py:55
+#, fuzzy
 msgid "(used when clicking Debug toolbar button)"
-msgstr ""
+msgstr "（当按下调试按钮后使用）"
 
 #: thonny/plugins/run_debug_config_page.py:60
 #, fuzzy
@@ -1404,12 +1324,14 @@ msgid "supports basic ANSI-colors and styles"
 msgstr ""
 
 #: thonny/plugins/shell_config_page.py:30
+#, fuzzy
 msgid "Maximum number of lines to keep."
-msgstr ""
+msgstr "可保持的最大行"
 
 #: thonny/plugins/shell_config_page.py:32
+#, fuzzy
 msgid "NB! Large values may cause poor performance!"
-msgstr ""
+msgstr "注意!该值较大可能影响运行效果"
 
 #: thonny/plugins/shell_config_page.py:47
 msgid "Maximum length of line fragments before squeezing"
@@ -1421,12 +1343,14 @@ msgid "Running current script in terminal"
 msgstr "在终端运行此脚本"
 
 #: thonny/plugins/terminal_config_page.py:15
+#, fuzzy
 msgid "Present Python REPL after program ends"
-msgstr ""
+msgstr "程序执行后显示Python REPL"
 
 #: thonny/plugins/terminal_config_page.py:22
+#, fuzzy
 msgid "Keep terminal window open after Python process ends"
-msgstr ""
+msgstr "程序执行后保持终端开启"
 
 #: thonny/plugins/terminal_config_page.py:29
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
@@ -1515,38 +1439,38 @@ msgstr ""
 msgid "Help contents"
 msgstr "帮助内容"
 
-#: thonny/plugins/micropython/__init__.py:165
+#: thonny/plugins/micropython/__init__.py:172
 msgid "CircuitPython device"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:169
+#: thonny/plugins/micropython/__init__.py:176
 #, fuzzy
 msgid "MicroPython device"
 msgstr "MicroPython设备"
 
-#: thonny/plugins/micropython/__init__.py:178
+#: thonny/plugins/micropython/__init__.py:185
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:181
+#: thonny/plugins/micropython/__init__.py:188
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:183
+#: thonny/plugins/micropython/__init__.py:190
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr ""
 
-#: thonny/plugins/micropython/__init__.py:207
+#: thonny/plugins/micropython/__init__.py:214
 #, fuzzy
 msgid "Port"
 msgstr "端口"
 
-#: thonny/plugins/micropython/__init__.py:216
+#: thonny/plugins/micropython/__init__.py:223
 #, fuzzy
 msgid "Try to detect port automatically"
 msgstr "自动探测端口"
 
-#: thonny/plugins/micropython/__init__.py:363
+#: thonny/plugins/micropython/__init__.py:411
 msgid "MicroPython (generic)"
 msgstr ""
 
@@ -1584,13 +1508,97 @@ msgstr ""
 msgid "CircuitPython (generic)"
 msgstr ""
 
-#: thonny/plugins/commenting_indenting.py:121
+#: thonny/plugins/commenting_indenting.py:123
 #, fuzzy
 msgid "Indent selected lines"
 msgstr "缩进选择的行"
 
-#: thonny/plugins/commenting_indenting.py:131
+#: thonny/plugins/commenting_indenting.py:133
 #, fuzzy
 msgid "Dedent selected lines"
 msgstr "反缩进选择的行"
+
+#: thonny/workbench.py:1264
+msgid "Switch to\n"
+"regular\n"
+"mode"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:54
+msgid "Make sure MicroPython has been installed to your micro:bit."
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:56
+msgid "Don't forget that main.py only works without embedded main script."
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:102
+msgid "Install latest MicroPython to BBC micro:bit"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:104
+msgid "micro:bit location:"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:109
+msgid "Version to be installed:"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:111
+#, fuzzy
+msgid "please wait"
+msgstr "请等待"
+
+#: thonny/plugins/microbit/__init__.py:115
+msgid "NB! All files on micro:bit will be deleted!"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:195
+#, fuzzy
+msgid "Installing ..."
+msgstr "安装中..."
+
+#: thonny/plugins/microbit/__init__.py:199
+#, fuzzy
+msgid "Done!"
+msgstr "完成!"
+
+#: thonny/plugins/microbit/__init__.py:199
+#, fuzzy
+msgid "You can now close this dialog."
+msgstr "你现在可以关闭此提示."
+
+#: thonny/plugins/micropython/__init__.py:292
+msgid "Firmware"
+msgstr ""
+
+#: thonny/plugins/micropython/__init__.py:295
+msgid "Open the dialog for installing or upgrading MicroPython on your device"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:67
+#, fuzzy
+msgid "Could not find disk '%s'."
+msgstr "无法找到磁盘'%s'"
+
+#: thonny/plugins/microbit/__init__.py:69
+msgid "Make sure you have micro:bit plugged in!"
+msgstr ""
+
+#: thonny/plugins/microbit/__init__.py:71
+msgid "Do you want to continue and locate the disk yourself?"
+msgstr ""
+
+#: thonny/misc_utils.py:116
+msgid "Could not find disk '%s'. Do you want to locate it yourself?"
+msgstr ""
+
+#: thonny/misc_utils.py:117
+msgid "Found several '%s' disks. Do you want to choose one yourself?"
+msgstr ""
+
+#: thonny/misc_utils.py:132
+#, fuzzy
+msgid "Can't find suitable disk"
+msgstr "无法找到合适的磁盘"
 
