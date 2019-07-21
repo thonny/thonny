@@ -716,7 +716,7 @@ msgstr "生成新的虚拟环境"
 #: thonny/running_config_page.py:59
 #, fuzzy
 msgid "Select existing or create a new empty directory"
-msgstr "选择已存在或这创建新的文件夹"
+msgstr "选择已存在或创建新的文件夹"
 
 #: thonny/running_config_page.py:74
 #, fuzzy
@@ -928,7 +928,7 @@ msgstr "配置已更新。 重启Thonny以开始于常规模式工作。\n"
 #: thonny/plugins/ast_view.py:209
 #, fuzzy
 msgid "Program tree"
-msgstr "程序结构"
+msgstr "抽象语法树AST"
 
 #: thonny/plugins/backend_config_page.py:130
 #, fuzzy
@@ -1053,9 +1053,11 @@ msgid "Browse the packages"
 msgstr "浏览模块"
 
 #: thonny/plugins/pip_gui.py:355
+#, fuzzy
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-msgstr ""
+msgstr "当前解释器下,你只能通过'工具--->打开系统Shell...'\n"
+"来安装升级或卸载模块."
 
 #: thonny/plugins/pip_gui.py:363
 #, fuzzy
@@ -1159,8 +1161,9 @@ msgid "Can't find package name from the list:"
 msgstr "无法从这个表中找到模块的名字:"
 
 #: thonny/plugins/pip_gui.py:615
+#, fuzzy
 msgid "Package '{}' is required for installing and uninstalling other packages."
-msgstr ""
+msgstr "在安装或卸载其他模块时需要用到'{}'模块."
 
 #: thonny/plugins/pip_gui.py:657
 #, fuzzy
@@ -1177,16 +1180,22 @@ msgid "Confirmation"
 msgstr ""
 
 #: thonny/plugins/pip_gui.py:814
+#, fuzzy
 msgid "Looks like you are installing a Thonny-related package.\n"
 "If you meant to install a Thonny plugin, then you should\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr ""
+msgstr "看起来你在安装一个与Thonny相关的模块,\n"
+"如果你想安装一个Thonny的插件你应该通过\n"
+"'工具--->管理插件...'替代.\n"
+"你确定在后台安装 %s 吗?"
 
 #: thonny/plugins/pip_gui.py:912
+#, fuzzy
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
-msgstr ""
+msgstr "注意!这还可能存在一个与当前Thonny兼容的版本,\n"
+"点击'...'可查看或选择该版本安装."
 
 #: thonny/plugins/pip_gui.py:920
 msgid "Thonny plugin without requirements"
@@ -1264,16 +1273,19 @@ msgid "Open replayer..."
 msgstr ""
 
 #: thonny/plugins/run_debug_config_page.py:12
+#, fuzzy
 msgid "Change working directory to script directory on Run / Debug"
-msgstr ""
+msgstr "改变工作目录为运行或调试脚本的目录"
 
 #: thonny/plugins/run_debug_config_page.py:20
+#, fuzzy
 msgid "Show function calls (frames) in separate windows"
-msgstr ""
+msgstr "在单独的窗口中显示函数调用(框架)"
 
 #: thonny/plugins/run_debug_config_page.py:21
+#, fuzzy
 msgid "Uncheck if you want more traditional experience."
-msgstr ""
+msgstr "如果你想要传统的体验请取消勾选"
 
 #: thonny/plugins/run_debug_config_page.py:27
 #, fuzzy
@@ -1281,12 +1293,14 @@ msgid "Open and close Stack view automatically"
 msgstr "自动打开和关闭栈视图"
 
 #: thonny/plugins/run_debug_config_page.py:28
+#, fuzzy
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
-msgstr ""
+msgstr "第一次调用时打开栈试图,回到主程序关闭"
 
 #: thonny/plugins/run_debug_config_page.py:37
+#, fuzzy
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
-msgstr ""
+msgstr "允许进入模块脚本中(即主脚本之外)"
 
 #: thonny/plugins/run_debug_config_page.py:38
 #, fuzzy
@@ -1319,12 +1333,14 @@ msgid "Run & Debug"
 msgstr "运行&调试"
 
 #: thonny/plugins/shell_config_page.py:16
+#, fuzzy
 msgid "Terminal emulation"
-msgstr ""
+msgstr "终端仿真"
 
 #: thonny/plugins/shell_config_page.py:18
+#, fuzzy
 msgid "supports basic ANSI-colors and styles"
-msgstr ""
+msgstr "支持基本的ANSI颜色和样式"
 
 #: thonny/plugins/shell_config_page.py:30
 #, fuzzy
@@ -1585,8 +1601,9 @@ msgid "Could not find disk '%s'."
 msgstr "无法找到磁盘'%s'"
 
 #: thonny/plugins/microbit/__init__.py:69
+#, fuzzy
 msgid "Make sure you have micro:bit plugged in!"
-msgstr ""
+msgstr "请确定micro:bit已经插入!"
 
 #: thonny/plugins/microbit/__init__.py:71
 msgid "Do you want to continue and locate the disk yourself?"
