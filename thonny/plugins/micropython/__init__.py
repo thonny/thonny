@@ -58,7 +58,7 @@ class MicroPythonProxy(SubprocessProxy):
                     """\
                     Couldn't find the device automatically. 
                     Check the connection (making sure the device is not in bootloader mode)
-                    or choose "Tools → Options → Backend" to select the port manually."""
+                    or choose "Tools → Options → Interpreter" to select the port manually."""
                 )
 
                 if len(potential) > 1:
