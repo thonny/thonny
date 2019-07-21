@@ -32,12 +32,14 @@ then
     $TARGET_DIR/bin/python3.7 -m pip install setuptools-scm
 fi
 
-$TARGET_DIR/bin/python3.7 -m pip install jedi==0.14.*
-$TARGET_DIR/bin/python3.7 -m pip install --no-binary mypy mypy==0.720
-$TARGET_DIR/bin/python3.7 -m pip install pylint==2.3.*
+$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir asttokens==1.1.*
+$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir parso==0.5.*
+$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir jedi==0.14.*
+$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir --no-binary mypy mypy==0.720
+$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir pylint==2.3.*
 $TARGET_DIR/bin/python3.7 -m pip install docutils==0.14
 $TARGET_DIR/bin/python3.7 -m pip install pyserial==3.4
-$TARGET_DIR/bin/python3.7 -m pip install distro==1.4.*
+$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir distro==1.4.*
 $TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################
