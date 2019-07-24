@@ -690,22 +690,10 @@ class MicroPythonBackend:
             raise UserError("Expected %d written bytes but wrote %d" % (size, bytes_written))
 
     def _cmd_read_file(self, cmd):
-        # TODO: better to read piecewise?
-        content_bytes = self._evaluate(
-            "__temp_content",
-            prelude=dedent(
-                """
-                __temp_path = '%(path)s' 
-                with open(__temp_path, 'rb') as __temp_fp:
-                    __temp_content = __temp_fp.read()
-                """
-            )
-            % cmd,
-            cleanup="del __temp_fp; del __temp_path; del __temp_content",
-        )
+        blocks = list(self._read_file(cmd["path"]))
 
-        return {"content_bytes": content_bytes, "path": cmd["path"]}
-
+        return {"content_bytes": b"".join(blocks), "path": cmd["path"]}
+    
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
@@ -878,6 +866,27 @@ class MicroPythonBackend:
             else:
                 # keep only the name
                 fp.write(indent + name + " = None\n")
+
+    def _read_file(self, path):
+        # TODO: read block-wise
+        yield self._evaluate(
+            "__temp_content",
+            prelude=dedent(
+                """
+                __temp_path = '%s' 
+                with open(__temp_path, 'rb') as __temp_fp:
+                    __temp_content = __temp_fp.read()
+                """
+            )
+            % path,
+            cleanup="del __temp_fp; del __temp_path; del __temp_content",
+        )
+    
+    def _download_file(self, source, target):
+        with open(target, "wb") as out_fp:
+            for block in self._read_file(source):
+                out_fp.write(block)
+                os.fsync(out_fp)
 
     def _get_fs_mount_name(self):
         if self._welcome_text is None:
