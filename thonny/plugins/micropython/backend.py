@@ -33,6 +33,13 @@ import io
 import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
 
+# See https://github.com/dhylands/rshell/blob/master/rshell/main.py
+# for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
+# ampy uses 32 bytes: https://github.com/pycampers/ampy/blob/master/ampy/files.py
+# I'm not worrying so much, because reader thread reads continuously
+# and writer (SerialConnection) has it's own blocks and delays
+BUFFER_SIZE = 512
+
 BAUDRATE = 115200
 ENCODING = "utf-8"
 
@@ -340,6 +347,19 @@ class MicroPythonBackend:
         debug("GOTOK")
         assert ok == OK, "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
         return self._process_until_raw_prompt(capture_output)
+
+    def _execute_without_output(self, script):
+        out, err, value = self._execute(script, capture_output=True)
+        if out or err:
+
+            print(
+                "PROBLEM EXECUTING INTERNAL SCRIPT:\n" + out + err + "\nSCRIPT:\n" + script,
+                file=sys.stderr,
+            )
+
+        assert out == "", "stdout: " + repr(out)
+        assert err == "", "stderr: " + repr(err)
+        assert value is None, "value: " + repr(value)
 
     def _execute_print_expr(self, expr, prelude="", cleanup="", capture_output=False):
         # assuming expr really contains an expression
@@ -690,10 +710,16 @@ class MicroPythonBackend:
             raise UserError("Expected %d written bytes but wrote %d" % (size, bytes_written))
 
     def _cmd_read_file(self, cmd):
-        blocks = list(self._read_file(cmd["path"]))
+        try:
+            content_bytes = b"".join(self._read_file(cmd["path"]))
+            error = None
+        except Exception as e:
+            _report_internal_error()
+            error = str(e)
+            content_bytes = None
 
-        return {"content_bytes": b"".join(blocks), "path": cmd["path"]}
-    
+        return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
+
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
@@ -868,20 +894,26 @@ class MicroPythonBackend:
                 fp.write(indent + name + " = None\n")
 
     def _read_file(self, path):
-        # TODO: read block-wise
-        yield self._evaluate(
-            "__temp_content",
-            prelude=dedent(
-                """
-                __temp_path = '%s' 
-                with open(__temp_path, 'rb') as __temp_fp:
-                    __temp_content = __temp_fp.read()
-                """
-            )
-            % path,
-            cleanup="del __temp_fp; del __temp_path; del __temp_content",
-        )
-    
+        # TODO: read from mount when possible
+        # file_size = self._get_file_size(path)
+        self._execute_without_output("__temp_fp = open(%r, 'rb')" % path)
+        while True:
+            block = self._evaluate("__temp_fp.read(%s)" % BUFFER_SIZE)
+            if block:
+                yield block
+            if len(block) < BUFFER_SIZE:
+                break
+
+        self._execute_without_output("__temp_fp.close(); del __temp_fp")
+
+    def _get_file_size(self, path):
+        if self._supports_directories():
+            script = "__module_os.stat(%r)[6]"
+        else:
+            script = "os.stat(%r)[6]"
+
+        return self._evaluate(script % path, prelude="import os as __module_os")
+
     def _download_file(self, source, target):
         with open(target, "wb") as out_fp:
             for block in self._read_file(source):
