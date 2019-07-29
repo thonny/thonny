@@ -883,12 +883,11 @@ class TextFrame(ttk.Frame):
         self.text.event_generate("<<VerticalScroll>>")
 
     def _gutter_scroll(self, *args):
-        # FIXME: this doesn't work properly
-        # Can't scroll to bottom when line numbers are not visible
-        # and can't type normally at the bottom, when line numbers are visible
-        return
-        # self._vbar.set(*args)
-        # self.text.yview(tk.MOVETO, args[0])
+        try:
+            self._vbar.set(*args)
+            self.text.yview(tk.MOVETO, args[0])
+        except TclError:
+            pass
 
     def _horizontal_scrollbar_update(self, *args):
         self._hbar.set(*args)
