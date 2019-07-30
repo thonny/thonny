@@ -695,7 +695,6 @@ class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
 class BackendFileDialog(CommonDialog):
     def __init__(self, master, kind, initial_dir):
         super().__init__(master=master)
-        self.configure(selectmode="browse")
         self.result = None
 
         self.updating_selection = False
@@ -715,6 +714,7 @@ class BackendFileDialog(CommonDialog):
         self.browser = DialogRemoteFileBrowser(background, self)
         self.browser.grid(row=0, column=0, columnspan=4, sticky="nsew", pady=20, padx=20)
         self.browser.configure(borderwidth=1, relief="groove")
+        self.browser.tree.configure(selectmode="browse")
 
         self.name_label = ttk.Label(background, text="File name:")
         self.name_label.grid(row=1, column=0, pady=(0, 20), padx=20, sticky="w")

@@ -359,10 +359,9 @@ class MicroPythonBackend:
                 "PROBLEM EXECUTING INTERNAL SCRIPT:\n" + out + err + "\nSCRIPT:\n" + script,
                 file=sys.stderr,
             )
+            raise RuntimeError("Failed MP script")
 
-        assert out == "", "stdout: " + repr(out)
-        assert err == "", "stderr: " + repr(err)
-        assert value is None, "value: " + repr(value)
+        return value
 
     def _execute_print_expr(self, expr, prelude="", cleanup="", capture_output=False):
         # assuming expr really contains an expression
@@ -655,64 +654,6 @@ class MicroPythonBackend:
 
         return os.path.join(mount_path, os.path.normpath(path_suffix))
 
-    def _write_file(self, content_bytes, target_path):
-        mount_name = self._get_fs_mount_name()
-        if mount_name is not None:
-            # CircuitPython devices only allow writing via mount,
-            # other mounted devices may show outdated data in mount
-            # when written via serial.
-            self._write_file_via_mount(content_bytes, target_path)
-        else:
-            self._write_file_via_serial(content_bytes, target_path)
-
-    def _write_file_via_mount(self, content_blocks, target_path):
-        mounted_target_path = self._internal_path_to_mounted_path(target_path)
-        with open(mounted_target_path, "wb") as f:
-            for block in content_blocks:
-                f.write(block)
-                f.flush()
-                os.fsync(f)
-
-    def _write_file_via_serial(self, content_blocks, target_path):
-        # prelude
-        out, err, __ = self._execute(
-            dedent(
-                """
-            __temp_path = '{path}'
-            __temp_f = open(__temp_path, 'wb')
-            __temp_written = 0
-            """
-            ).format(path=target_path),
-            capture_output=True,
-        )
-
-        if out:
-            self._send_output(out, "stdout")
-        if err:
-            self._send_output(err, "stderr")
-        if out or err:
-            return
-
-        size = 0
-        for block in content_blocks:
-            self._execute("__temp_written += __temp_f.write(%r)" % block, capture_output=True)
-            size += len(block)
-
-        bytes_written = self._evaluate(
-            "__temp_written",
-            cleanup=dedent(
-                """
-                __temp_f.close()
-                del __temp_f
-                del __temp_written
-                del __temp_path
-            """
-            ),
-        )
-
-        if bytes_written != size:
-            raise UserError("Expected %d written bytes but wrote %d" % (size, bytes_written))
-
     def _cmd_read_file(self, cmd):
         try:
             content_bytes = b"".join(self._read_file(cmd["path"]))
@@ -729,8 +670,11 @@ class MicroPythonBackend:
         print(cmd)
 
     def _cmd_upload(self, cmd):
-        print(self._list_local_files_with_info(cmd["source_paths"]))
-        # print(cmd)
+        total_size = 0
+        files = self._list_local_files_with_info(cmd["source_paths"])
+        for file in files:
+            total_size += file["size"]
+            file["target_path"] = cmd["target_dir"]
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -918,6 +862,81 @@ class MicroPythonBackend:
 
         self._execute_without_output("__temp_fp.close(); del __temp_fp")
 
+    def _write_file(self, content_blocks, target_path):
+        try:
+            self._write_file_via_serial(content_blocks, target_path)
+        except ReadOnlyFilesystemError:
+            self._write_file_via_mount(content_blocks, target_path)
+
+        self._sync_all_filesystems()
+
+    def _write_file_via_mount(self, content_blocks, target_path):
+        mounted_target_path = self._internal_path_to_mounted_path(target_path)
+        with open(mounted_target_path, "wb") as f:
+            print("writing via mount")
+            for block in content_blocks:
+                f.write(block)
+                f.flush()
+                os.fsync(f)
+
+    def _write_file_via_serial(self, content_blocks, target_path):
+        # prelude
+        try:
+            out, err, value = self._execute(
+                dedent(
+                    """
+                __temp_path = '{path}'
+                __temp_written = 0
+                __temp_f = open(__temp_path, 'wb')
+                """
+                ).format(path=target_path),
+                capture_output=True,
+            )
+
+            if "readonly" in err.replace("-", "").lower():
+                raise ReadOnlyFilesystemError()
+
+            print("writing via serial")
+            size = 0
+            for block in content_blocks:
+                self._execute_without_output("__temp_written += __temp_f.write(%r)" % block)
+                size += len(block)
+
+            bytes_written = self._evaluate("__temp_written")
+
+            if bytes_written != size:
+                raise UserError("Expected %d written bytes but wrote %d" % (size, bytes_written))
+
+        finally:
+            # clean up
+            self._execute(
+                dedent(
+                    """
+                    try:
+                        del __temp_written
+                        del __temp_path
+                        __temp_f.close()
+                        del __temp_f
+                    except:
+                        pass
+                """
+                )
+            )
+
+    def _sync_all_filesystems(self):
+        self._execute_without_output(
+            dedent(
+                """
+            try:
+                from os import sync as __temp_sync
+                __temp_sync()
+                del __temp_sync
+            except ImportError:
+                pass
+        """
+            )
+        )
+
     def _list_local_files_with_info(self, paths):
         def rec_list_with_size(path):
             result = {}
@@ -932,10 +951,10 @@ class MicroPythonBackend:
             return result
 
         result = []
-        for source_path in paths:
-            sizes = rec_list_with_size(source_path)
+        for requested_path in paths:
+            sizes = rec_list_with_size(requested_path)
             for path in sizes:
-                result.append({"path": path, "size": sizes[path], "source_path": source_path})
+                result.append({"path": path, "size": sizes[path], "requested_path": requested_path})
 
         result.sort(key=lambda rec: rec["path"])
         return result
@@ -948,8 +967,15 @@ class MicroPythonBackend:
 
         return self._evaluate(script % path, prelude="import os as __module_os")
 
-    def _makedirs_via_mount(self, path):
-        os.makedirs(path)
+    def _makedirs(self, path):
+        if path == "/":
+            return
+
+        mounted_path = self._internal_path_to_mounted_path(path)
+        if mounted_path is None:
+            self._makedirs_via_serial(path)
+        else:
+            os.makedirs(mounted_path, exist_ok=True)
 
     def _makedirs_via_serial(self, path):
         if path == "/":
@@ -1136,6 +1162,14 @@ def linux_dirname_basename(path):
 
     path = path.rstrip("/")
     return path.rsplit("/", maxsplit=1)
+
+
+def linux_join_path_parts(*parts):
+    return "/".join()
+
+
+class ReadOnlyFilesystemError(RuntimeError):
+    pass
 
 
 if __name__ == "__main__":
