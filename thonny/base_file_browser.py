@@ -53,7 +53,7 @@ class BaseFileBrowser(ttk.Frame):
                 # 5
             ),
             yscrollcommand=self.vert_scrollbar.set,
-            selectmode="browse",
+            selectmode="extended",
         )
         self.tree.grid(row=2, column=0, sticky=tk.NSEW)
         self.vert_scrollbar["command"] = self.tree.yview
@@ -232,18 +232,27 @@ class BaseFileBrowser(ttk.Frame):
         self.path_bar.configure(height=height)
 
     def get_selected_node(self):
+        """Returns single node (or nothing)"""
         nodes = self.tree.selection()
-        assert len(nodes) <= 1
         if len(nodes) == 1:
             return nodes[0]
+        elif len(nodes) > 1:
+            return self.tree.focus() or None
         else:
             return None
+
+    def get_selected_nodes(self):
+        """Can return several nodes"""
+        return self.tree.selection()
 
     def get_selected_path(self):
         return self.get_selected_value("path")
 
     def get_selected_kind(self):
         return self.get_selected_value("kind")
+
+    def get_selected_name(self):
+        return self.get_selected_value("name")
 
     def get_selected_value(self, key):
         node_id = self.get_selected_node()
@@ -253,7 +262,7 @@ class BaseFileBrowser(ttk.Frame):
         else:
             return None
 
-    def get_focused_path(self):
+    def get_active_directory(self):
         path = self.tree.set(ROOT_NODE_ID, "path")
         return path
 
@@ -480,21 +489,25 @@ class BaseFileBrowser(ttk.Frame):
         node_id = self.tree.identify_row(event.y)
 
         if node_id:
-            self.tree.selection_set(node_id)
+            if node_id not in self.tree.selection():
+                # replace current selection
+                self.tree.selection_set(node_id)
             self.tree.focus(node_id)
-            path = self.tree.set(node_id, "path")
-            kind = self.tree.set(node_id, "kind")
-            self.refresh_menu(path, kind)
+            self.refresh_menu()
             self.menu.tk_popup(event.x_root, event.y_root)
 
     def post_button_menu(self):
-        self.refresh_menu(self.get_selected_path(), self.get_selected_kind())
+        self.refresh_menu()
         self.menu.tk_popup(
             self.menu_button.winfo_rootx(),
             self.menu_button.winfo_rooty() + self.menu_button.winfo_height(),
         )
 
-    def refresh_menu(self, selected_path, selected_kind):
+    def refresh_menu(self):
+        selected_path = self.get_selected_path()
+        selected_kind = self.get_selected_kind()
+        selected_name = self.get_selected_name()
+
         self.menu.delete(0, "end")
 
         self.menu.add_command(label=_("Refresh"), command=self.refresh_tree)
@@ -502,11 +515,14 @@ class BaseFileBrowser(ttk.Frame):
         # self.menu.add_command(
         #    label=_("Delete"), command=lambda: self.delete_path(selected_path, selected_kind)
         # )
-        self.menu.add_command(
-            label=_("Focus into"),
-            command=lambda: self.request_focus_into(selected_path),
-            state="active" if selected_kind == "dir" else "disabled",
-        )
+
+        if selected_kind == "dir":
+            self.menu.add_command(
+                label=_("Focus into %s") % selected_name,
+                command=lambda: self.request_focus_into(selected_path),
+            )
+        else:
+            "TODO: add open command"
 
     def refresh_tree(self, paths_to_invalidate=None):
         self.invalidate_cache(paths_to_invalidate)
@@ -679,6 +695,7 @@ class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
 class BackendFileDialog(CommonDialog):
     def __init__(self, master, kind, initial_dir):
         super().__init__(master=master)
+        self.configure(selectmode="browse")
         self.result = None
 
         self.updating_selection = False
@@ -766,7 +783,7 @@ class BackendFileDialog(CommonDialog):
             return
 
         if self.browser.get_selected_kind() == "file":
-            name = self.browser.get_selected_value("name")
+            name = self.browser.get_selected_name()
             if name:
                 self.name_var.set(name)
 

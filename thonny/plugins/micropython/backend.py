@@ -274,6 +274,9 @@ class MicroPythonBackend:
                 _report_internal_error()
                 response = create_error_response(context_info="other unhandled exception")
 
+        if response is None:
+            response = {}
+
         if response is False:
             # Command doesn't want to send any response
             return
@@ -721,6 +724,14 @@ class MicroPythonBackend:
 
         return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
 
+    def _cmd_download(self, cmd):
+        # for item in cmd["items"]:
+        print(cmd)
+
+    def _cmd_upload(self, cmd):
+        print(self._list_local_files_with_info(cmd["source_paths"]))
+        # print(cmd)
+
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
@@ -907,6 +918,28 @@ class MicroPythonBackend:
 
         self._execute_without_output("__temp_fp.close(); del __temp_fp")
 
+    def _list_local_files_with_info(self, paths):
+        def rec_list_with_size(path):
+            result = {}
+            if os.path.isfile(path):
+                result[path] = os.path.getsize(path)
+            elif os.path.isdir(path):
+                for name in os.listdir(path):
+                    result.update(rec_list_with_size(os.path.join(path, name)))
+            else:
+                raise RuntimeError("Can't process " + path)
+
+            return result
+
+        result = []
+        for source_path in paths:
+            sizes = rec_list_with_size(source_path)
+            for path in sizes:
+                result.append({"path": path, "size": sizes[path], "source_path": source_path})
+
+        result.sort(key=lambda rec: rec["path"])
+        return result
+
     def _get_file_size(self, path):
         if self._supports_directories():
             script = "__module_os.stat(%r)[6]"
@@ -914,6 +947,38 @@ class MicroPythonBackend:
             script = "os.stat(%r)[6]"
 
         return self._evaluate(script % path, prelude="import os as __module_os")
+
+    def _makedirs_via_mount(self, path):
+        os.makedirs(path)
+
+    def _makedirs_via_serial(self, path):
+        if path == "/":
+            return
+        path = path.rstrip("/")
+
+        script = (
+            dedent(
+                """
+            __temp_path = %r
+            import os as __module_os
+            parts = __temp_path.split('/')
+            for i in range(2, len(parts)):
+                path = "/".join(parts[:i])
+                try:
+                    __module_os.stat(path)
+                except OSError:
+                    # does not exist
+                    __module_os.mkdir(path)
+        """
+            )
+            % path
+        )
+
+        self._execute(script)
+
+    def _upload_file(self, source, target):
+        target_dir, target_base = linux_dirname_basename(target)
+        self._makedirs(target_dir)
 
     def _download_file(self, source, target):
         with open(target, "wb") as out_fp:
@@ -1063,6 +1128,14 @@ def parse_api_information(file_path):
             defs[class_name] = member_names
 
     return defs
+
+
+def linux_dirname_basename(path):
+    if path == "/":
+        return ("/", "")
+
+    path = path.rstrip("/")
+    return path.rsplit("/", maxsplit=1)
 
 
 if __name__ == "__main__":

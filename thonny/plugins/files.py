@@ -6,7 +6,7 @@ import tkinter as tk
 from thonny import get_workbench, get_runner, get_shell
 from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
 from thonny.ui_utils import lookup_style_option
-from thonny.common import normpath_with_actual_case
+from thonny.common import normpath_with_actual_case, InlineCommand
 from thonny.running import construct_cd_command
 from thonny.misc_utils import running_on_windows
 from tkinter import messagebox
@@ -91,6 +91,15 @@ class FilesView(tk.PanedWindow):
         if self.remote_added:
             self.save_split()
 
+    def get_active_local_dir(self):
+        return self.local_files.get_active_directory()
+
+    def get_active_remote_dir(self):
+        if self.remote_added:
+            return self.remote_files.get_active_directory()
+        else:
+            return None
+
     def destroy(self):
         get_workbench().unbind("BackendTerminated", self.on_backend_terminate)
         get_workbench().unbind("BackendRestart", self.on_backend_restart)
@@ -157,6 +166,52 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         if cwd != self.current_focus and os.path.isdir(cwd):
             self.focus_into(cwd)
 
+    def _check_add_upload_command(self):
+        target_dir = self.master.get_active_remote_dir()
+
+        if target_dir is None:
+            return
+
+        nodes = self.get_selected_nodes()
+
+        if not nodes:
+            return
+        elif len(nodes) == 1:
+            source_desc = self.tree.set(nodes[0], "name")
+        else:
+            source_desc = _("%d items") % len(nodes)
+
+        proxy = get_runner().get_backend_proxy()
+
+        if not proxy.supports_directories():
+            target_dir_desc = proxy.get_node_label()
+        else:
+            target_dir_desc = target_dir
+
+        label = _("Upload") + " %s → %s" % (source_desc, target_dir_desc)
+
+        paths = [self.tree.set(node, "path") for node in nodes]
+        kinds = [self.tree.set(node, "kind") for node in nodes]
+
+        def upload():
+            if "dir" in kinds and not proxy.supports_directories():
+                messagebox.showerror(
+                    "Can't upload directory",
+                    "%s does not support directories.\n" % proxy.get_node_label()
+                    + "You can only upload files.",
+                )
+            else:
+                get_runner().send_command(
+                    InlineCommand("upload", source_paths=paths, target_dir=target_dir)
+                )
+
+        self.menu.add_command(label=label, command=upload)
+
+    def refresh_menu(self):
+        super().refresh_menu()
+        self.menu.add_separator()
+        self._check_add_upload_command()
+
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def __init__(self, master, show_hidden_files=False):
@@ -190,6 +245,34 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                 self.focus_into(path)
             else:
                 get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
+
+    def _add_download_command(self):
+        nodes = self.get_selected_nodes()
+
+        target_dir = self.master.get_active_local_dir()
+
+        if not nodes:
+            return
+        elif len(nodes) == 1:
+            source_desc = self.tree.set(nodes[0], "name")
+        else:
+            source_desc = _("%d items") % len(nodes)
+
+        label = _("Download") + " %s → %s" % (source_desc, target_dir)
+
+        paths = [self.tree.set(node, "path") for node in nodes]
+
+        def download():
+            get_runner().send_command(
+                InlineCommand("download", source_paths=paths, target_dir=target_dir)
+            )
+
+        self.menu.add_command(label=label, command=download)
+
+    def refresh_menu(self):
+        super().refresh_menu()
+        self.menu.add_separator()
+        self._add_download_command()
 
 
 def load_plugin() -> None:
