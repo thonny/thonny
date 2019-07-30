@@ -629,43 +629,48 @@ class MicroPythonBackend:
         return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
 
     def _cmd_write_file(self, cmd):
-        mount_name = self._get_fs_mount_name()
-        if mount_name is not None:
-            # CircuitPython devices only allow writing via mount,
-            # other mounted devices may show outdated data in mount
-            # when written via serial.
-            self._write_file_via_mount(cmd)
-        else:
-            self._write_file_via_serial(cmd)
+        def generate_blocks(content_bytes, block_size):
+            for i in range(0, len(content_bytes), block_size):
+                yield content_bytes[i : i + block_size]
+
+        self._write_file(generate_blocks(cmd["content_bytes"], BUFFER_SIZE), cmd["path"])
 
         return InlineResponse(
             command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
         )
 
-    def _write_file_via_mount(self, cmd):
-        # TODO: should be done async in background process
+    def _internal_path_to_mounted_path(self, path):
+        mount_path = self._get_fs_mount()
+        if mount_path is None:
+            return None
 
         flash_prefix = self._get_flash_prefix()
-        if cmd["path"].startswith(flash_prefix):
-            path_suffix = cmd["path"][len(flash_prefix) :]
-        elif cmd["path"].startswith("/"):
-            path_suffix = cmd["path"][1:]
+        if not path.startswith(flash_prefix):
+            return None
+
+        path_suffix = path[len(flash_prefix) :]
+
+        return os.path.join(mount_path, os.path.normpath(path_suffix))
+
+    def _write_file(self, content_bytes, target_path):
+        mount_name = self._get_fs_mount_name()
+        if mount_name is not None:
+            # CircuitPython devices only allow writing via mount,
+            # other mounted devices may show outdated data in mount
+            # when written via serial.
+            self._write_file_via_mount(content_bytes, target_path)
         else:
-            # something like micro:bit but with mounted fs
-            path_suffix
+            self._write_file_via_serial(content_bytes, target_path)
 
-        target_path = os.path.join(self._get_fs_mount(), path_suffix)
-        with open(target_path, "wb") as f:
-            f.write(cmd["content_bytes"])
-            f.flush()
-            os.fsync(f)
+    def _write_file_via_mount(self, content_blocks, target_path):
+        mounted_target_path = self._internal_path_to_mounted_path(target_path)
+        with open(mounted_target_path, "wb") as f:
+            for block in content_blocks:
+                f.write(block)
+                f.flush()
+                os.fsync(f)
 
-    def _write_file_via_serial(self, cmd):
-        data = cmd["content_bytes"]
-
-        # Don't create too long commands
-        BUFFER_SIZE = 512
-
+    def _write_file_via_serial(self, content_blocks, target_path):
         # prelude
         out, err, __ = self._execute(
             dedent(
@@ -674,7 +679,7 @@ class MicroPythonBackend:
             __temp_f = open(__temp_path, 'wb')
             __temp_written = 0
             """
-            ).format(path=cmd["path"]),
+            ).format(path=target_path),
             capture_output=True,
         )
 
@@ -685,14 +690,10 @@ class MicroPythonBackend:
         if out or err:
             return
 
-        size = len(data)
-        for i in range(0, size, BUFFER_SIZE):
-            chunk_size = min(BUFFER_SIZE, size - i)
-            chunk = data[i : i + chunk_size]
-            self._execute(
-                "__temp_written += __temp_f.write({chunk!r})".format(chunk=chunk),
-                capture_output=True,
-            )
+        size = 0
+        for block in content_blocks:
+            self._execute("__temp_written += __temp_f.write(%r)" % block, capture_output=True)
+            size += len(block)
 
         bytes_written = self._evaluate(
             "__temp_written",
