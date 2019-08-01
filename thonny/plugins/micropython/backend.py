@@ -671,10 +671,24 @@ class MicroPythonBackend:
 
     def _cmd_upload(self, cmd):
         total_size = 0
-        files = self._list_local_files_with_info(cmd["source_paths"])
-        for file in files:
+        local_files = self._list_local_files_with_info(cmd["source_paths"])
+        target_dir = cmd["target_dir"].rstrip("/")
+
+        upload_items = []
+        for file in local_files:
             total_size += file["size"]
-            file["target_path"] = cmd["target_dir"]
+            # compute filenames (and subdirs) in target_dir
+            # relative to the context of the user selected items
+            assert file["path"].startswith(file["original_context"])
+            path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
+            target_path = linux_join_path_parts(target_dir, to_linux_path(path_suffix))
+            upload_items.append((file["path"], target_path))
+
+        for source, target in upload_items:
+            print("uploading", source, "=>", target)
+            self._upload_file(source, target)
+
+        print("done")
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -852,15 +866,19 @@ class MicroPythonBackend:
     def _read_file(self, path):
         # TODO: read from mount when possible
         # file_size = self._get_file_size(path)
+        print("opening", path)
         self._execute_without_output("__temp_fp = open(%r, 'rb')" % path)
         while True:
+            print("reading", path)
             block = self._evaluate("__temp_fp.read(%s)" % BUFFER_SIZE)
             if block:
                 yield block
             if len(block) < BUFFER_SIZE:
                 break
 
+        print("closing", path)
         self._execute_without_output("__temp_fp.close(); del __temp_fp")
+        print("closed", path)
 
     def _write_file(self, content_blocks, target_path):
         try:
@@ -873,7 +891,6 @@ class MicroPythonBackend:
     def _write_file_via_mount(self, content_blocks, target_path):
         mounted_target_path = self._internal_path_to_mounted_path(target_path)
         with open(mounted_target_path, "wb") as f:
-            print("writing via mount")
             for block in content_blocks:
                 f.write(block)
                 f.flush()
@@ -882,6 +899,7 @@ class MicroPythonBackend:
     def _write_file_via_serial(self, content_blocks, target_path):
         # prelude
         try:
+            print("opening for writing")
             out, err, value = self._execute(
                 dedent(
                     """
@@ -896,9 +914,9 @@ class MicroPythonBackend:
             if "readonly" in err.replace("-", "").lower():
                 raise ReadOnlyFilesystemError()
 
-            print("writing via serial")
             size = 0
             for block in content_blocks:
+                print("writing", len(block))
                 self._execute_without_output("__temp_written += __temp_f.write(%r)" % block)
                 size += len(block)
 
@@ -954,7 +972,13 @@ class MicroPythonBackend:
         for requested_path in paths:
             sizes = rec_list_with_size(requested_path)
             for path in sizes:
-                result.append({"path": path, "size": sizes[path], "requested_path": requested_path})
+                result.append(
+                    {
+                        "path": path,
+                        "size": sizes[path],
+                        "original_context": os.path.dirname(requested_path),
+                    }
+                )
 
         result.sort(key=lambda rec: rec["path"])
         return result
@@ -1006,22 +1030,62 @@ class MicroPythonBackend:
         target_dir, target_base = linux_dirname_basename(target)
         self._makedirs(target_dir)
 
+        def block_generator():
+            with open(source, "rb") as source_fp:
+                while True:
+                    block = source_fp.read(BUFFER_SIZE)
+                    if block:
+                        yield block
+                    else:
+                        break
+
+        self._write_file(block_generator(), target)
+
     def _download_file(self, source, target):
+        os.makedirs(os.path.dirname(target), exist_ok=True)
         with open(target, "wb") as out_fp:
             for block in self._read_file(source):
                 out_fp.write(block)
                 os.fsync(out_fp)
 
-    def _get_fs_mount_name(self):
+    def _get_fs_mount_label(self):
+        # This method is most likely required with CircuitPython,
+        # so try its approach first
+        # https://learn.adafruit.com/welcome-to-circuitpython/the-circuitpy-drive
+        result = self._evaluate(
+            "__temp_result",
+            prelude=dedent(
+                """
+            try:
+                from storage import getmount as __temp_getmount
+                try:
+                    __temp_result = __temp_getmount("/").label
+                finally:
+                    del __temp_getmount
+            except ImportError:
+                __temp_result = None 
+            except OSError:
+                __temp_result = None 
+        """
+            ),
+            cleanup="del __temp_result",
+        )
+
+        if result is not None:
+            return result
+
         if self._welcome_text is None:
             return None
 
-        markers_by_name = {"PYBFLASH": {"pyblite", "pyboard"}, "CIRCUITPY": {"circuitpython"}}
+        """
+        # following is not reliable and probably not needed 
+        markers_by_name = {"PYBFLASH": {"pyb"}, "CIRCUITPY": {"circuitpython"}}
 
         for name in markers_by_name:
             for marker in markers_by_name[name]:
                 if marker.lower() in self._welcome_text.lower():
                     return name
+        """
 
         return None
 
@@ -1040,16 +1104,17 @@ class MicroPythonBackend:
             return "/"
 
     def _get_fs_mount(self):
-        if self._get_fs_mount_name() is None:
+        label = self._get_fs_mount_label()
+        if label is None:
             return None
         else:
             candidates = find_volumes_by_name(
-                self._get_fs_mount_name(),
+                self._get_fs_mount_label(),
                 # querying A can be very slow
                 skip_letters="A",
             )
             if len(candidates) == 0:
-                raise RuntimeError("Could not find volume " + self._get_fs_mount_name())
+                raise RuntimeError("Could not find volume " + self._get_fs_mount_label())
             elif len(candidates) > 1:
                 raise RuntimeError("Found several possible mount points: %s" % candidates)
             else:
@@ -1164,8 +1229,12 @@ def linux_dirname_basename(path):
     return path.rsplit("/", maxsplit=1)
 
 
-def linux_join_path_parts(*parts):
-    return "/".join()
+def linux_join_path_parts(left, right):
+    return left.rstrip("/") + "/" + right.strip("/")
+
+
+def to_linux_path(path):
+    return path.replace("\\", "/")
 
 
 class ReadOnlyFilesystemError(RuntimeError):
