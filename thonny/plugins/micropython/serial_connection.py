@@ -45,7 +45,9 @@ class SerialConnection(MicroPythonConnection):
         self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
         self._reading_thread.start()
 
-    def write(self, data, block_size=32, delay=0.01):
+    def write(self, data, block_size=256, delay=0.01):
+        # delay and block size taken from rshell
+        # https://github.com/dhylands/rshell/blob/master/rshell/pyboard.py#L242
         for i in range(0, len(data), block_size):
             block = data[i : i + block_size]
             # self._log_data(b"[" + block + b"]")
