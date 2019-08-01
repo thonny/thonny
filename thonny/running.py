@@ -839,7 +839,6 @@ class SubprocessProxy(BackendProxy):
                 try:
                     publish_as_msg(data)
                 except Exception:
-                    traceback.print_exc()
                     # Can mean the line was from subprocess,
                     # which can't be captured by stream faking.
                     # NB! If subprocess printed it without linebreak,
