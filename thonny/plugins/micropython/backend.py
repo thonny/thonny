@@ -287,6 +287,9 @@ class MicroPythonBackend:
             elif isinstance(cmd, InlineCommand):
                 response = InlineResponse(cmd.name, **response)
 
+        if "id" in cmd and "command_id" not in response:
+            response["command_id"] = cmd["id"]
+
         debug("cmd: " + str(cmd) + ", respin: " + str(response))
         self.send_message(response)
 

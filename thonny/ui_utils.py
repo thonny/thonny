@@ -46,6 +46,23 @@ class CommonDialog(tk.Toplevel):
                 focussed_widget.focus_set()
 
 
+class CommonDialogEx(CommonDialog):
+    def __init__(self, master=None, cnf={}, **kw):
+        super().__init__(master=master, cnf=cnf, **kw)
+
+        # Need to fill the dialog with a frame to gain theme support
+        self.main_frame = ttk.Frame(self)
+        self.main_frame.grid(row=0, column=0, sticky="nsew")
+        self.columnconfigure(0, weight=1)
+        self.rowconfigure(0, weight=1)
+
+        self.bind("<Escape>", self.on_close, True)
+        self.protocol("WM_DELETE_WINDOW", self.on_close)
+
+    def on_close(self, event=None):
+        self.destroy()
+
+
 class CustomMenubar(ttk.Frame):
     def __init__(self, master):
         ttk.Frame.__init__(self, master, style="CustomMenubar.TFrame")

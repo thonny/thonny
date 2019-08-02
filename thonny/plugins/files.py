@@ -202,7 +202,9 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                 )
             else:
                 get_runner().send_command(
-                    InlineCommand("upload", source_paths=paths, target_dir=target_dir)
+                    InlineCommand(
+                        "upload", source_paths=paths, target_dir=target_dir, blocking=True
+                    )
                 )
 
         self.menu.add_command(label=label, command=upload)

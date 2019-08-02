@@ -18,10 +18,11 @@ import signal
 import subprocess
 import sys
 import time
-import traceback
 from logging import debug
 from threading import Thread
 from time import sleep
+
+from tkinter import ttk
 
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
 from thonny.code import get_current_breakpoints, get_saved_current_script_filename, is_remote_path
@@ -46,7 +47,8 @@ from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
 from thonny.terminal import run_in_terminal
-from thonny.ui_utils import select_sequence
+from thonny.ui_utils import select_sequence, CommonDialog, show_dialog, CommonDialogEx
+from tkinter import messagebox
 
 
 WINDOWS_EXE = "python.exe"
@@ -226,6 +228,9 @@ class Runner:
         if "debug" in cmd.name.lower():
             cmd["breakpoints"] = get_current_breakpoints()
 
+        if "id" not in cmd:
+            cmd["id"] = generate_command_id()
+
         # Offer the command
         logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)
@@ -244,6 +249,10 @@ class Runner:
 
         if cmd.name[0].isupper():
             get_workbench().event_generate("BackendRestart", full=False)
+
+        if cmd.get("blocking"):
+            dlg = BlockingDialog(get_workbench(), cmd)
+            show_dialog(dlg)
 
     def _postpone_command(self, cmd: CommandToBackend) -> None:
         # in case of InlineCommands, discard older same type command
@@ -1378,3 +1387,61 @@ def get_environment_overrides_for_python_subprocess(target_executable):
 
 def construct_cd_command(path):
     return construct_cmd_line(["%cd", normpath_with_actual_case(path)])
+
+
+_command_id_counter = 0
+
+
+def generate_command_id():
+    global _command_id_counter
+    _command_id_counter += 1
+    return "cmd_" + str(_command_id_counter)
+
+
+class BlockingDialog(CommonDialogEx):
+    def __init__(self, master, cmd):
+        super().__init__(master)
+        self._sent_interrupt = False
+
+        self._cmd_id = cmd["id"]
+
+        self._description_label = ttk.Label(self.main_frame, text=str(cmd))
+        self._description_label.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+
+        self._cancel_button = ttk.Button(self.main_frame, text=_("Cancel"), command=self._on_cancel)
+        self._cancel_button.grid(row=2, column=0, padx=10, pady=10)
+
+        if isinstance(cmd, InlineCommand):
+            print("binding")
+            get_workbench().bind("InlineResponse", self._on_response)
+        else:
+            raise NotImplementedError()
+
+    def _on_response(self, event):
+        print("got", event)
+        if event.get("command_id") == self._cmd_id:
+            self.destroy()
+
+    def _send_interrupt(self):
+        self._sent_interrupt = True
+        self._description_label.configure(text="Cancelling...")
+        print("Sending interrupt")
+
+    def on_close(self, event=None):
+        self._on_cancel()
+
+    def _on_cancel(self):
+        if self._sent_interrupt:
+            if messagebox.askyesno(
+                "Interrupt again?",
+                "Do you want to close this dialog without waiting cancelling to complete?",
+            ):
+                self.destroy()
+            else:
+                self._send_interrupt()
+
+        else:
+            if messagebox.askyesno(
+                "Cancel current operation?", "Do you really want to cancel this operation?"
+            ):
+                self._send_interrupt()
