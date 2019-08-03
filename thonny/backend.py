@@ -2102,6 +2102,10 @@ class NiceTracer(Tracer):
 
         for node in ast.walk(root):
             if not isinstance(node, (ast.expr, ast.stmt)):
+                if isinstance(node, ast.comprehension):
+                    for expr in node.ifs:
+                        add_tag(expr, "comprehension.if")
+
                 continue
 
             # tag last children
@@ -2231,10 +2235,6 @@ class NiceTracer(Tracer):
             elif isinstance(node, ast.Compare):
                 # TODO: use static analysis to detect type of left child
                 add_tag(node, "skipexport")
-
-            if isinstance(node, ast.comprehension):
-                for expr in node.ifs:
-                    add_tag(expr, "comprehension.if")
 
             if isinstance(node, (ast.Assign)):
                 # value will be presented in assignment's before_statement_again

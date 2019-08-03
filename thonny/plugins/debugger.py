@@ -425,7 +425,10 @@ class FrameVisualizer:
                 assert "expression" in frame_info.event
                 stmt_tag = "suspended_focus"
 
-            self._tag_range(frame_info.current_statement, stmt_tag)
+            if frame_info.current_statement is not None:
+                self._tag_range(frame_info.current_statement, stmt_tag)
+            else:
+                logging.warning("Missing current_statement: %s", frame_info)
 
         self._expression_box.update_expression(msg, frame_info)
 
