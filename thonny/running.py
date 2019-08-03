@@ -1401,6 +1401,7 @@ def generate_command_id():
 class BlockingDialog(CommonDialogEx):
     def __init__(self, master, cmd, mode="indeterminate"):
         super().__init__(master)
+        self.title(_("Working..."))
         self._sent_interrupt = False
         self._mode = mode
 

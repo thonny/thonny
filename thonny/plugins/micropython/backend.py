@@ -1217,7 +1217,7 @@ class MicroPythonBackend:
         def block_generator():
             with open(source, "rb") as source_fp:
                 while True:
-                    block = source_fp.read(1024)
+                    block = source_fp.read(512)
                     if block:
                         yield block
                     else:
