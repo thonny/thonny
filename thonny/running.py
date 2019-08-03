@@ -47,7 +47,7 @@ from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
 from thonny.terminal import run_in_terminal
-from thonny.ui_utils import select_sequence, CommonDialog, show_dialog, CommonDialogEx
+from thonny.ui_utils import select_sequence, show_dialog, CommonDialogEx
 from tkinter import messagebox
 
 
@@ -1399,33 +1399,57 @@ def generate_command_id():
 
 
 class BlockingDialog(CommonDialogEx):
-    def __init__(self, master, cmd):
+    def __init__(self, master, cmd, mode="indeterminate"):
         super().__init__(master)
         self._sent_interrupt = False
+        self._mode = mode
 
         self._cmd_id = cmd["id"]
 
-        self._description_label = ttk.Label(self.main_frame, text=str(cmd))
+        description = cmd.get("description", str(cmd))
+
+        self._description_label = ttk.Label(self.main_frame, text=description)
         self._description_label.grid(row=0, column=0, padx=10, pady=10, sticky="new")
+
+        self._progress_bar = ttk.Progressbar(self.main_frame, mode=self._mode, length=200)
+        self._progress_bar.grid(row=1, column=0, padx=10, sticky="new")
+        self._progress_bar.start()
 
         self._cancel_button = ttk.Button(self.main_frame, text=_("Cancel"), command=self._on_cancel)
         self._cancel_button.grid(row=2, column=0, padx=10, pady=10)
 
+        self._start_time = time.time()
+
         if isinstance(cmd, InlineCommand):
             print("binding")
-            get_workbench().bind("InlineResponse", self._on_response)
+            get_workbench().bind("InlineResponse", self._on_response, True)
+            get_workbench().bind("InlineProgress", self._on_progress, True)
         else:
             raise NotImplementedError()
 
     def _on_response(self, event):
-        print("got", event)
         if event.get("command_id") == self._cmd_id:
+            print("took", time.time() - self._start_time)
             self.destroy()
+
+        if event.get("error") and not event.get("interrupted"):
+            messagebox.showerror("Error", event.get("error"))
+
+    def _on_progress(self, event):
+        if event.get("command_id") != self._cmd_id:
+            return
+
+        if self._mode == "indeterminate":
+            self._progress_bar.stop()
+            self._mode = "determinate"
+            self._progress_bar.configure(mode=self._mode)
+        self._progress_bar.configure(maximum=event["maximum"], value=event["value"])
 
     def _send_interrupt(self):
         self._sent_interrupt = True
         self._description_label.configure(text="Cancelling...")
         print("Sending interrupt")
+        get_runner()._cmd_interrupt()
 
     def on_close(self, event=None):
         self._on_cancel()

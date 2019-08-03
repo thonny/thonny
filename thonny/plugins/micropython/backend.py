@@ -32,6 +32,7 @@ import jedi
 import io
 import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
+import binascii
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
@@ -81,7 +82,9 @@ class MicroPythonBackend:
     def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
         self._cwd = None
+        self._interrupt_requested = False
         self._command_queue = Queue()  # populated by reader thread
+        self._progress_times = {}
 
         self._api_stubs_path = api_stubs_path
 
@@ -197,8 +200,35 @@ class MicroPythonBackend:
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
+    def _check_send_inline_progress(self, cmd, value, maximum, description=None):
+        assert "id" in cmd
+        prev_time = self._progress_times.get(cmd["id"], 0)
+        if value != maximum and time.time() - prev_time < 0.2:
+            # Don't notify too often
+            return
+        else:
+            self._progress_times[cmd["id"]] = time.time()
+
+        if description is None:
+            description = cmd.get("description", "Working...")
+
+        self.send_message(
+            BackendEvent(
+                event_type="InlineProgress",
+                command_id=cmd["id"],
+                value=value,
+                maximum=maximum,
+                description=description,
+            )
+        )
+
     def _interrupt(self):
         self._connection.write(INTERRUPT_CMD)
+
+    def _check_for_interrupt(self):
+        if self._interrupt_requested:
+            self._interrupt_requested = False
+            raise KeyboardInterrupt()
 
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -242,7 +272,10 @@ class MicroPythonBackend:
                 logger.info("Read stdin EOF")
                 sys.exit()
             cmd = parse_message(line)
-            self._command_queue.put(cmd)
+            if isinstance(cmd, InterruptCommand):
+                self._interrupt_requested = True
+            else:
+                self._command_queue.put(cmd)
 
     def handle_command(self, cmd):
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
@@ -269,7 +302,7 @@ class MicroPythonBackend:
                 sys.stderr.write(str(e) + "\n")
                 response = create_error_response()
             except KeyboardInterrupt:
-                response = create_error_response(user_exception=self._prepare_user_exception())
+                response = create_error_response(error="Interrupted", interrupted=True)
             except Exception:
                 _report_internal_error()
                 response = create_error_response(context_info="other unhandled exception")
@@ -669,11 +702,37 @@ class MicroPythonBackend:
         return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
 
     def _cmd_download(self, cmd):
-        # for item in cmd["items"]:
-        print(cmd)
+        total_size = 0
+        completed_files_size = 0
+        remote_files = self._list_remote_files_with_info(cmd["source_paths"])
+        target_dir = cmd["target_dir"].rstrip("/").rstrip("\\")
+
+        download_items = []
+        for file in remote_files:
+            total_size += file["size"]
+            # compute filenames (and subdirs) in target_dir
+            # relative to the context of the user selected items
+            assert file["path"].startswith(file["original_context"])
+            path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
+            target_path = os.path.join(target_dir, os.path.normpath(path_suffix))
+            download_items.append((file["path"], target_path, file["size"]))
+
+        def notify(current_file_progress):
+            self._check_send_inline_progress(
+                cmd, completed_files_size + current_file_progress, total_size
+            )
+
+        # replace the indeterminate progressbar with determinate as soon as possible
+        notify(0)
+
+        for source, target, size in download_items:
+            written_bytes = self._download_file(source, target, notify)
+            assert written_bytes == size
+            completed_files_size += size
 
     def _cmd_upload(self, cmd):
         total_size = 0
+        completed_files_size = 0
         local_files = self._list_local_files_with_info(cmd["source_paths"])
         target_dir = cmd["target_dir"].rstrip("/")
 
@@ -685,13 +744,20 @@ class MicroPythonBackend:
             assert file["path"].startswith(file["original_context"])
             path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
             target_path = linux_join_path_parts(target_dir, to_linux_path(path_suffix))
-            upload_items.append((file["path"], target_path))
+            upload_items.append((file["path"], target_path, file["size"]))
 
-        for source, target in upload_items:
-            print("uploading", source, "=>", target)
-            self._upload_file(source, target)
+        def notify(current_file_progress):
+            self._check_send_inline_progress(
+                cmd, completed_files_size + current_file_progress, total_size
+            )
 
-        print("done")
+        # replace the indeterminate progressbar with determinate as soon as possible
+        notify(0)
+
+        for source, target, size in upload_items:
+            written_bytes = self._upload_file(source, target, notify)
+            assert written_bytes == size
+            completed_files_size += size
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -869,46 +935,59 @@ class MicroPythonBackend:
     def _read_file(self, path):
         # TODO: read from mount when possible
         # file_size = self._get_file_size(path)
-        print("opening", path)
-        self._execute_without_output("__temp_fp = open(%r, 'rb')" % path)
+        block_size = 512
+
+        self._execute_without_output("__th_fp = open(%r, 'rb')" % path)
+        if "binascii" in self._builtin_modules:
+            self._execute_without_output("from binascii import hexlify as __temp_hexlify")
+
         while True:
-            print("reading", path)
-            block = self._evaluate("__temp_fp.read(%s)" % BUFFER_SIZE)
+            self._check_for_interrupt()
+            if "binascii" in self._builtin_modules:
+                block = binascii.unhexlify(
+                    self._evaluate("__temp_hexlify(__th_fp.read(%s))" % block_size)
+                )
+            else:
+                block = self._evaluate("__th_fp.read(%s)" % block_size)
             if block:
                 yield block
-            if len(block) < BUFFER_SIZE:
+            if len(block) < block_size:
                 break
 
-        print("closing", path)
-        self._execute_without_output("__temp_fp.close(); del __temp_fp")
-        print("closed", path)
+        self._execute_without_output("__th_fp.close(); del __th_fp")
 
-    def _write_file(self, content_blocks, target_path):
+    def _write_file(self, content_blocks, target_path, notifier=None):
         try:
-            self._write_file_via_serial(content_blocks, target_path)
+            result = self._write_file_via_serial(content_blocks, target_path, notifier)
         except ReadOnlyFilesystemError:
-            self._write_file_via_mount(content_blocks, target_path)
+            result = self._write_file_via_mount(content_blocks, target_path, notifier)
 
         self._sync_all_filesystems()
+        return result
 
-    def _write_file_via_mount(self, content_blocks, target_path):
+    def _write_file_via_mount(self, content_blocks, target_path, notifier=None):
         mounted_target_path = self._internal_path_to_mounted_path(target_path)
         with open(mounted_target_path, "wb") as f:
+            bytes_written = 0
             for block in content_blocks:
-                f.write(block)
+                self._check_for_interrupt()
+                bytes_written += f.write(block)
                 f.flush()
                 os.fsync(f)
+                if notifier is not None:
+                    notifier(bytes_written)
 
-    def _write_file_via_serial(self, content_blocks, target_path):
+        return bytes_written
+
+    def _write_file_via_serial(self, content_blocks, target_path, notifier=None):
         # prelude
         try:
-            print("opening for writing")
             out, err, value = self._execute(
                 dedent(
                     """
-                __temp_path = '{path}'
-                __temp_written = 0
-                __temp_f = open(__temp_path, 'wb')
+                __th_path = '{path}'
+                __th_written = 0
+                __th_f = open(__th_path, 'wb')
                 """
                 ).format(path=target_path),
                 capture_output=True,
@@ -917,16 +996,47 @@ class MicroPythonBackend:
             if "readonly" in err.replace("-", "").lower():
                 raise ReadOnlyFilesystemError()
 
-            size = 0
+            # Define function to allow shorter write commands
+            if "binascii" in self._builtin_modules:
+                self._execute_without_output(
+                    dedent(
+                        """
+                    from binascii import unhexlify as __th_unhex
+                    def __W(x):
+                        global __th_written
+                        __th_written += __th_f.write(__th_unhex(x))
+                """
+                    )
+                )
+            else:
+                self._execute_without_output(
+                    dedent(
+                        """
+                    def __W(x):
+                        global __th_written
+                        __th_written += __th_f.write(x)
+                """
+                    )
+                )
+
+            bytes_sent = 0
             for block in content_blocks:
-                print("writing", len(block))
-                self._execute_without_output("__temp_written += __temp_f.write(%r)" % block)
-                size += len(block)
+                self._check_for_interrupt()
+                if "binascii" in self._builtin_modules:
+                    script = "__W(%r)" % binascii.hexlify(block)
+                else:
+                    script = "__W(%r)" % block
+                self._execute_without_output(script)
+                bytes_sent += len(block)
+                if notifier is not None:
+                    notifier(bytes_sent)
 
-            bytes_written = self._evaluate("__temp_written")
+            bytes_received = self._evaluate("__th_written")
 
-            if bytes_written != size:
-                raise UserError("Expected %d written bytes but wrote %d" % (size, bytes_written))
+            if bytes_received != bytes_sent:
+                raise UserError(
+                    "Expected %d written bytes but wrote %d" % (bytes_sent, bytes_received)
+                )
 
         finally:
             # clean up
@@ -934,24 +1044,28 @@ class MicroPythonBackend:
                 dedent(
                     """
                     try:
-                        del __temp_written
-                        del __temp_path
-                        __temp_f.close()
-                        del __temp_f
+                        del __W
+                        del __th_written
+                        del __th_path
+                        __th_f.close()
+                        del __th_f
+                        del __th_unhex
                     except:
                         pass
                 """
                 )
             )
 
+        return bytes_sent
+
     def _sync_all_filesystems(self):
         self._execute_without_output(
             dedent(
                 """
             try:
-                from os import sync as __temp_sync
-                __temp_sync()
-                del __temp_sync
+                from os import sync as __th_sync
+                __th_sync()
+                del __th_sync
             except ImportError:
                 pass
         """
@@ -986,6 +1100,73 @@ class MicroPythonBackend:
         result.sort(key=lambda rec: rec["path"])
         return result
 
+    def _list_remote_files_with_info(self, paths):
+        # prepare universal functions
+        self._execute_without_output(
+            dedent(
+                """
+            try:
+                from os import stat as __th_stat
+                
+                def __th_getsize(path):
+                    return __th_stat(path)[6]
+                
+                def __th_isdir(path):
+                    return __th_stat(path)[0] & 0o170000 == 0o040000
+                    
+            except ImportError:
+                __th_stat = None
+                # micro:bit
+                from os import size as __th_getsize
+                
+                def __th_isdir(path):
+                    return False
+        """
+            )
+        )
+
+        self._execute_without_output(
+            dedent(
+                """
+            def __th_rec_list_with_size(path):
+                result = {}
+                if __th_isdir(path):
+                    for name in os.listdir(path):
+                        result.update(rec_list_with_size(path + "/" + name))
+                else:
+                    result[path] = __th_getsize(path)
+    
+                return result
+        """
+            )
+        )
+
+        result = []
+        for requested_path in paths:
+            sizes = self._evaluate("__th_rec_list_with_size(%r)" % requested_path)
+            for path in sizes:
+                result.append(
+                    {
+                        "path": path,
+                        "size": sizes[path],
+                        "original_context": os.path.dirname(requested_path),
+                    }
+                )
+
+        result.sort(key=lambda rec: rec["path"])
+
+        self._execute_without_output(
+            dedent(
+                """
+            del __th_stat
+            del __th_getsize
+            del __th_isdir
+            del __th_rec_list_with_size
+        """
+            )
+        )
+        return result
+
     def _get_file_size(self, path):
         if self._supports_directories():
             script = "__module_os.stat(%r)[6]"
@@ -1012,9 +1193,9 @@ class MicroPythonBackend:
         script = (
             dedent(
                 """
-            __temp_path = %r
+            __th_path = %r
             import os as __module_os
-            parts = __temp_path.split('/')
+            parts = __th_path.split('/')
             for i in range(2, len(parts)):
                 path = "/".join(parts[:i])
                 try:
@@ -1029,49 +1210,54 @@ class MicroPythonBackend:
 
         self._execute(script)
 
-    def _upload_file(self, source, target):
+    def _upload_file(self, source, target, notifier):
         target_dir, target_base = linux_dirname_basename(target)
         self._makedirs(target_dir)
 
         def block_generator():
             with open(source, "rb") as source_fp:
                 while True:
-                    block = source_fp.read(BUFFER_SIZE)
+                    block = source_fp.read(1024)
                     if block:
                         yield block
                     else:
                         break
 
-        self._write_file(block_generator(), target)
+        return self._write_file(block_generator(), target, notifier=notifier)
 
-    def _download_file(self, source, target):
+    def _download_file(self, source, target, notifier=None):
         os.makedirs(os.path.dirname(target), exist_ok=True)
+        bytes_written = 0
         with open(target, "wb") as out_fp:
             for block in self._read_file(source):
                 out_fp.write(block)
                 os.fsync(out_fp)
+                bytes_written += len(block)
+                notifier(bytes_written)
+
+        return bytes_written
 
     def _get_fs_mount_label(self):
         # This method is most likely required with CircuitPython,
         # so try its approach first
         # https://learn.adafruit.com/welcome-to-circuitpython/the-circuitpy-drive
         result = self._evaluate(
-            "__temp_result",
+            "__th_result",
             prelude=dedent(
                 """
             try:
-                from storage import getmount as __temp_getmount
+                from storage import getmount as __th_getmount
                 try:
-                    __temp_result = __temp_getmount("/").label
+                    __th_result = __th_getmount("/").label
                 finally:
-                    del __temp_getmount
+                    del __th_getmount
             except ImportError:
-                __temp_result = None 
+                __th_result = None 
             except OSError:
-                __temp_result = None 
+                __th_result = None 
         """
             ),
-            cleanup="del __temp_result",
+            cleanup="del __th_result",
         )
 
         if result is not None:
@@ -1134,47 +1320,47 @@ class MicroPythonBackend:
 
     def _get_dirs_child_data_generic(self, cmd):
         return self._evaluate(
-            "__temp_result",
+            "__th_result",
             prelude=dedent(
                 """
                 import os as __module_os
                 # Init all vars, so that they can be deleted
                 # even if the loop makes no iterations
-                __temp_result = {}
-                __temp_path = None
-                __temp_st = None 
-                __temp_children = None
-                __temp_name = None
-                __temp_real_path = None
-                __temp_full = None
+                __th_result = {}
+                __th_path = None
+                __th_st = None 
+                __th_children = None
+                __th_name = None
+                __th_real_path = None
+                __th_full = None
                 
-                for __temp_path in %(paths)r:
-                    __temp_real_path = __temp_path or '/'
-                    __temp_children = {}
-                    for __temp_name in __module_os.listdir(__temp_real_path):
-                        if __temp_name.startswith('.') or __temp_name == "System Volume Information":
+                for __th_path in %(paths)r:
+                    __th_real_path = __th_path or '/'
+                    __th_children = {}
+                    for __th_name in __module_os.listdir(__th_real_path):
+                        if __th_name.startswith('.') or __th_name == "System Volume Information":
                             continue
-                        __temp_full = (__temp_real_path + '/' + __temp_name).replace("//", "/")
-                        # print("processing", __temp_full)
-                        __temp_st = __module_os.stat(__temp_full)
-                        if __temp_st[0] & 0o170000 == 0o040000:
+                        __th_full = (__th_real_path + '/' + __th_name).replace("//", "/")
+                        # print("processing", __th_full)
+                        __th_st = __module_os.stat(__th_full)
+                        if __th_st[0] & 0o170000 == 0o040000:
                             # directory
-                            __temp_children[__temp_name] = None
+                            __th_children[__th_name] = None
                         else:
-                            __temp_children[__temp_name] = __temp_st[6]
+                            __th_children[__th_name] = __th_st[6]
                             
-                    __temp_result[__temp_path] = __temp_children                            
+                    __th_result[__th_path] = __th_children                            
             """
             )
             % {"paths": cmd.paths},
             cleanup=dedent(
                 """
                 del __module_os
-                del __temp_st
-                del __temp_children
-                del __temp_name
-                del __temp_path
-                del __temp_full
+                del __th_st
+                del __th_children
+                del __th_name
+                del __th_path
+                del __th_full
             """
             ),
         )

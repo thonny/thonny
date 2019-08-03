@@ -203,7 +203,11 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
             else:
                 get_runner().send_command(
                     InlineCommand(
-                        "upload", source_paths=paths, target_dir=target_dir, blocking=True
+                        "upload",
+                        source_paths=paths,
+                        target_dir=target_dir,
+                        blocking=True,
+                        description=label,
                     )
                 )
 
@@ -266,7 +270,13 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
 
         def download():
             get_runner().send_command(
-                InlineCommand("download", source_paths=paths, target_dir=target_dir)
+                InlineCommand(
+                    "download",
+                    source_paths=paths,
+                    target_dir=target_dir,
+                    blocking=True,
+                    description=label,
+                )
             )
 
         self.menu.add_command(label=label, command=download)
