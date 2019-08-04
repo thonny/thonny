@@ -210,6 +210,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                         description=label,
                     )
                 )
+                self.master.remote_files.refresh_tree()
 
         self.menu.add_command(label=label, command=upload)
 
@@ -278,6 +279,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                     description=label,
                 )
             )
+            self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=label, command=download)
 
