@@ -148,7 +148,7 @@ class MicroPythonBackend:
         return welcome_text.decode(ENCODING)
 
     def _fetch_uname(self):
-        res = self._evaluate("__module_os.uname()", prelude="import os as __module_os")
+        res = self._evaluate("__thonny_os.uname()", prelude="import os as __thonny_os")
         return {
             "sysname": res[0],
             "nodename": res[1],
@@ -193,8 +193,8 @@ class MicroPythonBackend:
 
     def _fetch_cwd(self):
         return self._evaluate(
-            "__module_os.getcwd() if hasattr(__module_os, 'getcwd') else ''",
-            prelude="import os as __module_os",
+            "__thonny_os.getcwd() if hasattr(__thonny_os, 'getcwd') else ''",
+            prelude="import os as __thonny_os",
         )
 
     def _send_ready_message(self):
@@ -618,7 +618,7 @@ class MicroPythonBackend:
                 raise UserError("This device doesn't have directories")
 
             path = cmd.args[0]
-            self._execute("import os as __module_os; __module_os.chdir(%r)" % path)
+            self._execute("import os as __thonny_os; __thonny_os.chdir(%r)" % path)
             self._cwd = self._fetch_cwd()
             return {}
         else:
@@ -937,7 +937,7 @@ class MicroPythonBackend:
         # file_size = self._get_file_size(path)
         block_size = 512
 
-        self._execute_without_output("__th_fp = open(%r, 'rb')" % path)
+        self._execute_without_output("__thonny_fp = open(%r, 'rb')" % path)
         if "binascii" in self._builtin_modules:
             self._execute_without_output("from binascii import hexlify as __temp_hexlify")
 
@@ -945,16 +945,27 @@ class MicroPythonBackend:
             self._check_for_interrupt()
             if "binascii" in self._builtin_modules:
                 block = binascii.unhexlify(
-                    self._evaluate("__temp_hexlify(__th_fp.read(%s))" % block_size)
+                    self._evaluate("__temp_hexlify(__thonny_fp.read(%s))" % block_size)
                 )
             else:
-                block = self._evaluate("__th_fp.read(%s)" % block_size)
+                block = self._evaluate("__thonny_fp.read(%s)" % block_size)
             if block:
                 yield block
             if len(block) < block_size:
                 break
 
-        self._execute_without_output("__th_fp.close(); del __th_fp")
+        self._execute_without_output(
+            dedent(
+                """
+            __thonny_fp.close()
+            del __thonny_fp
+            try:
+                del __temp_hexlify
+            except:
+                pass
+            """
+            )
+        )
 
     def _write_file(self, content_blocks, target_path, notifier=None):
         try:
@@ -985,9 +996,9 @@ class MicroPythonBackend:
             out, err, value = self._execute(
                 dedent(
                     """
-                __th_path = '{path}'
-                __th_written = 0
-                __th_f = open(__th_path, 'wb')
+                __thonny_path = '{path}'
+                __thonny_written = 0
+                __thonny_f = open(__thonny_path, 'wb')
                 """
                 ).format(path=target_path),
                 capture_output=True,
@@ -1001,10 +1012,10 @@ class MicroPythonBackend:
                 self._execute_without_output(
                     dedent(
                         """
-                    from binascii import unhexlify as __th_unhex
+                    from binascii import unhexlify as __thonny_unhex
                     def __W(x):
-                        global __th_written
-                        __th_written += __th_f.write(__th_unhex(x))
+                        global __thonny_written
+                        __thonny_written += __thonny_f.write(__thonny_unhex(x))
                 """
                     )
                 )
@@ -1013,8 +1024,8 @@ class MicroPythonBackend:
                     dedent(
                         """
                     def __W(x):
-                        global __th_written
-                        __th_written += __th_f.write(x)
+                        global __thonny_written
+                        __thonny_written += __thonny_f.write(x)
                 """
                     )
                 )
@@ -1031,7 +1042,7 @@ class MicroPythonBackend:
                 if notifier is not None:
                     notifier(bytes_sent)
 
-            bytes_received = self._evaluate("__th_written")
+            bytes_received = self._evaluate("__thonny_written")
 
             if bytes_received != bytes_sent:
                 raise UserError(
@@ -1045,11 +1056,11 @@ class MicroPythonBackend:
                     """
                     try:
                         del __W
-                        del __th_written
-                        del __th_path
-                        __th_f.close()
-                        del __th_f
-                        del __th_unhex
+                        del __thonny_written
+                        del __thonny_path
+                        __thonny_f.close()
+                        del __thonny_f
+                        del __thonny_unhex
                     except:
                         pass
                 """
@@ -1063,9 +1074,9 @@ class MicroPythonBackend:
             dedent(
                 """
             try:
-                from os import sync as __th_sync
-                __th_sync()
-                del __th_sync
+                from os import sync as __thonny_sync
+                __thonny_sync()
+                del __thonny_sync
             except ImportError:
                 pass
         """
@@ -1106,20 +1117,20 @@ class MicroPythonBackend:
             dedent(
                 """
             try:
-                from os import stat as __th_stat
+                from os import stat as __thonny_stat
                 
-                def __th_getsize(path):
-                    return __th_stat(path)[6]
+                def __thonny_getsize(path):
+                    return __thonny_stat(path)[6]
                 
-                def __th_isdir(path):
-                    return __th_stat(path)[0] & 0o170000 == 0o040000
+                def __thonny_isdir(path):
+                    return __thonny_stat(path)[0] & 0o170000 == 0o040000
                     
             except ImportError:
-                __th_stat = None
+                __thonny_stat = None
                 # micro:bit
-                from os import size as __th_getsize
+                from os import size as __thonny_getsize
                 
-                def __th_isdir(path):
+                def __thonny_isdir(path):
                     return False
         """
             )
@@ -1128,13 +1139,13 @@ class MicroPythonBackend:
         self._execute_without_output(
             dedent(
                 """
-            def __th_rec_list_with_size(path):
+            def __thonny_rec_list_with_size(path):
                 result = {}
-                if __th_isdir(path):
+                if __thonny_isdir(path):
                     for name in os.listdir(path):
                         result.update(rec_list_with_size(path + "/" + name))
                 else:
-                    result[path] = __th_getsize(path)
+                    result[path] = __thonny_getsize(path)
     
                 return result
         """
@@ -1143,7 +1154,7 @@ class MicroPythonBackend:
 
         result = []
         for requested_path in paths:
-            sizes = self._evaluate("__th_rec_list_with_size(%r)" % requested_path)
+            sizes = self._evaluate("__thonny_rec_list_with_size(%r)" % requested_path)
             for path in sizes:
                 result.append(
                     {
@@ -1158,10 +1169,10 @@ class MicroPythonBackend:
         self._execute_without_output(
             dedent(
                 """
-            del __th_stat
-            del __th_getsize
-            del __th_isdir
-            del __th_rec_list_with_size
+            del __thonny_stat
+            del __thonny_getsize
+            del __thonny_isdir
+            del __thonny_rec_list_with_size
         """
             )
         )
@@ -1169,11 +1180,11 @@ class MicroPythonBackend:
 
     def _get_file_size(self, path):
         if self._supports_directories():
-            script = "__module_os.stat(%r)[6]"
+            script = "__thonny_os.stat(%r)[6]"
         else:
             script = "os.stat(%r)[6]"
 
-        return self._evaluate(script % path, prelude="import os as __module_os")
+        return self._evaluate(script % path, prelude="import os as __thonny_os")
 
     def _makedirs(self, path):
         if path == "/":
@@ -1193,16 +1204,21 @@ class MicroPythonBackend:
         script = (
             dedent(
                 """
-            __th_path = %r
-            import os as __module_os
-            parts = __th_path.split('/')
-            for i in range(2, len(parts)):
-                path = "/".join(parts[:i])
+            import os as __thonny_os
+            __thonny_parts = %r.split('/')
+            for i in range(2, len(__thonny_parts)):
+                __thonny_path = "/".join(__thonny_parts[:i])
                 try:
-                    __module_os.stat(path)
+                    __thonny_os.stat(__thonny_path)
                 except OSError:
                     # does not exist
-                    __module_os.mkdir(path)
+                    __thonny_os.mkdir(__thonny_path)
+            
+            del __thonny_parts
+            try:
+                del __thonny_path
+            except:
+                pass
         """
             )
             % path
@@ -1242,22 +1258,22 @@ class MicroPythonBackend:
         # so try its approach first
         # https://learn.adafruit.com/welcome-to-circuitpython/the-circuitpy-drive
         result = self._evaluate(
-            "__th_result",
+            "__thonny_result",
             prelude=dedent(
                 """
             try:
-                from storage import getmount as __th_getmount
+                from storage import getmount as __thonny_getmount
                 try:
-                    __th_result = __th_getmount("/").label
+                    __thonny_result = __thonny_getmount("/").label
                 finally:
-                    del __th_getmount
+                    del __thonny_getmount
             except ImportError:
-                __th_result = None 
+                __thonny_result = None 
             except OSError:
-                __th_result = None 
+                __thonny_result = None 
         """
             ),
-            cleanup="del __th_result",
+            cleanup="del __thonny_result",
         )
 
         if result is not None:
@@ -1314,53 +1330,55 @@ class MicroPythonBackend:
 
         assert cmd["paths"] == {""}, "Bad command: " + repr(cmd)
         file_sizes = self._evaluate(
-            "{name : __module_os.size(name) for name in __module_os.listdir()}"
+            "{name : __thonny_os.size(name) for name in __thonny_os.listdir()}"
         )
         return {"": file_sizes}
 
     def _get_dirs_child_data_generic(self, cmd):
         return self._evaluate(
-            "__th_result",
+            "__thonny_result",
             prelude=dedent(
                 """
-                import os as __module_os
+                import os as __thonny_os
                 # Init all vars, so that they can be deleted
                 # even if the loop makes no iterations
-                __th_result = {}
-                __th_path = None
-                __th_st = None 
-                __th_children = None
-                __th_name = None
-                __th_real_path = None
-                __th_full = None
+                __thonny_result = {}
+                __thonny_path = None
+                __thonny_st = None 
+                __thonny_children = None
+                __thonny_name = None
+                __thonny_real_path = None
+                __thonny_full = None
                 
-                for __th_path in %(paths)r:
-                    __th_real_path = __th_path or '/'
-                    __th_children = {}
-                    for __th_name in __module_os.listdir(__th_real_path):
-                        if __th_name.startswith('.') or __th_name == "System Volume Information":
+                for __thonny_path in %(paths)r:
+                    __thonny_real_path = __thonny_path or '/'
+                    __thonny_children = {}
+                    for __thonny_name in __thonny_os.listdir(__thonny_real_path):
+                        if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
                             continue
-                        __th_full = (__th_real_path + '/' + __th_name).replace("//", "/")
-                        # print("processing", __th_full)
-                        __th_st = __module_os.stat(__th_full)
-                        if __th_st[0] & 0o170000 == 0o040000:
+                        __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
+                        # print("processing", __thonny_full)
+                        __thonny_st = __thonny_os.stat(__thonny_full)
+                        if __thonny_st[0] & 0o170000 == 0o040000:
                             # directory
-                            __th_children[__th_name] = None
+                            __thonny_children[__thonny_name] = None
                         else:
-                            __th_children[__th_name] = __th_st[6]
+                            __thonny_children[__thonny_name] = __thonny_st[6]
                             
-                    __th_result[__th_path] = __th_children                            
+                    __thonny_result[__thonny_path] = __thonny_children                            
             """
             )
             % {"paths": cmd.paths},
             cleanup=dedent(
                 """
-                del __module_os
-                del __th_st
-                del __th_children
-                del __th_name
-                del __th_path
-                del __th_full
+                del __thonny_os
+                del __thonny_st
+                del __thonny_children
+                del __thonny_name
+                del __thonny_path
+                del __thonny_full
+                del __thonny_result
+                del __thonny_real_path
             """
             ),
         )
