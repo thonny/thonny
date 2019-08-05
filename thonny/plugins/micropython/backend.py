@@ -607,7 +607,7 @@ class MicroPythonBackend:
 
     def _supports_directories(self):
         # NB! make sure self._cwd is queried first
-        return self._cwd is not None
+        return bool(self._cwd)
 
     def _cmd_interrupt(self, cmd):
         self._interrupt()
@@ -657,14 +657,23 @@ class MicroPythonBackend:
         return {"module_name": cmd.module_name, "globals": globs}
 
     def _cmd_get_dirs_child_data(self, cmd):
-        if "micro:bit" in self._welcome_text.lower():
-            data = self._get_dirs_child_data_microbit(cmd)
-            dir_separator = ""
-        else:
-            data = self._get_dirs_child_data_generic(cmd)
+        if self._supports_directories():
+            data = self._get_dirs_child_data_generic(cmd["paths"])
             dir_separator = "/"
+        else:
+            assert cmd["paths"] == {""}, "Bad command: " + repr(cmd)
+            sizes = self._get_microbit_file_sizes()
+            root_data = {name: {"kind": "file", "size": size} for (name, size) in sizes.items()}
+            data = {"": root_data}
+            total_size = sum(sizes[name] for name in sizes)
+            dir_separator = ""
 
-        return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
+        return {
+            "node_id": cmd["node_id"],
+            "dir_separator": dir_separator,
+            "data": data,
+            # "fs_info" : self._get_fs_info(path)
+        }
 
     def _cmd_write_file(self, cmd):
         def generate_blocks(content_bytes, block_size):
@@ -998,7 +1007,7 @@ class MicroPythonBackend:
                     """
                 __thonny_path = '{path}'
                 __thonny_written = 0
-                __thonny_f = open(__thonny_path, 'wb')
+                __thonny_fp = open(__thonny_path, 'wb')
                 """
                 ).format(path=target_path),
                 capture_output=True,
@@ -1006,6 +1015,9 @@ class MicroPythonBackend:
 
             if "readonly" in err.replace("-", "").lower():
                 raise ReadOnlyFilesystemError()
+
+            elif err:
+                raise RuntimeError("Problem opening file for writing: " + err)
 
             # Define function to allow shorter write commands
             if "binascii" in self._builtin_modules:
@@ -1015,7 +1027,7 @@ class MicroPythonBackend:
                     from binascii import unhexlify as __thonny_unhex
                     def __W(x):
                         global __thonny_written
-                        __thonny_written += __thonny_f.write(__thonny_unhex(x))
+                        __thonny_written += __thonny_fp.write(__thonny_unhex(x))
                 """
                     )
                 )
@@ -1025,7 +1037,7 @@ class MicroPythonBackend:
                         """
                     def __W(x):
                         global __thonny_written
-                        __thonny_written += __thonny_f.write(x)
+                        __thonny_written += __thonny_fp.write(x)
                 """
                     )
                 )
@@ -1058,8 +1070,8 @@ class MicroPythonBackend:
                         del __W
                         del __thonny_written
                         del __thonny_path
-                        __thonny_f.close()
-                        del __thonny_f
+                        __thonny_fp.close()
+                        del __thonny_fp
                         del __thonny_unhex
                     except:
                         pass
@@ -1117,6 +1129,7 @@ class MicroPythonBackend:
             dedent(
                 """
             try:
+                import os as __thonny_os
                 from os import stat as __thonny_stat
                 
                 def __thonny_getsize(path):
@@ -1142,8 +1155,8 @@ class MicroPythonBackend:
             def __thonny_rec_list_with_size(path):
                 result = {}
                 if __thonny_isdir(path):
-                    for name in os.listdir(path):
-                        result.update(rec_list_with_size(path + "/" + name))
+                    for name in __thonny_os.listdir(path):
+                        result.update(__thonny_rec_list_with_size(path + "/" + name))
                 else:
                     result[path] = __thonny_getsize(path)
     
@@ -1169,11 +1182,12 @@ class MicroPythonBackend:
         self._execute_without_output(
             dedent(
                 """
-            del __thonny_stat
-            del __thonny_getsize
-            del __thonny_isdir
-            del __thonny_rec_list_with_size
-        """
+                del __thonny_os
+                del __thonny_stat
+                del __thonny_getsize
+                del __thonny_isdir
+                del __thonny_rec_list_with_size
+            """
             )
         )
         return result
@@ -1201,17 +1215,23 @@ class MicroPythonBackend:
             return
         path = path.rstrip("/")
 
+        print("Making", path)
+
         script = (
             dedent(
                 """
             import os as __thonny_os
             __thonny_parts = %r.split('/')
-            for i in range(2, len(__thonny_parts)):
+            print(__thonny_parts)
+            for i in range(2, len(__thonny_parts) + 1):
                 __thonny_path = "/".join(__thonny_parts[:i])
+                print("testing", __thonny_path)
                 try:
                     __thonny_os.stat(__thonny_path)
+                    print("stat")
                 except OSError:
                     # does not exist
+                    print("nostat")
                     __thonny_os.mkdir(__thonny_path)
             
             del __thonny_parts
@@ -1325,16 +1345,17 @@ class MicroPythonBackend:
             else:
                 return candidates[0]
 
-    def _get_dirs_child_data_microbit(self, cmd):
-        """let it be here so micro:bit works with generic proxy as well"""
+    def _get_fs_info(self, path):
+        asdf
 
-        assert cmd["paths"] == {""}, "Bad command: " + repr(cmd)
-        file_sizes = self._evaluate(
-            "{name : __thonny_os.size(name) for name in __thonny_os.listdir()}"
+    def _get_microbit_file_sizes(self):
+        return self._evaluate(
+            "{name : __thonny_os.size(name) for name in __thonny_os.listdir()}",
+            prelude="import os as __thonny_os",
+            cleanup="del __thonny_os",
         )
-        return {"": file_sizes}
 
-    def _get_dirs_child_data_generic(self, cmd):
+    def _get_dirs_child_data_generic(self, paths):
         return self._evaluate(
             "__thonny_result",
             prelude=dedent(
@@ -1350,6 +1371,18 @@ class MicroPythonBackend:
                 __thonny_real_path = None
                 __thonny_full = None
                 
+                def __thonny_fs_info(path):
+                    try:
+                        from os import statvfs
+                        fs_stat = __thonny_statvfs(path)
+                        size = fs_stat[0] * fs_stat[2]
+                        free = fs_stat[0] * fs_stat[3] 
+                    except ImportError:
+                        size = None
+                        free = None
+                        
+                    return {"size" : size, "free": free}
+                        
                 for __thonny_path in %(paths)r:
                     __thonny_real_path = __thonny_path or '/'
                     __thonny_children = {}
@@ -1361,18 +1394,20 @@ class MicroPythonBackend:
                         __thonny_st = __thonny_os.stat(__thonny_full)
                         if __thonny_st[0] & 0o170000 == 0o040000:
                             # directory
-                            __thonny_children[__thonny_name] = None
+                            __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
                         else:
-                            __thonny_children[__thonny_name] = __thonny_st[6]
+                            __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
+                        __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9])  
                             
                     __thonny_result[__thonny_path] = __thonny_children                            
             """
             )
-            % {"paths": cmd.paths},
+            % {"paths": paths},
             cleanup=dedent(
                 """
                 del __thonny_os
                 del __thonny_st
+                del __thonny_fs_info
                 del __thonny_children
                 del __thonny_name
                 del __thonny_path

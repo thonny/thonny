@@ -434,3 +434,19 @@ def _copy_to_windows_clipboard(data):
     SetClipboardData(CF_UNICODETEXT, hCd)
     # ctypes.windll.user32.SetClipboardText(CF_UNICODETEXT, hCd)
     CloseClipboard()
+
+
+def sizeof_fmt(num, suffix="B"):
+    """Readable file size
+    :param num: Bytes value
+    :type num: int
+    :param suffix: Unit suffix (optionnal) default = B
+    :type suffix: str
+    :rtype: str
+    """
+    # https://gist.github.com/cbwar/d2dfbc19b140bd599daccbe0fe925597
+    for unit in ["", "k", "M", "G", "T", "P", "E", "Z"]:
+        if abs(num) < 1024.0:
+            return "%3.1f %s%s" % (num, unit, suffix)
+        num /= 1024.0
+    return "%.1f%s%s" % (num, "Yi", suffix)

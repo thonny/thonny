@@ -14,7 +14,9 @@ from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
-from thonny.misc_utils import running_on_windows, start_time, lap_time
+from thonny.misc_utils import running_on_windows, start_time, lap_time, sizeof_fmt
+import datetime
+import time
 
 _dummy_node_text = "..."
 
@@ -277,11 +279,6 @@ class BaseFileBrowser(ttk.Frame):
             if isinstance(children_data, dict):
                 for child_name in children_data:
                     child_data = children_data[child_name]
-                    if child_data is None or isinstance(child_data, int):
-                        # this is shortcut for simple systems
-                        child_data = {"size": child_data}
-                        children_data[child_name] = child_data
-
                     assert isinstance(child_data, dict)
                     if "label" not in child_data:
                         child_data["label"] = child_name
@@ -420,6 +417,14 @@ class BaseFileBrowser(ttk.Frame):
 
         path = self.tree.set(node_id, "path")
 
+        if data.get("time"):
+            dtime = datetime.datetime.fromtimestamp(int(data["time"]))
+            # time_str = dtime.strftime("%c")
+            time_str = dtime.isoformat().replace("T", " ")
+            self.tree.set(node_id, "time", time_str)
+        else:
+            self.tree.set(node_id, "time", "")
+
         if data["isdir"]:
             self.tree.set(node_id, "kind", "dir")
             self.tree.set(node_id, "size", "")
@@ -504,11 +509,14 @@ class BaseFileBrowser(ttk.Frame):
         )
 
     def refresh_menu(self):
+        self.menu.delete(0, "end")
+        self.add_first_menu_items()
+        self.add_last_menu_items()
+
+    def add_first_menu_items(self):
         selected_path = self.get_selected_path()
         selected_kind = self.get_selected_kind()
         selected_name = self.get_selected_name()
-
-        self.menu.delete(0, "end")
 
         self.menu.add_command(label=_("Refresh"), command=self.refresh_tree)
         # self.menu.add_command(label=_("New file"), command=self.create_new_file)
@@ -523,6 +531,38 @@ class BaseFileBrowser(ttk.Frame):
             )
         else:
             "TODO: add open command"
+
+    def add_last_menu_items(self):
+        self.menu.add_separator()
+        self.menu.add_command(label=_("Properties"), command=self.show_properties)
+
+    def show_properties(self):
+        node_id = self.get_selected_node()
+        values = self.tree.set(node_id)
+
+        text = _("Path") + ":\n    " + values["path"] + "\n\n"
+        if values["kind"] == "dir":
+            title = _("Directory properties")
+        else:
+            title = _("File properties")
+            size_fmt_str = sizeof_fmt(int(values["size"]))
+            bytes_str = str(values["size"]) + " " + _("bytes")
+
+            text += (
+                _("Size")
+                + ":\n    "
+                + (
+                    bytes_str
+                    if size_fmt_str.endswith(" B")
+                    else size_fmt_str + "  (" + bytes_str + ")"
+                )
+                + "\n\n"
+            )
+
+        if values["time"].strip():
+            text += _("Modified") + ":\n    " + values["time"] + "\n\n"
+
+        messagebox.showinfo(title, text.strip())
 
     def refresh_tree(self, paths_to_invalidate=None):
         self.invalidate_cache(paths_to_invalidate)

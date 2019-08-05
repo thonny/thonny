@@ -214,8 +214,8 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
         self.menu.add_command(label=label, command=upload)
 
-    def refresh_menu(self):
-        super().refresh_menu()
+    def add_first_menu_items(self):
+        super().add_first_menu_items()
         self.menu.add_separator()
         self._check_add_upload_command()
 
@@ -283,8 +283,8 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
 
         self.menu.add_command(label=label, command=download)
 
-    def refresh_menu(self):
-        super().refresh_menu()
+    def add_first_menu_items(self):
+        super().add_first_menu_items()
         self.menu.add_separator()
         self._add_download_command()
 
