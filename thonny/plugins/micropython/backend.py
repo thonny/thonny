@@ -27,7 +27,7 @@ from queue import Queue, Empty
 import threading
 import os
 import time
-from thonny.misc_utils import find_volumes_by_name
+from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
 import jedi
 import io
 import tokenize
@@ -609,6 +609,9 @@ class MicroPythonBackend:
         # NB! make sure self._cwd is queried first
         return bool(self._cwd)
 
+    def _connected_to_microbit(self):
+        return "micro:bit" in self._welcome_text.lower()
+
     def _cmd_interrupt(self, cmd):
         self._interrupt()
 
@@ -665,15 +668,12 @@ class MicroPythonBackend:
             sizes = self._get_microbit_file_sizes()
             root_data = {name: {"kind": "file", "size": size} for (name, size) in sizes.items()}
             data = {"": root_data}
-            total_size = sum(sizes[name] for name in sizes)
             dir_separator = ""
 
-        return {
-            "node_id": cmd["node_id"],
-            "dir_separator": dir_separator,
-            "data": data,
-            # "fs_info" : self._get_fs_info(path)
-        }
+        return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
+
+    def _cmd_get_fs_info(self, cmd):
+        return self._get_fs_info(cmd.path)
 
     def _cmd_write_file(self, cmd):
         def generate_blocks(content_bytes, block_size):
@@ -1346,7 +1346,65 @@ class MicroPythonBackend:
                 return candidates[0]
 
     def _get_fs_info(self, path):
-        asdf
+        result = self._evaluate(
+            dedent(
+                """{
+                    "total" : __thonny_total,
+                    "used" : __thonny_used,
+                    "free": __thonny_free,
+                    "sizes": __thonny_sizes
+                }"""
+            ),
+            prelude=dedent(
+                """
+                try:
+                    from os import statvfs as __thonny_statvfs
+                    __thonny_stat = __thonny_statvfs(%r)
+                    __thonny_total = __thonny_stat[2] * __thonny_stat[0]
+                    __thonny_free = __thonny_stat[3] * __thonny_stat[0]
+                    __thonny_used = __thonny_total - __thonny_free
+                    __thonny_sizes = None
+                    del __thonny_statvfs
+                    del __thonny_stat 
+                except ImportError:
+                    import os as __thonny_os
+                    __thonny_sizes = [__thonny_os.size(name) for name in __thonny_os.listdir()]
+                    __thonny_used = None
+                    __thonny_total = None
+                    __thonny_free = None  
+                    del __thonny_os
+            """
+            )
+            % path,
+            cleanup=dedent(
+                """
+                del __thonny_total
+                del __thonny_free
+                del __thonny_used
+                del __thonny_sizes
+            """
+            ),
+        )
+
+        if result["sizes"] is not None:
+            if self._connected_to_microbit():
+                comment = "Assuming around 30 kB of storage space for user files."
+            else:
+                comment = "Don't know the size of storage space on this device."
+
+            files_total_size = sum(result["sizes"])
+
+            # TODO: compute number of used blocks
+            if files_total_size > 0:
+                comment += "\n\n" + "At least %s of it is used by %d file(s)." % (
+                    sizeof_fmt(files_total_size),
+                    len(result["sizes"]),
+                )
+
+            result["comment"] = comment
+            del result["sizes"]
+
+        return result
 
     def _get_microbit_file_sizes(self):
         return self._evaluate(
@@ -1371,21 +1429,10 @@ class MicroPythonBackend:
                 __thonny_real_path = None
                 __thonny_full = None
                 
-                def __thonny_fs_info(path):
-                    try:
-                        from os import statvfs
-                        fs_stat = __thonny_statvfs(path)
-                        size = fs_stat[0] * fs_stat[2]
-                        free = fs_stat[0] * fs_stat[3] 
-                    except ImportError:
-                        size = None
-                        free = None
-                        
-                    return {"size" : size, "free": free}
-                        
                 for __thonny_path in %(paths)r:
                     __thonny_real_path = __thonny_path or '/'
                     __thonny_children = {}
+                    
                     for __thonny_name in __thonny_os.listdir(__thonny_real_path):
                         if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
                             continue
@@ -1407,7 +1454,6 @@ class MicroPythonBackend:
                 """
                 del __thonny_os
                 del __thonny_st
-                del __thonny_fs_info
                 del __thonny_children
                 del __thonny_name
                 del __thonny_path

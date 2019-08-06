@@ -14,9 +14,9 @@ from tkinter.simpledialog import askstring
 from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
-from thonny.misc_utils import running_on_windows, start_time, lap_time, sizeof_fmt
+from thonny.misc_utils import running_on_windows, sizeof_fmt
 import datetime
-import time
+import shutil
 
 _dummy_node_text = "..."
 
@@ -270,6 +270,31 @@ class BaseFileBrowser(ttk.Frame):
 
     def request_dirs_child_data(self, node_id, paths):
         raise NotImplementedError()
+
+    def show_fs_info(self):
+        path = self.get_selected_path()
+        if path is None:
+            path = self.current_focus
+        self.request_fs_info(path)
+
+    def request_fs_info(self, path):
+        raise NotImplementedError()
+
+    def present_fs_info(self, info):
+        total_str = "?" if info["total"] is None else sizeof_fmt(info["total"])
+        used_str = "?" if info["used"] is None else sizeof_fmt(info["used"])
+        free_str = "?" if info["free"] is None else sizeof_fmt(info["free"])
+        text = (
+            "Storage space on this drive or filesystem:\n\n"
+            "    total: %s\n" % total_str
+            + "    used: %s\n" % used_str
+            + "    free: %s\n" % free_str
+        )
+
+        if info.get("comment"):
+            text += "\n" + info["comment"]
+
+        messagebox.showinfo("Storage info", text)
 
     def cache_dirs_child_data(self, data):
         data = deepcopy(data)
@@ -535,9 +560,16 @@ class BaseFileBrowser(ttk.Frame):
     def add_last_menu_items(self):
         self.menu.add_separator()
         self.menu.add_command(label=_("Properties"), command=self.show_properties)
+        self.menu.add_command(label=_("Storage info"), command=self.show_fs_info)
 
     def show_properties(self):
         node_id = self.get_selected_node()
+        if node_id is None:
+            messagebox.showerror(
+                "Need to select an item", "Select an item from below and try again!"
+            )
+            return
+
         values = self.tree.set(node_id)
 
         text = _("Path") + ":\n    " + values["path"] + "\n\n"
@@ -649,6 +681,15 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             self.select_path_if_visible(event["path"])
             # TODO: select this file in tree?
 
+    def request_fs_info(self, path):
+        if path == "":
+            messagebox.showinfo("Unsupported operation", "Select a drive and try again!")
+        else:
+            if not os.path.isdir(path):
+                path = os.path.dirname(path)
+
+            self.present_fs_info(shutil.disk_usage(path)._asdict())
+
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
@@ -658,11 +699,13 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         self.dir_separator = "/"
 
         get_workbench().bind("get_dirs_child_data_response", self.update_dir_data, True)
+        get_workbench().bind("get_fs_info_response", self.present_fs_info, True)
         get_workbench().bind("RemoteFileOperation", self.on_remote_file_operation, True)
 
     def destroy(self):
         super().destroy()
         get_workbench().unbind("get_dirs_child_data_response", self.update_dir_data)
+        get_workbench().unbind("get_fs_info_response", self.present_fs_info)
         get_workbench().unbind("RemoteFileOperation", self.on_remote_file_operation)
 
     def get_root_text(self):
@@ -677,6 +720,10 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
             get_runner().send_command(
                 InlineCommand("get_dirs_child_data", node_id=node_id, paths=paths)
             )
+
+    def request_fs_info(self, path):
+        if get_runner():
+            get_runner().send_command(InlineCommand("get_fs_info", path=path))
 
     def get_dir_separator(self):
         return self.dir_separator
