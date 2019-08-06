@@ -447,6 +447,8 @@ def sizeof_fmt(num, suffix="B"):
     # https://gist.github.com/cbwar/d2dfbc19b140bd599daccbe0fe925597
     for unit in ["", "k", "M", "G", "T", "P", "E", "Z"]:
         if abs(num) < 1024.0:
-            return "%3.1f %s%s" % (num, unit, suffix)
+            if unit == "":
+                return "%d %s%s" % (num, unit, suffix)
+            return "%.1f %s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, "Yi", suffix)

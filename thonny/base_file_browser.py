@@ -560,7 +560,7 @@ class BaseFileBrowser(ttk.Frame):
     def add_last_menu_items(self):
         self.menu.add_separator()
         self.menu.add_command(label=_("Properties"), command=self.show_properties)
-        self.menu.add_command(label=_("Storage info"), command=self.show_fs_info)
+        self.menu.add_command(label=_("Storage space"), command=self.show_fs_info)
 
     def show_properties(self):
         node_id = self.get_selected_node()
