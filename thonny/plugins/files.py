@@ -215,13 +215,6 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
         self.menu.add_command(label=label, command=upload)
 
-    def perform_delete(self, paths, description):
-        for path in sorted(paths, key=len, reverse=True):
-            if os.path.isdir(path):
-                shutil.rmtree(path)
-            else:
-                os.remove(path)
-
     def add_middle_menu_items(self):
         self._check_add_upload_command()
         super().add_middle_menu_items()
@@ -289,11 +282,6 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=label, command=download)
-
-    def perform_delete(self, paths, description):
-        get_runner().send_command(
-            InlineCommand("delete", paths=paths, blocking=True, description=description)
-        )
 
     def add_middle_menu_items(self):
         self._add_download_command()

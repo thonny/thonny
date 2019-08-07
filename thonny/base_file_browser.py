@@ -741,6 +741,13 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
             self.present_fs_info(shutil.disk_usage(path)._asdict())
 
+    def perform_delete(self, paths, description):
+        for path in sorted(paths, key=len, reverse=True):
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
+
     def perform_mkdir(self, parent_dir, name):
         os.mkdir(os.path.join(parent_dir, name), mode=0o700)
 
@@ -827,6 +834,11 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
         self.refresh_tree([parent])
         self.path_to_highlight = path
+
+    def perform_delete(self, paths, description):
+        get_runner().send_command(
+            InlineCommand("delete", paths=paths, blocking=True, description=description)
+        )
 
     def perform_mkdir(self, parent_dir, name):
         get_runner().send_command(
