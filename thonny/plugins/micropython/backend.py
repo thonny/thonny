@@ -812,6 +812,19 @@ class MicroPythonBackend:
             assert written_bytes == size
             completed_files_size += size
 
+    def _cmd_mkdir(self, cmd):
+        assert self._supports_directories()
+        self._execute_without_output(
+            dedent(
+                """
+            import os as __thonny_os
+            __thonny_os.mkdir(%r)
+            del __thonny_os
+        """
+                % cmd.path
+            )
+        )
+
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)

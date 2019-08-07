@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, simpledialog
 import os.path
 
 from thonny import get_workbench, misc_utils, tktextext, get_runner
@@ -243,7 +243,7 @@ class BaseFileBrowser(ttk.Frame):
         else:
             return None
 
-    def get_selected_nodes(self, notify_if_empty=True):
+    def get_selected_nodes(self, notify_if_empty=False):
         """Can return several nodes"""
         result = self.tree.selection()
         if not result and notify_if_empty:
@@ -539,6 +539,9 @@ class BaseFileBrowser(ttk.Frame):
     def refresh_menu(self):
         self.menu.delete(0, "end")
         self.add_first_menu_items()
+        self.menu.add_separator()
+        self.add_middle_menu_items()
+        self.menu.add_separator()
         self.add_last_menu_items()
 
     def add_first_menu_items(self):
@@ -556,8 +559,12 @@ class BaseFileBrowser(ttk.Frame):
         else:
             "TODO: add open command"
 
+    def add_middle_menu_items(self):
+        self.menu.add_command(label=_("Delete"), command=self.delete)
+        if self.supports_directories():
+            self.menu.add_command(label=_("New directory"), command=self.mkdir)
+
     def add_last_menu_items(self):
-        self.menu.add_separator()
         self.menu.add_command(label=_("Properties"), command=self.show_properties)
         self.menu.add_command(label=_("Storage space"), command=self.show_fs_info)
 
@@ -656,7 +663,28 @@ class BaseFileBrowser(ttk.Frame):
         self.perform_delete(paths, _("Deleting %s") % item_desc)
         self.refresh_tree()
 
+    def mkdir(self):
+        parent = self.get_selected_path()
+        if parent is None:
+            parent = self.current_focus
+        else:
+            if self.get_selected_kind() == "file":
+                # dirname does the right thing even if parent is Linux path and runnning on Windows
+                parent = os.path.dirname(parent)
+
+        name = simpledialog.askstring(
+            "New directory", "Enter name for new directory under\n%s" % parent
+        )
+        self.perform_mkdir(parent, name)
+        self.refresh_tree()
+
     def perform_delete(self, paths, description):
+        raise NotImplementedError()
+
+    def supports_directories(self):
+        return True
+
+    def perform_mkdir(self, parent_dir, name):
         raise NotImplementedError()
 
 
@@ -713,6 +741,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
             self.present_fs_info(shutil.disk_usage(path)._asdict())
 
+    def perform_mkdir(self, parent_dir, name):
+        os.mkdir(os.path.join(parent_dir, name), mode=0o700)
+
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
     def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
@@ -766,6 +797,15 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
     def open_file(self, path):
         get_workbench().get_editor_notebook().show_remote_file(path)
 
+    def supports_directories(self):
+        runner = get_runner()
+        if not runner:
+            return False
+        proxy = runner.get_backend_proxy()
+        if not proxy:
+            return False
+        return proxy.supports_directories()
+
     def on_remote_file_operation(self, event):
         path = event["path"]
         exists_in_cache = self.file_exists_in_cache(path)
@@ -787,6 +827,11 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
         self.refresh_tree([parent])
         self.path_to_highlight = path
+
+    def perform_mkdir(self, parent_dir, name):
+        get_runner().send_command(
+            InlineCommand("mkdir", path=parent_dir + self.get_dir_separator() + name)
+        )
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):

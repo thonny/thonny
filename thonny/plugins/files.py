@@ -222,11 +222,9 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
             else:
                 os.remove(path)
 
-    def add_first_menu_items(self):
-        super().add_first_menu_items()
-        self.menu.add_separator()
+    def add_middle_menu_items(self):
         self._check_add_upload_command()
-        self.menu.add_command(label=_("Delete"), command=self.delete)
+        super().add_middle_menu_items()
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
@@ -297,11 +295,9 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             InlineCommand("delete", paths=paths, blocking=True, description=description)
         )
 
-    def add_first_menu_items(self):
-        super().add_first_menu_items()
-        self.menu.add_separator()
+    def add_middle_menu_items(self):
         self._add_download_command()
-        self.menu.add_command(label=_("Delete"), command=self.delete)
+        super().add_middle_menu_items()
 
 
 def load_plugin() -> None:
