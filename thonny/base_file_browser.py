@@ -11,12 +11,12 @@ from thonny.ui_utils import (
     CommonDialog,
 )
 from tkinter.simpledialog import askstring
-from tkinter.messagebox import showerror
 from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
 from thonny.misc_utils import running_on_windows, sizeof_fmt
 import datetime
 import shutil
+import traceback
 
 _dummy_node_text = "..."
 
@@ -247,8 +247,26 @@ class BaseFileBrowser(ttk.Frame):
         """Can return several nodes"""
         result = self.tree.selection()
         if not result and notify_if_empty:
-            messagebox.showerror("Nothing selected", "Select something and try again")
+            self.notify_missing_selection()
         return result
+
+    def get_selection_info(self, notify_if_empty=False):
+        nodes = self.get_selected_nodes(notify_if_empty)
+        if not nodes:
+            return None
+
+        if not nodes:
+            self.notify_missing_selection()
+            return
+        elif len(nodes) == 1:
+            description = "'" + self.tree.set(nodes[0], "name") + "'"
+        else:
+            description = _("%d items") % len(nodes)
+
+        paths = [self.tree.set(node, "path") for node in nodes]
+        kinds = [self.tree.set(node, "kind") for node in nodes]
+
+        return {"description": description, "nodes": nodes, "paths": paths, "kinds": kinds}
 
     def get_selected_path(self):
         return self.get_selected_value("path")
@@ -571,9 +589,7 @@ class BaseFileBrowser(ttk.Frame):
     def show_properties(self):
         node_id = self.get_selected_node()
         if node_id is None:
-            messagebox.showerror(
-                "Need to select an item", "Select an item from below and try again!"
-            )
+            self.notify_missing_selection()
             return
 
         values = self.tree.set(node_id)
@@ -635,32 +651,26 @@ class BaseFileBrowser(ttk.Frame):
 
         if name in self._cached_child_data[parent_path]:
             # TODO: ignore case in windows
-            showerror("Error", "The file '" + path + "' already exists", parent=get_workbench())
+            messagebox.showerror(
+                "Error", "The file '" + path + "' already exists", parent=get_workbench()
+            )
         else:
             self.open_file(path)
 
     def delete(self):
-        nodes = self.get_selected_nodes()
-
-        if not nodes:
+        selection = self.get_selection_info(True)
+        if not selection:
             return
-        elif len(nodes) == 1:
-            item_desc = "'" + self.tree.set(nodes[0], "name") + "'"
-        else:
-            item_desc = _("%d items") % len(nodes)
 
-        paths = [self.tree.set(node, "path") for node in nodes]
-        kinds = [self.tree.set(node, "kind") for node in nodes]
-
-        confirmation = "Are you sure want to delete %s?" % item_desc
+        confirmation = "Are you sure want to delete %s?" % selection["description"]
         confirmation += "\n\nNB! Recycle bin won't be used (no way to undelete)!"
-        if "dir" in kinds:
+        if "dir" in selection["kinds"]:
             confirmation += "\n" + "Directories will be deleted with content."
 
         if not messagebox.askyesno("Are you sure?", confirmation):
             return
 
-        self.perform_delete(paths, _("Deleting %s") % item_desc)
+        self.perform_delete(selection["paths"], _("Deleting %s") % selection["description"])
         self.refresh_tree()
 
     def mkdir(self):
@@ -675,7 +685,10 @@ class BaseFileBrowser(ttk.Frame):
         name = simpledialog.askstring(
             "New directory", "Enter name for new directory under\n%s" % parent
         )
-        self.perform_mkdir(parent, name)
+        if not name or not name.strip():
+            return
+
+        self.perform_mkdir(parent, name.strip())
         self.refresh_tree()
 
     def perform_delete(self, paths, description):
@@ -686,6 +699,10 @@ class BaseFileBrowser(ttk.Frame):
 
     def perform_mkdir(self, parent_dir, name):
         raise NotImplementedError()
+
+    def notify_missing_selection(self):
+        traceback.print_stack()
+        messagebox.showerror("Nothing selected", "Select an item and try again!")
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):
@@ -734,7 +751,7 @@ class BaseLocalFileBrowser(BaseFileBrowser):
 
     def request_fs_info(self, path):
         if path == "":
-            messagebox.showinfo("Unsupported operation", "Select a drive and try again!")
+            self.notify_missing_selection()
         else:
             if not os.path.isdir(path):
                 path = os.path.dirname(path)

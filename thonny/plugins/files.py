@@ -10,8 +10,6 @@ from thonny.common import normpath_with_actual_case, InlineCommand
 from thonny.running import construct_cd_command
 from thonny.misc_utils import running_on_windows
 from tkinter import messagebox
-import shutil
-
 
 minsize = 80
 
@@ -167,20 +165,10 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         if cwd != self.current_focus and os.path.isdir(cwd):
             self.focus_into(cwd)
 
-    def _check_add_upload_command(self):
+    def check_add_upload_command(self):
         target_dir = self.master.get_active_remote_dir()
-
         if target_dir is None:
             return
-
-        nodes = self.get_selected_nodes()
-
-        if not nodes:
-            return
-        elif len(nodes) == 1:
-            source_desc = self.tree.set(nodes[0], "name")
-        else:
-            source_desc = _("%d items") % len(nodes)
 
         proxy = get_runner().get_backend_proxy()
 
@@ -189,13 +177,12 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
         else:
             target_dir_desc = target_dir
 
-        label = _("Upload") + " %s → %s" % (source_desc, target_dir_desc)
-
-        paths = [self.tree.set(node, "path") for node in nodes]
-        kinds = [self.tree.set(node, "kind") for node in nodes]
-
         def upload():
-            if "dir" in kinds and not proxy.supports_directories():
+            selection = self.get_selection_info(True)
+            if not selection:
+                return
+
+            if "dir" in selection["kinds"] and not proxy.supports_directories():
                 messagebox.showerror(
                     "Can't upload directory",
                     "%s does not support directories.\n" % proxy.get_node_label()
@@ -205,18 +192,19 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                 get_runner().send_command(
                     InlineCommand(
                         "upload",
-                        source_paths=paths,
+                        source_paths=selection["paths"],
                         target_dir=target_dir,
                         blocking=True,
-                        description=label,
+                        description=_("Uploading %s to %s")
+                        % (selection["description"], target_dir),
                     )
                 )
                 self.master.remote_files.refresh_tree()
 
-        self.menu.add_command(label=label, command=upload)
+        self.menu.add_command(label=_("Upload to %s") % target_dir_desc, command=upload)
 
     def add_middle_menu_items(self):
-        self._check_add_upload_command()
+        self.check_add_upload_command()
         super().add_middle_menu_items()
 
 
@@ -253,38 +241,29 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             else:
                 get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
 
-    def _add_download_command(self):
-        nodes = self.get_selected_nodes()
-
+    def add_download_command(self):
         target_dir = self.master.get_active_local_dir()
 
-        if not nodes:
-            return
-        elif len(nodes) == 1:
-            source_desc = self.tree.set(nodes[0], "name")
-        else:
-            source_desc = _("%d items") % len(nodes)
-
-        label = _("Download") + " %s → %s" % (source_desc, target_dir)
-
-        paths = [self.tree.set(node, "path") for node in nodes]
-
         def download():
+            selection = self.get_selection_info(True)
+            if not selection:
+                return
+
             get_runner().send_command(
                 InlineCommand(
                     "download",
-                    source_paths=paths,
+                    source_paths=selection["paths"],
                     target_dir=target_dir,
                     blocking=True,
-                    description=label,
+                    description=_("Downloading %s to %s") % (selection["description"], target_dir),
                 )
             )
             self.master.local_files.refresh_tree()
 
-        self.menu.add_command(label=label, command=download)
+        self.menu.add_command(label=_("Download to %s") % target_dir, command=download)
 
     def add_middle_menu_items(self):
-        self._add_download_command()
+        self.add_download_command()
         super().add_middle_menu_items()
 
 
