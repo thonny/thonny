@@ -243,9 +243,12 @@ class BaseFileBrowser(ttk.Frame):
         else:
             return None
 
-    def get_selected_nodes(self):
+    def get_selected_nodes(self, notify_if_empty=True):
         """Can return several nodes"""
-        return self.tree.selection()
+        result = self.tree.selection()
+        if not result and notify_if_empty:
+            messagebox.showerror("Nothing selected", "Select something and try again")
+        return result
 
     def get_selected_path(self):
         return self.get_selected_value("path")
@@ -311,7 +314,7 @@ class BaseFileBrowser(ttk.Frame):
                     if "isdir" not in child_data:
                         child_data["isdir"] = child_data.get("size", 0) is None
             else:
-                assert children_data in ("file", "missing")
+                assert children_data is None
 
         self._cached_child_data.update(data)
 
@@ -544,10 +547,6 @@ class BaseFileBrowser(ttk.Frame):
         selected_name = self.get_selected_name()
 
         self.menu.add_command(label=_("Refresh"), command=self.refresh_tree)
-        # self.menu.add_command(label=_("New file"), command=self.create_new_file)
-        # self.menu.add_command(
-        #    label=_("Delete"), command=lambda: self.delete_path(selected_path, selected_kind)
-        # )
 
         if selected_kind == "dir":
             self.menu.add_command(
@@ -605,9 +604,6 @@ class BaseFileBrowser(ttk.Frame):
             self.select_path_if_visible(self.path_to_highlight)
             self.path_to_highlight = None
 
-    def delete_path(self, path, kind):
-        print("DELETE")
-
     def create_new_file(self):
         selected_node_id = self.get_selected_node()
 
@@ -635,6 +631,33 @@ class BaseFileBrowser(ttk.Frame):
             showerror("Error", "The file '" + path + "' already exists", parent=get_workbench())
         else:
             self.open_file(path)
+
+    def delete(self):
+        nodes = self.get_selected_nodes()
+
+        if not nodes:
+            return
+        elif len(nodes) == 1:
+            item_desc = "'" + self.tree.set(nodes[0], "name") + "'"
+        else:
+            item_desc = _("%d items") % len(nodes)
+
+        paths = [self.tree.set(node, "path") for node in nodes]
+        kinds = [self.tree.set(node, "kind") for node in nodes]
+
+        confirmation = "Are you sure want to delete %s?" % item_desc
+        confirmation += "\n\nNB! Recycle bin won't be used (no way to undelete)!"
+        if "dir" in kinds:
+            confirmation += "\n" + "Directories will be deleted with content."
+
+        if not messagebox.askyesno("Are you sure?", confirmation):
+            return
+
+        self.perform_delete(paths, _("Deleting %s") % item_desc)
+        self.refresh_tree()
+
+    def perform_delete(self, paths, description):
+        raise NotImplementedError()
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):

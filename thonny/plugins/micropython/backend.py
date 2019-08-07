@@ -686,6 +686,50 @@ class MicroPythonBackend:
             command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
         )
 
+    def _cmd_delete(self, cmd):
+        assert cmd.paths
+
+        paths = sorted(cmd.paths, key=lambda x: len(x), reverse=True)
+
+        if not self._supports_directories():
+            self._execute(
+                dedent(
+                    """
+                import os as __thonny_os
+                for __thonny_path in %r: 
+                    __thonny_os.remove(__thonny_path)
+                    
+                del __thonny_path
+                del __thonny_os
+            """
+                )
+                % paths
+            )
+        else:
+            self._execute(
+                dedent(
+                    """
+                import os as __thonny_os
+                def __thonny_delete(path):
+                    if __thonny_os.stat(path)[0] & 0o170000 == 0o040000:
+                        for name in __thonny_os.listdir(path):
+                            child_path = path + "/" + name
+                            __thonny_delete(child_path)
+                        __thonny_os.rmdir(path)
+                    else:
+                        __thonny_os.remove(path)
+                
+                for __thonny_path in %r: 
+                    __thonny_delete(__thonny_path)
+                    
+                del __thonny_path
+                del __thonny_delete
+                del __thonny_os
+            """
+                )
+                % paths
+            )
+
     def _internal_path_to_mounted_path(self, path):
         mount_path = self._get_fs_mount()
         if mount_path is None:
@@ -1424,6 +1468,7 @@ class MicroPythonBackend:
                 __thonny_result = {}
                 __thonny_path = None
                 __thonny_st = None 
+                __thonny_child_names = None
                 __thonny_children = None
                 __thonny_name = None
                 __thonny_real_path = None
@@ -1431,20 +1476,25 @@ class MicroPythonBackend:
                 
                 for __thonny_path in %(paths)r:
                     __thonny_real_path = __thonny_path or '/'
-                    __thonny_children = {}
-                    
-                    for __thonny_name in __thonny_os.listdir(__thonny_real_path):
-                        if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
-                            continue
-                        __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
-                        # print("processing", __thonny_full)
-                        __thonny_st = __thonny_os.stat(__thonny_full)
-                        if __thonny_st[0] & 0o170000 == 0o040000:
-                            # directory
-                            __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
-                        else:
-                            __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
-                        __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9])  
+                    try:
+                        __thonny_child_names = __thonny_os.listdir(__thonny_real_path)
+                    except OSError:
+                        # probably deleted directory
+                        __thonny_children = None
+                    else:
+                        __thonny_children = {}
+                        for __thonny_name in __thonny_child_names:
+                            if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
+                                continue
+                            __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
+                            # print("processing", __thonny_full)
+                            __thonny_st = __thonny_os.stat(__thonny_full)
+                            if __thonny_st[0] & 0o170000 == 0o040000:
+                                # directory
+                                __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
+                            else:
+                                __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
+                            __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9])  
                             
                     __thonny_result[__thonny_path] = __thonny_children                            
             """

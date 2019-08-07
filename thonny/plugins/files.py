@@ -10,6 +10,7 @@ from thonny.common import normpath_with_actual_case, InlineCommand
 from thonny.running import construct_cd_command
 from thonny.misc_utils import running_on_windows
 from tkinter import messagebox
+import shutil
 
 
 minsize = 80
@@ -214,10 +215,18 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
         self.menu.add_command(label=label, command=upload)
 
+    def perform_delete(self, paths, description):
+        for path in sorted(paths, key=len, reverse=True):
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
+
     def add_first_menu_items(self):
         super().add_first_menu_items()
         self.menu.add_separator()
         self._check_add_upload_command()
+        self.menu.add_command(label=_("Delete"), command=self.delete)
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
@@ -283,10 +292,16 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
 
         self.menu.add_command(label=label, command=download)
 
+    def perform_delete(self, paths, description):
+        get_runner().send_command(
+            InlineCommand("delete", paths=paths, blocking=True, description=description)
+        )
+
     def add_first_menu_items(self):
         super().add_first_menu_items()
         self.menu.add_separator()
         self._add_download_command()
+        self.menu.add_command(label=_("Delete"), command=self.delete)
 
 
 def load_plugin() -> None:

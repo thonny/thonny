@@ -398,10 +398,8 @@ def get_single_dir_child_data(path):
             result["<not accessible>"] = {"kind": "error", "size": -1, "time": None}
 
         return result
-    elif os.path.isfile(path):
-        return "file"
     else:
-        return "missing"
+        return None
 
 
 def get_windows_volumes_info():
