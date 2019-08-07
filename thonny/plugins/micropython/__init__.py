@@ -155,6 +155,9 @@ class MicroPythonProxy(SubprocessProxy):
     def supports_directories(self):
         return self._cwd is not None and self._cwd != ""
 
+    def supports_trash(self):
+        return False
+
     def is_connected(self):
         return self._proc is not None
 

@@ -689,6 +689,9 @@ class BackendProxy:
     def supports_directories(self):
         return True
 
+    def supports_trash(self):
+        return True
+
     def can_do_file_operations(self):
         return False
 

@@ -254,10 +254,6 @@ class BaseFileBrowser(ttk.Frame):
         nodes = self.get_selected_nodes(notify_if_empty)
         if not nodes:
             return None
-
-        if not nodes:
-            self.notify_missing_selection()
-            return
         elif len(nodes) == 1:
             description = "'" + self.tree.set(nodes[0], "name") + "'"
         else:
@@ -578,7 +574,15 @@ class BaseFileBrowser(ttk.Frame):
             "TODO: add open command"
 
     def add_middle_menu_items(self):
-        self.menu.add_command(label=_("Delete"), command=self.delete)
+        if self.supports_trash():
+            if running_on_windows():
+                trash_label = _("Move to Recycle Bin")
+            else:
+                trash_label = _("Move to Trash")
+            self.menu.add_command(label=trash_label, command=self.move_to_trash)
+        else:
+            self.menu.add_command(label=_("Delete"), command=self.delete)
+            
         if self.supports_directories():
             self.menu.add_command(label=_("New directory"), command=self.mkdir)
 
@@ -673,6 +677,19 @@ class BaseFileBrowser(ttk.Frame):
         self.perform_delete(selection["paths"], _("Deleting %s") % selection["description"])
         self.refresh_tree()
 
+    def move_to_trash(self):
+        assert self.supports_trash()
+        
+        selection = self.get_selection_info(True)
+        if not selection:
+            return
+
+        self.perform_move_to_trash(selection["paths"], _("Moving %s to trash") % selection["description"])
+        self.refresh_tree()
+
+    def supports_trash(self):
+        return False
+
     def mkdir(self):
         parent = self.get_selected_path()
         if parent is None:
@@ -692,6 +709,9 @@ class BaseFileBrowser(ttk.Frame):
         self.refresh_tree()
 
     def perform_delete(self, paths, description):
+        raise NotImplementedError()
+
+    def perform_move_to_trash(self, paths, description):
         raise NotImplementedError()
 
     def supports_directories(self):
@@ -759,14 +779,32 @@ class BaseLocalFileBrowser(BaseFileBrowser):
             self.present_fs_info(shutil.disk_usage(path)._asdict())
 
     def perform_delete(self, paths, description):
+        # Deprecated. moving to trash should be used instead
+        raise NotImplementedError()
+        """
         for path in sorted(paths, key=len, reverse=True):
             if os.path.isdir(path):
                 shutil.rmtree(path)
             else:
                 os.remove(path)
+        """
+
+    def perform_move_to_trash(self, paths, description):
+        import send2trash
+        for path in paths:
+            print("moving to trash:", repr(path))
+            send2trash.send2trash(path)
 
     def perform_mkdir(self, parent_dir, name):
         os.mkdir(os.path.join(parent_dir, name), mode=0o700)
+
+    def supports_trash(self):
+        try:
+            import send2trash  # @UnusedImport
+
+            return True
+        except ImportError:
+            return False
 
 
 class BaseRemoteFileBrowser(BaseFileBrowser):
@@ -861,6 +899,9 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         get_runner().send_command(
             InlineCommand("mkdir", path=parent_dir + self.get_dir_separator() + name)
         )
+
+    def supports_trash(self):
+        return get_runner().get_backend_proxy().supports_trash()
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
