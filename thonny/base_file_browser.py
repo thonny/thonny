@@ -689,10 +689,11 @@ class BaseFileBrowser(ttk.Frame):
 
         trash = "Recycle Bin" if running_on_windows() else "Trash"
         if not messagebox.askyesno(
-            "Really move to Trash?",
+            "Really move to %s?" % trash,
             "I'll try to move %s to %s,\n" % (selection["description"], trash)
             + "but my method is not always reliable —\n"
-            + "in some cases the files can't be restored.\n\n"
+            + "in some cases the files will be deleted\n"
+            + "without the possibility to restore.\n\n"
             + "Is this OK?",
         ):
             return
