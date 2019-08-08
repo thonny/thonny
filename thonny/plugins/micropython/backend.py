@@ -83,6 +83,7 @@ class MicroPythonBackend:
         self._connection = connection
         self._cwd = None
         self._interrupt_requested = False
+        self._cancel_requested = False
         self._command_queue = Queue()  # populated by reader thread
         self._progress_times = {}
 
@@ -120,6 +121,7 @@ class MicroPythonBackend:
     def _mainloop(self):
         while True:
             try:
+                self._cancel_requested = False
                 self._interrupt_requested = False
                 self._check_for_connection_errors()
                 cmd = self._command_queue.get(timeout=0.1)
@@ -227,12 +229,13 @@ class MicroPythonBackend:
         self._connection.write(INTERRUPT_CMD)
 
     def _check_for_interrupt(self, action_scope):
-        if self._interrupt_requested:
-            if action_scope == "device":
-                self._interrupt()
-            else:
-                assert action_scope == "local"
-                raise KeyboardInterrupt()
+        if action_scope == "device" and self._interrupt_requested:
+            self._interrupt()
+            self._interrupt_requested = False
+
+        if action_scope == "local" and self._cancel_requested:
+            self._cancel_requested = False
+            raise KeyboardInterrupt()
 
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -278,6 +281,7 @@ class MicroPythonBackend:
             cmd = parse_message(line)
             if isinstance(cmd, InterruptCommand):
                 self._interrupt_requested = True
+                self._cancel_requested = True
             else:
                 self._command_queue.put(cmd)
 
@@ -1621,7 +1625,7 @@ def linux_dirname_basename(path):
     if path == "/":
         return ("/", "")
 
-    if "/" not in path: # micro:bit
+    if "/" not in path:  # micro:bit
         return "", path
 
     path = path.rstrip("/")
@@ -1629,7 +1633,7 @@ def linux_dirname_basename(path):
 
 
 def linux_join_path_parts(left, right):
-    if left == "": # micro:bit
+    if left == "":  # micro:bit
         return right.strip("/")
     return left.rstrip("/") + "/" + right.strip("/")
 
