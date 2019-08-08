@@ -1459,9 +1459,9 @@ msgstr "Laadi üles asukohta %s"
 
 #: thonny/plugins/files.py:261
 msgid "Downloading %s to %s"
-msgstr ""
+msgstr "Laadi %s alla asukohta %s"
 
 #: thonny/plugins/files.py:267
 msgid "Download to %s"
-msgstr ""
+msgstr "Laadi alla asukohta %s"
 
