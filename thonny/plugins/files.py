@@ -189,9 +189,10 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                     + "You can only upload files.",
                 )
             else:
-                get_runner().send_command(
+                response = get_runner().send_command(
                     InlineCommand(
                         "upload",
+                        allow_overwrite=None,
                         source_paths=selection["paths"],
                         target_dir=target_dir,
                         blocking=True,
@@ -199,6 +200,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                         % (selection["description"], target_dir),
                     )
                 )
+                check_upload_download_response("upload", response)
                 self.master.remote_files.refresh_tree()
 
         self.menu.add_command(label=_("Upload to %s") % target_dir_desc, command=upload)
@@ -249,7 +251,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             if not selection:
                 return
 
-            get_runner().send_command(
+            response = get_runner().send_command(
                 InlineCommand(
                     "download",
                     source_paths=selection["paths"],
@@ -258,6 +260,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                     description=_("Downloading %s to %s") % (selection["description"], target_dir),
                 )
             )
+            self.on_upload_download_response("download", response)
             self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=_("Download to %s") % target_dir, command=download)
@@ -265,6 +268,34 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def add_middle_menu_items(self):
         self.add_download_command()
         super().add_middle_menu_items()
+
+
+def check_upload_download_response(command_name, command_response):
+    if command_response.get("existing_files"):
+        # command was not performed because overwriting existing files need confirmation
+        existing = sorted(command_response["existing_files"][:25])
+        if len(command_response["existing_files"]) > 25:
+            existing.append("...")
+
+        user_response = messagebox.askokcancel(
+            "Overwriting",
+            "Some file(s) will be overwritten:\n\n" + "   " + "\n   ".join(existing),
+            icon="info",
+        )
+        if not user_response:
+            return
+
+        else:
+            get_runner().send_command(
+                InlineCommand(
+                    command_name,
+                    allow_overwrite=True,
+                    source_paths=command_response["source_paths"],
+                    target_dir=command_response["target_dir"],
+                    blocking=True,
+                    description=command_response["description"],
+                )
+            )
 
 
 def load_plugin() -> None:

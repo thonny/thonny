@@ -784,20 +784,35 @@ class MicroPythonBackend:
             completed_files_size += size
 
     def _cmd_upload(self, cmd):
-        total_size = 0
         completed_files_size = 0
         local_files = self._list_local_files_with_info(cmd["source_paths"])
         target_dir = cmd["target_dir"].rstrip("/")
 
         upload_items = []
         for file in local_files:
-            total_size += file["size"]
             # compute filenames (and subdirs) in target_dir
             # relative to the context of the user selected items
             assert file["path"].startswith(file["original_context"])
             path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
             target_path = linux_join_path_parts(target_dir, to_linux_path(path_suffix))
-            upload_items.append((file["path"], target_path, file["size"]))
+            upload_items.append(dict(source=file["path"], target=target_path, size=file["size"]))
+
+        print("over", cmd["allow_overwrite"])
+        if not cmd["allow_overwrite"]:
+            targets = [item["target"] for item in upload_items]
+            print("targets", targets)
+            existing_files = self._get_existing_files(targets)
+            print("existing", existing_files)
+            if existing_files:
+                return {
+                    "existing_files": existing_files,
+                    "source_paths": cmd["source_paths"],
+                    "target_dir": cmd["target_dir"],
+                    "description": cmd["description"],
+                }
+
+        print("remaining", upload_items)
+        total_size = sum([item["size"] for item in upload_items])
 
         def notify(current_file_progress):
             self._check_send_inline_progress(
@@ -807,10 +822,10 @@ class MicroPythonBackend:
         # replace the indeterminate progressbar with determinate as soon as possible
         notify(0)
 
-        for source, target, size in upload_items:
-            written_bytes = self._upload_file(source, target, notify)
-            assert written_bytes == size
-            completed_files_size += size
+        for item in upload_items:
+            written_bytes = self._upload_file(item["source"], item["target"], notify)
+            assert written_bytes == item["size"]
+            completed_files_size += item["size"]
 
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
@@ -1059,7 +1074,7 @@ class MicroPythonBackend:
     def _write_file_via_serial(self, content_blocks, target_path, notifier=None):
         # prelude
         try:
-            out, err, value = self._execute(
+            _, err, _ = self._execute(
                 dedent(
                     """
                 __thonny_path = '{path}'
@@ -1249,6 +1264,36 @@ class MicroPythonBackend:
         )
         return result
 
+    def _get_existing_files(self, paths):
+        if self._supports_directories():
+            func = "stat"
+        else:
+            func = "size"
+
+        return self._evaluate(
+            "__thonny_result",
+            prelude=dedent(
+                """
+                import os as __thonny_os
+                __thonny_result = []
+                for __thonny_path in %r:
+                    try:
+                        __thonny_os.%s(__thonny_path)
+                        __thonny_result.append(__thonny_path)
+                    except OSError:
+                        pass
+                """
+            )
+            % (paths, func),
+            cleanup=dedent(
+                """
+                del __thonny_os
+                del __thonny_result
+                del __thonny_path
+                """
+            ),
+        )
+
     def _get_file_size(self, path):
         if self._supports_directories():
             script = "__thonny_os.stat(%r)[6]"
@@ -1272,23 +1317,17 @@ class MicroPythonBackend:
             return
         path = path.rstrip("/")
 
-        print("Making", path)
-
         script = (
             dedent(
                 """
             import os as __thonny_os
             __thonny_parts = %r.split('/')
-            print(__thonny_parts)
             for i in range(2, len(__thonny_parts) + 1):
                 __thonny_path = "/".join(__thonny_parts[:i])
-                print("testing", __thonny_path)
                 try:
                     __thonny_os.stat(__thonny_path)
-                    print("stat")
                 except OSError:
                     # does not exist
-                    print("nostat")
                     __thonny_os.mkdir(__thonny_path)
             
             del __thonny_parts
@@ -1304,7 +1343,8 @@ class MicroPythonBackend:
         self._execute(script)
 
     def _upload_file(self, source, target, notifier):
-        target_dir, target_base = linux_dirname_basename(target)
+        print("upload", source, "=>", target)
+        target_dir, _ = linux_dirname_basename(target)
         self._makedirs(target_dir)
 
         def block_generator():
@@ -1500,7 +1540,6 @@ class MicroPythonBackend:
                             if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
                                 continue
                             __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
-                            # print("processing", __thonny_full)
                             __thonny_st = __thonny_os.stat(__thonny_full)
                             if __thonny_st[0] & 0o170000 == 0o040000:
                                 # directory

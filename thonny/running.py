@@ -253,6 +253,7 @@ class Runner:
         if cmd.get("blocking"):
             dlg = BlockingDialog(get_workbench(), cmd)
             show_dialog(dlg)
+            return dlg.response
 
     def _postpone_command(self, cmd: CommandToBackend) -> None:
         # in case of InlineCommands, discard older same type command
@@ -1405,6 +1406,7 @@ class BlockingDialog(CommonDialogEx):
     def __init__(self, master, cmd, mode="indeterminate"):
         super().__init__(master)
         self.title(_("Working..."))
+        self.response = None
         self._sent_interrupt = False
         self._mode = mode
 
@@ -1432,6 +1434,8 @@ class BlockingDialog(CommonDialogEx):
             raise NotImplementedError()
 
     def _on_response(self, event):
+        self.response = event
+
         if event.get("command_id") == self._cmd_id:
             print("took", time.time() - self._start_time)
             self.destroy()
