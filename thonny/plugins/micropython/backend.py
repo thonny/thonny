@@ -120,6 +120,7 @@ class MicroPythonBackend:
     def _mainloop(self):
         while True:
             try:
+                self._interrupt_requested = False
                 self._check_for_connection_errors()
                 cmd = self._command_queue.get(timeout=0.1)
                 if isinstance(cmd, InputSubmission):
@@ -225,13 +226,13 @@ class MicroPythonBackend:
     def _interrupt(self):
         self._connection.write(INTERRUPT_CMD)
 
-    def _check_for_interrupt(self, target):
+    def _check_for_interrupt(self, action_scope):
         if self._interrupt_requested:
-            self._interrupt_requested = False
-            if target == "device":
+            if action_scope == "device":
                 self._interrupt()
             else:
-                raise KeyboardInterrupt
+                assert action_scope == "local"
+                raise KeyboardInterrupt()
 
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -467,7 +468,6 @@ class MicroPythonBackend:
         output = b""
         out = b""
         err = b""
-        debug("proura")
         while not done:
             if (
                 self._connection.num_bytes_received == 0
