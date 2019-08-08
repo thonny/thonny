@@ -1454,7 +1454,7 @@ class BlockingDialog(CommonDialogEx):
     def _send_interrupt(self):
         self._sent_interrupt = True
         self._description_label.configure(text="Cancelling...")
-        print("Sending interrupt")
+        self._cancel_button.configure(text=_("Close"))
         get_runner()._cmd_interrupt()
 
     def on_close(self, event=None):

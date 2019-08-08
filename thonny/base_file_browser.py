@@ -587,7 +587,7 @@ class BaseFileBrowser(ttk.Frame):
             self.menu.add_command(label=_("Delete"), command=self.delete)
 
         if self.supports_directories():
-            self.menu.add_command(label=_("New directory"), command=self.mkdir)
+            self.menu.add_command(label=_("New directory") + "...", command=self.mkdir)
 
     def add_last_menu_items(self):
         self.menu.add_command(label=_("Properties"), command=self.show_properties)
