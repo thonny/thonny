@@ -1621,11 +1621,16 @@ def linux_dirname_basename(path):
     if path == "/":
         return ("/", "")
 
+    if "/" not in path: # micro:bit
+        return "", path
+
     path = path.rstrip("/")
     return path.rsplit("/", maxsplit=1)
 
 
 def linux_join_path_parts(left, right):
+    if left == "": # micro:bit
+        return right.strip("/")
     return left.rstrip("/") + "/" + right.strip("/")
 
 
