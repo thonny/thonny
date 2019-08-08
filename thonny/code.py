@@ -51,8 +51,6 @@ class Editor(ttk.Frame):
         self._filename = None
         self._last_known_mtime = None
         self._asking_about_external_change = False
-        self._loading = False
-        self._waiting_write_completion = False
 
         self._code_view.text.bind("<<Modified>>", self._on_text_modified, True)
         self._code_view.text.bind("<<TextChange>>", self._on_text_change, True)
@@ -60,8 +58,6 @@ class Editor(ttk.Frame):
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
         get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
-        get_workbench().bind("read_file_response", self._complete_loading_remote_file, True)
-        get_workbench().bind("write_file_response", self._complete_writing_remote_file, True)
 
         self.update_appearance()
 
@@ -88,9 +84,7 @@ class Editor(ttk.Frame):
         else:
             result = os.path.basename(self.get_filename())
 
-        if self._loading or self._waiting_write_completion:
-            result += " ..."
-        elif self.is_modified():
+        if self.is_modified():
             result += " *"
 
         return result
@@ -118,8 +112,9 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     "File is gone",
-                    "Looks like '%s' was deleted or moved outside Thonny.\n\n" % self._filename
-                    + "Do you want to also close this editor?",
+                    "Looks like '%s' was deleted or moved outside if the editor.\n\n"
+                    % self._filename
+                    + "Do you want to also close the editor?",
                     parent=get_workbench(),
                 ):
                     self.master.close_editor(self)
@@ -132,7 +127,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     "External modification",
-                    "Looks like '%s' was modified outside Thonny.\n\n" % self._filename
+                    "Looks like '%s' was modified outside the editor.\n\n" % self._filename
                     + "Do you want to discard current editor content and reload the file from disk?",
                     parent=get_workbench(),
                 ):
@@ -160,11 +155,9 @@ class Editor(ttk.Frame):
         return result
 
     def _load_file(self, filename, keep_undo=False):
-        self._waiting_write_completion = False
-
         try:
             if is_remote_path(filename):
-                self._start_loading_remote_file(filename)
+                self._load_remote_file(filename)
             else:
                 self._load_local_file(filename, keep_undo)
         except SyntaxError as e:
@@ -195,10 +188,8 @@ class Editor(ttk.Frame):
         self.get_text_widget().edit_modified(False)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
-        self._loading = False
 
-    def _start_loading_remote_file(self, filename):
-        self._loading = True
+    def _load_remote_file(self, filename):
         self._filename = filename
         self._newlines = None
         self._code_view.set_content("")
@@ -206,19 +197,18 @@ class Editor(ttk.Frame):
 
         target_filename = extract_target_path(self._filename)
 
-        get_runner().send_command(InlineCommand("read_file", path=target_filename))
         self.update_title()
+        response = get_runner().send_command(
+            InlineCommand(
+                "read_file", path=target_filename, blocking=True, description=_("Loading") + "..."
+            )
+        )
 
-    def _complete_loading_remote_file(self, msg):
-        if not self._filename or not self._filename.endswith(msg["path"]):
-            return
-
-        content = msg["content_bytes"]
-
-        if msg.get("error"):
+        if response.get("error"):
             # TODO: make it softer
-            raise RuntimeError(msg["error"])
+            raise RuntimeError(response["error"])
 
+        content = response["content_bytes"]
         if content.count(b"\r\n") > content.count(b"\n") / 2:
             self._newlines = "\r\n"
         else:
@@ -227,7 +217,6 @@ class Editor(ttk.Frame):
         self._code_view.text.set_read_only(False)
         self._code_view.set_content_as_bytes(content)
         self.get_text_widget().edit_modified(False)
-        self._loading = False
         self.update_title()
 
     def is_modified(self):
@@ -290,7 +279,6 @@ class Editor(ttk.Frame):
             self.master.remember_recent_file(save_filename)
 
         if not save_copy or save_filename == self._filename:
-            self._waiting_write_completion = False
             self._code_view.text.edit_modified(False)
 
         return True
@@ -299,17 +287,21 @@ class Editor(ttk.Frame):
         if get_runner().can_do_file_operations():
             target_filename = extract_target_path(save_filename)
 
-            # causes progress marker to be displayed, even when saving a copy
-            self._waiting_write_completion = True
-
             get_runner().send_command(
                 InlineCommand(
                     "write_file",
                     path=target_filename,
                     content_bytes=content_bytes,
                     editor_id=id(self),
+                    blocking=True,
+                    description=_("Saving") + "...",
                 )
             )
+
+            if not save_copy:
+                self._code_view.text.edit_modified(False)
+
+            self.update_title()
 
             # NB! edit_modified is not falsed yet!
             get_workbench().event_generate(
@@ -319,18 +311,6 @@ class Editor(ttk.Frame):
         else:
             messagebox.showwarning("Can't save", "Device is busy, wait and try again!")
             return False
-
-    def _complete_writing_remote_file(self, msg):
-        if msg.get("editor_id") == id(self):
-            self._waiting_write_completion = False
-            if (
-                self._filename
-                and is_remote_path(self._filename)
-                and extract_target_path(self._filename) == msg["path"]
-            ):
-                # ie. it was not "Save copy ..."
-                self._code_view.text.edit_modified(False)
-            self.update_title()
 
     def ask_new_path(self):
         node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
@@ -469,7 +449,6 @@ class Editor(ttk.Frame):
 
     def _on_text_modified(self, event):
         self.update_title()
-        self._waiting_write_completion = False
 
     def update_title(self):
         try:
@@ -479,7 +458,6 @@ class Editor(ttk.Frame):
 
     def _on_text_change(self, event):
         self.update_title()
-        self._waiting_write_completion = False
 
     def destroy(self):
         get_workbench().unbind("DebuggerResponse", self._listen_debugger_progress)
