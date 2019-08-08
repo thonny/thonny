@@ -19,7 +19,7 @@ msgstr "Redigeeri"
 msgid "View"
 msgstr "Vaated"
 
-#: thonny/running.py:93 thonny/workbench.py:358
+#: thonny/running.py:95 thonny/workbench.py:358
 msgid "Run"
 msgstr "Käivita"
 
@@ -179,15 +179,15 @@ msgstr "Võta muudatus tagasi"
 msgid "Redo"
 msgstr "Rakenda tagasivõetud muudatus uuesti"
 
-#: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2159
+#: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2176
 msgid "Cut"
 msgstr "Lõika"
 
-#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2160
+#: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2177
 msgid "Copy"
 msgstr "Kopeeri"
 
-#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2161
+#: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2178
 msgid "Paste"
 msgstr "Kleebi"
 
@@ -195,15 +195,15 @@ msgstr "Kleebi"
 msgid "Select all"
 msgstr "Vali kõik"
 
-#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1273
+#: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1276
 msgid "Run to cursor"
 msgstr "Jooksuta kursorini"
 
-#: thonny/plugins/debugger.py:860
+#: thonny/plugins/debugger.py:863
 msgid "Can't close yet"
 msgstr "Ei saa veel sulgeda"
 
-#: thonny/plugins/debugger.py:861
+#: thonny/plugins/debugger.py:864
 msgid "Use \"Stop\" command if you want to cancel debugging"
 msgstr "Kui soovid silumist lõpetada, siis kasuta \"Stop\" käsku"
 
@@ -261,7 +261,7 @@ msgstr "Ekspordi kasutuslogi"
 msgid "Events"
 msgstr "Sündmused"
 
-#: thonny/plugins/files.py:200
+#: thonny/plugins/files.py:307
 msgid "Files"
 msgstr "Failid"
 
@@ -387,8 +387,9 @@ msgstr "Otsi pakki PyPI-st"
 msgid "Uninstall"
 msgstr "Desinstalli"
 
-#: thonny/code.py:570 thonny/plugins/microbit/__init__.py:200
-#: thonny/plugins/pip_gui.py:204 thonny/ui_utils.py:350 thonny/ui_utils.py:1626
+#: thonny/code.py:548 thonny/plugins/microbit/__init__.py:200
+#: thonny/plugins/pip_gui.py:204 thonny/running.py:1457 thonny/ui_utils.py:367
+#: thonny/ui_utils.py:1643
 msgid "Close"
 msgstr "Sulge"
 
@@ -471,67 +472,67 @@ msgstr "Tagasi\n"
 msgid "Variables"
 msgstr "Muutujad"
 
-#: thonny/base_file_browser.py:29
+#: thonny/base_file_browser.py:30
 msgid "This computer"
 msgstr "See arvuti"
 
-#: thonny/base_file_browser.py:500
+#: thonny/base_file_browser.py:568
 msgid "Refresh"
 msgstr "Värskenda"
 
-#: thonny/base_file_browser.py:506
+#: thonny/base_file_browser.py:572
 msgid "Focus into"
 msgstr "Mine sisse"
 
-#: thonny/base_file_browser.py:744
+#: thonny/base_file_browser.py:1001
 msgid "Error"
 msgstr "Viga"
 
-#: thonny/base_file_browser.py:744
+#: thonny/base_file_browser.py:1001
 msgid "You need to select a file!"
 msgstr "Sa peand valima faili!"
 
-#: thonny/base_file_browser.py:748
+#: thonny/base_file_browser.py:1005
 msgid "Overwrite?"
 msgstr "Kirjutada üle?"
 
-#: thonny/base_file_browser.py:748
+#: thonny/base_file_browser.py:1005
 msgid "Do you want to overwrite '%s' ?"
 msgstr "Kas soovid '%s' üle kirjutada?"
 
-#: thonny/code.py:535 thonny/code.py:537
+#: thonny/code.py:513 thonny/code.py:515
 msgid "New"
 msgstr "Uus"
 
-#: thonny/code.py:548
+#: thonny/code.py:526
 msgid "Open..."
 msgstr "Ava..."
 
-#: thonny/code.py:550
+#: thonny/code.py:528
 msgid "Load"
 msgstr "Lae"
 
-#: thonny/code.py:559
+#: thonny/code.py:537
 msgid "Recent files"
 msgstr "Hiljutised failid"
 
-#: thonny/code.py:581 thonny/ui_utils.py:352
+#: thonny/code.py:559 thonny/ui_utils.py:369
 msgid "Close all"
 msgstr "Sulge kõik"
 
-#: thonny/code.py:591 thonny/code.py:593
+#: thonny/code.py:569 thonny/code.py:571
 msgid "Save"
 msgstr "Salvesta"
 
-#: thonny/code.py:605
+#: thonny/code.py:583
 msgid "Save as..."
 msgstr "Salvesta nimega..."
 
-#: thonny/code.py:616
+#: thonny/code.py:594
 msgid "Save copy..."
 msgstr "Salvesta koopia..."
 
-#: thonny/code.py:625
+#: thonny/code.py:603
 msgid "Rename..."
 msgstr "Nimeta ümber..."
 
@@ -539,31 +540,31 @@ msgstr "Nimeta ümber..."
 msgid "Thonny options"
 msgstr "Thonny seaded"
 
-#: thonny/running.py:92
+#: thonny/running.py:94
 msgid "Run current script"
 msgstr "Jooksuta käesolev skript"
 
-#: thonny/running.py:123
+#: thonny/running.py:125
 msgid "Run current script in terminal"
 msgstr "Jooksuta käesolev skript terminalis"
 
-#: thonny/running.py:136
+#: thonny/running.py:138
 msgid "Stop/Restart backend"
 msgstr "Peata/taaskäivita interpretaator"
 
-#: thonny/running.py:137
+#: thonny/running.py:139
 msgid "Stop"
 msgstr "Peata"
 
-#: thonny/running.py:148
+#: thonny/running.py:150
 msgid "Interrupt execution"
 msgstr "Katkesta programm"
 
-#: thonny/running.py:159
+#: thonny/running.py:161
 msgid "Send EOF / Soft reboot"
 msgstr "Saada EOF / Soft reboot"
 
-#: thonny/running.py:170
+#: thonny/running.py:172
 msgid "Disconnect"
 msgstr "Ühenda lahti"
 
@@ -649,7 +650,7 @@ msgstr "Parema jõudluse nimel ei näidata Käsureal väga pikki ridu\n"
 msgid "Wrap text (may be slow)"
 msgstr "Murra rida (võib olla aeglane)"
 
-#: thonny/shell.py:1425 thonny/ui_utils.py:1622
+#: thonny/shell.py:1425 thonny/ui_utils.py:1639
 msgid "Copy to clipboard"
 msgstr "Kopeeri lõikepuhvrisse"
 
@@ -671,15 +672,15 @@ msgstr "Plotter visualiseerib käsureale\n"
 msgid "See Help for details."
 msgstr "Täpsemalt vaata abiinfost."
 
-#: thonny/ui_utils.py:351
+#: thonny/ui_utils.py:368
 msgid "Close others"
 msgstr "Sulge ülejäänud"
 
-#: thonny/ui_utils.py:1482
+#: thonny/ui_utils.py:1499
 msgid "Copying"
 msgstr "Kopeerin"
 
-#: thonny/ui_utils.py:1485
+#: thonny/ui_utils.py:1502
 msgid "Copying\n"
 "  %s\n"
 "to\n"
@@ -690,26 +691,26 @@ msgstr "Kopeerin\n"
 "  %s"
 
 #: thonny/config_ui.py:31 thonny/plugins/microbit/__init__.py:127
-#: thonny/plugins/pip_gui.py:1066 thonny/ui_utils.py:1493
-#: thonny/ui_utils.py:1695
+#: thonny/plugins/pip_gui.py:1066 thonny/running.py:1424
+#: thonny/ui_utils.py:1510 thonny/ui_utils.py:1712
 msgid "Cancel"
 msgstr "Tühista"
 
-#: thonny/config_ui.py:30 thonny/ui_utils.py:1747
+#: thonny/config_ui.py:30 thonny/ui_utils.py:1764
 msgid "OK"
 msgstr "Sobib"
 
-#: thonny/ui_utils.py:1766
+#: thonny/ui_utils.py:1783
 msgid "Cancel the process?"
 msgstr "Tühista protsess?"
 
-#: thonny/ui_utils.py:1767
+#: thonny/ui_utils.py:1784
 msgid "The process is still running.\n"
 "Are you sure you want to cancel?"
 msgstr "Protsess käib veel.\n"
 "Oled Sa kindel, et soovid katkestada?"
 
-#: thonny/ui_utils.py:2165
+#: thonny/ui_utils.py:2182
 msgid "Select All"
 msgstr "Vali kõik"
 
@@ -782,67 +783,67 @@ msgstr "Programmipuu"
 msgid "Select interpreter"
 msgstr "Vali interpretaator"
 
-#: thonny/plugins/debugger.py:1159
+#: thonny/plugins/debugger.py:1162
 msgid "Resume"
 msgstr "Naase"
 
-#: thonny/plugins/debugger.py:1171
+#: thonny/plugins/debugger.py:1174
 msgid "Run / resume"
 msgstr "Jooksuta / naase"
 
-#: thonny/plugins/debugger.py:1186
+#: thonny/plugins/debugger.py:1189
 msgid "Debug current script"
 msgstr "Silu käesolevat skripti"
 
-#: thonny/plugins/debugger.py:1188
+#: thonny/plugins/debugger.py:1191
 msgid "Debug"
 msgstr "Silu"
 
-#: thonny/plugins/debugger.py:1199
+#: thonny/plugins/debugger.py:1202
 msgid "Debug current script (nicer)"
 msgstr "Silu käesolevat skripti (ägedam)"
 
-#: thonny/plugins/debugger.py:1211
+#: thonny/plugins/debugger.py:1214
 msgid "Debug current script (faster)"
 msgstr "Silu käesolevat skripti (kiirem)"
 
-#: thonny/plugins/debugger.py:1222
+#: thonny/plugins/debugger.py:1225
 msgid "Step over"
 msgstr "Astu üle"
 
-#: thonny/plugins/debugger.py:1224
+#: thonny/plugins/debugger.py:1227
 msgid "Over"
 msgstr "Üle"
 
-#: thonny/plugins/debugger.py:1235
+#: thonny/plugins/debugger.py:1238
 msgid "Step into"
 msgstr "Asti sisse"
 
-#: thonny/plugins/debugger.py:1237
+#: thonny/plugins/debugger.py:1240
 msgid "Into"
 msgstr "Sisse"
 
-#: thonny/plugins/debugger.py:1248
+#: thonny/plugins/debugger.py:1251
 msgid "Step out"
 msgstr "Astu välja"
 
-#: thonny/plugins/debugger.py:1250
+#: thonny/plugins/debugger.py:1253
 msgid "Out"
 msgstr "Välja"
 
-#: thonny/plugins/debugger.py:1285
+#: thonny/plugins/debugger.py:1288
 msgid "Step back"
 msgstr "Astu tagasi"
 
-#: thonny/plugins/debugger.py:1287
+#: thonny/plugins/debugger.py:1290
 msgid "Back"
 msgstr "Tagasi"
 
-#: thonny/plugins/debugger.py:1293
+#: thonny/plugins/debugger.py:1296
 msgid "Stack"
 msgstr "Pinu"
 
-#: thonny/plugins/debugger.py:1294
+#: thonny/plugins/debugger.py:1297
 msgid "Exception"
 msgstr "Erind"
 
@@ -1226,35 +1227,35 @@ msgstr "Avaleht"
 msgid "Help contents"
 msgstr "Abiinfo sisukord"
 
-#: thonny/plugins/micropython/__init__.py:172
+#: thonny/plugins/micropython/__init__.py:175
 msgid "CircuitPython device"
 msgstr "CircuitPythoni seade"
 
-#: thonny/plugins/micropython/__init__.py:176
+#: thonny/plugins/micropython/__init__.py:179
 msgid "MicroPython device"
 msgstr "MicroPythoni seade"
 
-#: thonny/plugins/micropython/__init__.py:185
+#: thonny/plugins/micropython/__init__.py:191
 msgid "Connect your device to the computer and select corresponding port below"
 msgstr "Ühenda seade arvutiga ja vali allpoolt selle port"
 
-#: thonny/plugins/micropython/__init__.py:188
+#: thonny/plugins/micropython/__init__.py:194
 msgid "look for your device name, \"USB Serial\" or \"UART\""
 msgstr "otsi oma seadme nime või fraase \"USB Serial\" või \"UART\""
 
-#: thonny/plugins/micropython/__init__.py:190
+#: thonny/plugins/micropython/__init__.py:196
 msgid "If you can't find it, you may need to install proper USB driver first."
 msgstr "Kui sa ei leia seda, siis pead võibolla installima sobiva USB draiveri."
 
-#: thonny/plugins/micropython/__init__.py:214
+#: thonny/plugins/micropython/__init__.py:220
 msgid "Port"
 msgstr "Port"
 
-#: thonny/plugins/micropython/__init__.py:223
+#: thonny/plugins/micropython/__init__.py:229
 msgid "Try to detect port automatically"
 msgstr "Proovi tuvastada port automaatselt"
 
-#: thonny/plugins/micropython/__init__.py:411
+#: thonny/plugins/micropython/__init__.py:417
 msgid "MicroPython (generic)"
 msgstr "MicroPython (üldine)"
 
@@ -1344,11 +1345,11 @@ msgstr "Valmis!"
 msgid "You can now close this dialog."
 msgstr "Võid nüüd selle akna sulgeda."
 
-#: thonny/plugins/micropython/__init__.py:292
+#: thonny/plugins/micropython/__init__.py:298
 msgid "Firmware"
 msgstr "Püsivara"
 
-#: thonny/plugins/micropython/__init__.py:295
+#: thonny/plugins/micropython/__init__.py:301
 msgid "Open the dialog for installing or upgrading MicroPython on your device"
 msgstr "Ava MicroPythoni installimise või uuendamise dialoog"
 
@@ -1364,15 +1365,103 @@ msgstr "Veendu, et micro:bit on ühendatud!"
 msgid "Do you want to continue and locate the disk yourself?"
 msgstr "Kas soovid jätkata ja draivi ise valida?"
 
-#: thonny/misc_utils.py:116
+#: thonny/misc_utils.py:120
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
 msgstr "Ei leia draivi nimega '%s'. Kas soovid selle ise valida?"
 
-#: thonny/misc_utils.py:117
+#: thonny/misc_utils.py:123
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
 msgstr "Leidsin mitu draivi nimega '%s'. Kas soovid ühe neist ise valida?"
 
-#: thonny/misc_utils.py:132
+#: thonny/misc_utils.py:137
 msgid "Can't find suitable disk"
 msgstr "Ei leia sobivat draivi."
+
+#: thonny/base_file_browser.py:259
+msgid "%d items"
+msgstr "%d üksust"
+
+#: thonny/base_file_browser.py:581
+msgid "Move to Recycle Bin"
+msgstr "Liiguta Prügikasti"
+
+#: thonny/base_file_browser.py:583
+msgid "Move to Trash"
+msgstr "Liiguta Prügikasti"
+
+#: thonny/base_file_browser.py:586
+msgid "Delete"
+msgstr "Kustuta"
+
+#: thonny/base_file_browser.py:589
+msgid "New directory"
+msgstr "Uus kaust"
+
+#: thonny/base_file_browser.py:592
+msgid "Properties"
+msgstr "Omadused"
+
+#: thonny/base_file_browser.py:593
+msgid "Storage space"
+msgstr "Salvestusruum"
+
+#: thonny/base_file_browser.py:603
+msgid "Path"
+msgstr "Tee"
+
+#: thonny/base_file_browser.py:605
+msgid "Directory properties"
+msgstr "Kausta omadused"
+
+#: thonny/base_file_browser.py:607
+msgid "File properties"
+msgstr "Faili omadused"
+
+#: thonny/base_file_browser.py:609
+msgid "bytes"
+msgstr "baiti"
+
+#: thonny/base_file_browser.py:612
+msgid "Size"
+msgstr "Suurus"
+
+#: thonny/base_file_browser.py:623
+msgid "Modified"
+msgstr "Muudetud"
+
+#: thonny/base_file_browser.py:679
+msgid "Deleting %s"
+msgstr "Kustutan %s"
+
+#: thonny/base_file_browser.py:701
+msgid "Moving %s to %s"
+msgstr "Liigutan %s asukohta %s"
+
+#: thonny/code.py:203
+msgid "Loading"
+msgstr "Laadin"
+
+#: thonny/code.py:297
+msgid "Saving"
+msgstr "Salvestan"
+
+#: thonny/running.py:1408
+msgid "Working..."
+msgstr "Töötan..."
+
+#: thonny/plugins/files.py:199
+msgid "Uploading %s to %s"
+msgstr "Laadin %s üles asukohta %s"
+
+#: thonny/plugins/files.py:206
+msgid "Upload to %s"
+msgstr "Laadi üles asukohta %s"
+
+#: thonny/plugins/files.py:261
+msgid "Downloading %s to %s"
+msgstr ""
+
+#: thonny/plugins/files.py:267
+msgid "Download to %s"
+msgstr ""
 

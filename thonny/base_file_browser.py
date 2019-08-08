@@ -564,13 +564,12 @@ class BaseFileBrowser(ttk.Frame):
     def add_first_menu_items(self):
         selected_path = self.get_selected_path()
         selected_kind = self.get_selected_kind()
-        selected_name = self.get_selected_name()
 
         self.menu.add_command(label=_("Refresh"), command=self.refresh_tree)
 
         if selected_kind == "dir":
             self.menu.add_command(
-                label=_("Focus into %s") % selected_name,
+                label=_("Focus into"),
                 command=lambda: self.request_focus_into(selected_path),
             )
         else:
