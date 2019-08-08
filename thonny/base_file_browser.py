@@ -569,8 +569,7 @@ class BaseFileBrowser(ttk.Frame):
 
         if selected_kind == "dir":
             self.menu.add_command(
-                label=_("Focus into"),
-                command=lambda: self.request_focus_into(selected_path),
+                label=_("Focus into"), command=lambda: self.request_focus_into(selected_path)
             )
         else:
             "TODO: add open command"
