@@ -225,10 +225,13 @@ class MicroPythonBackend:
     def _interrupt(self):
         self._connection.write(INTERRUPT_CMD)
 
-    def _check_for_interrupt(self):
+    def _check_for_interrupt(self, target):
         if self._interrupt_requested:
             self._interrupt_requested = False
-            raise KeyboardInterrupt()
+            if target == "device":
+                self._interrupt()
+            else:
+                raise KeyboardInterrupt
 
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -486,6 +489,7 @@ class MicroPythonBackend:
             # There may be an input submission waiting
             # and we can't progress without resolving it first
             self._check_for_side_commands()
+            self._check_for_interrupt("device")
 
             # Process input in chunks (max 1 parsing marker per chunk).
             # Prefer whole lines (to reduce the number of events),
@@ -579,7 +583,6 @@ class MicroPythonBackend:
         self._execute("globals().clear(); __name__ = '__main__'")
 
     def _check_for_side_commands(self):
-        # TODO: do interrupts in reading thread
         # most likely the queue is empty
         if self._command_queue.empty():
             return
@@ -589,8 +592,6 @@ class MicroPythonBackend:
             cmd = self._command_queue.get()
             if isinstance(cmd, InputSubmission):
                 self._submit_input(cmd.data)
-            elif isinstance(cmd, InterruptCommand):
-                self._interrupt()
             elif isinstance(cmd, EOFCommand):
                 self._soft_reboot(True)
             else:
@@ -1029,7 +1030,7 @@ class MicroPythonBackend:
             self._execute_without_output("from binascii import hexlify as __temp_hexlify")
 
         while True:
-            self._check_for_interrupt()
+            self._check_for_interrupt("local")
             if "binascii" in self._builtin_modules:
                 block = binascii.unhexlify(
                     self._evaluate("__temp_hexlify(__thonny_fp.read(%s))" % block_size)
@@ -1068,7 +1069,7 @@ class MicroPythonBackend:
         with open(mounted_target_path, "wb") as f:
             bytes_written = 0
             for block in content_blocks:
-                self._check_for_interrupt()
+                self._check_for_interrupt("local")
                 bytes_written += f.write(block)
                 f.flush()
                 os.fsync(f)
@@ -1122,7 +1123,7 @@ class MicroPythonBackend:
 
             bytes_sent = 0
             for block in content_blocks:
-                self._check_for_interrupt()
+                self._check_for_interrupt("local")
                 if "binascii" in self._builtin_modules:
                     script = "__W(%r)" % binascii.hexlify(block)
                 else:
