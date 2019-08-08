@@ -10,6 +10,9 @@ def run_in_terminal(cmd, cwd, env_overrides={}, keep_open=True, title=None):
 
     env = get_environment_with_overrides(env_overrides)
 
+    if not cwd or not os.path.exists(cwd):
+        cwd = os.getcwd()
+
     if platform.system() == "Windows":
         _run_in_terminal_in_windows(cmd, cwd, env, keep_open, title)
     elif platform.system() == "Linux":

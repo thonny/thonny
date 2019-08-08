@@ -178,6 +178,9 @@ class MicroPythonProxy(SubprocessProxy):
         else:
             return _("MicroPython device")
 
+    def get_exe_dirs(self):
+        return []
+
 
 class MicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
