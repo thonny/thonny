@@ -272,7 +272,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
 
 
 def check_upload_download_response(command_name, command_response):
-    if command_response.get("existing_files"):
+    if command_response and command_response.get("existing_files"):
         # command was not performed because overwriting existing files need confirmation
         existing = sorted(command_response["existing_files"][:25])
         if len(command_response["existing_files"]) > 25:
