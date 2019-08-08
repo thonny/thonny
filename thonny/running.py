@@ -1427,7 +1427,6 @@ class BlockingDialog(CommonDialogEx):
         self._start_time = time.time()
 
         if isinstance(cmd, InlineCommand):
-            print("binding")
             get_workbench().bind("InlineResponse", self._on_response, True)
             get_workbench().bind("InlineProgress", self._on_progress, True)
         else:
@@ -1437,7 +1436,6 @@ class BlockingDialog(CommonDialogEx):
         self.response = event
 
         if event.get("command_id") == self._cmd_id:
-            print("took", time.time() - self._start_time)
             self.destroy()
 
         if event.get("error") and not event.get("interrupted"):

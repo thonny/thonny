@@ -192,7 +192,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
                 response = get_runner().send_command(
                     InlineCommand(
                         "upload",
-                        allow_overwrite=None,
+                        allow_overwrite=False,
                         source_paths=selection["paths"],
                         target_dir=target_dir,
                         blocking=True,
@@ -254,13 +254,14 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
             response = get_runner().send_command(
                 InlineCommand(
                     "download",
+                    allow_overwrite=False,
                     source_paths=selection["paths"],
                     target_dir=target_dir,
                     blocking=True,
                     description=_("Downloading %s to %s") % (selection["description"], target_dir),
                 )
             )
-            self.on_upload_download_response("download", response)
+            check_upload_download_response("download", response)
             self.master.local_files.refresh_tree()
 
         self.menu.add_command(label=_("Download to %s") % target_dir, command=download)

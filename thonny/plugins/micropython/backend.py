@@ -419,7 +419,6 @@ class MicroPythonBackend:
 
     def _evaluate(self, expr, prelude="", cleanup=""):
         _, _, value_repr = self._execute_print_expr(expr, prelude, cleanup)
-        debug("GOTVALUE")
         if value_repr is None:
             return None
         else:
@@ -768,7 +767,18 @@ class MicroPythonBackend:
             assert file["path"].startswith(file["original_context"])
             path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
             target_path = os.path.join(target_dir, os.path.normpath(path_suffix))
-            download_items.append((file["path"], target_path, file["size"]))
+            download_items.append(dict(source=file["path"], target=target_path, size=file["size"]))
+
+        if not cmd["allow_overwrite"]:
+            targets = [item["target"] for item in download_items]
+            existing_files = list(filter(os.path.exists, targets))
+            if existing_files:
+                return {
+                    "existing_files": existing_files,
+                    "source_paths": cmd["source_paths"],
+                    "target_dir": cmd["target_dir"],
+                    "description": cmd["description"],
+                }
 
         def notify(current_file_progress):
             self._check_send_inline_progress(
@@ -778,10 +788,10 @@ class MicroPythonBackend:
         # replace the indeterminate progressbar with determinate as soon as possible
         notify(0)
 
-        for source, target, size in download_items:
-            written_bytes = self._download_file(source, target, notify)
-            assert written_bytes == size
-            completed_files_size += size
+        for item in download_items:
+            written_bytes = self._download_file(item["source"], item["target"], notify)
+            assert written_bytes == item["size"]
+            completed_files_size += item["size"]
 
     def _cmd_upload(self, cmd):
         completed_files_size = 0
@@ -797,12 +807,9 @@ class MicroPythonBackend:
             target_path = linux_join_path_parts(target_dir, to_linux_path(path_suffix))
             upload_items.append(dict(source=file["path"], target=target_path, size=file["size"]))
 
-        print("over", cmd["allow_overwrite"])
         if not cmd["allow_overwrite"]:
             targets = [item["target"] for item in upload_items]
-            print("targets", targets)
-            existing_files = self._get_existing_files(targets)
-            print("existing", existing_files)
+            existing_files = self._get_existing_remote_files(targets)
             if existing_files:
                 return {
                     "existing_files": existing_files,
@@ -811,7 +818,6 @@ class MicroPythonBackend:
                     "description": cmd["description"],
                 }
 
-        print("remaining", upload_items)
         total_size = sum([item["size"] for item in upload_items])
 
         def notify(current_file_progress):
@@ -1264,7 +1270,7 @@ class MicroPythonBackend:
         )
         return result
 
-    def _get_existing_files(self, paths):
+    def _get_existing_remote_files(self, paths):
         if self._supports_directories():
             func = "stat"
         else:
@@ -1343,7 +1349,6 @@ class MicroPythonBackend:
         self._execute(script)
 
     def _upload_file(self, source, target, notifier):
-        print("upload", source, "=>", target)
         target_dir, _ = linux_dirname_basename(target)
         self._makedirs(target_dir)
 
