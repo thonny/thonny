@@ -16,7 +16,6 @@ from copy import deepcopy
 from thonny.misc_utils import running_on_windows, sizeof_fmt
 import datetime
 import shutil
-import traceback
 
 _dummy_node_text = "..."
 
@@ -540,8 +539,12 @@ class BaseFileBrowser(ttk.Frame):
                 # replace current selection
                 self.tree.selection_set(node_id)
             self.tree.focus(node_id)
-            self.refresh_menu()
-            self.menu.tk_popup(event.x_root, event.y_root)
+        else:
+            self.tree.selection_set()
+            self.path_bar.focus_set()
+
+        self.refresh_menu()
+        self.menu.tk_popup(event.x_root, event.y_root)
 
     def post_button_menu(self):
         self.refresh_menu()
@@ -582,7 +585,7 @@ class BaseFileBrowser(ttk.Frame):
             self.menu.add_command(label=trash_label, command=self.move_to_trash)
         else:
             self.menu.add_command(label=_("Delete"), command=self.delete)
-            
+
         if self.supports_directories():
             self.menu.add_command(label=_("New directory"), command=self.mkdir)
 
@@ -679,12 +682,24 @@ class BaseFileBrowser(ttk.Frame):
 
     def move_to_trash(self):
         assert self.supports_trash()
-        
+
         selection = self.get_selection_info(True)
         if not selection:
             return
 
-        self.perform_move_to_trash(selection["paths"], _("Moving %s to trash") % selection["description"])
+        trash = "Recycle Bin" if running_on_windows() else "Trash"
+        if not messagebox.askyesno(
+            "Really move to Trash?",
+            "I'll try to move %s to %s,\n" % (selection["description"], trash)
+            + "but my method is not always reliable —\n"
+            + "in some cases the files can't be restored.\n\n"
+            + "Is this OK?",
+        ):
+            return
+
+        self.perform_move_to_trash(
+            selection["paths"], _("Moving %s to %s") % (selection["description"], trash)
+        )
         self.refresh_tree()
 
     def supports_trash(self):
@@ -721,7 +736,6 @@ class BaseFileBrowser(ttk.Frame):
         raise NotImplementedError()
 
     def notify_missing_selection(self):
-        traceback.print_stack()
         messagebox.showerror("Nothing selected", "Select an item and try again!")
 
 
@@ -790,9 +804,10 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         """
 
     def perform_move_to_trash(self, paths, description):
+        # TODO: do it with subprocess dialog
         import send2trash
+
         for path in paths:
-            print("moving to trash:", repr(path))
             send2trash.send2trash(path)
 
     def perform_mkdir(self, parent_dir, name):
