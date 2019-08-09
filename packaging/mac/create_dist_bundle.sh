@@ -23,19 +23,19 @@ FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
 
 # install deps #####################################################
-$PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir asttokens==1.1.*
-$PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir parso==0.5.*
-$PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir jedi==0.14.*
-$PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir --no-binary mypy mypy==0.720
-$PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir pylint==2.3.*
-$PYTHON_CURRENT/bin/python3.7 -m pip install docutils==0.15.*
-$PYTHON_CURRENT/bin/python3.7 -m pip install pyserial==3.4
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir asttokens==1.1.*
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir parso==0.5.*
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir jedi==0.14.*
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir --no-binary mypy mypy==0.720
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir pylint==2.3.*
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install docutils==0.15.*
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pyserial==3.4
 
 # install certifi #####################################################
-$PYTHON_CURRENT/bin/python3.7 -m pip install certifi
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install certifi
 
 # install thonny #####################################################
-$PYTHON_CURRENT/bin/python3.7 -m pip install --pre --no-cache-dir thonny
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir thonny
 rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
 
 # clean unnecessary stuff ###################################################
@@ -117,5 +117,41 @@ hdiutil internet-enable -yes $FILENAME
 # sign dmg ######################
 codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $FILENAME
 
-# clean up
-rm -rf build
+# plus ####################################################################################
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install colorama
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install flask
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install birdseye
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygal
+
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygame
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pgzero
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pillow
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pytest
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install requests
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install guizero
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install gpiozero
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install numpy
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install scipy
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install matplotlib
+
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pandas
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install lxml
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install beautifulsoup4
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install openpyxl
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install xlrd
+
+find $PYTHON_CURRENT/lib -name '*.pyc' -delete
+find $PYTHON_CURRENT/lib -name '*.exe' -delete
+
+# create dmg #####################################################################
+PLUS_FILENAME=dist/thonny-plus-${VERSION}.dmg
+rm -f $PLUS_FILENAME
+hdiutil create -srcfolder build -volname "Thonny Plus $VERSION" $PLUS_FILENAME
+hdiutil internet-enable -yes $PLUS_FILENAME
+
+# sign dmg ######################
+codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $PLUS_FILENAME
+
+
+# clean up #######################################################################
+#rm -rf build
