@@ -80,7 +80,7 @@ msgstr "全屏"
 #: thonny/workbench.py:1250
 #, fuzzy
 msgid "Program arguments"
-msgstr "程序参数(args)"
+msgstr "程序参数"
 
 #: thonny/plugins/about.py:25 thonny/plugins/about.py:157
 #, fuzzy
@@ -1444,17 +1444,17 @@ msgstr "这是一个留言"
 #: thonny/plugins/theme_and_font_config_page.py:147
 #, fuzzy
 msgid "The answer is"
-msgstr "结果是"
+msgstr "The answer is"
 
 #: thonny/plugins/theme_and_font_config_page.py:151
 #, fuzzy
 msgid "unclosed_string"
-msgstr "未关闭字符串"
+msgstr "unclosed_string"
 
 #: thonny/plugins/theme_and_font_config_page.py:153
 #, fuzzy
 msgid "blah, blah"
-msgstr "等..."
+msgstr "blah,blah"
 
 #: thonny/plugins/theme_and_font_config_page.py:176
 #, fuzzy
@@ -1464,7 +1464,7 @@ msgstr "注意!改变一些风格在重启Thonny后生效!"
 #: thonny/plugins/theme_and_font_config_page.py:215
 #, fuzzy
 msgid "Enter an integer"
-msgstr "输入一个整数"
+msgstr "请输入一个整数"
 
 #: thonny/plugins/theme_and_font_config_page.py:228
 #, fuzzy
