@@ -2,6 +2,13 @@
 Version history
 ===============
 
+3.2.0rc1 (2019-08-09)
+=====================
+* NEW: Several new commands for Files view (New directory, Move to Trash, Delete, Upload (to MicroPython device), Download (from MicroPython device), ...)
+* CHANGED: MicroPython files are now displayed in the upper pane of Files view
+* CHANGED: Saving or loading editor content to/from MicroPython device displays progress bar
+* TECHNICAL: New dependency: Send2Trash
+
 3.2.0b7 (2019-07-19)
 ====================
 * FIXED: Problem with translation markers disturbing import
