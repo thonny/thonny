@@ -33,6 +33,7 @@ import io
 import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
 import binascii
+import shutil
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
@@ -397,13 +398,8 @@ class MicroPythonBackend:
 
     def _execute_without_output(self, script):
         out, err, value = self._execute(script, capture_output=True)
-        if out or err:
-
-            print(
-                "PROBLEM EXECUTING INTERNAL SCRIPT:\n" + out + err + "\nSCRIPT:\n" + script,
-                file=sys.stderr,
-            )
-            raise RuntimeError("Failed MP script")
+        if err or out:
+            raise RuntimeError("Failed MP script: " + str(out) + "\n" + str(err))
 
         return value
 
@@ -695,44 +691,13 @@ class MicroPythonBackend:
 
         paths = sorted(cmd.paths, key=lambda x: len(x), reverse=True)
 
-        if not self._supports_directories():
-            self._execute(
-                dedent(
-                    """
-                import os as __thonny_os
-                for __thonny_path in %r: 
-                    __thonny_os.remove(__thonny_path)
-                    
-                del __thonny_path
-                del __thonny_os
-            """
-                )
-                % paths
-            )
-        else:
-            self._execute(
-                dedent(
-                    """
-                import os as __thonny_os
-                def __thonny_delete(path):
-                    if __thonny_os.stat(path)[0] & 0o170000 == 0o040000:
-                        for name in __thonny_os.listdir(path):
-                            child_path = path + "/" + name
-                            __thonny_delete(child_path)
-                        __thonny_os.rmdir(path)
-                    else:
-                        __thonny_os.remove(path)
-                
-                for __thonny_path in %r: 
-                    __thonny_delete(__thonny_path)
-                    
-                del __thonny_path
-                del __thonny_delete
-                del __thonny_os
-            """
-                )
-                % paths
-            )
+        try:
+            self._delete_via_serial(paths)
+        except Exception as e:
+            if "read-only" in str(e).lower():
+                self._delete_via_mount(paths)
+
+        self._sync_all_filesystems()
 
     def _internal_path_to_mounted_path(self, path):
         mount_path = self._get_fs_mount()
@@ -801,7 +766,9 @@ class MicroPythonBackend:
     def _cmd_upload(self, cmd):
         completed_files_size = 0
         local_files = self._list_local_files_with_info(cmd["source_paths"])
-        target_dir = cmd["target_dir"].rstrip("/")
+        target_dir = cmd["target_dir"]
+        assert target_dir.startswith("/") or not self._supports_directories()
+        assert not target_dir.endswith("/") or target_dir == "/"
 
         upload_items = []
         for file in local_files:
@@ -809,7 +776,7 @@ class MicroPythonBackend:
             # relative to the context of the user selected items
             assert file["path"].startswith(file["original_context"])
             path_suffix = file["path"][len(file["original_context"]) :].strip("/").strip("\\")
-            target_path = linux_join_path_parts(target_dir, to_linux_path(path_suffix))
+            target_path = self._join_remote_path_parts(target_dir, to_remote_path(path_suffix))
             upload_items.append(dict(source=file["path"], target=target_path, size=file["size"]))
 
         if not cmd["allow_overwrite"]:
@@ -840,16 +807,9 @@ class MicroPythonBackend:
 
     def _cmd_mkdir(self, cmd):
         assert self._supports_directories()
-        self._execute_without_output(
-            dedent(
-                """
-            import os as __thonny_os
-            __thonny_os.mkdir(%r)
-            del __thonny_os
-        """
-                % cmd.path
-            )
-        )
+        assert cmd.path.startswith("/")
+        self._makedirs(cmd.path)
+        self._sync_all_filesystems()
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response
@@ -1305,6 +1265,13 @@ class MicroPythonBackend:
             ),
         )
 
+    def _join_remote_path_parts(self, left, right):
+        if left == "":  # micro:bit
+            assert not self._supports_directories()
+            return right.strip("/")
+
+        return left.rstrip("/") + "/" + right.strip("/")
+
     def _get_file_size(self, path):
         if self._supports_directories():
             script = "__thonny_os.stat(%r)[6]"
@@ -1317,11 +1284,16 @@ class MicroPythonBackend:
         if path == "/":
             return
 
-        mounted_path = self._internal_path_to_mounted_path(path)
-        if mounted_path is None:
+        try:
             self._makedirs_via_serial(path)
-        else:
-            os.makedirs(mounted_path, exist_ok=True)
+        except Exception as e:
+            if "read-only" in str(e).lower():
+                self._makedirs_via_mount(path)
+
+    def _makedirs_via_mount(self, path):
+        mounted_path = self._internal_path_to_mounted_path(path)
+        assert mounted_path is not None, "Couldn't find mounted path for " + path
+        os.makedirs(mounted_path, exist_ok=True)
 
     def _makedirs_via_serial(self, path):
         if path == "/":
@@ -1351,10 +1323,59 @@ class MicroPythonBackend:
             % path
         )
 
-        self._execute(script)
+        self._execute_without_output(script)
+
+    def _delete_via_mount(self, paths):
+        for path in paths:
+            mounted_path = self._internal_path_to_mounted_path(path)
+            assert mounted_path is not None
+            shutil.rmtree(mounted_path)
+
+    def _delete_via_serial(self, paths):
+        if not self._supports_directories():
+            self._execute_without_output(
+                dedent(
+                    """
+                import os as __thonny_os
+                for __thonny_path in %r: 
+                    __thonny_os.remove(__thonny_path)
+                    
+                del __thonny_path
+                del __thonny_os
+            """
+                )
+                % paths
+            )
+        else:
+            self._execute_without_output(
+                dedent(
+                    """
+                import os as __thonny_os
+                def __thonny_delete(path):
+                    if __thonny_os.stat(path)[0] & 0o170000 == 0o040000:
+                        for name in __thonny_os.listdir(path):
+                            child_path = path + "/" + name
+                            __thonny_delete(child_path)
+                        __thonny_os.rmdir(path)
+                    else:
+                        __thonny_os.remove(path)
+                
+                for __thonny_path in %r: 
+                    __thonny_delete(__thonny_path)
+                    
+                del __thonny_path
+                del __thonny_delete
+                del __thonny_os
+            """
+                )
+                % paths
+            )
 
     def _upload_file(self, source, target, notifier):
+        assert target.startswith("/") or not self._supports_directories()
         target_dir, _ = linux_dirname_basename(target)
+        assert target_dir.startswith("/") or not self._supports_directories()
+
         self._makedirs(target_dir)
 
         def block_generator():
@@ -1632,13 +1653,7 @@ def linux_dirname_basename(path):
     return path.rsplit("/", maxsplit=1)
 
 
-def linux_join_path_parts(left, right):
-    if left == "":  # micro:bit
-        return right.strip("/")
-    return left.rstrip("/") + "/" + right.strip("/")
-
-
-def to_linux_path(path):
+def to_remote_path(path):
     return path.replace("\\", "/")
 
 
