@@ -15,16 +15,16 @@ copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
 
-%BUILDDIR%\python -m pip install --no-cache-dir asttokens==1.1.*
-%BUILDDIR%\python -m pip install --no-cache-dir parso==0.5.*
-%BUILDDIR%\python -m pip install --no-cache-dir jedi==0.14.*
-%BUILDDIR%\python -m pip install --no-cache-dir --no-binary mypy mypy==0.720
-%BUILDDIR%\python -m pip install --no-cache-dir pylint==2.3.*
-%BUILDDIR%\python -m pip install docutils==0.15.*
-%BUILDDIR%\python -m pip install pyserial==3.4
+%BUILDDIR%\python -s -m pip install --no-cache-dir asttokens==1.1.*
+%BUILDDIR%\python -s -m pip install --no-cache-dir parso==0.5.*
+%BUILDDIR%\python -s -m pip install --no-cache-dir jedi==0.14.*
+%BUILDDIR%\python -s -m pip install --no-cache-dir --no-binary mypy mypy==0.720
+%BUILDDIR%\python -s -m pip install --no-cache-dir pylint==2.3.*
+%BUILDDIR%\python -s -m pip install docutils==0.15.*
+%BUILDDIR%\python -s -m pip install pyserial==3.4
 
 @echo ............... INSTALLING THONNY ...................................
-%BUILDDIR%\python -m pip install --pre --no-cache-dir thonny
+%BUILDDIR%\python -s -m pip install --pre --no-cache-dir thonny
 
 @echo ............... CLEANING PYTHON ............................
 @rem delete following 3 files to avoid confusion (user may think they're Thonny license etc.)
@@ -79,13 +79,37 @@ copy ..\..\README.rst %BUILDDIR% /Y>NUL
 
 @echo ............... CREATING INSTALLER ..........................
 set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
-"C:\Program Files (x86)\Inno Setup 6\iscc" /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
+"C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > installer_building.log
 
 @echo ............... CREATING ZIP ..........................
 SET PATH=%PATH%;C:\Program Files\7-Zip
 cd %BUILDDIR%
 7z a -tzip ..\dist\thonny-%VERSION%-windows.zip *
+cd ..
 
+@echo ............... XXL ..........................
+%BUILDDIR%\python -s -m pip install guizero
+%BUILDDIR%\python -s -m pip install gpiozero
+%BUILDDIR%\python -s -m pip install requests
+%BUILDDIR%\python -s -m pip install pillow
+%BUILDDIR%\python -s -m pip install scipy
+%BUILDDIR%\python -s -m pip install matplotlib
+%BUILDDIR%\python -s -m pip install numpy
+
+%BUILDDIR%\python -s -m pip install pgzero
+%BUILDDIR%\python -s -m pip install pygame
+
+%BUILDDIR%\python -s -m pip install flask
+
+%BUILDDIR%\python -s -m pip install pytest
+
+%BUILDDIR%\python -s -m pip install colorama
+%BUILDDIR%\python -s -m pip install birdseye
+%BUILDDIR%\python -s -m pip install beautifulsoup4
+
+del /S "%BUILDDIR%\*.pyc">NUL
+
+"C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
 
 @rem rmdir %BUILDDIR% /S /Q
 pause

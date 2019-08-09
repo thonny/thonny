@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 set -e
 
-VER=VERSION 
+VERSION=_VERSION_
+VARIANT=_VARIANT_
 
 echo 
-echo "This script will download and install Thonny $VER for Linux (32 or 64-bit PC)."
+echo "This script will download and install Thonny ($VARIANT-$VERSION) for Linux (32 or 64-bit PC)."
 read -p "Press ENTER to continue or Ctrl+C to cancel."
 
 ARCHITECTURE="$(uname -m)"
-FILENAME=thonny-$VER-$ARCHITECTURE.tar.gz
-URL="https://github.com/thonny/thonny/releases/download/v$VER/$FILENAME"
+FILENAME=$VARIANT-$VERSION-$ARCHITECTURE.tar.gz
+URL="https://github.com/thonny/thonny/releases/download/v$VERSION/$FILENAME"
 
 echo "Downloading $URL"
 

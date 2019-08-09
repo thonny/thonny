@@ -29,25 +29,26 @@ export LD_LIBRARY_PATH=$TARGET_DIR/lib
 
 if [ `getconf LONG_BIT` = "32" ]
 then
-    $TARGET_DIR/bin/python3.7 -m pip install setuptools-scm
+    $TARGET_DIR/bin/python3.7 -s -m pip install setuptools-scm
 fi
 
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir asttokens==1.1.*
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir parso==0.5.*
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir jedi==0.14.*
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir --no-binary mypy mypy==0.720
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir pylint==2.3.*
-$TARGET_DIR/bin/python3.7 -m pip install docutils==0.15.*
-$TARGET_DIR/bin/python3.7 -m pip install pyserial==3.4
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir distro==1.4.*
-$TARGET_DIR/bin/python3.7 -m pip install --no-cache-dir certifi
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir asttokens==1.1.*
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir parso==0.5.*
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir jedi==0.14.*
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir --no-binary mypy mypy==0.720
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir pylint==2.3.*
+$TARGET_DIR/bin/python3.7 -s -m pip install docutils==0.15.*
+$TARGET_DIR/bin/python3.7 -s -m pip install pyserial==3.4
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir distro==1.4.*
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir certifi
 
 # INSTALL THONNY ###################################
-$TARGET_DIR/bin/python3.7 -m pip install --pre --no-cache-dir thonny
+$TARGET_DIR/bin/python3.7 -s -m pip install --pre --no-cache-dir thonny
 
 VERSION=$(<$TARGET_DIR/lib/python3.7/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
+XXL_VERSION_NAME=thonny-xxl-$VERSION-$ARCHITECTURE 
 
 
 # clean up unnecessary stuff
@@ -114,11 +115,46 @@ cp ../../*LICENSE.txt $TARGET_DIR
 mkdir -p dist
 tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
 
+# XXL ###########################################################
+
+$TARGET_DIR/bin/python3.7 -s -m pip install guizero
+$TARGET_DIR/bin/python3.7 -s -m pip install gpiozero
+$TARGET_DIR/bin/python3.7 -s -m pip install requests
+$TARGET_DIR/bin/python3.7 -s -m pip install pillow
+$TARGET_DIR/bin/python3.7 -s -m pip install scipy
+$TARGET_DIR/bin/python3.7 -s -m pip install matplotlib
+$TARGET_DIR/bin/python3.7 -s -m pip install numpy
+
+$TARGET_DIR/bin/python3.7 -s -m pip install pgzero
+$TARGET_DIR/bin/python3.7 -s -m pip install pygame
+
+$TARGET_DIR/bin/python3.7 -s -m pip install flask
+
+$TARGET_DIR/bin/python3.7 -s -m pip install pytest
+
+$TARGET_DIR/bin/python3.7 -s -m pip install colorama
+$TARGET_DIR/bin/python3.7 -s -m pip install birdseye
+$TARGET_DIR/bin/python3.7 -s -m pip install beautifulsoup4
+
+find $TARGET_DIR -type f -name "*.pyo" -delete
+find $TARGET_DIR -type f -name "*.pyc" -delete
+
+mkdir -p dist
+tar -cvzf dist/$XXL_VERSION_NAME.tar.gz -C build thonny
+
 
 # create download + install script
+# normal
 DOWNINSTALL_FILENAME=thonny-$VERSION.bash
-
 DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
 cp downinstall_template.sh $DOWNINSTALL_TARGET
-sed -i "s/VERSION/$VERSION/g" $DOWNINSTALL_TARGET
+sed -i "s/_VERSION_/$VERSION/g" $DOWNINSTALL_TARGET
+sed -i "s/_VARIANT_/thonny/g" $DOWNINSTALL_TARGET
+
+# xxl
+XXL_DOWNINSTALL_FILENAME=thonny-xxl-$VERSION.bash
+XXL_DOWNINSTALL_TARGET=dist/$DOWNINSTALL_FILENAME
+cp downinstall_template.sh $XXL_DOWNINSTALL_TARGET
+sed -i "s/_VERSION_/$VERSION/g" $XXL_DOWNINSTALL_TARGET
+sed -i "s/_VARIANT_/thonny-xxl/g" $XXL_DOWNINSTALL_TARGET
 

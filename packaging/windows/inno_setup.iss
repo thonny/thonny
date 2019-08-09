@@ -1,6 +1,7 @@
 ﻿; Give AppVer and SourceFolder from command line, eg:
 ; "C:\Program Files (x86)\Inno Setup 5\iscc" /dAppVer=1.13 /dSourceFolder=build inno_setup.iss 
 ;#define AppVer "9.9.9"
+;#define InstallerPrefix "thonny"
 ;#define SourceFolder "C:\workspaces\python_stuff\thonny\packaging\windows\dummy"
 #define AppUserModelID "Thonny.Thonny"
 #define ThonnyPyProgID "Thonny.py"
@@ -41,7 +42,7 @@ AlwaysShowDirOnReadyPage=yes
 ; Request extra space for precompiling libraries
 ExtraDiskSpaceRequired=25000000
 OutputDir=dist
-OutputBaseFilename=thonny-{#AppVer}
+OutputBaseFilename={#InstallerPrefix}-{#AppVer}
 Compression=lzma2/ultra
 SolidCompression=yes
 
