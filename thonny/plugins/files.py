@@ -216,7 +216,8 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
     def on_toplevel_response(self, event):
-        self.check_update_focus()
+        if get_runner().get_backend_proxy().has_own_filesystem():
+            self.check_update_focus()
 
     def check_update_focus(self):
         proxy = get_runner().get_backend_proxy()
