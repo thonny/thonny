@@ -28,7 +28,7 @@ $PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir parso==0.5.*
 $PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir jedi==0.14.*
 $PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir --no-binary mypy mypy==0.720
 $PYTHON_CURRENT/bin/python3.7 -m pip install --no-cache-dir pylint==2.3.*
-$PYTHON_CURRENT/bin/python3.7 -m pip install docutils==0.14
+$PYTHON_CURRENT/bin/python3.7 -m pip install docutils==0.15.*
 $PYTHON_CURRENT/bin/python3.7 -m pip install pyserial==3.4
 
 # install certifi #####################################################

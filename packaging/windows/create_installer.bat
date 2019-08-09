@@ -20,7 +20,7 @@ copy thonny_python.ini %BUILDDIR%
 %BUILDDIR%\python -m pip install --no-cache-dir jedi==0.14.*
 %BUILDDIR%\python -m pip install --no-cache-dir --no-binary mypy mypy==0.720
 %BUILDDIR%\python -m pip install --no-cache-dir pylint==2.3.*
-%BUILDDIR%\python -m pip install docutils==0.14
+%BUILDDIR%\python -m pip install docutils==0.15.*
 %BUILDDIR%\python -m pip install pyserial==3.4
 
 @echo ............... INSTALLING THONNY ...................................
