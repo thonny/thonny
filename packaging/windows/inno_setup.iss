@@ -188,7 +188,7 @@ Root: HKLM; Check: StartedForAllUsers; Subkey: "Software\Classes\.py\ShellNew"; 
 Root: HKCU; Subkey: "Software\Classes\{#ThonnyPyProgID}\shell\Edit with IDLE"; ValueType: none; Flags: deletekey dontcreatekey uninsdeletekey
 
 [Run]
-Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."; StatusMsg: "Compiling standard library..."
+Filename: "{app}\pythonw.exe"; Parameters: "-m compileall ."; StatusMsg: "Compiling standard library... (takes a while)"
 
 
 [UninstallDelete]
