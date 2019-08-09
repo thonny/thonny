@@ -117,36 +117,46 @@ hdiutil internet-enable -yes $FILENAME
 # sign dmg ######################
 codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $FILENAME
 
-# plus ####################################################################################
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install colorama
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install flask
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install birdseye
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygal
-
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygame
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pgzero
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pillow
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pytest
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install requests
+# xxl ####################################################################################
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install guizero
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install gpiozero
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install numpy
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install requests
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pillow
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install scipy
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install matplotlib
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install numpy
 
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pandas
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install lxml
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pgzero
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygame
+
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install flask
+
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install pytest
+
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install colorama
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install birdseye
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install beautifulsoup4
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install openpyxl
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install xlrd
+
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygal
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install easygui
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pysimplegui
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pykkar
+
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pandas
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install lxml
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install openpyxl
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install xlrd
+
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip install vpython
+#$PYTHON_CURRENT/bin/python3.7 -s -m pip uninstall notebook
 
 find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
 
 # create dmg #####################################################################
-PLUS_FILENAME=dist/thonny-plus-${VERSION}.dmg
+PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 rm -f $PLUS_FILENAME
-hdiutil create -srcfolder build -volname "Thonny Plus $VERSION" $PLUS_FILENAME
+hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" $PLUS_FILENAME
 hdiutil internet-enable -yes $PLUS_FILENAME
 
 # sign dmg ######################
