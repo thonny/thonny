@@ -2,6 +2,11 @@
 Version history
 ===============
 
+3.2.0 (2019-08-12)
+=====================
+* FIXED #849: Uploading single file to MicroPython doesn't work
+* UPDATE: Updated translations
+
 3.2.0rc1 (2019-08-09)
 =====================
 * NEW: Several new commands for Files view (New directory, Move to Trash, Delete, Upload (to MicroPython device), Download (from MicroPython device), ...)
