@@ -1650,7 +1650,11 @@ def linux_dirname_basename(path):
         return "", path
 
     path = path.rstrip("/")
-    return path.rsplit("/", maxsplit=1)
+    dir_, file_ = path.rsplit("/", maxsplit=1)
+    if dir_ == "":
+        dir_ = "/"
+
+    return dir_, file_
 
 
 def to_remote_path(path):
