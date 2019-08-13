@@ -3,6 +3,7 @@ from threading import Thread
 from tkinter import messagebox
 
 from thonny import get_workbench, get_runner
+import logging
 
 _server_started = False
 
@@ -15,11 +16,13 @@ def _start_debug_enabled():
 
 
 def start_server():
-    from birdseye import server
-
-    server.app.run(
-        port=get_workbench().get_option("run.birdseye_port"), debug=False, use_reloader=False
-    )
+    try:
+        from birdseye import server
+        server.app.run(
+            port=get_workbench().get_option("run.birdseye_port"), debug=False, use_reloader=False
+        )
+    except Exception:
+        logging.getLogger("thonny").exception("Problem running Birdseye server")
 
 
 def debug_with_birdseye():
