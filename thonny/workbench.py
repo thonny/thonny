@@ -2,9 +2,10 @@
 
 import ast
 import collections
+from getpass import getuser
 import importlib
 import logging
-import os.path
+import os
 import pkgutil
 import platform
 import queue
@@ -32,6 +33,8 @@ from typing import (
     cast,
 )  # pylint: disable=unused-import
 from warnings import warn
+
+from xdg import XDG_RUNTIME_DIR
 
 import thonny
 from thonny import (
@@ -68,7 +71,22 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
 )
 
-THONNY_PORT = 4957
+def get_socket_path():
+    base = XDG_RUNTIME_DIR or os.environ.get("TMPDIR", None) or  os.environ.get("appdata", None) or "/tmp"
+    path = os.path.join(base, "thonny-%s" % getuser())
+
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+
+    if not os.name == 'nt':
+        os.chmod(path, 0o700)
+
+    return os.path.join(path, "ipc.sock")
+
+
+THONNY_SOCK = get_socket_path()
 SERVER_SUCCESS = "OK"
 SINGLE_INSTANCE_DEFAULT = True
 SIMPLE_MODE_VIEWS = ["ShellView"]

@@ -214,14 +214,26 @@ def _should_delegate():
 
 
 def _try_delegate_to_existing_instance(args):
+    import errno
     import socket
     from thonny import workbench
 
     try:
         # Try to create server socket.
         # This is fastest way to find out if Thonny is already running
-        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serversocket.bind(("localhost", workbench.THONNY_PORT))
+        if os.path.exists(workbench.THONNY_SOCK):
+            # Try to connect to detect stale socket
+            clientsocket = socket.socket(socket.AF_UNIX)
+            try:
+                clientsocket.connect(workbench.THONNY_SOCK)
+                clientsocket.close()
+            except socket.error as err:
+                if err.errno == errno.ECONNREFUSED:
+                    os.unlink(workbench.THONNY_SOCK)
+                else:
+                    raise err
+        serversocket = socket.socket(socket.AF_UNIX)
+        serversocket.bind(workbench.THONNY_SOCK)
         serversocket.listen(10)
         # we were able to create server socket (ie. Thonny was not running)
         # Let's use the socket in Thonny so that requests coming while
@@ -246,7 +258,8 @@ def _delegate_to_existing_instance(args):
     from thonny import workbench
 
     data = repr(args).encode(encoding="utf_8")
-    sock = socket.create_connection(("localhost", workbench.THONNY_PORT))
+    sock = socket.socket(socket.AF_UNIX)
+    sock.connect(workbench.THONNY_SOCK)
     sock.sendall(data)
     sock.shutdown(socket.SHUT_WR)
     response = bytes([])

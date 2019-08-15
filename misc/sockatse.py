@@ -1,16 +1,33 @@
+from getpass import getuser
+import os
 import socket
 from time import sleep
 
-port = 4957
+from xdg import XDG_RUNTIME_DIR
+
+def get_socket_path():
+    base = XDG_RUNTIME_DIR or os.environ.get("TMPDIR", None) or  os.environ.get("appdata", None) or "/tmp"
+    path = os.path.join(base, "thonny-%s" % getuser())
+
+    try:
+        os.mkdir(path)
+    except FileExistsError:
+        pass
+
+    if not os.name == 'nt':
+        os.chmod(path, 0o700)
+
+    return os.path.join(path, "ipc.sock")
 
 
 def become_client():
-    s = socket.create_connection(("localhost", port), 0.1)
+    s = socket.socket(AF_UNIX)
+    s.connect(get_socket_path(), 0.1)
 
 
 def become_server():
-    serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serversocket.bind(("localhost", port))
+    serversocket = socket.socket(socket.AF_UNIX)
+    serversocket.bind(get_socket_path())
     serversocket.listen(5)
     while True:
         (clientsocket, address) = serversocket.accept()
