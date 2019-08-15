@@ -3,6 +3,7 @@ import sys
 import platform
 from typing import TYPE_CHECKING, cast, Optional
 
+from xdg import XDG_CONFIG_HOME
 
 def _compute_thonny_user_dir():
     if os.environ.get("THONNY_USER_DIR", ""):
@@ -38,11 +39,7 @@ def _compute_thonny_user_dir():
     elif platform.system() == "Darwin":
         return os.path.expanduser("~/Library/Thonny")
     else:
-        # https://specifications.freedesktop.org/basedir-spec/latest/ar01s02.html
-        data_home = os.environ.get(
-            "XDG_CONFIG_HOME", os.path.expanduser(os.path.join("~", ".config"))
-        )
-        return os.path.join(data_home, "Thonny")
+        return os.path.join(XDG_CONFIG_HOME, "Thonny")
 
 
 def is_portable():

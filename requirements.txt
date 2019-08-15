@@ -7,3 +7,4 @@ docutils>=0.13.1
 mypy>=0.470
 asttokens>=1.1.10
 Send2Trash>=1.4.2
+xdg>=4.0
