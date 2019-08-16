@@ -35,17 +35,22 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Alex Hall
 * Anatoly Techtonik
 * André Roberge
+* Antonio Carlos
 * Austin Bart
 * badukaire
 * cefn
+* Celso Isayah Dias
 * Chad Purdy
 * cspaier
 * cubimon
+* Dominic Twyman
 * Emanuel Angelo
 * Filip Schouwenaars
 * Fizban
 * fstengel
 * Georges Khaznadar
+* Ivanhercaz
+* Ivan.schamann
 * Илья Кругликов
 * Jens Diemer
 * Juan Falgueras
@@ -55,12 +60,14 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Phil Duby
 * Rene Lehtma
 * segalion
+* Simon Gijsen
 * Simon Long
 * Sven Duzont
 * Taavi Ilp
 * Toomas Mölder
+* Tusamten
 * Xin Rong
 * 涂紳騰 (Shen-Teng Tu)
-* 張文宏 (Wen-Hung , Chang)
+* 張文宏 (Wen-Hung, Chang)
 
 Please let us know if we have forgotten to add your name to this list! Also, let us know if you want to remove your name.
