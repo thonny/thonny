@@ -2,16 +2,17 @@ BASE_LANGUAGE_CODE = "en_US"
 BASE_LANGUAGE_NAME = "English"
 
 LANGUAGES_DICT = {
-    "de_DE": "Deutsch [BETA]",
+    "de_DE": "Deutsch [ALPHA]",
     "nl_NL": "Nederlands [BETA]",
     "et_EE": "Eesti",
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
-    "es_ES": "Español [BETA]",
-    "fr_FR": "Français [BETA]",
+    "es_ES": "Español [ALPHA]",
+    "fr_FR": "Français [ALPHA]",
     "pt_BR": "Português [BETA]",
+    "pt_BR": "Português (BR) [ALPHA]",
     "ru_RU": "Русский [BETA]",
     "zh_TW": "繁體中文-TW [BETA]",
-    "ja_JP": "日本語  [BETA]",
+    "ja_JP": "日本語  [ALPHA]",
     "zh_CN": "简体中文  [BETA]",
 }
 
