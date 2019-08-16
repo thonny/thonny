@@ -79,11 +79,11 @@ class BaseFileBrowser(ttk.Frame):
         self.hard_drive_icon = wb.get_image("hard-drive")
 
         self.tree.column("#0", width=200, anchor=tk.W)
-        self.tree.heading("#0", text="Name", anchor=tk.W)
+        self.tree.heading("#0", text=_("Name"), anchor=tk.W)
         self.tree.column("time", width=60, anchor=tk.W)
-        self.tree.heading("time", text="Time", anchor=tk.W)
+        self.tree.heading("time", text=_("Time"), anchor=tk.W)
         self.tree.column("size", width=40, anchor=tk.E)
-        self.tree.heading("size", text="Size (bytes)", anchor=tk.E)
+        self.tree.heading("size", text=_("Size (bytes)"), anchor=tk.E)
         self.tree.column("kind", width=30, anchor=tk.W)
         #         self.tree.heading("kind", text="Kind")
         #         self.tree.column("path", width=300, anchor=tk.W)
@@ -301,16 +301,16 @@ class BaseFileBrowser(ttk.Frame):
         used_str = "?" if info["used"] is None else sizeof_fmt(info["used"])
         free_str = "?" if info["free"] is None else sizeof_fmt(info["free"])
         text = (
-            "Storage space on this drive or filesystem:\n\n"
-            "    total: %s\n" % total_str
-            + "    used: %s\n" % used_str
-            + "    free: %s\n" % free_str
+            _("Storage space on this drive or filesystem:\n\n")
+            + _("    total: %s\n") % total_str
+            + _("    used: %s\n") % used_str
+            + _("    free: %s\n") % free_str
         )
 
         if info.get("comment"):
             text += "\n" + info["comment"]
 
-        messagebox.showinfo("Storage info", text)
+        messagebox.showinfo(_("Storage info"), text)
 
     def cache_dirs_child_data(self, data):
         data = deepcopy(data)
@@ -714,7 +714,7 @@ class BaseFileBrowser(ttk.Frame):
                 parent = os.path.dirname(parent)
 
         name = simpledialog.askstring(
-            "New directory", "Enter name for new directory under\n%s" % parent
+            "New directory", _("Enter name for new directory under\n%s") % parent
         )
         if not name or not name.strip():
             return
@@ -735,7 +735,7 @@ class BaseFileBrowser(ttk.Frame):
         raise NotImplementedError()
 
     def notify_missing_selection(self):
-        messagebox.showerror("Nothing selected", "Select an item and try again!")
+        messagebox.showerror(_("Nothing selected"), _("Select an item and try again!"))
 
 
 class BaseLocalFileBrowser(BaseFileBrowser):
@@ -940,10 +940,10 @@ class BackendFileDialog(CommonDialog):
 
         self.kind = kind
         if kind == "open":
-            self.title("Open from " + get_runner().get_node_label())
+            self.title(_("Open from ") + get_runner().get_node_label())
         else:
             assert kind == "save"
-            self.title("Save to " + get_runner().get_node_label())
+            self.title(_("Save to ") + get_runner().get_node_label())
 
         background = ttk.Frame(self)
         background.grid(row=0, column=0, sticky="nsew")
@@ -955,7 +955,7 @@ class BackendFileDialog(CommonDialog):
         self.browser.configure(borderwidth=1, relief="groove")
         self.browser.tree.configure(selectmode="browse")
 
-        self.name_label = ttk.Label(background, text="File name:")
+        self.name_label = ttk.Label(background, text=_("File name:"))
         self.name_label.grid(row=1, column=0, pady=(0, 20), padx=20, sticky="w")
 
         self.name_var = create_string_var("")
@@ -965,10 +965,10 @@ class BackendFileDialog(CommonDialog):
         self.name_entry.grid(row=1, column=1, pady=(0, 20), padx=(0, 20), sticky="we")
         self.name_entry.bind("<KeyRelease>", self.on_name_edit, True)
 
-        self.ok_button = ttk.Button(background, text="OK", command=self.on_ok)
+        self.ok_button = ttk.Button(background, text=_("OK"), command=self.on_ok)
         self.ok_button.grid(row=1, column=2, pady=(0, 20), padx=(0, 20), sticky="e")
 
-        self.cancel_button = ttk.Button(background, text="Cancel", command=self.on_cancel)
+        self.cancel_button = ttk.Button(background, text=_("Cancel"), command=self.on_cancel)
         self.cancel_button.grid(row=1, column=3, pady=(0, 20), padx=(0, 20), sticky="e")
 
         background.rowconfigure(0, weight=1)

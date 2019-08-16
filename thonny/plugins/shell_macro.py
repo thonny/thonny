@@ -10,7 +10,7 @@ class ShellMacroDialog(CommonDialog):
     def __init__(self, master):
         super().__init__(master)
 
-        self.title("Configure shell macro")
+        self.title(_("Configure shell macro"))
         if misc_utils.running_on_mac_os():
             self.configure(background="systemSheetBackground")
         self.transient(master)

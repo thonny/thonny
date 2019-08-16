@@ -217,7 +217,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             driver_url_label = create_url_label(self, driver_url)
             driver_url_label.grid(row=1, column=0, sticky="nw")
 
-        port_label = ttk.Label(self, text="Port or WebREPL" if self.allow_webrepl else _("Port"))
+        port_label = ttk.Label(self, text=_("Port or WebREPL") if self.allow_webrepl else _("Port"))
         port_label.grid(row=3, column=0, sticky="nw", pady=(10, 0))
 
         self._ports_by_desc = {
@@ -272,7 +272,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         self._webrepl_frame = ttk.Frame(self)
 
         self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
-        url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
+        url_label = ttk.Label(self._webrepl_frame, text=_("URL (eg. %s)") % DEFAULT_WEBREPL_URL)
         url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
         url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=24)
         url_entry.grid(row=1, column=0, sticky="nw")
@@ -281,7 +281,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             get_workbench().get_option(self.backend_name + ".webrepl_password")
         )
         pw_label = ttk.Label(
-            self._webrepl_frame, text="Password (the one specified with `import webrepl_setup`)"
+            self._webrepl_frame, text=_("Password (the one specified with `import webrepl_setup`)")
         )
         pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
         pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=9)
@@ -420,9 +420,9 @@ def load_plugin():
 
     def explain_deprecation():
         messagebox.showinfo(
-            "Moved commands",
+            _("Moved commands"),
             dedent(
-                """
+                _("""
             MicroPython commands have been moved or replaced:
             
             * "Select device"
@@ -440,14 +440,14 @@ def load_plugin():
                     * Moved into "Run" menu as "Send EOF / Soft reboot"
             " "Close serial connection"
                     * Moved into "Run" menu as "Disconnect"
-        """
+        """)
             ),
         )
 
     get_workbench().add_command(
         "devicedeprecation",
         "tempdevice",
-        "Where are all the commands?",
+        _("Where are all the commands?"),
         explain_deprecation,
         group=1,
     )

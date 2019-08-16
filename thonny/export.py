@@ -9,7 +9,7 @@ class ExportDialog(CommonDialog):
     def __init__(self, master):
         super().__init__(master=master)
 
-        self.title("Export file")
+        self.title(_("Export file"))
         self.protocol("WM_DELETE_WINDOW", self.on_cancel)
 
         mainframe = ttk.Frame(self)
@@ -20,10 +20,10 @@ class ExportDialog(CommonDialog):
         self.notebook = ttk.Notebook(mainframe)
         self.notebook.grid(row=3, column=0, columnspan=3, padx=20, pady=(20, 0), sticky="nsew")
 
-        self.ok_button = ttk.Button(mainframe, text="OK", command=self.on_ok)
+        self.ok_button = ttk.Button(mainframe, text=_("OK"), command=self.on_ok)
         self.ok_button.grid(row=4, column=1, sticky="e", padx=(20, 10), pady=(10, 20))
 
-        self.cancel_button = ttk.Button(mainframe, text="Cancel", command=self.on_cancel)
+        self.cancel_button = ttk.Button(mainframe, text=_("Cancel"), command=self.on_cancel)
         self.cancel_button.grid(row=4, column=2, sticky="e", padx=(0, 20), pady=(10, 20))
 
         mainframe.columnconfigure(0, weight=1)

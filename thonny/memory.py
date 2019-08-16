@@ -53,9 +53,9 @@ class VariablesFrame(MemoryFrame):
         self.tree.column("id", width=450, anchor=tk.W, stretch=True)
         self.tree.column("value", width=450, anchor=tk.W, stretch=True)
 
-        self.tree.heading("name", text="Name", anchor=tk.W)
-        self.tree.heading("id", text="Value ID", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("name", text=_("Name"), anchor=tk.W)
+        self.tree.heading("id", text=_("Value ID"), anchor=tk.W)
+        self.tree.heading("value", text=_("Value"), anchor=tk.W)
 
         get_workbench().bind("ShowView", self._update_memory_model, True)
         get_workbench().bind("HideView", self._update_memory_model, True)

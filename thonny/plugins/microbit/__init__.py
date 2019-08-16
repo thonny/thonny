@@ -173,7 +173,7 @@ class FlashingDialog(CommonDialog):
             self._hex_size = candidates[0]["size"]
 
     def _close_with_error(self, text):
-        messagebox.showerror("Error", text)
+        messagebox.showerror(_("Error"), text)
         self._close()
 
     def _update_state(self):

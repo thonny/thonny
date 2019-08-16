@@ -542,31 +542,31 @@ class FeedbackDialog(CommonDialog):
         self.main_file_path = main_file_path
         self.snapshots = self._select_unsent_snapshots(all_snapshots)
 
-        self.title("Send feedback for Assistant")
+        self.title(_("Send feedback for Assistant"))
 
         padx = 15
 
         intro_label = ttk.Label(
             main_frame,
-            text="Below are the messages Assistant gave you in response to "
+            text=_("Below are the messages Assistant gave you in response to ")
             + (
-                "using the shell"
+                _("using the shell")
                 if self._happened_in_shell()
-                else "testing '" + os.path.basename(main_file_path) + "'"
+                else _("testing '") + os.path.basename(main_file_path) + "'"
             )
-            + " since "
+            + _(" since ")
             + self._get_since_str()
             + ".\n\n"
-            + "In order to improve this feature, Thonny developers would love to know how "
-            + "useful or confusing these messages were. We will only collect version "
-            + "information and the data you enter or approve on this form.",
+            + _("In order to improve this feature, Thonny developers would love to know how ")
+            + _("useful or confusing these messages were. We will only collect version ")
+            + _("information and the data you enter or approve on this form."),
             wraplength=550,
         )
         intro_label.grid(row=1, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 15))
 
         tree_label = ttk.Label(
             main_frame,
-            text="Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!",
+            text=_("Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!"),
         )
         tree_label.grid(row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         tree_frame = ui_utils.TreeFrame(
@@ -583,9 +583,9 @@ class FeedbackDialog(CommonDialog):
         self.tree.column("confusing", width=30, anchor=tk.CENTER, stretch=False)
         self.tree.column("title", width=350, anchor=tk.W, stretch=True)
 
-        self.tree.heading("helpful", text="H", anchor=tk.CENTER)
-        self.tree.heading("confusing", text="C", anchor=tk.CENTER)
-        self.tree.heading("title", text="Group / Message", anchor=tk.W)
+        self.tree.heading("helpful", text=_("H"), anchor=tk.CENTER)
+        self.tree.heading("confusing", text=_("C"), anchor=tk.CENTER)
+        self.tree.heading("title", text=_("Group / Message"), anchor=tk.W)
         self.tree["show"] = ("headings",)
         self.tree.bind("<1>", self._on_tree_click, True)
         main_font = tk.font.nametofont("TkDefaultFont")
@@ -599,7 +599,7 @@ class FeedbackDialog(CommonDialog):
             variable=self.include_thonny_id_var,
             onvalue=1,
             offvalue=0,
-            text="Include Thonny's installation time (allows us to group your submissions)",
+            text=_("Include Thonny's installation time (allows us to group your submissions)"),
         )
         include_thonny_id_check.grid(
             row=4, column=0, columnspan=3, sticky="nw", padx=padx, pady=(5, 0)
@@ -611,13 +611,13 @@ class FeedbackDialog(CommonDialog):
             variable=self.include_snapshots_var,
             onvalue=1,
             offvalue=0,
-            text="Include snapshots of the code and Assistant responses at each run",
+            text=_("Include snapshots of the code and Assistant responses at each run"),
         )
         include_snapshots_check.grid(
             row=5, column=0, columnspan=3, sticky="nw", padx=padx, pady=(0, 0)
         )
 
-        comments_label = ttk.Label(main_frame, text="Any comments? Enhancement ideas?")
+        comments_label = ttk.Label(main_frame, text=_("Any comments? Enhancement ideas?"))
         comments_label.grid(row=6, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         self.comments_text_frame = tktextext.TextFrame(
             main_frame,
@@ -639,7 +639,7 @@ class FeedbackDialog(CommonDialog):
         url_font.configure(underline=1, size=url_font.cget("size"))
         preview_link = ttk.Label(
             main_frame,
-            text="(Preview the data to be sent)",
+            text=_("(Preview the data to be sent)"),
             style="Url.TLabel",
             cursor="hand2",
             font=url_font,
@@ -647,10 +647,10 @@ class FeedbackDialog(CommonDialog):
         preview_link.bind("<1>", self._preview_submission_data, True)
         preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
 
-        submit_button = ttk.Button(main_frame, text="Submit", width=10, command=self._submit_data)
+        submit_button = ttk.Button(main_frame, text=_("Submit"), width=10, command=self._submit_data)
         submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
 
-        cancel_button = ttk.Button(main_frame, text="Cancel", width=7, command=self._close)
+        cancel_button = ttk.Button(main_frame, text=_("Cancel"), width=7, command=self._close)
         cancel_button.grid(row=8, column=1, sticky="ne", padx=(10, 15), pady=15)
 
         self.protocol("WM_DELETE_WINDOW", self._close)

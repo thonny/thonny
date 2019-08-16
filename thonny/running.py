@@ -1439,7 +1439,7 @@ class BlockingDialog(CommonDialogEx):
             self.destroy()
 
         if event.get("error") and not event.get("interrupted"):
-            messagebox.showerror("Error", event.get("error"))
+            messagebox.showerror(_("Error"), event.get("error"))
 
     def _on_progress(self, event):
         if event.get("command_id") != self._cmd_id:
@@ -1453,7 +1453,7 @@ class BlockingDialog(CommonDialogEx):
 
     def _send_interrupt(self):
         self._sent_interrupt = True
-        self._description_label.configure(text="Cancelling...")
+        self._description_label.configure(text=_("Cancelling..."))
         self._cancel_button.configure(text=_("Close"))
         get_runner()._cmd_interrupt()
 

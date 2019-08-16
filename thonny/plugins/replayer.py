@@ -36,7 +36,7 @@ class ReplayWindow(CommonDialog):
         self.main_pw.add(self.right_frame, width=200)
         self.center_pw.add(self.editor_notebook, height=700)
         self.center_pw.add(shell_book, height=300)
-        shell_book.add(self.shell, text="Shell")
+        shell_book.add(self.shell, text=_("Shell"))
         self.right_pw.grid(sticky=tk.NSEW)
         self.control_frame.grid(sticky=tk.NSEW)
         self.right_pw.add(self.log_frame, height=600)
@@ -71,7 +71,7 @@ class ControlFrame(ttk.Frame):
     def __init__(self, master, **kw):
         ttk.Frame.__init__(self, master=master, **kw)
 
-        self.toggle_button = ttk.Button(self, text="Play")
+        self.toggle_button = ttk.Button(self, text=_("Play"))
         self.speed_scale = ttk.Scale(self, from_=1, to=100, orient=tk.HORIZONTAL)
 
         self.toggle_button.grid(row=0, column=0, sticky=tk.NSEW, pady=(10, 0), padx=(0, 5))
@@ -84,8 +84,8 @@ class LogFrame(ui_utils.TreeFrame):
     def __init__(self, master, editor_book, shell, details_frame):
         ui_utils.TreeFrame.__init__(self, master, ("desc", "pause"))
 
-        self.tree.heading("desc", text="Event", anchor=tk.W)
-        self.tree.heading("pause", text="Pause (sec)", anchor=tk.W)
+        self.tree.heading("desc", text=_("Event"), anchor=tk.W)
+        self.tree.heading("pause", text=_("Pause (sec)"), anchor=tk.W)
 
         self.configure(border=1, relief=tk.GROOVE)
 
@@ -170,8 +170,8 @@ class LogFrame(ui_utils.TreeFrame):
 class EventDetailsFrame(ui_utils.TreeFrame):
     def __init__(self, master):
         ui_utils.TreeFrame.__init__(self, master, columns=("attribute", "value"))
-        self.tree.heading("attribute", text="Attribute", anchor=tk.W)
-        self.tree.heading("value", text="Value", anchor=tk.W)
+        self.tree.heading("attribute", text=_("Attribute"), anchor=tk.W)
+        self.tree.heading("value", text=_("Value"), anchor=tk.W)
         self.configure(border=1, relief=tk.GROOVE)
 
     def load_event(self, event):
@@ -283,7 +283,7 @@ class ReplayerEditorNotebook(ttk.Notebook):
     def get_editor_by_text_widget_id(self, text_widget_id):
         if text_widget_id not in self._editors_by_text_widget_id:
             editor = ReplayerEditorProper(self)
-            self.add(editor, text="<untitled>")
+            self.add(editor, text=_("<untitled>"))
             self._editors_by_text_widget_id[text_widget_id] = editor
 
         return self._editors_by_text_widget_id[text_widget_id]

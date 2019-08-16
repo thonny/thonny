@@ -34,8 +34,8 @@ class AstView(ui_utils.TreeFrame):
         self.tree.column("end_lineno", width=30, anchor=tk.W)
         self.tree.column("end_col_offset", width=30, anchor=tk.W)
 
-        self.tree.heading("#0", text="Node", anchor=tk.W)
-        self.tree.heading("range", text="Code range", anchor=tk.W)
+        self.tree.heading("#0", text=_("Node"), anchor=tk.W)
+        self.tree.heading("range", text=_("Code range"), anchor=tk.W)
 
         self.tree["show"] = ("headings", "tree")
         self._current_source = None

@@ -1434,7 +1434,7 @@ class SqueezedTextDialog(CommonDialog):
         )
         expand_button.grid(row=0, column=2, sticky="e", padx=padding)
 
-        close_button = ttk.Button(button_frame, text="Close", command=self._on_close)
+        close_button = ttk.Button(button_frame, text=_("Close"), command=self._on_close)
         close_button.grid(row=0, column=3, sticky="e")
 
         self.bind("<Escape>", self._on_close, True)

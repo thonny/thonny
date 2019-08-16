@@ -1582,10 +1582,10 @@ class ChoiceDialog(CommonDialog):
             rb.grid(row=row, column=0, columnspan=2, sticky="w", padx=20)
             row += 1
 
-        ok_button = ttk.Button(self, text="OK", command=self._ok, default="active")
+        ok_button = ttk.Button(self, text=_("OK"), command=self._ok, default="active")
         ok_button.grid(row=row, column=0, sticky="e", pady=20)
 
-        cancel_button = ttk.Button(self, text="Cancel", command=self._cancel)
+        cancel_button = ttk.Button(self, text=_("Cancel"), command=self._cancel)
         cancel_button.grid(row=row, column=1, sticky="e", padx=20, pady=20)
 
         self.bind("<Escape>", self._cancel, True)
