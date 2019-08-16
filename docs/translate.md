@@ -4,6 +4,8 @@ Thonny's internationalisation is a collaborative effort kindly hosted by [POEdit
 
 Thonny's help pages are not translated in POEditor but in the main repository. See below for details.
 
+**NB! Don't mark new strings for translation without consulting core developers first! Some strings are left unmarked on purpose (to reduce the amount of translation required or because they may change).**
+
 ## Short story for translators
 [Thonny project in POEditor](https://poeditor.com/join/project/Gh188fdYH6) is the main source for translations -- it is recommended you use this environment for translation. If you wish to use another tool then don't forget to import your updates to POEditor as well.
 
@@ -25,6 +27,9 @@ The languages files are inside the `thonny/locale` folder: `thonny/locale/<LANGU
 There, you will find the `pot`, `po` and `mo` files.
 
 ### Mark strings
+
+**NB! Don't mark new strings for translation without consulting core developers first! Some strings are left unmarked on purpose (to reduce the amount of translation required or because they may change).**
+
 Mark the string to be translated as `_(string_to_be_translated)`.
 
 The shortcut `_()` for `gettext.gettext()` is available everywhere in the project since gettext is installed in `__main__.py` (see [gettext docs](https://docs.python.org/3/library/gettext.html#localizing-your-application)).
