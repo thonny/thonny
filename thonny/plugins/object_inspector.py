@@ -74,9 +74,9 @@ class ObjectInspector(ttk.Frame):
                     page.grid(row=1, column=0, sticky="nsew", padx=0)
                     tab.configure(style="Active.ViewTab.TLabel")
                     if self.active_page == self.attributes_page and (
-                        self.object_info is None or
-                        "attributes" in self.object_info and
-                        self.object_info["attributes"] == {}
+                        self.object_info is None
+                        or "attributes" in self.object_info
+                        and self.object_info["attributes"] == {}
                     ):
                         self.request_object_info()
 

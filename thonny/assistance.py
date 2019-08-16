@@ -566,7 +566,9 @@ class FeedbackDialog(CommonDialog):
 
         tree_label = ttk.Label(
             main_frame,
-            text=_("Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!"),
+            text=_(
+                "Which messages were helpful (H) or confusing (C)?       Click on  [  ]  to mark!"
+            ),
         )
         tree_label.grid(row=2, column=0, columnspan=3, sticky="nw", padx=padx, pady=(15, 0))
         tree_frame = ui_utils.TreeFrame(
@@ -647,7 +649,9 @@ class FeedbackDialog(CommonDialog):
         preview_link.bind("<1>", self._preview_submission_data, True)
         preview_link.grid(row=8, column=0, sticky="nw", padx=15, pady=15)
 
-        submit_button = ttk.Button(main_frame, text=_("Submit"), width=10, command=self._submit_data)
+        submit_button = ttk.Button(
+            main_frame, text=_("Submit"), width=10, command=self._submit_data
+        )
         submit_button.grid(row=8, column=0, sticky="ne", padx=0, pady=15)
 
         cancel_button = ttk.Button(main_frame, text=_("Cancel"), width=7, command=self._close)

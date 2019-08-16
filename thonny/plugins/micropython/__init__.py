@@ -422,7 +422,8 @@ def load_plugin():
         messagebox.showinfo(
             _("Moved commands"),
             dedent(
-                _("""
+                _(
+                    """
             MicroPython commands have been moved or replaced:
             
             * "Select device"
@@ -440,7 +441,8 @@ def load_plugin():
                     * Moved into "Run" menu as "Send EOF / Soft reboot"
             " "Close serial connection"
                     * Moved into "Run" menu as "Disconnect"
-        """)
+        """
+                )
             ),
         )
 
