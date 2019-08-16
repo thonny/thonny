@@ -41,6 +41,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Chad Purdy
 * cspaier
 * cubimon
+* Emanuel Angelo
 * Filip Schouwenaars
 * Fizban
 * fstengel
@@ -60,5 +61,6 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Toomas Mölder
 * Xin Rong
 * 涂紳騰 (Shen-Teng Tu)
+* 張文宏 (Wen-Hung , Chang)
 
 Please let us know if we have forgotten to add your name to this list! Also, let us know if you want to remove your name.
