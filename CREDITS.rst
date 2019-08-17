@@ -56,7 +56,8 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Juan Falgueras
 * Kauri Raba
 * Matt Iversen
-* Miro Hrončok 
+* Miro Hrončok
+* Peter Marshall
 * Phil Duby
 * Rene Lehtma
 * segalion
