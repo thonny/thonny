@@ -8,7 +8,7 @@ LANGUAGES_DICT = {
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
     "es_ES": "Español [ALPHA]",
     "fr_FR": "Français [ALPHA]",
-    "pt_BR": "Português [BETA]",
+    "pt_PT": "Português (PT) [BETA]",
     "pt_BR": "Português (BR) [ALPHA]",
     "ru_RU": "Русский [BETA]",
     "zh_TW": "繁體中文-TW [BETA]",
