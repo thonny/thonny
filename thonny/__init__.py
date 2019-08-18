@@ -245,7 +245,14 @@ def _delegate_to_existing_instance(args):
     import socket
     from thonny import workbench
 
-    data = repr(args).encode(encoding="utf_8")
+    transformed_args = []
+    for arg in args:
+        if not arg.startswith("-"):
+            arg = os.path.abspath(arg)
+
+        transformed_args.append(arg)
+
+    data = repr(transformed_args).encode(encoding="utf_8")
     sock = socket.create_connection(("localhost", workbench.THONNY_PORT))
     sock.sendall(data)
     sock.shutdown(socket.SHUT_WR)
