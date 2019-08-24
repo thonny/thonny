@@ -9,8 +9,6 @@ import sys
 import time
 from typing import Optional, Sequence, Tuple
 
-from thonny import get_workbench
-
 
 def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
     # Deleting the folder on Windows is not so easy task
@@ -134,8 +132,10 @@ def find_volume_by_name(
         from tkinter.messagebox import askyesno
         from thonny.ui_utils import askdirectory
 
-        if askyesno(_("Can't find suitable disk"), msg, parent=get_workbench()):
-            path = askdirectory(master=get_workbench())
+        import tkinter as tk
+
+        if askyesno(_("Can't find suitable disk"), msg, parent=tk._default_root):
+            path = askdirectory(master=tk._default_root)
             if path:
                 return path
 
