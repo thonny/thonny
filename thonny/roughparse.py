@@ -5,7 +5,7 @@ Mostly copied/adapted from idlelib.HyperParser and idlelib.PyParse
 
 import re
 import string
-from collections import Mapping
+from collections.abc import Mapping
 from keyword import iskeyword
 from typing import Dict  # @UnusedImport
 
