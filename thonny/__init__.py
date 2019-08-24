@@ -3,6 +3,8 @@ import sys
 import platform
 from typing import TYPE_CHECKING, cast, Optional
 
+SINGLE_INSTANCE_DEFAULT = True
+
 
 def _compute_thonny_user_dir():
     if os.environ.get("THONNY_USER_DIR", ""):
@@ -84,10 +86,11 @@ def get_version():
 
 THONNY_USER_DIR = _compute_thonny_user_dir()
 CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
+LOCK_FILE_NAME = os.path.join(THONNY_USER_DIR, "single_instance.lock")
 
 
 def _check_welcome():
-    from thonny import workbench, misc_utils
+    from thonny import misc_utils
 
     if not os.path.exists(CONFIGURATION_FILE_NAME) and not misc_utils.running_on_rpi():
         from thonny.first_run import FirstRunWindow
@@ -116,7 +119,6 @@ def launch():
     gettext.install("thonny", "locale")
 
     _prepare_thonny_user_dir()
-
     try:
         runpy.run_module("thonny.customize", run_name="__main__")
     except ImportError:
@@ -125,37 +127,31 @@ def launch():
     if not _check_welcome():
         return
 
+    if _should_delegate():
+        delegation_result = _try_delegate_to_existing_instance(sys.argv[1:])
+        if delegation_result is True:
+            # we're done
+            print("Delegated to an existing Thonny instance. Exiting now.")
+            return 0
+
+    # Did not or could not delegate
+
     try:
         from thonny import workbench
 
-        if _should_delegate():
-            # First check if there is existing Thonny instance to handle the request
-            delegation_result = _try_delegate_to_existing_instance(sys.argv[1:])
-            if delegation_result == True:  # pylint: disable=singleton-comparison
-                # we're done
-                print("Delegated to an existing Thonny instance. Exiting now.")
-                return 0
-
-            if hasattr(delegation_result, "accept"):
-                # we have server socket to put in use
-                server_socket = delegation_result
-            else:
-                server_socket = None
-
-            bench = workbench.Workbench(server_socket)
-        else:
-            bench = workbench.Workbench()
-
+        bench = workbench.Workbench()
         try:
             bench.mainloop()
         except SystemExit:
             bench.destroy()
         return 0
+
     except SystemExit as e:
         from tkinter import messagebox
 
         messagebox.showerror("System exit", str(e), parent=get_workbench())
         return -1
+
     except Exception:
         from logging import exception
 
@@ -203,45 +199,34 @@ def _prepare_thonny_user_dir():
 
 
 def _should_delegate():
-    from thonny import workbench
+    if not os.path.exists(LOCK_FILE_NAME):
+        # no previous instance
+        return
+    # maybe the process was killed and the lock file is abandoned?
+    try:
+        os.remove(LOCK_FILE_NAME)
+        # We were able to delete it, ie. it was abandoned
+        return
+    except OSError:
+        pass
+
     from thonny.config import try_load_configuration
 
     configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
-    # Setting the default
-    configuration_manager.set_default("general.single_instance", workbench.SINGLE_INSTANCE_DEFAULT)
-    # getting the value (may use the default or return saved value)
+    configuration_manager.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
     return configuration_manager.get_option("general.single_instance")
 
 
 def _try_delegate_to_existing_instance(args):
-    import socket
-    from thonny import workbench
+    assert os.path.exists(LOCK_FILE_NAME)
 
-    try:
-        # Try to create server socket.
-        # This is fastest way to find out if Thonny is already running
-        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serversocket.bind(("localhost", workbench.THONNY_PORT))
-        serversocket.listen(10)
-        # we were able to create server socket (ie. Thonny was not running)
-        # Let's use the socket in Thonny so that requests coming while
-        # UI gets constructed don't get lost.
-        # (Opening several files with Thonny in Windows results in many
-        # Thonny processes opened quickly)
-        return serversocket
-    except OSError:
-        # port was already taken, most likely by previous Thonny instance.
-        # Try to connect and send arguments
-        try:
-            return _delegate_to_existing_instance(args)
-        except Exception:
-            import traceback
+    with open(LOCK_FILE_NAME, "r") as fp:
+        port = int(fp.readline())
 
-            traceback.print_exc()
-            return False
+    return _delegate_to_existing_instance(port, args)
 
 
-def _delegate_to_existing_instance(args):
+def _delegate_to_existing_instance(port, args):
     import socket
     from thonny import workbench
 
@@ -253,7 +238,9 @@ def _delegate_to_existing_instance(args):
         transformed_args.append(arg)
 
     data = repr(transformed_args).encode(encoding="utf_8")
-    sock = socket.create_connection(("localhost", workbench.THONNY_PORT))
+    # using "localhost" instead of "127.0.0.1" can be much slower
+    sock = socket.create_connection(("127.0.0.1", port), timeout=3.0)
+    sock.settimeout(3.0)
     sock.sendall(data)
     sock.shutdown(socket.SHUT_WR)
     response = bytes([])

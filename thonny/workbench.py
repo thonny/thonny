@@ -68,9 +68,7 @@ from thonny.ui_utils import (
     sequence_to_accelerator,
 )
 
-THONNY_PORT = 4957
 SERVER_SUCCESS = "OK"
-SINGLE_INSTANCE_DEFAULT = True
 SIMPLE_MODE_VIEWS = ["ShellView"]
 
 MenuItem = collections.namedtuple("MenuItem", ["group", "position_in_group", "tester"])
@@ -120,13 +118,15 @@ class Workbench(tk.Tk):
 
     """
 
-    def __init__(self, server_socket=None) -> None:
+    def __init__(self) -> None:
         thonny._workbench = self
         self._closing = False
         self._destroyed = False
         self._lost_focus = False
         self._is_portable = is_portable()
         self.initializing = True
+        self._init_server_loop()
+
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
         self._event_handlers = {}  # type: Dict[str, Set[Callable]]
@@ -190,9 +190,6 @@ class Workbench(tk.Tk):
         self._editor_notebook.focus_set()
         self._try_action(self._open_views)
 
-        if server_socket is not None:
-            self._init_server_loop(server_socket)
-
         self.bind_class("CodeViewText", "<<CursorMove>>", self.update_title, True)
         self.bind_class("CodeViewText", "<<Modified>>", self.update_title, True)
         self.bind_class("CodeViewText", "<<TextChange>>", self.update_title, True)
@@ -205,6 +202,7 @@ class Workbench(tk.Tk):
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
         self._make_sanity_checks()
+        self._poll_socket_requests()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
 
     def _make_sanity_checks(self):
@@ -230,7 +228,7 @@ class Workbench(tk.Tk):
         self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE_NAME)
         self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]
 
-        self.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
+        self.set_default("general.single_instance", thonny.SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.ui_mode", "simple" if running_on_rpi() else "regular")
         self.set_default("general.debug_mode", False)
         self.set_default("general.disable_notification_sound", False)
@@ -543,22 +541,46 @@ class Workbench(tk.Tk):
         except Exception:
             self.report_exception("Error when initializing backend")
 
-    def _init_server_loop(self, server_socket) -> None:
+    def _init_server_loop(self) -> None:
         """Socket will listen requests from newer Thonny instances,
         which try to delegate opening files to older instance"""
         self._requests_from_socket = queue.Queue()  # type: queue.Queue[bytes]
+
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(("127.0.0.1", 0))
+        server_socket.listen(10)
+
+        # advertise the port
+        port = server_socket.getsockname()[1]
+        with open(thonny.LOCK_FILE_NAME, "w") as fp:
+            fp.write(str(port) + "\n")
+
+        # open again to aquire the lock
+        self._lock_fp = open(thonny.LOCK_FILE_NAME, "a")
 
         def server_loop():
             while True:
                 logging.debug("Waiting for next client")
                 (client_socket, _) = server_socket.accept()
                 try:
-                    self._handle_socket_request(client_socket)
+                    data = bytes()
+                    while True:
+                        new_data = client_socket.recv(1024)
+                        if len(new_data) > 0:
+                            data += new_data
+                        else:
+                            break
+
+                    self._requests_from_socket.put(data)
+
+                    # respond OK
+                    client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
+                    client_socket.shutdown(socket.SHUT_WR)
+                    logging.debug("AFTER NEW REQUEST %s", client_socket)
                 except Exception:
                     traceback.print_exc()
 
         Thread(target=server_loop, daemon=True).start()
-        self._poll_socket_requests()
 
     def _init_commands(self) -> None:
 
@@ -2012,24 +2034,6 @@ class Workbench(tk.Tk):
             menu.add_separator()
 
         return "end"
-
-    def _handle_socket_request(self, client_socket: socket.socket) -> None:
-        """runs in separate thread"""
-        # read the request
-        data = bytes()
-        while True:
-            new_data = client_socket.recv(1024)
-            if len(new_data) > 0:
-                data += new_data
-            else:
-                break
-
-        self._requests_from_socket.put(data)
-
-        # respond OK
-        client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
-        client_socket.shutdown(socket.SHUT_WR)
-        logging.debug("AFTER NEW REQUEST %s", client_socket)
 
     def _poll_socket_requests(self) -> None:
         """runs in gui thread"""
