@@ -131,7 +131,7 @@ class EventLogger:
         # if uncompressed logs have grown over 10MB,
         # compress these into new zipfile
 
-        log_dir = self._get_log_dir()
+        log_dir = _get_log_dir()
         total_size = 0
         uncompressed_files = []
         for item in os.listdir(log_dir):
