@@ -228,7 +228,7 @@ class Workbench(tk.Tk):
             self.report_exception()
 
     def _init_configuration(self) -> None:
-        self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE_NAME)
+        self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE)
         self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]
 
         self.set_default("general.single_instance", thonny.SINGLE_INSTANCE_DEFAULT)
@@ -550,11 +550,11 @@ class Workbench(tk.Tk):
         self._ipc_requests = queue.Queue()  # type: queue.Queue[bytes]
 
         try:
-            if os.path.exists(thonny.LOCK_FILE_NAME):
+            if os.path.exists(thonny.LOCK_FILE):
                 # Fails if it is locked
-                os.remove(thonny.LOCK_FILE_NAME)
+                os.remove(thonny.LOCK_FILE)
 
-            self._single_instance_lock_fp = open(thonny.LOCK_FILE_NAME, "w")
+            self._single_instance_lock_fp = open(thonny.LOCK_FILE, "w")
         except OSError:
             self._single_instance_lock_fp = None
             # looks like race condition, another instance created the lock first,
@@ -575,10 +575,10 @@ class Workbench(tk.Tk):
         self._single_instance_lock_fp.write(actual_secret + "\n")
         self._single_instance_lock_fp.close()
 
-        os.chmod(thonny.LOCK_FILE_NAME, 0o600)
+        os.chmod(thonny.LOCK_FILE, 0o600)
 
         # open again to lock the file for writing
-        self._single_instance_lock_fp = open(thonny.LOCK_FILE_NAME, "a")
+        self._single_instance_lock_fp = open(thonny.LOCK_FILE, "a")
 
         def server_loop():
             while True:
@@ -2122,7 +2122,7 @@ class Workbench(tk.Tk):
         try:
             if hasattr(self, "_single_instance_lock_fp") and self._single_instance_lock_fp:
                 self._single_instance_lock_fp.close()
-                os.remove(thonny.LOCK_FILE_NAME)
+                os.remove(thonny.LOCK_FILE)
 
             self._closing = True
 

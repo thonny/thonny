@@ -86,18 +86,18 @@ def get_version():
 
 
 THONNY_USER_DIR = _compute_thonny_user_dir()
-CONFIGURATION_FILE_NAME = os.path.join(THONNY_USER_DIR, "configuration.ini")
-LOCK_FILE_NAME = os.path.join(THONNY_USER_DIR, "single_instance.lock")
+CONFIGURATION_FILE = os.path.join(THONNY_USER_DIR, "configuration.ini")
+LOCK_FILE = os.path.join(THONNY_USER_DIR, "single_instance.lock")
 
 
 def _check_welcome():
     from thonny import misc_utils
 
-    if not os.path.exists(CONFIGURATION_FILE_NAME) and not misc_utils.running_on_rpi():
+    if not os.path.exists(CONFIGURATION_FILE) and not misc_utils.running_on_rpi():
         from thonny.first_run import FirstRunWindow
         from thonny.config import ConfigurationManager
 
-        mgr = ConfigurationManager(CONFIGURATION_FILE_NAME)
+        mgr = ConfigurationManager(CONFIGURATION_FILE)
 
         win = FirstRunWindow(mgr)
         win.mainloop()
@@ -200,12 +200,12 @@ def _prepare_thonny_user_dir():
 
 
 def _should_delegate():
-    if not os.path.exists(LOCK_FILE_NAME):
+    if not os.path.exists(LOCK_FILE):
         # no previous instance
         return
     # maybe the process was killed and the lock file is abandoned?
     try:
-        os.remove(LOCK_FILE_NAME)
+        os.remove(LOCK_FILE)
         # We were able to delete it, ie. it was abandoned
         return
     except OSError:
@@ -213,7 +213,7 @@ def _should_delegate():
 
     from thonny.config import try_load_configuration
 
-    configuration_manager = try_load_configuration(CONFIGURATION_FILE_NAME)
+    configuration_manager = try_load_configuration(CONFIGURATION_FILE)
     configuration_manager.set_default("general.single_instance", SINGLE_INSTANCE_DEFAULT)
     return configuration_manager.get_option("general.single_instance")
 
@@ -222,7 +222,7 @@ def _delegate_to_existing_instance(args):
     import socket
     from thonny import workbench
 
-    with open(LOCK_FILE_NAME, "r") as fp:
+    with open(LOCK_FILE, "r") as fp:
         port = int(fp.readline().strip())
         secret = fp.readline().strip()
 
