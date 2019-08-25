@@ -125,7 +125,10 @@ class Workbench(tk.Tk):
         self._lost_focus = False
         self._is_portable = is_portable()
         self.initializing = True
-        self._init_server_loop()
+
+        self._init_configuration()
+        if self._in_single_instance_mode():
+            self._init_server_loop()
 
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
@@ -147,7 +150,6 @@ class Workbench(tk.Tk):
         self.content_inspector_classes = []  # type: List[Type]
         self._latin_shortcuts = {}  # type: Dict[Tuple[int,int], List[Tuple[Callable, Callable]]]
 
-        self._init_configuration()
         self._init_diagnostic_logging()
         self._init_language()
 
@@ -202,7 +204,8 @@ class Workbench(tk.Tk):
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
         self._make_sanity_checks()
-        self._poll_socket_requests()
+        if self._in_single_instance_mode():
+            self._poll_ipc_requests()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
 
     def _make_sanity_checks(self):
@@ -544,19 +547,38 @@ class Workbench(tk.Tk):
     def _init_server_loop(self) -> None:
         """Socket will listen requests from newer Thonny instances,
         which try to delegate opening files to older instance"""
-        self._requests_from_socket = queue.Queue()  # type: queue.Queue[bytes]
+        self._ipc_requests = queue.Queue()  # type: queue.Queue[bytes]
+
+        try:
+            if os.path.exists(thonny.LOCK_FILE_NAME):
+                # Fails if it is locked
+                os.remove(thonny.LOCK_FILE_NAME)
+
+            self._single_instance_lock_fp = open(thonny.LOCK_FILE_NAME, "w")
+        except OSError:
+            self._single_instance_lock_fp = None
+            # looks like race condition, another instance created the lock first,
+            # let it be
+            return
 
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(("127.0.0.1", 0))
         server_socket.listen(10)
 
-        # advertise the port
+        # advertise the port and secret
         port = server_socket.getsockname()[1]
-        with open(thonny.LOCK_FILE_NAME, "w") as fp:
-            fp.write(str(port) + "\n")
+        import uuid
 
-        # open again to aquire the lock
-        self._lock_fp = open(thonny.LOCK_FILE_NAME, "a")
+        actual_secret = str(uuid.uuid4())
+
+        self._single_instance_lock_fp.write(str(port) + "\n")
+        self._single_instance_lock_fp.write(actual_secret + "\n")
+        self._single_instance_lock_fp.close()
+
+        os.chmod(thonny.LOCK_FILE_NAME, 0o600)
+
+        # open again to lock the file for writing
+        self._single_instance_lock_fp = open(thonny.LOCK_FILE_NAME, "a")
 
         def server_loop():
             while True:
@@ -570,13 +592,17 @@ class Workbench(tk.Tk):
                             data += new_data
                         else:
                             break
+                    proposed_secret, args = ast.literal_eval(data.decode("UTF-8"))
+                    if proposed_secret == actual_secret:
+                        self._ipc_requests.put(args)
+                        # respond OK
+                        client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
+                        client_socket.shutdown(socket.SHUT_WR)
+                        logging.debug("AFTER NEW REQUEST %s", client_socket)
+                    else:
+                        client_socket.shutdown(socket.SHUT_WR)
+                        raise PermissionError("Wrong secret")
 
-                    self._requests_from_socket.put(data)
-
-                    # respond OK
-                    client_socket.sendall(SERVER_SUCCESS.encode(encoding="utf-8"))
-                    client_socket.shutdown(socket.SHUT_WR)
-                    logging.debug("AFTER NEW REQUEST %s", client_socket)
                 except Exception:
                     traceback.print_exc()
 
@@ -2035,20 +2061,24 @@ class Workbench(tk.Tk):
 
         return "end"
 
-    def _poll_socket_requests(self) -> None:
-        """runs in gui thread"""
+    def _poll_ipc_requests(self) -> None:
         try:
-            while not self._requests_from_socket.empty():
-                data = self._requests_from_socket.get()
-                args = ast.literal_eval(data.decode("UTF-8"))
-                assert isinstance(args, list)
-                for filename in args:
-                    if os.path.isfile(filename):
-                        self.get_editor_notebook().show_file(filename)
+            if self._ipc_requests.empty():
+                return
 
-                self.become_active_window()
+            while not self._ipc_requests.empty():
+                args = self._ipc_requests.get()
+                try:
+                    for filename in args:
+                        if os.path.isfile(filename):
+                            self.get_editor_notebook().show_file(filename)
+
+                except Exception:
+                    traceback.print_exc()
+
+            self.become_active_window()
         finally:
-            self.after(50, self._poll_socket_requests)
+            self.after(50, self._poll_ipc_requests)
 
     def _on_close(self) -> None:
         if not self.get_editor_notebook().check_allow_closing():
@@ -2090,6 +2120,10 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
+            if hasattr(self, "_single_instance_lock_fp") and self._single_instance_lock_fp:
+                self._single_instance_lock_fp.close()
+                os.remove(thonny.LOCK_FILE_NAME)
+
             self._closing = True
 
             # Tk clipboard gets cleared on exit and won't end up in system clipboard
@@ -2110,13 +2144,16 @@ class Workbench(tk.Tk):
             except Exception:
                 pass
 
-            tk.Tk.destroy(self)
-        except tk.TclError:
+        except Exception:
             logging.exception("Error while destroying workbench")
+
         finally:
-            runner = get_runner()
-            if runner != None:
-                runner.destroy_backend()
+            try:
+                super().destroy()
+            finally:
+                runner = get_runner()
+                if runner != None:
+                    runner.destroy_backend()
 
     def _on_configure(self, event) -> None:
         # called when window is moved or resized
@@ -2278,6 +2315,9 @@ class Workbench(tk.Tk):
 
     def _mac_quit(self, *args):
         self._on_close()
+
+    def _in_single_instance_mode(self):
+        return self.get_option("general.single_instance")
 
     def get_toolbar(self):
         return self._toolbar

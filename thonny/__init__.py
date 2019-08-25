@@ -2,6 +2,7 @@ import os.path
 import sys
 import platform
 from typing import TYPE_CHECKING, cast, Optional
+import traceback
 
 SINGLE_INSTANCE_DEFAULT = True
 
@@ -128,11 +129,12 @@ def launch():
         return
 
     if _should_delegate():
-        delegation_result = _try_delegate_to_existing_instance(sys.argv[1:])
-        if delegation_result is True:
-            # we're done
+        try:
+            _delegate_to_existing_instance(sys.argv[1:])
             print("Delegated to an existing Thonny instance. Exiting now.")
             return 0
+        except Exception:
+            traceback.print_exc()
 
     # Did not or could not delegate
 
@@ -157,7 +159,6 @@ def launch():
 
         exception("Internal launch or mainloop error")
         from thonny import ui_utils
-        import traceback
 
         dlg = ui_utils.LongTextDialog(
             "Internal error", traceback.format_exc(), parent=get_workbench()
@@ -217,18 +218,13 @@ def _should_delegate():
     return configuration_manager.get_option("general.single_instance")
 
 
-def _try_delegate_to_existing_instance(args):
-    assert os.path.exists(LOCK_FILE_NAME)
-
-    with open(LOCK_FILE_NAME, "r") as fp:
-        port = int(fp.readline())
-
-    return _delegate_to_existing_instance(port, args)
-
-
-def _delegate_to_existing_instance(port, args):
+def _delegate_to_existing_instance(args):
     import socket
     from thonny import workbench
+
+    with open(LOCK_FILE_NAME, "r") as fp:
+        port = int(fp.readline().strip())
+        secret = fp.readline().strip()
 
     transformed_args = []
     for arg in args:
@@ -237,8 +233,8 @@ def _delegate_to_existing_instance(port, args):
 
         transformed_args.append(arg)
 
-    data = repr(transformed_args).encode(encoding="utf_8")
-    # using "localhost" instead of "127.0.0.1" can be much slower
+    data = repr((secret, transformed_args)).encode(encoding="utf_8")
+    # "localhost" can be much slower than "127.0.0.1"
     sock = socket.create_connection(("127.0.0.1", port), timeout=3.0)
     sock.settimeout(3.0)
     sock.sendall(data)
@@ -251,7 +247,8 @@ def _delegate_to_existing_instance(port, args):
         else:
             response += new_data
 
-    return response.decode("UTF-8") == workbench.SERVER_SUCCESS
+    if response.decode("UTF-8") != workbench.SERVER_SUCCESS:
+        raise RuntimeError("Unsuccessful delegation")
 
 
 def set_dpi_aware():
