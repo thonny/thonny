@@ -231,7 +231,7 @@ def _delegate_to_existing_instance(args):
     # "localhost" can be much slower than "127.0.0.1"
     try:
         sock = socket.create_connection(("127.0.0.1", port), timeout=2.0)
-    except socket.timeout:
+    except Exception:
         # Maybe the lock is abandoned
         print("Trying to remove lock")
         os.remove(LOCK_FILE)
