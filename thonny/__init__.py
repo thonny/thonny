@@ -3,6 +3,7 @@ import sys
 import platform
 from typing import TYPE_CHECKING, cast, Optional
 import traceback
+import logging
 
 SINGLE_INSTANCE_DEFAULT = True
 
@@ -203,13 +204,6 @@ def _should_delegate():
     if not os.path.exists(LOCK_FILE):
         # no previous instance
         return
-    # maybe the process was killed and the lock file is abandoned?
-    try:
-        os.remove(LOCK_FILE)
-        # We were able to delete it, ie. it was abandoned
-        return
-    except OSError:
-        pass
 
     from thonny.config import try_load_configuration
 
@@ -235,8 +229,16 @@ def _delegate_to_existing_instance(args):
 
     data = repr((secret, transformed_args)).encode(encoding="utf_8")
     # "localhost" can be much slower than "127.0.0.1"
-    sock = socket.create_connection(("127.0.0.1", port), timeout=3.0)
-    sock.settimeout(3.0)
+    try:
+        sock = socket.create_connection(("127.0.0.1", port), timeout=2.0)
+    except socket.timeout:
+        # Maybe the lock is abandoned
+        print("Trying to remove lock")
+        os.remove(LOCK_FILE)
+        print("Successfully removed abandoned lock")
+        raise
+
+    sock.settimeout(2.0)
     sock.sendall(data)
     sock.shutdown(socket.SHUT_WR)
     response = bytes([])

@@ -127,8 +127,7 @@ class Workbench(tk.Tk):
         self.initializing = True
 
         self._init_configuration()
-        if self._in_single_instance_mode():
-            self._init_server_loop()
+        self._check_init_server_loop()
 
         tk.Tk.__init__(self, className="Thonny")
         tk.Tk.report_callback_exception = self._on_tk_exception  # type: ignore
@@ -204,7 +203,7 @@ class Workbench(tk.Tk):
         self.initializing = False
         self.event_generate("<<WorkbenchInitialized>>")
         self._make_sanity_checks()
-        if self._in_single_instance_mode():
+        if self._is_server():
             self._poll_ipc_requests()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
 
@@ -544,23 +543,15 @@ class Workbench(tk.Tk):
         except Exception:
             self.report_exception("Error when initializing backend")
 
-    def _init_server_loop(self) -> None:
+    def _check_init_server_loop(self) -> None:
         """Socket will listen requests from newer Thonny instances,
         which try to delegate opening files to older instance"""
-        self._ipc_requests = queue.Queue()  # type: queue.Queue[bytes]
 
-        try:
-            if os.path.exists(thonny.LOCK_FILE):
-                # Fails if it is locked
-                os.remove(thonny.LOCK_FILE)
-
-            self._single_instance_lock_fp = open(thonny.LOCK_FILE, "w")
-        except OSError:
-            self._single_instance_lock_fp = None
-            # looks like race condition, another instance created the lock first,
-            # let it be
+        if not self.get_option("general.single_instance") or os.path.exists(thonny.LOCK_FILE):
+            self._ipc_requests = None
             return
 
+        self._ipc_requests = queue.Queue()  # type: queue.Queue[bytes]
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind(("127.0.0.1", 0))
         server_socket.listen(10)
@@ -571,14 +562,11 @@ class Workbench(tk.Tk):
 
         actual_secret = str(uuid.uuid4())
 
-        self._single_instance_lock_fp.write(str(port) + "\n")
-        self._single_instance_lock_fp.write(actual_secret + "\n")
-        self._single_instance_lock_fp.close()
+        with open(thonny.LOCK_FILE, "w") as fp:
+            fp.write(str(port) + "\n")
+            fp.write(actual_secret + "\n")
 
         os.chmod(thonny.LOCK_FILE, 0o600)
-
-        # open again to lock the file for writing
-        self._single_instance_lock_fp = open(thonny.LOCK_FILE, "a")
 
         def server_loop():
             while True:
@@ -2120,8 +2108,7 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
-            if hasattr(self, "_single_instance_lock_fp") and self._single_instance_lock_fp:
-                self._single_instance_lock_fp.close()
+            if self._is_server():
                 os.remove(thonny.LOCK_FILE)
 
             self._closing = True
@@ -2316,8 +2303,8 @@ class Workbench(tk.Tk):
     def _mac_quit(self, *args):
         self._on_close()
 
-    def _in_single_instance_mode(self):
-        return self.get_option("general.single_instance")
+    def _is_server(self):
+        return self._ipc_requests is not None
 
     def get_toolbar(self):
         return self._toolbar
