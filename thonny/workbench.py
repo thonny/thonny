@@ -2108,7 +2108,7 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
-            if self._is_server():
+            if self._is_server() and os.path.exists(thonny.LOCK_FILE):
                 os.remove(thonny.LOCK_FILE)
 
             self._closing = True
