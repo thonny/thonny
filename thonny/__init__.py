@@ -281,7 +281,9 @@ def _create_client_socket():
         # "localhost" can be much slower than "127.0.0.1"
         client_socket = socket.create_connection(("127.0.0.1", port), timeout=timeout)
     else:
-        client_socket = socket.create_connection(IPC_FILE, timeout=timeout)
+        client_socket = socket.socket(socket.AF_UNIX)  # @UndefinedVariable
+        client_socket.settimeout(timeout)
+        client_socket.connect(IPC_FILE)
         secret = ""
 
     return client_socket, secret
