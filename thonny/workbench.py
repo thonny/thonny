@@ -547,26 +547,13 @@ class Workbench(tk.Tk):
         """Socket will listen requests from newer Thonny instances,
         which try to delegate opening files to older instance"""
 
-        if not self.get_option("general.single_instance") or os.path.exists(thonny.LOCK_FILE):
+        if not self.get_option("general.single_instance") or os.path.exists(thonny.IPC_FILE):
             self._ipc_requests = None
             return
 
         self._ipc_requests = queue.Queue()  # type: queue.Queue[bytes]
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind(("127.0.0.1", 0))
+        server_socket, actual_secret = self._create_server_socket()
         server_socket.listen(10)
-
-        # advertise the port and secret
-        port = server_socket.getsockname()[1]
-        import uuid
-
-        actual_secret = str(uuid.uuid4())
-
-        with open(thonny.LOCK_FILE, "w") as fp:
-            fp.write(str(port) + "\n")
-            fp.write(actual_secret + "\n")
-
-        os.chmod(thonny.LOCK_FILE, 0o600)
 
         def server_loop():
             while True:
@@ -595,6 +582,29 @@ class Workbench(tk.Tk):
                     traceback.print_exc()
 
         Thread(target=server_loop, daemon=True).start()
+
+    def _create_server_socket(self):
+        if running_on_windows():
+            server_socket = socket.socket(socket.AF_INET)  # @UndefinedVariable
+            server_socket.bind(("127.0.0.1", 0))
+
+            # advertise the port and secret
+            port = server_socket.getsockname()[1]
+            import uuid
+
+            secret = str(uuid.uuid4())
+
+            with open(thonny.IPC_FILE, "w") as fp:
+                fp.write(str(port) + "\n")
+                fp.write(secret + "\n")
+
+        else:
+            server_socket = socket.socket(socket.AF_UNIX)  # @UndefinedVariable
+            server_socket.bind(thonny.IPC_FILE)
+            secret = ""
+
+        os.chmod(thonny.IPC_FILE, 0o600)
+        return server_socket, secret
 
     def _init_commands(self) -> None:
 
@@ -2108,8 +2118,8 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
-            if self._is_server() and os.path.exists(thonny.LOCK_FILE):
-                os.remove(thonny.LOCK_FILE)
+            if self._is_server() and os.path.exists(thonny.IPC_FILE):
+                os.remove(thonny.IPC_FILE)
 
             self._closing = True
 

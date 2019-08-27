@@ -30,15 +30,9 @@ def _compute_thonny_user_dir():
         # we're in a virtualenv or venv
         return os.path.join(sys.prefix, ".thonny")
     elif platform.system() == "Windows":
-        # http://stackoverflow.com/a/3859336/261181
-        # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
-        import ctypes.wintypes
+        from thonny import misc_utils
 
-        CSIDL_APPDATA = 26
-        SHGFP_TYPE_CURRENT = 0
-        buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
-        ctypes.windll.shell32.SHGetFolderPathW(0, CSIDL_APPDATA, 0, SHGFP_TYPE_CURRENT, buf)
-        return os.path.join(buf.value, "Thonny")
+        return os.path.join(misc_utils.get_roaming_appdata_dir(), "Thonny")
     elif platform.system() == "Darwin":
         return os.path.expanduser("~/Library/Thonny")
     else:
@@ -88,7 +82,32 @@ def get_version():
 
 THONNY_USER_DIR = _compute_thonny_user_dir()
 CONFIGURATION_FILE = os.path.join(THONNY_USER_DIR, "configuration.ini")
-LOCK_FILE = os.path.join(THONNY_USER_DIR, "single_instance.lock")
+
+
+def _get_ipc_file_path():
+    from thonny import misc_utils
+    import getpass
+
+    if platform.system() == "Windows":
+        base_dir = misc_utils.get_local_appdata_dir()
+    else:
+        base_dir = os.environ.get("XDG_RUNTIME_DIR")
+        if not base_dir or not os.path.exists(base_dir):
+            base_dir = os.environ.get("TMPDIR")
+
+    if not base_dir or not os.path.exists(base_dir):
+        base_dir = THONNY_USER_DIR
+
+    ipc_dir = os.path.join(base_dir, "thonny-%s" % getpass.getuser())
+    os.makedirs(ipc_dir, exist_ok=True)
+
+    if not platform.system() == "Windows":
+        os.chmod(ipc_dir, 0o700)
+
+    return os.path.join(ipc_dir, "ipc.sock")
+
+
+IPC_FILE = _get_ipc_file_path()
 
 
 def _check_welcome():
@@ -201,7 +220,7 @@ def _prepare_thonny_user_dir():
 
 
 def _should_delegate():
-    if not os.path.exists(LOCK_FILE):
+    if not os.path.exists(IPC_FILE):
         # no previous instance
         return
 
@@ -213,12 +232,8 @@ def _should_delegate():
 
 
 def _delegate_to_existing_instance(args):
-    import socket
     from thonny import workbench
-
-    with open(LOCK_FILE, "r") as fp:
-        port = int(fp.readline().strip())
-        secret = fp.readline().strip()
+    import socket
 
     transformed_args = []
     for arg in args:
@@ -227,16 +242,16 @@ def _delegate_to_existing_instance(args):
 
         transformed_args.append(arg)
 
-    data = repr((secret, transformed_args)).encode(encoding="utf_8")
-    # "localhost" can be much slower than "127.0.0.1"
     try:
-        sock = socket.create_connection(("127.0.0.1", port), timeout=2.0)
+        sock, secret = _create_client_socket()
     except Exception:
         # Maybe the lock is abandoned
         print("Trying to remove lock")
-        os.remove(LOCK_FILE)
+        os.remove(IPC_FILE)
         print("Successfully removed abandoned lock")
         raise
+
+    data = repr((secret, transformed_args)).encode(encoding="utf_8")
 
     sock.settimeout(2.0)
     sock.sendall(data)
@@ -251,6 +266,25 @@ def _delegate_to_existing_instance(args):
 
     if response.decode("UTF-8") != workbench.SERVER_SUCCESS:
         raise RuntimeError("Unsuccessful delegation")
+
+
+def _create_client_socket():
+    import socket
+
+    timeout = 2.0
+
+    if platform.system() == "Windows":
+        with open(IPC_FILE, "r") as fp:
+            port = int(fp.readline().strip())
+            secret = fp.readline().strip()
+
+        # "localhost" can be much slower than "127.0.0.1"
+        client_socket = socket.create_connection(("127.0.0.1", port), timeout=timeout)
+    else:
+        client_socket = socket.create_connection(IPC_FILE, timeout=timeout)
+        secret = ""
+
+    return client_socket, secret
 
 
 def set_dpi_aware():

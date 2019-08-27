@@ -452,3 +452,23 @@ def sizeof_fmt(num, suffix="B"):
             return "%.1f %s%s" % (num, unit, suffix)
         num /= 1024.0
     return "%.1f%s%s" % (num, "Yi", suffix)
+
+
+def _get_known_folder(ID):
+    # http://stackoverflow.com/a/3859336/261181
+    # http://www.installmate.com/support/im9/using/symbols/functions/csidls.htm
+    import ctypes.wintypes
+
+    SHGFP_TYPE_CURRENT = 0
+    buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
+    ctypes.windll.shell32.SHGetFolderPathW(0, ID, 0, SHGFP_TYPE_CURRENT, buf)
+    assert buf.value
+    return buf.value
+
+
+def get_roaming_appdata_dir():
+    return _get_known_folder(26)
+
+
+def get_local_appdata_dir():
+    return _get_known_folder(28)
