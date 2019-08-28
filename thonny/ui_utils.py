@@ -1893,34 +1893,42 @@ def _get_dialog_provider():
 
 def asksaveasfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getSaveFile.htm
-    _ensure_parent(options)
+    _tweak_file_dialog_parent(options)
     return _get_dialog_provider().asksaveasfilename(**options)
 
 
 def askopenfilename(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _ensure_parent(options)
+    _tweak_file_dialog_parent(options)
     return _get_dialog_provider().askopenfilename(**options)
 
 
 def askopenfilenames(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/getOpenFile.htm
-    _ensure_parent(options)
+    _tweak_file_dialog_parent(options)
     return _get_dialog_provider().askopenfilenames(**options)
 
 
 def askdirectory(**options):
     # https://tcl.tk/man/tcl8.6/TkCmd/chooseDirectory.htm
-    _ensure_parent(options)
+    _tweak_file_dialog_parent(options)
     return _get_dialog_provider().askdirectory(**options)
 
 
-def _ensure_parent(options):
-    if "parent" not in options:
+def _tweak_file_dialog_parent(options):
+    if running_on_mac_os():
+        # used to require master/parent (https://bugs.python.org/issue34927)
+        # but this is deprecated in Catalina (https://github.com/thonny/thonny/issues/840)
         if "master" in options:
-            options["parent"] = options["master"]
-        else:
-            options["parent"] = tk._default_root
+            del options["master"]
+        if "parent" in options:
+            del options["parent"]
+    else:
+        if "parent" not in options:
+            if "master" in options:
+                options["parent"] = options["master"]
+            else:
+                options["parent"] = tk._default_root
 
 
 class _ZenityDialogProvider:
