@@ -95,7 +95,6 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 messagebox.showerror(
                     _("Bad directory"),
                     _("Selected directory is not empty.\nSelect another or cancel."),
-                    parent=get_workbench(),
                 )
             else:
                 break

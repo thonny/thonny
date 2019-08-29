@@ -1350,8 +1350,6 @@ def try_remove_linenumbers(text, master):
             title="Remove linenumbers",
             message="Do you want to remove linenumbers from pasted text?",
             default=messagebox.YES,
-            master=master,
-            parent=master,
         ):
             return remove_line_numbers(text)
         else:
@@ -1782,7 +1780,7 @@ class SubprocessDialog(CommonDialog):
             if messagebox.askyesno(
                 _("Cancel the process?"),
                 _("The process is still running.\nAre you sure you want to cancel?"),
-                parent=self,
+                parent=None if running_on_mac_os() else self,
             ):
                 # try gently first
                 try:

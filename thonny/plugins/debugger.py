@@ -16,7 +16,7 @@ from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_util
 from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.memory import VariablesFrame
-from thonny.misc_utils import shorten_repr, running_on_rpi
+from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence, CommonDialog
 from thonny.running import RUN_COMMAND_CAPTION
@@ -862,7 +862,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
         showinfo(
             _("Can't close yet"),
             _('Use "Stop" command if you want to cancel debugging'),
-            parent=self,
+            parent=None if running_on_mac_os() else self,
         )
 
     def close(self, frame_id=None):

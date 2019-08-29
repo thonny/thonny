@@ -617,7 +617,6 @@ class PipDialog(CommonDialog):
                 ).format(name)
                 + "\n\n"
                 + _("Are you sure you want to uninstall it?"),
-                parent=get_workbench(),
             ):
                 return
             args = ["uninstall", "-y", name]
@@ -819,7 +818,6 @@ class BackendPipDialog(PipDialog):
                     + "Are you sure you want to install %s for the back-end?"
                 )
                 % name,
-                parent=get_workbench(),
             )
         else:
             return True
@@ -925,7 +923,6 @@ class PluginsPipDialog(PipDialog):
                 )
                 + "\n\n"
                 + other_version_text,
-                parent=get_workbench(),
             )
             return False
         elif reqs:
@@ -940,7 +937,6 @@ class PluginsPipDialog(PipDialog):
                     + _("If you still want it, then please install it from the command line.")
                     + "\n\n"
                     + other_version_text,
-                    parent=get_workbench(),
                 )
                 return False
 

@@ -171,7 +171,7 @@ def launch():
     except SystemExit as e:
         from tkinter import messagebox
 
-        messagebox.showerror("System exit", str(e), parent=get_workbench())
+        messagebox.showerror("System exit", str(e))
         return -1
 
     except Exception:
@@ -180,9 +180,7 @@ def launch():
         exception("Internal launch or mainloop error")
         from thonny import ui_utils
 
-        dlg = ui_utils.LongTextDialog(
-            "Internal error", traceback.format_exc(), parent=get_workbench()
-        )
+        dlg = ui_utils.LongTextDialog("Internal error", traceback.format_exc())
         ui_utils.show_dialog(dlg, get_workbench())
         return -1
     finally:

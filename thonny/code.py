@@ -115,7 +115,6 @@ class Editor(ttk.Frame):
                     "Looks like '%s' was deleted or moved outside if the editor.\n\n"
                     % self._filename
                     + "Do you want to also close the editor?",
-                    parent=get_workbench(),
                 ):
                     self.master.close_editor(self)
                 else:
@@ -129,7 +128,6 @@ class Editor(ttk.Frame):
                     "External modification",
                     "Looks like '%s' was modified outside the editor.\n\n" % self._filename
                     + "Do you want to discard current editor content and reload the file from disk?",
-                    parent=get_workbench(),
                 ):
                     self._load_file(self._filename, keep_undo=True)
                 else:
@@ -269,9 +267,7 @@ class Editor(ttk.Frame):
             )
         except PermissionError:
             messagebox.showerror(
-                "Permission Error",
-                "Looks like this file or folder is not writable.",
-                parent=get_workbench(),
+                "Permission Error", "Looks like this file or folder is not writable."
             )
             return False
 
@@ -340,7 +336,6 @@ class Editor(ttk.Frame):
 
         # http://tkinter.unpythonic.net/wiki/tkFileDialog
         new_filename = asksaveasfilename(
-            master=get_workbench(),
             filetypes=_dialog_filetypes,
             defaultextension=".py",
             initialdir=initialdir,
@@ -386,7 +381,6 @@ class Editor(ttk.Frame):
                     + "you won't be able to import the library module named '%s'" % mod_name
                     + ".\n\n"
                     + "Do you still want to use this name for your script?",
-                    parent=get_workbench(),
                 ):
                     return self.ask_new_local_path()
 
@@ -702,9 +696,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         if node == "local":
             path = askopenfilename(
-                master=get_workbench(),
-                filetypes=_dialog_filetypes,
-                initialdir=get_workbench().get_local_cwd(),
+                filetypes=_dialog_filetypes, initialdir=get_workbench().get_local_cwd()
             )
         else:
             assert node == "remote"
@@ -899,11 +891,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             message = "Do you want to save file before closing?"
 
         confirm = messagebox.askyesnocancel(
-            title="Save On Close",
-            message=message,
-            default=messagebox.YES,
-            master=get_workbench(),
-            parent=get_workbench(),
+            title="Save On Close", message=message, default=messagebox.YES
         )
 
         if confirm:

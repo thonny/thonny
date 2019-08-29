@@ -656,9 +656,7 @@ class BaseFileBrowser(ttk.Frame):
 
         if name in self._cached_child_data[parent_path]:
             # TODO: ignore case in windows
-            messagebox.showerror(
-                "Error", "The file '" + path + "' already exists", parent=get_workbench()
-            )
+            messagebox.showerror("Error", "The file '" + path + "' already exists")
         else:
             self.open_file(path)
 

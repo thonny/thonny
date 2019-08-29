@@ -10,9 +10,7 @@ def load_plugin():
 
         def doit():
             if not os.path.exists(old_data_dir):
-                showinfo(
-                    "Already deleted", "Looks like it's already deleted", parent=get_workbench()
-                )
+                showinfo("Already deleted", "Looks like it's already deleted")
                 return
 
             answer = askyesno(
@@ -24,12 +22,11 @@ def load_plugin():
                 + "If you don't intend to use older Thonny versions anymore, "
                 + "you probably want to delete the old directory and reclaim disk space.\n\n"
                 + "Do you want me to delete this directory now?",
-                parent=get_workbench(),
             )
             if answer:
                 shutil.rmtree(old_data_dir, True)
                 shutil.rmtree(old_data_dir, True)  # first one may keep empty directory
-                showinfo("Done!", "Done!", parent=get_workbench())
+                showinfo("Done!", "Done!")
 
         get_workbench().add_command(
             "delolddatadir", "tools", "Clean up Thonny 2.1 data folder ...", doit, group=110

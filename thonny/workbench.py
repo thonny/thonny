@@ -1324,7 +1324,6 @@ class Workbench(tk.Tk):
                     + "Restart Thonny to start working in regular mode.\n\n"
                     + "(See 'Tools → Options → General' if you change your mind later.)"
                 ),
-                parent=self,
             )
 
         label.bind("<1>", on_click, True)

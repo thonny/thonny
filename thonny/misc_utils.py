@@ -134,7 +134,7 @@ def find_volume_by_name(
 
         import tkinter as tk
 
-        if askyesno(_("Can't find suitable disk"), msg, parent=tk._default_root):
+        if askyesno(_("Can't find suitable disk"), msg):
             path = askdirectory(master=tk._default_root)
             if path:
                 return path
