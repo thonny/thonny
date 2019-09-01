@@ -188,10 +188,11 @@ def _update_highlighting(event, text_changed, need_update, delay=None):
 def update_highlighting_full(event):
     _update_highlighting(event, True, True)
 
+
 def clear_highlighting(text):
     text.tag_remove("surrounding_parens", "0.1", "end")
     text.tag_remove("unclosed_expression", "0.1", "end")
-    
+
 
 _last_move_time = 0
 
