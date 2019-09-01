@@ -43,8 +43,7 @@ class ParenMatcher:
         self._tokens_cache = {}
 
     def update_highlighting(self):
-        self.text.tag_remove("surrounding_parens", "0.1", "end")
-        self.text.tag_remove("unclosed_expression", "0.1", "end")
+        clear_highlighting(self.text)
 
         if get_workbench().get_option("view.paren_highlighting"):
             self._update_highlighting_for_active_range()
@@ -189,6 +188,10 @@ def _update_highlighting(event, text_changed, need_update, delay=None):
 def update_highlighting_full(event):
     _update_highlighting(event, True, True)
 
+def clear_highlighting(text):
+    text.tag_remove("surrounding_parens", "0.1", "end")
+    text.tag_remove("unclosed_expression", "0.1", "end")
+    
 
 _last_move_time = 0
 
@@ -211,6 +214,8 @@ def update_highlighting_edit_cw(event):
         event.widget = event.text_widget
         trivial = event.get("trivial_for_parens", False)
         _update_highlighting(event, True, not trivial)
+        if trivial:
+            event.text_widget.tag_remove("surrounding_parens", "0.1", "end")
 
 
 def load_plugin() -> None:
