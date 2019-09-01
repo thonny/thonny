@@ -898,9 +898,11 @@ class VM:
 
     def export_variables(self, variables):
         result = {}
-        for name in variables:
-            if not name.startswith("__"):
-                result[name] = self.export_value(variables[name], 100)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            for name in variables:
+                if not name.startswith("__"):
+                    result[name] = self.export_value(variables[name], 100)
 
         return result
 
