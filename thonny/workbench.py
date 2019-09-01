@@ -2013,10 +2013,18 @@ class Workbench(tk.Tk):
                     continue
                 tester = self._menu_item_specs[(menu_name, command_label)].tester
 
-                if tester and not tester():
-                    menu.entryconfigure(i, state=tk.DISABLED)
-                else:
+                enabled = not tester
+                if tester:
+                    try:
+                        enabled = tester()
+                    except Exception:
+                        traceback.print_exc()
+                        enabled = False
+
+                if enabled:
                     menu.entryconfigure(i, state=tk.NORMAL)
+                else:
+                    menu.entryconfigure(i, state=tk.DISABLED)
 
     def _find_location_for_menu_item(self, menu_name: str, command_label: str) -> Union[str, int]:
 
