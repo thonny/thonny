@@ -877,11 +877,17 @@ class TextFrame(ttk.Frame):
         self._update_gutter_active_line()
 
     def _vertical_scrollbar_update(self, *args):
+        if not hasattr(self, "_vbar"):
+            return
+
         self._vbar.set(*args)
         self._gutter.yview(tk.MOVETO, args[0])
         self.text.event_generate("<<VerticalScroll>>")
 
     def _gutter_scroll(self, *args):
+        if not hasattr(self, "_vbar"):
+            return
+
         try:
             self._vbar.set(*args)
             self.text.yview(tk.MOVETO, args[0])
