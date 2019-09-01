@@ -69,6 +69,10 @@ class MicroPythonProxy(SubprocessProxy):
 
         super().__init__(clean, running.get_frontend_python())
 
+        # Following is required for compatibility with older MP plugins (ESP)
+        # TODO: remove it later
+        self.micropython_upload_enabled = False
+
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.backend
 
