@@ -19,7 +19,6 @@ from thonny.memory import VariablesFrame
 from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence, CommonDialog
-from thonny.running import RUN_COMMAND_CAPTION
 
 _current_debugger = None
 
