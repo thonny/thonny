@@ -2451,6 +2451,7 @@ class CustomStackFrame:
         self.current_evaluations = []
         self.current_statement = None
         self.current_root_expression = None
+        self.node_tags = set()
 
 
 class FancySourceFileLoader(SourceFileLoader):
