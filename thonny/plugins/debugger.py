@@ -462,6 +462,8 @@ class FrameVisualizer:
         # For most statements I want to highlight block of whole lines
         # but for pseudo-statements (like header in for-loop) I want to highlight only the indicated range
 
+        self._text.tag_raise(tag)
+
         line_prefix = self._text.get(
             "%d.0" % self._translate_lineno(text_range.lineno),
             "%d.%d" % (self._translate_lineno(text_range.lineno), text_range.col_offset),
