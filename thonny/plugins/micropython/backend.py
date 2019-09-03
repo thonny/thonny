@@ -99,8 +99,8 @@ class MicroPythonBackend:
         try:
             self._prepare(clean)
             self._mainloop()
-        except ConnectionClosedException:
-            self._on_connection_closed()
+        except ConnectionClosedException as e:
+            self._on_connection_closed(e)
         except Exception:
             logger.exception("Crash in backend")
             traceback.print_exc()
@@ -1600,10 +1600,11 @@ class MicroPythonBackend:
     def _check_for_connection_errors(self):
         self._connection._check_for_error()
 
-    def _on_connection_closed(self):
-        self._send_output(
-            "\n" + "Connection closed. Use 'Run → Stop / Restart' to reconnect." + "\n", "stderr"
-        )
+    def _on_connection_closed(self, error=None):
+        message = "Connection lost"
+        if error:
+            message += " (" + str(error) + ")"
+        self._send_output("\n" + message + "\n", "stderr")
         sys.exit(EXPECTED_TERMINATION_CODE)
 
 

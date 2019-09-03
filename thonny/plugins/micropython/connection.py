@@ -103,11 +103,7 @@ class MicroPythonConnection:
         if self._error is None:
             return
 
-        if self._error == "EOF":
-            # TODO:
-            raise ConnectionClosedException(self._error)
-        else:
-            raise RuntimeError(self._error)
+        raise ConnectionClosedException(self._error)
 
     def unread(self, data):
         self._read_buffer = data + self._read_buffer

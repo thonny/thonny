@@ -80,9 +80,8 @@ class SerialConnection(MicroPythonConnection):
                 if to_be_published:
                     self._read_queue.put(to_be_published)
 
-        except SerialException as e:
-            logging.exception("Error while reading from serial")
-            self._error = str("Serial reading error: %s" % e)
+        except Exception as e:
+            self._error = str(e)
 
     def incoming_is_empty(self):
         return self._serial.in_waiting == 0 and super().incoming_is_empty()
