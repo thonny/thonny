@@ -543,6 +543,8 @@ class BaseFileBrowser(ttk.Frame):
             self.tree.selection_set()
             self.path_bar.focus_set()
 
+        self.tree.update()
+        
         self.refresh_menu()
         self.menu.tk_popup(event.x_root, event.y_root)
 
