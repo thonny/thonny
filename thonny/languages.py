@@ -14,6 +14,7 @@ LANGUAGES_DICT = {
     "zh_TW": "繁體中文-TW [BETA]",
     "zh_CN": "简体中文  [BETA]",
     "ja_JP": "日本語  [ALPHA]",
+    "lt_LT": "Lietuvių"
 }
 
 
