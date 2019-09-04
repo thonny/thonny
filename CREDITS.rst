@@ -72,6 +72,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Taavi Ilp
 * Toomas Mölder
 * Tusamten
+* Vytenis (svajoklis-1)
 * Xin Rong
 * 涂紳騰 (Shen-Teng Tu)
 * 張文宏 (Wen-Hung, Chang)
