@@ -1439,7 +1439,7 @@ msgstr "预览"
 #: thonny/plugins/theme_and_font_config_page.py:144
 #, fuzzy
 msgid "This is a comment"
-msgstr "这是一个留言"
+msgstr "这是一个注释"
 
 #: thonny/plugins/theme_and_font_config_page.py:147
 #, fuzzy
