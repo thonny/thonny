@@ -60,12 +60,12 @@ msgstr "缩小字体"
 #: thonny/workbench.py:607
 #, fuzzy
 msgid "Focus editor"
-msgstr "移动到编辑器"
+msgstr "切换到编辑器"
 
 #: thonny/workbench.py:616
 #, fuzzy
 msgid "Focus shell"
-msgstr "移动到shell"
+msgstr "切换到shell"
 
 #: thonny/workbench.py:627
 #, fuzzy
@@ -185,7 +185,7 @@ msgstr "Birdseye是一个python的调试器,需要独立安装.\n"
 #: thonny/plugins/birdseye_frontend.py:60
 #, fuzzy
 msgid "Debug current script (birdseye)"
-msgstr "当前脚本调试(birdseye)"
+msgstr "调试当前脚本(birdseye)"
 
 #: thonny/plugins/commenting_indenting.py:143
 #, fuzzy
@@ -459,7 +459,7 @@ msgstr "Pygame Zero模式\n"
 #: thonny/plugins/pip_gui.py:78
 #, fuzzy
 msgid "Find package from PyPI"
-msgstr "从PyPI安装模块"
+msgstr "从PyPI安装包"
 
 #: thonny/plugins/pip_gui.py:188 thonny/plugins/pip_gui.py:190
 #, fuzzy
@@ -497,12 +497,12 @@ msgstr "安装"
 #: thonny/plugins/pip_gui.py:505
 #, fuzzy
 msgid "Could not find the package from PyPI."
-msgstr "没有从PyPI找到此模块"
+msgstr "没有从PyPI找到此包"
 
 #: thonny/plugins/pip_gui.py:515
 #, fuzzy
 msgid "exact package name"
-msgstr "确切的库名"
+msgstr "确切的包名"
 
 #: thonny/plugins/pip_gui.py:533
 #, fuzzy
@@ -942,7 +942,7 @@ msgstr "配置已更新。 重启Thonny以开始于常规模式工作。\n"
 #: thonny/plugins/ast_view.py:209
 #, fuzzy
 msgid "Program tree"
-msgstr "抽象语法树AST"
+msgstr "程序树状图"
 
 #: thonny/plugins/backend_config_page.py:130
 #, fuzzy
@@ -972,52 +972,52 @@ msgstr "调试"
 #: thonny/plugins/debugger.py:1202
 #, fuzzy
 msgid "Debug current script (nicer)"
-msgstr "调试当前脚本(完全)"
+msgstr "调试当前脚本(nicer)"
 
 #: thonny/plugins/debugger.py:1214
 #, fuzzy
 msgid "Debug current script (faster)"
-msgstr "调试当前脚本(快速)"
+msgstr "调试当前脚本(faster)"
 
 #: thonny/plugins/debugger.py:1225
 #, fuzzy
 msgid "Step over"
-msgstr "下一行(Step Over)"
+msgstr "步过"
 
 #: thonny/plugins/debugger.py:1227
 #, fuzzy
 msgid "Over"
-msgstr "下一行(Over)"
+msgstr "步过"
 
 #: thonny/plugins/debugger.py:1238
 #, fuzzy
 msgid "Step into"
-msgstr "步入(Step into)"
+msgstr "步进"
 
 #: thonny/plugins/debugger.py:1240
 #, fuzzy
 msgid "Into"
-msgstr "进入(Into)"
+msgstr "步进"
 
 #: thonny/plugins/debugger.py:1251
 #, fuzzy
 msgid "Step out"
-msgstr "步出(Step out)"
+msgstr "步出"
 
 #: thonny/plugins/debugger.py:1253
 #, fuzzy
 msgid "Out"
-msgstr "步出(Out)"
+msgstr "步出"
 
 #: thonny/plugins/debugger.py:1288
 #, fuzzy
 msgid "Step back"
-msgstr "回执(Step back)"
+msgstr "回执"
 
 #: thonny/plugins/debugger.py:1290
 #, fuzzy
 msgid "Back"
-msgstr "回执(Back)"
+msgstr "回执"
 
 #: thonny/plugins/debugger.py:1296
 #, fuzzy
@@ -1067,19 +1067,19 @@ msgstr "已安装"
 #: thonny/plugins/pip_gui.py:352
 #, fuzzy
 msgid "Browse the packages"
-msgstr "浏览模块"
+msgstr "浏览包"
 
 #: thonny/plugins/pip_gui.py:355
 #, fuzzy
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
 msgstr "当前解释器下,你只能通过'工具--->打开系统Shell...'\n"
-"来安装升级或卸载模块"
+"来安装升级或卸载包"
 
 #: thonny/plugins/pip_gui.py:363
 #, fuzzy
 msgid "Packages' directory"
-msgstr "模块文件夹"
+msgstr "包文件夹"
 
 #: thonny/plugins/pip_gui.py:368
 #, fuzzy
@@ -1089,13 +1089,13 @@ msgstr "从PyPI安装"
 #: thonny/plugins/pip_gui.py:371
 #, fuzzy
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
-msgstr "如果你不知道模块的来源,那么你可从PyPI\n"
+msgstr "如果你不知道包的来源,那么你可从PyPI\n"
 "中查找,在搜索框输入名字并回车进行查找"
 
 #: thonny/plugins/pip_gui.py:387
 #, fuzzy
 msgid "to locate requirements.txt file and install the packages specified in it."
-msgstr "安装requirements.txt中的模块"
+msgstr "安装requirements.txt中的包"
 
 #: thonny/plugins/pip_gui.py:392
 #, fuzzy
@@ -1105,7 +1105,7 @@ msgstr "点击"
 #: thonny/plugins/pip_gui.py:397
 #, fuzzy
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-msgstr "安装本地的模块（扩展名通常为.whl, .tar.gz or .zip）"
+msgstr "安装本地的包（扩展名通常为.whl, .tar.gz or .zip）"
 
 #: thonny/plugins/pip_gui.py:403
 #, fuzzy
@@ -1115,7 +1115,7 @@ msgstr "升级或卸载"
 #: thonny/plugins/pip_gui.py:405
 #, fuzzy
 msgid "Start by selecting the package from the left."
-msgstr "在左边选择你要操作的模块"
+msgstr "在左边选择你要操作的包"
 
 #: thonny/plugins/pip_gui.py:409
 #, fuzzy
@@ -1130,17 +1130,17 @@ msgstr "虚拟环境"
 #: thonny/plugins/pip_gui.py:416
 #, fuzzy
 msgid "user site packages"
-msgstr "用户安装的模块"
+msgstr "用户安装的包"
 
 #: thonny/plugins/pip_gui.py:421
 #, fuzzy
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
-msgstr "这里列出了所有可用的模块,但升级或卸载只能在这里"
+msgstr "这里列出了所有可用的包,但升级或卸载只能在这里"
 
 #: thonny/plugins/pip_gui.py:431
 #, fuzzy
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
-msgstr "新的模块也会安装到这个文件夹下,其他位置必须通过其他方式管理."
+msgstr "新的包也会安装到这个文件夹下,其他位置必须通过其他方式管理."
 
 #: thonny/plugins/pip_gui.py:456
 #, fuzzy
@@ -1165,7 +1165,7 @@ msgstr "你需要输入"
 #: thonny/plugins/pip_gui.py:520
 #, fuzzy
 msgid "Could not find the package info from PyPI."
-msgstr "无法从PyPI找到此模块"
+msgstr "无法从PyPI找到此包."
 
 #: thonny/plugins/pip_gui.py:522 thonny/plugins/pip_gui.py:1120
 #, fuzzy
@@ -1175,22 +1175,22 @@ msgstr "错误代码"
 #: thonny/plugins/pip_gui.py:581
 #, fuzzy
 msgid "Can't find package name from the list:"
-msgstr "无法从这个表中找到模块的名字:"
+msgstr "无法从这个表中找到包的名字:"
 
 #: thonny/plugins/pip_gui.py:615
 #, fuzzy
 msgid "Package '{}' is required for installing and uninstalling other packages."
-msgstr "在安装或卸载其他模块时需要用到'{}'模块."
+msgstr "在安装或卸载其他包时需要用到'{}'包."
 
 #: thonny/plugins/pip_gui.py:657
 #, fuzzy
 msgid "Package"
-msgstr "模块"
+msgstr "包"
 
 #: thonny/plugins/pip_gui.py:757
 #, fuzzy
 msgid "Manage packages for %s"
-msgstr "管理%s模块"
+msgstr "管理%s包"
 
 #: thonny/plugins/pip_gui.py:813
 #, fuzzy
@@ -1204,7 +1204,7 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr "看起来你在安装一个与Thonny相关的模块,\n"
+msgstr "看起来你在安装一个与Thonny相关的包,\n"
 "如果你想安装一个Thonny的插件你应该通过\n"
 "'工具--->管理插件...'替代.\n"
 "你确定在后台安装 %s 吗?"
@@ -1237,7 +1237,7 @@ msgstr "不匹配的依赖项"
 #: thonny/plugins/pip_gui.py:936
 #, fuzzy
 msgid "This package requires different Thonny version:"
-msgstr "这个库需要另一个Thonny版本:"
+msgstr "这个包需要另一个Thonny版本:"
 
 #: thonny/plugins/pip_gui.py:940
 #, fuzzy
@@ -1247,7 +1247,7 @@ msgstr "如果你需要它,那么请从命令行中安装."
 #: thonny/plugins/pip_gui.py:984
 #, fuzzy
 msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
-msgstr "(此时和Thonny后台使用相同的解释器,所以两个窗口管理相同的模块.)"
+msgstr "(此时和Thonny后台使用相同的解释器,所以两个窗口管理相同的包.)"
 
 #: thonny/plugins/pip_gui.py:990
 #, fuzzy
@@ -1287,7 +1287,7 @@ msgstr "错误:"
 #: thonny/plugins/pip_gui.py:1232
 #, fuzzy
 msgid "Manage packages..."
-msgstr "管理模块..."
+msgstr "管理包..."
 
 #: thonny/plugins/pip_gui.py:1238
 #, fuzzy
@@ -1327,7 +1327,7 @@ msgstr "第一次调用时打开栈试图,回到主程序关闭"
 #: thonny/plugins/run_debug_config_page.py:37
 #, fuzzy
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
-msgstr "允许进入模块脚本中(即主脚本之外)"
+msgstr "允许进入包脚本中(即主脚本之外)"
 
 #: thonny/plugins/run_debug_config_page.py:38
 #, fuzzy
@@ -1439,7 +1439,7 @@ msgstr "预览"
 #: thonny/plugins/theme_and_font_config_page.py:144
 #, fuzzy
 msgid "This is a comment"
-msgstr "这是一个留言"
+msgstr "这是一个注释"
 
 #: thonny/plugins/theme_and_font_config_page.py:147
 #, fuzzy
@@ -1561,7 +1561,7 @@ msgstr "从本地文件中安装"
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
 msgstr "此窗口是为了管理Thonny的插件和插件的依赖项.\n"
-"如果你想为你的程序安装模块请选择'工具 ->管理模块...'"
+"如果你想为你的程序安装包请选择'工具 ->管理包...'"
 
 #: thonny/plugins/circuitpython/__init__.py:47
 #, fuzzy
