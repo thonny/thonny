@@ -1,5 +1,4 @@
 jedi==0.15.*
-setuptools==41.*
 pyserial==3.4.*
 pylint==2.3.*
 docutils==0.15.*
