@@ -15,13 +15,7 @@ copy thonny_python.ini %BUILDDIR%
 
 @echo ............... INSTALLING DEPS ...................................
 
-%BUILDDIR%\python -s -m pip install --no-cache-dir asttokens==1.1.*
-%BUILDDIR%\python -s -m pip install --no-cache-dir parso==0.5.*
-%BUILDDIR%\python -s -m pip install --no-cache-dir jedi==0.14.*
-%BUILDDIR%\python -s -m pip install --no-cache-dir --no-binary mypy mypy==0.720
-%BUILDDIR%\python -s -m pip install --no-cache-dir pylint==2.3.*
-%BUILDDIR%\python -s -m pip install docutils==0.15.*
-%BUILDDIR%\python -s -m pip install pyserial==3.4
+%BUILDDIR%\python -s -m pip install --no-cache-dir --no-binary mypy -r ..\requirements-regular-bundle.txt
 
 @echo ............... INSTALLING THONNY ...................................
 %BUILDDIR%\python -s -m pip install --pre --no-cache-dir thonny
@@ -88,24 +82,7 @@ cd %BUILDDIR%
 cd ..
 
 @echo ............... XXL ..........................
-%BUILDDIR%\python -s -m pip install guizero
-%BUILDDIR%\python -s -m pip install gpiozero
-%BUILDDIR%\python -s -m pip install requests
-%BUILDDIR%\python -s -m pip install pillow
-%BUILDDIR%\python -s -m pip install scipy
-%BUILDDIR%\python -s -m pip install matplotlib
-%BUILDDIR%\python -s -m pip install numpy
-
-%BUILDDIR%\python -s -m pip install pgzero
-%BUILDDIR%\python -s -m pip install pygame
-
-%BUILDDIR%\python -s -m pip install flask
-
-%BUILDDIR%\python -s -m pip install pytest
-
-%BUILDDIR%\python -s -m pip install colorama
-%BUILDDIR%\python -s -m pip install birdseye
-%BUILDDIR%\python -s -m pip install beautifulsoup4
+%BUILDDIR%\python -s -m pip install --no-cache-dir -r ..\requirements-xxl-bundle.txt
 
 del /S "%BUILDDIR%\*.pyc">NUL
 

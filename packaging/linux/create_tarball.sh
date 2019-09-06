@@ -32,13 +32,7 @@ then
     $TARGET_DIR/bin/python3.7 -s -m pip install setuptools-scm
 fi
 
-$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir asttokens==1.1.*
-$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir parso==0.5.*
-$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir jedi==0.14.*
-$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir --no-binary mypy mypy==0.720
-$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir pylint==2.3.*
-$TARGET_DIR/bin/python3.7 -s -m pip install docutils==0.15.*
-$TARGET_DIR/bin/python3.7 -s -m pip install pyserial==3.4
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
 $TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir distro==1.4.*
 $TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir certifi
 
@@ -117,24 +111,7 @@ tar -cvzf dist/$VERSION_NAME.tar.gz -C build thonny
 
 # XXL ###########################################################
 
-$TARGET_DIR/bin/python3.7 -s -m pip install guizero
-$TARGET_DIR/bin/python3.7 -s -m pip install gpiozero
-$TARGET_DIR/bin/python3.7 -s -m pip install requests
-$TARGET_DIR/bin/python3.7 -s -m pip install pillow
-$TARGET_DIR/bin/python3.7 -s -m pip install scipy
-$TARGET_DIR/bin/python3.7 -s -m pip install matplotlib
-$TARGET_DIR/bin/python3.7 -s -m pip install numpy
-
-$TARGET_DIR/bin/python3.7 -s -m pip install pgzero
-$TARGET_DIR/bin/python3.7 -s -m pip install pygame
-
-$TARGET_DIR/bin/python3.7 -s -m pip install flask
-
-$TARGET_DIR/bin/python3.7 -s -m pip install pytest
-
-$TARGET_DIR/bin/python3.7 -s -m pip install colorama
-$TARGET_DIR/bin/python3.7 -s -m pip install birdseye
-$TARGET_DIR/bin/python3.7 -s -m pip install beautifulsoup4
+$TARGET_DIR/bin/python3.7 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
 
 find $TARGET_DIR -type f -name "*.pyo" -delete
 find $TARGET_DIR -type f -name "*.pyc" -delete

@@ -23,16 +23,10 @@ FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
 
 # install deps #####################################################
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir asttokens==1.1.*
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir parso==0.5.*
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir jedi==0.14.*
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir --no-binary mypy mypy==0.720
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir pylint==2.3.*
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install docutils==0.15.*
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pyserial==3.4
+$PYTHON_CURRENT/bin/python3.7  -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
 
 # install certifi #####################################################
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install certifi
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir certifi
 
 # install thonny #####################################################
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir thonny
@@ -118,37 +112,7 @@ hdiutil internet-enable -yes $FILENAME
 codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $FILENAME
 
 # xxl ####################################################################################
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install guizero
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install gpiozero
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install requests
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pillow
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install scipy
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install matplotlib
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install numpy
-
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pgzero
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygame
-
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install flask
-
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install pytest
-
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install colorama
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install birdseye
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install beautifulsoup4
-
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pygal
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install easygui
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pysimplegui
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pykkar
-
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install pandas
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install lxml
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install openpyxl
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install xlrd
-
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip install vpython
-#$PYTHON_CURRENT/bin/python3.7 -s -m pip uninstall notebook
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
 
 find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
