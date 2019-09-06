@@ -42,6 +42,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Antonio Carlos
 * Austin Bart
 * badukaire
+* borpol
 * cefn
 * Celso Isayah Dias
 * Chad Purdy
