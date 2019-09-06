@@ -2,8 +2,27 @@
 Version history
 ===============
 
+3.2.1 (2019-09-?)
+=================
+* NEW: Add European Portuguese translation (by Emanuel Angelo)
+* NEW: Add Lithuanian translation (by Vytenis)
+* NEW: Add Ukrainian translation (by borpol)
+* FIXED #802: Avoid scary traceback on MicroPython disconnect
+* FIXED #840: Problems with file dialogs in macOS 10.15
+* FIXED #843: Make right-click select items in Files view in macOS
+* FIXED #845: Crash with older ESP plug-in
+* FIXED #851: Ignore warnings when exporting variables
+* FIXED #854: Make single instance mode work in multi-user systems
+* FIXED #855: Wrong coloring with paren matching
+* FIXED #859: Support relative paths when opening files with Thonny from command line
+* FIXED #874: Multiline strings break stepping focus background
+* FIXED: Dutch translation was inproperly set up
+* FIXED: Internal error in Object Inspector (by Emanuel Angelo)
+* FIXED: Problem with compacting user event logs
+* TECHNICAL: Make tests run with Python 3.8
+
 3.2.0 (2019-08-12)
-=====================
+==================
 * FIXED #849: Uploading single file to MicroPython doesn't work
 * UPDATE: Updated translations
 
