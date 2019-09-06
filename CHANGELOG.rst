@@ -2,8 +2,8 @@
 Version history
 ===============
 
-3.2.1 (2019-09-?)
-=================
+3.2.1 (2019-09-06)
+==================
 * NEW: Add European Portuguese translation (by Emanuel Angelo)
 * NEW: Add Lithuanian translation (by Vytenis)
 * NEW: Add Ukrainian translation (by borpol)
