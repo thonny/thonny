@@ -78,7 +78,7 @@ set /p VERSION=<%BUILDDIR%\Lib\site-packages\thonny\VERSION
 @echo ............... CREATING ZIP ..........................
 SET PATH=%PATH%;C:\Program Files\7-Zip
 cd %BUILDDIR%
-7z a -tzip ..\dist\thonny-%VERSION%-windows.zip *
+7z a -tzip ..\dist\thonny-%VERSION%-windows-portable.zip *
 cd ..
 
 @echo ............... XXL ..........................
