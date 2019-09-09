@@ -45,7 +45,7 @@ msgstr "Išeiti"
 
 #: thonny/workbench.py:595
 msgid "Decrease font size"
-msgstr "Sumažinti šrifto dydį"
+msgstr "Sumažinti šriftą"
 
 #: thonny/workbench.py:607
 msgid "Focus editor"
@@ -53,7 +53,7 @@ msgstr "Pereiti prie redaktoriaus"
 
 #: thonny/workbench.py:616
 msgid "Focus shell"
-msgstr "Pereiti prie terminalo"
+msgstr "Pereiti prie komand. eilutės"
 
 #: thonny/workbench.py:627
 msgid "Maximize view"
@@ -237,7 +237,7 @@ msgstr "Leisti kodo užbaigimą su tab klavišu redaktoriuose"
 
 #: thonny/plugins/editor_config_page.py:40
 msgid "Allow code completion with Tab-key in Shell"
-msgstr "Leisti kodo užbaigimą su tab klavišu terminale"
+msgstr "Leisti kodo užbaigimą su tab klavišu komand. eilutėje"
 
 #: thonny/plugins/editor_config_page.py:44
 msgid "Show line numbers"
@@ -550,7 +550,7 @@ msgstr "Paleisti esamą scenarijų terminale"
 
 #: thonny/running.py:138
 msgid "Stop/Restart backend"
-msgstr "Sustabtydi/Perkrauti tarnybinį servisą"
+msgstr "Sustabdyti/Perkrauti tarnybinį servisą"
 
 #: thonny/running.py:139
 msgid "Stop"
@@ -625,7 +625,7 @@ msgstr "Kuriama virtuali aplinka"
 
 #: thonny/shell.py:72
 msgid "Clear shell"
-msgstr "Išvalyti terminalą"
+msgstr "Išvalyti komand. eilutę"
 
 #: thonny/shell.py:126
 msgid "Plotter"
@@ -642,7 +642,7 @@ msgstr "Rodyti braižyklę"
 #: thonny/shell.py:1389
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
-msgstr "Dėl greitaveikos terminalas labai ilgų eilučių nerodo pilnai (žiūrėkite Įrankiai => Nustatymai => Terminalas).\n"
+msgstr "Dėl greitaveikos komand. eilutė labai ilgų eilučių nerodo pilnai (žiūrėkite Įrankiai → Nustatymai → Komand. Eilutė).\n"
 "Čia jūs galite dirbti su originaliu teksto fragmentu."
 
 #: thonny/shell.py:1400
@@ -655,7 +655,7 @@ msgstr "Kopijuoti į iškarpinę"
 
 #: thonny/shell.py:1431
 msgid "Expand in Shell"
-msgstr "Išskleisti terminale"
+msgstr "Išskleisti komand. eilutėje"
 
 #: thonny/shell.py:1442
 msgid "Squeezed text (%d characters)"
@@ -665,7 +665,7 @@ msgstr "Suspaustas tekstas (%d ženklų)"
 msgid "Plotter visualizes series of\n"
 "numbers printed to the Shell."
 msgstr "Braižyklė parodo numerių seriją\n"
-"išspausdintą į terminalą"
+"išspausdintą į komand. eilutę"
 
 #: thonny/shell.py:1613
 msgid "See Help for details."
@@ -715,7 +715,7 @@ msgstr "Pasirinkti viską"
 
 #: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:162
 msgid "Shell"
-msgstr "Terminalas"
+msgstr "Komand. eilutė"
 
 #: thonny/workbench.py:512
 msgid "The same interpreter which runs Thonny (default)"
@@ -774,7 +774,7 @@ msgid "Configuration has been updated. Restart Thonny to start working in regula
 "(See 'Tools → Options → General' if you change your mind later.)"
 msgstr "Konfigūracija atnaujinta. Perkraukite Thonny norėdami dirbti numatytame režime.\n"
 "\n"
-"(Žiūrėkite 'Įrankiai => Nustatymai => Bendra' jei apsigalvosite.)"
+"(Žiūrėkite 'Įrankiai → Nustatymai → Bendra' jei apsigalvosite.)"
 
 #: thonny/plugins/ast_view.py:209
 msgid "Program tree"
@@ -883,7 +883,7 @@ msgstr "Peržiūrėti paketus"
 #: thonny/plugins/pip_gui.py:355
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-msgstr "Su esamu interpretatoriumi jūs galite paketus naršyti tik čia. Naudokite 'Įrankiai => Atverti sistemos terminalą...' norėdami įdiegti, atnaujinti ar išdiegti."
+msgstr "Su esamu interpretatoriumi jūs galite paketus naršyti tik čia. Naudokite 'Įrankiai → Atverti sistemos komand. eilutę...' norėdami įdiegti, atnaujinti ar išdiegti."
 
 #: thonny/plugins/pip_gui.py:363
 msgid "Packages' directory"
@@ -987,7 +987,7 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr "Atrodo, kad jūs bandote sudiegti su Thonny susijusį paketą. Jei norėjote sudiegti Thonny įskiepį, pasirinkite 'Įrankiai => Valdyti įskiepius...'.\n"
+msgstr "Atrodo, kad jūs bandote sudiegti su Thonny susijusį paketą. Jei norėjote sudiegti Thonny įskiepį, pasirinkite 'Įrankiai → Valdyti įskiepius...'.\n"
 "\n"
 "Ar tikrai norite sudiegti %s tarnybinei daliai?"
 
@@ -1006,7 +1006,7 @@ msgid "Looks like you are trying to install an outdated Thonny\n"
 "If you still want it, then please install it from the command line."
 msgstr "Atrodo, kad jūs bandote sudiegti pasenusį Thonny įskiepį (jis nenurodo reikalingos Thonny versijos).\n"
 "\n"
-"Jei vis dar jo norite, sudiekite jį iš terminalo."
+"Jei vis dar jo norite, sudiekite jį iš komand. eilutės."
 
 #: thonny/plugins/pip_gui.py:935
 msgid "Unsuitable requirements"
@@ -1018,7 +1018,7 @@ msgstr "Šis paketas reikalauja kitos Thonny versijos:"
 
 #: thonny/plugins/pip_gui.py:940
 msgid "If you still want it, then please install it from the command line."
-msgstr "Jei vis dar jo norite, sudiekite iš terminalo."
+msgstr "Jei vis dar jo norite, sudiekite iš komand. eilutės."
 
 #: thonny/plugins/pip_gui.py:984
 msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
@@ -1042,7 +1042,7 @@ msgstr "Norima versija"
 
 #: thonny/plugins/pip_gui.py:1060
 msgid "Upgrade dependencies"
-msgstr "Atnaujinimo priklausomybės"
+msgstr "Atnaujinti priklausomybes"
 
 #: thonny/plugins/pip_gui.py:1118
 msgid "Requires:"
@@ -1078,7 +1078,7 @@ msgstr "Nužymėkite norėdami tradicinės veiksenos."
 
 #: thonny/plugins/run_debug_config_page.py:27
 msgid "Open and close Stack view automatically"
-msgstr "Atidaryti ir uždaryti dėklo vaizdą automatiškai"
+msgstr "Atverti ir uždaryti dėklo vaizdą automatiškai"
 
 #: thonny/plugins/run_debug_config_page.py:28
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
@@ -1147,7 +1147,7 @@ msgstr "Palikti terminalo langą atvirą po to kai pasibaigia Python procesas"
 #: thonny/plugins/terminal_config_page.py:29
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
-msgstr "NB! Automatinis uždarymas turi būti įgalintas Terminalo nustatymuose (Profiliai => Terminalas => Kai išeinama iš terminalo)"
+msgstr "NB! Automatinis uždarymas turi būti įgalintas Terminalo nustatymuose (Profiliai → Komand. eilutė → Kai išeinama iš komand. eilutės)"
 
 #: thonny/plugins/terminal_config_page.py:38
 msgid "Terminal"
@@ -1207,7 +1207,7 @@ msgstr "Atverti Thonny programos aplanką..."
 
 #: thonny/plugins/thonny_folders.py:23
 msgid "Open Thonny data folder..."
-msgstr "Atidaryti Thonny duomenų aplanką..."
+msgstr "Atverti Thonny duomenų aplanką..."
 
 #: thonny/plugins/help/__init__.py:58
 msgid "Home"
@@ -1255,7 +1255,7 @@ msgstr "Spausdinti..."
 
 #: thonny/plugins/system_shell/__init__.py:59
 msgid "Open system shell..."
-msgstr "Atverti sistemos terminalą..."
+msgstr "Atverti sistemos komand. eilutę..."
 
 #: thonny/plugins/backend_config_page.py:61
 msgid "Details"
@@ -1273,7 +1273,7 @@ msgstr "Sudiegti iš lokalaus failo"
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
 msgstr "Šis dialogas skirtas valdyti Thonny įskiepius ir jų priklausomybes.\n"
-"Jei norite diegti paketus savo programoms naudokite \"Įrankiai => Valdyti paketus...'"
+"Jei norite diegti paketus savo programoms naudokite \"Įrankiai → Valdyti paketus...'"
 
 #: thonny/plugins/circuitpython/__init__.py:47
 msgid "CircuitPython (generic)"
@@ -1341,7 +1341,7 @@ msgstr "Programinė apratinė įranga"
 
 #: thonny/plugins/micropython/__init__.py:301
 msgid "Open the dialog for installing or upgrading MicroPython on your device"
-msgstr "Atidaryti dialogą sudiegti ar atnaujinti MicroPython jūsų įrenginyje"
+msgstr "Atverti dialogą sudiegti ar atnaujinti MicroPython jūsų įrenginyje"
 
 #: thonny/plugins/microbit/__init__.py:67
 msgid "Could not find disk '%s'."
