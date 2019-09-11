@@ -102,7 +102,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
         path = normpath_with_actual_case(path)
 
         proc = subprocess.Popen(
-            [running.get_frontend_python(), "-m", "venv", path],
+            [running.get_interpreter_for_subprocess(), "-m", "venv", path],
             stdin=None,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,

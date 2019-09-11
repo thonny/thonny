@@ -6,7 +6,7 @@ from typing import Iterable
 
 from thonny import get_runner, ui_utils, get_workbench
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
-from thonny.running import get_frontend_python
+from thonny.running import get_interpreter_for_subprocess
 import logging
 
 
@@ -19,7 +19,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
         self.interesting_files = [main_file_path] + list(imported_file_paths)
 
         args = [
-            get_frontend_python(),
+            get_interpreter_for_subprocess(),
             "-m",
             "mypy",
             "--ignore-missing-imports",

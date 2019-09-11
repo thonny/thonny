@@ -3,7 +3,7 @@ import subprocess
 
 from thonny import ui_utils, get_workbench
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
-from thonny.running import get_frontend_python
+from thonny.running import get_interpreter_for_subprocess
 import logging
 
 
@@ -53,7 +53,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         """
 
         self._proc = ui_utils.popen_with_ui_thread_callback(
-            [get_frontend_python(), "-m", "pylint"]
+            [get_interpreter_for_subprocess(), "-m", "pylint"]
             + options
             + [main_file_path]
             + list(imported_file_paths),

@@ -49,6 +49,7 @@ from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedI
 from thonny.terminal import run_in_terminal
 from thonny.ui_utils import select_sequence, show_dialog, CommonDialogEx
 from tkinter import messagebox
+import warnings
 
 
 WINDOWS_EXE = "python.exe"
@@ -62,6 +63,8 @@ EXPECTED_TERMINATION_CODE = 1234
 
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
+
+_console_allocated = False
 
 
 class Runner:
@@ -83,7 +86,14 @@ class Runner:
                 shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
 
     def start(self) -> None:
-        self._check_alloc_console()
+        global _console_allocated
+        try:
+            self._check_alloc_console()
+            _console_allocated = True
+        except Exception:
+            logging.getLogger("thonny").exception("Problem allocating console")
+            _console_allocated = False
+
         self.restart_backend(False, True)
         # temporary
         self._remove_obsolete_jedi_copies()
@@ -375,7 +385,13 @@ class Runner:
 
     def _cmd_interrupt(self) -> None:
         if self._proxy is not None:
-            self._proxy.interrupt()
+            if _console_allocated:
+                self._proxy.interrupt()
+            else:
+                messagebox.showerror(
+                    "No console",
+                    "Can't interrupt as console was not allocated.\n\nUse Stop/Restart instead.",
+                )
         else:
             logging.warning("Interrupting without proxy")
 
@@ -556,7 +572,7 @@ class Runner:
         return self._proxy
 
     def _check_alloc_console(self) -> None:
-        if sys.executable.endswith("thonny.exe") or sys.executable.endswith("pythonw.exe"):
+        if sys.executable.endswith("pythonw.exe"):
             # These don't have console allocated.
             # Console is required for sending interrupts.
 
@@ -566,9 +582,7 @@ class Runner:
 
             kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 
-            exe = sys.executable.replace("thonny.exe", "python.exe").replace(
-                "pythonw.exe", "python.exe"
-            )
+            exe = sys.executable.replace("pythonw.exe", "python.exe")
 
             cmd = [exe, "-c", "print('Hi!'); input()"]
             child = subprocess.Popen(
@@ -1086,7 +1100,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
         # This way all students will have similar configuration
         # independently of system Python (if Thonny is used with system Python)
 
-        # NB! Cant run venv.create directly, because in Windows
+        # NB! Cant run venv.create directly, because in Windows bundle
         # it tries to link venv to thonny.exe.
         # Need to run it via proper python
         args = ["-m", "venv"]
@@ -1135,7 +1149,7 @@ class PrivateVenvCPythonProxy(CPythonProxy):
 
 class SameAsFrontendCPythonProxy(CPythonProxy):
     def __init__(self, clean):
-        super().__init__(clean, get_frontend_python())
+        super().__init__(clean, get_interpreter_for_subprocess())
 
     def fetch_next_message(self):
         msg = super().fetch_next_message()
@@ -1157,7 +1171,7 @@ class CustomCPythonProxy(CPythonProxy):
             used_interpreters.append(executable)
         get_workbench().set_option("CustomInterpreter.used_paths", used_interpreters)
 
-        super().__init__(clean, executable)
+        super().__init__(clean, get_interpreter_for_subprocess(executable))
 
     def fetch_next_message(self):
         msg = super().fetch_next_message()
@@ -1227,7 +1241,10 @@ def create_frontend_python_process(
     args, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.STDOUT
 ):
     """Used for running helper commands (eg. for installing plug-ins on by the plug-ins)"""
-    python_exe = get_frontend_python().replace("pythonw.exe", "python.exe")
+    if _console_allocated:
+        python_exe = get_interpreter_for_subprocess().replace("pythonw.exe", "python.exe")
+    else:
+        python_exe = get_interpreter_for_subprocess().replace("python.exe", "pythonw.exe")
     env = get_environment_for_python_subprocess(python_exe)
     env["PYTHONIOENCODING"] = "utf-8"
     env["PYTHONUNBUFFERED"] = "1"
@@ -1275,10 +1292,6 @@ class BackendTerminatedError(Exception):
     def __init__(self, returncode=None):
         Exception.__init__(self)
         self.returncode = returncode
-
-
-def get_frontend_python():
-    return sys.executable.replace("thonny.exe", "python.exe").replace("pythonw.exe", "python.exe")
 
 
 def is_venv_interpreter_of_current_interpreter(executable):
@@ -1475,3 +1488,20 @@ class BlockingDialog(CommonDialogEx):
                 "Cancel current operation?", "Do you really want to cancel this operation?"
             ):
                 self._send_interrupt()
+
+
+def get_frontend_python():
+    # TODO: deprecated (name can be misleading)
+    warnings.warn("get_frontend_python is deprecated")
+    return get_interpreter_for_subprocess(sys.executable)
+
+
+def get_interpreter_for_subprocess(candidate=None):
+    if candidate is None:
+        candidate = sys.executable
+
+    pythonw = candidate.replace("python.exe", "pythonw.exe")
+    if not _console_allocated and os.path.exists(pythonw):
+        return pythonw
+    else:
+        return candidate.replace("pythonw.exe", "python.exe")

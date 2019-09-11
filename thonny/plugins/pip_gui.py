@@ -31,6 +31,7 @@ from thonny.ui_utils import (
     scrollbar_style,
     CommonDialog,
 )
+from thonny.running import get_interpreter_for_subprocess
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 
@@ -885,7 +886,7 @@ class PluginsPipDialog(PipDialog):
             return None
 
     def _get_interpreter(self):
-        return sys.executable.replace("thonny.exe", "python.exe")
+        return get_interpreter_for_subprocess(sys.executable)
 
     def _should_install_to_site_packages(self):
         return self._targets_virtual_environment()

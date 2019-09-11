@@ -67,7 +67,7 @@ class MicroPythonProxy(SubprocessProxy):
 
                 self._show_error(message)
 
-        super().__init__(clean, running.get_frontend_python())
+        super().__init__(clean, running.get_interpreter_for_subprocess())
 
         # Following is required for compatibility with older MP plugins (ESP)
         # TODO: remove it later

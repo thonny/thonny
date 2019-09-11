@@ -510,7 +510,7 @@ class Workbench(tk.Tk):
             "SameAsFrontend",
             running.SameAsFrontendCPythonProxy,
             _("The same interpreter which runs Thonny (default)"),
-            running.get_frontend_python(),
+            running.get_interpreter_for_subprocess(),
             "1",
         )
 
