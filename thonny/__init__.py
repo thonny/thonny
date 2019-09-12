@@ -137,14 +137,15 @@ def launch():
         sys.executable = sys.executable[: -len("thonny.exe")] + "pythonw.exe"
 
     set_dpi_aware()
-    gettext.install("thonny", "locale")
 
-    _prepare_thonny_user_dir()
     try:
         runpy.run_module("thonny.customize", run_name="__main__")
     except ImportError:
         pass
 
+    gettext.install("thonny", "locale")
+    _prepare_thonny_user_dir()
+    
     if not _check_welcome():
         return
 
