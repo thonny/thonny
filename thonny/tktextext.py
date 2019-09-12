@@ -272,6 +272,14 @@ class EnhancedText(TweakableText):
         self.bind("<2>", self._on_mouse_click, True)
         self.bind("<3>", self._on_mouse_click, True)
 
+        if _running_on_x11() or _running_on_mac():
+
+            def custom_redo(event):
+                self.event_generate("<<Redo>>")
+                return "break"
+
+            self.bind("<Control-y>", custom_redo, True)
+
     def _redirect_ctrld(self, event):
         # I want to disable the deletion effect of Ctrl-D in the text but still
         # keep the event for other purposes
@@ -1105,6 +1113,10 @@ def rebind_control_a(root):
 
 def _running_on_mac():
     return tk._default_root.call("tk", "windowingsystem") == "aqua"
+
+
+def _running_on_x11():
+    return tk._default_root.call("tk", "windowingsystem") == "x11"
 
 
 def get_keyboard_language():
