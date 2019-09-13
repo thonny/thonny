@@ -70,9 +70,6 @@ class MicrobitConfigPage(MicroPythonConfigPage):
             + "\n\n"
             + _("Do you want to continue and locate the disk yourself?"),
         )
-        """
-        mount_path = "C:\\"
-        """
         if mount_path is None:
             return
 

@@ -89,6 +89,7 @@ OBSOLETE_PLUGINS = [
     "thonnycontrib.micropython",
     "thonnycontrib.circuitpython",
     "thonnycontrib.microbit",
+    "thonnycontrib.esp",
 ]
 
 

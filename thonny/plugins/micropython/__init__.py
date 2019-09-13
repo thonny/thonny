@@ -407,6 +407,28 @@ def list_serial_ports():
         os.path.islink = old_islink
 
 
+def list_serial_ports_with_descriptions():
+    def port_order(p):
+        name = p.device
+        if name is None:
+            return ""
+        elif name.startswith("COM") and len(name) == 4:
+            # Make one-digit COM ports go before COM10
+            return name.replace("COM", "COM0")
+        else:
+            return name
+
+    sorted_ports = sorted(list_serial_ports(), key=port_order)
+
+    return [
+        (
+            p.description if p.device in p.description else p.description + " (" + p.device + ")",
+            p.device,
+        )
+        for p in sorted_ports
+    ]
+
+
 def add_micropython_backend(name, proxy_class, description, config_page):
     get_workbench().set_default(name + ".port", "auto")
     get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)

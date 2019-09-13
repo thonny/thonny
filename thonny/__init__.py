@@ -145,7 +145,7 @@ def launch():
 
     gettext.install("thonny", "locale")
     _prepare_thonny_user_dir()
-    
+
     if not _check_welcome():
         return
 
