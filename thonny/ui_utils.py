@@ -39,7 +39,6 @@ class CommonDialog(tk.Toplevel):
 
     def _unlock_on_focus_in(self, event):
         if not self.winfo_ismapped():
-            print("unlocking")
             focussed_widget = self.focus_get()
             self.deiconify()
             if focussed_widget:
@@ -1390,7 +1389,7 @@ def center_window(win, master=None):
     return assign_geometry(win, master)
 
 
-def assign_geometry(win, master=None):
+def assign_geometry(win, master=None, min_left=0, min_top=0):
 
     if master is None:
         master = tk._default_root
@@ -1425,6 +1424,9 @@ def assign_geometry(win, master=None):
 
     left = master.winfo_rootx() + master.winfo_width() // 2 - width // 2
     top = master.winfo_rooty() + master.winfo_height() // 2 - height // 2
+
+    left = max(left, min_left)
+    top = max(top, min_top)
 
     if saved_size:
         win.geometry("%dx%d+%d+%d" % (width, height, left, top))
@@ -1724,6 +1726,7 @@ class SubprocessDialog(CommonDialog):
         )  # escape-close only if process has completed
         self.protocol("WM_DELETE_WINDOW", self._close)
 
+        self.update_idletasks()
         self._start_listening()
 
     def _start_listening(self):
@@ -1762,11 +1765,18 @@ class SubprocessDialog(CommonDialog):
                 self.button["text"] = _("OK")
                 self.button.focus_set()
                 if self.returncode != 0:
-                    self.text.direct_insert("end", "\n\nReturn code: ", ("stderr",))
+                    self.text.direct_insert(
+                        "end",
+                        "\n\nProcess failed, return code: %s\n" % self.returncode,
+                        ("stderr",),
+                    )
+                    self.update_idletasks()
+                    self.text.see("end")
                 elif self._autoclose:
                     self._close()
                 else:
                     self.text.direct_insert("end", "\n\n" + self._conclusion)
+                    self.update_idletasks()
                     self.text.see("end")
 
         poll_output_events()
@@ -2058,7 +2068,7 @@ def handle_mistreated_latin_shortcuts(registry, event):
                     handler()
 
 
-def show_dialog(dlg, master=None, geometry=True):
+def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
     if master is None:
         master = tk._default_root
 
@@ -2072,7 +2082,7 @@ def show_dialog(dlg, master=None, geometry=True):
         if isinstance(geometry, str):
             dlg.geometry(geometry)
         else:
-            assign_geometry(dlg, master)
+            assign_geometry(dlg, master, min_left, min_top)
         # dlg.wm_deiconify()
 
     try:
