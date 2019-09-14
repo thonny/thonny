@@ -21,30 +21,12 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 from collections import OrderedDict
 import tkinter
+from thonny.plugins.micropython.serial_connection import SerialConnection
+from thonny.misc_utils import running_on_mac_os, construct_cmd_line
+import time
 
 
 class ESPProxy(MicroPythonProxy):
-    def _finalize_repl(self):
-        # In some cases there may be still something coming.
-        sleep(0.1)
-        remainder = self._serial.read_all().decode("utf-8", "replace").strip()
-        # display it unless it looks like an extra raw prompt
-        if remainder and (len(remainder) > 40 or "raw REPL; CTRL-B to exit" not in remainder):
-            self._send_error_to_shell(remainder)
-
-    @property
-    def firmware_filetypes(self):
-        return [("*.bin files", ".bin"), ("all files", ".*")]
-
-    def erase_flash(self):
-        self.disconnect()
-        cmd = [get_frontend_python(), "-u", "-m", "esptool", "--port", self.port, "erase_flash"]
-        proc = subprocess.Popen(
-            cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True
-        )
-        dlg = SubprocessDialog(get_workbench(), proc, "Erasing flash", autoclose=False)
-        dlg.wait_window()
-
     @property
     def allow_webrepl(self):
         return True
@@ -62,32 +44,6 @@ class ESP8266Proxy(ESPProxy):
             (0x1A86, 0x7523),  # USB-SERIAL CH340,
         }
 
-    @property
-    def flash_mode(self):
-        # "dio" for some boards with a particular FlashROM configuration (e.g. some variants of a NodeMCU board)
-        # https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html
-        # https://github.com/espressif/esptool/wiki/SPI-Flash-Modes
-
-        # TODO: detect the need for this (or provide conf option for the backend)
-        return "keep"
-        # return "dio"
-
-    def construct_firmware_upload_command(self, firmware_path):
-        return [
-            get_frontend_python(),
-            "-u",
-            "-m",
-            "esptool",
-            "--port",
-            self.port,
-            #'--baud', '460800',
-            "write_flash",
-            #'--flash_size', 'detect',
-            # "--flash_mode", self.flash_mode,
-            "0x0000",
-            firmware_path,
-        ]
-
     def _get_api_stubs_path(self):
         return os.path.join(os.path.dirname(__file__), "esp8266_api_stubs")
 
@@ -100,29 +56,14 @@ class ESP32Proxy(ESPProxy):
             (0x10C4, 0xEA60)  # Silicon Labs CP210x USB to UART Bridge
         }
 
-    def construct_firmware_upload_command(self, firmware_path):
-        return [
-            get_frontend_python(),
-            "-u",
-            "-m",
-            "esptool",
-            #'--chip', 'esp32',
-            "--port",
-            self.port,
-            #'--baud', '460800',
-            "write_flash",
-            #'--flash_size=detect',
-            "0x1000",
-            firmware_path,
-        ]
-
     def _get_api_stubs_path(self):
         return os.path.join(os.path.dirname(__file__), "esp32_api_stubs")
 
 
 class ESPConfigPage(MicroPythonConfigPage):
-    def __init__(self, master, chip):
-        self.chip = chip
+    def __init__(self, master, chip, firmware_start_address):
+        self._chip = chip
+        self._firmware_start_address = firmware_start_address
         super().__init__(master)
 
     def _get_flashing_frame(self):
@@ -133,27 +74,28 @@ class ESPConfigPage(MicroPythonConfigPage):
         return True
 
     def _open_flashing_dialog(self):
-        dlg = ESPFlashingDialog(get_workbench(), self.chip)
+        dlg = ESPFlashingDialog(get_workbench(), self._chip, self._firmware_start_address)
         ui_utils.show_dialog(dlg)
 
 
 class ESP8266ConfigPage(ESPConfigPage):
     def __init__(self, master):
-        super().__init__(master, "esp8266")
+        super().__init__(master, "esp8266", "0x0")
 
 
 class ESP32ConfigPage(ESPConfigPage):
     def __init__(self, master):
-        super().__init__(master, "esp32")
+        super().__init__(master, "esp32", "0x1000")
 
 
 class ESPFlashingDialog(CommonDialogEx):
-    def __init__(self, master, chip, initial_port_desc=""):
+    def __init__(self, master, chip, start_address, initial_port_desc=""):
         super().__init__(master)
 
         self.title("Install %s firmware with esptool" % chip.upper())
 
-        self.chip = chip
+        self._chip = chip
+        self._start_address = start_address
         self._esptool_command = self._get_esptool_command()
         if not self._esptool_command:
             messagebox.showerror(
@@ -162,7 +104,7 @@ class ESPFlashingDialog(CommonDialogEx):
                 + "Install it via 'Tools => Manage plug-ins'\n"
                 + "or using your OP-system package manager.",
             )
-            return self._cancel()
+            return self._close()
 
         self.main_frame.columnconfigure(2, weight=1)
 
@@ -189,7 +131,7 @@ class ESPFlashingDialog(CommonDialogEx):
         firmware_label = ttk.Label(self.main_frame, text="Firmware")
         firmware_label.grid(row=2, column=1, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
 
-        self._firmware_entry = ttk.Entry(self.main_frame, width=80)
+        self._firmware_entry = ttk.Entry(self.main_frame, width=65)
         self._firmware_entry.grid(row=2, column=2, sticky="nsew", padx=ipadx, pady=(ipady, 0))
 
         browse_button = ttk.Button(self.main_frame, text="Browse...", command=self._browse)
@@ -208,7 +150,7 @@ class ESPFlashingDialog(CommonDialogEx):
         install_button = ttk.Button(self.main_frame, text="Install", command=self._install)
         install_button.grid(row=4, column=1, columnspan=2, sticky="e", padx=ipadx, pady=(0, epady))
 
-        cancel_button = ttk.Button(self.main_frame, text="Cancel", command=self._cancel)
+        cancel_button = ttk.Button(self.main_frame, text="Close", command=self._close)
         cancel_button.grid(
             row=4, column=3, columnspan=1, sticky="we", padx=(0, epadx), pady=(0, epady)
         )
@@ -240,6 +182,26 @@ class ESPFlashingDialog(CommonDialogEx):
             self._firmware_entry.delete(0, "end")
             self._firmware_entry.insert(0, path)
 
+    def _check_connection(self, port):
+        proxy = get_runner().get_backend_proxy()
+        if isinstance(proxy, MicroPythonProxy):
+            # Most likely it is using the same port
+            proxy.disconnect()
+            time.sleep(1.5)
+
+        # Maybe another program is connected
+        # or the user doesn't have sufficient permissions?
+        try:
+            conn = SerialConnection(port, 115200, skip_reader=True)
+            conn.close()
+
+            return True
+        except Exception as e:
+            messagebox.showerror(
+                "Can't connect", str(e), master=None if running_on_mac_os() else self
+            )
+            return False
+
     def _install(self):
         if not self._port_desc_variable.get():
             messagebox.showerror("Select port", "Please select port")
@@ -252,35 +214,69 @@ class ESPFlashingDialog(CommonDialogEx):
             messagebox.showerror("Bad firmware path", "Can't find firmware, please check path")
             return
 
+        erase_command = self._esptool_command + [
+            "--chip",
+            self._chip,
+            "--port",
+            port,
+            "erase_flash",
+        ]
+
         write_command = self._esptool_command + [
             "--chip",
-            self.chip,
+            self._chip,
             "--port",
             port,
             "write_flash",
-            "0x1000",
+            self._start_address,
             firmware_path,
         ]
 
-        erase_command = self._esptool_command + ["--chip", self.chip, "--port", port, "erase_flash"]
+        if not self._check_connection(port):
+            return
 
+        # unknown problem with first dialog appearing at 0,0
+        # self.update_idletasks()
+        if self.winfo_screenwidth() >= 1024:
+            min_left = ems_to_pixels(15)
+            min_top = ems_to_pixels(5)
+        else:
+            min_left = 0
+            min_top = 0
+
+        def long_desc(cmd):
+            return "Command:\n%s\n\nOutput:\n" % construct_cmd_line(cmd)
+
+        self.update_idletasks()
         if self._erase_variable.get():
             proc = self._create_subprocess(erase_command)
-            dlg = SubprocessDialog(self, proc, "Erasing flash", autoclose=False)
-            show_dialog(dlg)
+            dlg = SubprocessDialog(
+                self,
+                proc,
+                "Erasing flash",
+                long_description=long_desc(erase_command),
+                autoclose=True,
+            )
+            show_dialog(dlg, master=self, min_left=min_left, min_top=min_top)
             if dlg.cancelled or dlg.returncode:
                 return
 
         proc = self._create_subprocess(write_command)
-        dlg = SubprocessDialog(self, proc, "Installing firmware", autoclose=False)
-        show_dialog(dlg)
+        dlg = SubprocessDialog(
+            self,
+            proc,
+            "Installing firmware",
+            long_description=long_desc(write_command),
+            autoclose=False,
+        )
+        show_dialog(dlg, master=self, min_left=min_left, min_top=min_top)
 
     def _create_subprocess(self, cmd):
         return subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True
         )
 
-    def _cancel(self):
+    def _close(self):
         self.destroy()
 
 

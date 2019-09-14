@@ -9,7 +9,7 @@ from textwrap import dedent
 
 
 class SerialConnection(MicroPythonConnection):
-    def __init__(self, port, baudrate):
+    def __init__(self, port, baudrate, skip_reader=False):
         super().__init__()
 
         try:
@@ -42,8 +42,11 @@ class SerialConnection(MicroPythonConnection):
 
             raise ConnectionFailedException(message)
 
-        self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
-        self._reading_thread.start()
+        if skip_reader:
+            self._reading_thread = None
+        else:
+            self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
+            self._reading_thread.start()
 
     def write(self, data, block_size=256, delay=0.01):
         # delay and block size taken from rshell
@@ -96,7 +99,8 @@ class SerialConnection(MicroPythonConnection):
         if self._serial is not None:
             try:
                 self._serial.cancel_read()
-                self._reading_thread.join()
+                if self._reading_thread:
+                    self._reading_thread.join()
             finally:
                 try:
                     self._serial.close()
