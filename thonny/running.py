@@ -606,8 +606,17 @@ class Runner:
                 # Without flush the console window becomes visible, but Thonny can be still used
                 logging.getLogger("thonny").exception("Problem with finalizing console allocation")
 
-    def ready_for_remote_file_operations(self):
-        return self._proxy and self._proxy.ready_for_remote_file_operations()
+    def ready_for_remote_file_operations(self, propose_waiting=False):
+        if not self._proxy or not self.supports_remote_files():
+            return False
+        
+        ready = self._proxy.ready_for_remote_file_operations()
+        
+        if not ready and propose_waiting:
+            messagebox.showerror("Can't complete", "Device is busy, please wait and try again!")
+        
+        return ready
+
 
     def get_supported_features(self) -> Set[str]:
         if self._proxy is None:
