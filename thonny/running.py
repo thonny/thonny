@@ -478,7 +478,7 @@ class Runner:
                 "other messages don't affect the state"
 
             if "cwd" in msg:
-                if not self.has_own_filesystem():
+                if not self.supports_remote_files():
                     get_workbench().set_local_cwd(msg["cwd"])
 
             # Publish the event
@@ -615,11 +615,11 @@ class Runner:
         else:
             return self._proxy.get_supported_features()
 
-    def has_own_filesystem(self):
+    def supports_remote_files(self):
         if self._proxy is None:
             return False
         else:
-            return self._proxy.has_own_filesystem()
+            return self._proxy.supports_remote_files()
 
     def get_node_label(self):
         if self._proxy is None:
@@ -695,14 +695,16 @@ class BackendProxy:
         """Used as files caption if back-end has separate files"""
         return "Back-end"
 
-    def has_own_filesystem(self):
+    def supports_remote_files(self):
+        """Whether remote file browser should be presented with this back-end"""
         return False
 
     def uses_local_filesystem(self):
+        """Whether it runs code from local files"""
         return True
 
-    def supports_directories(self):
-        return True
+    def supports_remote_directories(self):
+        return False
 
     def supports_trash(self):
         return True

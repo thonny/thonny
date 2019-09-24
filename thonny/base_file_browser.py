@@ -1121,7 +1121,7 @@ def ask_backend_path(master, dialog_kind):
     if not proxy:
         return None
 
-    assert proxy.has_own_filesystem()
+    assert proxy.supports_remote_files()
 
     dlg = BackendFileDialog(master, dialog_kind, proxy.get_cwd())
     show_dialog(dlg, master)
@@ -1129,7 +1129,7 @@ def ask_backend_path(master, dialog_kind):
 
 
 def choose_node_for_file_operations(master, prompt):
-    if get_runner().has_own_filesystem():
+    if get_runner().supports_remote_files():
         dlg = NodeChoiceDialog(master, prompt)
         show_dialog(dlg, master)
         return dlg.result

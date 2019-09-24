@@ -31,7 +31,7 @@ class MicrobitProxy(MicroPythonProxy):
 
         super()._start_background_process(clean)
 
-    def supports_directories(self):
+    def supports_remote_directories(self):
         return False
 
     @property

@@ -47,7 +47,7 @@ class FilesView(tk.PanedWindow):
             self.hide_remote()
             return
 
-        if proxy.has_own_filesystem():
+        if proxy.supports_remote_files():
             # remote pane is needed
             if not self.remote_added:
                 self.add(self.remote_files, before=self.local_files, minsize=minsize)
@@ -172,7 +172,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
         proxy = get_runner().get_backend_proxy()
 
-        if not proxy.supports_directories():
+        if not proxy.supports_remote_directories():
             target_dir_desc = proxy.get_node_label()
         else:
             target_dir_desc = target_dir
@@ -182,7 +182,7 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
             if not selection:
                 return
 
-            if "dir" in selection["kinds"] and not proxy.supports_directories():
+            if "dir" in selection["kinds"] and not proxy.supports_remote_directories():
                 messagebox.showerror(
                     "Can't upload directory",
                     "%s does not support directories.\n" % proxy.get_node_label()
@@ -216,7 +216,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
         get_workbench().bind("ToplevelResponse", self.on_toplevel_response, True)
 
     def on_toplevel_response(self, event):
-        if get_runner().get_backend_proxy().has_own_filesystem():
+        if get_runner().get_backend_proxy().supports_remote_files():
             self.check_update_focus()
 
     def check_update_focus(self):
@@ -227,7 +227,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
     def request_focus_into(self, path):
         proxy = get_runner().get_backend_proxy()
         if proxy:
-            assert proxy.has_own_filesystem()
+            assert proxy.supports_remote_files()
 
             if not get_runner().is_waiting_toplevel_command():
                 messagebox.showerror(
@@ -235,7 +235,7 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
                     "Can't change or refresh directories when device is busy.\n"
                     + "Wait until current command completes and try again.",
                 )
-            elif not proxy.supports_directories():
+            elif not proxy.supports_remote_directories():
                 assert path == ""
                 self.focus_into(path)
             elif self.current_focus == path:

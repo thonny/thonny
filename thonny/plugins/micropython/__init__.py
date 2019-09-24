@@ -147,7 +147,7 @@ class MicroPythonProxy(SubprocessProxy):
 
         return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
-    def has_own_filesystem(self):
+    def supports_remote_files(self):
         return self._proc is not None
 
     def uses_local_filesystem(self):
@@ -156,7 +156,7 @@ class MicroPythonProxy(SubprocessProxy):
     def can_do_file_operations(self):
         return self._proc is not None and get_runner().is_waiting_toplevel_command()
 
-    def supports_directories(self):
+    def supports_remote_directories(self):
         return self._cwd is not None and self._cwd != ""
 
     def supports_trash(self):
