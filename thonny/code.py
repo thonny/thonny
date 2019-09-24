@@ -280,7 +280,7 @@ class Editor(ttk.Frame):
         return True
 
     def write_remote_file(self, save_filename, content_bytes, save_copy):
-        if get_runner().can_do_file_operations():
+        if get_runner().ready_for_remote_file_operations():
             target_filename = extract_target_path(save_filename)
 
             get_runner().send_command(
@@ -833,7 +833,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         return editor
 
     def show_remote_file(self, target_filename):
-        if not get_runner().can_do_file_operations():
+        if not get_runner().ready_for_remote_file_operations():
             messagebox.showwarning(
                 "Can't open",
                 "Device is busy, can't read file content.\n" + "Please try again later!",

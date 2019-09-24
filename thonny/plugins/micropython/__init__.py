@@ -153,7 +153,7 @@ class MicroPythonProxy(SubprocessProxy):
     def uses_local_filesystem(self):
         return False
 
-    def can_do_file_operations(self):
+    def ready_for_remote_file_operations(self):
         return self._proc is not None and get_runner().is_waiting_toplevel_command()
 
     def supports_remote_directories(self):

@@ -606,8 +606,8 @@ class Runner:
                 # Without flush the console window becomes visible, but Thonny can be still used
                 logging.getLogger("thonny").exception("Problem with finalizing console allocation")
 
-    def can_do_file_operations(self):
-        return self._proxy and self._proxy.can_do_file_operations()
+    def ready_for_remote_file_operations(self):
+        return self._proxy and self._proxy.ready_for_remote_file_operations()
 
     def get_supported_features(self) -> Set[str]:
         if self._proxy is None:
@@ -709,7 +709,7 @@ class BackendProxy:
     def supports_trash(self):
         return True
 
-    def can_do_file_operations(self):
+    def ready_for_remote_file_operations(self):
         return False
 
     def get_cwd(self):
