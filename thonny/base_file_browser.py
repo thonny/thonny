@@ -1132,6 +1132,8 @@ def choose_node_for_file_operations(master, prompt):
     if get_runner().supports_remote_files():
         dlg = NodeChoiceDialog(master, prompt)
         show_dialog(dlg, master)
+        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+            return None
         return dlg.result
     else:
         return "local"
