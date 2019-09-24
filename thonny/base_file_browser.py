@@ -880,7 +880,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         proxy = runner.get_backend_proxy()
         if not proxy:
             return False
-        return proxy.supports_directories()
+        return proxy.supports_remote_directories()
 
     def on_remote_file_operation(self, event):
         path = event["path"]

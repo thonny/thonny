@@ -613,7 +613,9 @@ class Runner:
         ready = self._proxy.ready_for_remote_file_operations()
         
         if not ready and propose_waiting:
-            messagebox.showerror("Can't complete", "Device is busy, please wait and try again!")
+            messagebox.showerror("Can't complete", 
+                                 "Device is busy -- can't perform this action now."
+                                 + "\nPlease wait or cancel current work and try again!")
         
         return ready
 
