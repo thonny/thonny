@@ -33,6 +33,7 @@ from thonny.common import (
     ToplevelResponse,
     InterruptCommand,
     EOFCommand,
+    CommandToBackend,
 )
 from thonny.config_ui import ConfigurationPage
 from thonny.misc_utils import find_volumes_by_name, TimeHelper
@@ -99,6 +100,12 @@ class MicroPythonProxy(SubprocessProxy):
             else:
                 self._proc.send_signal(signal.SIGINT)
         """
+
+    def send_command(self, cmd: CommandToBackend) -> Optional[str]:
+        if isinstance(cmd, EOFCommand):
+            get_shell().restart()  # Runner doesn't notice restart
+
+        return super().send_command(cmd)
 
     def _clear_environment(self):
         "TODO:"
