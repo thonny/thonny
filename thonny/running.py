@@ -42,7 +42,7 @@ from thonny.common import (
     path_startswith,
     serialize_message,
     update_system_path,
-)
+    EOFCommand)
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
@@ -431,14 +431,14 @@ class Runner:
 
     def soft_reboot(self):
         proxy = self.get_backend_proxy()
-        if hasattr(proxy, "_soft_reboot_and_run_main"):
-            proxy._soft_reboot_and_run_main()
+        if proxy and proxy.supports_soft_reboot():
+            proxy.soft_reboot()
             self._set_state("running")
         return
 
     def soft_reboot_enabled(self):
         proxy = self.get_backend_proxy()
-        return proxy and proxy.is_functional() and hasattr(proxy, "_soft_reboot_and_run_main")
+        return proxy and proxy.is_functional() and proxy.supports_soft_reboot()
 
     def _poll_vm_messages(self) -> None:
         """I chose polling instead of event_generate in listener thread,
@@ -714,12 +714,18 @@ class BackendProxy:
     def uses_local_filesystem(self):
         """Whether it runs code from local files"""
         return True
+    
+    def soft_reboot(self):
+        raise NotImplementedError()
 
     def supports_remote_directories(self):
         return False
 
     def supports_trash(self):
         return True
+    
+    def supports_soft_reboot(self):
+        return False
 
     def ready_for_remote_file_operations(self):
         return False
@@ -1068,6 +1074,12 @@ class CPythonProxy(SubprocessProxy):
 
     def get_supported_features(self):
         return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
+    
+    def supports_soft_reboot(self):
+        return True
+    
+    def soft_reboot(self):
+        self._send_msg(EOFCommand())
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):
