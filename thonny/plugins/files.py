@@ -224,25 +224,8 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
         if self.current_focus != proxy.get_cwd():
             self.focus_into(proxy.get_cwd())
 
-    def request_focus_into(self, path):
-        proxy = get_runner().get_backend_proxy()
-        if proxy:
-            assert proxy.supports_remote_files()
-
-            if not get_runner().is_waiting_toplevel_command():
-                messagebox.showerror(
-                    "Error",
-                    "Can't change or refresh directories when device is busy.\n"
-                    + "Wait until current command completes and try again.",
-                )
-            elif not proxy.supports_remote_directories():
-                assert path == ""
-                self.focus_into(path)
-            elif self.current_focus == path:
-                # refreshes
-                self.focus_into(path)
-            else:
-                get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
+    def request_new_focus(self, path):
+        get_shell().submit_magic_command(["%cd", path if path != "" else "/"])
 
     def add_download_command(self):
         target_dir = self.master.get_active_local_dir()

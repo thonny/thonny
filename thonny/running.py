@@ -633,6 +633,12 @@ class Runner:
         else:
             return self._proxy.supports_remote_files()
 
+    def supports_remote_directories(self):
+        if self._proxy is None:
+            return False
+        else:
+            return self._proxy.supports_remote_directories()
+
     def get_node_label(self):
         if self._proxy is None:
             return "Back-end"

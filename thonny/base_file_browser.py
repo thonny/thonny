@@ -567,7 +567,7 @@ class BaseFileBrowser(ttk.Frame):
         selected_path = self.get_selected_path()
         selected_kind = self.get_selected_kind()
 
-        self.menu.add_command(label=_("Refresh"), command=self.refresh_tree)
+        self.menu.add_command(label=_("Refresh"), command=self.cmd_refresh_tree)
 
         if selected_kind == "dir":
             self.menu.add_command(
@@ -575,6 +575,9 @@ class BaseFileBrowser(ttk.Frame):
             )
         else:
             "TODO: add open command"
+    
+    def cmd_refresh_tree(self):
+        self.refresh_tree()
 
     def add_middle_menu_items(self):
         if self.supports_trash():
@@ -916,6 +919,31 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
 
     def supports_trash(self):
         return get_runner().get_backend_proxy().supports_trash()
+    
+    def request_focus_into(self, path):
+        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+            return False
+        
+        super().request_focus_into(path)
+
+        if not get_runner().supports_remote_directories():
+            assert path == ""
+            self.focus_into(path)
+        elif self.current_focus == path:
+            # refreshes
+            self.focus_into(path)
+        else:
+            self.request_new_focus(path)
+    
+    def request_new_focus(self, path):
+        # Overridden in active browser
+        self.focus_into(path)
+    
+    def cmd_refresh_tree(self):
+        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+            return
+        
+        super().cmd_refresh_tree()
 
 
 class DialogRemoteFileBrowser(BaseRemoteFileBrowser):
