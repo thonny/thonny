@@ -432,8 +432,9 @@ class Runner:
     def soft_reboot(self):
         proxy = self.get_backend_proxy()
         if hasattr(proxy, "_soft_reboot_and_run_main"):
-            return proxy._soft_reboot_and_run_main()
-        return None
+            proxy._soft_reboot_and_run_main()
+            self._set_state("running")
+        return
 
     def soft_reboot_enabled(self):
         proxy = self.get_backend_proxy()
