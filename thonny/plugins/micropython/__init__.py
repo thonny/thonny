@@ -99,12 +99,6 @@ class MicroPythonProxy(SubprocessProxy):
             else:
                 self._proc.send_signal(signal.SIGINT)
         """
-    
-    def soft_reboot(self):
-        self._send_msg(EOFCommand())
-        
-    def supports_soft_reboot(self):
-        return True
 
     def _clear_environment(self):
         "TODO:"

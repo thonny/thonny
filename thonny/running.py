@@ -42,7 +42,8 @@ from thonny.common import (
     path_startswith,
     serialize_message,
     update_system_path,
-    EOFCommand)
+    EOFCommand,
+)
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
@@ -166,11 +167,11 @@ class Runner:
         )
 
         get_workbench().add_command(
-            "softreboot",
+            "ctrld",
             "run",
             _("Send EOF / Soft reboot"),
-            self.soft_reboot,
-            self.soft_reboot_enabled,
+            self.ctrld,
+            self.ctrld_enabled,
             group=100,
             default_sequence="<Control-d>",
             extra_sequences=["<<CtrlDInText>>"],
@@ -429,16 +430,17 @@ class Runner:
     def disconnect_enabled(self):
         return hasattr(self.get_backend_proxy(), "disconnect")
 
-    def soft_reboot(self):
+    def ctrld(self):
         proxy = self.get_backend_proxy()
-        if proxy and proxy.supports_soft_reboot():
-            proxy.soft_reboot()
-            self._set_state("running")
-        return
+        if not proxy:
+            return
 
-    def soft_reboot_enabled(self):
+        proxy.send_command(EOFCommand())
+        self._set_state("running")
+
+    def ctrld_enabled(self):
         proxy = self.get_backend_proxy()
-        return proxy and proxy.is_functional() and proxy.supports_soft_reboot()
+        return proxy and proxy.is_functional()
 
     def _poll_vm_messages(self) -> None:
         """I chose polling instead of event_generate in listener thread,
@@ -610,16 +612,17 @@ class Runner:
     def ready_for_remote_file_operations(self, propose_waiting=False):
         if not self._proxy or not self.supports_remote_files():
             return False
-        
-        ready = self._proxy.ready_for_remote_file_operations()
-        
-        if not ready and propose_waiting:
-            messagebox.showerror("Can't complete", 
-                                 "Device is busy -- can't perform this action now."
-                                 + "\nPlease wait or cancel current work and try again!")
-        
-        return ready
 
+        ready = self._proxy.ready_for_remote_file_operations()
+
+        if not ready and propose_waiting:
+            messagebox.showerror(
+                "Can't complete",
+                "Device is busy -- can't perform this action now."
+                + "\nPlease wait or cancel current work and try again!",
+            )
+
+        return ready
 
     def get_supported_features(self) -> Set[str]:
         if self._proxy is None:
@@ -720,18 +723,12 @@ class BackendProxy:
     def uses_local_filesystem(self):
         """Whether it runs code from local files"""
         return True
-    
-    def soft_reboot(self):
-        raise NotImplementedError()
 
     def supports_remote_directories(self):
         return False
 
     def supports_trash(self):
         return True
-    
-    def supports_soft_reboot(self):
-        return False
 
     def ready_for_remote_file_operations(self):
         return False
@@ -1080,12 +1077,6 @@ class CPythonProxy(SubprocessProxy):
 
     def get_supported_features(self):
         return {"run", "debug", "run_in_terminal", "pip_gui", "system_shell"}
-    
-    def supports_soft_reboot(self):
-        return True
-    
-    def soft_reboot(self):
-        self._send_msg(EOFCommand())
 
 
 class PrivateVenvCPythonProxy(CPythonProxy):

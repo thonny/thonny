@@ -136,20 +136,26 @@ class InputSubmission(Record):
         self.data = data
 
 
-class InterruptCommand(Record):
-    pass
-
-
-class EOFCommand(Record):
-    pass
-
-
 class CommandToBackend(Record):
     """Command meant for the back-end"""
 
     def __init__(self, name: str, **kw) -> None:
         super().__init__(**kw)
         self.name = name
+
+
+class InterruptCommand(CommandToBackend):
+    def __init__(self, **kw) -> None:
+        if "name" in kw:
+            del kw["name"]
+        super().__init__("interrupt", **kw)
+
+
+class EOFCommand(CommandToBackend):
+    def __init__(self, **kw) -> None:
+        if "name" in kw:
+            del kw["name"]
+        super().__init__("eof", **kw)
 
 
 class ToplevelCommand(CommandToBackend):

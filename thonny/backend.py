@@ -49,7 +49,8 @@ from thonny.common import (
     get_augmented_system_path,
     update_system_path,
     is_same_path,
-    EOFCommand)
+    EOFCommand,
+)
 import queue
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
@@ -131,6 +132,9 @@ class VM:
                     cmd = self._fetch_command()
                     if isinstance(cmd, InputSubmission):
                         self._input_queue.put(cmd)
+                    elif isinstance(cmd, EOFCommand):
+                        self.send_message(ToplevelResponse(SystemExit=True))
+                        sys.exit()
                     elif isinstance(cmd, ToplevelCommand):
                         self._source_info_by_frame = {}
                         self._input_queue = queue.Queue()
@@ -1096,50 +1100,56 @@ class VM:
             super().__init__(vm, target_stream)
             self._buffer = ""
             self._eof = False
-        
+
         def _generic_read(self, method, original_limit):
             if original_limit is None:
                 effective_limit = -1
             elif method == "readlines" and original_limit > -1:
-                # NB! size hint is defined in weird way 
-                # "no more lines will be read if the total size (in bytes/characters) 
+                # NB! size hint is defined in weird way
+                # "no more lines will be read if the total size (in bytes/characters)
                 # of all lines so far **exceeds** the hint".
                 effective_limit = original_limit + 1
             else:
                 effective_limit = original_limit
-                
+
             try:
                 self._vm._enter_io_function()
                 while True:
                     if effective_limit == 0:
                         result = ""
                         break
-                    
+
                     elif effective_limit > 0 and len(self._buffer) >= effective_limit:
                         result = self._buffer[:effective_limit]
                         self._buffer = self._buffer[effective_limit:]
-                        if method == "readlines" and not result.endswith("\n") and "\n" in self._buffer:
+                        if (
+                            method == "readlines"
+                            and not result.endswith("\n")
+                            and "\n" in self._buffer
+                        ):
                             # limit is just a hint
                             # https://docs.python.org/3/library/io.html#io.IOBase.readlines
-                            extra = self._buffer[:self._buffer.find("\n") + 1]
+                            extra = self._buffer[: self._buffer.find("\n") + 1]
                             result += extra
-                            self._buffer = self._buffer[len(extra):]
+                            self._buffer = self._buffer[len(extra) :]
                         break
-                            
+
                     elif method == "readline" and "\n" in self._buffer:
                         pos = self._buffer.find("\n") + 1
                         result = self._buffer[:pos]
                         self._buffer = self._buffer[pos:]
                         break
-                    
+
                     elif self._eof:
                         result = self._buffer
                         self._buffer = ""
-                        self._eof = False # That's how official implementation does
+                        self._eof = False  # That's how official implementation does
                         break
-                    
+
                     else:
-                        self._vm.send_message(BackendEvent("InputRequest", method=method, limit=original_limit))
+                        self._vm.send_message(
+                            BackendEvent("InputRequest", method=method, limit=original_limit)
+                        )
                         cmd = self._vm._fetch_command()
                         if isinstance(cmd, InputSubmission):
                             self._buffer += cmd.data
@@ -1149,9 +1159,9 @@ class VM:
                             self._vm.handle_command(cmd)
                         else:
                             raise RuntimeError("Wrong type of command when waiting for input")
-                
+
                 return result
-            
+
             finally:
                 self._vm._exit_io_function()
 
@@ -1162,7 +1172,7 @@ class VM:
             return self._generic_read("readline", limit)
 
         def readlines(self, limit=-1):
-            return self._generic_read("readlines", limit).splitlines(True)            
+            return self._generic_read("readlines", limit).splitlines(True)
 
         def __next__(self):
             return self.readline()
