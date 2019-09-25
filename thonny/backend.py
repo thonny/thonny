@@ -1175,7 +1175,11 @@ class VM:
             return self._generic_read("readlines", limit).splitlines(True)
 
         def __next__(self):
-            return self.readline()
+            result = self.readline()
+            if not result:
+                raise StopIteration
+            
+            return result
 
         def __iter__(self):
             return self
