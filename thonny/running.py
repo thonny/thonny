@@ -435,6 +435,14 @@ class Runner:
         if not proxy:
             return
 
+        if get_shell().has_pending_input():
+            messagebox.showerror(
+                "Can't perform this action",
+                "Ctrl+D only has effect on an empty line / prompt.\n"
+                + "Submit current input (press ENTER) and try again",
+            )
+            return
+
         proxy.send_command(EOFCommand())
         self._set_state("running")
 

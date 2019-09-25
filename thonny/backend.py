@@ -1178,7 +1178,7 @@ class VM:
             result = self.readline()
             if not result:
                 raise StopIteration
-            
+
             return result
 
         def __iter__(self):

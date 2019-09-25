@@ -199,6 +199,9 @@ class ShellView(tk.PanedWindow):
     def clear_shell(self):
         self.text._clear_shell()
 
+    def has_pending_input(self):
+        return self.text.has_pending_input()
+
     def report_exception(self, prelude=None, conclusion=None):
         if prelude is not None:
             self.text.direct_insert("end", prelude + "\n", ("stderr",))
@@ -956,6 +959,10 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         # self._print_marks("after output")
         # output_insert mark will move automatically because of its gravity
+
+    def has_pending_input(self):
+        pending = self.get("input_start", "end-1c")
+        return bool(pending)
 
     def _try_submit_input(self):
         # see if there is already enough inputted text to submit
