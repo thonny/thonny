@@ -1153,6 +1153,7 @@ class VM:
                         cmd = self._vm._fetch_command()
                         if isinstance(cmd, InputSubmission):
                             self._buffer += cmd.data
+                            self._processed_symbol_count += len(cmd.data)
                         elif isinstance(cmd, EOFCommand):
                             self._eof = True
                         elif isinstance(cmd, InlineCommand):
