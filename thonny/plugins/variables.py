@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
@@ -50,7 +50,14 @@ class VariablesView(VariablesFrame):
         self._clear_tree()
 
     def _handle_get_globals_response(self, event):
-        self.show_globals(event["globals"], event["module_name"])
+        if "error" in event:
+            self._clear_tree()
+            messagebox.showerror("Error querying global variables", event["error"])
+        elif "globals" not in event:
+            self._clear_tree()
+            messagebox.showerror("Error querying global variables", str(event))
+        else:
+            self.show_globals(event["globals"], event["module_name"])
 
     def _handle_toplevel_response(self, event):
         if "globals" in event:
