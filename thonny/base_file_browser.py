@@ -459,12 +459,16 @@ class BaseFileBrowser(ttk.Frame):
         path = self.tree.set(node_id, "path")
 
         if data.get("time"):
-            dtime = datetime.datetime.fromtimestamp(int(data["time"]))
-            # time_str = dtime.strftime("%c")
-            time_str = dtime.isoformat().replace("T", " ")
-            self.tree.set(node_id, "time", time_str)
+            try:
+                dtime = datetime.datetime.fromtimestamp(int(data["time"]))
+            except Exception:
+                time_str = ""
+            else:
+                time_str = dtime.isoformat().replace("T", " ")
         else:
-            self.tree.set(node_id, "time", "")
+            time_str = ""
+
+        self.tree.set(node_id, "time", time_str)
 
         if data["isdir"]:
             self.tree.set(node_id, "kind", "dir")
