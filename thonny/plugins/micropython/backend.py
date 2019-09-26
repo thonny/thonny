@@ -63,6 +63,7 @@ OK = b"OK"
 # Looks like it's not translatable in CP
 # https://github.com/adafruit/circuitpython/blob/master/locale/circuitpython.pot
 FIRST_RAW_PROMPT = b"raw REPL; CTRL-B to exit\r\n>"
+FIRST_RAW_PROMPT_SUFFIX = b"\r\n>"
 
 RAW_PROMPT = b">"
 
@@ -125,7 +126,14 @@ class MicroPythonBackend:
                 self._cancel_requested = False
                 self._interrupt_requested = False
                 self._check_for_connection_errors()
-                cmd = self._command_queue.get(timeout=0.1)
+                try:
+                    cmd = self._command_queue.get(timeout=0.1)
+                except Empty:
+                    # No command in queue, but maybe a thread produced output meanwhile
+                    # or the user resetted the device
+                    self._forward_unexpected_output()
+                    continue
+
                 if isinstance(cmd, InputSubmission):
                     self._submit_input(cmd.data)
                 elif isinstance(cmd, EOFCommand):
@@ -134,8 +142,6 @@ class MicroPythonBackend:
                     self._interrupt()
                 else:
                     self.handle_command(cmd)
-            except Empty:
-                self._check_for_idle_events()
             except KeyboardInterrupt:
                 self._interrupt()
 
@@ -290,6 +296,9 @@ class MicroPythonBackend:
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
 
         def create_error_response(**kw):
+            if not "error" in kw:
+                kw["error"] = traceback.format_exc()
+
             if isinstance(cmd, ToplevelCommand):
                 return ToplevelResponse(command_name=cmd.name, **kw)
             else:
@@ -383,8 +392,16 @@ class MicroPythonBackend:
             "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
         )
 
+    def _ensure_raw_propmt(self):
+        # similar to _interrupt_to_raw_prompt, but assumes we are already in a prompt
+        self._forward_unexpected_output()
+        self._connection.write(RAW_MODE_CMD)
+        prompt = self._connection.read_until(FIRST_RAW_PROMPT_SUFFIX, 1, True)
+        if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
+            raise TimeoutError("Could not ensure raw prompt")
+
     def _execute(self, script, capture_output=False):
-        # self._ensure_raw_propmt()
+        self._ensure_raw_propmt()
 
         # send command
         self._connection.write(script.encode(ENCODING) + EOT)
@@ -601,8 +618,23 @@ class MicroPythonBackend:
         while postponed:
             self._command_queue.put(postponed.pop(0))
 
-    def _check_for_idle_events(self):
-        self._send_output(self._connection.read_all().decode(ENCODING, "replace"), "stdout")
+    def _forward_unexpected_output(self):
+        "Invoked between commands"
+        data = self._connection.read_all()
+        if data.endswith(NORMAL_PROMPT):
+            # looks like the device was resetted
+
+            # hide the regular prompt from the output ...
+            data = data[: -len(NORMAL_PROMPT)]
+            at_prompt = True
+        else:
+            at_prompt = False
+
+        self._send_output(data.decode(ENCODING, "replace"), "stdout")
+        if at_prompt:
+            # ... and recreate Thonny prompt
+            self.send_message(ToplevelResponse())
+
         self._check_for_connection_errors()
 
     def _supports_directories(self):
