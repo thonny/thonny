@@ -51,6 +51,7 @@ from thonny.terminal import run_in_terminal
 from thonny.ui_utils import select_sequence, show_dialog, CommonDialogEx
 from tkinter import messagebox
 import warnings
+import re
 
 
 WINDOWS_EXE = "python.exe"
@@ -61,6 +62,8 @@ RUN_COMMAND_CAPTION = ""
 EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
 EXPECTED_TERMINATION_CODE = 1234
+
+ANSI_CODE_TERMINATOR = re.compile("[@-~]")
 
 # other components may turn it on in order to avoid grouping output lines into one event
 io_animation_required = False
@@ -990,25 +993,46 @@ class SubprocessProxy(BackendProxy):
             # combine available small output messages to one single message,
             # in order to put less pressure on UI code
 
+            wait_time = 0.01
+            total_wait_time = 0
             while True:
                 if len(self._response_queue) == 0:
-                    return msg
+                    if _ends_with_incomplete_ansi_code(msg["data"]) and total_wait_time < 0.1:
+                        # Allow reader to send the remaining part
+                        sleep(wait_time)
+                        total_wait_time += wait_time
+                        continue
+                    else:
+                        return msg
                 else:
                     next_msg = self._response_queue.popleft()
                     if (
                         next_msg.event_type == "ProgramOutput"
                         and next_msg["stream_name"] == msg["stream_name"]
-                        and len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD
-                        and ("\n" not in msg["data"] or not io_animation_required)
+                        and (
+                            len(msg["data"]) + len(next_msg["data"]) <= OUTPUT_MERGE_THRESHOLD
+                            and ("\n" not in msg["data"] or not io_animation_required)
+                            or _ends_with_incomplete_ansi_code(msg["data"])
+                        )
                     ):
                         msg["data"] += next_msg["data"]
                     else:
-                        # not same type of message, put it back
+                        # not to be sent in the same block, put it back
                         self._response_queue.appendleft(next_msg)
                         return msg
 
         else:
             return msg
+
+
+def _ends_with_incomplete_ansi_code(data):
+    pos = data.rfind("\033")
+    if pos == -1:
+        return False
+
+    # note ANSI_CODE_TERMINATOR also includes [
+    params_and_terminator = data[pos + 2 :]
+    return not ANSI_CODE_TERMINATOR.search(params_and_terminator)
 
 
 class CPythonProxy(SubprocessProxy):
