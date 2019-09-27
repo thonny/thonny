@@ -1603,13 +1603,18 @@ class MicroPythonBackend:
                             if __thonny_name.startswith('.') or __thonny_name == "System Volume Information":
                                 continue
                             __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
-                            __thonny_st = __thonny_os.stat(__thonny_full)
-                            if __thonny_st[0] & 0o170000 == 0o040000:
-                                # directory
-                                __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
-                            else:
-                                __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
-                            __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9])  
+                            try:
+                                __thonny_st = __thonny_os.stat(__thonny_full)
+                                if __thonny_st[0] & 0o170000 == 0o040000:
+                                    # directory
+                                    __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
+                                else:
+                                    __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
+                                __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9])
+                            except OverflowError:
+                                # Probably "System Volume Information" in trinket
+                                # https://github.com/thonny/thonny/issues/923
+                                pass
                             
                     __thonny_result[__thonny_path] = __thonny_children                            
             """
