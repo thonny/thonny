@@ -1638,6 +1638,10 @@ class MicroPythonBackend:
             message += " (" + str(error) + ")"
         self._send_output("\n" + message + "\n", "stderr")
         self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
+        try:
+            traceback.print_exc()
+        except:
+            print("notrace")
         sys.exit(EXPECTED_TERMINATION_CODE)
 
 
