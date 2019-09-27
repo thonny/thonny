@@ -2609,7 +2609,6 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
 
         if tb is not None:
             yield (_traceback_message, None, None, None)
-            have_seen_first_relevant_frame = False
 
             tb_temp = tb
             for entry in traceback.extract_tb(tb):
@@ -2622,15 +2621,8 @@ def format_exception_with_frame_info(e_type, e_value, e_traceback, shorten_filen
                         or entry.name != "parse"
                         or etype is not SyntaxError
                     )
-                    or (
-                        have_seen_first_relevant_frame
-                        and not (issubclass(etype, ImportError) and entry.name == "_custom_import")
-                    )
                     or in_debug_mode()
                 ):
-
-                    have_seen_first_relevant_frame = True
-
                     fmt = '  File "{}", line {}, in {}\n'.format(
                         entry.filename, entry.lineno, entry.name
                     )
