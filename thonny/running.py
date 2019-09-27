@@ -810,7 +810,7 @@ class SubprocessProxy(BackendProxy):
         debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
         self._proc = subprocess.Popen(
             cmd_line,
-            # bufsize=0,
+            bufsize=0,
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -886,10 +886,11 @@ class SubprocessProxy(BackendProxy):
                 self.cwd = msg["cwd"]
             message_queue.append(msg)
 
-            while len(message_queue) > 100:
+            if len(message_queue) > 50:
                 # Probably backend runs an infinite/long print loop.
                 # Throttle message thougput in order to keep GUI thread responsive.
-                sleep(0.1)
+                while len(message_queue) > 0:
+                    sleep(0.1)
 
         while not self._is_disconnected():
             data = stdout.readline()
