@@ -95,8 +95,8 @@ sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
 
 # sign frameworks and app ##############################
-codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain build/Thonny.app/Contents/Frameworks/Python.framework
-codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain build/Thonny.app
+codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db build/Thonny.app/Contents/Frameworks/Python.framework
+codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db build/Thonny.app
 
 # add readme #####################################################################
 cp readme.txt build
@@ -109,7 +109,7 @@ hdiutil create -srcfolder build -volname "Thonny $VERSION" $FILENAME
 hdiutil internet-enable -yes $FILENAME
 
 # sign dmg ######################
-codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $FILENAME
+codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db $FILENAME
 
 # xxl ####################################################################################
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
@@ -124,7 +124,7 @@ hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" $PLUS_FILENAME
 hdiutil internet-enable -yes $PLUS_FILENAME
 
 # sign dmg ######################
-codesign -s "Aivar Annamaa" --keychain ~/Library/Keychains/login.keychain $PLUS_FILENAME
+codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db $PLUS_FILENAME
 
 
 # clean up #######################################################################
