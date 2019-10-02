@@ -124,6 +124,15 @@ $PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir -r ../requirement
 find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
 
+# sign frameworks and app ##############################
+codesign --force -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+	--entitlements thonny.entitlements --options runtime \
+	build/Thonny.app/Contents/Frameworks/Python.framework
+codesign --force -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+	--entitlements thonny.entitlements --options runtime \
+	build/Thonny.app
+
+
 # create dmg #####################################################################
 PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 rm -f $PLUS_FILENAME
