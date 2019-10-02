@@ -109,7 +109,7 @@ cp readme.txt build
 mkdir -p dist
 FILENAME=dist/thonny-${VERSION}.dmg
 rm -f $FILENAME
-hdiutil create -srcfolder build -volname "Thonny $VERSION" $FILENAME
+hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
 hdiutil internet-enable -yes $FILENAME
 
 # sign dmg ######################
@@ -127,7 +127,7 @@ find $PYTHON_CURRENT/lib -name '*.exe' -delete
 # create dmg #####################################################################
 PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 rm -f $PLUS_FILENAME
-hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" $PLUS_FILENAME
+hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
 hdiutil internet-enable -yes $PLUS_FILENAME
 
 # sign dmg #######################################################################
