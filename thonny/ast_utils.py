@@ -31,9 +31,9 @@ def find_expression(node, text_range):
             return node
 
 
-def parse_source(source: bytes, filename="<unknown>", mode="exec"):
+def parse_source(source: bytes, filename="<unknown>", mode="exec", fallback_to_one_char=False):
     root = ast.parse(source, filename, mode)
-    mark_text_ranges(root, source)
+    mark_text_ranges(root, source, fallback_to_one_char)
     return root
 
 
@@ -167,7 +167,7 @@ def get_last_child(node, skip_incorrect=True):
     return None
 
 
-def mark_text_ranges(node, source: bytes):
+def mark_text_ranges(node, source: bytes, fallback_to_one_char=False):
     """
     Node is an AST, source is corresponding source as string.
     Function adds recursively attributes end_lineno and end_col_offset to each node
@@ -181,3 +181,12 @@ def mark_text_ranges(node, source: bytes):
             if hasattr(child, "lineno"):
                 # Fixes problems with some nodes like binop
                 child.lineno, child.col_offset = child.first_token.start
+
+        # some nodes stay without end info
+        if (
+            hasattr(child, "lineno")
+            and (not hasattr(child, "end_lineno") or not hasattr(child, "end_col_offset"))
+            and fallback_to_one_char
+        ):
+            child.end_lineno = child.lineno
+            child.end_col_offset = child.col_offset + 2

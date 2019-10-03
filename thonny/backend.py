@@ -2206,6 +2206,7 @@ class NiceTracer(Tracer):
             if hasattr(ast, "JoinedStr") and isinstance(node, ast.JoinedStr):
                 # can't present children normally without
                 # ast giving correct locations for them
+                # https://bugs.python.org/issue29051
                 add_tag(node, "ignore_children")
 
             elif isinstance(node, ast.Num):
@@ -2306,6 +2307,8 @@ class NiceTracer(Tracer):
     def _should_instrument_as_expression(self, node):
         return (
             isinstance(node, _ast.expr)
+            and hasattr(node, "end_lineno")
+            and hasattr(node, "end_col_offset")
             and not getattr(node, "incorrect_range", False)
             and "ignore" not in node.tags
             and (not hasattr(node, "ctx") or isinstance(node.ctx, ast.Load))

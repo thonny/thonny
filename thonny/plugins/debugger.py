@@ -712,7 +712,7 @@ class ExpressionBox(tk.Text):
             return str(local_lineno) + "." + str(local_col_offset)
 
         for node in ast.walk(main_node):
-            if "lineno" in node._attributes:
+            if "lineno" in node._attributes and hasattr(node, "end_lineno"):
                 index1 = _create_index(node.lineno, node.col_offset)
                 index2 = _create_index(node.end_lineno, node.end_col_offset)
 

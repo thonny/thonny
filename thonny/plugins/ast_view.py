@@ -67,7 +67,7 @@ class AstView(ui_utils.TreeFrame):
             return
 
         try:
-            root = ast_utils.parse_source(self._current_source)
+            root = ast_utils.parse_source(self._current_source, fallback_to_one_char=True)
             selected_ast_node = _find_closest_containing_node(root, selection)
 
         except Exception as e:
