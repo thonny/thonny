@@ -68,7 +68,7 @@ class GeneralConfigurationPage(ConfigurationPage):
         # scaling
         self._scaling_label = ttk.Label(self, text=_("UI scaling factor"))
         self._scaling_label.grid(row=30, column=0, sticky=tk.W, padx=(0, 10), pady=(10, 0))
-        scalings = sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
+        scalings = ["default"] + sorted({0.5, 0.75, 1.0, 1.25, 1.33, 1.5, 2.0, 2.5, 3.0, 4.0})
         self.add_combobox("general.scaling", scalings, row=30, column=1, pady=(10, 0), width=10)
 
         self._font_scaling_var = get_workbench().get_variable("general.font_scaling_mode")
