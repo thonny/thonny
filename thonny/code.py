@@ -280,7 +280,7 @@ class Editor(ttk.Frame):
         return True
 
     def write_remote_file(self, save_filename, content_bytes, save_copy):
-        if get_runner().ready_for_remote_file_operations(propose_waiting=True):
+        if get_runner().ready_for_remote_file_operations(show_message=True):
             target_filename = extract_target_path(save_filename)
 
             get_runner().send_command(
@@ -832,7 +832,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         return editor
 
     def show_remote_file(self, target_filename):
-        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+        if not get_runner().ready_for_remote_file_operations(show_message=True):
             return None
         else:
             return self.show_file(make_remote_path(target_filename))

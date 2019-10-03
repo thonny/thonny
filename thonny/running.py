@@ -400,7 +400,7 @@ class Runner:
             logging.warning("Interrupting without proxy")
 
     def _cmd_interrupt_enabled(self) -> bool:
-        if not self._proxy or not self._proxy.is_functional():
+        if not self._proxy or not self._proxy.is_connected():
             return False
         # TODO: distinguish command and Ctrl+C shortcut
 
@@ -451,7 +451,7 @@ class Runner:
 
     def ctrld_enabled(self):
         proxy = self.get_backend_proxy()
-        return proxy and proxy.is_functional()
+        return proxy and proxy.is_connected()
 
     def _poll_vm_messages(self) -> None:
         """I chose polling instead of event_generate in listener thread,
@@ -620,18 +620,21 @@ class Runner:
                 # Without flush the console window becomes visible, but Thonny can be still used
                 logging.getLogger("thonny").exception("Problem with finalizing console allocation")
 
-    def ready_for_remote_file_operations(self, propose_waiting=False):
+    def ready_for_remote_file_operations(self, show_message=False):
         if not self._proxy or not self.supports_remote_files():
             return False
 
         ready = self._proxy.ready_for_remote_file_operations()
 
-        if not ready and propose_waiting:
-            messagebox.showerror(
-                "Can't complete",
-                "Device is busy -- can't perform this action now."
-                + "\nPlease wait or cancel current work and try again!",
-            )
+        if not ready and show_message:
+            if self._proxy.is_connected():
+                msg = "Device is not connected"
+            else:
+                msg = (
+                    "Device is busy -- can't perform this action now."
+                    + "\nPlease wait or cancel current work and try again!",
+                )
+            messagebox.showerror("Can't complete", msg)
 
         return ready
 
@@ -712,8 +715,7 @@ class BackendProxy:
         """
         pass
 
-    def is_functional(self):
-        """Used in MicroPython proxies"""
+    def is_connected(self):
         return True
 
     def get_local_executable(self):
@@ -848,8 +850,11 @@ class SubprocessProxy(BackendProxy):
     def send_program_input(self, data):
         self._send_msg(InputSubmission(data))
 
-    def _is_disconnected(self):
-        return self._proc is None or self._proc.poll() is not None
+    def process_is_alive(self):
+        return self._proc is not None and self._proc.poll() is None
+
+    def is_connected(self):
+        return self.process_is_alive()
 
     def get_sys_path(self):
         return self._sys_path
@@ -892,7 +897,7 @@ class SubprocessProxy(BackendProxy):
                 while len(message_queue) > 0:
                     sleep(0.1)
 
-        while not self._is_disconnected():
+        while self.process_is_alive():
             data = stdout.readline()
             # debug("... read some stdout data", repr(data))
             if data == "":
@@ -927,7 +932,7 @@ class SubprocessProxy(BackendProxy):
 
     def _listen_stderr(self, stderr):
         # stderr is used only for debugger debugging
-        while not self._is_disconnected():
+        while self.process_is_alive():
             data = stderr.readline()
             if data == "":
                 break
@@ -982,7 +987,7 @@ class SubprocessProxy(BackendProxy):
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
-            if self._is_disconnected():
+            if not self.process_is_alive():
                 raise BackendTerminatedError(self._proc.returncode if self._proc else None)
             else:
                 return None

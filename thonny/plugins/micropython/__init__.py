@@ -169,9 +169,6 @@ class MicroPythonProxy(SubprocessProxy):
     def is_connected(self):
         return self._proc is not None
 
-    def is_functional(self):
-        return self.is_connected()
-
     def _show_error(self, text):
         get_shell().print_error("\n" + text + "\n")
 

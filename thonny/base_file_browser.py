@@ -925,7 +925,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         return get_runner().get_backend_proxy().supports_trash()
 
     def request_focus_into(self, path):
-        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+        if not get_runner().ready_for_remote_file_operations(show_message=True):
             return False
 
         super().request_focus_into(path)
@@ -944,7 +944,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         self.focus_into(path)
 
     def cmd_refresh_tree(self):
-        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+        if not get_runner().ready_for_remote_file_operations(show_message=True):
             return
 
         super().cmd_refresh_tree()
@@ -1164,7 +1164,9 @@ def choose_node_for_file_operations(master, prompt):
     if get_runner().supports_remote_files():
         dlg = NodeChoiceDialog(master, prompt)
         show_dialog(dlg, master)
-        if not get_runner().ready_for_remote_file_operations(propose_waiting=True):
+        if dlg.result == "remote" and not get_runner().ready_for_remote_file_operations(
+            show_message=True
+        ):
             return None
         return dlg.result
     else:
