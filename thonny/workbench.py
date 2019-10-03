@@ -1406,7 +1406,12 @@ class Workbench(tk.Tk):
             label: translated label, used only when menu with given name doesn't exist yet
         """
         if name not in self._menus:
-            menu = tk.Menu(self._menubar, **get_style_configuration("Menu"))
+            if running_on_mac_os():
+                conf = {}
+            else:
+                conf = get_style_configuration("Menu")
+
+            menu = tk.Menu(self._menubar, **conf)
             menu["postcommand"] = lambda: self._update_menu(menu, name)
             self._menubar.add_cascade(label=label if label else name, menu=menu)
 
