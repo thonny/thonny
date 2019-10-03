@@ -2069,6 +2069,9 @@ def handle_mistreated_latin_shortcuts(registry, event):
 
 
 def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
+    if getattr(dlg, "closed", False):
+        return 
+    
     if master is None:
         master = tk._default_root
 

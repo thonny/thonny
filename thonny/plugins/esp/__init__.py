@@ -277,6 +277,7 @@ class ESPFlashingDialog(CommonDialogEx):
         )
 
     def _close(self):
+        self.closed = True
         self.destroy()
 
 
