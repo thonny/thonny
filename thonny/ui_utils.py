@@ -2101,6 +2101,8 @@ def show_dialog(dlg, master=None, geometry=True, min_left=0, min_top=0):
     master.winfo_toplevel().lift()
     master.winfo_toplevel().focus_force()
     master.winfo_toplevel().grab_set()
+    if running_on_mac_os():
+        master.winfo_toplevel().grab_release()
 
     if focused_widget is not None:
         try:
