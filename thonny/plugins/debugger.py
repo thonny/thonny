@@ -16,7 +16,7 @@ from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_util
 from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.memory import VariablesFrame
-from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os, running_on_linux
+from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence, CommonDialog
 from _tkinter import TclError
@@ -325,7 +325,11 @@ class FrameVisualizer:
         self._frame_id = frame_info.id
         self._filename = frame_info.filename
         self._firstlineno = None
-        self._expression_box = ExpressionBox(text_frame)
+        if running_on_mac_os():
+            self._expression_box = PlacedExpressionBox(text_frame)
+        else:
+            self._expression_box = PlacedExpressionBox(text_frame)
+
         self._note_box = ui_utils.NoteBox(text_frame.winfo_toplevel())
         self._next_frame_visualizer = None
         self._prev_frame_visualizer = None
@@ -571,45 +575,9 @@ class EditorVisualizer(FrameVisualizer):
         self._decorate_editor_title("")
 
 
-class ExpressionBox(tk.Toplevel):
-    def __init__(self, codeview):
-
-        super().__init__(codeview.winfo_toplevel())
-        if running_on_mac_os():
-            try:
-                # NB! Must be the first thing to do after creation
-                # https://wiki.tcl-lang.org/page/MacWindowStyle
-                self.tk.call(
-                    "::tk::unsupported::MacWindowStyle", "style", self._w, "help", "noActivates"
-                )
-            except TclError:
-                pass
-        elif running_on_linux():
-            self.wm_attributes("-type", "utility")
-        else:
-            # Can't be used in Mac because it would make window stay on top
-            self.wm_overrideredirect(1)
-
-        self.resizable(False, False)
-        self.wm_transient(codeview.winfo_toplevel())
-
-        self.lift()
-
-        opts = dict(
-            height=1,
-            width=1,
-            relief=tk.FLAT,
-            background="#DCEDF2",
-            borderwidth=0,
-            highlightthickness=0,
-            padx=7,
-            pady=7,
-            wrap=tk.NONE,
-            font="EditorFont",
-        )
-        opts.update(get_syntax_options_for_tag("expression_box"))
-        self.text = tk.Text(self, **opts)
-        self.text.grid()
+class BaseExpressionBox:
+    def __init__(self, codeview, text):
+        self.text = text
 
         self._codeview = codeview
 
@@ -622,6 +590,22 @@ class ExpressionBox(tk.Toplevel):
         self.text.tag_configure("exception", get_syntax_options_for_tag("exception_focus"))
         self.text.tag_raise("exception", "before")
         self.text.tag_raise("exception", "after")
+
+    def get_text_options(self):
+        opts = dict(
+            height=1,
+            width=1,
+            relief=tk.RAISED,
+            background="#DCEDF2",
+            borderwidth=1,
+            highlightthickness=0,
+            padx=7,
+            pady=7,
+            wrap=tk.NONE,
+            font="EditorFont",
+        )
+        opts.update(get_syntax_options_for_tag("expression_box"))
+        return opts
 
     def update_expression(self, msg, frame_info):
         focus = frame_info.focus
@@ -674,8 +658,6 @@ class ExpressionBox(tk.Toplevel):
             return ""
 
     def clear_debug_view(self):
-        if self.winfo_ismapped():
-            self.withdraw()
         self._main_range = None
         self._last_focus = None
         self._clear_expression()
@@ -722,9 +704,6 @@ class ExpressionBox(tk.Toplevel):
         self._clear_expression()
 
         self.text.insert("1.0", source)
-
-        # Title for cases where titlebar removal doesn't work out
-        self.title(source.replace("\n", "").replace("\r", "")[:100])
 
         # create node marks
         def _create_index(lineno, col_offset):
@@ -799,6 +778,71 @@ class ExpressionBox(tk.Toplevel):
             x = 30
             y = 30
 
+        self._set_position_make_visible(x, y)
+
+    def _update_size(self):
+        content = self.text.get("1.0", tk.END)
+        lines = content.splitlines()
+        self.text["height"] = len(lines)
+        self.text["width"] = max(map(len, lines))
+
+
+class PlacedExpressionBox(BaseExpressionBox, tk.Text):
+    def __init__(self, codeview):
+        tk.Text.__init__(self, codeview.winfo_toplevel(), self.get_text_options())
+        BaseExpressionBox.__init__(self, codeview, self)
+
+    def clear_debug_view(self):
+        if self.winfo_ismapped():
+            self.place_forget()
+
+        super().clear_debug_view()
+
+    def _set_position_make_visible(self, rel_x, rel_y):
+        x = rel_x
+        y = rel_y
+
+        widget = self._codeview.text
+        while widget != self.master:
+            x += widget.winfo_x()
+            y += widget.winfo_y()
+            widget = widget.master
+
+        if not self.winfo_ismapped():
+            self.place(x=x, y=y, anchor=tk.NW)
+            self.update()
+
+
+class ToplevelExpressionBox(BaseExpressionBox, tk.Toplevel):
+    def __init__(self, codeview):
+        tk.Toplevel.__init__(self, codeview.winfo_toplevel())
+        text = tk.Text(self, **self.get_text_options())
+        BaseExpressionBox.__init__(self, codeview, text)
+        self.text.grid()
+
+        if running_on_mac_os():
+            try:
+                # NB! Must be the first thing to do after creation
+                # https://wiki.tcl-lang.org/page/MacWindowStyle
+                self.tk.call(
+                    "::tk::unsupported::MacWindowStyle", "style", self._w, "help", "noActivates"
+                )
+            except TclError:
+                pass
+        else:
+            raise RuntimeError("Should be used only on Mac")
+
+        self.resizable(False, False)
+        self.wm_transient(codeview.winfo_toplevel())
+        self.lift()
+
+    def clear_debug_view(self):
+        if self.winfo_ismapped():
+            self.withdraw()
+
+        super().clear_debug_view()
+
+    def _set_position_make_visible(self, rel_x, rel_y):
         """
         widget = self._codeview.text
         while widget is not None:
@@ -806,19 +850,19 @@ class ExpressionBox(tk.Toplevel):
             y += widget.winfo_y()
             widget = widget.master
         """
-        x += self._codeview.text.winfo_rootx()
-        y += self._codeview.text.winfo_rooty()
+        x = rel_x + self._codeview.text.winfo_rootx()
+        y = rel_y + self._codeview.text.winfo_rooty()
 
         if not self.winfo_ismapped():
             self.update()
             self.deiconify()
         self.geometry("+%d+%d" % (x, y))
 
-    def _update_size(self):
-        content = self.text.get("1.0", tk.END)
-        lines = content.splitlines()
-        self.text["height"] = len(lines)
-        self.text["width"] = max(map(len, lines))
+    def get_text_options(self):
+        opts = super().get_text_options()
+        opts["relief"] = "flat"
+        opts["borderwidth"] = 0
+        return opts
 
 
 class DialogVisualizer(CommonDialog, FrameVisualizer):
