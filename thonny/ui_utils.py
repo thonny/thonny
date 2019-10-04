@@ -1019,16 +1019,19 @@ class ToolTip:
         x = x + self.widget.winfo_rootx() + 27
         y = y + cy + self.widget.winfo_rooty() + self.widget.winfo_height() + 2
         self.tipwindow = tw = tk.Toplevel(self.widget)
-        tw.wm_overrideredirect(1)
+        if running_on_mac_os():
+            tw.wm_geometry("+%d+%d" % (x, y))
+            try:
+                # Must be the first thing to do after creating window
+                # https://wiki.tcl-lang.org/page/MacWindowStyle
+                tw.tk.call("::tk::unsupported::MacWindowStyle", "style", tw._w, "help", "noActivates")
+            except tk.TclError:
+                pass
+        else:
+            tw.wm_overrideredirect(1)
         if running_on_mac_os():
             # TODO: maybe it's because of Tk 8.5, not because of Mac
             tw.wm_transient(self.widget)
-        tw.wm_geometry("+%d+%d" % (x, y))
-        try:
-            # For Mac OS
-            tw.tk.call("::tk::unsupported::MacWindowStyle", "style", tw._w, "help", "noActivates")
-        except tk.TclError:
-            pass
         label = tk.Label(tw, text=self.text, **self.options)
         label.pack()
         # get_workbench().bind("WindowFocusOut", self.hidetip, True)
