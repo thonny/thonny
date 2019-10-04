@@ -326,7 +326,7 @@ class FrameVisualizer:
         self._filename = frame_info.filename
         self._firstlineno = None
         if running_on_mac_os():
-            self._expression_box = PlacedExpressionBox(text_frame)
+            self._expression_box = ToplevelExpressionBox(text_frame)
         else:
             self._expression_box = PlacedExpressionBox(text_frame)
 
