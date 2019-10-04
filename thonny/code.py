@@ -21,6 +21,7 @@ from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
 from thonny.misc_utils import running_on_windows, running_on_mac_os
 from _tkinter import TclError
 from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
+import logging
 
 _dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
 
@@ -852,8 +853,11 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self.tab(editor, text=title)
         except TclError:
             pass
-
-        self.indicate_modification()
+        
+        try:
+            self.indicate_modification()
+        except Exception:
+            logging.exception("Could not update modification indication")
 
     def indicate_modification(self):
         if not running_on_mac_os():
