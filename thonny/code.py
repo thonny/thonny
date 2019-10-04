@@ -853,7 +853,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self.tab(editor, text=title)
         except TclError:
             pass
-        
+
         try:
             self.indicate_modification()
         except Exception:
