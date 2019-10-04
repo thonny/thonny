@@ -16,7 +16,7 @@ from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_util
 from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.memory import VariablesFrame
-from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os
+from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os, running_on_linux
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence, CommonDialog
 from _tkinter import TclError
@@ -584,6 +584,8 @@ class ExpressionBox(tk.Toplevel):
                 )
             except TclError:
                 pass
+        elif running_on_linux():
+            self.wm_attributes("-type", "utility")
         else:
             # Can't be used in Mac because it would make window stay on top
             self.wm_overrideredirect(1)
