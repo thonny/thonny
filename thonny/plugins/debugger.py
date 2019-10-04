@@ -19,6 +19,7 @@ from thonny.memory import VariablesFrame
 from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import select_sequence, CommonDialog
+from _tkinter import TclError
 
 _current_debugger = None
 
@@ -570,36 +571,55 @@ class EditorVisualizer(FrameVisualizer):
         self._decorate_editor_title("")
 
 
-class ExpressionBox(tk.Text):
+class ExpressionBox(tk.Toplevel):
     def __init__(self, codeview):
+
+        super().__init__(codeview.winfo_toplevel())
+        if running_on_mac_os():
+            try:
+                # NB! Must be the first thing to do after creation
+                # https://wiki.tcl-lang.org/page/MacWindowStyle
+                self.tk.call(
+                    "::tk::unsupported::MacWindowStyle", "style", self._w, "help", "noActivates"
+                )
+            except TclError:
+                pass
+        else:
+            # Can't be used in Mac because it would make window stay on top
+            self.wm_overrideredirect(1)
+
+        self.resizable(False, False)
+        self.wm_transient(codeview.winfo_toplevel())
+
+        self.lift()
 
         opts = dict(
             height=1,
             width=1,
-            relief=tk.RAISED,
+            relief=tk.FLAT,
             background="#DCEDF2",
-            borderwidth=1,
+            borderwidth=0,
             highlightthickness=0,
             padx=7,
             pady=7,
             wrap=tk.NONE,
             font="EditorFont",
         )
-
         opts.update(get_syntax_options_for_tag("expression_box"))
+        self.text = tk.Text(self, **opts)
+        self.text.grid()
 
-        tk.Text.__init__(self, codeview.winfo_toplevel(), **opts)
         self._codeview = codeview
 
         self._last_focus = None
         self._last_root_expression = None
 
-        self.tag_configure("value", get_syntax_options_for_tag("value"))
-        self.tag_configure("before", get_syntax_options_for_tag("active_focus"))
-        self.tag_configure("after", get_syntax_options_for_tag("completed_focus"))
-        self.tag_configure("exception", get_syntax_options_for_tag("exception_focus"))
-        self.tag_raise("exception", "before")
-        self.tag_raise("exception", "after")
+        self.text.tag_configure("value", get_syntax_options_for_tag("value"))
+        self.text.tag_configure("before", get_syntax_options_for_tag("active_focus"))
+        self.text.tag_configure("after", get_syntax_options_for_tag("completed_focus"))
+        self.text.tag_configure("exception", get_syntax_options_for_tag("exception_focus"))
+        self.text.tag_raise("exception", "before")
+        self.text.tag_raise("exception", "after")
 
     def update_expression(self, msg, frame_info):
         focus = frame_info.focus
@@ -647,29 +667,29 @@ class ExpressionBox(tk.Text):
             end_mark = self._get_mark_name(
                 self._last_focus.end_lineno, self._last_focus.end_col_offset
             )
-            return self.get(start_mark, end_mark)
+            return self.text.get(start_mark, end_mark)
         else:
             return ""
 
     def clear_debug_view(self):
         if self.winfo_ismapped():
-            self.place_forget()
+            self.withdraw()
         self._main_range = None
         self._last_focus = None
         self._clear_expression()
 
     def _clear_expression(self):
-        for tag in self.tag_names():
-            self.tag_remove(tag, "1.0", "end")
+        for tag in self.text.tag_names():
+            self.text.tag_remove(tag, "1.0", "end")
 
-        self.mark_unset(*self.mark_names())
-        self.delete("1.0", "end")
+        self.text.mark_unset(*self.text.mark_names())
+        self.text.delete("1.0", "end")
 
     def _replace(self, focus, value):
         start_mark = self._get_mark_name(focus.lineno, focus.col_offset)
         end_mark = self._get_mark_name(focus.end_lineno, focus.end_col_offset)
 
-        self.delete(start_mark, end_mark)
+        self.text.delete(start_mark, end_mark)
 
         id_str = memory.format_object_id(value.id)
         if get_workbench().in_heap_mode():
@@ -678,12 +698,12 @@ class ExpressionBox(tk.Text):
             value_str = shorten_repr(value.repr, 100)
 
         object_tag = "object_" + str(value.id)
-        self.insert(start_mark, value_str, ("value", object_tag))
+        self.text.insert(start_mark, value_str, ("value", object_tag))
         if misc_utils.running_on_mac_os():
             sequence = "<Command-Button-1>"
         else:
             sequence = "<Control-Button-1>"
-        self.tag_bind(
+        self.text.tag_bind(
             object_tag,
             sequence,
             lambda _: get_workbench().event_generate("ObjectSelect", object_id=value.id),
@@ -699,7 +719,10 @@ class ExpressionBox(tk.Text):
 
         self._clear_expression()
 
-        self.insert("1.0", source)
+        self.text.insert("1.0", source)
+
+        # Title for cases where titlebar removal doesn't work out
+        self.title(source.replace("\n", "").replace("\r", "")[:100])
 
         # create node marks
         def _create_index(lineno, col_offset):
@@ -717,16 +740,16 @@ class ExpressionBox(tk.Text):
                 index2 = _create_index(node.end_lineno, node.end_col_offset)
 
                 start_mark = self._get_mark_name(node.lineno, node.col_offset)
-                if not start_mark in self.mark_names():
-                    self.mark_set(start_mark, index1)
+                if not start_mark in self.text.mark_names():
+                    self.text.mark_set(start_mark, index1)
                     # print("Creating mark", start_mark, index1)
-                    self.mark_gravity(start_mark, tk.LEFT)
+                    self.text.mark_gravity(start_mark, tk.LEFT)
 
                 end_mark = self._get_mark_name(node.end_lineno, node.end_col_offset)
-                if not end_mark in self.mark_names():
-                    self.mark_set(end_mark, index2)
+                if not end_mark in self.text.mark_names():
+                    self.text.mark_set(end_mark, index2)
                     # print("Creating mark", end_mark, index2)
-                    self.mark_gravity(end_mark, tk.RIGHT)
+                    self.text.mark_gravity(end_mark, tk.RIGHT)
 
     def _get_mark_name(self, lineno, col_offset):
         return str(lineno) + "_" + str(col_offset)
@@ -744,9 +767,9 @@ class ExpressionBox(tk.Text):
 
     def _highlight_range(self, text_range, state, has_exception):
         logging.debug("EV._highlight_range: %s", text_range)
-        self.tag_remove("after", "1.0", "end")
-        self.tag_remove("before", "1.0", "end")
-        self.tag_remove("exception", "1.0", "end")
+        self.text.tag_remove("after", "1.0", "end")
+        self.text.tag_remove("before", "1.0", "end")
+        self.text.tag_remove("exception", "1.0", "end")
 
         if state.startswith("after"):
             tag = "after"
@@ -757,10 +780,10 @@ class ExpressionBox(tk.Text):
 
         start_index = self._get_mark_name(text_range.lineno, text_range.col_offset)
         end_index = self._get_mark_name(text_range.end_lineno, text_range.end_col_offset)
-        self.tag_add(tag, start_index, end_index)
+        self.text.tag_add(tag, start_index, end_index)
 
         if has_exception:
-            self.tag_add("exception", start_index, end_index)
+            self.text.tag_add("exception", start_index, end_index)
 
     def _update_position(self, text_range):
         self._codeview.update_idletasks()
@@ -774,20 +797,26 @@ class ExpressionBox(tk.Text):
             x = 30
             y = 30
 
+        """
         widget = self._codeview.text
-        while widget != self.winfo_toplevel():
+        while widget is not None:
             x += widget.winfo_x()
             y += widget.winfo_y()
             widget = widget.master
+        """
+        x += self._codeview.text.winfo_rootx()
+        y += self._codeview.text.winfo_rooty()
 
-        self.place(x=x, y=y, anchor=tk.NW)
-        self.update_idletasks()
+        if not self.winfo_ismapped():
+            self.update()
+            self.deiconify()
+        self.geometry("+%d+%d" % (x, y))
 
     def _update_size(self):
-        content = self.get("1.0", tk.END)
+        content = self.text.get("1.0", tk.END)
         lines = content.splitlines()
-        self["height"] = len(lines)
-        self["width"] = max(map(len, lines))
+        self.text["height"] = len(lines)
+        self.text["width"] = max(map(len, lines))
 
 
 class DialogVisualizer(CommonDialog, FrameVisualizer):
