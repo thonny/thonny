@@ -18,7 +18,7 @@ from thonny.common import (
 )
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
-from thonny.misc_utils import running_on_windows
+from thonny.misc_utils import running_on_windows, running_on_mac_os
 from _tkinter import TclError
 from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
 
@@ -852,6 +852,30 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self.tab(editor, text=title)
         except TclError:
             pass
+
+        self.indicate_modification()
+
+    def indicate_modification(self):
+        if not running_on_mac_os():
+            return
+
+        atts = self.winfo_toplevel().wm_attributes()
+        if "-modified" in atts:
+            i = atts.index("-modified")
+            mod = atts[i : i + 2]
+            rest = atts[:i] + atts[i + 2 :]
+        else:
+            mod = ()
+            rest = atts
+
+        for editor in self.get_all_editors():
+            if editor.is_modified():
+                if mod != ("-modified", 1):
+                    self.winfo_toplevel().wm_attributes(*(rest + ("-modified", 1)))
+                break
+        else:
+            if mod == ("-modified", 1):
+                self.winfo_toplevel().wm_attributes(*(rest + ("-modified", 0)))
 
     def _open_file(self, filename):
         editor = Editor(self)
