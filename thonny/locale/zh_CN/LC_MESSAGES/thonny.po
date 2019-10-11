@@ -793,17 +793,17 @@ msgstr "换行文字（可能很慢）"
 #: thonny/shell.py:1425 thonny/ui_utils.py:1639
 #, fuzzy
 msgid "Copy to clipboard"
-msgstr "复制到剪切板"
+msgstr "复制文本"
 
 #: thonny/shell.py:1431
 #, fuzzy
 msgid "Expand in Shell"
-msgstr "在shell中扩展"
+msgstr "Shell中展开"
 
 #: thonny/shell.py:1442
 #, fuzzy
 msgid "Squeezed text (%d characters)"
-msgstr "压缩文本(%d 个字符)"
+msgstr "详细文本(%d 个字符)"
 
 #: thonny/shell.py:1611
 #, fuzzy
