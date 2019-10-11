@@ -195,18 +195,22 @@ def pix():
                             bgr = re.search(r"selected_bg_color:#([0-9a-fA-F]*)", line, re.M).group(
                                 1
                             )  # @UndefinedVariable
-                            settings["Menu"]["configure"]["activebackground"] = (
-                                "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
-                            )
+                            color = "#" + bgr[0:2] + bgr[4:6] + bgr[8:10]
+                            if is_good_color(color):
+                                settings["Menu"]["configure"]["activebackground"] = color
                         if "selected_fg_color" in line:
                             fgr = re.search(r"selected_fg_color:#([0-9a-fA-F]*)", line, re.M).group(
                                 1
                             )  # @UndefinedVariable
-                            settings["Menu"]["configure"]["activeforeground"] = (
-                                "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
-                            )
+                            color = "#" + fgr[0:2] + fgr[4:6] + fgr[8:10]
+                            if is_good_color(color):
+                                settings["Menu"]["configure"]["activeforeground"] = color
 
     return settings
+
+
+def is_good_color(s):
+    return bool(re.match("^#[0-9a-fA-F]{6}$", s))
 
 
 def pix_dark():
