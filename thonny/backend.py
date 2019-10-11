@@ -1354,6 +1354,7 @@ class Tracer(Executor):
             or sys.version_info >= (3, 6)
             and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
             or "importlib._bootstrap" in code.co_filename
+            or code.co_name in ["<listcomp>", "<setcomp>", "<dictcomp>"]
             or self._vm.is_doing_io()
             or path_startswith(code.co_filename, self._thonny_src_dir)
         )
