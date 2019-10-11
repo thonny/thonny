@@ -2,7 +2,6 @@
 import os.path
 import sys
 import tkinter as tk
-import tokenize
 import traceback
 from logging import exception
 from tkinter import messagebox, ttk
@@ -48,7 +47,6 @@ class Editor(ttk.Frame):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        self._newlines = None
         self._filename = None
         self._last_known_mtime = None
         self._asking_about_external_change = False
@@ -171,11 +169,8 @@ class Editor(ttk.Frame):
         self.update_appearance()
 
     def _load_local_file(self, filename, keep_undo=False):
-        with tokenize.open(filename) as fp:  # TODO: support also text files
+        with open(filename, "rb") as fp:
             source = fp.read()
-
-        # get the file file format (DOS/UNIX)
-        self._newlines = fp.newlines
 
         # Make sure Windows filenames have proper format
         filename = normpath_with_actual_case(filename)
@@ -183,14 +178,13 @@ class Editor(ttk.Frame):
         self._last_known_mtime = os.path.getmtime(self._filename)
 
         get_workbench().event_generate("Open", editor=self, filename=filename)
-        self._code_view.set_content(source, keep_undo)
+        self._code_view.set_content_as_bytes(source, keep_undo)
         self.get_text_widget().edit_modified(False)
         self._code_view.focus_set()
         self.master.remember_recent_file(filename)
 
     def _load_remote_file(self, filename):
         self._filename = filename
-        self._newlines = None
         self._code_view.set_content("")
         self._code_view.text.set_read_only(True)
 
@@ -208,11 +202,6 @@ class Editor(ttk.Frame):
             raise RuntimeError(response["error"])
 
         content = response["content_bytes"]
-        if content.count(b"\r\n") > content.count(b"\n") / 2:
-            self._newlines = "\r\n"
-        else:
-            self._newlines = "\n"
-
         self._code_view.text.set_read_only(False)
         self._code_view.set_content_as_bytes(content)
         self.get_text_widget().edit_modified(False)
@@ -237,7 +226,7 @@ class Editor(ttk.Frame):
                 "SaveAs", editor=self, filename=save_filename, save_copy=save_copy
             )
 
-        content_bytes = self._code_view.get_content_as_bytes(self._newlines)
+        content_bytes = self._code_view.get_content_as_bytes()
 
         if is_remote_path(save_filename):
             result = self.write_remote_file(save_filename, content_bytes, save_copy)

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import io
+import os
+import re
 import tkinter as tk
 import tokenize
 from typing import Dict, Union  # @UnusedImport
 
 from thonny import get_workbench, roughparse, tktextext, ui_utils
 from thonny.common import TextRange
-from thonny.misc_utils import running_on_windows
 from thonny.tktextext import EnhancedText
 from thonny.ui_utils import EnhancedTextWithLogging, scrollbar_style
 
@@ -15,6 +16,10 @@ _syntax_options = {}  # type: Dict[str, Union[str, int]]
 # BREAKPOINT_SYMBOL = "•" # Bullet
 # BREAKPOINT_SYMBOL = "○" # White circle
 BREAKPOINT_SYMBOL = "●"  # Black circle
+
+OLD_MAC_LINEBREAK = re.compile("\r(?!\n)")
+UNIX_LINEBREAK = re.compile("(?<!\r)\n")
+WINDOWS_LINEBREAK = re.compile("\r\n")
 
 
 class SyntaxText(EnhancedText):
@@ -236,7 +241,7 @@ class CodeView(tktextext.TextFrame):
         self._syntax_theme_change_binding = get_workbench().bind(
             "SyntaxThemeChanged", self._reload_theme_options, True
         )
-
+        self._original_newlines = os.linesep
         self._reload_theme_options()
         self._gutter.bind("<Double-Button-1>", self._toggle_breakpoint, True)
         # self.text.tag_configure("breakpoint_line", background="pink")
@@ -256,22 +261,24 @@ class CodeView(tktextext.TextFrame):
         encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
         return encoding
 
-    def get_content_as_bytes(self, newlines=None):
-        newlines_windows = "\r\n"
-        chars = self.get_content().replace("\r", "")
-        if newlines == None and running_on_windows() or newlines == newlines_windows:
-            chars = chars.replace("\n", newlines_windows)
+    def get_content_as_bytes(self):
+        content = self.get_content()
 
-        return chars.encode(
-            self.detect_encoding(self.get_content().encode("ascii", errors="replace"))
-        )
+        # convert all linebreaks to original format
+        content = OLD_MAC_LINEBREAK.sub(self._original_newlines, content)
+        content = WINDOWS_LINEBREAK.sub(self._original_newlines, content)
+        content = UNIX_LINEBREAK.sub(self._original_newlines, content)
 
-    def set_content_as_bytes(self, data):
+        return content.encode(self.detect_encoding(content.encode("ascii", errors="replace")))
+
+    def set_content_as_bytes(self, data, keep_undo=False):
         encoding = self.detect_encoding(data)
-        chars = data.decode(encoding).replace("\r\n", "\n")
-        self.set_content(chars)
+        chars = data.decode(encoding)
+        self.set_content(chars, keep_undo)
 
     def set_content(self, content, keep_undo=False):
+        content, self._original_newlines = tweak_newlines(content)
+
         self.text.direct_delete("1.0", tk.END)
         self.text.direct_insert("1.0", content)
 
@@ -396,3 +403,23 @@ def get_syntax_options_for_tag(tag, **base_options):
     if tag in _syntax_options:
         base_options.update(_syntax_options[tag])
     return base_options
+
+
+def tweak_newlines(content):
+    cr_count = len(OLD_MAC_LINEBREAK.findall(content))
+    lf_count = len(UNIX_LINEBREAK.findall(content))
+    crlf_count = len(WINDOWS_LINEBREAK.findall(content))
+
+    if cr_count > 0 and lf_count == 0 and crlf_count == 0:
+        original_newlines = "\r"
+    elif crlf_count > 0 and lf_count == 0 and cr_count == 0:
+        original_newlines = "\r\n"
+    elif lf_count > 0 and crlf_count == 0 and cr_count == 0:
+        original_newlines = "\n"
+    else:
+        original_newlines = os.linesep
+
+    content = OLD_MAC_LINEBREAK.sub("\n", content)
+    content = WINDOWS_LINEBREAK.sub("\n", content)
+
+    return content, original_newlines
