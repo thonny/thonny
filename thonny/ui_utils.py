@@ -28,6 +28,7 @@ from thonny.tktextext import TweakableText
 import sys
 from _tkinter import TclError
 import webbrowser
+from thonny.languages import get_button_padding
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 
@@ -2283,6 +2284,18 @@ def ems_to_pixels(x):
     if EM_WIDTH is None:
         EM_WIDTH = tkinter.font.nametofont("TkDefaultFont").measure("m")
     return int(EM_WIDTH * x)
+
+
+_btn_padding = None
+
+
+def tr_btn(s):
+    """Translates button caption, adds padding to make sure text fits"""
+    global _btn_padding
+    if _btn_padding is None:
+        _btn_padding = get_button_padding()
+
+    return _btn_padding + _(s) + _btn_padding
 
 
 if __name__ == "__main__":

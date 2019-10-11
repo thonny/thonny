@@ -1,3 +1,5 @@
+from thonny import get_workbench
+
 BASE_LANGUAGE_CODE = "en_US"
 BASE_LANGUAGE_NAME = "English"
 
@@ -17,6 +19,17 @@ LANGUAGES_DICT = {
     "ja_JP": "日本語  [ALPHA]",
     "lt_LT": "Lietuvių [BETA]",
 }
+
+# how many spaces to add to button caption in order to make whole text visible
+BUTTON_PADDING_SIZES = {"zh_TW": 4, "zh_CN": 4, "ja_JP": 4}
+
+
+def get_button_padding():
+    code = get_workbench().get_option("general.language")
+    if code in BUTTON_PADDING_SIZES:
+        return BUTTON_PADDING_SIZES[code] * " "
+    else:
+        return ""
 
 
 def get_language_code_by_name(name):

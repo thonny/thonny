@@ -21,6 +21,7 @@ from thonny.ui_utils import (
     show_dialog,
     lookup_style_option,
     CommonDialog,
+    tr_btn,
 )
 import tkinter as tk
 import webbrowser
@@ -1429,19 +1430,19 @@ class SqueezedTextDialog(CommonDialog):
         button_frame.grid(row=3, column=0, padx=padding, pady=padding, sticky="nswe")
         button_frame.columnconfigure(2, weight=1)
 
-        copy_caption = _("Copy to clipboard")
+        copy_caption = tr_btn("Copy to clipboard")
         copy_button = ttk.Button(
             button_frame, text=copy_caption, width=len(copy_caption), command=self._on_copy
         )
         copy_button.grid(row=0, column=1, sticky="w", padx=(0, padding))
 
-        expand_caption = _("Expand in Shell")
+        expand_caption = tr_btn("Expand in Shell")
         expand_button = ttk.Button(
             button_frame, text=expand_caption, width=len(expand_caption), command=self._on_expand
         )
         expand_button.grid(row=0, column=2, sticky="e", padx=padding)
 
-        close_button = ttk.Button(button_frame, text="Close", command=self._on_close)
+        close_button = ttk.Button(button_frame, text=tr_btn("Close"), command=self._on_close)
         close_button.grid(row=0, column=3, sticky="e")
 
         self.bind("<Escape>", self._on_close, True)
