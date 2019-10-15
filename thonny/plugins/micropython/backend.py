@@ -1103,6 +1103,7 @@ class MicroPythonBackend:
                     def __W(x):
                         global __thonny_written
                         __thonny_written += __thonny_fp.write(__thonny_unhex(x))
+                        __thonny_fp.flush()
                 """
                     )
                 )
@@ -1113,6 +1114,7 @@ class MicroPythonBackend:
                     def __W(x):
                         global __thonny_written
                         __thonny_written += __thonny_fp.write(x)
+                        __thonny_fp.flush()
                 """
                     )
                 )
