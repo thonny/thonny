@@ -130,6 +130,7 @@ class MicroPythonProxy(SubprocessProxy):
                 ("USB" in p.description and "serial" in p.description.lower())
                 or "UART" in p.description
                 or "DAPLink" in p.description
+                or "STLink" in p.description
             )
         ]
 
