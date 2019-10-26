@@ -398,6 +398,8 @@ class BaseFileBrowser(ttk.Frame):
                 self.tree.set_children(node_id)  # clear the list of children
                 self.tree.item(node_id, open=False)
 
+        elif children_data is None:
+            raise RuntimeError("None data for %s" % path)
         else:
             fs_children_names = children_data.keys()
             tree_children_ids = self.tree.get_children(node_id)
