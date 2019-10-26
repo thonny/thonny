@@ -1741,15 +1741,17 @@ class Workbench(tk.Tk):
                 size=round(editor_font_size * small_size_factor)
             )
 
-        style = ttk.Style()
+        # Update Treeview font and row height           
         if running_on_mac_os():
             treeview_font_size = int(editor_font_size * 0.7 + 4)
-            rowheight = int(treeview_font_size * 1.2 + self.scale(4))
         else:
             treeview_font_size = int(editor_font_size * 0.7 + 2)
-            rowheight = int(treeview_font_size * 2.0 + self.scale(3))
+        
+        treeview_font = tk_font.nametofont("TreeviewFont")
+        treeview_font.configure(size=treeview_font_size)
+        rowheight = round(treeview_font.metrics("linespace") * 1.3)
 
-        tk_font.nametofont("TreeviewFont").configure(size=treeview_font_size)
+        style = ttk.Style()
         style.configure("Treeview", rowheight=rowheight)
 
         if self._editor_notebook is not None:
