@@ -507,15 +507,15 @@ class Workbench(tk.Tk):
         self.set_default("CustomInterpreter.used_paths", [])
         self.set_default("CustomInterpreter.path", "")
 
+        from thonny import running_config_page
+
         self.add_backend(
             "SameAsFrontend",
             running.SameAsFrontendCPythonProxy,
             _("The same interpreter which runs Thonny (default)"),
-            running.get_interpreter_for_subprocess(),
+            running_config_page.SameAsFrontEndConfigurationPage,
             "1",
         )
-
-        from thonny import running_config_page
 
         self.add_backend(
             "CustomCPython",
@@ -529,9 +529,7 @@ class Workbench(tk.Tk):
             "PrivateVenv",
             running.PrivateVenvCPythonProxy,
             _("A special virtual environment (deprecated)"),
-            _("This virtual environment is automatically maintained by Thonny.\n")
-            + _("Location: ")
-            + running.get_private_venv_path(),
+            running_config_page.PrivateVenvConfigurationPage,
             "z",
         )
 
@@ -1086,9 +1084,8 @@ class Workbench(tk.Tk):
 
         # assing names to related classes
         proxy_class.backend_name = name  # type: ignore
-        if not isinstance(config_page_constructor, str):
-            if not getattr(config_page_constructor, "backend_name", None):
-                config_page_constructor.backend_name = name
+        if not getattr(config_page_constructor, "backend_name", None):
+            config_page_constructor.backend_name = name
 
     def add_ui_theme(
         self,

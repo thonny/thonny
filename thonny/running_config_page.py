@@ -8,8 +8,28 @@ from thonny import get_workbench, running, ui_utils
 from thonny.common import normpath_with_actual_case
 from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage
-from thonny.running import WINDOWS_EXE
+from thonny.running import WINDOWS_EXE, get_interpreter_for_subprocess
 from thonny.ui_utils import SubprocessDialog, askdirectory, askopenfilename, create_string_var
+
+
+class SameAsFrontEndConfigurationPage(BackendDetailsConfigPage):
+    def __init__(self, master):
+        super().__init__(master)
+        label = ttk.Label(self, text=get_interpreter_for_subprocess())
+        label.grid()
+
+
+class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
+    def __init__(self, master):
+        super().__init__(master)
+        text = (
+            _("This virtual environment is automatically maintained by Thonny.\n")
+            + _("Location: ")
+            + running.get_private_venv_path()
+        )
+
+        label = ttk.Label(self, text=text)
+        label.grid()
 
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
