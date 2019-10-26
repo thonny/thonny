@@ -1741,12 +1741,12 @@ class Workbench(tk.Tk):
                 size=round(editor_font_size * small_size_factor)
             )
 
-        # Update Treeview font and row height           
+        # Update Treeview font and row height
         if running_on_mac_os():
             treeview_font_size = int(editor_font_size * 0.7 + 4)
         else:
             treeview_font_size = int(editor_font_size * 0.7 + 2)
-        
+
         treeview_font = tk_font.nametofont("TreeviewFont")
         treeview_font.configure(size=treeview_font_size)
         rowheight = round(treeview_font.metrics("linespace") * 1.3)
