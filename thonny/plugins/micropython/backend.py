@@ -11,6 +11,7 @@ from thonny.common import (
     serialize_message,
     BackendEvent,
     ValueInfo,
+    execute_system_command,
 )
 import sys
 import logging
@@ -678,6 +679,9 @@ class MicroPythonBackend:
             # source is a statement (or invalid syntax)
             self._execute(cmd.source)
             return {}
+
+    def _cmd_execute_system_command(self, cmd):
+        execute_system_command(cmd)
 
     def _cmd_get_globals(self, cmd):
         if cmd.module_name == "__main__":

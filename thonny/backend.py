@@ -14,7 +14,6 @@ import pydoc
 import re
 import signal
 import site
-import subprocess
 import sys
 import tokenize
 import traceback
@@ -22,7 +21,6 @@ import types
 import warnings
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
-from threading import Thread
 
 import __main__  # @UnresolvedImport
 import _ast
@@ -50,6 +48,7 @@ from thonny.common import (
     update_system_path,
     is_same_path,
     EOFCommand,
+    execute_system_command,
 )
 import queue
 
@@ -443,48 +442,7 @@ class VM:
 
     def _cmd_execute_system_command(self, cmd):
         self._check_update_tty_mode(cmd)
-        env = dict(os.environ).copy()
-        encoding = "utf-8"
-        env["PYTHONIOENCODING"] = encoding
-        # Make sure this python interpreter and its scripts are available
-        # in PATH
-        update_system_path(env, get_augmented_system_path(get_exe_dirs()))
-        popen_kw = dict(
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            shell=True,
-            env=env,
-            universal_newlines=True,
-        )
-
-        if sys.version_info >= (3, 6):
-            popen_kw["errors"] = "replace"
-            popen_kw["encoding"] = encoding
-
-        assert cmd.cmd_line.startswith("!")
-        cmd_line = cmd.cmd_line[1:]
-        proc = subprocess.Popen(cmd_line, **popen_kw)
-
-        def copy_stream(source, target):
-            while True:
-                c = source.readline()
-                if c == "":
-                    break
-                else:
-                    target.write(c)
-
-        copy_out = Thread(target=lambda: copy_stream(proc.stdout, sys.stdout), daemon=True)
-        copy_err = Thread(target=lambda: copy_stream(proc.stderr, sys.stderr), daemon=True)
-
-        copy_out.start()
-        copy_err.start()
-        try:
-            proc.wait()
-        except KeyboardInterrupt as e:
-            print(str(e), file=sys.stderr)
-
-        copy_out.join()
-        copy_err.join()
+        execute_system_command(cmd)
 
     def _cmd_process_gui_events(self, cmd):
         # advance the event loop
