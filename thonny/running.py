@@ -245,6 +245,8 @@ class Runner:
         if "id" not in cmd:
             cmd["id"] = generate_command_id()
 
+        cmd["local_cwd"] = get_workbench().get_local_cwd()
+
         # Offer the command
         logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)

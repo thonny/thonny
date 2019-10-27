@@ -84,6 +84,7 @@ def debug(msg):
 class MicroPythonBackend:
     def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
+        self._local_cwd = None
         self._cwd = None
         self._interrupt_requested = False
         self._cancel_requested = False
@@ -295,6 +296,9 @@ class MicroPythonBackend:
 
     def handle_command(self, cmd):
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
+
+        if "local_cwd" in cmd:
+            self._local_cwd = cmd["local_cwd"]
 
         def create_error_response(**kw):
             if not "error" in kw:
@@ -682,7 +686,7 @@ class MicroPythonBackend:
 
     def _cmd_execute_system_command(self, cmd):
         # Can't use stdin, because a thread is draining it
-        execute_system_command(cmd, disconnect_stdin=True)
+        execute_system_command(cmd, cwd=self._local_cwd, disconnect_stdin=True)
 
     def _cmd_get_globals(self, cmd):
         if cmd.module_name == "__main__":

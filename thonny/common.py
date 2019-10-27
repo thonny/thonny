@@ -551,7 +551,7 @@ def get_windows_lnk_target(lnk_file_path):
     return result.strip()
 
 
-def execute_system_command(cmd, disconnect_stdin=False):
+def execute_system_command(cmd, cwd=None, disconnect_stdin=False):
     env = dict(os.environ).copy()
     encoding = "utf-8"
     env["PYTHONIOENCODING"] = encoding
@@ -566,6 +566,9 @@ def execute_system_command(cmd, disconnect_stdin=False):
         universal_newlines=True,
         bufsize=0,
     )
+
+    if cwd and os.path.isdir(cwd):
+        popen_kw["cwd"] = cwd
 
     if disconnect_stdin:
         popen_kw["stdin"] = subprocess.DEVNULL
