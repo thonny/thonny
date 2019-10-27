@@ -681,7 +681,8 @@ class MicroPythonBackend:
             return {}
 
     def _cmd_execute_system_command(self, cmd):
-        execute_system_command(cmd)
+        # Can't use stdin, because a thread is draining it
+        execute_system_command(cmd, disconnect_stdin=True)
 
     def _cmd_get_globals(self, cmd):
         if cmd.module_name == "__main__":

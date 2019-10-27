@@ -551,7 +551,7 @@ def get_windows_lnk_target(lnk_file_path):
     return result.strip()
 
 
-def execute_system_command(cmd):
+def execute_system_command(cmd, disconnect_stdin=False):
     env = dict(os.environ).copy()
     encoding = "utf-8"
     env["PYTHONIOENCODING"] = encoding
@@ -559,8 +559,16 @@ def execute_system_command(cmd):
     # in PATH
     update_system_path(env, get_augmented_system_path(get_exe_dirs()))
     popen_kw = dict(
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True, env=env, universal_newlines=True
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        shell=True,
+        env=env,
+        universal_newlines=True,
+        bufsize=0,
     )
+
+    if disconnect_stdin:
+        popen_kw["stdin"] = subprocess.DEVNULL
 
     if sys.version_info >= (3, 6):
         popen_kw["errors"] = "replace"
