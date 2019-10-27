@@ -1710,6 +1710,14 @@ class Workbench(tk.Tk):
         ]:
             tk_font.nametofont(io_name).configure(family=io_font_family, size=io_font_size)
 
+        try:
+            shell = self.get_view("ShellView", create=False)
+        except Exception:
+            # shell may be not created yet
+            pass
+        else:
+            shell.update_tabs()
+
         tk_font.nametofont("EditorFont").configure(family=editor_font_family, size=editor_font_size)
         tk_font.nametofont("SmallEditorFont").configure(
             family=editor_font_family, size=editor_font_size - 2
