@@ -234,6 +234,9 @@ class ShellView(tk.PanedWindow):
         if self.plotter is not None and self.plotter.winfo_ismapped():
             self.plotter.update_plot()
 
+    def update_tabs(self):
+        self.text.update_tabs()
+
     def resize_plotter(self):
         if len(self.panes()) > 1 and self.text.winfo_width() > 5:
             get_workbench().set_option("view.shell_sash_position", self.sash_coord(0)[0])
@@ -273,6 +276,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
     def __init__(self, master, view=None, cnf={}, **kw):
         self.view = view
+        kw["tabstyle"] = "wordprocessor"
         super().__init__(master, cnf, **kw)
 
         self._command_history = (
@@ -308,6 +312,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         x_padding = 4
         io_vert_spacing = 10
         io_indent = 16 + x_padding
+        self.io_indent = io_indent
         code_indent = prompt_font.measure(">>> ") + x_padding
 
         self.tag_configure("command", lmargin1=code_indent, lmargin2=code_indent)
@@ -346,6 +351,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.mark_gravity("output_insert", tk.RIGHT)
 
         self.active_object_tags = set()
+
+        self.update_tabs()
 
         self.tag_raise("io_hyperlink")
         self.tag_raise("underline")
@@ -805,6 +812,18 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         get_workbench().show_view("ShellView")
         if focused_view is not None:
             focused_view.focus()
+
+    def update_tabs(self):
+        tab_chars = 8
+        tab_pixels = tk.font.nametofont("IOFont").measure("n" * tab_chars)
+
+        offset = self.io_indent
+        tabs = [offset]
+        for _ in range(20):
+            offset += tab_pixels
+            tabs.append(offset)
+
+        self.tag_configure("io", tabs=tabs, tabstyle="wordprocessor")
 
     def restart(self):
         self._insert_text_directly(

@@ -245,6 +245,8 @@ class Runner:
         if "id" not in cmd:
             cmd["id"] = generate_command_id()
 
+        cmd["local_cwd"] = get_workbench().get_local_cwd()
+
         # Offer the command
         logging.debug("RUNNER Sending: %s, %s", cmd.name, cmd)
         response = self._proxy.send_command(cmd)
@@ -810,6 +812,11 @@ class SubprocessProxy(BackendProxy):
             creationflags = subprocess.CREATE_NEW_PROCESS_GROUP
 
         debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
+
+        extra_params = {}
+        if sys.version_info > (3, 5):
+            extra_params["encoding"] = "utf-8"
+
         self._proc = subprocess.Popen(
             cmd_line,
             bufsize=0,
@@ -820,6 +827,7 @@ class SubprocessProxy(BackendProxy):
             env=env,
             universal_newlines=True,
             creationflags=creationflags,
+            **extra_params
         )
 
         # setup asynchronous output listeners

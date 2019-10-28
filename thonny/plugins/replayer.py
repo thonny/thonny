@@ -66,6 +66,8 @@ class ReplayerFileBrowser(BaseLocalFileBrowser):
         if path:
             self.log_frame.load_log(path)
 
+        return "break"  # avoid default action of opening the node
+
 
 class ControlFrame(ttk.Frame):
     def __init__(self, master, **kw):
