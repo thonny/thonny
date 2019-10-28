@@ -1384,7 +1384,7 @@ msgstr "注意!该值较大可能影响运行效果"
 #: thonny/plugins/shell_config_page.py:47
 #, fuzzy
 msgid "Maximum length of line fragments before squeezing"
-msgstr "单次输出最多字符数.超出后提取"
+msgstr "行的最大长度.超出后提取"
 
 #: thonny/plugins/terminal_config_page.py:10
 #, fuzzy
