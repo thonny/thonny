@@ -53,8 +53,8 @@ INTERRUPT_CMD = b"\x03"
 SOFT_REBOOT_CMD = b"\x04"
 
 # Output tokens
-THONNY_MSG_START = b"\x02"
-THONNY_MSG_END = b"\x04"
+THONNY_MSG_START = b"\x02<thonny>"
+THONNY_MSG_END = b"</thonny>\x04"
 EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
 LF = b"\n"
