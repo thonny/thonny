@@ -157,7 +157,7 @@ class MicroPythonBackend:
         self._connection.write(RAW_MODE_CMD)
         self._connection.read_until(FIRST_RAW_PROMPT)
 
-        return welcome_text.decode(ENCODING)
+        return welcome_text.decode(ENCODING, errors="replace")
 
     def _fetch_uname(self):
         res = self._evaluate("__thonny_os.uname()", prelude="import os as __thonny_os")
@@ -516,7 +516,8 @@ class MicroPythonBackend:
             # Process input in chunks (max 1 parsing marker per chunk).
             # Prefer whole lines (to reduce the number of events),
             # but don't wait too long for eol.
-            output += self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.05)
+            ddd = self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.05)
+            output += ddd
             stream_name = "stderr" if eot_count == 1 else "stdout"
 
             if output.endswith(THONNY_MSG_START):
@@ -572,7 +573,7 @@ class MicroPythonBackend:
             if output.endswith(FIRST_RAW_PROMPT[:-1]):
                 # incomplete raw prompt, wait for more
                 pass
-            else:
+            elif output:
                 if capture_output:
                     if stream_name == "stdout":
                         out += output
@@ -580,14 +581,13 @@ class MicroPythonBackend:
                         assert stream_name == "stderr"
                         err += output
                 else:
-                    # TODO: deal with partial UTF-8 chars
-                    self._send_output(output.decode(ENCODING), stream_name)
+                    self._send_output(output.decode(ENCODING, errors="replace"), stream_name)
                 output = b""
 
         debug("doneproc")
         return (
-            out.decode(ENCODING),
-            err.decode(ENCODING),
+            out.decode(ENCODING, errors="replace"),
+            err.decode(ENCODING, errors="replace"),
             None if value is None else value.decode(ENCODING),
         )
 

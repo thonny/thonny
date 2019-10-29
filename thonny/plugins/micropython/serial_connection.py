@@ -74,12 +74,19 @@ class SerialConnection(MicroPythonConnection):
 
                 # don't publish incomplete utf-8 data
                 try:
-                    data.decode("utf-8")
+                    data.decode("utf-8")  # testing if data decodes
                     to_be_published = data
                     data = b""
                 except UnicodeDecodeError as e:
-                    to_be_published = data[: e.start]
-                    data = data[e.start :]
+                    if e.start == 0:
+                        # Invalid start byte, ie. we have missed first byte(s) of the codepoint.
+                        # No use of waiting, output everything
+                        to_be_published = data
+                        data = b""
+                    else:
+                        to_be_published = data[: e.start]
+                        data = data[e.start :]
+
                 if to_be_published:
                     self._read_queue.put(to_be_published)
 
