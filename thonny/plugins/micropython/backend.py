@@ -252,8 +252,12 @@ class MicroPythonBackend:
 
         discarded_bytes = b""
 
-        for delay in [0.05, 0.5, 0.1, 2.0]:
+        for delay in [0.05, 0.5, 0.1, 1.0, 3.0, 5.0]:
             # Interrupt several times, because with some drivers first interrupts seem to vanish
+            if delay >= 1:
+                self._show_error(
+                    "Could not enter REPL. Trying again with %d second waiting time..." % delay
+                )
             self._connection.reset_output_buffer()
             self._connection.write(INTERRUPT_CMD)
             self._connection.write(RAW_MODE_CMD)
@@ -262,7 +266,25 @@ class MicroPythonBackend:
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(b"\r\n>"):
                 break
         else:
-            raise TimeoutError("Can't get to raw prompt. Read bytes: " + str(discarded_bytes))
+            max_tail_length = 500
+            if len(discarded_bytes) > max_tail_length:
+                discarded_bytes_str = (
+                    "[skipping %d bytes] ..." % (len(discarded_bytes) - max_tail_length)
+                ) + repr(discarded_bytes[:-max_tail_length])
+            else:
+                discarded_bytes_str = repr(discarded_bytes)
+            self._show_error(
+                "Could not enter REPL. Giving up. Read bytes:\n"
+                + discarded_bytes_str
+                + "\n\nYour options:\n\n"
+                + "  - check connection properties;\n"
+                + "  - make sure the device has suitable firmware;\n"
+                + "  - make sure the device is not in bootloader mode;\n"
+                + "  - reset the device and try again;\n"
+                + "  - try other serial clients (Putty, TeraTerm, screen, ...);\n"
+                + "  - ask for help in Thonny's forum or issue tracker."
+            )
+            sys.exit()
 
     def _soft_reboot(self, side_command):
         if side_command:
@@ -496,15 +518,12 @@ class MicroPythonBackend:
                 and not self._ctrl_suggestion_given
                 and time.time() - self._startup_time > 1.5
             ):
-                self._send_output(
+                self._show_error(
                     "\n"
                     + "Device is busy or does not respond. Your options:\n\n"
-                    + "  - check the connection properties;\n"
-                    + "  - make sure the device has suitable firmware;\n"
-                    + "  - make sure the device is not in bootloader mode;\n"
-                    + "  - wait until current work is complete;\n"
-                    + "  - use Ctrl+C to interrupt current work.\n",
-                    "stderr",
+                    + "  - wait until it completes current work;\n"
+                    + "  - use Ctrl+C to interrupt current work;\n"
+                    + "  - use Stop/Restart to interrupt more and enter REPL.\n"
                 )
                 self._ctrl_suggestion_given = True
 
@@ -1654,6 +1673,9 @@ class MicroPythonBackend:
         self._send_output("\n" + message + "\n", "stderr")
         self._send_output("\n" + "Use Stop/Restart to reconnect." + "\n", "stderr")
         sys.exit(EXPECTED_TERMINATION_CODE)
+
+    def _show_error(self, msg):
+        self._send_output(msg + "\n", "stderr")
 
 
 class ExecutionError(Exception):
