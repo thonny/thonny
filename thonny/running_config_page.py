@@ -34,9 +34,9 @@ class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
         label = ttk.Label(self, text=text)
         label.grid()
 
-
     def should_restart(self):
         return False
+
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
