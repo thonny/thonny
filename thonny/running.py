@@ -527,7 +527,7 @@ class Runner:
         except Exception:
             logging.exception("Failed retrieving backend faults")
 
-        err = err.strip() + " Use 'Stop/Restart' to restart ...\n"
+        err = err.strip() + " Use 'Stop/Restart' to restart.\n"
 
         if returncode != EXPECTED_TERMINATION_CODE:
             get_workbench().event_generate("ProgramOutput", stream_name="stderr", data="\n" + err)
