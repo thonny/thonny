@@ -7,7 +7,8 @@ For performance reasons, coloring is updated in 2 phases:
 
 First phase may insert wrong tokens inside triple-quoted strings, but the
 priorities of triple-quoted-string tags are higher and therefore user
-doesn't see these wrong taggings.
+doesn't see these wrong taggings. In some cases (eg. open strings)
+these wrong tags are removed later.
 
 In Shell only current command entry is colored
 
@@ -215,10 +216,13 @@ class SyntaxColorer:
 
 class CodeViewSyntaxColorer(SyntaxColorer):
     def _update_coloring(self):
-        search_start = self.text.index("@0,0")
-        search_end = self.text.index(
+        viewport_start = self.text.index("@0,0")
+        viewport_end = self.text.index(
             "@%d,%d lineend" % (self.text.winfo_width(), self.text.winfo_height())
         )
+
+        search_start = viewport_start
+        search_end = viewport_end
 
         while True:
             res = self.text.tag_nextrange(TODO, search_start, search_end)
@@ -245,16 +249,20 @@ class CodeViewSyntaxColorer(SyntaxColorer):
                 search_start = update_end
 
         # Multiline tokens need to be searched from the whole source
-        # open_before = getattr(self.text, "number_of_open_multiline_strings", 0)
         if self._multiline_dirty:
             self._update_multiline_tokens("1.0", "end")
-        # open_after = getattr(self.text, "number_of_open_multiline_strings", 0)
 
-        """
-        if open_after == 0 and open_before != 0:
-            # recolor uniline tokens after closing last open multiline string
-            self._update_uniline_tokens("1.0", "end")
-        """
+        # Get rid of wrong open string tags (https://github.com/thonny/thonny/issues/943)
+        search_start = viewport_start
+        while True:
+            tag_range = self.text.tag_nextrange("open_string", search_start, viewport_end)
+            if not tag_range:
+                return
+
+            if "string3" in self.text.tag_names(tag_range[0]):
+                self.text.tag_remove("open_string", tag_range[0], tag_range[1])
+
+            search_start = tag_range[1]
 
 
 class ShellSyntaxColorer(SyntaxColorer):
