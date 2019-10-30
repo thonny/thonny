@@ -52,6 +52,7 @@ from thonny.ui_utils import select_sequence, show_dialog, CommonDialogEx
 from tkinter import messagebox
 import warnings
 import re
+import traceback
 
 
 WINDOWS_EXE = "python.exe"
@@ -1101,7 +1102,12 @@ class CPythonProxy(SubprocessProxy):
 
     def _loop_gui_update(self, force=False):
         if force or get_runner().is_waiting_toplevel_command():
-            self.send_command(InlineCommand("process_gui_events"))
+            try:
+                self.send_command(InlineCommand("process_gui_events"))
+            except OSError:
+                # the backend process may have been closed already
+                # https://github.com/thonny/thonny/issues/966
+                logging.getLogger("thonny").exception("Could not send process_gui_events")
 
         self._gui_update_loop_id = get_workbench().after(50, self._loop_gui_update)
 
