@@ -95,10 +95,11 @@ msgid "Made in\n"
 "open-source community,\n"
 "Raspberry Pi Foundation\n"
 "and Cybernetica AS"
-msgstr "编写于塔尔图大学(爱沙尼亚),\n"
-"Raspberry Pi Foundation\n"
-"和 Cybernetica AS开源社区\n"
-"协助支持."
+msgstr "编写于:\n"
+"爱沙尼亚,塔尔图大学.\n"
+"帮助者:\n"
+"开源社区,树莓派基金\n"
+"会和Cybernetica AS."
 
 #: thonny/plugins/about.py:103
 #, fuzzy
@@ -108,9 +109,10 @@ msgid "This program comes with\n"
 "redistribute it under certain conditions, see\n"
 "https://opensource.org/licenses/MIT\n"
 "for details"
-msgstr "这是一款免费的软件(无保证),你也\n"
-"可以在特定的条件下分发它.详细参\n"
-"阅https://opensource.org/licenses/MIT\n"
+msgstr "此软件完全免责!\n"
+"这是一款自由软件,你也可以在特\n"
+"定的条款下分发它,详细请查看\n"
+"https://opensource.org/licenses/MIT.\n"
 ""
 
 #: thonny/plugins/about.py:146
@@ -260,7 +262,7 @@ msgstr "高亮匹配名称"
 #: thonny/plugins/editor_config_page.py:20
 #, fuzzy
 msgid "Highlight local variables"
-msgstr "高亮显示局部(块)变量"
+msgstr "斜体显示局部变量"
 
 #: thonny/plugins/editor_config_page.py:25
 #, fuzzy
@@ -402,13 +404,13 @@ msgstr "字体缩放模式"
 #, fuzzy
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
-msgstr "Heap模式已开启.\n"
-"在视图中可关闭"
+msgstr "堆模式已开启.\n"
+"在视图中可关闭."
 
 #: thonny/plugins/heap.py:83
 #, fuzzy
 msgid "Heap"
-msgstr "堆栈(Heap)"
+msgstr "堆"
 
 #: thonny/plugins/general_config_page.py:42
 #, fuzzy
@@ -422,14 +424,14 @@ msgid "This box is meant for your working notes -- assignment instructions, code
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
 "\n"
 "Feel free to delete this text to make room for your own notes."
-msgstr "这里用于您的工作笔记 - 分配说明，代码段，等等。\n"
+msgstr "这里您可以记录你的笔记 (文档，代码段，等等)。\n"
 "所有内容都会自动保存并下次打开Thonny时加载。\n"
 "您可以随意删除此文本，为自己的笔记腾出空间。"
 
 #: thonny/plugins/notes.py:61
 #, fuzzy
 msgid "Notes"
-msgstr "笔记"
+msgstr "笔记本"
 
 #: thonny/plugins/object_inspector.py:108
 #, fuzzy
@@ -782,7 +784,7 @@ msgstr "显示绘图器"
 #, fuzzy
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
-msgstr "出于性能原因，Shell避免显示非常长的行(请参阅Tools => Options => Shell).\n"
+msgstr "出于性能原因，Shell避免显示非常长的行(请参阅 工具 => 设置 => Shell).\n"
 "在这里，您可以与原始文本片段进行交互."
 
 #: thonny/shell.py:1400
@@ -803,7 +805,7 @@ msgstr "Shell中展开"
 #: thonny/shell.py:1442
 #, fuzzy
 msgid "Squeezed text (%d characters)"
-msgstr "详细文本(%d 个字符)"
+msgstr "提取的文本(%d 个字符)"
 
 #: thonny/shell.py:1611
 #, fuzzy
@@ -942,7 +944,7 @@ msgstr "配置已更新。 重启Thonny以开始于常规模式工作。\n"
 #: thonny/plugins/ast_view.py:209
 #, fuzzy
 msgid "Program tree"
-msgstr "程序树状图"
+msgstr "程序树图"
 
 #: thonny/plugins/backend_config_page.py:130
 #, fuzzy
@@ -1057,7 +1059,7 @@ msgstr "注意,改变设置后请重启Thonny!"
 #: thonny/plugins/general_config_page.py:102
 #, fuzzy
 msgid "General"
-msgstr "通用"
+msgstr "常规"
 
 #: thonny/plugins/pip_gui.py:108
 #, fuzzy
@@ -1372,7 +1374,7 @@ msgstr "支持基本的ANSI颜色和样式"
 #: thonny/plugins/shell_config_page.py:30
 #, fuzzy
 msgid "Maximum number of lines to keep."
-msgstr "可保持的最大行"
+msgstr "可保存的最大行数"
 
 #: thonny/plugins/shell_config_page.py:32
 #, fuzzy
@@ -1382,7 +1384,7 @@ msgstr "注意!该值较大可能影响运行效果"
 #: thonny/plugins/shell_config_page.py:47
 #, fuzzy
 msgid "Maximum length of line fragments before squeezing"
-msgstr "缩进前每行的最大长度"
+msgstr "行的最大长度.超出后提取"
 
 #: thonny/plugins/terminal_config_page.py:10
 #, fuzzy
@@ -1392,7 +1394,7 @@ msgstr "在终端运行此脚本"
 #: thonny/plugins/terminal_config_page.py:15
 #, fuzzy
 msgid "Present Python REPL after program ends"
-msgstr "程序执行后显示Python REPL"
+msgstr "程序执行后启动Python REPL"
 
 #: thonny/plugins/terminal_config_page.py:22
 #, fuzzy
@@ -1738,7 +1740,7 @@ msgstr "大小"
 #: thonny/base_file_browser.py:623
 #, fuzzy
 msgid "Modified"
-msgstr "已修改"
+msgstr "修改时间"
 
 #: thonny/base_file_browser.py:679
 #, fuzzy
