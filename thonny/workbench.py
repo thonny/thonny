@@ -1754,7 +1754,7 @@ class Workbench(tk.Tk):
 
         treeview_font = tk_font.nametofont("TreeviewFont")
         treeview_font.configure(size=treeview_font_size)
-        rowheight = round(treeview_font.metrics("linespace") * 1.3)
+        rowheight = round(treeview_font.metrics("linespace") * 1.2)
 
         style = ttk.Style()
         style.configure("Treeview", rowheight=rowheight)
