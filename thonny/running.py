@@ -814,7 +814,7 @@ class SubprocessProxy(BackendProxy):
         debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
 
         extra_params = {}
-        if sys.version_info > (3, 5):
+        if sys.version_info >= (3, 6):
             extra_params["encoding"] = "utf-8"
 
         self._proc = subprocess.Popen(
