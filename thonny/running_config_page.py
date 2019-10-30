@@ -18,6 +18,9 @@ class SameAsFrontEndConfigurationPage(BackendDetailsConfigPage):
         label = ttk.Label(self, text=get_interpreter_for_subprocess())
         label.grid()
 
+    def should_restart(self):
+        return False
+
 
 class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
@@ -31,6 +34,9 @@ class PrivateVenvConfigurationPage(BackendDetailsConfigPage):
         label = ttk.Label(self, text=text)
         label.grid()
 
+
+    def should_restart(self):
+        return False
 
 class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master):
