@@ -136,7 +136,6 @@ codesign --force -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/l
 PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 rm -f $PLUS_FILENAME
 hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
-hdiutil internet-enable -yes $PLUS_FILENAME
 
 # sign dmg #######################################################################
 codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
