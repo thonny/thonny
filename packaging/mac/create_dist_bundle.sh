@@ -110,7 +110,6 @@ mkdir -p dist
 FILENAME=dist/thonny-${VERSION}.dmg
 rm -f $FILENAME
 hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
-hdiutil internet-enable -yes $FILENAME
 
 # sign dmg ######################
 codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
