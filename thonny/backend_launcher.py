@@ -12,8 +12,19 @@ gives relative __file__-s on imported modules.)
 """
 
 if __name__ == "__main__":
-    # imports required by the backend itself
     import sys
+    import platform
+
+    if platform.system() == "Darwin":
+        import os
+
+        try:
+            os.getcwd()
+        except Exception:
+            print(
+                "\nNB! Potential problems detected, see\nhttps://github.com/thonny/thonny/wiki/MacOSX#catalina\n",
+                file=sys.stderr,
+            )
 
     if not sys.version_info > (3, 5):
         print(
