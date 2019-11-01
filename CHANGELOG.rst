@@ -2,6 +2,39 @@
 Version history
 ===============
 
+3.2.2 (2019-11-01)
+==================
+* NEW: ESP plug-in has been merged into main Thonny package
+* UPDATE: Updated several translations (by Vytenis, rnLIKEm, Dleta...)
+* FIXED #219: Implement sending EOF / restart for CPython
+* FIXED #873: More robust color preference loading in Pi theme
+* FIXED #876: Don't step into comprehension calls
+* FIXED #897: Redo shortcut not working in Linux and Mac
+* FIXED #899: Can't set THONNY_USER_DIR in customize.py
+* FIXED #904: Don't show remote MicroPython dialogs when device is busy
+* FIXED #905: Problems with Thonny menu on Mac after closing a dialog
+* FIXED #911: Allow restoring default scaling factor
+* FIXED #921: Make MicroPython backend play nicer with device resets
+* FIXED #923: CircuitPython on Trinket m0 gives small int overflow when listing files
+* FIXED #925: Save or open problem with network paths
+* FIXED #927: Visual glitch / ghosting in Expression Box in macOS
+* FIXED #928: Tooltips stay on top in macOS
+* FIXED #929: Indicate dirty state in macOS close button
+* FIXED #933: Scaling doesn't work right for Treeviews (Files, Variables)
+* FIXED #934: Pad button captions for certain languages
+* FIXED #936: Problem uploading files to some STM boards
+* FIXED #939: More robust handling of different line endings
+* FIXED #943: Wrong syntax highlighting with triple quoted string
+* FIXED #946: Handle broken UTF-8 codepoints in MicroPython output
+* FIXED #951: Use standard tabstops for program output
+* FIXED #953: Allow running system commands with MP back-end
+* FIXED #957: Wrong encoding in multiprocessing output
+* FIXED #960: File browser is not working in replayer
+* FIXED #966: Thonny encounters "internal error" in programs calling exit()
+* FIXED #969: Provide nicer message, when MicroPython backend can't get to the REPL
+* FIXED: Don't apply theming to menu in macOS (menu items were dull with dark themes)
+
+
 3.2.1 (2019-09-06)
 ==================
 * NEW: Add European Portuguese translation (by Emanuel Angelo)
