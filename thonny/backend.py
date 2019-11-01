@@ -44,8 +44,6 @@ from thonny.common import (
     range_contains_smaller_or_equal,
     serialize_message,
     get_exe_dirs,
-    get_augmented_system_path,
-    update_system_path,
     is_same_path,
     EOFCommand,
     execute_system_command,
@@ -354,6 +352,7 @@ class VM:
             signal.signal(signal.SIGINT, signal_handler)
 
     def _cmd_get_environment_info(self, cmd):
+
         return ToplevelResponse(
             main_dir=self._main_dir,
             path=sys.path,
