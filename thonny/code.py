@@ -697,7 +697,7 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         if path:
             # self.close_single_untitled_unmodified_editor()
-            self.show_file(path)
+            self.show_file(path, propose_dialog=False)
 
     def _control_o(self, event):
         # http://stackoverflow.com/questions/22907200/remap-default-keybinding-in-tkinter
@@ -807,9 +807,19 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
         return False
 
-    def show_file(self, filename, text_range=None, set_focus=True):
+    def show_file(self, filename, text_range=None, set_focus=True, propose_dialog=True):
         # self.close_single_untitled_unmodified_editor()
-        editor = self.get_editor(filename, True)
+        try:
+            editor = self.get_editor(filename, True)
+        except PermissionError:
+            logging.getLogger("thonny").exception("Loading " + filename)
+            msg = "Got permission error when trying to load\n" + filename
+            if running_on_mac_os() and propose_dialog:
+                msg += "\n\nTry opening it with File => Open."
+
+            messagebox.showerror("Permission error", msg)
+            return None
+
         assert editor is not None
 
         self.select(editor)
