@@ -8,16 +8,17 @@ LANGUAGES_DICT = {
     "et_EE": "Eesti",
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
     "es_ES": "Español [ALPHA]",
-    "fr_FR": "Français [ALPHA]",
+    "fr_FR": "Français [BETA]",
     "nl_NL": "Nederlands [BETA]",
     "pt_PT": "Português (PT) [BETA]",
     "pt_BR": "Português (BR) [ALPHA]",
-    "ru_RU": "Русский [BETA]",
-    "uk_UA": "Українська [BETA]",
-    "zh_TW": "繁體中文-TW [BETA]",
-    "zh_CN": "简体中文  [BETA]",
+    "ru_RU": "Русский",
+    "uk_UA": "Українська",
+    "zh_TW": "繁體中文-TW",
+    "zh_CN": "简体中文 ",
     "ja_JP": "日本語  [ALPHA]",
-    "lt_LT": "Lietuvių [BETA]",
+    "lt_LT": "Lietuvių",
+    "el_GR": "Ελληνικά [BETA]",
 }
 
 # how many spaces to add to button caption in order to make whole text visible

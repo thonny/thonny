@@ -2,10 +2,15 @@
 Version history
 ===============
 
+3.2.3 (2019-11-02)
+==================
+* NEW: Greek translation (by Nikos)
+* UPDATE: Updated several translations (by Vytenis, rnLIKEm, Dleta, Alex ANDRÉ, NathanBnm, LionelVaux, Paul, Eric W, Frank Stengel,  ...)
+
+
 3.2.2 (2019-11-01)
 ==================
 * NEW: ESP plug-in has been merged into main Thonny package
-* UPDATE: Updated several translations (by Vytenis, rnLIKEm, Dleta...)
 * FIXED #219: Implement sending EOF / restart for CPython
 * FIXED #873: More robust color preference loading in Pi theme
 * FIXED #876: Don't step into comprehension calls

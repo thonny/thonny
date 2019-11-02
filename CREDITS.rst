@@ -63,6 +63,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Kauri Raba
 * Matt Iversen
 * Miro Hrončok
+* NathanBnm
 * Peter Marshall
 * Phil Duby
 * Rene Lehtma

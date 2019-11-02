@@ -5,71 +5,71 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Generator: POEditor.com\n"
 "Project-Id-Version: Thonny\n"
-"Language: fr\n"
+"Language: el\n"
 
 #: thonny/workbench.py:355
 msgid "File"
-msgstr "Fichier"
+msgstr "Αρχείο"
 
 #: thonny/workbench.py:356
 msgid "Edit"
-msgstr "Édition"
+msgstr "Επεξεργασία"
 
 #: thonny/workbench.py:357
 msgid "View"
-msgstr "Affichage"
+msgstr "Προβολή"
 
 #: thonny/running.py:95 thonny/workbench.py:358
 msgid "Run"
-msgstr "Exécuter"
+msgstr "Εκτέλεση"
 
 #: thonny/workbench.py:360
 msgid "Tools"
-msgstr "Outils"
+msgstr "Εργαλεία"
 
 #: thonny/plugins/help/__init__.py:68 thonny/workbench.py:361
 msgid "Help"
-msgstr "Aide"
+msgstr "Βοήθεια"
 
 #: thonny/workbench.py:522
 msgid "Alternative Python 3 interpreter or virtual environment"
-msgstr "Interpréteur Python 3 alternatif ou environnement virtuel"
+msgstr "Εναλλακτικό διερμηνευτή Python 3 ή εικονικό περιβάλλον"
 
 #: thonny/workbench.py:530
 msgid "A special virtual environment (deprecated)"
-msgstr "Un environnement virtuel spécifique (obsolète)"
+msgstr "Ένα ειδικό εικονικό περιβάλλον (μη χρησιμοποιούμενο)"
 
 #: thonny/workbench.py:568
 msgid "Exit"
-msgstr "Quitter"
+msgstr "Έξοδος"
 
 #: thonny/workbench.py:595
 msgid "Decrease font size"
-msgstr "Diminuer la taille de la police"
+msgstr "Μείωση μεγέθους γραμματοσειράς"
 
 #: thonny/workbench.py:607
 msgid "Focus editor"
-msgstr "Placer le curseur dans l'éditeur"
+msgstr "Εστίαση στον επεξεργαστή κειμένου"
 
 #: thonny/workbench.py:616
 msgid "Focus shell"
-msgstr "Placer le curseur dans la console"
+msgstr "Εστίαση στο κέλυφος"
 
 #: thonny/workbench.py:627
 msgid "Maximize view"
-msgstr "Agrandir la vue"
+msgstr "Μεγιστοποίηση"
 
 #: thonny/workbench.py:639
 msgid "Full screen"
-msgstr "Plein écran"
+msgstr "Πλήρης οθόνη"
 
 #: thonny/workbench.py:1250
 msgid "Program arguments"
-msgstr "Arguments du programme"
+msgstr "Παράμετροι προγράμματος"
 
 #: thonny/plugins/about.py:25 thonny/plugins/about.py:157
 msgid "About Thonny"
-msgstr "À propos de Thonny"
+msgstr "Σχετικά με το Thonny"
 
 #: thonny/plugins/about.py:77
 msgid "Made in\n"
@@ -78,7 +78,11 @@ msgid "Made in\n"
 "open-source community,\n"
 "Raspberry Pi Foundation\n"
 "and Cybernetica AS"
-msgstr "Programmé à l'Université de Tartu, Estonie, avec l'aide de la communauté open-source, de la Fondation Raspberry Pi et de Cybernetica SAS"
+msgstr "Δημιουργήθηκε\n"
+"στο Πανεπιστήμιο Tartu της Εσθονίας\n"
+"με την βοήθεια της κοινότητας λογισμικού ανοιιχτού κώδικα,\n"
+"του Raspberry Pi Foundation \n"
+"και της Cybernetica AS"
 
 #: thonny/plugins/about.py:103
 msgid "This program comes with\n"
@@ -87,258 +91,254 @@ msgid "This program comes with\n"
 "redistribute it under certain conditions, see\n"
 "https://opensource.org/licenses/MIT\n"
 "for details"
-msgstr "Ce programme n'est fourni\n"
-"SANS AUCUNE GARANTIE QUELLE QU'ELLE SOIT \n"
-"Il s'agit d'un logiciel libre et vous pouvez le\n"
-"redistribuer sous certaines conditions.\n"
-"Voir https://opensource.org/licenses/MIT\n"
-"pour plus de détails"
+msgstr "Αυτό το πρόγραμμα δεν παρέχει\n"
+"ΑΠΟΛΥΤΩΣ ΚΑΜΙΑ ΕΓΓΥΗΣΗ!\n"
+"Είναι ελεύθερο λογισμικό και είστε ευπρόσδεκτοι\n"
+"να το αναδιανείμετε υπό ορισμένες προϋποθέσεις, βλ\n"
+"https://opensource.org/licenses/MIT\n"
+"για λεπτομέρειες"
 
 #: thonny/plugins/about.py:146
 msgid "Version history"
-msgstr "Historique de version"
+msgstr "Ιστορικό έκδοσης"
 
 #: thonny/plugins/about.py:153
 msgid "Report problems"
-msgstr "Signaler un problème"
+msgstr "Αναφορά προβλήματος"
 
 #: thonny/plugins/assistant_config_page.py:15
 msgid "Open Assistant automatically when program crashes with an exception"
-msgstr "Ouvrir automatiquement l’assistant lorsqu’un programme plante avec une exception."
+msgstr "Άνοιγμα του Βοηθού αυτόματα όταν το πρόγραμμα τερματιστεί με εξαίρεση"
 
 #: thonny/plugins/assistant_config_page.py:21
 msgid "Open Assistant automatically when it has warnings for your code"
-msgstr "Ouvrir l’assistant automatiquement lorsqu'il y a des avertissements pour votre code"
+msgstr "Άνοιγμα του Βοηθού αυτόματα όταν υπάρχουν προειδοποιήσεις για τον κώδικα"
 
 #: thonny/plugins/assistant_config_page.py:26
 msgid "Perform selected Pylint checks"
-msgstr "Effectuer les vérifications Pylint sélectionnées"
+msgstr "Εκτέλεση των επιλεγμένων ελέγχων Pylint"
 
 #: thonny/plugins/assistant_config_page.py:29
 msgid "Perform MyPy checks"
-msgstr "Effectuer les vérifications MyPy"
+msgstr "Εκτέλεση ελέγχων MyPy"
 
-#. id ? code ?
 #: thonny/plugins/assistant_config_page.py:31
 msgid "Disabled checks (one id per line)"
-msgstr "Vérifications désactivées (un identifiant par ligne)"
+msgstr "Απενεργοποιημένοι έλεγχοι (μία ταυτότητα ανά γραμμή)"
 
 #: thonny/assistance.py:962 thonny/plugins/assistant_config_page.py:68
 msgid "Assistant"
-msgstr "Assistant"
+msgstr "Βοηθός"
 
 #: thonny/plugins/autocomplete.py:316
 msgid "Auto-complete"
-msgstr "Auto-complétion"
+msgstr "Αυτόματη συμπλήρωση"
 
 #: thonny/plugins/backend_config_page.py:43
 msgid "Which interpreter or device should Thonny use for running your code?"
-msgstr "Quel interpréteur ou appareil Thonny doit-il utiliser pour exécuter votre code ?"
+msgstr "Ποιον διερμηνευτή ή συσκευή να χρησιμοποιήσει το Thonny για να τρέξει τον κώδικά σου;"
 
 #: thonny/plugins/backend_config_page.py:127
 msgid "Interpreter"
-msgstr "Interpréteur"
+msgstr "Διερμηνευτής"
 
 #: thonny/plugins/birdseye_frontend.py:32
 msgid "About Birdseye"
-msgstr "À propos de Birdseye"
+msgstr "Σχετικά με τo Birdseye"
 
 #: thonny/plugins/birdseye_frontend.py:33
 msgid "Birdseye is a Python debugger which needs to be installed separately.\n"
 "\n"
 "Do you want to open the help page and learn more?"
-msgstr "Birdseye est un débogueur Python qui doit être installé séparément.\n"
-"\n"
-"Voulez-vous ouvrir l’aide pour en savoir plus ?"
+msgstr "Το Birdseye είναι ένας αποσφαλματωτής της Python που πρέπει να εγκατασταθεί ξεχωριστά."
 
 #: thonny/plugins/birdseye_frontend.py:60
 msgid "Debug current script (birdseye)"
-msgstr "Déboguer le script courant (birdseye)"
+msgstr "Αποσφαλμάτωση τρέχοντος προγράμματος (birdseye)"
 
 #: thonny/plugins/commenting_indenting.py:143
 msgid "Toggle comment"
-msgstr "Commenter/Décommenter"
+msgstr "Εναλλαγή σχολίου"
 
 #: thonny/plugins/commenting_indenting.py:153
 msgid "Comment out"
-msgstr "Commenter"
+msgstr "Σχόλιο"
 
 #: thonny/plugins/commenting_indenting.py:163
 msgid "Uncomment"
-msgstr "Décommenter"
+msgstr "Αφαίρεση σχολίου"
 
 #: thonny/plugins/common_editing_commands.py:20
 msgid "Undo"
-msgstr "Annuler"
+msgstr "Αναίρεση"
 
 #: thonny/plugins/common_editing_commands.py:32
 msgid "Redo"
-msgstr "Rétablir"
+msgstr "Ακύρωση Αναίρεσης"
 
 #: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2176
 msgid "Cut"
-msgstr "Couper"
+msgstr "Αποκοπή"
 
 #: thonny/plugins/common_editing_commands.py:60 thonny/ui_utils.py:2177
 msgid "Copy"
-msgstr "Copier"
+msgstr "Αντιγραφή"
 
 #: thonny/plugins/common_editing_commands.py:72 thonny/ui_utils.py:2178
 msgid "Paste"
-msgstr "Coller"
+msgstr "Επικόλληση"
 
 #: thonny/plugins/common_editing_commands.py:84 thonny/plugins/debugger.py:124
 msgid "Select all"
-msgstr "Tout sélectionner"
+msgstr "Επιλογή όλων"
 
 #: thonny/plugins/debugger.py:117 thonny/plugins/debugger.py:1276
 msgid "Run to cursor"
-msgstr "Exécuter jusqu'au curseur"
+msgstr "Eκτέλεση μέχρι τον κέρσορα"
 
 #: thonny/plugins/debugger.py:863
 msgid "Can't close yet"
-msgstr "Impossible de fermer pour l'instant"
+msgstr "Δεν μπορεί να κλείσει ακόμη"
 
 #: thonny/plugins/debugger.py:864
 msgid "Use \"Stop\" command if you want to cancel debugging"
-msgstr "Utilisez la commande « Stop » pour annuler le débogage"
+msgstr "Χρησιμοποίηστε την εντολή \"Stop\" αν θέλετε να σταματήσετε την αποσφαλμάτωση"
 
 #: thonny/plugins/dock_user_windows_frontend.py:27
 msgid "Dock user windows"
-msgstr "Ancrer les fenêtres de l'utilisateur"
+msgstr "Ενσωμάτωση παραθύρων χρήστη"
 
 #: thonny/plugins/editor_config_page.py:14
 msgid "Highlight matching names"
-msgstr "Surligner les noms correspondants"
+msgstr "Επισήμανση ονόματων που ταιριάζουν"
 
 #: thonny/plugins/editor_config_page.py:20
 msgid "Highlight local variables"
-msgstr "Surligner les variables locales"
+msgstr "Επισήμανση τοπικών μεταβλητών"
 
 #: thonny/plugins/editor_config_page.py:25
 msgid "Highlight parentheses"
-msgstr "Surligner les parenthèses"
+msgstr "Επισήμανση παρανθέσεων"
 
 #: thonny/plugins/editor_config_page.py:26
 msgid "Highlight syntax elements"
-msgstr "Surligner les éléments de syntaxe"
+msgstr "Επισήμανση στοιχείων συντακτικού"
 
 #: thonny/plugins/editor_config_page.py:29
 msgid "Highlight current line (requires reopening the editor)"
-msgstr "Surligner la ligne du curseur (nécessite de ré-ouvrir l'éditeur)"
+msgstr "Επισήμανση τρέχουσας γραμμής (απαιτεί εκ νέου άνοιγμα του επεξεργαστή κειμένου)"
 
 #: thonny/plugins/editor_config_page.py:34
 msgid "Allow code completion with Tab-key in editors"
-msgstr "Permettre la complétion du code avec la touche de tabulation dans les éditeurs"
+msgstr "Να επιτρέπεται η συμπλήρωση κώδικα με το πλήκτρο Tab στον επεξεργαστή κειμένου"
 
 #: thonny/plugins/editor_config_page.py:40
 msgid "Allow code completion with Tab-key in Shell"
-msgstr "Permettre la complétion du code avec la touche de tabulation dans la console"
+msgstr "Να επιτρέπεται η συμπλήρωση κώδικα με το πλήκτρο Tab στο κέλυφος"
 
 #: thonny/plugins/editor_config_page.py:44
 msgid "Show line numbers"
-msgstr "Afficher les numéros de ligne"
+msgstr "Εμφάνιση αριθμού γραμμών"
 
 #: thonny/plugins/editor_config_page.py:47
 msgid "Recommended maximum line length\n"
 "(Set to 0 to turn off margin line)"
-msgstr "Longueur maximale de ligne recommandée\n"
-"(définir à 0 pour désactiver la limite)"
+msgstr "Συνιστώμενο μέγιστο μήκος γραμμής\n"
+"(Ρυθμίστε στο 0 για να απενεργοποιήσετε τη γραμμή περιθωρίου)"
 
 #: thonny/plugins/editor_config_page.py:68
 msgid "Editor"
-msgstr "Éditeur"
+msgstr "Επεξεργαστής κειμένου"
 
 #: thonny/plugins/event_logging.py:197
 msgid "Export usage logs..."
-msgstr "Exporter les journaux d’utilisation…"
+msgstr "Εξαγωγή αρχείων καταγραφής χρήσης ..."
 
 #: thonny/plugins/event_view.py:38
 msgid "Events"
-msgstr "Événements"
+msgstr "Γεγονότα"
 
 #: thonny/plugins/files.py:307
 msgid "Files"
-msgstr "Fichiers"
+msgstr "Αρχεία"
 
 #: thonny/plugins/find_replace.py:56 thonny/plugins/find_replace.py:412
 msgid "Find & Replace"
-msgstr "Rechercher et remplacer"
+msgstr "Εύρεση & Αντικατάσταση"
 
 #: thonny/plugins/find_replace.py:62
 msgid "Find:"
-msgstr "Rechercher :"
+msgstr "Εύρεση:"
 
 #: thonny/plugins/find_replace.py:73
 msgid "Replace with:"
-msgstr "Remplacer par :"
+msgstr "Αντικατάσταση με:"
 
 #: thonny/plugins/find_replace.py:91
 msgid "Case sensitive"
-msgstr "Sensible à la casse"
+msgstr "Διάκριση πεζών-κεφαλαίων"
 
 #: thonny/plugins/find_replace.py:98
 msgid "Up"
-msgstr "Précédent"
+msgstr "Επάνω"
 
 #: thonny/plugins/find_replace.py:102
 msgid "Down"
-msgstr "Suivant"
+msgstr "Κάτω"
 
 #: thonny/plugins/find_replace.py:111
 msgid "Find"
-msgstr "Rechercher"
+msgstr "Εύρεση"
 
 #: thonny/plugins/find_replace.py:121
 msgid "Replace"
-msgstr "Remplacer"
+msgstr "Αντικατάσταση"
 
 #: thonny/plugins/find_replace.py:129
 msgid "Replace+Find"
-msgstr "Remplacer et rechercher"
+msgstr "Αντικαταστάση+Εύρεση"
 
 #: thonny/plugins/find_replace.py:138
 msgid "Replace all"
-msgstr "Remplacer tout"
+msgstr "Αντικατάσταση όλων"
 
 #: thonny/plugins/find_replace.py:232
 msgid "Enter string to be replaced."
-msgstr "Entrez le texte à remplacer."
+msgstr "Εισάγετε συμβολοσειρά για αντικατάσταση"
 
 #: thonny/plugins/find_replace.py:316
 msgid "The specified text was not found!"
-msgstr "Le texte spécifié n'a pas été trouvé !"
+msgstr "Το ζητούμενο κειμενο δεν βρέθηκε!"
 
 #: thonny/plugins/general_config_page.py:13
 msgid "Allow only single Thonny instance"
-msgstr "N'autoriser qu'une seule instance de Thonny"
+msgstr "Να επιτρέπεται μόνο μία εκτέλεση του Thonny"
 
 #: thonny/plugins/general_config_page.py:20
 msgid "Reopen all files from previous session"
-msgstr "Réouvrir tous les fichiers de la session précédente"
+msgstr "Άνοιγμα όλων των αρχείων από προηγούμενη συνεδρία"
 
 #: thonny/plugins/general_config_page.py:26
 msgid "Disable notification sound"
-msgstr "Désactiver les sons de notification"
+msgstr "Απενεργοποίηση ηχητικών ειδοποιήσεων"
 
 #: thonny/plugins/general_config_page.py:75
 msgid "Font scaling mode"
-msgstr "Mode de mise à l'échelle de la police"
+msgstr "Λειτουργία κλιμάκωσης γραμματοσειρών"
 
 #: thonny/plugins/heap.py:35
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
-msgstr "Le suivi des allocations mémoire est activé.\n"
-"Fermez-le pour le désactiver."
+msgstr "Η λειτουργία Σωρού είναι ενεργοποιημένη.\n"
+"Κλείστε την προβολή Σωρού για να την απενεργοποιήσετε."
 
-#. Pile ?
 #: thonny/plugins/heap.py:83
 msgid "Heap"
-msgstr "Allocations mémoire"
+msgstr "Σωρός"
 
 #: thonny/plugins/general_config_page.py:42
 msgid "Language"
-msgstr "Langue"
+msgstr "Γλώσσα"
 
 #: thonny/plugins/notes.py:33
 msgid "This box is meant for your working notes -- assignment instructions, code snippets, whatever.\n"
@@ -346,353 +346,350 @@ msgid "This box is meant for your working notes -- assignment instructions, code
 "Everything will be saved automatically and loaded when you open Thonny next time.\n"
 "\n"
 "Feel free to delete this text to make room for your own notes."
-msgstr "Cette section est prévue pour vos notes de travail : instructions d’affectation, fragments de code, ce que vous voulez.\n"
+msgstr "Αυτό το πλαίσιο προορίζεται για τις σημειώσεις εργασίας σας - οδηγίες ανάθεσης, αποσπάσματα κώδικα, οτιδήποτε άλλο.\n"
 "\n"
-"Tout sera sauvegardé automatiquement et chargé lorsque vous ouvrirez Thonny la prochaine fois.\n"
+"Όλα θα αποθηκευτούν αυτόματα και θα φορτωθούν όταν ανοίξετε το Thonny την επόμενη φορά.\n"
 "\n"
-"N’hésitez pas à effacer ce texte pour faire de la place pour vos propres notes."
+"Διαγράψτε ελεύθερα αυτό το κείμενο για να κάνετε χώρο για τις δικές σας σημειώσεις."
 
 #: thonny/plugins/notes.py:61
 msgid "Notes"
-msgstr "Notes"
+msgstr "Σημειώσεις"
 
 #: thonny/plugins/object_inspector.py:108
 msgid "Previous object"
-msgstr "Objet précédent"
+msgstr "Προηγούμενο αντικείμενο"
 
 #: thonny/plugins/object_inspector.py:111
 msgid "Next object"
-msgstr "Objet suivant"
+msgstr "Επόμενο αντικείμενο"
 
 #: thonny/plugins/object_inspector.py:601
 msgid "Object inspector"
-msgstr "Inspecteur d'objet"
+msgstr "Επιθεωρητής αντικειμένου"
 
-#. Vu qu'il s'agit d'une vue qui donne la structure du code (fonctions, classes etc), est-ce que "structure" ne serait pas mieux ?
 #: thonny/plugins/outline.py:137
 msgid "Outline"
-msgstr "Structure"
+msgstr "Περιεχόμενα"
 
 #: thonny/plugins/pgzero_frontend.py:26
 msgid "Pygame Zero mode"
-msgstr "Mode Pygame Zero"
+msgstr "Λειτουργία Pygame Zero"
 
 #: thonny/plugins/pip_gui.py:78
 msgid "Find package from PyPI"
-msgstr "Rechercher un paquet sur PyPI"
+msgstr "Εύρεση πακέτου από PyPl"
 
 #: thonny/plugins/pip_gui.py:188 thonny/plugins/pip_gui.py:190
 msgid "Uninstall"
-msgstr "Désinstaller"
+msgstr "Απεγκατάσταση"
 
 #: thonny/code.py:548 thonny/plugins/microbit/__init__.py:200
 #: thonny/plugins/pip_gui.py:204 thonny/running.py:1457 thonny/ui_utils.py:367
 #: thonny/ui_utils.py:1643
 msgid "Close"
-msgstr "Fermer"
+msgstr "Κλείσιμο"
 
 #: thonny/plugins/pip_gui.py:382
 msgid "Click "
-msgstr "Cliquez "
+msgstr "Κλικ "
 
 #: thonny/plugins/pip_gui.py:383 thonny/plugins/pip_gui.py:393
 msgid "here"
-msgstr "ici"
+msgstr "Εδώ"
 
 #: thonny/plugins/pip_gui.py:181 thonny/plugins/pip_gui.py:478
 msgid "Upgrade"
-msgstr "Mettre à jour"
+msgstr "Αναβάθμιση"
 
 #: thonny/plugins/microbit/__init__.py:123 thonny/plugins/pip_gui.py:483
 #: thonny/plugins/pip_gui.py:1064
 msgid "Install"
-msgstr "Installer"
+msgstr "Εγκατάσταση"
 
 #: thonny/plugins/pip_gui.py:505
 msgid "Could not find the package from PyPI."
-msgstr "Impossible de trouver le paquet dans PyPi."
+msgstr "Αδυναμία εύρεσης πακέτου από PyPl."
 
 #: thonny/plugins/pip_gui.py:515
 msgid "exact package name"
-msgstr "le nom exact du module"
+msgstr "Ακριβές όνομα πακέτο"
 
 #: thonny/plugins/pip_gui.py:533
 msgid "Latest stable version"
-msgstr "Dernière version stable"
+msgstr "Τελευταία σταθερή έκδοση"
 
 #: thonny/plugins/pip_gui.py:535
 msgid "Latest version"
-msgstr "Dernière version"
+msgstr "Τελευταία έκδοση"
 
 #: thonny/plugins/pip_gui.py:536
 msgid "Summary"
-msgstr "Résumé"
+msgstr "Περίληψη"
 
 #: thonny/plugins/pip_gui.py:537
 msgid "Author"
-msgstr "Auteur"
+msgstr "Συντάκτης"
 
 #: thonny/plugins/pip_gui.py:538
 msgid "Homepage"
-msgstr "Page d'accueil"
+msgstr "Αρχική σελίδα"
 
 #: thonny/plugins/pip_gui.py:540
 msgid "Bugtracker"
-msgstr "Suivi des bogues"
+msgstr "Ανιχνευτής σφαλμάτων"
 
 #: thonny/plugins/pip_gui.py:542
 msgid "Documentation"
-msgstr "Documentation"
+msgstr "Βιβλιογραφία"
 
 #: thonny/plugins/pip_gui.py:544
 msgid "PyPI page"
-msgstr "Page PyPI"
+msgstr "Σελίδα PyPl"
 
 #: thonny/plugins/pip_gui.py:548
 msgid "Requires"
-msgstr "Nécessite"
+msgstr "Απαιτεί"
 
 #: thonny/plugins/pip_gui.py:614
 msgid "Really uninstall?"
-msgstr "Voulez-vous vraiment désinstaller ?"
+msgstr "Σίγουρα απεγκατάσταση;"
 
 #: thonny/plugins/pip_gui.py:619
 msgid "Are you sure you want to uninstall it?"
-msgstr "Êtes-vous sur de vouloir le désinstaller ?"
+msgstr "Είσαι σίγουρος ότι θέλεις να το απεγκαταστήσεις;"
 
 #: thonny/plugins/variables.py:19
 msgid "Back to\n"
 "current frame"
-msgstr "Revenir au\n"
-"cadre courant"
+msgstr "Πίσω στο τρέχoν frame"
 
 #: thonny/plugins/variables.py:131
 msgid "Variables"
-msgstr "Variables"
+msgstr "Μεταβλητές"
 
 #: thonny/base_file_browser.py:30
 msgid "This computer"
-msgstr "Cet ordinateur"
+msgstr "Αυτός ο υπολογιστής"
 
 #: thonny/base_file_browser.py:568
 msgid "Refresh"
-msgstr "Actualiser"
+msgstr "Ανανέωση"
 
 #: thonny/base_file_browser.py:572
 msgid "Focus into"
-msgstr "Accentuer dans"
+msgstr "Εστίαση σε"
 
 #: thonny/base_file_browser.py:1001
 msgid "Error"
-msgstr "Erreur"
+msgstr "Σφάλμα"
 
 #: thonny/base_file_browser.py:1001
 msgid "You need to select a file!"
-msgstr "Vous devez sélectionner un fichier !"
+msgstr "Πρέπει να επιλέξεις ενα αρχείο!"
 
 #: thonny/base_file_browser.py:1005
 msgid "Overwrite?"
-msgstr "Écraser ?"
+msgstr "Αντικατάσταση;"
 
 #: thonny/base_file_browser.py:1005
 msgid "Do you want to overwrite '%s' ?"
-msgstr "Voulez-vous écraser « %s » ?"
+msgstr "Θέλεις να αντικαταστήσειςς το '%s';"
 
 #: thonny/code.py:513 thonny/code.py:515
 msgid "New"
-msgstr "Nouveau"
+msgstr "Νέο"
 
 #: thonny/code.py:526
 msgid "Open..."
-msgstr "Ouvrir…"
+msgstr "Άνοιγμα"
 
 #: thonny/code.py:528
 msgid "Load"
-msgstr "Charger"
+msgstr "Φόρτωση"
 
 #: thonny/code.py:537
 msgid "Recent files"
-msgstr "Fichiers récents"
+msgstr "Πρόσφατα αρχεία"
 
 #: thonny/code.py:559 thonny/ui_utils.py:369
 msgid "Close all"
-msgstr "Tout fermer"
+msgstr "Κλείσιμο όλων"
 
 #: thonny/code.py:569 thonny/code.py:571
 msgid "Save"
-msgstr "Enregistrer"
+msgstr "Αποθήκευση"
 
 #: thonny/code.py:583
 msgid "Save as..."
-msgstr "Enregistrer sous…"
+msgstr "Αποθήκευση ως..."
 
 #: thonny/code.py:594
 msgid "Save copy..."
-msgstr "Enregistrer une copie…"
+msgstr "Αποθήκευση αντιγράφου..."
 
 #: thonny/code.py:603
 msgid "Rename..."
-msgstr "Renommer…"
+msgstr "Μετονομασία..."
 
 #: thonny/config_ui.py:17
 msgid "Thonny options"
-msgstr "Options de Thonny"
+msgstr "Επιλογές Thonny"
 
 #: thonny/running.py:94
 msgid "Run current script"
-msgstr "Exécuter le script courant"
+msgstr "Εκτέλεση τρέχοντος προγράμματος"
 
 #: thonny/running.py:125
 msgid "Run current script in terminal"
-msgstr "Exécuter le script courant dans un terminal"
+msgstr "Εκτέλεση τρέχοντος προγράμματος στο τερματικό"
 
 #: thonny/running.py:138
 msgid "Stop/Restart backend"
-msgstr "Arrêter/redémarrer l’interpréteur"
+msgstr "Σταμάτημα/Επανεκκίνηση backend"
 
 #: thonny/running.py:139
 msgid "Stop"
-msgstr "Arrêter"
+msgstr "Σταμάτημα"
 
 #: thonny/running.py:150
 msgid "Interrupt execution"
-msgstr "Interrompre l’exécution"
+msgstr "Διακοπή εκτέλεσης"
 
 #: thonny/running.py:161
-#, fuzzy
 msgid "Send EOF / Soft reboot"
-msgstr "Envoyer le symbole EOF / Redémarrer"
+msgstr "Αποστολή EOF / Soft reboot"
 
 #: thonny/running.py:172
 msgid "Disconnect"
-msgstr "Déconnecter"
+msgstr "Αποσύνδεση"
 
 #: thonny/running_config_page.py:23
 msgid "Known interpreters"
-msgstr "Interpréteurs connus"
+msgstr "Γνωστοί διερμηνευτές"
 
 #: thonny/running_config_page.py:36
 msgid "Your interpreter isn't in the list?"
-msgstr "Votre interpréteur n’est pas dans la liste ?"
+msgstr "Ο διερμηνευτής σου δεν είναι στην λίστα;"
 
 #: thonny/running_config_page.py:43
 msgid "Locate another"
-msgstr "En trouver un autre"
+msgstr "Εύρεση άλλου"
 
 #: thonny/running_config_page.py:45
 msgid "python executable"
-msgstr "exécutable python"
+msgstr "εκτελέσιμο Python"
 
 #: thonny/running_config_page.py:47
 msgid "NB! Thonny only supports Python 3.5 and later"
-msgstr "Remarque : Thonny ne supporte que Python 3.5 et versions ultérieures"
+msgstr "Υπενθύμιση! Το Thonny υποστηρίζει μόνο Python 3.5 και νεότερη έκδοση"
 
 #: thonny/running_config_page.py:56
 msgid "Create new virtual environment"
-msgstr "Créer un nouvel environnement virtuel"
+msgstr "Δημιουργία νέου εικονικού περιβάλλοντος"
 
 #: thonny/running_config_page.py:59
 msgid "Select existing or create a new empty directory"
-msgstr "Sélectionner un dossier existant ou en créer un nouveau"
+msgstr "Επιλογή υπάρχοντος ή δημιουργία νέου καταλόγου"
 
 #: thonny/running_config_page.py:74
 msgid "Python interpreters"
-msgstr "Interpréteurs Python"
+msgstr "Διερμηνευτές Python"
 
 #: thonny/plugins/pip_gui.py:657 thonny/plugins/pip_gui.py:669
 #: thonny/running_config_page.py:75
 msgid "all files"
-msgstr "tous les fichiers"
+msgstr "όλα τα αρχεία"
 
 #: thonny/running_config_page.py:89
 msgid "Select empty directory for new virtual environment"
-msgstr "Sélectionner un dossier vide pour le nouvel environnement virtuel"
+msgstr "Επιλέξτε κενό κατάλογο για νέο εικονικό περιβάλλον"
 
 #: thonny/running_config_page.py:96
 msgid "Bad directory"
-msgstr "Dossier invalide"
+msgstr "Προβληματικός κατάλογος"
 
 #: thonny/running_config_page.py:97
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
-msgstr "Le dossier sélectionné n'est pas vide. Sélectionner un autre ou annuler."
+msgstr "Ο επιλεγμένος κατάλογος δεν είναι κενός.\n"
+"Επιλέξτε άλλο ή ακυρώστε."
 
 #: thonny/running_config_page.py:112
 msgid "Creating virtual environment"
-msgstr "Création de l'environnement virtuel"
+msgstr "Δημιουργία εικονικού περιβάλλοντος"
 
 #: thonny/shell.py:72
 msgid "Clear shell"
-msgstr "Vider la console"
+msgstr "Καθάρισε το κέλυφος"
 
 #: thonny/shell.py:126
 msgid "Plotter"
-msgstr "Grapheur"
+msgstr "Σχεδιογράφος"
 
 #: thonny/shell.py:245
 msgid "Clear"
-msgstr "Effacer"
+msgstr "Καθάρισμα"
 
 #: thonny/shell.py:258
 msgid "Show Plotter"
-msgstr "Afficher le Grapheur"
+msgstr "Εμφάνιση σχεδιογράφου"
 
 #: thonny/shell.py:1389
 msgid "For performance reasons, Shell avoids showing very long lines in full (see Tools => Options => Shell).\n"
 "Here you can interact with the original text fragment."
-msgstr "Pour des raisons de performance, la console évite d'afficher les très longues lignes en entier (voir Outils => Options => Console).\n"
-"Vous pouvez interagir ici avec le texte original."
+msgstr "Για λόγους απόδοσης, το κέλυφος αποφεύγει να εμφανίζει πλήρως τις μεγάλες γραμμές (βλ. Εργαλεία=> Επιλογές=> Κέλυφος).\n"
+"Εδώ μπορείτε να αλληλεπιδράσετε με το αρχικό κειμένο."
 
 #: thonny/shell.py:1400
-#, fuzzy
 msgid "Wrap text (may be slow)"
-msgstr "Enrouler le texte (peut être lent)"
+msgstr "Αναδίπλωση κειμένου (ενδέχεται να είναι αργή)"
 
 #: thonny/shell.py:1425 thonny/ui_utils.py:1639
 msgid "Copy to clipboard"
-msgstr "Copier dans le presse-papiers"
+msgstr "Αντιγραφή στο πρόχειρο"
 
 #: thonny/shell.py:1431
 msgid "Expand in Shell"
-msgstr "Étendre dans la console"
+msgstr "Επέκτεινε το κέλυφος"
 
 #: thonny/shell.py:1442
 msgid "Squeezed text (%d characters)"
-msgstr "Texte tronqué (%d caractères)"
+msgstr "Συμπιεσμένο κείμενο (%d χαρακτήρες)"
 
 #: thonny/shell.py:1611
 msgid "Plotter visualizes series of\n"
 "numbers printed to the Shell."
-msgstr "Le Grapheur rend visuelles des séries de\n"
-"nombres affichées dans le Shell"
+msgstr "Ο σχεδιαστής απεικονίζει μια σειρά από\n"
+"αριθμούς που εκτυπώνονται στο κέλυφος."
 
 #: thonny/shell.py:1613
 msgid "See Help for details."
-msgstr "Voir l'aide pour des détails"
+msgstr "Ανατρέξτε στη Βοήθεια για λεπτομέρειες."
 
 #: thonny/ui_utils.py:368
 msgid "Close others"
-msgstr "Fermer les autres"
+msgstr "Κλείσε τα υπόλοιπα"
 
 #: thonny/ui_utils.py:1499
 msgid "Copying"
-msgstr "Copie"
+msgstr "Αντιγραφή"
 
 #: thonny/ui_utils.py:1502
 msgid "Copying\n"
 "  %s\n"
 "to\n"
 "  %s"
-msgstr "Copie de\n"
-"  %s\n"
-"vers\n"
-"  %s"
+msgstr "Αντιγραφή από\n"
+"  %s\n"
+"στο\n"
+"  %s"
 
 #: thonny/config_ui.py:31 thonny/plugins/microbit/__init__.py:127
 #: thonny/plugins/pip_gui.py:1066 thonny/running.py:1424
 #: thonny/ui_utils.py:1510 thonny/ui_utils.py:1712
 msgid "Cancel"
-msgstr "Annuler"
+msgstr "Ακύρωση"
 
 #: thonny/config_ui.py:30 thonny/ui_utils.py:1764
 msgid "OK"
@@ -700,286 +697,286 @@ msgstr "OK"
 
 #: thonny/ui_utils.py:1783
 msgid "Cancel the process?"
-msgstr "Annuler le processus ?"
+msgstr "Ακύρωση της διαδικασίας;"
 
 #: thonny/ui_utils.py:1784
 msgid "The process is still running.\n"
 "Are you sure you want to cancel?"
-msgstr "Ce processus est toujours en cours d'exécution.\n"
-"Êtes-vous sûr de vouloir annuler ?"
+msgstr "Η διεργασία είναι σε εξέλιξη.\n"
+"Είσαι σίγουρος ότι θέλεις να ακυρώσεις;"
 
 #: thonny/ui_utils.py:2182
 msgid "Select All"
-msgstr "Sélectionner tout"
+msgstr "Επιλογή Όλων"
 
 #: thonny/plugins/shell_config_page.py:61 thonny/workbench.py:162
 msgid "Shell"
-msgstr "Console"
+msgstr "Κέλυφος"
 
 #: thonny/workbench.py:512
 msgid "The same interpreter which runs Thonny (default)"
-msgstr "Le même interpréteur qui exécute Thonny (par défaut)"
+msgstr "Τον ίδιο διερμηνευτή που χρησιμοποιεί τοThonny (προεπιλογή)"
 
 #: thonny/workbench.py:531
 msgid "This virtual environment is automatically maintained by Thonny.\n"
 ""
-msgstr "Cet environnement virtuel est automatiquement maintenu par Thonny.\n"
-"\n"
-""
+msgstr "Αυτό το εικονικό περιβάλλον συντηρείται αυτόματα από το Thonny."
 
 #: thonny/workbench.py:532
 msgid "Location: "
-msgstr "Emplacement :"
+msgstr "Τοποθεσία:"
 
 #: thonny/workbench.py:578
 msgid "Options..."
-msgstr "Options…"
+msgstr "Επιλογές..."
 
 #: thonny/workbench.py:585
 msgid "Increase font size"
-msgstr "Augmenter la taille de la police"
+msgstr "Αύξηση μεγέθους γραμματοσειράς"
 
 #: thonny/workbench.py:650
 msgid "Change font size"
-msgstr "Modifier la taille de la police"
+msgstr "Αλλαγή μεγέθους γραμματοσειράς"
 
 #: thonny/workbench.py:651
 msgid "Zoom"
-msgstr "Zoom"
+msgstr "Μεγέθυνση"
 
 #: thonny/workbench.py:660
 msgid "Exit Thonny"
-msgstr "Quitter Thonny"
+msgstr "Έξοδος από το Thonny"
 
 #: thonny/workbench.py:663
 msgid "Quit"
-msgstr "Quitter"
+msgstr "Τερματισμός"
 
 #: thonny/workbench.py:1054 thonny/workbench.py:1062
 msgid "Overwriting theme '%s'"
-msgstr "Remplacement du thème « %s »"
+msgstr "Αντικατάσταση θέματος '%s'"
 
 #: thonny/workbench.py:1221
 msgid "Program arguments:"
-msgstr "Arguments du programme :"
+msgstr "Παράμετροι προγράμματος:"
 
 #: thonny/workbench.py:1275
 msgid "Regular mode"
-msgstr "Mode normal"
+msgstr "Κανονική λειτουργία"
 
 #: thonny/workbench.py:1276
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
 "\n"
 "(See 'Tools → Options → General' if you change your mind later.)"
-msgstr "La configuration a été mise à jour. Redémarrez Thonny pour commencer à travailler en mode normal.\n"
+msgstr "Οι ρυθμίσεις έχουν ενημερωθεί. Κάντε επανεκκίνηση του Thonny για να αρχίσετε να εργάζεστε σε κανονική λειτουργία.\n"
 "\n"
-"(Voir « Outils → Options → Général » si vous changez d'avis plus tard.)"
+"(Δείτε 'Εργαλεία → Επιλογές → Γενικά' αν αλλάξετε γνώμη αργότερα.)"
 
 #: thonny/plugins/ast_view.py:209
 msgid "Program tree"
-msgstr "Arbre du programme"
+msgstr "Δέντρο Προγράμματος"
 
 #: thonny/plugins/backend_config_page.py:130
 msgid "Select interpreter"
-msgstr "Sélectionner l'interpréteur"
+msgstr "Επιλογή διερμηνευτή"
 
 #: thonny/plugins/debugger.py:1162
 msgid "Resume"
-msgstr "Reprendre"
+msgstr "Συνέχεια"
 
 #: thonny/plugins/debugger.py:1174
 msgid "Run / resume"
-msgstr "Exécuter / reprendre"
+msgstr "Εκτέλεση / Συνέχεια"
 
 #: thonny/plugins/debugger.py:1189
 msgid "Debug current script"
-msgstr "Déboguer le script courant"
+msgstr "Αποσφαλμάτωση τρέχοντος προγράμματος"
 
 #: thonny/plugins/debugger.py:1191
 msgid "Debug"
-msgstr "Déboguer"
+msgstr "Αποσφαλμάτωση"
 
 #: thonny/plugins/debugger.py:1202
 msgid "Debug current script (nicer)"
-msgstr "Déboguer le script courant (plus joli)"
+msgstr "Αποσφαλμάτωση τρέχοντος προγράμματος (καλύτερη)"
 
 #: thonny/plugins/debugger.py:1214
 msgid "Debug current script (faster)"
-msgstr "Déboguer le script courant (plus rapide)"
+msgstr "Αποσφαλμάτωση τρέχοντος προγράμματος (ταχύτερη)"
 
 #: thonny/plugins/debugger.py:1225
 msgid "Step over"
-msgstr "Nœud suivant"
+msgstr "Προσπέραση\n"
+""
 
 #: thonny/plugins/debugger.py:1227
 msgid "Over"
-msgstr "Suivant"
+msgstr "πάνω από"
 
 #: thonny/plugins/debugger.py:1238
 msgid "Step into"
-msgstr "Entrer dans le nœud"
+msgstr "Είσοδος"
 
 #: thonny/plugins/debugger.py:1240
 msgid "Into"
-msgstr "Entrer"
+msgstr "Πρός"
 
 #: thonny/plugins/debugger.py:1251
 msgid "Step out"
-msgstr "Sortir du nœud"
+msgstr "Έξοδος"
 
 #: thonny/plugins/debugger.py:1253
 msgid "Out"
-msgstr "Sortir"
+msgstr "Έξω"
 
 #: thonny/plugins/debugger.py:1288
 msgid "Step back"
-msgstr "Nœud précédent"
+msgstr "Οπισθοδρόμηση"
 
 #: thonny/plugins/debugger.py:1290
 msgid "Back"
-msgstr "Précédent"
+msgstr "Πίσω"
 
 #: thonny/plugins/debugger.py:1296
 msgid "Stack"
-msgstr "Pile"
+msgstr "Στοίβα"
 
 #: thonny/plugins/debugger.py:1297
 msgid "Exception"
-msgstr "Exception"
+msgstr "Εξαίρεση"
 
 #: thonny/plugins/general_config_page.py:16
 msgid "Log program usage events"
-msgstr "Journaliser les évènements d'utilisation du programme"
+msgstr "Καταγραφή συμβάντων κατά την χρήση του προγράμματος"
 
 #: thonny/plugins/general_config_page.py:32
 msgid "Debug mode (provides more detailed diagnostic logs)"
-msgstr "Mode de débogage (fournit des journaux de diagnostic plus détaillés)"
+msgstr "Λειτουργία εντοπισμού σφαλμάτων (παρέχει πιο λεπτομερή καταγραφή διαγνωστικών)"
 
 #: thonny/plugins/general_config_page.py:56
 msgid "UI mode"
-msgstr "Type d'interface"
+msgstr "Λειτουργία UI"
 
 #: thonny/plugins/general_config_page.py:69
 msgid "UI scaling factor"
-msgstr "Facteur d'échelle de l'interface"
+msgstr "Παράγοντας κλιμάκωσης UI"
 
 #: thonny/plugins/general_config_page.py:88
 msgid "NB! Restart Thonny after changing these options!"
-msgstr "Remarque : Redémarrez Thonny après avoir modifié ces options !"
+msgstr "Yπενθύμιση! Επανεκκινήστε το Thonny μετά την αλλαγή αυτών των επιλογών!"
 
+#. αλλαγή 1/11
 #: thonny/plugins/general_config_page.py:102
 msgid "General"
-msgstr "Général"
+msgstr "Γενικά"
 
 #: thonny/plugins/pip_gui.py:108
 msgid "INSTALL"
-msgstr "INSTALLER"
+msgstr "ΕΓΚΑΤΑΣΤΑΣΗ"
 
 #: thonny/plugins/pip_gui.py:352
 msgid "Browse the packages"
-msgstr "Parcourir les paquets"
+msgstr "Περιήγηση στα πακέτα"
 
 #: thonny/plugins/pip_gui.py:355
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-msgstr "Avec l'interpréteur courant vous ne pouvez parcourir que ces paquets.\n"
-"Utilisez « Outils → Ouvrir la console du système… » pour installer, mettre à jour ou désinstaller."
+msgstr "Με τον τρέχοντα διερμηνευή μπορείτε μόνο να περιηγηθείτε στα πακέτα.\n"
+"Μεταβείτε σε: 'Εργαλεία → Άνοιξε το κέλυφος συστήματος ...' για εγκατάσταση, αναβάθμιση ή απεγκατάσταση."
 
 #: thonny/plugins/pip_gui.py:363
 msgid "Packages' directory"
-msgstr "Dossier des paquets"
+msgstr "Κατάλογος πακέτων"
 
 #: thonny/plugins/pip_gui.py:368
 msgid "Install from PyPI"
-msgstr "Installer depuis PyPI"
+msgstr "Εγκαταστήστε από PyPI"
 
 #: thonny/plugins/pip_gui.py:371
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
-msgstr "Si vous ne savez pas d'où vous pouvez obtenir le paquet, alors vous pouvez faire une recherche dans l'Index des Paquets Python. Commencez par entrer le nom du paquet dans le champ de recherche ci-dessus et appuyez sur ENTRÉE."
+msgstr "Εάν δεν γνωρίζετε από πού να κατεβάσετε το πακέτο, τότε κατά πάσα πιθανότητα  πρέπει να κάνετε αναζήτηση στον κατάλογο πακέτων Python. Ξεκινήστε εισάγοντας το όνομα του πακέτου στο πλαίσιο αναζήτησης παραπάνω και πατώντας ENTER."
 
 #: thonny/plugins/pip_gui.py:387
 msgid "to locate requirements.txt file and install the packages specified in it."
-msgstr "pour trouver le fichier requirements.txt et installer les paquets qui y sont spécifiés."
+msgstr "για να εντοπίσετε το αρχείο requirements.txt και να εγκαταστήσετε τα πακέτα που ορίζονται από αυτό."
 
 #: thonny/plugins/pip_gui.py:392
 msgid "Click"
-msgstr "Cliquez"
+msgstr "Κάντε κλικ"
 
 #: thonny/plugins/pip_gui.py:397
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-msgstr "pour trouver et installer le fichier du paquet (généralement avec l'extension .whl, .tar.gz ou .zip)."
+msgstr "για να εντοπίσετε και να εγκαταστήσετε το πακέτου(συνήθως με επέκταση .whl, .tar.gz ή .zip)."
 
 #: thonny/plugins/pip_gui.py:403
 msgid "Upgrade or uninstall"
-msgstr "Mettre à jour ou désinstaller"
+msgstr "Αναβάθμιση ή κατάργηση εγκατάστασης"
 
 #: thonny/plugins/pip_gui.py:405
 msgid "Start by selecting the package from the left."
-msgstr "Commencez par sélectionner le paquet sur la gauche."
+msgstr "Ξεκινήστε επιλέγοντας το πακέτο από τα αριστερά."
 
 #: thonny/plugins/pip_gui.py:409
 msgid "Target:"
-msgstr "Cible :"
+msgstr "Στόχος:"
 
 #: thonny/plugins/pip_gui.py:412
 msgid "virtual environment"
-msgstr "environnement virtuel"
+msgstr "εικονικό περιβάλλον"
 
 #: thonny/plugins/pip_gui.py:416
 msgid "user site packages"
-msgstr "paquets de l'utilisateur du site"
+msgstr "πακέτα ιστότοπου χρήστη"
 
 #: thonny/plugins/pip_gui.py:421
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
-msgstr "Cette boîte de dialogue liste tous les paquets disponibles, mais n'autorise la mise à jour et la désinstallation que depuis"
+msgstr "Αυτό το παράθυρο διαλόγου εμφανίζει όλα τα διαθέσιμα πακέτα, αλλά επιτρέπει την αναβάθμιση και την απεγκατάσταση μόνο των πακέτων"
 
 #: thonny/plugins/pip_gui.py:431
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
-msgstr "Les nouveaux paquets seront également installés dans ce dossier. D'autres emplacements peuvent être gérés de façon différente."
+msgstr "Νέα πακέτα θα εγκατασταθούν επίσης σε αυτόν τον κατάλογο. Οι άλλες τοποθεσίες πρέπει να διαχειρίζονται με εναλλακτικά μέσα."
 
 #: thonny/plugins/pip_gui.py:456
 msgid "Installed version:"
-msgstr "Version installée :"
+msgstr "Εγκατεστημένη έκδοση:"
 
 #: thonny/plugins/pip_gui.py:458
 msgid "Installed to:"
-msgstr "Installée dans :"
+msgstr "Εγκαταστήθηκε σε:"
 
 #: thonny/plugins/pip_gui.py:510
 msgid "Please check your spelling!"
-msgstr "Veuillez vérifier la syntaxe !"
+msgstr "Ελέγξτε την ορθογραφία σας!"
 
 #: thonny/plugins/pip_gui.py:512
 msgid "You need to enter"
-msgstr "Vous devez entrer"
+msgstr "Πρέπει να εισέλθετε"
 
 #: thonny/plugins/pip_gui.py:520
 msgid "Could not find the package info from PyPI."
-msgstr "Impossible de trouver le paquet dans PyPI"
+msgstr "Δεν ήταν δυνατή η εύρεση των πληροφοριών πακέτου από PyPI."
 
 #: thonny/plugins/pip_gui.py:522 thonny/plugins/pip_gui.py:1120
 msgid "Error code:"
-msgstr "Code d'erreur :"
+msgstr "Κωδικός σφάλματος:"
 
 #: thonny/plugins/pip_gui.py:581
 msgid "Can't find package name from the list:"
-msgstr "Impossible de trouver le nom du paquet dans la liste :"
+msgstr "Δεν βρέθηκε το όνομα πακέτου από τη λίστα:"
 
 #: thonny/plugins/pip_gui.py:615
 msgid "Package '{}' is required for installing and uninstalling other packages."
-msgstr "Le paquet « {} » est nécessaire pour installer ou désinstaller d'autres paquets."
+msgstr "Το πακέτο '{}' είναι απαραίτητο για την εγκατάσταση και την απεγκατάσταση άλλων πακέτων."
 
 #: thonny/plugins/pip_gui.py:657
 msgid "Package"
-msgstr "Paquet"
+msgstr "Πακέτο"
 
 #: thonny/plugins/pip_gui.py:757
 msgid "Manage packages for %s"
-msgstr "Gérer les paquets pour %s"
+msgstr "Διαχείριση πακέτων για %s"
 
 #: thonny/plugins/pip_gui.py:813
 msgid "Confirmation"
-msgstr "Confirmation"
+msgstr "Επιβεβαίωση"
 
 #: thonny/plugins/pip_gui.py:814
 msgid "Looks like you are installing a Thonny-related package.\n"
@@ -987,471 +984,476 @@ msgid "Looks like you are installing a Thonny-related package.\n"
 "choose 'Tools → Manage plugins...' instead\n"
 "\n"
 "Are you sure you want to install %s for the back-end?"
-msgstr "Il semble que vous êtes en train d'installer un paquet lié à Thonny. Si vous vouliez installer un plugin de Thonny, alors vous devriez sélectionner  « Outils → Gérer les plugins… »\n"
+msgstr "Φαίνεται ότι εγκαθιστάτε ένα πακέτο που σχετίζεται με το Thonny.\n"
+"Εάν σκοπεύατε να εγκαταστήσετε ένα πρόσθετο στο Thonny, τότε \n"
+"θα έπρεπε να επιλέξτε \"Εργαλεία → Διαχείριση πρόσθετων ...\"\n"
 "\n"
-"Êtes-vous sûr de vouloir installer %s pour l'interpréteur ?"
+"Είστε βέβαιοι ότι θέλετε να εγκαταστήσετε το %s για το back-end;"
 
 #: thonny/plugins/pip_gui.py:912
 msgid "NB! There may be another version available which is compatible with current Thonny version. Click on '...' button to choose the version to install."
-msgstr "Remarque : Il est possible qu'il y ait une autre version disponible qui soit compatible avec la version actuelle de Thonny. Cliquez sur le bouton « … » pour sélectionner la version à installer."
+msgstr "Υπενθύμιση! Μπορεί να υπάρχει άλλη διαθέσιμη έκδοση που είναι συμβατή με την τρέχουσα έκδοση Thonny. Κάντε κλικ στο κουμπί '...' για να επιλέξετε την έκδοση που θα εγκατασταθεί."
 
 #: thonny/plugins/pip_gui.py:920
 msgid "Thonny plugin without requirements"
-msgstr "Plugin pour Thonny sans aucun pré-requis"
+msgstr "Πρόσθετο του Thonny χωρίς προδιαγραφές"
 
 #: thonny/plugins/pip_gui.py:921
 msgid "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
 "\n"
 "If you still want it, then please install it from the command line."
-msgstr "Il semble que vous essayez d'installer un plugin de Thonny déprécié (il ne spécifie pas la version de Thonny requise).\n"
+msgstr "Φαίνεται ότι προσπαθείτε να εγκαταστήσετε ένα παλιό πρόσθετο\n"
+"του Thonny (δεν καθορίζει την απαιτούμενη έκδοση Thonny).\n"
 "\n"
-"Si vous le voulez vraiment, veuillez l'installer en ligne de commande."
+"Εάν το θέλετε ακόμα, τότε εγκαταστήστε το από τη γραμμή εντολών."
 
 #: thonny/plugins/pip_gui.py:935
 msgid "Unsuitable requirements"
-msgstr "Exigences non satisfaites"
+msgstr "Ακατάλληλες προδιαγραφές"
 
 #: thonny/plugins/pip_gui.py:936
 msgid "This package requires different Thonny version:"
-msgstr "Ce paquet nécessite une version différente de Thonny :"
+msgstr "Αυτό το πακέτο απαιτεί διαφορετική έκδοση του Thonny:"
 
 #: thonny/plugins/pip_gui.py:940
 msgid "If you still want it, then please install it from the command line."
-msgstr "Si vous le voulez vraiment, veuillez l'installer en ligne de commande."
+msgstr "Εάν το θέλετε ακόμα, τότε εγκαταστήστε το από τη γραμμή εντολών."
 
 #: thonny/plugins/pip_gui.py:984
 msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
-msgstr "(Dans ce cas l'interpréteur de Thonny utilise le même interpréteur, afin que les deux boîtes de dialogue gèrent les mêmes paquets.)"
+msgstr "(Σε αυτήν την περίπτωση, το back-end του Thonny χρησιμοποιεί τον ίδιο διερμηνευτή, επομένως και τα δύο παράθυρα διαχειρίζονται τα ίδια πακέτα.)"
 
 #: thonny/plugins/pip_gui.py:990
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
-msgstr "Remarque : Vous devez redémarrer Thonny après avoir installé / mis à jour / désinstallé un plugin."
+msgstr "Υπενθύμιση! Πρέπει να κάνετε επανεκκίνηση του Thonny μετά την εγκατάσταση / αναβάθμιση / κατάργηση της εγκατάστασης ενός πρόσθετου."
 
 #: thonny/plugins/pip_gui.py:1000
 msgid "Thonny plug-ins"
-msgstr "Plugins de Thonny"
+msgstr "Πρόσθετα του Thonny"
 
 #: thonny/plugins/pip_gui.py:1013
 msgid "Advanced install / upgrade / downgrade"
-msgstr "Installation / Mise à jour / Rétrogradation avancée"
+msgstr "Προχωρημένη εγκατάσταση / αναβάθμιση / υποβάθμιση"
 
 #: thonny/plugins/pip_gui.py:1022
 msgid "Desired version"
-msgstr "Version souhaitée"
+msgstr "Επιθυμητή έκδοση"
 
 #: thonny/plugins/pip_gui.py:1060
 msgid "Upgrade dependencies"
-msgstr "Mettre à jour les dépendances"
+msgstr "Αναβάθμιση εξαρτήσεων"
 
 #: thonny/plugins/pip_gui.py:1118
 msgid "Requires:"
-msgstr "Exigences :"
+msgstr "Απαιτεί:"
 
 #: thonny/plugins/pip_gui.py:1122
 msgid "Error:"
-msgstr "Erreur :"
+msgstr "Σφάλμα:"
 
 #: thonny/plugins/pip_gui.py:1232
 msgid "Manage packages..."
-msgstr "Gérer les paquets…"
+msgstr "Διαχείριση πακέτων ..."
 
 #: thonny/plugins/pip_gui.py:1238
 msgid "Manage plug-ins..."
-msgstr "Gérer les plugins…"
+msgstr "Διαχείριση προσθέτων..."
 
 #: thonny/plugins/replayer.py:354
-#, fuzzy
 msgid "Open replayer..."
-msgstr "Ouvrir le relecteur…"
+msgstr "Άνοιγμα αναπαραγωγής ..."
 
 #: thonny/plugins/run_debug_config_page.py:12
 msgid "Change working directory to script directory on Run / Debug"
-msgstr "Modifier le dossier de travail en dossier de script lors de l'exécution / débogage"
+msgstr "Αλλαγή από τον τρέχοντα κατάλογο εργασίας στον κατάλογο του προγράμματος κατά την Eκτέλεση/Αποσφαλμάτωση"
 
 #: thonny/plugins/run_debug_config_page.py:20
 msgid "Show function calls (frames) in separate windows"
-msgstr "Afficher les appels de fonction (cadres) dans des fenêtres séparées"
+msgstr "Εμφάνιση κλήσεων συναρτήσεων (πλαισίων) σε ξεχωριστά παράθυρα"
 
 #: thonny/plugins/run_debug_config_page.py:21
 msgid "Uncheck if you want more traditional experience."
-msgstr "Décochez si vous souhaitez une expérience d'utilisation plus classique."
+msgstr "Αποεπιλέξτε εάν θέλετε μια πιο παραδοσιακή εμπειρία."
 
 #: thonny/plugins/run_debug_config_page.py:27
 msgid "Open and close Stack view automatically"
-msgstr "Ouvrir et fermer la vue de la pile automatiquement"
+msgstr "Αυτόματο άνοιγμα και κλείσιμο της προβολής της Στοίβας"
 
 #: thonny/plugins/run_debug_config_page.py:28
 msgid "Opens the Stack view on first call and closes it when program returns to main frame."
-msgstr "Ouvre la vue de la pile au premier appel et la ferme lorsque le programme revient au cadre principal."
+msgstr "Ανοίγει την προβολή στοίβας κατά την πρώτη κλήση και κλείνει όταν το πρόγραμμα επιστρέψει στο κύριο πλαίσιο."
 
 #: thonny/plugins/run_debug_config_page.py:37
 msgid "Allow stepping into libraries (ie. outside of main script directory)"
-msgstr "Autoriser l'entrée dans les bibliothèques en mode débogage (par ex. en dehors du dossier du script principal)"
+msgstr "Να επιτρέπεται η μετάβαση σε βιβλιοθήκες (π.χ. εκτός του καταλόγου του κύριου προγράμματος)"
 
 #: thonny/plugins/run_debug_config_page.py:38
 msgid "May make debugging slower."
-msgstr "Peut ralentir le débogueur."
+msgstr "Μπορεί να κάνει την αποσφαλμάτωση πιο αργή."
 
 #: thonny/plugins/run_debug_config_page.py:43
 msgid "Preferred debugger"
-msgstr "Débogueur favori"
+msgstr "Προτιμώμενο πρόγραμμα αποσφαλμάτωσης"
 
 #: thonny/plugins/run_debug_config_page.py:55
 msgid "(used when clicking Debug toolbar button)"
-msgstr "(utilisé lors du clic sur le bouton Déboguer dans la barre d'outils)"
+msgstr "(χρησιμοποιείται όταν κάνετε κλικ στο κουμπί Γραμμή εργαλείων εντοπισμού σφαλμάτων)"
 
 #: thonny/plugins/run_debug_config_page.py:60
 msgid "Birdseye port"
-msgstr "Port de Birdseye"
+msgstr "Θύρα Birdseye"
 
 #: thonny/plugins/run_debug_config_page.py:64
 msgid "(restart Thonny after changing this)"
-msgstr "(redémarrez Thonny après avoir modifié ceci)"
+msgstr "(επανεκιννήστε το Thonny μετά από αυτήν την αλλαγή)"
 
 #: thonny/plugins/run_debug_config_page.py:72
 msgid "Run & Debug"
-msgstr "Exécuter et déboguer"
+msgstr "Εκτέλεση & Αποσφαλμάτωση"
 
 #: thonny/plugins/shell_config_page.py:16
 msgid "Terminal emulation"
-msgstr "Émulation du terminal"
+msgstr "Προσομοίωση τερματικού"
 
 #: thonny/plugins/shell_config_page.py:18
 msgid "supports basic ANSI-colors and styles"
-msgstr "prend en charge les styles et les couleurs ANSI simples"
+msgstr "υποστηρίζει βασικά χρώματα ANSI και στυλ"
 
 #: thonny/plugins/shell_config_page.py:30
 msgid "Maximum number of lines to keep."
-msgstr "Nombre maximum de lignes à conserver."
+msgstr "Μέγιστος αριθμός διατηρητέων γραμμών"
 
 #: thonny/plugins/shell_config_page.py:32
 msgid "NB! Large values may cause poor performance!"
-msgstr "Remarque : De grandes valeurs peuvent réduire les performances !"
+msgstr "Υπενθύμιση! Μεγάλες τιμές μπορεί να προκαλέσουν αργή απόδοση!"
 
 #: thonny/plugins/shell_config_page.py:47
 msgid "Maximum length of line fragments before squeezing"
-msgstr "Longueur maximum de ligne avant de tronquer le texte"
+msgstr "Μέγιστο μήκος τμήματων γραμμής πριν την συμπίεση"
 
 #: thonny/plugins/terminal_config_page.py:10
 msgid "Running current script in terminal"
-msgstr "Exécution du script courant dans le terminal"
+msgstr "Τρέχον εκτελέσιμο πρόγραμμα στο τερματικό"
 
 #: thonny/plugins/terminal_config_page.py:15
 msgid "Present Python REPL after program ends"
-msgstr "Afficher Python REPL après la fin du programme"
+msgstr "Παρουσίαση του Python REPL μετά το τέλος του προγράμματος"
 
 #: thonny/plugins/terminal_config_page.py:22
 msgid "Keep terminal window open after Python process ends"
-msgstr "Conserver la fenêtre du terminal ouverte après la fin du processus Python"
+msgstr "Διατήρησε το τερματικό ανοικτό μετά την ολοκλήρωση της διεργασίας Python"
 
 #: thonny/plugins/terminal_config_page.py:29
+#, fuzzy
 msgid "NB! Automatic closing needs to be enabled in Terminal's settings\n"
 "(Profiles → Shell → When the shell exits)"
-msgstr "Remarque : La fermeture automatique doit être activée dans les paramètres du terminal (Profils → Console → Lorsque la console se ferme)"
+msgstr "Υπενθύμιση! Το αυτόματο κλείσιμο πρέπει να ενεργοποιηθεί στις ρυθμίσεις του τερματικού\n"
+"(Τερματικό → Προτιμήσεις → Προφίλ → Κέλυφος → Όταν το κέλυφος εξέρχεται)"
 
 #: thonny/plugins/terminal_config_page.py:38
 msgid "Terminal"
-msgstr "Terminal"
+msgstr "Τερματικό"
 
 #: thonny/plugins/theme_and_font_config_page.py:39
 msgid "UI theme"
-msgstr "Thème de l'interface"
+msgstr "Θεματικό UI"
 
 #: thonny/plugins/theme_and_font_config_page.py:52
 msgid "Syntax theme"
-msgstr "Thème de la syntaxe"
+msgstr "Θεματικό σύνταξης"
 
 #: thonny/plugins/theme_and_font_config_page.py:84
 msgid "Editor font"
-msgstr "Police de l'éditeur"
+msgstr "Γραμματοσειρά επεξεργαστή κειμένου"
 
-#. Ici IO désigne Input/Output soit Entrée/Sortie. Cela correspond à la police de la console (Shell). Il est donc plus approprié de traduire par "Police de la console"
 #: thonny/plugins/theme_and_font_config_page.py:107
 msgid "IO font"
-msgstr "Police de la console"
+msgstr "Γραμματοσειρά IO"
 
 #: thonny/plugins/theme_and_font_config_page.py:132
 msgid "Preview"
-msgstr "Aperçu"
+msgstr "Προεπισκόπηση"
 
 #: thonny/plugins/theme_and_font_config_page.py:144
 msgid "This is a comment"
-msgstr "Ceci est un commentaire"
+msgstr "Αυτό είναι ένα σχόλιο"
 
 #: thonny/plugins/theme_and_font_config_page.py:147
 msgid "The answer is"
-msgstr "La réponse est"
+msgstr "Η απάντηση είναι"
 
 #: thonny/plugins/theme_and_font_config_page.py:151
 msgid "unclosed_string"
-msgstr "chaîne_non_fermée"
+msgstr "ανοιχτή_συμβολοσειρά"
 
 #: thonny/plugins/theme_and_font_config_page.py:153
 msgid "blah, blah"
-msgstr "bla, bla"
+msgstr "Μπλα, μπλα"
 
 #: thonny/plugins/theme_and_font_config_page.py:176
 msgid "NB! Some style elements change only after restarting Thonny!"
-msgstr "Remarque : Certains éléments de style ne seront modifiés qu'après le redémarrage de Thonny !"
+msgstr "Υπενθύμιση! Ορισμένα στοιχεία στυλ αλλάζουν μόνο μετά την επανεκκίνηση του Thonny!"
 
 #: thonny/plugins/theme_and_font_config_page.py:215
 msgid "Enter an integer"
-msgstr "Entrez un nombre entier"
+msgstr "Πληκτρολογήστε έναν ακέραιο αριθμό"
 
 #: thonny/plugins/theme_and_font_config_page.py:228
 msgid "Theme & Font"
-msgstr "Thème et police"
+msgstr "Θεματικό & Γραμματοσειρά"
 
 #: thonny/plugins/thonny_folders.py:18
 msgid "Open Thonny program folder..."
-msgstr "Ouvrir le dossier programme de Thonny…"
+msgstr "Άνοιξε τον φάκελο προγραμμάτων του Thonny..."
 
 #: thonny/plugins/thonny_folders.py:23
 msgid "Open Thonny data folder..."
-msgstr "Ouvrir le dossier de données de Thonny…"
+msgstr "Άνοιξε τον φάκελο δεδομένων του Thonny ..."
 
 #: thonny/plugins/help/__init__.py:58
 msgid "Home"
-msgstr "Accueil"
+msgstr "Αρχική"
 
 #: thonny/plugins/help/__init__.py:69
 msgid "Help contents"
-msgstr "Contenu de l'aide"
+msgstr "Περιεχόμενα Βοήθειας"
 
 #: thonny/plugins/micropython/__init__.py:175
 msgid "CircuitPython device"
-msgstr "appareil CircuitPyhton"
+msgstr "Συσκευή CircuitPython"
 
 #: thonny/plugins/micropython/__init__.py:179
 msgid "MicroPython device"
-msgstr "appareil MicroPyhton"
+msgstr "Συσκευή MicroPython"
 
 #: thonny/plugins/micropython/__init__.py:191
 msgid "Connect your device to the computer and select corresponding port below"
-msgstr "Connectez votre appareil à l'ordinateur et sélectionnez le port correspondant ci-dessous"
+msgstr "Συνδέστε τη συσκευή σας στον υπολογιστή και επιλέξτε την αντίστοιχη θύρα παρακάτω"
 
 #: thonny/plugins/micropython/__init__.py:194
 msgid "look for your device name, \"USB Serial\" or \"UART\""
-msgstr "recherche du nom de votre appareil, « USB Serial » ou « UART »"
+msgstr "αναζητήστε το όνομα της συσκευής σας, \"USB Serial\" ή \"UART\""
 
 #: thonny/plugins/micropython/__init__.py:196
 msgid "If you can't find it, you may need to install proper USB driver first."
-msgstr "Si vous ne le trouvez pas, vous devriez d'abord installer un pilote USB correct."
+msgstr "Αν δεν μπορείτε να το βρείτε, ίσως χρειαστεί να εγκαταστήσετε πρώτα τον κατάλληλο οδηγό USB."
 
 #: thonny/plugins/micropython/__init__.py:220
 msgid "Port"
-msgstr "Port"
+msgstr "Θύρα"
 
 #: thonny/plugins/micropython/__init__.py:229
 msgid "Try to detect port automatically"
-msgstr "Essayer de détecter le port automatiquement"
+msgstr "Προσπαθήστε να εντοπίσετε αυτόματα τη θύρα"
 
 #: thonny/plugins/micropython/__init__.py:417
 msgid "MicroPython (generic)"
-msgstr "MicroPython (générique)"
+msgstr "MicroPython (γενόσημο)"
 
 #: thonny/plugins/printing/__init__.py:79
 msgid "Print..."
-msgstr "Imprimer…"
+msgstr "Εκτύπωση..."
 
 #: thonny/plugins/system_shell/__init__.py:59
 msgid "Open system shell..."
-msgstr "Ouvrir la console du système…"
+msgstr "Άνοιξε το κέλυφος συστήματος"
 
 #: thonny/plugins/backend_config_page.py:61
 msgid "Details"
-msgstr "Détails"
+msgstr "Λεπτομέρειες"
 
 #: thonny/plugins/pip_gui.py:380
 msgid "Install from requirements file"
-msgstr "Installer depuis un fichier d'exigences"
+msgstr "Εγκατάσταση από το αρχείο προδιαγραφών"
 
 #: thonny/plugins/pip_gui.py:391
 msgid "Install from local file"
-msgstr "Installer depuis un fichier local"
+msgstr "Εγκατάσταση από τοπικό αρχείο"
 
 #: thonny/plugins/pip_gui.py:970
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
 "If you want to install packages for your own programs then choose 'Tools → Manage packages...'"
-msgstr "Cette boîte de dialogue concerne la gestion des plugins de Thonny et leurs dépendances.\n"
-"Si vous souhaitez installer des paquets pour vos propres programmes, sélectionnez « Outils → Gérer les paquets… »"
+msgstr "Αυτός ο διάλογος είναι για τη διαχείριση των προσθηκών Thonny και των εξαρτήσεων τους.\n"
+"Αν θέλετε να εγκαταστήσετε πακέτα για τα δικά σας προγράμματα, επιλέξτε \"Εργαλεία → Διαχείριση πακέτων ...\""
 
 #: thonny/plugins/circuitpython/__init__.py:47
 msgid "CircuitPython (generic)"
-msgstr "CircuitPython (générique)"
+msgstr "CircuitPython (γενόσημο)"
 
 #: thonny/plugins/commenting_indenting.py:123
 msgid "Indent selected lines"
-msgstr "Indenter les lignes sélectionnées"
+msgstr "Αύξηση εσοχής επιλεγμένων γραμμών"
 
 #: thonny/plugins/commenting_indenting.py:133
 msgid "Dedent selected lines"
-msgstr "Désindenter les lignes sélectionnées"
+msgstr "Μείωση εσοχής επιλεγμένων γραμμών"
 
 #: thonny/workbench.py:1264
 msgid "Switch to\n"
 "regular\n"
 "mode"
-msgstr "Passer en mode normal"
+msgstr "Αλλαγή σε\n"
+"κανονική\n"
+"λειτουργία"
 
 #: thonny/plugins/microbit/__init__.py:54
 msgid "Make sure MicroPython has been installed to your micro:bit."
-msgstr "Veuillez vérifier que MicroPython a bien été installé dans votre micro:bit."
+msgstr "Βεβαιωθείτε ότι το MicroPython έχει εγκατασταθεί στο micro:bit σας."
 
 #: thonny/plugins/microbit/__init__.py:56
 msgid "Don't forget that main.py only works without embedded main script."
-msgstr "N'oubliez pas que main.py ne peut fonctionner que sans script principal intégré."
+msgstr "Μην ξεχνάτε ότι το main.py λειτουργεί μόνο χωρίς ενσωματωμένο κύριο πρόγραμμα."
 
 #: thonny/plugins/microbit/__init__.py:102
 msgid "Install latest MicroPython to BBC micro:bit"
-msgstr "Installer la dernière version de MicroPython dans BBC micro:bit"
+msgstr "Εγκαταστήστε την  τελευταία έκδοση MicroPython στο BBC micro:bit"
 
 #: thonny/plugins/microbit/__init__.py:104
 msgid "micro:bit location:"
-msgstr "Emplacement de micro:bit :"
+msgstr "τοποθεσία micro:bit"
 
 #: thonny/plugins/microbit/__init__.py:109
 msgid "Version to be installed:"
-msgstr "Version qui sera installée :"
+msgstr "Έκδοση που πρόκειται να εγκατασταθεί:"
 
 #: thonny/plugins/microbit/__init__.py:111
 msgid "please wait"
-msgstr "veuillez patienter"
+msgstr "Παρακαλώ περιμένετε"
 
 #: thonny/plugins/microbit/__init__.py:115
 msgid "NB! All files on micro:bit will be deleted!"
-msgstr "Remarque : Tous les fichiers sur le micro:bit seront supprimés !"
+msgstr "Υπενθύμιση! Όλα τα αρχεία σε αυτό το micro:bit θα διαγραφούν!"
 
 #: thonny/plugins/microbit/__init__.py:195
 msgid "Installing ..."
-msgstr "Installation…"
+msgstr "Εγκατάσταση ..."
 
 #: thonny/plugins/microbit/__init__.py:199
 msgid "Done!"
-msgstr "Terminé !"
+msgstr "Ολοκληρώθηκε!"
 
 #: thonny/plugins/microbit/__init__.py:199
 msgid "You can now close this dialog."
-msgstr "Vous pouvez désormais fermer cette boîte de dialogue."
+msgstr "Τώρα μπορείτε να κλείσετε αυτό το παράθυρο διάλογου."
 
 #: thonny/plugins/micropython/__init__.py:298
 msgid "Firmware"
-msgstr "Micrologiciel"
+msgstr "Yλικολογισμικό"
 
 #: thonny/plugins/micropython/__init__.py:301
 msgid "Open the dialog for installing or upgrading MicroPython on your device"
-msgstr "Ouvrir la boîte de dialogue pour installer ou mettre à jour MicroPython sur votre appareil"
+msgstr "Ανοίξτε το παράθυρο διαλόγου για την εγκατάσταση ή την αναβάθμιση του MicroPython στη συσκευή σας"
 
 #: thonny/plugins/microbit/__init__.py:67
 msgid "Could not find disk '%s'."
-msgstr "Impossible de trouver le disque « %s »."
+msgstr "Δεν ήταν δυνατή η εύρεση του δίσκου '%s'."
 
 #: thonny/plugins/microbit/__init__.py:69
 msgid "Make sure you have micro:bit plugged in!"
-msgstr "Veuillez vérifier si le micro:bit est bien branché !"
+msgstr "Βεβαιωθείτε ότι έχετε συνδέσει το micro:bit συνδεδεμένο!"
 
 #: thonny/plugins/microbit/__init__.py:71
 msgid "Do you want to continue and locate the disk yourself?"
-msgstr "Voulez-vous poursuivre et trouver le disque vous-même ?"
+msgstr "Θέλετε να συνεχίσετε και να εντοπίσετε μόνοι σας τον δίσκο;"
 
 #: thonny/misc_utils.py:120
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
-msgstr "Impossible de trouver le dique « %s ». Voulez-vous le trouver vous-même ?"
+msgstr "Δεν ήταν δυνατή η εύρεση του δίσκου '%s'. Θέλετε να τον εντοπίσετε μόνοι σας;"
 
 #: thonny/misc_utils.py:123
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
-msgstr "Plusieurs disques « %s » trouvés. Voulez-vous en sélectionner un vous-même ?"
+msgstr "Βρέθηκαν διάφοροι δίσκοι '%s'. Θέλετε να επιλέξετε έναν εσείς;"
 
 #: thonny/misc_utils.py:137
 msgid "Can't find suitable disk"
-msgstr "Impossible de trouver un disque valide"
+msgstr "Δεν είναι δυνατή η εύρεση κατάλληλου δίσκου"
 
 #: thonny/base_file_browser.py:259
 msgid "%d items"
-msgstr "%d éléments"
+msgstr "%d στοιχεία"
 
 #: thonny/base_file_browser.py:581
 msgid "Move to Recycle Bin"
-msgstr "Déplacer vers la corbeille"
+msgstr "Μετακίνηση στον Κάδο Ανακύκλωσης"
 
 #: thonny/base_file_browser.py:583
 msgid "Move to Trash"
-msgstr "Déplacer vers la corbeille"
+msgstr "Μετακίνηση στα Άχρηστα"
 
 #: thonny/base_file_browser.py:586
 msgid "Delete"
-msgstr "Supprimer"
+msgstr "Διαγραφή"
 
 #: thonny/base_file_browser.py:589
 msgid "New directory"
-msgstr "Nouveau dossier"
+msgstr "Νέος κατάλογος"
 
 #: thonny/base_file_browser.py:592
 msgid "Properties"
-msgstr "Propriétés"
+msgstr "Ιδιότητες"
 
 #: thonny/base_file_browser.py:593
 msgid "Storage space"
-msgstr "Espace de stockage"
+msgstr "Χώρος αποθήκευσης"
 
 #: thonny/base_file_browser.py:603
 msgid "Path"
-msgstr "Chemin"
+msgstr "Μονοπάτι"
 
 #: thonny/base_file_browser.py:605
 msgid "Directory properties"
-msgstr "Propriétés du dossier"
+msgstr "Ιδιότητες καταλόγου"
 
 #: thonny/base_file_browser.py:607
 msgid "File properties"
-msgstr "Propriétés du fichier"
+msgstr "Ιδιότητες αρχείου"
 
 #: thonny/base_file_browser.py:609
 msgid "bytes"
-msgstr "octets"
+msgstr "bytes"
 
 #: thonny/base_file_browser.py:612
 msgid "Size"
-msgstr "Taille"
+msgstr "Μεγέθος"
 
 #: thonny/base_file_browser.py:623
 msgid "Modified"
-msgstr "Modifié le"
+msgstr "Τροποποιήθηκε"
 
 #: thonny/base_file_browser.py:679
 msgid "Deleting %s"
-msgstr "Suppression de %s"
+msgstr "Διαγραφή %s"
 
 #: thonny/base_file_browser.py:701
 msgid "Moving %s to %s"
-msgstr "Déplacement de %s vers %s"
+msgstr "Μετακίνηση του %s στο %s"
 
 #: thonny/code.py:203
 msgid "Loading"
-msgstr "Chargement"
+msgstr "Φόρτωση"
 
 #: thonny/code.py:297
 msgid "Saving"
-msgstr "Enregistrement"
+msgstr "Αποθήκευση"
 
 #: thonny/running.py:1408
 msgid "Working..."
-msgstr "Chargement…"
+msgstr "Επεξεργάζεται..."
 
 #: thonny/plugins/files.py:199
 msgid "Uploading %s to %s"
-msgstr "Téléversement de %s vers %s"
+msgstr "Ανέβασμα του %s στο  %s"
 
 #: thonny/plugins/files.py:206
 msgid "Upload to %s"
-msgstr "Téléversement vers %s"
+msgstr "Ανέβασμα στο %s"
 
 #: thonny/plugins/files.py:261
 msgid "Downloading %s to %s"
-msgstr "Téléchargement de %s vers %s"
+msgstr "Λήψη του %s στο %s"
 
 #: thonny/plugins/files.py:267
 msgid "Download to %s"
-msgstr "Téléchargement vers %s"
+msgstr "Μεταφόρτωση στο %s"
 
