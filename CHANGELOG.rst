@@ -2,7 +2,7 @@
 Version history
 ===============
 
-3.2.3 (2019-11-0?)
+3.2.3 (2019-11-03)
 ==================
 * NEW: Greek translation (by Nikos)
 * UPDATE: Updated several translations (by Vytenis, rnLIKEm, Dleta, Alex ANDRÉ, NathanBnm, LionelVaux, Paul, Eric W, Frank Stengel,  ...)
