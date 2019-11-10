@@ -3,6 +3,8 @@ from thonny import get_workbench
 BASE_LANGUAGE_CODE = "en_US"
 BASE_LANGUAGE_NAME = "English"
 
+# http://www.internationalphoneticalphabet.org/languages/language-names-in-native-language/
+
 LANGUAGES_DICT = {
     "de_DE": "Deutsch [ALPHA]",
     "et_EE": "Eesti",
@@ -10,10 +12,11 @@ LANGUAGES_DICT = {
     "es_ES": "Español [ALPHA]",
     "fr_FR": "Français [BETA]",
     "nl_NL": "Nederlands [BETA]",
+    "pl_PL": "Polski [BETA]",
     "pt_PT": "Português (PT) [BETA]",
     "pt_BR": "Português (BR) [ALPHA]",
     "ru_RU": "Русский",
-    "tr_TR": "Türkçe"
+    "tr_TR": "Türkçe [BETA]",
     "uk_UA": "Українська",
     "zh_TW": "繁體中文-TW",
     "zh_CN": "简体中文 ",
