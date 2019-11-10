@@ -2,9 +2,14 @@
 Version history
 ===============
 
+3.2.4 (2019-11-??)
+==================
+* NEW: Turkish translation by M. Burak Kalkan
+* NEW: Polish translation by Jarek Miszczak
+
 3.2.3 (2019-11-03)
 ==================
-* NEW: Greek translation (by Nikos)
+* NEW: Greek translation by Nikos
 * UPDATE: Updated several translations (by Vytenis, rnLIKEm, Dleta, Alex ANDRÉ, NathanBnm, LionelVaux, Paul, Eric W, Frank Stengel,  ...)
 * UPDATE: Propose opening files via dialog in case of macOS Catalina permission error (#813).
 
