@@ -191,7 +191,7 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
     def __init__(self, master=None, cnf={}, **kw):
 
         if "replace_tabs" not in kw:
-            kw["replace_tabs"] = True
+            kw["replace_tabs"] = False
 
         super().__init__(
             master=master,
