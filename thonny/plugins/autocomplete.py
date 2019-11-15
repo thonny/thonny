@@ -259,11 +259,12 @@ class ShellCompleter(Completer):
         get_runner().send_command(InlineCommand("shell_autocomplete", source=source))
 
     def _handle_backend_response(self, msg):
-        # check if the response is relevant for current state
-        if msg.source != self._get_prefix():
-            self._close()
-        else:
-            self._present_completions(msg.completions)
+        if hasattr(msg, 'source'):
+            # check if the response is relevant for current state
+            if msg.source != self._get_prefix():
+                self._close()
+            else:
+                self._present_completions(msg.completions)
 
     def _get_prefix(self):
         return self.text.get("input_start", "insert")  # TODO: allow multiple line input

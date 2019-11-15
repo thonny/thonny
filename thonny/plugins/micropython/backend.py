@@ -936,7 +936,8 @@ class MicroPythonBackend:
                 prefix = match.group()
                 if "." in prefix:
                     obj, prefix = prefix.rsplit(".", 1)
-                    names = self._evaluate("dir(%s)" % obj)
+                    names = self._evaluate(
+                        "dir({}) if '{}' in locals() or '{}' in globals() else []".format(obj, obj, obj))
                 else:
                     names = self._evaluate("dir()")
             else:
@@ -944,6 +945,10 @@ class MicroPythonBackend:
                 prefix = ""
 
             completions = []
+
+            # prevent TypeError (iterating over None)
+            names = names if names else []
+
             for name in names:
                 if name.startswith(prefix) and not name.startswith("__"):
                     completions.append({"name": name, "complete": name[len(prefix) :]})
