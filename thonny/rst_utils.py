@@ -475,4 +475,5 @@ def escape(s):
 
 
 def create_title(text, line_symbol="="):
+    text = text.replace("\r\n", "\n").replace("\n", " ").strip()
     return text + "\n" + line_symbol * len(text) + "\n"

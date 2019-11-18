@@ -489,7 +489,10 @@ class GenericErrorHelper(ErrorHelper):
                     "generic-search-the-web",
                     "Search the web",
                     "Try performing a web search for\n\n``Python %s: %s``"
-                    % (self.error_info["type_name"], rst_utils.escape(self.error_info["message"])),
+                    % (
+                        self.error_info["type_name"],
+                        rst_utils.escape(self.error_info["message"].replace("\n", " ").strip()),
+                    ),
                     1,
                 )
             )
