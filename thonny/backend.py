@@ -1245,7 +1245,7 @@ class Tracer(Executor):
         super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
-        self._reported_frame_ids = set()
+        self._last_reported_frame_ids = set()
 
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1383,7 +1383,7 @@ class Tracer(Executor):
         pass
 
     def _check_notify_return(self, frame_id):
-        if frame_id in self._reported_frame_ids:
+        if frame_id in self._last_reported_frame_ids:
             # Need extra notification, because it may be long time until next interesting event
             self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
 
@@ -1458,7 +1458,7 @@ class FastTracer(Tracer):
             tracer_class="FastTracer",
         )
 
-        self._reported_frame_ids.update(map(lambda f: f.id, stack))
+        self._last_reported_frame_ids = set(map(lambda f: f.id, stack))
 
         self._vm.send_message(msg)
 
@@ -1824,6 +1824,7 @@ class NiceTracer(Tracer):
 
         # Convert stack of TempFrameInfos to stack of FrameInfos
         new_stack = []
+        self._last_reported_frame_ids = set()
         for tframe in state["stack"]:
             system_frame = tframe.system_frame
             module_name = system_frame.f_globals["__name__"]
@@ -1855,7 +1856,7 @@ class NiceTracer(Tracer):
                 )
             )
 
-            self._reported_frame_ids.add(frame_id)
+            self._last_reported_frame_ids.add(frame_id)
 
         state["stack"] = new_stack
         state["tracer_class"] = "NiceTracer"
