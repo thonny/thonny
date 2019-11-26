@@ -1379,17 +1379,6 @@ class Tracer(Executor):
                 "is_fresh": exc == self._fresh_exception,
             }
 
-    def _get_breakpoints_with_cursor_position(self, cmd):
-        if cmd["cursor_position"] is None:
-            return cmd["breakpoints"]
-        else:
-            result = copy.copy(cmd["breakpoints"])
-            path, line = cmd["cursor_position"]
-            if path not in result:
-                result[path] = set()
-            result[path].add(line)
-            return result
-
     def _breakpointhook(self, *args, **kw):
         pass
 
@@ -1489,9 +1478,6 @@ class FastTracer(Tracer):
 
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
-
-    def _cmd_run_to_cursor_completed(self, frame, cmd):
-        return self._at_a_breakpoint(frame, cmd, self._get_breakpoints_with_cursor_position(cmd))
 
     def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
         # TODO: try re-entering same line in loop
@@ -1995,9 +1981,6 @@ class NiceTracer(Tracer):
 
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
-
-    def _cmd_run_to_cursor_completed(self, frame, cmd):
-        return self._at_a_breakpoint(frame, cmd, self._get_breakpoints_with_cursor_position(cmd))
 
     def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
         if breakpoints is None:

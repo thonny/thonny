@@ -42,14 +42,17 @@ class Debugger:
             # tell VM the state we are seeing
             cmd.setdefault(
                 frame_id=self._last_progress_message.stack[-1].id,
-                breakpoints=code.get_current_breakpoints(),
-                cursor_position=self.get_run_to_cursor_breakpoint(),
+                breakpoints=self.get_effective_breakpoints(command),
                 state=self._last_progress_message.stack[-1].event,
                 focus=self._last_progress_message.stack[-1].focus,
                 allow_stepping_into_libraries=get_workbench().get_option(
                     "debugger.allow_stepping_into_libraries"
                 ),
             )
+            if command == "run_to_cursor":
+                # cursor position was added as another breakpoint
+                cmd.name = "resume"
+
             get_runner().send_command(cmd)
             if command == "resume":
                 self.clear_last_frame()
@@ -58,6 +61,18 @@ class Debugger:
 
     def get_run_to_cursor_breakpoint(self):
         return None
+
+    def get_effective_breakpoints(self, command):
+        result = code.get_current_breakpoints()
+
+        if command == "run_to_cursor":
+            bp = self.get_run_to_cursor_breakpoint()
+            if bp != None:
+                filename, lineno = bp
+                result.setdefault(filename, set())
+                result[filename].add(lineno)
+
+        return result
 
     def command_enabled(self, command):
         if not get_runner().is_waiting_debugger_command():
