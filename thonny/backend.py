@@ -39,7 +39,7 @@ from thonny.common import (
     UserError,
     ValueInfo,
     parse_message,
-    path_startswith,
+    path_startswith,  # TODO: try to get rid of this
     range_contains_smaller,
     range_contains_smaller_or_equal,
     serialize_message,
@@ -58,6 +58,14 @@ AFTER_EXPRESSION_MARKER = "_thonny_hidden_after_expr"
 logger = logging.getLogger("thonny.backend")
 
 _CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.ini")
+
+
+_CO_GENERATOR = getattr(inspect, "CO_GENERATOR", 0)
+_CO_COROUTINE = getattr(inspect, "CO_COROUTINE", 0) 
+_CO_ITERABLE_COROUTINE = getattr(inspect, "CO_ITERABLE_COROUTINE", 0)
+_CO_ASYNC_GENERATOR = getattr(inspect, "CO_ASYNC_GENERATOR", 0)
+
+_CO_WEIRDO = _CO_GENERATOR | _CO_COROUTINE | _CO_ITERABLE_COROUTINE | _CO_ASYNC_GENERATOR
 
 TempFrameInfo = namedtuple(
     "TempFrameInfo",
@@ -1246,6 +1254,8 @@ class Tracer(Executor):
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
         self._last_reported_frame_ids = set()
+        self._breakpoint_linenos_by_file_hashes = {}
+        self._canonic_hash_cache = {}
 
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1263,6 +1273,20 @@ class Tracer(Executor):
             exception=None,
             breakpoints=breakpoints,
         )
+
+        self._precompute()
+
+    def _canonic_hash(self, filename):
+        # adapted from bdb
+        result = self._canonic_hash_cache.get(filename)
+        if result is None:
+            if filename.startswith("<"):
+                result = hash(filename)
+            else:
+                result = hash(os.path.normcase(os.path.abspath(filename)))
+
+            self._canonic_hash_cache[filename] = result
+        return result
 
     def _trace(self, frame, event, arg):
         raise NotImplementedError()
@@ -1344,12 +1368,21 @@ class Tracer(Executor):
                 self._vm.handle_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
+                self._precompute()
                 return cmd
+
+    def _precompute(self):
+        bps = self._current_command.breakpoints
+
+        self._breakpoint_linenos_by_file_hashes = {self._canonic_hash(key): bps[key] for key in bps}
 
     def _register_affected_frame(self, exception_obj, frame):
         if not hasattr(exception_obj, "_affected_frame_ids_"):
             exception_obj._affected_frame_ids_ = set()
         exception_obj._affected_frame_ids_.add(id(frame))
+
+    def _get_breakpoints_in_file(self, filename):
+        return self._breakpoint_linenos_by_file_hashes.get(self._canonic_hash(filename), set())
 
     def _get_current_exception(self):
         if self._fresh_exception is not None:
@@ -1479,11 +1512,9 @@ class FastTracer(Tracer):
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
 
-    def _at_a_breakpoint(self, frame, cmd, breakpoints=None):
+    def _at_a_breakpoint(self, frame, cmd):
         # TODO: try re-entering same line in loop
-        if breakpoints is None:
-            breakpoints = cmd.breakpoints
-
+        breakpoints = cmd.breakpoints
         filename = frame.f_code.co_filename
         return filename in breakpoints and frame.f_lineno in breakpoints[filename]
 
