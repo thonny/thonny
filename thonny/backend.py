@@ -2,7 +2,6 @@
 
 import ast
 import builtins
-import copy
 import functools
 import importlib
 import inspect
@@ -61,7 +60,7 @@ _CONFIG_FILENAME = os.path.join(thonny.THONNY_USER_DIR, "backend_configuration.i
 
 
 _CO_GENERATOR = getattr(inspect, "CO_GENERATOR", 0)
-_CO_COROUTINE = getattr(inspect, "CO_COROUTINE", 0) 
+_CO_COROUTINE = getattr(inspect, "CO_COROUTINE", 0)
 _CO_ITERABLE_COROUTINE = getattr(inspect, "CO_ITERABLE_COROUTINE", 0)
 _CO_ASYNC_GENERATOR = getattr(inspect, "CO_ASYNC_GENERATOR", 0)
 
@@ -1254,8 +1253,9 @@ class Tracer(Executor):
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
         self._last_reported_frame_ids = set()
-        self._breakpoint_linenos_by_file_hashes = {}
-        self._canonic_hash_cache = {}
+        self._canonic_path_cache = {}
+        self._file_interest_cache = {}
+        self._file_breakpoints_cache = {}
 
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1274,18 +1274,19 @@ class Tracer(Executor):
             breakpoints=breakpoints,
         )
 
-        self._precompute()
+        self._initialize_new_command()
 
-    def _canonic_hash(self, filename):
+    def _get_canonic_path(self, path):
         # adapted from bdb
-        result = self._canonic_hash_cache.get(filename)
+        result = self._canonic_path_cache.get(path)
         if result is None:
-            if filename.startswith("<"):
-                result = hash(filename)
+            if path.startswith("<"):
+                result = path
             else:
-                result = hash(os.path.normcase(os.path.abspath(filename)))
+                result = os.path.normcase(os.path.abspath(path))
 
-            self._canonic_hash_cache[filename] = result
+            self._canonic_path_cache[path] = result
+
         return result
 
     def _trace(self, frame, event, arg):
@@ -1308,15 +1309,23 @@ class Tracer(Executor):
                 sys.breakpointhook = old_breakpointhook
 
     def _should_skip_frame(self, frame, event):
-        if event == "return":
-            # need to close frame in UI even if user issued Resume
-            return False
+        if event == "call":
+            # new frames
+            return (
+                (
+                    self._current_command.name == "resume"
+                    and not self._get_breakpoints_in_file(frame.f_code.co_filename)
+                    or self._current_command.name == "step_over"
+                    and not self._get_breakpoints_in_file(frame.f_code.co_filename)
+                    and id(frame) not in self._last_reported_frame_ids
+                )
+                or not self._is_interesting_frame(frame)
+                or self._vm.is_doing_io()
+            )
 
-        return (
-            not self._is_interesting_frame(frame)
-            or self._current_command.name == "resume"
-            and frame.f_code.co_filename not in self._current_command.breakpoints
-        )
+        else:
+            # once we have entered a frame, we need to reach the return event
+            return False
 
     def _is_interesting_frame(self, frame):
         # For some reason Pylint doesn't see inspect.CO_GENERATOR and such
@@ -1327,17 +1336,12 @@ class Tracer(Executor):
             code is None
             or code.co_filename is None
             or not self._is_interesting_module_file(code.co_filename)
-            or code.co_flags & inspect.CO_GENERATOR  # @UndefinedVariable
-            or sys.version_info >= (3, 5)
-            and code.co_flags & inspect.CO_COROUTINE  # @UndefinedVariable
-            or sys.version_info >= (3, 5)
-            and code.co_flags & inspect.CO_ITERABLE_COROUTINE  # @UndefinedVariable
-            or sys.version_info >= (3, 6)
-            and code.co_flags & inspect.CO_ASYNC_GENERATOR  # @UndefinedVariable
-            or "importlib._bootstrap" in code.co_filename
+            or code.co_flags & _CO_GENERATOR
+            and code.co_flags & _CO_COROUTINE
+            and code.co_flags & _CO_ITERABLE_COROUTINE
+            and code.co_flags & _CO_ASYNC_GENERATOR
+            # or "importlib._bootstrap" in code.co_filename
             or code.co_name in ["<listcomp>", "<setcomp>", "<dictcomp>"]
-            or self._vm.is_doing_io()
-            or path_startswith(code.co_filename, self._thonny_src_dir)
         )
 
     def _is_interesting_module_file(self, path):
@@ -1346,14 +1350,34 @@ class Tracer(Executor):
         # When command is "resume", then only modules with breakpoints are interesting
         # (used to be more flexible, but this caused problems
         # when main script was in ~/. Then user site library became interesting as well)
-        return (
-            self._main_module_path is not None
+
+        result = self._file_interest_cache.get(path, None)
+        if result is not None:
+            return result
+
+        _, extension = os.path.splitext(path.lower())
+
+        result = (
+            self._get_breakpoints_in_file(path)
+            or self._main_module_path is not None
+            and is_same_path(path, self._main_module_path)
+            or extension in (".py", ".pyw")
             and (
                 self._current_command.get("allow_stepping_into_libraries", False)
-                or is_same_path(os.path.dirname(path), os.path.dirname(self._main_module_path))
+                or (
+                    path_startswith(path, os.path.dirname(self._main_module_path))
+                    # main module may be at the root of the fs
+                    and not path_startswith(path, sys.prefix)
+                    and not path_startswith(path, sys.base_prefix)
+                    and not path_startswith(path, site.getusersitepackages() or "usersitenotexists")
+                )
             )
-            or path in self._current_command["breakpoints"]
+            and not path_startswith(path, self._thonny_src_dir)
         )
+
+        self._file_interest_cache[path] = result
+
+        return result
 
     def _is_interesting_exception(self, frame):
         # interested only in exceptions in command frame or its parent frames
@@ -1368,13 +1392,16 @@ class Tracer(Executor):
                 self._vm.handle_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
-                self._precompute()
+                self._initialize_new_command()
                 return cmd
 
-    def _precompute(self):
-        bps = self._current_command.breakpoints
+    def _initialize_new_command(self):
+        self._file_interest_cache = {}  # because there may be new breakpoints
 
-        self._breakpoint_linenos_by_file_hashes = {self._canonic_hash(key): bps[key] for key in bps}
+        self._file_breakpoints_cache = {}
+        for path, linenos in self._current_command.breakpoints.items():
+            self._file_breakpoints_cache[path] = linenos
+            self._file_breakpoints_cache[self._get_canonic_path(path)] = linenos
 
     def _register_affected_frame(self, exception_obj, frame):
         if not hasattr(exception_obj, "_affected_frame_ids_"):
@@ -1382,7 +1409,15 @@ class Tracer(Executor):
         exception_obj._affected_frame_ids_.add(id(frame))
 
     def _get_breakpoints_in_file(self, filename):
-        return self._breakpoint_linenos_by_file_hashes.get(self._canonic_hash(filename), set())
+        result = self._file_breakpoints_cache.get(filename, None)
+
+        if result is not None:
+            return result
+
+        canonic_path = self._get_canonic_path(filename)
+        result = self._file_breakpoints_cache.get(canonic_path, set())
+        self._file_breakpoints_cache[filename] = result
+        return result
 
     def _get_current_exception(self):
         if self._fresh_exception is not None:
