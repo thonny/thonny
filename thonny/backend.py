@@ -1696,6 +1696,9 @@ class NiceTracer(Tracer):
                     self._handle_progress_event(frame.f_back, event, marker_function_args, node)
                 self._try_interpret_as_again_event(frame.f_back, event, marker_function_args, node)
 
+                # Don't need any more events from these frames
+                return None
+
             else:
                 # Calls to proper functions.
                 # Client doesn't care about these events,
