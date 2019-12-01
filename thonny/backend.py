@@ -1707,18 +1707,20 @@ class NiceTracer(Tracer):
                 self._custom_stack.append(CustomStackFrame(frame, "call"))
 
         elif event == "exception":
-            self._fresh_exception = arg
-            self._register_affected_frame(arg[1], frame)
+            if self._is_interesting_exception(frame, arg):
+                self._fresh_exception = arg
+                self._register_affected_frame(arg[1], frame)
 
-            # use the state prepared by previous event
-            last_custom_frame = self._custom_stack[-1]
-            assert last_custom_frame.system_frame == frame
+                # use the state prepared by previous event
+                last_custom_frame = self._custom_stack[-1]
+                assert last_custom_frame.system_frame == frame
 
-            assert last_custom_frame.event.startswith("before_")
-            pseudo_event = last_custom_frame.event.replace("before_", "after_").replace(
-                "_again", ""
-            )
-            self._handle_progress_event(frame, pseudo_event, {}, last_custom_frame.node)
+                assert last_custom_frame.event.startswith("before_")
+                pseudo_event = last_custom_frame.event.replace("before_", "after_").replace(
+                    "_again", ""
+                )
+                print("handle", pseudo_event, {}, last_custom_frame.node)
+                self._handle_progress_event(frame, pseudo_event, {}, last_custom_frame.node)
 
         elif event == "return":
             self._fresh_exception = None
