@@ -1606,15 +1606,27 @@ class NiceTracer(Tracer):
         return root
 
     def _should_skip_frame(self, frame, event):
+        # nice tracer can't skip any of the frames which need to be
+        # shown in the stacktrace
         code = frame.f_code
-        return (
-            # never skip marker functions, because they are triggers
-            # for adding new custom stack frames
-            code.co_name not in self.marker_function_names
-            and (
-                super()._should_skip_frame(frame, event)
-                or code.co_filename not in self._instrumented_files
-            )
+        if code is None:
+            return True
+
+        if event == "call":
+            # new frames
+            if code.co_name in self.marker_function_names:
+                return False
+
+            else:
+                return not self._is_interesting_frame(frame) or self._vm.is_doing_io()
+
+        else:
+            # once we have entered a frame, we need to reach the return event
+            return False
+
+    def _is_interesting_frame(self, frame):
+        return frame.f_code.co_filename in self._instrumented_files and super()._is_interesting_frame(
+            frame
         )
 
     def find_spec(self, fullname, path=None, target=None):
