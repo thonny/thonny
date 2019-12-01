@@ -1379,11 +1379,12 @@ class Tracer(Executor):
 
         return result
 
-    def _is_interesting_exception(self, frame):
+    def _is_interesting_exception(self, frame, arg):
         # interested only in exceptions in command frame or its parent frames
-        return id(frame) == self._current_command["frame_id"] or not self._frame_is_alive(
-            self._current_command["frame_id"]
-        )
+        return (
+            id(frame) == self._current_command["frame_id"]
+            or not self._frame_is_alive(self._current_command["frame_id"])
+        ) and arg[0] not in (StopIteration, StopAsyncIteration)
 
     def _fetch_next_debugger_command(self):
         while True:
@@ -1496,9 +1497,9 @@ class FastTracer(Tracer):
             self._check_notify_return(id(frame))
 
         elif event == "exception":
-            self._fresh_exception = arg
-            self._register_affected_frame(arg[1], frame)
-            if self._is_interesting_exception(frame):
+            if self._is_interesting_exception(frame, arg):
+                self._fresh_exception = arg
+                self._register_affected_frame(arg[1], frame)
                 # UI doesn't know about separate exception events
                 self._report_current_state(frame)
                 self._current_command = self._fetch_next_debugger_command()
