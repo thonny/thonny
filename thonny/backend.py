@@ -1378,11 +1378,7 @@ class Tracer(Executor):
         return result
 
     def _is_interesting_exception(self, frame, arg):
-        # interested only in exceptions in command frame or its parent frames
-        return (
-            id(frame) == self._current_command["frame_id"]
-            or not self._frame_is_alive(self._current_command["frame_id"])
-        ) and arg[0] not in (StopIteration, StopAsyncIteration)
+        return arg[0] not in (StopIteration, StopAsyncIteration)
 
     def _fetch_next_debugger_command(self):
         while True:
@@ -1554,6 +1550,16 @@ class FastTracer(Tracer):
 
     def _frame_is_alive(self, frame_id):
         return frame_id in self._alive_frame_ids
+
+    def _is_interesting_exception(self, frame, arg):
+        return super()._is_interesting_exception(frame, arg) and (
+            self._current_command.name in ["step_into", "step_over"]
+            and (
+                # in command frame or its parent frames
+                id(frame) == self._current_command["frame_id"]
+                or not self._frame_is_alive(self._current_command["frame_id"])
+            )
+        )
 
 
 class NiceTracer(Tracer):
