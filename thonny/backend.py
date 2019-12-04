@@ -1328,8 +1328,6 @@ class Tracer(Executor):
             return False
 
     def _is_interesting_frame(self, frame):
-        # For some reason Pylint doesn't see inspect.CO_GENERATOR and such
-        # pylint: disable=no-member
         code = frame.f_code
 
         return not (
