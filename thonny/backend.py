@@ -1711,19 +1711,28 @@ class NiceTracer(Tracer):
                 self._custom_stack.append(CustomStackFrame(frame, "call"))
 
         elif event == "exception":
+            # Note that Nicer can't filter out exception based on current command
+            # because it must be possible to go back and replay with different command
             if self._is_interesting_exception(frame, arg):
                 self._fresh_exception = arg
                 self._register_affected_frame(arg[1], frame)
 
+                # Last command (step_into or step_over) produced this exception
+                # Show red after-state for this focus
                 # use the state prepared by previous event
                 last_custom_frame = self._custom_stack[-1]
                 assert last_custom_frame.system_frame == frame
+
+                # TODO: instead of producing an event here, next before_-event
+                # should create matching after event for each before event
+                # which would remain unclosed because of this exception.
+                # Existence of these after events would simplify step_over management
 
                 assert last_custom_frame.event.startswith("before_")
                 pseudo_event = last_custom_frame.event.replace("before_", "after_").replace(
                     "_again", ""
                 )
-                print("handle", pseudo_event, {}, last_custom_frame.node)
+                #print("handle", pseudo_event, {}, last_custom_frame.node)
                 self._handle_progress_event(frame, pseudo_event, {}, last_custom_frame.node)
 
         elif event == "return":
