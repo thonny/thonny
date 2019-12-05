@@ -651,6 +651,7 @@ class BaseExpressionBox:
                         and msg["exception_info"]["is_fresh"]
                     ),
                 )
+                self._last_focus = focus
 
             self._update_position(frame_info.current_root_expression)
             self._update_size()
@@ -659,7 +660,6 @@ class BaseExpressionBox:
             # hide and clear on non-expression events
             self.clear_debug_view()
 
-        self._last_focus = focus
         self._last_root_expression = frame_info.current_root_expression
 
     def get_focused_text(self):
