@@ -48,6 +48,7 @@ from thonny.common import (
     execute_system_command,
 )
 import queue
+import dis
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"
@@ -1252,6 +1253,7 @@ class Tracer(Executor):
         super().__init__(vm, original_cmd)
         self._thonny_src_dir = os.path.dirname(sys.modules["thonny"].__file__)
         self._fresh_exception = None
+        self._prev_breakpoints = {}
         self._last_reported_frame_ids = set()
         self._canonic_path_cache = {}
         self._file_interest_cache = {}
@@ -1304,25 +1306,6 @@ class Tracer(Executor):
             sys.settrace(None)
             if hasattr(sys, "breakpointhook"):
                 sys.breakpointhook = old_breakpointhook
-
-    def _should_skip_frame(self, frame, event):
-        if event == "call":
-            # new frames
-            return (
-                (
-                    self._current_command.name == "resume"
-                    and not self._get_breakpoints_in_file(frame.f_code.co_filename)
-                    or self._current_command.name == "step_over"
-                    and not self._get_breakpoints_in_file(frame.f_code.co_filename)
-                    and id(frame) not in self._last_reported_frame_ids
-                )
-                or not self._is_interesting_frame(frame)
-                or self._vm.is_doing_io()
-            )
-
-        else:
-            # once we have entered a frame, we need to reach the return event
-            return False
 
     def _is_interesting_frame(self, frame):
         code = frame.f_code
@@ -1378,6 +1361,8 @@ class Tracer(Executor):
         return arg[0] not in (StopIteration, StopAsyncIteration)
 
     def _fetch_next_debugger_command(self):
+        self._prev_breakpoints = self._current_command.breakpoints
+        
         while True:
             cmd = self._vm._fetch_command()
             if isinstance(cmd, InlineCommand):
@@ -1388,12 +1373,13 @@ class Tracer(Executor):
                 return cmd
 
     def _initialize_new_command(self):
-        self._file_interest_cache = {}  # because there may be new breakpoints
-
-        self._file_breakpoints_cache = {}
-        for path, linenos in self._current_command.breakpoints.items():
-            self._file_breakpoints_cache[path] = linenos
-            self._file_breakpoints_cache[self._get_canonic_path(path)] = linenos
+        if self._current_command.breakpoints != self._prev_breakpoints:
+            self._file_interest_cache = {}  # because there may be new breakpoints
+            self._file_breakpoints_cache = {}
+            for path, linenos in self._current_command.breakpoints.items():
+                self._file_breakpoints_cache[path] = linenos
+                self._file_breakpoints_cache[self._get_canonic_path(path)] = linenos
+            
 
     def _register_affected_frame(self, exception_obj, frame):
         if not hasattr(exception_obj, "_affected_frame_ids_"):
@@ -1460,10 +1446,14 @@ class FastTracer(Tracer):
         super().__init__(vm, original_cmd)
 
         self._command_frame_returned = False
+        self._code_linenos_cache = {}
+        self._code_breakpoints_cache = {}
 
     def _initialize_new_command(self):
         super()._initialize_new_command()
         self._command_frame_returned = False
+        if self._current_command.breakpoints != self._prev_breakpoints:
+            self._code_breakpoints_cache = {}
 
     def _breakpointhook(self, *args, **kw):
         frame = inspect.currentframe()
@@ -1472,9 +1462,33 @@ class FastTracer(Tracer):
         self._report_current_state(frame)
         self._current_command = self._fetch_next_debugger_command()
 
+    def _should_skip_frame(self, frame, event):
+        if event == "call":
+            # new frames
+            return (
+                (
+                    self._current_command.name == "resume"
+                    #and not self._get_breakpoints_in_file(frame.f_code.co_filename)
+                    and not self._get_breakpoints_in_code(frame.f_code)
+                    or self._current_command.name == "step_over"
+                    #and not self._get_breakpoints_in_file(frame.f_code.co_filename)
+                    and not self._get_breakpoints_in_code(frame.f_code)
+                    and id(frame) not in self._last_reported_frame_ids
+                )
+                or not self._is_interesting_frame(frame)
+                or self._vm.is_doing_io()
+            )
+
+        else:
+            # once we have entered a frame, we need to reach the return event
+            return False
+
     def _trace(self, frame, event, arg):
         if self._should_skip_frame(frame, event):
             return None
+        
+        #return None
+        #return self._trace
 
         frame_id = id(frame)
 
@@ -1502,6 +1516,7 @@ class FastTracer(Tracer):
 
         elif event == "line":
             self._fresh_exception = None
+            if 
 
             handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
             if handler(frame, self._current_command):
@@ -1543,10 +1558,33 @@ class FastTracer(Tracer):
 
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
-
+    
+    def _get_breakpoints_in_code(self, f_code):
+        
+        bps_in_file = self._get_breakpoints_in_file(f_code.co_filename)
+        
+        code_id = id(f_code)
+        result = self._code_breakpoints_cache.get(code_id, None)
+        
+        if result is None:
+            if not bps_in_file:
+                result = set()
+            else: 
+                co_linenos = self._code_linenos_cache.get(code_id, None)
+                if co_linenos is None:
+                    co_linenos = {pair[1] for pair in dis.findlinestarts(f_code)}
+                    self._code_linenos_cache[code_id] = co_linenos
+            
+                result = bps_in_file.intersection(co_linenos)
+                
+            self._code_breakpoints_cache[code_id] = result
+        
+        return result
+        
+        
     def _at_a_breakpoint(self, frame, cmd):
         # TODO: try re-entering same line in loop
-        return frame.f_lineno in self._get_breakpoints_in_file(frame.f_code.co_filename)
+        return frame.f_lineno in self._get_breakpoints_in_code(frame.f_code)
 
     def _is_interesting_exception(self, frame, arg):
         return super()._is_interesting_exception(frame, arg) and (
