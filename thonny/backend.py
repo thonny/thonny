@@ -1485,8 +1485,6 @@ class FastTracer(Tracer):
             # can we skip this frame?
             if self._current_command.name == "step_over" and not self._current_command.breakpoints:
                 return None
-            else:
-                self._alive_frame_ids.add(id(frame))
 
         elif event == "return":
             self._fresh_exception = None
