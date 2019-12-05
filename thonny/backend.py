@@ -1516,7 +1516,6 @@ class FastTracer(Tracer):
 
         elif event == "line":
             self._fresh_exception = None
-            if 
 
             handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
             if handler(frame, self._current_command):
