@@ -1292,9 +1292,6 @@ class Tracer(Executor):
     def _trace(self, frame, event, arg):
         raise NotImplementedError()
 
-    def _frame_is_alive(self, frame_id):
-        raise NotImplementedError()
-
     def _execute_prepared_user_code(self, statements, expression, global_vars):
         try:
             sys.settrace(self._trace)
@@ -1462,7 +1459,11 @@ class FastTracer(Tracer):
     def __init__(self, vm, original_cmd):
         super().__init__(vm, original_cmd)
 
-        self._alive_frame_ids = set()
+        self._command_frame_returned = False
+
+    def _initialize_new_command(self):
+        super()._initialize_new_command()
+        self._command_frame_returned = False
 
     def _breakpointhook(self, *args, **kw):
         frame = inspect.currentframe()
@@ -1474,6 +1475,8 @@ class FastTracer(Tracer):
     def _trace(self, frame, event, arg):
         if self._should_skip_frame(frame, event):
             return None
+
+        frame_id = id(frame)
 
         if event == "call":
             self._check_store_main_frame_id(frame)
@@ -1487,8 +1490,9 @@ class FastTracer(Tracer):
 
         elif event == "return":
             self._fresh_exception = None
-            self._alive_frame_ids.remove(id(frame))
-            self._check_notify_return(id(frame))
+            if frame_id == self._current_command["frame_id"]:
+                self._command_frame_returned = True
+            self._check_notify_return(frame_id)
 
         elif event == "exception":
             if self._is_interesting_exception(frame, arg):
@@ -1532,12 +1536,12 @@ class FastTracer(Tracer):
         frame_id = id(frame)
         return (
             frame_id == cmd.frame_id
-            or cmd.frame_id not in self._alive_frame_ids
+            or self._command_frame_returned
             or self._at_a_breakpoint(frame, cmd)
         )
 
     def _cmd_step_out_completed(self, frame, cmd):
-        return cmd.frame_id not in self._alive_frame_ids or self._at_a_breakpoint(frame, cmd)
+        return self._command_frame_returned or self._at_a_breakpoint(frame, cmd)
 
     def _cmd_resume_completed(self, frame, cmd):
         return self._at_a_breakpoint(frame, cmd)
@@ -1548,8 +1552,6 @@ class FastTracer(Tracer):
         filename = frame.f_code.co_filename
         return filename in breakpoints and frame.f_lineno in breakpoints[filename]
 
-    def _frame_is_alive(self, frame_id):
-        return frame_id in self._alive_frame_ids
 
     def _is_interesting_exception(self, frame, arg):
         return super()._is_interesting_exception(frame, arg) and (
@@ -1557,7 +1559,7 @@ class FastTracer(Tracer):
             and (
                 # in command frame or its parent frames
                 id(frame) == self._current_command["frame_id"]
-                or not self._frame_is_alive(self._current_command["frame_id"])
+                or self._command_frame_returned
             )
         )
 
