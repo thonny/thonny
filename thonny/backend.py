@@ -2587,7 +2587,11 @@ def _fetch_frame_source_info(frame):
         return None, None, True
 
     is_libra = _is_library_file(frame.f_code.co_filename)
-    if frame.f_code.co_name == "<module>":
+
+    if frame.f_code.co_name == "<lambda>":
+        source = inspect.getsource(frame.f_code)
+        return source, frame.f_code.co_firstlineno, is_libra
+    elif frame.f_code.co_name == "<module>":
         # inspect.getsource and getsourcelines don't help here
         with tokenize.open(frame.f_code.co_filename) as fp:
             return fp.read(), 1, is_libra
