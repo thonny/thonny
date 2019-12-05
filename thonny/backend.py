@@ -1258,6 +1258,7 @@ class Tracer(Executor):
         self._canonic_path_cache = {}
         self._file_interest_cache = {}
         self._file_breakpoints_cache = {}
+        self._command_completion_handler = None
 
         # first (automatic) stepping command depends on whether any breakpoints were set or not
         breakpoints = self._original_cmd.breakpoints
@@ -1362,7 +1363,7 @@ class Tracer(Executor):
 
     def _fetch_next_debugger_command(self):
         self._prev_breakpoints = self._current_command.breakpoints
-        
+
         while True:
             cmd = self._vm._fetch_command()
             if isinstance(cmd, InlineCommand):
@@ -1373,13 +1374,16 @@ class Tracer(Executor):
                 return cmd
 
     def _initialize_new_command(self):
+        self._command_completion_handler = getattr(
+            self, "_cmd_%s_completed" % self._current_command.name
+        )
+
         if self._current_command.breakpoints != self._prev_breakpoints:
             self._file_interest_cache = {}  # because there may be new breakpoints
             self._file_breakpoints_cache = {}
             for path, linenos in self._current_command.breakpoints.items():
                 self._file_breakpoints_cache[path] = linenos
                 self._file_breakpoints_cache[self._get_canonic_path(path)] = linenos
-            
 
     def _register_affected_frame(self, exception_obj, frame):
         if not hasattr(exception_obj, "_affected_frame_ids_"):
@@ -1468,12 +1472,12 @@ class FastTracer(Tracer):
             return (
                 (
                     self._current_command.name == "resume"
-                    #and not self._get_breakpoints_in_file(frame.f_code.co_filename)
                     and not self._get_breakpoints_in_code(frame.f_code)
                     or self._current_command.name == "step_over"
-                    #and not self._get_breakpoints_in_file(frame.f_code.co_filename)
                     and not self._get_breakpoints_in_code(frame.f_code)
                     and id(frame) not in self._last_reported_frame_ids
+                    or self._current_command.name == "step_out"
+                    and not self._get_breakpoints_in_code(frame.f_code)
                 )
                 or not self._is_interesting_frame(frame)
                 or self._vm.is_doing_io()
@@ -1486,9 +1490,9 @@ class FastTracer(Tracer):
     def _trace(self, frame, event, arg):
         if self._should_skip_frame(frame, event):
             return None
-        
-        #return None
-        #return self._trace
+
+        # return None
+        # return self._trace
 
         frame_id = id(frame)
 
@@ -1517,8 +1521,7 @@ class FastTracer(Tracer):
         elif event == "line":
             self._fresh_exception = None
 
-            handler = getattr(self, "_cmd_%s_completed" % self._current_command.name)
-            if handler(frame, self._current_command):
+            if self._command_completion_handler(frame):
                 self._report_current_state(frame)
                 self._current_command = self._fetch_next_debugger_command()
 
@@ -1541,47 +1544,45 @@ class FastTracer(Tracer):
 
         self._vm.send_message(msg)
 
-    def _cmd_step_into_completed(self, frame, cmd):
+    def _cmd_step_into_completed(self, frame):
         return True
 
-    def _cmd_step_over_completed(self, frame, cmd):
-        frame_id = id(frame)
+    def _cmd_step_over_completed(self, frame):
         return (
-            frame_id == cmd.frame_id
+            id(frame) == self._current_command.frame_id
             or self._command_frame_returned
-            or self._at_a_breakpoint(frame, cmd)
+            or self._at_a_breakpoint(frame)
         )
 
-    def _cmd_step_out_completed(self, frame, cmd):
-        return self._command_frame_returned or self._at_a_breakpoint(frame, cmd)
+    def _cmd_step_out_completed(self, frame):
+        return self._command_frame_returned or self._at_a_breakpoint(frame)
 
-    def _cmd_resume_completed(self, frame, cmd):
-        return self._at_a_breakpoint(frame, cmd)
-    
+    def _cmd_resume_completed(self, frame):
+        return self._at_a_breakpoint(frame)
+
     def _get_breakpoints_in_code(self, f_code):
-        
+
         bps_in_file = self._get_breakpoints_in_file(f_code.co_filename)
-        
+
         code_id = id(f_code)
         result = self._code_breakpoints_cache.get(code_id, None)
-        
+
         if result is None:
             if not bps_in_file:
                 result = set()
-            else: 
+            else:
                 co_linenos = self._code_linenos_cache.get(code_id, None)
                 if co_linenos is None:
                     co_linenos = {pair[1] for pair in dis.findlinestarts(f_code)}
                     self._code_linenos_cache[code_id] = co_linenos
-            
+
                 result = bps_in_file.intersection(co_linenos)
-                
+
             self._code_breakpoints_cache[code_id] = result
-        
+
         return result
-        
-        
-    def _at_a_breakpoint(self, frame, cmd):
+
+    def _at_a_breakpoint(self, frame):
         # TODO: try re-entering same line in loop
         return frame.f_lineno in self._get_breakpoints_in_code(frame.f_code)
 
@@ -1766,7 +1767,7 @@ class NiceTracer(Tracer):
                 pseudo_event = last_custom_frame.event.replace("before_", "after_").replace(
                     "_again", ""
                 )
-                #print("handle", pseudo_event, {}, last_custom_frame.node)
+                # print("handle", pseudo_event, {}, last_custom_frame.node)
                 self._handle_progress_event(frame, pseudo_event, {}, last_custom_frame.node)
 
         elif event == "return":
