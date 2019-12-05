@@ -882,7 +882,7 @@ class ToplevelExpressionBox(BaseExpressionBox, tk.Toplevel):
 
 class DialogVisualizer(CommonDialog, FrameVisualizer):
     def __init__(self, master, frame_info):
-        super().__init__(master)
+        CommonDialog.__init__(self, master)
 
         self.transient(master)
         if misc_utils.running_on_windows():
@@ -913,6 +913,7 @@ class DialogVisualizer(CommonDialog, FrameVisualizer):
 
         self._load_code(frame_info)
         self._text_frame.text.focus()
+        self.update()
 
     def _init_layout_widgets(self, master, frame_info):
         self.main_frame = ttk.Frame(
