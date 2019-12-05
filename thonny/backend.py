@@ -1548,10 +1548,7 @@ class FastTracer(Tracer):
 
     def _at_a_breakpoint(self, frame, cmd):
         # TODO: try re-entering same line in loop
-        breakpoints = cmd.breakpoints
-        filename = frame.f_code.co_filename
-        return filename in breakpoints and frame.f_lineno in breakpoints[filename]
-
+        return frame.f_lineno in self._get_breakpoints_in_file(frame.f_code.co_filename)
 
     def _is_interesting_exception(self, frame, arg):
         return super()._is_interesting_exception(frame, arg) and (
