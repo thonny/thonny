@@ -1438,10 +1438,10 @@ class Tracer(Executor):
             self._vm.send_message(InlineResponse("debugger_return", frame_id=frame_id))
 
     def _check_store_main_frame_id(self, frame):
-        if (
-            self._current_command.frame_id is None
-            and frame.f_code.co_filename == self._main_module_path
-        ):
+        # initial command doesn't have a frame id
+        if self._current_command.frame_id is None and self._get_canonic_path(
+            frame.f_code.co_filename
+        ) == self._get_canonic_path(self._main_module_path):
             self._current_command.frame_id = id(frame)
 
 
