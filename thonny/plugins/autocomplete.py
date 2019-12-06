@@ -259,7 +259,7 @@ class ShellCompleter(Completer):
         get_runner().send_command(InlineCommand("shell_autocomplete", source=source))
 
     def _handle_backend_response(self, msg):
-        if hasattr(msg, 'source'):
+        if hasattr(msg, "source"):
             # check if the response is relevant for current state
             if msg.source != self._get_prefix():
                 self._close()
