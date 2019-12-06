@@ -80,7 +80,7 @@ msgid "Made in\n"
 "and Cybernetica AS"
 msgstr "Δημιουργήθηκε\n"
 "στο Πανεπιστήμιο Tartu της Εσθονίας\n"
-"με την βοήθεια της κοινότητας λογισμικού ανοιιχτού κώδικα,\n"
+"με την βοήθεια της κοινότητας λογισμικού ανοιχτού κώδικα,\n"
 "του Raspberry Pi Foundation \n"
 "και της Cybernetica AS"
 
@@ -162,7 +162,7 @@ msgstr "Εναλλαγή σχολίου"
 
 #: thonny/plugins/commenting_indenting.py:153
 msgid "Comment out"
-msgstr "Σχόλιο"
+msgstr "Προσθήκη σχολίου"
 
 #: thonny/plugins/commenting_indenting.py:163
 msgid "Uncomment"
@@ -174,7 +174,7 @@ msgstr "Αναίρεση"
 
 #: thonny/plugins/common_editing_commands.py:32
 msgid "Redo"
-msgstr "Ακύρωση Αναίρεσης"
+msgstr "Επανάληψη"
 
 #: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2176
 msgid "Cut"
@@ -210,23 +210,23 @@ msgstr "Ενσωμάτωση παραθύρων χρήστη"
 
 #: thonny/plugins/editor_config_page.py:14
 msgid "Highlight matching names"
-msgstr "Επισήμανση ονόματων που ταιριάζουν"
+msgstr "Επισήμανε ονόματα που ταιριάζουν"
 
 #: thonny/plugins/editor_config_page.py:20
 msgid "Highlight local variables"
-msgstr "Επισήμανση τοπικών μεταβλητών"
+msgstr "Επισήμανε τοπικές μεταβλητές"
 
 #: thonny/plugins/editor_config_page.py:25
 msgid "Highlight parentheses"
-msgstr "Επισήμανση παρανθέσεων"
+msgstr "Επισήμανε παρανθέσεις"
 
 #: thonny/plugins/editor_config_page.py:26
 msgid "Highlight syntax elements"
-msgstr "Επισήμανση στοιχείων συντακτικού"
+msgstr "Επισήμανε στοιχεία συντακτικού"
 
 #: thonny/plugins/editor_config_page.py:29
 msgid "Highlight current line (requires reopening the editor)"
-msgstr "Επισήμανση τρέχουσας γραμμής (απαιτεί εκ νέου άνοιγμα του επεξεργαστή κειμένου)"
+msgstr "Επισήμανε την τρέχουσα γραμμή (απαιτεί εκ νέου άνοιγμα του επεξεργαστή κειμένου)"
 
 #: thonny/plugins/editor_config_page.py:34
 msgid "Allow code completion with Tab-key in editors"
@@ -350,7 +350,7 @@ msgstr "Αυτό το πλαίσιο προορίζεται για τις σημ
 "\n"
 "Όλα θα αποθηκευτούν αυτόματα και θα φορτωθούν όταν ανοίξετε το Thonny την επόμενη φορά.\n"
 "\n"
-"Διαγράψτε ελεύθερα αυτό το κείμενο για να κάνετε χώρο για τις δικές σας σημειώσεις."
+"Διαγράψτε ελεύθερα αυτό το κείμενο για να κάνετε χώρο για τις σημειώσεις σας."
 
 #: thonny/plugins/notes.py:61
 msgid "Notes"
@@ -413,7 +413,7 @@ msgstr "Αδυναμία εύρεσης πακέτου από PyPl."
 
 #: thonny/plugins/pip_gui.py:515
 msgid "exact package name"
-msgstr "Ακριβές όνομα πακέτο"
+msgstr "Ακριβές όνομα πακέτου"
 
 #: thonny/plugins/pip_gui.py:533
 msgid "Latest stable version"
@@ -462,7 +462,7 @@ msgstr "Είσαι σίγουρος ότι θέλεις να το απεγκατ
 #: thonny/plugins/variables.py:19
 msgid "Back to\n"
 "current frame"
-msgstr "Πίσω στο τρέχoν frame"
+msgstr "Πίσω στο τρέχoν πλαίσιο"
 
 #: thonny/plugins/variables.py:131
 msgid "Variables"
@@ -558,7 +558,7 @@ msgstr "Διακοπή εκτέλεσης"
 
 #: thonny/running.py:161
 msgid "Send EOF / Soft reboot"
-msgstr "Αποστολή EOF / Soft reboot"
+msgstr "Αποστολή Τέλους Αρχείου (EOF) / Επανεκκίνηση μέσω λογισμικού"
 
 #: thonny/running.py:172
 msgid "Disconnect"
@@ -888,7 +888,7 @@ msgstr "Κατάλογος πακέτων"
 
 #: thonny/plugins/pip_gui.py:368
 msgid "Install from PyPI"
-msgstr "Εγκαταστήστε από PyPI"
+msgstr "Εγκατάσταση από PyPI"
 
 #: thonny/plugins/pip_gui.py:371
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
@@ -908,7 +908,7 @@ msgstr "για να εντοπίσετε και να εγκαταστήσετε 
 
 #: thonny/plugins/pip_gui.py:403
 msgid "Upgrade or uninstall"
-msgstr "Αναβάθμιση ή κατάργηση εγκατάστασης"
+msgstr "Αναβάθμιση ή απεγκατάσταση"
 
 #: thonny/plugins/pip_gui.py:405
 msgid "Start by selecting the package from the left."
@@ -928,11 +928,11 @@ msgstr "πακέτα ιστότοπου χρήστη"
 
 #: thonny/plugins/pip_gui.py:421
 msgid "This dialog lists all available packages, but allows upgrading and uninstalling only packages from"
-msgstr "Αυτό το παράθυρο διαλόγου εμφανίζει όλα τα διαθέσιμα πακέτα, αλλά επιτρέπει την αναβάθμιση και την απεγκατάσταση μόνο των πακέτων"
+msgstr "Αυτό το παράθυρο διαλόγου εμφανίζει όλα τα διαθέσιμα πακέτα, αλλά επιτρέπει την αναβάθμιση και την απεγκατάσταση μόνο των πακέτων από"
 
 #: thonny/plugins/pip_gui.py:431
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
-msgstr "Νέα πακέτα θα εγκατασταθούν επίσης σε αυτόν τον κατάλογο. Οι άλλες τοποθεσίες πρέπει να διαχειρίζονται με εναλλακτικά μέσα."
+msgstr "Νέα πακέτα θα εγκατασταθούν επίσης σε αυτόν τον κατάλογο. Οι άλλες τοποθεσίεςα διαχειρίζονται με εναλλακτικά μέσα."
 
 #: thonny/plugins/pip_gui.py:456
 msgid "Installed version:"
