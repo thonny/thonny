@@ -33,6 +33,7 @@ Libraries, resources and tools
 
 Source contributors, advisors, translators and frequent bug-reporters
 ---------------------------------------------------------------------
+* adzierzanowski
 * Aivar Annamaa
 * Alar Leemet
 * Aleks ANDRÉ

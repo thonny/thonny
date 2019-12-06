@@ -6,6 +6,8 @@ Version history
 ==================
 * NEW: Turkish translation by M. Burak Kalkan
 * NEW: Polish translation by Jarek Miszczak
+* NEW: Partial Italian translation by 
+* FIXED #987: MicroPython autocomplete problems by adzierzanowski 
 
 3.2.3 (2019-11-03)
 ==================
