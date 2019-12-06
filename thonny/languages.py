@@ -11,6 +11,7 @@ LANGUAGES_DICT = {
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
     "es_ES": "Español [ALPHA]",
     "fr_FR": "Français [BETA]",
+    "it_IT": "Italiano [ALPHA]",
     "nl_NL": "Nederlands [BETA]",
     "pl_PL": "Polski [BETA]",
     "pt_PT": "Português (PT) [BETA]",
