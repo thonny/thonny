@@ -11,7 +11,7 @@ class ConfigurationDialog(CommonDialog):
 
     def __init__(self, master, page_records):
         super().__init__(master)
-        width = ems_to_pixels(53)
+        width = ems_to_pixels(73)
         height = ems_to_pixels(43)
         self.geometry("%dx%d" % (width, height))
         self.title(_("Thonny options"))
