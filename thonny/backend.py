@@ -1277,7 +1277,7 @@ class Tracer(Executor):
             breakpoints=breakpoints,
         )
 
-        self._initialize_new_command()
+        self._initialize_new_command(None)
 
     def _get_canonic_path(self, path):
         # adapted from bdb
@@ -1361,19 +1361,19 @@ class Tracer(Executor):
     def _is_interesting_exception(self, frame, arg):
         return arg[0] not in (StopIteration, StopAsyncIteration)
 
-    def _fetch_next_debugger_command(self):
+    def _fetch_next_debugger_command(self, current_frame):
         while True:
             cmd = self._vm._fetch_command()
             if isinstance(cmd, InlineCommand):
                 self._vm.handle_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
-                self._current_command = cmd
                 self._prev_breakpoints = self._current_command.breakpoints
-                self._initialize_new_command()
+                self._current_command = cmd
+                self._initialize_new_command(current_frame)
                 return
 
-    def _initialize_new_command(self):
+    def _initialize_new_command(self, current_frame):
         self._command_completion_handler = getattr(
             self, "_cmd_%s_completed" % self._current_command.name
         )
@@ -1453,18 +1453,31 @@ class FastTracer(Tracer):
         self._code_linenos_cache = {}
         self._code_breakpoints_cache = {}
 
-    def _initialize_new_command(self):
-        super()._initialize_new_command()
+    def _initialize_new_command(self, current_frame):
+        super()._initialize_new_command(current_frame)
         self._command_frame_returned = False
         if self._current_command.breakpoints != self._prev_breakpoints:
             self._code_breakpoints_cache = {}
+
+            # restore tracing for active frames which were skipped before
+            # but have breakpoints now
+            frame = current_frame
+            while frame is not None:
+                if (
+                    frame.f_trace is None
+                    and frame.f_code is not None
+                    and self._get_breakpoints_in_code(frame.f_code)
+                ):
+                    frame.f_trace = self._trace
+
+                frame = frame.f_back
 
     def _breakpointhook(self, *args, **kw):
         frame = inspect.currentframe()
         while not self._is_interesting_frame(frame):
             frame = frame.f_back
         self._report_current_state(frame)
-        self._fetch_next_debugger_command()
+        self._fetch_next_debugger_command(frame)
 
     def _should_skip_frame(self, frame, event):
         if event == "call":
@@ -1516,14 +1529,14 @@ class FastTracer(Tracer):
                 self._register_affected_frame(arg[1], frame)
                 # UI doesn't know about separate exception events
                 self._report_current_state(frame)
-                self._fetch_next_debugger_command()
+                self._fetch_next_debugger_command(frame)
 
         elif event == "line":
             self._fresh_exception = None
 
             if self._command_completion_handler(frame):
                 self._report_current_state(frame)
-                self._fetch_next_debugger_command()
+                self._fetch_next_debugger_command(frame)
 
         else:
             self._fresh_exception = None
@@ -1613,7 +1626,7 @@ class NiceTracer(Tracer):
 
     def _breakpointhook(self, *args, **kw):
         self._report_state(len(self._saved_states) - 1)
-        self._fetch_next_debugger_command()
+        self._fetch_next_debugger_command(None)
 
     def _install_marker_functions(self):
         # Make dummy marker functions universally available by putting them
@@ -1912,7 +1925,7 @@ class NiceTracer(Tracer):
                 if cmd_complete:
                     state["in_client_log"] = True
                     self._report_state(self._current_state_index)
-                    self._fetch_next_debugger_command()
+                    self._fetch_next_debugger_command(frame)
 
             if self._current_command.name == "step_back":
                 if self._current_state_index == 0:
