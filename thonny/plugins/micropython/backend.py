@@ -1647,7 +1647,9 @@ class MicroPythonBackend:
                                     __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
                                 else:
                                     __thonny_children[__thonny_name] = {"kind" : "file", "size" :__thonny_st[6]}
-                                __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9])
+                                
+                                # converting from 2000-01-01 epoch to Unix epoch 
+                                __thonny_children[__thonny_name]["time"] = max(__thonny_st[8], __thonny_st[9]) + 946684800
                             except OverflowError:
                                 # Probably "System Volume Information" in trinket
                                 # https://github.com/thonny/thonny/issues/923
