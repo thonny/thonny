@@ -69,6 +69,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Peter Marshall
 * Phil Duby
 * Rene Lehtma
+* sailslack
 * segalion
 * Simon Gijsen
 * Simon Long
