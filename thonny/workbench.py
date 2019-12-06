@@ -1480,6 +1480,8 @@ class Workbench(tk.Tk):
             filename = os.path.join(
                 os.path.dirname(filename), "_disabled_" + os.path.basename(filename)
             )
+            if not os.path.exists(filename):
+                return None
 
         # are there platform-specific variants?
         plat_filename = filename[:-4] + "_" + platform.system() + ".png"
