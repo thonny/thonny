@@ -1362,8 +1362,6 @@ class Tracer(Executor):
         return arg[0] not in (StopIteration, StopAsyncIteration)
 
     def _fetch_next_debugger_command(self):
-        self._prev_breakpoints = self._current_command.breakpoints
-
         while True:
             cmd = self._vm._fetch_command()
             if isinstance(cmd, InlineCommand):
@@ -1371,6 +1369,7 @@ class Tracer(Executor):
             else:
                 assert isinstance(cmd, DebuggerCommand)
                 self._current_command = cmd
+                self._prev_breakpoints = self._current_command.breakpoints
                 self._initialize_new_command()
                 return
 
