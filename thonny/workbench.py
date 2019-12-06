@@ -935,8 +935,10 @@ class Workbench(tk.Tk):
 
         if image:
             _image = self.get_image(image)  # type: Optional[tk.PhotoImage]
+            _disabled_image = self.get_image(image, disabled=True)
         else:
             _image = None
+            _disabled_image = None
 
         if not accelerator and sequence:
             accelerator = sequence_to_accelerator(sequence)
@@ -993,6 +995,7 @@ class Workbench(tk.Tk):
             self._add_toolbar_button(
                 command_id,
                 _image,
+                _disabled_image,
                 command_label,
                 caption,
                 caption if alternative_caption is None else alternative_caption,
@@ -1454,7 +1457,9 @@ class Workbench(tk.Tk):
         """Returns thonny package directory"""
         return os.path.dirname(sys.modules["thonny"].__file__)
 
-    def get_image(self, filename: str, tk_name: Optional[str] = None) -> tk.PhotoImage:
+    def get_image(
+        self, filename: str, tk_name: Optional[str] = None, disabled=False
+    ) -> tk.PhotoImage:
 
         if filename in self._image_mapping_by_theme[self._current_theme_name]:
             filename = self._image_mapping_by_theme[self._current_theme_name][filename]
@@ -1470,6 +1475,11 @@ class Workbench(tk.Tk):
                     filename = filename + ".png"
                 elif os.path.exists(filename + ".gif"):
                     filename = filename + ".gif"
+
+        if disabled:
+            filename = os.path.join(
+                os.path.dirname(filename), "_disabled_" + os.path.basename(filename)
+            )
 
         # are there platform-specific variants?
         plat_filename = filename[:-4] + "_" + platform.system() + ".png"
@@ -1773,6 +1783,7 @@ class Workbench(tk.Tk):
         self,
         command_id: str,
         image: Optional[tk.PhotoImage],
+        disabled_image: Optional[tk.PhotoImage],
         command_label: str,
         caption: str,
         alternative_caption: str,
@@ -1807,10 +1818,15 @@ class Workbench(tk.Tk):
         else:
             button_width = None
 
+        if disabled_image is not None:
+            image_spec = [image, "disabled", disabled_image]
+        else:
+            image_spec = image
+
         button = ttk.Button(
             group_frame,
             command=handler,
-            image=image,
+            image=image_spec,
             style="Toolbutton",
             state=tk.NORMAL,
             text=caption,
