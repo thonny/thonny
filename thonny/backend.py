@@ -1370,8 +1370,8 @@ class Tracer(Executor):
                 self._vm.handle_command(cmd)
             else:
                 assert isinstance(cmd, DebuggerCommand)
-                self._initialize_new_command()
                 self._current_command = cmd
+                self._initialize_new_command()
                 return
 
     def _initialize_new_command(self):
