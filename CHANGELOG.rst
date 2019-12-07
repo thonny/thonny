@@ -2,7 +2,7 @@
 Version history
 ===============
 
-3.2.4 (2019-12-??)
+3.2.4 (2019-12-07)
 ==================
 * NEW: Turkish translation by M. Burak Kalkan
 * NEW: Polish translation by Jarek Miszczak
