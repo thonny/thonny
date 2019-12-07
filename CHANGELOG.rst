@@ -2,12 +2,25 @@
 Version history
 ===============
 
-3.2.4 (2019-11-??)
+3.2.4 (2019-12-??)
 ==================
 * NEW: Turkish translation by M. Burak Kalkan
 * NEW: Polish translation by Jarek Miszczak
-* NEW: Partial Italian translation by 
-* FIXED #987: MicroPython autocomplete problems by adzierzanowski 
+* NEW: Partial Italian translation by sailslack
+* UPDATED: Greek and Spanish translations
+* CHANGED: XXL bundle now includes also pandas
+* CHANGED: Make faster tracer show exceptions only with step_over and step_into
+* CHANGE #1018: Use traditional stack view by default in Simple mode
+* ENHANCEMENT: Improved performance for Faster debugger (proposed and supported by Raspberry Pi)
+* FIXED #975: Fix stepping through lambdas with faster debugger
+* FIXED #977: Don't report certain exceptions in faster debugger
+* FIXED #983: Propose replacing tabs with spaces only in the editor (not in debugger frames)
+* FIXED #986: Nicer debugger fails when run with breakpoints only in secondary files
+* FIXED #987: MicroPython autocomplete problems by adzierzanowski
+* FIXED #1003: Wrong interpretation of MicroPython file timestamps
+* FIXED #1005: Avoid testing included MicroPython stubs
+* FIXED #1015: Indicate disabled toolbar buttons on macOS
+
 
 3.2.3 (2019-11-03)
 ==================
