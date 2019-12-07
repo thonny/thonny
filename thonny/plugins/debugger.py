@@ -1253,7 +1253,11 @@ def load_plugin() -> None:
     global RESUME_COMMAND_CAPTION
     RESUME_COMMAND_CAPTION = _("Resume")
 
-    get_workbench().set_default("debugger.frames_in_separate_windows", True)
+    if get_workbench().in_simple_mode():
+        get_workbench().set_default("debugger.frames_in_separate_windows", False)
+    else:
+        get_workbench().set_default("debugger.frames_in_separate_windows", True)
+
     get_workbench().set_default("debugger.automatic_stack_view", True)
     get_workbench().set_default(
         "debugger.preferred_debugger", "faster" if running_on_rpi() else "nicer"
