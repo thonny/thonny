@@ -167,9 +167,13 @@ class ESPFlashingDialog(CommonDialogEx):
 
             result = shutil.which("esptool")
             if result:
-                return result
+                return [result]
             else:
-                return shutil.which("esptool.py")
+                result = shutil.which("esptool.py")
+                if result:
+                    return [result]
+                else:
+                    return None
 
     def _reload_ports(self):
         pairs = list_serial_ports_with_descriptions()
