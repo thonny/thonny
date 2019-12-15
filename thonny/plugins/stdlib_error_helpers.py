@@ -37,6 +37,8 @@ class SyntaxErrorHelper(ErrorHelper):
                             self.tokens.append(t)
                     except tokenize.TokenError as e:
                         self.token_error = e
+                    except IndentationError as e:
+                        self.indentation_error = e
 
                 if not self.tokens or self.tokens[-1].type not in [
                     token.ERRORTOKEN,
