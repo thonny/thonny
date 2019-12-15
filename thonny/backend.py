@@ -311,7 +311,13 @@ class VM:
 
         original_sys_path = sys.path
         try:
+            # add fallback import directory in case backend doesn't have these modules
             sys.path = sys.path + self._frontend_sys_path
+
+            # remove current script dir / current dir to reduce chance of shadowing
+            # (example: asttokens import numbers. The user wouldn't meet this problem when running
+            # with plain python)
+            sys.path = sys.path[1:]
             for name in names:
                 try:
                     import_module(name)
