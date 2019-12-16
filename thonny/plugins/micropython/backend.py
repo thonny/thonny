@@ -880,6 +880,7 @@ class MicroPythonBackend:
             completions = script.completions()
             result["completions"] = self._filter_completions(completions)
         except Exception:
+            traceback.print_exc()
             result["error"] = "Autocomplete error"
 
         return result
@@ -891,18 +892,19 @@ class MicroPythonBackend:
             if completion.name.startswith("__"):
                 continue
 
-            parent_name = completion.parent().name
-            name = completion.name
-            root = completion.full_name.split(".")[0]
+            if completion.parent() and completion.full_name:
+                parent_name = completion.parent().name
+                name = completion.name
+                root = completion.full_name.split(".")[0]
 
-            # jedi proposes names from CPython builtins
-            if root in self._builtins_info and name not in self._builtins_info[root]:
-                continue
+                # jedi proposes names from CPython builtins
+                if root in self._builtins_info and name not in self._builtins_info[root]:
+                    continue
 
-            if parent_name == "builtins" and name not in self._builtins_info:
-                continue
+                if parent_name == "builtins" and name not in self._builtins_info:
+                    continue
 
-            result.append({"name": name, "complete": completion.complete})
+            result.append({"name": completion.name, "complete": completion.complete})
 
         return result
 
