@@ -531,11 +531,11 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             if stream_name == "stdout" and self.tty_mode:
                 tags |= self._get_ansi_tags()
 
-            if (
-                len(data) > self._get_squeeze_threshold()
-                and "\n" not in data
-                and not SIMPLE_URL_SPLIT_REGEX.search(data)
-            ):
+            non_url_length = len(data)
+            for url_match in SIMPLE_URL_SPLIT_REGEX.finditer(data):
+                non_url_length -= url_match.end() - url_match.start()
+
+            if non_url_length > self._get_squeeze_threshold() and "\n" not in data:
                 self._io_cursor_offset = 0  # ignore the effect of preceding \r and \b
                 button_text = data[:40] + " …"
                 btn = tk.Label(
