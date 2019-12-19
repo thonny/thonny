@@ -10,20 +10,15 @@ class AssistantConfigPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
 
-        try:
-            import friendly_traceback
-
-            ttk.Label(self, text=_("Friendly traceback level")).grid(row=1, column=0, sticky="w")
-            self.add_combobox(
-                "assistance.friendly_traceback_level",
-                values=[0, 1, 2, 3, 4, 5, 6, 7, 9],
-                row=1,
-                column=1,
-                width=3,
-                padx=5,
-            )
-        except ImportError:
-            pass
+        ttk.Label(self, text=_("Friendly traceback level")).grid(row=1, column=0, sticky="w")
+        self.add_combobox(
+            "assistance.friendly_traceback_level",
+            values=[0, 1, 2, 3, 4, 5, 6, 7, 9],
+            row=1,
+            column=1,
+            width=3,
+            padx=5,
+        )
 
         self.add_checkbox(
             "assistance.open_assistant_on_errors",

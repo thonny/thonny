@@ -1297,7 +1297,6 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                 )
 
             if len(matches) == 1:
-                print(matches)
                 filename = os.path.expanduser(matches[0].group("file"))
                 lineno = int(matches[0].group("line"))
                 if os.path.exists(filename) and os.path.isfile(filename):
