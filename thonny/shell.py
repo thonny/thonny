@@ -973,11 +973,14 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                     _insert(parts[0], tags)
                     _insert(parts[1], tags + ("io_hyperlink",))
                     _insert(parts[2], tags)
-                    # self.tag_raise("io_hyperlink", "io")
-                    # self.tag_raise("io_hyperlink", "stderr")
-                    # self.tag_raise("io_hyperlink", "stdout")
                 else:
-                    _insert_and_highlight_urls(line, tags)
+                    parts = re.split(r"(\'[^\']+\.pyw?\')", line, flags=re.IGNORECASE)
+                    if len(parts) == 3 and os.path.exists(os.path.expanduser(parts[1][1:-1])):
+                        match = re.search(r"\S", line)
+                        _insert(line[: match.start()], tags)
+                        _insert(line[match.start() :], tags + ("io_hyperlink",))
+                    else:
+                        _insert_and_highlight_urls(line, tags)
         else:
             _insert_and_highlight_urls(txt, tags)
 
@@ -1283,10 +1286,20 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
     def _handle_hyperlink(self, event):
         try:
             line = self.get("insert linestart", "insert lineend")
-            matches = re.findall(r'File "([^"]+)", line (\d+)', line)
-            if len(matches) == 1 and len(matches[0]) == 2:
-                filename, lineno = matches[0]
-                lineno = int(lineno)
+            # Python stacktrace
+            matches = list(re.finditer(r'File "(?P<file>[^"]+)", line (?P<line>\d+)', line))
+            if not matches:
+                # Friendly traceback
+                matches = list(
+                    re.finditer(
+                        r"\b(?P<line>\d+)\b.+'(?P<file>[^\']+\.pyw?)'", line, flags=re.IGNORECASE
+                    )
+                )
+
+            if len(matches) == 1:
+                print(matches)
+                filename = os.path.expanduser(matches[0].group("file"))
+                lineno = int(matches[0].group("line"))
                 if os.path.exists(filename) and os.path.isfile(filename):
                     # TODO: better use events instead direct referencing
                     get_workbench().get_editor_notebook().show_file(
@@ -1303,6 +1316,10 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             traceback.print_exc()
 
     def _show_user_exception(self, user_exception):
+        fr_tr = user_exception.get("friendly_traceback", None)
+        if fr_tr is not None:
+            self._format_friendly_traceback(fr_tr)
+            return
 
         for line, frame_id, *_ in user_exception["items"]:
 
@@ -1318,6 +1335,13 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                 tags += (frame_tag,)
                 self.tag_bind(frame_tag, "<ButtonRelease-1>", handle_frame_click, True)
 
+            self._insert_text_directly(line, tags)
+
+    def _format_friendly_traceback(self, s):
+        tags = ("io", "stderr")
+
+        lines = s.splitlines(True)
+        for line in lines:
             self._insert_text_directly(line, tags)
 
     def _discard_old_content(self):

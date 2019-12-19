@@ -790,6 +790,11 @@ class SubprocessProxy(BackendProxy):
         env["THONNY_USER_DIR"] = THONNY_USER_DIR
         env["THONNY_FRONTEND_SYS_PATH"] = repr(sys.path)
 
+        env["THONNY_LANGUAGE"] = get_workbench().get_option("general.language")
+        env["FRIENDLY_TRACEBACK_LEVEL"] = str(
+            get_workbench().get_option("assistance.friendly_traceback_level")
+        )
+
         if get_workbench().in_debug_mode():
             env["THONNY_DEBUG"] = "1"
         elif "THONNY_DEBUG" in env:
