@@ -5,4 +5,3 @@ docutils==0.15.*
 mypy==0.720
 asttokens==1.1.*
 Send2Trash==1.5.*
-friendly-traceback==0.0.26
