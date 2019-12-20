@@ -10,7 +10,12 @@ class AssistantConfigPage(ConfigurationPage):
     def __init__(self, master):
         super().__init__(master)
 
-        ttk.Label(self, text=_("Friendly traceback level")).grid(row=1, column=0, sticky="w")
+        ui_utils.create_url_label(
+            self,
+            "https://aroberge.github.io/friendly-traceback-docs/docs/html/design.html#verbosity",
+            text=_("Friendly traceback level"),
+        ).grid(row=1, column=0, sticky="w")
+        
         self.add_combobox(
             "assistance.friendly_traceback_level",
             values=[0, 1, 2, 3, 4, 5, 6, 7, 9],
