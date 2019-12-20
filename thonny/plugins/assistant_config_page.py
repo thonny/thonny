@@ -15,7 +15,7 @@ class AssistantConfigPage(ConfigurationPage):
             "https://aroberge.github.io/friendly-traceback-docs/docs/html/design.html#verbosity",
             text=_("Friendly traceback level"),
         ).grid(row=1, column=0, sticky="w")
-        
+
         self.add_combobox(
             "assistance.friendly_traceback_level",
             values=[0, 1, 2, 3, 4, 5, 6, 7, 9],
