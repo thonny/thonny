@@ -2,6 +2,19 @@
 Version history
 ===============
 
+3.2.5 (2019-12-20)
+==================
+* CHANGED: Python version in binary bundles upgraded from 3.7.5 to 3.7.6
+* FIXED #32: Thonny can now display/copy/paste Unicode emojis with Python 3.7.6+ / 3.8.1+. Selection can be still wonky, though. Fixed by https://github.com/python/cpython/pull/16545
+* FIXED #1019: Crash on startup when Shell gets text inserted too soon
+* FIXED #1023: Accept code completions without parent and full_name 
+* FIXED #1025: Extra imports by Thonny's back-end make stdlib name shadowing more troublesome
+* FIXED #1026: Allow '+' in image data URI chars in Shell
+* FIXED #1028: Thonny now has preliminary support for `Friendly Traceback <https://github.com/aroberge/friendly-traceback>`_. 
+* FIXED: Allow larger images in shell (don't squeeze image URI-s), #401
+* FIXED: Problem using esptool on PATH
+
+
 3.2.4 (2019-12-07)
 ==================
 * NEW: Turkish translation by M. Burak Kalkan
