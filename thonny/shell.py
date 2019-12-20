@@ -1035,8 +1035,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             self._submit_input(submittable_text)
 
     def _editing_allowed(self):
-        # TODO: get rid of this
-        return True
+        return get_runner() is not None
 
     def _extract_submittable_input(self, input_text, tail):
 
