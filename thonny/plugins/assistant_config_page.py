@@ -12,7 +12,7 @@ class AssistantConfigPage(ConfigurationPage):
 
         ui_utils.create_url_label(
             self,
-            "https://aroberge.github.io/friendly-traceback-docs/docs/html/design.html#verbosity",
+            "https://github.com/thonny/thonny/wiki/Friendly-traceback",
             text=_("Friendly traceback level"),
         ).grid(row=1, column=0, sticky="w")
 
