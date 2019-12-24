@@ -166,6 +166,30 @@ all_checks = [
         "usage": "enhancement",
     },
     {
+        "msg_id": "C0114",
+        "msg_sym": "missing-module-docstring",
+        "msg_text": "Missing module docstring",
+        "msg_xpln": "Used when a module has no docstring. Empty modules do not require a docstring.",
+        "tho_xpln": "",
+        "usage": "skip",
+    },
+    {
+        "msg_id": "C0115",
+        "msg_sym": "missing-class-docstring",
+        "msg_text": "Missing class docstring",
+        "msg_xpln": "Used when a class has no docstring. Even an empty class must have a docstring.",
+        "tho_xpln": "",
+        "usage": "skip",
+    },
+    {
+        "msg_id": "C0116",
+        "msg_sym": "missing-function-docstring",
+        "msg_text": "Missing function or method docstring",
+        "msg_xpln": "Used when a function or method has no docstring. Some special methods like __init__ do not require a docstring.",
+        "tho_xpln": "",
+        "usage": "skip",
+    },
+    {
         "msg_id": "C0121",  # TODO: find out what it means. NB! Other message in wikidot
         "msg_sym": "singleton-comparison",
         "msg_text": "Comparison to %s should be %s",
@@ -417,15 +441,24 @@ all_checks = [
         "usage": "enhancement",
     },
     {
-        "msg_id": "C1801",
-        "msg_sym": "len-as-condition",
-        "msg_text": "Do not use `len(SEQUENCE)` to determine if a sequence is empty",
-        "msg_xpln": "Used when Pylint detects that len(sequence) is being used "
-        "inside a condition to determine if a sequence is empty. Instead "
-        "of comparing the length to 0, rely on the fact that empty "
-        "sequences are false.",
+        "msg_id": "C0415",
+        "msg_sym": "import-outside-toplevel",
+        "msg_text": "Import outside toplevel (%s)",
+        "msg_xpln": "Used when an import statement is used anywhere other than the module toplevel."
+        "Move this import to the top of the file.",
         "tho_xpln": "",
         "usage": "skip",
+    },
+    {
+        "msg_id": "C1801",
+        "msg_sym": "len-as-condition",
+        "msg_text": "Do not use `len(SEQUENCE)` without comparison to determine if a sequence is empty",
+        "msg_xpln": "Used when Pylint detects that len(sequence) is being used without explicit"
+        "comparison inside a condition to determine if a sequence is empty. Instead of"
+        "coercing the length to a boolean, either rely on the fact that empty sequences"
+        "are false or compare the length against a scalar.",
+        "tho_xpln": "",
+        "usage": "enhancement",
     },
     {
         "msg_id": "E0001",
@@ -694,6 +727,14 @@ all_checks = [
         "msg_xpln": "Used when a class has duplicate bases.",
         "tho_xpln": "",
         "usage": "skip",
+    },
+    {
+        "msg_id": "E0242",
+        "msg_sym": "class-variable-slots-conflict",
+        "msg_text": "Value %r in slots conflicts with class variable",
+        "msg_xpln": "Used when a value in __slots__ conflicts with a class variable, property or method.",
+        "tho_xpln": "",
+        "usage": "warning",
     },
     {
         "msg_id": "E0301",
@@ -1088,6 +1129,14 @@ all_checks = [
         "usage": "typing",
     },
     {
+        "msg_id": "E1141",
+        "msg_sym": "dict-iter-missing-items",
+        "msg_text": "Unpacking a dictionary in iteration without calling .items()",
+        "msg_xpln": "Emitted when trying to iterate through a dict without calling .items()",
+        "tho_xpln": "",
+        "usage": "typing",
+    },
+    {
         "msg_id": "E1200",
         "msg_sym": "logging-unsupported-format",
         "msg_text": "Unsupported logging format character %r (%#02x) at index %d",
@@ -1450,9 +1499,18 @@ all_checks = [
     {
         "msg_id": "R0205",
         "msg_sym": "useless-object-inheritance",
-        "msg_text": "Class %r inherits from object, can be safely removed from bases " "in python3",
-        "msg_xpln": "Used when a class inherit from object, which under python3 is "
-        "implicit, hence can be safely removed from bases.",
+        "msg_text": "Class %r inherits from object, can be safely removed from bases in python3",
+        "msg_xpln": "Used when a class inherit from object, which under python3 is implicit, hence "
+        "can be safely removed from bases.",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
+        "msg_id": "R0206",
+        "msg_sym": "property-with-parameters",
+        "msg_text": "Cannot have defined parameters for properties",
+        "msg_xpln": "Used when we detect that a property also has parameters, which are useless, "
+        "given that properties cannot be called with additional arguments.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1730,10 +1788,10 @@ all_checks = [
         "msg_id": "R1717",
         "msg_sym": "consider-using-dict-comprehension",
         "msg_text": "Consider using a dictionary comprehension",
-        "msg_xpln": "Although there is nothing syntactically wrong with this code, "
-        "it is hard to read and can be simplified to a dict "
-        "comprehension. Also it is faster since you don't need to create "
-        "another transient list",
+        "msg_xpln": "Emitted when we detect the creation of a dictionary using the dict() callable "
+        "and a transient list. Although there is nothing syntactically wrong with this "
+        "code, it is hard to read and can be simplified to a dict comprehension.Also it "
+        "is faster since you don't need to create another transient list",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1763,6 +1821,43 @@ all_checks = [
         "msg_xpln": "Used in order to highlight an unnecessary block of code following an if "
         "containing a raise statement. As such, it will warn when it encounters an else "
         "following a chain of ifs, all of them containing a raise statement.",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
+        "msg_id": "R1721",
+        "msg_sym": "unnecessary-comprehension",
+        "msg_text": "Unnecessary use of a comprehension",
+        "msg_xpln": "Instead of using an identitiy comprehension, consider using the list, dict or "
+        "set constructor. It is faster and simpler.",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
+        "msg_id": "R1722",
+        "msg_sym": "consider-using-sys-exit",
+        "msg_text": "Consider using sys.exit()",
+        "msg_xpln": "Instead of using exit() or quit(), consider using the sys.exit().",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
+        "msg_id": "R1723",
+        "msg_sym": "no-else-break",
+        "msg_text": 'Unnecessary "%s" after "break"',
+        "msg_xpln": "Used in order to highlight an unnecessary block of code following an if "
+        "containing a break statement. As such, it will warn when it encounters an else "
+        "following a chain of ifs, all of them containing a break statement.",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
+        "msg_id": "R1724",
+        "msg_sym": "no-else-continue",
+        "msg_text": 'Unnecessary "%s" after "continue"',
+        "msg_xpln": "Used in order to highlight an unnecessary block of code following an if "
+        "containing a continue statement. As such, it will warn when it encounters an "
+        "else following a chain of ifs, all of them containing a continue statement.",
         "tho_xpln": "",
         "usage": "enhancement",
     },
@@ -1924,7 +2019,7 @@ all_checks = [
     {
         "msg_id": "W0199",
         "msg_sym": "assert-on-tuple",
-        "msg_text": "Assert called on a 2-uple. Did you mean 'assert x,y'?",
+        "msg_text": "Assert called on a 2-item-tuple. Did you mean 'assert x,y'?",
         "msg_xpln": "A call of assert on a tuple will always evaluate to true if the "
         "tuple is not empty, and will always evaluate to false if it is.",
         "tho_xpln": "",
@@ -2022,6 +2117,15 @@ all_checks = [
         "usage": "enhancement",
     },
     {
+        "msg_id": "W0236",
+        "msg_sym": "invalid-overridden-method",
+        "msg_text": "Method %r was expected to be %r, found it instead as %r",
+        "msg_xpln": "Used when we detect that a method was overridden as a property or the other "
+        "way around, which could result in potential bugs at runtime.",
+        "tho_xpln": "",
+        "usage": "enhancement",
+    },
+    {
         "msg_id": "W0301",
         "msg_sym": "unnecessary-semicolon",
         "msg_text": "Unnecessary semicolon",
@@ -2080,6 +2184,14 @@ all_checks = [
         "This won't work, because your module will shadow the library module.",
         "tho_xpln": "",
         "usage": "warning",
+    },
+    {
+        "msg_id": "W0407",
+        "msg_sym": "preferred-module",
+        "msg_text": "Prefer importing %r instead of %r",
+        "msg_xpln": "Used when a module imported has a preferred replacement module.",
+        "tho_xpln": "",
+        "usage": "enhancement",
     },
     {
         "msg_id": "W0410",
@@ -2311,6 +2423,15 @@ all_checks = [
         "usage": "warning",
     },
     {
+        "msg_id": "W1114",
+        "msg_sym": "arguments-out-of-order",
+        "msg_text": "Positional arguments appear to be out of order",
+        "msg_xpln": "Emitted when the caller's argument names fully match the parameter names in "
+        "the function signature but do not have the same order.",
+        "tho_xpln": "",
+        "usage": "warning",
+    },
+    {
         "msg_id": "W1201",
         "msg_sym": "logging-not-lazy",
         "msg_text": "Specify string format arguments as logging function parameters",
@@ -2328,13 +2449,10 @@ all_checks = [
     {
         "msg_id": "W1202",
         "msg_sym": "logging-format-interpolation",
-        "msg_text": "Use % formatting in logging functions and pass the % parameters "
-        "as arguments",
-        "msg_xpln": "Used when a logging statement has a call form of "
-        '"logging.<logging '
-        'method>(format_string.format(format_args...))". Such calls '
-        "should use % formatting instead, but leave interpolation to the "
-        "logging function by passing the parameters as arguments.",
+        "msg_text": "Use % formatting in logging functions and pass the % parameters as arguments",
+        "msg_xpln": 'Used when a logging statement has a call form of "logging.<logging '
+        'method>(<string formatting>)". with invalid string formatting. Use another way '
+        "for format the string instead.",
         "tho_xpln": "",
         "usage": "skip",
     },  # Don't want to force this
@@ -2551,6 +2669,16 @@ all_checks = [
         "into.https://docs.python.org/3/library/subprocess.html#popen-constructor",
         "tho_xpln": "",
         "usage": "warning",
+    },
+    {
+        "msg_id": "W1510",
+        "msg_sym": "subprocess-run-check",
+        "msg_text": "Using subprocess.run without explicitly set `check` is not recommended.",
+        "msg_xpln": "The check parameter should always be used with explicitly set `check` keyword "
+        "to make clear what the error-handling behavior "
+        "is.https://docs.python.org/3/library/subprocess.html#subprocess.runs",
+        "tho_xpln": "",
+        "usage": "enhancement",
     },
     {
         "msg_id": "W1601",
@@ -2877,7 +3005,7 @@ all_checks = [
         "msg_sym": "range-builtin-not-iterating",
         "msg_text": "range built-in referenced when not iterating",
         "msg_xpln": "Used when the range built-in is referenced in a non-iterating "
-        "context (returns an iterator in Python 3)",
+        "context (returns a range in Python 3)",
         "tho_xpln": "",
         "usage": "warning",
     },
