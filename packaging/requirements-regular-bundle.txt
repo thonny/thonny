@@ -1,7 +1,8 @@
+parso==0.5.*
 jedi==0.15.*
 pyserial==3.4.*
-pylint==2.3.*
+pylint==2.4.*
 docutils==0.15.*
-mypy==0.720
-asttokens==1.1.*
+mypy==0.761
+asttokens==2.0.*
 Send2Trash==1.5.*
