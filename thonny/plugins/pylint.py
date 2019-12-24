@@ -196,7 +196,7 @@ all_checks = [
         "msg_xpln": "Used when an expression is compared to singleton values like "
         "True, False or None.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "enhancement",
     },
     {
         "msg_id": "C0122",
@@ -280,7 +280,7 @@ all_checks = [
         "msg_text": "Class __slots__ should be a non-string iterable",
         "msg_xpln": "Used when a class __slots__ is a simple string, rather than an iterable.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "C0301",  # option: max-line-length, 100 by default
@@ -304,7 +304,7 @@ all_checks = [
         "msg_text": "Trailing whitespace",
         "msg_xpln": "Used when there is whitespace between the end of a line and the newline.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "skip",  # TODO: implement automatic strip
     },
     {
         "msg_id": "C0304",
@@ -312,7 +312,7 @@ all_checks = [
         "msg_text": "Final newline missing",
         "msg_xpln": "Used when the last line in a file is missing a newline.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "skip",  # TODO: manage it automatically
     },
     {
         "msg_id": "C0305",
@@ -328,7 +328,7 @@ all_checks = [
         "msg_text": "More than one statement on a single line",
         "msg_xpln": "Used when more than on statement are found on the same line.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "enhancement",
     },
     {
         "msg_id": "C0325",
@@ -354,7 +354,7 @@ all_checks = [
         "msg_text": "Mixed line endings LF and CRLF",
         "msg_xpln": "Used when there are mixed (LF and CRLF) newline signs in a file.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "skip",  # TODO: visualize it
     },
     {
         "msg_id": "C0328",
@@ -362,7 +362,7 @@ all_checks = [
         "msg_text": "Unexpected line ending format. There is '%s' while it should be '%s'.",
         "msg_xpln": "Used when there is different newline than expected.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "skip",  # TODO: visualize it
     },
     {
         "msg_id": "C0330",
@@ -402,7 +402,7 @@ all_checks = [
         "msg_text": "Multiple imports on one line (%s)",
         "msg_xpln": "Used when import statement importing multiple modules is detected.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "C0411",
@@ -411,7 +411,7 @@ all_checks = [
         "msg_xpln": "Used when PEP8 import order is not respected (standard imports "
         "first, then third-party libraries, then local imports)",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "C0412",
@@ -419,7 +419,7 @@ all_checks = [
         "msg_text": "Imports from package %s are not grouped",
         "msg_xpln": "Used when imports are not grouped by packages",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "C0413",
@@ -427,7 +427,7 @@ all_checks = [
         "msg_text": 'Import "%s" should be placed at the top of the module',
         "msg_xpln": "Used when code and imports are mixed",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "C0414",
@@ -474,7 +474,7 @@ all_checks = [
         "msg_text": "Unrecognized file option %r",
         "msg_xpln": "Used when an unknown inline option is encountered.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0012",
@@ -482,7 +482,7 @@ all_checks = [
         "msg_text": "Bad option value %r",
         "msg_xpln": "Used when a bad value for an inline option is encountered.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0100",
@@ -491,7 +491,7 @@ all_checks = [
         "msg_xpln": "Used when the special class method __init__ is turned into a "
         "generator by a yield in its body.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0101",
@@ -558,7 +558,7 @@ all_checks = [
         "msg_xpln": "Used when an abstract class with `abc.ABCMeta` as metaclass has "
         "abstract methods and is instantiated.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0111",
@@ -685,7 +685,7 @@ all_checks = [
         "msg_text": "Invalid object %r in __slots__, must contain only non empty strings",
         "msg_xpln": "Used when an invalid (non-string) object occurs in __slots__.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0237",
@@ -693,7 +693,7 @@ all_checks = [
         "msg_text": "Assigning to attribute %r not defined in class slots",
         "msg_xpln": "Used when assigning to an attribute not defined in the class slots.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "typing",
     },
     {
         "msg_id": "E0238",
@@ -702,7 +702,7 @@ all_checks = [
         "msg_xpln": "Used when an invalid __slots__ is found in class. Only a "
         "string, an iterable or a sequence is permitted.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0239",
@@ -718,7 +718,7 @@ all_checks = [
         "msg_text": "Inconsistent method resolution order for class %r",
         "msg_xpln": "Used when a class has an inconsistent method resolution order.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0241",
@@ -726,7 +726,7 @@ all_checks = [
         "msg_text": "Duplicate bases for class %r",
         "msg_xpln": "Used when a class has duplicate bases.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0242",
@@ -743,7 +743,7 @@ all_checks = [
         "msg_xpln": "Used when an __iter__ method returns something which is not an "
         "iterable (i.e. has no `__next__` method)",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0302",
@@ -753,7 +753,7 @@ all_checks = [
         "number of parameters. If it has too few or too many, it might "
         "not work at all.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0303",
@@ -762,7 +762,7 @@ all_checks = [
         "msg_xpln": "Used when a __len__ method returns something which is not a "
         "non-negative integer",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0401",
@@ -779,7 +779,7 @@ all_checks = [
         "msg_xpln": "Used when a relative import tries to access too many levels in "
         "the current package.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0601",
@@ -803,7 +803,7 @@ all_checks = [
         "msg_text": "Undefined variable name %r in __all__",
         "msg_xpln": "Used when an undefined variable name is referenced in __all__.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0604",
@@ -811,7 +811,7 @@ all_checks = [
         "msg_text": "Invalid object %r in __all__, must contain only strings",
         "msg_xpln": "Used when an invalid (non-string) object occurs in __all__.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E0611",
@@ -1264,8 +1264,7 @@ all_checks = [
         "msg_id": "E1602",
         "msg_sym": "parameter-unpacking",
         "msg_text": "Parameter unpacking specified",
-        "msg_xpln": "Used when parameter unpacking is specified for a "
-        "function(Python 3 doesn't allow it)",
+        "msg_xpln": "Used when parameter unpacking is specified for a function (Python 3 doesn't allow it)",
         "tho_xpln": "",
         "usage": "skip",
     },
@@ -1301,20 +1300,18 @@ all_checks = [
         "msg_sym": "yield-inside-async-function",
         "msg_text": "Yield inside async function",
         "msg_xpln": "Used when an `yield` or `yield from` statement is found inside "
-        "an async function. This message can't be emitted when using "
-        "Python < 3.5.",
+        "an async function.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "E1701",
         "msg_sym": "not-async-context-manager",
         "msg_text": "Async context manager '%s' doesn't implement __aenter__ and __aexit__.",
         "msg_xpln": "Used when an async context manager is used with an object that "
-        "does not implement the async context management protocol. This "
-        "message can't be emitted when using Python < 3.5.",
+        "does not implement the async context management protocol.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "F0001",
@@ -1376,7 +1373,7 @@ all_checks = [
         "msg_xpln": "Used when an inline option is either badly formatted or can't "
         "be used inside modules.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "I0011",
@@ -1419,17 +1416,16 @@ all_checks = [
         "msg_xpln": "Reported when a message is explicitly disabled for a line or a "
         "block of code, but never triggered.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "warning",
     },
     {
         "msg_id": "I0022",
         "msg_sym": "deprecated-pragma",
         "msg_text": 'Pragma "%s" is deprecated, use "%s" instead',
         "msg_xpln": "Some inline pylint options have been renamed or reworked, only "
-        "the most recent form should be used. NOTE:skip-all is only "
-        "available with pylint >= 0.26",
+        "the most recent form should be used.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "I0023",
@@ -1478,7 +1474,7 @@ all_checks = [
         "msg_xpln": "Used when a method doesn't use its bound instance, and so could "
         "be written as a function.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R0202",
@@ -1539,7 +1535,7 @@ all_checks = [
         "msg_xpln": "Used when class has too many parent classes, try to reduce this "
         "to get a simpler (and so easier to use) class.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R0902",
@@ -1548,7 +1544,7 @@ all_checks = [
         "msg_xpln": "Used when class has too many instance attributes, try to reduce "
         "this to get a simpler (and so easier to use) class.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R0903",
@@ -1566,7 +1562,7 @@ all_checks = [
         "msg_xpln": "Used when class has too many public methods, try to reduce this "
         "to get a simpler (and so easier to use) class.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R0911",
@@ -1575,7 +1571,7 @@ all_checks = [
         "msg_xpln": "Used when a function or method has too many return statement, "
         "making it hard to follow.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R0912",
@@ -1584,7 +1580,7 @@ all_checks = [
         "msg_xpln": "Used when a function or method has too many branches, making it "
         "hard to follow.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R0913",
@@ -1592,7 +1588,7 @@ all_checks = [
         "msg_text": "Too many arguments (%s/%s)",
         "msg_xpln": "Used when a function or method takes too many arguments.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "enhancement",
     },
     {
         "msg_id": "R0914",
@@ -1600,7 +1596,7 @@ all_checks = [
         "msg_text": "Too many local variables (%s/%s)",
         "msg_xpln": "Used when a function or method has too many local variables.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "enhancement",
     },
     {
         "msg_id": "R0915",
@@ -1664,7 +1660,7 @@ all_checks = [
         "warn when it encounters an else following a chain of ifs, all "
         "of them containing a return statement.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },  # not sure if the recommended style is better (https://github.com/SoCo/SoCo/issues/500)
     {
         "msg_id": "R1706",
@@ -1727,7 +1723,7 @@ all_checks = [
         "statement can safely be removed because Python will implicitly "
         "return None",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "R1712",
@@ -1782,7 +1778,7 @@ all_checks = [
         'operation like"a < b and b < c", suggesting instead to refactor '
         'it to "a < b < c"',
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },  # IMO this is confusing syntax if one expects < to be binary op
     {
         "msg_id": "R1717",
@@ -2031,7 +2027,7 @@ all_checks = [
         "msg_text": "Attribute %r defined outside __init__",
         "msg_xpln": "Used when an instance attribute is defined outside the __init__ method.",
         "tho_xpln": "",
-        "usage": "enhancement",
+        "usage": "style",
     },
     {
         "msg_id": "W0211",
@@ -2454,7 +2450,7 @@ all_checks = [
         'method>(<string formatting>)". with invalid string formatting. Use another way '
         "for format the string instead.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "enhancement",
     },  # Don't want to force this
     {
         "msg_id": "W1203",
@@ -2466,7 +2462,7 @@ all_checks = [
         "instead, but leave interpolation to the logging function by "
         "passing the parameters as arguments.",
         "tho_xpln": "",
-        "usage": "skip",
+        "usage": "style",
     },
     {
         "msg_id": "W1300",
