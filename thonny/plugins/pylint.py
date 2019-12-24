@@ -119,7 +119,7 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         self.completion_handler(self, warnings)
 
 
-# according to version 2.3.1 (pylint --list-msgs)
+# according to version 2.4.4 (pylint --list-msgs)
 all_checks = [
     {
         "msg_id": "C0102",
