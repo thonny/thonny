@@ -87,7 +87,8 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
                     "group": "warnings",
                 }
                 if m.group(3):
-                    atts["col_offset"] = int(m.group(4))
+                    # https://github.com/thonny/thonny/issues/598
+                    atts["col_offset"] = max(int(m.group(4)) - 1, 0)
 
                 # TODO: add better categorization and explanation
                 atts["symbol"] = "mypy-" + atts["kind"]
