@@ -25,6 +25,7 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
             "--ignore-missing-imports",
             "--check-untyped-defs",
             "--warn-redundant-casts",
+            "--warn-unused-ignores",
             "--show-column-numbers",
             main_file_path,
         ] + list(imported_file_paths)
@@ -44,6 +45,14 @@ class MyPyAnalyzer(SubprocessProgramAnalyzer):
         if ver >= (0, 590):
             args.insert(3, "--python-executable")
             args.insert(4, get_runner().get_local_executable())
+        
+        if ver >= (0, 730):
+            args.insert(3, "--warn-unreachable")
+            args.insert(3, "--allow-redefinition")
+            args.insert(3, "--strict-equality")
+            args.insert(3, "--no-color-output")
+            args.insert(3, "--no-error-summary")
+            
 
         env = os.environ.copy()
         env["MYPYPATH"] = os.path.join(os.path.dirname(__file__), "typeshed_extras")
