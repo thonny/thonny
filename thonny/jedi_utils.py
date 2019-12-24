@@ -10,7 +10,7 @@ def import_python_tree():
 
     if get_version_tuple() < (0, 11, 0):
         # make sure not to import parso in this case, even if it exits
-        from jedi.parser.python import tree  # @UnresolvedImport @UnusedImport
+        from jedi.parser import tree  # @UnresolvedImport @UnusedImport
     else:
         # assume older versions, which use parso
         from parso.python import tree  # @UnresolvedImport @UnusedImport @Reimport
