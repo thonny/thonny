@@ -740,14 +740,11 @@ class EnhancedText(TweakableText):
 
 
 class TextFrame(ttk.Frame):
-    "Decorates text with scrollbars, line numbers and print margin"
+    "Decorates text with scrollbars, listens for theme changes"
 
     def __init__(
         self,
         master,
-        line_numbers=False,
-        line_length_margin=0,
-        first_line_number=1,
         text_class=EnhancedText,
         horizontal_scrollbar=True,
         vertical_scrollbar=True,
@@ -757,8 +754,6 @@ class TextFrame(ttk.Frame):
         horizontal_scrollbar_style=None,
         borderwidth=0,
         relief="sunken",
-        gutter_background="#e0e0e0",
-        gutter_foreground="#999999",
         **text_options
     ):
         ttk.Frame.__init__(self, master=master, borderwidth=borderwidth, relief=relief)
@@ -776,39 +771,6 @@ class TextFrame(ttk.Frame):
         final_text_options.update(text_options)
         self.text = text_class(self, **final_text_options)
         self.text.grid(row=0, column=2, sticky=tk.NSEW)
-
-        self._gutter = tk.Text(
-            self,
-            width=5,
-            padx=0,
-            pady=5,
-            highlightthickness=0,
-            bd=0,
-            takefocus=False,
-            font=self.text["font"],
-            background="#e0e0e0",
-            foreground=gutter_foreground,
-            selectbackground=gutter_background,
-            selectforeground=gutter_foreground,
-            cursor="arrow",
-            state="disabled",
-            undo=False,
-            wrap="none",
-        )
-        self._gutter_is_gridded = False
-        self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True),
-        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click, True)
-        self._gutter.bind("<Button-1>", self.on_gutter_click, True)
-        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion, True)
-        self._gutter["yscrollcommand"] = self._gutter_scroll
-
-        # need tags for justifying and rmargin
-        self._gutter.tag_configure("content", justify="right", rmargin=3)
-
-        # gutter will be gridded later
-        assert first_line_number is not None
-        self._first_line_number = first_line_number
-        self.set_gutter_visibility(line_numbers)
 
         if vertical_scrollbar:
             self._vbar = vertical_scrollbar_class(
@@ -829,7 +791,119 @@ class TextFrame(ttk.Frame):
         self.columnconfigure(2, weight=1)
         self.rowconfigure(0, weight=1)
 
+        self._ui_theme_change_binding = self.bind(
+            "<<ThemeChanged>>", self._reload_theme_options, True
+        )
+
+        # TODO: add context menu?
+
+        self._reload_theme_options(None)
+
+    def focus_set(self):
+        self.text.focus_set()
+
+    def _vertical_scrollbar_update(self, *args):
+        if not hasattr(self, "_vbar"):
+            return
+
+        self._vbar.set(*args)
+        self.text.event_generate("<<VerticalScroll>>")
+
+    def _horizontal_scrollbar_update(self, *args):
+        self._hbar.set(*args)
+
+    def _vertical_scroll(self, *args):
+        self.text.yview(*args)
+        self.text.event_generate("<<VerticalScroll>>")
+
+    def _horizontal_scroll(self, *args):
+        self.text.xview(*args)
+
+    def _reload_theme_options(self, event=None):
+        pass
+
+    def destroy(self):
+        self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
+        super().destroy()
+
+
+class EnhancedTextFrame(TextFrame):
+    "Adds line numbers and print margin"
+
+    def __init__(
+        self,
+        master,
+        line_numbers=False,
+        line_length_margin=0,
+        first_line_number=1,
+        text_class=EnhancedText,
+        horizontal_scrollbar=True,
+        vertical_scrollbar=True,
+        vertical_scrollbar_class=ttk.Scrollbar,
+        horizontal_scrollbar_class=ttk.Scrollbar,
+        vertical_scrollbar_style=None,
+        horizontal_scrollbar_style=None,
+        borderwidth=0,
+        relief="sunken",
+        gutter_background="#e0e0e0",
+        gutter_foreground="#999999",
+        **text_options
+    ):
+        self._gutter = None
+
+        super().__init__(
+            master,
+            text_class=text_class,
+            horizontal_scrollbar=horizontal_scrollbar,
+            vertical_scrollbar=vertical_scrollbar,
+            vertical_scrollbar_class=vertical_scrollbar_class,
+            horizontal_scrollbar_class=horizontal_scrollbar_class,
+            vertical_scrollbar_style=vertical_scrollbar_style,
+            horizontal_scrollbar_style=horizontal_scrollbar_style,
+            borderwidth=borderwidth,
+            relief=relief,
+            **text_options
+        )
+
         self._recommended_line_length = line_length_margin
+
+        self._gutter = tk.Text(
+            self,
+            width=5,
+            padx=0,
+            pady=5,
+            highlightthickness=0,
+            bd=0,
+            takefocus=False,
+            font=self.text["font"],
+            background="#e0e0e0",
+            foreground=gutter_foreground,
+            selectbackground=gutter_background,
+            selectforeground=gutter_foreground,
+            cursor="arrow",
+            state="disabled",
+            undo=False,
+            wrap="none",
+        )
+
+        if "height" in text_options:
+            self._gutter.configure(height=text_options["height"])
+
+        self._gutter_is_gridded = False
+        self._gutter.bind("<Double-Button-1>", self.on_gutter_double_click, True),
+        self._gutter.bind("<ButtonRelease-1>", self.on_gutter_click, True)
+        self._gutter.bind("<Button-1>", self.on_gutter_click, True)
+        self._gutter.bind("<Button1-Motion>", self.on_gutter_motion, True)
+        self._gutter["yscrollcommand"] = self._gutter_scroll
+
+        # need tags for justifying and rmargin
+        self._gutter.tag_configure("content", justify="right", rmargin=3)
+
+        # gutter will be gridded later
+        assert first_line_number is not None
+        self._first_line_number = first_line_number
+        self.set_gutter_visibility(line_numbers)
+
         margin_line_color = ttk.Style().lookup("Gutter", "background", default="LightGray")
         self._margin_line = tk.Canvas(
             self.text,
@@ -844,15 +918,7 @@ class TextFrame(ttk.Frame):
         self.text.bind("<<TextChange>>", self._text_changed, True)
         self.text.bind("<<CursorMove>>", self._cursor_moved, True)
 
-        self._ui_theme_change_binding = self.bind(
-            "<<ThemeChanged>>", self._reload_theme_options, True
-        )
-        self._reload_theme_options()
-
-        # TODO: add context menu?
-
-    def focus_set(self):
-        self.text.focus_set()
+        self._reload_gutter_theme_options()
 
     def set_gutter_visibility(self, value):
         if value and not self._gutter_is_gridded:
@@ -878,20 +944,6 @@ class TextFrame(ttk.Frame):
         self._recommended_line_length = value
         self.update_margin_line()
 
-    def _text_changed(self, event):
-        self.update_gutter()
-
-    def _cursor_moved(self, event):
-        self._update_gutter_active_line()
-
-    def _vertical_scrollbar_update(self, *args):
-        if not hasattr(self, "_vbar"):
-            return
-
-        self._vbar.set(*args)
-        self._gutter.yview(tk.MOVETO, args[0])
-        self.text.event_generate("<<VerticalScroll>>")
-
     def _gutter_scroll(self, *args):
         if not hasattr(self, "_vbar"):
             return
@@ -902,18 +954,11 @@ class TextFrame(ttk.Frame):
         except TclError:
             pass
 
-    def _horizontal_scrollbar_update(self, *args):
-        self._hbar.set(*args)
-        self.update_margin_line()
+    def _text_changed(self, event):
+        self.update_gutter()
 
-    def _vertical_scroll(self, *args):
-        self.text.yview(*args)
-        self._gutter.yview(*args)
-        self.text.event_generate("<<VerticalScroll>>")
-
-    def _horizontal_scroll(self, *args):
-        self.text.xview(*args)
-        self.update_margin_line()
+    def _cursor_moved(self, event):
+        self._update_gutter_active_line()
 
     def update_gutter(self, clean=False):
         if clean:
@@ -1041,7 +1086,31 @@ class TextFrame(ttk.Frame):
         except tk.TclError:
             exception("on_gutter_motion")
 
+    def _vertical_scrollbar_update(self, *args):
+        if not hasattr(self, "_vbar"):
+            return
+
+        super()._vertical_scrollbar_update(*args)
+        self._gutter.yview(tk.MOVETO, args[0])
+
+    def _horizontal_scrollbar_update(self, *args):
+        super()._horizontal_scrollbar_update(*args)
+        self.update_margin_line()
+
+    def _vertical_scroll(self, *args):
+        super()._vertical_scroll(*args)
+        self._gutter.yview(*args)
+
+    def _horizontal_scroll(self, *args):
+        super()._horizontal_scroll(*args)
+        self.update_margin_line()
+
     def _reload_theme_options(self, event=None):
+        super()._reload_theme_options(event)
+        if self._gutter is not None:
+            self._reload_gutter_theme_options(event)
+
+    def _reload_gutter_theme_options(self, event=None):
 
         style = ttk.Style()
         background = style.lookup("GUTTER", "background")
@@ -1052,10 +1121,6 @@ class TextFrame(ttk.Frame):
         foreground = style.lookup("GUTTER", "foreground")
         if foreground:
             self._gutter.configure(foreground=foreground, selectforeground=foreground)
-
-    def destroy(self):
-        self.unbind("<<ThemeChanged>>", self._ui_theme_change_binding)
-        super().destroy()
 
 
 def get_text_font(text):

@@ -220,10 +220,9 @@ class CodeViewText(EnhancedTextWithLogging, PythonText):
         menu.tk_popup(event.x_root, event.y_root)
 
 
-class CodeView(tktextext.TextFrame):
+class CodeView(tktextext.EnhancedTextFrame):
     def __init__(self, master, propose_remove_line_numbers=False, **text_frame_args):
-        tktextext.TextFrame.__init__(
-            self,
+        super().__init__(
             master,
             text_class=CodeViewText,
             undo=True,
@@ -370,9 +369,8 @@ class CodeView(tktextext.TextFrame):
         super().destroy()
         get_workbench().unbind("SyntaxThemeChanged", self._reload_theme_options)
 
-    def _reload_theme_options(self, event=None):
-        super()._reload_theme_options(event)
-
+    def _reload_gutter_theme_options(self, event=None):
+        # super()._reload_gutter_theme_options(event)
         if "GUTTER" in _syntax_options:
             opts = _syntax_options["GUTTER"].copy()
             if "background" in opts and "selectbackground" not in opts:
