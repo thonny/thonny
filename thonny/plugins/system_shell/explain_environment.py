@@ -73,21 +73,29 @@ def list_commands(prefix, highlighted_reals, highlighted_dirs):
 def normpath_with_actual_case(name):
     """In Windows return the path with the case it is stored in the filesystem"""
     # copied from thonny.common to make this script independent
-    assert os.path.isabs(name)
-    assert os.path.exists(name)
+    assert os.path.isabs(name) or os.path.ismount(name), "Not abs nor mount: " + name
+    assert os.path.exists(name), "Not exists: " + name
 
     if os.name == "nt":
-        name = os.path.realpath(name)
+        # https://stackoverflow.com/questions/2113822/python-getting-filename-case-as-stored-in-windows/2114975
+        name = os.path.normpath(name)
 
         from ctypes import create_unicode_buffer, windll
 
         buf = create_unicode_buffer(512)
+        # GetLongPathNameW alone doesn't fix filename part
         windll.kernel32.GetShortPathNameW(name, buf, 512)  # @UndefinedVariable
         windll.kernel32.GetLongPathNameW(buf.value, buf, 512)  # @UndefinedVariable
-        assert len(buf.value) >= 2
-
         result = buf.value
-        assert isinstance(result, str)
+
+        if result.casefold() != name.casefold():
+            # Sometimes GetShortPathNameW + GetLongPathNameW doesn't work
+            # see eg. https://github.com/thonny/thonny/issues/925
+            windll.kernel32.GetLongPathNameW(name, buf, 512)  # @UndefinedVariable
+            result = buf.value
+
+            if result.casefold() != name.casefold():
+                result = name
 
         if result[1] == ":":
             # ensure drive letter is capital
@@ -95,6 +103,10 @@ def normpath_with_actual_case(name):
         else:
             return result
     else:
+        # easy on Linux
+        # too difficult on mac
+        # https://stackoverflow.com/questions/14515073/in-python-on-osx-with-hfs-how-can-i-get-the-correct-case-of-an-existing-filenam
+        # Hopefully only correct case comes into Thonny (eg. via open dialog)
         return os.path.normpath(name)
 
 
