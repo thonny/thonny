@@ -50,6 +50,7 @@ def list_commands(prefix, highlighted_reals, highlighted_dirs):
         cmd = prefix + suffix
         target = shutil.which(cmd)
         if target is not None:
+            target = os.path.abspath(target)
             target = normpath_with_actual_case(target)
             real = equivalent_realpath(target)
 
