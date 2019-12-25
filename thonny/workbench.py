@@ -245,8 +245,12 @@ class Workbench(tk.Tk):
         language_code = self.get_option("general.language")
         if language_code in languages.LANGUAGES_DICT:
             path = os.path.join(os.path.dirname(__file__), "locale")
-            language = gettext.translation("thonny", path, [language_code])
-            language.install()
+            try:
+                language = gettext.translation("thonny", path, [language_code])
+                language.install()
+            except Exception:
+                traceback.print_exc()
+                self.report_exception("Can't load language " + language_code)
 
     def _get_logging_level(self) -> int:
         if self.in_debug_mode():
