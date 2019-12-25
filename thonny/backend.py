@@ -1048,7 +1048,7 @@ class VM:
 
         thonny_lang = os.environ.get("THONNY_LANGUAGE", "")
         if thonny_lang:
-            friendly_traceback.set_lang(thonny_lang[:2])
+            friendly_traceback.set_lang(thonny_lang)
 
         friendly_traceback.exclude_file_from_traceback(__file__)
 
