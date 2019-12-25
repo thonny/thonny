@@ -14,11 +14,7 @@ def _open_system_shell():
     Bonus (and most difficult) part is executing a script in this window
     for recommending commands for running given python and related pip"""
 
-    filename = get_saved_current_script_filename(force=False)
-    if filename:
-        cwd = os.path.dirname(filename)
-    else:
-        cwd = None
+    cwd = get_workbench().get_local_cwd()
 
     proxy = get_runner().get_backend_proxy()
     if proxy and proxy.get_local_executable():
