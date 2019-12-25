@@ -133,7 +133,7 @@ class ThemeAndFontConfigurationPage(ConfigurationPage):
             row=20, column=1, sticky="w", pady=(5, 2), columnspan=5
         )
         self._preview_codeview = CodeView(
-            self, height=6, font="EditorFont", relief="groove", borderwidth=1
+            self, height=6, font="EditorFont", relief="groove", borderwidth=1, line_numbers=True
         )
 
         self._preview_codeview.set_content(
