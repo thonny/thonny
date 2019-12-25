@@ -61,6 +61,7 @@ class RstText(TweakableText):
         self.tag_configure("em", font=italic_font)
         self.tag_configure("strong", font=bold_font)
 
+        # TODO: hyperlink syntax options may require different background as well
         self.tag_configure(
             "a",
             **{**get_syntax_options_for_tag("hyperlink"), "underline": False},
