@@ -1,6 +1,7 @@
 from thonny.plugins.micropython.connection import MicroPythonConnection
 from queue import Queue
 import threading
+import sys
 
 
 class WebReplConnection(MicroPythonConnection):
@@ -45,19 +46,19 @@ class WebReplConnection(MicroPythonConnection):
         import websockets
 
         self._ws = await asyncio.wait_for(websockets.connect(self._url, ping_interval=None), 3)
-        print("GOT WS", self._ws)
+        debug("GOT WS", self._ws)
 
         # read password prompt and send password
         read_chars = ""
         while read_chars != "Password: ":
-            print("prelude", read_chars)
+            debug("prelude", read_chars)
             ch = await self._ws.recv()
-            print("GOT", ch)
+            debug("GOT", ch)
             read_chars += ch
 
-        print("sending password")
+        debug("sending password")
         await self._ws.send(self._password + "\n")
-        print("sent password")
+        debug("sent password")
 
     async def _ws_keep_reading(self):
         while True:
@@ -75,7 +76,7 @@ class WebReplConnection(MicroPythonConnection):
         while True:
             while not self._write_queue.empty():
                 data = self._write_queue.get(block=False).decode("UTF-8")
-                print("Wrote:", repr(data))
+                debug("Wrote:", repr(data))
                 await self._ws.send(data)
             # Allow reading loop to progress
             await asyncio.sleep(0.01)
@@ -91,3 +92,8 @@ class WebReplConnection(MicroPythonConnection):
         import asyncio
         asyncio.get_event_loop().run_until_complete(self.async_close())
         """
+
+
+def debug(*args, file=sys.stderr):
+    return
+    print(*args, file=file)

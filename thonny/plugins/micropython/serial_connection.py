@@ -5,6 +5,7 @@ import time
 from serial.serialutil import SerialException
 import logging
 import platform
+import sys
 from textwrap import dedent
 
 
@@ -114,3 +115,7 @@ class SerialConnection(MicroPythonConnection):
                     self._serial = None
                 except Exception:
                     logging.exception("Couldn't close serial")
+
+
+def debug(*args, file=sys.stderr):
+    print(*args, file=file)
