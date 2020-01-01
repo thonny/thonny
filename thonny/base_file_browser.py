@@ -19,16 +19,13 @@ import shutil
 
 _dummy_node_text = "..."
 
-LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
+_LOCAL_FILES_ROOT_TEXT = ""  # needs to be initialized later
 TEXT_EXTENSIONS = [".py", ".pyw", ".txt", ".log", ".csv", ".json", ".yml", ".yaml"]
 ROOT_NODE_ID = ""
 
 
 class BaseFileBrowser(ttk.Frame):
     def __init__(self, master, show_hidden_files=False, show_expand_buttons=True):
-        global LOCAL_FILES_ROOT_TEXT
-        LOCAL_FILES_ROOT_TEXT = _("This computer")
-
         self.show_expand_buttons = show_expand_buttons
         self._cached_child_data = {}
         self.path_to_highlight = None
@@ -216,7 +213,7 @@ class BaseFileBrowser(ttk.Frame):
         return path.split(self.get_dir_separator())
 
     def get_root_text(self):
-        return LOCAL_FILES_ROOT_TEXT
+        return get_local_files_root_text()
 
     def on_open_node(self, event):
         node_id = self.get_selected_node()
@@ -1094,7 +1091,7 @@ class NodeChoiceDialog(CommonDialog):
         self.columnconfigure(0, weight=1)
         self.rowconfigure(0, weight=1)
 
-        local_caption = LOCAL_FILES_ROOT_TEXT
+        local_caption = get_local_files_root_text()
         remote_caption = get_runner().get_node_label()
 
         button_width = max(len(local_caption), len(remote_caption)) + 10
@@ -1173,3 +1170,13 @@ def choose_node_for_file_operations(master, prompt):
         return dlg.result
     else:
         return "local"
+
+
+def get_local_files_root_text():
+    global _LOCAL_FILES_ROOT_TEXT
+
+    if not _LOCAL_FILES_ROOT_TEXT:
+        # translation can't be done in module load time
+        _LOCAL_FILES_ROOT_TEXT = _("This computer")
+
+    return _LOCAL_FILES_ROOT_TEXT
