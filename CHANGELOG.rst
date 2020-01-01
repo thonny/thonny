@@ -2,6 +2,11 @@
 Version history
 ===============
 
+3.2.6 (2020-01-01)
+==================
+* FIXED #1043: Can't load files from MicroPython device (regression introduced in 3.2.5)
+* FIXED: Missing "Local files" label on save target selection dialog
+
 3.2.5 (2019-12-25)
 ==================
 * CHANGED: Python version in binary bundles upgraded from 3.7.5 to 3.7.6
