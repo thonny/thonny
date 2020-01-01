@@ -289,7 +289,9 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
         self._webrepl_frame = ttk.Frame(self)
 
-        self._webrepl_url_var = create_string_var(DEFAULT_WEBREPL_URL)
+        self._webrepl_url_var = create_string_var(
+            get_workbench().get_option(self.backend_name + ".webrepl_url")
+        )
         url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
         url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
         url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=24)
