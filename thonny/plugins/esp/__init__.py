@@ -77,7 +77,7 @@ class ESPConfigPage(MicroPythonConfigPage):
 
     @property
     def allow_webrepl(self):
-        return True
+        return False
 
 
 class ESP8266ConfigPage(ESPConfigPage):
