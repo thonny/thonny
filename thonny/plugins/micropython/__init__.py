@@ -77,7 +77,7 @@ class MicroPythonProxy(SubprocessProxy):
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.backend
 
-        return [
+        cmd = [
             thonny.plugins.micropython.backend.__file__,
             "--clean",
             str(self._clean_start),
@@ -86,6 +86,18 @@ class MicroPythonProxy(SubprocessProxy):
             "--api_stubs_path",
             self._get_api_stubs_path(),
         ]
+
+        if self._port == "webrepl":
+            cmd.extend(
+                [
+                    "--url",
+                    get_workbench().get_option(self.backend_name + ".webrepl_url"),
+                    "--password",
+                    get_workbench().get_option(self.backend_name + ".webrepl_password"),
+                ]
+            )
+
+        return cmd
 
     def interrupt(self):
         self._send_msg(InterruptCommand())
@@ -252,7 +264,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         port_descriptions = [key for key, _ in sorted(self._ports_by_desc.items(), key=port_order)]
 
         self._port_desc_variable = create_string_var(
-            self.get_current_port_desc(), self._on_change_port
+            self.get_stored_port_desc(), self._on_change_port
         )
         self._port_combo = ttk.Combobox(
             self,
@@ -317,7 +329,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
         return self._flashing_frame
 
-    def get_current_port_desc(self):
+    def get_stored_port_desc(self):
         name = get_workbench().get_option(self.backend_name + ".port")
         for desc in self._ports_by_desc:
             if self._ports_by_desc[desc] == name:
@@ -325,14 +337,21 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
 
         return ""
 
+    def get_selected_port_name(self):
+        port_desc = self._port_desc_variable.get()
+        return self._ports_by_desc[port_desc]
+
     def is_modified(self):
         return (
             self._port_desc_variable.modified  # pylint: disable=no-member
-            or self.allow_webrepl
+            or self.webrepl_selected()
             and self._webrepl_password_var.modified  # pylint: disable=no-member
-            or self.allow_webrepl
+            or self.webrepl_selected()
             and self._webrepl_url_var.modified
         )  # pylint: disable=no-member
+
+    def webrepl_selected(self):
+        return self.get_selected_port_name() == "webrepl"
 
     def should_restart(self):
         return self.is_modified()
@@ -342,10 +361,9 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
             return
 
         else:
-            port_desc = self._port_desc_variable.get()
-            port_name = self._ports_by_desc[port_desc]
+            port_name = self.get_selected_port_name()
             get_workbench().set_option(self.backend_name + ".port", port_name)
-            if self.allow_webrepl:
+            if self.webrepl_selected():
                 get_workbench().set_option(
                     self.backend_name + ".webrepl_url", self._webrepl_url_var.get()
                 )
