@@ -27,9 +27,7 @@ import time
 
 
 class ESPProxy(MicroPythonProxy):
-    @property
-    def allow_webrepl(self):
-        return True
+    pass
 
 
 class ESP8266Proxy(ESPProxy):
@@ -76,6 +74,10 @@ class ESPConfigPage(MicroPythonConfigPage):
     def _open_flashing_dialog(self):
         dlg = ESPFlashingDialog(get_workbench(), self._chip, self._firmware_start_address)
         ui_utils.show_dialog(dlg)
+
+    @property
+    def allow_webrepl(self):
+        return True
 
 
 class ESP8266ConfigPage(ESPConfigPage):
