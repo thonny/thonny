@@ -4,6 +4,7 @@ Version history
 
 3.2.6 (2020-01-01)
 ==================
+* FIXED #1035: Make highlight names work with recent Jedi versions 
 * FIXED #1043: Can't load files from MicroPython device (regression introduced in 3.2.5)
 * FIXED: Missing "Local files" label on save target selection dialog
 
