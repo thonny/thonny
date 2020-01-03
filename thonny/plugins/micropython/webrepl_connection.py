@@ -99,13 +99,21 @@ class WebReplConnection(MicroPythonConnection):
                     repr(data),
                 )
 
-                str_data = data.decode("UTF-8")
-                for i in range(0, len(str_data), self._write_block_size):
-                    str_block = str_data[i : i + self._write_block_size]
+                # chunk without breaking utf-8 chars
+                start_pos = 0
+                while start_pos < len(data):
+                    end_pos = start_pos + self._write_block_size
+                    # make sure next block doesn't start with a continuation char
+                    while end_pos < len(data) and data[end_pos] >= 0x80 and data[end_pos] < 0xC0:
+                        end_pos -= 1
+
+                    block = data[start_pos:end_pos]
+                    str_block = block.decode("UTF-8")
                     await self._ws.send(str_block)
                     await asyncio.sleep(max(self._min_write_delay, self._write_delay))
-
                     debug("Wrote chars", len(str_block))
+
+                    start_pos = end_pos
 
                 debug("Wrote bytes", len(data))
                 self._write_responses.put(len(data))
