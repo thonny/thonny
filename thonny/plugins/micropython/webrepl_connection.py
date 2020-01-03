@@ -57,10 +57,14 @@ class WebReplConnection(MicroPythonConnection):
         await asyncio.gather(self._ws_keep_reading(), self._ws_keep_writing())
 
     async def _ws_connect(self):
-        import asyncio
         import websockets
 
-        self._ws = await asyncio.wait_for(websockets.connect(self._url, ping_interval=None), 3)
+        try:
+            self._ws = await websockets.connect(self._url, ping_interval=None)
+        except websockets.exceptions.InvalidMessage:
+            # try once more
+            self._ws = await websockets.connect(self._url, ping_interval=None)
+
         debug("GOT WS", self._ws)
 
         # read password prompt and send password
