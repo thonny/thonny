@@ -219,11 +219,12 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
                 + "\n"
                 + intro_text
                 + "\n\n"
-                + ("Connecting via WebREPL protocol:")
+                + ("Connecting via WebREPL protocol (EXPERIMENTAL):")
                 + "\n"
                 + (
                     "If your device supports WebREPL, first connect via serial, make sure WebREPL is enabled\n"
-                    + "(import webrepl_setup), connect your computer and device to same network and select < WebREPL > below"
+                    + "(import webrepl_setup), connect your computer and device to same network and select\n"
+                    + "< WebREPL > below"
                 )
             )
 
@@ -294,18 +295,16 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         )
         url_label = ttk.Label(self._webrepl_frame, text="URL (eg. %s)" % DEFAULT_WEBREPL_URL)
         url_label.grid(row=0, column=0, sticky="nw", pady=(10, 0))
-        url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=24)
+        url_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_url_var, width=30)
         url_entry.grid(row=1, column=0, sticky="nw")
 
         self._webrepl_password_var = create_string_var(
             get_workbench().get_option(self.backend_name + ".webrepl_password")
         )
-        pw_label = ttk.Label(
-            self._webrepl_frame, text="Password (the one specified with `import webrepl_setup`)"
-        )
-        pw_label.grid(row=2, column=0, sticky="nw", pady=(10, 0))
-        pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=9)
-        pw_entry.grid(row=3, column=0, sticky="nw")
+        pw_label = ttk.Label(self._webrepl_frame, text="Password")
+        pw_label.grid(row=0, column=1, sticky="nw", pady=(10, 0), padx=(10, 0))
+        pw_entry = ttk.Entry(self._webrepl_frame, textvariable=self._webrepl_password_var, width=15)
+        pw_entry.grid(row=1, column=1, sticky="nw", padx=(10, 0))
 
         return self._webrepl_frame
 

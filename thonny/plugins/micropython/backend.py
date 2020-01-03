@@ -1757,6 +1757,7 @@ if __name__ == "__main__":
     parser.add_argument("--url", type=str)
     parser.add_argument("--password", type=str)
     parser.add_argument("--api_stubs_path", type=str)
+    parser.add_argument("--min_write_delay", type=float, default=0.01)
     args = parser.parse_args()
 
     port = None if args.port == "None" else args.port
@@ -1768,7 +1769,7 @@ if __name__ == "__main__":
         elif port == "webrepl":
             from thonny.plugins.micropython.webrepl_connection import WebReplConnection
 
-            connection = WebReplConnection(args.url, args.password)
+            connection = WebReplConnection(args.url, args.password, args.min_write_delay)
         else:
             from thonny.plugins.micropython.serial_connection import SerialConnection
 
