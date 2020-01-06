@@ -2,6 +2,11 @@
 Version history
 ===============
 
+???
+==================
+* NEW: Include esptool in binary bundles
+
+
 3.2.6 (2020-01-01)
 ==================
 * FIXED #1035: Make highlight names work with recent Jedi versions 
