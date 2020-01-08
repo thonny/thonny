@@ -22,7 +22,11 @@ from _tkinter import TclError
 from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
 import logging
 
-_dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
+_dialog_filetypes = [
+    ("Python files", ".py .pyw"),
+    ("text files", ".txt"),
+    ("all files", ".*"),
+]
 
 REMOTE_PATH_MARKER = " :: "
 
@@ -34,7 +38,10 @@ class Editor(ttk.Frame):
 
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
-            get_workbench(), propose_remove_line_numbers=True, font="EditorFont", replace_tabs=True
+            get_workbench(),
+            propose_remove_line_numbers=True,
+            font="EditorFont",
+            replace_tabs=True,
         )
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
@@ -56,7 +63,9 @@ class Editor(ttk.Frame):
         self._code_view.text.bind("<Control-Tab>", self._control_tab, True)
 
         get_workbench().bind("DebuggerResponse", self._listen_debugger_progress, True)
-        get_workbench().bind("ToplevelResponse", self._listen_for_toplevel_response, True)
+        get_workbench().bind(
+            "ToplevelResponse", self._listen_for_toplevel_response, True
+        )
 
         self.update_appearance()
 
@@ -125,7 +134,8 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     "External modification",
-                    "Looks like '%s' was modified outside the editor.\n\n" % self._filename
+                    "Looks like '%s' was modified outside the editor.\n\n"
+                    % self._filename
                     + "Do you want to discard current editor content and reload the file from disk?",
                 ):
                     self._load_file(self._filename, keep_undo=True)
@@ -193,7 +203,10 @@ class Editor(ttk.Frame):
         self.update_title()
         response = get_runner().send_command(
             InlineCommand(
-                "read_file", path=target_filename, blocking=True, description=_("Loading") + "..."
+                "read_file",
+                path=target_filename,
+                blocking=True,
+                description=_("Loading") + "...",
             )
         )
 
@@ -298,7 +311,9 @@ class Editor(ttk.Frame):
             return False
 
     def ask_new_path(self):
-        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to save to?")
+        node = choose_node_for_file_operations(
+            self.winfo_toplevel(), "Where to save to?"
+        )
         if not node:
             return None
 
@@ -367,7 +382,8 @@ class Editor(ttk.Frame):
                 if not tk.messagebox.askyesno(
                     "Potential problem",
                     "If you name your script '%s', " % base
-                    + "you won't be able to import the library module named '%s'" % mod_name
+                    + "you won't be able to import the library module named '%s'"
+                    % mod_name
                     + ".\n\n"
                     + "Do you still want to use this name for your script?",
                 ):
@@ -380,7 +396,8 @@ class Editor(ttk.Frame):
 
     def update_appearance(self):
         self._code_view.set_gutter_visibility(
-            get_workbench().get_option("view.show_line_numbers") or get_workbench().in_simple_mode()
+            get_workbench().get_option("view.show_line_numbers")
+            or get_workbench().in_simple_mode()
         )
         self._code_view.set_line_length_margin(
             get_workbench().get_option("view.recommended_line_length")
@@ -561,6 +578,19 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
+            "save_all_files",
+            "file",
+            _("Save All files"),
+            self._cmd_save_all_files,
+            caption=_("Save All files"),
+            default_sequence=select_sequence("<Control-Alt-s>", "<Command-s>"),
+            extra_sequences=["<Control-Greek_sigma>"],
+            tester=self._cmd_save_all_files_enabled,
+            group=10,
+            # include_in_toolbar=True,
+        )
+
+        get_workbench().add_command(
             "save_file_as",
             "file",
             _("Save as..."),
@@ -589,7 +619,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             group=10,
         )
 
-        get_workbench().createcommand("::tk::mac::OpenDocument", self._mac_open_document)
+        get_workbench().createcommand(
+            "::tk::mac::OpenDocument", self._mac_open_document
+        )
 
     def load_startup_files(self):
         """If no filename was sent from command line
@@ -645,7 +677,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
     def _update_recent_menu(self):
         recents = get_workbench().get_option("file.recent_files")
         relevant_recents = [
-            path for path in recents if os.path.exists(path) and not self.file_is_opened(path)
+            path
+            for path in recents
+            if os.path.exists(path) and not self.file_is_opened(path)
         ]
         self._recent_menu.delete(0, "end")
         for path in relevant_recents:
@@ -667,7 +701,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         get_workbench().set_option("file.current_file", current_file)
 
         open_files = [
-            editor.get_filename() for editor in self.winfo_children() if editor.get_filename()
+            editor.get_filename()
+            for editor in self.winfo_children()
+            if editor.get_filename()
         ]
         get_workbench().set_option("file.open_files", open_files)
 
@@ -679,7 +715,9 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         new_editor.focus_set()
 
     def _cmd_open_file(self):
-        node = choose_node_for_file_operations(self.winfo_toplevel(), "Where to open from?")
+        node = choose_node_for_file_operations(
+            self.winfo_toplevel(), "Where to open from?"
+        )
         if not node:
             return None
 
@@ -736,7 +774,21 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             self.update_editor_title(self.get_current_editor())
 
     def _cmd_save_file_enabled(self):
-        return self.get_current_editor() and self.get_current_editor().save_file_enabled()
+        return (
+            self.get_current_editor() and self.get_current_editor().save_file_enabled()
+        )
+
+    def _cmd_save_all_files(self):
+        for editor in self.get_all_editors():
+            if editor.save_file_enabled() == True:
+                editor.save_file()
+                self.update_editor_title(editor)
+
+    def _cmd_save_all_files_enabled(self):
+        for editor in self.get_all_editors():
+            if editor.save_file_enabled() == True:
+                return True
+        return False
 
     def _cmd_save_file_as(self):
         if not self.get_current_editor():
@@ -767,11 +819,18 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             os.remove(old_filename)
 
     def _cmd_rename_file_enabled(self):
-        return self.get_current_editor() and self.get_current_editor().get_filename() is not None
+        return (
+            self.get_current_editor()
+            and self.get_current_editor().get_filename() is not None
+        )
 
     def close_single_untitled_unmodified_editor(self):
         editors = self.winfo_children()
-        if len(editors) == 1 and not editors[0].is_modified() and not editors[0].get_filename():
+        if (
+            len(editors) == 1
+            and not editors[0].is_modified()
+            and not editors[0].get_filename()
+        ):
             self._cmd_close_file()
 
     def _mac_open_document(self, *args):
