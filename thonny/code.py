@@ -561,6 +561,19 @@ class EditorNotebook(ui_utils.ClosableNotebook):
         )
 
         get_workbench().add_command(
+            "save_all_files",
+            "file",
+            _("Save All files"),
+            self._cmd_save_all_files,
+            caption=_("Save All files"),
+            default_sequence=select_sequence("<Control-q>", "<Command-q>"),
+            extra_sequences=["<Control-Greek_sigma>"],
+            tester=self._cmd_save_all_files_enabled,
+            group=10,
+            #include_in_toolbar=True,
+        )
+
+        get_workbench().add_command(
             "save_file_as",
             "file",
             _("Save as..."),
@@ -737,6 +750,19 @@ class EditorNotebook(ui_utils.ClosableNotebook):
 
     def _cmd_save_file_enabled(self):
         return self.get_current_editor() and self.get_current_editor().save_file_enabled()
+
+    def _cmd_save_all_files(self):
+        for editor in self.get_all_editors():
+            if editor.save_file_enabled() == True:
+                editor.save_file()
+                self.update_editor_title(editor)
+    
+    def _cmd_save_all_files_enabled(self):
+        for editor in self.get_all_editors():
+            if editor.save_file_enabled() == True:
+                return True
+        return False
+
 
     def _cmd_save_file_as(self):
         if not self.get_current_editor():
