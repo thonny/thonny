@@ -1762,8 +1762,8 @@ class NiceTracer(Tracer):
 
         if event == "call":
             self._fresh_exception = (
-                None
-            )  # some code is running, therefore exception is not fresh anymore
+                None  # some code is running, therefore exception is not fresh anymore
+            )
 
             if code_name in self.marker_function_names:
                 self._check_store_main_frame_id(frame.f_back)
