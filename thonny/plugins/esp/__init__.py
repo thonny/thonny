@@ -157,30 +157,32 @@ class ESPFlashingDialog(CommonDialogEx):
         )
 
         # FLASH_MODE
-        self._flashmode =tkinter.StringVar(None, "keep")
+        self._flashmode = tkinter.StringVar(None, "keep")
         flashmode_group = LabelFrame(self.main_frame, text="Flash mode", padx=10, pady=10)
-        flashmode_group.grid(row=4, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
+        flashmode_group.grid(
+            row=4, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady, 0)
+        )
 
         self._flashmode_keep_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="From image file (keep)", variable=self._flashmode, value='keep'
+            flashmode_group, text="From image file (keep)", variable=self._flashmode, value="keep"
         )
-        self._flashmode_keep_radiobutton.grid( row=0, column=0, sticky="w" )
+        self._flashmode_keep_radiobutton.grid(row=0, column=0, sticky="w")
 
-        #self._flashmode_variable.value=False
+        # self._flashmode_variable.value=False
         self._flashmode_qio_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="Quad I/O (qio)", variable=self._flashmode, value='qio'
+            flashmode_group, text="Quad I/O (qio)", variable=self._flashmode, value="qio"
         )
-        self._flashmode_qio_radiobutton.grid( row=0, column=1, sticky="w")
+        self._flashmode_qio_radiobutton.grid(row=0, column=1, sticky="w")
 
         self._flashmode_dio_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="Dual I/O (dio)", variable=self._flashmode, value='dio'
+            flashmode_group, text="Dual I/O (dio)", variable=self._flashmode, value="dio"
         )
-        self._flashmode_dio_radiobutton.grid( row=1, column=0, sticky="w" )
+        self._flashmode_dio_radiobutton.grid(row=1, column=0, sticky="w")
 
         self._flashmode_dout_radiobutton = ttk.Radiobutton(
-            flashmode_group, text="Dual Output (dout)", variable=self._flashmode, value='dout'
+            flashmode_group, text="Dual Output (dout)", variable=self._flashmode, value="dout"
         )
-        self._flashmode_dout_radiobutton.grid( row=1, column=1, sticky="w" )
+        self._flashmode_dout_radiobutton.grid(row=1, column=1, sticky="w")
 
         # Buttons
         install_button = ttk.Button(self.main_frame, text="Install", command=self._install)
