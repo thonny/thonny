@@ -18,7 +18,7 @@ from thonny.running import get_frontend_python, get_interpreter_for_subprocess
 from time import sleep
 
 import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+from tkinter import ttk, filedialog, messagebox, LabelFrame
 from collections import OrderedDict
 import tkinter
 from thonny.plugins.micropython.serial_connection import SerialConnection
@@ -156,13 +156,39 @@ class ESPFlashingDialog(CommonDialogEx):
             row=3, column=1, columnspan=3, sticky="w", padx=(epadx, 0), pady=(ipady, 0)
         )
 
+        # FLASH_MODE
+        self._flashmode =tkinter.StringVar(None, "keep")
+        flashmode_group = LabelFrame(self.main_frame, text="Flash mode", padx=10, pady=10)
+        flashmode_group.grid(row=4, column=1, columnspan=2, sticky="w", padx=(epadx, 0), pady=(ipady, 0))
+
+        self._flashmode_keep_radiobutton = ttk.Radiobutton(
+            flashmode_group, text="From image file (keep)", variable=self._flashmode, value='keep'
+        )
+        self._flashmode_keep_radiobutton.grid( row=0, column=0, sticky="w" )
+
+        #self._flashmode_variable.value=False
+        self._flashmode_qio_radiobutton = ttk.Radiobutton(
+            flashmode_group, text="Quad I/O (qio)", variable=self._flashmode, value='qio'
+        )
+        self._flashmode_qio_radiobutton.grid( row=0, column=1, sticky="w")
+
+        self._flashmode_dio_radiobutton = ttk.Radiobutton(
+            flashmode_group, text="Dual I/O (dio)", variable=self._flashmode, value='dio'
+        )
+        self._flashmode_dio_radiobutton.grid( row=1, column=0, sticky="w" )
+
+        self._flashmode_dout_radiobutton = ttk.Radiobutton(
+            flashmode_group, text="Dual Output (dout)", variable=self._flashmode, value='dout'
+        )
+        self._flashmode_dout_radiobutton.grid( row=1, column=1, sticky="w" )
+
         # Buttons
         install_button = ttk.Button(self.main_frame, text="Install", command=self._install)
-        install_button.grid(row=4, column=1, columnspan=2, sticky="e", padx=ipadx, pady=(0, epady))
+        install_button.grid(row=5, column=1, columnspan=2, sticky="e", padx=ipadx, pady=(0, epady))
 
         cancel_button = ttk.Button(self.main_frame, text="Close", command=self._close)
         cancel_button.grid(
-            row=4, column=3, columnspan=1, sticky="we", padx=(0, epadx), pady=(0, epady)
+            row=5, column=3, columnspan=1, sticky="we", padx=(0, epadx), pady=(0, epady)
         )
 
         self._reload_ports()
@@ -242,6 +268,8 @@ class ESPFlashingDialog(CommonDialogEx):
             "--port",
             port,
             "write_flash",
+            "--flash_mode",
+            self._flashmode.get(),
             self._start_address,
             firmware_path,
         ]
