@@ -76,6 +76,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Simon Gijsen
 * Simon Long
 * Sven Duzont
+* Syed Nasim
 * Taavi Ilp
 * Toomas Mölder
 * Tusamten
