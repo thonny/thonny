@@ -573,7 +573,6 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             default_sequence=select_sequence("<Control-Alt-s>", "<Command-Alt-s>"),
             tester=self._cmd_save_all_files_enabled,
             group=10,
-            # include_in_toolbar=True,
         )
 
         get_workbench().add_command(
