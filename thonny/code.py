@@ -22,11 +22,7 @@ from _tkinter import TclError
 from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
 import logging
 
-_dialog_filetypes = [
-    ("Python files", ".py .pyw"),
-    ("text files", ".txt"),
-    ("all files", ".*"),
-]
+_dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
 
 REMOTE_PATH_MARKER = " :: "
 
@@ -38,7 +34,7 @@ class Editor(ttk.Frame):
 
         # parent of codeview will be workbench so that it can be maximized
         self._code_view = CodeView(
-            get_workbench(), propose_remove_line_numbers=True, font="EditorFont", replace_tabs=True,
+            get_workbench(), propose_remove_line_numbers=True, font="EditorFont", replace_tabs=True
         )
         get_workbench().event_generate(
             "EditorTextCreated", editor=self, text_widget=self.get_text_widget()
@@ -197,7 +193,7 @@ class Editor(ttk.Frame):
         self.update_title()
         response = get_runner().send_command(
             InlineCommand(
-                "read_file", path=target_filename, blocking=True, description=_("Loading") + "...",
+                "read_file", path=target_filename, blocking=True, description=_("Loading") + "..."
             )
         )
 
