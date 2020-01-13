@@ -6,7 +6,7 @@ BASE_LANGUAGE_NAME = "English"
 # http://www.internationalphoneticalphabet.org/languages/language-names-in-native-language/
 
 LANGUAGES_DICT = {
-    "de_DE": "Deutsch [ALPHA]",
+    "de_DE": "Deutsch [BETA]",
     "et_EE": "Eesti",
     BASE_LANGUAGE_CODE: BASE_LANGUAGE_NAME,
     "es_ES": "Español [ALPHA]",
