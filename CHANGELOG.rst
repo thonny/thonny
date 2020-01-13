@@ -6,7 +6,7 @@ Version history
 ==================
 * NEW: Include esptool in binary bundles
 * NEW: ESP flash dialog now allows selecting flash mode, #1056 by Rune Langøy
-
+* NEW: "Save all" command, #1053 by Syed Nasim
 
 
 3.2.6 (2020-01-01)
