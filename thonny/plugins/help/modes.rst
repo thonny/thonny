@@ -8,7 +8,7 @@ This is the default mode. Nothing much to say about this.
 
 Simple mode
 -----------
-In this mode the menus are hidden and Variables view gets automatically opened. 
+In this mode the menus are hidden, toolbar buttons have captions and Variables view gets automatically opened. 
 Use a small link in the upper-right corner of the main window to return to regular mode.
 
 Expert mode
