@@ -56,7 +56,7 @@ def get_statement_of_position(node, pos):
 def _copy_of_get_statement_of_position(node, pos):
     # https://github.com/davidhalter/jedi/commit/9f3a2f93c48eda24e2dcc25e54eb7cc10aa73848
     from parso.python import tree
-    
+
     for c in node.children:
         if c.start_pos <= pos <= c.end_pos:
             if c.type not in (
