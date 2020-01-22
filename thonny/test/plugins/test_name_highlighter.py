@@ -83,6 +83,17 @@ def test_all():
         warnings.warn("Skipping name matcher tests in Python 3.8")
         return
 
+    import jedi
+
+    if (
+        jedi.__version__.startswith("0.13.")
+        or jedi.__version__.startswith("0.14.")
+        or jedi.__version__.startswith("0.15.")
+        or jedi.__version__.startswith("0.16.")
+    ):
+        warnings.warn("Skipping name matcher tests for Jedi " + jedi.__version__)
+        return
+
     for i, test in enumerate(TEST_GROUPS):
         print("Running test group %d: " % (i + 1))
         _assert_returns_correct_indices(test[0], test[1], test[2])

@@ -8,6 +8,9 @@ Version history
 * NEW: ESP flash dialog now allows selecting flash mode, #1056 by Rune Langøy
 * NEW: "Save all" command, #1053 by Syed Nasim
 
+3.2.7 (2020-01-22)
+==================
+* TECHNICAL: Skip name hilighter tests for recent Jedi versions
 
 3.2.6 (2020-01-01)
 ==================
