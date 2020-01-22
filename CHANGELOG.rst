@@ -2,6 +2,10 @@
 Version history
 ===============
 
+3.2.7 (2020-01-22)
+==================
+* TECHNICAL: Skip name hilighter tests for recent Jedi versions
+
 3.2.6 (2020-01-01)
 ==================
 * FIXED #1035: Make highlight names work with recent Jedi versions 
