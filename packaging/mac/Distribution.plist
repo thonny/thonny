@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="1">
+    <pkg-ref id="org.thonny"/>
+    <options customize="never" require-scripts="false"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="org.thonny"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="org.thonny" visible="false">
+        <pkg-ref id="org.thonny"/>
+    </choice>
+    <pkg-ref id="org.thonny" version="3.2.6" onConclusion="none">ThonnyComponent.pkg</pkg-ref>
+</installer-gui-script>

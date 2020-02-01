@@ -68,7 +68,7 @@ mv $SCRIPT_DIR/python3.7 $PYTHON_CURRENT/bin/
 # NB! check that pip.sh refers to correct executable!
 cp $SCRIPT_DIR/../pip.sh $PYTHON_CURRENT/bin/pip3.7
 
-# create linkns ###############################################################
+# create links ###############################################################
 cd $PYTHON_CURRENT/bin
 ln -s python3.7 python3
 ln -s pip3.7 pip3
@@ -95,10 +95,13 @@ sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
 
 # sign frameworks and app ##############################
-codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+
+SIGN_ID="Developer ID Application: Aivar Annamaa (2SA9D4CVU8)"
+
+codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app/Contents/Frameworks/Python.framework
-codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app
 
@@ -112,11 +115,32 @@ rm -f $FILENAME
 hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
 
 # sign dmg ######################
-codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	$FILENAME
 
 
+# create installer ################
+COMPONENT_PACKAGE=ThonnyComponent.pkg
+pkgbuild \
+	--root build \
+	--component-plist Component.plist \
+	--install-location /Applications\
+	$COMPONENT_PACKAGE
+	
+INSTALLER_SIGN_ID="Developer ID Installer: Aivar Annamaa (2SA9D4CVU8)"
+
+PRODUCT_ARCHIVE=dist/thonny-${VERSION}.pkg
+productbuild \
+	--distribution Distribution.plist \
+	--resources . \
+	--package-path $COMPONENT_PACKAGE \
+	--sign "$INSTALLER_SIGN_ID" \
+	--keychain ~/Library/Keychains/login.keychain-db \
+	--timestamp \
+	$PRODUCT_ARCHIVE
+
+exit 0
 # xxl ####################################################################################
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
 
@@ -124,10 +148,10 @@ find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
 
 # sign frameworks and app ##############################
-codesign --force -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign --force -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app/Contents/Frameworks/Python.framework
-codesign --force -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign --force -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app
 
@@ -138,7 +162,7 @@ rm -f $PLUS_FILENAME
 hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
 
 # sign dmg #######################################################################
-codesign -s "Aivar Annamaa" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	$PLUS_FILENAME
 

@@ -37,6 +37,7 @@ packaging/windows/build
 packaging/windows/Python36
 packaging/mac/out.txt
 packaging/mac/build
+packaging/mac/*.pkg
 packaging/windows/pythonny
 packaging/setuptools/*.zip
 packaging/setuptools/*.tar.gz
