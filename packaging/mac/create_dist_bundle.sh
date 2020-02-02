@@ -112,7 +112,7 @@ cp readme.txt build
 mkdir -p dist
 FILENAME=dist/thonny-${VERSION}.dmg
 rm -f $FILENAME
-hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
+#hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
 
 # sign dmg ######################
 codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
@@ -123,18 +123,25 @@ codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain
 # create installer ################
 COMPONENT_PACKAGE=ThonnyComponent.pkg
 pkgbuild \
-	--root build \
+ 	--root build \
 	--component-plist Component.plist \
 	--install-location /Applications\
+	--scripts scripts \
+	--identifier "org.thonny" \
+	--version $VERSION \
+	--filter readme.txt \
 	$COMPONENT_PACKAGE
 	
 INSTALLER_SIGN_ID="Developer ID Installer: Aivar Annamaa (2SA9D4CVU8)"
 
+cp ../license-soft-wrap.txt resources/LICENSE.txt
+
 PRODUCT_ARCHIVE=dist/thonny-${VERSION}.pkg
 productbuild \
+	--identifier "org.thonny" \
+	--version $VERSION \
 	--distribution Distribution.plist \
-	--resources . \
-	--package-path $COMPONENT_PACKAGE \
+	--resources resources \
 	--sign "$INSTALLER_SIGN_ID" \
 	--keychain ~/Library/Keychains/login.keychain-db \
 	--timestamp \
@@ -159,7 +166,7 @@ codesign --force -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.
 # create dmg #####################################################################
 PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 rm -f $PLUS_FILENAME
-hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
+#hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
 
 # sign dmg #######################################################################
 codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \

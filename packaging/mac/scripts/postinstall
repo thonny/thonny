@@ -1,0 +1,15 @@
+#!/bin/bash
+
+PYTHON_VER=3.7
+
+echo "Removing quarantine flags"
+xattr -rd com.apple.quarantine "$2/Thonny.app"
+
+echo "Compiling standard library"
+"$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYTHON_VER/bin/python$PYTHON_VER" \
+	-m compileall \
+	"$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYTHON_VER/lib/python$PYTHON_VER"
+
+echo "Done postinstall!"
+
+exit 0

@@ -4,25 +4,25 @@
 <array>
 	<dict>
 		<key>BundleHasStrictIdentifier</key>
-		<true/>
+		<false/>
 		<key>BundleIsRelocatable</key>
 		<false/>
 		<key>BundleIsVersionChecked</key>
-		<true/>
+		<false/>
 		<key>BundleOverwriteAction</key>
 		<string>upgrade</string>
 		<key>ChildBundles</key>
 		<array>
 			<dict>
 				<key>BundleOverwriteAction</key>
-				<string></string>
+				<string>upgrade</string>
 				<key>ChildBundles</key>
 				<array>
 					<dict>
 						<key>BundleHasStrictIdentifier</key>
-						<true/>
+						<false/>
 						<key>BundleOverwriteAction</key>
-						<string></string>
+						<string>upgrade</string>
 						<key>RootRelativeBundlePath</key>
 						<string>Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app</string>
 					</dict>

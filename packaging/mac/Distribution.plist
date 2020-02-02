@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<installer-gui-script minSpecVersion="1">
-    <pkg-ref id="org.thonny"/>
-    <options customize="never" require-scripts="false"/>
+<installer-gui-script minSpecVersion="2">
+	<title>Thonny</title>
+	<welcome mime-type="text/html"><![CDATA[<html><body><br />
+		<p>
+		You will be guided through the steps necessary to install this software.
+		</p></body></html>]]>
+	</welcome>
+    <license file="LICENSE.txt" mime-type="text/plain" />
+    <allowed-os-versions>
+        <os-version min="10.9"/>
+    </allowed-os-versions>
+    <options customize="never" require-scripts="false" hostArchitectures="x86_64"/>
+    <domains enable_anywhere="true" enable_currentUserHome="false" enable_localSystem="true" /> 
     <choices-outline>
-        <line choice="default">
-            <line choice="org.thonny"/>
-        </line>
+        <line choice="default"/>
     </choices-outline>
-    <choice id="default"/>
-    <choice id="org.thonny" visible="false">
-        <pkg-ref id="org.thonny"/>
+    <choice id="default" visible="false">
+	    <pkg-ref id="org.thonny" onConclusion="none">ThonnyComponent.pkg</pkg-ref>
     </choice>
-    <pkg-ref id="org.thonny" version="3.2.6" onConclusion="none">ThonnyComponent.pkg</pkg-ref>
+    <must-close>
+    	<app id="org.thonny" />
+    </must-close>
 </installer-gui-script>
