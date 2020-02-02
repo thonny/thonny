@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <installer-gui-script minSpecVersion="2">
 	<title>Thonny</title>
-	<welcome mime-type="text/html"><![CDATA[<html><body><br />
-		<p>
-		You will be guided through the steps necessary to install this software.
-		</p></body></html>]]>
-	</welcome>
     <license file="LICENSE.txt" mime-type="text/plain" />
     <allowed-os-versions>
         <os-version min="10.9"/>

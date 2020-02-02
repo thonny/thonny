@@ -1,19 +1,17 @@
-#!/bin/bash
+#!/Applications/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7 -E
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-UGLY_PYTHON_BIN="$DIR/../Frameworks/Python.framework/Versions/3.7/bin"
-UGLY_SSL_CERT_DIR="$DIR/../Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/certifi"
+# IDLE: #!/Applications/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python -E
 
-# resolve ..-s in the path
-PYTHON_BIN="$(cd "$UGLY_PYTHON_BIN" && pwd -P)"
-export SSL_CERT_DIR="$(cd "$UGLY_SSL_CERT_DIR" && pwd -P)"
-export SSL_CERT_FILE="$SSL_CERT_DIR/cacert.pem"
+import sys
+import os.path
 
-unset PYTHONHOME
-unset PYTHONPATH
-unset PYTHONSTARTUP
-unset PYTHONINSPECT
-unset TCL_LIBRARY
-unset TK_LIBRARY
+SSL_CERT_DIR = sys.prefix + "/lib/python3.7/site-packages/certifi"
+os.environ["SSL_CERT_DIR"] = SSL_CERT_DIR
+os.environ["SSL_CERT_DIR"] = SSL_CERT_DIR + "/cacert.pem"
 
-exec "$PYTHON_BIN/python3.7" -E -m thonny "$@"
+for key in ["TCL_LIBRARY", "TK_LIBRARY"]:
+	if key in os.environ:
+		del os.environ[key]
+	
+import thonny
+thonny.launch()

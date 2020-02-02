@@ -82,7 +82,7 @@ cp thonny_python.ini $PYTHON_CURRENT/bin
 
 
 # Replace Python.app Info.plist to get name "Thonny" to menubar
-cp -f $SCRIPT_DIR/Python.app.plist $PYTHON_CURRENT/Resources/Python.app/Contents/Info.plist
+#cp -f $SCRIPT_DIR/Python.app.plist $PYTHON_CURRENT/Resources/Python.app/Contents/Info.plist
 
 # version info ##############################################################
 VERSION=$(<$PYTHON_CURRENT/lib/python3.7/site-packages/thonny/VERSION)
@@ -115,13 +115,14 @@ rm -f $FILENAME
 #hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
 
 # sign dmg ######################
-codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
-	--entitlements thonny.entitlements --options runtime \
-	$FILENAME
+#codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+#	--entitlements thonny.entitlements --options runtime \
+#	$FILENAME
 
 
 # create installer ################
 COMPONENT_PACKAGE=ThonnyComponent.pkg
+rm -f $COMPONENT_PACKAGE
 pkgbuild \
  	--root build \
 	--component-plist Component.plist \
@@ -137,6 +138,7 @@ INSTALLER_SIGN_ID="Developer ID Installer: Aivar Annamaa (2SA9D4CVU8)"
 cp ../license-soft-wrap.txt resources/LICENSE.txt
 
 PRODUCT_ARCHIVE=dist/thonny-${VERSION}.pkg
+rm -f $PRODUCT_ARCHIVE
 productbuild \
 	--identifier "org.thonny" \
 	--version $VERSION \
@@ -165,13 +167,13 @@ codesign --force -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.
 
 # create dmg #####################################################################
 PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
-rm -f $PLUS_FILENAME
+#rm -f $PLUS_FILENAME
 #hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
 
 # sign dmg #######################################################################
-codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
-	--entitlements thonny.entitlements --options runtime \
-	$PLUS_FILENAME
+#codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+#	--entitlements thonny.entitlements --options runtime \
+#	$PLUS_FILENAME
 
 
 # Notarizing #####################################################################
