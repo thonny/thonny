@@ -15,7 +15,8 @@
 __pycache__
 dist
 packaging/linux/build
-build  
+build
+resources_build
 MANIFEST
 RemoteSystemsTempFiles
 installer_building.log

@@ -1,4 +1,6 @@
-#!/Applications/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7 -E
+#!SHEBANG_PY -E
+
+# ALT: !/Applications/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7 -E
 
 # IDLE: #!/Applications/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python -E
 

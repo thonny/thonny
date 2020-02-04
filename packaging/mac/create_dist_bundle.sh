@@ -89,7 +89,6 @@ VERSION=$(<$PYTHON_CURRENT/lib/python3.7/site-packages/thonny/VERSION)
 ARCHITECTURE="$(uname -m)"
 VERSION_NAME=thonny-$VERSION-$ARCHITECTURE 
 
-
 # set version ############################################################
 sed -i.bak "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 rm -f build/Thonny.app/Contents/Info.plist.bak
@@ -121,6 +120,16 @@ rm -f $FILENAME
 
 
 # create installer ################
+# prepare resources
+
+mkdir -p resources_build
+cp resource_templates/* resources
+sed -i '' "s/VERSION/$VERSION/g" resources_build/WELCOME.html
+cp ../license-soft-wrap.txt resources_build/LICENSE.txt
+
+
+
+# component
 COMPONENT_PACKAGE=ThonnyComponent.pkg
 rm -f $COMPONENT_PACKAGE
 pkgbuild \
@@ -135,15 +144,13 @@ pkgbuild \
 	
 INSTALLER_SIGN_ID="Developer ID Installer: Aivar Annamaa (2SA9D4CVU8)"
 
-cp ../license-soft-wrap.txt resources/LICENSE.txt
-
 PRODUCT_ARCHIVE=dist/thonny-${VERSION}.pkg
 rm -f $PRODUCT_ARCHIVE
 productbuild \
 	--identifier "org.thonny" \
 	--version $VERSION \
 	--distribution Distribution.plist \
-	--resources resources \
+	--resources resources_build \
 	--sign "$INSTALLER_SIGN_ID" \
 	--keychain ~/Library/Keychains/login.keychain-db \
 	--timestamp \

@@ -1,17 +1,45 @@
 #!/bin/bash
 
-PYTHON_VER=3.7
+#set -e # compileall can fail the installation
 
 echo "Starting postinstall"
 echo "Thonny was installed to $2"
 
-#echo "Removing quarantine flags"
-#xattr -rd com.apple.quarantine "$2/Thonny.app"
+PYVER="3.7"
+PYINT="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/bin/python$PYVER"
+PYLIB="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/lib/python$PYVER"
+PYAPP="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/Resources/Python.app/Contents/MacOS/Python"
+
+
+echo "Setting launcher shebang"
+sed -i '' "s:SHEBANG_PY:$PYAPP:g" "$2/Thonny.app/Contents/MacOS/thonny"
+
+echo "Removing quarantine flags"
+xattr -rd com.apple.quarantine "$2/Thonny.app"
+
+
 
 echo "Compiling standard library"
-"$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYTHON_VER/bin/python$PYTHON_VER" \
-	-m compileall \
-	"$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYTHON_VER/lib/python$PYTHON_VER"
+
+"$PYINT" -E -s -Wi \
+    "$PYLIB/compileall.py" -q -j0 -f \
+    -x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data' \
+    "$PYLIB"
+
+"$PYINT" -E -s -Wi -O \
+    "$PYLIB/compileall.py" -q -j0 -f \
+    -x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data' \
+    "$PYLIB"
+
+"$PYINT" -E -s -Wi \
+    "$PYLIB/compileall.py" -q -j0 -f \
+    -x badsyntax \
+    "$PYLIB/site-packages"
+
+"$PYINT" -E -s -Wi -O \
+    "$PYLIB/compileall.py" -q -j0 -f \
+    -x badsyntax \
+    "$PYLIB/site-packages"
 
 echo "Done postinstall!"
 
