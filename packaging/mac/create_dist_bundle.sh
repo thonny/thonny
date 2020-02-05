@@ -117,9 +117,10 @@ codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app/Contents/Frameworks/Python.framework \
 	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7 \
-	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python \
 	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app 
-	
+
+# For some reason this executable needs to be signed after the others, 
+# otherwise notarizer reports it as with invalid signature
 codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python 

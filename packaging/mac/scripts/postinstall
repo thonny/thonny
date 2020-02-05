@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -e # compileall can fail the installation
+#set -e # compileall can fail the installation 
 
 echo "Starting postinstall"
 echo "Thonny was installed to $2"
