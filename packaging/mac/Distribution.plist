@@ -12,9 +12,9 @@
         <line choice="default"/>
     </choices-outline>
     <choice id="default" visible="false">
-	    <pkg-ref id="org.thonny" onConclusion="none">ThonnyComponent.pkg</pkg-ref>
+	    <pkg-ref id="org.thonny.Thonny.component" onConclusion="none">ThonnyComponent.pkg</pkg-ref>
     </choice>
     <must-close>
-    	<app id="org.thonny" />
+    	<app id="org.thonny.Thonny" />
     </must-close>
 </installer-gui-script>

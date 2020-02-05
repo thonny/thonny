@@ -9,7 +9,7 @@
 	<string>Thonny</string>
 	
 	<key>CFBundleIdentifier</key>
-	<string>org.thonny</string>
+	<string>org.thonny.Thonny</string>
 	
 	<key>LSMinimumSystemVersion</key>
 	<string>10.9.0</string>

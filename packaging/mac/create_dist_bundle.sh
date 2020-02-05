@@ -164,7 +164,7 @@ pkgbuild \
 	--component-plist Component.plist \
 	--install-location /Applications\
 	--scripts scripts \
-	--identifier "org.thonny" \
+	--identifier "org.thonny.Thonny.component" \
 	--version $VERSION \
 	--filter readme.txt \
 	--sign "$INSTALLER_SIGN_ID" \
@@ -176,7 +176,7 @@ echo "Creating product archive"
 PRODUCT_ARCHIVE=dist/thonny-${VERSION}.pkg
 rm -f $PRODUCT_ARCHIVE
 productbuild \
-	--identifier "org.thonny" \
+	--identifier "org.thonny.Thonny.product" \
 	--version $VERSION \
 	--distribution Distribution.plist \
 	--resources resources_build \
@@ -214,7 +214,7 @@ PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 
 # Notarizing #####################################################################
 # https://successfulsoftware.net/2018/11/16/how-to-notarize-your-software-on-macos/
-# xcrun altool -t osx --primary-bundle-id org.thonny --notarize-app --username <apple id email> --password <generated app specific pw> --file <dmg>
+# xcrun altool -t osx --primary-bundle-id org.thonny.Thonny --notarize-app --username <apple id email> --password <generated app specific pw> --file <dmg>
 # xcrun altool --notarization-info $1 --username aivar.annamaa@gmail.com --password <notarize ID>
 # xcrun stapler staple <dmg>
 
