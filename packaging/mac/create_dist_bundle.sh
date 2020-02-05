@@ -15,9 +15,13 @@ mkdir -p build
 # copy template #################################################
 cp -R -H $PREFIX/Thonny.app build
 
-# update launch script (might have changed after last create_base_bundle.sh) #####################
-cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/thonny \
+# update launch scripts (might have changed after last create_base_bundle.sh) #####################
+cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/MacOS/* \
     build/Thonny.app/Contents/MacOS
+cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/Resources/* \
+    build/Thonny.app/Contents/Resources
+cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/Info.plist \
+    build/Thonny.app/Contents
 
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
@@ -29,7 +33,7 @@ $PYTHON_CURRENT/bin/python3.7  -s -m pip install --no-cache-dir --no-binary mypy
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir certifi
 
 # install thonny #####################################################
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir thonny
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir thonny==3.2.6
 rm $PYTHON_CURRENT/bin/thonny # because this contains absolute paths
 
 # clean unnecessary stuff ###################################################
@@ -84,9 +88,6 @@ cd $SCRIPT_DIR
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $PYTHON_CURRENT/bin 
 
-
-# Replace Python.app Info.plist to get name "Thonny" to menubar
-#cp -f $SCRIPT_DIR/Python.app.plist $PYTHON_CURRENT/Resources/Python.app/Contents/Info.plist
 
 # version info ##############################################################
 VERSION=$(<$PYTHON_CURRENT/lib/python3.7/site-packages/thonny/VERSION)
