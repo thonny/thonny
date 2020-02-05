@@ -74,6 +74,10 @@ ln -s python3.7 python3
 ln -s pip3.7 pip3
 cd $SCRIPT_DIR
 
+# link for launcher
+cd build/Thonny.app/Contents/MacOS
+ln -s ../Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python Python
+cd $SCRIPT_DIR
 
 
 
@@ -96,11 +100,34 @@ rm -f build/Thonny.app/Contents/Info.plist.bak
 # sign frameworks and app ##############################
 
 SIGN_ID="Developer ID Application: Aivar Annamaa (2SA9D4CVU8)"
+INSTALLER_SIGN_ID="Developer ID Installer: Aivar Annamaa (2SA9D4CVU8)"
 
-codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+
+#codesign -s "$SIGN_ID" --force --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+#	--entitlements thonny.entitlements \
+#	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/lib/python3.7/lib-dynload/*.so \ 
+#	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/lib/*.dylib 
+
+codesign -s "$SIGN_ID" --force --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+	--entitlements thonny.entitlements \
+	$(find build/Thonny.app -type f -name "*.so") \
+	$(find build/Thonny.app -type f -name "*.dylib") 
+
+codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
-	build/Thonny.app/Contents/Frameworks/Python.framework
-codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+	build/Thonny.app/Contents/Frameworks/Python.framework \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7 \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app 
+	
+codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+	--entitlements thonny.entitlements --options runtime \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python 
+	
+#build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python 
+	
+	
+codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app
 
@@ -114,21 +141,20 @@ rm -f $FILENAME
 #hdiutil create -srcfolder build -volname "Thonny $VERSION" -fs HFS+ -format UDBZ $FILENAME
 
 # sign dmg ######################
-#codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+#codesign -s "$SIGN_ID" --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 #	--entitlements thonny.entitlements --options runtime \
 #	$FILENAME
 
 
 # create installer ################
 # prepare resources
-
+echo "Creating installer"
 mkdir -p resources_build
-cp resource_templates/* resources
+cp resource_templates/* resources_build
 sed -i '' "s/VERSION/$VERSION/g" resources_build/WELCOME.html
 cp ../license-soft-wrap.txt resources_build/LICENSE.txt
 
-
-
+echo "Creating component package"
 # component
 COMPONENT_PACKAGE=ThonnyComponent.pkg
 rm -f $COMPONENT_PACKAGE
@@ -140,10 +166,12 @@ pkgbuild \
 	--identifier "org.thonny" \
 	--version $VERSION \
 	--filter readme.txt \
+	--sign "$INSTALLER_SIGN_ID" \
+	--keychain ~/Library/Keychains/login.keychain-db \
+	--timestamp \
 	$COMPONENT_PACKAGE
 	
-INSTALLER_SIGN_ID="Developer ID Installer: Aivar Annamaa (2SA9D4CVU8)"
-
+echo "Creating product archive"
 PRODUCT_ARCHIVE=dist/thonny-${VERSION}.pkg
 rm -f $PRODUCT_ARCHIVE
 productbuild \
@@ -164,10 +192,10 @@ find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
 
 # sign frameworks and app ##############################
-codesign --force -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign --force -s "$SIGN_ID" --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app/Contents/Frameworks/Python.framework
-codesign --force -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+codesign --force -s "$SIGN_ID" --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app
 
@@ -178,7 +206,7 @@ PLUS_FILENAME=dist/thonny-xxl-${VERSION}.dmg
 #hdiutil create -srcfolder build -volname "Thonny XXL $VERSION" -fs HFS+ -format UDBZ $PLUS_FILENAME
 
 # sign dmg #######################################################################
-#codesign -s "$SIGN_ID" --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+#codesign -s "$SIGN_ID" --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
 #	--entitlements thonny.entitlements --options runtime \
 #	$PLUS_FILENAME
 

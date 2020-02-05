@@ -10,7 +10,6 @@ PYINT="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/bin/py
 PYLIB="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/lib/python$PYVER"
 PYAPP="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/Resources/Python.app/Contents/MacOS/Python"
 
-
 echo "Setting launcher shebang"
 sed -i '' "s:SHEBANG_PY:$PYAPP:g" "$2/Thonny.app/Contents/MacOS/thonny"
 
