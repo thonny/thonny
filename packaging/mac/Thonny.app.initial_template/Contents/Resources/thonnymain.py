@@ -32,6 +32,7 @@ os.chdir(os.path.expanduser('~/Documents'))
 # 3. Thonny script alters sys.argv and uses os.execve to replace itself with
 #       thonnymain.py running under the symlinked python.
 #       This is the magic step.
+#       NB! This seems to enable Thonny menu instead of Python menu
 # 4. During interpreter initialization, because PYTHONEXECUTABLE is defined,
 #    sys.executable may get set to an unuseful value.
 #

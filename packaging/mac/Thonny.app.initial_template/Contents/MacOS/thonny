@@ -5,21 +5,12 @@
 import sys
 import os.path
 
-SSL_CERT_DIR = sys.prefix + "/lib/python3.7/site-packages/certifi"
-os.environ["SSL_CERT_DIR"] = SSL_CERT_DIR
-os.environ["SSL_CERT_DIR"] = SSL_CERT_DIR + "/cacert.pem"
-
-for key in ["TCL_LIBRARY", "TK_LIBRARY"]:
-	if key in os.environ:
-		del os.environ[key]
-	
-#import thonny
-#thonny.launch()
+print("ARGV", sys.argv)
 
 execdir = os.path.dirname(sys.argv[0])
 executable = os.path.join(execdir, "Python")
 resdir = os.path.join(os.path.dirname(execdir), "Resources")
-#libdir = os.path.join(os.path.dirname(execdir), "Frameworks")
+libdir = os.path.join(os.path.dirname(execdir), "Frameworks/Python.framework/Versions/3.7/lib")
 mainprogram = os.path.join(resdir, "thonnymain.py")
 
 sys.argv.insert(1, mainprogram)
@@ -28,8 +19,18 @@ pypath = os.getenv("PYTHONPATH", "")
 if pypath:
     pypath = ":" + pypath
 os.environ["PYTHONPATH"] = resdir + pypath
-
+print("LIBDIR", libdir)
 os.environ["PYTHONEXECUTABLE"] = executable
-#os.environ["DYLD_LIBRARY_PATH"] = libdir
-#os.environ["DYLD_FRAMEWORK_PATH"] = libdir
+os.environ["DYLD_LIBRARY_PATH"] = libdir
+os.environ["DYLD_FRAMEWORK_PATH"] = libdir
+os.environ["TCL_LIBRARY"] = libdir + "/tcl8.6"
+os.environ["TK_LIBRARY"] = libdir + "/tk8.6"
+
+print("TCL", os.environ["TCL_LIBRARY"])
+
+SSL_CERT_DIR = libdir + "/python3.7/site-packages/certifi"
+os.environ["SSL_CERT_DIR"] = SSL_CERT_DIR
+os.environ["SSL_CERT_FILE"] = SSL_CERT_DIR + "/cacert.pem"
+
+
 os.execve(executable, sys.argv, os.environ)
