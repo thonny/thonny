@@ -13,10 +13,8 @@ PYAPP="$2/Thonny.app/Contents/Frameworks/Python.framework/Versions/$PYVER/Resour
 echo "Setting launcher shebang"
 sed -i '' "s:SHEBANG_PY:$PYAPP:g" "$2/Thonny.app/Contents/MacOS/thonny"
 
-echo "Removing quarantine flags"
-xattr -rd com.apple.quarantine "$2/Thonny.app"
-
-
+#echo "Removing quarantine flags"
+#xattr -rd com.apple.quarantine "$2/Thonny.app"
 
 echo "Compiling standard library"
 
@@ -25,17 +23,7 @@ echo "Compiling standard library"
     -x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data' \
     "$PYLIB"
 
-"$PYINT" -E -s -Wi -O \
-    "$PYLIB/compileall.py" -q -j0 -f \
-    -x 'bad_coding|badsyntax|site-packages|lib2to3/tests/data' \
-    "$PYLIB"
-
 "$PYINT" -E -s -Wi \
-    "$PYLIB/compileall.py" -q -j0 -f \
-    -x badsyntax \
-    "$PYLIB/site-packages"
-
-"$PYINT" -E -s -Wi -O \
     "$PYLIB/compileall.py" -q -j0 -f \
     -x badsyntax \
     "$PYLIB/site-packages"
