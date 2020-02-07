@@ -26,9 +26,6 @@ pkgbuild \
 	--identifier "org.thonny.Thonny.component" \
 	--version $VERSION \
 	--filter readme.txt \
-	--sign "$INSTALLER_SIGN_ID" \
-	--keychain ~/Library/Keychains/login.keychain-db \
-	--timestamp \
 	$COMPONENT_PACKAGE
 	
 echo "Creating product archive"
