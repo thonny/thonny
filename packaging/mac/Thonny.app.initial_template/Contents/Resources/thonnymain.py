@@ -37,7 +37,7 @@ import sys, os.path
 # Reset sys.executable to its normal value, the actual path of
 # the interpreter in the framework, by following the symlink
 # exported in PYTHONEXECUTABLE.
-pyex = os.environ['PYTHONEXECUTABLE']
+pyex = os.environ['PYTHON_SYS_EXECUTABLE']
 sys.executable = os.path.join(sys.prefix, 'bin', 'python%d.%d'%(sys.version_info[:2]))
 
 # Remove any sys.path entries for the Resources dir in the Thonny.app bundle.
@@ -48,7 +48,7 @@ if p[2].startswith('/Contents/MacOS/Python'):
 
 # Unexport PYTHONEXECUTABLE so that the other Python processes started
 # by Thonny have a normal sys.executable.
-del os.environ['PYTHONEXECUTABLE']
+del os.environ['PYTHON_SYS_EXECUTABLE']
 
 # Look for the -psn argument that the launcher adds and remove it, it will
 # only confuse the Thonny startup code.
