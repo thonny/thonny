@@ -36,9 +36,6 @@ install_name_tool -id @rpath/Python.framework/Versions/$VERSION/Python $NEW_MAIN
 install_name_tool -change $ORIG_MAIN_LIB $MAIN_LIB_LOCAL_NAME $BUNDLE_EXE
 install_name_tool -add_rpath @executable_path/../../../../../../../ $BUNDLE_EXE
 
-# TODO: update curses libraries links in lib
-
-
 # update tkinter links
 chmod 0755 $LOCAL_FRAMEWORKS/Python.framework/Versions/3.7/lib/libtcl8.6.dylib
 install_name_tool -change \

@@ -8,7 +8,7 @@ Steps for creating the bundle:
 
 Steps 1...3 need to be done once per new Python version.
 
-4. Run create_dist_bundle.sh. This will pip-install newest Thonny into the Python 
-	copied into ~/thonny_template_build_37 and create a distribution bundle under dist. 
+4. Run create_release.sh. This will pip-install newest Thonny into the Python 
+	copied into ~/thonny_template_build_37 and create distribution packages under dist. 
 	This step needs to be done once after uploading new version of Thonny into PyPI.
   

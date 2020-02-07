@@ -15,9 +15,6 @@ PYAPP="$PYFWK/Versions/$PYVER/Resources/Python.app/Contents/MacOS/Python"
 echo "Updating shebangs in bin"
 sed -i '' "s:#!/Library/Frameworks/Python.framework:\"$PYFWK\":" "$PYBIN/*"
 
-#echo "Removing quarantine flags"
-#xattr -rd com.apple.quarantine "$2/Thonny.app"
-
 echo "Compiling standard library"
 
 "$PYINT" -E -s -Wi \

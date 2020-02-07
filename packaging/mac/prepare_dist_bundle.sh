@@ -1,11 +1,12 @@
 #!/bin/bash
 set -e
 
-# Should be run after new thonny package is uploaded to PyPi
+VERSION=$1
+shift
+req_files="$@"
 
 PREFIX=$HOME/thonny_template_build_37
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
 
 # prepare working folder #########################################################
 rm -rf build
@@ -24,12 +25,16 @@ cp $SCRIPT_DIR/Thonny.app.initial_template/Contents/Info.plist \
     build/Thonny.app/Contents
 
 FRAMEWORKS=build/Thonny.app/Contents/Frameworks
-PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7/
+PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7
 
 # install #####################################################
-$PYTHON_CURRENT/bin/python3.7  -s -m pip install --no-cache-dir --no-binary mypy -r ../requirements-regular-bundle.txt
+for req_file in $req_files
+do
+	echo "installing from $req_file"
+	$PYTHON_CURRENT/bin/python3.7  -s -m pip install --no-cache-dir --no-binary mypy -r $req_file
+done
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir certifi
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir thonny==3.2.6
+$PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir "thonny==${VERSION}"
 
 rm $PYTHON_CURRENT/bin/thonny # because Thonny is not supposed to run from there
 
@@ -43,8 +48,15 @@ rm -rf $FRAMEWORKS/Tk.framework/Versions/8.6/Resources/Documentation
 rm -rf $PYTHON_CURRENT/Resources/English.lproj/Documentation
 
 rm -rf $PYTHON_CURRENT/share
+
 rm -rf $PYTHON_CURRENT/lib/python3.7/test
+rm -rf $PYTHON_CURRENT/lib/python3.7/distutils/test
+rm -rf $PYTHON_CURRENT/lib/python3.7/lib2to3/test
+rm -rf $PYTHON_CURRENT/lib/python3.7/unittest/test
+
 rm -rf $PYTHON_CURRENT/lib/python3.7/idlelib
+rm -rf $PYTHON_CURRENT/bin/idle3
+rm -rf $PYTHON_CURRENT/bin/idle3.7
 
 rm -rf $PYTHON_CURRENT/lib/python3.7/site-packages/pylint/test
 rm -rf $PYTHON_CURRENT/lib/python3.7/site-packages/mypy/test
@@ -53,7 +65,7 @@ find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
 
 
-# link to Python for launcher
+# create link to Python.app interpreter
 cd build/Thonny.app/Contents/MacOS
 ln -s ../Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python Python
 cd $SCRIPT_DIR
@@ -62,33 +74,13 @@ cd $SCRIPT_DIR
 # copy the token signifying Thonny-private Python
 cp thonny_python.ini $PYTHON_CURRENT/bin 
 
+./make_scripts_relocatable.py "$PYTHON_CURRENT/bin" 
 
-# version info ##############################################################
-VERSION=$(<$PYTHON_CURRENT/lib/python3.7/site-packages/thonny/VERSION)
+
+
+
+# set version info ##############################################################
 sed -i '' "s/VERSION/$VERSION/" build/Thonny.app/Contents/Info.plist
 
-# installer
-./create_installer_from_build.sh $VERSION "thonny"
 
-# xxl ####################################################################################
-$PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir -r ../requirements-xxl-bundle.txt
-
-find $PYTHON_CURRENT/lib -name '*.pyc' -delete
-find $PYTHON_CURRENT/lib -name '*.exe' -delete
-
-./create_installer_from_build.sh $VERSION "thonny-xxl"
-
-
-
-
-
-# Notarizing #####################################################################
-# https://successfulsoftware.net/2018/11/16/how-to-notarize-your-software-on-macos/
-# xcrun altool -t osx --primary-bundle-id org.thonny.Thonny --notarize-app --username <apple id email> --password <generated app specific pw> --file <dmg>
-# xcrun altool --notarization-info $1 --username aivar.annamaa@gmail.com --password <notarize ID>
-# xcrun stapler staple <dmg>
-
-
-# clean up #######################################################################
-#rm -rf build
 
