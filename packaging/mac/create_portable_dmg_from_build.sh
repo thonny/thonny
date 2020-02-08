@@ -22,7 +22,7 @@ EOL
 cp ../portable_thonny.ini build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin
 
 mkdir -p dist	
-filename=dist/${name_prefix}-${version}-portable.dmg	
+filename=dist/${name_prefix}-${version}-macos-portable.dmg	
 rm -f $filename	
 hdiutil create -srcfolder build -volname "Portable Thonny $version" -fs HFS+ -format UDBZ $filename
 
