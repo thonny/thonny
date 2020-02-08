@@ -10,13 +10,13 @@ echo
 echo "### Creating regular installer ###############################################"
 ./prepare_dist_bundle.sh $thonny_version ../requirements-regular-bundle.txt
 ./sign_bundle_in_build.sh
-./create_installer_from_build.sh "thonny" $thonny_version
+./create_installer_from_build.sh "thonny" "Thonny" $thonny_version
 
 echo 
 echo "### Creating XXL installer ###################################################"
 ./prepare_dist_bundle.sh $thonny_version ../requirements-regular-bundle.txt ../requirements-xxl-bundle.txt
 ./sign_bundle_in_build.sh
-./create_installer_from_build.sh "thonny-xxl" $thonny_version
+./create_installer_from_build.sh "thonny-xxl" "Thonny XXL" $thonny_version
 
 echo 
 echo "### Creating portable DMG ####################################################"
