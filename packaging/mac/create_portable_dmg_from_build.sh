@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 SIGN_ID="Developer ID Application: Aivar Annamaa (2SA9D4CVU8)"
 name_prefix=$1
@@ -12,22 +12,31 @@ This volume contains portable Thonny ${version}.
 In order to use it, drag Thonny icon to your USB stick (or another location).
 
 In portable mode Thonny keeps the configuration file inside the application bundle,
-ie. Thonny remembers your settings when use your USB stick in another Mac.  
+ie. Thonny remembers your settings when use your USB stick in another Mac.  .
 
 More info about this release: https://github.com/thonny/thonny/releases/tag/v${version}
 More info about Thonny: https://thonny.org
 EOL
 
-# copy portable mode marker
-cp ../portable_thonny.ini build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin
 
 mkdir -p dist	
 filename=dist/${name_prefix}-${version}-macos-portable.dmg	
 rm -f $filename	
 hdiutil create -srcfolder build -volname "Portable Thonny $version" -fs HFS+ -format UDBZ $filename
 
+echo "bef sign dmg"
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+
 codesign -s "$SIGN_ID" --timestamp \
 	--keychain ~/Library/Keychains/login.keychain-db \
-	--entitlements thonny.entitlements \
-	--options runtime \
 	$filename
+
+echo "af sign dmg"
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+spctl --assess -vvv $filename

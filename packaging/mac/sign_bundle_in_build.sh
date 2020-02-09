@@ -1,27 +1,79 @@
 #!/bin/bash
 
-set -e
+#set -e
 
 SIGN_ID="Developer ID Application: Aivar Annamaa (2SA9D4CVU8)"
+CHAIN="~/Library/Keychains/login.keychain-db"
 
-codesign -s "$SIGN_ID" --force --deep --timestamp --keychain ~/Library/Keychains/login.keychain-db \
-	--entitlements thonny.entitlements \
+# NB! It looks like the signing order matters for notarization
+# Also, it looks like any problem within the framework is also reported as problem
+# with main lib (Python.framework/Versions/3.7/Python)
+
+echo "1 - libs"
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	$(find build/Thonny.app -type f -name "*.so") \
 	$(find build/Thonny.app -type f -name "*.dylib") 
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
 
-codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+echo "2 - bins"
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	--entitlements thonny.entitlements --options runtime \
-	build/Thonny.app/Contents/Frameworks/Python.framework \
 	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7 \
-	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7m \
-	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app 
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7m 
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
 
-# For some reason this executable needs to be signed after the others, 
-# otherwise notarizer reports it as with invalid signature
-codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+echo "3 - Py.app launcher"
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	--entitlements thonny.entitlements --options runtime \
-	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python 
-	
-codesign -s "$SIGN_ID" --force --timestamp --keychain ~/Library/Keychains/login.keychain-db \
+	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+
+#echo "4 - main lib"
+#codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+#	--entitlements thonny.entitlements --options runtime \
+#	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python 
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+
+# Seems to be covered by signing Thonny.app 
+#echo "5 - Py app" 
+#codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+#	--entitlements thonny.entitlements --options runtime \
+#	build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+#spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+
+# Seems to be covered by signing Thonny.app or by signing main Python lib (Python.framework/Versions/3.7/Python)
+echo "6 - Framework" 
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
+	--entitlements thonny.entitlements --options runtime \
+	build/Thonny.app/Contents/Frameworks/Python.framework 
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+
+
+echo "7 - Thonny" 
+codesign -s "$SIGN_ID" --force --timestamp --keychain $CHAIN \
 	--entitlements thonny.entitlements --options runtime \
 	build/Thonny.app
+	
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
+spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
+

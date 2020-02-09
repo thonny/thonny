@@ -28,10 +28,13 @@ FRAMEWORKS=build/Thonny.app/Contents/Frameworks
 PYTHON_CURRENT=$FRAMEWORKS/Python.framework/Versions/3.7
 
 # install #####################################################
+export MACOSX_DEPLOYMENT_TARGET=10.9
+export SDKROOT=~/MacOSX10.9.sdk
+
 for req_file in $req_files
 do
 	echo "installing from $req_file"
-	$PYTHON_CURRENT/bin/python3.7  -s -m pip install --no-cache-dir --no-binary mypy -r $req_file
+	$PYTHON_CURRENT/bin/python3.7  -s -m pip install --no-binary mypy --no-binary lxml -r $req_file
 done
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --no-cache-dir certifi
 $PYTHON_CURRENT/bin/python3.7 -s -m pip install --pre --no-cache-dir "thonny==${VERSION}"
