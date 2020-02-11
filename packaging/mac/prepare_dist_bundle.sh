@@ -67,6 +67,10 @@ rm -rf $PYTHON_CURRENT/lib/python3.7/site-packages/mypy/test
 find $PYTHON_CURRENT/lib -name '*.pyc' -delete
 find $PYTHON_CURRENT/lib -name '*.exe' -delete
 
+# for some reason the notarizer doesn't like txt files in these packages
+find $PYTHON_CURRENT/lib/python3.7/site-packages/lxml -name '*.txt' -delete       || true
+find $PYTHON_CURRENT/lib/python3.7/site-packages/matplotlib -name '*.txt' -delete || true
+
 
 # create link to Python.app interpreter
 cd build/Thonny.app/Contents/MacOS
