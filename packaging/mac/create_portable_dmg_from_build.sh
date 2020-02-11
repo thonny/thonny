@@ -24,19 +24,6 @@ filename=dist/${name_prefix}-${version}-macos-portable.dmg
 rm -f $filename	
 hdiutil create -srcfolder build -volname "Portable Thonny $version" -fs HFS+ -format UDBZ $filename
 
-echo "bef sign dmg"
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
-
 codesign -s "$SIGN_ID" --timestamp \
 	--keychain ~/Library/Keychains/login.keychain-db \
 	$filename
-
-echo "af sign dmg"
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Python
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/bin/python3.7
-spctl --assess -vvv build/Thonny.app/Contents/Frameworks/Python.framework/Versions/3.7/Resources/Python.app/Contents/MacOS/Python
-spctl --assess -vvv $filename
