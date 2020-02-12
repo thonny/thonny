@@ -12,9 +12,6 @@ PYINT="$PYBIN/python$PYVER"
 PYLIB="$PYFWK/Versions/$PYVER/lib/python$PYVER"
 PYAPP="$PYFWK/Versions/$PYVER/Resources/Python.app/Contents/MacOS/Python"
 
-echo "Updating shebangs in bin"
-sed -i '' "s:#!/Library/Frameworks/Python.framework:\"$PYFWK\":" "$PYBIN/*"
-
 echo "Compiling standard library"
 
 "$PYINT" -E -s -Wi \
