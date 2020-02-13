@@ -75,9 +75,9 @@ class AboutDialog(CommonDialog):
         credits_label = ttk.Label(
             main_frame,
             text=_(
-                "Made at the\n"
+                "Made in\n"
                 + "University of Tartu, Estonia,\n"
-                + "with help from the\n"
+                + "with the help from\n"
                 + "open-source community,\n"
                 + "Raspberry Pi Foundation\n"
                 + "and Cybernetica AS"
