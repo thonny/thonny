@@ -1,24 +1,23 @@
-#!/bin/bash
+#!SHEBANG_PY
 
-ugly_macos_dir="$(cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd)"
-contents_dir="$(cd "${ugly_macos_dir}/.." && pwd -P)"
-macos_dir="$contents_dir/MacOS"
-res_dir="$contents_dir/Resources"
-bin_dir="$contents_dir/Frameworks/Python.framework/Versions/3.7/bin"
-executable="$macos_dir/Python"
+# inspired by IDLE.app/Contents/IDLE
 
-export SSL_CERT_DIR="$contents_dir/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/certifi"
-export SSL_CERT_FILE="$SSL_CERT_DIR/cacert.pem"
+import sys
+import os.path
 
-unset PYTHONHOME
-unset PYTHONPATH
-unset PYTHONSTARTUP
-unset PYTHONINSPECT
+execdir = os.path.dirname(sys.argv[0])
+executable = os.path.join(execdir, "Python")
+resdir = os.path.join(os.path.dirname(execdir), "Resources")
+libdir = os.path.join(os.path.dirname(execdir), "Frameworks/Python.framework/Versions/3.7/lib")
+ssl_cert_dir = libdir + "/python3.7/site-packages/certifi"
+mainprogram = os.path.join(resdir, "thonnymain.py")
 
-export TCL_LIBRARY="$contents_dir/Frameworks/Python.framework/Versions/3.7/lib/tcl8.6"
-export TK_LIBRARY="$contents_dir/Frameworks/Python.framework/Versions/3.7/lib/tk8.6"
+sys.argv.insert(1, mainprogram)
 
-export PYTHON_SYS_EXECUTABLE="$executable"
+os.environ["PYTHON_SYS_EXECUTABLE"] = executable
+os.environ["SSL_CERT_DIR"] = ssl_cert_dir
+os.environ["SSL_CERT_FILE"] = ssl_cert_dir + "/cacert.pem"
+os.environ["TCL_LIBRARY"] = libdir + "/tcl8.6"
+os.environ["TK_LIBRARY"] = libdir + "/tk8.6"
 
-exec "$executable" -E "$res_dir/thonnymain.py" "$@"
-
+os.execve(executable, sys.argv, os.environ)
