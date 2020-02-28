@@ -1014,6 +1014,8 @@ class BackendFileDialog(CommonDialog):
         )
 
         self.browser.request_focus_into(initial_dir)
+        
+        self.name_entry.focus_set()
 
     def on_ok(self, event=None):
         tree = self.browser.tree
