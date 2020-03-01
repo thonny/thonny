@@ -487,7 +487,7 @@ class MicroPythonBackend:
         
         After submitting commands to the raw REPL, the output should be like
         {stdout}\x04\{stderr}\x04\n\>
-        In the end of {stdout} there may be \x02{value-for-thonny}
+        In the end of {stdout} there may be \x02<thonny>{value-for-thonny}</thonny>\x04.
         
         Interrupts will alter the execution, but from the response parsing
         perspective they don't matter as they look like any other exception.
