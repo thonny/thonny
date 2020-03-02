@@ -47,6 +47,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * cefn
 * Celso Isayah Dias
 * Chad Purdy
+* codemee
 * cspaier
 * cubimon
 * Dominic Twyman
