@@ -127,11 +127,11 @@ msgstr "自動完成"
 
 #: thonny/plugins/backend_config_page.py:43
 msgid "Which interpreter or device should Thonny use for running your code?"
-msgstr "Thonny應該使用哪一個直釋器或設備來執行你的程式？"
+msgstr "Thonny應該使用哪一個直譯器或設備來執行你的程式？"
 
 #: thonny/plugins/backend_config_page.py:127
 msgid "Interpreter"
-msgstr "直釋器"
+msgstr "直譯器"
 
 #: thonny/plugins/birdseye_frontend.py:32
 msgid "About Birdseye"
