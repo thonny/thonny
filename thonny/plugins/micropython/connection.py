@@ -122,6 +122,9 @@ class MicroPythonConnection:
             end="",
         )
 
+    def _make_output_available(self, data, block=True):
+        self._read_queue.put(data, block=block)
+
     def incoming_is_empty(self):
         return self._read_queue.empty() and len(self._read_buffer) == 0
 

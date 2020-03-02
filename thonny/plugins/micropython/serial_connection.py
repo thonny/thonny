@@ -89,7 +89,7 @@ class SerialConnection(MicroPythonConnection):
                         data = data[e.start :]
 
                 if to_be_published:
-                    self._read_queue.put(to_be_published)
+                    self._make_output_available(to_be_published)
 
         except Exception as e:
             self._error = str(e)
@@ -115,6 +115,21 @@ class SerialConnection(MicroPythonConnection):
                     self._serial = None
                 except Exception:
                     logging.exception("Couldn't close serial")
+
+
+class DifficultSerialConnection(SerialConnection):
+    """For hardening the communication protocol"""
+
+    def _make_output_available(self, data, block=True):
+
+        # output Thonny message marker as two parts
+        pos = data.find(b"<thonny>")
+        if pos > -1:
+            super()._make_output_available(data[: pos + 5], block=block)
+            time.sleep(0.1)
+            super()._make_output_available(data[pos + 5 :], block=block)
+        else:
+            super()._make_output_available(data, block=block)
 
 
 def debug(*args, file=sys.stderr):

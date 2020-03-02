@@ -87,7 +87,7 @@ class WebReplConnection(MicroPythonConnection):
                 break
 
             self.num_bytes_received += len(data)
-            self._read_queue.put(data, block=False)
+            self._make_output_available.put(data, block=False)
 
     async def _ws_keep_writing(self):
         import asyncio
@@ -177,7 +177,7 @@ class alt_WebReplConnection(MicroPythonConnection):
                 if len(data) == 0:
                     self._error = "EOF"
                     break
-                self._read_queue.put(data)
+                self._make_output_available(data)
                 self.num_bytes_received += len(data)
         except Exception as e:
             self._error = str(e)

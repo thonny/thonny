@@ -1772,8 +1772,9 @@ if __name__ == "__main__":
             connection = WebReplConnection(args.url, args.password, args.min_write_delay)
         else:
             from thonny.plugins.micropython.serial_connection import SerialConnection
+            from thonny.plugins.micropython.serial_connection import DifficultSerialConnection
 
-            connection = SerialConnection(port, BAUDRATE)
+            connection = DifficultSerialConnection(port, BAUDRATE)
 
         vm = MicroPythonBackend(connection, clean=args.clean, api_stubs_path=args.api_stubs_path)
 
