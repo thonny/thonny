@@ -472,24 +472,6 @@ class MicroPythonBackend:
             raise RuntimeError("Failed MP script: " + str(out) + "\n" + str(err))
 
         return value
-
-    def _old_evaluate_to_repr(self, expr, prelude="", cleanup=""):
-        # assuming expr really contains an expression
-        # separator is for separating side-effect output and printed value
-        script = ""
-        if prelude:
-            script += prelude + "\n"
-        script += "print(%r, repr(%s), sep='', end=%r)" % (
-            THONNY_MSG_START.decode(),
-            expr,
-            THONNY_MSG_END.decode(),
-        )
-
-        # assuming cleanup doesn't cause output
-        if cleanup:
-            script += "\n" + cleanup
-
-        return self._execute(script, capture_output=False)
     
     def _evaluate_to_repr(self, expr, prelude="", cleanup=""):
         """Uses raw-REPL to evaluate and print the repr of given expression.
@@ -522,7 +504,7 @@ class MicroPythonBackend:
         self._submit_code_to_raw_repl(script)
         
         # forward side effects (if any)
-        _, first_terminator = self._process_until_first_eot_or_last_propmt(capture_output=False)
+        first_terminator = self._forward_output_until_eot_or_active_propmt()
         if first_terminator != EOT:
             self._connection.unread(first_terminator)
             self._forward_confusion_until_active_prompt()
@@ -556,44 +538,46 @@ class MicroPythonBackend:
         
         return data_with_terminator[:-len(final_terminator)]
     
-    def _execute_and_capture_output(self, script):
+    def _execute_and_capture_output(self, script, timeout=5):
         """Executes script in raw repl, captures stdout and consumes terminators.
         Returns stdout if everything goes well. 
         Forwards everything up to active prompt if there are any problems
         """
         self._submit_code_to_raw_repl(script)
         
-        output, first_terminator = self._process_until_first_eot_or_last_propmt(capture_output=True)
-        if first_terminator != EOT:
-            self._connection.unread(first_terminator)
+        output_with_eot = self._connection.soft_read_until(EOT, timeout=timeout)
+        if not output_with_eot.endswith(EOT):
+            self._connection.unread(output_with_eot)
             self._forward_confusion_until_active_prompt()
             return None
         
         final_terminator = EOT + RAW_PROMPT 
-        terminal_data = self._connection.soft_read_until(final_terminator, timeout=LAST_HOPE_TIMEOUT)
+        err_and_prompt = self._connection.soft_read_until(final_terminator, timeout=LAST_HOPE_TIMEOUT)
         
-        if terminal_data != final_terminator:
-            self._connection.unread(first_terminator)
-            self._connection.unread(terminal_data)
+        if err_and_prompt != final_terminator:
+            self._connection.unread(output_with_eot)
+            self._connection.unread(EOT)
+            self._connection.unread(err_and_prompt)
             self._forward_confusion_until_active_prompt()
             return None
             
         # nothing should follow the raw prompt
         remaining = self._connection.read_all()
         if remaining:
-            self._connection.unread(first_terminator)
-            self._connection.unread(terminal_data)
+            self._connection.unread(output_with_eot)
+            self._connection.unread(EOT)
+            self._connection.unread(err_and_prompt)
             self._connection.unread(remaining)
             self._forward_confusion_until_active_prompt()
             return None
         
-        return output
+        return output_with_eot[:-len(EOT)]
     
     def execute_user_code(self, script):
         """Executes the code in raw REPL and forwards everything up to active prompt"""
         self._submit_code_to_raw_repl(script)
         
-        _, first_terminator = self._process_until_first_eot_or_last_propmt(capture_output=False)
+        first_terminator = self._forward_output_until_eot_or_active_propmt()
         if first_terminator != EOT:
             self._connection.unread(first_terminator)
             self._forward_confusion_until_active_prompt()
@@ -629,13 +613,6 @@ class MicroPythonBackend:
         
         return True # This is the happy path
     
-    def _old_evaluate(self, expr, prelude="", cleanup=""):
-        _, _, value_repr = self._old_evaluate_to_repr(expr, prelude, cleanup)
-        if value_repr is None:
-            return None
-        else:
-            return ast.literal_eval(value_repr)
-
     def _evaluate(self, expr, prelude="", cleanup=""):
         value_repr = self._evaluate_to_repr(expr, prelude, cleanup)
         if value_repr is None:
@@ -643,48 +620,17 @@ class MicroPythonBackend:
         else:
             return ast.literal_eval(value_repr)
 
-
-    def _gather_raw_result(self, expected_max_time):
-        """Read the stdout and stderr part of the result of the command 
-        given in raw mode. The priority is completeness: if something looks wrong, 
-        output the result and return nothing."""
-        out = self._connection.soft_read_until(EOT, timeout=expected_max_time + LAST_HOPE_TIMEOUT)
-        if not out.endswith(EOT):
-            # something is wrong
-            self._connection.unread(out)
-            self._forward_unexpected_output()
-            return None, None
-        else:
-            out = out[: -len(EOT)]
-
-        terminator = EOT + RAW_PROMPT
-        # 1 seconds should be plenty for the error to appear
-        err = self._connection.soft_read_until(terminator, timeout=1 + LAST_HOPE_TIMEOUT)
-        # we can't be sure about the result if terminator is followed by something else
-        remaining = self._connection.read_all()
-        if not err.endswith(terminator) or remaining:
-            self._connection.unread(out)
-            self._forward_unexpected_output()
-            self._connection.unread(err)
-            self._forward_unexpected_output()
-            self._connection.unread(remaining)
-            self._forward_unexpected_output()
-            return None, None
-        else:
-            err = err[: -len(terminator)]
-
-        return out, err
     
     def _forward_confusion_until_active_prompt(self):
         """Used for forwarding problematic output in case of parse errors"""
         while True:
-            _, terminator = self._process_until_first_eot_or_last_propmt(capture_output=False)
+            terminator = self._forward_output_until_eot_or_active_propmt()
             if terminator in (NORMAL_PROMPT, RAW_PROMPT):
                 return
             else:
                 self._send_output(terminator, "stdout")
     
-    def _process_until_first_eot_or_last_propmt(self, capture_output=False):
+    def _forward_output_until_eot_or_active_propmt(self):
         """Meant for incrementally forwarding stdout from user statements, 
         scripts and soft-reboots.
         
