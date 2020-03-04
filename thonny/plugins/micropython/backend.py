@@ -55,6 +55,8 @@ SOFT_REBOOT_CMD = b"\x04"
 # Output tokens
 THONNY_MSG_START = b"\x02<thonny>"
 THONNY_MSG_END = b"</thonny>\x04"
+THONNY_START_TAG = b"<thonny>"
+THONNY_END_TAG = b"</thonny>"
 EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
 LF = b"\n"
@@ -68,9 +70,17 @@ FIRST_RAW_PROMPT_SUFFIX = b"\r\n>"
 
 RAW_PROMPT = b">"
 
-BLOCK_CLOSERS = re.compile(
+INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
+    b"|".join(map(re.escape, [LF, EOT, NORMAL_PROMPT]))
+)
+
+OLD_BLOCK_CLOSERS = re.compile(
     b"|".join(map(re.escape, [LF, EOT, THONNY_MSG_START, NORMAL_PROMPT, FIRST_RAW_PROMPT]))
 )
+
+# extra seconds to wait, when we believe the expected result is not coming 
+# but we're not sure yet
+LAST_HOPE_TIMEOUT = 2
 
 
 logger = logging.getLogger("thonny.micropython.backend")
@@ -408,6 +418,10 @@ class MicroPythonBackend:
     def _send_output(self, data, stream_name):
         if not data:
             return
+        
+        if isinstance(data, bytes):
+            data = data.decode(ENCODING, errors="replace")
+            
         data = self._transform_output(data)
         msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
         self.send_message(msg)
@@ -426,6 +440,18 @@ class MicroPythonBackend:
         prompt = self._connection.read_until(FIRST_RAW_PROMPT_SUFFIX, 1, True)
         if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
             raise TimeoutError("Could not ensure raw prompt")
+
+    def _submit_code_to_raw_repl(self, script):
+        self._ensure_raw_propmt()
+
+        # send command
+        self._connection.write(script.encode(ENCODING) + EOT)
+        debug("Wrote " + script + "\n--------\n")
+
+        # fetch command confirmation
+        ok = self._connection.read(2)
+        debug("GOTOK")
+        assert ok == OK, "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
 
     def _execute(self, script, capture_output=False):
         self._ensure_raw_propmt()
@@ -447,7 +473,7 @@ class MicroPythonBackend:
 
         return value
 
-    def _execute_print_expr(self, expr, prelude="", cleanup="", capture_output=False):
+    def _old_evaluate_to_repr(self, expr, prelude="", cleanup=""):
         # assuming expr really contains an expression
         # separator is for separating side-effect output and printed value
         script = ""
@@ -463,15 +489,257 @@ class MicroPythonBackend:
         if cleanup:
             script += "\n" + cleanup
 
-        return self._execute(script, capture_output)
-
-    def _evaluate(self, expr, prelude="", cleanup=""):
-        _, _, value_repr = self._execute_print_expr(expr, prelude, cleanup)
+        return self._execute(script, capture_output=False)
+    
+    def _evaluate_to_repr(self, expr, prelude="", cleanup=""):
+        """Uses raw-REPL to evaluate and print the repr of given expression.
+        
+        The expected serial output is following:
+        
+            {output from the side effect of prelude or expr}
+            EOT
+            <thonny>{repr of the value}</thonny>
+            EOT
+            EOT
+            RAW_PROMPT
+        
+        Side effect text before first EOT gets always forwarded.
+        Returns the repr only if everything goes according to the plan.
+        Forwards everything up to active prompt and returns None if anything looks fishy
+        (this may block).
+        """
+        script = ""
+        if prelude:
+            script += prelude + "\n"
+        script += "print(%r, repr(%s), sep='', end=%r)" % (
+            THONNY_MSG_START.decode(),
+            expr,
+            THONNY_MSG_END.decode(),
+        )
+        if cleanup:
+            script += "\n" + cleanup
+        
+        self._submit_code_to_raw_repl(script)
+        
+        # forward side effects (if any)
+        _, first_terminator = self._process_until_first_eot_or_last_propmt(capture_output=False)
+        if first_terminator != EOT:
+            self._connection.unread(first_terminator)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        start_tag = self._connection.soft_read_until(THONNY_START_TAG, timeout=LAST_HOPE_TIMEOUT)
+        if start_tag != THONNY_START_TAG:
+            self._connection.unread(first_terminator)
+            self._connection.unread(start_tag)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        final_terminator = THONNY_END_TAG + EOT + EOT + RAW_PROMPT
+        data_with_terminator = self._connection.soft_read_until(final_terminator, timeout=LAST_HOPE_TIMEOUT)
+        if not data_with_terminator.endswith(final_terminator):
+            self._connection.unread(first_terminator)
+            self._connection.unread(start_tag)
+            self._connection.unread(data_with_terminator)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        # nothing should follow the raw prompt
+        remaining = self._connection.read_all()
+        if remaining:
+            self._connection.unread(first_terminator)
+            self._connection.unread(start_tag)
+            self._connection.unread(data_with_terminator)
+            self._connection.unread(remaining)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        return data_with_terminator[:-len(final_terminator)]
+    
+    def _execute_and_capture_output(self, script):
+        """Executes script in raw repl, captures stdout and consumes terminators.
+        Returns stdout if everything goes well. 
+        Forwards everything up to active prompt if there are any problems
+        """
+        self._submit_code_to_raw_repl(script)
+        
+        output, first_terminator = self._process_until_first_eot_or_last_propmt(capture_output=True)
+        if first_terminator != EOT:
+            self._connection.unread(first_terminator)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        final_terminator = EOT + RAW_PROMPT 
+        terminal_data = self._connection.soft_read_until(final_terminator, timeout=LAST_HOPE_TIMEOUT)
+        
+        if terminal_data != final_terminator:
+            self._connection.unread(first_terminator)
+            self._connection.unread(terminal_data)
+            self._forward_confusion_until_active_prompt()
+            return None
+            
+        # nothing should follow the raw prompt
+        remaining = self._connection.read_all()
+        if remaining:
+            self._connection.unread(first_terminator)
+            self._connection.unread(terminal_data)
+            self._connection.unread(remaining)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        return output
+    
+    def execute_user_code(self, script):
+        """Executes the code in raw REPL and forwards everything up to active prompt"""
+        self._submit_code_to_raw_repl(script)
+        
+        _, first_terminator = self._process_until_first_eot_or_last_propmt(capture_output=False)
+        if first_terminator != EOT:
+            self._connection.unread(first_terminator)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        # Don't wait too long for err when first EOT is already out
+        err_with_eot = self._connection.soft_read_until(EOT, timeout=LAST_HOPE_TIMEOUT)
+        if not err_with_eot.endswith(EOT):
+            self._connection.unread(first_terminator)
+            self._connection.unread(err_with_eot)
+            self._forward_confusion_until_active_prompt()
+            return None
+           
+        err = err_with_eot[:-len(EOT)] 
+        if err:
+            self._send_output(err, "stderr")
+        
+        raw_prompt = self._connection.soft_read_until(RAW_PROMPT, timeout=LAST_HOPE_TIMEOUT)
+        if raw_prompt != RAW_PROMPT:
+            self._connection.unread(EOT) # this was captured above
+            self._connection.unread(raw_prompt)
+            self._forward_confusion_until_active_prompt()
+            return None
+            
+        # nothing should follow the raw prompt
+        remaining = self._connection.read_all()
+        if remaining:
+            self._connection.unread(EOT) 
+            self._connection.unread(raw_prompt)
+            self._connection.unread(remaining)
+            self._forward_confusion_until_active_prompt()
+            return None
+        
+        return True # This is the happy path
+    
+    def _old_evaluate(self, expr, prelude="", cleanup=""):
+        _, _, value_repr = self._old_evaluate_to_repr(expr, prelude, cleanup)
         if value_repr is None:
             return None
         else:
             return ast.literal_eval(value_repr)
 
+    def _evaluate(self, expr, prelude="", cleanup=""):
+        value_repr = self._evaluate_to_repr(expr, prelude, cleanup)
+        if value_repr is None:
+            return None
+        else:
+            return ast.literal_eval(value_repr)
+
+
+    def _gather_raw_result(self, expected_max_time):
+        """Read the stdout and stderr part of the result of the command 
+        given in raw mode. The priority is completeness: if something looks wrong, 
+        output the result and return nothing."""
+        out = self._connection.soft_read_until(EOT, timeout=expected_max_time + LAST_HOPE_TIMEOUT)
+        if not out.endswith(EOT):
+            # something is wrong
+            self._connection.unread(out)
+            self._forward_unexpected_output()
+            return None, None
+        else:
+            out = out[: -len(EOT)]
+
+        terminator = EOT + RAW_PROMPT
+        # 1 seconds should be plenty for the error to appear
+        err = self._connection.soft_read_until(terminator, timeout=1 + LAST_HOPE_TIMEOUT)
+        # we can't be sure about the result if terminator is followed by something else
+        remaining = self._connection.read_all()
+        if not err.endswith(terminator) or remaining:
+            self._connection.unread(out)
+            self._forward_unexpected_output()
+            self._connection.unread(err)
+            self._forward_unexpected_output()
+            self._connection.unread(remaining)
+            self._forward_unexpected_output()
+            return None, None
+        else:
+            err = err[: -len(terminator)]
+
+        return out, err
+    
+    def _forward_confusion_until_active_prompt(self):
+        """Used for forwarding problematic output in case of parse errors"""
+        while True:
+            _, terminator = self._process_until_first_eot_or_last_propmt(capture_output=False)
+            if terminator in (NORMAL_PROMPT, RAW_PROMPT):
+                return
+            else:
+                self._send_output(terminator, "stdout")
+    
+    def _process_until_first_eot_or_last_propmt(self, capture_output=False):
+        """Meant for incrementally forwarding stdout from user statements, 
+        scripts and soft-reboots.
+        
+        Also used for forwarding (or capturing) side-effect output from 
+        expression evaluations and for capturing help("modules") output.
+        
+        The code may have been submitted in any of the REPL modes or
+        automatically via (soft-)reset.
+        
+        NB! The processing may end in normal
+        mode even if the command is started in raw mode (eg. when user 
+        presses reset during processing in some devices)!
+        
+        The processing may also end in FIRST_RAW_REPL, when it was started in 
+        normal REPL and Ctrl+A was issued during processing (ie. before Ctrl+C in 
+        this example):
+        
+            6
+            7
+            8
+            9
+            10
+            Traceback (most recent call last):
+              File "main.py", line 5, in <module>
+            KeyboardInterrupt:
+            MicroPython v1.11-624-g210d05328 on 2019-12-09; ESP32 module with ESP32
+            Type "help()" for more information.
+            >>>
+            raw REPL; CTRL-B to exit
+            >
+        
+        (Preceding output does not contain EOT)
+        Note that this Ctrl+A may have been issued even before Thonny connected to
+        the device.
+
+        Note that interrupt does not affect the structure of the output -- it is
+        presented just like any other exception.
+        
+        The method returns pair of captured output (or b"" if not requested)
+        and EOT, RAW_PROMPT or NORMAL_PROMPT, depending on which terminator ended the processing.
+        
+        The terminating EOT may be either the first EOT from normal raw-REPL
+        output or the starting EOT from Thonny expression (or, in principle, even
+        the second raw-REPL EOT or terminating Thonny expression EOT) 
+        -- the caller will do the interpretation.
+        
+        Because ot the special role of EOT and NORMAL_PROMT, we assume user code
+        will not output these. If it does, processing will break.
+        TODO: Experiment with this!
+        
+        """
+        
+        # TODO: may need input processing in order to progress
+        
+    
     def _process_until_initial_raw_prompt(self):
         self._connection.write(RAW_MODE_CMD)
         try:
@@ -535,7 +803,7 @@ class MicroPythonBackend:
             # Process input in chunks (max 1 parsing marker per chunk).
             # Prefer whole lines (to reduce the number of events),
             # but don't wait too long for eol.
-            ddd = self._connection.soft_read_until(BLOCK_CLOSERS, timeout=0.05)
+            ddd = self._connection.soft_read_until(OLD_BLOCK_CLOSERS, timeout=0.55)
             output += ddd
             stream_name = "stderr" if eot_count == 1 else "stdout"
 
@@ -642,7 +910,7 @@ class MicroPythonBackend:
         while postponed:
             self._command_queue.put(postponed.pop(0))
 
-    def _forward_unexpected_output(self):
+    def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
         data = self._connection.read_all()
         if data.endswith(NORMAL_PROMPT):
@@ -654,7 +922,7 @@ class MicroPythonBackend:
         else:
             at_prompt = False
 
-        self._send_output(data.decode(ENCODING, "replace"), "stdout")
+        self._send_output(data.decode(ENCODING, "replace"), stream_name)
         if at_prompt:
             # ... and recreate Thonny prompt
             self.send_message(ToplevelResponse())
@@ -684,7 +952,7 @@ class MicroPythonBackend:
             raise UserError("%cd takes one parameter")
 
     def _cmd_Run(self, cmd):
-        self._clear_environment()
+        #self._clear_environment()
         assert cmd.get("source")
         self._execute(cmd["source"])
         return {}
@@ -694,7 +962,7 @@ class MicroPythonBackend:
             # Try to parse as expression
             ast.parse(cmd.source, mode="eval")
             # If it didn't fail then source is an expression
-            _, _, value_repr = self._execute_print_expr(cmd.source)
+            _, _, value_repr = self._evaluate_to_repr(cmd.source)
             if value_repr is None:
                 value_repr = repr(None)
             return {"value_info": ValueInfo(0, value_repr)}

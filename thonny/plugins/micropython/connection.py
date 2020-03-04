@@ -106,7 +106,8 @@ class MicroPythonConnection:
         raise ConnectionClosedException(self._error)
 
     def unread(self, data):
-        self._read_buffer = data + self._read_buffer
+        if data:
+            self._read_buffer = data + self._read_buffer
 
     def write(self, data, block_size=32, delay=0.01):
         raise NotImplementedError()
