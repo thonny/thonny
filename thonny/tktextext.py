@@ -195,6 +195,7 @@ class EnhancedText(TweakableText):
         self._last_event_kind = None
         self._last_key_time = None
 
+        self._bind_keypad()
         self._bind_editing_aids()
         self._bind_movement_aids()
         self._bind_selection_aids()
@@ -248,6 +249,23 @@ class EnhancedText(TweakableText):
 
         if platform.system() == "Windows":
             self.bind("<KeyPress>", self._insert_untypable_characters_on_windows, True)
+
+    def _bind_keypad(self):
+        kmap = {
+            '<KP_Left>': '<Left>',
+            '<KP_Right>': '<Right>',
+            '<KP_Up>': '<Up>',
+            '<KP_Down>': '<Down>',
+            '<KP_Home>': '<Home>',
+            '<KP_End>': '<End>',
+            '<KP_Next>': '<Next>',
+            '<KP_Prior>': '<Prior>',
+            '<KP_Enter>': '<Return>',
+        }
+        for i in kmap:
+            def mfunc(event, key=i):
+                self.event_generate(kmap[key], **{'state': event.state})
+            self.bind(i, mfunc)
 
     def _bind_movement_aids(self):
         self.bind("<Home>", self.perform_smart_home, True)
