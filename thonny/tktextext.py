@@ -75,12 +75,12 @@ class TweakableText(tk.Text):
 
     def set_insertwidth(self, new_width):
         """Change cursor width
-        
+
         NB! Need to be careful with setting text["insertwidth"]!
         My first straightforward solution caused unexplainable
         infinite loop of insertions and deletions in the text
         (Repro: insert a line and a word, select that word and then do Ctrl-Z).
-        
+
         This solution seems safe but be careful!
         """
         if self._suppress_events:
@@ -163,10 +163,10 @@ class TweakableText(tk.Text):
 
 
 class EnhancedText(TweakableText):
-    """Text widget with extra navigation and editing aids. 
+    """Text widget with extra navigation and editing aids.
     Provides more comfortable deletion, indentation and deindentation,
     and undo handling. Not specific to Python code.
-    
+
     Most of the code is adapted from idlelib.EditorWindow.
     """
 
@@ -251,6 +251,8 @@ class EnhancedText(TweakableText):
             self.bind("<KeyPress>", self._insert_untypable_characters_on_windows, True)
 
     def _bind_keypad(self):
+        """Remap keypad movement events to non-keypad equivalents"""
+        # https://github.com/thonny/thonny/issues/1106
         kmap = {
             '<KP_Left>': '<Left>',
             '<KP_Right>': '<Right>',
@@ -262,10 +264,14 @@ class EnhancedText(TweakableText):
             '<KP_Prior>': '<Prior>',
             '<KP_Enter>': '<Return>',
         }
-        for i in kmap:
-            def mfunc(event, key=i):
+        for from_key in kmap:
+            def mfunc(event, key=from_key):
                 self.event_generate(kmap[key], **{'state': event.state})
-            self.bind(i, mfunc)
+                return 'break'
+            try:
+                self.bind(from_key, mfunc)
+            except TclError:
+                pass
 
     def _bind_movement_aids(self):
         self.bind("<Home>", self.perform_smart_home, True)
