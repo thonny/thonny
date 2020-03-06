@@ -494,7 +494,7 @@ class MicroPythonBackend:
     def _evaluate_to_repr(self, expr, prelude="", cleanup=""):
         """Uses raw-REPL to evaluate and print the repr of given expression.
         
-        The expected serial output is following:
+        The expected serial output is following (linebreaks are for readablity):
         
             {output from the side effect of prelude or expr}
             EOT
@@ -537,17 +537,19 @@ class MicroPythonBackend:
             self._forward_confusion_until_active_prompt(script)
             return None
 
-        final_terminator = THONNY_MSG_END + EOT + EOT + RAW_PROMPT
+        msg_terminator = THONNY_MSG_END + EOT
         data_with_terminator = self._connection.soft_read_until(
-            final_terminator, timeout=LAST_HOPE_TIMEOUT
+            msg_terminator, timeout=LAST_HOPE_TIMEOUT
         )
-        if not data_with_terminator.endswith(final_terminator):
+        if not data_with_terminator.endswith(msg_terminator):
             print("not terminator", data_with_terminator)
             self._connection.unread(first_terminator)
             self._connection.unread(start_tag)
             self._connection.unread(data_with_terminator)
             self._forward_confusion_until_active_prompt(script)
             return None
+        
+        final_terminator = EOT + RAW_PROMPT
 
         # nothing should follow the raw prompt
         remaining = self._connection.read_all()
@@ -1990,7 +1992,8 @@ if __name__ == "__main__":
             from thonny.plugins.micropython.serial_connection import SerialConnection
             from thonny.plugins.micropython.serial_connection import DifficultSerialConnection
 
-            connection = DifficultSerialConnection(port, BAUDRATE)
+            connection = SerialConnection(port, BAUDRATE)
+            #connection = DifficultSerialConnection(port, BAUDRATE)
 
         vm = MicroPythonBackend(connection, clean=args.clean, api_stubs_path=args.api_stubs_path)
 
