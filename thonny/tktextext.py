@@ -254,20 +254,22 @@ class EnhancedText(TweakableText):
         """Remap keypad movement events to non-keypad equivalents"""
         # https://github.com/thonny/thonny/issues/1106
         kmap = {
-            '<KP_Left>': '<Left>',
-            '<KP_Right>': '<Right>',
-            '<KP_Up>': '<Up>',
-            '<KP_Down>': '<Down>',
-            '<KP_Home>': '<Home>',
-            '<KP_End>': '<End>',
-            '<KP_Next>': '<Next>',
-            '<KP_Prior>': '<Prior>',
-            '<KP_Enter>': '<Return>',
+            "<KP_Left>": "<Left>",
+            "<KP_Right>": "<Right>",
+            "<KP_Up>": "<Up>",
+            "<KP_Down>": "<Down>",
+            "<KP_Home>": "<Home>",
+            "<KP_End>": "<End>",
+            "<KP_Next>": "<Next>",
+            "<KP_Prior>": "<Prior>",
+            "<KP_Enter>": "<Return>",
         }
         for from_key in kmap:
+
             def mfunc(event, key=from_key):
-                self.event_generate(kmap[key], **{'state': event.state})
-                return 'break'
+                self.event_generate(kmap[key], **{"state": event.state})
+                return "break"
+
             try:
                 self.bind(from_key, mfunc)
             except TclError:
