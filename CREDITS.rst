@@ -52,6 +52,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * cubimon
 * Dominic Twyman
 * Dominik George
+* Eliot Blennerhassett
 * Emanuel Angelo
 * Filip Schouwenaars
 * Fizban
