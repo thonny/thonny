@@ -22,9 +22,15 @@ class MicroPythonConnection:
         self.num_bytes_received = 0
         self._error = None
 
-    def read(self, size, timeout=1):
+    def soft_read(self, size, timeout=1):
+        return self.read(size, timeout, True)
+
+    def read(self, size, timeout=1, timeout_is_soft=False):
         if timeout == 0:
-            raise TimeoutError()
+            if timeout_is_soft:
+                return b""
+            else:
+                raise TimeoutError()
 
         timer = TimeHelper(timeout)
 
@@ -34,7 +40,10 @@ class MicroPythonConnection:
             try:
                 self._read_buffer.extend(self._read_queue.get(True, timer.time_left))
             except queue.Empty:
-                raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
+                if timeout_is_soft:
+                    return b""
+                else:
+                    raise TimeoutError("Reaction timeout. Bytes read: %s" % self._read_buffer)
 
         try:
             data = self._read_buffer[:size]

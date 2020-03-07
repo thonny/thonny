@@ -53,10 +53,8 @@ INTERRUPT_CMD = b"\x03"
 SOFT_REBOOT_CMD = b"\x04"
 
 # Output tokens
-THONNY_MSG_START = b"\x02<thonny>"
-THONNY_MSG_END = b"</thonny>\x04"
-THONNY_START_TAG = b"<thonny>"
-THONNY_END_TAG = b"</thonny>"
+THONNY_MSG_START = b"<thonny>"
+THONNY_MSG_END = b"</thonny>"
 EOT = b"\x04"
 NORMAL_PROMPT = b">>> "
 LF = b"\n"
@@ -70,16 +68,44 @@ FIRST_RAW_PROMPT_SUFFIX = b"\r\n>"
 
 RAW_PROMPT = b">"
 
-INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(b"|".join(map(re.escape, [LF, EOT, NORMAL_PROMPT])))
-
-OLD_BLOCK_CLOSERS = re.compile(
-    b"|".join(map(re.escape, [LF, EOT, THONNY_MSG_START, NORMAL_PROMPT, FIRST_RAW_PROMPT]))
-)
-
 # extra seconds to wait, when we believe the expected result is not coming
 # but we're not sure yet
 LAST_HOPE_TIMEOUT = 2
 
+FALLBACK_BUILTIN_MODULES = [
+    "cmath",
+    "gc",
+    "math",
+    "sys",
+    "array",
+    "binascii",
+    "collections",
+    "errno",
+    "hashlib",
+    "heapq",
+    "io",
+    "json",
+    "os",
+    "re",
+    "select",
+    "socket",
+    "ssl",
+    "struct",
+    "time",
+    "zlib",
+    "_thread",
+    "btree",
+    "framebuf",
+    "machine",
+    "micropython",
+    "network",
+    "bluetooth",
+    "cryptolib",
+    "ctypes",
+    "pyb",
+    "esp",
+    "esp32",
+]
 
 logger = logging.getLogger("thonny.micropython.backend")
 
@@ -105,7 +131,7 @@ class MicroPythonBackend:
         self._command_reading_thread.start()
 
         self._startup_time = time.time()
-        self._ctrl_suggestion_given = False
+        self._interrupt_suggestion_given = False
 
         try:
             self._prepare(clean)
@@ -121,7 +147,8 @@ class MicroPythonBackend:
             self._interrupt_to_raw_prompt()
             self._clear_environment()
         else:
-            self._process_until_initial_raw_prompt()
+            self._connection.write(RAW_MODE_CMD)
+            self._forward_output_until_active_prompt()
 
         self._cwd = self._fetch_cwd()
         self._welcome_text = self._fetch_welcome_text()
@@ -178,8 +205,12 @@ class MicroPythonBackend:
         }
 
     def _fetch_builtin_modules(self):
-        out, err, _ = self._execute("help('modules')", capture_output=True)
-        assert not err, "Error was: %r" % err
+        out = self._execute_and_capture_output("help('modules')")
+        if out is None:
+            self._send_error_message(
+                "Could not query builtin modules. Code completion may not work properly."
+            )
+            return FALLBACK_BUILTIN_MODULES
 
         modules_str_lines = out.strip().splitlines()
 
@@ -306,7 +337,7 @@ class MicroPythonBackend:
         self._connection.write(SOFT_REBOOT_CMD)
 
         if not side_command:
-            self._process_until_raw_prompt()
+            self._forward_output_until_active_prompt()
             self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _read_commands(self):
@@ -424,6 +455,9 @@ class MicroPythonBackend:
         msg = BackendEvent(event_type="ProgramOutput", stream_name=stream_name, data=data)
         self.send_message(msg)
 
+    def _send_error_message(self, msg):
+        self._send_output("\n" + msg + "\n", "stderr")
+
     def _transform_output(self, data):
         # Any keypress wouldn't work
         return data.replace(
@@ -451,30 +485,16 @@ class MicroPythonBackend:
         debug("GOTOK")
         assert ok == OK, "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
 
-    def _execute(self, script, capture_output=False):
-        self._ensure_raw_propmt()
-
-        # send command
-        self._connection.write(script.encode(ENCODING) + EOT)
-        debug("Wrote " + script + "\n--------\n")
-
-        # fetch command confirmation
-        ok = self._connection.read(2)
-        debug("GOTOK")
-        assert ok == OK, "Expected OK, got %r, followed by %r" % (ok, self._connection.read_all())
-        return self._process_until_raw_prompt(capture_output)
-
-    def _execute_without_output(self, script):
-        out, err, value = self._execute(script, capture_output=True)
-        if err or out:
-            raise RuntimeError("Failed MP script: " + str(out) + "\n" + str(err))
-
-        return value
+    def _execute_without_errors(self, script):
+        """Meant for management tasks. stdout will be unexpected but tolerated.
+        stderr will cause exception"""
+        result = self._evaluate("True", prelude=script)
+        assert result is True
 
     def _evaluate_to_repr(self, expr, prelude="", cleanup=""):
         """Uses raw-REPL to evaluate and print the repr of given expression.
         
-        The expected serial output is following:
+        The expected serial output is following (linebreaks are for readablity):
         
             {output from the side effect of prelude or expr}
             EOT
@@ -492,7 +512,7 @@ class MicroPythonBackend:
         if prelude:
             script += prelude + "\n"
         script += "print(%r, repr(%s), sep='', end=%r)" % (
-            THONNY_MSG_START.decode(),
+            (EOT + THONNY_MSG_START).decode(),
             expr,
             THONNY_MSG_END.decode(),
         )
@@ -504,39 +524,45 @@ class MicroPythonBackend:
         # forward side effects (if any)
         first_terminator = self._forward_output_until_eot_or_active_propmt()
         if first_terminator != EOT:
+            print("not EOT", repr(first_terminator))
             self._connection.unread(first_terminator)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
-        start_tag = self._connection.soft_read_until(THONNY_START_TAG, timeout=LAST_HOPE_TIMEOUT)
-        if start_tag != THONNY_START_TAG:
+        start_tag = self._connection.soft_read_until(THONNY_MSG_START, timeout=LAST_HOPE_TIMEOUT)
+        if start_tag != THONNY_MSG_START:
+            print("not start_tag", repr(start_tag))
             self._connection.unread(first_terminator)
             self._connection.unread(start_tag)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
-        final_terminator = THONNY_END_TAG + EOT + EOT + RAW_PROMPT
+        msg_terminator = THONNY_MSG_END + EOT
         data_with_terminator = self._connection.soft_read_until(
-            final_terminator, timeout=LAST_HOPE_TIMEOUT
+            msg_terminator, timeout=LAST_HOPE_TIMEOUT
         )
-        if not data_with_terminator.endswith(final_terminator):
+        if not data_with_terminator.endswith(msg_terminator):
+            print("not terminator", data_with_terminator)
             self._connection.unread(first_terminator)
             self._connection.unread(start_tag)
             self._connection.unread(data_with_terminator)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
+        
+        final_terminator = EOT + RAW_PROMPT
 
         # nothing should follow the raw prompt
         remaining = self._connection.read_all()
         if remaining:
+            print("got remaining", repr(remaining))
             self._connection.unread(first_terminator)
             self._connection.unread(start_tag)
             self._connection.unread(data_with_terminator)
             self._connection.unread(remaining)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
-        return data_with_terminator[: -len(final_terminator)]
+        return data_with_terminator[: -len(final_terminator)].decode(ENCODING, errors="strict")
 
     def _execute_and_capture_output(self, script, timeout=5):
         """Executes script in raw repl, captures stdout and consumes terminators.
@@ -548,7 +574,7 @@ class MicroPythonBackend:
         output_with_eot = self._connection.soft_read_until(EOT, timeout=timeout)
         if not output_with_eot.endswith(EOT):
             self._connection.unread(output_with_eot)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
         final_terminator = EOT + RAW_PROMPT
@@ -560,7 +586,7 @@ class MicroPythonBackend:
             self._connection.unread(output_with_eot)
             self._connection.unread(EOT)
             self._connection.unread(err_and_prompt)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
         # nothing should follow the raw prompt
@@ -570,19 +596,19 @@ class MicroPythonBackend:
             self._connection.unread(EOT)
             self._connection.unread(err_and_prompt)
             self._connection.unread(remaining)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
-        return output_with_eot[: -len(EOT)]
+        return output_with_eot[: -len(EOT)].decode(ENCODING, errors="strict")
 
-    def execute_user_code(self, script):
+    def _execute_user_code(self, script):
         """Executes the code in raw REPL and forwards everything up to active prompt"""
         self._submit_code_to_raw_repl(script)
 
         first_terminator = self._forward_output_until_eot_or_active_propmt()
         if first_terminator != EOT:
             self._connection.unread(first_terminator)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
         # Don't wait too long for err when first EOT is already out
@@ -590,7 +616,7 @@ class MicroPythonBackend:
         if not err_with_eot.endswith(EOT):
             self._connection.unread(first_terminator)
             self._connection.unread(err_with_eot)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
         err = err_with_eot[: -len(EOT)]
@@ -601,7 +627,7 @@ class MicroPythonBackend:
         if raw_prompt != RAW_PROMPT:
             self._connection.unread(EOT)  # this was captured above
             self._connection.unread(raw_prompt)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
         # nothing should follow the raw prompt
@@ -610,7 +636,7 @@ class MicroPythonBackend:
             self._connection.unread(EOT)
             self._connection.unread(raw_prompt)
             self._connection.unread(remaining)
-            self._forward_confusion_until_active_prompt()
+            self._forward_confusion_until_active_prompt(script)
             return None
 
         return True  # This is the happy path
@@ -622,28 +648,35 @@ class MicroPythonBackend:
         else:
             return ast.literal_eval(value_repr)
 
-    def _forward_confusion_until_active_prompt(self):
+    def _forward_confusion_until_active_prompt(self, script):
+        self._send_output("THONNY FAILED TO EXECUTE FOLLOWING SCRIPT:\n", "stderr")
+        self._send_output(script.strip() + "\n\n", "stderr")
+        self._send_output("THE OUTPUT WAS:\n", "stderr")
+        return self._forward_output_until_active_prompt("stderr")
+
+    def _forward_output_until_active_prompt(self, stream_name="stdout"):
         """Used for forwarding problematic output in case of parse errors"""
         while True:
-            terminator = self._forward_output_until_eot_or_active_propmt()
-            if terminator in (NORMAL_PROMPT, RAW_PROMPT):
+            terminator = self._forward_output_until_eot_or_active_propmt(stream_name)
+            if terminator in (NORMAL_PROMPT, RAW_PROMPT, FIRST_RAW_PROMPT):
                 return
             else:
                 self._send_output(terminator, "stdout")
 
-    def _forward_output_until_eot_or_active_propmt(self):
+    def _forward_output_until_eot_or_active_propmt(self, stream_name="stdout"):
         """Meant for incrementally forwarding stdout from user statements, 
-        scripts and soft-reboots.
-        
-        Also used for forwarding (or capturing) side-effect output from 
+        scripts and soft-reboots. Also used for forwarding side-effect output from 
         expression evaluations and for capturing help("modules") output.
+        In these cases it is expected to arrive to an EOT.
+        
+        Also used for initial prompt searching or for recovering from a protocol error.
+        In this case it must work until active prompt.
         
         The code may have been submitted in any of the REPL modes or
         automatically via (soft-)reset.
         
-        NB! The processing may end in normal
-        mode even if the command is started in raw mode (eg. when user 
-        presses reset during processing in some devices)!
+        NB! The processing may end in normal mode even if the command was started 
+        in raw mode (eg. when user presses reset during processing in some devices)!
         
         The processing may also end in FIRST_RAW_REPL, when it was started in 
         normal REPL and Ctrl+A was issued during processing (ie. before Ctrl+C in 
@@ -682,147 +715,106 @@ class MicroPythonBackend:
         will not output these. If it does, processing will break.
         TODO: Experiment with this!
         
-        """
-
-        # TODO: may need input processing in order to progress
-
-    def _process_until_initial_raw_prompt(self):
-        self._connection.write(RAW_MODE_CMD)
-        try:
-            self._process_until_raw_prompt()
-        except KeyboardInterrupt:
-            self._interrupt()
-
-    def _process_until_raw_prompt(self, capture_output=False):
-        """
-        Forwards output, extracts Thonny message, replaces normal prompts with raw prompts.
-        
-        This is executed when some code is running or just after requesting raw prompt.
-        
-        After submitting commands to the raw REPL, the output should be like
-        {stdout}\x04\{stderr}\x04\n\>
-        In the end of {stdout} there may be \x02<thonny>{value-for-thonny}</thonny>\x04.
-        
-        Interrupts will alter the execution, but from the response parsing
-        perspective they don't matter as they look like any other exception.
-        
-        Things get complicated because of soft-reboots, which always end with
-        regular prompt. Soft-reboots can occur because of Ctrl+D, machine.soft_reset()
-        and even reset button (micro:bit).
-        
-        Because of soft-reboot we can't assume we'll find the terminating markers for 
-        each command.
-        
         Output produced by background threads (eg. in WiPy ESP32) cause even more difficulties, 
         because it becomes impossible to say whether we are at prompt and output
-        is from another thread or the main thread is running.
+        is from another thread or the main thread is still running.
         For now I'm ignoring these problems and assume all output comes from the main thread.
-         
         """
-        # TODO: experiment with Ctrl+C, Ctrl+D, reset
-        eot_count = 0
-        value = None
-        done = False
-        output = b""
-        out = b""
-        err = b""
-        while not done:
-            if (
-                self._connection.num_bytes_received == 0
-                and not self._ctrl_suggestion_given
-                and time.time() - self._startup_time > 1.5
-            ):
-                self._show_error(
-                    "\n"
-                    + "Device is busy or does not respond. Your options:\n\n"
-                    + "  - wait until it completes current work;\n"
-                    + "  - use Ctrl+C to interrupt current work;\n"
-                    + "  - use Stop/Restart to interrupt more and enter REPL.\n"
-                )
-                self._ctrl_suggestion_given = True
+        INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
+            b"|".join(map(re.escape, [LF, EOT, NORMAL_PROMPT, FIRST_RAW_PROMPT]))
+        )
 
+        pending = b""
+        while True:
             # There may be an input submission waiting
             # and we can't progress without resolving it first
             self._check_for_side_commands()
             self._check_for_interrupt("device")
 
-            # Process input in chunks (max 1 parsing marker per chunk).
-            # Prefer whole lines (to reduce the number of events),
-            # but don't wait too long for eol.
-            ddd = self._connection.soft_read_until(OLD_BLOCK_CLOSERS, timeout=0.55)
-            output += ddd
-            stream_name = "stderr" if eot_count == 1 else "stdout"
+            # Prefer whole lines, but allow also incremental output to single line
+            # Note that here I'm not looking for non-first raw prompt, because this
+            # is always preceded by EOT.
+            new_data = self._connection.soft_read_until(
+                INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
+            )
+            if not new_data:
+                # In case we are still waiting for the first bits after connecting ...
+                if (
+                    self._connection.num_bytes_received == 0
+                    and not self._interrupt_suggestion_given
+                    and time.time() - self._startup_time > 1.5
+                ):
+                    self._show_error(
+                        "\n"
+                        + "Device is busy or does not respond. Your options:\n\n"
+                        + "  - wait until it completes current work;\n"
+                        + "  - use Ctrl+C to interrupt current work;\n"
+                        + "  - use Stop/Restart to interrupt more and enter REPL.\n"
+                    )
+                    self._interrupt_suggestion_given = True
 
-            if output.endswith(THONNY_MSG_START):
-                debug("MSGSTA: " + str(output))
-                output = output[: -len(THONNY_MSG_START)]
+                continue
 
-                # Low chance of failure (eg. because of precisely timed reboot),
-                # therefore it's safe to use big timeout
-                temp = self._connection.soft_read_until(THONNY_MSG_END, timeout=3)
-                if temp.endswith(THONNY_MSG_END):
-                    value = temp[: -len(THONNY_MSG_END)]
-                    debug("GOTVALUE: " + str(value))
+            pending += new_data
+
+            if pending.endswith(EOT):
+                self._send_output(pending[: -len(EOT)], stream_name)
+                return EOT
+
+            elif pending.endswith(LF):
+                self._send_output(pending, stream_name)
+                pending = b""
+
+            elif pending.endswith(NORMAL_PROMPT) or pending.endswith(FIRST_RAW_PROMPT):
+                # This looks like prompt (or its prefix).
+                # Make sure it is not followed by anything.
+                # Note that in this context the prompt means something is wrong
+                # (EOT would have been the happy path), so no need to hurry.
+                # The only case where this path is happy path is just after connecting.
+                follow_up = self._connection.soft_read(1, timeout=0.5)
+                if follow_up:
+                    # Nope, the prompt is not active.
+                    # (Actually it may be that a background thread has produced this follow up,
+                    # but this would be too hard to consider.)
+                    # Don't output yet, because the follow up may turn into another prompt
+                    # and they can be captured all together.
+                    pending += follow_up
                 else:
-                    # failure, restore everything to help diagnosis
-                    output = output + THONNY_MSG_START + temp
-
-            elif output.endswith(EOT):
-                debug("EOT: " + str(output))
-                output = output[: -len(EOT)]
-                eot_count += 1
-                if eot_count == 2:
-                    # Normal completion of the command
-                    # big chance of being at the raw prompt
-                    temp = self._connection.soft_read_until(RAW_PROMPT, timeout=0.1)
-                    if temp == RAW_PROMPT and self._connection.incoming_is_empty():
-                        done = True
-                    elif temp:
-                        # Failure, temp needs to be parsed again
-                        self._connection.unread(temp)
-
-            elif output.endswith(FIRST_RAW_PROMPT) and self._connection.incoming_is_empty():
-                debug("FIRAPRO: " + str(output))
-                output = output[: -len(FIRST_RAW_PROMPT)]
-                done = True
-
-            elif (
-                output.endswith(NORMAL_PROMPT)
-                and self._connection.peek_incoming() == b"\r\n" + FIRST_RAW_PROMPT
-            ):
-                debug("NOPRO: " + str(output))
-                output = output + self._connection.read_until(FIRST_RAW_PROMPT)
-                # skip both normal and raw prompt together
-                # (otherwise they get processed separately)
-                output = output[: -len(NORMAL_PROMPT + b"\r\n" + FIRST_RAW_PROMPT)]
-                done = True
-
-            elif output.endswith(NORMAL_PROMPT) and self._connection.incoming_is_empty():
-                debug("NOPRO2: " + str(output))
-                output = output[: -len(NORMAL_PROMPT)]
-                # switch to raw mode and continue
-                self._connection.write(RAW_MODE_CMD)
-
-            if output.endswith(FIRST_RAW_PROMPT[:-1]):
-                # incomplete raw prompt, wait for more
-                pass
-            elif output:
-                if capture_output:
-                    if stream_name == "stdout":
-                        out += output
+                    # let's hope it is an active prompt
+                    if pending.endswith(NORMAL_PROMPT):
+                        terminator = NORMAL_PROMPT
                     else:
-                        assert stream_name == "stderr"
-                        err += output
-                else:
-                    self._send_output(output.decode(ENCODING, errors="replace"), stream_name)
-                output = b""
+                        terminator = FIRST_RAW_PROMPT
 
-        debug("doneproc")
-        return (
-            out.decode(ENCODING, errors="replace"),
-            err.decode(ENCODING, errors="replace"),
-            None if value is None else value.decode(ENCODING),
-        )
+                    # Strip all trailing prompts
+                    out = pending
+                    while True:
+                        if out.endswith(NORMAL_PROMPT):
+                            out = out[: -len(NORMAL_PROMPT)]
+                        elif out.endswith(FIRST_RAW_PROMPT):
+                            out = out[: -len(FIRST_RAW_PROMPT)]
+                        else:
+                            break
+                    self._send_output(out, stream_name)
+
+                    return terminator
+
+            elif ends_overlap(pending, NORMAL_PROMPT) or ends_overlap(pending, FIRST_RAW_PROMPT):
+                # Maybe we have a prefix of the prompt and the rest is still coming?
+                follow_up = self._connection.soft_read(1, timeout=0.1)
+                if not follow_up:
+                    # most likely not a Python prompt, let's forget about it
+                    self._send_output(pending, stream_name)
+                    pending = b""
+                else:
+                    # Let's withhold this for now
+                    pending += follow_up
+
+            else:
+                # No EOT or prompt in sight.
+                # Output and keep working.
+                self._send_output(pending, stream_name)
+                pending = b""
 
     def _clear_environment(self):
         # TODO: Ctrl+D in raw repl is perfect for MicroPython
@@ -835,7 +827,7 @@ class MicroPythonBackend:
         #            del globals()[name]
         # """).strip())
         # or
-        self._execute("globals().clear(); __name__ = '__main__'")
+        self._execute_without_errors("globals().clear(); __name__ = '__main__'")
 
     def _check_for_side_commands(self):
         # most likely the queue is empty
@@ -891,7 +883,7 @@ class MicroPythonBackend:
                 raise UserError("This device doesn't have directories")
 
             path = cmd.args[0]
-            self._execute("import os as __thonny_os; __thonny_os.chdir(%r)" % path)
+            self._execute_without_errors("import os as __thonny_os; __thonny_os.chdir(%r)" % path)
             self._cwd = self._fetch_cwd()
             return {}
         else:
@@ -900,7 +892,7 @@ class MicroPythonBackend:
     def _cmd_Run(self, cmd):
         # self._clear_environment()
         assert cmd.get("source")
-        self._execute(cmd["source"])
+        self._execute_user_code(cmd["source"])
         return {}
 
     def _cmd_execute_source(self, cmd):
@@ -908,13 +900,13 @@ class MicroPythonBackend:
             # Try to parse as expression
             ast.parse(cmd.source, mode="eval")
             # If it didn't fail then source is an expression
-            _, _, value_repr = self._evaluate_to_repr(cmd.source)
+            value_repr = self._evaluate_to_repr(cmd.source)
             if value_repr is None:
                 value_repr = repr(None)
             return {"value_info": ValueInfo(0, value_repr)}
         except SyntaxError:
             # source is a statement (or invalid syntax)
-            self._execute(cmd.source)
+            self._execute_user_code(cmd.source)
             return {}
 
     def _cmd_execute_system_command(self, cmd):
@@ -1177,7 +1169,7 @@ class MicroPythonBackend:
     def _cmd_dump_api_info(self, cmd):
         "For use during development of the plug-in"
 
-        self._execute(
+        self._execute_without_errors(
             dedent(
                 """
             def __get_object_atts(obj):
@@ -1206,10 +1198,7 @@ class MicroPythonBackend:
                 self._dump_module_stubs(module_name, file_name)
 
     def _dump_module_stubs(self, module_name, file_name):
-        out, err, __ = self._execute("import {0}".format(module_name), capture_output=True)
-        if out or err:
-            print("FAILED IMPORTING MODULE:", module_name, "\nErr: " + out + err)
-            return
+        self._execute_without_errors("import {0}".format(module_name))
 
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
         with io.open(file_name, "w", encoding="utf-8", newline="\n") as fp:
@@ -1273,9 +1262,9 @@ class MicroPythonBackend:
         # file_size = self._get_file_size(path)
         block_size = 512
 
-        self._execute_without_output("__thonny_fp = open(%r, 'rb')" % path)
+        self._execute_without_errors("__thonny_fp = open(%r, 'rb')" % path)
         if "binascii" in self._builtin_modules:
-            self._execute_without_output("from binascii import hexlify as __temp_hexlify")
+            self._execute_without_errors("from binascii import hexlify as __temp_hexlify")
 
         while True:
             self._check_for_interrupt("local")
@@ -1290,7 +1279,7 @@ class MicroPythonBackend:
             if len(block) < block_size:
                 break
 
-        self._execute_without_output(
+        self._execute_without_errors(
             dedent(
                 """
             __thonny_fp.close()
@@ -1329,26 +1318,32 @@ class MicroPythonBackend:
     def _write_file_via_serial(self, content_blocks, target_path, notifier=None):
         # prelude
         try:
-            _, err, _ = self._execute(
+            result = self._evaluate(
+                "__thonny_result",
                 dedent(
                     """
-                __thonny_path = '{path}'
-                __thonny_written = 0
-                __thonny_fp = open(__thonny_path, 'wb')
+                try:
+                    __thonny_path = '{path}'
+                    __thonny_written = 0
+                    __thonny_fp = open(__thonny_path, 'wb')
+                    __thonny_result = "OK"
+                except Exception as e:
+                    __thonny_result = str(e)
                 """
                 ).format(path=target_path),
                 capture_output=True,
             )
 
-            if "readonly" in err.replace("-", "").lower():
+            # TODO: refactor with try-except
+            if "readonly" in result.replace("-", "").lower():
                 raise ReadOnlyFilesystemError()
 
-            elif err:
-                raise RuntimeError("Problem opening file for writing: " + err)
+            elif result != "OK":
+                raise RuntimeError("Problem opening file for writing: " + result)
 
             # Define function to allow shorter write commands
             if "binascii" in self._builtin_modules:
-                self._execute_without_output(
+                self._execute_without_errors(
                     dedent(
                         """
                     from binascii import unhexlify as __thonny_unhex
@@ -1360,7 +1355,7 @@ class MicroPythonBackend:
                     )
                 )
             else:
-                self._execute_without_output(
+                self._execute_without_errors(
                     dedent(
                         """
                     def __W(x):
@@ -1377,7 +1372,7 @@ class MicroPythonBackend:
                     script = "__W(%r)" % binascii.hexlify(block)
                 else:
                     script = "__W(%r)" % block
-                self._execute_without_output(script)
+                self._execute_without_errors(script)
                 bytes_sent += len(block)
                 if notifier is not None:
                     notifier(bytes_sent)
@@ -1391,7 +1386,7 @@ class MicroPythonBackend:
 
         finally:
             # clean up
-            self._execute(
+            self._execute_without_errors(
                 dedent(
                     """
                     try:
@@ -1410,7 +1405,7 @@ class MicroPythonBackend:
         return bytes_sent
 
     def _sync_all_filesystems(self):
-        self._execute_without_output(
+        self._execute_without_errors(
             dedent(
                 """
             try:
@@ -1453,7 +1448,7 @@ class MicroPythonBackend:
 
     def _list_remote_files_with_info(self, paths):
         # prepare universal functions
-        self._execute_without_output(
+        self._execute_without_errors(
             dedent(
                 """
             try:
@@ -1477,7 +1472,7 @@ class MicroPythonBackend:
             )
         )
 
-        self._execute_without_output(
+        self._execute_without_errors(
             dedent(
                 """
             def __thonny_rec_list_with_size(path):
@@ -1507,7 +1502,7 @@ class MicroPythonBackend:
 
         result.sort(key=lambda rec: rec["path"])
 
-        self._execute_without_output(
+        self._execute_without_errors(
             dedent(
                 """
                 del __thonny_os
@@ -1608,7 +1603,7 @@ class MicroPythonBackend:
             % path
         )
 
-        self._execute_without_output(script)
+        self._execute_without_errors(script)
 
     def _delete_via_mount(self, paths):
         for path in paths:
@@ -1618,7 +1613,7 @@ class MicroPythonBackend:
 
     def _delete_via_serial(self, paths):
         if not self._supports_directories():
-            self._execute_without_output(
+            self._execute_without_errors(
                 dedent(
                     """
                 import os as __thonny_os
@@ -1632,7 +1627,7 @@ class MicroPythonBackend:
                 % paths
             )
         else:
-            self._execute_without_output(
+            self._execute_without_errors(
                 dedent(
                     """
                 import os as __thonny_os
@@ -1913,6 +1908,15 @@ def _report_internal_error():
     traceback.print_exc()
 
 
+def ends_overlap(left, right):
+    """Returns whether the left ends with one of the non-empty prefixes of the right"""
+    for i in range(1, min(len(left), len(right)) + 1):
+        if left.endswith(right[:i]):
+            return True
+
+    return False
+
+
 def parse_api_information(file_path):
     with tokenize.open(file_path) as fp:
         source = fp.read()
@@ -1988,7 +1992,8 @@ if __name__ == "__main__":
             from thonny.plugins.micropython.serial_connection import SerialConnection
             from thonny.plugins.micropython.serial_connection import DifficultSerialConnection
 
-            connection = DifficultSerialConnection(port, BAUDRATE)
+            connection = SerialConnection(port, BAUDRATE)
+            #connection = DifficultSerialConnection(port, BAUDRATE)
 
         vm = MicroPythonBackend(connection, clean=args.clean, api_stubs_path=args.api_stubs_path)
 
