@@ -31,7 +31,7 @@ pkgbuild \
 	$COMPONENT_PACKAGE
 	
 echo "Creating product archive"
-PRODUCT_ARCHIVE=dist/${PROD_PKG_PREFIX}-${VERSION}-macos-installer.pkg
+PRODUCT_ARCHIVE=dist/${PROD_PKG_PREFIX}-${VERSION}.pkg
 rm -f $PRODUCT_ARCHIVE
 productbuild \
 	--identifier "org.thonny.Thonny.product" \
