@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#set -e
+set -e
 
 SIGN_ID="Developer ID Application: Aivar Annamaa (2SA9D4CVU8)"
 name_prefix=$1
