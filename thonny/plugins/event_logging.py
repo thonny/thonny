@@ -119,6 +119,9 @@ class EventLogger:
         data = self._extract_interesting_data(event, sequence)
         data["sequence"] = sequence
         data["time"] = datetime.now().isoformat()
+        if len(data["time"]) == 19:
+            # 0 fraction gets skipped, but reader assumes it
+            data["time"] += ".0"
         self._events.append(data)
 
     def _on_worbench_close(self, event=None):

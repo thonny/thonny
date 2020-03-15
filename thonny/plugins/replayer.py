@@ -113,6 +113,9 @@ class LogFrame(ui_utils.TreeFrame):
             for event in events:
                 node_id = self.tree.insert("", "end")
                 self.tree.set(node_id, "desc", event["sequence"])
+                if len(event["time"]) == 19:
+                    # 0 fraction may have been skipped
+                    event["time"] += ".0"
                 event_time = datetime.strptime(event["time"], "%Y-%m-%dT%H:%M:%S.%f")
                 if last_event_time:
                     delta = event_time - last_event_time
