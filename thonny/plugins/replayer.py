@@ -64,7 +64,11 @@ class ReplayerFileBrowser(BaseLocalFileBrowser):
         # self.save_current_folder()
         path = self.get_selected_path()
         if path:
-            self.log_frame.load_log(path)
+            kind = self.get_selected_kind()
+            if kind == "dir":
+                self.focus_into(path)
+            else:
+                self.log_frame.load_log(path)
 
         return "break"  # avoid default action of opening the node
 
