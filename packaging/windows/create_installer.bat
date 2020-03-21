@@ -86,6 +86,11 @@ cd ..
 
 del /S "%BUILDDIR%\*.pyc">NUL
 
+@rem no point in keeping exe-s in Scripts, as they contain absolute path to the interpreter
+del "%BUILDDIR%\Scripts\*.exe" /Q>NUL
+del "%BUILDDIR%\Scripts\*.manifest" /Q>NUL
+
+
 "C:\Program Files (x86)\Inno Setup 6\iscc" /dInstallerPrefix=thonny-xxl /dAppVer=%VERSION% /dSourceFolder=build inno_setup.iss > xxl_installer_building.log
 
 @rem rmdir %BUILDDIR% /S /Q

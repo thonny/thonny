@@ -88,15 +88,7 @@ Type: filesandordirs; Name: "{userstartmenu}\Thonny.lnk"
 
 
 ; LEFTOVERS FROM OBSOLETE VERSIONS
-; Delete old format settings. New filename is configuration.ini
-Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\preferences.ini"
-; Delete backend directory (Thonny occasionally fails to delete it at runtime)
-Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\backend"
-; Delete old 3rd party libs
-Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Python35"
-; TEMP
-;Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\BundledPython36"
-Type: filesandordirs; Name: "{%USERPROFILE}\.thonny\Py36"
+Type: filesandordirs; Name: "{%USERPROFILE}\.thonny"
 
 [Tasks]
 Name: CreateDesktopIcon; Description: "Create desktop icon"; Flags: unchecked;
