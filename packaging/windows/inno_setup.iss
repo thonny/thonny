@@ -21,6 +21,7 @@ AppUpdatesURL=https://thonny.org
 
 ; Actual privileges depend on how user started the installer
 PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=commandline
 MinVersion=6.0
 
 ; Will show important info on welcome page
