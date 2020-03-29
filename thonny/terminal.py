@@ -166,6 +166,7 @@ def _get_linux_terminal_command():
         if os.path.realpath(xte).endswith("/lxterminal") and shutil.which("lxterminal"):
             # need to know exact program, because it needs special treatment
             return "lxterminal"
+        elif os.path.realpath(xte).endswith("/terminator") and shutil.which("terminator"):
             # https://github.com/thonny/thonny/issues/1129
             return "terminator"
         else:
