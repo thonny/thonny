@@ -93,6 +93,11 @@ def _run_in_terminal_in_linux(cmd, cwd, env, keep_open):
             term_cmd=term_cmd, in_term_cmd=_shellquote(in_term_cmd)
         )
 
+    if term_cmd == "terminator" and "PYTHONPATH" in env:
+        # it is written in Python 2 and the PYTHONPATH of Python 3 will confuse it
+        # https://github.com/thonny/thonny/issues/1129
+        del env["PYTHONPATH"]
+
     subprocess.Popen(whole_cmd, cwd=cwd, env=env, shell=True)
 
 
@@ -161,6 +166,8 @@ def _get_linux_terminal_command():
         if os.path.realpath(xte).endswith("/lxterminal") and shutil.which("lxterminal"):
             # need to know exact program, because it needs special treatment
             return "lxterminal"
+            # https://github.com/thonny/thonny/issues/1129
+            return "terminator"
         else:
             return "x-terminal-emulator"
     # Older konsole didn't pass on the environment
