@@ -1242,7 +1242,11 @@ class Executor:
                 assert not ast_postprocessors
                 # Useful in shell to get last expression value in multi-statement block
                 root = self._prepare_ast(source, filename, "exec")
-                statements = compile(ast.Module(body=root.body[:-1]), filename, "exec")
+                # https://bugs.python.org/issue35894
+                # https://github.com/pallets/werkzeug/pull/1552/files#diff-9e75ca133f8601f3b194e2877d36df0eR950
+                module = ast.parse("")
+                module.body = root.body[:-1]
+                statements = compile(module, filename, "exec")
                 expression = compile(ast.Expression(root.body[-1].value), filename, "eval")
             else:
                 root = self._prepare_ast(source, filename, mode)
