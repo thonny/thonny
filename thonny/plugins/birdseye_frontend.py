@@ -17,6 +17,11 @@ def _start_debug_enabled():
 
 def start_server():
     try:
+        # Seems to be needed for initializing birdseye.__path__ properly
+        # https://github.com/thonny/thonny/issues/1141
+        import birdseye  
+        assert birdseye.__path__
+        
         from birdseye import server
 
         server.app.run(
