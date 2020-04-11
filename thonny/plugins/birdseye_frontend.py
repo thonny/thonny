@@ -1,11 +1,12 @@
 import os.path
-from threading import Thread
 from tkinter import messagebox
 
-from thonny import get_workbench, get_runner
-import logging
+from thonny import get_workbench, get_runner, running, THONNY_USER_DIR
+import subprocess
+import atexit
 
 _server_started = False
+_server_process = None
 
 
 def _start_debug_enabled():
@@ -16,19 +17,30 @@ def _start_debug_enabled():
 
 
 def start_server():
-    try:
-        # Seems to be needed for initializing birdseye.__path__ properly
-        # https://github.com/thonny/thonny/issues/1141
-        import birdseye  
-        assert birdseye.__path__
-        
-        from birdseye import server
+    global _server_process
 
-        server.app.run(
-            port=get_workbench().get_option("run.birdseye_port"), debug=False, use_reloader=False
-        )
-    except Exception:
-        logging.getLogger("thonny").exception("Problem running Birdseye server")
+    out_err_filename = os.path.join(THONNY_USER_DIR, "birdseye.log")
+    output_file = open(out_err_filename, "w")
+    _server_process = subprocess.Popen(
+        [
+            running.get_interpreter_for_subprocess(),
+            "-m",
+            "birdseye",
+            "-p",
+            str(get_workbench().get_option("run.birdseye_port")),
+        ],
+        stdout=output_file,
+        stderr=output_file,
+    )
+    atexit.register(close_server)
+
+
+def close_server():
+    if _server_process is not None:
+        try:
+            _server_process.kill()
+        except:
+            pass
 
 
 def debug_with_birdseye():
@@ -49,8 +61,8 @@ def debug_with_birdseye():
         return
 
     if not _server_started:
+        start_server()
         _server_started = True
-        Thread(target=start_server, daemon=True).start()
 
     os.environ["BIRDSEYE_PORT"] = str(get_workbench().get_option("run.birdseye_port"))
     get_runner().execute_current("Birdseye")
