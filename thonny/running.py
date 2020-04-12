@@ -63,6 +63,8 @@ EDITOR_CONTENT_TOKEN = "$EDITOR_CONTENT"
 
 EXPECTED_TERMINATION_CODE = 123
 
+INTERRUPT_SEQUENCE = "<Control-c>"
+
 ANSI_CODE_TERMINATOR = re.compile("[@-~]")
 
 # other components may turn it on in order to avoid grouping output lines into one event
@@ -164,10 +166,12 @@ class Runner:
             _("Interrupt execution"),
             handler=self._cmd_interrupt,
             tester=self._cmd_interrupt_enabled,
-            default_sequence="<Control-c>",
+            default_sequence=INTERRUPT_SEQUENCE,
+            skip_sequence_binding=True,  # Sequence will be bound differently
             group=100,
             bell_when_denied=False,
         )
+        get_workbench().bind(INTERRUPT_SEQUENCE, self._cmd_interrupt_with_shortcut, True)
 
         get_workbench().add_command(
             "ctrld",
@@ -399,12 +403,11 @@ class Runner:
                     "Can't interrupt as console was not allocated.\n\nUse Stop/Restart instead.",
                 )
         else:
-            logging.warning("Interrupting without proxy")
+            logging.warning("User tried interrupting without proxy")
 
-    def _cmd_interrupt_enabled(self) -> bool:
-        if not self._proxy or not self._proxy.is_connected():
-            return False
-        # TODO: distinguish command and Ctrl+C shortcut
+    def _cmd_interrupt_with_shortcut(self, event=None):
+        if not self._cmd_interrupt_enabled():
+            return
 
         widget = get_workbench().focus_get()
         if not running_on_mac_os():  # on Mac Ctrl+C is not used for Copy
@@ -414,10 +417,17 @@ class Runner:
                     if isinstance(selection, str) and len(selection) > 0:
                         # assuming user meant to copy, not interrupt
                         # (IDLE seems to follow same logic)
-                        return False
+                        return
                 except Exception:
                     # selection_get() gives error when calling without selection on Ubuntu
                     pass
+
+        self._cmd_interrupt()
+        return "break"
+
+    def _cmd_interrupt_enabled(self) -> bool:
+        if not self._proxy or not self._proxy.is_connected():
+            return False
 
         return self.is_running() or self.is_waiting_toplevel_command()
 
@@ -1567,7 +1577,7 @@ class BlockingDialog(CommonDialogEx):
                 "Cancel current operation?", "Do you really want to cancel this operation?"
             ):
                 self._send_interrupt()
-    
+
     def destroy(self):
         get_workbench().unbind("InlineResponse", self._on_response)
         get_workbench().unbind("InlineProgress", self._on_progress)
