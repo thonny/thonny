@@ -100,18 +100,8 @@ class MicroPythonProxy(SubprocessProxy):
         return cmd
 
     def interrupt(self):
+        # Don't interrupt local process, but direct it to device
         self._send_msg(InterruptCommand())
-        """
-        # For some reason following kills the backend and KeyboardInterrupt can't be caught 
-        if self._proc is not None and self._proc.poll() is None:
-            if running_on_windows():
-                try:
-                    os.kill(self._proc.pid, signal.CTRL_BREAK_EVENT)  # @UndefinedVariable
-                except Exception:
-                    logging.exception("Could not interrupt backend process")
-            else:
-                self._proc.send_signal(signal.SIGINT)
-        """
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
         if isinstance(cmd, EOFCommand):

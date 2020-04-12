@@ -124,8 +124,6 @@ class MicroPythonBackend:
         self._connection = connection
         self._local_cwd = None
         self._cwd = None
-        self._interrupt_requested = False
-        self._cancel_requested = False
         self._command_queue = Queue()  # populated by reader thread
         self._progress_times = {}
 
@@ -163,28 +161,21 @@ class MicroPythonBackend:
 
     def _mainloop(self):
         while True:
+            self._check_for_connection_errors()
             try:
-                self._cancel_requested = False
-                self._interrupt_requested = False
-                self._check_for_connection_errors()
-                try:
-                    cmd = self._command_queue.get(timeout=0.1)
-                except Empty:
-                    # No command in queue, but maybe a thread produced output meanwhile
-                    # or the user resetted the device
-                    self._forward_unexpected_output()
-                    continue
+                cmd = self._command_queue.get(timeout=0.1)
+            except Empty:
+                # No command in queue, but maybe a thread produced output meanwhile
+                # or the user resetted the device
+                self._forward_unexpected_output()
+                continue
 
-                if isinstance(cmd, InputSubmission):
-                    self._submit_input(cmd.data)
-                elif isinstance(cmd, EOFCommand):
-                    self._soft_reboot(False)
-                elif isinstance(cmd, InterruptCommand):
-                    self._interrupt()
-                else:
-                    self.handle_command(cmd)
-            except KeyboardInterrupt:
-                self._interrupt()
+            if isinstance(cmd, InputSubmission):
+                self._submit_input(cmd.data)
+            elif isinstance(cmd, EOFCommand):
+                self._soft_reboot(False)
+            else:
+                self.handle_command(cmd)
 
     def _fetch_welcome_text(self):
         self._connection.write(NORMAL_MODE_CMD)
@@ -280,15 +271,6 @@ class MicroPythonBackend:
     def _interrupt(self):
         self._connection.write(INTERRUPT_CMD)
 
-    def _check_for_interrupt(self, action_scope):
-        if action_scope == "device" and self._interrupt_requested:
-            self._interrupt()
-            self._interrupt_requested = False
-
-        if action_scope == "local" and self._cancel_requested:
-            self._cancel_requested = False
-            raise KeyboardInterrupt()
-
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies. See CalliopeMiniProxy for more details
@@ -354,8 +336,8 @@ class MicroPythonBackend:
                 sys.exit()
             cmd = parse_message(line)
             if isinstance(cmd, InterruptCommand):
-                self._interrupt_requested = True
-                self._cancel_requested = True
+                # This is a priority command and will be handled right away
+                self._interrupt()
             else:
                 self._command_queue.put(cmd)
 
@@ -744,7 +726,6 @@ class MicroPythonBackend:
             # There may be an input submission waiting
             # and we can't progress without resolving it first
             self._check_for_side_commands()
-            self._check_for_interrupt("device")
 
             # Prefer whole lines, but allow also incremental output to single line
             # Note that here I'm not looking for non-first raw prompt, because this
@@ -893,9 +874,6 @@ class MicroPythonBackend:
 
     def _connected_to_microbit(self):
         return "micro:bit" in self._welcome_text.lower()
-
-    def _cmd_interrupt(self, cmd):
-        self._interrupt()
 
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
@@ -1287,7 +1265,6 @@ class MicroPythonBackend:
             self._execute_without_errors("from binascii import hexlify as __temp_hexlify")
 
         while True:
-            self._check_for_interrupt("local")
             if "binascii" in self._builtin_modules:
                 block = binascii.unhexlify(
                     self._evaluate("__temp_hexlify(__thonny_fp.read(%s))" % block_size)
@@ -1326,7 +1303,6 @@ class MicroPythonBackend:
         with open(mounted_target_path, "wb") as f:
             bytes_written = 0
             for block in content_blocks:
-                self._check_for_interrupt("local")
                 bytes_written += f.write(block)
                 f.flush()
                 os.fsync(f)
@@ -1387,7 +1363,6 @@ class MicroPythonBackend:
 
             bytes_sent = 0
             for block in content_blocks:
-                self._check_for_interrupt("local")
                 if "binascii" in self._builtin_modules:
                     script = "__W(%r)" % binascii.hexlify(block)
                 else:
