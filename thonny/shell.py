@@ -965,7 +965,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         tags = tuple(tags)
 
         # Make stacktrace clickable
-        if "stderr" in tags or "error" in tags:
+        if "stderr" in tags or "error" in tags or ("File" in txt and "line" in txt):
             # show lines pointing to source lines as hyperlinks
             for line in txt.splitlines(True):
                 parts = re.split(r"(File .* line \d+.*)$", line, maxsplit=1)
