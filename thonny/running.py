@@ -438,10 +438,7 @@ class Runner:
         return "break"
 
     def _cmd_interrupt_enabled(self) -> bool:
-        if not self._proxy or not self._proxy.is_connected():
-            return False
-
-        return self.is_running() or self.is_waiting_toplevel_command()
+        return self._proxy and self._proxy.is_connected()
 
     def cmd_stop_restart(self) -> None:
         if get_workbench().in_simple_mode():
