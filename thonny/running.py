@@ -52,7 +52,6 @@ from thonny.ui_utils import select_sequence, show_dialog, CommonDialogEx
 from tkinter import messagebox
 import warnings
 import re
-import traceback
 
 
 WINDOWS_EXE = "python.exe"
@@ -1568,6 +1567,11 @@ class BlockingDialog(CommonDialogEx):
                 "Cancel current operation?", "Do you really want to cancel this operation?"
             ):
                 self._send_interrupt()
+    
+    def destroy(self):
+        get_workbench().unbind("InlineResponse", self._on_response)
+        get_workbench().unbind("InlineProgress", self._on_progress)
+        super().destroy()
 
 
 def get_frontend_python():
