@@ -98,7 +98,14 @@ def _get_ipc_file_path():
     if not base_dir or not os.path.exists(base_dir):
         base_dir = THONNY_USER_DIR
 
-    ipc_dir = os.path.join(base_dir, "thonny-%s" % getpass.getuser())
+    try:
+        username = getpass.getuser()
+    except:
+        # https://github.com/thonny/thonny/issues/1146
+        # https://bugs.python.org/issue32731
+        username = os.path.basename(os.path.expanduser("~"))
+
+    ipc_dir = os.path.join(base_dir, "thonny-%s" % username)
     os.makedirs(ipc_dir, exist_ok=True)
 
     if not platform.system() == "Windows":
