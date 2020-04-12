@@ -82,7 +82,7 @@ FALLBACK_BUILTIN_MODULES = [
     "math",
     "sys",
     "array",
-    "binascii",
+    #"binascii", # don't include it, as it may give false signal for reader/writer
     "collections",
     "errno",
     "hashlib",
@@ -1259,13 +1259,14 @@ class MicroPythonBackend:
         # TODO: read from mount when possible
         # file_size = self._get_file_size(path)
         block_size = 512
+        hex_mode = self.should_hexlify(path) 
 
         self._execute_without_errors("__thonny_fp = open(%r, 'rb')" % path)
-        if "binascii" in self._builtin_modules:
+        if hex_mode:
             self._execute_without_errors("from binascii import hexlify as __temp_hexlify")
 
         while True:
-            if "binascii" in self._builtin_modules:
+            if hex_mode:
                 block = binascii.unhexlify(
                     self._evaluate("__temp_hexlify(__thonny_fp.read(%s))" % block_size)
                 )
@@ -1338,7 +1339,8 @@ class MicroPythonBackend:
                 raise RuntimeError("Problem opening file for writing: " + result)
 
             # Define function to allow shorter write commands
-            if "binascii" in self._builtin_modules:
+            hex_mode = self.should_hexlify(target_path)
+            if hex_mode:
                 self._execute_without_errors(
                     dedent(
                         """
@@ -1363,7 +1365,7 @@ class MicroPythonBackend:
 
             bytes_sent = 0
             for block in content_blocks:
-                if "binascii" in self._builtin_modules:
+                if hex_mode:
                     script = "__W(%r)" % binascii.hexlify(block)
                 else:
                     script = "__W(%r)" % block
@@ -1390,6 +1392,7 @@ class MicroPythonBackend:
                         del __thonny_path
                         __thonny_fp.close()
                         del __thonny_fp
+                        del __thonny_result
                         del __thonny_unhex
                     except:
                         pass
@@ -1893,6 +1896,16 @@ class MicroPythonBackend:
     def _show_error(self, msg):
         self._send_output(msg + "\n", "stderr")
 
+    def should_hexlify(self, path):
+        if "binascii" not in self._builtin_modules:
+            return False
+        
+        for ext in (".py", ".txt", ".csv"):
+            if path.lower().endswith(ext):
+                return False
+        
+        return True
+    
 
 class ProtocolError(Exception):
     def __init__(self, message, captured):
