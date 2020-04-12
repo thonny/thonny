@@ -22,6 +22,7 @@ from logging import debug
 from threading import Thread
 from time import sleep
 
+import tkinter as tk
 from tkinter import ttk
 
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
@@ -409,17 +410,28 @@ class Runner:
         if not self._cmd_interrupt_enabled():
             return
 
-        widget = get_workbench().focus_get()
-        if not running_on_mac_os():  # on Mac Ctrl+C is not used for Copy
-            if widget is not None and hasattr(widget, "selection_get"):
+        if not running_on_mac_os():  # on Mac Ctrl+C is not used for Copy.
+            # Disable Ctrl+C interrupt in editor and shell, when some text is selected
+            # (assuming user intended to copy instead of interrupting)
+            widget = get_workbench().focus_get()
+            if isinstance(widget, tk.Text):
+                if len(widget.tag_ranges("sel")) > 0:
+                    # this test is reliable, unlike selection_get below
+                    return
+            else:
                 try:
                     selection = widget.selection_get()
                     if isinstance(selection, str) and len(selection) > 0:
-                        # assuming user meant to copy, not interrupt
+                        # Assuming user meant to copy, not interrupt
                         # (IDLE seems to follow same logic)
+
+                        # NB! This is not perfect in Linux, as the selection can be in another app
+                        # ie. there may be no selection in Thonny actually.
+                        # In other words, Ctrl+C interrupt may fail when not given inside a Text
                         return
                 except Exception:
-                    # selection_get() gives error when calling without selection on Ubuntu
+                    # widget either doesn't have selection_get or it
+                    # gave error (can happen without selection on Ubuntu)
                     pass
 
         self._cmd_interrupt()
