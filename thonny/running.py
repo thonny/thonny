@@ -418,16 +418,17 @@ class Runner:
                 if len(widget.tag_ranges("sel")) > 0:
                     # this test is reliable, unlike selection_get below
                     return
-            else:
+            elif isinstance(widget, (tk.Listbox, ttk.Entry, tk.Entry, tk.Spinbox)):
                 try:
                     selection = widget.selection_get()
                     if isinstance(selection, str) and len(selection) > 0:
                         # Assuming user meant to copy, not interrupt
                         # (IDLE seems to follow same logic)
 
-                        # NB! This is not perfect in Linux, as the selection can be in another app
+                        # NB! This is not perfect, as in Linux the selection can be in another app
                         # ie. there may be no selection in Thonny actually.
-                        # In other words, Ctrl+C interrupt may fail when not given inside a Text
+                        # In other words, Ctrl+C interrupt may be dropped without reason
+                        # when given inside the widgets listed above.
                         return
                 except Exception:
                     # widget either doesn't have selection_get or it
