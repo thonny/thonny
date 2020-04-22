@@ -35,10 +35,12 @@ Source contributors, advisors, translators and frequent bug-reporters
 ---------------------------------------------------------------------
 * adzierzanowski
 * Aivar Annamaa
+* Albin
 * Alar Leemet
 * Aleks ANDRÉ
 * Alex Hall
 * Anatoly Techtonik
+* Anders Pamdal
 * André Roberge
 * Antonio Carlos
 * Austin Bart

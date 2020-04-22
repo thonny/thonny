@@ -17,6 +17,7 @@ LANGUAGES_DICT = {
     "pt_PT": "Português (PT) [BETA]",
     "pt_BR": "Português (BR) [ALPHA]",
     "ru_RU": "Русский",
+    "sv_SE": "Svenska [BETA]",
     "tr_TR": "Türkçe [BETA]",
     "uk_UA": "Українська",
     "zh_TW": "繁體中文-TW",
