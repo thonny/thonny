@@ -31,7 +31,6 @@ msgstr "工具"
 msgid "Help"
 msgstr "說明"
 
-
 #: thonny/workbench.py:522
 msgid "Alternative Python 3 interpreter or virtual environment"
 msgstr "另外的Python 3直譯器或虛擬環境"
