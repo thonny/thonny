@@ -35,6 +35,7 @@ import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
 import binascii
 import shutil
+from threading import Lock
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
@@ -119,6 +120,7 @@ def debug(msg):
     print(msg, file=sys.stderr)
 
 
+
 class MicroPythonBackend:
     def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
@@ -134,6 +136,8 @@ class MicroPythonBackend:
 
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
+        
+        self._writing_lock = Lock()
 
         try:
             self._prepare(clean)
@@ -268,9 +272,6 @@ class MicroPythonBackend:
             )
         )
 
-    def _interrupt(self):
-        self._connection.write(INTERRUPT_CMD)
-
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies. See CalliopeMiniProxy for more details
@@ -337,9 +338,19 @@ class MicroPythonBackend:
             cmd = parse_message(line)
             if isinstance(cmd, InterruptCommand):
                 # This is a priority command and will be handled right away
-                self._interrupt()
+                self._interrupt_in_command_reading_thread()
             else:
                 self._command_queue.put(cmd)
+    
+    def _interrupt_in_command_reading_thread(self):
+        with self._writing_lock:
+            # don't interrupt while command or input is being written
+            self._connection.write(INTERRUPT_CMD)
+            time.sleep(0.1)
+            self._connection.write(INTERRUPT_CMD)
+            time.sleep(0.1)
+            self._connection.write(INTERRUPT_CMD)
+            print("sent interrupt")
 
     def handle_command(self, cmd):
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
@@ -415,16 +426,17 @@ class MicroPythonBackend:
             cdata = cdata[:-1] + "\r\n"
 
         bdata = cdata.encode(ENCODING)
-
-        self._connection.write(bdata)
-        # Try to consume the echo
-
-        try:
-            echo = self._connection.read(len(bdata))
-        except queue.Empty:
-            # leave it.
-            logging.warning("Timeout when reading echo")
-            return
+        
+        with self._writing_lock:
+            self._connection.write(bdata)
+            # Try to consume the echo
+    
+            try:
+                echo = self._connection.read(len(bdata))
+            except queue.Empty:
+                # leave it.
+                logging.warning("Timeout when reading input echo")
+                return
 
         if echo != bdata:
             # because of autoreload? timing problems? interruption?
@@ -474,11 +486,13 @@ class MicroPythonBackend:
         self._ensure_raw_propmt()
 
         # send command
-        self._connection.write(script.encode(ENCODING) + EOT)
-        debug("Wrote " + script + "\n--------\n")
-
-        # fetch command confirmation
-        confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
+        with self._writing_lock:
+            self._connection.write(script.encode(ENCODING) + EOT)
+            debug("Wrote " + script + "\n--------\n")
+    
+            # fetch command confirmation
+            confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
+            
         if confirmation != OK:
             raise ProtocolError(
                 "Could not read command confirmation", confirmation + self._connection.read_all()
@@ -1314,91 +1328,88 @@ class MicroPythonBackend:
 
     def _write_file_via_serial(self, content_blocks, target_path, notifier=None):
         # prelude
-        try:
-            result = self._evaluate(
-                "__thonny_result",
-                dedent(
-                    """
-                try:
-                    __thonny_path = '{path}'
-                    __thonny_written = 0
-                    __thonny_fp = open(__thonny_path, 'wb')
-                    __thonny_result = "OK"
-                except Exception as e:
-                    __thonny_result = str(e)
+        result = self._evaluate(
+            "__thonny_result",
+            dedent(
                 """
-                ).format(path=target_path),
-                capture_output=True,
-            )
+            try:
+                __thonny_path = '{path}'
+                __thonny_written = 0
+                __thonny_fp = open(__thonny_path, 'wb')
+                __thonny_result = "OK"
+            except Exception as e:
+                __thonny_result = str(e)
+            """
+            ).format(path=target_path),
+        )
 
-            # TODO: refactor with try-except
-            if "readonly" in result.replace("-", "").lower():
-                raise ReadOnlyFilesystemError()
+        if "readonly" in result.replace("-", "").lower():
+            raise ReadOnlyFilesystemError()
 
-            elif result != "OK":
-                raise RuntimeError("Problem opening file for writing: " + result)
+        elif result != "OK":
+            raise RuntimeError("Problem opening file for writing: " + result)
 
-            # Define function to allow shorter write commands
-            hex_mode = self.should_hexlify(target_path)
-            if hex_mode:
-                self._execute_without_errors(
-                    dedent(
-                        """
-                    from binascii import unhexlify as __thonny_unhex
-                    def __W(x):
-                        global __thonny_written
-                        __thonny_written += __thonny_fp.write(__thonny_unhex(x))
-                        __thonny_fp.flush()
-                """
-                    )
-                )
-            else:
-                self._execute_without_errors(
-                    dedent(
-                        """
-                    def __W(x):
-                        global __thonny_written
-                        __thonny_written += __thonny_fp.write(x)
-                """
-                    )
-                )
-
-            bytes_sent = 0
-            for block in content_blocks:
-                if hex_mode:
-                    script = "__W(%r)" % binascii.hexlify(block)
-                else:
-                    script = "__W(%r)" % block
-                self._execute_without_errors(script)
-                bytes_sent += len(block)
-                if notifier is not None:
-                    notifier(bytes_sent)
-
-            bytes_received = self._evaluate("__thonny_written")
-
-            if bytes_received != bytes_sent:
-                raise UserError(
-                    "Expected %d written bytes but wrote %d" % (bytes_sent, bytes_received)
-                )
-
-        finally:
-            # clean up
+        # Define function to allow shorter write commands
+        hex_mode = self.should_hexlify(target_path)
+        if hex_mode:
             self._execute_without_errors(
                 dedent(
                     """
-                    try:
-                        del __W
-                        del __thonny_written
-                        del __thonny_path
-                        __thonny_fp.close()
-                        del __thonny_fp
-                        del __thonny_result
-                        del __thonny_unhex
-                    except:
-                        pass
-                """
+                from binascii import unhexlify as __thonny_unhex
+                def __W(x):
+                    global __thonny_written
+                    __thonny_written += __thonny_fp.write(__thonny_unhex(x))
+                    __thonny_fp.flush()
+            """
                 )
             )
+        else:
+            self._execute_without_errors(
+                dedent(
+                    """
+                def __W(x):
+                    global __thonny_written
+                    __thonny_written += __thonny_fp.write(x)
+            """
+                )
+            )
+
+        bytes_sent = 0
+        for block in content_blocks:
+            if hex_mode:
+                script = "__W(%r)" % binascii.hexlify(block)
+            else:
+                script = "__W(%r)" % block
+            self._execute_without_errors(script)
+            print("Wrote", script)
+            bytes_sent += len(block)
+            if notifier is not None:
+                notifier(bytes_sent)
+
+        bytes_received = self._evaluate("__thonny_written")
+
+        if bytes_received != bytes_sent:
+            raise UserError(
+                "Expected %d written bytes but wrote %d" % (bytes_sent, bytes_received)
+            )
+
+        # clean up
+        self._execute_without_errors(
+            dedent(
+                """
+                try:
+                    del __W
+                    del __thonny_written
+                    del __thonny_path
+                    __thonny_fp.close()
+                    del __thonny_fp
+                    del __thonny_result
+                    del __thonny_unhex
+                except:
+                    pass
+            """
+            )
+        )
 
         return bytes_sent
 
