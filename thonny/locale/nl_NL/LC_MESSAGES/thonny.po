@@ -1371,89 +1371,89 @@ msgstr "Kan geen geschikte schijf vinden"
 
 #: thonny/base_file_browser.py:259
 msgid "%d items"
-msgstr ""
+msgstr "%d items"
 
 #: thonny/base_file_browser.py:581
 msgid "Move to Recycle Bin"
-msgstr ""
+msgstr "Verplaats naar Prullenbak"
 
 #: thonny/base_file_browser.py:583
 msgid "Move to Trash"
-msgstr ""
+msgstr "Verplaats naar prullenmand"
 
 #: thonny/base_file_browser.py:586
 msgid "Delete"
-msgstr ""
+msgstr "Verwijder"
 
 #: thonny/base_file_browser.py:589
 msgid "New directory"
-msgstr ""
+msgstr "Nieuwe map"
 
 #: thonny/base_file_browser.py:592
 msgid "Properties"
-msgstr ""
+msgstr "Eigenschappen"
 
 #: thonny/base_file_browser.py:593
 msgid "Storage space"
-msgstr ""
+msgstr "Opslagruimte"
 
 #: thonny/base_file_browser.py:603
 msgid "Path"
-msgstr ""
+msgstr "Pad"
 
 #: thonny/base_file_browser.py:605
 msgid "Directory properties"
-msgstr ""
+msgstr "Mapeigenschappen"
 
 #: thonny/base_file_browser.py:607
 msgid "File properties"
-msgstr ""
+msgstr "Bestandseigenschappen"
 
 #: thonny/base_file_browser.py:609
 msgid "bytes"
-msgstr ""
+msgstr "bytes"
 
 #: thonny/base_file_browser.py:612
 msgid "Size"
-msgstr ""
+msgstr "Grootte"
 
 #: thonny/base_file_browser.py:623
 msgid "Modified"
-msgstr ""
+msgstr "Gewijzigd"
 
 #: thonny/base_file_browser.py:679
 msgid "Deleting %s"
-msgstr ""
+msgstr "Bezig met verwijderen van %s"
 
 #: thonny/base_file_browser.py:701
 msgid "Moving %s to %s"
-msgstr ""
+msgstr "Bezig met verplaatsen van %s naar %s"
 
 #: thonny/code.py:203
 msgid "Loading"
-msgstr ""
+msgstr "Bezig met laden"
 
 #: thonny/code.py:297
 msgid "Saving"
-msgstr ""
+msgstr "Bezig met opslaan"
 
 #: thonny/running.py:1408
 msgid "Working..."
-msgstr ""
+msgstr "Bezig..."
 
 #: thonny/plugins/files.py:199
 msgid "Uploading %s to %s"
-msgstr ""
+msgstr "Bezig met uploaden van %s naar %s"
 
 #: thonny/plugins/files.py:206
 msgid "Upload to %s"
-msgstr ""
+msgstr "Uploaden naar %s"
 
 #: thonny/plugins/files.py:261
 msgid "Downloading %s to %s"
-msgstr ""
+msgstr "Bezig met %s downloaden naar %s"
 
 #: thonny/plugins/files.py:267
 msgid "Download to %s"
-msgstr ""
+msgstr "Downloaden naar %s"
 

@@ -574,7 +574,7 @@ msgstr "Ejecutable de Python"
 
 #: thonny/running_config_page.py:47
 msgid "NB! Thonny only supports Python 3.5 and later"
-msgstr ""
+msgstr "NB! Thonny solo es compatible con Python 3.5 y versiones posteriores"
 
 #: thonny/running_config_page.py:56
 msgid "Create new virtual environment"
@@ -582,7 +582,7 @@ msgstr "Crear un nuevo entorno virtual"
 
 #: thonny/running_config_page.py:59
 msgid "Select existing or create a new empty directory"
-msgstr ""
+msgstr "Seleccione directorio existente o cree uno nuevo vacío"
 
 #: thonny/running_config_page.py:74
 msgid "Python interpreters"
@@ -595,7 +595,7 @@ msgstr "todos los archivos"
 
 #: thonny/running_config_page.py:89
 msgid "Select empty directory for new virtual environment"
-msgstr ""
+msgstr "Seleccione un directorio vacío para el nuevo entorno virtual."
 
 #: thonny/running_config_page.py:96
 msgid "Bad directory"
@@ -604,11 +604,12 @@ msgstr ""
 #: thonny/running_config_page.py:97
 msgid "Selected directory is not empty.\n"
 "Select another or cancel."
-msgstr ""
+msgstr "El directorio seleccionado no está vacío.\n"
+"Seleccione otro o cancele."
 
 #: thonny/running_config_page.py:112
 msgid "Creating virtual environment"
-msgstr ""
+msgstr "Creando ambiente virtual."
 
 #: thonny/shell.py:72
 msgid "Clear shell"
@@ -620,7 +621,7 @@ msgstr ""
 
 #: thonny/shell.py:245
 msgid "Clear"
-msgstr ""
+msgstr "Limpiar"
 
 #: thonny/shell.py:258
 msgid "Show Plotter"
@@ -633,11 +634,11 @@ msgstr ""
 
 #: thonny/shell.py:1400
 msgid "Wrap text (may be slow)"
-msgstr ""
+msgstr "Ajustar texto (puede ser lento)"
 
 #: thonny/shell.py:1425 thonny/ui_utils.py:1639
 msgid "Copy to clipboard"
-msgstr ""
+msgstr "Copiar al portapapeles"
 
 #: thonny/shell.py:1431
 msgid "Expand in Shell"
@@ -741,15 +742,15 @@ msgstr "Salir"
 
 #: thonny/workbench.py:1054 thonny/workbench.py:1062
 msgid "Overwriting theme '%s'"
-msgstr ""
+msgstr "Sobrescribir tema '%s "
 
 #: thonny/workbench.py:1221
 msgid "Program arguments:"
-msgstr ""
+msgstr "Argumentos del programa:"
 
 #: thonny/workbench.py:1275
 msgid "Regular mode"
-msgstr ""
+msgstr "Modo regular"
 
 #: thonny/workbench.py:1276
 msgid "Configuration has been updated. Restart Thonny to start working in regular mode.\n"
@@ -775,7 +776,7 @@ msgstr "Ejecutar / reanudar"
 
 #: thonny/plugins/debugger.py:1189
 msgid "Debug current script"
-msgstr ""
+msgstr "Depurar el script actual"
 
 #: thonny/plugins/debugger.py:1191
 msgid "Debug"
@@ -787,7 +788,7 @@ msgstr ""
 
 #: thonny/plugins/debugger.py:1214
 msgid "Debug current script (faster)"
-msgstr ""
+msgstr "Depurar el script actual (rápidamente)"
 
 #: thonny/plugins/debugger.py:1225
 msgid "Step over"
@@ -859,7 +860,7 @@ msgstr "INSTALAR"
 
 #: thonny/plugins/pip_gui.py:352
 msgid "Browse the packages"
-msgstr ""
+msgstr "Navegar paquetes"
 
 #: thonny/plugins/pip_gui.py:355
 msgid "With current interpreter you can only browse the packages here.\n"
@@ -896,7 +897,7 @@ msgstr "Actualizar o desinstalar"
 
 #: thonny/plugins/pip_gui.py:405
 msgid "Start by selecting the package from the left."
-msgstr ""
+msgstr "Comience seleccionando el paquete desde la izquierda"
 
 #: thonny/plugins/pip_gui.py:409
 msgid "Target:"
@@ -916,7 +917,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:431
 msgid "New packages will be also installed into this directory. Other locations must be managed by alternative means."
-msgstr ""
+msgstr "También se instalarán nuevos paquetes en este directorio. Otras ubicaciones deben gestionarse por medios alternativos."
 
 #: thonny/plugins/pip_gui.py:456
 msgid "Installed version:"
@@ -956,7 +957,7 @@ msgstr "Paquete"
 
 #: thonny/plugins/pip_gui.py:757
 msgid "Manage packages for %s"
-msgstr ""
+msgstr "Administrar paquetes para %s"
 
 #: thonny/plugins/pip_gui.py:813
 msgid "Confirmation"
@@ -983,19 +984,21 @@ msgid "Looks like you are trying to install an outdated Thonny\n"
 "plug-in (it doesn't specify required Thonny version).\n"
 "\n"
 "If you still want it, then please install it from the command line."
-msgstr ""
+msgstr "Parece que estás intentando instalar un plug-in de Thonny obsoleto (no especifica la versión de Thonny requerida).\n"
+"\n"
+"Si desea instalarlo, instálelo desde la línea de comandos."
 
 #: thonny/plugins/pip_gui.py:935
 msgid "Unsuitable requirements"
-msgstr ""
+msgstr "Requisitos inadecuados"
 
 #: thonny/plugins/pip_gui.py:936
 msgid "This package requires different Thonny version:"
-msgstr ""
+msgstr "Este paquete requiere una versión diferente de Thonny:"
 
 #: thonny/plugins/pip_gui.py:940
 msgid "If you still want it, then please install it from the command line."
-msgstr ""
+msgstr "Si aún lo desea, instálelo desde la línea de comandos."
 
 #: thonny/plugins/pip_gui.py:984
 msgid "(In this case Thonny's back-end uses same interpreter, so both dialogs manage same packages.)"
@@ -1003,11 +1006,11 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:990
 msgid "NB! You need to restart Thonny after installing / upgrading / uninstalling a plug-in."
-msgstr ""
+msgstr "¡NB! Debe reiniciar Thonny después de instalar / actualizar / desinstalar un complemento."
 
 #: thonny/plugins/pip_gui.py:1000
 msgid "Thonny plug-ins"
-msgstr ""
+msgstr "Plug-ins de Thonny"
 
 #: thonny/plugins/pip_gui.py:1013
 msgid "Advanced install / upgrade / downgrade"
@@ -1156,7 +1159,7 @@ msgstr ""
 
 #: thonny/plugins/theme_and_font_config_page.py:147
 msgid "The answer is"
-msgstr ""
+msgstr "La respuesta es"
 
 #: thonny/plugins/theme_and_font_config_page.py:151
 msgid "unclosed_string"
@@ -1176,7 +1179,7 @@ msgstr ""
 
 #: thonny/plugins/theme_and_font_config_page.py:228
 msgid "Theme & Font"
-msgstr ""
+msgstr "Temas y Fuentes"
 
 #: thonny/plugins/thonny_folders.py:18
 msgid "Open Thonny program folder..."
@@ -1188,7 +1191,7 @@ msgstr ""
 
 #: thonny/plugins/help/__init__.py:58
 msgid "Home"
-msgstr ""
+msgstr "Inicio"
 
 #: thonny/plugins/help/__init__.py:69
 msgid "Help contents"
@@ -1244,7 +1247,7 @@ msgstr ""
 
 #: thonny/plugins/pip_gui.py:391
 msgid "Install from local file"
-msgstr ""
+msgstr "Instalar desde archivo local"
 
 #: thonny/plugins/pip_gui.py:970
 msgid "This dialog is for managing Thonny plug-ins and their dependencies.\n"
@@ -1267,7 +1270,7 @@ msgstr "Des-indentar las líneas seleccionadas."
 msgid "Switch to\n"
 "regular\n"
 "mode"
-msgstr ""
+msgstr "Cambiar a modo regular"
 
 #: thonny/plugins/microbit/__init__.py:54
 msgid "Make sure MicroPython has been installed to your micro:bit."
@@ -1287,7 +1290,7 @@ msgstr ""
 
 #: thonny/plugins/microbit/__init__.py:109
 msgid "Version to be installed:"
-msgstr ""
+msgstr "Versión a instalar:"
 
 #: thonny/plugins/microbit/__init__.py:111
 msgid "please wait"
@@ -1295,7 +1298,7 @@ msgstr "por favor espere"
 
 #: thonny/plugins/microbit/__init__.py:115
 msgid "NB! All files on micro:bit will be deleted!"
-msgstr ""
+msgstr "NB! ¡Todos los archivos en micro: bit serán eliminados!"
 
 #: thonny/plugins/microbit/__init__.py:195
 msgid "Installing ..."
@@ -1315,7 +1318,7 @@ msgstr "Firmware"
 
 #: thonny/plugins/micropython/__init__.py:301
 msgid "Open the dialog for installing or upgrading MicroPython on your device"
-msgstr ""
+msgstr "Abra el cuadro de diálogo para instalar o actualizar MicroPython en su dispositivo"
 
 #: thonny/plugins/microbit/__init__.py:67
 msgid "Could not find disk '%s'."
@@ -1323,11 +1326,11 @@ msgstr "No se pudo encontrar el disco '%s'."
 
 #: thonny/plugins/microbit/__init__.py:69
 msgid "Make sure you have micro:bit plugged in!"
-msgstr ""
+msgstr "¡Asegúrese de tener micro: bit conectado!"
 
 #: thonny/plugins/microbit/__init__.py:71
 msgid "Do you want to continue and locate the disk yourself?"
-msgstr ""
+msgstr "¿Desea continuar y ubicar el disco por usted mismo?"
 
 #: thonny/misc_utils.py:120
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
@@ -1371,7 +1374,7 @@ msgstr "Espacio de almacenamiento"
 
 #: thonny/base_file_browser.py:603
 msgid "Path"
-msgstr ""
+msgstr "Ruta"
 
 #: thonny/base_file_browser.py:605
 msgid "Directory properties"

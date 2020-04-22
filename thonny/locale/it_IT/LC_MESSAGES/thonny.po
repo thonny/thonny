@@ -165,7 +165,7 @@ msgstr "Attiva commenti"
 
 #: thonny/plugins/commenting_indenting.py:153
 msgid "Comment out"
-msgstr ""
+msgstr "Commenta"
 
 #: thonny/plugins/commenting_indenting.py:163
 msgid "Uncomment"
@@ -175,9 +175,11 @@ msgstr "Decommenta"
 msgid "Undo"
 msgstr "Annulla"
 
+#. Sui software tradotti c'è scritto "Ripristina", NON "Ripeti"
 #: thonny/plugins/common_editing_commands.py:32
+#, fuzzy
 msgid "Redo"
-msgstr "Ripeti"
+msgstr "Ripristina"
 
 #: thonny/plugins/common_editing_commands.py:48 thonny/ui_utils.py:2176
 msgid "Cut"
@@ -332,7 +334,8 @@ msgstr ""
 #: thonny/plugins/heap.py:35
 msgid "Heap mode is on.\n"
 "Close Heap view to turn it off."
-msgstr ""
+msgstr "La modalità Heap è attiva.\n"
+"Chiudi la scheda Heap per disattivarla."
 
 #: thonny/plugins/heap.py:83
 msgid "Heap"
@@ -376,7 +379,7 @@ msgstr ""
 
 #: thonny/plugins/pgzero_frontend.py:26
 msgid "Pygame Zero mode"
-msgstr ""
+msgstr "Modalità Pygame Zero"
 
 #: thonny/plugins/pip_gui.py:78
 msgid "Find package from PyPI"
@@ -439,7 +442,7 @@ msgstr "Pagine Home"
 
 #: thonny/plugins/pip_gui.py:540
 msgid "Bugtracker"
-msgstr ""
+msgstr "Bugtracker"
 
 #: thonny/plugins/pip_gui.py:542
 msgid "Documentation"
@@ -548,7 +551,7 @@ msgstr "Esegui lo script corrente nel terminale"
 
 #: thonny/running.py:138
 msgid "Stop/Restart backend"
-msgstr ""
+msgstr "Ferma/Riavvia il backend"
 
 #: thonny/running.py:139
 msgid "Stop"
@@ -672,7 +675,7 @@ msgstr "Vedi Aiuto per i dettagli."
 
 #: thonny/ui_utils.py:368
 msgid "Close others"
-msgstr ""
+msgstr "Chiudi le altre schede"
 
 #: thonny/ui_utils.py:1499
 msgid "Copying"
@@ -755,11 +758,11 @@ msgstr "Chiudi"
 
 #: thonny/workbench.py:1054 thonny/workbench.py:1062
 msgid "Overwriting theme '%s'"
-msgstr ""
+msgstr "Sovrascrivi il tema '%s'"
 
 #: thonny/workbench.py:1221
 msgid "Program arguments:"
-msgstr ""
+msgstr "Argomenti del programma:"
 
 #: thonny/workbench.py:1275
 msgid "Regular mode"
@@ -808,7 +811,7 @@ msgstr "Debug dello script corrente (più veloce)"
 
 #: thonny/plugins/debugger.py:1225
 msgid "Step over"
-msgstr ""
+msgstr "Step over"
 
 #: thonny/plugins/debugger.py:1227
 msgid "Over"
@@ -816,7 +819,7 @@ msgstr ""
 
 #: thonny/plugins/debugger.py:1238
 msgid "Step into"
-msgstr ""
+msgstr "Step into"
 
 #: thonny/plugins/debugger.py:1240
 msgid "Into"
@@ -824,7 +827,7 @@ msgstr ""
 
 #: thonny/plugins/debugger.py:1251
 msgid "Step out"
-msgstr ""
+msgstr "Step out"
 
 #: thonny/plugins/debugger.py:1253
 msgid "Out"
@@ -852,7 +855,7 @@ msgstr ""
 
 #: thonny/plugins/general_config_page.py:32
 msgid "Debug mode (provides more detailed diagnostic logs)"
-msgstr ""
+msgstr "Modalità debug (fornisce informazioni diagnostiche più dettagliate)"
 
 #: thonny/plugins/general_config_page.py:56
 msgid "UI mode"
@@ -864,11 +867,11 @@ msgstr ""
 
 #: thonny/plugins/general_config_page.py:88
 msgid "NB! Restart Thonny after changing these options!"
-msgstr ""
+msgstr "NB! Riavvia Thonny dopo aver cambiato queste opzioni!"
 
 #: thonny/plugins/general_config_page.py:102
 msgid "General"
-msgstr ""
+msgstr "Generale"
 
 #: thonny/plugins/pip_gui.py:108
 msgid "INSTALL"
@@ -881,31 +884,31 @@ msgstr ""
 #: thonny/plugins/pip_gui.py:355
 msgid "With current interpreter you can only browse the packages here.\n"
 "Use 'Tools → Open system shell...' for installing, upgrading or uninstalling."
-msgstr ""
+msgstr "Con l'interprete corrente puoi solo visualizzare i pacchetti. Utilizza 'Strumenti --> Apri la shell di sistema...' per installarli, aggiornarli o disinstallarli."
 
 #: thonny/plugins/pip_gui.py:363
 msgid "Packages' directory"
-msgstr ""
+msgstr "Directory dei pacchetti"
 
 #: thonny/plugins/pip_gui.py:368
 msgid "Install from PyPI"
-msgstr ""
+msgstr "Installa da PyPI"
 
 #: thonny/plugins/pip_gui.py:371
 msgid "If you don't know where to get the package from, then most likely you'll want to search the Python Package Index. Start by entering the name of the package in the search box above and pressing ENTER."
-msgstr ""
+msgstr "Se non sai dove prendere i pacchetti, allora dovresti cercare nell'Indice dei Pacchetti Python. Inizia inserendo il nome del pacchetto nella casella di ricerca e premendo INVIO."
 
 #: thonny/plugins/pip_gui.py:387
 msgid "to locate requirements.txt file and install the packages specified in it."
-msgstr ""
+msgstr "Per cercare il file requirements.txt e installare i pacchetti specificati in esso"
 
 #: thonny/plugins/pip_gui.py:392
 msgid "Click"
-msgstr ""
+msgstr "Clicca"
 
 #: thonny/plugins/pip_gui.py:397
 msgid "to locate and install the package file (usually with .whl, .tar.gz or .zip extension)."
-msgstr ""
+msgstr "Per cercare e installare il package file (solitamente con estensione .whl, tar.gz, .zip)"
 
 #: thonny/plugins/pip_gui.py:403
 msgid "Upgrade or uninstall"
@@ -1255,7 +1258,7 @@ msgstr ""
 
 #: thonny/plugins/backend_config_page.py:61
 msgid "Details"
-msgstr ""
+msgstr "Dettagli"
 
 #: thonny/plugins/pip_gui.py:380
 msgid "Install from requirements file"
@@ -1338,7 +1341,7 @@ msgstr ""
 
 #: thonny/plugins/microbit/__init__.py:67
 msgid "Could not find disk '%s'."
-msgstr ""
+msgstr "Non ho trovato il disco '%s'"
 
 #: thonny/plugins/microbit/__init__.py:69
 msgid "Make sure you have micro:bit plugged in!"
@@ -1350,7 +1353,7 @@ msgstr ""
 
 #: thonny/misc_utils.py:120
 msgid "Could not find disk '%s'. Do you want to locate it yourself?"
-msgstr ""
+msgstr "Non ho trovato il disco '%s'. Vuoi cercarlo da solo?"
 
 #: thonny/misc_utils.py:123
 msgid "Found several '%s' disks. Do you want to choose one yourself?"
@@ -1362,7 +1365,7 @@ msgstr ""
 
 #: thonny/base_file_browser.py:259
 msgid "%d items"
-msgstr ""
+msgstr "%d elementi"
 
 #: thonny/base_file_browser.py:581
 msgid "Move to Recycle Bin"
@@ -1378,11 +1381,11 @@ msgstr "Cancella"
 
 #: thonny/base_file_browser.py:589
 msgid "New directory"
-msgstr ""
+msgstr "Nuova cartella"
 
 #: thonny/base_file_browser.py:592
 msgid "Properties"
-msgstr ""
+msgstr "Proprietà"
 
 #: thonny/base_file_browser.py:593
 msgid "Storage space"
@@ -1390,11 +1393,11 @@ msgstr ""
 
 #: thonny/base_file_browser.py:603
 msgid "Path"
-msgstr ""
+msgstr "Percorso"
 
 #: thonny/base_file_browser.py:605
 msgid "Directory properties"
-msgstr ""
+msgstr "Proprietà della cartella"
 
 #: thonny/base_file_browser.py:607
 msgid "File properties"
