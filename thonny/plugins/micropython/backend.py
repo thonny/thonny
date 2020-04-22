@@ -83,7 +83,7 @@ FALLBACK_BUILTIN_MODULES = [
     "math",
     "sys",
     "array",
-    #"binascii", # don't include it, as it may give false signal for reader/writer
+    # "binascii", # don't include it, as it may give false signal for reader/writer
     "collections",
     "errno",
     "hashlib",
@@ -120,7 +120,6 @@ def debug(msg):
     print(msg, file=sys.stderr)
 
 
-
 class MicroPythonBackend:
     def __init__(self, connection, clean, api_stubs_path):
         self._connection = connection
@@ -136,7 +135,7 @@ class MicroPythonBackend:
 
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
-        
+
         self._writing_lock = Lock()
 
         try:
@@ -341,7 +340,7 @@ class MicroPythonBackend:
                 self._interrupt_in_command_reading_thread()
             else:
                 self._command_queue.put(cmd)
-    
+
     def _interrupt_in_command_reading_thread(self):
         with self._writing_lock:
             # don't interrupt while command or input is being written
@@ -426,11 +425,11 @@ class MicroPythonBackend:
             cdata = cdata[:-1] + "\r\n"
 
         bdata = cdata.encode(ENCODING)
-        
+
         with self._writing_lock:
             self._connection.write(bdata)
             # Try to consume the echo
-    
+
             try:
                 echo = self._connection.read(len(bdata))
             except queue.Empty:
@@ -489,10 +488,10 @@ class MicroPythonBackend:
         with self._writing_lock:
             self._connection.write(script.encode(ENCODING) + EOT)
             debug("Wrote " + script + "\n--------\n")
-    
+
             # fetch command confirmation
             confirmation = self._connection.soft_read(2, timeout=WAIT_OR_CRASH_TIMEOUT)
-            
+
         if confirmation != OK:
             raise ProtocolError(
                 "Could not read command confirmation", confirmation + self._connection.read_all()
@@ -1273,7 +1272,7 @@ class MicroPythonBackend:
         # TODO: read from mount when possible
         # file_size = self._get_file_size(path)
         block_size = 512
-        hex_mode = self.should_hexlify(path) 
+        hex_mode = self.should_hexlify(path)
 
         self._execute_without_errors("__thonny_fp = open(%r, 'rb')" % path)
         if hex_mode:
@@ -1389,9 +1388,7 @@ class MicroPythonBackend:
         bytes_received = self._evaluate("__thonny_written")
 
         if bytes_received != bytes_sent:
-            raise UserError(
-                "Expected %d written bytes but wrote %d" % (bytes_sent, bytes_received)
-            )
+            raise UserError("Expected %d written bytes but wrote %d" % (bytes_sent, bytes_received))
 
         # clean up
         self._execute_without_errors(
@@ -1910,13 +1907,13 @@ class MicroPythonBackend:
     def should_hexlify(self, path):
         if "binascii" not in self._builtin_modules:
             return False
-        
+
         for ext in (".py", ".txt", ".csv"):
             if path.lower().endswith(ext):
                 return False
-        
+
         return True
-    
+
 
 class ProtocolError(Exception):
     def __init__(self, message, captured):
