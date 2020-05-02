@@ -454,37 +454,3 @@ def load_plugin():
         _("MicroPython (generic)"),
         GenericMicroPythonConfigPage,
     )
-
-    def explain_deprecation():
-        messagebox.showinfo(
-            "Moved commands",
-            dedent(
-                """
-            MicroPython commands have been moved or replaced:
-            
-            * "Select device"
-                    * Moved into "Run" menu as "Select interpreter"
-            * "Upload current script as main script"
-            * "Upload current script as boot script"
-            * "Upload current script with current name"
-                    * use "File => Save copy..."
-            * "Show device's main script"
-            * "Show device's boot script"
-                    * Double-click in Files view (Show => Files)
-            * "Upload ____ firmware"
-                    * Moved into interpreter config page or "Tools" menu
-            * "Soft reboot"
-                    * Moved into "Run" menu as "Send EOF / Soft reboot"
-            " "Close serial connection"
-                    * Moved into "Run" menu as "Disconnect"
-        """
-            ),
-        )
-
-    get_workbench().add_command(
-        "devicedeprecation",
-        "tempdevice",
-        "Where are all the commands?",
-        explain_deprecation,
-        group=1,
-    )

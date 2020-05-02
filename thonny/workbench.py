@@ -361,7 +361,6 @@ class Workbench(tk.Tk):
         self.get_menu("edit", _("Edit"))
         self.get_menu("view", _("View"))
         self.get_menu("run", _("Run"))
-        self.get_menu("tempdevice", "Device")
         self.get_menu("tools", _("Tools"))
         self.get_menu("help", _("Help"))
 
