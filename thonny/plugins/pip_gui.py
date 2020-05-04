@@ -655,7 +655,7 @@ class PipDialog(CommonDialog):
         filename = askopenfilename(
             master=self,
             filetypes=[(_("Package"), ".whl .zip .tar.gz"), (_("all files"), ".*")],
-            initialdir=get_workbench().get_local_cwd,
+            initialdir=get_workbench().get_local_cwd(),
         )
         if filename:  # Note that missing filename may be "" or () depending on tkinter version
             self._install_local_file(filename, False)
