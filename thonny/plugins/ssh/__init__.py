@@ -20,11 +20,13 @@ from tkinter import ttk, messagebox
 from thonny.ui_utils import askopenfilename, create_url_label
 from typing import Optional
 
+import thonny
+
 import jedi
 import serial.tools.list_ports
 from serial import SerialException
 
-from thonny import common, get_runner, get_shell, get_workbench, running
+from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     BackendEvent,
     InlineResponse,
@@ -42,31 +44,23 @@ from thonny.running import BackendProxy, SubprocessProxy
 from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
 import collections
 from threading import Thread
+from logging import debug
+import shlex
 
 
 class SshProxy(SubprocessProxy):
     def __init__(self, clean):
-        super().__init__(clean, "python3")
         self._host = get_workbench().get_option("ssh.host")
         self._user = get_workbench().get_option("ssh.user")
         self._password = get_workbench().get_option("ssh.password")
         self._client = None
+        self._proc = None
+        self._starting = True
 
-        try:
-            from paramiko.client import SSHClient
-        except ImportError:
-            self._show_error(
-                "SSH connection requires an extra package -- 'paramiko'.\n"
-                + "You can install it via 'Tools => Manage plug-ins' or via system package manager."
-            )
-            return
-        
-        self._client = SSHClient()
-        self._client.connect(hostname=self._host, username=self._user, password=self._password)
-        
+        super().__init__(clean, "python3")
 
     def _get_launcher_with_args(self):
-        return ["~/launcher.py"]
+        return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
 
     def _start_background_process(self, clean=None):
         # deque, because in one occasion I need to put messages back
@@ -102,7 +96,7 @@ class SshProxy(SubprocessProxy):
                 % self._executable
             )
         """
-        
+
         cmd_line = [
             self._executable,
             "-u",  # unbuffered IO
@@ -110,20 +104,58 @@ class SshProxy(SubprocessProxy):
             # (to avoid problems when using different Python versions without write permissions)
         ] + self._get_launcher_with_args()
 
-        debug("Starting the backend: %s %s", cmd_line, get_workbench().get_local_cwd())
-        
-        stdout, stderr, stdin = self._client.exec_command(command, bufsize, timeout, get_pty, environment)
+        cmd_line_str = " ".join(map(shlex.quote, cmd_line))
+
+        debug("Starting the backend: %s %s", cmd_line_str, get_workbench().get_local_cwd())
+
+        # Don't remain waiting
+        self._starting = True
+        Thread(target=self._connect_in_background, args=(cmd_line_str,), daemon=True).start()
+
+    def _connect_in_background(self, cmd_line_str):
+        try:
+            from paramiko.client import SSHClient
+        except ImportError:
+            self._show_error(
+                "SSH connection requires an extra package -- 'paramiko'.\n"
+                + "You can install it via 'Tools => Manage plug-ins' or via system package manager."
+            )
+            return
+
+        self._client = SSHClient()
+        self._client.load_system_host_keys()
+        print("connecting:", self._host, self._user, self._password)
+        self._client.connect(hostname=self._host, username=self._user, password=self._password)
+        print("Connected")
+
+        self._check_install_thonny_backend()
+
+        env = {
+            "THONNY_USER_DIR": "~/.config/Thonny",
+            "THONNY_FRONTEND_SYS_PATH": "[]",
+        }
+
+        stdin, stdout, stderr = self._client.exec_command(
+            cmd_line_str, bufsize=0, timeout=None, get_pty=True, environment=env
+        )
+        self._proc = SshPopen(stdin, stdout, stderr)
 
         # setup asynchronous output listeners
         Thread(target=self._listen_stdout, args=(stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(stderr,), daemon=True).start()
 
+        self._starting = False
+
     def _get_initial_cwd(self):
         return "~/"
 
+    def is_terminated(self):
+        return not self._starting and not super().process_is_alive()
+
     def interrupt(self):
         # Don't interrupt local process, but direct it to device
-        self._send_msg(InterruptCommand())
+        # self._send_msg(InterruptCommand())
+        self._proc.stdin.write("\x03")
 
     def supports_remote_files(self):
         return self._proc is not None
@@ -154,11 +186,84 @@ class SshProxy(SubprocessProxy):
 
     def get_exe_dirs(self):
         return []
-    
+
     def destroy(self):
         super().destroy()
         self._client.close()
-        
+
+    def _get_remote_program_directory(self):
+        return "/tmp/thonny-backend-" + thonny.get_version()
+
+    def _check_install_thonny_backend(self):
+        import paramiko
+
+        sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
+
+        launch_dir = self._get_remote_program_directory()
+        try:
+            sftp.stat(launch_dir)
+            # dir is present
+            if not launch_dir.endswith("-dev"):
+                # don't overwrite unless in dev mode
+                return
+
+        except IOError:
+            sftp.mkdir(launch_dir)
+
+        # copy backend_launcher next to thonny module so that thonny module will be in path
+        # import thonny.backend_launcher
+        # sftp.put(thonny.backend_launcher.__file__, launch_dir + "/launch.py")
+
+        # other files go to thonny directory
+        module_dir = launch_dir + "/thonny"
+        try:
+            sftp.stat(module_dir)
+        except IOError:
+            sftp.mkdir(module_dir)
+
+        import thonny.backend_launcher
+        import thonny.backend
+        import thonny.common
+        import thonny.ast_utils
+
+        # create empty __init__.py
+        # sftp.open(module_dir + "/__init__.py", "w").close()
+
+        for module in [
+            thonny,
+            thonny.backend_launcher,
+            thonny.backend,
+            thonny.common,
+            thonny.ast_utils,
+        ]:
+            local_path = module.__file__
+            remote_path = module_dir + "/" + os.path.basename(local_path)
+            print("putting", local_path, "to", remote_path)
+            sftp.put(local_path, remote_path)
+
+        sftp.close()
+
+
+class SshPopen:
+    """
+    Wraps Channel streams to subprocess.Popen-like structure
+    """
+
+    def __init__(self, stdin, stdout, stderr):
+        self.stdin = stdin
+        self.stdout = stdout
+        self.stderr = stderr
+        self.returncode = None
+
+    def poll(self):
+        if self.stdout.closed:
+            self.returncode = self.stdout.channel.recv_exit_status()
+            return self.returncode
+        else:
+            return None
+
+    def kill(self):
+        pass
 
 
 class SshProxyConfigPage(BackendDetailsConfigPage):
@@ -166,18 +271,35 @@ class SshProxyConfigPage(BackendDetailsConfigPage):
 
     def __init__(self, master):
         super().__init__(master)
+        self._changed = False
 
-    def is_modified(self):
-        return False
+        self._host_var = self._add_text_field("Host", "ssh.host", 1)
+        self._user_var = self._add_text_field("Username", "ssh.user", 3)
+        self._password_var = self._add_text_field("Password", "ssh.password", 5, show="•")
 
-    def should_restart(self):
-        return self.is_modified()
+    def _add_text_field(self, label_text, variable_name, row, show=None):
+        entry_label = ttk.Label(self, text=label_text)
+        entry_label.grid(row=row, column=0, sticky="w")
+
+        variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
+        entry = ttk.Entry(self, textvariable=variable, show=show)
+        entry.grid(row=row + 1, column=0, sticky="we")
+        return variable
+
+    def _on_change(self):
+        print("detected change")
+        self._changed = True
 
     def apply(self):
-        return
+        get_workbench().set_option("ssh.host", self._host_var.get())
+        get_workbench().set_option("ssh.user", self._user_var.get())
+        get_workbench().set_option("ssh.password", self._password_var.get())
+
+    def should_restart(self):
+        return self._changed
 
 
-def _load_plugin():
+def load_plugin():
     get_workbench().set_default("ssh.host", "raspberrypi.local")
     get_workbench().set_default("ssh.user", "pi")
     get_workbench().set_default("ssh.password", "raspberry")

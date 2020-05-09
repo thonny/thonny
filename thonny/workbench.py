@@ -549,7 +549,9 @@ class Workbench(tk.Tk):
         """Socket will listen requests from newer Thonny instances,
         which try to delegate opening files to older instance"""
 
-        if not self.get_option("general.single_instance") or os.path.exists(thonny.IPC_FILE):
+        if not self.get_option("general.single_instance") or os.path.exists(
+            thonny.get_ipc_file_path()
+        ):
             self._ipc_requests = None
             return
 
@@ -596,16 +598,16 @@ class Workbench(tk.Tk):
 
             secret = str(uuid.uuid4())
 
-            with open(thonny.IPC_FILE, "w") as fp:
+            with open(thonny.get_ipc_file_path(), "w") as fp:
                 fp.write(str(port) + "\n")
                 fp.write(secret + "\n")
 
         else:
             server_socket = socket.socket(socket.AF_UNIX)  # @UndefinedVariable
-            server_socket.bind(thonny.IPC_FILE)
+            server_socket.bind(thonny.get_ipc_file_path())
             secret = ""
 
-        os.chmod(thonny.IPC_FILE, 0o600)
+        os.chmod(thonny.get_ipc_file_path(), 0o600)
         return server_socket, secret
 
     def _init_commands(self) -> None:
@@ -2159,8 +2161,8 @@ class Workbench(tk.Tk):
 
     def destroy(self) -> None:
         try:
-            if self._is_server() and os.path.exists(thonny.IPC_FILE):
-                os.remove(thonny.IPC_FILE)
+            if self._is_server() and os.path.exists(thonny.get_ipc_file_path()):
+                os.remove(thonny.get_ipc_file_path())
 
             self._closing = True
 

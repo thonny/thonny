@@ -492,6 +492,7 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
+                print("Got", msg)
                 logging.debug(
                     "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
                 )
@@ -886,6 +887,9 @@ class SubprocessProxy(BackendProxy):
     def process_is_alive(self):
         return self._proc is not None and self._proc.poll() is None
 
+    def is_terminated(self):
+        return not self.process_is_alive()
+
     def is_connected(self):
         return self.process_is_alive()
 
@@ -931,7 +935,12 @@ class SubprocessProxy(BackendProxy):
                     sleep(0.1)
 
         while self.process_is_alive():
-            data = stdout.readline()
+            try:
+                data = stdout.readline()
+            except IOError:
+                sleep(0.1)
+                continue
+
             # debug("... read some stdout data", repr(data))
             if data == "":
                 break
@@ -1020,7 +1029,7 @@ class SubprocessProxy(BackendProxy):
 
     def fetch_next_message(self):
         if not self._response_queue or len(self._response_queue) == 0:
-            if not self.process_is_alive():
+            if self.is_terminated():
                 raise BackendTerminatedError(self._proc.returncode if self._proc else None)
             else:
                 return None

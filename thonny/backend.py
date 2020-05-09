@@ -91,6 +91,8 @@ class VM:
         global _vm
         _vm = self
 
+        print("HELLOO FROM VM")
+
         self._ini = None
         self._command_handlers = {}
         self._object_info_tweakers = []
@@ -124,7 +126,10 @@ class VM:
         # unset __doc__, then exec dares to write doc of the script there
         __main__.__doc__ = None
 
-        self._frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
+        if "THONNY_FRONTEND_SYS_PATH" in os.environ:
+            self._frontend_sys_path = ast.literal_eval(os.environ["THONNY_FRONTEND_SYS_PATH"])
+        else:
+            self._frontend_sys_path = []
         self._load_shared_modules()
         self._load_plugins()
 
@@ -328,7 +333,11 @@ class VM:
 
     def _load_plugins(self):
         # built-in plugins
-        import thonny.plugins.backend  # pylint: disable=redefined-outer-name
+        try:
+            import thonny.plugins.backend  # pylint: disable=redefined-outer-name
+        except ImportError:
+            # May happen eg. in ssh session
+            return
 
         self._load_plugins_from_path(thonny.plugins.backend.__path__, "thonny.plugins.backend.")
 

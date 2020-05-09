@@ -84,7 +84,14 @@ THONNY_USER_DIR = _compute_thonny_user_dir()
 CONFIGURATION_FILE = os.path.join(THONNY_USER_DIR, "configuration.ini")
 
 
-def _get_ipc_file_path():
+_IPC_FILE = None
+
+
+def get_ipc_file_path():
+    global _IPC_FILE
+    if _IPC_FILE:
+        return _IPC_FILE
+
     from thonny import misc_utils
     import getpass
 
@@ -111,10 +118,8 @@ def _get_ipc_file_path():
     if not platform.system() == "Windows":
         os.chmod(ipc_dir, 0o700)
 
-    return os.path.join(ipc_dir, "ipc.sock")
-
-
-IPC_FILE = _get_ipc_file_path()
+    _IPC_FILE = os.path.join(ipc_dir, "ipc.sock")
+    return _IPC_FILE
 
 
 def _check_welcome():
@@ -226,7 +231,7 @@ def _prepare_thonny_user_dir():
 
 
 def _should_delegate():
-    if not os.path.exists(IPC_FILE):
+    if not os.path.exists(get_ipc_file_path()):
         # no previous instance
         return
 
@@ -253,7 +258,7 @@ def _delegate_to_existing_instance(args):
     except Exception:
         # Maybe the lock is abandoned
         print("Trying to remove lock")
-        os.remove(IPC_FILE)
+        os.remove(get_ipc_file_path())
         print("Successfully removed abandoned lock")
         raise
 
@@ -280,7 +285,7 @@ def _create_client_socket():
     timeout = 2.0
 
     if platform.system() == "Windows":
-        with open(IPC_FILE, "r") as fp:
+        with open(get_ipc_file_path(), "r") as fp:
             port = int(fp.readline().strip())
             secret = fp.readline().strip()
 
@@ -289,7 +294,7 @@ def _create_client_socket():
     else:
         client_socket = socket.socket(socket.AF_UNIX)  # @UndefinedVariable
         client_socket.settimeout(timeout)
-        client_socket.connect(IPC_FILE)
+        client_socket.connect(get_ipc_file_path())
         secret = ""
 
     return client_socket, secret

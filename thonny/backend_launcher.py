@@ -51,13 +51,12 @@ if __name__ == "__main__":
     assert spec.loader is not None
     spec.loader.exec_module(thonny)
 
-    THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     # set up logging
     logger = logging.getLogger("thonny")
     logger.propagate = False
     logFormatter = logging.Formatter("%(levelname)s: %(message)s")
     file_handler = logging.FileHandler(
-        os.path.join(THONNY_USER_DIR, "backend.log"), encoding="UTF-8", mode="w"
+        os.path.join(thonny.THONNY_USER_DIR, "backend.log"), encoding="UTF-8", mode="w"
     )
     file_handler.setFormatter(logFormatter)
     file_handler.setLevel(logging.INFO)
@@ -76,7 +75,7 @@ if __name__ == "__main__":
 
     import faulthandler
 
-    fault_out = open(os.path.join(THONNY_USER_DIR, "backend_faults.log"), mode="w")
+    fault_out = open(os.path.join(thonny.THONNY_USER_DIR, "backend_faults.log"), mode="w")
     faulthandler.enable(fault_out)
 
     # Disable blurry scaling in Windows
