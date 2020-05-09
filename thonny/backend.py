@@ -91,8 +91,6 @@ class VM:
         global _vm
         _vm = self
 
-        print("HELLOO FROM VM")
-
         self._ini = None
         self._command_handlers = {}
         self._object_info_tweakers = []

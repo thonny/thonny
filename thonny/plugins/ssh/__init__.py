@@ -57,7 +57,7 @@ class SshProxy(SubprocessProxy):
         self._proc = None
         self._starting = True
 
-        super().__init__(clean, "python3")
+        super().__init__(clean, "/usr/bin/python3")
 
     def _get_launcher_with_args(self):
         return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
@@ -124,9 +124,7 @@ class SshProxy(SubprocessProxy):
 
         self._client = SSHClient()
         self._client.load_system_host_keys()
-        print("connecting:", self._host, self._user, self._password)
         self._client.connect(hostname=self._host, username=self._user, password=self._password)
-        print("Connected")
 
         self._check_install_thonny_backend()
 
@@ -136,7 +134,7 @@ class SshProxy(SubprocessProxy):
         }
 
         stdin, stdout, stderr = self._client.exec_command(
-            cmd_line_str, bufsize=0, timeout=None, get_pty=True, environment=env
+            cmd_line_str, bufsize=0, timeout=None, get_pty=False, environment=env
         )
         self._proc = SshPopen(stdin, stdout, stderr)
 
@@ -144,6 +142,7 @@ class SshProxy(SubprocessProxy):
         Thread(target=self._listen_stdout, args=(stdout,), daemon=True).start()
         Thread(target=self._listen_stderr, args=(stderr,), daemon=True).start()
 
+        self._send_msg(ToplevelCommand("get_environment_info"))
         self._starting = False
 
     def _get_initial_cwd(self):
@@ -156,6 +155,12 @@ class SshProxy(SubprocessProxy):
         # Don't interrupt local process, but direct it to device
         # self._send_msg(InterruptCommand())
         self._proc.stdin.write("\x03")
+
+    def fetch_next_message(self):
+        msg = super().fetch_next_message()
+        if msg and "welcome_text" in msg:
+            msg["welcome_text"] += " (" + self._executable + " on " + self._host + ")"
+        return msg
 
     def supports_remote_files(self):
         return self._proc is not None
@@ -238,7 +243,6 @@ class SshProxy(SubprocessProxy):
         ]:
             local_path = module.__file__
             remote_path = module_dir + "/" + os.path.basename(local_path)
-            print("putting", local_path, "to", remote_path)
             sftp.put(local_path, remote_path)
 
         sftp.close()

@@ -492,7 +492,6 @@ class Runner:
                 msg = self._proxy.fetch_next_message()
                 if not msg:
                     break
-                print("Got", msg)
                 logging.debug(
                     "RUNNER GOT: %s, %s in state: %s", msg.event_type, msg, self.get_state()
                 )
