@@ -101,6 +101,10 @@ class LocalsHighlighter:
 
 
 def update_highlighting(event):
+    if jedi_utils.get_version_tuple() < (0, 9):
+        logging.warning("Jedi version is too old. Disabling locals marker")
+        return
+
     assert isinstance(event.widget, tk.Text)
     text = event.widget
 
@@ -111,10 +115,6 @@ def update_highlighting(event):
 
 
 def load_plugin() -> None:
-    if jedi_utils.get_version_tuple() < (0, 9):
-        logging.warning("Jedi version is too old. Disabling locals marker")
-        return
-
     wb = get_workbench()
     wb.set_default("view.locals_highlighting", False)
     wb.bind_class("CodeViewText", "<<TextChange>>", update_highlighting, True)

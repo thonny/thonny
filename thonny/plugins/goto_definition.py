@@ -1,7 +1,5 @@
 import tkinter as tk
 
-from jedi import Script
-
 from thonny import get_workbench
 from thonny.ui_utils import control_is_pressed
 
@@ -18,6 +16,7 @@ def goto_definition(event):
     index_parts = index.split(".")
     line, column = int(index_parts[0]), int(index_parts[1])
     # TODO: find current editor filename
+    from jedi import Script
     script = Script(source, line=line, column=column, path="")
     defs = script.goto_definitions()
     if len(defs) > 0:

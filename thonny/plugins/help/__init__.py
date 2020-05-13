@@ -4,7 +4,7 @@ import tkinter.font
 from tkinter import ttk
 
 import thonny
-from thonny import get_workbench, rst_utils, tktextext, ui_utils
+from thonny import get_workbench, tktextext, ui_utils
 from thonny.config import try_load_configuration
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import scrollbar_style
@@ -12,6 +12,8 @@ from thonny.ui_utils import scrollbar_style
 
 class HelpView(TextFrame):
     def __init__(self, master):
+        from thonny import rst_utils
+        
         TextFrame.__init__(
             self,
             master,

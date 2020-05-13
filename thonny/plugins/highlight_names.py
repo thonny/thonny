@@ -2,12 +2,10 @@ import logging
 import tkinter as tk
 import traceback
 
-from jedi import Script
+from thonny import get_workbench
+from thonny import jedi_utils
 
-from thonny import get_workbench, jedi_utils
-
-tree = jedi_utils.import_python_tree()
-
+tree = None
 
 class BaseNameHighlighter:
     def __init__(self, text):
@@ -292,6 +290,7 @@ class UsagesHighlighter(BaseNameHighlighter):
 
     def get_positions_for(self, source, line, column):
         # https://github.com/davidhalter/jedi/issues/897
+        from jedi import Script
         script = Script(source + ")", line=line, column=column, path="")
         usages = script.usages()
 
@@ -315,6 +314,15 @@ class CombinedHighlighter(VariablesHighlighter, UsagesHighlighter):
 
 
 def update_highlighting(event):
+    if jedi_utils.get_version_tuple() < (0, 9):
+        logging.warning("Jedi version is too old. Disabling name highlighter")
+        return
+    
+    global tree
+    if not tree:
+        # using lazy importing to speed up Thonny loading
+        tree = jedi_utils.import_python_tree()        
+    
     assert isinstance(event.widget, tk.Text)
     text = event.widget
 
@@ -329,10 +337,6 @@ def update_highlighting(event):
 
 
 def load_plugin() -> None:
-    if jedi_utils.get_version_tuple() < (0, 9):
-        logging.warning("Jedi version is too old. Disabling name highlighter")
-        return
-
     wb = get_workbench()
     wb.set_default("view.name_highlighting", False)
     wb.bind_class("CodeViewText", "<<CursorMove>>", update_highlighting, True)

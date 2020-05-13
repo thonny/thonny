@@ -20,7 +20,6 @@ from tkinter import ttk, messagebox
 from thonny.ui_utils import askopenfilename, create_url_label
 from typing import Optional
 
-import jedi
 import serial.tools.list_ports
 from serial import SerialException
 

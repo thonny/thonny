@@ -29,7 +29,6 @@ import threading
 import os
 import time
 from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
-import jedi
 import io
 import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
@@ -1093,6 +1092,7 @@ class MicroPythonBackend:
         result = dict(source=cmd.source, row=cmd.row, column=cmd.column)
 
         try:
+            import jedi
             script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
             completions = script.completions()
             result["completions"] = self._filter_completions(completions)
@@ -1134,6 +1134,7 @@ class MicroPythonBackend:
             response = {"source": cmd.source}
 
             try:
+                import jedi
                 # at the moment I'm assuming source is the code before cursor, not whole input
                 lines = source.split("\n")
                 script = jedi.Script(

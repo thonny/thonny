@@ -22,7 +22,6 @@ from typing import Optional
 
 import thonny
 
-import jedi
 import serial.tools.list_ports
 from serial import SerialException
 

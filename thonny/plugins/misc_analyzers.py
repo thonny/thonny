@@ -1,5 +1,5 @@
 from thonny.assistance import ProgramAnalyzer, add_program_analyzer
-from thonny import get_runner, rst_utils
+from thonny import get_runner
 from thonny.running import CPythonProxy
 import logging
 import os
@@ -227,6 +227,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
         self.completion_handler(self, list(self._get_warnings(main_file_path)))
 
     def _get_warnings(self, main_file_path):
+        from thonny import rst_utils
         # TODO: current dir may be different
         main_file_dir = os.path.dirname(main_file_path)
         if not os.path.isdir(main_file_dir):
