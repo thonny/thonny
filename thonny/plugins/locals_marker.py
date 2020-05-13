@@ -101,6 +101,10 @@ class LocalsHighlighter:
 
 
 def update_highlighting(event):
+    if not get_workbench().ready:
+        # don't slow down loading process
+        return
+     
     if jedi_utils.get_version_tuple() < (0, 9):
         logging.warning("Jedi version is too old. Disabling locals marker")
         return
