@@ -20,9 +20,6 @@ from typing import Optional
 
 import thonny
 
-import serial.tools.list_ports
-from serial import SerialException
-
 from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     BackendEvent,

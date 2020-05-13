@@ -1,8 +1,6 @@
-import serial
 from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
 import threading
 import time
-from serial.serialutil import SerialException
 import logging
 import platform
 import sys
@@ -11,6 +9,9 @@ from textwrap import dedent
 
 class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate, skip_reader=False):
+        import serial
+        from serial.serialutil import SerialException
+           
         super().__init__()
 
         try:

@@ -18,9 +18,6 @@ from tkinter import ttk, messagebox
 from thonny.ui_utils import askopenfilename, create_url_label
 from typing import Optional
 
-import serial.tools.list_ports
-from serial import SerialException
-
 from thonny import common, get_runner, get_shell, get_workbench, running
 from thonny.common import (
     BackendEvent,
@@ -406,6 +403,8 @@ def list_serial_ports():
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)
     # Workarond: temporally patch os.path.islink
+    import serial.tools.list_ports
+    
     try:
         old_islink = os.path.islink
         if platform.system() == "Windows":
