@@ -8,7 +8,6 @@ import sys
 import tempfile
 import textwrap
 import tkinter as tk
-import urllib.request
 from collections import namedtuple
 from tkinter import messagebox, ttk
 from typing import (
@@ -785,6 +784,7 @@ class FeedbackDialog(CommonDialog):
         return json.dumps(submission, indent=2)
 
     def _submit_data(self):
+        import urllib.request
         json_data = self._collect_submission_data()
         compressed_data = gzip.compress(json_data.encode("ascii"))
 

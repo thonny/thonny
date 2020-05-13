@@ -12,7 +12,6 @@ import shutil
 from time import sleep
 from tkinter import ttk, messagebox
 import threading
-from urllib.request import urlopen
 import json
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
@@ -137,6 +136,7 @@ class FlashingDialog(CommonDialog):
         pass
 
     def _start_downloading_release_info(self):
+        from urllib.request import urlopen
         def work():
             with urlopen(LATEST_RELEASE_URL) as fp:
                 self._release_info = json.loads(fp.read().decode("UTF-8"))
@@ -200,6 +200,7 @@ class FlashingDialog(CommonDialog):
             self.after(200, self._update_state)
 
     def _start_installing(self):
+        from urllib.request import urlopen
 
         self._progress_bar.configure(maximum=self._hex_size)
 

@@ -7,15 +7,11 @@ import re
 import subprocess
 import sys
 import tkinter as tk
-import urllib.error
-import urllib.parse
 from concurrent.futures.thread import ThreadPoolExecutor
-from distutils.version import LooseVersion, StrictVersion
 from logging import exception
 from os import makedirs
 from tkinter import messagebox, ttk
 from tkinter.messagebox import showerror
-from urllib.request import urlopen, urlretrieve
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
@@ -238,6 +234,8 @@ class PipDialog(CommonDialog):
         raise NotImplementedError()
 
     def _install_pip(self):
+        from urllib.request import urlretrieve
+
         self._clear()
         self.info_text.direct_insert("end", ("Installing pip") + "\n\n", ("caption",))
         self.info_text.direct_insert(
@@ -1002,6 +1000,8 @@ class PluginsPipDialog(PipDialog):
 
 class DetailsDialog(CommonDialog):
     def __init__(self, master, package_metadata, selected_version):
+        from distutils.version import StrictVersion
+        
         super().__init__(master)
         self.result = None
         self._closed = False
@@ -1135,6 +1135,7 @@ class DetailsDialog(CommonDialog):
 
 
 def _fetch_url_future(url, timeout=10):
+    from urllib.request import urlopen
     def load_url():
         with urlopen(url, timeout=timeout) as conn:
             return (conn, conn.read())
@@ -1144,6 +1145,7 @@ def _fetch_url_future(url, timeout=10):
 
 
 def _get_latest_stable_version(version_strings):
+    from distutils.version import LooseVersion
     versions = []
     for s in version_strings:
         if s.replace(".", "").isnumeric():  # Assuming stable versions have only dots and numbers
@@ -1170,6 +1172,9 @@ def _ask_installation_details(master, data, selected_version):
 
 
 def _start_fetching_package_info(name, version_str, completion_handler):
+    import urllib.error
+    import urllib.parse
+    
     # Fetch info from PyPI
     if version_str is None:
         url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
