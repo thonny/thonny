@@ -2,7 +2,6 @@ import json
 import os.path
 import time
 import tkinter as tk
-import zipfile
 from datetime import datetime
 
 from thonny import THONNY_USER_DIR, get_workbench
@@ -131,6 +130,7 @@ class EventLogger:
         self._check_compress_logs()
 
     def _check_compress_logs(self):
+        import zipfile
         # if uncompressed logs have grown over 10MB,
         # compress these into new zipfile
 
@@ -174,6 +174,7 @@ def _get_log_dir():
 
 
 def export():
+    import zipfile
     filename = asksaveasfilename(
         filetypes=[("Zip-files", ".zip"), ("all files", ".*")],
         defaultextension=".zip",
