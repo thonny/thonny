@@ -93,7 +93,6 @@ def get_ipc_file_path():
         return _IPC_FILE
 
     from thonny import misc_utils
-    import getpass
 
     if platform.system() == "Windows":
         base_dir = misc_utils.get_local_appdata_dir()
@@ -105,11 +104,10 @@ def get_ipc_file_path():
     if not base_dir or not os.path.exists(base_dir):
         base_dir = THONNY_USER_DIR
 
-    try:
-        username = getpass.getuser()
-    except:
-        # https://github.com/thonny/thonny/issues/1146
-        # https://bugs.python.org/issue32731
+    for name in ("LOGNAME", "USER", "LNAME", "USERNAME"):
+        if name in os.environ:
+            username = os.environ.get(name)
+    else:
         username = os.path.basename(os.path.expanduser("~"))
 
     ipc_dir = os.path.join(base_dir, "thonny-%s" % username)
