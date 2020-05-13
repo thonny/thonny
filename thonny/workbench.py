@@ -120,6 +120,7 @@ class Workbench(tk.Tk):
 
     def __init__(self) -> None:
         thonny._workbench = self
+        self.ready = False
         self._closing = False
         self._destroyed = False
         self._lost_focus = False
@@ -206,8 +207,12 @@ class Workbench(tk.Tk):
         if self._is_server():
             self._poll_ipc_requests()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
-        self.after(1, lambda: self.event_generate("WorkbenchReady"))
-
+        self.after_idle(self.advertise_ready)
+    
+    def advertise_ready(self):
+        self.event_generate("WorkbenchReady")
+        self.ready = True
+    
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
         bad_home_msg = None
