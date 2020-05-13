@@ -206,6 +206,7 @@ class Workbench(tk.Tk):
         if self._is_server():
             self._poll_ipc_requests()
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
+        self.after(1, lambda: self.event_generate("WorkbenchReady"))
 
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
