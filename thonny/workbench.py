@@ -206,13 +206,24 @@ class Workbench(tk.Tk):
         self._make_sanity_checks()
         if self._is_server():
             self._poll_ipc_requests()
+        
+        """
+        for name in sorted(sys.modules):
+            if (
+                not name.startswith("_")
+                and not name.startswith("thonny")
+                and not name.startswith("tkinter")
+            ):
+                print(name)
+        """
+
         self.after(1, self._start_runner)  # Show UI already before waiting for the backend to start
         self.after_idle(self.advertise_ready)
-    
+
     def advertise_ready(self):
         self.event_generate("WorkbenchReady")
         self.ready = True
-    
+
     def _make_sanity_checks(self):
         home_dir = os.path.expanduser("~")
         bad_home_msg = None
@@ -2350,6 +2361,7 @@ class Workbench(tk.Tk):
 
         # Fallback
         import webbrowser
+
         webbrowser.open(url, False, True)
 
     def open_help_topic(self, topic, fragment=None):
