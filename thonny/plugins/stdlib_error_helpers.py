@@ -1,4 +1,3 @@
-import ast
 import builtins
 import re
 import token
@@ -7,7 +6,7 @@ import os.path
 
 from thonny.assistance import ErrorHelper, Suggestion, name_similarity, add_error_helper
 from thonny import assistance
-from thonny.misc_utils import running_on_linux, running_on_windows
+from thonny.misc_utils import running_on_windows
 
 
 class SyntaxErrorHelper(ErrorHelper):
@@ -379,6 +378,8 @@ class NameErrorHelper(ErrorHelper):
         return Suggestion("missing-import", "Did you forget to import it?", body, relevance)
 
     def _sug_local_from_global(self):
+        import ast
+        
         relevance = 0
         body = None
 

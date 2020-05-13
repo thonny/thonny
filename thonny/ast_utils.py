@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import ast
-from asttokens.asttokens import ASTTokens
 
 
 def extract_text_range(source, text_range):
@@ -173,6 +172,8 @@ def mark_text_ranges(node, source: bytes, fallback_to_one_char=False):
     Function adds recursively attributes end_lineno and end_col_offset to each node
     which has attributes lineno and col_offset.
     """
+    from asttokens.asttokens import ASTTokens
+    
     ASTTokens(source.decode("utf8"), tree=node)
     for child in ast.walk(node):
         if hasattr(child, "last_token"):
