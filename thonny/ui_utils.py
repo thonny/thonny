@@ -27,7 +27,6 @@ from thonny.misc_utils import (
 from thonny.tktextext import TweakableText
 import sys
 from _tkinter import TclError
-import webbrowser
 from thonny.languages import get_button_padding
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
@@ -2246,6 +2245,8 @@ class TextMenu(MenuEx):
 
 
 def create_url_label(master, url, text=None):
+    import webbrowser
+    
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
     url_label = ttk.Label(

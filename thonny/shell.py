@@ -24,7 +24,6 @@ from thonny.ui_utils import (
     tr_btn,
 )
 import tkinter as tk
-import webbrowser
 from thonny.running import EDITOR_CONTENT_TOKEN
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
@@ -1283,6 +1282,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.config(cursor="")
 
     def _handle_hyperlink(self, event):
+        import webbrowser
+        
         try:
             line = self.get("insert linestart", "insert lineend")
             # Python stacktrace

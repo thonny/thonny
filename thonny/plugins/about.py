@@ -4,7 +4,6 @@ import datetime
 import platform
 import tkinter as tk
 import tkinter.font
-import webbrowser
 from tkinter import ttk
 
 import thonny
@@ -15,6 +14,8 @@ from thonny.ui_utils import CommonDialog
 
 class AboutDialog(CommonDialog):
     def __init__(self, master):
+        import webbrowser
+        
         super().__init__(master)
 
         main_frame = ttk.Frame(self)
@@ -137,6 +138,7 @@ def load_plugin() -> None:
         ui_utils.show_dialog(AboutDialog(get_workbench()))
 
     def open_url(url):
+        import webbrowser
         # webbrowser.open returns bool, but add_command expects None
         webbrowser.open(url)
 

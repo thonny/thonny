@@ -11,7 +11,6 @@ import threading
 import time
 import tokenize
 import traceback
-import webbrowser
 from queue import Queue
 from textwrap import dedent
 from time import sleep

@@ -1,6 +1,5 @@
 import os
 from thonny.backend import get_vm, Executor, prepare_hooks, return_execution_result
-import webbrowser
 
 
 def _cmd_Birdseye(cmd):
@@ -13,6 +12,8 @@ class BirdsEyeRunner(Executor):
     @return_execution_result
     @prepare_hooks
     def execute_source(self, source, filename, mode, ast_postprocessors):
+        import webbrowser
+        
         assert mode == "exec"
         # ignore ast_postprocessors, because birdseye requires source
 

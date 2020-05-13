@@ -14,7 +14,6 @@ import sys
 import tkinter as tk
 import tkinter.font as tk_font
 import traceback
-import webbrowser
 import gettext
 from threading import Thread
 from tkinter import ttk, messagebox
@@ -2344,6 +2343,7 @@ class Workbench(tk.Tk):
             return
 
         # Fallback
+        import webbrowser
         webbrowser.open(url, False, True)
 
     def open_help_topic(self, topic, fragment=None):

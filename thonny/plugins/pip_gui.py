@@ -9,7 +9,6 @@ import sys
 import tkinter as tk
 import urllib.error
 import urllib.parse
-import webbrowser
 from concurrent.futures.thread import ThreadPoolExecutor
 from distutils.version import LooseVersion, StrictVersion
 from logging import exception
@@ -709,6 +708,7 @@ class PipDialog(CommonDialog):
         url = _extract_click_text(self.info_text, event, "url")
         if url is not None:
             if url.startswith("http:") or url.startswith("https:"):
+                import webbrowser
                 webbrowser.open(url)
             else:
                 os.makedirs(url, exist_ok=True)

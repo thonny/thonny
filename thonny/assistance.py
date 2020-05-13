@@ -9,7 +9,6 @@ import tempfile
 import textwrap
 import tkinter as tk
 import urllib.request
-import webbrowser
 from collections import namedtuple
 from tkinter import messagebox, ttk
 from typing import (
@@ -735,6 +734,7 @@ class FeedbackDialog(CommonDialog):
         if running_on_mac_os():
             subprocess.Popen(["open", "-e", temp_path])
         else:
+            import webbrowser
             webbrowser.open(temp_path)
 
     def _collect_submission_data(self):

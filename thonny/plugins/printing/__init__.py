@@ -1,6 +1,5 @@
 import os.path
 import tempfile
-import webbrowser
 import platform
 import subprocess
 
@@ -27,6 +26,7 @@ def print_current_script():
     if platform.system() == "Darwin":
         subprocess.Popen(["open", temp_fn])
     else:
+        import webbrowser
         webbrowser.open(temp_fn)
 
 
