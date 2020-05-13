@@ -1,7 +1,6 @@
 import os.path
 from tkinter.messagebox import askyesno, showinfo
 from thonny import get_workbench, THONNY_USER_DIR
-import shutil
 
 
 def load_plugin():
@@ -9,6 +8,8 @@ def load_plugin():
     if os.path.exists(old_data_dir):
 
         def doit():
+            import shutil
+
             if not os.path.exists(old_data_dir):
                 showinfo("Already deleted", "Looks like it's already deleted")
                 return

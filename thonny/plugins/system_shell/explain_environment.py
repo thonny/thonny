@@ -1,5 +1,4 @@
 import platform
-import shutil
 import sys
 import os.path
 
@@ -48,6 +47,7 @@ def is_bundled_exe(p):
 def list_commands(prefix, highlighted_reals, highlighted_dirs):
     for suffix in ["", "3", "3.5", "3.6", "3.7", "3.8"]:
         cmd = prefix + suffix
+        import shutil
         target = shutil.which(cmd)
         if target is not None:
             target = os.path.abspath(target)

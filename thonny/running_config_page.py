@@ -1,7 +1,6 @@
 import os.path
 import subprocess
 import tkinter as tk
-from shutil import which
 from tkinter import messagebox, ttk
 
 from thonny import get_workbench, running, ui_utils
@@ -198,6 +197,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                 if os.path.exists(path):
                     result.add(path)
 
+        from shutil import which
         for command in ["python3", "python3.5", "python3.5", "python3.6", "python3.7", "python3.8"]:
             path = which(command)
             if path is not None and os.path.isabs(path):

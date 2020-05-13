@@ -8,11 +8,9 @@ from thonny.plugins.micropython import (
 from thonny import get_workbench, ui_utils
 from thonny.ui_utils import FileCopyDialog, CommonDialog, ems_to_pixels
 from thonny.misc_utils import find_volume_by_name
-import shutil
 from time import sleep
 from tkinter import ttk, messagebox
 import threading
-import json
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
@@ -137,6 +135,7 @@ class FlashingDialog(CommonDialog):
 
     def _start_downloading_release_info(self):
         from urllib.request import urlopen
+        import json
         def work():
             with urlopen(LATEST_RELEASE_URL) as fp:
                 self._release_info = json.loads(fp.read().decode("UTF-8"))

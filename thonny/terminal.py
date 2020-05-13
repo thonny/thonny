@@ -1,7 +1,6 @@
 import os.path
 import platform
 import shlex
-import shutil
 import subprocess
 
 
@@ -161,6 +160,8 @@ def _run_in_terminal_in_macos(cmd, cwd, env_overrides, keep_open):
 
 
 def _get_linux_terminal_command():
+    import shutil
+
     xte = shutil.which("x-terminal-emulator")
     if xte:
         if os.path.realpath(xte).endswith("/lxterminal") and shutil.which("lxterminal"):

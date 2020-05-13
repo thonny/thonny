@@ -3,7 +3,6 @@
 import os.path
 import platform
 import shlex
-import shutil
 import subprocess
 import sys
 import time
@@ -13,6 +12,8 @@ from typing import Optional, Sequence, Tuple
 def delete_dir_try_hard(path: str, hardness: int = 5) -> None:
     # Deleting the folder on Windows is not so easy task
     # http://bugs.python.org/issue15496
+    import shutil
+
     for i in range(hardness):
         if os.path.exists(path):
             time.sleep(i * 0.5)

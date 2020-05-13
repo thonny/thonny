@@ -1,4 +1,3 @@
-import json
 import os.path
 import time
 import tkinter as tk
@@ -124,6 +123,7 @@ class EventLogger:
         self._events.append(data)
 
     def _on_worbench_close(self, event=None):
+        import json
         with open(self._filename, encoding="UTF-8", mode="w") as fp:
             json.dump(self._events, fp, indent="    ")
 

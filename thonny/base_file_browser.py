@@ -15,7 +15,6 @@ from thonny.common import InlineCommand, get_dirs_child_data
 from copy import deepcopy
 from thonny.misc_utils import running_on_windows, sizeof_fmt
 import datetime
-import shutil
 
 _dummy_node_text = "..."
 
@@ -794,7 +793,8 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         else:
             if not os.path.isdir(path):
                 path = os.path.dirname(path)
-
+            
+            import shutil
             self.present_fs_info(shutil.disk_usage(path)._asdict())
 
     def perform_delete(self, paths, description):

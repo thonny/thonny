@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import json
 import logging
 import os
 import re
 import subprocess
 import sys
 import tkinter as tk
-from concurrent.futures.thread import ThreadPoolExecutor
 from logging import exception
 from os import makedirs
 from tkinter import messagebox, ttk
@@ -1140,6 +1138,7 @@ def _fetch_url_future(url, timeout=10):
         with urlopen(url, timeout=timeout) as conn:
             return (conn, conn.read())
 
+    from concurrent.futures.thread import ThreadPoolExecutor
     executor = ThreadPoolExecutor(max_workers=1)
     return executor.submit(load_url)
 
@@ -1186,6 +1185,7 @@ def _start_fetching_package_info(name, version_str, completion_handler):
     url_future = _fetch_url_future(url)
 
     def poll_fetch_complete():
+        import json
         if url_future.done():
             try:
                 _, bin_data = url_future.result()

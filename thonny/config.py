@@ -8,7 +8,6 @@ import os.path
 import tkinter as tk
 from configparser import ConfigParser
 from logging import exception
-import shutil
 from thonny import THONNY_USER_DIR
 import traceback
 
@@ -73,6 +72,7 @@ class ConfigurationManager:
                     new_user_logs = os.path.join(THONNY_USER_DIR, "user_logs")
                     if os.path.exists(old_user_logs) and not os.path.exists(new_user_logs):
                         try:
+                            import shutil
                             shutil.copytree(old_user_logs, new_user_logs)
                         except Exception:
                             traceback.print_exc()

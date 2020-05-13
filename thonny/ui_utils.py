@@ -4,7 +4,6 @@ import logging
 import os
 import platform
 import re
-import shutil
 import signal
 import subprocess
 import textwrap
@@ -1900,6 +1899,7 @@ def _get_dialog_provider():
     if platform.system() != "Linux":
         return filedialog
 
+    import shutil
     if shutil.which("zenity"):
         return _ZenityDialogProvider
 

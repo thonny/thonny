@@ -1,5 +1,4 @@
 import ast
-import json
 import os.path
 import tkinter as tk
 from datetime import datetime
@@ -110,6 +109,8 @@ class LogFrame(ui_utils.TreeFrame):
         self.loading = True
         self.editor_notebook.reset()
         self.shell.reset()
+        
+        import json
 
         with open(filename, encoding="UTF-8") as f:
             events = json.load(f)

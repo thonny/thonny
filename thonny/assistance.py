@@ -1,11 +1,8 @@
 import ast
 import datetime
-import gzip
-import json
 import logging
 import os.path
 import sys
-import tempfile
 import textwrap
 import tkinter as tk
 from collections import namedtuple
@@ -720,6 +717,7 @@ class FeedbackDialog(CommonDialog):
         self.tree.item(item_id, values=tuple(values))
 
     def _preview_submission_data(self, event=None):
+        import tempfile
         temp_path = os.path.join(
             tempfile.mkdtemp(),
             "ThonnyAssistantFeedback_"
@@ -737,6 +735,8 @@ class FeedbackDialog(CommonDialog):
             webbrowser.open(temp_path)
 
     def _collect_submission_data(self):
+        import json
+
         tree_data = []
 
         for iid in self.tree.get_children():
@@ -785,6 +785,9 @@ class FeedbackDialog(CommonDialog):
 
     def _submit_data(self):
         import urllib.request
+        import gzip
+
+
         json_data = self._collect_submission_data()
         compressed_data = gzip.compress(json_data.encode("ascii"))
 

@@ -33,7 +33,6 @@ import io
 import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
 import binascii
-import shutil
 from threading import Lock
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
@@ -1616,6 +1615,7 @@ class MicroPythonBackend:
         for path in paths:
             mounted_path = self._internal_path_to_mounted_path(path)
             assert mounted_path is not None
+            import shutil
             shutil.rmtree(mounted_path)
 
     def _delete_via_serial(self, paths):

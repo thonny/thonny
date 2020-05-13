@@ -1,5 +1,4 @@
 import os.path
-import tempfile
 import platform
 import subprocess
 
@@ -19,6 +18,7 @@ def print_current_script():
     title_html = escape_html(editor.get_title())
     full_html = template_html.replace("%title%", title_html).replace("%script%", script_html)
 
+    import tempfile
     temp_handle, temp_fn = tempfile.mkstemp(suffix=".html", prefix="thonny_")
     with os.fdopen(temp_handle, "w", encoding="utf-8") as f:
         f.write(full_html)
