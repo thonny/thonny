@@ -4,7 +4,6 @@ import io
 import os
 import re
 import tkinter as tk
-import tokenize
 from typing import Dict, Union  # @UnusedImport
 
 from thonny import get_workbench, roughparse, tktextext, ui_utils
@@ -257,6 +256,7 @@ class CodeView(tktextext.EnhancedTextFrame):
         return self.text.get("1.0", "end-1c")  # -1c because Text always adds a newline itself
 
     def detect_encoding(self, data):
+        import tokenize
         encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
         return encoding
 

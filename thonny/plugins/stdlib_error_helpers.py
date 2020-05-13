@@ -1,7 +1,6 @@
 import builtins
 import re
 import token
-import tokenize
 import os.path
 
 from thonny.assistance import ErrorHelper, Suggestion, name_similarity, add_error_helper
@@ -11,6 +10,8 @@ from thonny.misc_utils import running_on_windows
 
 class SyntaxErrorHelper(ErrorHelper):
     def __init__(self, error_info):
+        import tokenize
+
         super().__init__(error_info)
 
         self.tokens = []
@@ -65,6 +66,8 @@ class SyntaxErrorHelper(ErrorHelper):
                 self.suggestions = [self._sug_missing_or_misplaced_colon()]
 
     def _sug_missing_or_misplaced_colon(self):
+        import tokenize
+
         i = 0
         title = "Did you forget the colon?"
         relevance = 0

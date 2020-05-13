@@ -7,7 +7,6 @@ import os.path
 import platform
 import site
 import sys
-import tokenize
 from collections import namedtuple
 from typing import List, Optional  # @UnusedImport
 import subprocess
@@ -271,6 +270,8 @@ def path_startswith(child_name: str, dir_name: str) -> bool:
 
 
 def read_source(filename):
+    import tokenize
+    
     with tokenize.open(filename) as fp:
         return fp.read()
 

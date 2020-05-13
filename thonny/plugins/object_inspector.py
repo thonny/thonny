@@ -8,7 +8,6 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.common import InlineCommand
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
-import base64
 
 
 class ObjectInspector(ttk.Frame):
@@ -566,6 +565,7 @@ class ImageInspector(ContentInspector, tk.Frame):
     def set_object_info(self, object_info):
         # print(object_info["image_data"])
         if isinstance(object_info["image_data"], bytes):
+            import base64
             data = base64.b64encode(object_info["image_data"])
         elif isinstance(object_info["image_data"], str):
             data = object_info["image_data"]

@@ -1,6 +1,5 @@
 import io
 import token
-import tokenize
 
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
@@ -131,6 +130,8 @@ class ParenMatcher:
             self.text.tag_add("unclosed_expression", open_index, end_index)
 
     def _get_paren_tokens(self, start_index, end_index):
+        import tokenize
+        
         if (start_index, end_index) in self._tokens_cache:
             return self._tokens_cache[(start_index, end_index)]
 

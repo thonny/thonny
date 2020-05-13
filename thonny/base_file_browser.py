@@ -12,7 +12,6 @@ from thonny.ui_utils import (
 )
 from tkinter.simpledialog import askstring
 from thonny.common import InlineCommand, get_dirs_child_data
-from copy import deepcopy
 from thonny.misc_utils import running_on_windows, sizeof_fmt
 import datetime
 
@@ -309,6 +308,7 @@ class BaseFileBrowser(ttk.Frame):
         messagebox.showinfo("Storage info", text)
 
     def cache_dirs_child_data(self, data):
+        from copy import deepcopy
         data = deepcopy(data)
 
         for parent_path in data:

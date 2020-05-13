@@ -9,7 +9,6 @@ import sys
 import textwrap
 import threading
 import time
-import tokenize
 import traceback
 from queue import Queue
 from textwrap import dedent

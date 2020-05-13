@@ -30,7 +30,6 @@ import os
 import time
 from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
 import io
-import tokenize
 from thonny.running import EXPECTED_TERMINATION_CODE
 import binascii
 from threading import Lock
@@ -1942,6 +1941,7 @@ def ends_overlap(left, right):
 
 
 def parse_api_information(file_path):
+    import tokenize
     with tokenize.open(file_path) as fp:
         source = fp.read()
 
