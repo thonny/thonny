@@ -198,6 +198,7 @@ class CustomCPythonConfigurationPage(BackendDetailsConfigPage):
                     result.add(path)
 
         from shutil import which
+
         for command in ["python3", "python3.5", "python3.5", "python3.6", "python3.7", "python3.8"]:
             path = which(command)
             if path is not None and os.path.isabs(path):

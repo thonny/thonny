@@ -13,7 +13,7 @@ from thonny.ui_utils import scrollbar_style
 class HelpView(TextFrame):
     def __init__(self, master):
         from thonny import rst_utils
-        
+
         TextFrame.__init__(
             self,
             master,
@@ -35,7 +35,7 @@ class HelpView(TextFrame):
             "HELP_CONTENT",
         )
         get_workbench().bind("WorkbenchReady", self.on_workbench_ready, True)
-    
+
     def on_workbench_ready(self, event=None):
         self.load_rst_file("index.rst")
 

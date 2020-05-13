@@ -257,6 +257,7 @@ class CodeView(tktextext.EnhancedTextFrame):
 
     def detect_encoding(self, data):
         import tokenize
+
         encoding, _ = tokenize.detect_encoding(io.BytesIO(data).readline)
         return encoding
 

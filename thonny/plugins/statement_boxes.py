@@ -12,7 +12,6 @@ from thonny import get_workbench, jedi_utils
 from thonny.codeview import get_syntax_options_for_tag
 
 
-
 def create_bitmap_file(width, height, predicate, name):
 
     cache_dir = os.path.join(thonny.THONNY_USER_DIR, "image_cache")

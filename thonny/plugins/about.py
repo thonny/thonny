@@ -15,7 +15,7 @@ from thonny.ui_utils import CommonDialog
 class AboutDialog(CommonDialog):
     def __init__(self, master):
         import webbrowser
-        
+
         super().__init__(master)
 
         main_frame = ttk.Frame(self)
@@ -139,6 +139,7 @@ def load_plugin() -> None:
 
     def open_url(url):
         import webbrowser
+
         # webbrowser.open returns bool, but add_command expects None
         webbrowser.open(url)
 

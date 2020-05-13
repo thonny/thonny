@@ -309,6 +309,7 @@ class BaseFileBrowser(ttk.Frame):
 
     def cache_dirs_child_data(self, data):
         from copy import deepcopy
+
         data = deepcopy(data)
 
         for parent_path in data:
@@ -793,8 +794,9 @@ class BaseLocalFileBrowser(BaseFileBrowser):
         else:
             if not os.path.isdir(path):
                 path = os.path.dirname(path)
-            
+
             import shutil
+
             self.present_fs_info(shutil.disk_usage(path)._asdict())
 
     def perform_delete(self, paths, description):

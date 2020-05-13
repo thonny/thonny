@@ -90,6 +90,7 @@ class Runner:
         for item in os.listdir(THONNY_USER_DIR):
             if item.startswith("jedi_0."):
                 import shutil
+
                 shutil.rmtree(os.path.join(THONNY_USER_DIR, item), True)
 
     def start(self) -> None:

@@ -705,6 +705,7 @@ class PipDialog(CommonDialog):
         if url is not None:
             if url.startswith("http:") or url.startswith("https:"):
                 import webbrowser
+
                 webbrowser.open(url)
             else:
                 os.makedirs(url, exist_ok=True)
@@ -999,7 +1000,7 @@ class PluginsPipDialog(PipDialog):
 class DetailsDialog(CommonDialog):
     def __init__(self, master, package_metadata, selected_version):
         from distutils.version import StrictVersion
-        
+
         super().__init__(master)
         self.result = None
         self._closed = False
@@ -1134,17 +1135,20 @@ class DetailsDialog(CommonDialog):
 
 def _fetch_url_future(url, timeout=10):
     from urllib.request import urlopen
+
     def load_url():
         with urlopen(url, timeout=timeout) as conn:
             return (conn, conn.read())
 
     from concurrent.futures.thread import ThreadPoolExecutor
+
     executor = ThreadPoolExecutor(max_workers=1)
     return executor.submit(load_url)
 
 
 def _get_latest_stable_version(version_strings):
     from distutils.version import LooseVersion
+
     versions = []
     for s in version_strings:
         if s.replace(".", "").isnumeric():  # Assuming stable versions have only dots and numbers
@@ -1173,7 +1177,7 @@ def _ask_installation_details(master, data, selected_version):
 def _start_fetching_package_info(name, version_str, completion_handler):
     import urllib.error
     import urllib.parse
-    
+
     # Fetch info from PyPI
     if version_str is None:
         url = "https://pypi.org/pypi/{}/json".format(urllib.parse.quote(name))
@@ -1186,6 +1190,7 @@ def _start_fetching_package_info(name, version_str, completion_handler):
 
     def poll_fetch_complete():
         import json
+
         if url_future.done():
             try:
                 _, bin_data = url_future.result()

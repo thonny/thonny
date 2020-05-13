@@ -382,7 +382,7 @@ class NameErrorHelper(ErrorHelper):
 
     def _sug_local_from_global(self):
         import ast
-        
+
         relevance = 0
         body = None
 

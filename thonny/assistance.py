@@ -718,6 +718,7 @@ class FeedbackDialog(CommonDialog):
 
     def _preview_submission_data(self, event=None):
         import tempfile
+
         temp_path = os.path.join(
             tempfile.mkdtemp(),
             "ThonnyAssistantFeedback_"
@@ -732,6 +733,7 @@ class FeedbackDialog(CommonDialog):
             subprocess.Popen(["open", "-e", temp_path])
         else:
             import webbrowser
+
             webbrowser.open(temp_path)
 
     def _collect_submission_data(self):
@@ -786,7 +788,6 @@ class FeedbackDialog(CommonDialog):
     def _submit_data(self):
         import urllib.request
         import gzip
-
 
         json_data = self._collect_submission_data()
         compressed_data = gzip.compress(json_data.encode("ascii"))

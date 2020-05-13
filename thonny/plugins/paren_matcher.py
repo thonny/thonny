@@ -131,7 +131,7 @@ class ParenMatcher:
 
     def _get_paren_tokens(self, start_index, end_index):
         import tokenize
-        
+
         if (start_index, end_index) in self._tokens_cache:
             return self._tokens_cache[(start_index, end_index)]
 

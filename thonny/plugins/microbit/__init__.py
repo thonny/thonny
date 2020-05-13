@@ -136,6 +136,7 @@ class FlashingDialog(CommonDialog):
     def _start_downloading_release_info(self):
         from urllib.request import urlopen
         import json
+
         def work():
             with urlopen(LATEST_RELEASE_URL) as fp:
                 self._release_info = json.loads(fp.read().decode("UTF-8"))

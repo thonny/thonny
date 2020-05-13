@@ -566,6 +566,7 @@ class ImageInspector(ContentInspector, tk.Frame):
         # print(object_info["image_data"])
         if isinstance(object_info["image_data"], bytes):
             import base64
+
             data = base64.b64encode(object_info["image_data"])
         elif isinstance(object_info["image_data"], str):
             data = object_info["image_data"]

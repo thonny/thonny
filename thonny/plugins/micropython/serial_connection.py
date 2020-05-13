@@ -11,7 +11,7 @@ class SerialConnection(MicroPythonConnection):
     def __init__(self, port, baudrate, skip_reader=False):
         import serial
         from serial.serialutil import SerialException
-           
+
         super().__init__()
 
         try:

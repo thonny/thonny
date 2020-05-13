@@ -1900,6 +1900,7 @@ def _get_dialog_provider():
         return filedialog
 
     import shutil
+
     if shutil.which("zenity"):
         return _ZenityDialogProvider
 
@@ -2246,7 +2247,7 @@ class TextMenu(MenuEx):
 
 def create_url_label(master, url, text=None):
     import webbrowser
-    
+
     url_font = tkinter.font.nametofont("TkDefaultFont").copy()
     url_font.configure(underline=1)
     url_label = ttk.Label(

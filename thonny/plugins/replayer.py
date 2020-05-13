@@ -109,7 +109,7 @@ class LogFrame(ui_utils.TreeFrame):
         self.loading = True
         self.editor_notebook.reset()
         self.shell.reset()
-        
+
         import json
 
         with open(filename, encoding="UTF-8") as f:

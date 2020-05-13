@@ -7,6 +7,7 @@ from thonny import jedi_utils
 
 tree = None
 
+
 class BaseNameHighlighter:
     def __init__(self, text):
         self.text = text
@@ -291,6 +292,7 @@ class UsagesHighlighter(BaseNameHighlighter):
     def get_positions_for(self, source, line, column):
         # https://github.com/davidhalter/jedi/issues/897
         from jedi import Script
+
         script = Script(source + ")", line=line, column=column, path="")
         usages = script.usages()
 
@@ -316,17 +318,17 @@ class CombinedHighlighter(VariablesHighlighter, UsagesHighlighter):
 def update_highlighting(event):
     if not get_workbench().ready:
         # don't slow down loading process
-        return 
-    
+        return
+
     if jedi_utils.get_version_tuple() < (0, 9):
         logging.warning("Jedi version is too old. Disabling name highlighter")
         return
-    
+
     global tree
     if not tree:
         # using lazy importing to speed up Thonny loading
-        tree = jedi_utils.import_python_tree()        
-    
+        tree = jedi_utils.import_python_tree()
+
     assert isinstance(event.widget, tk.Text)
     text = event.widget
 

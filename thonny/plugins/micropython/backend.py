@@ -1091,6 +1091,7 @@ class MicroPythonBackend:
 
         try:
             import jedi
+
             script = jedi.Script(cmd.source, cmd.row, cmd.column, sys_path=[self._api_stubs_path])
             completions = script.completions()
             result["completions"] = self._filter_completions(completions)
@@ -1133,6 +1134,7 @@ class MicroPythonBackend:
 
             try:
                 import jedi
+
                 # at the moment I'm assuming source is the code before cursor, not whole input
                 lines = source.split("\n")
                 script = jedi.Script(
@@ -1615,6 +1617,7 @@ class MicroPythonBackend:
             mounted_path = self._internal_path_to_mounted_path(path)
             assert mounted_path is not None
             import shutil
+
             shutil.rmtree(mounted_path)
 
     def _delete_via_serial(self, paths):
@@ -1942,6 +1945,7 @@ def ends_overlap(left, right):
 
 def parse_api_information(file_path):
     import tokenize
+
     with tokenize.open(file_path) as fp:
         source = fp.read()
 

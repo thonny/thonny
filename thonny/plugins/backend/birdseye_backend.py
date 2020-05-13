@@ -13,7 +13,7 @@ class BirdsEyeRunner(Executor):
     @prepare_hooks
     def execute_source(self, source, filename, mode, ast_postprocessors):
         import webbrowser
-        
+
         assert mode == "exec"
         # ignore ast_postprocessors, because birdseye requires source
 

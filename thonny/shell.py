@@ -1283,7 +1283,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
     def _handle_hyperlink(self, event):
         import webbrowser
-        
+
         try:
             line = self.get("insert linestart", "insert lineend")
             # Python stacktrace

@@ -73,6 +73,7 @@ class ConfigurationManager:
                     if os.path.exists(old_user_logs) and not os.path.exists(new_user_logs):
                         try:
                             import shutil
+
                             shutil.copytree(old_user_logs, new_user_logs)
                         except Exception:
                             traceback.print_exc()

@@ -228,6 +228,7 @@ class ProgramNamingAnalyzer(ProgramAnalyzer):
 
     def _get_warnings(self, main_file_path):
         from thonny import rst_utils
+
         # TODO: current dir may be different
         main_file_dir = os.path.dirname(main_file_path)
         if not os.path.isdir(main_file_dir):

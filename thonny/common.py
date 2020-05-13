@@ -271,7 +271,7 @@ def path_startswith(child_name: str, dir_name: str) -> bool:
 
 def read_source(filename):
     import tokenize
-    
+
     with tokenize.open(filename) as fp:
         return fp.read()
 

@@ -403,7 +403,7 @@ def list_serial_ports():
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)
     # Workarond: temporally patch os.path.islink
     import serial.tools.list_ports
-    
+
     try:
         old_islink = os.path.islink
         if platform.system() == "Windows":

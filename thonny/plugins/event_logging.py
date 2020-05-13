@@ -124,6 +124,7 @@ class EventLogger:
 
     def _on_worbench_close(self, event=None):
         import json
+
         with open(self._filename, encoding="UTF-8", mode="w") as fp:
             json.dump(self._events, fp, indent="    ")
 
@@ -131,6 +132,7 @@ class EventLogger:
 
     def _check_compress_logs(self):
         import zipfile
+
         # if uncompressed logs have grown over 10MB,
         # compress these into new zipfile
 
@@ -175,6 +177,7 @@ def _get_log_dir():
 
 def export():
     import zipfile
+
     filename = asksaveasfilename(
         filetypes=[("Zip-files", ".zip"), ("all files", ".*")],
         defaultextension=".zip",
