@@ -5,6 +5,7 @@ encoding//stuff/stylekatse.py=utf-8
 encoding//thonny/ast_utils.py=utf-8
 encoding//thonny/backend.py=utf-8
 encoding//thonny/backend_launcher.py=utf-8
+encoding//thonny/backend_lite.py=utf-8
 encoding//thonny/code.py=utf-8
 encoding//thonny/codeview.py=utf-8
 encoding//thonny/common.py=utf-8
