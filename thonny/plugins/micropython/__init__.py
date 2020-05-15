@@ -71,7 +71,7 @@ class MicroPythonProxy(SubprocessProxy):
         import thonny.plugins.micropython.backend
 
         cmd = [
-            thonny.plugins.micropython.backend.__file__,
+            thonny.plugins.micropython.serial_backend.__file__,
             "--clean",
             str(self._clean_start),
             "--port",

@@ -206,7 +206,7 @@ class Workbench(tk.Tk):
         self._make_sanity_checks()
         if self._is_server():
             self._poll_ipc_requests()
-        
+
         """
         for name in sorted(sys.modules):
             if (
