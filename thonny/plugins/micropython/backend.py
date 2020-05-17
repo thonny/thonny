@@ -87,12 +87,16 @@ class MicroPythonBackend:
 
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
+        self._prepare_helpers()
         self._cwd = self._fetch_cwd()
         self._welcome_text = self._fetch_welcome_text()
         self._builtin_modules = self._fetch_builtin_modules()
         self._builtins_info = self._fetch_builtins_info()
 
         self._send_ready_message()
+
+    def _prepare_helpers(self):
+        pass
 
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()

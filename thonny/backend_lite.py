@@ -29,6 +29,8 @@ _vm = None
 
 
 _ffi_library_cache = {}
+
+
 def _get_library_with_ffi(name, maxver, extra=()):
     """MicroPython Unix port may miss some required functions. This function can load them 
     from elsewhere.
@@ -39,9 +41,10 @@ def _get_library_with_ffi(name, maxver, extra=()):
     """
     if name in _ffi_library_cache:
         return _ffi_library_cache[name]
-    
+
+    import sys
     import ffi  # @UnresolvedImport
-    
+
     def libs():
         if sys.platform == "linux":
             yield "%s.so" % name
@@ -52,7 +55,7 @@ def _get_library_with_ffi(name, maxver, extra=()):
                 yield "%s.%s" % (name, ext)
         else:
             raise RuntimeError(sys.platform + " not supported")
-        
+
         for n in extra:
             yield n
 
@@ -66,8 +69,10 @@ def _get_library_with_ffi(name, maxver, extra=()):
             err = e
     raise err
 
+
 def _get_libc():
     return _get_library_with_ffi("libc", 6)
+
 
 def _check_os_error(ret):
     # Return True is error was EINTR (which usually means that OS call
@@ -79,24 +84,26 @@ def _check_os_error(ret):
         if e == errno.EINTR:
             return True
         raise OSError(e)
-    
+
+
 try:
     from os import getcwd
 except ImportError:
     _getcwd = _get_libc().func("s", "getcwd", "si")
+
     def getcwd():
         buf = bytearray(512)
         return _getcwd(buf, 512)
+
 
 try:
     from os import chdir
 except ImportError:
     _chdir = _get_libc().func("i", "chdir", "s")
+
     def chdir(dir_):
         r = _chdir(dir_)
         _check_os_error(r)
-
-            
 
 
 class VM:
@@ -603,7 +610,6 @@ class Executor:
         except Exception:
             _report_internal_error()
             return {}
-
 
 
 def _get_python_version_string(add_word_size=False):
