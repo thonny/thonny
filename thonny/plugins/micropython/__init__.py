@@ -68,10 +68,10 @@ class MicroPythonProxy(SubprocessProxy):
         self.micropython_upload_enabled = False
 
     def _get_launcher_with_args(self):
-        import thonny.plugins.micropython.backend
+        import thonny.plugins.micropython.bare_metal_backend
 
         cmd = [
-            thonny.plugins.micropython.serial_backend.__file__,
+            thonny.plugins.micropython.bare_metal_backend.__file__,
             "--clean",
             str(self._clean_start),
             "--port",

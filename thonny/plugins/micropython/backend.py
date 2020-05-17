@@ -86,7 +86,7 @@ class MicroPythonBackend:
             traceback.print_exc()
 
     def _prepare(self, clean):
-        self._process_until_initial_prompt()
+        self._process_until_initial_prompt(clean)
         self._cwd = self._fetch_cwd()
         self._welcome_text = self._fetch_welcome_text()
         self._builtin_modules = self._fetch_builtin_modules()
