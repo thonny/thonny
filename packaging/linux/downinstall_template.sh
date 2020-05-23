@@ -14,11 +14,11 @@ URL="https://github.com/thonny/thonny/releases/download/v$VERSION/$FILENAME"
 
 echo "Downloading $URL"
 
-wget -O $FILENAME $URL
-tar -zxf $FILENAME
-./thonny/install
-rm -rf ./thonny
-rm $FILENAME
+TMPDIR=$(mktemp -d -p .)
+wget -O $TMPDIR/$FILENAME $URL
+tar -zxf $TMPDIR/$FILENAME -C $TMPDIR
+$TMPDIR/thonny/install
+rm -rf $TMPDIR
 
 echo 
 read -p "Press ENTER to exit the installer."
