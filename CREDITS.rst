@@ -41,6 +41,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Alex Hall
 * Anatoly Techtonik
 * Anders Pamdal
+* Andrew Scheller
 * André Roberge
 * Antonio Carlos
 * Austin Bart
