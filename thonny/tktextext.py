@@ -53,7 +53,13 @@ class TweakableText(tk.Text):
                 and operation in ["delete", "index", "get"]
                 and args in [("sel.first", "sel.last"), ("sel.first",)]
             ):
-
+                pass
+            # Don't worry about hitting ends of undo/redo stacks
+            elif (
+                operation == "edit"
+                and args in [("undo",), ("redo",)]
+                and str(e).lower() == "nothing to " + args[0]
+            ):
                 pass
             else:
                 exception(
