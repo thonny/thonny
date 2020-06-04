@@ -1115,6 +1115,7 @@ class EnhancedTextFrame(TextFrame):
                 min(gutter_selection_start, linepos), max(gutter_selection_start - 1, linepos - 1)
             )
             self.text.mark_set("insert", "%s.0" % linepos)
+            self.text.focus_set()
         except tk.TclError:
             exception("on_gutter_motion")
 
