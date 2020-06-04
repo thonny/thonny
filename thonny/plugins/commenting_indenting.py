@@ -105,13 +105,13 @@ def _cmd_uncomment_selection():
 
 def _cmd_indent_selection():
     text = _get_focused_writable_text()
-    if text is not None:
+    if text is not None and hasattr(text, "indent_region"):
         text.indent_region()
 
 
 def _cmd_dedent_selection():
     text = _get_focused_writable_text()
-    if text is not None:
+    if text is not None and hasattr(text, "dedent_region"):
         text.dedent_region()
 
 
