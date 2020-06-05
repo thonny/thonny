@@ -88,6 +88,7 @@ Source contributors, advisors, translators and frequent bug-reporters
 * Tusamten
 * Vytenis (svajoklis-1)
 * Xin Rong
+* 丁向阳 (Ding-XiangYang)
 * 涂紳騰 (Shen-Teng Tu)
 * 張文宏 (Wen-Hung, Chang)
 
