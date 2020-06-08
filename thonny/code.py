@@ -695,9 +695,13 @@ class EditorNotebook(ui_utils.ClosableNotebook):
             return None
 
         if node == "local":
-            path = askopenfilename(
-                filetypes=_dialog_filetypes, initialdir=get_workbench().get_local_cwd()
-            )
+            initialdir = get_workbench().get_local_cwd()
+            if (
+                self.get_current_editor() is not None
+                and self.get_current_editor().get_filename() is not None
+            ):
+                initialdir = os.path.dirname(self.get_current_editor().get_filename())
+            path = askopenfilename(filetypes=_dialog_filetypes, initialdir=initialdir)
         else:
             assert node == "remote"
             target_path = ask_backend_path(self.winfo_toplevel(), "open")
