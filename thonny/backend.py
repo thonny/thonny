@@ -67,6 +67,8 @@ _CO_ASYNC_GENERATOR = getattr(inspect, "CO_ASYNC_GENERATOR", 0)
 
 _CO_WEIRDO = _CO_GENERATOR | _CO_COROUTINE | _CO_ITERABLE_COROUTINE | _CO_ASYNC_GENERATOR
 
+_REPL_HELPER_NAME = "_thonny_repl_print"
+
 TempFrameInfo = namedtuple(
     "TempFrameInfo",
     [
@@ -104,6 +106,7 @@ class VM:
         site.sethelper()  # otherwise help function is not available
         pydoc.pager = pydoc.plainpager  # otherwise help command plays tricks
         self._install_fake_streams()
+        self._install_repl_helper()
         self._current_executor = None
         self._io_level = 0
         self._tty_mode = True
@@ -431,7 +434,6 @@ class VM:
         source = ws_stripped_source.strip("?")
         num_stripped_question_marks = len(ws_stripped_source) - len(source)
 
-        # let's see if it's single expression or something more complex
         try:
             root = ast.parse(source, filename=filename, mode="exec")
         except SyntaxError as e:
@@ -441,17 +443,10 @@ class VM:
 
         assert isinstance(root, ast.Module)
 
-        if len(root.body) == 1 and isinstance(root.body[0], ast.Expr):
-            mode = "eval"
-        elif len(root.body) > 1 and isinstance(root.body[-1], ast.Expr):
-            mode = "exec+eval"
-        else:
-            mode = "exec"
-
         result_attributes = self._execute_source(
             source,
             filename,
-            mode,
+            "repl",
             NiceTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
             cmd,
         )
@@ -823,6 +818,15 @@ class VM:
             )
         finally:
             self._current_executor = None
+
+    def _install_repl_helper(self):
+        def _handle_repl_value(obj):
+            if obj is not None:
+                print(repr({"repr": repr(obj), "id": id(obj)}) + "\x04")
+                self._heap[id(obj)] = obj
+                builtins._ = obj
+
+        setattr(builtins, _REPL_HELPER_NAME, _handle_repl_value)
 
     def _install_fake_streams(self):
         self._original_stdin = sys.stdin
@@ -1242,32 +1246,27 @@ class Executor:
             self._main_module_path = filename
 
         global_vars = __main__.__dict__
-        statements = expression = None
 
         try:
-            if mode == "exec+eval":
+            if mode == "repl":
                 assert not ast_postprocessors
                 # Useful in shell to get last expression value in multi-statement block
                 root = self._prepare_ast(source, filename, "exec")
                 # https://bugs.python.org/issue35894
                 # https://github.com/pallets/werkzeug/pull/1552/files#diff-9e75ca133f8601f3b194e2877d36df0eR950
                 module = ast.parse("")
-                module.body = root.body[:-1]
+                module.body = root.body
+                self._instrument_repl_code(module)
                 statements = compile(module, filename, "exec")
-                expression = compile(ast.Expression(root.body[-1].value), filename, "eval")
-            else:
+            elif mode == "exec":
                 root = self._prepare_ast(source, filename, mode)
-                if mode == "eval":
-                    assert not ast_postprocessors
-                    expression = compile(root, filename, mode)
-                elif mode == "exec":
-                    for func in ast_postprocessors:
-                        func(root)
-                    statements = compile(root, filename, mode)
-                else:
-                    raise ValueError("Unknown mode")
+                for func in ast_postprocessors:
+                    func(root)
+                statements = compile(root, filename, mode)
+            else:
+                raise ValueError("Unknown mode", mode)
 
-            return self._execute_prepared_user_code(statements, expression, global_vars)
+            return self._execute_prepared_user_code(statements, global_vars)
         except SyntaxError:
             return {"user_exception": self._vm._prepare_user_exception()}
         except SystemExit:
@@ -1278,14 +1277,8 @@ class Executor:
 
     @return_execution_result
     @prepare_hooks
-    def _execute_prepared_user_code(self, statements, expression, global_vars):
-        if statements:
-            exec(statements, global_vars)
-        if expression:
-            value = eval(expression, global_vars)
-            if value is not None:
-                builtins._ = value
-            return {"value_info": self._vm.export_value(value)}
+    def _execute_prepared_user_code(self, statements, global_vars):
+        exec(statements, global_vars)
 
     def find_spec(self, fullname, path=None, target=None):
         """override in subclass for custom-loading user modules"""
@@ -1293,6 +1286,17 @@ class Executor:
 
     def _prepare_ast(self, source, filename, mode):
         return ast.parse(source, filename, mode)
+
+    def _instrument_repl_code(self, root):
+        # modify all expression statements to print and register their non-None values
+        for node in ast.walk(root):
+            if isinstance(node, ast.Expr):
+                node.value = ast.Call(
+                    func=ast.Name(id=_REPL_HELPER_NAME, ctx=ast.Load()),
+                    args=[node.value],
+                    keywords=[],
+                )
+                ast.fix_missing_locations(node)
 
 
 class SimpleRunner(Executor):
@@ -1346,14 +1350,14 @@ class Tracer(Executor):
     def _trace(self, frame, event, arg):
         raise NotImplementedError()
 
-    def _execute_prepared_user_code(self, statements, expression, global_vars):
+    def _execute_prepared_user_code(self, statements, global_vars):
         try:
             sys.settrace(self._trace)
             if hasattr(sys, "breakpointhook"):
                 old_breakpointhook = sys.breakpointhook
                 sys.breakpointhook = self._breakpointhook
 
-            return super()._execute_prepared_user_code(statements, expression, global_vars)
+            return super()._execute_prepared_user_code(statements, global_vars)
         finally:
             sys.settrace(None)
             if hasattr(sys, "breakpointhook"):
@@ -2626,9 +2630,9 @@ class NiceTracer(Tracer):
     def _debug(self, *args):
         logger.debug("TRACER: " + str(args))
 
-    def _execute_prepared_user_code(self, statements, expression, global_vars):
+    def _execute_prepared_user_code(self, statements, global_vars):
         try:
-            return Tracer._execute_prepared_user_code(self, statements, expression, global_vars)
+            return Tracer._execute_prepared_user_code(self, statements, global_vars)
         finally:
             """
             from thonny.misc_utils import _win_get_used_memory
