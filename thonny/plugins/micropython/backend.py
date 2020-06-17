@@ -310,9 +310,12 @@ class MicroPythonBackend:
     def _transform_output(self, data):
         return data
 
-    def _execute(self, script, timeout, capture_stdout):
+    def _execute(self, script, timeout, capture):
         """Ensures prompt and submits the script.
-        Returns (out, value_repr, err) if there are no problems, ie. all parts of the 
+        Reads (and doesn't return) until next active prompt or connection error.
+        
+        If capture is False, then forwards output incrementally. Otherwise
+        returns (out, err) if there are no problems, ie. all parts of the 
         output are present and it reaches active prompt.
         Otherwise raises ProtocolError.
         
