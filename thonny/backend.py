@@ -46,7 +46,8 @@ from thonny.common import (
     is_same_path,
     EOFCommand,
     execute_system_command,
-)
+    OBJECT_LINK_START,
+    OBJECT_LINK_END)
 import queue
 import dis
 
@@ -822,7 +823,7 @@ class VM:
     def _install_repl_helper(self):
         def _handle_repl_value(obj):
             if obj is not None:
-                print(repr({"repr": repr(obj), "id": id(obj)}) + "\x04")
+                print("%s%r@%s%s" % (OBJECT_LINK_START, obj, id(obj), OBJECT_LINK_END))
                 self._heap[id(obj)] = obj
                 builtins._ = obj
 

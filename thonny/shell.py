@@ -9,7 +9,13 @@ import traceback
 
 from thonny import get_runner, get_workbench, memory, roughparse, ui_utils, running
 from thonny.codeview import PythonText, get_syntax_options_for_tag
-from thonny.common import InlineCommand, ToplevelCommand, ToplevelResponse
+from thonny.common import (
+    InlineCommand,
+    ToplevelCommand,
+    ToplevelResponse,
+    OBJECT_LINK_START,
+    OBJECT_LINK_END,
+)
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
 from thonny.tktextext import index2line, TextFrame, TweakableText
 from thonny.ui_utils import (
@@ -326,6 +332,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("restart_line", wrap="none", lmargin1=x_padding, lmargin2=x_padding)
+        self.tag_configure("object_link_marker", elide=True)
+        self.tag_configure("object_id", elide=True)
 
         self.tag_configure("welcome", lmargin1=x_padding, lmargin2=x_padding)
 
@@ -390,6 +398,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             self.tag_add("before_io", "output_insert -1 line linestart")
 
         self._update_visible_io(None)
+        self._render_object_links("end")
 
     def _handle_toplevel_response(self, msg: ToplevelResponse) -> None:
         if msg.get("error"):
@@ -599,6 +608,41 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                 self._insert_text_directly(data, tuple(tags))
 
         self._applied_io_events.append((original_data, stream_name))
+
+    def _render_object_links(self, start):
+        closer_start = self.search(
+            OBJECT_LINK_END, index=start, stopindex="command_io_start", backwards=True, elide=False
+        )
+        if not closer_start:
+            return
+
+        self.tag_add(
+            "object_link_marker",
+            closer_start,
+            "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)),
+        )
+
+        id_start = self.search(
+            "@", index=closer_start, stopindex="command_io_start", backwards=True
+        )
+        if not id_start:
+            logging.getLogger("thonny").warning("Can't find object id")
+
+        id_str = self.get(id_start, closer_start)[1:]
+        self.tag_add("object_id", id_start, closer_start)
+
+        opener_start = self.search(
+            OBJECT_LINK_START, index=id_start, stopindex="command_io_start", backwards=True
+        )
+        value_start = "%s + %d chars" % (opener_start, len(OBJECT_LINK_START))
+        self.tag_add(
+            "object_link_marker", opener_start, value_start,
+        )
+
+        self.tag_remove("io", value_start, closer_start)
+        self.tag_add("value", value_start, closer_start)
+
+        self._render_object_links(opener_start)
 
     def _show_squeezed_text(self, button):
         dlg = SqueezedTextDialog(self, button)
