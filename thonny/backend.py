@@ -432,9 +432,7 @@ class VM:
         """Executes Python source entered into shell"""
         self._check_update_tty_mode(cmd)
         filename = "<pyshell>"
-        ws_stripped_source = cmd.source.strip()
-        source = ws_stripped_source.strip("?")
-        num_stripped_question_marks = len(ws_stripped_source) - len(source)
+        source = cmd.source.strip()
 
         try:
             root = ast.parse(source, filename=filename, mode="exec")
@@ -452,8 +450,6 @@ class VM:
             NiceTracer if getattr(cmd, "debug_mode", False) else SimpleRunner,
             cmd,
         )
-
-        result_attributes["num_stripped_question_marks"] = num_stripped_question_marks
 
         return ToplevelResponse(command_name="execute_source", **result_attributes)
 

@@ -56,6 +56,15 @@ class ShellConfigurationPage(ConfigurationPage):
         )
         squeeze_combo.grid(row=22, column=1, sticky=tk.W, padx=10, pady=10)
 
+        self.add_checkbox(
+            "shell.auto_inspect_values",
+            _("Open evaluated values in Object inspector"),
+            30,
+            0,
+            columnspan=2,
+            pady=(0, 10),
+        )
+
 
 def load_plugin() -> None:
     get_workbench().add_configuration_page("shell", _("Shell"), ShellConfigurationPage, 70)

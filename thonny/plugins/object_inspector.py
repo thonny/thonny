@@ -33,6 +33,7 @@ class ObjectInspector(ttk.Frame):
         get_workbench().bind("get_object_info_response", self._handle_object_info_event, True)
         get_workbench().bind("DebuggerResponse", self._handle_progress_event, True)
         get_workbench().bind("ToplevelResponse", self._handle_progress_event, True)
+        get_workbench().bind("BackendRestart", self._on_backend_restart, True)
 
         # self.demo()
 
@@ -172,6 +173,10 @@ class ObjectInspector(ttk.Frame):
             self.set_object_info(None)
             self._set_title("object @ " + thonny.memory.format_object_id(object_id))
             self.request_object_info()
+
+    def _on_backend_restart(self, event=None):
+        self.set_object_info(None)
+        self.object_id = None
 
     def _set_title(self, text):
         self.title_label.configure(text=text)

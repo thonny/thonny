@@ -84,6 +84,7 @@ class ShellView(tk.PanedWindow):
         get_workbench().set_default("shell.max_lines", 1000)
         get_workbench().set_default("shell.squeeze_threshold", 1000)
         get_workbench().set_default("shell.tty_mode", True)
+        get_workbench().set_default("shell.auto_inspect_values", True)
 
         self.text = ShellText(
             main_frame,
@@ -643,7 +644,15 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.tag_add("value", value_start, closer_start)
         self.tag_add(id_str, value_start, closer_start)
 
+        if get_workbench().in_heap_mode():
+            id_repr = memory.format_object_id(int(id_str))
+            self.direct_delete(value_start, id_start)
+            self.direct_insert(value_start, id_repr, ("value", id_str))
+
         self._render_object_links(opener_start)
+
+        if get_workbench().get_option("shell.auto_inspect_values"):
+            get_workbench().event_generate("ObjectSelect", object_id=int(id_str))
 
     def _show_squeezed_text(self, button):
         dlg = SqueezedTextDialog(self, button)
@@ -1311,6 +1320,10 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         end_index = self.index("output_end")
         self._clear_content(end_index)
 
+    def _on_backend_restart(self, event=None):
+        # make sure dead values are not clickable anymore
+        self.tag_remove("value", "0.1", "end")
+
     def compute_smart_home_destination_index(self):
         """Is used by EnhancedText"""
 
@@ -1477,6 +1490,7 @@ class ShellText(BaseShellText):
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
+        get_workbench().bind("BackendRestart", self._on_backend_restart, True)
 
 
 class SqueezedTextDialog(CommonDialog):

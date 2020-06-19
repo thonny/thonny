@@ -2,11 +2,13 @@
 Version history
 ===============
 
-???
+3.3.0 (???)
 ==================
 * NEW: Include esptool in binary bundles
 * NEW: ESP flash dialog now allows selecting flash mode, #1056 by Rune Langøy
 * NEW: "Save all" command, #1053 by Syed Nasim
+* NEW: Clicking on a value in the Shell opens it in the Object inspector. 
+* NEW: By default, after evaluating an expression in the Shell the value will be automatically shown in the Object inspector (if open). See Options => Shell to turn it off.
 
 3.2.7 (2020-01-22)
 ==================
