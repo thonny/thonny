@@ -441,7 +441,7 @@ class FloatInspector(TextFrame, ContentInspector):
             if ratio_dec_str != object_info["repr"]:
                 explanation = _(
                     "The representation above is an approximate value of this float. "
-                    "The exact value is %s which is about %s"
+                    "The exact stored value is %s which is about %s"
                 )
 
                 content += explanation % (
