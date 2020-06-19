@@ -333,8 +333,6 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.tag_configure("prompt", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("value", lmargin1=x_padding, lmargin2=x_padding)
         self.tag_configure("restart_line", wrap="none", lmargin1=x_padding, lmargin2=x_padding)
-        self.tag_configure("object_link_marker", elide=True)
-        self.tag_configure("object_id", elide=True)
 
         self.tag_configure("welcome", lmargin1=x_padding, lmargin2=x_padding)
 
@@ -617,12 +615,6 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         if not closer_start:
             return
 
-        self.tag_add(
-            "object_link_marker",
-            closer_start,
-            "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)),
-        )
-
         id_start = self.search(
             "@", index=closer_start, stopindex="command_io_start", backwards=True
         )
@@ -630,15 +622,12 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             logging.getLogger("thonny").warning("Can't find object id")
 
         id_str = self.get(id_start, closer_start)[1:]
-        self.tag_add("object_id", id_start, closer_start)
+        self.direct_delete(id_start, "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)))
 
         opener_start = self.search(
             OBJECT_LINK_START, index=id_start, stopindex="command_io_start", backwards=True
         )
         value_start = "%s + %d chars" % (opener_start, len(OBJECT_LINK_START))
-        self.tag_add(
-            "object_link_marker", opener_start, value_start,
-        )
 
         self.tag_remove("io", value_start, closer_start)
         self.tag_add("value", value_start, closer_start)
@@ -648,6 +637,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             id_repr = memory.format_object_id(int(id_str))
             self.direct_delete(value_start, id_start)
             self.direct_insert(value_start, id_repr, ("value", id_str))
+
+        self.direct_delete(opener_start, value_start)
 
         self._render_object_links(opener_start)
 
@@ -1334,7 +1325,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             return super().compute_smart_home_destination_index()
 
     def _value_click(self, event):
-        tags = self.tag_names("@%d,%d" % (event.x, event.y))
+        pos = "@%d,%d" % (event.x, event.y)
+        tags = self.tag_names(pos)
         for tag in tags:
             if tag.isnumeric():
                 get_workbench().show_view("ObjectInspector", set_focus=False)
@@ -1482,6 +1474,7 @@ class ShellText(BaseShellText):
         self.bindtags(self.bindtags() + ("ShellText",))
 
         self.tag_bind("value", "<1>", self._value_click)
+        self.tag_bind("value", "<ButtonRelease-1>", self._value_mouse_up)
         self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
 
         self.bind("<Motion>", self._on_mouse_move, True)
