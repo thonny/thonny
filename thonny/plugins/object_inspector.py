@@ -8,6 +8,7 @@ from thonny import get_runner, get_workbench, ui_utils
 from thonny.common import InlineCommand
 from thonny.misc_utils import shorten_repr
 from thonny.tktextext import TextFrame
+from thonny.ui_utils import ems_to_pixels
 
 
 class ObjectInspector(ttk.Frame):
@@ -493,7 +494,7 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
         thonny.memory.MemoryFrame.__init__(self, master, ("index", "id", "value"))
 
         # self.vert_scrollbar.grid_remove()
-        self.tree.column("index", width=40, anchor=tk.W, stretch=False)
+        self.tree.column("index", width=ems_to_pixels(6), anchor=tk.W, stretch=False)
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
 
