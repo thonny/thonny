@@ -15,7 +15,7 @@ def format_object_id(object_id):
     if object_id is None:
         return None
     else:
-        return "0x" + hex(object_id)[2:].upper()  # .rjust(8,'0')
+        return "0x" + hex(object_id)[2:]  # .rjust(8,'0')
 
 
 def parse_object_id(object_id_repr):
