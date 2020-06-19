@@ -820,7 +820,13 @@ class VM:
     def _install_repl_helper(self):
         def _handle_repl_value(obj):
             if obj is not None:
-                print("%s%r@%s%s" % (OBJECT_LINK_START, obj, id(obj), OBJECT_LINK_END))
+                try:
+                    obj_repr = repr(obj)
+                    if len(obj_repr) > 5000:
+                        obj_repr = obj_repr[:5000] + "…"
+                except Exception as e:
+                    obj_repr = "<repr error: " + str(e) + ">"
+                print("%s%s@%s%s" % (OBJECT_LINK_START, obj_repr, id(obj), OBJECT_LINK_END))
                 self._heap[id(obj)] = obj
                 builtins._ = obj
 

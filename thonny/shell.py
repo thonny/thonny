@@ -542,9 +542,14 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
             for url_match in SIMPLE_URL_SPLIT_REGEX.finditer(data):
                 non_url_length -= url_match.end() - url_match.start()
 
-            if non_url_length > self._get_squeeze_threshold() and "\n" not in data:
+            if (
+                non_url_length > self._get_squeeze_threshold()
+                and "\n" not in data
+                and not (data.startswith(OBJECT_LINK_START))
+            ):
                 self._io_cursor_offset = 0  # ignore the effect of preceding \r and \b
-                button_text = data[:40] + " …"
+                actual_text = self._remove_object_link_markers(data)
+                button_text = actual_text[:40] + " …"
                 btn = tk.Label(
                     self,
                     text=button_text,
@@ -555,7 +560,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                     font="IOFont",
                 )
                 btn.bind("<1>", lambda e: self._show_squeezed_text(btn), True)
-                btn.contained_text = data
+                btn.contained_text = actual_text
                 btn.tags = tags
                 self._squeeze_buttons.add(btn)
                 create_tooltip(btn, "%d characters squeezed. " % len(data) + "Click for details.")
@@ -607,6 +612,18 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                 self._insert_text_directly(data, tuple(tags))
 
         self._applied_io_events.append((original_data, stream_name))
+
+    def _remove_object_link_markers(self, data):
+        end_pos = data.find(OBJECT_LINK_END)
+        if end_pos < 0:
+            return data
+
+        at_pos = data.rfind("@", 0, end_pos)
+        if at_pos < 0:
+            return data
+
+        data = data[:at_pos] + data[end_pos + len(OBJECT_LINK_END) :]
+        return data.replace(OBJECT_LINK_START, "")
 
     def _render_object_links(self, start):
         closer_start = self.search(
@@ -1337,8 +1354,8 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         pos = "@%d,%d" % (event.x, event.y)
         rng = self.tag_prevrange("value", pos)
         if not rng:
-            return 
-        
+            return
+
         # select whole value unless user has started a partial selection
         if not self.tag_nextrange("sel", rng[0], rng[1]):
             self.tag_remove("sel", "1.0", "end")
