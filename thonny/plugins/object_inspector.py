@@ -399,7 +399,9 @@ class StringInspector(TextFrame, ContentInspector):
 class IntInspector(TextFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
-        TextFrame.__init__(self, master, read_only=True, horizontal_scrollbar=False)
+        TextFrame.__init__(
+            self, master, read_only=True, horizontal_scrollbar=False, font="TkDefaultFont"
+        )
 
     def applies_to(self, object_info):
         return object_info["type"] == repr(int)
@@ -424,7 +426,14 @@ class IntInspector(TextFrame, ContentInspector):
 class FloatInspector(TextFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
-        TextFrame.__init__(self, master, read_only=True, horizontal_scrollbar=False, wrap="word")
+        TextFrame.__init__(
+            self,
+            master,
+            read_only=True,
+            horizontal_scrollbar=False,
+            wrap="word",
+            font="TkDefaultFont",
+        )
 
     def applies_to(self, object_info):
         return object_info["type"] == repr(float)
