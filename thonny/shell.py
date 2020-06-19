@@ -641,6 +641,7 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         self.tag_remove("io", value_start, closer_start)
         self.tag_add("value", value_start, closer_start)
+        self.tag_add(id_str, value_start, closer_start)
 
         self._render_object_links(opener_start)
 
@@ -1319,11 +1320,13 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         else:
             return super().compute_smart_home_destination_index()
 
-    def _hyperlink_enter(self, event):
-        self.config(cursor="hand2")
-
-    def _hyperlink_leave(self, event):
-        self.config(cursor="")
+    def _value_click(self, event):
+        tags = self.tag_names("@%d,%d" % (event.x, event.y))
+        for tag in tags:
+            if tag.isnumeric():
+                get_workbench().show_view("ObjectInspector", set_focus=False)
+                get_workbench().update_idletasks()
+                get_workbench().event_generate("ObjectSelect", object_id=int(tag))
 
     def _handle_hyperlink(self, event):
         import webbrowser
@@ -1413,6 +1416,15 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
 
         self.direct_delete("0.1", cut_idx)
 
+    def _on_mouse_move(self, event=None):
+        tags = self.tag_names("@%d,%d" % (event.x, event.y))
+        if "value" in tags or "io_hyperlink" in tags:
+            if self.cget("cursor") != "hand2":
+                self.config(cursor="hand2")
+        else:
+            if self.cget("cursor"):
+                self.config(cursor="")
+
     def _invalidate_current_data(self):
         """
         Grayes out input & output displayed so far
@@ -1456,9 +1468,10 @@ class ShellText(BaseShellText):
         super().__init__(master, view, cnf=cnf, **kw)
         self.bindtags(self.bindtags() + ("ShellText",))
 
+        self.tag_bind("value", "<1>", self._value_click)
         self.tag_bind("io_hyperlink", "<ButtonRelease-1>", self._handle_hyperlink)
-        self.tag_bind("io_hyperlink", "<Enter>", self._hyperlink_enter)
-        self.tag_bind("io_hyperlink", "<Leave>", self._hyperlink_leave)
+
+        self.bind("<Motion>", self._on_mouse_move, True)
 
         get_workbench().bind("InputRequest", self._handle_input_request, True)
         get_workbench().bind("ProgramOutput", self._handle_program_output, True)
