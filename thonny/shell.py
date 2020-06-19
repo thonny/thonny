@@ -1333,6 +1333,17 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
                 get_workbench().update_idletasks()
                 get_workbench().event_generate("ObjectSelect", object_id=int(tag))
 
+    def _value_mouse_up(self, event):
+        pos = "@%d,%d" % (event.x, event.y)
+        rng = self.tag_prevrange("value", pos)
+        if not rng:
+            return 
+        
+        # select whole value unless user has started a partial selection
+        if not self.tag_nextrange("sel", rng[0], rng[1]):
+            self.tag_remove("sel", "1.0", "end")
+            self.tag_add("sel", rng[0], rng[1])
+
     def _handle_hyperlink(self, event):
         import webbrowser
 

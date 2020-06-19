@@ -7,8 +7,9 @@ Version history
 * NEW: Include esptool in binary bundles
 * NEW: ESP flash dialog now allows selecting flash mode, #1056 by Rune Langøy
 * NEW: "Save all" command, #1053 by Syed Nasim
-* NEW: Clicking on a value in the Shell opens it in the Object inspector. 
+* NEW: Clicking on a value in the Shell selects it and opens in the Object inspector. 
 * NEW: By default, after evaluating an expression in the Shell the value will be automatically shown in the Object inspector (if open). See Options => Shell to turn it off.
+*
 * FIXED #795: Support evaluating several expressions at once in the Shell (just like official Python REPL)
 
 3.2.7 (2020-01-22)
