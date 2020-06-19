@@ -606,6 +606,7 @@ class TreeFrame(ttk.Frame):
         columns,
         displaycolumns="#all",
         show_scrollbar=True,
+        show_statusbar=False,
         borderwidth=0,
         relief="flat",
         **tree_kw
@@ -616,7 +617,9 @@ class TreeFrame(ttk.Frame):
             self, orient=tk.VERTICAL, style=scrollbar_style("Vertical")
         )
         if show_scrollbar:
-            self.vert_scrollbar.grid(row=0, column=1, sticky=tk.NSEW)
+            self.vert_scrollbar.grid(
+                row=0, column=1, sticky=tk.NSEW, rowspan=2 if show_statusbar else 1
+            )
 
         self.tree = ttk.Treeview(
             self,
@@ -632,6 +635,12 @@ class TreeFrame(ttk.Frame):
         self.rowconfigure(0, weight=1)
         self.tree.bind("<<TreeviewSelect>>", self.on_select, "+")
         self.tree.bind("<Double-Button-1>", self.on_double_click, "+")
+
+        if show_statusbar:
+            self.statusbar = ttk.Frame(self)
+            self.statusbar.grid(row=1, column=0, sticky="nswe")
+        else:
+            self.statusbar = None
 
     def _clear_tree(self):
         for child_id in self.tree.get_children():

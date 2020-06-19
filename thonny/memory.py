@@ -23,8 +23,8 @@ def parse_object_id(object_id_repr):
 
 
 class MemoryFrame(TreeFrame):
-    def __init__(self, master, columns):
-        TreeFrame.__init__(self, master, columns)
+    def __init__(self, master, columns, show_statusbar=False):
+        TreeFrame.__init__(self, master, columns, show_statusbar=show_statusbar)
 
         font = tk_font.nametofont("TkDefaultFont").copy()
         font.configure(underline=True)

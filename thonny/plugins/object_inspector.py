@@ -491,16 +491,22 @@ class ReprInspector(TextFrame, ContentInspector):
 class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
-        thonny.memory.MemoryFrame.__init__(self, master, ("index", "id", "value"))
+        thonny.memory.MemoryFrame.__init__(
+            self, master, ("index", "id", "value"), show_statusbar=True
+        )
 
         # self.vert_scrollbar.grid_remove()
-        self.tree.column("index", width=ems_to_pixels(6), anchor=tk.W, stretch=False)
+        self.tree.column("index", width=ems_to_pixels(4), anchor=tk.W, stretch=False)
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
 
         self.tree.heading("index", text="Index", anchor=tk.W)
         self.tree.heading("id", text="Value ID", anchor=tk.W)
         self.tree.heading("value", text="Value", anchor=tk.W)
+
+        self.len_label = ttk.Label(self.statusbar, text="", anchor="w")
+        self.len_label.grid(row=0, column=0, sticky="w")
+        self.statusbar.columnconfigure(0, weight=1)
 
         self.elements_have_indices = None
         self.update_memory_model()
@@ -555,22 +561,18 @@ class ElementsInspector(thonny.memory.MemoryFrame, ContentInspector):
             index += 1
 
         count = len(object_info["elements"])
-        self.tree.config(height=min(count, 10))
-
-        """ TODO:
-        label.configure (
-            text=("%d element" if count == 1 else "%d elements") % count
-        )
-        """
+        self.len_label.configure(text=" len: %d" % count)
 
 
 class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
     def __init__(self, master):
         ContentInspector.__init__(self, master)
-        thonny.memory.MemoryFrame.__init__(self, master, ("key_id", "id", "key", "value"))
+        thonny.memory.MemoryFrame.__init__(
+            self, master, ("key_id", "id", "key", "value"), show_statusbar=True
+        )
         self.configure(border=1)
         # self.vert_scrollbar.grid_remove()
-        self.tree.column("key_id", width=100, anchor=tk.W, stretch=False)
+        self.tree.column("key_id", width=ems_to_pixels(7), anchor=tk.W, stretch=False)
         self.tree.column("key", width=100, anchor=tk.W, stretch=False)
         self.tree.column("id", width=750, anchor=tk.W, stretch=True)
         self.tree.column("value", width=750, anchor=tk.W, stretch=True)
@@ -579,6 +581,10 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
         self.tree.heading("key", text="Key", anchor=tk.W)
         self.tree.heading("id", text="Value ID", anchor=tk.W)
         self.tree.heading("value", text="Value", anchor=tk.W)
+
+        self.len_label = ttk.Label(self.statusbar, text="", anchor="w")
+        self.len_label.grid(row=0, column=0, sticky="w")
+        self.statusbar.columnconfigure(0, weight=1)
 
         self.update_memory_model()
 
@@ -615,14 +621,7 @@ class DictInspector(thonny.memory.MemoryFrame, ContentInspector):
             )
 
         count = len(object_info["entries"])
-        self.tree.config(height=min(count, 10))
-
-        """ TODO:
-        label.configure (
-            text=("%d entry" if count == 1 else "%d entries") % count
-        )
-        """
-
+        self.len_label.configure(text=" len: %d" % count)
         self.update_memory_model()
 
 
