@@ -133,6 +133,8 @@ class ObjectInspector(ttk.Frame):
                 ElementsInspector(self.content_page),
                 DictInspector(self.content_page),
                 ImageInspector(self.content_page),
+                IntInspector(self.content_page),
+                FloatInspector(self.content_page),
                 ReprInspector(self.content_page),  # fallback content inspector
             ]
         )
@@ -392,6 +394,62 @@ class StringInspector(TextFrame, ContentInspector):
                            line_count_term,
                            "line" if line_count_term == 1 else "lines"))
         """
+
+
+class IntInspector(TextFrame, ContentInspector):
+    def __init__(self, master):
+        ContentInspector.__init__(self, master)
+        TextFrame.__init__(self, master, read_only=True, horizontal_scrollbar=False)
+
+    def applies_to(self, object_info):
+        return object_info["type"] == repr(int)
+
+    def set_object_info(self, object_info):
+        content = ast.literal_eval(object_info["repr"])
+        self.text.set_content(
+            object_info["repr"]
+            + "\n\n"
+            + "bin: "
+            + bin(content)
+            + "\n"
+            + "oct: "
+            + oct(content)
+            + "\n"
+            + "hex: "
+            + hex(content)
+            + "\n"
+        )
+
+
+class FloatInspector(TextFrame, ContentInspector):
+    def __init__(self, master):
+        ContentInspector.__init__(self, master)
+        TextFrame.__init__(self, master, read_only=True, horizontal_scrollbar=False, wrap="word")
+
+    def applies_to(self, object_info):
+        return object_info["type"] == repr(float)
+
+    def set_object_info(self, object_info):
+        content = object_info["repr"] + "\n\n\n"
+
+        if "as_integer_ratio" in object_info:
+            ratio = object_info["as_integer_ratio"]
+            from decimal import Decimal
+
+            ratio_dec_str = str(Decimal(ratio[0]) / Decimal(ratio[1]))
+
+            if ratio_dec_str != object_info["repr"]:
+                explanation = _(
+                    "The representation above is an approximate value of this float. "
+                    "The exact value is %s which is about %s"
+                )
+
+                content += explanation % (
+                    "\n\n  %d / %d\n\n" % ratio,
+                    "\n\n  %s\n\n" % ratio_dec_str,
+                )
+
+        self.text.set_content(content)
 
 
 class ReprInspector(TextFrame, ContentInspector):

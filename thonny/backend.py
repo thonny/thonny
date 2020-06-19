@@ -699,6 +699,8 @@ class VM:
                 self._add_elements_info(value, info)
             elif isinstance(value, dict):
                 self._add_entries_info(value, info)
+            elif isinstance(value, float):
+                self._add_float_info(value, info)
             elif hasattr(value, "image_data"):
                 info["image_data"] = value.image_data
 
@@ -779,6 +781,10 @@ class VM:
         info["entries"] = []
         for key in value:
             info["entries"].append((self.export_value(key), self.export_value(value[key])))
+
+    def _add_float_info(self, value, info):
+        if not value.is_integer():
+            info["as_integer_ratio"] = value.as_integer_ratio()
 
     def _execute_file(self, cmd, executor_class):
         self._check_update_tty_mode(cmd)
