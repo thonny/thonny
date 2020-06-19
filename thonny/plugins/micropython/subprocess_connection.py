@@ -19,7 +19,7 @@ class SerialConnection(MicroPythonConnection):
             universal_newlines=True,
         )
 
-        self._stdin = os.fdopen(master, 'w')    
-            
+        self._stdin = os.fdopen(master, "w")
+
         self._reading_thread = threading.Thread(target=self._listen_serial, daemon=True)
         self._reading_thread.start()

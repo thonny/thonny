@@ -47,7 +47,8 @@ from thonny.common import (
     EOFCommand,
     execute_system_command,
     OBJECT_LINK_START,
-    OBJECT_LINK_END)
+    OBJECT_LINK_END,
+)
 import queue
 import dis
 

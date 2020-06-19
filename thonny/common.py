@@ -16,7 +16,7 @@ from threading import Thread
 
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny]"
-OBJECT_LINK_END = "[/object_link_for_thonny]" 
+OBJECT_LINK_END = "[/object_link_for_thonny]"
 
 ValueInfo = namedtuple("ValueInfo", ["id", "repr"])
 FrameInfo = namedtuple(
