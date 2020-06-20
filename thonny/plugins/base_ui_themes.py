@@ -499,7 +499,7 @@ def windows() -> CompoundUiThemeSettings:
                     "borderwidth": scale(1),
                 }
             },
-            "Inactive.ViewTab.TLabel": {"configure": {"font": "UnderlineTkDefaultFont"}},
+            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]},},
         },
     ]
 
@@ -545,6 +545,15 @@ def enhanced_clam() -> CompoundUiThemeSettings:
                     "highlightthickness": scale(1),
                 }
             },
+            "ViewTab.TLabel": {"configure": {"padding": [scale(5), 0]}},
+            "Active.ViewTab.TLabel": {
+                "configure": {
+                    # "font" : "BoldTkDefaultFont",
+                    "relief": "sunken",
+                    "borderwidth": scale(1),
+                }
+            },
+            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]},},
         },
     ]
 
@@ -559,6 +568,15 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
             "TPanedWindow": {"configure": {"background": "systemDialogBackgroundActive"}},
             "TFrame": {"configure": {"background": "systemDialogBackgroundActive"}},
             "Tab": {"map": {"foreground": [("selected", "white")]}},
+            "ViewTab.TLabel": {"configure": {"padding": [scale(5), 0]}},
+            "Active.ViewTab.TLabel": {
+                "configure": {
+                    # "font" : "BoldTkDefaultFont",
+                    "relief": "sunken",
+                    "borderwidth": scale(1),
+                }
+            },
+            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]},},
         },
     ]
 

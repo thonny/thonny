@@ -249,7 +249,7 @@ def clean(
             }
         },
         "Inactive.ViewTab.TLabel": {
-            "configure": {"foreground": normal_foreground, "font": "UnderlineTkDefaultFont"},
+            "configure": {"foreground": normal_foreground},
             "map": {"background": [("hover", high_detail)]},
         },
         "Text": {"configure": {"background": text_background, "foreground": normal_foreground}},
