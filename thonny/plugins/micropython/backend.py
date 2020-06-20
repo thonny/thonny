@@ -1,3 +1,38 @@
+"""
+MP 1.12
+
+>>> import uos
+>>> dir(uos)
+['__class__', '__name__', 'remove', 'VfsFat', 'VfsLfs2', 'chdir', 'dupterm', 'dupterm_notify', 
+'getcwd', 'ilistdir', 'listdir', 'mkdir', 'mount', 'rename', 'rmdir', 'stat', 'statvfs', 'umount', 
+'uname', 'urandom']
+>>> import sys
+>>> dir(sys)
+['__class__', '__name__', 'argv', 'byteorder', 'exit', 'implementation', 'maxsize', 'modules', 
+'path', 'platform', 'print_exception', 'stderr', 'stdin', 'stdout', 'version', 'version_info']
+
+micro:bit (1.9.2)
+
+>>> import os
+>>> dir(os)
+['__name__', 'remove', 'listdir', 'size', 'uname']
+>>> import sys
+>>> dir(sys)
+['__name__', 'version', 'version_info', 'implementation', 'platform', 'byteorder', 'exit', 
+'print_exception']
+
+CP 5.0
+>>> dir(os)
+['__class__', '__name__', 'chdir', 'getcwd', 'listdir', 'mkdir', 'remove', 'rename', 'rmdir', 'sep',
+'stat', 'statvfs', 'sync', 'uname', 'unlink', 'urandom']
+>>> import sys
+>>> dir(sys)
+['__class__', '__name__', 'argv', 'byteorder', 'exit', 'implementation', 'maxsize', 'modules', 
+'path', 'platform', 'print_exception', 'stderr', 'stdin', 'stdout', 'version', 'version_info']
+
+
+"""
+
 from thonny.common import (
     InputSubmission,
     InterruptCommand,
@@ -10,7 +45,8 @@ from thonny.common import (
     UserError,
     serialize_message,
     BackendEvent,
-    ValueInfo,
+    OBJECT_LINK_START,
+    OBJECT_LINK_END,
 )
 import sys
 import logging
@@ -37,6 +73,7 @@ INTERRUPT_CMD = b"\x03"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 EOT = b"\x04"
+LAST_RESULT_NAME = "__last_thonny_repl_value__"
 
 # first prompt when switching to raw mode (or after soft reboot in raw mode)
 # Looks like it's not translatable in CP
@@ -96,7 +133,28 @@ class MicroPythonBackend:
         self._send_ready_message()
 
     def _prepare_helpers(self):
-        pass
+        self._execute(
+            dedent(
+                """
+            class __thonny_helper:
+                import os
+                import sys
+                
+                try:
+                    from os import listdir
+                except ImportError:
+                    @staticmethod
+                    def listdir(x):
+                        return [rec[0] for rec in os.listdir() if rec[0] not in ('.', '..')]
+                
+                try:
+                    from os import chdir
+                    from os import getcwd
+                except ImportError:
+                    
+        """
+            )
+        )
 
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()
@@ -380,22 +438,6 @@ class MicroPythonBackend:
         else:
             return stdout
 
-    def _execute_user_code(self, script):
-        """Executes the code in raw REPL and forwards output / err,
-        if all goes according to protocol. Raises ProtocolError othewise."""
-        stdout, value_repr, err = self._execute(
-            script, timeout=SECONDS_IN_YEAR, capture_stdout=False
-        )
-
-        if value_repr is not None:
-            raise ProtocolError(
-                "Unexpected value repr",
-                stdout + EOT + VALUE_REPR_START + value_repr + VALUE_REPR_END + EOT + err,
-            )
-        else:
-            self._send_output(stdout, "stdout")
-            self._send_output(err, "stderr")
-
     def _evaluate(self, expr, prelude="", cleanup=""):
         value_repr = self._evaluate_to_repr(expr, prelude, cleanup)
         return ast.literal_eval(value_repr)
@@ -436,23 +478,18 @@ class MicroPythonBackend:
         raise NotImplementedError()
 
     def _cmd_Run(self, cmd):
+        """Only for %run $EDITOR_CONTENT. Clean runs will be handled differently."""
+        # TODO: clear last object inspector requests dictionary
         assert cmd.get("source")
-        self._execute_user_code(cmd["source"])
+        self._execute(cmd.source, timeout=SECONDS_IN_YEAR, capture_stdout=False)        
         return {}
 
     def _cmd_execute_source(self, cmd):
-        try:
-            # Try to parse as expression
-            ast.parse(cmd.source, mode="eval")
-            # If it didn't fail then source is an expression
-            value_repr = self._evaluate_to_repr(cmd.source)
-            if value_repr is None:
-                value_repr = repr(None)
-            return {"value_info": ValueInfo(0, value_repr)}
-        except SyntaxError:
-            # source is a statement (or invalid syntax)
-            self._execute_user_code(cmd.source)
-            return {}
+        # TODO: clear last object inspector requests dictionary
+        source = self._add_expression_statement_handlers(cmd.source)
+        self._execute(source, timeout=SECONDS_IN_YEAR, capture_stdout=False)
+        # TODO: assign last value to _
+        return {}
 
     def _cmd_execute_system_command(self, cmd):
         raise NotImplementedError()
@@ -974,6 +1011,54 @@ class MicroPythonBackend:
 
     def _show_error(self, msg):
         self._send_output(msg + "\n", "stderr")
+
+    def _add_expression_statement_handlers(self, source):
+        try:
+            root = ast.parse(source)
+
+            from thonny.ast_utils import mark_text_ranges
+
+            mark_text_ranges(root, source)
+
+            expr_stmts = []
+            for node in ast.walk(root):
+                if isinstance(node, ast.Expr):
+                    expr_stmts.append(node)
+
+            temp_name = "__thonny_value__"
+            marker_prefix = (
+                "[globals().__setitem__({result_name!r}, {temp_name})"
+                " or print({start_marker!r} + {temp_name} + '@' + str(id({temp_name})) + {end_marker!r})"
+                " for {temp_name} in ["
+            ).format(
+                result_name=LAST_RESULT_NAME,
+                temp_name=temp_name,
+                start_marker=OBJECT_LINK_START,
+                end_marker=OBJECT_LINK_END,
+            )
+
+            marker_suffix = "] if {temp_name} is not None]".format(temp_name=temp_name)
+
+            lines = source.splitlines(keepends=True)
+            for node in reversed(expr_stmts):
+                lines[node.lineno] = (
+                    lines[node.lineno][: node.col_offset]
+                    + marker_prefix
+                    + lines[node.lineno][node.col_offset :]
+                )
+                lines[node.end_lineno] = (
+                    lines[node.end_lineno][: node.end_col_offset]
+                    + marker_suffix
+                    + lines[node.end_lineno][node.end_col_offset :]
+                )
+            
+            new_source = "".join(lines)
+            # make sure it parses
+            ast.parse(new_source)
+            return new_source
+        except Exception:
+            logging.getLogger("thonny").exception("Problem adding Expr handlers")
+            return source
 
 
 class ProtocolError(Exception):
