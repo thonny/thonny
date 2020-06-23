@@ -33,21 +33,39 @@ FALLBACK_BUILTIN_MODULES = [
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def _prepare_helpers(self):
-        script = textwrap.dedent(
+    def _get_extra_helpers(self):
+        return textwrap.dedent(
             """
-            import sys as _thonny_sys
-            import ffi as _thonny_ffi
-            
-            _thonny_sys.modules["_thonny_libc"] = _thonny_ffi.open(
-                "libc.so.6" if _thonny_sys.platform == "linux" else "libc.dylib"
-            )
-            
-            del _thonny_sys
-            del _thonny_ffi
-        """
-        )
-        self._execute_without_errors(script)
+            try:
+                from os import getcwd, chdir, rmdir
+            except ImportError:
+                # https://github.com/pfalcon/pycopy-lib/blob/master/os/os/__init__.py
+                
+                import ffi
+                
+                libc = ffi.open(
+                    "libc.so.6" if sys.platform == "linux" else "libc.dylib"
+                )
+
+                def check_error(ret):
+                    if ret == -1:
+                        raise OSError(os.errno())
+                        
+                _getcwd = libc.func("s", "getcwd", "si")
+                def getcwd():
+                    buf = bytearray(512)
+                    return _getcwd(buf, 512)
+
+                _chdir = libc.func("i", "chdir", "s")
+                def chdir(dir):
+                    r = _chdir(dir)
+                    check_error(r)
+                
+                _rmdir = libc.func("i", "rmdir", "s")
+                def rmdir(name):
+                    e = _rmdir(name)
+                    check_error(e)                                    
+                """)
 
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()

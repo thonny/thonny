@@ -53,7 +53,7 @@ import logging
 import traceback
 import queue
 from thonny.plugins.micropython.connection import ConnectionClosedException
-from textwrap import dedent
+from textwrap import dedent, indent
 import ast
 import re
 from queue import Queue, Empty
@@ -147,15 +147,13 @@ class MicroPythonBackend:
                     def listdir(x):
                         return [rec[0] for rec in os.listdir() if rec[0] not in ('.', '..')]
                 
-                try:
-                    from os import chdir
-                    from os import getcwd
-                except ImportError:
                     
-        """
-            )
+        """) + "\n" + indent(self._get_extra_helpers(), "    ")
         )
 
+    def _get_extra_helpers(self):
+        return ""
+        
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()
 
@@ -852,7 +850,7 @@ class MicroPythonBackend:
             def __thonny_rec_list_with_size(path):
                 result = {}
                 if __thonny_isdir(path):
-                    for name in __thonny_os.listdir(path):
+                    for name in __thonny_helper.listdir(path):
                         result.update(__thonny_rec_list_with_size(path + "/" + name))
                 else:
                     result[path] = __thonny_getsize(path)
@@ -955,7 +953,7 @@ class MicroPythonBackend:
                 for __thonny_path in %(paths)r:
                     __thonny_real_path = __thonny_path or '/'
                     try:
-                        __thonny_child_names = __thonny_os.listdir(__thonny_real_path)
+                        __thonny_child_names = __thonny_helper.listdir(__thonny_real_path)
                     except OSError:
                         # probably deleted directory
                         __thonny_children = None

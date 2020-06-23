@@ -107,6 +107,12 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         self._interrupt_suggestion_given = False
 
         super().__init__(connection, clean, api_stubs_path)
+    
+    def _get_extra_helpers(self):
+        return dedent("""
+            from os import getcwd, chdir, rmdir
+        """)
+
 
     def _process_until_initial_prompt(self, clean):
         if clean:
