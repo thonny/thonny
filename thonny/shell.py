@@ -356,6 +356,9 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         self.mark_set("output_insert", "end-1c")
         self.mark_gravity("output_insert", tk.RIGHT)
 
+        self.mark_set("command_io_start", "1.0")
+        self.mark_gravity("command_io_start", "left")
+
         self.active_object_tags = set()
 
         self.update_tabs()
@@ -637,8 +640,15 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         )
         if not id_start:
             logging.getLogger("thonny").warning("Can't find object id")
+            return
 
         id_str = self.get(id_start, closer_start)[1:]
+        try:
+            int(id_str)
+        except ValueError:
+            logging.getLogger("thonny").warning("Can't parse object id: " + id_str)
+            return
+
         self.direct_delete(id_start, "%s + %d chars" % (closer_start, len(OBJECT_LINK_END)))
 
         opener_start = self.search(
