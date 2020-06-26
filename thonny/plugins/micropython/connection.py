@@ -124,7 +124,7 @@ class MicroPythonConnection:
 
     def _log_data(self, data):
         print(
-            data.decode("Latin-1")
+            data.decode("utf-8", errors="replace")
             .replace("\r\n", "\n")
             .replace("\x01", "①")
             .replace("\x02", "②")
@@ -134,6 +134,7 @@ class MicroPythonConnection:
         )
 
     def _make_output_available(self, data, block=True):
+        # self._log_data(data)
         self._read_queue.put(data, block=block)
 
     def incoming_is_empty(self):

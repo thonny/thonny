@@ -33,12 +33,10 @@ FALLBACK_BUILTIN_MODULES = [
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def _get_extra_helpers(self):
+    def _get_custom_helpers(self):
         return textwrap.dedent(
             """
-            try:
-                from os import getcwd, chdir, rmdir
-            except ImportError:
+            if not hasattr(os, "getcwd") or not hasattr(os, "getcwd") or not hasattr(os, "rmdir"):
                 # https://github.com/pfalcon/pycopy-lib/blob/master/os/os/__init__.py
                 
                 import ffi
@@ -46,63 +44,47 @@ class MicroPythonOsBackend(MicroPythonBackend):
                 libc = ffi.open(
                     "libc.so.6" if sys.platform == "linux" else "libc.dylib"
                 )
-
-                def check_error(ret):
+                
+                @classmethod
+                def check_error(cls, ret):
                     if ret == -1:
-                        raise OSError(os.errno())
-                        
+                        raise OSError(cls.os.errno())
+                
                 _getcwd = libc.func("s", "getcwd", "si")
-                def getcwd():
+                @classmethod
+                def getcwd(cls):
                     buf = bytearray(512)
-                    return _getcwd(buf, 512)
+                    return cls._getcwd(buf, 512)
 
                 _chdir = libc.func("i", "chdir", "s")
-                def chdir(dir):
-                    r = _chdir(dir)
-                    check_error(r)
+                @classmethod
+                def chdir(cls, dir):
+                    r = cls._chdir(dir)
+                    cls.check_error(r)
                 
                 _rmdir = libc.func("i", "rmdir", "s")
-                def rmdir(name):
-                    e = _rmdir(name)
-                    check_error(e)                                    
-                """)
+                @classmethod
+                def rmdir(cls.name):
+                    e = cls._rmdir(name)
+                    cls.check_error(e)                                    
+                """
+        )
 
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()
 
     def _fetch_welcome_text(self):
-        impl_ver = self._evaluate(
-            "_thonny_sys.implementation.version", "import sys as _thonny_sys", "del _thonny_sys"
-        )
+        impl_ver = self._evaluate("__thonny_helper.sys.implementation.version")
 
         return "MicroPython " + ".".join(impl_ver) + "\n"
 
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
 
-    def _fetch_cwd(self):
-        self._evaluate(
-            "_thonny_getcwd(_thonny_buf, 512)",
-            dedent(
-                """
-                import sys as _thonny_sys
-                _thonny_buf = bytearray(512)
-                _thonny_getcwd = _thonny_sys.modules["_thonny_libc"].func("s", "getcwd", "si")
-            """
-            ),
-            dedent(
-                """
-                del _thonny_sys
-                del _thonny_buf
-                del _thonny_getcwd
-            """
-            ),
-        )
-
     def _soft_reboot(self, side_command):
         raise NotImplementedError()
 
-    def _execute(self, script, timeout, capture_stdout):
+    def _execute_with_consumer(self, script, output_consumer):
         """Ensures prompt and submits the script.
         Returns (out, value_repr, err) if there are no problems, ie. all parts of the 
         output are present and it reaches active prompt.
@@ -126,7 +108,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _cmd_cd(self, cmd):
         if len(cmd.args) == 1:
             path = cmd.args[0]
-            self._execute_without_errors(
+            self._execute_without_output(
                 dedent(
                     """
                 import sys as _thonny_sys

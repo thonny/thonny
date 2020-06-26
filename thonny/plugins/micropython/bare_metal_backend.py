@@ -107,19 +107,34 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         self._interrupt_suggestion_given = False
 
         super().__init__(connection, clean, api_stubs_path)
-    
-    def _get_extra_helpers(self):
-        return dedent("""
-            from os import getcwd, chdir, rmdir
-        """)
 
+    def _get_custom_helpers(self):
+        return dedent(
+            """
+            @classmethod
+            def getcwd(cls):
+                if hasattr(cls, "getcwd"):
+                    return cls.os.getcwd()
+                else:
+                    # micro:bit
+                    return ""
+            
+            @classmethod
+            def chdir(cls, x):
+                return cls.os.chdir(x)
+            
+            @classmethod
+            def rmdir(cls, x):
+                return cls.os.rmdir(x)
+        """
+        )
 
     def _process_until_initial_prompt(self, clean):
         if clean:
             self._interrupt_to_raw_prompt()
         else:
             self._connection.write(RAW_MODE_CMD)
-            self._forward_output_until_active_prompt()
+            self._forward_output_until_active_prompt(self._send_output)
 
     def _fetch_welcome_text(self):
         self._connection.write(NORMAL_MODE_CMD)
@@ -134,8 +149,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         return welcome_text.decode(ENCODING, errors="replace")
 
     def _fetch_builtin_modules(self):
-        out = self._execute_and_capture_output("help('modules')")
-        if out is None:
+        script = "help('modules')"
+        out, err = self._execute(script, capture_output=True)
+        if err or not out:
             self._send_error_message(
                 "Could not query builtin modules. Code completion may not work properly."
             )
@@ -157,12 +173,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         )
 
         return modules_str.split()
-
-    def _fetch_cwd(self):
-        return self._evaluate(
-            "__thonny_os.getcwd() if hasattr(__thonny_os, 'getcwd') else ''",
-            prelude="import os as __thonny_os",
-        )
 
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
@@ -216,7 +226,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         self._connection.write(SOFT_REBOOT_CMD)
 
         if not side_command:
-            self._forward_output_until_active_prompt()
+            self._forward_output_until_active_prompt(self._send_output)
             self.send_message(ToplevelResponse(cwd=self._cwd))
 
     def _transform_output(self, data):
@@ -231,10 +241,16 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
         # assuming we are already in a prompt
         self._forward_unexpected_output()
-        self._connection.write(RAW_MODE_CMD)
-        prompt = self._connection.read_until(FIRST_RAW_PROMPT_SUFFIX, 1, True)
+        with self._writing_lock:
+            self._connection.write(RAW_MODE_CMD)
+
+        prompt = self._connection.read_until(
+            FIRST_RAW_PROMPT_SUFFIX, timeout=WAIT_OR_CRASH_TIMEOUT, timeout_is_soft=True
+        )
         if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
             raise TimeoutError("Could not ensure raw prompt")
+
+        self._ensure_helpers()
 
         # send command
         with self._writing_lock:
@@ -248,103 +264,77 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             raise ProtocolError(
                 "Could not read command confirmation", confirmation + self._connection.read_all()
             )
+        else:
+            debug("GOTOK")
 
-        debug("GOTOK")
+    def _ensure_helpers(self):
+        # assuming raw prompt
+        # TODO: add error handling and / or timeouts
+        with self._writing_lock:
+            self._connection.write(b"""print("__thonny_helper" in globals())""" + EOT)
 
-    def _execute(self, script, timeout, capture_stdout):
+        out = self._connection.read_until(EOT + EOT + RAW_PROMPT)
+        value = out[:-3].strip()
+        if value == b"OKTrue":
+            return
+
+        assert value == b"OKFalse"
+
+        with self._writing_lock:
+            self._connection.write(self._get_all_helpers().encode(ENCODING) + EOT)
+
+        out = self._connection.read_until(EOT + EOT + RAW_PROMPT)
+
+    def _execute_with_consumer(self, script, output_consumer):
         """Expected output after submitting the command and reading the confirmation is following:
         
-            - User code: 
-                stdout
-                EOT
-                stderr
-                EOT
-                RAW_PROMPT
-                
-            - Thonny management/evaluation commands:
-                stdout (rare, eg. produced by unorthodox __repr__ methods)  
-                EOT + VALUE_REPR_START + value_repr + VALUE_REPR_END
-                EOT 
-                EOT
-                RAW_PROMPT
+            stdout
+            EOT
+            stderr
+            EOT
+            RAW_PROMPT
         """
 
         self._submit_code(script)
 
-        # The part until first EOT is supposed to be stdout output.
-        # If capture is not required then it is produced by user code,
-        # ie. the output produced should be forwarded as it appears.
-        if capture_stdout:
-            stdout_block = self._connection.soft_read_until(EOT, timeout=timeout)
-            if stdout_block.endswith(EOT):
-                out = stdout_block[: -len(EOT)]
-            else:
-                raise ProtocolError("Captured output was not terminated properly", stdout_block)
+        terminator = self._forward_output_until_eot_or_active_propmt(output_consumer, "stdout")
+        if terminator != EOT:
+            # an unexpected prompt
+            return
+
+        terminator = self._forward_output_until_eot_or_active_propmt(output_consumer, "stderr")
+        if terminator != EOT:
+            # an unexpected prompt
+            return
+
+        data = self._connection.read(1) + self._connection.read_all()
+        if data == RAW_PROMPT:
+            # happy path
+            return
         else:
-            out = b""
-            terminator = self._forward_output_until_eot_or_active_propmt()
-            if terminator != EOT:
-                raise ProtocolError("Incremental output was not terminated properly", terminator)
-            stdout_block = out + terminator
+            self._connection.unread(data)
+            self._forward_output_until_active_prompt(output_consumer, "stdout")
 
-        # Remaining part must contain value repr and empty stderr or (possibly empty) stderr alone.
-        # Value repr followed by non-empty stderr (eg. by cleanup code) is considered a protocol
-        # error. This part can be read as one block. It should appear quite quickly as the first
-        # EOT is already present.
-        final_terminator = EOT + RAW_PROMPT
-        value_err_block = self._connection.soft_read_until(final_terminator, WAIT_OR_CRASH_TIMEOUT)
-        if not value_err_block.endswith(final_terminator):
-            raise ProtocolError(
-                "Value/stderr was not terminated properly", stdout_block + value_err_block
-            )
-
-        trimmed_value_err_block = value_err_block[: -len(final_terminator)]
-        # trimmed_value_err_block may or may not contain value-repr block
-        if trimmed_value_err_block.count(EOT) == 0:
-            value_repr = None
-            err = trimmed_value_err_block
-        elif (
-            trimmed_value_err_block.count(EOT) == 1
-            and trimmed_value_err_block.startswith(VALUE_REPR_START)
-            and trimmed_value_err_block.endswith(VALUE_REPR_END + EOT)
-        ):
-            value_repr = trimmed_value_err_block[
-                len(VALUE_REPR_START) : -len(VALUE_REPR_END + EOT)
-            ].decode(ENCODING)
-            err = b""
-        else:
-            raise ProtocolError(
-                "Unexpected structure in value/stderr block", stdout_block + value_err_block
-            )
-
-        # The final condition -- the raw prompt we reached must be active prompt,
-        # ie. it must be the end of the output
-        remainder = self._connection.soft_read(1, timeout=0.01) + self._connection.read_all()
-        if remainder:
-            raise ProtocolError(
-                "Unexpected output after raw prompt", stdout_block + value_err_block + remainder
-            )
-
-        return out.decode(ENCODING), value_repr, err.decode(ENCODING)
-
-    def _forward_output_until_active_prompt(self, stream_name="stdout"):
+    def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
         """Used for finding initial prompt or forwarding problematic output 
         in case of parse errors"""
         while True:
-            terminator = self._forward_output_until_eot_or_active_propmt(stream_name)
+            terminator = self._forward_output_until_eot_or_active_propmt(
+                output_consumer, stream_name
+            )
             if terminator in (NORMAL_PROMPT, RAW_PROMPT, FIRST_RAW_PROMPT):
                 return terminator
             else:
-                self._send_output(terminator, "stdout")
+                output_consumer(terminator, "stdout")
 
-    def _forward_output_until_eot_or_active_propmt(self, stream_name="stdout"):
+    def _forward_output_until_eot_or_active_propmt(self, output_consumer, stream_name="stdout"):
         """Meant for incrementally forwarding stdout from user statements, 
         scripts and soft-reboots. Also used for forwarding side-effect output from 
         expression evaluations and for capturing help("modules") output.
         In these cases it is expected to arrive to an EOT.
         
         Also used for initial prompt searching or for recovering from a protocol error.
-        In this case it must work until active prompt.
+        In this case it must work until active normal prompt or first raw prompt.
         
         The code may have been submitted in any of the REPL modes or
         automatically via (soft-)reset.
@@ -431,15 +421,15 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             pending += new_data
 
             if pending.endswith(EOT):
-                self._send_output(pending[: -len(EOT)], stream_name)
+                output_consumer(pending[: -len(EOT)], stream_name)
                 return EOT
 
             elif pending.endswith(LF):
-                self._send_output(pending, stream_name)
+                output_consumer(pending, stream_name)
                 pending = b""
 
             elif pending.endswith(NORMAL_PROMPT) or pending.endswith(FIRST_RAW_PROMPT):
-                # This looks like prompt (or its prefix).
+                # This looks like prompt.
                 # Make sure it is not followed by anything.
                 # Note that in this context the prompt means something is wrong
                 # (EOT would have been the happy path), so no need to hurry.
@@ -468,7 +458,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                             out = out[: -len(FIRST_RAW_PROMPT)]
                         else:
                             break
-                    self._send_output(out, stream_name)
+                    output_consumer(out, stream_name)
 
                     return terminator
 
@@ -477,7 +467,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 follow_up = self._connection.soft_read(1, timeout=0.1)
                 if not follow_up:
                     # most likely not a Python prompt, let's forget about it
-                    self._send_output(pending, stream_name)
+                    output_consumer(pending, stream_name)
                     pending = b""
                 else:
                     # Let's withhold this for now
@@ -486,7 +476,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             else:
                 # No EOT or prompt in sight.
                 # Output and keep working.
-                self._send_output(pending, stream_name)
+                output_consumer(pending, stream_name)
                 pending = b""
 
     def _forward_unexpected_output(self, stream_name="stdout"):
@@ -522,7 +512,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 raise UserError("This device doesn't have directories")
 
             path = cmd.args[0]
-            self._execute_without_errors("import os as __thonny_os; __thonny_os.chdir(%r)" % path)
+            self._execute_without_output(
+                "import os as __thonny_helper.os; __thonny_helper.os.chdir(%r)" % path
+            )
             self._cwd = self._fetch_cwd()
             return {}
         else:
@@ -535,42 +527,36 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
     def _cmd_get_fs_info(self, cmd):
         result = self._evaluate(
             dedent(
-                """{
-                    "total" : __thonny_total,
-                    "used" : __thonny_used,
-                    "free": __thonny_free,
-                    "sizes": __thonny_sizes
-                }"""
-            ),
-            prelude=dedent(
                 """
-                try:
-                    from os import statvfs as __thonny_statvfs
-                    __thonny_stat = __thonny_statvfs(%r)
-                    __thonny_total = __thonny_stat[2] * __thonny_stat[0]
-                    __thonny_free = __thonny_stat[3] * __thonny_stat[0]
-                    __thonny_used = __thonny_total - __thonny_free
-                    __thonny_sizes = None
-                    del __thonny_statvfs
-                    del __thonny_stat 
-                except ImportError:
-                    import os as __thonny_os
-                    __thonny_sizes = [__thonny_os.size(name) for name in __thonny_os.listdir()]
-                    __thonny_used = None
-                    __thonny_total = None
-                    __thonny_free = None  
-                    del __thonny_os
+            try:
+                from os import statvfs as __thonny_statvfs
+                __thonny_stat = __thonny_statvfs(%r)
+                __thonny_total = __thonny_stat[2] * __thonny_stat[0]
+                __thonny_free = __thonny_stat[3] * __thonny_stat[0]
+                __thonny_used = __thonny_total - __thonny_free
+                __thonny_sizes = None
+                del __thonny_statvfs
+                del __thonny_stat 
+            except ImportError:
+                import os as __thonny_helper.os
+                __thonny_sizes = [__thonny_helper.os.size(name) for name in __thonny_helper.listdir()]
+                __thonny_used = None
+                __thonny_total = None
+                __thonny_free = None
+            
+            __thonny_helper.print_mgmt_value({
+                "total" : __thonny_total,
+                "used" : __thonny_used,
+                "free": __thonny_free,
+                "sizes": __thonny_sizes
+            })  
+                
+            del __thonny_total
+            del __thonny_free
+            del __thonny_used
+            del __thonny_sizes
             """
             )
-            % cmd.path,
-            cleanup=dedent(
-                """
-                del __thonny_total
-                del __thonny_free
-                del __thonny_used
-                del __thonny_sizes
-            """
-            ),
         )
 
         if result["sizes"] is not None:
@@ -653,9 +639,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         block_size = 512
         hex_mode = self._should_hexlify(path)
 
-        self._execute_without_errors("__thonny_fp = open(%r, 'rb')" % path)
+        self._execute_without_output("__thonny_fp = open(%r, 'rb')" % path)
         if hex_mode:
-            self._execute_without_errors("from binascii import hexlify as __temp_hexlify")
+            self._execute_without_output("from binascii import hexlify as __temp_hexlify")
 
         while True:
             if hex_mode:
@@ -669,7 +655,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             if len(block) < block_size:
                 break
 
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
             __thonny_fp.close()
@@ -705,9 +691,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         return bytes_written
 
     def _write_file_via_serial(self, content_blocks, target_path, notifier=None):
-        # prelude
         result = self._evaluate(
-            "__thonny_result",
             dedent(
                 """
             try:
@@ -717,6 +701,10 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 __thonny_result = "OK"
             except Exception as e:
                 __thonny_result = str(e)
+            
+            __thonny_helper.print_mgmt_value(__thonny_result)
+            
+            del __thonny_result
             """
             ).format(path=target_path),
         )
@@ -730,7 +718,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         # Define function to allow shorter write commands
         hex_mode = self._should_hexlify(target_path)
         if hex_mode:
-            self._execute_without_errors(
+            self._execute_without_output(
                 dedent(
                     """
                 from binascii import unhexlify as __thonny_unhex
@@ -742,7 +730,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 )
             )
         else:
-            self._execute_without_errors(
+            self._execute_without_output(
                 dedent(
                     """
                 def __W(x):
@@ -758,7 +746,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 script = "__W(%r)" % binascii.hexlify(block)
             else:
                 script = "__W(%r)" % block
-            self._execute_without_errors(script)
+            self._execute_without_output(script)
             print("Wrote", script)
             bytes_sent += len(block)
             if notifier is not None:
@@ -770,7 +758,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             raise UserError("Expected %d written bytes but wrote %d" % (bytes_sent, bytes_received))
 
         # clean up
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
                 try:
@@ -790,7 +778,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         return bytes_sent
 
     def _sync_all_filesystems(self):
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
             try:
@@ -826,15 +814,15 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         script = (
             dedent(
                 """
-            import os as __thonny_os
+            import os as __thonny_helper.os
             __thonny_parts = %r.split('/')
             for i in range(2, len(__thonny_parts) + 1):
                 __thonny_path = "/".join(__thonny_parts[:i])
                 try:
-                    __thonny_os.stat(__thonny_path)
+                    __thonny_helper.os.stat(__thonny_path)
                 except OSError:
                     # does not exist
-                    __thonny_os.mkdir(__thonny_path)
+                    __thonny_helper.os.mkdir(__thonny_path)
             
             del __thonny_parts
             try:
@@ -846,7 +834,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             % path
         )
 
-        self._execute_without_errors(script)
+        self._execute_without_output(script)
 
     def _delete_via_mount(self, paths):
         for path in paths:
@@ -858,39 +846,39 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _delete_via_serial(self, paths):
         if not self._supports_directories():
-            self._execute_without_errors(
+            self._execute_without_output(
                 dedent(
                     """
-                import os as __thonny_os
+                import os as __thonny_helper.os
                 for __thonny_path in %r: 
-                    __thonny_os.remove(__thonny_path)
+                    __thonny_helper.os.remove(__thonny_path)
                     
                 del __thonny_path
-                del __thonny_os
+                
             """
                 )
                 % paths
             )
         else:
-            self._execute_without_errors(
+            self._execute_without_output(
                 dedent(
                     """
-                import os as __thonny_os
+                import os as __thonny_helper.os
                 def __thonny_delete(path):
-                    if __thonny_os.stat(path)[0] & 0o170000 == 0o040000:
-                        for name in __thonny_os.listdir(path):
+                    if __thonny_helper.os.stat(path)[0] & 0o170000 == 0o040000:
+                        for name in __thonny_helper.os.listdir(path):
                             child_path = path + "/" + name
                             __thonny_delete(child_path)
-                        __thonny_os.rmdir(path)
+                        __thonny_helper.os.rmdir(path)
                     else:
-                        __thonny_os.remove(path)
+                        __thonny_helper.os.remove(path)
                 
                 for __thonny_path in %r: 
                     __thonny_delete(__thonny_path)
                     
                 del __thonny_path
                 del __thonny_delete
-                del __thonny_os
+                
             """
                 )
                 % paths
@@ -931,8 +919,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         # so try its approach first
         # https://learn.adafruit.com/welcome-to-circuitpython/the-circuitpy-drive
         result = self._evaluate(
-            "__thonny_result",
-            prelude=dedent(
+            dedent(
                 """
             try:
                 from storage import getmount as __thonny_getmount
@@ -944,9 +931,12 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 __thonny_result = None 
             except OSError:
                 __thonny_result = None 
-        """
-            ),
-            cleanup="del __thonny_result",
+            
+            __thonny_helper.print_mgmt_value(__thonny_result)
+            
+            del __thonny_result
+            """
+            )
         )
 
         if result is not None:
@@ -1000,9 +990,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _get_microbit_file_sizes(self):
         return self._evaluate(
-            "{name : __thonny_os.size(name) for name in __thonny_os.listdir()}",
-            prelude="import os as __thonny_os",
-            cleanup="del __thonny_os",
+            "{name : __thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()}"
         )
 
     def _check_for_connection_errors(self):

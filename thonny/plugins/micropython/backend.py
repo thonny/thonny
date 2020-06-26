@@ -73,7 +73,7 @@ INTERRUPT_CMD = b"\x03"
 VALUE_REPR_START = b"<repr>"
 VALUE_REPR_END = b"</repr>"
 EOT = b"\x04"
-LAST_RESULT_NAME = "__last_thonny_repl_value__"
+MGMT_VALUE_START = b"\x02"
 
 # first prompt when switching to raw mode (or after soft reboot in raw mode)
 # Looks like it's not translatable in CP
@@ -86,7 +86,7 @@ RAW_PROMPT = b">"
 # How many seconds to wait for something that should appear quickly.
 # In other words -- how long to wait with reporting a protocol error
 # (hoping that the required piece is still coming)
-WAIT_OR_CRASH_TIMEOUT = 3
+WAIT_OR_CRASH_TIMEOUT = 5
 
 SECONDS_IN_YEAR = 60 * 60 * 24 * 365
 
@@ -100,6 +100,8 @@ def debug(msg):
 
 class MicroPythonBackend:
     def __init__(self, connection, clean, api_stubs_path):
+        self._prev_time = time.time()
+
         self._connection = connection
         self._local_cwd = None
         self._cwd = None
@@ -114,17 +116,21 @@ class MicroPythonBackend:
         self._writing_lock = Lock()
 
         try:
+            self._report_time("before prepare")
             self._prepare(clean)
             self._mainloop()
         except ConnectionClosedException as e:
             self._on_connection_closed(e)
+        except ProtocolError as e:
+            self._send_output("ProtocolError: %s\n" % (e.message,), "stderr")
+            self._send_output("CAPTURED DATA: %s\n" % (e.captured,), "stderr")
         except Exception:
             logger.exception("Crash in backend")
             traceback.print_exc()
 
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
-        self._prepare_helpers()
+        self._execute_without_output(self._get_all_helpers())
         self._cwd = self._fetch_cwd()
         self._welcome_text = self._fetch_welcome_text()
         self._builtin_modules = self._fetch_builtin_modules()
@@ -132,28 +138,56 @@ class MicroPythonBackend:
 
         self._send_ready_message()
 
-    def _prepare_helpers(self):
-        self._execute(
+        self._report_time("prepared")
+
+    def _get_all_helpers(self):
+        # Can't import functions into class context:
+        # https://github.com/micropython/micropython/issues/6198
+        return (
             dedent(
                 """
             class __thonny_helper:
                 import os
                 import sys
                 
-                try:
-                    from os import listdir
-                except ImportError:
-                    @staticmethod
-                    def listdir(x):
-                        return [rec[0] for rec in os.listdir() if rec[0] not in ('.', '..')]
+                # for object inspector
+                last_repl_values = []
+                @classmethod
+                def print_repl_value(cls, obj):
+                    if obj is not None:
+                        cls.last_repl_values.append(obj)
+                        cls.last_repl_values = cls.last_repl_values[-{num_values_to_keep}:]
+                        print({start_marker!r}, obj, '@', id(obj), {end_marker!r}, sep='')
                 
+                @staticmethod
+                def print_mgmt_value(obj):
+                    print({mgmt_marker!r}, repr(obj), sep='', end='')
                     
-        """) + "\n" + indent(self._get_extra_helpers(), "    ")
+                @classmethod
+                def listdir(cls, x):
+                    if hasattr(cls.os, "listdir"):
+                        return cls.os.listdir(x)
+                    else:
+                        return [rec[0] for rec in cls.os.ilistdir(x) if rec[0] not in ('.', '..')]
+            """
+            ).format(
+                num_values_to_keep=self._get_num_values_to_keep(),
+                start_marker=OBJECT_LINK_START,
+                end_marker=OBJECT_LINK_END,
+                mgmt_marker=MGMT_VALUE_START.decode(ENCODING),
+            )
+            + "\n"
+            + indent(self._get_custom_helpers(), "    ")
         )
 
-    def _get_extra_helpers(self):
+    def _get_custom_helpers(self):
         return ""
-        
+
+    def _get_num_values_to_keep(self):
+        """How many last evaluated REPL values and visited Object inspector values to keep
+        in internal lists for the purpose of retrieving them by id for Object inspector"""
+        return 5
+
     def _process_until_initial_prompt(self, clean):
         raise NotImplementedError()
 
@@ -195,7 +229,7 @@ class MicroPythonBackend:
             return {}
 
     def _fetch_cwd(self):
-        raise NotImplementedError()
+        return self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
@@ -251,6 +285,7 @@ class MicroPythonBackend:
             print("sent interrupt")
 
     def handle_command(self, cmd):
+        self._report_time("before " + cmd.name)
         assert isinstance(cmd, (ToplevelCommand, InlineCommand))
 
         if "local_cwd" in cmd:
@@ -314,6 +349,8 @@ class MicroPythonBackend:
         debug("cmd: " + str(cmd) + ", respin: " + str(response))
         self.send_message(response)
 
+        self._report_time("after " + cmd.name)
+
     def _submit_input(self, cdata: str) -> None:
         # TODO: what if there is a previous unused data waiting
         assert self._connection.outgoing_is_empty()
@@ -366,13 +403,28 @@ class MicroPythonBackend:
     def _transform_output(self, data):
         return data
 
-    def _execute(self, script, timeout, capture):
+    def _execute(self, script, capture_output):
+        if capture_output:
+            output_lists = {"stdout": [], "stderr": []}
+
+            def consume_output(data, stream_name):
+                output_lists[stream_name].append(data)
+
+            self._execute_with_consumer(script, consume_output)
+            return [
+                b"".join(output_lists[name]).decode(ENCODING, errors="replace")
+                for name in ["stdout", "stderr"]
+            ]
+        else:
+            self._execute_with_consumer(script, self._send_output)
+
+    def _execute_with_consumer(self, script, output_consumer):
         """Ensures prompt and submits the script.
-        Reads (and doesn't return) until next active prompt or connection error.
+        Reads (and doesn't return) until next prompt or connection error.
         
         If capture is False, then forwards output incrementally. Otherwise
-        returns (out, err) if there are no problems, ie. all parts of the 
-        output are present and it reaches active prompt.
+        returns output if there are no problems, ie. all expected parts of the 
+        output are present and it reaches a prompt.
         Otherwise raises ProtocolError.
         
         The execution may block. In this case the user should do something (eg. provide
@@ -381,64 +433,43 @@ class MicroPythonBackend:
         """
         raise NotImplementedError()
 
-    def _execute_without_errors(self, script):
-        """Meant for management tasks. stdout will be unexpected but tolerated.
-        stderr will cause exception"""
-        result = self._evaluate("True", prelude=script)
-        assert result is True
+    def _execute_without_output(self, script):
+        """Meant for management tasks."""
+        out, err = self._execute(script, capture_output=True)
+        if out or err:
+            self._handle_bad_output(script, out, err)
 
-    def _evaluate_to_repr(self, expr, prelude="", cleanup="", timeout=SECONDS_IN_YEAR):
-        """Uses REPL to evaluate and print the repr of given expression.
+    def _evaluate(self, script):
+        """Evaluate the output of the script or raise ProtocolError, if anything looks wrong.
         
-        Side effects before printing the repr always get forwarded.
-        Returns the repr only if everything goes according to the plan.
-        Raises ProtocolError if anything looks fishy.
-        """
-        script = ""
-        if prelude:
-            script += prelude + "\n"
-        script += "print(%r, repr(%s), sep='', end=%r)" % (
-            (EOT + VALUE_REPR_START).decode(),
-            expr,
-            VALUE_REPR_END.decode(),
-        )
-        if cleanup:
-            script += "\n" + cleanup
+        Adds printing code if the script contains single expression and doesn't 
+        already contain printing code"""
+        try:
+            ast.parse(script, mode="eval")
+            prefix = "__thonny_helper.print_mgmt_value("
+            suffix = ")"
+            if not script.strip().startswith(prefix):
+                script = prefix + script + suffix
+        except SyntaxError:
+            pass
 
-        stdout, value_repr, err = self._execute(script, timeout=timeout, capture_stdout=False)
+        out, err = self._execute(script, capture_output=True)
+        if err:
+            return self._handle_bad_output(script, out, err)
 
-        assert not stdout
+        if MGMT_VALUE_START.decode(ENCODING) not in out:
+            return self._handle_bad_output(script, out, err)
 
-        if value_repr is None:
-            raise ProtocolError("Could not find value repr", err)
-        elif err:
-            raise ProtocolError(
-                "Evaluated with errors",
-                EOT + VALUE_REPR_START + value_repr + VALUE_REPR_END + EOT + err,
+        side_effects, value_str = out.rsplit(MGMT_VALUE_START.decode(ENCODING), maxsplit=1)
+        if side_effects:
+            logging.getLogger("thonny").warning(
+                "Unexpected output from MP evaluate:\n" + side_effects
             )
-        else:
-            return value_repr
 
-    def _execute_and_capture_output(self, script, timeout=5):
-        """Executes script in raw repl, captures stdout and consumes terminators.
-        Returns stdout if everything goes well. 
-        Raises ProtocolError if anything looks fishy.
-        """
-        stdout, value_repr, err = self._execute(script, timeout=timeout, capture_stdout=True)
-
-        if value_repr is not None:
-            raise ProtocolError(
-                "Unexpected value repr",
-                stdout + EOT + VALUE_REPR_START + value_repr + VALUE_REPR_END + EOT + err,
-            )
-        elif err:
-            raise ProtocolError("Captured output with errors", stdout + EOT + err)
-        else:
-            return stdout
-
-    def _evaluate(self, expr, prelude="", cleanup=""):
-        value_repr = self._evaluate_to_repr(expr, prelude, cleanup)
-        return ast.literal_eval(value_repr)
+        try:
+            return ast.literal_eval(value_str)
+        except SyntaxError:
+            return self._handle_bad_output(script, out, err)
 
     def _forward_output_until_active_prompt(self, stream_name="stdout"):
         """Used for finding initial prompt or forwarding problematic output 
@@ -479,13 +510,13 @@ class MicroPythonBackend:
         """Only for %run $EDITOR_CONTENT. Clean runs will be handled differently."""
         # TODO: clear last object inspector requests dictionary
         assert cmd.get("source")
-        self._execute(cmd.source, timeout=SECONDS_IN_YEAR, capture_stdout=False)        
+        self._execute(cmd.source, capture_output=False)
         return {}
 
     def _cmd_execute_source(self, cmd):
         # TODO: clear last object inspector requests dictionary
         source = self._add_expression_statement_handlers(cmd.source)
-        self._execute(source, timeout=SECONDS_IN_YEAR, capture_stdout=False)
+        self._execute(source, capture_output=False)
         # TODO: assign last value to _
         return {}
 
@@ -499,8 +530,17 @@ class MicroPythonBackend:
             )
         else:
             globs = self._evaluate(
-                "{name : repr(getattr(__mod_for_globs, name)) in dir(__mod_for_globs) if not name.startswith('__')}",
-                prelude="import %s as __mod_for_globs",
+                dedent(
+                    """
+                import %s as __mod_for_globs
+                __thonny_helper.print_mgmt_value(
+                    {name : repr(getattr(__mod_for_globs, name)) 
+                        in dir(__mod_for_globs) 
+                        if not name.startswith('__')}
+                )
+                del __mod_for_globs
+            """
+                )
             )
         return {"module_name": cmd.module_name, "globals": globs}
 
@@ -702,7 +742,7 @@ class MicroPythonBackend:
     def _cmd_dump_api_info(self, cmd):
         "For use during development of the plug-in"
 
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
             def __get_object_atts(obj):
@@ -731,7 +771,7 @@ class MicroPythonBackend:
                 self._dump_module_stubs(module_name, file_name)
 
     def _dump_module_stubs(self, module_name, file_name):
-        self._execute_without_errors("import {0}".format(module_name))
+        self._execute_without_output("import {0}".format(module_name))
 
         os.makedirs(os.path.dirname(file_name), exist_ok=True)
         with io.open(file_name, "w", encoding="utf-8", newline="\n") as fp:
@@ -820,21 +860,21 @@ class MicroPythonBackend:
 
     def _list_remote_files_with_info(self, paths):
         # prepare universal functions
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
             try:
-                import os as __thonny_os
-                from os import stat as __thonny_stat
+                
+                from os import stat as __tthonny_stat
                 
                 def __thonny_getsize(path):
-                    return __thonny_stat(path)[6]
+                    return __thonny_helper.os.stat(path)[6]
                 
                 def __thonny_isdir(path):
-                    return __thonny_stat(path)[0] & 0o170000 == 0o040000
+                    return __thonny_helper.os.stat(path)[0] & 0o170000 == 0o040000
                     
             except ImportError:
-                __thonny_stat = None
+                __thonny_helper.os.stat = None
                 # micro:bit
                 from os import size as __thonny_getsize
                 
@@ -844,7 +884,7 @@ class MicroPythonBackend:
             )
         )
 
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
             def __thonny_rec_list_with_size(path):
@@ -874,11 +914,10 @@ class MicroPythonBackend:
 
         result.sort(key=lambda rec: rec["path"])
 
-        self._execute_without_errors(
+        self._execute_without_output(
             dedent(
                 """
-                del __thonny_os
-                del __thonny_stat
+                
                 del __thonny_getsize
                 del __thonny_isdir
                 del __thonny_rec_list_with_size
@@ -894,27 +933,22 @@ class MicroPythonBackend:
             func = "size"
 
         return self._evaluate(
-            "__thonny_result",
-            prelude=dedent(
+            dedent(
                 """
-                import os as __thonny_os
+                
                 __thonny_result = []
                 for __thonny_path in %r:
                     try:
-                        __thonny_os.%s(__thonny_path)
+                        __thonny_helper.os.%s(__thonny_path)
                         __thonny_result.append(__thonny_path)
                     except OSError:
                         pass
-                """
-            )
-            % (paths, func),
-            cleanup=dedent(
-                """
-                del __thonny_os
+                __thonny_helper.print_mgmt_value(__thonny_result)
                 del __thonny_result
                 del __thonny_path
                 """
-            ),
+            )
+            % (paths, func),
         )
 
     def _join_remote_path_parts(self, left, right):
@@ -925,7 +959,7 @@ class MicroPythonBackend:
         return left.rstrip("/") + "/" + right.strip("/")
 
     def _get_file_size(self, path):
-        return self._evaluate("__thonny_os.stat(%r)[6]" % path, prelude="import os as __thonny_os")
+        return self._evaluate("__thonny_helper.os.stat(%r)[6]" % path)
 
     def _upload_file(self, source, target, notifier):
         raise NotImplementedError()
@@ -935,10 +969,9 @@ class MicroPythonBackend:
 
     def _get_dirs_child_data_generic(self, paths):
         return self._evaluate(
-            "__thonny_result",
-            prelude=dedent(
+            dedent(
                 """
-                import os as __thonny_os
+                
                 # Init all vars, so that they can be deleted
                 # even if the loop makes no iterations
                 __thonny_result = {}
@@ -964,7 +997,7 @@ class MicroPythonBackend:
                                 continue
                             __thonny_full = (__thonny_real_path + '/' + __thonny_name).replace("//", "/")
                             try:
-                                __thonny_st = __thonny_os.stat(__thonny_full)
+                                __thonny_st = __thonny_helper.os.stat(__thonny_full)
                                 if __thonny_st[0] & 0o170000 == 0o040000:
                                     # directory
                                     __thonny_children[__thonny_name] = {"kind" : "dir", "size" : None}
@@ -978,13 +1011,11 @@ class MicroPythonBackend:
                                 # https://github.com/thonny/thonny/issues/923
                                 pass
                             
-                    __thonny_result[__thonny_path] = __thonny_children                            
-            """
-            )
-            % {"paths": paths},
-            cleanup=dedent(
-                """
-                del __thonny_os
+                    __thonny_result[__thonny_path] = __thonny_children
+                
+                
+                __thonny_helper.print_mgmt_value(__thonny_result)
+                                       
                 del __thonny_st
                 del __thonny_children
                 del __thonny_name
@@ -993,7 +1024,8 @@ class MicroPythonBackend:
                 del __thonny_result
                 del __thonny_real_path
             """
-            ),
+            )
+            % {"paths": paths}
         )
 
     def _check_for_connection_errors(self):
@@ -1010,6 +1042,12 @@ class MicroPythonBackend:
     def _show_error(self, msg):
         self._send_output(msg + "\n", "stderr")
 
+    def _handle_bad_output(self, script, out, err):
+        self._show_error("PROBLEM WITH INTERNAL MANAGEMENT COMMAND\n")
+        self._show_error("COMMAND:\n" + script + "\n")
+        self._show_error("STDOUT:\n" + out + "\n")
+        self._show_error("STDERR:\n" + err + "\n")
+
     def _add_expression_statement_handlers(self, source):
         try:
             root = ast.parse(source)
@@ -1023,33 +1061,23 @@ class MicroPythonBackend:
                 if isinstance(node, ast.Expr):
                     expr_stmts.append(node)
 
-            temp_name = "__thonny_value__"
-            marker_prefix = (
-                "[globals().__setitem__({result_name!r}, {temp_name})"
-                " or print({start_marker!r} + {temp_name} + '@' + str(id({temp_name})) + {end_marker!r})"
-                " for {temp_name} in ["
-            ).format(
-                result_name=LAST_RESULT_NAME,
-                temp_name=temp_name,
-                start_marker=OBJECT_LINK_START,
-                end_marker=OBJECT_LINK_END,
-            )
-
-            marker_suffix = "] if {temp_name} is not None]".format(temp_name=temp_name)
+            marker_prefix = "__thonny_helper.print_repl_value("
+            marker_suffix = ")"
 
             lines = source.splitlines(keepends=True)
             for node in reversed(expr_stmts):
-                lines[node.lineno] = (
-                    lines[node.lineno][: node.col_offset]
-                    + marker_prefix
-                    + lines[node.lineno][node.col_offset :]
-                )
-                lines[node.end_lineno] = (
-                    lines[node.end_lineno][: node.end_col_offset]
+                lines[node.end_lineno - 1] = (
+                    lines[node.end_lineno - 1][: node.end_col_offset]
                     + marker_suffix
-                    + lines[node.end_lineno][node.end_col_offset :]
+                    + lines[node.end_lineno - 1][node.end_col_offset :]
                 )
-            
+
+                lines[node.lineno - 1] = (
+                    lines[node.lineno - 1][: node.col_offset]
+                    + marker_prefix
+                    + lines[node.lineno - 1][node.col_offset :]
+                )
+
             new_source = "".join(lines)
             # make sure it parses
             ast.parse(new_source)
@@ -1057,6 +1085,11 @@ class MicroPythonBackend:
         except Exception:
             logging.getLogger("thonny").exception("Problem adding Expr handlers")
             return source
+
+    def _report_time(self, caption):
+        new_time = time.time()
+        print("TIME", caption, new_time - self._prev_time)
+        self._prev_time = new_time
 
 
 class ProtocolError(Exception):
