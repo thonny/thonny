@@ -1,6 +1,6 @@
 from thonny.plugins.micropython import (
-    MicroPythonProxy,
-    MicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
+    BareMetalMicroPythonConfigPage,
     add_micropython_backend,
     list_serial_ports_with_descriptions,
 )
@@ -26,7 +26,7 @@ from thonny.misc_utils import running_on_mac_os, construct_cmd_line
 import time
 
 
-class ESPProxy(MicroPythonProxy):
+class ESPProxy(BareMetalMicroPythonProxy):
     pass
 
 
@@ -66,7 +66,7 @@ class ESP32Proxy(ESPProxy):
         return os.path.join(os.path.dirname(__file__), "esp32_api_stubs")
 
 
-class ESPConfigPage(MicroPythonConfigPage):
+class ESPConfigPage(BareMetalMicroPythonConfigPage):
     def __init__(self, master, chip, firmware_start_address):
         self._chip = chip
         self._firmware_start_address = firmware_start_address
@@ -226,7 +226,7 @@ class ESPFlashingDialog(CommonDialogEx):
 
     def _check_connection(self, port):
         proxy = get_runner().get_backend_proxy()
-        if isinstance(proxy, MicroPythonProxy):
+        if isinstance(proxy, BareMetalMicroPythonProxy):
             # Most likely it is using the same port
             proxy.disconnect()
             time.sleep(1.5)

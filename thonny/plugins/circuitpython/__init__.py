@@ -3,8 +3,8 @@ import tkinter as tk
 from tkinter import ttk
 
 from thonny.plugins.micropython import (
-    MicroPythonProxy,
-    MicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
+    BareMetalMicroPythonConfigPage,
     add_micropython_backend,
 )
 from thonny import get_workbench
@@ -14,7 +14,7 @@ from tkinter.messagebox import showinfo
 from thonny.misc_utils import list_volumes
 
 
-class CircuitPythonProxy(MicroPythonProxy):
+class CircuitPythonProxy(BareMetalMicroPythonProxy):
     @property
     def known_usb_vids_pids(self):
         """Copied from https://github.com/mu-editor/mu/blob/master/mu/modes/adafruit.py"""
@@ -37,7 +37,7 @@ class CircuitPythonProxy(MicroPythonProxy):
         }
 
 
-class CircuitPythonConfigPage(MicroPythonConfigPage):
+class CircuitPythonConfigPage(BareMetalMicroPythonConfigPage):
     def _get_usb_driver_url(self):
         return "https://learn.adafruit.com/welcome-to-circuitpython/installing-circuitpython"
 

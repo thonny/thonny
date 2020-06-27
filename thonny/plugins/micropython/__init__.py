@@ -37,7 +37,7 @@ from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 
 
-class MicroPythonProxy(SubprocessProxy):
+class BareMetalMicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         self._port = get_workbench().get_option(self.backend_name + ".port")
         self._clean_start = clean
@@ -183,7 +183,7 @@ class MicroPythonProxy(SubprocessProxy):
         return []
 
 
-class MicroPythonConfigPage(BackendDetailsConfigPage):
+class BareMetalMicroPythonConfigPage(BackendDetailsConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
 
     def __init__(self, master):
@@ -382,7 +382,7 @@ class MicroPythonConfigPage(BackendDetailsConfigPage):
         return False
 
 
-class GenericMicroPythonProxy(MicroPythonProxy):
+class GenericBareMetalMicroPythonProxy(BareMetalMicroPythonProxy):
     @property
     def known_usb_vids_pids(self):
         """Return set of pairs of USB device (VID, PID)"""
@@ -392,7 +392,7 @@ class GenericMicroPythonProxy(MicroPythonProxy):
         }
 
 
-class GenericMicroPythonConfigPage(MicroPythonConfigPage):
+class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
     @property
     def allow_webrepl(self):
         return False
@@ -445,7 +445,7 @@ def add_micropython_backend(name, proxy_class, description, config_page):
 def load_plugin():
     add_micropython_backend(
         "GenericMicroPython",
-        GenericMicroPythonProxy,
+        GenericBareMetalMicroPythonProxy,
         _("MicroPython (generic)"),
-        GenericMicroPythonConfigPage,
+        GenericBareMetalMicroPythonConfigPage,
     )

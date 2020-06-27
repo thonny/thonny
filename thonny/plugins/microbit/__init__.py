@@ -1,8 +1,8 @@
 import sys
 import os.path
 from thonny.plugins.micropython import (
-    MicroPythonProxy,
-    MicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
+    BareMetalMicroPythonConfigPage,
     add_micropython_backend,
 )
 from thonny import get_workbench, ui_utils
@@ -15,7 +15,7 @@ import threading
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
 
-class MicrobitProxy(MicroPythonProxy):
+class MicrobitProxy(BareMetalMicroPythonProxy):
     def _start_background_process(self, clean=None):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies
@@ -41,7 +41,7 @@ class MicrobitProxy(MicroPythonProxy):
         return {(0x0D28, 0x0204)}  # Adafruit CRICKit M0
 
 
-class MicrobitConfigPage(MicroPythonConfigPage):
+class MicrobitConfigPage(BareMetalMicroPythonConfigPage):
     def _get_usb_driver_url(self):
         return "https://microbit-micropython.readthedocs.io/en/latest/devguide/repl.html"
 
