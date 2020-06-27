@@ -105,6 +105,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
     def __init__(self, connection, clean, api_stubs_path):
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
+        self._raw_prompt_ensured = False
 
         super().__init__(connection, clean, api_stubs_path)
 
@@ -138,13 +139,10 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _fetch_welcome_text(self):
         self._connection.write(NORMAL_MODE_CMD)
+        self._raw_prompt_ensured = False
         welcome_text = self._connection.read_until(NORMAL_PROMPT).strip(b"\r\n >")
         if os.name != "nt":
             welcome_text = welcome_text.replace(b"\r\n", b"\n")
-
-        # Go back to raw prompt
-        self._connection.write(RAW_MODE_CMD)
-        self._connection.read_until(FIRST_RAW_PROMPT)
 
         return welcome_text.decode(ENCODING, errors="replace")
 
@@ -192,6 +190,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             time.sleep(delay)
             discarded_bytes += self._connection.read_all()
             if discarded_bytes.endswith(FIRST_RAW_PROMPT) or discarded_bytes.endswith(b"\r\n>"):
+                self._raw_prompt_ensured = True
                 break
         else:
             max_tail_length = 500
@@ -221,6 +220,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         # Need to go to normal mode. MP doesn't run user code in raw mode
         # (CP does, but it doesn't hurt to do it there as well)
         self._connection.write(NORMAL_MODE_CMD)
+        self._raw_prompt_ensured = False
         self._connection.read_until(NORMAL_PROMPT)
 
         self._connection.write(SOFT_REBOOT_CMD)
@@ -241,16 +241,25 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
         # assuming we are already in a prompt
         self._forward_unexpected_output()
-        with self._writing_lock:
+
+        if not self._raw_prompt_ensured:
+            debug("Ensuring raw prompt")
             self._connection.write(RAW_MODE_CMD)
 
-        prompt = self._connection.read_until(
-            FIRST_RAW_PROMPT_SUFFIX, timeout=WAIT_OR_CRASH_TIMEOUT, timeout_is_soft=True
-        )
-        if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
-            raise TimeoutError("Could not ensure raw prompt")
+            prompt = (
+                self._connection.read_until(
+                    FIRST_RAW_PROMPT_SUFFIX, timeout=WAIT_OR_CRASH_TIMEOUT, timeout_is_soft=True
+                )
+                + self._connection.read_all()
+            )
 
-        self._ensure_helpers()
+            if not prompt.endswith(FIRST_RAW_PROMPT_SUFFIX):
+                self._send_output(prompt, "stdout")
+                raise TimeoutError("Could not ensure raw prompt")
+
+            self._raw_prompt_ensured = True
+            debug("Restoring helpers")
+            self._prepare_helpers()
 
         # send command
         with self._writing_lock:
@@ -266,24 +275,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             )
         else:
             debug("GOTOK")
-
-    def _ensure_helpers(self):
-        # assuming raw prompt
-        # TODO: add error handling and / or timeouts
-        with self._writing_lock:
-            self._connection.write(b"""print("__thonny_helper" in globals())""" + EOT)
-
-        out = self._connection.read_until(EOT + EOT + RAW_PROMPT)
-        value = out[:-3].strip()
-        if value == b"OKTrue":
-            return
-
-        assert value == b"OKFalse"
-
-        with self._writing_lock:
-            self._connection.write(self._get_all_helpers().encode(ENCODING) + EOT)
-
-        out = self._connection.read_until(EOT + EOT + RAW_PROMPT)
 
     def _execute_with_consumer(self, script, output_consumer):
         """Expected output after submitting the command and reading the confirmation is following:
@@ -310,6 +301,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         data = self._connection.read(1) + self._connection.read_all()
         if data == RAW_PROMPT:
             # happy path
+            self._raw_prompt_ensured = True
             return
         else:
             self._connection.unread(data)
@@ -323,6 +315,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 output_consumer, stream_name
             )
             if terminator in (NORMAL_PROMPT, RAW_PROMPT, FIRST_RAW_PROMPT):
+                self._raw_prompt_ensured = terminator in (RAW_PROMPT, FIRST_RAW_PROMPT)
                 return terminator
             else:
                 output_consumer(terminator, "stdout")
@@ -482,24 +475,26 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
         data = self._connection.read_all()
-        at_prompt = False
+        if data:
+            self._raw_prompt_ensured = data.endswith(FIRST_RAW_PROMPT)
 
-        while data.endswith(NORMAL_PROMPT) or data.endswith(FIRST_RAW_PROMPT):
-            # looks like the device was resetted
-            at_prompt = True
+            met_prompt = False
+            while data.endswith(NORMAL_PROMPT) or data.endswith(FIRST_RAW_PROMPT):
+                # looks like the device was resetted
+                met_prompt = True
 
-            if data.endswith(NORMAL_PROMPT):
-                terminator = NORMAL_PROMPT
-            else:
-                terminator = FIRST_RAW_PROMPT
+                if data.endswith(NORMAL_PROMPT):
+                    terminator = NORMAL_PROMPT
+                else:
+                    terminator = FIRST_RAW_PROMPT
 
-            # hide the prompt from the output ...
-            data = data[: -len(terminator)]
+                # hide the prompt from the output ...
+                data = data[: -len(terminator)]
 
-        self._send_output(data.decode(ENCODING, "replace"), stream_name)
-        if at_prompt:
-            # ... and recreate Thonny prompt
-            self.send_message(ToplevelResponse())
+            self._send_output(data.decode(ENCODING, "replace"), stream_name)
+            if met_prompt:
+                # ... and recreate Thonny prompt
+                self.send_message(ToplevelResponse())
 
         self._check_for_connection_errors()
 

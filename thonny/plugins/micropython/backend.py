@@ -130,15 +130,19 @@ class MicroPythonBackend:
 
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
-        self._execute_without_output(self._get_all_helpers())
-        self._cwd = self._fetch_cwd()
+
+        self._prepare_helpers()
         self._welcome_text = self._fetch_welcome_text()
+        self._cwd = self._fetch_cwd()
+        self._send_ready_message()
+
         self._builtin_modules = self._fetch_builtin_modules()
         self._builtins_info = self._fetch_builtins_info()
 
-        self._send_ready_message()
-
         self._report_time("prepared")
+
+    def _prepare_helpers(self):
+        self._execute_without_output(self._get_all_helpers())
 
     def _get_all_helpers(self):
         # Can't import functions into class context:
@@ -509,14 +513,15 @@ class MicroPythonBackend:
     def _cmd_Run(self, cmd):
         """Only for %run $EDITOR_CONTENT. Clean runs will be handled differently."""
         # TODO: clear last object inspector requests dictionary
-        assert cmd.get("source")
-        self._execute(cmd.source, capture_output=False)
+        if cmd.get("source"):
+            self._execute(cmd.source, capture_output=False)
         return {}
 
     def _cmd_execute_source(self, cmd):
         # TODO: clear last object inspector requests dictionary
-        source = self._add_expression_statement_handlers(cmd.source)
-        self._execute(source, capture_output=False)
+        if cmd.source:
+            source = self._add_expression_statement_handlers(cmd.source)
+            self._execute(source, capture_output=False)
         # TODO: assign last value to _
         return {}
 
