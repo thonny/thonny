@@ -23,6 +23,7 @@ from thonny.plugins.micropython.backend import (
     linux_dirname_basename,
     WAIT_OR_CRASH_TIMEOUT,
 )
+import queue
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
@@ -103,11 +104,12 @@ def debug(msg):
 
 class MicroPythonBareMetalBackend(MicroPythonBackend):
     def __init__(self, connection, clean, api_stubs_path):
+        self._connection = connection
         self._startup_time = time.time()
         self._interrupt_suggestion_given = False
         self._raw_prompt_ensured = False
 
-        super().__init__(connection, clean, api_stubs_path)
+        super().__init__(clean, api_stubs_path)
 
     def _get_custom_helpers(self):
         return dedent(
@@ -235,6 +237,37 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             "Press any key to enter the REPL. Use CTRL-D to reload.",
             "Press Ctrl-C to enter the REPL. Use CTRL-D to reload.",
         )
+
+    def _write(self, data):
+        self._connection.write(data)
+
+    def _submit_input(self, cdata: str) -> None:
+        # TODO: what if there is a previous unused data waiting
+        assert self._connection.outgoing_is_empty()
+
+        assert cdata.endswith("\n")
+        if not cdata.endswith("\r\n"):
+            # submission is done with CRLF
+            cdata = cdata[:-1] + "\r\n"
+
+        bdata = cdata.encode(ENCODING)
+
+        with self._writing_lock:
+            self.write(bdata)
+            # Try to consume the echo
+
+            try:
+                echo = self._connection.read(len(bdata))
+            except queue.Empty:
+                # leave it.
+                logging.warning("Timeout when reading input echo")
+                return
+
+        if echo != bdata:
+            # because of autoreload? timing problems? interruption?
+            # Leave it.
+            logging.warning("Unexpected echo. Expected %s, got %s" % (bdata, echo))
+            self._connection.unread(echo)
 
     def _submit_code(self, script):
         assert script  # otherwise EOT produces soft reboot
@@ -495,8 +528,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             if met_prompt:
                 # ... and recreate Thonny prompt
                 self.send_message(ToplevelResponse())
-
-        self._check_for_connection_errors()
 
     def _connected_to_microbit(self):
         return "micro:bit" in self._welcome_text.lower()
@@ -988,9 +1019,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             "{name : __thonny_helper.os.size(name) for name in __thonny_helper.os.listdir()}"
         )
 
-    def _check_for_connection_errors(self):
-        self._connection._check_for_error()
-
     def _should_hexlify(self, path):
         if "binascii" not in self._builtin_modules:
             return False
@@ -1000,6 +1028,9 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 return False
 
         return True
+
+    def _is_connected(self):
+        return self._connection._error is None
 
 
 def _ends_overlap(left, right):

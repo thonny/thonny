@@ -26,7 +26,7 @@ class MicroPythonConnection:
     def soft_read(self, size, timeout=1):
         return self.read(size, timeout, True)
 
-    def read(self, size, timeout=1, timeout_is_soft=False):
+    def read(self, size, timeout=10, timeout_is_soft=False):
         if timeout == 0:
             if timeout_is_soft:
                 return b""
@@ -116,6 +116,9 @@ class MicroPythonConnection:
         raise ConnectionClosedException(self._error)
 
     def unread(self, data):
+        if isinstance(data, str):
+            data = data.encode(self.encoding)
+
         if data:
             self._read_buffer = data + self._read_buffer
 
@@ -124,7 +127,7 @@ class MicroPythonConnection:
 
     def _log_data(self, data):
         print(
-            data.decode("utf-8", errors="replace")
+            data.decode(self.encoding, errors="replace")
             .replace("\r\n", "\n")
             .replace("\x01", "①")
             .replace("\x02", "②")

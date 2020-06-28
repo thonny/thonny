@@ -51,7 +51,6 @@ from thonny.common import (
 import sys
 import logging
 import traceback
-import queue
 from thonny.plugins.micropython.connection import ConnectionClosedException
 from textwrap import dedent, indent
 import ast
@@ -99,10 +98,9 @@ def debug(msg):
 
 
 class MicroPythonBackend:
-    def __init__(self, connection, clean, api_stubs_path):
+    def __init__(self, clean, api_stubs_path):
         self._prev_time = time.time()
 
-        self._connection = connection
         self._local_cwd = None
         self._cwd = None
         self._command_queue = Queue()  # populated by reader thread
@@ -196,8 +194,7 @@ class MicroPythonBackend:
         raise NotImplementedError()
 
     def _mainloop(self):
-        while True:
-            self._check_for_connection_errors()
+        while self._is_connected():
             try:
                 cmd = self._command_queue.get(timeout=0.1)
             except Empty:
@@ -212,6 +209,9 @@ class MicroPythonBackend:
                 self._soft_reboot(False)
             else:
                 self.handle_command(cmd)
+
+    def _is_connected(self):
+        raise NotImplementedError()
 
     def _fetch_welcome_text(self):
         raise NotImplementedError()
@@ -281,11 +281,11 @@ class MicroPythonBackend:
     def _interrupt_in_command_reading_thread(self):
         with self._writing_lock:
             # don't interrupt while command or input is being written
-            self._connection.write(INTERRUPT_CMD)
+            self.write(INTERRUPT_CMD)
             time.sleep(0.1)
-            self._connection.write(INTERRUPT_CMD)
+            self.write(INTERRUPT_CMD)
             time.sleep(0.1)
-            self._connection.write(INTERRUPT_CMD)
+            self.write(INTERRUPT_CMD)
             print("sent interrupt")
 
     def handle_command(self, cmd):
@@ -355,33 +355,11 @@ class MicroPythonBackend:
 
         self._report_time("after " + cmd.name)
 
+    def _write(self, data):
+        raise NotImplementedError()
+
     def _submit_input(self, cdata: str) -> None:
-        # TODO: what if there is a previous unused data waiting
-        assert self._connection.outgoing_is_empty()
-
-        assert cdata.endswith("\n")
-        if not cdata.endswith("\r\n"):
-            # submission is done with CRLF
-            cdata = cdata[:-1] + "\r\n"
-
-        bdata = cdata.encode(ENCODING)
-
-        with self._writing_lock:
-            self._connection.write(bdata)
-            # Try to consume the echo
-
-            try:
-                echo = self._connection.read(len(bdata))
-            except queue.Empty:
-                # leave it.
-                logging.warning("Timeout when reading input echo")
-                return
-
-        if echo != bdata:
-            # because of autoreload? timing problems? interruption?
-            # Leave it.
-            logging.warning("Unexpected echo. Expected %s, got %s" % (bdata, echo))
-            self._connection.unread(echo)
+        raise NotImplementedError()
 
     def send_message(self, msg):
         if "cwd" not in msg:
@@ -394,7 +372,7 @@ class MicroPythonBackend:
         if not data:
             return
 
-        if isinstance(data, bytes):
+        if isinstance(data, (bytes, bytearray)):
             data = data.decode(ENCODING, errors="replace")
 
         data = self._transform_output(data)
@@ -1033,9 +1011,6 @@ class MicroPythonBackend:
             % {"paths": paths}
         )
 
-    def _check_for_connection_errors(self):
-        self._connection._check_for_error()
-
     def _on_connection_closed(self, error=None):
         message = "Connection lost"
         if error:
@@ -1093,7 +1068,7 @@ class MicroPythonBackend:
 
     def _report_time(self, caption):
         new_time = time.time()
-        print("TIME", caption, new_time - self._prev_time)
+        # print("TIME", caption, new_time - self._prev_time)
         self._prev_time = new_time
 
 

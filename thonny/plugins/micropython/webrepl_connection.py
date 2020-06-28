@@ -10,6 +10,7 @@ DEBUG = False
 
 class WebReplConnection(MicroPythonConnection):
     def __init__(self, url, password, min_write_delay):
+        self.num_bytes_received = 0
         super().__init__()
 
         try:
