@@ -419,6 +419,10 @@ class LocalMicroPythonProxy(SubprocessProxy):
         self._send_msg(InterruptCommand())
 
     def send_command(self, cmd: CommandToBackend) -> Optional[str]:
+        if cmd.name == "Run":
+            self._close_backend()
+            self._start_background_process(extra_args=["--run_args", repr(cmd.args)])
+
         if isinstance(cmd, EOFCommand):
             get_shell().restart()  # Runner doesn't notice restart
 
@@ -459,6 +463,18 @@ class LocalMicroPythonProxy(SubprocessProxy):
 
     def get_exe_dirs(self):
         return []
+
+    def fetch_next_message(self):
+        msg = super().fetch_next_message()
+        if msg is not None and msg.event_type == "hide_original_welcome_text":
+            if self._original_welcome_text:
+                return BackendEvent(
+                    event_type="HideTrailingOutput", text=self._original_welcome_text
+                )
+            else:
+                return None
+        else:
+            return msg
 
 
 class LocalMicroPythonConfigPage(BackendDetailsConfigPage):

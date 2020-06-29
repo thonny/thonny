@@ -2,12 +2,12 @@ from thonny.plugins.micropython.connection import MicroPythonConnection
 
 
 class SubprocessConnection(MicroPythonConnection):
-    def __init__(self, executable, args, env):
+    def __init__(self, executable, args):
         import threading
         import ptyprocess
 
         super().__init__()
-        cmd = [executable]
+        cmd = [executable] + args
         self._proc = ptyprocess.PtyProcessUnicode.spawn(cmd, echo=False)
         # print(dir(self._proc))
         # self._poll = select.poll()

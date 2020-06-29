@@ -1,13 +1,15 @@
 import os
 import sys
 import logging
-from thonny.plugins.micropython.backend import MicroPythonBackend, EOT
+from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_overlap, ENCODING
 import textwrap
 from textwrap import dedent
-from thonny.common import UserError, BackendEvent, serialize_message
+from thonny.common import UserError, BackendEvent, serialize_message, ToplevelResponse
 from thonny.plugins.micropython.subprocess_connection import SubprocessConnection
 from thonny.plugins.micropython.connection import ConnectionFailedException
-from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT
+from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
+import ast
+import re
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
@@ -42,8 +44,9 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def __init__(self, connection, clean, api_stubs_path):
+    def __init__(self, connection, clean, api_stubs_path, run_args):
         self._connection = connection
+        self._run_args = run_args
         super().__init__(clean, api_stubs_path)
 
     def _get_custom_helpers(self):
@@ -84,13 +87,24 @@ class MicroPythonOsBackend(MicroPythonBackend):
         )
 
     def _process_until_initial_prompt(self, clean):
-        data = self._connection.read_until(NORMAL_PROMPT)
-        self._send_output(data, "stdout")
+        if run_args:  # ie a script was run
+            self._forward_output_until_active_prompt(self._send_output, "stdout")
+            # don't want the trailing welcome banner (which was recorded by the Proxy in a
+            # previous run of this script)
+            msg = BackendEvent("hide_original_welcome_text")
+            self.send_message(msg)
+            self._welcome_text = ""
+        else:  # plain repl, ie after selecting the back-end or after Stop/Restart
+            output = []
 
-    def _fetch_welcome_text(self):
-        impl_ver = self._evaluate("__thonny_helper.sys.implementation.version")
+            def collect_output(data, stream_name):
+                output.append(data)
 
-        return "MicroPython " + ".".join(map(str, impl_ver)) + "\n"
+            self._forward_output_until_active_prompt(collect_output, "stdout")
+            self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
+            self._welcome_text = self._original_welcome_text.replace(
+                "Use Ctrl-D to exit, Ctrl-E for paste mode\n", ""
+            )
 
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
@@ -118,10 +132,51 @@ class MicroPythonOsBackend(MicroPythonBackend):
         out = self._connection.read_until(NORMAL_PROMPT)[: -len(NORMAL_PROMPT)]
         output_consumer(out, "stdout")
 
-    def _forward_output_until_active_prompt(self, stream_name="stdout"):
-        """Used for finding initial prompt or forwarding problematic output 
-        in case of protocol errors"""
-        raise NotImplementedError()
+    def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
+        INCREMENTAL_OUTPUT_BLOCK_CLOSERS = re.compile(
+            b"|".join(map(re.escape, [LF, NORMAL_PROMPT]))
+        )
+
+        pending = b""
+        while True:
+            # There may be an input submission waiting
+            # and we can't progress without resolving it first
+            self._check_for_side_commands()
+
+            # Prefer whole lines, but allow also incremental output to single line
+            new_data = self._connection.soft_read_until(
+                INCREMENTAL_OUTPUT_BLOCK_CLOSERS, timeout=0.05
+            )
+            if not new_data:
+                continue
+
+            pending += new_data
+
+            if pending.endswith(LF):
+                output_consumer(pending, stream_name)
+                pending = b""
+
+            elif pending.endswith(NORMAL_PROMPT):
+                out = pending[: -len(NORMAL_PROMPT)]
+                output_consumer(out, stream_name)
+                return NORMAL_PROMPT
+
+            elif ends_overlap(pending, NORMAL_PROMPT):
+                # Maybe we have a prefix of the prompt and the rest is still coming?
+                follow_up = self._connection.soft_read(1, timeout=0.1)
+                if not follow_up:
+                    # most likely not a Python prompt, let's forget about it
+                    output_consumer(pending, stream_name)
+                    pending = b""
+                else:
+                    # Let's withhold this for now
+                    pending += follow_up
+
+            else:
+                # No prompt in sight.
+                # Output and keep working.
+                output_consumer(pending, stream_name)
+                pending = b""
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
@@ -131,29 +186,11 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _write(self, data):
         raise NotImplementedError()
 
-    def _cmd_cd(self, cmd):
-        if len(cmd.args) == 1:
-            path = cmd.args[0]
-            self._execute_without_output(
-                dedent(
-                    """
-                import sys as _thonny_sys
-                try:
-                    if _thonny_sys.modules["_thonny_libc"].func("i", "chdir", "s")(%r) != 0:
-                        raise OSError("cd failed")
-                finally:
-                    del _thonny_sys
-            """
-                )
-                % path
-            )
-            self._cwd = self._fetch_cwd()
-            return {}
-        else:
-            raise UserError("%cd takes one parameter")
-
     def _cmd_execute_system_command(self, cmd):
-        raise NotImplementedError()
+        assert cmd.cmd_line.startswith("!")
+        cmd_line = cmd.cmd_line[1:]
+        # "or None" in order to avoid MP repl to print its value
+        self._execute("__thonny_helper.os.system(%r) or None" % cmd_line)
 
     def _cmd_get_fs_info(self, cmd):
         raise NotImplementedError()
@@ -197,11 +234,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", type=str)
     parser.add_argument("--api_stubs_path", type=str)
+    parser.add_argument("--run_args", type=str, default="[]")
     args = parser.parse_args()
 
     try:
-        connection = SubprocessConnection(args.executable, ["-i"], None)
-        vm = MicroPythonOsBackend(connection, clean=None, api_stubs_path=args.api_stubs_path)
+        run_args = ast.literal_eval(args.run_args)
+        connection = SubprocessConnection(args.executable, ["-i"] + run_args)
+        vm = MicroPythonOsBackend(
+            connection, clean=None, api_stubs_path=args.api_stubs_path, run_args=run_args
+        )
     except ConnectionFailedException as e:
         text = "\n" + str(e) + "\n"
         msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)

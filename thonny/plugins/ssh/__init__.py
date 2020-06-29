@@ -55,7 +55,7 @@ class SshProxy(SubprocessProxy):
     def _get_launcher_with_args(self):
         return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
 
-    def _start_background_process(self, clean=None):
+    def _start_background_process(self, clean=None, extra_args=[]):
         # deque, because in one occasion I need to put messages back
         self._response_queue = collections.deque()
 

@@ -1505,6 +1505,13 @@ class BaseShellText(EnhancedTextWithLogging, PythonText):
         if ui_utils.get_tk_version_info() >= (8, 6, 6):
             self.tag_configure("io", lmargincolor=get_syntax_options_for_tag("TEXT")["background"])
 
+    def _hide_trailing_output(self, msg):
+        pos = self.search(msg.text, index="end", backwards=True)
+        if pos:
+            end_pos = self.index("%s + %d chars" % (pos, len(msg.text)))
+            if end_pos == self.index("output_end"):
+                self.direct_delete(pos, end_pos)
+
 
 class ShellText(BaseShellText):
     def __init__(self, master, view, cnf={}, **kw):
@@ -1522,6 +1529,7 @@ class ShellText(BaseShellText):
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
         get_workbench().bind("BackendRestart", self._on_backend_restart, True)
+        get_workbench().bind("HideTrailingOutput", self._hide_trailing_output, True)
 
 
 class SqueezedTextDialog(CommonDialog):

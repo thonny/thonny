@@ -22,6 +22,7 @@ from thonny.plugins.micropython.backend import (
     _report_internal_error,
     linux_dirname_basename,
     WAIT_OR_CRASH_TIMEOUT,
+    ends_overlap,
 )
 import queue
 
@@ -488,7 +489,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
                     return terminator
 
-            elif _ends_overlap(pending, NORMAL_PROMPT) or _ends_overlap(pending, FIRST_RAW_PROMPT):
+            elif ends_overlap(pending, NORMAL_PROMPT) or ends_overlap(pending, FIRST_RAW_PROMPT):
                 # Maybe we have a prefix of the prompt and the rest is still coming?
                 follow_up = self._connection.soft_read(1, timeout=0.1)
                 if not follow_up:
@@ -531,20 +532,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _connected_to_microbit(self):
         return "micro:bit" in self._welcome_text.lower()
-
-    def _cmd_cd(self, cmd):
-        if len(cmd.args) == 1:
-            if not self._supports_directories():
-                raise UserError("This device doesn't have directories")
-
-            path = cmd.args[0]
-            self._execute_without_output(
-                "import os as __thonny_helper.os; __thonny_helper.os.chdir(%r)" % path
-            )
-            self._cwd = self._fetch_cwd()
-            return {}
-        else:
-            raise UserError("%cd takes one parameter")
 
     def _cmd_execute_system_command(self, cmd):
         # Can't use stdin, because a thread is draining it
@@ -1031,15 +1018,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
     def _is_connected(self):
         return self._connection._error is None
-
-
-def _ends_overlap(left, right):
-    """Returns whether the left ends with one of the non-empty prefixes of the right"""
-    for i in range(1, min(len(left), len(right)) + 1):
-        if left.endswith(right[:i]):
-            return True
-
-    return False
 
 
 if __name__ == "__main__":

@@ -105,6 +105,8 @@ class MicroPythonBackend:
         self._cwd = None
         self._command_queue = Queue()  # populated by reader thread
         self._progress_times = {}
+        self._welcome_text = None
+        self._original_welcome_text = None
 
         self._api_stubs_path = api_stubs_path
 
@@ -130,9 +132,14 @@ class MicroPythonBackend:
         self._process_until_initial_prompt(clean)
 
         self._prepare_helpers()
-        self._welcome_text = self._fetch_welcome_text()
         self._cwd = self._fetch_cwd()
-        self._send_ready_message()
+
+        if self._welcome_text is None:
+            self._welcome_text = self._fetch_welcome_text()
+
+        if self._welcome_text:
+            # not required when a script is run in os_backend
+            self._send_ready_message()
 
         self._builtin_modules = self._fetch_builtin_modules()
         self._builtins_info = self._fetch_builtins_info()
@@ -236,7 +243,13 @@ class MicroPythonBackend:
         return self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
-        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
+        self.send_message(
+            ToplevelResponse(
+                welcome_text=self._welcome_text,
+                cwd=self._cwd,
+                original_welcome_text=self._original_welcome_text,
+            )
+        )
 
     def _check_send_inline_progress(self, cmd, value, maximum, description=None):
         assert "id" in cmd
@@ -385,7 +398,7 @@ class MicroPythonBackend:
     def _transform_output(self, data):
         return data
 
-    def _execute(self, script, capture_output):
+    def _execute(self, script, capture_output=False):
         if capture_output:
             output_lists = {"stdout": [], "stderr": []}
 
@@ -453,7 +466,7 @@ class MicroPythonBackend:
         except SyntaxError:
             return self._handle_bad_output(script, out, err)
 
-    def _forward_output_until_active_prompt(self, stream_name="stdout"):
+    def _forward_output_until_active_prompt(self, output_consumer, stream_name="stdout"):
         """Used for finding initial prompt or forwarding problematic output 
         in case of protocol errors"""
         raise NotImplementedError()
@@ -486,7 +499,16 @@ class MicroPythonBackend:
         return bool(self._cwd)
 
     def _cmd_cd(self, cmd):
-        raise NotImplementedError()
+        if len(cmd.args) == 1:
+            if not self._supports_directories():
+                raise UserError("This device doesn't have directories")
+
+            path = cmd.args[0]
+            self._execute_without_output("__thonny_helper.chdir(%r)" % path)
+            self._cwd = self._fetch_cwd()
+            return {}
+        else:
+            raise UserError("%cd takes one parameter")
 
     def _cmd_Run(self, cmd):
         """Only for %run $EDITOR_CONTENT. Clean runs will be handled differently."""
@@ -1133,6 +1155,15 @@ def linux_dirname_basename(path):
 
 def to_remote_path(path):
     return path.replace("\\", "/")
+
+
+def ends_overlap(left, right):
+    """Returns whether the left ends with one of the non-empty prefixes of the right"""
+    for i in range(1, min(len(left), len(right)) + 1):
+        if left.endswith(right[:i]):
+            return True
+
+    return False
 
 
 class ReadOnlyFilesystemError(RuntimeError):
