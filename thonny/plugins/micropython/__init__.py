@@ -480,6 +480,72 @@ class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
         pass
 
 
+class SshMicroPythonProxy(SubprocessProxy):
+    def __init__(self, clean):
+        super().__init__(clean, running.get_interpreter_for_subprocess())
+
+    def _get_launcher_with_args(self):
+        import thonny.plugins.micropython.os_backend
+
+        cmd = [
+            thonny.plugins.micropython.os_backend.__file__,
+            "--executable",
+            "/snap/bin/micropython",
+            "--api_stubs_path",
+            self._get_api_stubs_path(),
+        ]
+        return cmd
+
+    def interrupt(self):
+        # Don't interrupt local process, but direct it to the device
+        self._send_msg(InterruptCommand())
+
+    def send_command(self, cmd: CommandToBackend) -> Optional[str]:
+        if isinstance(cmd, EOFCommand):
+            get_shell().restart()  # Runner doesn't notice restart
+
+        return super().send_command(cmd)
+
+    def _get_api_stubs_path(self):
+        import inspect
+
+        return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
+
+    def _get_initial_cwd(self):
+        return get_workbench().get_local_cwd()
+
+    def supports_remote_files(self):
+        return False
+        # return self._proc is not None
+
+    def uses_local_filesystem(self):
+        return True
+
+    def ready_for_remote_file_operations(self):
+        return False
+
+    def supports_remote_directories(self):
+        return False
+
+    def supports_trash(self):
+        return True
+
+    def is_connected(self):
+        return self._proc is not None
+
+    def _show_error(self, text):
+        get_shell().print_error("\n" + text + "\n")
+
+    def disconnect(self):
+        self.destroy()
+
+    def get_node_label(self):
+        return "node_label_here"
+
+    def get_exe_dirs(self):
+        return []
+
+
 def list_serial_ports():
     # serial.tools.list_ports.comports() can be too slow
     # because os.path.islink can be too slow (https://github.com/pyserial/pyserial/pull/303)

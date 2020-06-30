@@ -5,7 +5,6 @@ from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_ove
 import textwrap
 from textwrap import dedent
 from thonny.common import UserError, BackendEvent, serialize_message, ToplevelResponse
-from thonny.plugins.micropython.subprocess_connection import SubprocessConnection
 from thonny.plugins.micropython.connection import ConnectionFailedException
 from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
 import ast
@@ -44,10 +43,10 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def __init__(self, executable, clean, api_stubs_path):
+    def __init__(self, executable, api_stubs_path):
         self._executable = executable
         try:
-            self._connection = SubprocessConnection(executable)
+            self._connection = self._create_connection()
         except ConnectionFailedException as e:
             text = "\n" + str(e) + "\n"
             msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
@@ -55,7 +54,10 @@ class MicroPythonOsBackend(MicroPythonBackend):
             sys.stdout.flush()
             return
 
-        super().__init__(clean, api_stubs_path)
+        super().__init__(None, api_stubs_path)
+
+    def _create_connection(self, run_args=[]):
+        raise NotImplementedError()
 
     def _get_custom_helpers(self):
         return textwrap.dedent(
@@ -192,7 +194,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _cmd_Run(self, cmd):
         self._connection.close()
         self._report_time("befconn")
-        self._connection = SubprocessConnection(self._executable, ["-i"] + cmd.args)
+        self._connection = self._create_connection(cmd.args)
         self._report_time("afconn")
         self._forward_output_until_active_prompt(self._send_output, "stdout")
         self._report_time("afforv")
@@ -234,6 +236,34 @@ class MicroPythonOsBackend(MicroPythonBackend):
         return not self._connection._error
 
 
+class MicroPythonLocalBackend(MicroPythonOsBackend):
+    def _create_connection(self, run_args=[]):
+        from thonny.plugins.micropython.subprocess_connection import SubprocessConnection
+
+        return SubprocessConnection(self._executable, ["-i"] + run_args)
+
+    def _cmd_cd(self, cmd):
+        result = super()._cmd_cd(cmd)
+        os.chdir(self._cwd)
+        return result
+
+
+class MicroPythonSshBackend(MicroPythonOsBackend):
+    def __init__(self, host, user, password, executable, api_stubs_path):
+        from paramiko.client import SSHClient
+
+        self._client = SSHClient()
+        self._client.load_system_host_keys()
+        self._client.connect(hostname=host, username=user, password=password)
+
+        super().__init__(executable, api_stubs_path)
+
+    def _create_connection(self, run_args=[]):
+        from thonny.plugins.micropython.ssh_connection import SshConnection
+
+        return SshConnection(self._executable, ["-i"] + run_args)
+
+
 if __name__ == "__main__":
     THONNY_USER_DIR = os.environ["THONNY_USER_DIR"]
     logger = logging.getLogger("thonny.micropython.backend")
@@ -249,8 +279,16 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--host", type=str)
+    parser.add_argument("--user", type=str)
+    parser.add_argument("--password", type=str)
     parser.add_argument("--executable", type=str)
     parser.add_argument("--api_stubs_path", type=str)
     args = parser.parse_args()
 
-    vm = MicroPythonOsBackend(args.executable, clean=None, api_stubs_path=args.api_stubs_path)
+    if args.host:
+        vm = MicroPythonSshBackend(
+            args.host, args.user, args.password, args.executable, args.api_stubs_path
+        )
+    else:
+        vm = MicroPythonLocalBackend(args.executable, api_stubs_path=args.api_stubs_path)
