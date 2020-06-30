@@ -9,6 +9,7 @@ from thonny.plugins.micropython.connection import ConnectionFailedException
 from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
 import ast
 import re
+import traceback
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
@@ -48,6 +49,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
         try:
             self._connection = self._create_connection()
         except ConnectionFailedException as e:
+            traceback.print_exc()
             text = "\n" + str(e) + "\n"
             msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
             sys.stdout.write(serialize_message(msg) + "\n")
@@ -261,7 +263,7 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
     def _create_connection(self, run_args=[]):
         from thonny.plugins.micropython.ssh_connection import SshConnection
 
-        return SshConnection(self._executable, ["-i"] + run_args)
+        return SshConnection(self._client, self._executable, ["-i"] + run_args)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import shlex
 
 class SshConnection(MicroPythonConnection):
     def __init__(self, client, executable, args):
+        super().__init__()
         import threading
 
         self._client = client
@@ -17,8 +18,8 @@ class SshConnection(MicroPythonConnection):
         self._reading_thread.start()
 
     def write(self, data, block_size=255, delay=0.01):
-        if isinstance(data, (bytes, bytearray)):
-            data = data.decode(self.encoding)
+        if isinstance(data, str):
+            data = data.encode(self.encoding)
         self._stdin.write(data)
         self._stdin.flush()
         return len(data)
@@ -27,11 +28,10 @@ class SshConnection(MicroPythonConnection):
         "NB! works in background thread"
         try:
             while True:
-                chars = self._stdout.read(1)
-                if len(chars) > 0:
-                    as_bytes = chars.encode(self.encoding)
-                    self.num_bytes_received += len(as_bytes)
-                    self._make_output_available(as_bytes)
+                data = self._stdout.read(1)
+                if len(data) > 0:
+                    self.num_bytes_received += len(data)
+                    self._make_output_available(data)
                 else:
                     self._error = "EOF"
                     break

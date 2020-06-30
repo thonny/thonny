@@ -493,6 +493,12 @@ class SshMicroPythonProxy(SubprocessProxy):
             "/snap/bin/micropython",
             "--api_stubs_path",
             self._get_api_stubs_path(),
+            "--host",
+            "localhost",
+            "--user",
+            "demo",
+            "--password",
+            "demo",
         ]
         return cmd
 
@@ -544,6 +550,22 @@ class SshMicroPythonProxy(SubprocessProxy):
 
     def get_exe_dirs(self):
         return []
+
+
+class SshMicroPythonConfigPage(BackendDetailsConfigPage):
+    backend_name = None  # Will be overwritten on Workbench.add_backend
+
+    def __init__(self, master):
+        super().__init__(master)
+
+    def is_modified(self):
+        return False
+
+    def should_restart(self):
+        return self.is_modified()
+
+    def apply(self):
+        pass
 
 
 def list_serial_ports():
@@ -603,4 +625,8 @@ def load_plugin():
         LocalMicroPythonProxy,
         _("MicroPython (local)"),
         LocalMicroPythonConfigPage,
+    )
+
+    add_micropython_backend(
+        "SshMicroPython", SshMicroPythonProxy, _("MicroPython (SSH)"), SshMicroPythonConfigPage,
     )
