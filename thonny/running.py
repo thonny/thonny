@@ -780,7 +780,6 @@ class SubprocessProxy(BackendProxy):
         self._executable = executable
         self._response_queue = None
         self._welcome_text = ""
-        self._original_welcome_text = ""
 
         self._proc = None
         self._response_queue = None
@@ -994,9 +993,6 @@ class SubprocessProxy(BackendProxy):
 
         if msg.get("welcome_text"):
             self._welcome_text = msg["welcome_text"]
-
-        if msg.get("original_welcome_text"):
-            self._original_welcome_text = msg["original_welcome_text"]
 
         if "in_venv" in msg:
             self._in_venv = msg["in_venv"]

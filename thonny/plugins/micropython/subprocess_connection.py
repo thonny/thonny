@@ -1,8 +1,9 @@
 from thonny.plugins.micropython.connection import MicroPythonConnection
+import signal
 
 
 class SubprocessConnection(MicroPythonConnection):
-    def __init__(self, executable, args):
+    def __init__(self, executable, args=[]):
         import threading
         import ptyprocess
 
@@ -43,8 +44,8 @@ class SubprocessConnection(MicroPythonConnection):
             self._error = str(e)
 
     def close(self):
-        if self._proc is not None and self._proc.poll() is None:
-            self._proc.kill()
-            self._reading_thread.join()
+        if self._proc is not None:
+            self._proc.kill(signal.SIGKILL)
+            # self._reading_thread.join() # 0.2 secs!
             self._proc = None
             self._reading_thread = None

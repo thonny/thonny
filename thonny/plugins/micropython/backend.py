@@ -106,7 +106,6 @@ class MicroPythonBackend:
         self._command_queue = Queue()  # populated by reader thread
         self._progress_times = {}
         self._welcome_text = None
-        self._original_welcome_text = None
 
         self._api_stubs_path = api_stubs_path
 
@@ -243,13 +242,7 @@ class MicroPythonBackend:
         return self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
-        self.send_message(
-            ToplevelResponse(
-                welcome_text=self._welcome_text,
-                cwd=self._cwd,
-                original_welcome_text=self._original_welcome_text,
-            )
-        )
+        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd,))
 
     def _check_send_inline_progress(self, cmd, value, maximum, description=None):
         assert "id" in cmd
@@ -1090,7 +1083,7 @@ class MicroPythonBackend:
 
     def _report_time(self, caption):
         new_time = time.time()
-        # print("TIME", caption, new_time - self._prev_time)
+        # print("TIME %s: %.3f" % (caption, new_time - self._prev_time))
         self._prev_time = new_time
 
 

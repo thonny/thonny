@@ -44,9 +44,17 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def __init__(self, connection, clean, api_stubs_path, run_args):
-        self._connection = connection
-        self._run_args = run_args
+    def __init__(self, executable, clean, api_stubs_path):
+        self._executable = executable
+        try:
+            self._connection = SubprocessConnection(executable)
+        except ConnectionFailedException as e:
+            text = "\n" + str(e) + "\n"
+            msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
+            sys.stdout.write(serialize_message(msg) + "\n")
+            sys.stdout.flush()
+            return
+
         super().__init__(clean, api_stubs_path)
 
     def _get_custom_helpers(self):
@@ -87,24 +95,16 @@ class MicroPythonOsBackend(MicroPythonBackend):
         )
 
     def _process_until_initial_prompt(self, clean):
-        if run_args:  # ie a script was run
-            self._forward_output_until_active_prompt(self._send_output, "stdout")
-            # don't want the trailing welcome banner (which was recorded by the Proxy in a
-            # previous run of this script)
-            msg = BackendEvent("hide_original_welcome_text")
-            self.send_message(msg)
-            self._welcome_text = ""
-        else:  # plain repl, ie after selecting the back-end or after Stop/Restart
-            output = []
+        output = []
 
-            def collect_output(data, stream_name):
-                output.append(data)
+        def collect_output(data, stream_name):
+            output.append(data)
 
-            self._forward_output_until_active_prompt(collect_output, "stdout")
-            self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
-            self._welcome_text = self._original_welcome_text.replace(
-                "Use Ctrl-D to exit, Ctrl-E for paste mode\n", ""
-            )
+        self._forward_output_until_active_prompt(collect_output, "stdout")
+        self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
+        self._welcome_text = self._original_welcome_text.replace(
+            "Use Ctrl-D to exit, Ctrl-E for paste mode\n", ""
+        )
 
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
@@ -180,11 +180,28 @@ class MicroPythonOsBackend(MicroPythonBackend):
 
     def _forward_unexpected_output(self, stream_name="stdout"):
         "Invoked between commands"
-        pass
-        # TODO:
+        data = self._connection.read_all()
+        if data.endswith(NORMAL_PROMPT):
+            self._send_output(data[: -len(NORMAL_PROMPT)], "stdout")
+        elif data:
+            self._send_output(data, "stdout")
 
     def _write(self, data):
-        raise NotImplementedError()
+        self._connection.write(data)
+
+    def _cmd_Run(self, cmd):
+        self._connection.close()
+        self._report_time("befconn")
+        self._connection = SubprocessConnection(self._executable, ["-i"] + cmd.args)
+        self._report_time("afconn")
+        self._forward_output_until_active_prompt(self._send_output, "stdout")
+        self._report_time("afforv")
+        self.send_message(
+            BackendEvent(event_type="HideTrailingOutput", text=self._original_welcome_text)
+        )
+        self._report_time("beffhelp")
+        self._prepare_helpers()
+        self._report_time("affhelp")
 
     def _cmd_execute_system_command(self, cmd):
         assert cmd.cmd_line.startswith("!")
@@ -234,17 +251,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--executable", type=str)
     parser.add_argument("--api_stubs_path", type=str)
-    parser.add_argument("--run_args", type=str, default="[]")
     args = parser.parse_args()
 
-    try:
-        run_args = ast.literal_eval(args.run_args)
-        connection = SubprocessConnection(args.executable, ["-i"] + run_args)
-        vm = MicroPythonOsBackend(
-            connection, clean=None, api_stubs_path=args.api_stubs_path, run_args=run_args
-        )
-    except ConnectionFailedException as e:
-        text = "\n" + str(e) + "\n"
-        msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
-        sys.stdout.write(serialize_message(msg) + "\n")
-        sys.stdout.flush()
+    vm = MicroPythonOsBackend(args.executable, clean=None, api_stubs_path=args.api_stubs_path)
