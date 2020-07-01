@@ -9,10 +9,13 @@ class SshConnection(MicroPythonConnection):
 
         self._client = client
 
-        cmd_line_str = " ".join(map(shlex.quote, [executable] + args))
-        self._stdin, self._stdout, self._stderr = self._client.exec_command(
+        cmd_line_str = "echo $$ ; exec " + " ".join(map(shlex.quote, [executable] + args))
+        self._stdin, self._stdout, _ = self._client.exec_command(
             cmd_line_str, bufsize=0, timeout=None, get_pty=True
         )
+
+        # stderr gets directed to stdout because of pty
+        self._pid = self._stdout.readline().strip()
 
         self._reading_thread = threading.Thread(target=self._listen_output, daemon=True)
         self._reading_thread.start()
@@ -40,7 +43,7 @@ class SshConnection(MicroPythonConnection):
             self._error = str(e)
 
     def close(self):
-        self._client.close()
+        self._client.exec_command("kill -s SIGKILL %s" % self._pid)
         self._reading_thread.join()
         self._client = None
         self._reading_thread = None
