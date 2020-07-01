@@ -119,6 +119,46 @@ class BackendConfigurationPage(ConfigurationPage):
         return None
 
 
+class BaseSshProxyConfigPage(BackendDetailsConfigPage):
+    backend_name = None  # Will be overwritten on Workbench.add_backend
+
+    def __init__(self, master, conf_group):
+        super().__init__(master)
+        self._changed = False
+        self._conf_group = conf_group
+
+        self._host_var = self._add_text_field("Host", self._conf_group + ".host", 1)
+        self._user_var = self._add_text_field("Username", self._conf_group + ".user", 3)
+        self._password_var = self._add_text_field(
+            "Password", self._conf_group + ".password", 5, show="•"
+        )
+        self._executable_var = self._add_text_field(
+            "Interpreter", self._conf_group + ".executable", 30
+        )
+
+    def _add_text_field(self, label_text, variable_name, row, show=None):
+        entry_label = ttk.Label(self, text=label_text)
+        entry_label.grid(row=row, column=0, sticky="w")
+
+        variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
+        entry = ttk.Entry(self, textvariable=variable, show=show)
+        entry.grid(row=row + 1, column=0, sticky="we")
+        return variable
+
+    def _on_change(self):
+        print("detected change")
+        self._changed = True
+
+    def apply(self):
+        get_workbench().set_option(self._conf_group + ".host", self._host_var.get())
+        get_workbench().set_option(self._conf_group + ".user", self._user_var.get())
+        get_workbench().set_option(self._conf_group + ".password", self._password_var.get())
+        get_workbench().set_option(self._conf_group + ".executable", self._executable_var.get())
+
+    def should_restart(self):
+        return self._changed
+
+
 def load_plugin() -> None:
     def select_device():
         get_workbench().show_options("interpreter")

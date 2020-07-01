@@ -30,7 +30,7 @@ from thonny.common import (
 )
 from thonny.config_ui import ConfigurationPage
 from thonny.misc_utils import find_volumes_by_name, TimeHelper
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage
+from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
 from thonny.running import BackendProxy, SubprocessProxy
 from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
 
@@ -487,18 +487,23 @@ class SshMicroPythonProxy(SubprocessProxy):
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend
 
+        host = get_workbench().get_option("SshMicroPython.host")
+        user = get_workbench().get_option("SshMicroPython.user")
+        password = get_workbench().get_option("SshMicroPython.password")
+        executable = get_workbench().get_option("SshMicroPython.executable")
+
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
             "--executable",
-            "/snap/bin/micropython",
+            executable,
             "--api_stubs_path",
             self._get_api_stubs_path(),
             "--host",
-            "localhost",
+            host,
             "--user",
-            "demo",
+            user,
             "--password",
-            "demo",
+            password,
         ]
         return cmd
 
@@ -552,20 +557,11 @@ class SshMicroPythonProxy(SubprocessProxy):
         return []
 
 
-class SshMicroPythonConfigPage(BackendDetailsConfigPage):
+class SshMicroPythonConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
 
     def __init__(self, master):
-        super().__init__(master)
-
-    def is_modified(self):
-        return False
-
-    def should_restart(self):
-        return self.is_modified()
-
-    def apply(self):
-        pass
+        super().__init__(master, "SshMicroPython")
 
 
 def list_serial_ports():
@@ -605,10 +601,11 @@ def list_serial_ports_with_descriptions():
     ]
 
 
-def add_micropython_backend(name, proxy_class, description, config_page):
-    get_workbench().set_default(name + ".port", "auto")
-    get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
-    get_workbench().set_default(name + ".webrepl_password", "")
+def add_micropython_backend(name, proxy_class, description, config_page, bare_metal=True):
+    if bare_metal:
+        get_workbench().set_default(name + ".port", "auto")
+        get_workbench().set_default(name + ".webrepl_url", DEFAULT_WEBREPL_URL)
+        get_workbench().set_default(name + ".webrepl_password", "")
     get_workbench().add_backend(name, proxy_class, description, config_page)
 
 
@@ -625,8 +622,18 @@ def load_plugin():
         LocalMicroPythonProxy,
         _("MicroPython (local)"),
         LocalMicroPythonConfigPage,
+        bare_metal=False,
     )
+    get_workbench().set_default("LocalMicroPython.executable", "micropython")
 
     add_micropython_backend(
-        "SshMicroPython", SshMicroPythonProxy, _("MicroPython (SSH)"), SshMicroPythonConfigPage,
+        "SshMicroPython",
+        SshMicroPythonProxy,
+        _("MicroPython (SSH)"),
+        SshMicroPythonConfigPage,
+        bare_metal=False,
     )
+    get_workbench().set_default("SshMicroPython.executable", "micropython")
+    get_workbench().set_default("SshMicroPython.host", "")
+    get_workbench().set_default("SshMicroPython.user", "")
+    get_workbench().set_default("SshMicroPython.password", "")

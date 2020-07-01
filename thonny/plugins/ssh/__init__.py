@@ -32,7 +32,7 @@ from thonny.common import (
 )
 from thonny.config_ui import ConfigurationPage
 from thonny.misc_utils import find_volumes_by_name, TimeHelper
-from thonny.plugins.backend_config_page import BackendDetailsConfigPage
+from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
 from thonny.running import BackendProxy, SubprocessProxy
 from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
 import collections
@@ -46,11 +46,12 @@ class SshProxy(SubprocessProxy):
         self._host = get_workbench().get_option("ssh.host")
         self._user = get_workbench().get_option("ssh.user")
         self._password = get_workbench().get_option("ssh.password")
+        self._executable = get_workbench().get_option("ssh.executable")
         self._client = None
         self._proc = None
         self._starting = True
 
-        super().__init__(clean, "/usr/bin/python3")
+        super().__init__(clean, self._executable)
 
     def _get_launcher_with_args(self):
         return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
@@ -263,37 +264,11 @@ class SshPopen:
         pass
 
 
-class SshProxyConfigPage(BackendDetailsConfigPage):
+class SshProxyConfigPage(BaseSshProxyConfigPage):
     backend_name = None  # Will be overwritten on Workbench.add_backend
 
     def __init__(self, master):
-        super().__init__(master)
-        self._changed = False
-
-        self._host_var = self._add_text_field("Host", "ssh.host", 1)
-        self._user_var = self._add_text_field("Username", "ssh.user", 3)
-        self._password_var = self._add_text_field("Password", "ssh.password", 5, show="•")
-
-    def _add_text_field(self, label_text, variable_name, row, show=None):
-        entry_label = ttk.Label(self, text=label_text)
-        entry_label.grid(row=row, column=0, sticky="w")
-
-        variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
-        entry = ttk.Entry(self, textvariable=variable, show=show)
-        entry.grid(row=row + 1, column=0, sticky="we")
-        return variable
-
-    def _on_change(self):
-        print("detected change")
-        self._changed = True
-
-    def apply(self):
-        get_workbench().set_option("ssh.host", self._host_var.get())
-        get_workbench().set_option("ssh.user", self._user_var.get())
-        get_workbench().set_option("ssh.password", self._password_var.get())
-
-    def should_restart(self):
-        return self._changed
+        super().__init__(master, "ssh")
 
 
 def load_plugin():

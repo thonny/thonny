@@ -59,6 +59,14 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _create_connection(self, run_args=[]):
         raise NotImplementedError()
 
+    def _tweak_welcome_text(self, original):
+        return (
+            original.replace("Use Ctrl-D to exit, Ctrl-E for paste mode\n", "").strip()
+            + " ("
+            + self._executable
+            + ")\n"
+        )
+
     def _get_custom_helpers(self):
         return textwrap.dedent(
             """
@@ -104,14 +112,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
 
         self._forward_output_until_active_prompt(collect_output, "stdout")
         self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
-        self._welcome_text = (
-            self._original_welcome_text.replace(
-                "Use Ctrl-D to exit, Ctrl-E for paste mode\n", ""
-            ).strip()
-            + " ("
-            + self._executable
-            + ")\n"
-        )
+        self._welcome_text = self._tweak_welcome_text(self._original_welcome_text)
 
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
@@ -257,6 +258,10 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
     def __init__(self, host, user, password, executable, api_stubs_path):
         from paramiko.client import SSHClient
 
+        self._host = host
+        self._user = user
+        self._password = password
+
         self._client = SSHClient()
         self._client.load_system_host_keys()
         self._client.connect(hostname=host, username=user, password=password)
@@ -268,6 +273,16 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         from thonny.plugins.micropython.ssh_connection import SshProcessConnection
 
         return SshProcessConnection(self._client, self._executable, ["-i"] + run_args)
+
+    def _tweak_welcome_text(self, original):
+        return (
+            super()._tweak_welcome_text(original).strip()
+            + "\n"
+            + self._user
+            + "@"
+            + self._host
+            + "\n"
+        )
 
 
 if __name__ == "__main__":
