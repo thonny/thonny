@@ -3,11 +3,9 @@ import sys
 import logging
 from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_overlap, ENCODING
 import textwrap
-from textwrap import dedent
-from thonny.common import UserError, BackendEvent, serialize_message, ToplevelResponse
+from thonny.common import BackendEvent, serialize_message
 from thonny.plugins.micropython.connection import ConnectionFailedException
 from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
-import ast
 import re
 import traceback
 
@@ -106,8 +104,13 @@ class MicroPythonOsBackend(MicroPythonBackend):
 
         self._forward_output_until_active_prompt(collect_output, "stdout")
         self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
-        self._welcome_text = self._original_welcome_text.replace(
-            "Use Ctrl-D to exit, Ctrl-E for paste mode\n", ""
+        self._welcome_text = (
+            self._original_welcome_text.replace(
+                "Use Ctrl-D to exit, Ctrl-E for paste mode\n", ""
+            ).strip()
+            + " ("
+            + self._executable
+            + ")\n"
         )
 
     def _fetch_builtin_modules(self):
@@ -261,9 +264,10 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         super().__init__(executable, api_stubs_path)
 
     def _create_connection(self, run_args=[]):
-        from thonny.plugins.micropython.ssh_connection import SshConnection
+        # NB! It's connection to the micropython process, not to the host
+        from thonny.plugins.micropython.ssh_connection import SshProcessConnection
 
-        return SshConnection(self._client, self._executable, ["-i"] + run_args)
+        return SshProcessConnection(self._client, self._executable, ["-i"] + run_args)
 
 
 if __name__ == "__main__":

@@ -2,7 +2,7 @@ from thonny.plugins.micropython.connection import MicroPythonConnection
 import shlex
 
 
-class SshConnection(MicroPythonConnection):
+class SshProcessConnection(MicroPythonConnection):
     def __init__(self, client, executable, args):
         super().__init__()
         import threading
