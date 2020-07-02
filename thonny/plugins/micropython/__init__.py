@@ -482,28 +482,28 @@ class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
 
 class SshMicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
+        self._host = get_workbench().get_option("SshMicroPython.host")
+        self._user = get_workbench().get_option("SshMicroPython.user")
+        self._password = get_workbench().get_option("SshMicroPython.password")
+        self._mp_executable = get_workbench().get_option("SshMicroPython.executable")
+
         super().__init__(clean, running.get_interpreter_for_subprocess())
 
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend
 
-        host = get_workbench().get_option("SshMicroPython.host")
-        user = get_workbench().get_option("SshMicroPython.user")
-        password = get_workbench().get_option("SshMicroPython.password")
-        executable = get_workbench().get_option("SshMicroPython.executable")
-
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
             "--executable",
-            executable,
+            self._mp_executable,
             "--api_stubs_path",
             self._get_api_stubs_path(),
             "--host",
-            host,
+            self._host,
             "--user",
-            user,
+            self._user,
             "--password",
-            password,
+            self._password,
         ]
         return cmd
 

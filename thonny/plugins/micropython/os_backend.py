@@ -4,10 +4,15 @@ import logging
 from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_overlap, ENCODING
 import textwrap
 from thonny.common import BackendEvent, serialize_message
-from thonny.plugins.micropython.connection import ConnectionFailedException
+from thonny.plugins.micropython.connection import (
+    ConnectionFailedException,
+    ConnectionClosedException,
+)
 from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
 import re
 import traceback
+import shlex
+from _ast import Not
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
@@ -42,12 +47,12 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def __init__(self, executable, api_stubs_path):
-        self._executable = executable
+    def __init__(self, mp_executable, api_stubs_path):
+        self._cwd = None
         try:
+            self._mp_executable = self._resolve_executable(mp_executable)
             self._connection = self._create_connection()
         except ConnectionFailedException as e:
-            traceback.print_exc()
             text = "\n" + str(e) + "\n"
             msg = BackendEvent(event_type="ProgramOutput", stream_name="stderr", data=text)
             sys.stdout.write(serialize_message(msg) + "\n")
@@ -56,6 +61,9 @@ class MicroPythonOsBackend(MicroPythonBackend):
 
         super().__init__(None, api_stubs_path)
 
+    def _resolve_executable(self, executable):
+        raise NotImplementedError()
+
     def _create_connection(self, run_args=[]):
         raise NotImplementedError()
 
@@ -63,7 +71,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
         return (
             original.replace("Use Ctrl-D to exit, Ctrl-E for paste mode\n", "").strip()
             + " ("
-            + self._executable
+            + self._mp_executable
             + ")\n"
         )
 
@@ -110,9 +118,11 @@ class MicroPythonOsBackend(MicroPythonBackend):
         def collect_output(data, stream_name):
             output.append(data)
 
+        self._report_time("befini")
         self._forward_output_until_active_prompt(collect_output, "stdout")
         self._original_welcome_text = b"".join(output).decode(ENCODING).replace("\r\n", "\n")
         self._welcome_text = self._tweak_welcome_text(self._original_welcome_text)
+        self._report_time("afini")
 
     def _fetch_builtin_modules(self):
         return FALLBACK_BUILTIN_MODULES
@@ -246,7 +256,18 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
     def _create_connection(self, run_args=[]):
         from thonny.plugins.micropython.subprocess_connection import SubprocessConnection
 
-        return SubprocessConnection(self._executable, ["-i"] + run_args)
+        return SubprocessConnection(self._mp_executable, ["-i"] + run_args)
+
+    def _resolve_executable(self, executable):
+        cmd_str = " ".join(map(shlex.quote, ["which", executable]))
+        stdin, stdout, stderr = self._client.exec_command(
+            cmd_str, bufsize=0, timeout=3, get_pty=False
+        )
+        result = stdout.readline().strip()
+        if result:
+            return result
+        else:
+            return executable
 
     def _cmd_cd(self, cmd):
         result = super()._cmd_cd(cmd)
@@ -255,24 +276,37 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
 
 class MicroPythonSshBackend(MicroPythonOsBackend):
-    def __init__(self, host, user, password, executable, api_stubs_path):
+    def __init__(self, host, user, password, mp_executable, api_stubs_path):
         from paramiko.client import SSHClient
 
         self._host = host
         self._user = user
         self._password = password
-
         self._client = SSHClient()
         self._client.load_system_host_keys()
         self._client.connect(hostname=host, username=user, password=password)
 
-        super().__init__(executable, api_stubs_path)
+        super().__init__(mp_executable, api_stubs_path)
+
+    def _resolve_executable(self, executable):
+        cmd_str = " ".join(map(shlex.quote, ["which", executable]))
+        stdin, stdout, stderr = self._client.exec_command(
+            cmd_str, bufsize=0, timeout=3, get_pty=False
+        )
+        result = stdout.readline().strip()
+        if result:
+            return result
+        else:
+            msg = "Executable '%s' not found. Please check your configuration!" % executable
+            if not executable.startswith("/"):
+                msg += " You may need to provide absolute path."
+            raise ConnectionFailedException(msg)
 
     def _create_connection(self, run_args=[]):
         # NB! It's connection to the micropython process, not to the host
         from thonny.plugins.micropython.ssh_connection import SshProcessConnection
 
-        return SshProcessConnection(self._client, self._executable, ["-i"] + run_args)
+        return SshProcessConnection(self._client, self._mp_executable, ["-i"] + run_args)
 
     def _tweak_welcome_text(self, original):
         return (

@@ -130,15 +130,21 @@ class MicroPythonBackend:
     def _prepare(self, clean):
         self._process_until_initial_prompt(clean)
 
+        self._report_time("bef preparing helpers")
         self._prepare_helpers()
-        self._cwd = self._fetch_cwd()
+        self._report_time("prepared helpers")
+        if self._cwd is None:
+            self._cwd = self._fetch_cwd()
+            self._report_time("got cwd")
 
         if self._welcome_text is None:
             self._welcome_text = self._fetch_welcome_text()
+            self._report_time("got welcome")
 
         if self._welcome_text:
             # not required when a script is run in os_backend
             self._send_ready_message()
+            self._report_time("sent ready")
 
         self._builtin_modules = self._fetch_builtin_modules()
         self._builtins_info = self._fetch_builtins_info()
@@ -215,6 +221,8 @@ class MicroPythonBackend:
                 self._soft_reboot(False)
             else:
                 self.handle_command(cmd)
+
+            self._forward_unexpected_output("stdout")
 
     def _is_connected(self):
         raise NotImplementedError()
@@ -1027,6 +1035,7 @@ class MicroPythonBackend:
         )
 
     def _on_connection_closed(self, error=None):
+        self._forward_unexpected_output("stderr")
         message = "Connection lost"
         if error:
             message += " (" + str(error) + ")"

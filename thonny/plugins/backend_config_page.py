@@ -146,7 +146,6 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
         return variable
 
     def _on_change(self):
-        print("detected change")
         self._changed = True
 
     def apply(self):
