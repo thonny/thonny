@@ -47,8 +47,7 @@ PASTE_MODE_LINE_PREFIX = b"=== "
 
 
 class MicroPythonOsBackend(MicroPythonBackend):
-    def __init__(self, mp_executable, api_stubs_path):
-        self._cwd = None
+    def __init__(self, mp_executable, api_stubs_path, cwd=None):
         try:
             self._mp_executable = self._resolve_executable(mp_executable)
             self._connection = self._create_connection()
@@ -59,7 +58,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
             sys.stdout.flush()
             return
 
-        super().__init__(None, api_stubs_path)
+        super().__init__(None, api_stubs_path, cwd=cwd)
 
     def _resolve_executable(self, executable):
         raise NotImplementedError()
@@ -276,7 +275,7 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
 
 class MicroPythonSshBackend(MicroPythonOsBackend):
-    def __init__(self, host, user, password, mp_executable, api_stubs_path):
+    def __init__(self, host, user, password, cwd, mp_executable, api_stubs_path):
         from paramiko.client import SSHClient
 
         self._host = host
@@ -286,7 +285,8 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         self._client.load_system_host_keys()
         self._client.connect(hostname=host, username=user, password=password)
 
-        super().__init__(mp_executable, api_stubs_path)
+        self._cwd = cwd
+        super().__init__(mp_executable, api_stubs_path, cwd=cwd)
 
     def _resolve_executable(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
@@ -299,14 +299,14 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         else:
             msg = "Executable '%s' not found. Please check your configuration!" % executable
             if not executable.startswith("/"):
-                msg += " You may need to provide absolute path."
+                msg += " You may need to provide its absolute path."
             raise ConnectionFailedException(msg)
 
     def _create_connection(self, run_args=[]):
         # NB! It's connection to the micropython process, not to the host
         from thonny.plugins.micropython.ssh_connection import SshProcessConnection
 
-        return SshProcessConnection(self._client, self._mp_executable, ["-i"] + run_args)
+        return SshProcessConnection(self._client, self._cwd, self._mp_executable, ["-i"] + run_args)
 
     def _tweak_welcome_text(self, original):
         return (
@@ -338,12 +338,18 @@ if __name__ == "__main__":
     parser.add_argument("--user", type=str)
     parser.add_argument("--password", type=str)
     parser.add_argument("--executable", type=str)
+    parser.add_argument("--cwd", type=str)
     parser.add_argument("--api_stubs_path", type=str)
     args = parser.parse_args()
 
     if args.host:
         vm = MicroPythonSshBackend(
-            args.host, args.user, args.password, args.executable, args.api_stubs_path
+            args.host,
+            args.user,
+            args.password,
+            args.cwd or None,
+            args.executable,
+            args.api_stubs_path,
         )
     else:
         vm = MicroPythonLocalBackend(args.executable, api_stubs_path=args.api_stubs_path)

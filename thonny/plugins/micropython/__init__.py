@@ -401,6 +401,7 @@ class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
 class LocalMicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
         super().__init__(clean, running.get_interpreter_for_subprocess())
+        self._mp_executable = get_workbench().get_option("LocalMicroPython.executable")
 
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend
@@ -408,7 +409,7 @@ class LocalMicroPythonProxy(SubprocessProxy):
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
             "--executable",
-            "/snap/bin/micropython",
+            self._mp_executable,
             "--api_stubs_path",
             self._get_api_stubs_path(),
         ]
@@ -458,7 +459,7 @@ class LocalMicroPythonProxy(SubprocessProxy):
         self.destroy()
 
     def get_node_label(self):
-        return "node_label_here"
+        return "Local"
 
     def get_exe_dirs(self):
         return []
@@ -494,6 +495,8 @@ class SshMicroPythonProxy(SubprocessProxy):
 
         cmd = [
             thonny.plugins.micropython.os_backend.__file__,
+            "--cwd",
+            get_workbench().get_option("SshMicroPython.cwd") or "",
             "--executable",
             self._mp_executable,
             "--api_stubs_path",
@@ -523,20 +526,23 @@ class SshMicroPythonProxy(SubprocessProxy):
         return os.path.join(os.path.dirname(inspect.getfile(self.__class__)), "api_stubs")
 
     def _get_initial_cwd(self):
-        return get_workbench().get_local_cwd()
+        return get_workbench().get_option("SshMicroPython.cwd")
+
+    def _publish_cwd(self, cwd):
+        return get_workbench().set_option("SshMicroPython.cwd", cwd)
 
     def supports_remote_files(self):
-        return False
+        return True
         # return self._proc is not None
 
     def uses_local_filesystem(self):
-        return True
+        return False
 
     def ready_for_remote_file_operations(self):
-        return False
+        return self.is_connected()
 
     def supports_remote_directories(self):
-        return False
+        return True
 
     def supports_trash(self):
         return True
@@ -551,7 +557,7 @@ class SshMicroPythonProxy(SubprocessProxy):
         self.destroy()
 
     def get_node_label(self):
-        return "node_label_here"
+        return self._host
 
     def get_exe_dirs(self):
         return []
@@ -634,6 +640,7 @@ def load_plugin():
         bare_metal=False,
     )
     get_workbench().set_default("SshMicroPython.executable", "micropython")
+    get_workbench().set_default("SshMicroPython.cwd", None)
     get_workbench().set_default("SshMicroPython.host", "")
     get_workbench().set_default("SshMicroPython.user", "")
     get_workbench().set_default("SshMicroPython.password", "")

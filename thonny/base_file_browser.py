@@ -929,7 +929,7 @@ class BaseRemoteFileBrowser(BaseFileBrowser):
         if not get_runner().ready_for_remote_file_operations(show_message=True):
             return False
 
-        super().request_focus_into(path)
+        # super().request_focus_into(path)
 
         if not get_runner().supports_remote_directories():
             assert path == ""

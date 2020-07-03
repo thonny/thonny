@@ -514,10 +514,6 @@ class Runner:
             else:
                 "other messages don't affect the state"
 
-            if "cwd" in msg:
-                if not self.supports_remote_files():
-                    get_workbench().set_local_cwd(msg["cwd"])
-
             # Publish the event
             # NB! This may cause another command to be sent before we get to postponed commands.
             try:
@@ -990,6 +986,7 @@ class SubprocessProxy(BackendProxy):
     def _store_state_info(self, msg):
         if "cwd" in msg:
             self._cwd = msg["cwd"]
+            self._publish_cwd(msg["cwd"])
 
         if msg.get("welcome_text"):
             self._welcome_text = msg["welcome_text"]
@@ -1008,6 +1005,10 @@ class SubprocessProxy(BackendProxy):
 
         if "exe_dirs" in msg:
             self._exe_dirs = msg["exe_dirs"]
+
+    def _publish_cwd(self, cwd):
+        if not self.supports_remote_files():
+            get_workbench().set_local_cwd(cwd)
 
     def get_supported_features(self):
         return {"run"}

@@ -98,11 +98,11 @@ def debug(msg):
 
 
 class MicroPythonBackend:
-    def __init__(self, clean, api_stubs_path):
+    def __init__(self, clean, api_stubs_path, cwd=None):
         self._prev_time = time.time()
 
         self._local_cwd = None
-        self._cwd = None
+        self._cwd = cwd
         self._command_queue = Queue()  # populated by reader thread
         self._progress_times = {}
         self._welcome_text = None
@@ -247,7 +247,10 @@ class MicroPythonBackend:
             return {}
 
     def _fetch_cwd(self):
-        return self._evaluate("__thonny_helper.getcwd()")
+        if "micro:bit" in self._welcome_text.lower():
+            return ""
+        else:
+            return self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd,))
@@ -505,7 +508,7 @@ class MicroPythonBackend:
                 raise UserError("This device doesn't have directories")
 
             path = cmd.args[0]
-            self._execute_without_output("__thonny_helper.chdir(%r)" % path)
+            self._execute("__thonny_helper.chdir(%r)" % path)
             self._cwd = self._fetch_cwd()
             return {}
         else:
@@ -516,6 +519,7 @@ class MicroPythonBackend:
         # TODO: clear last object inspector requests dictionary
         if cmd.get("source"):
             self._execute(cmd.source, capture_output=False)
+            self._cwd = self._fetch_cwd()
         return {}
 
     def _cmd_execute_source(self, cmd):
