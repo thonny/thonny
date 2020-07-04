@@ -9,8 +9,6 @@ class SshProcessConnection(MicroPythonConnection):
 
         self._client = client
 
-        cwd = "nuxer"
-
         cmd_line_str = (
             "echo $$ ;"
             + ((" cd %s  2> /dev/null ;" % shlex.quote(cwd) if cwd else ""))

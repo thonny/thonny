@@ -209,7 +209,16 @@ class MicroPythonOsBackend(MicroPythonBackend):
     def _cmd_Run(self, cmd):
         self._connection.close()
         self._report_time("befconn")
-        self._connection = self._create_connection(cmd.args)
+        args = cmd.args[:]
+        if cmd.source and args[0] == "-c":
+            if len(args) > 1:
+                self._send_error_message(
+                    "Warning: MicroPython doesn't allow program arguments (%s) together with '-c'"
+                    % " ".join(map(shlex.quote, args[1:]))
+                )
+            args = ["-c", cmd.source]
+
+        self._connection = self._create_connection(args)
         self._report_time("afconn")
         self._forward_output_until_active_prompt(self._send_output, "stdout")
         self._report_time("afforv")
@@ -218,6 +227,7 @@ class MicroPythonOsBackend(MicroPythonBackend):
         )
         self._report_time("beffhelp")
         self._prepare_helpers()
+        self._update_cwd()
         self._report_time("affhelp")
 
     def _cmd_execute_system_command(self, cmd):

@@ -133,9 +133,8 @@ class MicroPythonBackend:
         self._report_time("bef preparing helpers")
         self._prepare_helpers()
         self._report_time("prepared helpers")
-        if self._cwd is None:
-            self._cwd = self._fetch_cwd()
-            self._report_time("got cwd")
+        self._update_cwd()
+        self._report_time("got cwd")
 
         if self._welcome_text is None:
             self._welcome_text = self._fetch_welcome_text()
@@ -246,11 +245,9 @@ class MicroPythonBackend:
         else:
             return {}
 
-    def _fetch_cwd(self):
-        if "micro:bit" in self._welcome_text.lower():
-            return ""
-        else:
-            return self._evaluate("__thonny_helper.getcwd()")
+    def _update_cwd(self):
+        if "micro:bit" not in self._welcome_text.lower():
+            self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
         self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd,))
@@ -509,7 +506,7 @@ class MicroPythonBackend:
 
             path = cmd.args[0]
             self._execute("__thonny_helper.chdir(%r)" % path)
-            self._cwd = self._fetch_cwd()
+            self._update_cwd()
             return {}
         else:
             raise UserError("%cd takes one parameter")
@@ -519,7 +516,7 @@ class MicroPythonBackend:
         # TODO: clear last object inspector requests dictionary
         if cmd.get("source"):
             self._execute(cmd.source, capture_output=False)
-            self._cwd = self._fetch_cwd()
+            self._update_cwd()
         return {}
 
     def _cmd_execute_source(self, cmd):
@@ -527,6 +524,7 @@ class MicroPythonBackend:
         if cmd.source:
             source = self._add_expression_statement_handlers(cmd.source)
             self._execute(source, capture_output=False)
+            self._update_cwd()
         # TODO: assign last value to _
         return {}
 
