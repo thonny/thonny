@@ -205,9 +205,9 @@ class ActiveLocalFileBrowser(BaseLocalFileBrowser):
 
         self.menu.add_command(label=_("Upload to %s") % target_dir_desc, command=upload)
 
-    def add_middle_menu_items(self):
+    def add_middle_menu_items(self, context):
         self.check_add_upload_command()
-        super().add_middle_menu_items()
+        super().add_middle_menu_items(context)
 
 
 class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
@@ -250,9 +250,9 @@ class ActiveRemoteFileBrowser(BaseRemoteFileBrowser):
 
         self.menu.add_command(label=_("Download to %s") % target_dir, command=download)
 
-    def add_middle_menu_items(self):
+    def add_middle_menu_items(self, context):
         self.add_download_command()
-        super().add_middle_menu_items()
+        super().add_middle_menu_items(context)
 
 
 def check_upload_download_response(command_name, command_response):

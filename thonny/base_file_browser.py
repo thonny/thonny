@@ -548,25 +548,25 @@ class BaseFileBrowser(ttk.Frame):
 
         self.tree.update()
 
-        self.refresh_menu()
+        self.refresh_menu(context="item")
         self.menu.tk_popup(event.x_root, event.y_root)
 
     def post_button_menu(self):
-        self.refresh_menu()
+        self.refresh_menu(context="button")
         self.menu.tk_popup(
             self.menu_button.winfo_rootx(),
             self.menu_button.winfo_rooty() + self.menu_button.winfo_height(),
         )
 
-    def refresh_menu(self):
+    def refresh_menu(self, context):
         self.menu.delete(0, "end")
-        self.add_first_menu_items()
+        self.add_first_menu_items(context)
         self.menu.add_separator()
-        self.add_middle_menu_items()
+        self.add_middle_menu_items(context)
         self.menu.add_separator()
-        self.add_last_menu_items()
+        self.add_last_menu_items(context)
 
-    def add_first_menu_items(self):
+    def add_first_menu_items(self, context):
         selected_path = self.get_selected_path()
         selected_kind = self.get_selected_kind()
 
@@ -582,7 +582,7 @@ class BaseFileBrowser(ttk.Frame):
     def cmd_refresh_tree(self):
         self.refresh_tree()
 
-    def add_middle_menu_items(self):
+    def add_middle_menu_items(self, context):
         if self.supports_trash():
             if running_on_windows():
                 trash_label = _("Move to Recycle Bin")
@@ -595,9 +595,10 @@ class BaseFileBrowser(ttk.Frame):
         if self.supports_directories():
             self.menu.add_command(label=_("New directory") + "...", command=self.mkdir)
 
-    def add_last_menu_items(self):
+    def add_last_menu_items(self, context):
         self.menu.add_command(label=_("Properties"), command=self.show_properties)
-        self.menu.add_command(label=_("Storage space"), command=self.show_fs_info)
+        if context == "button":
+            self.menu.add_command(label=_("Storage space"), command=self.show_fs_info)
 
     def show_properties(self):
         node_id = self.get_selected_node()
