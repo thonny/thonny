@@ -550,7 +550,7 @@ class SshMicroPythonProxy(SubprocessProxy):
         return True
 
     def supports_trash(self):
-        return True
+        return False
 
     def is_connected(self):
         return self._proc is not None

@@ -154,7 +154,7 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
         get_workbench().set_option(self._conf_group + ".password", self._password_var.get())
         get_workbench().set_option(self._conf_group + ".executable", self._executable_var.get())
 
-        if self._changed():
+        if self._changed:
             # reset cwd setting to default
             get_workbench().set_option(self._conf_group + ".cwd", "")
 

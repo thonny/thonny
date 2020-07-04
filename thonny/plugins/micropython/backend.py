@@ -565,7 +565,32 @@ class MicroPythonBackend:
         raise NotImplementedError()
 
     def _cmd_delete(self, cmd):
-        raise NotImplementedError()
+        assert cmd.paths
+        self._delete_sorted_paths(sorted(cmd.paths, key=lambda x: len(x), reverse=True))
+
+    def _delete_sorted_paths(self, paths):
+        self._execute_without_output(
+            dedent(
+                """
+            def __thonny_delete(path):
+                if __thonny_helper.os.stat(path)[0] & 0o170000 == 0o040000:
+                    for name in __thonny_helper.listdir(path):
+                        child_path = path + "/" + name
+                        __thonny_delete(child_path)
+                    __thonny_helper.os.rmdir(path)
+                else:
+                    __thonny_helper.os.remove(path)
+            
+            for __thonny_path in %r: 
+                __thonny_delete(__thonny_path)
+                
+            del __thonny_path
+            del __thonny_delete
+            
+        """
+            )
+            % paths
+        )
 
     def _cmd_read_file(self, cmd):
         raise NotImplementedError()
@@ -653,7 +678,40 @@ class MicroPythonBackend:
             completed_files_size += item["size"]
 
     def _cmd_mkdir(self, cmd):
-        raise NotImplementedError()
+        assert self._supports_directories()
+        assert cmd.path.startswith("/")
+        self._makedirs(cmd.path)
+
+    def _makedirs(self, path):
+        if path == "/":
+            return
+
+        path = path.rstrip("/")
+
+        script = (
+            dedent(
+                """
+            __thonny_parts = %r.split('/')
+            __thonny_dummy = None
+            for i in range(2, len(__thonny_parts) + 1):
+                __thonny_path = "/".join(__thonny_parts[:i])
+                try:
+                    __thonny_helper.os.stat(__thonny_path) and None
+                except OSError:
+                    # does not exist
+                    __thonny_helper.os.mkdir(__thonny_path)
+            
+            del __thonny_parts
+            try:
+                del __thonny_path
+            except:
+                pass
+        """
+            )
+            % path
+        )
+
+        self._execute_without_output(script)
 
     def _cmd_editor_autocomplete(self, cmd):
         # template for the response

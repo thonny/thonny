@@ -247,18 +247,26 @@ class MicroPythonOsBackend(MicroPythonBackend):
         self._execute("__thonny_helper.os.system(%r) or None" % cmd_line)
 
     def _cmd_get_fs_info(self, cmd):
-        raise NotImplementedError()
+        script = """__thonny_helper.os.system("stat -f -c '%b %f %a %S' {path}") or None""".format(
+            path=cmd.path
+        )
+        out, err = self._execute(script, capture_output=True)
+
+        try:
+            total, free, available, block_size = map(int, out.strip().split())
+            return {
+                "total": total * block_size,
+                "free": available * block_size,
+                "used": (total - free) * block_size,
+            }
+        except Exception:
+            self._handle_bad_output(script, out, err)
+            raise
 
     def _cmd_write_file(self, cmd):
         raise NotImplementedError()
 
-    def _cmd_delete(self, cmd):
-        raise NotImplementedError()
-
     def _cmd_read_file(self, cmd):
-        raise NotImplementedError()
-
-    def _cmd_mkdir(self, cmd):
         raise NotImplementedError()
 
     def _upload_file(self, source, target, notifier):

@@ -576,6 +576,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             del __thonny_sizes
             """
             )
+            % cmd.path
         )
 
         if result["sizes"] is not None:
@@ -609,18 +610,30 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             command_name="write_file", path=cmd["path"], editor_id=cmd.get("editor_id")
         )
 
-    def _cmd_delete(self, cmd):
-        assert cmd.paths
+    def _delete_sorted_paths(self, paths):
+        if not self._supports_directories():
+            # micro:bit
+            self._execute_without_output(
+                dedent(
+                    """
+                import os as __thonny_helper.os
+                for __thonny_path in %r: 
+                    __thonny_helper.os.remove(__thonny_path)
+                    
+                del __thonny_path
+                
+            """
+                )
+                % paths
+            )
+        else:
+            try:
+                super()._delete_sorted_paths(paths)
+            except Exception as e:
+                if "read-only" in str(e).lower():
+                    self._delete_via_mount(paths)
 
-        paths = sorted(cmd.paths, key=lambda x: len(x), reverse=True)
-
-        try:
-            self._delete_via_serial(paths)
-        except Exception as e:
-            if "read-only" in str(e).lower():
-                self._delete_via_mount(paths)
-
-        self._sync_all_filesystems()
+            self._sync_all_filesystems()
 
     def _cmd_get_dirs_child_data(self, cmd):
         if self._connected_to_microbit():
@@ -828,45 +841,17 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             return
 
         try:
-            self._makedirs_via_serial(path)
+            super()._makedirs(path)
         except Exception as e:
             if "read-only" in str(e).lower():
                 self._makedirs_via_mount(path)
+
+        self._sync_all_filesystems()
 
     def _makedirs_via_mount(self, path):
         mounted_path = self._internal_path_to_mounted_path(path)
         assert mounted_path is not None, "Couldn't find mounted path for " + path
         os.makedirs(mounted_path, exist_ok=True)
-
-    def _makedirs_via_serial(self, path):
-        if path == "/":
-            return
-        path = path.rstrip("/")
-
-        script = (
-            dedent(
-                """
-            import os as __thonny_helper.os
-            __thonny_parts = %r.split('/')
-            for i in range(2, len(__thonny_parts) + 1):
-                __thonny_path = "/".join(__thonny_parts[:i])
-                try:
-                    __thonny_helper.os.stat(__thonny_path)
-                except OSError:
-                    # does not exist
-                    __thonny_helper.os.mkdir(__thonny_path)
-            
-            del __thonny_parts
-            try:
-                del __thonny_path
-            except:
-                pass
-        """
-            )
-            % path
-        )
-
-        self._execute_without_output(script)
 
     def _delete_via_mount(self, paths):
         for path in paths:
@@ -875,46 +860,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             import shutil
 
             shutil.rmtree(mounted_path)
-
-    def _delete_via_serial(self, paths):
-        if not self._supports_directories():
-            self._execute_without_output(
-                dedent(
-                    """
-                import os as __thonny_helper.os
-                for __thonny_path in %r: 
-                    __thonny_helper.os.remove(__thonny_path)
-                    
-                del __thonny_path
-                
-            """
-                )
-                % paths
-            )
-        else:
-            self._execute_without_output(
-                dedent(
-                    """
-                import os as __thonny_helper.os
-                def __thonny_delete(path):
-                    if __thonny_helper.os.stat(path)[0] & 0o170000 == 0o040000:
-                        for name in __thonny_helper.os.listdir(path):
-                            child_path = path + "/" + name
-                            __thonny_delete(child_path)
-                        __thonny_helper.os.rmdir(path)
-                    else:
-                        __thonny_helper.os.remove(path)
-                
-                for __thonny_path in %r: 
-                    __thonny_delete(__thonny_path)
-                    
-                del __thonny_path
-                del __thonny_delete
-                
-            """
-                )
-                % paths
-            )
 
     def _upload_file(self, source, target, notifier):
         assert target.startswith("/") or not self._supports_directories()
