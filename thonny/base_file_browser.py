@@ -227,9 +227,17 @@ class BaseFileBrowser(ttk.Frame):
         height = self.tk.call((self.path_bar, "count", "-update", "-displaylines", "1.0", "end"))
         self.path_bar.configure(height=height)
 
+    def _cleaned_selection(self):
+        # In some cases (eg. Python 3.6.9 and Tk 8.6.8 in Ubuntu when selecting a range with shift),
+        # nodes may contain collapsed children.
+        # In most cases this does no harm, because the command would apply to children as well,
+        # but dummy dir marker nodes may cause confusion
+        nodes = self.tree.selection()
+        return [node for node in nodes if self.tree.item(node, "text") != _dummy_node_text]
+
     def get_selected_node(self):
         """Returns single node (or nothing)"""
-        nodes = self.tree.selection()
+        nodes = self._cleaned_selection()
         if len(nodes) == 1:
             return nodes[0]
         elif len(nodes) > 1:
@@ -239,7 +247,7 @@ class BaseFileBrowser(ttk.Frame):
 
     def get_selected_nodes(self, notify_if_empty=False):
         """Can return several nodes"""
-        result = self.tree.selection()
+        result = self._cleaned_selection()
         if not result and notify_if_empty:
             self.notify_missing_selection()
         return result
