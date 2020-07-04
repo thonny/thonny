@@ -577,7 +577,7 @@ class MicroPythonBackend:
                     for name in __thonny_helper.listdir(path):
                         child_path = path + "/" + name
                         __thonny_delete(child_path)
-                    __thonny_helper.os.rmdir(path)
+                    __thonny_helper.rmdir(path)
                 else:
                     __thonny_helper.os.remove(path)
             
@@ -598,6 +598,7 @@ class MicroPythonBackend:
     def _cmd_download(self, cmd):
         total_size = 0
         completed_files_size = 0
+        # TODO: also deal with empty directories
         remote_files = self._list_remote_files_with_info(cmd["source_paths"])
         target_dir = cmd["target_dir"].rstrip("/").rstrip("\\")
 
@@ -631,12 +632,14 @@ class MicroPythonBackend:
         notify(0)
 
         for item in download_items:
+            os.makedirs(os.path.dirname(item["target"]), exist_ok=True)
             written_bytes = self._download_file(item["source"], item["target"], notify)
-            assert written_bytes == item["size"]
+            assert written_bytes is None or written_bytes == item["size"]
             completed_files_size += item["size"]
 
     def _cmd_upload(self, cmd):
         completed_files_size = 0
+        # TODO: also deal with empty directories
         local_files = self._list_local_files_with_info(cmd["source_paths"])
         target_dir = cmd["target_dir"]
         assert target_dir.startswith("/") or not self._supports_directories()
@@ -673,8 +676,14 @@ class MicroPythonBackend:
         notify(0)
 
         for item in upload_items:
+            assert item["target"].startswith("/") or not self._supports_directories()
+            target_dir, _ = linux_dirname_basename(item["target"])
+            assert target_dir.startswith("/") or not self._supports_directories()
+            self._makedirs(target_dir)
+
             written_bytes = self._upload_file(item["source"], item["target"], notify)
-            assert written_bytes == item["size"]
+            assert written_bytes is None or written_bytes == item["size"]
+
             completed_files_size += item["size"]
 
     def _cmd_mkdir(self, cmd):
@@ -930,18 +939,14 @@ class MicroPythonBackend:
         self._execute_without_output(
             dedent(
                 """
-            try:
-                
-                from os import stat as __tthonny_stat
-                
+            if hasattr(__thonny_helper.os, "stat"):
                 def __thonny_getsize(path):
                     return __thonny_helper.os.stat(path)[6]
                 
                 def __thonny_isdir(path):
                     return __thonny_helper.os.stat(path)[0] & 0o170000 == 0o040000
                     
-            except ImportError:
-                __thonny_helper.os.stat = None
+            else:
                 # micro:bit
                 from os import size as __thonny_getsize
                 

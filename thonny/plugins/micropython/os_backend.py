@@ -4,15 +4,11 @@ import logging
 from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_overlap, ENCODING
 import textwrap
 from thonny.common import BackendEvent, serialize_message
-from thonny.plugins.micropython.connection import (
-    ConnectionFailedException,
-    ConnectionClosedException,
-)
+from thonny.plugins.micropython.connection import ConnectionFailedException
 from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
 import re
-import traceback
 import shlex
-from _ast import Not
+
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",
@@ -263,18 +259,6 @@ class MicroPythonOsBackend(MicroPythonBackend):
             self._handle_bad_output(script, out, err)
             raise
 
-    def _cmd_write_file(self, cmd):
-        raise NotImplementedError()
-
-    def _cmd_read_file(self, cmd):
-        raise NotImplementedError()
-
-    def _upload_file(self, source, target, notifier):
-        raise NotImplementedError()
-
-    def _download_file(self, source, target, notifier=None):
-        raise NotImplementedError()
-
     def _is_connected(self):
         return not self._connection._error
 
@@ -303,8 +287,10 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         self._host = host
         self._user = user
         self._password = password
+        self._sftp = None
         self._client = SSHClient()
         self._client.load_system_host_keys()
+        # TODO: does it get closed properly after process gets killed?
         self._client.connect(hostname=host, username=user, password=password)
 
         self._cwd = cwd
@@ -312,9 +298,7 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
 
     def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
-        stdin, stdout, stderr = self._client.exec_command(
-            cmd_str, bufsize=0, timeout=3, get_pty=False
-        )
+        _, stdout, _ = self._client.exec_command(cmd_str, bufsize=0, timeout=3, get_pty=False)
         return stdout.readline().strip() or None
 
     def _create_connection(self, run_args=[]):
@@ -332,6 +316,41 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
             + self._host
             + "\n"
         )
+
+    def _get_sftp(self):
+        if self._sftp is None:
+            import paramiko
+
+            # TODO: does it get closed properly after process gets killed?
+            self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
+
+        return self._sftp
+
+    def _cmd_write_file(self, cmd):
+        raise NotImplementedError()
+
+    def _cmd_read_file(self, cmd):
+        raise NotImplementedError()
+
+    def _upload_file(self, source, target, notifier):
+        if notifier is None:
+            callback = None
+        else:
+
+            def callback(sent, total):
+                notifier(sent)
+
+        self._get_sftp().put(source, target, callback)
+
+    def _download_file(self, source, target, notifier=None):
+        if notifier is None:
+            callback = None
+        else:
+
+            def callback(sent, total):
+                notifier(sent)
+
+        self._get_sftp().get(source, target, callback)
 
 
 if __name__ == "__main__":

@@ -862,12 +862,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             shutil.rmtree(mounted_path)
 
     def _upload_file(self, source, target, notifier):
-        assert target.startswith("/") or not self._supports_directories()
-        target_dir, _ = linux_dirname_basename(target)
-        assert target_dir.startswith("/") or not self._supports_directories()
-
-        self._makedirs(target_dir)
-
         def block_generator():
             with open(source, "rb") as source_fp:
                 while True:
@@ -880,7 +874,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
         return self._write_file(block_generator(), target, notifier=notifier)
 
     def _download_file(self, source, target, notifier=None):
-        os.makedirs(os.path.dirname(target), exist_ok=True)
         bytes_written = 0
         with open(target, "wb") as out_fp:
             for block in self._read_file(source):
