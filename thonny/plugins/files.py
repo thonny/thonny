@@ -50,7 +50,7 @@ class FilesView(tk.PanedWindow):
         if proxy.supports_remote_files():
             # remote pane is needed
             if not self.remote_added:
-                self.add(self.remote_files, before=self.local_files, minsize=minsize)
+                self.add(self.remote_files, minsize=minsize)
                 self.remote_added = True
                 self.restore_split()
             self.remote_files.clear()
