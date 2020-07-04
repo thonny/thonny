@@ -400,8 +400,8 @@ class GenericBareMetalMicroPythonConfigPage(BareMetalMicroPythonConfigPage):
 
 class LocalMicroPythonProxy(SubprocessProxy):
     def __init__(self, clean):
-        super().__init__(clean, running.get_interpreter_for_subprocess())
         self._mp_executable = get_workbench().get_option("LocalMicroPython.executable")
+        super().__init__(clean, running.get_interpreter_for_subprocess())
 
     def _get_launcher_with_args(self):
         import thonny.plugins.micropython.os_backend
@@ -471,14 +471,19 @@ class LocalMicroPythonConfigPage(BackendDetailsConfigPage):
     def __init__(self, master):
         super().__init__(master)
 
-    def is_modified(self):
-        return False
+        self._changed = False
+        self._executable_var = self._add_text_field(
+            "Interpreter", "LocalMicroPython.executable", 30
+        )
 
-    def should_restart(self):
-        return self.is_modified()
+    def _on_change(self):
+        self._changed = True
 
     def apply(self):
-        pass
+        get_workbench().set_option("LocalMicroPython.executable", self._executable_var.get())
+
+    def should_restart(self):
+        return self._changed
 
 
 class SshMicroPythonProxy(SubprocessProxy):

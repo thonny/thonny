@@ -175,6 +175,12 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
         return modules_str.split()
 
+    def _update_cwd(self):
+        if self._connected_to_microbit():
+            self._cwd = ""
+        else:
+            super()._update_cwd()
+
     def _interrupt_to_raw_prompt(self):
         # NB! Sometimes disconnecting and reconnecting (on macOS?)
         # too quickly causes anomalies. See CalliopeMiniProxy for more details
@@ -616,6 +622,20 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
 
         self._sync_all_filesystems()
 
+    def _cmd_get_dirs_child_data(self, cmd):
+        if self._connected_to_microbit():
+            children = {}
+            sizes = self._get_microbit_file_sizes()
+            for name in sizes:
+                children[name] = {"kind": "file", "size": sizes[name], "time": None}
+            return {"node_id": cmd["node_id"], "dir_separator": "", "data": {"": children}}
+        else:
+            return super()._cmd_get_dirs_child_data(cmd)
+
+        data = self._get_dirs_child_data_generic(cmd["paths"])
+        dir_separator = "/"
+        return {"node_id": cmd["node_id"], "dir_separator": dir_separator, "data": data}
+
     def _internal_path_to_mounted_path(self, path):
         mount_path = self._get_fs_mount()
         if mount_path is None:
@@ -760,7 +780,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             else:
                 script = "__W(%r)" % block
             self._execute_without_output(script)
-            print("Wrote", script)
             bytes_sent += len(block)
             if notifier is not None:
                 notifier(bytes_sent)

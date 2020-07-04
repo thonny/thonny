@@ -133,12 +133,13 @@ class MicroPythonBackend:
         self._report_time("bef preparing helpers")
         self._prepare_helpers()
         self._report_time("prepared helpers")
-        self._update_cwd()
-        self._report_time("got cwd")
 
         if self._welcome_text is None:
             self._welcome_text = self._fetch_welcome_text()
             self._report_time("got welcome")
+
+        self._update_cwd()
+        self._report_time("got cwd")
 
         if self._welcome_text:
             # not required when a script is run in os_backend
@@ -295,11 +296,11 @@ class MicroPythonBackend:
     def _interrupt_in_command_reading_thread(self):
         with self._writing_lock:
             # don't interrupt while command or input is being written
-            self.write(INTERRUPT_CMD)
+            self._write(INTERRUPT_CMD)
             time.sleep(0.1)
-            self.write(INTERRUPT_CMD)
+            self._write(INTERRUPT_CMD)
             time.sleep(0.1)
-            self.write(INTERRUPT_CMD)
+            self._write(INTERRUPT_CMD)
             print("sent interrupt")
 
     def handle_command(self, cmd):

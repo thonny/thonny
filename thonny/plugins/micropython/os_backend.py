@@ -61,6 +61,16 @@ class MicroPythonOsBackend(MicroPythonBackend):
         super().__init__(None, api_stubs_path, cwd=cwd)
 
     def _resolve_executable(self, executable):
+        result = self._which(executable)
+        if result:
+            return result
+        else:
+            msg = "Executable '%s' not found. Please check your configuration!" % executable
+            if not executable.startswith("/"):
+                msg += " You may need to provide its absolute path."
+            raise ConnectionFailedException(msg)
+
+    def _which(self, executable):
         raise NotImplementedError()
 
     def _create_connection(self, run_args=[]):
@@ -267,16 +277,10 @@ class MicroPythonLocalBackend(MicroPythonOsBackend):
 
         return SubprocessConnection(self._mp_executable, ["-i"] + run_args)
 
-    def _resolve_executable(self, executable):
-        cmd_str = " ".join(map(shlex.quote, ["which", executable]))
-        stdin, stdout, stderr = self._client.exec_command(
-            cmd_str, bufsize=0, timeout=3, get_pty=False
-        )
-        result = stdout.readline().strip()
-        if result:
-            return result
-        else:
-            return executable
+    def _which(self, executable):
+        import shutil
+
+        return shutil.which(executable)
 
     def _cmd_cd(self, cmd):
         result = super()._cmd_cd(cmd)
@@ -298,19 +302,12 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         self._cwd = cwd
         super().__init__(mp_executable, api_stubs_path, cwd=cwd)
 
-    def _resolve_executable(self, executable):
+    def _which(self, executable):
         cmd_str = " ".join(map(shlex.quote, ["which", executable]))
         stdin, stdout, stderr = self._client.exec_command(
             cmd_str, bufsize=0, timeout=3, get_pty=False
         )
-        result = stdout.readline().strip()
-        if result:
-            return result
-        else:
-            msg = "Executable '%s' not found. Please check your configuration!" % executable
-            if not executable.startswith("/"):
-                msg += " You may need to provide its absolute path."
-            raise ConnectionFailedException(msg)
+        return stdout.readline().strip() or None
 
     def _create_connection(self, run_args=[]):
         # NB! It's connection to the micropython process, not to the host

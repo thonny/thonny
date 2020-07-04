@@ -1007,7 +1007,7 @@ class SubprocessProxy(BackendProxy):
             self._exe_dirs = msg["exe_dirs"]
 
     def _publish_cwd(self, cwd):
-        if not self.supports_remote_files():
+        if self.uses_local_filesystem():
             get_workbench().set_local_cwd(cwd)
 
     def get_supported_features(self):

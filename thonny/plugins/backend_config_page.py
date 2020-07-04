@@ -10,6 +10,15 @@ class BackendDetailsConfigPage(ConfigurationPage):
     def should_restart(self):
         raise NotImplementedError()
 
+    def _add_text_field(self, label_text, variable_name, row, show=None):
+        entry_label = ttk.Label(self, text=label_text)
+        entry_label.grid(row=row, column=0, sticky="w")
+
+        variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
+        entry = ttk.Entry(self, textvariable=variable, show=show)
+        entry.grid(row=row + 1, column=0, sticky="we")
+        return variable
+
 
 class OnlyTextConfigurationPage(BackendDetailsConfigPage):
     def __init__(self, master, text):
@@ -135,15 +144,6 @@ class BaseSshProxyConfigPage(BackendDetailsConfigPage):
         self._executable_var = self._add_text_field(
             "Interpreter", self._conf_group + ".executable", 30
         )
-
-    def _add_text_field(self, label_text, variable_name, row, show=None):
-        entry_label = ttk.Label(self, text=label_text)
-        entry_label.grid(row=row, column=0, sticky="w")
-
-        variable = create_string_var(get_workbench().get_option(variable_name), self._on_change)
-        entry = ttk.Entry(self, textvariable=variable, show=show)
-        entry.grid(row=row + 1, column=0, sticky="we")
-        return variable
 
     def _on_change(self):
         self._changed = True
