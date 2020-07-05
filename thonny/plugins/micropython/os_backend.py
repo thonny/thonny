@@ -1,4 +1,5 @@
 import os
+import io
 import sys
 import logging
 from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_overlap, ENCODING
@@ -327,22 +328,32 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
         return self._sftp
 
     def _cmd_write_file(self, cmd):
-        raise NotImplementedError()
+        with io.BytesIO(cmd["content_bytes"]) as fp:
+            self._get_sftp().putfo(fp, cmd["path"])
+
+        return {"path": cmd["path"], "editor_id": cmd.get("editor_id")}
 
     def _cmd_read_file(self, cmd):
-        raise NotImplementedError()
+        try:
+            with io.BytesIO() as fp:
+                self._get_sftp().getfo(cmd["path"], fp)
+                fp.seek(0)
+                content_bytes = fp.read()
+            error = None
+        except Exception as e:
+            # TODO: _report_internal_error()
+            error = str(e)
+            content_bytes = None
 
-    def _upload_file(self, source, target, notifier):
-        if notifier is None:
-            callback = None
-        else:
+        return {"content_bytes": content_bytes, "path": cmd["path"], "error": error}
 
-            def callback(sent, total):
-                notifier(sent)
-
-        self._get_sftp().put(source, target, callback)
+    def _upload_file(self, source, target, notifier=None):
+        self._move_data_via_sftp(self._get_sftp().put, source, target, notifier)
 
     def _download_file(self, source, target, notifier=None):
+        self._move_data_via_sftp(self._get_sftp().get, source, target, notifier)
+
+    def _move_data_via_sftp(self, op, source, target, notifier):
         if notifier is None:
             callback = None
         else:
@@ -350,7 +361,7 @@ class MicroPythonSshBackend(MicroPythonOsBackend):
             def callback(sent, total):
                 notifier(sent)
 
-        self._get_sftp().get(source, target, callback)
+        op(source, target, callback=callback)
 
 
 if __name__ == "__main__":
