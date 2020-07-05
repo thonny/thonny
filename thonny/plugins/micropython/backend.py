@@ -460,7 +460,7 @@ class MicroPythonBackend:
         side_effects, value_str = out.rsplit(MGMT_VALUE_START.decode(ENCODING), maxsplit=1)
         if side_effects:
             logging.getLogger("thonny").warning(
-                "Unexpected output from MP evaluate:\n" + side_effects
+                "Unexpected output from MP evaluate:\n" + side_effects + "\nSCRIPT:\n" + script
             )
 
         try:
@@ -1009,13 +1009,15 @@ class MicroPythonBackend:
                 """
                 
                 __thonny_result = []
+                __thonny_dummy = None
                 for __thonny_path in %r:
                     try:
-                        __thonny_helper.os.%s(__thonny_path)
+                        __thonny_dummy = __thonny_helper.os.%s(__thonny_path)
                         __thonny_result.append(__thonny_path)
                     except OSError:
                         pass
                 __thonny_helper.print_mgmt_value(__thonny_result)
+                del __thonny_dummy
                 del __thonny_result
                 del __thonny_path
                 """

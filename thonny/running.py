@@ -774,7 +774,6 @@ class SubprocessProxy(BackendProxy):
         super().__init__(clean)
 
         self._executable = executable
-        self._response_queue = None
         self._welcome_text = ""
 
         self._proc = None
