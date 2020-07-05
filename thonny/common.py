@@ -211,7 +211,7 @@ class InlineResponse(MessageFromBackend):
 def serialize_message(msg: Record) -> str:
     # I want to transfer only ASCII chars because encodings are not reliable
     # (eg. can't find a way to specify PYTHONIOENCODING for cx_freeze'd program)
-    return MESSAGE_MARKER + repr(msg).encode("UTF-7").decode("ASCII")
+    return MESSAGE_MARKER + ascii(msg)
 
 
 def parse_message(msg_string: str) -> Record:
@@ -219,7 +219,7 @@ def parse_message(msg_string: str) -> Record:
     # pylint: disable=unused-variable
     nan = float("nan")  # @UnusedVariable
     assert msg_string[0] == MESSAGE_MARKER
-    return eval(msg_string[1:].encode("ASCII").decode("UTF-7"))
+    return eval(msg_string[1:])
 
 
 def normpath_with_actual_case(name: str) -> str:
