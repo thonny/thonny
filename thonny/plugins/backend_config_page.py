@@ -62,6 +62,7 @@ class BackendConfigurationPage(ConfigurationPage):
             exportselection=False,
             textvariable=self._combo_variable,
             values=[spec.description for spec in sorted_backend_specs],
+            height=25,
         )
 
         self._combo.grid(row=1, column=0, columnspan=2, sticky=tk.NSEW, pady=(0, 10))
