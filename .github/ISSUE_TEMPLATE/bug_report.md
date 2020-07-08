@@ -13,4 +13,4 @@ _Before posting please search the issues and Thonnys forum (https://groups.googl
 _What is the problem? Did you get an error message? If yes, then please copy all of it, including the stacktrace. Does the problem happen always? How to reproduce it? Consider posting a screenshot and/or the code you were trying to run or debug._
 
 **Context**
-Your OS (eg. Windows 10 or 64-bit Ubuntu 18.04), _Thonny version, how did you install it (eg. with installer, pip or your distro's package manager), _
+_Your OS (eg. Windows 10 or 64-bit Ubuntu 18.04), Thonny version, how did you install it (eg. with installer, pip or your distro's package manager), _
