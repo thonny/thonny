@@ -29,7 +29,7 @@ from thonny.common import (
     InterruptCommand,
     EOFCommand,
     CommandToBackend,
-)
+ InlineCommand)
 from thonny.config_ui import ConfigurationPage
 from thonny.misc_utils import find_volumes_by_name, TimeHelper
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
@@ -47,18 +47,47 @@ class SshProxy(SubprocessProxy):
         self._user = get_workbench().get_option("ssh.user")
         self._password = get_workbench().get_option("ssh.password")
         self._executable = get_workbench().get_option("ssh.executable")
+        self._thread_commands = collections.deque()
         self._client = None
+        self._sftp = None
         self._proc = None
         self._starting = True
-
+        
+        self._thread_commands.append(InlineCommand("connect"))
         super().__init__(clean, self._executable)
+        Thread(target=self._process_thread_commands, daemon=True).start()
+
+    def send_command(self, cmd: CommandToBackend) -> Optional[str]:
+        if cmd.name in ["write_file", "read_file", "upload", "download"]:
+            self._thread_commands.append(cmd)
+        else:
+            super().send_command(cmd)
+
+    def _handle_local_commands(self):
+        pass
 
     def _get_launcher_with_args(self):
         return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
+    
+    def _process_thread_commands(self):
+        while True:
+            cmd = self._thread_commands.popleft()
+            if cmd.name == "quit":
+                return
+            elif cmd.name == "connect":
+                self._connect()
+            elif cmd.name == "launch":
+                self._execute_backend
+    
+    def _connect(self):
+        pass
+    
+    def _launch_backend(self):
+        pass
 
     def _start_background_process(self, clean=None, extra_args=[]):
-        # deque, because in one occasion I need to put messages back
         self._response_queue = collections.deque()
+        self._thread_commands = collections.deque()
 
         """
         # prepare environment
@@ -104,7 +133,7 @@ class SshProxy(SubprocessProxy):
 
         # Don't remain waiting
         self._starting = True
-        Thread(target=self._connect_in_background, args=(cmd_line_str,), daemon=True).start()
+        self._thread_commands.append(InlineCommand("launch"), cmd_line=cmd_line_str)
 
     def _connect_in_background(self, cmd_line_str):
         try:
@@ -141,6 +170,15 @@ class SshProxy(SubprocessProxy):
 
     def _get_initial_cwd(self):
         return "~/"
+
+    def _get_sftp(self):
+        if self._sftp is None:
+            import paramiko
+
+            # TODO: does it get closed properly after process gets killed?
+            self._sftp = paramiko.SFTPClient.from_transport(self._client.get_transport())
+
+        return self._sftp
 
     def is_terminated(self):
         return not self._starting and not super().process_is_alive()
