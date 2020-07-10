@@ -557,7 +557,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
                 del __thonny_statvfs
                 del __thonny_stat 
             except ImportError:
-                import os as __thonny_helper.os
                 __thonny_sizes = [__thonny_helper.os.size(name) for name in __thonny_helper.listdir()]
                 __thonny_used = None
                 __thonny_total = None
@@ -616,7 +615,6 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             self._execute_without_output(
                 dedent(
                     """
-                import os as __thonny_helper.os
                 for __thonny_path in %r: 
                     __thonny_helper.os.remove(__thonny_path)
                     
