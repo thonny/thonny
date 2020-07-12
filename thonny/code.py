@@ -111,7 +111,7 @@ class Editor(ttk.Frame):
 
                 if messagebox.askyesno(
                     "File is gone",
-                    "Looks like '%s' was deleted or moved outside if the editor.\n\n"
+                    "Looks like '%s' was deleted or moved outside of the editor.\n\n"
                     % self._filename
                     + "Do you want to also close the editor?",
                 ):
