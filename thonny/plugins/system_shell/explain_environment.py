@@ -1,6 +1,7 @@
 import platform
 import sys
 import os.path
+import warnings
 
 
 def _clear_screen():
@@ -66,9 +67,28 @@ def list_commands(prefix, highlighted_reals, highlighted_dirs):
                 or os.path.dirname(real) in highlighted_dirs
                 or os.path.dirname(target) in highlight_dirs
             ):
-                print("\033[1m" + line + "\033[0m")
+                print(wrap_in_ansi_code(line, "1"))
             else:
-                print("\033[2m" + line + "\033[0m")
+                print(wrap_in_ansi_code(line, "2"))
+
+
+def wrap_in_ansi_code(text, code):
+    if can_use_ansi_codes():
+        return "\033[" + code + "m" + text + "\033[0m"
+    else:
+        return text
+
+
+def can_use_ansi_codes():
+    if platform.system() == "Windows":
+        ver = platform.win32_ver()
+        try:
+            return int(ver[0]) >= 10
+        except:
+            warnings.warn("Can't determine Windows version %s" % (ver,))
+            return False
+    else:
+        return True
 
 
 def normpath_with_actual_case(name):
