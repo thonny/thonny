@@ -29,7 +29,8 @@ from thonny.common import (
     InterruptCommand,
     EOFCommand,
     CommandToBackend,
- InlineCommand)
+    InlineCommand,
+)
 from thonny.config_ui import ConfigurationPage
 from thonny.misc_utils import find_volumes_by_name, TimeHelper
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
@@ -52,7 +53,7 @@ class SshProxy(SubprocessProxy):
         self._sftp = None
         self._proc = None
         self._starting = True
-        
+
         self._thread_commands.append(InlineCommand("connect"))
         super().__init__(clean, self._executable)
         Thread(target=self._process_thread_commands, daemon=True).start()
@@ -68,7 +69,7 @@ class SshProxy(SubprocessProxy):
 
     def _get_launcher_with_args(self):
         return [self._get_remote_program_directory() + "/thonny/backend_launcher.py"]
-    
+
     def _process_thread_commands(self):
         while True:
             cmd = self._thread_commands.popleft()
@@ -78,10 +79,10 @@ class SshProxy(SubprocessProxy):
                 self._connect()
             elif cmd.name == "launch":
                 self._execute_backend
-    
+
     def _connect(self):
         pass
-    
+
     def _launch_backend(self):
         pass
 
