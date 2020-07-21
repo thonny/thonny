@@ -130,10 +130,10 @@ def find_volume_by_name(
         else:
             msg = found_several_msg % volume_name
 
-        from tkinter.messagebox import askyesno
-        from thonny.ui_utils import askdirectory
-
         import tkinter as tk
+        from tkinter.messagebox import askyesno
+
+        from thonny.ui_utils import askdirectory
 
         if askyesno(_("Can't find suitable disk"), msg):
             path = askdirectory(master=tk._default_root)

@@ -13,18 +13,18 @@ from tkinter.messagebox import showerror
 
 import thonny
 from thonny import get_runner, get_workbench, running, tktextext, ui_utils
-from thonny.common import InlineCommand, normpath_with_actual_case, is_same_path, path_startswith
+from thonny.common import InlineCommand, is_same_path, normpath_with_actual_case, path_startswith
+from thonny.running import get_interpreter_for_subprocess
 from thonny.ui_utils import (
     AutoScrollbar,
+    CommonDialog,
     SubprocessDialog,
     askopenfilename,
     get_busy_cursor,
     lookup_style_option,
     open_path_in_system_file_manager,
     scrollbar_style,
-    CommonDialog,
 )
-from thonny.running import get_interpreter_for_subprocess
 
 PIP_INSTALLER_URL = "https://bootstrap.pypa.io/get-pip.py"
 

@@ -1,13 +1,13 @@
-import re
+import logging
 import os.path
+import re
 import subprocess
 import sys
 from typing import Iterable
 
-from thonny import get_runner, ui_utils, get_workbench
+from thonny import get_runner, get_workbench, ui_utils
 from thonny.assistance import SubprocessProgramAnalyzer, add_program_analyzer
 from thonny.running import get_interpreter_for_subprocess
-import logging
 
 
 class MyPyAnalyzer(SubprocessProgramAnalyzer):

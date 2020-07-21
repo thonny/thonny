@@ -12,17 +12,18 @@ shell becomes kind of title for the execution.
 import collections
 import logging
 import os.path
+import re
 import shlex
 import signal
 import subprocess
 import sys
 import time
+import tkinter as tk
+import warnings
 from logging import debug
 from threading import Thread
 from time import sleep
-
-import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
 
 from thonny import THONNY_USER_DIR, common, get_runner, get_shell, get_workbench, ui_utils
 from thonny.code import get_current_breakpoints, get_saved_current_script_filename, is_remote_path
@@ -31,27 +32,24 @@ from thonny.common import (
     CommandToBackend,
     DebuggerCommand,
     DebuggerResponse,
+    EOFCommand,
     InlineCommand,
     InputSubmission,
     ToplevelCommand,
     ToplevelResponse,
     UserError,
-    normpath_with_actual_case,
     is_same_path,
+    normpath_with_actual_case,
     parse_message,
     path_startswith,
     serialize_message,
     update_system_path,
-    EOFCommand,
 )
 from thonny.misc_utils import construct_cmd_line, running_on_mac_os, running_on_windows
+from thonny.terminal import run_in_terminal
+from thonny.ui_utils import CommonDialogEx, select_sequence, show_dialog
 
 from typing import Any, List, Optional, Sequence, Set  # @UnusedImport; @UnusedImport
-from thonny.terminal import run_in_terminal
-from thonny.ui_utils import select_sequence, show_dialog, CommonDialogEx
-from tkinter import messagebox
-import warnings
-import re
 
 
 WINDOWS_EXE = "python.exe"

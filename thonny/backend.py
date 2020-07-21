@@ -2,6 +2,7 @@
 
 import ast
 import builtins
+import dis
 import functools
 import importlib
 import inspect
@@ -10,6 +11,7 @@ import logging
 import os.path
 import pkgutil
 import pydoc
+import queue
 import re
 import signal
 import site
@@ -21,13 +23,18 @@ import warnings
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 
-import __main__  # @UnresolvedImport
 import _ast
+
+import __main__  # @UnresolvedImport
 import thonny
+from thonny.common import path_startswith  # TODO: try to get rid of this
 from thonny.common import (
+    OBJECT_LINK_END,
+    OBJECT_LINK_START,
     BackendEvent,
     DebuggerCommand,
     DebuggerResponse,
+    EOFCommand,
     FrameInfo,
     InlineCommand,
     InlineResponse,
@@ -37,20 +44,14 @@ from thonny.common import (
     ToplevelResponse,
     UserError,
     ValueInfo,
+    execute_system_command,
+    get_exe_dirs,
+    is_same_path,
     parse_message,
-    path_startswith,  # TODO: try to get rid of this
     range_contains_smaller,
     range_contains_smaller_or_equal,
     serialize_message,
-    get_exe_dirs,
-    is_same_path,
-    EOFCommand,
-    execute_system_command,
-    OBJECT_LINK_START,
-    OBJECT_LINK_END,
 )
-import queue
-import dis
 
 BEFORE_STATEMENT_MARKER = "_thonny_hidden_before_stmt"
 BEFORE_EXPRESSION_MARKER = "_thonny_hidden_before_expr"

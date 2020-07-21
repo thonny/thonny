@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import ast
+import sys
 import tkinter as tk
 import traceback
 
 from thonny import ast_utils, get_workbench, ui_utils
 from thonny.common import TextRange, range_contains_smaller
-import sys
 
 
 class AstView(ui_utils.TreeFrame):

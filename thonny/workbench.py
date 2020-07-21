@@ -2,6 +2,7 @@
 
 import ast
 import collections
+import gettext
 import importlib
 import logging
 import os.path
@@ -14,45 +15,35 @@ import sys
 import tkinter as tk
 import tkinter.font as tk_font
 import traceback
-import gettext
 from threading import Thread
-from tkinter import ttk, messagebox
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,  # pylint: disable=unused-import
-    Sequence,
-    Set,  # pylint: disable=unused-import
-    Tuple,  # pylint: disable=unused-import
-    Type,
-    Union,
-    cast,
-)  # pylint: disable=unused-import
+from tkinter import messagebox, ttk
+from typing import Optional  # pylint: disable=unused-import; pylint: disable=unused-import
+from typing import Set  # pylint: disable=unused-import
+from typing import Tuple  # pylint: disable=unused-import
+from typing import Any, Callable, Dict, List, Sequence, Type, Union, cast
 from warnings import warn
 
 import thonny
 from thonny import (
     THONNY_USER_DIR,
-    get_runner,
-    running,
-    ui_utils,
     assistance,
-    languages,
+    get_runner,
     get_shell,
     is_portable,
+    languages,
+    running,
+    ui_utils,
 )
 from thonny.code import EditorNotebook
 from thonny.common import Record, UserError, normpath_with_actual_case
 from thonny.config import try_load_configuration
 from thonny.config_ui import ConfigurationDialog
 from thonny.misc_utils import (
+    copy_to_clipboard,
     running_on_linux,
     running_on_mac_os,
-    running_on_windows,
     running_on_rpi,
-    copy_to_clipboard,
+    running_on_windows,
 )
 from thonny.running import BackendProxy, Runner
 from thonny.shell import ShellView

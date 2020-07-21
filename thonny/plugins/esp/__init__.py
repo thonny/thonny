@@ -1,29 +1,29 @@
+import os
+import subprocess
+import time
+import tkinter
+import tkinter as tk
+from collections import OrderedDict
+from time import sleep
+from tkinter import LabelFrame, filedialog, messagebox, ttk
+
+from thonny import get_runner, get_workbench, ui_utils
+from thonny.misc_utils import construct_cmd_line, running_on_mac_os
 from thonny.plugins.micropython import (
-    BareMetalMicroPythonProxy,
     BareMetalMicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
     add_micropython_backend,
     list_serial_ports_with_descriptions,
 )
-from thonny import get_workbench, get_runner, ui_utils
-import os
-import subprocess
+from thonny.plugins.micropython.serial_connection import SerialConnection
+from thonny.running import get_frontend_python, get_interpreter_for_subprocess
 from thonny.ui_utils import (
-    SubprocessDialog,
     CommonDialog,
     CommonDialogEx,
+    SubprocessDialog,
     ems_to_pixels,
     show_dialog,
 )
-from thonny.running import get_frontend_python, get_interpreter_for_subprocess
-from time import sleep
-
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox, LabelFrame
-from collections import OrderedDict
-import tkinter
-from thonny.plugins.micropython.serial_connection import SerialConnection
-from thonny.misc_utils import running_on_mac_os, construct_cmd_line
-import time
 
 
 class ESPProxy(BareMetalMicroPythonProxy):

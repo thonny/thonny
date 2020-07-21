@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import ast
-import sys
 import configparser
 import datetime
 import os.path
+import sys
 import tkinter as tk
+import traceback
 from configparser import ConfigParser
 from logging import exception
+
 from thonny import THONNY_USER_DIR
-import traceback
 
 _manager_cache = {}
 

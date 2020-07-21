@@ -1,9 +1,9 @@
 import tkinter as tk
+import traceback
 from tkinter import ttk
 
 from thonny import get_workbench, ui_utils
-import traceback
-from thonny.ui_utils import ems_to_pixels, CommonDialog
+from thonny.ui_utils import CommonDialog, ems_to_pixels
 
 
 class ConfigurationDialog(CommonDialog):

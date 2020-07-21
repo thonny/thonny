@@ -6,8 +6,8 @@ from tkinter import ttk
 from thonny import get_workbench, tktextext, ui_utils
 from thonny.codeview import CodeView
 from thonny.config_ui import ConfigurationPage
-from thonny.ui_utils import create_string_var, scrollbar_style
 from thonny.shell import BaseShellText
+from thonny.ui_utils import create_string_var, scrollbar_style
 
 
 class ThemeAndFontConfigurationPage(ConfigurationPage):

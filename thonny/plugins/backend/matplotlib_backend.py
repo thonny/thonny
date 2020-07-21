@@ -1,6 +1,7 @@
-from thonny.backend import get_vm
 import os.path
 import platform
+
+from thonny.backend import get_vm
 
 local_conf_file = "matplotlibrc"
 user_conf_file1 = os.path.expanduser("~/.config/matplotlib/matplotlibrc")

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import logging
 import os.path
 import sys
 import tkinter as tk
@@ -6,21 +7,21 @@ import traceback
 from logging import exception
 from tkinter import messagebox, ttk
 
-from thonny import get_workbench, ui_utils, get_runner
+from _tkinter import TclError
+
+from thonny import get_runner, get_workbench, ui_utils
+from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations
 from thonny.codeview import CodeView
 from thonny.common import (
+    InlineCommand,
     TextRange,
     ToplevelResponse,
-    normpath_with_actual_case,
     is_same_path,
-    InlineCommand,
+    normpath_with_actual_case,
 )
+from thonny.misc_utils import running_on_mac_os, running_on_windows
 from thonny.tktextext import rebind_control_a
 from thonny.ui_utils import askopenfilename, asksaveasfilename, select_sequence
-from thonny.misc_utils import running_on_windows, running_on_mac_os
-from _tkinter import TclError
-from thonny.base_file_browser import choose_node_for_file_operations, ask_backend_path
-import logging
 
 _dialog_filetypes = [("Python files", ".py .pyw"), ("text files", ".txt"), ("all files", ".*")]
 

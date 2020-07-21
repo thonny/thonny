@@ -1,7 +1,8 @@
 import os.path
 import tkinter as tk
 from tkinter import ttk
-from thonny import ui_utils, languages, is_portable
+
+from thonny import is_portable, languages, ui_utils
 
 STD_MODE_TEXT = "Standard"
 RPI_MODE_TEXT = "Raspberry Pi"

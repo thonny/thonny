@@ -1,19 +1,19 @@
-import tkinter as tk
-from tkinter import ttk, messagebox, simpledialog
+import datetime
 import os.path
-
-from thonny import get_workbench, misc_utils, tktextext, get_runner
-from thonny.ui_utils import (
-    scrollbar_style,
-    lookup_style_option,
-    show_dialog,
-    create_string_var,
-    CommonDialog,
-)
+import tkinter as tk
+from tkinter import messagebox, simpledialog, ttk
 from tkinter.simpledialog import askstring
+
+from thonny import get_runner, get_workbench, misc_utils, tktextext
 from thonny.common import InlineCommand, get_dirs_child_data
 from thonny.misc_utils import running_on_windows, sizeof_fmt
-import datetime
+from thonny.ui_utils import (
+    CommonDialog,
+    create_string_var,
+    lookup_style_option,
+    scrollbar_style,
+    show_dialog,
+)
 
 _dummy_node_text = "..."
 

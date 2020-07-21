@@ -2,8 +2,7 @@ import logging
 import tkinter as tk
 import traceback
 
-from thonny import get_workbench
-from thonny import jedi_utils
+from thonny import get_workbench, jedi_utils
 
 tree = None
 

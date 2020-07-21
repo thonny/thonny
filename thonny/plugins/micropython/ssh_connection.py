@@ -1,5 +1,6 @@
-from thonny.plugins.micropython.connection import MicroPythonConnection
 import shlex
+
+from thonny.plugins.micropython.connection import MicroPythonConnection
 
 
 class SshProcessConnection(MicroPythonConnection):

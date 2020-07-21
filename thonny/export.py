@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+
 from thonny.ui_utils import CommonDialog
 
 page_specs = []

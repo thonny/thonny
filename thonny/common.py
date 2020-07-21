@@ -3,16 +3,16 @@
 """
 Classes used both by front-end and back-end
 """
+import logging
 import os.path
 import platform
 import site
-import sys
-from collections import namedtuple
-from typing import List, Optional  # @UnusedImport
 import subprocess
-import logging
+import sys
 import traceback
+from collections import namedtuple
 from threading import Thread
+from typing import List, Optional  # @UnusedImport
 
 MESSAGE_MARKER = "\x02"
 OBJECT_LINK_START = "[object_link_for_thonny]"
@@ -426,7 +426,6 @@ def get_windows_volumes_info():
     # http://stackoverflow.com/a/2288225/261181
     # http://msdn.microsoft.com/en-us/library/windows/desktop/aa364939%28v=vs.85%29.aspx
     import string
-
     from ctypes import windll
 
     all_drive_types = [

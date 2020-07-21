@@ -1,6 +1,7 @@
 import os.path
 from tkinter.messagebox import askyesno, showinfo
-from thonny import get_workbench, THONNY_USER_DIR
+
+from thonny import THONNY_USER_DIR, get_workbench
 
 
 def load_plugin():

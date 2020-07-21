@@ -1,6 +1,6 @@
+import os.path
 import platform
 import sys
-import os.path
 import warnings
 
 

@@ -1,5 +1,6 @@
 import os
-from thonny.backend import get_vm, Executor, prepare_hooks, return_execution_result
+
+from thonny.backend import Executor, get_vm, prepare_hooks, return_execution_result
 
 
 def _cmd_Birdseye(cmd):

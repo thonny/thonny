@@ -1,10 +1,10 @@
 import io
+import time
 import token
 
 from thonny import get_workbench
 from thonny.codeview import CodeViewText
 from thonny.shell import ShellText
-import time
 
 _OPENERS = {")": "(", "]": "[", "}": "{"}
 

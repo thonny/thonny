@@ -1,7 +1,7 @@
 # Stubs for turtle (generated from Python 3.7)
 
 import tkinter as TK
-from typing import Any, Optional, Union, overload, Tuple, Dict, List
+from typing import Any, Dict, List, Optional, Tuple, Union, overload
 
 class Vec2D(tuple):
     def __new__(cls, x: float, y: float): ...

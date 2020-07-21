@@ -2,14 +2,14 @@
 
 import os
 import tkinter as tk
-
-from thonny import get_workbench, get_runner, get_shell
-from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
-from thonny.ui_utils import lookup_style_option
-from thonny.common import normpath_with_actual_case, InlineCommand
-from thonny.running import construct_cd_command
-from thonny.misc_utils import running_on_windows
 from tkinter import messagebox
+
+from thonny import get_runner, get_shell, get_workbench
+from thonny.base_file_browser import BaseLocalFileBrowser, BaseRemoteFileBrowser
+from thonny.common import InlineCommand, normpath_with_actual_case
+from thonny.misc_utils import running_on_windows
+from thonny.running import construct_cd_command
+from thonny.ui_utils import lookup_style_option
 
 minsize = 80
 

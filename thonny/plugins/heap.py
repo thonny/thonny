@@ -3,11 +3,12 @@
 import tkinter as tk
 from tkinter import ttk
 
+from _tkinter import TclError
+
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand
 from thonny.memory import MAX_REPR_LENGTH_IN_GRID, MemoryFrame, format_object_id, parse_object_id
 from thonny.misc_utils import shorten_repr
-from _tkinter import TclError
 
 
 class HeapView(MemoryFrame):

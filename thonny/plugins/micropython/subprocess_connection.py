@@ -1,10 +1,12 @@
-from thonny.plugins.micropython.connection import MicroPythonConnection
 import signal
+
+from thonny.plugins.micropython.connection import MicroPythonConnection
 
 
 class SubprocessConnection(MicroPythonConnection):
     def __init__(self, executable, args=[]):
         import threading
+
         import ptyprocess
 
         super().__init__()

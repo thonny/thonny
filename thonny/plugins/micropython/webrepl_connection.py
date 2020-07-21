@@ -1,9 +1,9 @@
-from thonny.plugins.micropython.connection import MicroPythonConnection
-from queue import Queue
+import sys
 import threading
 import time
-import sys
+from queue import Queue
 
+from thonny.plugins.micropython.connection import MicroPythonConnection
 
 DEBUG = False
 

@@ -1,6 +1,7 @@
 import os.path
-from thonny.tktextext import TextFrame, EnhancedText
-from thonny import get_workbench, ui_utils, THONNY_USER_DIR
+
+from thonny import THONNY_USER_DIR, get_workbench, ui_utils
+from thonny.tktextext import EnhancedText, TextFrame
 from thonny.ui_utils import TextMenu
 
 

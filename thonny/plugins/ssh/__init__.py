@@ -1,45 +1,49 @@
-import logging
+import collections
 import io
+import logging
 import os
 import platform
 import queue
 import re
+import shlex
 import subprocess
 import sys
 import textwrap
 import threading
 import time
 import traceback
+from logging import debug
 from queue import Queue
 from textwrap import dedent
+from threading import Thread
 from time import sleep
-from tkinter import ttk, messagebox
-from thonny.ui_utils import askopenfilename, create_url_label
+from tkinter import messagebox, ttk
 from typing import Optional
 
 import thonny
-
 from thonny import common, get_runner, get_shell, get_workbench, running, ui_utils
 from thonny.common import (
     BackendEvent,
+    CommandToBackend,
+    EOFCommand,
+    InlineCommand,
     InlineResponse,
+    InterruptCommand,
     MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
-    InterruptCommand,
-    EOFCommand,
-    CommandToBackend,
-    InlineCommand,
 )
 from thonny.config_ui import ConfigurationPage
-from thonny.misc_utils import find_volumes_by_name, TimeHelper
+from thonny.misc_utils import TimeHelper, find_volumes_by_name
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
 from thonny.running import BackendProxy, SubprocessProxy
-from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
-import collections
-from threading import Thread
-from logging import debug
-import shlex
+from thonny.ui_utils import (
+    SubprocessDialog,
+    askopenfilename,
+    create_string_var,
+    create_url_label,
+    show_dialog,
+)
 
 
 class SshProxy(SubprocessProxy):
@@ -259,10 +263,10 @@ class SshProxy(SubprocessProxy):
         except IOError:
             sftp.mkdir(module_dir)
 
-        import thonny.backend_launcher
-        import thonny.backend
-        import thonny.common
         import thonny.ast_utils
+        import thonny.backend
+        import thonny.backend_launcher
+        import thonny.common
 
         # create empty __init__.py
         # sftp.open(module_dir + "/__init__.py", "w").close()

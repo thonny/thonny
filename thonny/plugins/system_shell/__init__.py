@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-import platform
 import os
+import platform
 import sys
 
+from thonny import get_runner, get_workbench, terminal
 from thonny.code import get_saved_current_script_filename
-from thonny import get_runner, terminal, get_workbench
-from thonny.common import get_exe_dirs, get_augmented_system_path
+from thonny.common import get_augmented_system_path, get_exe_dirs
 from thonny.running import get_environment_overrides_for_python_subprocess
 
 

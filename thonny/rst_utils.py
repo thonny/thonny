@@ -1,10 +1,10 @@
 import logging
 import tkinter as tk
+import traceback
 
 from thonny import get_workbench, ui_utils
 from thonny.codeview import get_syntax_options_for_tag
 from thonny.tktextext import TweakableText
-import traceback
 
 
 class RstText(TweakableText):

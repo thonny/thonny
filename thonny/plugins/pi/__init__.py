@@ -1,5 +1,6 @@
 import os
 import re
+
 from thonny import get_workbench
 from thonny.ui_utils import scale
 

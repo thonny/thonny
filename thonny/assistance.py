@@ -2,29 +2,26 @@ import ast
 import datetime
 import logging
 import os.path
+import subprocess
 import sys
 import textwrap
 import tkinter as tk
 from collections import namedtuple
 from tkinter import messagebox, ttk
-from typing import (
-    Dict,  # pylint disable=unused-import
-    Iterable,
-    List,  # pylint disable=unused-import
-    Optional,  # pylint disable=unused-import
-    Tuple,  # pylint disable=unused-import
-    Type,  # pylint disable=unused-import
-    Union,  # pylint disable=unused-import
-)
-
+from typing import Dict  # pylint disable=unused-import
+from typing import List  # pylint disable=unused-import
+from typing import Optional  # pylint disable=unused-import
+from typing import Tuple  # pylint disable=unused-import
+from typing import Type  # pylint disable=unused-import
+from typing import Union  # pylint disable=unused-import
+from typing import Iterable
 
 import thonny
-from thonny import get_workbench, rst_utils, tktextext, ui_utils, get_runner
+from thonny import get_runner, get_workbench, rst_utils, tktextext, ui_utils
 from thonny.common import ToplevelResponse, read_source
 from thonny.misc_utils import levenshtein_damerau_distance, running_on_mac_os
-from thonny.ui_utils import scrollbar_style, CommonDialog
 from thonny.running import CPythonProxy
-import subprocess
+from thonny.ui_utils import CommonDialog, scrollbar_style
 
 Suggestion = namedtuple("Suggestion", ["symbol", "title", "body", "relevance"])
 
@@ -786,8 +783,8 @@ class FeedbackDialog(CommonDialog):
         return json.dumps(submission, indent=2)
 
     def _submit_data(self):
-        import urllib.request
         import gzip
+        import urllib.request
 
         json_data = self._collect_submission_data()
         compressed_data = gzip.compress(json_data.encode("ascii"))

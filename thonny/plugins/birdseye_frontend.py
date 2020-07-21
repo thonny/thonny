@@ -1,9 +1,9 @@
+import atexit
 import os.path
+import subprocess
 from tkinter import messagebox
 
-from thonny import get_workbench, get_runner, running, THONNY_USER_DIR
-import subprocess
-import atexit
+from thonny import THONNY_USER_DIR, get_runner, get_workbench, running
 
 _server_started = False
 _server_process = None

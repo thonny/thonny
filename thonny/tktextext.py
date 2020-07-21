@@ -6,9 +6,9 @@ import time
 import tkinter as tk
 import traceback
 from logging import exception
-from tkinter import TclError, messagebox
+from tkinter import TclError
 from tkinter import font as tkfont
-from tkinter import ttk
+from tkinter import messagebox, ttk
 
 
 class TweakableText(tk.Text):

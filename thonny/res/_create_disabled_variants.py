@@ -1,4 +1,5 @@
 import os.path
+
 from PIL import Image
 
 d = os.path.dirname(__file__)

@@ -1,7 +1,8 @@
 import queue
-from thonny.misc_utils import TimeHelper
-from queue import Queue
 import re
+from queue import Queue
+
+from thonny.misc_utils import TimeHelper
 
 
 class MicroPythonConnection:

@@ -2,8 +2,8 @@
 """
 
 from thonny import get_workbench
-from thonny.tktextext import TextFrame
 from thonny.common import DebuggerResponse
+from thonny.tktextext import TextFrame
 
 
 class EventsView(TextFrame):

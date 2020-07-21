@@ -1,16 +1,17 @@
-import sys
 import os.path
+import sys
+import threading
+from time import sleep
+from tkinter import messagebox, ttk
+
+from thonny import get_workbench, ui_utils
+from thonny.misc_utils import find_volume_by_name
 from thonny.plugins.micropython import (
-    BareMetalMicroPythonProxy,
     BareMetalMicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
-from thonny import get_workbench, ui_utils
-from thonny.ui_utils import FileCopyDialog, CommonDialog, ems_to_pixels
-from thonny.misc_utils import find_volume_by_name
-from time import sleep
-from tkinter import ttk, messagebox
-import threading
+from thonny.ui_utils import CommonDialog, FileCopyDialog, ems_to_pixels
 
 LATEST_RELEASE_URL = "https://api.github.com/repos/bbcmicrobit/micropython/releases/latest"
 
@@ -134,8 +135,8 @@ class FlashingDialog(CommonDialog):
         pass
 
     def _start_downloading_release_info(self):
-        from urllib.request import urlopen
         import json
+        from urllib.request import urlopen
 
         def work():
             with urlopen(LATEST_RELEASE_URL) as fp:

@@ -38,13 +38,13 @@ class SyntaxColorer:
             BUILTIN,
             COMMENT,
             COMMENT_WITH_Q3DELIMITER,
+            KEYWORD,
             MAGIC_COMMAND,
+            NUMBER,
             STRING3,
             STRING3_DELIMITER,
-            STRING_OPEN,
-            KEYWORD,
             STRING_CLOSED,
-            NUMBER,
+            STRING_OPEN,
         )
 
         self.uniline_regex = re.compile(

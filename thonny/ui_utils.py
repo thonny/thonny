@@ -6,6 +6,7 @@ import platform
 import re
 import signal
 import subprocess
+import sys
 import textwrap
 import threading
 import time
@@ -15,18 +16,18 @@ import traceback
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
 
+from _tkinter import TclError
+
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange
+from thonny.languages import get_button_padding
 from thonny.misc_utils import (
     running_on_linux,
     running_on_mac_os,
-    running_on_windows,
     running_on_rpi,
+    running_on_windows,
 )
 from thonny.tktextext import TweakableText
-import sys
-from _tkinter import TclError
-from thonny.languages import get_button_padding
 
 PARENS_REGEX = re.compile(r"[\(\)\{\}\[\]]")
 

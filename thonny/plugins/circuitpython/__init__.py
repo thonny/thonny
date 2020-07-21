@@ -1,17 +1,17 @@
 import os.path
+import threading
 import tkinter as tk
 from tkinter import ttk
+from tkinter.messagebox import showinfo
 
+from thonny import get_workbench
+from thonny.misc_utils import list_volumes
 from thonny.plugins.micropython import (
-    BareMetalMicroPythonProxy,
     BareMetalMicroPythonConfigPage,
+    BareMetalMicroPythonProxy,
     add_micropython_backend,
 )
-from thonny import get_workbench
-from thonny.ui_utils import create_url_label, show_dialog, askopenfilename
-import threading
-from tkinter.messagebox import showinfo
-from thonny.misc_utils import list_volumes
+from thonny.ui_utils import askopenfilename, create_url_label, show_dialog
 
 
 class CircuitPythonProxy(BareMetalMicroPythonProxy):

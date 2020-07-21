@@ -1,7 +1,7 @@
 from typing import Callable, Dict, Union  # @UnusedImport
 
 from thonny import get_workbench
-from thonny.misc_utils import running_on_linux, running_on_windows, running_on_mac_os
+from thonny.misc_utils import running_on_linux, running_on_mac_os, running_on_windows
 from thonny.workbench import BasicUiThemeSettings, CompoundUiThemeSettings
 
 

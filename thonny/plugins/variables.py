@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from tkinter import ttk, messagebox
+from tkinter import messagebox, ttk
 
 from thonny import get_runner, get_workbench
 from thonny.common import InlineCommand

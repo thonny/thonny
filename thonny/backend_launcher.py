@@ -12,8 +12,8 @@ gives relative __file__-s on imported modules.)
 """
 
 if __name__ == "__main__":
-    import sys
     import platform
+    import sys
 
     if platform.system() == "Darwin":
         import os

@@ -1,36 +1,37 @@
 # -*- coding: utf-8 -*-
 
-from _tkinter import TclError
 import logging
 import os.path
 import re
-from tkinter import ttk
+import tkinter as tk
 import traceback
+from tkinter import ttk
 
-from thonny import get_runner, get_workbench, memory, roughparse, ui_utils, running
+from _tkinter import TclError
+
+from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
 from thonny.codeview import PythonText, get_syntax_options_for_tag
 from thonny.common import (
+    OBJECT_LINK_END,
+    OBJECT_LINK_START,
     InlineCommand,
     ToplevelCommand,
     ToplevelResponse,
-    OBJECT_LINK_START,
-    OBJECT_LINK_END,
 )
 from thonny.misc_utils import construct_cmd_line, parse_cmd_line, running_on_mac_os, shorten_repr
-from thonny.tktextext import index2line, TextFrame, TweakableText
+from thonny.running import EDITOR_CONTENT_TOKEN
+from thonny.tktextext import TextFrame, TweakableText, index2line
 from thonny.ui_utils import (
+    CommonDialog,
     EnhancedTextWithLogging,
-    scrollbar_style,
-    select_sequence,
     TextMenu,
     create_tooltip,
-    show_dialog,
     lookup_style_option,
-    CommonDialog,
+    scrollbar_style,
+    select_sequence,
+    show_dialog,
     tr_btn,
 )
-import tkinter as tk
-from thonny.running import EDITOR_CONTENT_TOKEN
 
 _CLEAR_SHELL_DEFAULT_SEQ = select_sequence("<Control-l>", "<Command-k>")
 

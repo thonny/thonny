@@ -1,9 +1,9 @@
+import sys
 import tkinter
+import warnings
 from typing import Sequence, Set  # @UnusedImport
 
 from thonny.plugins.highlight_names import VariablesHighlighter
-import sys
-import warnings
 
 TEST_STR1 = """def foo():
     foo()

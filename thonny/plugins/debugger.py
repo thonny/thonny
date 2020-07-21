@@ -12,14 +12,15 @@ from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
 
-from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, ui_utils, running
-from thonny.codeview import CodeView, get_syntax_options_for_tag, SyntaxText
+from _tkinter import TclError
+
+from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, running, ui_utils
+from thonny.codeview import CodeView, SyntaxText, get_syntax_options_for_tag
 from thonny.common import DebuggerCommand, InlineCommand
 from thonny.memory import VariablesFrame
-from thonny.misc_utils import shorten_repr, running_on_rpi, running_on_mac_os
+from thonny.misc_utils import running_on_mac_os, running_on_rpi, shorten_repr
 from thonny.tktextext import TextFrame
-from thonny.ui_utils import select_sequence, CommonDialog
-from _tkinter import TclError
+from thonny.ui_utils import CommonDialog, select_sequence
 
 _current_debugger = None
 

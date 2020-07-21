@@ -1,9 +1,9 @@
-import os.path
-import sys
-import platform
-from typing import TYPE_CHECKING, cast, Optional
-import traceback
 import logging
+import os.path
+import platform
+import sys
+import traceback
+from typing import TYPE_CHECKING, Optional, cast
 
 SINGLE_INSTANCE_DEFAULT = True
 
@@ -124,8 +124,8 @@ def _check_welcome():
     from thonny import misc_utils
 
     if not os.path.exists(CONFIGURATION_FILE) and not misc_utils.running_on_rpi():
-        from thonny.first_run import FirstRunWindow
         from thonny.config import ConfigurationManager
+        from thonny.first_run import FirstRunWindow
 
         mgr = ConfigurationManager(CONFIGURATION_FILE)
 
@@ -241,8 +241,9 @@ def _should_delegate():
 
 
 def _delegate_to_existing_instance(args):
-    from thonny import workbench
     import socket
+
+    from thonny import workbench
 
     transformed_args = []
     for arg in args:
@@ -317,9 +318,9 @@ if TYPE_CHECKING:
     # Following imports are required for MyPy
     # http://mypy.readthedocs.io/en/stable/common_issues.html#import-cycles
     import thonny.workbench
-    from thonny.workbench import Workbench
     from thonny.running import Runner
     from thonny.shell import ShellView
+    from thonny.workbench import Workbench
 
 _workbench = None  # type: Optional[Workbench]
 

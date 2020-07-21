@@ -1,7 +1,7 @@
 from tkinter import ttk
 
-from thonny.config_ui import ConfigurationPage
 from thonny import get_workbench, ui_utils
+from thonny.config_ui import ConfigurationPage
 from thonny.tktextext import TextFrame
 from thonny.ui_utils import scrollbar_style
 

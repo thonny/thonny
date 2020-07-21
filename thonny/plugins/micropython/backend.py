@@ -33,35 +33,36 @@ CP 5.0
 
 """
 
+import ast
+import io
+import logging
+import os
+import re
+import sys
+import threading
+import time
+import traceback
+from queue import Empty, Queue
+from textwrap import dedent, indent
+from threading import Lock
+
 from thonny.common import (
-    InputSubmission,
-    InterruptCommand,
+    OBJECT_LINK_END,
+    OBJECT_LINK_START,
+    BackendEvent,
     EOFCommand,
-    parse_message,
-    ToplevelCommand,
-    ToplevelResponse,
     InlineCommand,
     InlineResponse,
+    InputSubmission,
+    InterruptCommand,
+    ToplevelCommand,
+    ToplevelResponse,
     UserError,
+    parse_message,
     serialize_message,
-    BackendEvent,
-    OBJECT_LINK_START,
-    OBJECT_LINK_END,
 )
-import sys
-import logging
-import traceback
 from thonny.plugins.micropython.connection import ConnectionClosedException
-from textwrap import dedent, indent
-import ast
-import re
-from queue import Queue, Empty
-import threading
-import os
-import time
-import io
 from thonny.running import EXPECTED_TERMINATION_CODE
-from threading import Lock
 
 ENCODING = "utf-8"
 

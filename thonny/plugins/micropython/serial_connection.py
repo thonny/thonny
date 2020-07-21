@@ -1,10 +1,11 @@
-from thonny.plugins.micropython.connection import MicroPythonConnection, ConnectionFailedException
-import threading
-import time
 import logging
 import platform
 import sys
+import threading
+import time
 from textwrap import dedent
+
+from thonny.plugins.micropython.connection import ConnectionFailedException, MicroPythonConnection
 
 
 class SerialConnection(MicroPythonConnection):

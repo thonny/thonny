@@ -1,5 +1,5 @@
-import logging
 import io
+import logging
 import os
 import platform
 import queue
@@ -13,26 +13,31 @@ import traceback
 from queue import Queue
 from textwrap import dedent
 from time import sleep
-from tkinter import ttk, messagebox
-from thonny.ui_utils import askopenfilename, create_url_label
+from tkinter import messagebox, ttk
 from typing import Optional
 
 from thonny import common, get_runner, get_shell, get_workbench, running
 from thonny.common import (
     BackendEvent,
+    CommandToBackend,
+    EOFCommand,
     InlineResponse,
+    InterruptCommand,
     MessageFromBackend,
     ToplevelCommand,
     ToplevelResponse,
-    InterruptCommand,
-    EOFCommand,
-    CommandToBackend,
 )
 from thonny.config_ui import ConfigurationPage
-from thonny.misc_utils import find_volumes_by_name, TimeHelper
+from thonny.misc_utils import TimeHelper, find_volumes_by_name
 from thonny.plugins.backend_config_page import BackendDetailsConfigPage, BaseSshProxyConfigPage
 from thonny.running import BackendProxy, SubprocessProxy
-from thonny.ui_utils import SubprocessDialog, create_string_var, show_dialog
+from thonny.ui_utils import (
+    SubprocessDialog,
+    askopenfilename,
+    create_string_var,
+    create_url_label,
+    show_dialog,
+)
 
 DEFAULT_WEBREPL_URL = "ws://192.168.4.1:8266/"
 

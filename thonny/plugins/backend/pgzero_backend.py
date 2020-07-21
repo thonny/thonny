@@ -1,6 +1,7 @@
-import os
 import ast
+import os
 import sys
+
 from thonny.backend import VM, get_vm
 
 

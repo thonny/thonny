@@ -1,30 +1,31 @@
-from thonny.common import (
-    ToplevelResponse,
-    InlineResponse,
-    UserError,
-    serialize_message,
-    BackendEvent,
-    execute_system_command,
-)
-import sys
-import logging
-from thonny.plugins.micropython.connection import ConnectionFailedException
-from textwrap import dedent
-import re
-import os
-import time
-from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
 import binascii
-from thonny.plugins.micropython.backend import (
-    MicroPythonBackend,
-    ReadOnlyFilesystemError,
-    ProtocolError,
-    _report_internal_error,
-    linux_dirname_basename,
-    WAIT_OR_CRASH_TIMEOUT,
-    ends_overlap,
-)
+import logging
+import os
 import queue
+import re
+import sys
+import time
+from textwrap import dedent
+
+from thonny.common import (
+    BackendEvent,
+    InlineResponse,
+    ToplevelResponse,
+    UserError,
+    execute_system_command,
+    serialize_message,
+)
+from thonny.misc_utils import find_volumes_by_name, sizeof_fmt
+from thonny.plugins.micropython.backend import (
+    WAIT_OR_CRASH_TIMEOUT,
+    MicroPythonBackend,
+    ProtocolError,
+    ReadOnlyFilesystemError,
+    _report_internal_error,
+    ends_overlap,
+    linux_dirname_basename,
+)
+from thonny.plugins.micropython.connection import ConnectionFailedException
 
 # See https://github.com/dhylands/rshell/blob/master/rshell/main.py
 # for UART_BUFFER_SIZE vs USB_BUFFER_SIZE
@@ -1009,8 +1010,10 @@ if __name__ == "__main__":
 
             connection = WebReplConnection(args.url, args.password, args.min_write_delay)
         else:
-            from thonny.plugins.micropython.serial_connection import SerialConnection
-            from thonny.plugins.micropython.serial_connection import DifficultSerialConnection
+            from thonny.plugins.micropython.serial_connection import (
+                DifficultSerialConnection,
+                SerialConnection,
+            )
 
             connection = SerialConnection(port, BAUDRATE)
             # connection = DifficultSerialConnection(port, BAUDRATE)

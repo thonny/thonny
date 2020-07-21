@@ -1,15 +1,15 @@
-import os
 import io
-import sys
 import logging
-from thonny.plugins.micropython.backend import MicroPythonBackend, EOT, ends_overlap, ENCODING
-import textwrap
-from thonny.common import BackendEvent, serialize_message
-from thonny.plugins.micropython.connection import ConnectionFailedException
-from thonny.plugins.micropython.bare_metal_backend import NORMAL_PROMPT, LF
+import os
 import re
 import shlex
+import sys
+import textwrap
 
+from thonny.common import BackendEvent, serialize_message
+from thonny.plugins.micropython.backend import ENCODING, EOT, MicroPythonBackend, ends_overlap
+from thonny.plugins.micropython.bare_metal_backend import LF, NORMAL_PROMPT
+from thonny.plugins.micropython.connection import ConnectionFailedException
 
 FALLBACK_BUILTIN_MODULES = [
     "cmath",

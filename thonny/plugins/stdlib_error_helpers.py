@@ -1,10 +1,10 @@
 import builtins
+import os.path
 import re
 import token
-import os.path
 
-from thonny.assistance import ErrorHelper, Suggestion, name_similarity, add_error_helper
 from thonny import assistance
+from thonny.assistance import ErrorHelper, Suggestion, add_error_helper, name_similarity
 from thonny.misc_utils import running_on_windows
 
 

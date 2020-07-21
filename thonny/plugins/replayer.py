@@ -4,10 +4,10 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import ttk
 
-from thonny import codeview, get_workbench, ui_utils, THONNY_USER_DIR
+from thonny import THONNY_USER_DIR, codeview, get_workbench, ui_utils
 from thonny.base_file_browser import BaseLocalFileBrowser
 from thonny.plugins.coloring import SyntaxColorer
-from thonny.ui_utils import lookup_style_option, CommonDialog
+from thonny.ui_utils import CommonDialog, lookup_style_option
 
 
 class ReplayWindow(CommonDialog):
