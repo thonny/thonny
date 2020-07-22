@@ -5,9 +5,8 @@ import os.path
 import re
 import tkinter as tk
 import traceback
-from tkinter import ttk
-
 from _tkinter import TclError
+from tkinter import ttk
 
 from thonny import get_runner, get_workbench, memory, roughparse, running, ui_utils
 from thonny.codeview import PythonText, get_syntax_options_for_tag

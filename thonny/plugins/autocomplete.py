@@ -6,6 +6,7 @@ from thonny.codeview import CodeViewText
 from thonny.common import InlineCommand
 from thonny.shell import ShellText
 
+
 # TODO: adjust the window position in cases where it's too close to bottom or right edge - but make sure the current line is shown
 """Completions get computed on the backend, therefore getting the completions is
 asynchronous.

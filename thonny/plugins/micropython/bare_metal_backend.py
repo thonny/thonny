@@ -751,7 +751,7 @@ class MicroPythonBareMetalBackend(MicroPythonBackend):
             
             del __thonny_result
             """
-            ).format(path=target_path),
+            ).format(path=target_path)
         )
 
         if "readonly" in result.replace("-", "").lower():

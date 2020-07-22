@@ -252,7 +252,7 @@ class MicroPythonBackend:
             self._cwd = self._evaluate("__thonny_helper.getcwd()")
 
     def _send_ready_message(self):
-        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd,))
+        self.send_message(ToplevelResponse(welcome_text=self._welcome_text, cwd=self._cwd))
 
     def _check_send_inline_progress(self, cmd, value, maximum, description=None):
         assert "id" in cmd
@@ -1023,7 +1023,7 @@ class MicroPythonBackend:
                 del __thonny_path
                 """
             )
-            % (paths, func),
+            % (paths, func)
         )
 
     def _join_remote_path_parts(self, left, right):

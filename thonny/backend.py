@@ -23,9 +23,8 @@ import warnings
 from collections import namedtuple
 from importlib.machinery import PathFinder, SourceFileLoader
 
-import _ast
-
 import __main__  # @UnresolvedImport
+import _ast
 import thonny
 from thonny.common import path_startswith  # TODO: try to get rid of this
 from thonny.common import (

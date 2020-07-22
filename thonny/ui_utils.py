@@ -13,10 +13,9 @@ import time
 import tkinter as tk
 import tkinter.font
 import traceback
+from _tkinter import TclError
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, List, Optional, Tuple, Union  # @UnusedImport
-
-from _tkinter import TclError
 
 from thonny import get_workbench, misc_utils, tktextext
 from thonny.common import TextRange

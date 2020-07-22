@@ -499,7 +499,7 @@ def windows() -> CompoundUiThemeSettings:
                     "borderwidth": scale(1),
                 }
             },
-            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]},},
+            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]}},
         },
     ]
 
@@ -553,7 +553,7 @@ def enhanced_clam() -> CompoundUiThemeSettings:
                     "borderwidth": scale(1),
                 }
             },
-            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]},},
+            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]}},
         },
     ]
 
@@ -576,7 +576,7 @@ def enhanced_aqua() -> CompoundUiThemeSettings:
                     "borderwidth": scale(1),
                 }
             },
-            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]},},
+            "Inactive.ViewTab.TLabel": {"map": {"relief": [("hover", "raised")]}},
         },
     ]
 

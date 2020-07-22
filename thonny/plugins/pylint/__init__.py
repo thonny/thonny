@@ -120,8 +120,6 @@ class PylintAnalyzer(SubprocessProgramAnalyzer):
         self.completion_handler(self, warnings)
 
 
-
-
 all_checks_by_symbol = {c["msg_sym"]: c for c in all_messages}
 
 

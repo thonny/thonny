@@ -156,10 +156,7 @@ class SshProxy(SubprocessProxy):
 
         self._check_install_thonny_backend()
 
-        env = {
-            "THONNY_USER_DIR": "~/.config/Thonny",
-            "THONNY_FRONTEND_SYS_PATH": "[]",
-        }
+        env = {"THONNY_USER_DIR": "~/.config/Thonny", "THONNY_FRONTEND_SYS_PATH": "[]"}
 
         stdin, stdout, stderr = self._client.exec_command(
             cmd_line_str, bufsize=0, timeout=None, get_pty=False, environment=env

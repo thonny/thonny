@@ -4,10 +4,9 @@ import os.path
 import sys
 import tkinter as tk
 import traceback
+from _tkinter import TclError
 from logging import exception
 from tkinter import messagebox, ttk
-
-from _tkinter import TclError
 
 from thonny import get_runner, get_workbench, ui_utils
 from thonny.base_file_browser import ask_backend_path, choose_node_for_file_operations

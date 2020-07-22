@@ -1,7 +1,6 @@
 import os
 import subprocess
 import time
-import tkinter
 import tkinter as tk
 from collections import OrderedDict
 from time import sleep

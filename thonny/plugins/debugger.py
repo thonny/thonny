@@ -8,11 +8,10 @@ import ast
 import logging
 import os.path
 import tkinter as tk
+from _tkinter import TclError
 from tkinter import ttk
 from tkinter.messagebox import showinfo
 from typing import List, Union  # @UnusedImport
-
-from _tkinter import TclError
 
 from thonny import ast_utils, code, get_runner, get_workbench, memory, misc_utils, running, ui_utils
 from thonny.codeview import CodeView, SyntaxText, get_syntax_options_for_tag

@@ -17,7 +17,6 @@ import tkinter.font as tk_font
 import traceback
 from threading import Thread
 from tkinter import messagebox, ttk
-from typing import Optional  # pylint: disable=unused-import; pylint: disable=unused-import
 from typing import Set  # pylint: disable=unused-import
 from typing import Tuple  # pylint: disable=unused-import
 from typing import Any, Callable, Dict, List, Sequence, Type, Union, cast
@@ -57,6 +56,9 @@ from thonny.ui_utils import (
     select_sequence,
     sequence_to_accelerator,
 )
+
+from typing import Optional  # pylint: disable=unused-import; pylint: disable=unused-import
+
 
 SERVER_SUCCESS = "OK"
 SIMPLE_MODE_VIEWS = ["ShellView"]
@@ -236,7 +238,7 @@ class Workbench(tk.Tk):
 
     def _init_configuration(self) -> None:
         self._configuration_manager = try_load_configuration(thonny.CONFIGURATION_FILE)
-        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]
+        self._configuration_pages = []  # type: List[Tuple[str, str, Type[tk.Widget]]]
 
         self.set_default("general.single_instance", thonny.SINGLE_INSTANCE_DEFAULT)
         self.set_default("general.ui_mode", "simple" if running_on_rpi() else "regular")
@@ -375,9 +377,7 @@ class Workbench(tk.Tk):
         # built-in plugins
         import thonny.plugins  # pylint: disable=redefined-outer-name
 
-        self._load_plugins_from_path(
-            thonny.plugins.__path__, "thonny.plugins."  # type: ignore
-        )
+        self._load_plugins_from_path(thonny.plugins.__path__, "thonny.plugins.")  # type: ignore
 
         # 3rd party plugins from namespace package
         try:
@@ -1544,9 +1544,7 @@ class Workbench(tk.Tk):
 
         if view.hidden:  # type: ignore
             notebook.insert(
-                "auto",
-                view.home_widget,  # type: ignore
-                text=self._view_records[view_id]["label"],
+                "auto", view.home_widget, text=self._view_records[view_id]["label"]  # type: ignore
             )
             view.hidden = False  # type: ignore
             if hasattr(view, "on_show"):  # type: ignore
@@ -1966,9 +1964,7 @@ class Workbench(tk.Tk):
         while widget is not None:
             if hasattr(widget, "home_widget"):
                 # if widget is view, then widget.master is workbench
-                widget.grid(
-                    row=1, column=0, sticky=tk.NSEW, in_=widget.master  # type: ignore
-                )
+                widget.grid(row=1, column=0, sticky=tk.NSEW, in_=widget.master)  # type: ignore
                 # hide main_frame
                 self._main_frame.grid_forget()
                 self._maximized_view = widget
